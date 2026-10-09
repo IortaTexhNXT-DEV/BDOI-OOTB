@@ -1,507 +1,135 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
-import { Card } from "primereact/card";
-import InputTextField from "../../component/inputText";
-import SvgBlueArrow from "../../../assets/agentIcon/SvgBlueArrow";
-import "./index.scss";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import useClaimHeader from "../useClaimHeader";
 import { useSelector, useDispatch } from "react-redux";
-import { ProgressSpinner } from "primereact/progressspinner";
+import { Button } from "primereact/button";
+import { Column } from "primereact/column";
+import { DataTable } from "primereact/datatable";
+import { Toast } from "primereact/toast";
 import { getClaimDetails } from "../adjusterSubmission/store/adjusterSubmissionMiddleWare";
 import claimsService from "../../../services/claimsService";
+import { formatCurrency } from "../../../utility/currencyConverter";
+import { formatDate } from "../../../utility/dateFormat";
+import ClaimJourneyLayout, { ClaimActions, ClaimSection } from "../shared/ClaimJourneyLayout";
+import FormErrorSummary from "../shared/FormErrorSummary";
+import { stepForStatus } from "../shared/claimJourney";
 import SettlementCash from "./SettlementCash";
-import { formatDate as formatAppDate } from "../../../utility/dateFormat";
-import logger from "../../../utility/logger";
 
+/** Claim documents printed from the claim (claimsService.getClaimDocuments), with their translation key. */
+const DOCUMENTS = [
+  ["Claims Acknowledgement Letter", "acknowledgmentLetter"],
+  ["Claims Discharge Voucher", "claimsDischargeVoucher"],
+  ["Claims Data Sheet", "claimsDataSheet"],
+  ["FIR", "fir"],
+];
+
+/**
+ * Settlement and payment of a claim: the settlement recorded and approved, the claim documents to print (acknowledgement
+ * letter, discharge voucher, data sheet, police report) and, for a settlement paid through the broker, the money
+ * received from the insurers and paid to the claimant.
+ */
 const ClaimSettlement = () => {
   const { t } = useTranslation();
   const params = useParams();
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  // Get claim ID from URL params or navigation state
+  const toast = useRef(null);
   const claimId = params.id || location.state?.claimId || location.state?.id;
+  const [downloading, setDownloading] = useState(null);
+  const [cash, setCash] = useState(null);
 
-  // Loading states for download buttons
-  const [downloadLoading, setDownloadLoading] = useState({
-    acknowledgment: false,
-    dischargeVoucher: false,
-    dataSheet: false,
-    fir: false,
-  });
-
-  // Redux state for claim details
-  const { claimDetails, claimDetailsLoading, claimDetailsError } = useSelector(
-    ({ adjusterSubmissionReducers }) => ({
-      claimDetails: adjusterSubmissionReducers?.claimDetails || {},
-      claimDetailsLoading:
-        adjusterSubmissionReducers?.claimDetailsLoading || false,
-      claimDetailsError: adjusterSubmissionReducers?.claimDetailsError || "",
-    })
-  );
-
-  // Get policy holder data from Redux
-  const {
-    policyHolderName: reduxPolicyHolderName,
-    claimNumber: reduxClaimNumber,
-  } = useSelector(({ claimDetailsMainReducers }) => ({
-    policyHolderName: claimDetailsMainReducers?.policyHolderName || "",
-    policyNumber: claimDetailsMainReducers?.policyNumber || "",
-    claimNumber: claimDetailsMainReducers?.claimNumber || "",
+  const { claimDetails, claimDetailsError } = useSelector(({ adjusterSubmissionReducers }) => ({
+    claimDetails: adjusterSubmissionReducers?.claimDetails || {},
+    claimDetailsError: adjusterSubmissionReducers?.claimDetailsError || "",
   }));
+  // the claim of this page only (the store may still hold a claim opened earlier)
+  const claim = [claimDetails?.data?.id, claimDetails?.data?.claimId, claimDetails?.data?.claimNumber].includes(claimId) ? claimDetails.data : null;
 
-  // The claim of this page only (the store may still hold a claim opened earlier, or none yet on a direct link)
-  const claim = [claimDetails?.data?.id, claimDetails?.data?.claimId, claimDetails?.data?.claimNumber].includes(claimId)
-    ? claimDetails.data
-    : null;
-  const loadingClaim = claimDetailsLoading || (!claim && !claimDetailsError && Boolean(claimId));
-
-  // Header: the loaded claim, else the header lookup, else what the claim list left in the store
-  const header = useClaimHeader(claimId);
-  const policyHolderName =
-    claim?.policyHolderName ||
-    claim?.policy?.policyHolderName ||
-    header.policyHolderName ||
-    reduxPolicyHolderName ||
-    t("agent.loading");
-
-  const claimNumber =
-    claim?.claimNumber ||
-    header.claimNumber ||
-    reduxClaimNumber ||
-    t("agent.loading");
-
-  // Fetch claim details on component mount
   useEffect(() => {
-    if (claimId) {
-      dispatch(getClaimDetails(claimId));
-    }
+    if (claimId) dispatch(getClaimDetails(claimId));
   }, [dispatch, claimId]);
 
-  const handleNavigation = () => {
-    navigate(`/agent/clientview/${claim?.clientId || claim?.policy?.clientId}`);
-  };
-
-  const handleAcknowledgmentsubmit = async () => {
-    if (!claimId) {
-      logger.error("No claim ID available for document download");
-      return;
-    }
-
-    // Set loading state
-    setDownloadLoading((prev) => ({ ...prev, acknowledgment: true }));
-
+  const download = async (name) => {
+    setDownloading(name);
     try {
-      const result = await claimsService.getClaimDocuments(
-        claimId,
-        "Claims Acknowledgement Letter"
-      );
-
-      if (result.success) {
-        // Create download link
-        const link = document.createElement("a");
-        link.href = result.data.url;
-        link.download = `${result.data.documentName}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // Clean up the URL
-        window.URL.revokeObjectURL(result.data.url);
-      } else {
-        logger.error("Failed to download document:", result.error);
-        // You can add error handling here, like showing a toast
-      }
-    } catch (error) {
-      logger.error("Error downloading document:", error);
-      // You can add error handling here
+      const result = await claimsService.getClaimDocuments(claimId, name);
+      if (!result.success) throw new Error(result.error);
+      const link = document.createElement("a");
+      link.href = result.data.url;
+      link.download = `${result.data.documentName}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(result.data.url);
+    } catch (e) {
+      toast.current?.show({ severity: "error", summary: t("claimFlow.documentFailed"), detail: e?.message, life: 5000 });
     } finally {
-      // Clear loading state
-      setDownloadLoading((prev) => ({ ...prev, acknowledgment: false }));
+      setDownloading(null);
     }
   };
 
-  const handleClaimsDischargeVouchersubmit = async () => {
-    if (!claimId) {
-      logger.error("No claim ID available for document download");
-      return;
-    }
+  const status = claim?.lifecycleStatus;
+  const step = status ? stepForStatus(status) : "payment";
+  const settlement = claim ? [
+    [t("claimJourney.settlementType"), claim.settlementType],
+    [t("claimJourney.settlementAmount"), claim.settlementAmount ? formatCurrency(claim.settlementAmount) : null],
+    [t("claimJourney.issueDate"), claim.settlementIssueDate ? formatDate(claim.settlementIssueDate) : null],
+    [t("claimJourney.settleDate"), claim.settlementDate ? formatDate(claim.settlementDate) : null],
+    [t("claimFlow.submittedBy"), claim.settlementRequestedBy],
+    [t("claimFlow.approvedBy"), claim.settlementApprovedBy ? `${claim.settlementApprovedBy}${claim.settlementApprovedAt ? ` · ${formatDate(claim.settlementApprovedAt)}` : ""}` : null],
+    [t("claimFlow.settledAmount"), claim.settledAmount ? formatCurrency(claim.settledAmount) : null],
+    claim.rejectedReason ? [t("claimJourney.rejectReason"), claim.rejectedReason] : null,
+  ].filter(Boolean) : [];
 
-    // Set loading state
-    setDownloadLoading((prev) => ({ ...prev, dischargeVoucher: true }));
-
-    try {
-      const result = await claimsService.getClaimDocuments(
-        claimId,
-        "Claims Discharge Voucher"
-      );
-
-      if (result.success) {
-        // Create download link
-        const link = document.createElement("a");
-        link.href = result.data.url;
-        link.download = `${result.data.documentName}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // Clean up the URL
-        window.URL.revokeObjectURL(result.data.url);
-      } else {
-        logger.error("Failed to download document:", result.error);
-        // You can add error handling here, like showing a toast
-      }
-    } catch (error) {
-      logger.error("Error downloading document:", error);
-      // You can add error handling here
-    } finally {
-      // Clear loading state
-      setDownloadLoading((prev) => ({ ...prev, dischargeVoucher: false }));
-    }
-  };
-
-  const handleClaimsDatasheetubmit = async () => {
-    if (!claimId) {
-      logger.error("No claim ID available for document download");
-      return;
-    }
-
-    // Set loading state
-    setDownloadLoading((prev) => ({ ...prev, dataSheet: true }));
-
-    try {
-      const result = await claimsService.getClaimDocuments(
-        claimId,
-        "Claims Data Sheet"
-      );
-
-      if (result.success) {
-        // Create download link
-        const link = document.createElement("a");
-        link.href = result.data.url;
-        link.download = `${result.data.documentName}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // Clean up the URL
-        window.URL.revokeObjectURL(result.data.url);
-      } else {
-        logger.error("Failed to download document:", result.error);
-        // You can add error handling here, like showing a toast
-      }
-    } catch (error) {
-      logger.error("Error downloading document:", error);
-      // You can add error handling here
-    } finally {
-      // Clear loading state
-      setDownloadLoading((prev) => ({ ...prev, dataSheet: false }));
-    }
-  };
-
-  const handleFIRSubmit = async () => {
-    if (!claimId) {
-      logger.error("No claim ID available for document download");
-      return;
-    }
-
-    // Set loading state
-    setDownloadLoading((prev) => ({ ...prev, fir: true }));
-
-    try {
-      const result = await claimsService.getClaimDocuments(claimId, "FIR");
-
-      if (result.success) {
-        // Create download link
-        const link = document.createElement("a");
-        link.href = result.data.url;
-        link.download = `${result.data.documentName}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // Clean up the URL
-        window.URL.revokeObjectURL(result.data.url);
-      } else {
-        logger.error("Failed to download document:", result.error);
-        // You can add error handling here, like showing a toast
-      }
-    } catch (error) {
-      logger.error("Error downloading document:", error);
-      // You can add error handling here
-    } finally {
-      // Clear loading state
-      setDownloadLoading((prev) => ({ ...prev, fir: false }));
-    }
-  };
-
-  // Show loading state
-  if (loadingClaim) {
-    return (
-      <div className="claim__detailssettlemenet__container">
-        <div className="claim__details__container__titles">{t("claimSettlementDetail.clients")}</div>
-        <div 
-          className="claim__details__container__back__btn mt-3 cursor-pointer"
-          onClick={handleNavigation}
-        >
-          <SvgLeftArrow />
-          <div className="claim__details__container__back__btn__title">
-            {policyHolderName} / {claimNumber ? t("claimSettlementDetail.claimLabel", { claimNumber }) : t("claimSettlementDetail.loadingClaimDetails")}
-          </div>
-        </div>
-        <Card>
-          <div className="claim__title">{t("claimSettlementDetail.claimSettlement")}</div>
-          <div className="text-center p-4">
-            <div>{t("claimSettlementDetail.loadingClaimDetails")}</div>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
-  // Show error state
-  if (claimDetailsError) {
-    return (
-      <div className="claim__detailssettlemenet__container">
-        <div className="claim__details__container__titles">{t("claimSettlementDetail.clients")}</div>
-        <div 
-          className="claim__details__container__back__btn mt-3 cursor-pointer"
-          onClick={handleNavigation}
-        >
-          <SvgLeftArrow />
-          <div className="claim__details__container__back__btn__title">
-            {policyHolderName} / {claimNumber ? t("claimSettlementDetail.claimLabel", { claimNumber }) : t("claimSettlementDetail.loadingClaimDetails")}
-          </div>
-        </div>
-        <Card>
-          <div className="claim__title">{t("claimSettlementDetail.claimSettlement")}</div>
-          <div className="text-center p-4" style={{ color: "var(--color-danger)" }}>
-            <div>{t("claimSettlementDetail.errorLoadingClaimDetails", { error: claimDetailsError })}</div>
-          </div>
-        </Card>
-      </div>
-    );
-  }
+  const outstanding = cash?.paidThroughBroker ? cash.insurers.reduce((sum, i) => sum + i.outstanding, 0) : 0;
+  let next = null;
+  if (claim && cash?.paidThroughBroker && outstanding > 0) next = t("claimFlow.next.fundsDue", { amount: formatCurrency(outstanding) });
+  else if (claim && cash?.paidThroughBroker && cash.payableToClaimant > 0) next = t("claimFlow.next.payClaimant", { amount: formatCurrency(cash.payableToClaimant) });
+  else if (claim && ["approved", "pending-approval"].includes(status)) next = t("claimFlow.next.toSettle", { status: claim.claimStatus });
+  else if (claim) next = t("claimFlow.next.done", { status: claim.claimStatus });
 
   return (
-    <div className="claim__detailssettlemenet__container ">
-      <div>
-        <div className="claim__details__container__titles">{t("claimSettlementDetail.clients")}</div>
-        <div
-          onClick={handleNavigation}
-          className="claim__details__container__back__btn mt-3 cursor-pointer"
-        >
-          <SvgLeftArrow />
-          <div className="claim__details__container__back__btn__title">
-            {policyHolderName} / {claimNumber ? t("claimSettlementDetail.claimLabel", { claimNumber }) : t("claimSettlementDetail.loadingClaimDetails")}
-          </div>
-        </div>
-      </div>
-      <Card>
-        <div className="claim__title">{t("claimSettlementDetail.claimSettlement")}</div>
-        <div className="grid mt-2">
-          <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              value={claim?.policyNumber || claim?.policy?.policyNumber || header.policyNumber || ""}
-              label={t("claimSettlementDetail.policyNumber")}
-              disabled={true}
-            />
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              value={claim?.claimNumber || claim?.claimRefId || header.claimNumber || ""}
-              label={t("claimSettlementDetail.claimNumber")}
-              disabled={true}
-            />
-          </div>
-        </div>
-        <div className="grid mt-2">
-          <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              value={
-                formatAppDate(claim?.reportedDate, { empty: "" })
-              }
-              label={t("claimSettlementDetail.dateReported")}
-              disabled={true}
-            />
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              value={
-                formatAppDate(claim?.dateOfIncident, { empty: "" })
-              }
-              label={t("claimSettlementDetail.dateOfLoss")}
-              disabled={true}
-            />
-          </div>
-        </div>
-        <div className="claim__doc__title mt-2">{t("claimSettlementDetail.documents")}</div>
-        <div className="grid mt-2">
-          <div className="col-12 md:col-6 lg:col-6">
-            <div
-              onClick={() =>
-                !downloadLoading.acknowledgment && handleAcknowledgmentsubmit()
-              }
-              className={`policy__detail__view__box ${
-                downloadLoading.acknowledgment ? "loading" : ""
-              }`}
-              style={{
-                opacity: downloadLoading.acknowledgment ? 0.7 : 1,
-                pointerEvents: downloadLoading.acknowledgment ? "none" : "auto",
-              }}
-            >
-              <div className="policy__detail__view__box__title">
-                {t("claimSettlementDetail.acknowledgmentLetter")}
-              </div>
-              <div className="policy__detail__view__box__container cursor-pointer">
-                <div className="policy__detail__view__box__sub__title">
-                  {downloadLoading.acknowledgment ? (
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      <ProgressSpinner
-                        style={{ width: "16px", height: "16px" }}
-                      />
-                      {t("claimSettlementDetail.downloading")}
-                    </div>
-                  ) : (
-                    t("claimSettlementDetail.view")
-                  )}
-                </div>
-                {!downloadLoading.acknowledgment && <SvgBlueArrow />}
-              </div>
-            </div>
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <div
-              onClick={() =>
-                !downloadLoading.dischargeVoucher &&
-                handleClaimsDischargeVouchersubmit()
-              }
-              className={`policy__detail__view__box ${
-                downloadLoading.dischargeVoucher ? "loading" : ""
-              }`}
-              style={{
-                opacity: downloadLoading.dischargeVoucher ? 0.7 : 1,
-                pointerEvents: downloadLoading.dischargeVoucher
-                  ? "none"
-                  : "auto",
-              }}
-            >
-              <div className="policy__detail__view__box__title">
-                {t("claimSettlementDetail.claimsDischargeVoucher")}
-              </div>
-              <div className="policy__detail__view__box__container cursor-pointer">
-                <div className="policy__detail__view__box__sub__title">
-                  {downloadLoading.dischargeVoucher ? (
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      <ProgressSpinner
-                        style={{ width: "16px", height: "16px" }}
-                      />
-                      {t("claimSettlementDetail.downloading")}
-                    </div>
-                  ) : (
-                    t("claimSettlementDetail.view")
-                  )}
-                </div>
-                {!downloadLoading.dischargeVoucher && <SvgBlueArrow />}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="grid mt-2">
-          <div className="col-12 md:col-6 lg:col-6">
-            <div
-              onClick={() =>
-                !downloadLoading.dataSheet && handleClaimsDatasheetubmit()
-              }
-              className={`policy__detail__view__box ${
-                downloadLoading.dataSheet ? "loading" : ""
-              }`}
-              style={{
-                opacity: downloadLoading.dataSheet ? 0.7 : 1,
-                pointerEvents: downloadLoading.dataSheet ? "none" : "auto",
-              }}
-            >
-              <div className="policy__detail__view__box__title">
-                {t("claimSettlementDetail.claimsDataSheet")}
-              </div>
-
-              <div className="policy__detail__view__box__container cursor-pointer">
-                <div className="policy__detail__view__box__sub__title">
-                  {downloadLoading.dataSheet ? (
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      <ProgressSpinner
-                        style={{ width: "16px", height: "16px" }}
-                      />
-                      {t("claimSettlementDetail.downloading")}
-                    </div>
-                  ) : (
-                    t("claimSettlementDetail.view")
-                  )}
-                </div>
-                {!downloadLoading.dataSheet && <SvgBlueArrow />}
-              </div>
-            </div>
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <div
-              onClick={() => !downloadLoading.fir && handleFIRSubmit()}
-              className={`policy__detail__view__box ${
-                downloadLoading.fir ? "loading" : ""
-              }`}
-              style={{
-                opacity: downloadLoading.fir ? 0.7 : 1,
-                pointerEvents: downloadLoading.fir ? "none" : "auto",
-              }}
-            >
-              <div className="policy__detail__view__box__title">{t("claimSettlementDetail.fir")}</div>
-              <div className="policy__detail__view__box__container cursor-pointer">
-                <div className="policy__detail__view__box__sub__title">
-                  {downloadLoading.fir ? (
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      <ProgressSpinner
-                        style={{ width: "16px", height: "16px" }}
-                      />
-                      {t("claimSettlementDetail.downloading")}
-                    </div>
-                  ) : (
-                    t("claimSettlementDetail.view")
-                  )}
-                </div>
-                {!downloadLoading.fir && <SvgBlueArrow />}
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
-      <SettlementCash claimId={claim?.id || claimId} />
-    </div>
+    <ClaimJourneyLayout
+      claim={claim}
+      step={["payment", "approval"].includes(step) ? step : "payment"}
+      onBack={() => navigate(claim?.clientId ? `/agent/clientview/${claim.clientId}` : "/agent/claim")}
+      title={t("claimFlow.paymentTitle")}
+      actions={claim ? <Button type="button" icon="pi pi-history" outlined label={t("claimFlow.history")} onClick={() => navigate(`/agent/claimaudittrail/${claim.id}`)} /> : null}
+    >
+      <Toast ref={toast} />
+      {!claim && !claimDetailsError && <p className="claim-journey__hint">{t("claimJourney.loadingClaim")}</p>}
+      {claimDetailsError && !claim && <FormErrorSummary serverError={claimDetailsError} />}
+      {claim && (
+        <>
+          <ClaimSection title={t("claimJourney.settlementSection")}>
+            {claim.settlementType || claim.settlementAmount ? (
+              <dl className="claim-journey__facts">
+                {settlement.map(([label, value]) => (
+                  <div key={label}>
+                    <dt>{label}</dt>
+                    <dd>{value || "—"}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : <p className="claim-journey__hint">{t("claimFlow.noSettlement")}</p>}
+          </ClaimSection>
+          <ClaimSection title={t("claimSettlementDetail.documents")}>
+            <DataTable value={DOCUMENTS.map(([name, key]) => ({ name, key }))} dataKey="name" size="small">
+              <Column header={t("claimFlow.document")} body={(d) => t(`claimSettlementDetail.${d.key}`)} />
+              <Column header={t("claimFlow.actions")} className="bv-actions" headerClassName="bv-actions" body={(d) => (
+                <Button type="button" icon="pi pi-download" text rounded aria-label={t("claimFlow.download")} tooltip={t("claimFlow.download")}
+                  tooltipOptions={{ position: "top" }} loading={downloading === d.name} disabled={!!downloading} onClick={() => download(d.name)} />
+              )} />
+            </DataTable>
+          </ClaimSection>
+          <SettlementCash claimId={claim.id || claimId} onPosition={setCash} />
+        </>
+      )}
+      <ClaimActions next={next} tone={next && !outstanding && !(cash?.payableToClaimant > 0) && ["settled", "closed"].includes(status) ? "success" : "info"}>
+        <Button type="button" label={t("claimFlow.viewClaim")} icon="pi pi-eye" outlined onClick={() => navigate(`/agent/claimdetail/${claim?.id || claimId}`)} disabled={!claim} />
+      </ClaimActions>
+    </ClaimJourneyLayout>
   );
 };
 

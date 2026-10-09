@@ -1,739 +1,207 @@
-import { useState, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
-import { BreadCrumb } from "primereact/breadcrumb";
-import { Card } from "primereact/card";
-import { Chart } from "primereact/chart";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { Tag } from "primereact/tag";
-import { Dropdown } from "primereact/dropdown";
-import { Toast } from "primereact/toast";
-import { TabView, TabPanel } from "primereact/tabview";
-import { ProgressBar } from "primereact/progressbar";
-import { Avatar } from "primereact/avatar";
 import { Calendar } from "primereact/calendar";
+import { Chart } from "primereact/chart";
+import { Column } from "primereact/column";
+import { DataTable } from "primereact/datatable";
+import { Dropdown } from "primereact/dropdown";
+import { TabPanel, TabView } from "primereact/tabview";
+import { Toast } from "primereact/toast";
+import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import renewalsWorkspaceService, { periodRange, productLabel } from "../../../services/renewalsWorkspaceService";
-import SvgDot from "../../../assets/icons/SvgDot";
-import { calendarDateFormat, toIsoDate } from "../../../utility/dateFormat";
-import { useChartTheme } from "../../../theme/chartTheme";
+import StatCards from "../../../components/StatCards";
+import { EmptyState, FilterBar, SectionCard, StatusChip } from "../../../components/RecordPage";
+import { calendarDateFormat, formatDate, toIsoDate } from "../../../utility/dateFormat";
 import { downloadCsv } from "../../../utility/csvExport";
+import { useChartTheme } from "../../../theme/chartTheme";
+import { formatPercent, formatWithUnit } from "../../../utility/numberFormat";
+import { RenewalHeader } from "../shared";
 import "./index.scss";
-import { currencySymbol } from "../../../utility/currencyConverter";
-import { formatPercent, formatWithUnit, progressValue } from "../../../utility/numberFormat";
 
+const PERIODS = ["Current Month", "Last 3 Months", "Last 6 Months", "Year to Date", "Custom Range"];
+
+/** The KPI is met when the achieved value reaches the target (at or below it for cycle time, where lower is better). */
+const isMet = (kpi) => (kpi.lowerIsBetter ? kpi.achieved <= kpi.target : kpi.achieved >= kpi.target);
+
+/**
+ * Operations > Renewals > Performance: renewal KPIs of the renewals due in the period against the targets of the
+ * renewal settings (renewals.target_*), as a scorecard, per account executive, per product line and by month.
+ */
 const PerformanceTracking = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
-  const [loading, setLoading] = useState(false);
-  const [timeFilter, setTimeFilter] = useState('Current Month');
-  const [teamFilter, setTeamFilter] = useState('All Teams');
-  const [productFilter, setProductFilter] = useState('All Products');
-  const [dateRange, setDateRange] = useState([null, null]);
-  const [performanceData, setPerformanceData] = useState({});
-  // KPI targets from the renewal settings
-  const [targets, setTargets] = useState({});
-  const [chartData, setChartData] = useState({});
-  const [chartOptions, setChartOptions] = useState({});
-  const chart = useChartTheme();
   const toast = useRef(null);
-
-  const timeFilterOptions = [
-    { label: t("renewal.currentMonth"), value: 'Current Month' },
-    { label: t("renewal.last3Months"), value: 'Last 3 Months' },
-    { label: t("renewal.last6Months"), value: 'Last 6 Months' },
-    { label: t("renewal.yearToDate"), value: 'Year to Date' },
-    { label: t("renewal.customRange"), value: 'Custom Range' }
-  ];
-
-  const teamFilterOptions = [
-    { label: t("renewal.allTeams"), value: 'All Teams' },
-    { label: t("renewal.renewalTeamA"), value: 'Team A' },
-    { label: t("renewal.renewalTeamB"), value: 'Team B' },
-    { label: t("renewal.seniorAgents"), value: 'Senior' },
-    { label: t("renewal.juniorAgents"), value: 'Junior' }
-  ];
-
-  const productKeys = Object.keys(performanceData.byProduct || {});
-  const productFilterOptions = [
-    { label: t("renewal.allProducts"), value: 'All Products' },
-    ...productKeys.map(key => ({ label: productLabel(key), value: key }))
-  ];
-  const shownProducts = productFilter === 'All Products' ? productKeys : productKeys.filter(key => key === productFilter);
-
-  const items = [
-    { label: t("renewal.renewals"), url: "#" },
-    { label: t("renewal.performanceTracking"), url: "#" }
-  ];
-
-  const home = { icon: <SvgDot />, url: "#" };
+  const chart = useChartTheme();
+  const [loading, setLoading] = useState(false);
+  const [period, setPeriod] = useState("Current Month");
+  const [range, setRange] = useState(null);
+  const [line, setLine] = useState("");
+  const [data, setData] = useState({});
+  const [targets, setTargets] = useState({});
+  const [tab, setTab] = useState(0);
 
   useEffect(() => {
     renewalsWorkspaceService.getSettings("renewals").then(setTargets).catch(() => setTargets({}));
   }, []);
 
-  useEffect(() => {
-    loadPerformanceData();
-  }, [timeFilter, dateRange]);
-
-  useEffect(() => {
-    setupCharts();
-  }, [performanceData, productFilter, chart]);
-
-  const loadPerformanceData = async () => {
+  const load = useCallback(async () => {
+    if (period === "Custom Range" && !(range?.[0] && range?.[1])) return;
     setLoading(true);
     try {
-      setPerformanceData(await renewalsWorkspaceService.getPerformance(periodRange(timeFilter, dateRange)));
-    } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: t("common.error"),
-        detail: error?.message || t("renewal.failedToLoadPerformanceData"),
-        life: 3000
-      });
+      setData(await renewalsWorkspaceService.getPerformance(periodRange(period, range || [])));
+    } catch (e) {
+      toast.current?.show({ severity: "error", summary: t("common.error", "Error"), detail: e?.message, life: 5000 });
     } finally {
       setLoading(false);
     }
+  }, [period, range, t]);
+  useEffect(() => { load(); }, [load]);
+
+  const overall = useMemo(() => data.overall || {}, [data]);
+  const kpis = useMemo(() => [
+    { key: "renewalRate", target: Number(targets["renewals.target_renewal_rate"] ?? 0), achieved: overall.renewalRate ?? 0, unit: "%" },
+    { key: "premiumRetention", target: Number(targets["renewals.target_premium_retention"] ?? 0), achieved: overall.premiumRetention ?? 0, unit: "%" },
+    { key: "cycleTime", target: Number(targets["renewals.target_cycle_days"] ?? 0), achieved: overall.avgCycleTime ?? 0, unit: t("perf.days"), lowerIsBetter: true },
+    // shown only once satisfaction surveys are captured
+    { key: "customerSatisfaction", target: Number(targets["renewals.target_satisfaction"] ?? 0), achieved: overall.customerSatisfaction, unit: "/5" },
+  ].filter((k) => k.achieved !== undefined && k.achieved !== null).map((k) => ({ ...k, label: t(`perf.kpi.${k.key}`), variance: Math.round((k.achieved - k.target) * 100) / 100, met: isMet(k) })), [targets, overall, t]);
+
+  const products = Object.entries(data.byProduct || {}).filter(([key]) => !line || key === line)
+    .map(([key, p]) => ({ key, name: productLabel(key), ...p }));
+  const agents = data.byAgent || [];
+  const months = (data.trends?.monthly || []).map((m) => ({ ...m, label: new Date(`${m.month}-01T00:00:00`).toLocaleDateString(undefined, { month: "short", year: "numeric" }) }));
+
+  const figures = [
+    ...kpis.map((k) => ({ key: k.key, label: k.label, value: formatWithUnit(k.achieved, k.unit), note: t("perf.targetNote", { target: formatWithUnit(k.target, k.unit) }) })),
+    { key: "renewed", label: t("perf.renewed"), value: overall.renewed ?? null, note: t("perf.ofDecided", { count: (overall.renewed || 0) + (overall.lapsed || 0) }) },
+    { key: "open", label: t("perf.open"), value: overall.open ?? null, note: t("perf.dueInPeriod", { count: overall.total || 0 }) },
+  ];
+
+  const trendData = {
+    labels: months.map((m) => m.label),
+    datasets: [{ label: t("perf.kpi.renewalRate"), data: months.map((m) => m.rate), borderColor: chart.primary, backgroundColor: chart.primary, tension: 0, fill: false }],
   };
+  const trendOptions = chart.options({
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true, max: 100, ticks: { callback: (v) => `${v}%` } } },
+  });
 
-  const setupCharts = () => {
-    const [primaryColor, retainedColor] = chart.series(2);
-
-    // Performance Trend Chart
-    const trendData = {
-      labels: performanceData.trends?.monthly?.map(item => item.month) || [],
-      datasets: [
-        {
-          label: 'Renewal Rate (%)',
-          data: performanceData.trends?.monthly?.map(item => item.rate) || [],
-          borderColor: primaryColor,
-          backgroundColor: chart.alpha(primaryColor, 0.12),
-          tension: 0,
-          fill: false
-        }
-      ]
-    };
-
-    // Agent Performance Comparison
-    const agentComparisonData = {
-      labels: performanceData.byAgent?.map(agent => agent.agentName.split(' ')[0]) || [],
-      datasets: [
-        {
-          label: 'Renewal Rate (%)',
-          data: performanceData.byAgent?.map(agent => agent.renewalRate) || [],
-          backgroundColor: primaryColor,
-          borderRadius: 4
-        },
-        {
-          label: 'Premium Retained (M)',
-          data: performanceData.byAgent?.map(agent => agent.premiumRetained / 1000000) || [],
-          backgroundColor: retainedColor,
-          borderRadius: 4,
-          yAxisID: 'y1'
-        }
-      ]
-    };
-
-    // Product Performance Pie Chart
-    const productPerformanceData = {
-      labels: shownProducts.map(productLabel),
-      datasets: [
-        {
-          data: shownProducts.map(key => performanceData.byProduct[key]?.renewalRate || 0),
-          backgroundColor: chart.series(shownProducts.length),
-          borderColor: chart.surface
-        }
-      ]
-    };
-
-    setChartData({
-      trend: trendData,
-      agentComparison: agentComparisonData,
-      productPerformance: productPerformanceData
-    });
-
-    const baseOptions = {
-      maintainAspectRatio: false,
-      responsive: true,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            usePointStyle: true,
-            padding: 20
-          }
-        }
-      }
-    };
-
-    setChartOptions({
-      trend: chart.options({
-        ...baseOptions,
-        scales: {
-          y: {
-            beginAtZero: true,
-            max: 100,
-            ticks: {
-              callback: function(value) {
-                return value + '%';
-              }
-            }
-          }
-        }
-      }),
-      agentComparison: chart.options({
-        ...baseOptions,
-        scales: {
-          y: {
-            type: 'linear',
-            display: true,
-            position: 'left',
-            beginAtZero: true,
-            max: 100,
-            ticks: {
-              callback: function(value) {
-                return value + '%';
-              }
-            }
-          },
-          y1: {
-            type: 'linear',
-            display: true,
-            position: 'right',
-            beginAtZero: true,
-            grid: {
-              drawOnChartArea: false,
-            },
-            ticks: {
-              callback: function(value) {
-                return currencySymbol() + value + 'M';
-              }
-            }
-          }
-        }
-      }),
-      productPerformance: chart.options({
-        ...baseOptions,
-        plugins: {
-          ...baseOptions.plugins,
-          legend: {
-            position: 'right'
-          }
-        }
-      })
-    });
-  };
-
-  const formatPercentage = (value, decimals = 1) => formatPercent(value ?? 0, { decimals });
-
-  const agentRankingTemplate = (rowData) => {
-    const getRankIcon = (rank) => `#${rank}`;
-
-    const getRankColor = (rank) => {
-      switch (rank) {
-        case 1: return 'gold';
-        case 2: return 'silver';
-        case 3: return 'bronze';
-        default: return 'default';
-      }
-    };
-
-    return (
-      <div className={`rank-cell ${getRankColor(rowData.ranking)}`}>
-        <span className="rank-icon">{getRankIcon(rowData.ranking)}</span>
-      </div>
-    );
-  };
-
-  const agentNameTemplate = (rowData) => {
-    return (
-      <div className="agent-cell">
-        <Avatar
-          label={rowData.agentName.split(' ').map(n => n[0]).join('')}
-          size="normal"
-          shape="circle"
-          className="agent-avatar"
-        />
-        <div className="agent-info">
-          <span className="agent-name">{rowData.agentName}</span>
-          <small className="agent-team">Renewal Team</small>
-        </div>
-      </div>
-    );
-  };
-
-  const renewalRateTemplate = (rowData) => {
-    const rate = rowData.renewalRate || 0;
-    const getColor = (rate) => {
-      if (rate >= 90) return 'success';
-      if (rate >= 80) return 'info';
-      if (rate >= 70) return 'warning';
-      return 'danger';
-    };
-
-    return (
-      <div className="bv-meter">
-        <ProgressBar value={progressValue(rate)} showValue={false} />
-        <span className={`bv-meter__value ${getColor(rate)}`}>{formatPercentage(rate)}</span>
-      </div>
-    );
-  };
-
-  const premiumRetainedTemplate = (rowData) => {
-    return (
-      <div className="premium-cell">
-        <span className="premium-amount">{formatCurrency(rowData.premiumRetained)}</span>
-        <small className="premium-policies">{rowData.policiesRenewed} policies</small>
-      </div>
-    );
-  };
-
-  const cycleTimeTemplate = (rowData) => {
-    const days = rowData.avgCycleTime;
-    const getSeverity = (days) => {
-      if (days <= 14) return 'success';
-      if (days <= 21) return 'warning';
-      return 'danger';
-    };
-
-    return <Tag value={formatWithUnit(days, t("followUps.days", "days"))} severity={getSeverity(days)} />;
-  };
-
-  const productRateTemplate = (rowData, field) => {
-    const product = performanceData.byProduct?.[field];
-    if (!product) return '-';
-
-    return (
-      <div className="product-rate-cell">
-        <span className="rate">{formatPercentage(product.renewalRate)}</span>
-        <small className="avg-premium">{formatCurrency(product.avgPremium)}</small>
-      </div>
-    );
-  };
-
-  // KPI targets and achievements for the selected period
-  const kpiData = [
-    {
-      category: 'Renewal Rate',
-      target: Number(targets["renewals.target_renewal_rate"] ?? 85),
-      achieved: performanceData.overall?.renewalRate ?? 0,
-      unit: '%'
-    },
-    {
-      category: 'Premium Retention',
-      target: Number(targets["renewals.target_premium_retention"] ?? 90),
-      achieved: performanceData.overall?.premiumRetention ?? 0,
-      unit: '%'
-    },
-    {
-      category: 'Cycle Time',
-      target: Number(targets["renewals.target_cycle_days"] ?? 15),
-      achieved: performanceData.overall?.avgCycleTime ?? 0,
-      unit: 'days',
-      inverse: true // Lower is better
-    },
-    {
-      category: 'Customer Satisfaction',
-      target: Number(targets["renewals.target_satisfaction"] ?? 4.5),
-      achieved: performanceData.overall?.customerSatisfaction,
-      unit: '/5'
-    }
-  ].filter(kpi => kpi.achieved !== undefined && kpi.achieved !== null);
-
-  const achievementOf = (kpi) => (kpi.inverse
-    ? Math.max(0, 100 - ((kpi.achieved - kpi.target) / kpi.target) * 100)
-    : (kpi.achieved / kpi.target) * 100);
-  const handleExport = () => {
-    downloadCsv(`renewal-performance-${toIsoDate(new Date())}.csv`, kpiData, [
-      { header: t("renewal.kpiCategory"), field: "category" },
-      { header: t("renewal.target"), field: "target" },
-      { header: t("renewal.achieved"), field: "achieved" },
+  // the export of each tab: the rows the tab shows
+  const tabExports = [
+    { name: "renewal-kpis", rows: kpis, columns: [
+      { header: t("perf.col.kpi"), field: "label" },
+      { header: t("perf.col.target"), field: "target" },
+      { header: t("perf.col.achieved"), field: "achieved" },
       { header: t("renewal.unit"), field: "unit" },
-      { header: t("renewal.achievement"), field: (kpi) => `${achievementOf(kpi).toFixed(1)}%` },
-    ]);
-    toast.current.show({ severity: "success", summary: t("renewal.exportStarted"), detail: t("renewal.rowsExported", { count: kpiData.length }), life: 3000 });
+      { header: t("perf.col.variance"), field: "variance" },
+      { header: t("perf.col.status"), field: (k) => (k.met ? t("perf.met") : t("perf.notMet")) },
+    ] },
+    { name: "renewal-performance-by-account-executive", rows: agents, columns: [
+      { header: t("perf.col.agent"), field: "agentName" },
+      { header: t("perf.kpi.renewalRate"), field: "renewalRate" },
+      { header: t("perf.col.renewed"), field: "policiesRenewed" },
+      { header: t("perf.col.premiumRetained"), field: "premiumRetained" },
+      { header: t("perf.kpi.cycleTime"), field: "avgCycleTime" },
+    ] },
+    { name: "renewal-performance-by-line", rows: products, columns: [
+      { header: t("perf.col.line"), field: "name" },
+      { header: t("perf.kpi.renewalRate"), field: "renewalRate" },
+      { header: t("perf.col.renewed"), field: "renewed" },
+      { header: t("perf.col.lapsed"), field: "lapsed" },
+      { header: t("perf.col.open"), field: "open" },
+      { header: t("perf.col.avgPremium"), field: "avgPremium" },
+    ] },
+    { name: "renewal-rate-by-month", rows: months, columns: [
+      { header: t("perf.col.month"), field: "label" },
+      { header: t("perf.kpi.renewalRate"), field: "rate" },
+    ] },
+  ];
+  const exportCurrent = () => {
+    const { name, rows, columns } = tabExports[tab];
+    downloadCsv(`${name}-${toIsoDate(new Date())}.csv`, rows, columns);
+    toast.current?.show({ severity: "success", summary: t("renewal.exportStarted"), detail: t("renewal.rowsExported", { count: rows.length }), life: 3000 });
   };
-
-  // The KPI furthest from its target (none when every KPI is met)
-  const improvementArea = kpiData
-    .filter((kpi) => achievementOf(kpi) < 100)
-    .sort((a, b) => achievementOf(a) - achievementOf(b))[0]?.category;
-
-  // Insights computed from the performance data of the selected period (no fixed sentences)
-  const overall = performanceData.overall || {};
-  const topAgent = (performanceData.byAgent || [])[0];
-  const rankedProducts = productKeys
-    .map((key) => ({ key, rate: performanceData.byProduct?.[key]?.renewalRate }))
-    .filter((p) => p.rate !== undefined && p.rate !== null)
-    .sort((a, b) => a.rate - b.rate);
-  const weakestProduct = rankedProducts.length > 1 ? rankedProducts[0] : null;
-  const rateTarget = kpiData.find((k) => k.category === 'Renewal Rate')?.target;
-  const cycleTarget = kpiData.find((k) => k.category === 'Cycle Time')?.target;
-  const insights = [];
-  if (overall.renewalRate !== undefined && overall.renewalRate !== null) {
-    const met = overall.renewalRate >= rateTarget;
-    insights.push({
-      kind: met ? 'positive' : 'warning', icon: met ? 'pi-thumbs-up' : 'pi-exclamation-triangle',
-      title: t('followUps.insightRenewalRate', 'Renewal rate'),
-      text: t('followUps.insightRenewalRateText', 'Renewal rate is {{rate}} against a target of {{target}}.', { rate: formatPercent(overall.renewalRate), target: formatPercent(rateTarget) })
-        + (topAgent ? ` ${t('followUps.insightTopAgent', '{{agent}} leads with {{rate}}.', { agent: topAgent.agentName, rate: formatPercent(topAgent.renewalRate) })}` : ''),
-    });
-  }
-  if (overall.avgCycleTime) {
-    const met = overall.avgCycleTime <= cycleTarget;
-    insights.push({
-      kind: met ? 'success' : 'warning', icon: 'pi-clock',
-      title: t('followUps.insightCycleTime', 'Cycle time'),
-      text: t('followUps.insightCycleTimeText', 'Average cycle time is {{days}} against a target of {{target}}.', { days: formatWithUnit(overall.avgCycleTime, t('followUps.days', 'days')), target: formatWithUnit(cycleTarget, t('followUps.days', 'days')) }),
-    });
-  }
-  if (weakestProduct) {
-    insights.push({
-      kind: 'info', icon: 'pi-chart-line',
-      title: t('followUps.insightLowestProduct', 'Lowest renewal rate by product'),
-      text: t('followUps.insightLowestProductText', '{{product}} has the lowest renewal rate at {{rate}}.', { product: productLabel(weakestProduct.key), rate: formatPercent(weakestProduct.rate) }),
-    });
-  }
-
-  const kpiAchievementTemplate = (rowData) => {
-    const percentage = rowData.inverse
-      ? Math.max(0, 100 - ((rowData.achieved - rowData.target) / rowData.target) * 100)
-      : (rowData.achieved / rowData.target) * 100;
-
-    const getSeverity = (percentage) => {
-      if (percentage >= 100) return 'success';
-      if (percentage >= 90) return 'info';
-      if (percentage >= 80) return 'warning';
-      return 'danger';
-    };
-
-    return (
-      <div className="bv-meter">
-        <ProgressBar value={progressValue(percentage)} showValue={false} />
-        <span className={`bv-meter__value ${getSeverity(percentage)}`}>
-          {percentage >= 100 ? t('renewal.targetMet') : t('renewal.ofTarget', { pct: Math.round(percentage) })}
-        </span>
-      </div>
-    );
-  };
+  const num = { className: "bv-num", headerClassName: "bv-num" };
+  const empty = <EmptyState icon="pi-chart-bar" title={t("perf.emptyTitle")} text={t("perf.emptyText")} />;
 
   return (
-    <div className="container__performance__tracking__master">
+    <div className="bv-ops-page performance-page">
       <Toast ref={toast} />
+      <RenewalHeader title={t("perf.title")}
+        actions={(
+          <Button icon="pi pi-download" outlined label={t("perf.export")} tooltip={t("renewal.exportToCsv")} tooltipOptions={{ position: "top" }}
+            onClick={exportCurrent} disabled={!tabExports[tab].rows.length} />
+        )} />
+      <FilterBar>
+        <Dropdown value={period} onChange={(e) => setPeriod(e.value)} aria-label={t("perf.period")}
+          options={PERIODS.map((p) => ({ label: t(`perf.periods.${p}`, p), value: p }))} />
+        {period === "Custom Range" ? (
+          <Calendar value={range} onChange={(e) => setRange(e.value)} selectionMode="range" readOnlyInput showIcon dateFormat={calendarDateFormat()}
+            placeholder={t("perf.range")} aria-label={t("perf.range")} />
+        ) : null}
+        <Dropdown value={line} onChange={(e) => setLine(e.value || "")} aria-label={t("perf.line")}
+          options={[{ label: t("perf.allLines"), value: "" }, ...Object.keys(data.byProduct || {}).map((k) => ({ label: productLabel(k), value: k }))]} />
+        {data.period ? <span className="bv-muted">{t("perf.periodText", { from: formatDate(data.period.from), to: formatDate(data.period.to) })}</span> : null}
+      </FilterBar>
+      <StatCards items={figures} />
 
-      <div className="top__container">
-        <h1 className="page__title">{t("renewal.performanceTracking")}</h1>
-        <BreadCrumb model={items} home={home} />
-      </div>
+      <TabView activeIndex={tab} onTabChange={(e) => setTab(e.index)} className="bv-tabbar">
+        <TabPanel header={t("perf.tabs.kpi")} />
+        <TabPanel header={t("perf.tabs.agents")} />
+        <TabPanel header={t("perf.tabs.products")} />
+        <TabPanel header={t("perf.tabs.trend")} />
+      </TabView>
 
-      <div className="content-container">
-        {/* Filters Section */}
-        <div className="filters-section">
-          <Card>
-            <div className="filters-grid">
-              <div className="filter-field">
-                <label>Time Period</label>
-                <Dropdown
-                  value={timeFilter}
-                  onChange={(e) => setTimeFilter(e.value)}
-                  options={timeFilterOptions}
-                />
-              </div>
+      {tab === 0 ? (
+        <SectionCard flush title={t("perf.tabs.kpi")} hint={t("perf.kpiHint")}>
+          <DataTable value={kpis} dataKey="key" size="small" loading={loading}>
+            <Column field="label" header={t("perf.col.kpi")} />
+            <Column field="target" header={t("perf.col.target")} body={(k) => formatWithUnit(k.target, k.unit)} {...num} />
+            <Column field="achieved" header={t("perf.col.achieved")} body={(k) => formatWithUnit(k.achieved, k.unit)} {...num} />
+            <Column field="variance" header={t("perf.col.variance")} body={(k) => `${k.variance > 0 ? "+" : ""}${formatWithUnit(k.variance, k.unit)}`} {...num} />
+            <Column field="met" header={t("perf.col.status")} body={(k) => <StatusChip label={k.met ? t("perf.met") : t("perf.notMet")} severity={k.met ? "success" : "warning"} />} />
+          </DataTable>
+        </SectionCard>
+      ) : null}
 
-              <div className="filter-field">
-                <label>Team</label>
-                <Dropdown
-                  value={teamFilter}
-                  onChange={(e) => setTeamFilter(e.value)}
-                  options={teamFilterOptions}
-                />
-              </div>
+      {tab === 1 ? (
+        <SectionCard flush title={t("perf.tabs.agents")}>
+          <DataTable value={agents} dataKey="agentName" size="small" loading={loading} sortField="renewalRate" sortOrder={-1} emptyMessage={empty}>
+            <Column field="agentName" header={t("perf.col.agent")} sortable />
+            <Column field="renewalRate" header={t("perf.kpi.renewalRate")} sortable body={(a) => formatPercent(a.renewalRate)} {...num} />
+            <Column field="policiesRenewed" header={t("perf.col.renewed")} sortable {...num} />
+            <Column field="premiumRetained" header={t("perf.col.premiumRetained")} sortable body={(a) => formatCurrency(a.premiumRetained)} {...num} />
+            <Column field="avgCycleTime" header={t("perf.kpi.cycleTime")} sortable body={(a) => formatWithUnit(a.avgCycleTime, t("perf.days"))} {...num} />
+          </DataTable>
+        </SectionCard>
+      ) : null}
 
-              <div className="filter-field">
-                <label>Product Line</label>
-                <Dropdown
-                  value={productFilter}
-                  onChange={(e) => setProductFilter(e.value)}
-                  options={productFilterOptions}
-                />
-              </div>
+      {tab === 2 ? (
+        <SectionCard flush title={t("perf.tabs.products")}>
+          <DataTable value={products} dataKey="key" size="small" loading={loading} emptyMessage={empty}>
+            <Column field="name" header={t("perf.col.line")} sortable />
+            <Column field="renewalRate" header={t("perf.kpi.renewalRate")} sortable body={(p) => formatPercent(p.renewalRate)} {...num} />
+            <Column field="renewed" header={t("perf.col.renewed")} sortable {...num} />
+            <Column field="lapsed" header={t("perf.col.lapsed")} sortable {...num} />
+            <Column field="open" header={t("perf.col.open")} sortable {...num} />
+            <Column field="avgPremium" header={t("perf.col.avgPremium")} sortable body={(p) => formatCurrency(p.avgPremium)} {...num} />
+          </DataTable>
+        </SectionCard>
+      ) : null}
 
-              {timeFilter === 'Custom Range' && (
-                <div className="filter-field">
-                  <label>Date Range</label>
-                  <Calendar
-                    value={dateRange}
-                    onChange={(e) => setDateRange(e.value)}
-                    selectionMode="range"
-                    dateFormat={calendarDateFormat()}
-                  />
-                </div>
-              )}
-
-              <div className="filter-actions">
-                <Button
-                  label="Apply Filters"
-                  icon="pi pi-filter"
-                  onClick={loadPerformanceData}
-                  loading={loading}
-                />
-                <Button
-                  label="Export Report"
-                  icon="pi pi-file-excel"
-                  className="p-button-secondary"
-                  onClick={handleExport}
-                  disabled={!kpiData.length}
-                />
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* KPI Overview */}
-        <div className="kpi-overview">
-          <Card>
-            <div className="kpi-header">
-              <h3>Key Performance Indicators</h3>
-              <span className="chart-caption">{t("renewal.currentPeriod")}</span>
-            </div>
-            <div className="kpi-grid">
-              {kpiData.map((kpi, index) => (
-                <div key={index} className="kpi-item">
-                  <div className="kpi-details">
-                    <span className="kpi-category">{kpi.category}</span>
-                    <div className="kpi-values">
-                      <span className="achieved">{formatWithUnit(kpi.achieved, kpi.unit)}</span>
-                      <span className="target">Target: {formatWithUnit(kpi.target, kpi.unit)}</span>
-                    </div>
-                    <div className="bv-meter">
-                      <ProgressBar value={progressValue(kpi.inverse
-                        ? Math.max(0, 100 - ((kpi.achieved - kpi.target) / kpi.target) * 100)
-                        : Math.min((kpi.achieved / kpi.target) * 100, 100))} showValue={false} />
-                      <span className="bv-meter__value">{t('renewal.ofTarget', { pct: Math.round(progressValue(kpi.inverse
-                        ? Math.max(0, 100 - ((kpi.achieved - kpi.target) / kpi.target) * 100)
-                        : Math.min((kpi.achieved / kpi.target) * 100, 100))) })}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
-        </div>
-
-        {/* Performance Charts */}
-        <div className="performance-charts">
-          <TabView>
-            <TabPanel header={t("renewal.trendAnalysis")}>
-              <div className="charts-container">
-                <Card className="trend-chart">
-                  <div className="chart-header">
-                    <h3>Renewal Rate Trend</h3>
-                    <span className="chart-caption">12 months</span>
-                  </div>
-                  <Chart
-                    type="line"
-                    data={chartData.trend}
-                    options={chartOptions.trend}
-                    height="300px"
-                  />
-                </Card>
-              </div>
-            </TabPanel>
-
-            <TabPanel header={t("renewal.agentPerformance")}>
-              <div className="charts-container">
-                <div className="charts-grid">
-                  <Card className="comparison-chart">
-                    <div className="chart-header">
-                      <h3>Sales Performance Comparison</h3>
-                      <span className="chart-caption">Dual metrics</span>
-                    </div>
-                    <Chart
-                      type="bar"
-                      data={chartData.agentComparison}
-                      options={chartOptions.agentComparison}
-                      height="300px"
-                    />
-                  </Card>
-
-                  <Card className="leaderboard-card">
-                    <div className="chart-header">
-                      <h3>Sales Leaderboard</h3>
-                    </div>
-                    <DataTable
-                      value={performanceData.byAgent || []}
-                      className="leaderboard-table"
-                      showGridlines={false}
-                    >
-                      <Column
-                        body={agentRankingTemplate}
-                        header={t("renewal.rank")}
-                        style={{ width: '60px', textAlign: 'center' }}
-                      />
-                      <Column
-                        body={agentNameTemplate}
-                        header="Sales person"
-                        style={{ width: '180px' }}
-                      />
-                      <Column
-                        body={renewalRateTemplate}
-                        header={t("renewal.renewalRatePercent")}
-                        style={{ width: '120px' }}
-                      />
-                      <Column
-                        body={premiumRetainedTemplate}
-                        header={t("renewal.premium")}
-                        style={{ width: '140px' }}
-                      />
-                      <Column
-                        body={cycleTimeTemplate}
-                        header={t("renewal.cycleTime")}
-                        style={{ width: '100px' }}
-                      />
-                    </DataTable>
-                  </Card>
-                </div>
-              </div>
-            </TabPanel>
-
-            <TabPanel header={t("renewal.productPerformance")}>
-              <div className="charts-container">
-                <div className="charts-grid">
-                  <Card className="product-chart">
-                    <div className="chart-header">
-                      <h3>Product Performance Distribution</h3>
-                      <span className="chart-caption">Renewal rates</span>
-                    </div>
-                    <Chart
-                      type="doughnut"
-                      data={chartData.productPerformance}
-                      options={chartOptions.productPerformance}
-                      height="300px"
-                    />
-                  </Card>
-
-                  <Card className="product-metrics">
-                    <div className="chart-header">
-                      <h3>Product Metrics Summary</h3>
-                    </div>
-                    <DataTable
-                      value={[{ id: 1 }]} // Single row for product metrics
-                      className="product-table"
-                      showGridlines={false}
-                      header={null}
-                    >
-                      <Column field="product" header={t("renewal.product")} body={() => t("renewal.renewalRate", "Renewal Rate")} />
-                      {shownProducts.map(key => (
-                        <Column key={key} body={(data) => productRateTemplate(data, key)} header={productLabel(key)} />
-                      ))}
-                    </DataTable>
-                  </Card>
-                </div>
-              </div>
-            </TabPanel>
-
-            <TabPanel header={t("renewal.kpiScorecard")}>
-              <div className="scorecard-container">
-                <Card>
-                  <div className="chart-header">
-                    <h3>Performance Scorecard</h3>
-                    <span className="chart-caption">vs Targets</span>
-                  </div>
-                  <DataTable
-                    value={kpiData}
-                    className="scorecard-table"
-                    showGridlines={false}
-                  >
-                    <Column
-                      field="category"
-                      header={t("renewal.kpiCategory")}
-                      style={{ width: '25%' }}
-                    />
-                    <Column
-                      field="target"
-                      header={t("renewal.target")}
-                      style={{ width: '15%' }}
-                      body={(data) => formatWithUnit(data.target, data.unit)}
-                    />
-                    <Column
-                      field="achieved"
-                      header={t("renewal.achieved")}
-                      style={{ width: '15%' }}
-                      body={(data) => formatWithUnit(data.achieved, data.unit)}
-                    />
-                    <Column
-                      body={kpiAchievementTemplate}
-                      header={t("renewal.achievement")}
-                      style={{ width: '45%' }}
-                    />
-                  </DataTable>
-                </Card>
-
-                <div className="scorecard-summary">
-                  <Card>
-                    <div className="summary-header">
-                      <h3>Performance Summary</h3>
-                    </div>
-                    <div className="summary-metrics">
-                      <div className="summary-item">
-                        <span className="metric-label">KPIs Achieved</span>
-                        <span className="metric-value success">
-                          {kpiData.filter(kpi =>
-                            kpi.inverse
-                              ? kpi.achieved <= kpi.target
-                              : kpi.achieved >= kpi.target
-                          ).length}/{kpiData.length}
-                        </span>
-                      </div>
-                      <div className="summary-item">
-                        <span className="metric-label">Overall Score</span>
-                        <span className="metric-value info">
-                          {kpiData.length ? formatPercent(kpiData.reduce((total, kpi) => total + Math.min(achievementOf(kpi), 100), 0) / kpiData.length, { decimals: 0 }) : '-'}
-                        </span>
-                      </div>
-                      <div className="summary-item">
-                        <span className="metric-label">Top Performer</span>
-                        <span className="metric-value primary">
-                          {performanceData.byAgent?.[0]?.agentName || '-'}
-                        </span>
-                      </div>
-                      <div className="summary-item">
-                        <span className="metric-label">Improvement Area</span>
-                        <span className="metric-value warning">{improvementArea || '-'}</span>
-                      </div>
-                    </div>
-                  </Card>
-                </div>
-              </div>
-            </TabPanel>
-          </TabView>
-        </div>
-
-        {/* Performance Insights (computed from the data of the selected period) */}
-        {insights.length > 0 && (
-          <div className="performance-insights">
-            <Card>
-              <div className="insights-header">
-                <h3>{t('followUps.performanceInsights', 'Performance Insights')}</h3>
-              </div>
-              <div className="insights-grid">
-                {insights.map((insight) => (
-                  <div key={insight.title} className={`insight-item ${insight.kind}`}>
-                    <div className="insight-icon">
-                      <i className={`pi ${insight.icon}`}></i>
-                    </div>
-                    <div className="insight-content">
-                      <h4>{insight.title}</h4>
-                      <p>{insight.text}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </div>
-        )}
-      </div>
+      {tab === 3 ? (
+        <SectionCard title={t("perf.tabs.trend")} hint={t("perf.trendHint")}>
+          {months.length ? (
+            <div className="performance-page__chart"><Chart type="line" data={trendData} options={trendOptions} /></div>
+          ) : empty}
+          <DataTable value={months} dataKey="month" size="small" className={months.length ? "mt-3" : "hidden"}>
+            <Column field="label" header={t("perf.col.month")} />
+            <Column field="rate" header={t("perf.kpi.renewalRate")} body={(m) => formatPercent(m.rate)} {...num} />
+          </DataTable>
+        </SectionCard>
+      ) : null}
     </div>
   );
 };

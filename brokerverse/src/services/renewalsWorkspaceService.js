@@ -83,6 +83,7 @@ const renewalsWorkspaceService = {
   lapse: (id, reason, reasonCode = null) => call("POST", `${id}/lapse`, { reason, ...(reasonCode ? { reasonCode } : {}) }),
   reinstate: (id, note) => call("POST", `${id}/reinstate`, { note }),
   winBack: (id, payload) => call("POST", `${id}/win-back`, payload),
+  escalate: (id, note) => call("POST", `${id}/escalate`, { note }),
 
   getAtRisk: () => call("GET", "at-risk"),
   async getNegotiations() {

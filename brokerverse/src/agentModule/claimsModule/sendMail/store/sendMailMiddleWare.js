@@ -82,9 +82,7 @@ export const postSendData = createAsyncThunk(
           "MOTOR",
         reportedDate: new Date().toISOString(),
         claimStatus: "Pending",
-        claimType: isFireLob(claimDetailsData.productType)
-          ? "Fire"
-          : "Motor",
+        // claim type: the line of business (server default); the documents follow the cause of loss
         claimPriority: "High",
         // entered on the claim form (required there); never defaulted to today
         dateOfIncident: claimThirdPartyData.dateOfIncident || null,

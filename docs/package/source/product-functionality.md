@@ -253,7 +253,7 @@ Every business event posts a balanced journal through its posting rule. On a co-
 - Claims paid through the broker: funds received from each insurer and payment to the claimant, each posted with its journal.
 - Claim letters on the letterhead: Acknowledgment letter, Claims Discharge Voucher, Claims Data sheet and FIR.
 - Claim Audit Trail and field change history.
-- Claim document checklist by line of business and claim type (Master > Insurance Management > Claim Document Checklist), received / waived status, missing-document reminders to the claimant (manual and daily), submission to the insurer refused while a required document is missing (`claims.require_documents_before_submission`).
+- Claim documents as a step of the claim (after the insurer advice, and on the claim page) with a Next step panel on every claim step: checklist by line of business and claim type or cause of loss (Master > Insurance Management > Claim Document Checklist), progress (x of y required in), received / waived status, the work queue Claims Awaiting Documents, missing-document reminders to the claimant (manual and daily), submission to the insurer refused while a required document is missing (`claims.require_documents_before_submission`).
 - Motor claim repairs: estimates of accredited repair shops, the adjuster's decision, supplementary estimates, letter of authority (LOA-) with the insured's participation (`motor_claims.participation`) and the vehicle release acknowledgement.
 - Accounts > Claims Settlements: funds received from insurers and payment to the claimant from the Accounting menu, with the claim payment voucher (CPV-) and the release and quitclaim.
 
@@ -272,7 +272,7 @@ Every business event posts a balanced journal through its posting rule. On a co-
 
 - Pipeline 90 days before expiry (`renewals.pipeline_days`); notices at 60, 30 and 15 days (`limits.renewal_notice_days`); lapse 30 days after expiry (`renewals.grace_period_days`).
 - Renewal Policy, Renewal Batch (up to 500 policies), Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management with win-back campaigns, Performance.
-- At-risk score from claims in the term, unpaid premium, expiry within 30 days, premium increase, no contact and first renewal (`renewals.risk_weights`), with recommended actions.
+- At-risk register: score from claims in the term, unpaid premium, expiry within 15 days or the grace period, premium increase, no contact and first renewal (`renewals.risk_weights`), shown as a breakdown (factor, finding, weight, points); recommended actions (`renewals.risk_actions`) become My Work tasks on the renewal, and an escalation notifies the unit head.
 - Renewal issues the new term, marks the old policy Renewed, bills the premium and accrues commission to the original referrer.
 
 ![Renewal Queue](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-renewal-queue.png)

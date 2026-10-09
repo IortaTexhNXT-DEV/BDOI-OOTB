@@ -237,7 +237,7 @@ Every folder under `backend/src/modules` with a `router.js` is one back-end modu
 | Module and routes (endpoints) | Purpose | Main tables | Jobs, posting events, settings |
 |---|---|---|---|
 | `claims`<br>`/claims` (17) | Claim registration, lifecycle, field-level trail, settlement, Preliminary Loss Advice | `claims`, `claim_history`, `claim_field_changes`, `claim_settlement_movements` | Events `claim.funds_received`, `claim.paid_to_claimant`, `claim.settlement.paid_through_broker`; `claims.*` |
-| `claim-documents`<br>`/claim-documents` (6) | Claim document checklist, reminders, submission to the insurer | `claim_document_items`, `claim_document_reminders` | Job `claim-document-reminders`; `claims.document_*` |
+| `claim-documents`<br>`/claim-documents` (7) | Claim document checklist (the Documents step of a claim), the queue of claims awaiting documents, reminders, submission to the insurer | `claim_document_items`, `claim_document_reminders` | Job `claim-document-reminders`; `claims.document_*` |
 | `motor-claims`<br>`/motor-claims` (10) | Repair estimates, letters of authority, vehicle release | `claim_repair_estimates`, `claim_loas`, `claim_vehicle_releases` | `motor_claims.*` |
 | `claim-payments`<br>`/claim-payments` (6) | Claims Settlements in the Accounting menu: funds received and payment to the claimant | through `claims` and the receipt and voucher paths | Events `claim.*` |
 
@@ -904,7 +904,7 @@ The UAT scenario script loads a new database in the order below before it create
 | campaigns | /campaigns | 17 | 1 |
 | cancellations | /cancellations | 3 | 1 |
 | channels | /channels | 6 | 4 |
-| claim-documents | /claim-documents | 6 | 1 |
+| claim-documents | /claim-documents | 7 | 1 |
 | claim-payments | /claim-payments | 6 | 1 |
 | claims | /claims | 17 | 5 |
 | clients | /clients, /customers | 8 | 40 |

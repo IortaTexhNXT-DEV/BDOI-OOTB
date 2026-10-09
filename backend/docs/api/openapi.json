@@ -7280,7 +7280,7 @@
     "/audit/records/{entity}/{id}": {
       "get": {
         "operationId": "getAuditRecordsEntityId",
-        "summary": "History of one record as business events, newest first (sort=asc for oldest first): who (display name and roles), when (date and time in general.timezone, general.date_format), from where (screen / API / system job), the event and its changed fields as label, old value, new value (formatted; secrets never shown; ID numbers masked without view:pii). :id is the id or the record number",
+        "summary": "History of one record as business events, newest first (sort=asc for oldest first): who (display name and roles), when (date and time in general.timezone, general.date_format), from where (screen / API / system job), the event and its changed fields as label, old value, new value (formatted; secrets never shown; ID numbers masked without view:pii). :id is the id or the record number. export=csv | excel downloads the history, one row per changed field",
         "tags": [
           "Audit Trail"
         ],
@@ -7310,6 +7310,15 @@
               "type": "string"
             },
             "example": "desc"
+          },
+          {
+            "name": "export",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "excel"
           }
         ],
         "responses": {
@@ -27451,6 +27460,156 @@
         ]
       }
     },
+    "/claim-documents/awaiting": {
+      "get": {
+        "operationId": "getClaimDocumentsAwaiting",
+        "summary": "Work queue: open claims whose claim file has not gone to the insurer, with the required documents received and missing and the last reminder (stage missing | ready | all)",
+        "tags": [
+          "Claim Documents"
+        ],
+        "description": "Front-end touchpoint: Operations > Claims Awaiting Documents\n\nAccess: read:claims",
+        "parameters": [
+          {
+            "name": "stage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "missing"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "missing": {
+                              "type": "integer"
+                            },
+                            "ready": {
+                              "type": "integer"
+                            },
+                            "documentsMissing": {
+                              "type": "integer"
+                            },
+                            "notReminded": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "claimId": {
+                                "type": "string"
+                              },
+                              "claimNumber": {
+                                "type": "string"
+                              },
+                              "policyNumber": {
+                                "type": "string"
+                              },
+                              "claimant": {
+                                "type": "string"
+                              },
+                              "lob": {
+                                "type": "string"
+                              },
+                              "lossCause": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "reportedDate": {
+                                "type": "string"
+                              },
+                              "daysOpen": {
+                                "type": "integer"
+                              },
+                              "required": {
+                                "type": "integer"
+                              },
+                              "received": {
+                                "type": "integer"
+                              },
+                              "missing": {
+                                "type": "integer"
+                              },
+                              "lastReminderAt": {},
+                              "complete": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "summary": {
+                      "missing": 3,
+                      "ready": 1,
+                      "documentsMissing": 11,
+                      "notReminded": 1
+                    },
+                    "rows": [
+                      {
+                        "claimId": "clm_1",
+                        "claimNumber": "CLM-2026-00001",
+                        "policyNumber": "POL-2026-00001",
+                        "claimant": "Maria Santos",
+                        "lob": "MOTOR",
+                        "lossCause": "Theft",
+                        "status": "registered",
+                        "reportedDate": "2026-10-01",
+                        "daysOpen": 8,
+                        "required": 18,
+                        "received": 15,
+                        "missing": 3,
+                        "lastReminderAt": null,
+                        "complete": false
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Claims Awaiting Documents",
+        "x-permissions": [
+          "read:claims"
+        ]
+      }
+    },
     "/claim-documents/claims/{id}": {
       "get": {
         "operationId": "getClaimDocumentsClaimsId",
@@ -27458,7 +27617,7 @@
         "tags": [
           "Claim Documents"
         ],
-        "description": "Front-end touchpoint: Operations > Claim Documents\n\nAccess: read:claims",
+        "description": "Front-end touchpoint: Operations > Claims > claim > Documents\n\nAccess: read:claims",
         "parameters": [
           {
             "name": "id",
@@ -27577,7 +27736,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Operations > Claim Documents",
+        "x-screen": "Operations > Claims > claim > Documents",
         "x-permissions": [
           "read:claims"
         ]
@@ -27590,7 +27749,7 @@
         "tags": [
           "Claim Documents"
         ],
-        "description": "Front-end touchpoint: Operations > Claim Documents\n\nAccess: write:claims",
+        "description": "Front-end touchpoint: Operations > Claims > claim > Documents\n\nAccess: write:claims",
         "parameters": [
           {
             "name": "id",
@@ -27653,7 +27812,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Operations > Claim Documents",
+        "x-screen": "Operations > Claims > claim > Documents",
         "x-permissions": [
           "write:claims"
         ],
@@ -27688,7 +27847,7 @@
         "tags": [
           "Claim Documents"
         ],
-        "description": "Front-end touchpoint: Operations > Claim Documents\n\nAccess: write:claims",
+        "description": "Front-end touchpoint: Operations > Claims > claim > Documents\n\nAccess: write:claims",
         "parameters": [
           {
             "name": "id",
@@ -27755,7 +27914,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Operations > Claim Documents",
+        "x-screen": "Operations > Claims > claim > Documents",
         "x-permissions": [
           "write:claims"
         ],
@@ -27790,7 +27949,7 @@
         "tags": [
           "Claim Documents"
         ],
-        "description": "Front-end touchpoint: Operations > Claim Documents\n\nAccess: write:claims",
+        "description": "Front-end touchpoint: Operations > Claims > claim > Documents\n\nAccess: write:claims",
         "parameters": [
           {
             "name": "id",
@@ -27857,7 +28016,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Operations > Claim Documents",
+        "x-screen": "Operations > Claims > claim > Documents",
         "x-permissions": [
           "write:claims"
         ],
@@ -27881,7 +28040,7 @@
         "tags": [
           "Claim Documents"
         ],
-        "description": "Front-end touchpoint: Operations > Claim Documents > Remind\n\nAccess: write:claims",
+        "description": "Front-end touchpoint: Operations > Claims > claim > Documents > Remind\n\nAccess: write:claims",
         "parameters": [
           {
             "name": "id",
@@ -27945,7 +28104,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Operations > Claim Documents > Remind",
+        "x-screen": "Operations > Claims > claim > Documents > Remind",
         "x-permissions": [
           "write:claims"
         ],
@@ -27970,7 +28129,7 @@
         "tags": [
           "Claim Documents"
         ],
-        "description": "Front-end touchpoint: Operations > Claim Documents > Submit to insurer\n\nAccess: write:claims",
+        "description": "Front-end touchpoint: Operations > Claims > claim > Documents > Submit to insurer\n\nAccess: write:claims",
         "parameters": [
           {
             "name": "id",
@@ -28093,7 +28252,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Operations > Claim Documents > Submit to insurer",
+        "x-screen": "Operations > Claims > claim > Documents > Submit to insurer",
         "x-permissions": [
           "write:claims"
         ],
@@ -32615,6 +32774,137 @@
             }
           }
         }
+      }
+    },
+    "/clients/{id}/summary": {
+      "get": {
+        "operationId": "getClientsIdSummary",
+        "summary": "Figures of the client view: active policies and their premium, open claims, open renewals and the next expiry, unpaid balance and overdue bills, and the number of policies, quotations, claims, renewals, endorsements, receipts and KYC documents",
+        "tags": [
+          "Clients"
+        ],
+        "description": "Front-end touchpoint: Operations > Clients > Client view\n\nAccess: read:clients",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "clientId": {
+                          "type": "string"
+                        },
+                        "clientCode": {
+                          "type": "string"
+                        },
+                        "activePolicies": {
+                          "type": "integer"
+                        },
+                        "activePremium": {
+                          "type": "integer"
+                        },
+                        "openClaims": {
+                          "type": "integer"
+                        },
+                        "openRenewals": {
+                          "type": "integer"
+                        },
+                        "nextExpiry": {
+                          "type": "string"
+                        },
+                        "outstanding": {
+                          "type": "integer"
+                        },
+                        "overdueBills": {
+                          "type": "integer"
+                        },
+                        "counts": {
+                          "type": "object",
+                          "properties": {
+                            "policies": {
+                              "type": "integer"
+                            },
+                            "quotations": {
+                              "type": "integer"
+                            },
+                            "claims": {
+                              "type": "integer"
+                            },
+                            "renewals": {
+                              "type": "integer"
+                            },
+                            "endorsements": {
+                              "type": "integer"
+                            },
+                            "receipts": {
+                              "type": "integer"
+                            },
+                            "documents": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "clientId": "cl_1",
+                    "clientCode": "CL-2026-00001",
+                    "activePolicies": 2,
+                    "activePremium": 56730,
+                    "openClaims": 1,
+                    "openRenewals": 1,
+                    "nextExpiry": "2026-10-28",
+                    "outstanding": 26350,
+                    "overdueBills": 0,
+                    "counts": {
+                      "policies": 2,
+                      "quotations": 3,
+                      "claims": 2,
+                      "renewals": 1,
+                      "endorsements": 0,
+                      "receipts": 4,
+                      "documents": 2
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Clients > Client view",
+        "x-permissions": [
+          "read:clients"
+        ]
       }
     },
     "/clients/from-lead/{leadId}": {
@@ -134125,6 +134415,123 @@
         }
       }
     },
+    "/renewals/{id}/escalate": {
+      "post": {
+        "operationId": "postRenewalsIdEscalate",
+        "summary": "Escalate an at-risk renewal to the unit head (manager of the renewal owner, else renewals.approver_roles): recorded on the timeline and notified",
+        "tags": [
+          "Renewals workspace"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > At-Risk Policies > Escalate\n\nAccess: write:renewals",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "activity": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "type": {
+                              "type": "string"
+                            },
+                            "description": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "escalatedTo": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "activity": {
+                      "id": 12,
+                      "type": "Escalation",
+                      "description": "Client is comparing quotes from two other brokers"
+                    },
+                    "escalatedTo": [
+                      {
+                        "id": "usr_1",
+                        "name": "Carlo Mendoza"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > At-Risk Policies > Escalate",
+        "x-permissions": [
+          "write:renewals"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "note": "Client is comparing quotes from two other brokers"
+              }
+            }
+          }
+        }
+      }
+    },
     "/renewals/{id}/lapse": {
       "post": {
         "operationId": "postRenewalsIdLapse",
@@ -135398,7 +135805,7 @@
     "/renewals/at-risk": {
       "get": {
         "operationId": "getRenewalsAtRisk",
-        "summary": "At-risk renewals: risk score, factors, recommended actions",
+        "summary": "At-risk register: open renewals of Medium risk or above, highest score first, with the score breakdown (factor, finding, weight, points), recommended actions (renewals.risk_actions), next open task or step and last contact",
         "tags": [
           "Renewals workspace"
         ],
@@ -135420,7 +135827,16 @@
                       "items": {
                         "type": "object",
                         "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "renewalNumber": {
+                            "type": "string"
+                          },
                           "policyNumber": {
+                            "type": "string"
+                          },
+                          "insuredName": {
                             "type": "string"
                           },
                           "riskScore": {
@@ -135434,6 +135850,9 @@
                             "items": {
                               "type": "object",
                               "properties": {
+                                "code": {
+                                  "type": "string"
+                                },
                                 "factor": {
                                   "type": "string"
                                 },
@@ -135446,25 +135865,61 @@
                               }
                             }
                           },
+                          "scoreBreakdown": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "code": {
+                                  "type": "string"
+                                },
+                                "factor": {
+                                  "type": "string"
+                                },
+                                "value": {
+                                  "type": "string"
+                                },
+                                "weight": {
+                                  "type": "integer"
+                                },
+                                "points": {
+                                  "type": "integer"
+                                }
+                              }
+                            }
+                          },
                           "recommendedActions": {
                             "type": "array",
                             "items": {
                               "type": "string"
                             }
                           },
-                          "actionPlan": {
+                          "nextAction": {
                             "type": "object",
                             "properties": {
-                              "priority": {
+                              "kind": {
                                 "type": "string"
                               },
-                              "assignedTo": {
+                              "taskId": {
                                 "type": "string"
                               },
-                              "deadline": {
+                              "title": {
+                                "type": "string"
+                              },
+                              "dueDate": {
+                                "type": "string"
+                              },
+                              "assignee": {
                                 "type": "string"
                               }
                             }
+                          },
+                          "lastContactDate": {},
+                          "assignedAgent": {
+                            "type": "string"
+                          },
+                          "assignedAgentId": {
+                            "type": "string"
                           }
                         }
                       }
@@ -135475,24 +135930,50 @@
                   "success": true,
                   "data": [
                     {
+                      "id": "rnw_1",
+                      "renewalNumber": "RN-2026-00001",
                       "policyNumber": "POL-2025-00012",
-                      "riskScore": 65,
+                      "insuredName": "Maria Santos",
+                      "riskScore": 60,
                       "riskCategory": "High",
                       "riskFactors": [
                         {
+                          "code": "claims",
                           "factor": "Claims History",
                           "score": 25,
-                          "details": "1 claim(s) on the expiring term"
+                          "details": "2 claims in the current term"
+                        }
+                      ],
+                      "scoreBreakdown": [
+                        {
+                          "code": "claims",
+                          "factor": "Claims History",
+                          "value": "2 claims in the current term",
+                          "weight": 25,
+                          "points": 25
+                        },
+                        {
+                          "code": "unpaid",
+                          "factor": "Unpaid Premium",
+                          "value": null,
+                          "weight": 20,
+                          "points": 0
                         }
                       ],
                       "recommendedActions": [
-                        "Review claims experience with the insurer"
+                        "Review the claims record with the insurer",
+                        "Prepare an alternative quote"
                       ],
-                      "actionPlan": {
-                        "priority": "Urgent",
-                        "assignedTo": "Ana Reyes",
-                        "deadline": "2026-10-30"
-                      }
+                      "nextAction": {
+                        "kind": "task",
+                        "taskId": "tsk_1",
+                        "title": "Call the client",
+                        "dueDate": "2026-10-12",
+                        "assignee": "Ana Reyes"
+                      },
+                      "lastContactDate": null,
+                      "assignedAgent": "Ana Reyes",
+                      "assignedAgentId": "usr_1"
                     }
                   ]
                 }

@@ -12,6 +12,26 @@ const call = async (path) => {
   return json;
 };
 
+/** Fetch a download and save it under the file name the server gives (else `fallback`). */
+const saveFile = async (path, fallback) => {
+  const response = await fetch(`${BASE_URL}${path}`, { headers: { ...authService.getAuthHeader() } });
+  if (!response.ok) {
+    const json = await response.json().catch(() => ({}));
+    throw new Error(json.message || `Download failed (${response.status})`);
+  }
+  const blob = await response.blob();
+  const disposition = response.headers.get("Content-Disposition") || "";
+  const name = /filename="?([^";]+)"?/.exec(disposition)?.[1] || fallback;
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+
 const queryOf = (params) => new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== "")).toString();
 
 const auditService = {
@@ -31,24 +51,10 @@ const auditService = {
   /** Filter choices: { recordTypes, actions, users }. */
   getOptions: async () => (await call("/settings/audit/options")).data || { recordTypes: [], actions: [], users: [] },
   /** Download every event matching the filters (format: csv | excel), one row per changed field. */
-  download: async (filters = {}, format = "excel") => {
-    const response = await fetch(`${BASE_URL}/settings/audit/events?${queryOf({ ...filters, export: format })}`, { headers: { ...authService.getAuthHeader() } });
-    if (!response.ok) {
-      const json = await response.json().catch(() => ({}));
-      throw new Error(json.message || `Download failed (${response.status})`);
-    }
-    const blob = await response.blob();
-    const disposition = response.headers.get("Content-Disposition") || "";
-    const name = /filename="?([^";]+)"?/.exec(disposition)?.[1] || `audit-trail.${format === "csv" ? "csv" : "xlsx"}`;
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = name;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  },
+  download: (filters = {}, format = "excel") => saveFile(`/settings/audit/events?${queryOf({ ...filters, export: format })}`, `audit-trail.${format === "csv" ? "csv" : "xlsx"}`),
+  /** Download the history of one record (format: csv | excel), one row per changed field. */
+  downloadRecordHistory: (entity, id, format = "excel") =>
+    saveFile(`/audit/records/${encodeURIComponent(entity)}/${encodeURIComponent(id)}?${queryOf({ export: format })}`, `history.${format === "csv" ? "csv" : "xlsx"}`),
 };
 
 export default auditService;

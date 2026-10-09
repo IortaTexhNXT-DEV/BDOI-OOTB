@@ -1,33 +1,32 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { BreadCrumb } from "primereact/breadcrumb";
-import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
-import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
-import { Tag } from "primereact/tag";
 import BatchRenewalService from "../../services/batchRenewalService";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
+import StatCards from "../../components/StatCards";
+import { EmptyState, FilterBar, PageHeader, RowActions, SectionCard, StatusChip } from "../../components/RecordPage";
 import { calendarDateFormat, formatDate, toIsoDate } from "../../utility/dateFormat";
 import "./index.scss";
 
-const STATE_SEVERITY = { due: "info", grace: "warning", lapsed: "warning", "in-progress": null, renewed: "success", closed: "danger" };
-const toDate = (iso) => (iso ? new Date(`${iso}T00:00:00`) : null);
+const STATES = ["due", "grace", "lapsed", "in-progress", "renewed", "closed"];
+const STATE_SEVERITY = { due: "info", grace: "warning", lapsed: "warning", "in-progress": "info", renewed: "success", closed: "secondary" };
 
 /**
- * Renewal Policy: policies expiring in the window (and expired ones still renewable), each with its renewal state and
- * the action that fits it. A policy already renewed shows its new policy instead of a Renew action, and one whose
- * renewal window has closed is marked for a new business quotation.
+ * Renewals > Renewal Policy: policies expiring in the window (and expired ones still renewable), each with its renewal
+ * state and the action that fits it: renew, continue a renewal in progress, open the new policy of a renewed one. A
+ * policy whose renewal window has closed is quoted as new business.
  */
 const ExpiredPoliciesPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { formatCurrency } = useFormatCurrency();
-  const [filters, setFilters] = useState({ expiryFrom: null, expiryTo: null, search: "", state: "All" });
-  const [ready, setReady] = useState(false);
+  const [range, setRange] = useState(null);
+  const [search, setSearch] = useState("");
+  const [state, setState] = useState("");
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -40,136 +39,92 @@ const ExpiredPoliciesPage = () => {
         from.setDate(from.getDate() - (Number(o.graceDays || 0) + Number(o.lapsedRenewalDays || 0)));
         const to = new Date();
         to.setDate(to.getDate() + Number(o.pipelineDays || 90));
-        setFilters((f) => ({ ...f, expiryFrom: from, expiryTo: to }));
+        setRange([from, to]);
       })
-      .catch(() => {})
-      .finally(() => setReady(true));
+      .catch(() => setRange([]));
   }, []);
 
+  const [from, to] = range || [];
   const load = useCallback(async () => {
+    if (range === null || (from && !to)) return;
     setLoading(true);
     setError("");
     try {
-      const list = await BatchRenewalService.getRenewablePolicies({
-        renewableOnly: "",
-        includeRenewed: "true",
-        expiryFrom: filters.expiryFrom ? toIsoDate(filters.expiryFrom) : "",
-        expiryTo: filters.expiryTo ? toIsoDate(filters.expiryTo) : "",
-        search: filters.search.trim(),
-        state: filters.state === "All" ? "" : filters.state,
-      });
-      setRows(list);
+      setRows(await BatchRenewalService.getRenewablePolicies({
+        renewableOnly: "", includeRenewed: "true", expiryFrom: from ? toIsoDate(from) : "", expiryTo: to ? toIsoDate(to) : "", search: "", state: "",
+      }));
     } catch (e) {
       setError(e?.response?.data?.message || t("renewalPolicy.loadFailed"));
     } finally {
       setLoading(false);
     }
-  }, [filters, t]);
+  }, [range, from, to, t]);
+  useEffect(() => { load(); }, [load]);
 
-  useEffect(() => {
-    if (ready) load();
-    // filters are applied with the Search button; the first load uses the defaults
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready]);
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return rows.filter((p) => (!state || p.renewalState === state)
+      && (!q || [p.policyNumber, p.clientName, p.clientCode, p.product].some((v) => String(v || "").toLowerCase().includes(q))));
+  }, [rows, search, state]);
 
-  const stateOptions = useMemo(
-    () => ["All", "due", "grace", "lapsed", "in-progress", "renewed", "closed"].map((s) => ({ label: t(`renewalPolicy.states.${s}`), value: s })),
-    [t]
-  );
+  const figures = STATES.filter((s) => s !== "closed" || rows.some((p) => p.renewalState === s)).map((s) => ({
+    key: s, label: t(`renewalPolicy.states.${s}`), value: rows.filter((p) => p.renewalState === s).length, onClick: () => setState(state === s ? "" : s), active: state === s,
+  }));
 
-  const renew = (p) =>
-    navigate(`/agent/renewalquote/coveragedetails/coveragedetail/${p.policyId}`, {
-      state: { policyId: p.policyId, policyNumber: p.policyNumber, insuredName: p.clientName, lob: p.lob, productType: p.product },
-    });
-
-  const expiryText = (p) => {
+  const renew = (p) => navigate(`/agent/renewalquote/coveragedetails/coveragedetail/${p.policyId}`, {
+    state: { policyId: p.policyId, policyNumber: p.policyNumber, insuredName: p.clientName, lob: p.lob, productType: p.product },
+  });
+  const expiryNote = (p) => {
     const d = Number(p.daysToExpiry);
     if (d === 0) return t("renewalPolicy.expiresToday");
     return d > 0 ? t("renewalPolicy.expiresIn", { count: d }) : t("renewalPolicy.expiredAgo", { count: -d });
   };
-
-  const action = (p) => {
+  const actions = (p) => {
+    const main = [];
     if (p.renewalState === "renewed") {
-      return p.newPolicyId ? (
-        <Button type="button" size="small" text label={t("renewalPolicy.openNewPolicy", { number: p.newPolicyNumber || "" })} onClick={() => navigate(`/agent/policydetail/${p.newPolicyId}`)} />
-      ) : null;
+      if (p.newPolicyId) main.push({ icon: "pi pi-external-link", label: t("renewalPolicy.openNewPolicy", { number: p.newPolicyNumber || "" }), onClick: () => navigate(`/agent/policydetail/${p.newPolicyId}`) });
+    } else if (p.canRenew) {
+      main.push(p.renewalState === "in-progress"
+        ? { icon: "pi pi-arrow-right", label: t("renewalPolicy.continue"), onClick: () => renew(p) }
+        : { icon: "pi pi-refresh", label: t("renewalPolicy.renew"), onClick: () => renew(p) });
     }
-    if (!p.canRenew) return <span className="text-color-secondary text-sm">{t("renewalPolicy.quoteAsNew")}</span>;
     return (
-      <Button type="button" size="small" outlined label={p.renewalState === "in-progress" ? t("renewalPolicy.continue") : t("renewalPolicy.renew")} onClick={() => renew(p)} />
+      <RowActions actions={[{ icon: "pi pi-eye", label: t("renewalPolicy.viewPolicy"), onClick: () => navigate(`/agent/policydetail/${p.policyId}`) }, ...main]}
+        menu={[{ label: t("renewalPolicy.quoteAsNew"), icon: "pi pi-info-circle", disabled: true, hidden: p.canRenew || p.renewalState === "renewed" }]} />
     );
   };
 
-  const right = { textAlign: "right" };
-
   return (
-    <div className="policy__table__container mt-4">
-      <div className="grid mt-3">
-        <div className="col-12">
-          <label className="leadlisting__overal__container__title">{t("expiredPolicies.title")}</label>
-          <div className="mt-3">
-            <BreadCrumb model={[{ label: t("expiredPolicies.breadcrumb") }]} home={{ label: t("sidebar.Operations") }} className="breadCrums" />
-          </div>
-        </div>
-
-        <div className="col-12">
-          <div className="renewal-policy__filters">
-            <span>
-              <label htmlFor="rp-from">{t("renewalPolicy.expiryFrom")}</label>
-              <Calendar inputId="rp-from" value={filters.expiryFrom} onChange={(e) => setFilters({ ...filters, expiryFrom: e.value })} dateFormat={calendarDateFormat()} showIcon />
-            </span>
-            <span>
-              <label htmlFor="rp-to">{t("renewalPolicy.expiryTo")}</label>
-              <Calendar inputId="rp-to" value={filters.expiryTo} onChange={(e) => setFilters({ ...filters, expiryTo: e.value })} dateFormat={calendarDateFormat()} showIcon minDate={filters.expiryFrom || undefined} />
-            </span>
-            <span>
-              <label htmlFor="rp-state">{t("renewalPolicy.state")}</label>
-              <Dropdown inputId="rp-state" value={filters.state} options={stateOptions} onChange={(e) => setFilters({ ...filters, state: e.value })} />
-            </span>
-            <span className="renewal-policy__search">
-              <label htmlFor="rp-search">{t("renewalPolicy.search")}</label>
-              <InputText id="rp-search" value={filters.search} onChange={(e) => setFilters({ ...filters, search: e.target.value })} onKeyDown={(e) => e.key === "Enter" && load()} placeholder={t("renewalPolicy.searchPlaceholder")} />
-            </span>
-            <Button type="button" icon="pi pi-search" label={t("renewalPolicy.apply")} onClick={load} loading={loading} />
-          </div>
-          {error && <small className="p-error block mt-2">{error}</small>}
-        </div>
-
-        <div className="col-12">
-          <DataTable
-            value={rows}
-            loading={loading && !rows.length}
-            dataKey="policyId"
-            paginator
-            rows={20}
-            rowsPerPageOptions={[20, 50, 100]}
-            size="small"
-            sortField="expiryDate"
-            sortOrder={1}
-            emptyMessage={t("renewalPolicy.empty")}
-            scrollable
-            tableStyle={{ minWidth: "84rem" }}
-          >
-            <Column field="policyNumber" className="bv-nowrap" header={t("renewalPolicy.policyNumber")} sortable />
-            <Column field="clientName" header={t("renewalPolicy.client")} sortable />
-            <Column field="product" header={t("renewalPolicy.product")} sortable />
-            <Column field="insuranceCompanyName" header={t("renewalPolicy.insurer")} sortable />
-            <Column field="salesPerson" header={t("renewalPolicy.salesPerson")} sortable />
-            <Column field="expiryDate" className="bv-nowrap" header={t("renewalPolicy.expiry")} sortable body={(p) => formatDate(p.expiryDate)} />
-            <Column field="daysToExpiry" className="bv-nowrap" header={t("renewalPolicy.term")} sortable body={expiryText} />
-            <Column field="grossPremium" className="bv-nowrap" header={t("renewalPolicy.premium")} sortable alignHeader="right" bodyStyle={right} body={(p) => formatCurrency(p.grossPremium)} />
-            <Column field="paymentStatus" className="bv-nowrap" header={t("renewalPolicy.payment")} sortable />
-            <Column
-              field="renewalState"
-              className="bv-nowrap"
-              header={t("renewalPolicy.state")}
-              sortable
-              body={(p) => <Tag value={p.renewalStateLabel} severity={STATE_SEVERITY[p.renewalState] || undefined} title={p.message || ""} />}
-            />
-            <Column header="" body={action} style={{ width: "11rem" }} frozen alignFrozen="right" />
-          </DataTable>
-        </div>
-      </div>
+    <div className="bv-ops-page renewal-policy-page">
+      <PageHeader title={t("expiredPolicies.title")}
+        crumbs={[{ label: t("sidebar.Operations", "Operations") }, { label: t("renewalPages.renewals"), onClick: () => navigate("/renewal/queue") }, { label: t("expiredPolicies.title") }]} />
+      <StatCards items={figures} />
+      <SectionCard>
+        <FilterBar active={!!(search || state)} onClear={() => { setSearch(""); setState(""); }}>
+          <span className="p-input-icon-left bv-filter-bar__search">
+            <i className="pi pi-search" />
+            <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("renewalPolicy.searchPlaceholder")} aria-label={t("renewalPolicy.search")} />
+          </span>
+          <Calendar value={range && range.length ? range : null} onChange={(e) => setRange(e.value || [])} selectionMode="range" readOnlyInput showIcon showButtonBar
+            dateFormat={calendarDateFormat()} placeholder={t("renewalPolicy.expiryBetween")} aria-label={t("renewalPolicy.expiryBetween")} className="renewal-policy__range" />
+        </FilterBar>
+        {error ? <small className="p-error block mb-2">{error}</small> : null}
+        <DataTable value={filtered} loading={loading} dataKey="policyId" paginator rows={20} rowsPerPageOptions={[20, 50, 100]} size="small" sortField="expiryDate" sortOrder={1}
+          emptyMessage={<EmptyState icon="pi-calendar" title={t("renewalPolicy.emptyTitle")} text={t("renewalPolicy.empty")} />}>
+          <Column field="policyNumber" header={t("renewalPolicy.policyClient")} sortable
+            body={(p) => <span className="bv-cell-stack"><span className="bv-nowrap">{p.policyNumber}</span><small>{p.clientName}</small></span>} />
+          <Column field="product" header={t("renewalPolicy.productInsurer")} sortable
+            body={(p) => <span className="bv-cell-stack"><span>{p.product}</span><small>{p.insuranceCompanyName}</small></span>} />
+          <Column field="salesPerson" header={t("renewalPolicy.salesPerson")} sortable />
+          <Column field="expiryDate" header={t("renewalPolicy.expiry")} sortable
+            body={(p) => <span className="bv-cell-stack"><span className="bv-nowrap">{formatDate(p.expiryDate)}</span><small>{expiryNote(p)}</small></span>} />
+          <Column field="grossPremium" header={t("renewalPolicy.premium")} sortable body={(p) => formatCurrency(p.grossPremium)} className="bv-num" headerClassName="bv-num" />
+          <Column field="paymentStatus" header={t("renewalPolicy.payment")} sortable body={(p) => <StatusChip status={p.paymentStatus} />} />
+          <Column field="renewalState" header={t("renewalPolicy.state")} sortable
+            body={(p) => <span title={p.message || ""}><StatusChip label={p.renewalStateLabel} severity={STATE_SEVERITY[p.renewalState] || "info"} /></span>} />
+          <Column header={t("renewalPolicy.actions")} body={actions} className="bv-actions" headerClassName="bv-actions" />
+        </DataTable>
+      </SectionCard>
     </div>
   );
 };

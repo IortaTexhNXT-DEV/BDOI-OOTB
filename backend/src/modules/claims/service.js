@@ -114,7 +114,7 @@ export function toApi(r, labels, todayStr, open) {
     settlementIssueDate: settlement.settlementIssueDate || null, settlementDate: settlement.settlementDate || null,
     settlementRequestedBy: r.settlement_requested_by, settlementApprovedBy: r.settlement_approved_by, settlementApprovedAt: r.settlement_approved_at,
     rejectedReason: r.rejected_reason, rejectedReasonCode: r.rejected_reason_code ?? null, handlerUserId: r.handler_user_id, handlerName: r.handler_name, reportedByName: r.reported_by_name || null,
-    claimDueDate: r.due_date, daysOverdue, isOpen, closedAt: r.closed_at,
+    claimDueDate: r.due_date, daysOverdue, isOpen, closedAt: r.closed_at, submittedToInsurerAt: r.submitted_to_insurer_at || null,
     isCoInsurance: false, isCoInsurancePolicy: false, participatingInsurersCount: 0,
     policy: {
       id: r.policy_id, policyId: r.policy_id, policyNumber: r.policy_number, clientId: r.client_id || r.policy_client_id,

@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
-import "./index.scss";
+import ClaimJourneyLayout from "../shared/ClaimJourneyLayout";
 import ClaimDetailsCard from "./claimDetailsCard";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -69,37 +68,25 @@ const ClaimDetails = () => {
     navigationState.claimId,
   ]);
 
+  const holder = claimDetailsViewData?.PolicyHolderName || "";
+  const policyNumber = claimDetailsViewData?.policyNumber;
+  const clientId = claimDetailsViewData?.clientId || navigationState.clientId;
   return (
-    <div className="claim__details__container">
-      <div className="claim__details__container__titles">{t("agent.clients")}</div>
-      <div className="claim__details__container__back__btn mt-3">
-        <div onClick={() => navigate("/agent/clientlisting")}>
-          <SvgLeftArrow />
-        </div>
-        <div className="claim__details__container__back__btn__title">
-          {(() => {
-            const policyHolderName =
-              claimDetailsViewData?.PolicyHolderName || t("agent.loading");
-            const policyNumber = claimDetailsViewData?.policyNumber;
-            const claimIdValue = claimId;
-
-            return `${policyHolderName} / ${
-              policyNumber
-                ? `${t("agent.policyLabel")}: ${policyNumber}`
-                : claimIdValue
-                ? `${t("agent.claimLabel")}: ${claimIdValue}`
-                : t("agent.loading")
-            }`;
-          })()}
-        </div>
-      </div>
+    <ClaimJourneyLayout
+      step="notification"
+      claimNumber={claimId && claimId !== "new" ? claimDetailsViewData?.claimNumber || "" : ""}
+      holderName={holder}
+      reference={policyNumber ? t("claimFlow.policyRef", { number: policyNumber }) : ""}
+      onBack={() => navigate(clientId ? `/agent/clientview/${clientId}` : "/agent/claim")}
+      title={t("claimFlow.notificationTitle")}
+    >
       <ClaimDetailsCard
         leadRefId={leadRefId}
         quoteRefId={quoteRefId}
         policyRefId={policyRefId}
         initialLob={navigationState.lob || navigationState.productType}
       />
-    </div>
+    </ClaimJourneyLayout>
   );
 };
 

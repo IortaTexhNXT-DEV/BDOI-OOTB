@@ -144,6 +144,7 @@ import ClientListing from "../agentModule/quoteModule/clientListing";
 import ClientView from "../agentModule/quoteModule/clientView";
 import ClaimDetails from "../agentModule/claimsModule/claimDetails";
 import SendMail from "../agentModule/claimsModule/sendMail";
+import ClaimDocumentsStep from "../agentModule/claimsModule/claimDocuments";
 import RequestApproval from "../agentModule/claimsModule/requestApproval";
 import AdjusterSubmission from "../agentModule/claimsModule/adjusterSubmission";
 import SettlementApproval from "../agentModule/claimsModule/settlementApproval";
@@ -1542,6 +1543,7 @@ const Maincomponent = () => {
             element={<ClaimDetails />}
           />
           <Route path="/agent/claimrequest/sendmail" element={<SendMail />} />
+          <Route path="/agent/claimrequest/documents/:id" element={<ClaimDocumentsStep />} />
           <Route
             path="/agent/claimrequest/requestapproval/:id"
             element={<RequestApproval flow="normal" />}

@@ -58,24 +58,42 @@ export async function readContext() {
   };
 }
 
-/** Retention risk score with the contributing factors (weights from renewals.risk_weights). */
+/** Factors of the retention risk score, in the order of the breakdown: code (key of renewals.risk_weights) and label. */
+export const RISK_FACTORS = [
+  { code: 'claims', factor: 'Claims History' }, { code: 'unpaid', factor: 'Unpaid Premium' }, { code: 'firstRenewal', factor: 'First Renewal' },
+  { code: 'noContact', factor: 'No Contact' }, { code: 'increase', factor: 'Premium Increase' }, { code: 'dueSoon', factor: 'Due Soon' },
+];
+const plural = (n, word) => `${n} ${word}${Number(n) === 1 ? '' : 's'}`;
+
+/**
+ * Retention risk score of an open renewal: each factor found on the record adds its weight (renewals.risk_weights) and the
+ * total, at most 100, falls into a band (renewals.risk_bands). Factors: claims on the expiring term, premium still unpaid,
+ * a first renewal (no earlier term renewed with the broker), no notice or contact within renewals.risk_thresholds.noContactDays
+ * of expiry, a renewal premium above the expiring one by more than increasePercent, and expiry within dueSoonDays (or in /
+ * past the grace period). `factors` lists the factors found; `breakdown` every factor with its finding, weight and points.
+ */
 export function riskOf(r, ctx, daysToExpiry, variancePct) {
   const w = ctx.weights;
   const th = ctx.thresholds || RISK_THRESHOLDS;
-  const factors = [];
-  const add = (factor, score, details) => { if (score) factors.push({ factor, score, details }); };
-  if (r.claims_count > 0) add('Claims History', w.claims || 0, `${r.claims_count} claim(s) on the expiring term`);
-  if (r.unpaid > 0) add('Unpaid Premium', w.unpaid || 0, `Outstanding premium ${r.unpaid}`);
-  if (!r.loyalty_years) add('First Renewal', w.firstRenewal || 0, 'Statistically higher lapse rate');
-  if (!r.contact_attempts && !r.notice_stage && daysToExpiry <= th.noContactDays) add('No Contact', w.noContact || 0, 'No notice or contact yet');
-  if (variancePct != null && variancePct > th.increasePercent) add('Premium Increase', w.increase || 0, `${changeText(variancePct, ctx.changeCap)} increase quoted`);
   const grace = ctx.grace ?? 30;
-  if (daysToExpiry < -grace) add('Past Grace Period', w.dueSoon || 0, `Expired ${-daysToExpiry} day(s) ago, past the ${grace}-day grace period`);
-  else if (daysToExpiry < 0) add('In Grace Period', w.dueSoon || 0, `Expired ${-daysToExpiry} day(s) ago, within the ${grace}-day grace period`);
-  else if (daysToExpiry <= th.dueSoonDays) add('Due Soon', w.dueSoon || 0, `${daysToExpiry} day(s) to expiry`);
+  const found = {};
+  if (r.claims_count > 0) found.claims = { value: `${plural(r.claims_count, 'claim')} in the current term` };
+  if (r.unpaid > 0) found.unpaid = { value: 'Premium still unpaid', amount: Number(r.unpaid) };
+  if (!r.loyalty_years) found.firstRenewal = { value: 'First renewal with the broker' };
+  if (!r.contact_attempts && !r.notice_stage && daysToExpiry <= th.noContactDays) found.noContact = { value: 'No renewal notice or contact recorded yet' };
+  if (variancePct != null && variancePct > th.increasePercent) found.increase = { value: `Premium up ${changeText(variancePct, ctx.changeCap)} on the renewal quote` };
+  if (daysToExpiry < -grace) found.dueSoon = { factor: 'Past Grace Period', value: `Expired ${plural(-daysToExpiry, 'day')} ago, past the ${grace}-day grace period` };
+  else if (daysToExpiry < 0) found.dueSoon = { factor: 'In Grace Period', value: `Expired ${plural(-daysToExpiry, 'day')} ago, within the ${grace}-day grace period` };
+  else if (daysToExpiry <= th.dueSoonDays) found.dueSoon = { value: `Expires in ${plural(daysToExpiry, 'day')}` };
+  const breakdown = RISK_FACTORS.map(({ code, factor }) => {
+    const weight = Number(w[code]) || 0;
+    const hit = found[code];
+    return { code, factor: hit?.factor || factor, value: hit ? hit.value : null, ...(hit?.amount ? { amount: hit.amount } : {}), weight, points: hit ? weight : 0 };
+  });
+  const factors = breakdown.filter((f) => f.points).map((f) => ({ code: f.code, factor: f.factor, score: f.points, details: f.value, ...(f.amount ? { amount: f.amount } : {}) }));
   const score = Math.min(100, factors.reduce((s, f) => s + f.score, 0));
   const band = Object.entries(ctx.bands).sort((a, b) => b[1] - a[1]).find(([, min]) => score >= min)?.[0] || 'Low';
-  return { score, band, factors };
+  return { score, band, factors, breakdown };
 }
 
 /**
@@ -470,6 +488,29 @@ export async function addActivity(id, user, input) {
     return activity(db, r.id, user, { type: input.type, method: input.method, description: input.description, outcome: input.outcome, nextAction: input.nextAction, followUpDate: input.followUpDate ? await businessDate(input.followUpDate) : null, details: input.details || {} });
   });
   return activityApi(a);
+}
+
+/**
+ * Escalate an at-risk renewal to the unit head: the manager of the renewal's owner (users.reporting_to), or the users of
+ * renewals.approver_roles when the owner reports to no one. The escalation is recorded on the renewal timeline (it is not
+ * a contact with the client) and the unit head is notified.
+ */
+export async function escalate(id, user, { note } = {}) {
+  const r = await loadRow(id);
+  const owner = r.owner_user_id || r.policy_owner;
+  const head = owner ? await one(`SELECT m.id, m.display_name FROM users u JOIN users m ON m.id = u.reporting_to WHERE u.id = $1 AND m.status = 'active'`, [owner]) : null;
+  const roles = head ? [] : (await getSetting('renewals.approver_roles', ['processing'])) || [];
+  const to = head ? [head] : [];
+  for (const role of roles) for (const u of await usersWithRole(role)) if (u.id !== user.id && !to.some((x) => x.id === u.id)) to.push(u);
+  const names = to.map((u) => u.display_name).join(', ');
+  const description = note || `Escalated to ${names || 'the unit head'}`;
+  const a = await activity(null, r.id, user, { type: 'Escalation', description, details: { escalatedTo: to.map((u) => u.id) } });
+  for (const u of to) {
+    await notify({ userId: u.id, type: 'info', priority: 'high', title: `Renewal ${r.renewal_number} escalated`,
+      message: `${user.username} escalated the renewal of policy ${r.policy_number} (${r.client_name || 'client'}): ${description}`, link: '/renewal/at-risk', entity: 'renewal', entityId: r.id });
+  }
+  return { renewal: await getRenewal(r.id, { withDetail: false }), data: { activity: activityApi(a), escalatedTo: to.map((u) => ({ id: u.id, name: u.display_name })) },
+    audit: { escalatedTo: to.map((u) => u.id), note: note || null } };
 }
 
 // ---------------------------------------------------------------- approval, completion, lapse

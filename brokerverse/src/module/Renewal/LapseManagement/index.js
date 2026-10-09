@@ -1,1126 +1,482 @@
-import { useState, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
-import { BreadCrumb } from "primereact/breadcrumb";
-import { Card } from "primereact/card";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { Tag } from "primereact/tag";
-import { InputText } from "primereact/inputtext";
-import { Dropdown } from "primereact/dropdown";
-import { Toast } from "primereact/toast";
-import { Dialog } from "primereact/dialog";
-import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
-import { TabView, TabPanel } from "primereact/tabview";
-import { InputTextarea } from "primereact/inputtextarea";
-import { InputNumber } from "primereact/inputnumber";
-import { Badge } from "primereact/badge";
-import { ProgressBar } from "primereact/progressbar";
 import { Calendar } from "primereact/calendar";
+import { Checkbox } from "primereact/checkbox";
+import { Column } from "primereact/column";
+import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
+import { DataTable } from "primereact/datatable";
+import { Dialog } from "primereact/dialog";
+import { Dropdown } from "primereact/dropdown";
+import { InputNumber } from "primereact/inputnumber";
+import { InputText } from "primereact/inputtext";
+import { InputTextarea } from "primereact/inputtextarea";
+import { TabPanel, TabView } from "primereact/tabview";
+import { Toast } from "primereact/toast";
+import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
 import useMasterOptions from "../../../agentModule/component/useMasterOptions";
-import SvgDot from "../../../assets/icons/SvgDot";
+import StatCards from "../../../components/StatCards";
 import FieldError from "../../../components/FieldError";
-import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
+import { EmptyState, FilterBar, KeyFacts, PanelSection, RowActions, SectionCard, SidePanel, StatusChip } from "../../../components/RecordPage";
+import { calendarDateFormat, formatDate, toIsoDate } from "../../../utility/dateFormat";
 import { downloadCsv } from "../../../utility/csvExport";
-import { requiredErrors, hasErrors, errorSummary } from "../../../utility/requiredFields";
+import { formatPercent } from "../../../utility/numberFormat";
+import { PolicyCell, RenewalHeader } from "../shared";
 import "./index.scss";
-import { formatPercent, progressValue } from "../../../utility/numberFormat";
 
+const GRACE = "grace";
+const LAPSED = "lapsed";
+const CHANNELS = ["Email", "Phone", "SMS", "Letter", "Visit"];
+const PAYMENT_TERMS = ["Standard", "Extended", "Installments", "Deferred"];
+const BENEFITS = ["Waived reinstatement fee", "Free add-on coverage", "Extended payment terms", "Loyalty rewards", "Premium freeze", "Free policy review"];
+const SEGMENTS = ["All Lapsed", "High Value", "Recent Lapse", "Long-term", "Price Sensitive"];
+
+const addDays = (date, days) => {
+  const d = new Date(date);
+  d.setDate(d.getDate() + Number(days || 0));
+  return toIsoDate(d);
+};
+const inDays = (n) => new Date(Date.now() + n * 24 * 60 * 60 * 1000);
+
+/**
+ * Operations > Renewals > Lapse Management: renewals in their grace period and lapsed renewals, with the win-back offers
+ * made to each client and the win-back campaigns. Actions follow the state: a renewal in its grace period can be marked
+ * lapsed; a lapsed one can receive a win-back offer and be reinstated while it is within renewals.reinstatement_days.
+ */
 const LapseManagement = () => {
   const { t } = useTranslation();
   const { formatCurrency, currencyCode, locale } = useFormatCurrency();
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
-  const [reasonFilter, setReasonFilter] = useState("All");
+  const toast = useRef(null);
+  const [rows, setRows] = useState([]);
+  const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedPolicy, setSelectedPolicy] = useState(null);
-  const [detailsVisible, setDetailsVisible] = useState(false);
-  const [winBackVisible, setWinBackVisible] = useState(false);
-  const [campaignVisible, setCampaignVisible] = useState(false);
-  const [lapsedPolicies, setLapsedPolicies] = useState([]);
-  const [filteredPolicies, setFilteredPolicies] = useState([]);
-  const [winBackCampaigns, setWinBackCampaigns] = useState([]);
-  const [lapseVisible, setLapseVisible] = useState(false);
-  const [lapseReason, setLapseReason] = useState('');
-  const [lapseCode, setLapseCode] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [tab, setTab] = useState(0);
+  const [search, setSearch] = useState("");
+  const [state, setState] = useState("");
+  const [reason, setReason] = useState("");
+  const [panelId, setPanelId] = useState(null);
+  const [winBack, setWinBack] = useState(null);
+  const [lapse, setLapse] = useState(null);
+  const [campaign, setCampaign] = useState(null);
+  const [campaignErrors, setCampaignErrors] = useState({});
   // lapse reasons: Master > Insurance Management > Reason Codes (used for: lapse); the detail is free text
   const lapseCodes = useMasterOptions("reason-code", { filter: (r) => r.context === "lapse" });
-  const [dashboardData, setDashboardData] = useState({
-    totalLapsed: 0,
-    inGracePeriod: 0,
-    winBackEligible: 0,
-    revenueAtRisk: 0
-  });
-  const [winBackOffer, setWinBackOffer] = useState({
-    discount: 20,
-    additionalBenefits: [],
-    paymentTerms: 'Standard',
-    validUntil: new Date(Date.now() + 30*24*60*60*1000),
-    message: ''
-  });
-  const [campaignErrors, setCampaignErrors] = useState({});
-  const [newCampaign, setNewCampaign] = useState({
-    name: '',
-    startDate: new Date(),
-    endDate: new Date(Date.now() + 30*24*60*60*1000),
-    targetSegment: 'All Lapsed',
-    discount: 25,
-    benefits: [],
-    budget: 100000
-  });
-  const toast = useRef(null);
 
-  const statusOptions = [
-    { label: t("renewal.allStatuses"), value: "All" },
-    { label: t("renewal.inGracePeriod"), value: "In Grace Period" },
-    { label: t("renewal.lapsed"), value: "Lapsed" },
-    { label: t("renewal.winBackAttempted"), value: "Win-back Attempted" },
-    { label: t("renewal.reinstated"), value: "Reinstated" }
-  ];
+  const showError = useCallback((e) => toast.current?.show({ severity: "error", summary: t("common.error", "Error"), detail: e?.message || String(e), life: 5000 }), [t]);
+  const done = (summary, detail) => toast.current?.show({ severity: "success", summary, detail, life: 3000 });
 
-  const reasonOptions = [{ label: t("renewal.allReasons"), value: "All" }, ...lapseCodes];
-  const lapseCodeRecord = lapseCodes.find((o) => o.value === lapseCode)?.record;
-  const lapseNoteNeeded = !lapseCodeRecord || lapseCodeRecord.requiresNote === true || String(lapseCodeRecord.requiresNote).toLowerCase() === "true";
-
-  const benefitOptions = [
-    "Waived reinstatement fee",
-    "Free add-on coverage",
-    "Extended payment terms",
-    "Loyalty rewards",
-    "Premium freeze",
-    "Free policy review",
-    "24/7 support priority",
-    "Cashback offer"
-  ];
-
-  const paymentTermsOptions = [
-    { label: t("renewal.standardTerms"), value: "Standard" },
-    { label: t("renewal.extended60Days"), value: "Extended" },
-    { label: t("renewal.installments"), value: "Installments" },
-    { label: t("renewal.deferredPayment"), value: "Deferred" }
-  ];
-
-  const targetSegmentOptions = [
-    { label: t("renewal.allLapsed"), value: "All Lapsed" },
-    { label: t("renewal.highValue100K"), value: "High Value" },
-    { label: t("renewal.recentLapse30Days"), value: "Recent Lapse" },
-    { label: t("renewal.longTermClients3Years"), value: "Long-term" },
-    { label: t("renewal.priceSensitive"), value: "Price Sensitive" }
-  ];
-
-  const items = [
-    { label: t("renewal.renewals"), url: "#" },
-    { label: t("renewal.lapseManagement"), url: "#" }
-  ];
-
-  const home = { icon: <SvgDot />, url: "#" };
-
-  useEffect(() => {
-    loadInitialData();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [search, statusFilter, reasonFilter, lapsedPolicies]);
-
-  const showError = (error, fallbackKey) => {
-    toast.current.show({
-      severity: 'error',
-      summary: t("common.error"),
-      detail: error?.message || t(fallbackKey),
-      life: 3000
-    });
-  };
-
-  const addDays = (date, days) => {
-    const d = new Date(date);
-    d.setDate(d.getDate() + Number(days || 0));
-    return toIsoDate(d);
-  };
-
-  const loadInitialData = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [lapsed, queue, campaigns, settings] = await Promise.all([
+      const [lapsed, queue, list, settings] = await Promise.all([
         renewalsWorkspaceService.getLapsed(),
         renewalsWorkspaceService.getQueue(),
         renewalsWorkspaceService.getCampaigns(),
-        renewalsWorkspaceService.getSettings("renewals")
+        renewalsWorkspaceService.getSettings("renewals"),
       ]);
       const graceDays = settings["renewals.grace_period_days"];
-      const gracePeriodPolicies = queue.items
-        .filter(policy => policy.inGracePeriod)
-        .map(policy => ({
-          ...policy,
-          status: 'In Grace Period',
-          gracePeriodEnd: addDays(policy.expiryDate, graceDays),
-          lapseDate: null,
-          daysLapsed: 0,
-          premiumLost: policy.currentPremium,
-          lapseReason: null,
-          winBackAttempts: [],
-          reinstatementEligible: false,
-          winBackStatus: 'Eligible'
-        }));
-      const lapsedPolicies = lapsed.map(policy => ({
-        ...policy,
-        status: 'Lapsed',
-        winBackAttempts: (policy.winBackAttempts || []).map(a => ({ ...a, response: a.outcome || 'Pending' }))
+      const grace = queue.items.filter((p) => p.inGracePeriod).map((p) => ({
+        id: p.id, policyNumber: p.policyNumber, insuredName: p.insuredName, product: p.product, state: GRACE, statusLabel: p.status,
+        graceEnd: addDays(p.expiryDate, graceDays), premiumLost: p.currentPremium, lapseReason: null, winBackAttempts: [], reinstatementEligible: false,
       }));
-
-      const combinedData = [...lapsedPolicies, ...gracePeriodPolicies];
-      setLapsedPolicies(combinedData);
-      setWinBackCampaigns(campaigns);
-      calculateDashboard(combinedData);
-    } catch (error) {
-      showError(error, "renewal.failedToLoadLapseData");
+      setRows([...lapsed.map((p) => ({ ...p, state: LAPSED })), ...grace]);
+      setCampaigns(list);
+    } catch (e) {
+      showError(e);
     } finally {
       setLoading(false);
     }
-  };
+  }, [showError]);
+  useEffect(() => { load(); }, [load]);
 
-  const calculateDashboard = (data) => {
-    const inGrace = data.filter(p => p.status === 'In Grace Period');
-    const eligible = data.filter(p => p.reinstatementEligible);
-    const totalRevenue = data.reduce((sum, p) => sum + (p.premiumLost || p.currentPremium), 0);
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return rows.filter((r) => (!state || r.state === state || (state === "eligible" && r.reinstatementEligible))
+      && (!reason || r.lapseReasonCode === reason)
+      && (!q || [r.policyNumber, r.insuredName].some((v) => String(v || "").toLowerCase().includes(q))));
+  }, [rows, search, state, reason]);
+  const selected = rows.find((r) => r.id === panelId) || null;
 
-    setDashboardData({
-      totalLapsed: data.length,
-      inGracePeriod: inGrace.length,
-      winBackEligible: eligible.length,
-      revenueAtRisk: totalRevenue
-    });
-  };
+  const figures = [
+    { key: "lapsed", label: t("lapse.figures.lapsed"), value: rows.filter((r) => r.state === LAPSED).length, onClick: () => setState(state === LAPSED ? "" : LAPSED), active: state === LAPSED },
+    { key: "grace", label: t("lapse.figures.grace"), value: rows.filter((r) => r.state === GRACE).length, onClick: () => setState(state === GRACE ? "" : GRACE), active: state === GRACE },
+    { key: "eligible", label: t("lapse.figures.eligible"), value: rows.filter((r) => r.reinstatementEligible).length, onClick: () => setState(state === "eligible" ? "" : "eligible"), active: state === "eligible" },
+    { key: "premium", label: t("lapse.figures.premium"), value: formatCurrency(rows.reduce((s, r) => s + (Number(r.premiumLost) || 0), 0)) },
+  ];
 
-  const applyFilters = () => {
-    let filtered = [...lapsedPolicies];
-
-    if (search) {
-      filtered = filtered.filter(p =>
-        p.policyNumber.toLowerCase().includes(search.toLowerCase()) ||
-        p.insuredName.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-
-    if (statusFilter !== 'All') {
-      if (statusFilter === 'Lapsed') {
-        filtered = filtered.filter(p => p.lapseDate);
-      } else if (statusFilter === 'In Grace Period') {
-        filtered = filtered.filter(p => p.status === 'In Grace Period');
-      } else {
-        filtered = filtered.filter(p => p.winBackStatus === statusFilter);
-      }
-    }
-
-    if (reasonFilter !== 'All') {
-      filtered = filtered.filter(p => p.lapseReasonCode === reasonFilter);
-    }
-
-    setFilteredPolicies(filtered);
-    calculateDashboard(filtered);
-  };
-
-  const handleExport = () => {
-    downloadCsv(`lapse-management-${toIsoDate(new Date())}.csv`, filteredPolicies, [
-      { header: t("renewal.policyNumber"), field: "policyNumber" },
-      { header: t("renewal.insuredName"), field: "insuredName" },
-      { header: t("renewal.product"), field: "product" },
-      { header: t("renewal.status"), field: (p) => p.status || (p.lapseDate ? "Lapsed" : "Active") },
-      { header: t("renewal.lapsed"), field: (p) => formatAppDate(p.lapseDate) },
-      { header: t("renewal.daysLapsed"), field: "daysLapsed" },
-      { header: t("renewal.premiumLost"), field: "premiumLost" },
-      { header: t("renewal.reason"), field: "lapseReason" },
-      { header: t("renewal.winBack"), field: "winBackStatus" },
-      { header: t("renewal.attempts"), field: (p) => p.winBackAttempts?.length || 0 },
-    ]);
-    toast.current.show({ severity: "success", summary: t("renewal.exportStarted"), detail: t("renewal.rowsExported", { count: filteredPolicies.length }), life: 3000 });
-  };
-
-  const handleClear = () => {
-    setSearch("");
-    setStatusFilter("All");
-    setReasonFilter("All");
-    toast.current.show({
-      severity: 'info',
-      summary: t("renewal.filtersCleared"),
-      detail: t("renewal.allFiltersReset"),
-      life: 2000
-    });
-  };
-
-  const handleViewDetails = (rowData) => {
-    setSelectedPolicy(rowData);
-    setDetailsVisible(true);
-  };
-
-  const handleWinBack = (rowData) => {
-    setSelectedPolicy(rowData);
-    setWinBackOffer({
-      discount: 20,
-      additionalBenefits: ["Waived reinstatement fee"],
-      paymentTerms: 'Standard',
-      validUntil: new Date(Date.now() + 30*24*60*60*1000),
-      message: ''
-    });
-    setWinBackVisible(true);
-  };
-
-  const handleCreateCampaign = () => {
-    setNewCampaign({
-      name: '',
-      startDate: new Date(),
-      endDate: new Date(Date.now() + 30*24*60*60*1000),
-      targetSegment: 'All Lapsed',
-      discount: 25,
-      benefits: [],
-      budget: 100000
-    });
-    setCampaignErrors({});
-    setCampaignVisible(true);
-  };
-
-  const handleSendWinBack = async () => {
-    setLoading(true);
+  // ---------------------------------------------------------------- actions
+  const activeCampaign = campaigns.find((c) => c.status === "active");
+  const openWinBack = (row) => setWinBack({
+    row, method: "Email", discount: activeCampaign?.offer?.discount ?? 0, paymentTerms: "Standard", validUntil: inDays(30), benefits: [], response: "",
+    campaignId: activeCampaign?.id || null,
+  });
+  const sendWinBack = async () => {
+    setSaving(true);
     try {
+      const { row } = winBack;
       const offer = [
-        `${winBackOffer.discount}% discount`,
-        ...winBackOffer.additionalBenefits,
-        `${winBackOffer.paymentTerms} payment terms`,
-        `valid until ${formatAppDate(winBackOffer.validUntil)}`
-      ].join(', ');
-      const activeCampaign = winBackCampaigns.find(c => c.status === 'active');
-      await renewalsWorkspaceService.winBack(selectedPolicy.id, {
-        offer,
-        method: 'Email',
-        campaignId: activeCampaign?.id,
-        response: winBackOffer.message || undefined
-      });
-      setWinBackVisible(false);
-      toast.current.show({
-        severity: 'success',
-        summary: t("renewal.winBackSent"),
-        detail: t("renewal.winBackOfferSentTo", { name: selectedPolicy.insuredName }),
-        life: 3000
-      });
-      loadInitialData();
-    } catch (error) {
-      showError(error, "renewal.failedToSendWinBackOffer");
+        winBack.discount ? t("lapse.offerDiscount", { pct: winBack.discount }) : null,
+        ...winBack.benefits.map((b) => t(`lapse.benefits.${b}`, b)),
+        t("lapse.offerTerms", { terms: t(`lapse.paymentTerms.${winBack.paymentTerms}`, winBack.paymentTerms) }),
+        t("lapse.offerValid", { date: formatDate(winBack.validUntil) }),
+      ].filter(Boolean).join(", ");
+      await renewalsWorkspaceService.winBack(row.id, { offer, method: winBack.method, campaignId: winBack.campaignId || undefined, response: winBack.response.trim() || undefined });
+      setWinBack(null);
+      done(t("lapse.offerRecorded"), row.policyNumber);
+      load();
+    } catch (e) {
+      showError(e);
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
-  const handleCreateCampaignConfirm = async () => {
-    const errors = requiredErrors(newCampaign, [
-      ["name", "Campaign name"],
-      ["startDate", "Start date"],
-      ["endDate", "End date"],
-      ["endDate", "End date", (v) => !v.startDate || !v.endDate || v.endDate >= v.startDate, "End date must be on or after the start date"],
-    ]);
-    setCampaignErrors(errors);
-    if (hasErrors(errors)) {
-      toast.current?.show({ severity: "warn", summary: t("common.validation", "Validation"), detail: errorSummary(errors), life: 4000 });
-      return;
+  const codeRecord = lapseCodes.find((o) => o.value === lapse?.code)?.record;
+  const noteNeeded = !codeRecord || codeRecord.requiresNote === true || String(codeRecord.requiresNote).toLowerCase() === "true";
+  const confirmLapse = async () => {
+    setSaving(true);
+    try {
+      await renewalsWorkspaceService.lapse(lapse.row.id, lapse.note.trim(), lapse.code);
+      done(t("lapse.markedLapsed"), lapse.row.policyNumber);
+      setLapse(null);
+      load();
+    } catch (e) {
+      showError(e);
+    } finally {
+      setSaving(false);
     }
+  };
+  const reinstate = (row) => confirmDialog({
+    header: t("lapse.reinstate"),
+    message: t("lapse.reinstateConfirm", { policy: row.policyNumber }),
+    acceptLabel: t("lapse.reinstate"),
+    rejectLabel: t("common.cancel", "Cancel"),
+    accept: async () => {
+      try {
+        await renewalsWorkspaceService.reinstate(row.id);
+        done(t("lapse.reinstated"), row.policyNumber);
+        load();
+      } catch (e) {
+        showError(e);
+      }
+    },
+  });
+
+  const openCampaign = () => {
+    setCampaignErrors({});
+    setCampaign({ name: "", startDate: new Date(), endDate: inDays(30), targetSegment: "All Lapsed", discount: 0, benefits: [], budget: null });
+  };
+  const saveCampaign = async () => {
+    const errors = {};
+    if (campaign.name.trim().length < 2) errors.name = t("lapse.required");
+    if (!campaign.startDate) errors.startDate = t("lapse.required");
+    if (!campaign.endDate) errors.endDate = t("lapse.required");
+    else if (campaign.startDate && campaign.endDate < campaign.startDate) errors.endDate = t("lapse.endBeforeStart");
+    setCampaignErrors(errors);
+    if (Object.keys(errors).length) return;
+    setSaving(true);
     try {
       await renewalsWorkspaceService.createCampaign({
-        campaignName: newCampaign.name,
-        targetSegment: newCampaign.targetSegment,
-        startDate: toIsoDate(newCampaign.startDate),
-        endDate: toIsoDate(newCampaign.endDate),
-        discount: newCampaign.discount,
-        budget: newCampaign.budget,
-        offers: newCampaign.benefits
+        campaignName: campaign.name.trim(), targetSegment: campaign.targetSegment, startDate: toIsoDate(campaign.startDate), endDate: toIsoDate(campaign.endDate),
+        discount: campaign.discount || 0, budget: campaign.budget || 0, offers: campaign.benefits,
       });
-      setCampaignVisible(false);
-      toast.current.show({
-        severity: 'success',
-        summary: t("renewal.campaignCreated"),
-        detail: t("renewal.campaignCreatedSuccess", { name: newCampaign.name }),
-        life: 3000
-      });
-      loadInitialData();
-    } catch (error) {
-      showError(error, "renewal.failedToLoadLapseData");
+      done(t("lapse.campaignCreated"), campaign.name);
+      setCampaign(null);
+      load();
+    } catch (e) {
+      showError(e);
+    } finally {
+      setSaving(false);
     }
   };
 
-  const openLapse = (rowData) => {
-    setSelectedPolicy(rowData);
-    setLapseReason('');
-    setLapseCode(null);
-    setLapseVisible(true);
+  const exportCsv = () => {
+    downloadCsv(`lapse-management-${toIsoDate(new Date())}.csv`, filtered, [
+      { header: t("lapse.policy"), field: "policyNumber" },
+      { header: t("lapse.col.insured"), field: "insuredName" },
+      { header: t("lapse.col.product"), field: "product" },
+      { header: t("lapse.col.status"), field: (r) => (r.state === GRACE ? t("lapse.status.grace") : t("lapse.status.lapsed")) },
+      { header: t("lapse.graceEnd"), field: (r) => formatDate(r.graceEnd, { empty: "" }) },
+      { header: t("lapse.lapseDate"), field: (r) => formatDate(r.lapseDate, { empty: "" }) },
+      { header: t("lapse.col.days"), field: (r) => (r.state === LAPSED ? r.daysLapsed || 0 : "") },
+      { header: t("lapse.col.premium"), field: "premiumLost" },
+      { header: t("lapse.col.reason"), field: "lapseReason" },
+      { header: t("lapse.reinstateBy"), field: (r) => formatDate(r.reinstatementDeadline, { empty: "" }) },
+      { header: t("lapse.col.winBack"), field: (r) => (r.state === LAPSED ? r.winBackAttempts?.length || 0 : "") },
+    ]);
+    done(t("renewal.exportStarted"), t("renewal.rowsExported", { count: filtered.length }));
   };
 
-  const handleLapseConfirm = async () => {
-    try {
-      await renewalsWorkspaceService.lapse(selectedPolicy.id, lapseReason.trim(), lapseCode);
-      setLapseVisible(false);
-      toast.current.show({
-        severity: 'success',
-        summary: t("renewal.lapsed"),
-        detail: selectedPolicy.policyNumber,
-        life: 3000
-      });
-      loadInitialData();
-    } catch (error) {
-      showError(error, "renewal.failedToLoadLapseData");
+  // ---------------------------------------------------------------- columns
+  const statusBody = (r) => (r.state === GRACE
+    ? <StatusChip label={t("lapse.status.grace")} severity="warning" />
+    : <StatusChip label={t("lapse.status.lapsed")} severity="danger" />);
+  const daysBody = (r) => {
+    if (r.state === GRACE) {
+      const left = Math.max(0, Math.round((new Date(`${r.graceEnd}T00:00:00`) - new Date(toIsoDate(new Date()))) / 86400000));
+      return <span className="bv-cell-stack"><span>{t("lapse.graceLeft", { count: left })}</span><small>{t("lapse.graceEnds", { date: formatDate(r.graceEnd) })}</small></span>;
     }
+    return <span className="bv-cell-stack"><span>{t("lapse.daysLapsed", { count: r.daysLapsed || 0 })}</span><small>{formatDate(r.lapseDate)}</small></span>;
   };
-
-  const handleReinstate = (rowData) => {
-    confirmDialog({
-      message: t("renewal.confirmReinstate", "Reinstate {{policy}}?", { policy: rowData.policyNumber }),
-      header: t("renewal.reinstated"),
-      icon: 'pi pi-replay',
-      accept: async () => {
-        try {
-          await renewalsWorkspaceService.reinstate(rowData.id);
-          toast.current.show({
-            severity: 'success',
-            summary: t("renewal.reinstated"),
-            detail: rowData.policyNumber,
-            life: 3000
-          });
-          loadInitialData();
-        } catch (error) {
-          showError(error, "renewal.failedToLoadLapseData");
-        }
-      }
-    });
+  const reasonBody = (r) => (r.lapseReason
+    ? <span className="bv-cell-clip" title={r.lapseReason}>{r.lapseReason}</span>
+    : <span className="bv-muted">—</span>);
+  const winBackBody = (r) => {
+    if (r.state === GRACE) return <span className="bv-muted">—</span>;
+    const n = r.winBackAttempts?.length || 0;
+    return n ? <span>{t("lapse.offersMade", { count: n })}</span> : <span className="bv-muted">{t("lapse.noOffer")}</span>;
   };
-
-  const statusBodyTemplate = (rowData) => {
-    const status = rowData.status || (rowData.lapseDate ? 'Lapsed' : 'Active');
-    const getSeverity = (status) => {
-      switch (status) {
-        case 'In Grace Period': return 'warning';
-        case 'Lapsed': return 'danger';
-        case 'Reinstated': return 'success';
-        case 'Win-back Attempted': return 'info';
-        default: return 'secondary';
-      }
-    };
-
-    return <Tag value={status} severity={getSeverity(status)} />;
-  };
-
-  const daysLapsedBodyTemplate = (rowData) => {
-    if (rowData.status === 'In Grace Period') {
-      const graceDays = Math.floor((new Date(rowData.gracePeriodEnd) - new Date()) / (1000 * 60 * 60 * 24));
-      return (
-        <div className="grace-period-cell">
-          <i className="pi pi-clock warning"></i>
-          <span className="warning">{graceDays} days left</span>
-        </div>
-      );
-    }
-
-    if (rowData.daysLapsed) {
-      const severity = rowData.daysLapsed <= 30 ? 'info' : rowData.daysLapsed <= 90 ? 'warning' : 'danger';
-      return (
-        <div className="lapsed-days-cell">
-          <i className={`pi pi-calendar ${severity}`}></i>
-          <span className={severity}>{rowData.daysLapsed} days</span>
-        </div>
-      );
-    }
-
-    return <span>-</span>;
-  };
-
-  const premiumBodyTemplate = (rowData) => {
-    return formatCurrency(rowData.premiumLost || rowData.currentPremium);
-  };
-
-  const winBackStatusBodyTemplate = (rowData) => {
-    const status = rowData.winBackStatus || 'Eligible';
-    const getSeverity = (status) => {
-      switch (status) {
-        case 'Eligible': return 'success';
-        case 'In Progress': return 'info';
-        case 'Converted': return 'success';
-        case 'Declined': return 'danger';
-        default: return 'secondary';
-      }
-    };
-
-    return <Badge value={status} severity={getSeverity(status)} />;
-  };
-
-  const attemptsBodyTemplate = (rowData) => {
-    const attempts = rowData.winBackAttempts?.length || 0;
-    const maxAttempts = 3;
-    const percentage = (attempts / maxAttempts) * 100;
-
-    return (
-      <div className="bv-meter">
-        <ProgressBar value={progressValue(percentage)} showValue={false} />
-        <span className="bv-meter__value">{`${attempts} of ${maxAttempts}`}</span>
-      </div>
-    );
-  };
-
-  const actionBodyTemplate = (rowData) => {
-    return (
-      <div className="action-buttons">
-        <Button
-          icon="pi pi-eye"
-          className="p-button-text"
-          onClick={() => handleViewDetails(rowData)}
-          tooltip="View Details" aria-label="View Details"
-        />
-        <Button
-          icon="pi pi-send"
-          className="p-button-text"
-          onClick={() => handleWinBack(rowData)}
-          tooltip="Send Win-back"
-          disabled={!rowData.reinstatementEligible || rowData.winBackStatus === 'Converted'} aria-label="Send Win-back"
-        />
-        {rowData.status === 'In Grace Period' ? (
-          <Button
-            icon="pi pi-ban"
-            className="p-button-text p-button-danger"
-            onClick={() => openLapse(rowData)}
-            tooltip={t("renewal.lapsed")} aria-label={t("renewal.lapsed")}
-          />
-        ) : (
-          <Button
-            icon="pi pi-replay"
-            className="p-button-text"
-            onClick={() => handleReinstate(rowData)}
-            tooltip={t("renewal.reinstated")}
-            disabled={!rowData.reinstatementEligible} aria-label={t("renewal.reinstated")}
-          />
-        )}
-      </div>
-    );
-  };
-
-  const policyLinkTemplate = (rowData) => {
-    return (
-      <a href="#" className="policy-link" onClick={(e) => {
-        e.preventDefault();
-        handleViewDetails(rowData);
-      }}>
-        {rowData.policyNumber}
-      </a>
-    );
-  };
-
-  const winBackDialogFooter = (
-    <div className="dialog-footer">
-      <Button
-        label="Cancel"
-        icon="pi pi-times"
-        className="p-button-text"
-        onClick={() => setWinBackVisible(false)}
-      />
-      <Button
-        label="Send Win-back"
-        icon="pi pi-send"
-        onClick={handleSendWinBack}
-        loading={loading}
-      />
-    </div>
+  const actionsOf = (r) => [
+    { key: "offer", label: t("lapse.recordOffer"), icon: "pi pi-send", onClick: () => openWinBack(r), hidden: r.state !== LAPSED || !r.reinstatementEligible },
+    { key: "reinstate", label: t("lapse.reinstate"), icon: "pi pi-replay", onClick: () => reinstate(r), hidden: r.state !== LAPSED || !r.reinstatementEligible, primary: true },
+    { key: "lapse", label: t("lapse.markLapsed"), icon: "pi pi-ban", onClick: () => setLapse({ row: r, code: null, note: "" }), hidden: r.state !== GRACE, danger: true },
+  ].filter((a) => !a.hidden);
+  const actionsBody = (r) => (
+    <RowActions actions={[{ icon: "pi pi-eye", label: t("lapse.view"), onClick: () => setPanelId(r.id) }]}
+      menu={actionsOf(r).map((a) => ({ label: a.label, icon: a.icon, command: a.onClick, className: a.danger ? "bv-menu-danger" : undefined }))} />
   );
 
-  const campaignDialogFooter = (
-    <div className="dialog-footer">
-      <Button
-        label="Cancel"
-        icon="pi pi-times"
-        className="p-button-text"
-        onClick={() => setCampaignVisible(false)}
-      />
-      <Button
-        label="Create Campaign"
-        icon="pi pi-check"
-        onClick={handleCreateCampaignConfirm}
-      />
-    </div>
+  const listTab = (
+    <SectionCard>
+      <FilterBar active={!!(search || state || reason)} onClear={() => { setSearch(""); setState(""); setReason(""); }}
+        end={<Button icon="pi pi-download" outlined label={t("lapse.export")} tooltip={t("renewal.exportToCsv")} tooltipOptions={{ position: "top" }}
+          onClick={exportCsv} disabled={!filtered.length} />}>
+        <span className="p-input-icon-left bv-filter-bar__search">
+          <i className="pi pi-search" />
+          <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("lapse.searchHint")} aria-label={t("lapse.searchHint")} />
+        </span>
+        <Dropdown value={state} onChange={(e) => setState(e.value || "")} aria-label={t("lapse.col.status")}
+          options={[{ label: t("lapse.allStates"), value: "" }, { label: t("lapse.status.lapsed"), value: LAPSED }, { label: t("lapse.status.grace"), value: GRACE },
+            { label: t("lapse.figures.eligible"), value: "eligible" }]} />
+        <Dropdown value={reason} onChange={(e) => setReason(e.value || "")} filter aria-label={t("lapse.col.reason")}
+          options={[{ label: t("lapse.allReasons"), value: "" }, ...lapseCodes]} />
+      </FilterBar>
+      <DataTable value={filtered} dataKey="id" loading={loading} paginator rows={20} size="small"
+        emptyMessage={<EmptyState icon="pi-check-circle" title={t("lapse.emptyTitle")} text={rows.length ? t("lapse.emptyFiltered") : t("lapse.emptyText")} />}>
+        <Column field="policyNumber" header={t("lapse.col.policy")} sortable body={(r) => <PolicyCell policyNumber={r.policyNumber} insured={r.insuredName} onOpen={() => setPanelId(r.id)} />} />
+        <Column field="product" header={t("lapse.col.product")} sortable />
+        <Column field="state" header={t("lapse.col.status")} sortable body={statusBody} />
+        <Column field="daysLapsed" header={t("lapse.col.days")} sortable body={daysBody} />
+        <Column field="premiumLost" header={t("lapse.col.premium")} sortable body={(r) => formatCurrency(r.premiumLost)} className="bv-num" headerClassName="bv-num" />
+        <Column field="lapseReason" header={t("lapse.col.reason")} body={reasonBody} />
+        <Column header={t("lapse.col.winBack")} body={winBackBody} />
+        <Column header={t("lapse.col.actions")} body={actionsBody} className="bv-actions" headerClassName="bv-actions" />
+      </DataTable>
+    </SectionCard>
+  );
+
+  const campaignsTab = (
+    <SectionCard flush actions={<Button icon="pi pi-plus" label={t("lapse.newCampaign")} onClick={openCampaign} />} title={t("lapse.campaigns")}>
+      <DataTable value={campaigns} dataKey="id" loading={loading} size="small" paginator={campaigns.length > 20} rows={20}
+        emptyMessage={<EmptyState icon="pi-megaphone" title={t("lapse.noCampaigns")} text={t("lapse.noCampaignsText")}
+          action={<Button outlined icon="pi pi-plus" label={t("lapse.newCampaign")} onClick={openCampaign} />} />}>
+        <Column field="campaignName" header={t("lapse.campaign.name")} body={(c) => <span className="bv-cell-stack"><span>{c.campaignName}</span><small>{c.campaignId}</small></span>} />
+        <Column header={t("lapse.campaign.period")} body={(c) => `${formatDate(c.startDate)} - ${formatDate(c.endDate)}`} />
+        <Column field="targetSegment" header={t("lapse.campaign.target")} body={(c) => t(`lapse.segments.${c.targetSegment}`, c.targetSegment || "—")} />
+        <Column header={t("lapse.campaign.discount")} body={(c) => `${Number(c.offer?.discount || 0)}%`} className="bv-num" headerClassName="bv-num" />
+        <Column header={t("lapse.campaign.contacted")} body={(c) => c.statistics?.contacted ?? 0} className="bv-num" headerClassName="bv-num" />
+        <Column header={t("lapse.campaign.converted")} body={(c) => c.statistics?.converted ?? 0} className="bv-num" headerClassName="bv-num" />
+        <Column header={t("lapse.campaign.rate")} body={(c) => formatPercent(c.statistics?.conversionRate || 0)} className="bv-num" headerClassName="bv-num" />
+        <Column header={t("lapse.campaign.recovered")} body={(c) => formatCurrency(c.statistics?.revenueRecovered || 0)} className="bv-num" headerClassName="bv-num" />
+        <Column header={t("lapse.campaign.status")} body={(c) => <StatusChip status={c.status} />} />
+      </DataTable>
+    </SectionCard>
   );
 
   return (
-    <div className="container__lapse__management__master">
+    <div className="bv-ops-page lapse-page">
       <Toast ref={toast} />
       <ConfirmDialog />
+      <RenewalHeader title={t("lapse.title")}
+        actions={<Button icon="pi pi-refresh" text rounded aria-label={t("lapse.refresh")} tooltip={t("lapse.refresh")} tooltipOptions={{ position: "top" }} onClick={load} loading={loading} />} />
+      <StatCards items={figures} />
+      <TabView activeIndex={tab} onTabChange={(e) => setTab(e.index)} className="bv-tabbar">
+        <TabPanel header={t("lapse.tabList")} />
+        <TabPanel header={t("lapse.tabCampaigns")} />
+      </TabView>
+      {tab === 0 ? listTab : campaignsTab}
 
-      <div className="top__container">
-        <h1 className="page__title">{t("renewal.lapseManagement")}</h1>
-        <BreadCrumb model={items} home={home} />
-      </div>
+      <SidePanel visible={!!selected} onHide={() => setPanelId(null)} wide title={selected ? `${selected.policyNumber} · ${selected.insuredName || ""}` : ""}
+        meta={selected ? statusBody(selected) : null}
+        footer={selected ? actionsOf(selected).map((a) => (
+          <Button key={a.key} label={a.label} icon={a.icon} outlined={!a.primary} severity={a.danger ? "danger" : undefined} onClick={a.onClick} />
+        )) : null}>
+        {selected ? (
+          <>
+            <PanelSection title={t("lapse.policy")}>
+              <KeyFacts className="bv-key-facts--plain" items={[
+                { key: "product", label: t("lapse.col.product"), value: selected.product },
+                { key: "premium", label: t("lapse.col.premium"), value: formatCurrency(selected.premiumLost) },
+                selected.state === LAPSED
+                  ? { key: "lapsed", label: t("lapse.lapseDate"), value: formatDate(selected.lapseDate) }
+                  : { key: "grace", label: t("lapse.graceEnd"), value: formatDate(selected.graceEnd) },
+                selected.state === LAPSED ? { key: "deadline", label: t("lapse.reinstateBy"), value: formatDate(selected.reinstatementDeadline) } : null,
+                { key: "reason", label: t("lapse.col.reason"), value: selected.lapseReason },
+              ]} />
+            </PanelSection>
+            {selected.state === LAPSED ? (
+              <PanelSection title={t("lapse.history")}>
+                {selected.winBackAttempts?.length ? (
+                  <table className="bv-detail-table">
+                    <thead>
+                      <tr>
+                        <th>{t("lapse.historyCol.date")}</th>
+                        <th>{t("lapse.historyCol.channel")}</th>
+                        <th>{t("lapse.historyCol.offer")}</th>
+                        <th>{t("lapse.historyCol.response")}</th>
+                        <th>{t("lapse.historyCol.by")}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selected.winBackAttempts.map((a) => (
+                        <tr key={a.id}>
+                          <td className="bv-nowrap">{formatDate(a.date)}</td>
+                          <td>{t(`lapse.channels.${a.method}`, a.method || "—")}</td>
+                          <td>{a.offer || a.description || "—"}</td>
+                          <td>{a.outcome || <span className="bv-muted">{t("lapse.noResponse")}</span>}</td>
+                          <td>{a.by || "—"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : <p className="bv-panel-note">{t("lapse.noHistory")}</p>}
+              </PanelSection>
+            ) : null}
+          </>
+        ) : null}
+      </SidePanel>
 
-      <div className="content-container">
-        {/* Search Section */}
-        <div className="search-section">
-          <Card>
-            <div className="search-grid">
-              <div className="search-field">
-                <label>Policy/Insured Name</label>
-                <InputText
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search policies or names"
-                />
-              </div>
-
-              <div className="search-field">
-                <label>Status</label>
-                <Dropdown
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.value)}
-                  options={statusOptions}
-                />
-              </div>
-
-              <div className="search-field">
-                <label>Lapse Reason</label>
-                <Dropdown
-                  value={reasonFilter}
-                  onChange={(e) => setReasonFilter(e.value)}
-                  options={reasonOptions}
-                />
-              </div>
-
-              <div className="search-actions">
-                <Button label="Search" icon="pi pi-search" onClick={applyFilters} />
-                <Button label="Clear" className="p-button-secondary" onClick={handleClear} />
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* Dashboard Cards */}
-        <div className="dashboard-cards">
-          <Card className="dashboard-card">
-            <div className="card-content">
-              <i className="pi pi-ban card-icon red"></i>
-              <div className="card-info">
-                <span className="card-value">{dashboardData.totalLapsed}</span>
-                <span className="card-label">{t("renewal.totalAtRisk")}</span>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="dashboard-card clickable" onClick={() => setStatusFilter('In Grace Period')}>
-            <div className="card-content">
-              <i className="pi pi-clock card-icon orange"></i>
-              <div className="card-info">
-                <span className="card-value">{dashboardData.inGracePeriod}</span>
-                <span className="card-label">{t("renewal.inGracePeriod")}</span>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="dashboard-card clickable" onClick={() => setStatusFilter('Eligible')}>
-            <div className="card-content">
-              <i className="pi pi-refresh card-icon blue"></i>
-              <div className="card-info">
-                <span className="card-value">{dashboardData.winBackEligible}</span>
-                <span className="card-label">Win-back Eligible</span>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="dashboard-card">
-            <div className="card-content">
-              <i className="pi pi-wallet card-icon dark-red"></i>
-              <div className="card-info">
-                <span className="card-value">{formatCurrency(dashboardData.revenueAtRisk)}</span>
-                <span className="card-label">{t("renewal.revenueAtRisk")}</span>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* Main Content */}
-        <div className="main-content">
-          <TabView>
-            <TabPanel header={t("renewal.lapsedPolicies")}>
-              <div className="table-section">
-                <Card>
-                  <div className="table-header">
-                    <h3>Lapsed & Grace Period Policies</h3>
-                    <div className="table-actions">
-                      <Button
-                        label="Create Campaign"
-                        icon="pi pi-plus"
-                        onClick={handleCreateCampaign}
-                      />
-                      <Button
-                        icon="pi pi-refresh"
-                        className="p-button-text"
-                        onClick={loadInitialData}
-                        tooltip="Refresh" aria-label="Refresh"
-                      />
-                      <Button
-                        icon="pi pi-file-excel"
-                        className="p-button-text"
-                        onClick={handleExport}
-                        disabled={!filteredPolicies.length}
-                        tooltip={t("renewal.exportToCsv")} aria-label={t("renewal.exportToCsv")}
-                      />
-                    </div>
-                  </div>
-
-                  <DataTable
-                    value={filteredPolicies}
-                    className="lapse-table"
-                    stripedRows
-                    paginator
-                    rows={20}
-                    loading={loading}
-                    emptyMessage="No lapsed policies found"
-                    sortMode="multiple"
-                  >
-                    <Column
-                      body={policyLinkTemplate}
-                      header="Policy Number"
-                      style={{ width: '12%' }}
-                      sortable
-                      sortField="policyNumber"
-                    />
-                    <Column
-                      field="insuredName"
-                      header={t("renewal.insuredName")}
-                      style={{ width: '14%' }}
-                      sortable
-                    />
-                    <Column
-                      field="product"
-                      header={t("renewal.product")}
-                      style={{ width: '12%' }}
-                      sortable
-                    />
-                    <Column
-                      body={statusBodyTemplate}
-                      header={t("renewal.status")}
-                      style={{ width: '10%' }}
-                    />
-                    <Column
-                      body={daysLapsedBodyTemplate}
-                      header={t("renewal.daysLapsed")}
-                      style={{ width: '10%' }}
-                      sortable
-                      sortField="daysLapsed"
-                    />
-                    <Column
-                      body={premiumBodyTemplate}
-                      header={t("renewal.premiumLost")}
-                      style={{ width: '12%', textAlign: 'right' }}
-                      sortable
-                      sortField="premiumLost"
-                    />
-                    <Column
-                      field="lapseReason"
-                      header={t("renewal.reason")}
-                      style={{ width: '12%' }}
-                    />
-                    <Column
-                      body={winBackStatusBodyTemplate}
-                      header={t("renewal.winBack")}
-                      style={{ width: '10%' }}
-                    />
-                    <Column
-                      body={attemptsBodyTemplate}
-                      header={t("renewal.attempts")}
-                      style={{ width: '8%' }}
-                    />
-                    <Column
-                      body={actionBodyTemplate}
-                      header="Actions"
-                      style={{ width: '10%' }}
-                    />
-                  </DataTable>
-                </Card>
-              </div>
-            </TabPanel>
-
-            <TabPanel header={t("renewal.winBackCampaigns")}>
-              <div className="campaigns-section">
-                <Card>
-                  <div className="campaigns-header">
-                    <h3>Active Win-back Campaigns</h3>
-                    <Button
-                      label="New Campaign"
-                      icon="pi pi-plus"
-                      onClick={handleCreateCampaign}
-                    />
-                  </div>
-
-                  <div className="campaigns-grid">
-                    {winBackCampaigns.map(campaign => (
-                      <Card key={campaign.campaignId} className="campaign-card">
-                        <div className="campaign-content">
-                          <div className="campaign-header">
-                            <h4>{campaign.campaignName}</h4>
-                            <Badge value={campaign.campaignId} />
-                          </div>
-
-                          <div className="campaign-details">
-                            <div className="detail-item">
-                              <label>Period:</label>
-                              <span>
-                                {formatAppDate(campaign.startDate)} -
-                                {formatAppDate(campaign.endDate)}
-                              </span>
-                            </div>
-                            <div className="detail-item">
-                              <label>Target:</label>
-                              <span>{campaign.targetSegment}</span>
-                            </div>
-                            <div className="detail-item">
-                              <label>Discount:</label>
-                              <span>{campaign.offer?.discount}%</span>
-                            </div>
-                          </div>
-
-                          <div className="campaign-stats">
-                            <div className="stat-item">
-                              <span className="stat-value">{campaign.statistics?.targetedPolicies || 0}</span>
-                              <span className="stat-label">Targeted</span>
-                            </div>
-                            <div className="stat-item">
-                              <span className="stat-value">{campaign.statistics?.converted || 0}</span>
-                              <span className="stat-label">Converted</span>
-                            </div>
-                            <div className="stat-item">
-                              <span className="stat-value">{formatPercent(campaign.statistics?.conversionRate || 0)}</span>
-                              <span className="stat-label">Rate</span>
-                            </div>
-                            <div className="stat-item">
-                              <span className="stat-value">{formatCurrency(campaign.statistics?.revenueRecovered || 0)}</span>
-                              <span className="stat-label">Recovered</span>
-                            </div>
-                          </div>
-
-                          <div className="bv-meter">
-                            <ProgressBar value={progressValue(campaign.statistics?.conversionRate)} showValue={false} />
-                            <span className="bv-meter__value">{formatPercent(campaign.statistics?.conversionRate ?? 0)}</span>
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                </Card>
-              </div>
-            </TabPanel>
-          </TabView>
-        </div>
-
-        {/* Policy Details Dialog */}
-        <Dialog
-          header={t("renewal.policyDetails")}
-          visible={detailsVisible}
-          onHide={() => setDetailsVisible(false)}
-          style={{ width: '70vw' }}
-        >
-          {selectedPolicy && (
-            <TabView>
-              <TabPanel header={t("renewal.policyInformation")}>
-                <div className="detail-grid">
-                  <div className="detail-item">
-                    <label>Policy Number:</label>
-                    <span>{selectedPolicy.policyNumber}</span>
-                  </div>
-                  <div className="detail-item">
-                    <label>Insured Name:</label>
-                    <span>{selectedPolicy.insuredName}</span>
-                  </div>
-                  <div className="detail-item">
-                    <label>Product:</label>
-                    <span>{selectedPolicy.product}</span>
-                  </div>
-                  <div className="detail-item">
-                    <label>Premium:</label>
-                    <span>{formatCurrency(selectedPolicy.premiumLost || selectedPolicy.currentPremium)}</span>
-                  </div>
-                  {selectedPolicy.lapseDate && (
-                    <div className="detail-item">
-                      <label>Lapse Date:</label>
-                      <span>{formatAppDate(selectedPolicy.lapseDate)}</span>
-                    </div>
-                  )}
-                  {selectedPolicy.lapseReason && (
-                    <div className="detail-item">
-                      <label>Lapse Reason:</label>
-                      <span>{selectedPolicy.lapseReason}</span>
-                    </div>
-                  )}
-                </div>
-              </TabPanel>
-
-              <TabPanel header={t("renewal.winBackHistory")}>
-                <div className="winback-history">
-                  {selectedPolicy.winBackAttempts?.length > 0 ? (
-                    selectedPolicy.winBackAttempts.map((attempt, index) => (
-                      <div key={index} className="winback-item">
-                        <div className="winback-header">
-                          <strong>{attempt.method}</strong>
-                          <span>{formatAppDate(attempt.date)}</span>
-                        </div>
-                        <div className="winback-details">
-                          <p>Offer: {attempt.offer}</p>
-                          <p>Response: {attempt.response}</p>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p>No win-back attempts made yet.</p>
-                  )}
-                </div>
-              </TabPanel>
-            </TabView>
-          )}
-        </Dialog>
-
-        <Dialog
-          header={t("renewal.lapsed")}
-          visible={lapseVisible}
-          onHide={() => setLapseVisible(false)}
-          style={{ width: '400px' }}
-          footer={
-            <div>
-              <Button label="Cancel" icon="pi pi-times" className="p-button-text" onClick={() => setLapseVisible(false)} />
-              <Button label={t("renewal.lapsed")} icon="pi pi-ban" className="p-button-danger"
-                onClick={handleLapseConfirm} disabled={lapseNoteNeeded && lapseReason.trim().length < 3} />
-            </div>
-          }
-        >
-          <div className="form-field">
-            <label>{selectedPolicy?.policyNumber} - {selectedPolicy?.insuredName}</label>
-            <Dropdown
-              value={lapseCode}
-              options={lapseCodes}
-              onChange={(e) => setLapseCode(e.value || null)}
-              showClear
-              placeholder={t("renewal.lapseReasonCodeNone")}
-              style={{ width: '100%' }}
-            />
-            <InputTextarea
-              value={lapseReason}
-              onChange={(e) => setLapseReason(e.target.value)}
-              rows={3}
-              autoResize
-              placeholder={t(lapseCode ? "renewal.lapseNote" : "renewal.lapseReasonText")}
-              style={{ width: '100%', marginTop: '0.75rem' }}
-            />
+      <Dialog header={t("lapse.recordOffer")} visible={!!winBack} onHide={() => setWinBack(null)} style={{ width: "44rem" }} breakpoints={{ "768px": "95vw" }}
+        footer={(
+          <div>
+            <Button label={t("common.cancel", "Cancel")} text onClick={() => setWinBack(null)} />
+            <Button label={t("lapse.save")} icon="pi pi-check" onClick={sendWinBack} loading={saving} />
           </div>
-        </Dialog>
-
-        {/* Win-back Offer Dialog */}
-        <Dialog
-          header={t("renewal.sendWinBackOffer")}
-          visible={winBackVisible}
-          onHide={() => setWinBackVisible(false)}
-          style={{ width: '600px' }}
-          footer={winBackDialogFooter}
-        >
-          {selectedPolicy && (
-            <div className="winback-form">
-              <div className="policy-info">
-                <h4>Policy Information</h4>
-                <div className="info-grid">
-                  <div className="info-item">
-                    <label>Policy:</label>
-                    <span>{selectedPolicy.policyNumber}</span>
-                  </div>
-                  <div className="info-item">
-                    <label>Insured:</label>
-                    <span>{selectedPolicy.insuredName}</span>
-                  </div>
-                  <div className="info-item">
-                    <label>Premium:</label>
-                    <span>{formatCurrency(selectedPolicy.premiumLost || selectedPolicy.currentPremium)}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="offer-details">
-                <h4>Win-back Offer</h4>
-                <div className="form-grid">
-                  <div className="form-field">
-                    <label>Discount (%)</label>
-                    <InputNumber
-                      value={winBackOffer.discount}
-                      onValueChange={(e) => setWinBackOffer({...winBackOffer, discount: e.value})}
-                      min={0}
-                      max={50}
-                      suffix="%"
-                    />
-                  </div>
-
-                  <div className="form-field">
-                    <label>Payment Terms</label>
-                    <Dropdown
-                      value={winBackOffer.paymentTerms}
-                      onChange={(e) => setWinBackOffer({...winBackOffer, paymentTerms: e.value})}
-                      options={paymentTermsOptions}
-                    />
-                  </div>
-
-                  <div className="form-field">
-                    <label>Valid Until</label>
-                    <Calendar
-                      value={winBackOffer.validUntil}
-                      onChange={(e) => setWinBackOffer({...winBackOffer, validUntil: e.value})}
-                      dateFormat={calendarDateFormat()}
-                      minDate={new Date()}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-field">
-                  <label>Additional Benefits</label>
-                  <div className="benefits-selection">
-                    {benefitOptions.map(benefit => (
-                      <div key={benefit} className="benefit-checkbox">
-                        <input
-                          type="checkbox"
-                          id={benefit}
-                          checked={winBackOffer.additionalBenefits.includes(benefit)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setWinBackOffer({
-                                ...winBackOffer,
-                                additionalBenefits: [...winBackOffer.additionalBenefits, benefit]
-                              });
-                            } else {
-                              setWinBackOffer({
-                                ...winBackOffer,
-                                additionalBenefits: winBackOffer.additionalBenefits.filter(b => b !== benefit)
-                              });
-                            }
-                          }}
-                        />
-                        <label htmlFor={benefit}>{benefit}</label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="form-field">
-                  <label>Personal Message</label>
-                  <InputTextarea
-                    value={winBackOffer.message}
-                    onChange={(e) => setWinBackOffer({...winBackOffer, message: e.target.value})}
-                    rows={3}
-                    placeholder="Add a personal message to the offer"
-                  />
-                </div>
+        )}>
+        {winBack ? (
+          <div className="grid">
+            <div className="col-12"><p className="bv-panel-text">{`${winBack.row.policyNumber} · ${winBack.row.insuredName || ""} · ${formatCurrency(winBack.row.premiumLost)}`}</p></div>
+            <div className="col-12 md:col-4">
+              <label htmlFor="wb-channel">{t("lapse.historyCol.channel")}</label>
+              <Dropdown inputId="wb-channel" value={winBack.method} onChange={(e) => setWinBack({ ...winBack, method: e.value })} className="w-full"
+                options={CHANNELS.map((c) => ({ label: t(`lapse.channels.${c}`, c), value: c }))} />
+            </div>
+            <div className="col-12 md:col-4">
+              <label htmlFor="wb-discount">{t("lapse.discount")}</label>
+              <InputNumber inputId="wb-discount" value={winBack.discount} onValueChange={(e) => setWinBack({ ...winBack, discount: e.value || 0 })} min={0} max={100} suffix="%" className="w-full" />
+            </div>
+            <div className="col-12 md:col-4">
+              <label htmlFor="wb-valid">{t("lapse.validUntil")}</label>
+              <Calendar inputId="wb-valid" value={winBack.validUntil} onChange={(e) => setWinBack({ ...winBack, validUntil: e.value })} dateFormat={calendarDateFormat()} minDate={new Date()} showIcon className="w-full" />
+            </div>
+            <div className="col-12 md:col-6">
+              <label htmlFor="wb-terms">{t("lapse.paymentTermsLabel")}</label>
+              <Dropdown inputId="wb-terms" value={winBack.paymentTerms} onChange={(e) => setWinBack({ ...winBack, paymentTerms: e.value })} className="w-full"
+                options={PAYMENT_TERMS.map((p) => ({ label: t(`lapse.paymentTerms.${p}`, p), value: p }))} />
+            </div>
+            <div className="col-12 md:col-6">
+              <label htmlFor="wb-campaign">{t("lapse.campaignLabel")}</label>
+              <Dropdown inputId="wb-campaign" value={winBack.campaignId} onChange={(e) => setWinBack({ ...winBack, campaignId: e.value || null })} showClear className="w-full"
+                placeholder={t("lapse.noCampaign")} options={campaigns.map((c) => ({ label: `${c.campaignName} (${c.campaignId})`, value: c.id }))} />
+            </div>
+            <div className="col-12">
+              <label>{t("lapse.benefitsLabel")}</label>
+              <div className="lapse-benefits">
+                {BENEFITS.map((b) => (
+                  <span key={b} className="lapse-benefits__item">
+                    <Checkbox inputId={`wb-${b}`} checked={winBack.benefits.includes(b)}
+                      onChange={(e) => setWinBack({ ...winBack, benefits: e.checked ? [...winBack.benefits, b] : winBack.benefits.filter((x) => x !== b) })} />
+                    <label htmlFor={`wb-${b}`}>{t(`lapse.benefits.${b}`, b)}</label>
+                  </span>
+                ))}
               </div>
             </div>
-          )}
-        </Dialog>
-
-        {/* Create Campaign Dialog */}
-        <Dialog
-          header={t("renewal.createWinBackCampaign")}
-          visible={campaignVisible}
-          onHide={() => setCampaignVisible(false)}
-          style={{ width: '700px' }}
-          footer={campaignDialogFooter}
-        >
-          <div className="campaign-form">
-            <div className="form-grid">
-              <div className="form-field">
-                <label>Campaign Name *</label>
-                <InputText
-                  value={newCampaign.name}
-                  onChange={(e) => setNewCampaign({...newCampaign, name: e.target.value})}
-                  placeholder="Enter campaign name"
-                />
-                <FieldError error={campaignErrors.name} />
-              </div>
-
-              <div className="form-field">
-                <label>Target Segment</label>
-                <Dropdown
-                  value={newCampaign.targetSegment}
-                  onChange={(e) => setNewCampaign({...newCampaign, targetSegment: e.value})}
-                  options={targetSegmentOptions}
-                />
-              </div>
-
-              <div className="form-field">
-                <label>Start Date *</label>
-                <Calendar
-                  value={newCampaign.startDate}
-                  onChange={(e) => setNewCampaign({...newCampaign, startDate: e.value})}
-                  dateFormat={calendarDateFormat()}
-                  minDate={new Date()}
-                />
-                <FieldError error={campaignErrors.startDate} />
-              </div>
-
-              <div className="form-field">
-                <label>End Date *</label>
-                <Calendar
-                  value={newCampaign.endDate}
-                  onChange={(e) => setNewCampaign({...newCampaign, endDate: e.value})}
-                  dateFormat={calendarDateFormat()}
-                  minDate={newCampaign.startDate}
-                />
-                <FieldError error={campaignErrors.endDate} />
-              </div>
-
-              <div className="form-field">
-                <label>Discount (%)</label>
-                <InputNumber
-                  value={newCampaign.discount}
-                  onValueChange={(e) => setNewCampaign({...newCampaign, discount: e.value})}
-                  min={0}
-                  max={50}
-                  suffix="%"
-                />
-              </div>
-
-              <div className="form-field">
-                <label>Budget</label>
-                <InputNumber
-                  value={newCampaign.budget}
-                  onValueChange={(e) => setNewCampaign({...newCampaign, budget: e.value})}
-                  mode="currency"
-                  currency={currencyCode}
-                  locale={locale}
-                />
-              </div>
+            <div className="col-12">
+              <label htmlFor="wb-response">{t("lapse.clientResponse")}</label>
+              <InputText id="wb-response" value={winBack.response} onChange={(e) => setWinBack({ ...winBack, response: e.target.value })} className="w-full" maxLength={500} />
             </div>
+          </div>
+        ) : null}
+      </Dialog>
 
-            <div className="form-field">
-              <label>Campaign Benefits</label>
-              <div className="benefits-selection">
-                {benefitOptions.map(benefit => (
-                  <div key={benefit} className="benefit-checkbox">
-                    <input
-                      type="checkbox"
-                      id={`campaign-${benefit}`}
-                      checked={newCampaign.benefits.includes(benefit)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setNewCampaign({
-                            ...newCampaign,
-                            benefits: [...newCampaign.benefits, benefit]
-                          });
-                        } else {
-                          setNewCampaign({
-                            ...newCampaign,
-                            benefits: newCampaign.benefits.filter(b => b !== benefit)
-                          });
-                        }
-                      }}
-                    />
-                    <label htmlFor={`campaign-${benefit}`}>{benefit}</label>
-                  </div>
+      <Dialog header={t("lapse.markLapsed")} visible={!!lapse} onHide={() => setLapse(null)} style={{ width: "32rem" }} breakpoints={{ "768px": "95vw" }}
+        footer={(
+          <div>
+            <Button label={t("common.cancel", "Cancel")} text onClick={() => setLapse(null)} />
+            <Button label={t("lapse.markLapsed")} icon="pi pi-ban" severity="danger" onClick={confirmLapse} loading={saving}
+              disabled={noteNeeded && (lapse?.note || "").trim().length < 3} />
+          </div>
+        )}>
+        {lapse ? (
+          <div className="grid">
+            <div className="col-12"><p className="bv-panel-text">{`${lapse.row.policyNumber} · ${lapse.row.insuredName || ""}`}</p></div>
+            <div className="col-12">
+              <label htmlFor="lp-code">{t("lapse.reasonCode")}</label>
+              <Dropdown inputId="lp-code" value={lapse.code} options={lapseCodes} onChange={(e) => setLapse({ ...lapse, code: e.value || null })} showClear className="w-full"
+                placeholder={t("lapse.reasonCodeNone")} />
+            </div>
+            <div className="col-12">
+              <label htmlFor="lp-note">{noteNeeded ? `${t("lapse.reasonNote")} *` : t("lapse.reasonNote")}</label>
+              <InputTextarea id="lp-note" value={lapse.note} onChange={(e) => setLapse({ ...lapse, note: e.target.value })} rows={3} autoResize className="w-full" />
+            </div>
+          </div>
+        ) : null}
+      </Dialog>
+
+      <Dialog header={t("lapse.newCampaign")} visible={!!campaign} onHide={() => setCampaign(null)} style={{ width: "44rem" }} breakpoints={{ "768px": "95vw" }}
+        footer={(
+          <div>
+            <Button label={t("common.cancel", "Cancel")} text onClick={() => setCampaign(null)} />
+            <Button label={t("lapse.createCampaign")} icon="pi pi-check" onClick={saveCampaign} loading={saving} />
+          </div>
+        )}>
+        {campaign ? (
+          <div className="grid">
+            <div className="col-12">
+              <label htmlFor="cp-name">{t("lapse.campaign.name")} *</label>
+              <InputText id="cp-name" value={campaign.name} onChange={(e) => setCampaign({ ...campaign, name: e.target.value })} className="w-full" maxLength={200} />
+              <FieldError error={campaignErrors.name} />
+            </div>
+            <div className="col-12 md:col-6">
+              <label htmlFor="cp-start">{t("lapse.startDate")} *</label>
+              <Calendar inputId="cp-start" value={campaign.startDate} onChange={(e) => setCampaign({ ...campaign, startDate: e.value })} dateFormat={calendarDateFormat()} showIcon className="w-full" />
+              <FieldError error={campaignErrors.startDate} />
+            </div>
+            <div className="col-12 md:col-6">
+              <label htmlFor="cp-end">{t("lapse.endDate")} *</label>
+              <Calendar inputId="cp-end" value={campaign.endDate} onChange={(e) => setCampaign({ ...campaign, endDate: e.value })} dateFormat={calendarDateFormat()} showIcon className="w-full" />
+              <FieldError error={campaignErrors.endDate} />
+            </div>
+            <div className="col-12 md:col-4">
+              <label htmlFor="cp-target">{t("lapse.campaign.target")}</label>
+              <Dropdown inputId="cp-target" value={campaign.targetSegment} onChange={(e) => setCampaign({ ...campaign, targetSegment: e.value })} className="w-full"
+                options={SEGMENTS.map((s) => ({ label: t(`lapse.segments.${s}`, s), value: s }))} />
+            </div>
+            <div className="col-12 md:col-4">
+              <label htmlFor="cp-discount">{t("lapse.campaign.discount")}</label>
+              <InputNumber inputId="cp-discount" value={campaign.discount} onValueChange={(e) => setCampaign({ ...campaign, discount: e.value || 0 })} min={0} max={100} suffix="%" className="w-full" />
+            </div>
+            <div className="col-12 md:col-4">
+              <label htmlFor="cp-budget">{t("lapse.budget")}</label>
+              <InputNumber inputId="cp-budget" value={campaign.budget} onValueChange={(e) => setCampaign({ ...campaign, budget: e.value })} mode="currency" currency={currencyCode} locale={locale} min={0} className="w-full" />
+            </div>
+            <div className="col-12">
+              <label>{t("lapse.benefitsLabel")}</label>
+              <div className="lapse-benefits">
+                {BENEFITS.map((b) => (
+                  <span key={b} className="lapse-benefits__item">
+                    <Checkbox inputId={`cp-${b}`} checked={campaign.benefits.includes(b)}
+                      onChange={(e) => setCampaign({ ...campaign, benefits: e.checked ? [...campaign.benefits, b] : campaign.benefits.filter((x) => x !== b) })} />
+                    <label htmlFor={`cp-${b}`}>{t(`lapse.benefits.${b}`, b)}</label>
+                  </span>
                 ))}
               </div>
             </div>
           </div>
-        </Dialog>
-      </div>
+        ) : null}
+      </Dialog>
     </div>
   );
 };

@@ -1,65 +1,17 @@
 @import "../../../theme/bdoi/tokens";
 
-// Claim screens: one header, step bar, card and form grid for the whole claim journey.
+// Claim screens: page header and cards from components/RecordPage; the step bar, sections and form grid of the claim
+// journey are set here.
 .claim-journey {
   display: flex;
   flex-direction: column;
   gap: 16px;
   padding-bottom: 24px;
 
-  &__head {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-
-  &__head-side {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  &__title {
-    margin: 0 0 6px;
-    font-family: $font-heading;
-    font-size: 24px;
-    font-weight: 700;
-    color: $color-heading;
-  }
-
-  &__back {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0;
-    border: 0;
-    background: none;
-    font: inherit;
-    font-size: 15px;
-    color: $color-text;
-    cursor: pointer;
-
-    .pi {
-      color: $brand-blue;
-    }
-
-    &:hover span:first-of-type {
-      text-decoration: underline;
-    }
-  }
-
-  &__ref::before {
-    content: "/";
-    margin-right: 8px;
-    color: $color-placeholder;
-  }
-
-  &__status.p-tag {
-    background: $brand-blue-050;
-    color: $brand-navy;
-    font-weight: 600;
+  .bv-page-header,
+  .bv-key-facts,
+  .bv-section-card {
+    margin-bottom: 0;
   }
 
   &__steps.p-steps {
@@ -84,23 +36,24 @@
       white-space: normal;
       text-align: center;
     }
-  }
 
-  &__card.p-card {
-    border-radius: $radius-md;
-    box-shadow: $shadow-sm;
+    // steps already passed: the number in the brand colour with a tick, the label in the text colour
+    .claim-journey__step--done .p-steps-number {
+      background: $brand-blue-050;
+      border-color: $brand-blue;
+      color: $brand-blue;
+      font-size: 0;
 
-    .p-card-body {
-      padding: 20px 24px;
+      &::after {
+        content: "\e909";
+        font-family: "primeicons";
+        font-size: 12px;
+      }
     }
-  }
 
-  &__card-title {
-    margin: 0 0 16px;
-    font-family: $font-heading;
-    font-size: 18px;
-    font-weight: 700;
-    color: $color-heading;
+    .claim-journey__step--done .p-steps-title {
+      color: $color-text;
+    }
   }
 
   &__section + &__section {
@@ -211,15 +164,66 @@
     font-size: 13px;
   }
 
+  // Next step panel: what happens next on the left, the buttons for it on the right; it stays in view at the foot of
+  // the screen while a long form scrolls.
+  &__next {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 24px;
+    flex-wrap: wrap;
+    margin: 20px -4px 0;
+    padding: 12px 16px;
+    border: 1px solid $color-border;
+    border-left: 4px solid $brand-blue;
+    border-radius: $radius-sm;
+    background: $color-surface;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.04);
+
+    &--warning {
+      border-left-color: $color-warning;
+      background: $color-warning-050;
+    }
+
+    &--success {
+      border-left-color: $color-success;
+      background: $color-success-050;
+    }
+  }
+
+  &__next-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    min-width: 0;
+    flex: 1 1 260px;
+  }
+
+  &__next-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: $color-text-muted;
+  }
+
+  &__next-message {
+    font-size: 14px;
+    font-weight: 600;
+    color: $color-heading;
+  }
+
   &__actions {
     display: flex;
     justify-content: flex-end;
     align-items: center;
     gap: 12px;
-    margin-top: 20px;
-    padding-top: 16px;
-    border-top: 1px solid $color-border;
     flex-wrap: wrap;
+    margin-left: auto;
 
     .claim-journey__actions-start {
       margin-right: auto;
@@ -230,4 +234,94 @@
     color: $color-danger;
     margin-left: 2px;
   }
+}
+
+// "Same as the policy holder" above the driver fields
+.claim-journey__check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+
+  label {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 400;
+  }
+}
+
+// label above a plain input of a claim screen
+.claim-journey__label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: $color-heading;
+}
+
+// Documents of a claim (Documents step, claim page) and the queue of claims awaiting documents
+.claim-docs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &__progress {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__progress-head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__progress-figure {
+    font-size: 15px;
+    font-weight: 600;
+    color: $color-heading;
+    margin-right: 4px;
+  }
+
+  &__reason {
+    display: block;
+    max-width: 22rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &__file {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 16rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &__foot {
+    display: flex;
+    justify-content: flex-start;
+  }
+}
+
+.claim-docs__bar.p-progressbar {
+  height: 6px;
+  border-radius: 3px;
+  background: $color-surface-muted;
+
+  .p-progressbar-value {
+    background: $color-success;
+  }
+}
+
+.claim-docs__cell-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
 }

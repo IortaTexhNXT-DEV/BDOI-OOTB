@@ -892,8 +892,14 @@
    "chapter": "Claims"
   },
   {
-   "id": "claim-document-checklist",
-   "title": "Claim document checklist",
+   "id": "claim-documents",
+   "title": "Claim documents",
+   "level": 2,
+   "chapter": "Claims"
+  },
+  {
+   "id": "claims-awaiting-documents",
+   "title": "Claims awaiting documents",
    "level": 2,
    "chapter": "Claims"
   },

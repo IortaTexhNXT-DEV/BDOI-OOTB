@@ -1,20 +1,17 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { Toast } from "primereact/toast";
 import { useTranslation } from "react-i18next";
-import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
-import { Card } from "primereact/card";
-import InputTextField from "../../component/inputText";
+import { InputText } from "primereact/inputtext";
 import { FileUpload } from "primereact/fileupload";
-import SvgImageUpload from "../../../assets/icons/SvgImageUpload";
 import { Button } from "primereact/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import { InputTextarea } from "primereact/inputtextarea";
-import "./index.scss";
+import ClaimJourneyLayout, { ClaimActions, ClaimSection } from "../shared/ClaimJourneyLayout";
+import FormErrorSummary from "../shared/FormErrorSummary";
 import customHistory from "../../../routes/customHistory";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import { postSendData } from "./store/sendMailMiddleWare";
-import SvgUploadClose from "../../../assets/agentIcon/SvgUploadClose";
 import { setPolicyHolderData } from "../claimDetails/store/claimDetailsReducers";
 import logger from "../../../utility/logger";
 
@@ -22,7 +19,6 @@ const SendMail = () => {
   const { t } = useTranslation();
   const fileUploadRef = useRef(null);
   const errorToast = useRef(null);
-  const [uploadImage, setuploadImage] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
   const clientIdFromState =
@@ -48,13 +44,6 @@ const SendMail = () => {
 
   // Get dispatch for Redux actions
   const dispatch = useDispatch();
-  const handleUppendImg = (name, src) => {
-    setuploadImage(src?.objectURL);
-  };
-  const handleCancelUplaoded = () => {
-    setuploadImage(null);
-    fileUploadRef.current.clear();
-  };
 
   // Get policy number and policy holder name from claim details data
   const policyNumber = claimDetailsViewData?.policyNumber || "N/A";
@@ -74,16 +63,10 @@ const SendMail = () => {
   }, [dispatch, policyHolderName, policyNumber]);
 
   const formInitialValue = {
-    mailSubject: `Claim Request for Policy Number ${policyNumber}`,
-    write: `Hello,
-    I hope this email finds you well.
-    I am writing regarding a claim request for a client ${policyHolderName} with policy number ${policyNumber}`,
+    mailSubject: t("claimFlow.adviceSubject", { policy: policyNumber }),
+    write: t("claimFlow.adviceBody", { insured: policyHolderName, policy: policyNumber }),
     file: null,
   };
-  // const customValidation = (values) => {
-  //   if (!values.file) {
-  //   }
-  // };
   const handleSubmit = async (values) => {
     try {
       const result = await dispatch(postSendData(formik.values));
@@ -125,9 +108,9 @@ const SendMail = () => {
           fullResponse: result.payload,
         };
 
-        // Navigate to next page with claim ID in URL
+        // the claim is registered: on to its documents
         if (claimId) {
-          navigate(`/agent/claimrequest/requestapproval/${claimId}`, {
+          navigate(`/agent/claimrequest/documents/${claimId}`, {
             state: approvalState,
           });
         } else {
@@ -149,134 +132,55 @@ const SendMail = () => {
   };
   const formik = useFormik({
     initialValues: formInitialValue,
-    // validate: customValidation,
     onSubmit: handleSubmit,
   });
   const handleBackNavigation = () => {
     customHistory.back();
   };
   return (
-    <div className="claimrequest__details__container">
+    <ClaimJourneyLayout
+      step="insurerAdvice"
+      holderName={claimDetailsViewData?.PolicyHolderName || ""}
+      reference={claimDetailsViewData?.policyNumber ? t("claimFlow.policyRef", { number: claimDetailsViewData.policyNumber }) : ""}
+      onBack={handleBackNavigation}
+      title={t("claimFlow.adviceTitle")}
+    >
       <Toast ref={errorToast} />
-      <div className="claim__details__container__titles">{t("agent.clients")}</div>
-      <div 
-        className="claim__details__container__back__btn mt-3 cursor-pointer"
-        onClick={handleBackNavigation}
-      >
-        <SvgLeftArrow />
-        <div className="claim__details__container__back__btn__title">
-          {(() => {
-            const policyHolderName =
-              claimDetailsViewData?.PolicyHolderName || t("agent.loading");
-            const policyNumber = claimDetailsViewData?.policyNumber;
-            return `${policyHolderName} / ${
-              policyNumber ? `${t("agent.policyLabel")}: ${policyNumber}` : t("agent.loading")
-            }`;
-          })()}
-        </div>
-      </div>
-      <Card>
-        <div className="claim__details__container__titles">{t("agent.claimRequest")}</div>
-        <div className="mt-4">
-          <InputTextField
-            label={t("agent.mailSubject")}
-            value={formik.values.mailSubject}
-            onChange={formik.handleChange("mailSubject")}
-          />
-          {formik.touched.mailSubject && formik.errors.mailSubject && (
-            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
-              {formik.errors.mailSubject}
-            </div>
-          )}
-        </div>
-        <div className="mt-4">
-          <InputTextarea
-            label={t("agent.write")}
-            rows={5}
-            cols={30}
-            placeholder={t("agent.write")}
-            className="claim__write__field"
-            value={formik.values.write}
-            onChange={formik.handleChange("write")}
-          />
-          {formik.touched.write && formik.errors.write && (
-            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
-              {formik.errors.write}
-            </div>
-          )}
-        </div>
-
-        <div className="col-12 mt-4 p-0">
-          <div className="claim__request__upload__subtitle  mb-2">
-            {t("agent.documents")}
+      <ClaimSection title={t("claimFlow.adviceMessage")} hint={t("claimFlow.adviceHint")}>
+        <div className="grid">
+          <div className="col-12">
+            <label htmlFor="advice-subject" className="claim-journey__label">{t("agent.mailSubject")}</label>
+            <InputText id="advice-subject" value={formik.values.mailSubject} onChange={formik.handleChange("mailSubject")} className="w-full" />
           </div>
-          {/* {!imageURL ? ( */}
-          <div className="upload__card__container mt-2">
-            <div className="file_icon_selector">
-              <FileUpload
-                url="./upload"
-                auto
-                customUpload
-                mode="basic"
-                name="demo"
-                accept=".png,.jpg,.jpeg"
-                uploadHandler={(e) => {
-                  formik.setFieldValue("file", e.files[0]);
-                  handleUppendImg(e.options.props.name, e.files[0], "the data");
-                }}
-              />
-              <div className="icon_click_option">
-                <SvgImageUpload />
-              </div>
-              <div className="upload__caption text-center">{t("agent.upload")}</div>
-              <div className="upload__caption text-center">
-                {t("agent.maxFileSizePdf")}
-              </div>
-            </div>
+          <div className="col-12">
+            <label htmlFor="advice-body" className="claim-journey__label">{t("claimFlow.adviceBodyLabel")}</label>
+            <InputTextarea id="advice-body" rows={7} autoResize value={formik.values.write} onChange={formik.handleChange("write")} className="w-full" />
           </div>
-          {formik.touched.file && formik.errors.file && (
-            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
-              {formik.errors.file}
-            </div>
-          )}
-
-          {uploadImage && (
-            <div className="col-12 mt-2 ">
-              <span onClick={handleCancelUplaoded}>
-                <SvgUploadClose />
-              </span>
-            </div>
-          )}
-          {/* ) : ( */}
-          {/* } */}
         </div>
-
-        {error && (
-          <div className="mt-3" style={{ color: "var(--color-danger)", fontSize: "14px" }}>
-            {error}
-          </div>
-        )}
-
-        <div className="claimrequest__back__but">
-          <Button
-            onClick={handleBackNavigation}
-            link
-            className="claim__back__but"
-            disabled={loading}
-          >
-            {t("agent.back")}
-          </Button>
-          <Button
-            onClick={formik.handleSubmit}
-            className="claim__snd__but"
-            loading={loading}
-            disabled={loading}
-          >
-            {loading ? t("agent.sending") : t("agent.send")}
-          </Button>
+      </ClaimSection>
+      <ClaimSection title={t("claimJourney.proofOfDocuments")} hint={t("claimJourney.optional")}>
+        <div className="claim-journey__upload">
+          {formik.values.file ? (
+            <span className="claim-journey__file">
+              <i className="pi pi-file" aria-hidden="true" />
+              {formik.values.file.name}
+              <Button type="button" icon="pi pi-times" text rounded aria-label={t("claimJourney.removeFile")} tooltip={t("claimJourney.removeFile")}
+                tooltipOptions={{ position: "top" }} onClick={() => { formik.setFieldValue("file", null); fileUploadRef.current?.clear(); }} />
+            </span>
+          ) : (
+            <FileUpload ref={fileUploadRef} mode="basic" auto customUpload name="file" accept=".png,.jpg,.jpeg,.pdf" maxFileSize={2000000}
+              chooseLabel={t("claimJourney.chooseFile")} invalidFileSizeMessageSummary={t("claimJourney.fileTooLarge")} invalidFileSizeMessageDetail=""
+              uploadHandler={(e) => { formik.setFieldValue("file", e.files[0]); e.options.clear(); }} />
+          )}
+          <small>{t("claimJourney.fileRule")}</small>
         </div>
-      </Card>
-    </div>
+      </ClaimSection>
+      {error ? <FormErrorSummary serverError={error} /> : null}
+      <ClaimActions next={t("claimFlow.next.insurerAdvice")}>
+        <Button type="button" label={t("claimJourney.back")} outlined onClick={handleBackNavigation} disabled={loading} />
+        <Button type="button" label={t("claimFlow.registerAndSend")} icon="pi pi-send" onClick={formik.handleSubmit} loading={loading} disabled={loading} />
+      </ClaimActions>
+    </ClaimJourneyLayout>
   );
 };
 

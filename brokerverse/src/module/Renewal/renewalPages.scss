@@ -122,3 +122,30 @@
     background: $brand-blue;
   }
 }
+
+// Renewals screens on the shared page structure (components/RecordPage): the summary list of the main drivers of a risk
+// score, the score breakdown and the communication history of a renewal.
+.bv-risk-drivers {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  line-height: 18px;
+
+  li + li {
+    margin-top: 2px;
+  }
+}
+
+.bv-risk-score {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+
+  .bv-risk-score__value {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: $color-heading;
+  }
+}

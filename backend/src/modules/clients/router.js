@@ -43,6 +43,13 @@ define({
   handler: async (req, res) => sendEntity(res, svc.toClient(await svc.getClient(req.params.id))),
 });
 define({
+  method: 'GET', path: '/:id/summary', summary: 'Figures of the client view: active policies and their premium, open claims, open renewals and the next expiry, unpaid balance and overdue bills, and the number of policies, quotations, claims, renewals, endorsements, receipts and KYC documents',
+  screen: `${SCREEN} > Client view`, middleware: [...canRead, ownRecord('client')],
+  response: { success: true, data: { clientId: 'cl_1', clientCode: 'CL-2026-00001', activePolicies: 2, activePremium: 56730, openClaims: 1, openRenewals: 1, nextExpiry: '2026-10-28', outstanding: 26350, overdueBills: 0,
+    counts: { policies: 2, quotations: 3, claims: 2, renewals: 1, endorsements: 0, receipts: 4, documents: 2 } } },
+  handler: async (req, res) => ok(res, await svc.clientSummary(req.params.id)),
+});
+define({
   method: 'POST', path: '/', summary: 'Create a client', screen: SCREEN, middleware: [...canWrite, validate(clientBody.refine((b) => b.firstName || b.companyName, { message: 'firstName or companyName is required', path: ['firstName'] }))],
   request: { firstName: 'Juan', lastName: 'Dela Cruz', emailId: 'juan@example.com', leadCategory: 'Retail' }, response: { ...example, success: true },
   handler: async (req, res) => {
