@@ -1,6 +1,7 @@
 /**
- * One screen per setting: System Settings owns the display currency and language; the branding and the application
- * name come from the brand pack, with the e-mail and document sections on their layout screens; the
+ * One screen per setting: Master > Configuration edits the display currency and language (checked like before); the
+ * branding and the application name come from the brand pack, with the e-mail and document sections on their layout
+ * screens; the
  * Company master owns the legal identity (name, TIN, registered address, print logo) and the BIR forms read it from
  * the primary company; Premium Taxes & LGU Rates owns the premium tax rates. The generic configuration endpoints
  * refuse those keys, and the retired taxation master can no longer write tax.* settings.
@@ -28,7 +29,8 @@ describe('settings owned by another screen', () => {
   it('names the owning screen of each key', () => {
     expect(settingOwner('branding.primary_color').screen).toBe(BRANDING);
     expect(settingOwner('general.system_name').screen).toBe(BRANDING);
-    expect(settingOwner('currency.default').screen).toBe('Master > System Settings');
+    expect(settingOwner('currency.default')).toBeNull();
+    expect(settingOwner('general.default_language')).toBeNull();
     expect(settingOwner('bir.withholding_agent_tin').screen).toBe('Master > Company');
     expect(settingOwner('documents.default_logo_path').screen).toBe('Master > Company');
     expect(settingOwner('premium.taxes_by_lob').screen).toBe('Master > Finance > Premium Taxes & LGU Rates');
@@ -38,7 +40,6 @@ describe('settings owned by another screen', () => {
   it('PUT /settings refuses owned keys with the owning screen, and saves nothing of the request', async () => {
     const cases = [
       ['branding.primary_color', '#123456', BRANDING],
-      ['general.default_language', 'fil', 'Master > System Settings'],
       ['general.system_name', 'Other name', BRANDING],
       ['general.company_name', 'Another Corp.', 'Master > Company'],
       ['bir.withholding_agent_tin', '111-222-333-000', 'Master > Company'],
@@ -59,6 +60,22 @@ describe('settings owned by another screen', () => {
     const cfg = await ctx.api('put', '/system-settings/configuration').send({ settings: { 'tax.dst_rate': 0.2 } });
     expect(cfg.status).toBe(400);
     expect(cfg.body.message).toContain('Premium Taxes & LGU Rates');
+  });
+
+  it('Master > Configuration changes the display currency and the language, with their checks', async () => {
+    const bad = await ctx.api('put', '/settings').send({ settings: { 'currency.default': 'XXX', 'general.default_language': 'English' } });
+    expect(bad.status).toBe(400);
+    expect(bad.body.errors.map((e) => e.path)).toEqual(['currency.default', 'general.default_language']);
+    expect(await value('currency.default')).toBe('PHP');
+    const cfg = await ctx.api('put', '/system-settings/configuration').send({ settings: { 'currency.default': 'XXX' } });
+    expect(cfg.status).toBe(400);
+    expect(cfg.body.errors[0]).toMatchObject({ path: 'currency.default', message: expect.stringContaining('Currency master') });
+    const r = await ctx.api('put', '/settings').send({ settings: { 'currency.default': 'usd', 'general.default_language': 'en' } });
+    expect(r.status).toBe(200);
+    expect(await value('currency.default')).toBe('USD');
+    expect((await ctx.api('get', '/settings?group=currency')).body.data.find((s) => s.key === 'currency.default').managedBy).toBeNull();
+    await ctx.api('put', '/settings').send({ settings: { 'currency.default': 'PHP' } });
+    expect(await value('currency.default')).toBe('PHP');
   });
 
   it('a key sent back with its current value is not a change; other settings still save', async () => {

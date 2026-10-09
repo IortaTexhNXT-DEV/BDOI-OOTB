@@ -118,7 +118,7 @@ function instructions(kit, sheets, { prefill, cutover, environment, day }) {
     line('Users', 'Passwords are never in the workbook. A new user gets a temporary password shown once to the administrator after the load (must be changed at the first sign-in). A load cannot change your own account.');
     line('Authority limits', 'Loaded limits wait for the approval of another administrator (maker-checker) on Master > Generals > User Management > Authority Matrix.');
     line('Numbering', 'Next Number is the next sequence number of the current period (last number of the old system + 1); it cannot go below a number already issued. It is kept on the series as the start of the period, so the transaction reset after the smoke test restarts the series there (no need to load the sheet again). It must be above every migrated number of the same format (checked by both workbooks).');
-    line('Settings', 'Only settings of Master > Configuration are loaded; settings of another screen (System Settings, Company, Premium Taxes, Account Determination) are changed there. golive.locked is switched on in Master > Configuration, not by a workbook.');
+    line('Settings', 'Only settings of Master > Configuration are loaded; settings of another screen (the brand pack, Company, Premium Taxes, Account Determination) are changed there. golive.locked is switched on in Master > Configuration, not by a workbook.');
     line('Promotion', 'Download with current data from the source environment (Dev, SIT, UAT, Pre-Prod), upload into the next one. Rows equal to the target are skipped; differences update the target.');
     head('Entered on screen (not in this workbook)');
     for (const [what, where] of CONFIGURATION_ON_SCREEN) line(what, where);

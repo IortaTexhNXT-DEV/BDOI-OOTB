@@ -10,6 +10,7 @@ import { many, one, query } from '../../db/pool.js';
 import { isAdmin, ADMIN_ROLES, adminEquivalentRoles, revokeSessions } from '../../lib/auth.js';
 import { setSetting } from '../../lib/settings.js';
 import { settingOwner } from '../../lib/settingOwners.js';
+import { localizationErrors } from '../system-settings/service.js';
 import { passwordPolicy, recordHistory } from '../../lib/password.js';
 import { temporaryPassword } from '../../lib/secrets.js';
 import * as masters from '../masters/service.js';
@@ -160,7 +161,10 @@ const settingsSheet = () => ({
     if (owner) fail('key', `${v.key} is managed in ${owner.screen}; change it there`);
     if (isControlledSetting(v.key)) fail('key', `${v.key} is changed on Master > Finance > Account Determination, where a second user approves it`);
     if (NOT_LOADED.test(v.key)) fail('key', `${v.key} is not loaded from a workbook`);
-    const value = parseSettingValue(s, v.value);
+    const change = [v.key, parseSettingValue(s, v.value)];
+    const [invalid] = await localizationErrors([change]);
+    if (invalid) fail('value', `${v.key} ${invalid.message}`);
+    const value = change[1];
     if (v.key === 'golive.cutover_date' && value !== '' && !isDate(value)) fail('value', 'golive.cutover_date must be a date YYYY-MM-DD');
     if (JSON.stringify(value) === JSON.stringify(s.value)) return 'unchanged';
     await setSetting(v.key, value, ctx.user.id);
@@ -708,8 +712,8 @@ export const CONFIGURATION_ON_SCREEN = [
   ['Payment gateway credentials (kept in the secret store)', 'Master > Finance > Payment Gateways'],
   ['Integration connectors (endpoint, mode, credential variable names; the credentials themselves in the secret store), message templates, insurer API mappings', 'Master > System Configuration > Integrations / Message Templates / Insurer Integration'],
   ['Bank file layouts (validate each starter layout with the bank)', 'Master > Finance > Bank File Layouts'],
-  ['Application name, logo, colours (the brand pack of the deployment, BRAND_PACK)', 'Deployment configuration'],
-  ['Display currency, language', 'Master > System Configuration > System Settings'],
+  ['Application name, logo, favicon, colours (the brand pack of the deployment, BRAND_PACK, applied again at every start)', 'Deployment configuration'],
+  ['Display currency, language', 'Master > System Configuration > Configuration (Company & Branding)'],
   ['E-mail layout, documents and reports layout, document signatures', 'Master > System Configuration > E-mail Layout / Documents and Reports Layout / Document Signatures'],
   ['Company logo and letterhead images', 'Master > Generals > Organization > Company (upload the logo on the screen)'],
   ['Scheduled jobs', 'Master > Configuration > Schedules'],

@@ -4,7 +4,8 @@
  * promoting branding between environments) and the bundled brand packs shipped with the product (listed, checked,
  * enabled with the trademark acknowledgement, back to default). The look of the screens comes from the deployment's
  * brand pack (BRAND_PACK); the screens of Master > System Configuration edit the e-mail and document sections of the
- * theme (E-mail Layout, Documents and Reports Layout). Images and brand packs are handled through the API only.
+ * theme (E-mail Layout, Documents and Reports Layout). Images and brand packs are handled through the API only, and
+ * while BRAND_PACK is set the API refuses every change to the look of the screens (bundled.assertNotEnforced).
  */
 import { moduleRouter } from '../../lib/registry.js';
 import { audit } from '../../lib/audit.js';
@@ -32,6 +33,29 @@ const themeExample = { preset: 'iorta-technxt', name: 'iorta TechNXT (default)',
   login: { panel: 'library', library: 'philippines', panelImageUrl: '', focalX: 50, focalY: 50, overlay: 0, showOnMobile: false, headline: '', tagline: '' },
   documents: { accentColor: '', footerText: 'Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}' },
   email: { enabled: true, headerBg: '#ffffff', headerText: '#2e2e2e', accentColor: '#0072d8', showLogo: true, footerText: '{{companyName}} | {{address}}' } };
+
+/**
+ * The theme a save asks for. While the deployment enforces a brand pack, the request is laid over the theme in force
+ * (a section or value left out stays as it is) and may change only the e-mail and document sections and the logo
+ * height on documents; the application name is the pack's too.
+ */
+async function requestedTheme(body, systemName) {
+  const input = body.theme || (body.colors ? body : {});
+  const packId = bundled.deploymentPackId();
+  if (!packId) return input;
+  const current = await svc.currentTheme();
+  const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
+  const merged = { ...current, ...Object.fromEntries(['preset', 'name', 'font'].filter((k) => input[k] !== undefined).map((k) => [k, input[k]])) };
+  for (const section of Object.keys(svc.SCHEMA)) if (isObj(input[section])) merged[section] = { ...current[section], ...input[section] };
+  const { theme, errors } = svc.validateTheme(merged);
+  const locked = errors.length ? [] : bundled.screenDifferences(theme, current);
+  if (systemName !== undefined && systemName !== await getSetting('general.system_name', '')) locked.push('systemName');
+  if (locked.length) {
+    throw badRequest(`The look of the screens and the application name come from the brand pack of the deployment (BRAND_PACK=${packId}); only the e-mail and document layouts can be changed`,
+      locked.map((p) => ({ path: p, message: 'set by the brand pack of the deployment' })));
+  }
+  return merged;
+}
 
 /** Store a branding image (type, size and SVG checked) in the uploads storage; returns { url, key, fileName }. */
 async function storeBrandImage(asset, file, userId) {
@@ -87,25 +111,26 @@ define({
   handler: async (req, res) => ok(res, svc.validateTheme(req.body?.theme || req.body || {})),
 });
 define({
-  method: 'PUT', path: '/theme', summary: 'Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA',
+  method: 'PUT', path: '/theme', summary: 'Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA. While BRAND_PACK is set, only the e-mail and document sections (and the logo height on documents) can change: the request is laid over the theme in force and a change to anything else is refused',
   screen: SCREEN, middleware: canWrite('settings'), request: { theme: themeExample, systemName: 'BrokerVerse' }, response: { success: true, data: { theme: themeExample, warnings: [], checks: [] } },
   handler: async (req, res) => {
     const body = req.body || {};
     const before = await svc.currentTheme();
     const name = body.systemName === undefined ? undefined : String(body.systemName).trim();
     if (name !== undefined && (!name || name.length > 120 || /[<>]/.test(name))) throw badRequest('Validation failed', [{ path: 'systemName', message: 'Application name is required (max 120 characters, no < or >)' }]);
-    const saved = await svc.saveTheme(body.theme || (body.colors ? body : {}), req.user.id);
+    const saved = await svc.saveTheme(await requestedTheme(body, name), req.user.id);
     if (name !== undefined) await setSetting('general.system_name', name, req.user.id);
     await audit(req, { entity: 'branding', entityId: 'theme', action: 'update', before, after: { theme: saved.theme, ...(name !== undefined ? { systemName: name } : {}) } });
     ok(res, { ...(await editorPayload()), warnings: saved.warnings }, 'Theme saved');
   },
 });
 define({
-  method: 'POST', path: '/upload/:asset', summary: 'Upload a branding image (multipart "file"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing',
+  method: 'POST', path: '/upload/:asset', summary: 'Upload a branding image (multipart "file"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing. Refused while BRAND_PACK is set',
   screen: `${PACKS} > Upload`, middleware: [...canWrite('settings'), singleFile], request: { file: '(binary)' }, response: { success: true, data: { theme: themeExample } },
   handler: async (req, res) => {
     const asset = req.params.asset;
     if (!svc.ASSETS[asset]) throw badRequest(`Unknown branding image ${asset}; use logo, favicon or login-panel`);
+    bundled.assertNotEnforced(`The ${svc.ASSETS[asset].label.toLowerCase()}`);
     const stored = await storeBrandImage(asset, req.file, req.user.id);
     if (asset === 'login-panel') {
       const theme = await svc.currentTheme();
@@ -118,11 +143,12 @@ define({
   },
 });
 define({
-  method: 'DELETE', path: '/upload/:asset', summary: 'Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library)', screen: `${PACKS} > Reset image`,
+  method: 'DELETE', path: '/upload/:asset', summary: 'Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library). Refused while BRAND_PACK is set', screen: `${PACKS} > Reset image`,
   middleware: canWrite('settings'), response: { success: true, data: { theme: themeExample } },
   handler: async (req, res) => {
     const asset = req.params.asset;
     if (!svc.ASSETS[asset]) throw badRequest(`Unknown branding image ${asset}`);
+    bundled.assertNotEnforced(`The ${svc.ASSETS[asset].label.toLowerCase()}`);
     if (asset === 'login-panel') {
       const theme = await svc.currentTheme();
       await svc.saveTheme({ ...theme, login: { ...theme.login, panel: 'library', panelImageUrl: '' } }, req.user.id);
@@ -168,11 +194,12 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/brand-pack', summary: 'Import a brand pack (multipart "file": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name',
+  method: 'POST', path: '/brand-pack', summary: 'Import a brand pack (multipart "file": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name. Only the dry run while BRAND_PACK is set',
   screen: `${PACKS} > Import`, middleware: [...canWrite('settings'), singleFile], query: { dryRun: true, applyDocumentLogo: true },
   request: { file: '(binary .zip or .json)' }, response: { success: true, data: { name: 'Toyota Insurance Services', applied: ['theme', 'logo', 'documentLogo'], warnings: [] } },
   handler: async (req, res) => {
     const opt = { ...req.query, ...(req.file ? req.body : {}) };
+    if (!truthy(opt.dryRun)) bundled.assertNotEnforced('The branding');
     const pack = req.file ? svc.parseBrandPack(req.file.buffer, req.file.originalname) : svc.parseBrandPack(Buffer.from(JSON.stringify(req.body || {})), 'body');
     const roleAsset = (role) => (role === 'favicon' ? 'favicon' : role === 'loginPanel' ? 'login-panel' : 'logo');
     for (const [role, file] of Object.entries(pack.manifest.assets || {})) if (file) svc.assertBrandImage(roleAsset(role), { buffer: pack.files.get(file), originalname: file });
@@ -211,12 +238,13 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/packs/bundled/:id/enable', summary: 'Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name',
+  method: 'POST', path: '/packs/bundled/:id/enable', summary: 'Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name. Refused while BRAND_PACK is set (the API enforces that pack at start-up)',
   screen: `${PACKS} > Bundled packs > Enable`, middleware: canWrite('settings'), request: { acknowledgedPermission: true, applyDocumentLogo: true, applySystemName: true },
   response: { success: true, data: { name: 'Toyota Insurance Services', applied: ['theme', 'logo', 'documentLogo', 'systemName'], warnings: [], theme: themeExample, pack: bundledExample, enablement: enablementExample } },
   handler: async (req, res) => {
     const body = req.body || {};
     const pack = bundled.loadBundledPack(req.params.id);
+    bundled.assertNotEnforced('The branding');
     for (const [role, file] of Object.entries(pack.manifest.assets || {})) if (file) svc.assertBrandImage(role === 'favicon' ? 'favicon' : role === 'loginPanel' ? 'login-panel' : 'logo', { buffer: pack.files.get(file), originalname: file });
     const before = await svc.currentTheme();
     const result = await bundled.enableBundledPack(req.params.id, { user: req.user, acknowledgedPermission: body.acknowledgedPermission === true, ...enableOptions(body), storeImage: bundled.storeBundledImage });
@@ -226,9 +254,10 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/packs/reset-default', summary: 'Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited',
+  method: 'POST', path: '/packs/reset-default', summary: 'Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited. Refused while BRAND_PACK is set',
   screen: `${PACKS} > Back to default`, middleware: canWrite('settings'), response: { success: true, data: { theme: themeExample, restored: ['theme', 'logo', 'favicon', 'systemName', 'documentLogo'], enablement: enablementExample } },
   handler: async (req, res) => {
+    bundled.assertNotEnforced('The branding');
     const before = await svc.currentTheme();
     const result = await bundled.resetToDefault({ user: req.user });
     await audit(req, { entity: 'branding', entityId: result.enablement ? `bundled-pack:${result.enablement.packId}` : 'theme', action: 'reset-default', before, after: { restored: result.restored, theme: result.theme, enablementId: result.enablement?.id || null } });

@@ -5,17 +5,20 @@ import { badRequest } from '../../lib/errors.js';
 import { setSetting } from '../../lib/settings.js';
 import { ok } from '../../lib/respond.js';
 import { canRead, canWrite } from '../masters/helpers.js';
+import { assertNotEnforced } from '../branding/bundled.js';
 import * as svc from './service.js';
 
 /**
- * System Settings screen (Master > System Settings) plus the configuration catalogue that lets administrators
- * edit every business parameter (taxes, numbering, limits, notification switches, schedules) from the front end.
+ * System settings: the settings object the front end applies app-wide (GET, public: the sign-in page reads it), its
+ * update through the API, plus the configuration catalogue that lets administrators edit every business parameter
+ * (taxes, numbering, limits, notification switches, schedules, display currency and language) on Master > Configuration.
+ * The branding fields are the brand pack's while the deployment enforces one (BRAND_PACK).
  */
 const { router, define } = moduleRouter('System Settings', '/system-settings');
 // Files are held in memory and validated against uploads.image_max_bytes before being written to UPLOAD_DIR.
 const upload = memoryUpload({ files: 1 });
 const singleFile = (req, res, next) => upload.single('file')(req, res, (e) => next(e ? badRequest(e.message) : undefined));
-const SCREEN = 'Master > System Settings';
+const SCREEN = 'App shell (API only)';
 const example = {
   logoUrl: '/bdoi/iorta-technxt.png', logoPresets: [{ id: 'iorta-technxt', label: 'iorta TechNXT (BrokerVerse)', url: '/bdoi/iorta-technxt.png', builtIn: true }], displayCurrency: 'PHP',
   primaryColor: '#0072d8', secondaryColor: '#004ea8', defaultLanguage: 'en', faviconUrl: '/favicon.ico', systemName: 'BrokerVerse',
@@ -28,7 +31,7 @@ define({
   handler: async (_req, res) => ok(res, await svc.getSystemSettings()),
 });
 define({
-  method: 'PUT', path: '/', summary: 'Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName)', screen: SCREEN,
+  method: 'PUT', path: '/', summary: 'Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName); while BRAND_PACK is set a change to logoUrl, faviconUrl, the colours or systemName is refused', screen: SCREEN,
   middleware: canWrite('settings'), request: { systemName: 'BrokerVerse', displayCurrency: 'PHP', primaryColor: '#0072d8', secondaryColor: '#004ea8', defaultLanguage: 'en', logoUrl: '/iorta.png' },
   response: { success: true, data: example },
   handler: async (req, res) => {
@@ -40,7 +43,7 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/logo-presets', summary: 'Add a company logo preset (JSON { label, url, setActive } or multipart label + file + setActive)', screen: `${SCREEN} > Add Company Logo`,
+  method: 'POST', path: '/logo-presets', summary: 'Add a company logo preset (JSON { label, url, setActive } or multipart label + file + setActive); setActive is refused while BRAND_PACK is set', screen: `${SCREEN} > Add Company Logo`,
   middleware: [...canWrite('settings'), singleFile], request: { label: 'Sample Bank', url: 'https://example.com/logo.png', setActive: true },
   response: { success: true, data: example },
   handler: async (req, res) => {
@@ -62,11 +65,12 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/upload/:field', summary: 'Upload the logo or favicon (multipart "file"); stored under UPLOAD_DIR and recorded in documents', screen: `${SCREEN} > Upload`,
+  method: 'POST', path: '/upload/:field', summary: 'Upload the logo or favicon (multipart "file"); stored under UPLOAD_DIR and recorded in documents. Refused while BRAND_PACK is set', screen: `${SCREEN} > Upload`,
   middleware: [...canWrite('settings'), singleFile], request: { file: '(binary)' }, response: { success: true, data: example },
   handler: async (req, res) => {
     const field = svc.UPLOAD_FIELDS[req.params.field];
     if (!field) throw badRequest(`Unknown upload field ${req.params.field}; use one of ${Object.keys(svc.UPLOAD_FIELDS).join(', ')}`);
+    assertNotEnforced(field === 'logoUrl' ? 'The logo' : 'The favicon');
     const stored = await svc.storeImage(req.file, field === 'logoUrl' ? 'logo' : 'favicon', req.user.id, field);
     await setSetting(svc.FIELD_KEYS[field], stored.url, req.user.id);
     await audit(req, { entity: 'system-settings', entityId: field, action: 'upload', after: stored });
@@ -80,7 +84,7 @@ define({
   handler: async (req, res) => ok(res, await svc.configurationCatalogue(req.query.group)),
 });
 define({
-  method: 'PUT', path: '/configuration', summary: 'Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked; settings owned by another screen are refused', screen: 'Master > Configuration',
+  method: 'PUT', path: '/configuration', summary: 'Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked (the display currency must be an active currency); settings owned by another screen are refused', screen: 'Master > Configuration',
   middleware: canWrite('settings'), request: { settings: { 'limits.bulk_upload_max_rows': 1000, 'notification.email_enabled': true } },
   response: { success: true, data: { groups: [], items: [], total: 0 } },
   handler: async (req, res) => {

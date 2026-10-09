@@ -10,10 +10,12 @@ import { badRequest } from '../../lib/errors.js';
 import { saveFile } from '../masters/helpers.js';
 import { detectType } from '../uploads/fileTypes.js';
 import { assertNotOwnedElsewhere, settingOwner } from '../../lib/settingOwners.js';
+import { deploymentPackId } from '../branding/bundled.js';
 
 /**
- * Front-end field -> app_settings key. System Settings owns these keys (lib/settingOwners.js): the generic configuration
- * endpoints refuse them. systemName is the one application name (sign-in page, side bar, browser tab).
+ * Front-end field -> app_settings key. systemName is the one application name (sign-in page, side bar, browser tab).
+ * The branding fields belong to the brand pack (lib/settingOwners.js); the display currency and the language are also
+ * edited on Master > Configuration, with the same checks (localizationErrors).
  */
 export const FIELD_KEYS = {
   logoUrl: 'branding.logo_url',
@@ -27,7 +29,41 @@ export const FIELD_KEYS = {
 /** Upload targets: POST /system-settings/upload/:field */
 export const UPLOAD_FIELDS = { logo: 'logoUrl', favicon: 'faviconUrl', logoUrl: 'logoUrl', faviconUrl: 'faviconUrl' };
 
+/** Fields that set the look of the screens: the brand pack's while the deployment enforces one (BRAND_PACK). */
+const BRAND_FIELDS = { logoUrl: 'The logo', faviconUrl: 'The favicon', primaryColor: 'The primary colour', secondaryColor: 'The secondary colour', systemName: 'The application name' };
+
 const HEX = /^#[0-9a-fA-F]{6}$|^#[0-9a-fA-F]{3}$/;
+const LANGUAGE = /^[a-z]{2,3}(-[A-Za-z]{2})?$/;
+
+/**
+ * Errors of the display currency (an active currency of the Currency master) and the default language in a change
+ * ([key, value] pairs, the currency code normalised in place); `paths` names the field of each key in the errors.
+ */
+export async function localizationErrors(changes, paths = {}) {
+  const errors = [];
+  for (const change of changes) {
+    if (change[0] === 'currency.default') {
+      change[1] = String(change[1] || '').trim().toUpperCase();
+      if (!(await currencyChoices()).some((c) => c.code === change[1])) errors.push({ path: paths[change[0]] || change[0], message: 'Currency is not an active currency of the Currency master' });
+    }
+    if (change[0] === 'general.default_language' && !LANGUAGE.test(String(change[1] ?? '').trim())) errors.push({ path: paths[change[0]] || change[0], message: 'must be a language code such as en' });
+  }
+  return errors;
+}
+
+/** Refuse branding fields that differ from the values in force while the deployment enforces a brand pack. */
+async function assertBrandUnchanged(body) {
+  const packId = deploymentPackId();
+  if (!packId) return;
+  const errors = [];
+  const plain = (v) => String(v ?? '').trim().split('?')[0].toLowerCase();
+  for (const [field, label] of Object.entries(BRAND_FIELDS)) {
+    if (body[field] !== undefined && plain(body[field]) !== plain(await getSetting(FIELD_KEYS[field], ''))) {
+      errors.push({ path: field, message: `${label} comes from the brand pack of the deployment (BRAND_PACK=${packId})` });
+    }
+  }
+  if (errors.length) throw badRequest(`${errors.map((e) => e.path).join(', ')} cannot be changed while the deployment enforces the brand pack ${packId}`, errors);
+}
 
 async function values(keys) {
   const rows = await many('SELECT key, value, updated_at FROM app_settings WHERE key = ANY($1)', [keys]);
@@ -71,8 +107,9 @@ export async function getSystemSettings() {
   };
 }
 
-/** Validate and save the fields the System Settings screen sends; unknown fields are ignored. */
+/** Validate and save the system settings fields (PUT /system-settings); unknown fields are ignored. */
 export async function updateSystemSettings(body, userId) {
+  await assertBrandUnchanged(body);
   const changes = {};
   const errors = [];
   for (const [field, key] of Object.entries(FIELD_KEYS)) {
@@ -80,15 +117,12 @@ export async function updateSystemSettings(body, userId) {
     const v = typeof body[field] === 'string' ? body[field].trim() : body[field];
     if (['primaryColor', 'secondaryColor'].includes(field) && !HEX.test(v)) errors.push({ path: field, message: 'must be a hex colour such as #0072d8' });
     if (field === 'systemName' && (!v || String(v).length > 120)) errors.push({ path: field, message: 'Application name is required (max 120 characters)' });
-    if (field === 'defaultLanguage' && !/^[a-z]{2,3}(-[A-Za-z]{2})?$/.test(String(v))) errors.push({ path: field, message: 'must be a language code such as en' });
     if (['logoUrl', 'faviconUrl'].includes(field) && v && String(v).length > 1000) errors.push({ path: field, message: 'URL is too long' });
     changes[key] = v;
   }
-  if (changes['currency.default'] !== undefined) {
-    const choices = await currencyChoices();
-    changes['currency.default'] = String(changes['currency.default'] || '').toUpperCase();
-    if (!choices.some((c) => c.code === changes['currency.default'])) errors.push({ path: 'displayCurrency', message: 'Currency is not an active currency of the Currency master' });
-  }
+  const localization = Object.entries(changes);
+  errors.push(...await localizationErrors(localization, { 'currency.default': 'displayCurrency', 'general.default_language': 'defaultLanguage' }));
+  Object.assign(changes, Object.fromEntries(localization));
   if (errors.length) throw badRequest('Validation failed', errors);
   for (const [k, v] of Object.entries(changes)) await setSetting(k, v, userId);
   // a saved broker theme (branding.theme) owns the colours: the two colour fields update it
@@ -124,6 +158,7 @@ export async function storeImage(file, category, userId, entityId) {
 }
 
 export async function addLogoPreset({ label, url, setActive }, userId) {
+  if (setActive !== false && String(setActive) !== 'false') await assertBrandUnchanged({ logoUrl: url });
   const name = String(label || '').trim();
   if (!name) throw badRequest('Company / client name is required');
   if (!url) throw badRequest('Upload a logo file or enter a logo URL');
@@ -182,7 +217,7 @@ function coerceSetting(row, value) {
 
 /**
  * Apply { key: value } changes; every key must exist and be editable, values are coerced by type. A setting owned by
- * another screen (System Settings, Company master, Premium Taxes) is refused with the name of that screen.
+ * another screen (the brand pack, Company master, Premium Taxes) is refused with the name of that screen.
  */
 export async function updateConfiguration(changes, userId) {
   const keys = Object.keys(changes);
@@ -200,6 +235,8 @@ export async function updateConfiguration(changes, userId) {
   }
   if (errors.length) throw badRequest('Validation failed', errors);
   assertNotOwnedElsewhere(apply);
+  const invalid = await localizationErrors(apply);
+  if (invalid.length) throw badRequest('Validation failed', invalid);
   const { assertNotControlled, assertParkedEvents } = await import('../posting-rules/service.js');
   await assertNotControlled(apply);
   assertParkedEvents(apply);
