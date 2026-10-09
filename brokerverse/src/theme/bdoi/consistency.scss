@@ -1,0 +1,14 @@
+// One look for the shared patterns on every screen, older screens included. Loaded after enterprise.scss (from
+// bdoi.scss). Colours are theme tokens (brand) or the shared status tokens (success, warning, danger), never the
+// stock colours of the component library.
+@import "./tokens";
+
+// ---------------------------------------------------------------- dialog and side panel overlay
+// One overlay colour behind every dialog and side panel. The stock overlay fades in to black and the side panel rule
+// switched it to another colour once the panel was in place, so the backdrop flashed when a form opened and closed;
+// the colour is now the one the fade runs to.
+
+.p-dialog-mask,
+.p-sidebar-mask {
+  --maskbg: rgba(17, 24, 39, 0.32);
+}

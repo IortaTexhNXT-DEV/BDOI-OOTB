@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { Dialog } from "primereact/dialog";
@@ -26,6 +26,15 @@ const TaskDialog = ({ visible, task, today, onHide, onSaved }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [saving, setSaving] = useState(false);
   const set = (change) => setForm((f) => ({ ...f, ...change }));
+  // the date of the day when the dialog opens: the day arriving from the server later does not reset a form in progress
+  const todayRef = useRef(today);
+  todayRef.current = today;
+
+  // the people a task can be given to, loaded with the page: loaded on opening, the "Assigned to" row appeared after
+  // the panel and pushed the fields below it down
+  useEffect(() => {
+    myWorkService.assignees().then(setPeople).catch(() => setPeople([]));
+  }, []);
 
   useEffect(() => {
     if (!visible) return;
@@ -33,9 +42,8 @@ const TaskDialog = ({ visible, task, today, onHide, onSaved }) => {
     setForm(task ? {
       title: task.title, notes: task.notes || "", dueDate: task.dueDate, dueTime: task.dueTime, priority: task.priority, reminderMinutes: task.reminderMinutes,
       assignedTo: task.assignedTo, entity: task.entity || "", entityId: task.entityId || "", entityRef: task.entityRef || "",
-    } : blank(today));
-    myWorkService.assignees().then(setPeople).catch(() => setPeople([]));
-  }, [visible, task, today]);
+    } : blank(todayRef.current));
+  }, [visible, task]);
 
   const search = async (e) => {
     if (!form.entity) return setSuggestions([]);
