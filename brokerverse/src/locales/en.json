@@ -8641,7 +8641,8 @@
     "kpi": {
       "renewalRate": "Renewal rate",
       "premiumRetention": "Premium retention",
-      "cycleTime": "Average cycle time"
+      "cycleTime": "Average cycle time",
+      "customerSatisfaction": "Customer satisfaction"
     },
     "targetNote": "Target {{target}}",
     "renewed": "Renewed",

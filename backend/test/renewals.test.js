@@ -199,7 +199,9 @@ describe('renewals', () => {
     const byCode = Object.fromEntries(row.scoreBreakdown.map((f) => [f.code, f]));
     expect(byCode.claims).toMatchObject({ value: '2 claims in the current term', weight: 25, points: 25 });
     expect(byCode.firstRenewal.points).toBe(15);
-    expect(byCode.dueSoon).toMatchObject({ value: 'Expires in 10 days', points: 10 });
+    // days to expiry count in the business time zone, so near midnight there it can be one less than current_date + 10
+    expect([9, 10]).toContain(row.daysToExpiry);
+    expect(byCode.dueSoon).toMatchObject({ value: `Expires in ${row.daysToExpiry} days`, points: 10 });
     expect(byCode.unpaid).toMatchObject({ value: null, points: 0 });
     expect(row.riskScore).toBe(row.scoreBreakdown.reduce((s, f) => s + f.points, 0));
     expect(JSON.stringify(row)).not.toMatch(/Statistically/);

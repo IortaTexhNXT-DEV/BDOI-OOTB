@@ -833,7 +833,8 @@
     "kpi": {
       "renewalRate": "อัตราการต่ออายุ",
       "premiumRetention": "อัตราการรักษาเบี้ยประกัน",
-      "cycleTime": "ระยะเวลาดำเนินการเฉลี่ย"
+      "cycleTime": "ระยะเวลาดำเนินการเฉลี่ย",
+      "customerSatisfaction": "ความพึงพอใจของลูกค้า"
     },
     "targetNote": "เป้าหมาย {{target}}",
     "renewed": "ต่ออายุแล้ว",

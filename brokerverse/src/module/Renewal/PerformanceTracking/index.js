@@ -61,7 +61,9 @@ const PerformanceTracking = () => {
     { key: "renewalRate", target: Number(targets["renewals.target_renewal_rate"] ?? 0), achieved: overall.renewalRate ?? 0, unit: "%" },
     { key: "premiumRetention", target: Number(targets["renewals.target_premium_retention"] ?? 0), achieved: overall.premiumRetention ?? 0, unit: "%" },
     { key: "cycleTime", target: Number(targets["renewals.target_cycle_days"] ?? 0), achieved: overall.avgCycleTime ?? 0, unit: t("perf.days"), lowerIsBetter: true },
-  ].map((k) => ({ ...k, label: t(`perf.kpi.${k.key}`), variance: Math.round((k.achieved - k.target) * 100) / 100, met: isMet(k) })), [targets, overall, t]);
+    // shown only once satisfaction surveys are captured
+    { key: "customerSatisfaction", target: Number(targets["renewals.target_satisfaction"] ?? 0), achieved: overall.customerSatisfaction, unit: "/5" },
+  ].filter((k) => k.achieved !== undefined && k.achieved !== null).map((k) => ({ ...k, label: t(`perf.kpi.${k.key}`), variance: Math.round((k.achieved - k.target) * 100) / 100, met: isMet(k) })), [targets, overall, t]);
 
   const products = Object.entries(data.byProduct || {}).filter(([key]) => !line || key === line)
     .map(([key, p]) => ({ key, name: productLabel(key), ...p }));
