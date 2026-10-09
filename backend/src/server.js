@@ -18,7 +18,7 @@ try {
 fs.mkdirSync(config.uploadDir, { recursive: true });
 setReady(false); // GET /api/health answers 503 until migrations and seed are applied
 await migrate({ log: (m) => logger.info(m) });
-await seed({ log: (m) => logger.info(m) });
+await seed({ log: (m) => logger.info(m), warn: (m) => logger.warn(m) });
 if (config.brandPack) {
   // the branding is not worth refusing to start for: a pack that cannot be applied leaves the current branding
   await enforceDeploymentPack(config.brandPack, { log: logger }).catch((e) => logger.warn({ err: e }, `BRAND_PACK=${config.brandPack} was not applied: ${e.message}`));

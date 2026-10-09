@@ -8,6 +8,10 @@ rows are inserted by natural key or fixed id, and existing rows and administrato
 3. The SQL files, in file-name order (a file reports what it leaves undone with `RAISE WARNING`, written to the log): `seeds/*.sql` (**reference**) always, and `seeds/sample/*.sql` (**sample**)
    only when `SEED_SAMPLE_DATA` is on. Reference and sample files are interleaved by file name (a reference file
    runs before the sample file with the same name), so a sample file always runs after the reference data it reads.
+   A reference file that fails stops the start. A sample file runs in a transaction of its own: if it fails (demo
+   data that does not fit a database in use), it is rolled back and left out with a `WARNING` naming the file and the
+   database error, and the seed goes on with the next file (a later sample file that builds on it may be left out
+   too). The last line of the seed says how many sample files were left out.
 
 Roles (broker terminology, `ROLES` in `seed.js`): `system-admin` System Administrator (Super Admin Access, every
 permission), `sales` Sales & Marketing (Account Executive), `processing` Processing Team (Placement & Policy Processing),

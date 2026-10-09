@@ -50,6 +50,11 @@ policies) is converted by migration `0365_tisph_sample_data.sql` on the next sta
 business, keeps any record a user worked on (and the sample clients and prospects those records use) and records
 the conversion in the audit trail; the seed then adds the TISPH sample business. Non-sample data is never touched.
 
+Demo data never stops the start: a sample file that fails on a database in use is rolled back and left out, and the
+log shows `WARNING: sample data file sample/<file> was rolled back and left out: <database error>`; the seed ends
+with `seed complete (reference + sample data; N sample file(s) left out, ...)`. A reference file that fails still
+stops the start.
+
 | Variable | Default | Meaning |
 |---|---|---|
 | `SEED_SAMPLE_DATA` | `true` in development and test, `false` with `NODE_ENV=production` | Seed the sample / demo data. An explicit `true` / `false` wins (e.g. `true` on a UAT or demo site). The API logs a warning when it is on in production. |

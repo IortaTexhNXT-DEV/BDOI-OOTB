@@ -152,7 +152,8 @@ export function seedFiles({ sample = true } = {}) {
   return files.sort((a, b) => (a.base === b.base ? (a.kind === 'reference' ? -1 : 1) : a.base < b.base ? -1 : 1));
 }
 
-export async function seed({ log = console.log, sampleData } = {}) {
+/** Applies the seed. `log` receives the progress lines and `warn` the warnings (a line starting with WARNING:; default `log`). */
+export async function seed({ log = console.log, warn = log, sampleData } = {}) {
   for (const [code, name, description, isSystem] of ROLES) {
     await query(`INSERT INTO roles(code, name, description, is_system) VALUES ($1,$2,$3,$4)
                  ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description`, [code, name, description, isSystem]);
@@ -203,22 +204,42 @@ export async function seed({ log = console.log, sampleData } = {}) {
   // Module seed files, applied in file-name order (reference and sample interleaved so a sample file runs after the
   // reference files it builds on), each idempotent. Sample / demo files (seeds/sample) run only when sample data is on.
   const withSample = sampleData ?? seedSampleData();
-  if (withSample && process.env.NODE_ENV === 'production') log('WARNING: SEED_SAMPLE_DATA is on in production: demo leads, clients, policies and transactions are being seeded');
+  if (withSample && process.env.NODE_ENV === 'production') warn('WARNING: SEED_SAMPLE_DATA is on in production: demo leads, clients, policies and transactions are being seeded');
   // A seed file reports what it left undone with RAISE WARNING; the warning goes to the start-up log.
+  // A reference file that fails stops the start. A sample file runs in a transaction of its own: demo data that does not
+  // fit a database in use (rows of an earlier sample a user kept, records users changed) is rolled back and left out
+  // with a warning, and the start goes on with the next file.
   const client = await pool.connect();
-  const notice = (n) => log(`${n.severity === 'WARNING' ? 'WARNING: ' : ''}${n.message}`);
+  const notice = (n) => (n.severity === 'WARNING' ? warn(`WARNING: ${n.message}`) : log(n.message));
+  const skipped = [];
   client.on('notice', notice);
   try {
     for (const f of seedFiles({ sample: withSample })) {
-      await client.query(fs.readFileSync(f.path, 'utf8'));
-      log(`seeded ${f.name}`);
+      const sql = fs.readFileSync(f.path, 'utf8');
+      if (f.kind !== 'sample') {
+        await client.query(sql);
+        log(`seeded ${f.name}`);
+        continue;
+      }
+      await client.query('BEGIN');
+      try {
+        await client.query(sql);
+        await client.query('COMMIT');
+        log(`seeded ${f.name}`);
+      } catch (e) {
+        await client.query('ROLLBACK');
+        skipped.push(f.name);
+        warn(`WARNING: sample data file ${f.name} was rolled back and left out: ${e.message}${e.detail ? ` (${e.detail})` : ''}`);
+      }
     }
   } finally {
     client.off('notice', notice);
     client.release();
   }
-  log(withSample ? 'seed complete (reference + sample data)' : 'seed complete (reference data only; SEED_SAMPLE_DATA is off)');
-  return { sampleData: withSample };
+  if (!withSample) log('seed complete (reference data only; SEED_SAMPLE_DATA is off)');
+  else if (skipped.length) log(`seed complete (reference + sample data; ${skipped.length} sample file(s) left out, see the warnings above)`);
+  else log('seed complete (reference + sample data)');
+  return { sampleData: withSample, sampleSkipped: skipped };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
