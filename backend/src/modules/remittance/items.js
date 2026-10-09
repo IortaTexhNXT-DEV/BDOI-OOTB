@@ -65,12 +65,18 @@ const requireFields = (b, fields) => {
 /** Lines of approved remittances for an insurer that are not on a live settlement. */
 export async function availableLines(insurerRef) {
   const ins = await findInsurer(insurerRef);
-  const rows = await many(`SELECT l.*, r.remittance_number, r.id AS rem_id FROM remittance_lines l JOIN remittances r ON r.id = l.remittance_id
+  const rows = await many(`SELECT l.*, r.remittance_number, r.id AS rem_id, p.net_premium AS policy_net, p.premium_total AS policy_gross FROM remittance_lines l
+    JOIN remittances r ON r.id = l.remittance_id LEFT JOIN policies p ON p.id = l.policy_id
     WHERE r.insurance_company_id = $1 AND r.status = 'approved' AND l.status <> 'Settled'
       AND NOT EXISTS (SELECT 1 FROM remittance_items s WHERE s.kind = 'settlement' AND s.status NOT IN ('Rejected', 'Cancelled') AND s.data->'lineIds' @> to_jsonb(l.id))
     ORDER BY r.remittance_date, l.id`, [ins.id]);
+  // the commission rate is on the net premium (the premium of the line in the policy's net / gross proportion), as booked
+  const rate = (l) => {
+    const net = Number(l.policy_net) > 0 && Number(l.policy_gross) > 0 ? (Number(l.premium) * Number(l.policy_net)) / Number(l.policy_gross) : Number(l.premium);
+    return net ? round2((l.commission / net) * 100) : 0;
+  };
   return rows.map((l) => ({ id: Number(l.id), remittanceId: l.rem_id, remittanceNo: l.remittance_number, policyNo: l.policy_number, insuredName: l.insured_name, product: l.product,
-    premium: l.premium, commissionRate: l.premium ? round2((l.commission / l.premium) * 100) : 0, commission: l.commission, tax: l.tax, netAmount: l.net }));
+    premium: l.premium, commissionRate: rate(l), commission: l.commission, tax: l.tax, netAmount: l.net }));
 }
 
 export function calculateTotals(policies, adj = {}) {

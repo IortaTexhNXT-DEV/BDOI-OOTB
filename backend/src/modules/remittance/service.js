@@ -210,6 +210,17 @@ async function withShares(rows, insurerId) {
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
+/**
+ * Taxes on the commission of a broker-billed policy as booked on its bills: the output VAT the broker keeps less the EWT
+ * the insurer withholds. The insurer voucher deducts them (disbursements createInsurerRemittance), so the remittance and
+ * its settlement show the same net.
+ */
+async function commissionTaxesOf(policyId) {
+  const r = await one(`SELECT COALESCE(sum(commission_vat - commission_ewt), 0) AS t FROM receivables
+    WHERE policy_id = $1 AND status NOT IN ('cancelled', 'written-off') AND source <> 'opening'`, [policyId]);
+  return round2(Number(r.t));
+}
+
 /** Lines from explicit input rows or from policies (a co-insured policy: the insurer's share); returns normalised lines. */
 async function buildLines(lines, insurerId = null) {
   const out = [];
@@ -225,7 +236,7 @@ async function buildLines(lines, insurerId = null) {
     const share = pol && insurerId ? await insurerShare(pol, insurerId) : null;
     const premium = toNumber(l.premium ?? share?.premium ?? pol?.premium_total, NaN);
     const commission = toNumber(l.commission ?? (pol?.gross_billed ? 0 : share?.commission) ?? pol?.commission_amount, 0);
-    const tax = toNumber(l.tax ?? share?.tax ?? pol?.details?.taxTotal, 0);
+    const tax = toNumber(l.tax ?? share?.tax ?? pol?.details?.taxTotal ?? (pol && !pol.gross_billed ? await commissionTaxesOf(pol.id) : 0), 0);
     if (!Number.isFinite(premium)) throw badRequest('Validation failed', [{ path: 'lines', message: 'Each line needs a premium' }]);
     out.push({ policyId: pol?.id || null, policyNo: pol?.policy_number || l.policyNo || null, insuredName: pol?.insured_name || l.insuredName || null,
       product: cap(pol?.product_line) || l.product || null, effectiveDate: pol?.inception_date || isoDate(l.effectiveDate), premium, commission, tax, net: round2(premium - commission - tax),
@@ -625,8 +636,10 @@ export async function automatedCandidates(configCode) {
       const pols = await eligiblePolicies({ insurerId: ins.id, kind: 'direct-bill' });
       const gross = pols.reduce((s, x) => s + Number(x.premium_total), 0);
       const comm = pols.reduce((s, x) => s + Number(x.commission_amount), 0);
+      let tax = 0;
+      for (const x of pols.filter((p) => Number(p.commission_amount) > 0)) tax += await commissionTaxesOf(x.id);
       out.push({ id: `${cfg.code}:${ins.code}`, scheduleCode: cfg.code, configName: cfg.name, frequency: cfg.frequency, insurerId: ins.id, insurerCode: ins.code, insurerName: ins.name,
-        policyCount: pols.length, grossPremium: round2(gross), commission: round2(comm), estimatedAmount: round2(gross - comm), dueDate: nextRunDate(cfg.dayOfExecution, cfg.frequency),
+        policyCount: pols.length, grossPremium: round2(gross), commission: round2(comm), estimatedAmount: round2(gross - comm - tax), dueDate: nextRunDate(cfg.dayOfExecution, cfg.frequency),
         status: pols.length >= (Number(cfg.minTransactionCount) || 1) ? 'Ready' : 'Below minimum' });
     }
   }
