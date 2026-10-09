@@ -127,7 +127,7 @@ const TransactionTypes = () => {
               <>
                 <div className="col-12 md:col-6"><label>{t("bankReconciliation.accountRole")}</label>
                   <Dropdown value={v.accountRole} showClear filter options={data.accountRoles.map((r) => ({ label: `${r.role} (${r.accountCode})`, value: r.role }))} onChange={(e) => set({ accountRole: e.value || "" })} className="w-full" /></div>
-                <div className="col-12 md:col-6"><label>{t("bankReconciliation.orGlAccount")}</label><InputText value={v.glAccountCode} onChange={(e) => set({ glAccountCode: e.target.value })} className="w-full" /></div>
+                <div className="col-12 md:col-6"><label>{t("bankReconciliation.orGlAccount")}</label><InputText value={v.glAccountCode} maxLength={20} keyfilter="int" onChange={(e) => set({ glAccountCode: e.target.value })} className="w-full" /></div>
               </>
             )}
             <div className="col-12"><label>{t("bankReconciliation.matchPattern")}</label><InputText value={v.matchPattern} onChange={(e) => set({ matchPattern: e.target.value })} className="w-full" placeholder="service charge|svc chg" /></div>

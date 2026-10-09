@@ -1,7 +1,7 @@
 import userService from "../../../../../services/userService";
 import { searchText } from "../../../../../services/mastersService";
 import masterThunk from "../../../common/masterThunk";
-import { toRolePayload, toRoleRow } from "./roleMapping";
+import { byDepartment, toRolePayload, toRoleRow } from "./roleMapping";
 import {
   GET_ROLE_DETAILS,
   GET_ROLE_BY_ID,
@@ -12,7 +12,7 @@ import {
   GET_PATCH_ROLE,
 } from "../../../../../redux/actionTypes";
 
-const loadRoles = async () => (await userService.getRoles()).map(toRoleRow);
+const loadRoles = async () => (await userService.getRoles()).map(toRoleRow).sort(byDepartment);
 
 const findRole = async (row) => {
   const id = String(row?.id ?? row);

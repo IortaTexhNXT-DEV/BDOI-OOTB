@@ -81,12 +81,12 @@ const PolicyTypeDetailsAction = ({ action }) => {
     }
   };
   const setFormikValues = (data) => {
-    const policyTypeCode = data[0]?.policytypeCode;
+    const policyTypeCode = data[0]?.policyTypeCode;
     const policyTypeName = data[0]?.policyTypeName;
     const policyTypeDescription = data[0]?.policyTypeDescription;
-    const modifiedBy = "Johnson";
-    const modifiedOn = "12/12/23";
-    const Product = data[0]?.product;
+    const modifiedBy = data[0]?.modifiedBy;
+    const modifiedOn = data[0]?.modifiedOn;
+    const Product = data[0]?.Product;
 
     const updatedValues = {
       policyTypeCode: policyTypeCode ?? "",
@@ -148,6 +148,7 @@ const PolicyTypeDetailsAction = ({ action }) => {
         <div className="grid m-0 p-0">
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"
@@ -166,6 +167,7 @@ const PolicyTypeDetailsAction = ({ action }) => {
           </div>
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"
@@ -184,6 +186,7 @@ const PolicyTypeDetailsAction = ({ action }) => {
           </div>
           <div className="col-12 md:col-6 lg:col-6 xl:col-6 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"
@@ -203,6 +206,7 @@ const PolicyTypeDetailsAction = ({ action }) => {
           </div>
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"

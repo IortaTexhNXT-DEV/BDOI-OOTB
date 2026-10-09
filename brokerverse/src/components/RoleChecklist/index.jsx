@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { Checkbox } from "primereact/checkbox";
@@ -7,56 +7,62 @@ import "./index.scss";
 
 /** Roles shown before the search box is offered. */
 const SEARCH_FROM = 10;
+const OTHER = "";
 
 /**
- * Roles grouped for display: the standard roles of the product first, then each family of roles that share a code
- * prefix ("tis-sales-officer", "tis-finance": the TIS roles). A prefix of fewer than three roles, or one that is a
- * role code itself ("accounting" of "accounting-manager"), stays with the standard roles.
+ * Roles grouped for display: one group per department, in the order of the setting access.role_groups (the order of
+ * each role's groupOrder), then Other roles: the roles in no department. A role of the base platform (platform) is
+ * not offered for a new assignment; it is listed under Other roles only while the user holds it (`kept`), so it can be
+ * taken off.
  */
-export const groupRoles = (roles) => {
-  const codes = new Set(roles.map((r) => r.value));
-  const prefixOf = (code) => {
-    const i = String(code).indexOf("-");
-    return i > 0 ? String(code).slice(0, i) : "";
-  };
-  const counts = roles.reduce((acc, r) => {
-    const p = prefixOf(r.value);
-    if (p && !codes.has(p)) acc[p] = (acc[p] || 0) + 1;
-    return acc;
-  }, {});
-  const groups = new Map([["", []]]);
-  roles.forEach((r) => {
-    const p = prefixOf(r.value);
-    const key = p && !codes.has(p) && counts[p] >= 3 ? p : "";
+export const groupRoles = (roles, kept = new Set()) => {
+  const offered = roles.filter((r) => !r.platform || kept.has(r.value));
+  const order = (r) => (r.groupOrder === null || r.groupOrder === undefined ? Number.MAX_SAFE_INTEGER : r.groupOrder);
+  const groups = new Map();
+  [...offered].sort((a, b) => order(a) - order(b)).forEach((r) => {
+    const key = r.department || OTHER;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(r);
   });
-  return [...groups.entries()].filter(([, list]) => list.length).map(([key, list]) => ({ key, roles: list }));
+  const other = groups.get(OTHER);
+  groups.delete(OTHER);
+  if (other) groups.set(OTHER, other);
+  return [...groups.entries()].map(([key, list]) => ({ key, roles: list }));
 };
 
 /**
- * The roles of a user as an aligned grid of checkboxes in groups, with a search box for a long list and the number
- * chosen. `roles` are { value: code, label: name }; `value` the chosen codes.
+ * The roles of a user as an aligned grid of checkboxes grouped by department, each with its one-line description, a
+ * search box for a long list and the number chosen. `roles` are { value: code, label: name, description, department,
+ * groupOrder, platform }; `value` the chosen codes.
  */
 const RoleChecklist = ({ roles, value, onChange, disabled = false, invalid = false, id = "roles" }) => {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
+  const [kept, setKept] = useState(() => new Set());
   const chosen = useMemo(() => new Set(value || []), [value]);
-  const groups = useMemo(() => groupRoles(roles), [roles]);
+  // a platform role the user holds stays listed after it is unticked, until the form is left
+  useEffect(() => {
+    setKept((prev) => {
+      const held = roles.filter((r) => r.platform && chosen.has(r.value) && !prev.has(r.value));
+      return held.length ? new Set([...prev, ...held.map((r) => r.value)]) : prev;
+    });
+  }, [roles, chosen]);
+  const groups = useMemo(() => groupRoles(roles, kept), [roles, kept]);
   const needle = search.trim().toLowerCase();
-  const matches = (r) => !needle || r.label.toLowerCase().includes(needle) || String(r.value).toLowerCase().includes(needle);
+  const matches = (r) => !needle || [r.label, r.value, r.description, r.department].some((v) => String(v || "").toLowerCase().includes(needle));
   const shown = groups.map((g) => ({ ...g, roles: g.roles.filter(matches) })).filter((g) => g.roles.length);
+  const count = groups.reduce((n, g) => n + g.roles.length, 0);
 
   const toggle = (code, checked) => {
     const next = (value || []).filter((c) => c !== code);
     onChange(checked ? [...next, code] : next);
   };
-  const heading = (key) => (key ? t("generalMasters.roleGroup", { group: key.toUpperCase(), defaultValue: "{{group}} roles" }) : t("generalMasters.standardRoles", "Standard roles"));
+  const heading = (key) => key || t("generalMasters.otherRoles", "Other roles");
 
   return (
     <div className={`bv-role-checklist${invalid ? " bv-role-checklist--invalid" : ""}`} id={id}>
       <div className="bv-role-checklist__bar">
-        {roles.length >= SEARCH_FROM && (
+        {count >= SEARCH_FROM && (
           <span className="p-input-icon-left bv-role-checklist__search">
             <i className="pi pi-search" />
             <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("generalMasters.searchRoles", "Search roles")}
@@ -66,15 +72,18 @@ const RoleChecklist = ({ roles, value, onChange, disabled = false, invalid = fal
         <span className="bv-role-checklist__count">{t("generalMasters.rolesSelected", { count: chosen.size, defaultValue: "{{count}} selected" })}</span>
       </div>
       {shown.map((g) => (
-        <fieldset key={g.key || "standard"} className="bv-role-checklist__group">
-          {groups.length > 1 && <legend className="bv-role-checklist__heading">{heading(g.key)}</legend>}
+        <fieldset key={g.key || "other"} className="bv-role-checklist__group">
+          {(groups.length > 1 || g.key) && <legend className="bv-role-checklist__heading">{heading(g.key)}</legend>}
           <div className="bv-role-checklist__grid">
             {g.roles.map((r) => {
               const inputId = `${id}-${r.value}`;
               return (
                 <div key={r.value} className={`bv-role-checklist__item${chosen.has(r.value) ? " is-checked" : ""}`}>
                   <Checkbox inputId={inputId} checked={chosen.has(r.value)} disabled={disabled} onChange={(e) => toggle(r.value, e.checked)} />
-                  <label htmlFor={inputId}>{r.label}</label>
+                  <label htmlFor={inputId}>
+                    <span className="bv-role-checklist__name">{r.label}</span>
+                    {r.description ? <span className="bv-role-checklist__description" title={r.description}>{r.description}</span> : null}
+                  </label>
                 </div>
               );
             })}
@@ -87,7 +96,14 @@ const RoleChecklist = ({ roles, value, onChange, disabled = false, invalid = fal
 };
 
 RoleChecklist.propTypes = {
-  roles: PropTypes.arrayOf(PropTypes.shape({ value: PropTypes.string.isRequired, label: PropTypes.string.isRequired })).isRequired,
+  roles: PropTypes.arrayOf(PropTypes.shape({
+    value: PropTypes.string.isRequired,
+    label: PropTypes.string.isRequired,
+    description: PropTypes.string,
+    department: PropTypes.string,
+    groupOrder: PropTypes.number,
+    platform: PropTypes.bool,
+  })).isRequired,
   value: PropTypes.arrayOf(PropTypes.string),
   onChange: PropTypes.func.isRequired,
   disabled: PropTypes.bool,

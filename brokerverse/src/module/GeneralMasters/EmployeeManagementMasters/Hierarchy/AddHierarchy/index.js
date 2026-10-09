@@ -68,6 +68,8 @@ const AddHierarchy = ({ action }) => {
 
     if (!values.levelNumber) {
       errors.levelNumber = "Level number is required";
+    } else if (!/^\d{1,3}$/.test(String(values.levelNumber).trim())) {
+      errors.levelNumber = t("validation.wholeNumber");
     }
 
     return errors;
@@ -144,6 +146,7 @@ const AddHierarchy = ({ action }) => {
         <div className="grid add__account__sub__container p-3">
           <div className="col-12 md:col-3 lg:col-3">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               value={
                 action === "view"
@@ -160,6 +163,7 @@ const AddHierarchy = ({ action }) => {
           </div>
           <div className="col-12 md:col-3 lg:col-3">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               value={
                 action === "view"
@@ -193,6 +197,7 @@ const AddHierarchy = ({ action }) => {
           </div>
           <div className="col-12 md:col-3 lg:col-3">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               value={
                 action === "view"

@@ -181,7 +181,7 @@ const InsuranceDetailsAction = ({ action }) => {
       addressLine3: "",
       city: "",
       state: "",
-      country: "",
+      country: "Philippines",
       email: "",
       phoneNumber: "",
       tin: "",
@@ -231,6 +231,7 @@ const InsuranceDetailsAction = ({ action }) => {
         <div className="grid m-0 p-0">
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"
@@ -256,6 +257,7 @@ const InsuranceDetailsAction = ({ action }) => {
           </div>
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"
@@ -282,6 +284,7 @@ const InsuranceDetailsAction = ({ action }) => {
           </div>
           <div className="col-12 md:col-6 lg:col-6 xl:col-6 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"
@@ -386,6 +389,7 @@ const InsuranceDetailsAction = ({ action }) => {
           </div>
           <div className="col-12 md:col-3 lg:col-3 xl:col-3">
             <DropDowns
+              required
               disabled={action === "view" ? true : false}
               className="input__field__corrections"
               dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -416,6 +420,7 @@ const InsuranceDetailsAction = ({ action }) => {
 
           <div className="col-12 md:col-3 lg:col-3 xl:col-3">
             <DropDowns
+              required
               disabled={action === "view" ? true : false}
               className="input__field__corrections"
               dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -445,6 +450,7 @@ const InsuranceDetailsAction = ({ action }) => {
           </div>
           <div className="col-12 md:col-3 lg:col-3 xl:col-3">
             <DropDowns
+              required
               disabled={action === "view" ? true : false}
               className="input__field__corrections"
               dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -474,6 +480,7 @@ const InsuranceDetailsAction = ({ action }) => {
           </div>
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"
@@ -499,6 +506,7 @@ const InsuranceDetailsAction = ({ action }) => {
           </div>
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"
@@ -549,8 +557,9 @@ const InsuranceDetailsAction = ({ action }) => {
                 className="input__label__corrections"
                 placeholder={t("numberingMasters.creditTerms.useDefault")}
                 label={t(label)}
+                length={4}
                 value={(action === "add" || action === "edit" ? formik.values[key] : getInsuranceView?.[key]) ?? ""}
-                onChange={(e) => formik.setFieldValue(key, e.target.value)}
+                onChange={(e) => formik.setFieldValue(key, e.target.value.replace(/\D/g, ""))}
               />
               {formik.errors[key] && (
                 <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors[key]}</div>

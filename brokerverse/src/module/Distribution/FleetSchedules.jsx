@@ -14,11 +14,17 @@ import { Toast } from "primereact/toast";
 import service from "../../services/distributionService";
 import { hasPermission } from "../../utils/canOpen";
 import { confirmAction, promptText } from "../../utility/dialogs";
-import { ClientPicker, Field, PageHeader, StatusTag, date, isoDay, money, showError, showSuccess, useInsurers } from "./common";
+import { ClientPicker, Field, PageHeader, StatusTag, date, fieldErrors, isoDay, money, showError, showSuccess, useInsurers } from "./common";
 
 const BASE = "/operations/fleet-schedules";
 const EMPTY_VEHICLE = { plateNumber: "", conductionSticker: "", chassisNumber: "", engineNumber: "", make: "", model: "", yearModel: null, color: "", vehicleType: "private_cars",
   usage: "", mortgagee: "", sumInsured: null, ownDamageRate: 1.5, actsOfNatureRate: 0.5, bodilyInjury: 0, propertyDamage: 0, includeCtpl: true };
+
+/** The same date a year later: the end of the period the API takes when none is given. */
+const yearAfter = (d) => (d ? new Date(d.getFullYear() + 1, d.getMonth(), d.getDate()) : null);
+const dayAfter = (d) => (d ? new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1) : null);
+const startOfToday = () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); };
+const newFleet = () => ({ client: null, insuranceCompanyId: null, inceptionDate: startOfToday(), expiryDate: yearAfter(startOfToday()), expiryChanged: false, description: "" });
 
 /** Operations > Fleet Schedules: the list of fleets, and one fleet with its schedule of vehicles. */
 const FleetSchedules = () => {
@@ -36,6 +42,7 @@ const FleetList = () => {
   const [filters, setFilters] = useState({ status: null, search: "" });
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState(null);
+  const [errors, setErrors] = useState({});
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -49,13 +56,26 @@ const FleetList = () => {
   }, [filters]);
   useEffect(() => { load(); }, [load]);
 
+  const open = () => { setForm(newFleet()); setErrors({}); };
+  const close = () => { setForm(null); setErrors({}); };
+  const setFrom = (value) => setForm((f) => ({ ...f, inceptionDate: value, expiryDate: f.expiryChanged ? f.expiryDate : yearAfter(value) }));
+  const validate = () => {
+    const out = {};
+    if (!form.client?.id) out.clientId = t("distribution.fl.clientRequired", "Choose the client");
+    if (!form.inceptionDate) out.inceptionDate = t("distribution.fl.fromRequired", "Enter the start of the period");
+    if (form.inceptionDate && form.expiryDate && isoDay(form.expiryDate) <= isoDay(form.inceptionDate)) out.expiryDate = t("distribution.fl.toAfterFrom", "The period must end after it starts");
+    setErrors(out);
+    return !Object.keys(out).length;
+  };
   const create = async () => {
+    if (!validate()) return;
     try {
       const r = await service.createFleet({ clientId: form.client.id, insuranceCompanyId: form.insuranceCompanyId, inceptionDate: isoDay(form.inceptionDate),
         expiryDate: form.expiryDate ? isoDay(form.expiryDate) : null, description: form.description || null });
       showSuccess(toast, r.message);
       navigate(`${BASE}/${r.data.id}`);
     } catch (e) {
+      setErrors(fieldErrors(e));
       showError(toast, e);
     }
   };
@@ -65,7 +85,7 @@ const FleetList = () => {
       <Toast ref={toast} />
       <PageHeader home={t("distribution.home.operations", "Operations")} title={t("distribution.fl.title", "Fleet Schedules")}
         subtitle={t("distribution.fl.subtitle", "One motor policy covering many vehicles, each with its own premium and CTPL; vehicles added or deleted by endorsement at the pro-rata premium.")}>
-        {write ? <Button label={t("distribution.fl.new", "New fleet schedule")} icon="pi pi-plus" onClick={() => setForm({ client: null, insuranceCompanyId: null, inceptionDate: new Date(), expiryDate: null, description: "" })} /> : null}
+        {write ? <Button label={t("distribution.fl.new", "New fleet schedule")} icon="pi pi-plus" onClick={open} /> : null}
       </PageHeader>
       <div className="pe-card">
         <div className="dist-toolbar">
@@ -87,14 +107,23 @@ const FleetList = () => {
           <Column header={t("distribution.common.status", "Status")} body={(r) => <StatusTag status={r.status} />} />
         </DataTable>
       </div>
-      <Dialog className="pe-dialog" header={t("distribution.fl.new", "New fleet schedule")} visible={!!form} style={{ width: "min(640px, 96vw)" }} onHide={() => setForm(null)}
-        footer={<div><Button label={t("distribution.common.cancel", "Cancel")} text onClick={() => setForm(null)} /><Button label={t("distribution.fl.start", "Start")} icon="pi pi-check" onClick={create} disabled={!form?.client?.id || !form?.inceptionDate} /></div>}>
+      <Dialog className="pe-dialog" header={t("distribution.fl.new", "New fleet schedule")} visible={!!form} style={{ width: "min(640px, 96vw)" }} onHide={close}
+        footer={<div><Button label={t("distribution.common.cancel", "Cancel")} text onClick={close} /><Button label={t("distribution.fl.start", "Start")} icon="pi pi-check" onClick={create} /></div>}>
         {form && (
           <div className="dist-grid">
-            <Field label={t("distribution.fl.client", "Client")} full><ClientPicker value={form.client} onChange={(v) => setForm({ ...form, client: v })} placeholder={t("distribution.fl.findClient", "Find the client")} /></Field>
-            <Field label={t("distribution.fl.insurer", "Insurer")}><Dropdown value={form.insuranceCompanyId} options={insurers} filter showClear onChange={(e) => setForm({ ...form, insuranceCompanyId: e.value || null })} /></Field>
-            <Field label={t("distribution.fl.from", "Period from")}><Calendar value={form.inceptionDate} dateFormat="yy-mm-dd" showIcon onChange={(e) => setForm({ ...form, inceptionDate: e.value })} /></Field>
-            <Field label={t("distribution.fl.to", "Period to")} help={t("distribution.fl.toHelp", "One year when empty")}><Calendar value={form.expiryDate} dateFormat="yy-mm-dd" showIcon onChange={(e) => setForm({ ...form, expiryDate: e.value })} /></Field>
+            <Field label={t("distribution.fl.client", "Client")} full required error={errors.clientId}>
+              <ClientPicker value={form.client} onChange={(v) => setForm({ ...form, client: v })} placeholder={t("distribution.fl.findClient", "Find the client")} />
+            </Field>
+            <Field label={t("distribution.fl.insurer", "Insurer")} help={t("distribution.fl.insurerHelp", "Can be chosen later, before the policy is issued")}>
+              <Dropdown value={form.insuranceCompanyId} options={insurers} filter showClear onChange={(e) => setForm({ ...form, insuranceCompanyId: e.value || null })} />
+            </Field>
+            <Field label={t("distribution.fl.from", "Period from")} required error={errors.inceptionDate}>
+              <Calendar value={form.inceptionDate} dateFormat="yy-mm-dd" showIcon onChange={(e) => setFrom(e.value)} />
+            </Field>
+            <Field label={t("distribution.fl.to", "Period to")} error={errors.expiryDate} help={t("distribution.fl.toHelp", "One year after the start, unless you change it")}>
+              <Calendar value={form.expiryDate} dateFormat="yy-mm-dd" showIcon showButtonBar minDate={dayAfter(form.inceptionDate)}
+                onChange={(e) => setForm({ ...form, expiryDate: e.value, expiryChanged: true })} />
+            </Field>
             <Field label={t("distribution.common.description", "Description")} full><InputText value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Field>
           </div>
         )}

@@ -16,6 +16,7 @@ const SEVERITY = {
   queued: "warning", assigned: "success", created: "success", failed: "danger", processed: "success", partial: "warning", deleted: "secondary",
   "in-market": "info", placed: "warning", bound: "success", closed: "secondary", approached: "info", quoted: "info", accepted: "success", declined: "danger",
   submitted: "info", billed: "success", nil: "secondary", declared: "success", expired: "secondary", excluded: "secondary", "opted-out": "warning", done: "success", running: "info",
+  granted: "success", refused: "danger", withdrawn: "warning", "not-recorded": "secondary",
 };
 
 /** Status chip with a translated label (distribution.status.<status>). */
@@ -38,14 +39,16 @@ export const PageHeader = ({ home, section, title, trail = [], subtitle, childre
   </div>
 );
 
-/** A labelled form field of the two-column form grid (htmlFor: the id of its input). */
-export const Field = ({ label, children, full = false, help, htmlFor }) => (
-  <div className={`dist-field${full ? " dist-field--full" : ""}`}>
-    <label htmlFor={htmlFor}>{label}</label>
+/** A labelled form field of the two-column form grid (htmlFor: the id of its input); a required field is starred and its error replaces the help line. */
+export const Field = ({ label, children, full = false, help, htmlFor, required = false, error }) => (
+  <div className={`dist-field${full ? " dist-field--full" : ""}${error ? " dist-field--invalid" : ""}`}>
+    <label htmlFor={htmlFor}>{label}{required ? <span className="dist-required" aria-hidden="true"> *</span> : null}</label>
     {children}
-    {help ? <small className="pe-muted">{help}</small> : null}
+    {error ? <small className="p-error" role="alert">{error}</small> : help ? <small className="pe-muted">{help}</small> : null}
   </div>
 );
+
+export { apiFieldErrors as fieldErrors } from "../../hooks/useFieldErrors";
 
 /** Number of a numeric cell, right aligned. */
 export const num = (v, digits = 2) => (v === null || v === undefined || v === "" ? "" : Number(v).toLocaleString("en-PH", { minimumFractionDigits: digits, maximumFractionDigits: digits }));

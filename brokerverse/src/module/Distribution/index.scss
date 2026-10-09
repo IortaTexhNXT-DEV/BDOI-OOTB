@@ -34,6 +34,19 @@
   grid-column: 1 / -1;
 }
 
+.dist-required {
+  color: var(--color-danger, #b42318);
+}
+
+.dist-field--invalid {
+  .p-inputtext,
+  .p-dropdown,
+  .p-autocomplete-input,
+  .p-calendar .p-inputtext {
+    border-color: var(--color-danger, #b42318);
+  }
+}
+
 .dist-toolbar {
   display: flex;
   gap: 0.75rem;
@@ -70,9 +83,14 @@
   overflow: auto;
 }
 
+.dist-mail-subject {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
+
 .dist-mail-preview {
   width: 100%;
-  min-height: 24rem;
+  min-height: 32rem;
   border: 1px solid #e5e9f0;
   border-radius: 8px;
   background: #fff;
@@ -87,6 +105,33 @@
 
   @media (max-width: 720px) {
     grid-template-columns: 1fr;
+  }
+}
+
+// KPI tiles of a dialog (segment reach, campaign results): the dialog is outside .pe-page, which styles them on a page
+.pe-dialog {
+  .pe-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .pe-kpi {
+    border: 1px solid #e5e9f0;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+
+    .pe-kpi-label {
+      color: #6c737f;
+      font-size: 0.85rem;
+    }
+
+    .pe-kpi-value {
+      color: #111927;
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-top: 0.25rem;
+    }
   }
 }
 

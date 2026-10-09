@@ -10,6 +10,7 @@ import { assertPasswordAllowed, passwordPolicy, recordHistory, savePassword } fr
 import { temporaryPassword as temporaryPasswordFor } from '../../lib/secrets.js';
 import { loginHistory } from '../../lib/loginHistory.js';
 import { assertSod } from '../access-control/service.js';
+import { getSetting } from '../../lib/settings.js';
 
 const { router, define } = moduleRouter('User Management', '/users');
 const admin = [requireAuth, requirePermission('write:users')];
@@ -311,12 +312,37 @@ define({
 
 // ---- Roles & permissions
 const rolesRouter = moduleRouter('User Management', '/roles');
+/**
+ * Department of each role on the user form (setting access.role_groups: [{ name, roles: [{ code, summary }] }]) and the
+ * roles of the base platform (access.platform_roles), which are not offered for a new assignment.
+ */
+async function roleGroups() {
+  const [groups, platform] = await Promise.all([getSetting('access.role_groups', []), getSetting('access.platform_roles', [])]);
+  const place = new Map();
+  (Array.isArray(groups) ? groups : []).forEach((g, gi) => (Array.isArray(g?.roles) ? g.roles : []).forEach((r, ri) => {
+    if (r?.code && !place.has(r.code)) place.set(r.code, { department: String(g.name || ''), summary: r.summary || null, groupOrder: gi * 100 + ri });
+  }));
+  return { place, platform: new Set(Array.isArray(platform) ? platform : []) };
+}
 rolesRouter.define({
-  method: 'GET', path: '/', summary: 'List roles with their permissions and user counts', screen: 'Master > User Management > Role', middleware: [requireAuth],
-  response: { success: true, data: [{ id: 1, code: 'sales', name: 'Sales & Marketing (Account Executive)', permissions: ['read:leads'], users: 3 }] },
-  handler: async (_req, res) => ok(res, await many(`SELECT r.id, r.code, r.name, r.description, r.is_system AS "isSystem", r.status, r.inherits AS "includesRoles", r.created_at AS "createdAt",
-      COALESCE((SELECT array_agg(p.code ORDER BY p.code) FROM role_permissions rp JOIN permissions p ON p.id = rp.permission_id WHERE rp.role_id = r.id), '{}') AS permissions,
-      (SELECT count(*)::int FROM user_roles ur WHERE ur.role_id = r.id) AS users FROM roles r ORDER BY r.id`)),
+  method: 'GET', path: '/', summary: 'List roles with their permissions, user counts, department on the user form and last change (who and when)',
+  screen: 'Master > User Management > Role; User > Add / Edit', middleware: [requireAuth],
+  response: { success: true, data: [{ id: 9, code: 'tis-sales-associate', name: 'TIS Sales Associate', permissions: ['read:leads'], users: 3, department: 'Sales',
+    summary: 'Leads, clients, quotations, placements, policies, endorsements and renewals; no approvals', groupOrder: 0, platform: false,
+    modifiedBy: 'BrokerVerse Administrator', modifiedAt: '2026-10-09T08:00:00.000Z' }] },
+  handler: async (_req, res) => {
+    // the last change is the last audit entry of the role (the roles of the seed and the migrations have none)
+    const [rows, { place, platform }] = await Promise.all([many(`SELECT r.id, r.code, r.name, r.description, r.is_system AS "isSystem", r.status, r.inherits AS "includesRoles",
+        r.created_at AS "createdAt", COALESCE(last.at, r.updated_at) AS "modifiedAt", COALESCE(u.display_name, last.username) AS "modifiedBy",
+        COALESCE((SELECT array_agg(p.code ORDER BY p.code) FROM role_permissions rp JOIN permissions p ON p.id = rp.permission_id WHERE rp.role_id = r.id), '{}') AS permissions,
+        (SELECT count(*)::int FROM user_roles ur WHERE ur.role_id = r.id) AS users
+      FROM roles r
+      LEFT JOIN LATERAL (SELECT a.user_id, a.username, a.at FROM audit_log a WHERE a.entity = 'role' AND a.entity_id = r.id::text ORDER BY a.id DESC LIMIT 1) last ON true
+      LEFT JOIN users u ON u.id = last.user_id
+      ORDER BY r.id`), roleGroups()]);
+    ok(res, rows.map((r) => ({ ...r, department: place.get(r.code)?.department || null, summary: place.get(r.code)?.summary || null,
+      groupOrder: place.get(r.code)?.groupOrder ?? null, platform: platform.has(r.code) })));
+  },
 });
 rolesRouter.define({
   method: 'GET', path: '/permissions', summary: 'All permission codes grouped by module', screen: 'Master > User Management > Role > Add', middleware: [requireAuth],

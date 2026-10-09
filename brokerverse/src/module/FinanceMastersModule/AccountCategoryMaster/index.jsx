@@ -3,8 +3,6 @@ import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../assets/icons/SvgDot";
-import SvgAdd from "../../../assets/icons/SvgAdd";
-import { Button } from "primereact/button";
 import TableData from "./TableData/index";
 import ModalEditData from "./PopUpData/ModalEditData";
 import ModalViewData from "./PopUpData/ModalViewData";
@@ -14,6 +12,7 @@ import {
   getAccountCategoryDetailViewMiddleWare,
   getAccountCategoryDetailEditMiddleWare,
 } from "./store/accountCategoryMeddleware";
+import PageActions from "../../../components/PageActions";
 
 const AccountCategoryMaster = () => {
   const { t } = useTranslation();
@@ -58,16 +57,7 @@ const AccountCategoryMaster = () => {
           </div>
         </div>
         <div className="col-12 p-0 flex justify-content-end">
-          <Button
-            icon={
-              <div className="pt-1">
-                <SvgAdd />
-              </div>
-            }
-            label={t("financeMasters.add")}
-            className="correction__btn__reversal"
-            onClick={handleAddAction}
-          />
+          <PageActions onAdd={handleAddAction} />
         </div>
         <div className="col-12 p-0">
           <BreadCrumb

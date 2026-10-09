@@ -84,6 +84,7 @@ const CheckEditData = ({  visible, visibleEdit, setVisible, setVisibleEdit, getE
                     <div className="sm-col-12 col-12 md:col-6 lg-col-6">
                         <div>
                             <InputField
+                                required
                                 classNames="field__container"
                                 label="Cheque Book Number"
                                 placeholder={"Enter"}
@@ -96,6 +97,7 @@ const CheckEditData = ({  visible, visibleEdit, setVisible, setVisibleEdit, getE
                     <div className="sm-col-12 col-12 md:col-6 lg-col-6">
                         <div>
                             <InputField
+                                required
                                 classNames="field__container"
                                 label="Cheque Leaf Beginning"
                                 placeholder={"Enter"}
@@ -110,6 +112,7 @@ const CheckEditData = ({  visible, visibleEdit, setVisible, setVisibleEdit, getE
                     <div className="sm-col-12 col-12 md:col-6 lg-col-6">
                         <div>
                             <InputField
+                                required
                                 classNames="field__container"
                                 label="Cheque Leaf End"
                                 placeholder={"Enter"}
@@ -146,6 +149,7 @@ const CheckEditData = ({  visible, visibleEdit, setVisible, setVisibleEdit, getE
                     <div className="sm-col-12 col-12 md:col-6 lg-col-6">
                         <div>
                             <InputField
+                                required
                                 classNames="field__container"
                                 label="Cheque Book Number"
                                 placeholder={"Enter"}
@@ -158,6 +162,7 @@ const CheckEditData = ({  visible, visibleEdit, setVisible, setVisibleEdit, getE
                     <div className="sm-col-12 col-12 md:col-6 lg-col-6">
                         <div>
                             <InputField
+                                required
                                 classNames="field__container"
                                 label="Cheque Leaf Beginning"
                                 placeholder={"Enter"}
@@ -172,6 +177,7 @@ const CheckEditData = ({  visible, visibleEdit, setVisible, setVisibleEdit, getE
                     <div className="sm-col-12 col-12 md:col-6 lg-col-6">
                         <div>
                             <InputField
+                                required
                                 classNames="field__container"
                                 label="Cheque Leaf End"
                                 placeholder={"Enter"}

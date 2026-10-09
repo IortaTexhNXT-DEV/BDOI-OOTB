@@ -5,9 +5,6 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
-import SvgIconeye from "../../../../../assets/icons/SvgIconeye";
-import SvgEdit from "../../../../../assets/icons/SvgEdits";
 import SvgTable from "../../../../../assets/icons/SvgTable";
 import { useSelector, useDispatch } from "react-redux";
 import { useFormik } from "formik";
@@ -20,6 +17,7 @@ import {
 import MasterStatusToggle from "../../../common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
 import { formatDate as formatAppDate } from "../../../../../utility/dateFormat";
+import RowActions, { actionsColumn } from "../../../../../components/RowActions";
 
 const TableData = ({ navigate }) => {
   const { t } = useTranslation();
@@ -40,17 +38,6 @@ const TableData = ({ navigate }) => {
       };
     }
   );
-  const headeraction = {
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    padding: "1rem",
-    color: "#000",
-    border: "none",
-    // display:'flex',
-    // justifyContent:'space-around',
-    // alignItem:'center'
-  };
 
   const headerstyle = {
     // width: '10rem',
@@ -95,20 +82,7 @@ const TableData = ({ navigate }) => {
       );
     },
   };
-  const renderActionButton = (rowData) => {
-    return (
-      <div className="action__button__container">
-        <Button
-          icon={<SvgIconeye />}
-          onClick={() => handleView(rowData)}
-          className="action__button p-0" aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
-        <Button
-          icon={<SvgEdit />}
-          onClick={() => handleEdit(rowData)}
-          className="action__button p-0 w-auto" aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
-      </div>
-    );
-  };
+  const renderActionButton = (rowData) => <RowActions onView={() => handleView(rowData)} onEdit={() => handleEdit(rowData)} />;
 
   const handleView = (rowData) => {
     dispatch(getInsuranceViewMiddleWare(rowData));
@@ -221,9 +195,8 @@ const TableData = ({ navigate }) => {
         <Column
           body={renderActionButton}
           header={t("common.actions")}
-          className="fieldvalueaction_container"
-          headerStyle={headeraction}
-        ></Column>
+          {...actionsColumn}
+        />
       </DataTable>
     </div>
   );

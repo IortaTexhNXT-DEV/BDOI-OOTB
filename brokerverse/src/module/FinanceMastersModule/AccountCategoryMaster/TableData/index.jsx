@@ -5,14 +5,12 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
-import SvgIconeye from "../../../../assets/icons/SvgIconeye";
-import SvgEdit from "../../../../assets/icons/SvgEdits";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import { useDispatch, useSelector } from "react-redux";
 import { getAccountCategorySearchList, getAccountCategoryList } from "../store/accountCategoryMeddleware";
 import MasterStatusToggle from "../../../GeneralMasters/common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
+import RowActions, { actionsColumn } from "../../../../components/RowActions";
 
 const TableData = ({ handleViewAction, handleEditAction, EmptyTable }) => {
   const { t } = useTranslation();
@@ -69,20 +67,7 @@ const TableData = ({ handleViewAction, handleEditAction, EmptyTable }) => {
       );
     },
   };
-  const renderActionButton = (rowData) => {
-    return (
-      <div className="action__button__container">
-        <Button
-          icon={<SvgIconeye />}
-          onClick={() => handleViewAction(rowData)}
-          className="action__button p-0" aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
-        <Button
-          icon={<SvgEdit />}
-          onClick={() => handleEditAction(rowData)}
-          className="action__button p-0 w-auto" aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
-      </div>
-    );
-  };
+  const renderActionButton = (rowData) => <RowActions onView={() => handleViewAction(rowData)} onEdit={() => handleEditAction(rowData)} />;
 
   useEffect(() => {
     if (search?.length > 0) {
@@ -141,16 +126,10 @@ const TableData = ({ handleViewAction, handleEditAction, EmptyTable }) => {
           body={(columnData) => <MasterStatusToggle type="account-category" record={columnData} onChanged={reloadList} onError={showStatusError} />}
         ></Column>
         <Column
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            padding: "20px 1rem 17px 0px",
-          }}
-          field="id"
           body={renderActionButton}
-          header={t("financeMasters.action")}
-          className="fieldvalue_container"
-        ></Column>
+          header={t("common.actions")}
+          {...actionsColumn}
+        />
       </DataTable>
     </div>
   );

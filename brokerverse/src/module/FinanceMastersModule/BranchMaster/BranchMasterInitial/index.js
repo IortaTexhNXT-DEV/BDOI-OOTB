@@ -5,7 +5,6 @@ import { BreadCrumb } from "primereact/breadcrumb";
 import { useNavigate } from "react-router-dom";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import SvgFilters from "../../../../assets/icons/SvgFilters";
-import SvgAdd from "../../../../assets/icons/SvgAdd";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -15,6 +14,7 @@ import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import MasterStatusToggle from "../../../GeneralMasters/common/MasterStatusToggle";
 import { useMasterRecords } from "../../../GeneralMasters/common/useMasterOptions";
+import PageActions from "../../../../components/PageActions";
 
 const Index = () => {
   const { t } = useTranslation();
@@ -71,8 +71,6 @@ const Index = () => {
     email: row.EmailID,
   }));
 
-
-
   const handlePolicy = () => {
     navigate("/master/finance/branch/branchadding");
   };
@@ -90,10 +88,7 @@ const Index = () => {
           />
         </div>
         <div className="filterbutton_container">
-          <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
-            <SvgAdd className="addicon" />
-            <p className="addtext">Add</p>
-          </button>
+          <PageActions onAdd={handlePolicy} />
         </div>
       </div>
 

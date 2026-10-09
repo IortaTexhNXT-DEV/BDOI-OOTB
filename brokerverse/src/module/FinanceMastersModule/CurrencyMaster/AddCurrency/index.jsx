@@ -116,6 +116,7 @@ const AddCurrency = () => {
         <div className='grid'>
           <div className='col-12 md:col-3 lg:col-3'>
             <InputField
+              required
               label={t("financeMasters.currencyCodeLabel")}
               classNames='dropdown__add__sub'
               className='label__sub__add'
@@ -134,6 +135,7 @@ const AddCurrency = () => {
           </div>
           <div className='col-12 md:col-3 lg:col-3'>
             <DropDowns
+              required
               label={t("financeMasters.isoCode")}
               className='dropdown__add__sub'
               classNames='label__sub__add'
@@ -158,6 +160,7 @@ const AddCurrency = () => {
           </div>
           <div className='col-12 md:col-3 lg:col-3'>
             <InputField
+              required
               label={t("financeMasters.smallestUnit")}
               classNames='dropdown__add__sub'
               className='label__sub__add'
@@ -176,6 +179,7 @@ const AddCurrency = () => {
           </div>
           <div className='col-12 md:col-3 lg:col-3'>
             <InputField
+              required
               label={t("financeMasters.unitDescription")}
               classNames='dropdown__add__sub'
               className='label__sub__add'
@@ -196,6 +200,7 @@ const AddCurrency = () => {
         <div className='grid'>
           <div className='col-12 md:col-6 lg:col-6'>
             <InputField
+              required
               label={t("financeMasters.currencyName")}
               classNames='dropdown__add__sub'
               className='label__sub__add'
@@ -215,6 +220,7 @@ const AddCurrency = () => {
           </div>
           <div className='col-12 md:col-6 lg:col-6'>
             <InputField
+              required
               label={t("generalMasters.description")}
               classNames='dropdown__add__sub'
               className='label__sub__add'
@@ -235,6 +241,7 @@ const AddCurrency = () => {
         <div className='grid '>
           <div className='col-12 md:col-3 lg:col-3'>
             <InputField
+              required
               label={t("financeMasters.currencyFormat")}
               classNames='dropdown__add__sub'
               className='label__sub__add'
@@ -253,6 +260,7 @@ const AddCurrency = () => {
           </div>
           <div className='col-12 md:col-3 lg:col-3'>
             <InputField
+              required
               label={t("financeMasters.numberofDecimals")}
               classNames='dropdown__add__sub'
               className='label__sub__add'

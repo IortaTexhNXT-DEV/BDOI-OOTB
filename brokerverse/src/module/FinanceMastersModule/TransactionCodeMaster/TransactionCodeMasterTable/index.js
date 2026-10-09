@@ -6,9 +6,7 @@ import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router";
 import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
 import SvgTable from "../../../../assets/icons/SvgTable";
-import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import "./index.scss";
 import { useFormik } from "formik";
 import {
@@ -18,9 +16,9 @@ import {
   getTransactioncodeListMiddleware,
 } from "../store/transactionCodeMasterMiddleware";
 import { useDispatch, useSelector } from "react-redux";
-import SvgEditicons from "../../../../assets/icons/SvgEditicons";
 import MasterStatusToggle from "../../../GeneralMasters/common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
+import RowActions, { actionsColumn } from "../../../../components/RowActions";
 
 const TransactionCodeMasterTable = () => {
   const { t } = useTranslation();
@@ -76,21 +74,7 @@ const TransactionCodeMasterTable = () => {
     },
   };
 
-  const renderViewButton = (rowData) => {
-    return (
-      <div className="center-content">
-        <Button
-          icon={<SvgEyeIcon />}
-          className="eye__btn"
-          onClick={() => handleView(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
-        <Button
-          icon={<SvgEditicons />}
-          className="eye__btn"
-          onClick={() => handleEdit(rowData)} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
-      </div>
-    );
-  };
-
+  const renderViewButton = (rowData) => <RowActions onView={() => handleView(rowData)} onEdit={() => handleEdit(rowData)} />;
 
   const handleView = (rowData) => {
     dispatch(getTrascationcodeDetailsView(rowData));
@@ -111,16 +95,6 @@ const TransactionCodeMasterTable = () => {
     border: "none",
   };
 
-  const ViewheaderStyle = {
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    padding: 6,
-    color: "#000",
-    border: "none",
-    display: "flex",
-    justifyContent: "center",
-  };
   const dispatch = useDispatch();
   const statusToast = useRef(null);
   const reloadList = () => dispatch(getTransactioncodeListMiddleware());
@@ -228,10 +202,9 @@ const TransactionCodeMasterTable = () => {
             ></Column>
             <Column
               body={renderViewButton}
-              header="View"
-              headerStyle={{ ...ViewheaderStyle }}
-              className="fieldvalue_container_centered "
-            ></Column>
+              header={t("common.actions")}
+              {...actionsColumn}
+            />
           </DataTable>
         </div>
       </Card>

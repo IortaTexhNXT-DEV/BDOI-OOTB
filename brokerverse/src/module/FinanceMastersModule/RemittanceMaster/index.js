@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
-import SvgAdd from "../../../assets/icons/SvgAdd";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../assets/icons/SvgDot";
@@ -14,15 +13,15 @@ import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { Link, useNavigate } from "react-router-dom";
 import SvgTable from "../../../assets/icons/SvgTable";
-import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
 import ToggleButton from "../../../components/ToggleButton";
-import SvgEditicons from "../../../assets/icons/SvgEditicons";
 import { TieredMenu } from "primereact/tieredmenu";
 import { Card } from "primereact/card";
 import { Toast } from "primereact/toast";
 import remittanceService, { masterService } from "../../../services/remittanceService";
 import { showError, showSuccess } from "../../Remittance/shared";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import RowActions, { actionsColumn } from "../../../components/RowActions";
+import PageActions from "../../../components/PageActions";
 
 const RemittanceMaster = () => {
   const { t } = useTranslation();
@@ -121,27 +120,7 @@ const RemittanceMaster = () => {
     },
   };
 
-  const renderViewButton = (rowData) => {
-    return (
-      <div className="center-content">
-        <Button
-          icon={<SvgEyeIcon />}
-          className="view-eye-button"
-          onClick={() => handleView(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
-      </div>
-    );
-  };
-
-  const renderEditButton = (rowData) => {
-    return (
-      <div className="center-content">
-        <Button
-          icon={<SvgEditicons />}
-          className="edit-button"
-          onClick={() => handleEdit(rowData)} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
-      </div>
-    );
-  };
+  const renderActions = (rowData) => <RowActions onView={() => handleView(rowData)} onEdit={() => handleEdit(rowData)} />;
 
   const renderStatus = (rowData) => {
     return (
@@ -239,16 +218,7 @@ const RemittanceMaster = () => {
           </div>
         </div>
         <div className="col-12 p-0 flex justify-content-end">
-          <Button
-            icon={
-              <div className="pr-2">
-                <SvgAdd />
-              </div>
-            }
-            className="main__btn__action"
-            onClick={handleAdd} aria-label="Add" tooltip="Add" tooltipOptions={{ position: "top" }} >
-            {t("financeMasters.add")}
-          </Button>
+          <PageActions onAdd={handleAdd} />
         </div>
         <div className="col-12 p-0">
           <BreadCrumb
@@ -334,18 +304,9 @@ const RemittanceMaster = () => {
                   headerStyle={{ textAlign: "center" }}
                 />
                 <Column
-                  body={renderViewButton}
-                  header={t("financeMasters.view")}
-                  style={{ width: "8%" }}
-                  bodyStyle={{ textAlign: "center" }}
-                  headerStyle={{ textAlign: "center" }}
-                />
-                <Column
-                  body={renderEditButton}
-                  header={t("financeMasters.edit")}
-                  style={{ width: "8%" }}
-                  bodyStyle={{ textAlign: "center" }}
-                  headerStyle={{ textAlign: "center" }}
+                  body={renderActions}
+                  header={t("common.actions")}
+                  {...actionsColumn}
                 />
                 </DataTable>
 

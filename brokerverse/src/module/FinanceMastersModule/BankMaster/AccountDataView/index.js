@@ -12,11 +12,12 @@ import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Toast } from "primereact/toast";
 import SvgDot from "../../../../assets/icons/SvgDot";
-import SvgAdd from "../../../../assets/icons/SvgAdd";
 import mastersService, { errorMessage } from "../../../../services/mastersService";
 import useMasterOptions from "../../../GeneralMasters/common/useMasterOptions";
 import MasterStatusToggle from "../../../GeneralMasters/common/MasterStatusToggle";
 import { calendarDateFormat, formatDate, toDate, toIsoDate } from "../../../../utility/dateFormat";
+import RowActions, { actionsColumn } from "../../../../components/RowActions";
+import PageActions from "../../../../components/PageActions";
 
 const TYPE = "bank-account";
 const ACCOUNT_TYPES = ["Current Account", "Savings Account", "Time Deposit", "Trust Account"];
@@ -138,10 +139,7 @@ const BankAccounts = () => {
           />
         </div>
         <div className="filterbutton_container">
-          <button type="button" className="addbutton_container bv-add-button" onClick={() => open(null)}>
-            <SvgAdd />
-            <p className="addtext">{t("financeMasters.addAccount")}</p>
-          </button>
+          <PageActions onAdd={() => open(null)} addLabel={t("financeMasters.addAccount")} />
         </div>
       </div>
 
@@ -175,10 +173,7 @@ const BankAccounts = () => {
           <Column field="currency" header="Currency" />
           <Column header="Opened" body={(r) => formatDate(r.openingDate)} />
           <Column header={t("common.status")} body={(r) => <MasterStatusToggle type={TYPE} record={r} onChanged={load} onError={(e) => toast.current?.show({ severity: "error", detail: e.message })} />} />
-          <Column
-            header={t("financeMasters.action")}
-            body={(r) => <Button icon="pi pi-pencil" text rounded aria-label={`Edit ${r.accountCode}`} onClick={() => open(r)} tooltip={`Edit ${r.accountCode}`} tooltipOptions={{ position: "top" }} />}
-          />
+          <Column header={t("common.actions")} {...actionsColumn} body={(r) => <RowActions onEdit={() => open(r)} />} />
         </DataTable>
       </Card>
 

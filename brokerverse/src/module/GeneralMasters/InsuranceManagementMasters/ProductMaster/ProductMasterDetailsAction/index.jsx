@@ -105,7 +105,7 @@ const ProductMatserDetailsAction = ({ action }) => {
   const setFormikValues = (data) => {
     const productCode = data[0]?.productCode;
     const productName = data[0]?.productName;
-    const productDescription = data[0]?.description;
+    const productDescription = data[0]?.productDescription;
     const modifiedBy = data[0]?.modifiedBy;
     const modifiedOn = data[0]?.modifiedOn;
     const lineofBusiness = data[0]?.lineofBusiness;
@@ -173,6 +173,7 @@ const ProductMatserDetailsAction = ({ action }) => {
         <div className="grid m-0 p-0">
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"
@@ -191,6 +192,7 @@ const ProductMatserDetailsAction = ({ action }) => {
           </div>
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"
@@ -209,6 +211,7 @@ const ProductMatserDetailsAction = ({ action }) => {
           </div>
           <div className="col-12 md:col-6 lg:col-6 xl:col-6 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"

@@ -1,7 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "primereact/button";
-import SvgAdd from "../../../../../assets/icons/SvgAdd";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../../assets/icons/SvgDot";
@@ -11,8 +9,7 @@ import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
-import SvgEyeIcon from "../../../../../assets/icons/SvgEyeIcon";
-import SvgEditIcon from "../../../../../assets/icons/SvgEditIcon";
+import { Checkbox } from "primereact/checkbox";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getSearchRoleMiddleware,
@@ -22,6 +19,8 @@ import MasterStatusToggle from "../../../common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
 import userService from "../../../../../services/userService";
 import { formatDate } from "../../../../../utility/dateFormat";
+import RowActions, { actionsColumn } from "../../../../../components/RowActions";
+import PageActions from "../../../../../components/PageActions";
 
 const RoleMaster = () => {
   const { t } = useTranslation();
@@ -35,6 +34,9 @@ const RoleMaster = () => {
     }
   );
   const [search, setSearch] = useState("");
+  // the roles of the base platform (setting access.platform_roles) are listed only when asked for
+  const [showPlatform, setShowPlatform] = useState(false);
+  const rows = (search ? roleSearchList : roleTableList)?.filter((role) => showPlatform || !role.platform);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const statusToast = useRef(null);
@@ -80,16 +82,6 @@ const RoleMaster = () => {
     color: "#000",
     border: "none",
   };
-  const ViewheaderStyle = {
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    padding: "1rem",
-    color: "#000",
-    border: "none",
-    display: "flex",
-    justifyContent: "center",
-  };
 
   const [, setFirst] = useState(0);
   const [, setRowsPerPage] = useState(10);
@@ -99,28 +91,7 @@ const RoleMaster = () => {
     setRowsPerPage(event.rows);
   };
 
-  const renderViewButton = (rowData) => {
-    return (
-      <div className="role__actions">
-        <Button
-          icon={<SvgEyeIcon />}
-          className="role__action__btn"
-          aria-label={t("common.view")}
-          tooltip={t("common.view")}
-          tooltipOptions={{ position: "top" }}
-          onClick={() => handleView(rowData)}
-        />
-        <Button
-          icon={<SvgEditIcon />}
-          className="role__action__btn"
-          aria-label={t("common.edit")}
-          tooltip={t("common.edit")}
-          tooltipOptions={{ position: "top" }}
-          onClick={() => handlEdit(rowData)}
-        />
-      </div>
-    );
-  };
+  const renderViewButton = (rowData) => <RowActions onView={() => handleView(rowData)} onEdit={() => handlEdit(rowData)} />;
 
   const template2 = {
     layout:
@@ -165,12 +136,7 @@ const RoleMaster = () => {
         </div>
       </div>
       <div className="col-12 md:col-6 lg:col-6 add__icon__alighn__hierarchy mb-1">
-        <button type="button" className="add__icon__view__hierarchy bv-add-button" onClick={handleNavigate}>
-          <span className="add__icon__hierarchy">
-            <SvgAdd />
-          </span>
-          <span className="add__text__hierarchy">{t("generalMasters.add")}</span>
-        </button>
+        <PageActions onAdd={handleNavigate} />
       </div>
       <div className="col-12 m-0 ">
         <div className="sub__account__sub__container__hierarchy">
@@ -189,6 +155,10 @@ const RoleMaster = () => {
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
+              <div className="flex align-items-center gap-2 mt-3">
+                <Checkbox inputId="role-platform" checked={showPlatform} onChange={(e) => setShowPlatform(e.checked)} />
+                <label htmlFor="role-platform">{t("generalMasters.includePlatformRoles", "Include the base platform roles")}</label>
+              </div>
             </div>
           </div>
           <div className="col-12 ">
@@ -200,7 +170,7 @@ const RoleMaster = () => {
           >
             <div className="card">
               <DataTable
-                value={search ? roleSearchList : roleTableList}
+                value={rows}
                 style={{ overflowY: "auto", maxWidth: "100%" }}
                 responsive={true}
                 className="table__view__hierarchy"
@@ -229,13 +199,19 @@ const RoleMaster = () => {
                   className="fieldvalue_container"
                   body={(rowData) => rowData.roleName}
                 ></Column>
+                <Column
+                  field="department"
+                  header={t("generalMasters.department", "Department")}
+                  headerStyle={headerStyle}
+                  className="fieldvalue_container"
+                ></Column>
 
                 <Column
                   field="modifiedBy"
                   header="Modified By"
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.modifiedBy}
+                  body={(rowData) => rowData.modifiedBy || t("generalMasters.systemSetup", "System set-up")}
                 ></Column>
                 <Column
                   field="modifiedOn"
@@ -252,13 +228,10 @@ const RoleMaster = () => {
                   className="fieldvalue_container"
                 ></Column>
                 <Column
-                  field="action"
                   body={renderViewButton}
-                  header="Action"
-                  headerStyle={ViewheaderStyle}
-                  className="fieldvalue_container"
-                  style={{ minWidth: "9rem" }}
-                ></Column>
+                  header={t("common.actions")}
+                  {...actionsColumn}
+                />
               </DataTable>
             </div>
           </div>

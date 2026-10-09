@@ -18,6 +18,7 @@ import { signToken, verify } from '../../lib/auth.js';
 import { config } from '../../config.js';
 import { today } from '../../lib/dates.js';
 import { lobOf } from '../documents/common.js';
+import { emailLayout } from '../branding/service.js';
 
 export const PARTY_TYPES = ['client', 'lead', 'both'];
 
@@ -29,6 +30,7 @@ function cleanCriteria(c = {}) {
   const out = { partyType: PARTY_TYPES.includes(c.partyType) ? c.partyType : 'both' };
   for (const k of ['province', 'city', 'channelId', 'clientType', 'leadStatus']) if (c[k]) out[k] = String(c[k]).trim();
   if (c.lob) out.lob = lobOf(c.lob);
+  if (Number(c.productId) > 0) out.productId = Number(c.productId);
   if (Number(c.expiringWithinDays) > 0) out.expiringWithinDays = Math.min(366, Number(c.expiringWithinDays));
   if (c.hasActivePolicy === true || c.hasActivePolicy === 'true') out.hasActivePolicy = true;
   return out;
@@ -68,6 +70,7 @@ export async function segmentParties(criteria) {
     if (c.city) w.push(`c.city ILIKE ${p(c.city)}`);
     if (c.clientType) w.push(`c.client_type = ${p(c.clientType)}`);
     if (c.lob) w.push(`EXISTS (SELECT 1 FROM policies pl WHERE pl.client_id = c.id AND pl.lob = ${p(c.lob)})`);
+    if (c.productId) w.push(`EXISTS (SELECT 1 FROM policies pl WHERE pl.client_id = c.id AND pl.product_id = ${p(c.productId)})`);
     if (c.channelId) w.push(`EXISTS (SELECT 1 FROM policies pl WHERE pl.client_id = c.id AND pl.channel_id = ${p(c.channelId)})`);
     if (c.hasActivePolicy) w.push("EXISTS (SELECT 1 FROM policies pl WHERE pl.client_id = c.id AND pl.status IN ('active', 'issued'))");
     if (c.expiringWithinDays) {
@@ -81,6 +84,7 @@ export async function segmentParties(criteria) {
     if (c.province) w.push(`l.state ILIKE ${p(c.province)}`);
     if (c.city) w.push(`l.city ILIKE ${p(c.city)}`);
     if (c.lob) w.push(`l.lob = ${p(c.lob)}`);
+    if (c.productId) w.push(`l.product_id = ${p(c.productId)}`);
     if (c.channelId) w.push(`l.channel_id = ${p(c.channelId)}`);
     if (c.leadStatus) w.push(`l.status = ${p(c.leadStatus)}`);
     parts.push(`SELECT 'lead'::text, l.id, l.display_name, l.first_name, l.email FROM leads l WHERE ${w.join(' AND ')}`);
@@ -107,6 +111,62 @@ export async function previewSegment(criteria) {
     if (why) excluded[why] = (excluded[why] || 0) + 1; else eligible += 1;
   }
   return { total: rows.length, eligible, excluded, sample: rows.filter((x) => !exclusion(x)).slice(0, 10).map((x) => ({ partyType: x.party_type, name: x.name, email: x.email })) };
+}
+
+// ---------- marketing consents ----------
+
+export const CONSENT_CHANNELS = ['Form', 'E-mail', 'Phone', 'In person', 'Website'];
+const CONSENT_STATUSES = ['granted', 'refused', 'withdrawn', 'not-recorded'];
+
+const consentOut = (r) => ({
+  partyType: r.party_type, partyId: r.id, name: r.name, code: r.code, email: r.email,
+  status: r.granted === null || r.granted === undefined ? 'not-recorded' : r.granted && !r.withdrawn_at ? 'granted' : r.granted ? 'withdrawn' : 'refused',
+  channel: r.channel || null, evidence: r.evidence || null, recordedAt: r.recorded_at || null,
+});
+
+/**
+ * Clients and prospects with their current marketing consent (the latest record of the purpose 'marketing' in the
+ * consent register), found by name, code or e-mail and narrowed by party type, consent status or party. At most 200 rows.
+ */
+export async function marketingConsents(q = {}) {
+  const search = String(q.search || '').trim();
+  const status = CONSENT_STATUSES.includes(q.status) ? q.status : null;
+  const partyType = ['client', 'lead'].includes(q.partyType) ? q.partyType : null;
+  const rows = await many(`SELECT x.*, pc.granted, pc.withdrawn_at, pc.channel, pc.evidence, pc.recorded_at FROM (
+      SELECT 'client'::text AS party_type, c.id, c.display_name AS name, c.client_code AS code, c.email FROM clients c
+       WHERE c.anonymised_at IS NULL AND COALESCE(c.status, 'active') <> 'deleted'
+      UNION ALL
+      SELECT 'lead'::text, l.id, l.display_name, l.lead_number, l.email FROM leads l WHERE l.deleted_at IS NULL AND l.anonymised_at IS NULL AND l.client_id IS NULL) x
+    LEFT JOIN LATERAL (SELECT granted, withdrawn_at, channel, evidence, recorded_at FROM privacy_consents p WHERE p.party_type = x.party_type AND p.party_id = x.id
+      AND p.purpose = 'marketing' ORDER BY p.recorded_at DESC, p.id DESC LIMIT 1) pc ON true
+    WHERE ($1::text IS NULL OR x.party_type = $1)
+      AND ($2::text = '' OR x.name ILIKE '%' || $2 || '%' OR x.code ILIKE '%' || $2 || '%' OR x.email ILIKE '%' || $2 || '%')
+      AND ($3::text IS NULL OR $3 = CASE WHEN pc.granted IS NULL THEN 'not-recorded' WHEN pc.granted AND pc.withdrawn_at IS NULL THEN 'granted'
+        WHEN pc.granted THEN 'withdrawn' ELSE 'refused' END)
+      AND ($4::text IS NULL OR x.id = $4)
+    ORDER BY x.name LIMIT 200`, [partyType, search, status, q.partyId ? String(q.partyId) : null]);
+  return rows.map(consentOut);
+}
+
+/**
+ * Record the marketing consent of a client or prospect (agreed or refused, how it was given and the evidence). A newer
+ * record ends the consent in force before it, so one record is in force per party.
+ */
+export async function recordMarketingConsent(b, userId) {
+  const table = b.partyType === 'lead' ? 'leads' : 'clients';
+  const party = await one(`SELECT id, anonymised_at FROM ${table} WHERE id = $1`, [String(b.partyId)]);
+  if (!party) throw badRequest('Validation failed', [{ path: 'partyId', message: b.partyType === 'lead' ? 'Prospect not found' : 'Client not found' }]);
+  if (party.anonymised_at) throw badRequest('The personal data of this party were anonymised');
+  const version = await getSetting('privacy.notice_version', '1.0');
+  const id = await withTransaction(async (db) => {
+    const r = (await db.query(`INSERT INTO privacy_consents(party_type, party_id, purpose, granted, channel, notice_version, evidence, recorded_by)
+      VALUES ($1,$2,'marketing',$3,$4,$5,$6,$7) RETURNING id`, [b.partyType, party.id, b.granted, b.channel, String(version), b.evidence || null, userId])).rows[0];
+    await db.query(`UPDATE privacy_consents SET withdrawn_at = now(), withdrawn_by = $4, withdrawal_reason = 'Superseded by a later record'
+      WHERE party_type = $1 AND party_id = $2 AND purpose = 'marketing' AND granted AND withdrawn_at IS NULL AND id <> $3`, [b.partyType, party.id, r.id, userId]);
+    return r.id;
+  });
+  const [out] = await marketingConsents({ partyType: b.partyType, partyId: party.id });
+  return { id: Number(id), ...out };
 }
 
 // ---------- templates ----------
@@ -155,7 +215,7 @@ export async function createCampaign(b, userId) {
   await getSegment(b.segmentId);
   const t = await getTemplate(b.templateId);
   if (t.status !== 'active') throw badRequest('Validation failed', [{ path: 'templateId', message: 'The template is inactive' }]);
-  const number = await nextDocumentNumber('campaign', { unique: { table: 'campaigns', column: 'campaign_number' } });
+  const number = await nextDocumentNumber('marketing_campaign', { unique: { table: 'campaigns', column: 'campaign_number' } });
   const r = await one('INSERT INTO campaigns(campaign_number, name, segment_id, template_id, notes, created_by, updated_by) VALUES ($1,$2,$3,$4,$5,$6,$6) RETURNING id',
     [number, b.name, b.segmentId, b.templateId, b.notes || null, userId]);
   return campaignOut(await getCampaignRow(r.id));
@@ -194,14 +254,28 @@ export async function optOutLink(recipientId) {
   return `${config.publicBaseUrl}/api/campaigns/opt-out/${token}`;
 }
 
+const OPT_OUT = /\{\{\s*optOutLink\s*\}\}/;
+
 /** Personalised subject and body of a recipient (opt-out paragraph appended when the template has no {{optOutLink}}). */
 export async function renderMessage(template, party, link) {
   const vars = { firstName: party.first_name || party.name, fullName: party.name, companyName: await companyName(), optOutLink: link };
   let html = renderTemplate(template.body_html, vars);
-  if (!/\{\{\s*optOutLink\s*\}\}/.test(template.body_html)) {
-    html += `<p style="font-size:12px;color:#5f6b76">${renderTemplate((await getSetting('campaigns.opt_out_text', null)) || '', vars)}</p>`;
+  if (!OPT_OUT.test(template.body_html)) {
+    // the link of the paragraph is a link, not the address as text
+    const anchor = `<a href="${renderTemplate('{{optOutLink}}', vars)}">${renderTemplate('{{optOutLink}}', vars)}</a>`;
+    const text = String((await getSetting('campaigns.opt_out_text', null)) || '').split(OPT_OUT).map((part) => renderTemplate(part, vars)).join(anchor);
+    html += `<p style="font-size:12px;color:#5f6b76">${text}</p>`;
   }
   return { subject: renderTemplate(template.subject, vars, { html: false }), html };
+}
+
+/**
+ * A template filled in for a sample recipient in the e-mail layout of the theme (header with the logo, footer line, theme
+ * font), as the recipient sees it. The opt-out link is a sample address (it opens nothing).
+ */
+export async function previewMessage(template) {
+  const msg = await renderMessage(template, { first_name: 'Maria', name: 'Maria Santos' }, `${config.publicBaseUrl}/api/campaigns/opt-out/sample`);
+  return { subject: msg.subject, html: (await emailLayout(msg.html, { logoAs: 'data' })).html, hasOptOutLink: OPT_OUT.test(template.body_html) };
 }
 
 /** Send a campaign: recipients of the segment, consenting ones queued to the outbox, the others excluded. */

@@ -14,7 +14,9 @@ const qs = (params = {}) => {
 const handle = async (response) => {
   const body = await response.json().catch(() => ({}));
   if (!response.ok || body.success === false) {
-    throw new Error(apiErrorMessage(body, response.status));
+    const error = new Error(apiErrorMessage(body, response.status));
+    error.errors = Array.isArray(body.errors) ? body.errors : [];
+    throw error;
   }
   return body;
 };

@@ -6,7 +6,7 @@ import MasterRecordsPage from "./MasterRecordsPage";
 const page = (type, key, group, columns) => {
   const Screen = () => {
     const { t } = useTranslation();
-    return <MasterRecordsPage type={type} title={t(`opsAcc.masters.${key}.title`)} intro={t(`opsAcc.masters.${key}.intro`)} group={t(group)} section={t(`opsAcc.masters.${key}.section`)} columns={columns} />;
+    return <MasterRecordsPage type={type} title={t(`opsAcc.masters.${key}.title`)} help={t(`opsAcc.masters.${key}.help`)} group={t(group)} section={t(`opsAcc.masters.${key}.section`)} columns={columns} />;
   };
   Screen.displayName = `Master_${key}`;
   return Screen;

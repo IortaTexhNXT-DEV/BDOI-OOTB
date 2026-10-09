@@ -13,6 +13,8 @@ import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import SvgDot from "../../../assets/icons/SvgDot";
 import postingRulesService from "../../../services/postingRulesService";
+import FieldError from "../../../components/FieldError";
+import useFieldErrors, { blank } from "../../../hooks/useFieldErrors";
 import CommissionTaxes from "./CommissionTaxes";
 import "../PostingRules/index.scss";
 
@@ -36,7 +38,12 @@ const AccountDetermination = ({ section = "premium" }) => {
   const sections = useMemo(() => SECTIONS.filter((s) => data?.sections?.some((x) => x.section === s)), [data]);
   const [tab, setTab] = useState(0);
 
-  const fail = (e) => toast.current?.show({ severity: "error", summary: t("postingRules.error"), detail: e.message, life: 8000 });
+  const { errors, check, fromApi, clear } = useFieldErrors();
+  const openReason = (value) => { clear(); setReason(value); };
+  const fail = (e) => {
+    fromApi(e);
+    toast.current?.show({ severity: "error", summary: t("postingRules.error"), detail: e.message, life: 8000 });
+  };
   const done = (msg) => toast.current?.show({ severity: "success", summary: t("postingRules.saved"), detail: msg, life: 3000 });
 
   const load = useCallback(async () => {
@@ -84,11 +91,17 @@ const AccountDetermination = ({ section = "premium" }) => {
   };
   const saveReason = async () => {
     const r = reason;
+    if (!check({
+      code: r.isNew && !/^[A-Za-z0-9_-]{2,30}$/.test(String(r.code || "").trim()) ? t("postingRules.reasonCodeFormat") : null,
+      name: blank(r.name) ? t("postingRules.required") : null,
+      glAccount: r.glAccount ? null : t("postingRules.required"),
+      maxAmount: !blank(r.maxAmount) && !(Number(r.maxAmount) > 0) ? t("postingRules.maxAmountAboveZero") : null,
+    })) return;
     const body = { name: r.name, glAccount: r.glAccount, maxAmount: r.maxAmount === "" || r.maxAmount === null ? null : Number(r.maxAmount), description: r.description || null, status: r.status };
     try {
-      if (r.isNew) await postingRulesService.addWriteOffReason({ code: r.code, ...body });
+      if (r.isNew) await postingRulesService.addWriteOffReason({ code: r.code.trim(), ...body });
       else await postingRulesService.updateWriteOffReason(r.code, body);
-      setReason(null);
+      openReason(null);
       done(t("postingRules.reasonSaved", { code: r.code }));
       load();
     } catch (e) {
@@ -165,7 +178,7 @@ const AccountDetermination = ({ section = "premium" }) => {
           </TabPanel>
           <TabPanel header={t("postingRules.writeOffReasons")}>
             <div className="flex justify-content-end mb-2">
-              <Button label={t("postingRules.addReason")} icon="pi pi-plus" onClick={() => setReason({ ...EMPTY_REASON })} />
+              <Button label={t("postingRules.addReason")} icon="pi pi-plus" onClick={() => openReason({ ...EMPTY_REASON })} />
             </div>
             <DataTable value={data?.writeOffReasons || []} dataKey="code" size="small" stripedRows>
               <Column field="code" header={t("postingRules.reasonCode")} style={{ width: "10rem" }} />
@@ -173,31 +186,35 @@ const AccountDetermination = ({ section = "premium" }) => {
               <Column header={t("postingRules.glAccount")} body={(r) => `${r.glAccount} ${r.glName || ""}`} />
               <Column header={t("postingRules.maxAmount")} body={(r) => (r.maxAmount === null ? "—" : r.maxAmount.toLocaleString("en-US", { minimumFractionDigits: 2 }))} />
               <Column header={t("postingRules.status")} body={(r) => <Tag value={r.status} severity={r.status === "active" ? "success" : "secondary"} />} />
-              <Column style={{ width: "4rem" }} body={(r) => <Button icon="pi pi-pencil" className="p-button-text p-button-sm" onClick={() => setReason({ ...r, maxAmount: r.maxAmount ?? "", isNew: false })} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />} />
+              <Column style={{ width: "4rem" }} body={(r) => <Button icon="pi pi-pencil" className="p-button-text p-button-sm" onClick={() => openReason({ ...r, maxAmount: r.maxAmount ?? "", isNew: false })} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />} />
             </DataTable>
           </TabPanel>
         </TabView>}
       </div>
 
-      <Dialog header={reason?.isNew ? t("postingRules.addReason") : reason?.code} visible={!!reason} style={{ width: "min(560px, 95vw)" }} onHide={() => setReason(null)}
-        footer={<div><Button label={t("postingRules.cancel")} className="p-button-text" onClick={() => setReason(null)} /><Button label={t("postingRules.save")} icon="pi pi-save" onClick={saveReason} /></div>}>
+      <Dialog header={reason?.isNew ? t("postingRules.addReason") : reason?.code} visible={!!reason} style={{ width: "min(560px, 95vw)" }} onHide={() => openReason(null)}
+        footer={<div><Button label={t("postingRules.cancel")} className="p-button-text" onClick={() => openReason(null)} /><Button label={t("postingRules.save")} icon="pi pi-save" onClick={saveReason} /></div>}>
         {reason && (
           <div className="grid posting-rules__editor">
             <div className="col-12 md:col-4">
-              <label>{t("postingRules.reasonCode")}</label>
-              <InputText value={reason.code} disabled={!reason.isNew} onChange={(e) => setReason({ ...reason, code: e.target.value })} className="w-full" />
+              <label>{t("postingRules.reasonCode")} *</label>
+              <InputText value={reason.code} maxLength={30} disabled={!reason.isNew} onChange={(e) => setReason({ ...reason, code: e.target.value.toUpperCase() })} className="w-full" />
+              <FieldError error={errors.code} />
             </div>
             <div className="col-12 md:col-8">
-              <label>{t("postingRules.reason")}</label>
+              <label>{t("postingRules.reason")} *</label>
               <InputText value={reason.name} onChange={(e) => setReason({ ...reason, name: e.target.value })} className="w-full" />
+              <FieldError error={errors.name} />
             </div>
             <div className="col-12">
-              <label>{t("postingRules.glAccount")}</label>
+              <label>{t("postingRules.glAccount")} *</label>
               <Dropdown value={reason.glAccount} options={glOptions} filter onChange={(e) => setReason({ ...reason, glAccount: e.value })} className="w-full" />
+              <FieldError error={errors.glAccount} />
             </div>
             <div className="col-12 md:col-6">
               <label>{t("postingRules.maxAmount")}</label>
               <InputText value={reason.maxAmount} keyfilter="money" onChange={(e) => setReason({ ...reason, maxAmount: e.target.value })} className="w-full" />
+              <FieldError error={errors.maxAmount} />
             </div>
             <div className="col-12 md:col-6">
               <label>{t("postingRules.status")}</label>

@@ -12,7 +12,7 @@ import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
 import service from "../../services/opsAccountingService";
 import { promptText } from "../../utility/dialogs";
-import { Field, OpsTag, PageHeader, date, isoOf, money, numericColumn, showError, showSuccess } from "./common";
+import { Field, OpsTag, PageHeader, blank, date, isoOf, money, numericColumn, showError, showSuccess, useFieldErrors } from "./common";
 
 const STATUSES = ["all", "draft", "for-approval", "open", "approved", "partially-paid", "paid", "rejected", "cancelled"];
 const newLine = (account = "") => ({ description: "", accountCode: account, amount: null, vatable: true, assetClass: null });
@@ -33,6 +33,8 @@ const SupplierInvoices = () => {
   const [classes, setClasses] = useState([]);
   const [form, setForm] = useState(null);
   const [view, setView] = useState(null);
+  const { errors, check, fromApi, clear } = useFieldErrors();
+  const openForm = (value) => { clear(); setForm(value); };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -59,15 +61,21 @@ const SupplierInvoices = () => {
       if (view) setView(await service.supplierInvoice(view.id));
       return true;
     } catch (e) {
+      fromApi(e);
       showError(toast, e);
       return false;
     }
   };
-  const save = (submit) => act(() => service.createSupplierInvoice({
+  const save = (submit) => check({
+    supplierId: form.supplierId ? null : t("opsAcc.required"),
+    supplierInvoiceNo: blank(form.supplierInvoiceNo) ? t("opsAcc.required") : null,
+    invoiceDate: form.invoiceDate ? null : t("opsAcc.required"),
+    lines: form.lines.every((l) => l.amount > 0) ? null : t("opsAcc.ap.lineAmounts"),
+  }) && act(() => service.createSupplierInvoice({
     supplierId: form.supplierId, supplierInvoiceNo: form.supplierInvoiceNo, invoiceDate: isoOf(form.invoiceDate), description: form.description || null,
     ...(form.ewtCode !== undefined ? { ewtCode: form.ewtCode || null } : {}), submit,
     lines: form.lines.map((l) => ({ description: l.description || form.description || "Supplier invoice", accountCode: l.accountCode || undefined, amount: l.amount, vatable: l.vatable, assetClass: l.assetClass || null })),
-  }), (r) => t("opsAcc.ap.saved", { number: r.voucherNumber, status: t(`opsAcc.status.${r.status}`) })).then((ok) => ok && setForm(null));
+  }), (r) => t("opsAcc.ap.saved", { number: r.voucherNumber, status: t(`opsAcc.status.${r.status}`) })).then((ok) => ok && openForm(null));
   const reason = async (label) => promptText(t(label));
   const setLine = (i, patch) => setForm((f) => ({ ...f, lines: f.lines.map((l, k) => (k === i ? { ...l, ...patch } : l)) }));
   const net = (form?.lines || []).reduce((s, l) => s + Number(l.amount || 0), 0);
@@ -76,7 +84,7 @@ const SupplierInvoices = () => {
     <div className="pe-page">
       <Toast ref={toast} />
       <PageHeader title={t("opsAcc.ap.invoices")} section={t("opsAcc.ap.menu")} subtitle={t("opsAcc.ap.invoicesIntro")}>
-        <Button icon="pi pi-plus" label={t("opsAcc.ap.newInvoice")} onClick={() => setForm({ supplierId: null, supplierInvoiceNo: "", invoiceDate: new Date(), description: "", lines: [newLine()] })} />
+        <Button icon="pi pi-plus" label={t("opsAcc.ap.newInvoice")} onClick={() => openForm({ supplierId: null, supplierInvoiceNo: "", invoiceDate: new Date(), description: "", lines: [newLine()] })} />
       </PageHeader>
       <div className="pe-card">
         <div className="flex gap-2 mb-2">
@@ -129,30 +137,31 @@ const SupplierInvoices = () => {
         )}
       </Dialog>
 
-      <Dialog className="pe-dialog" header={t("opsAcc.ap.newInvoice")} visible={!!form} style={{ width: "min(1000px, 98vw)" }} onHide={() => setForm(null)}
-        footer={<div><Button label={t("opsAcc.cancel")} text onClick={() => setForm(null)} /><Button label={t("opsAcc.ap.saveDraft")} outlined onClick={() => save(false)} />
+      <Dialog className="pe-dialog" header={t("opsAcc.ap.newInvoice")} visible={!!form} style={{ width: "min(1000px, 98vw)" }} onHide={() => openForm(null)}
+        footer={<div><Button label={t("opsAcc.cancel")} text onClick={() => openForm(null)} /><Button label={t("opsAcc.ap.saveDraft")} outlined onClick={() => save(false)} />
           <Button label={t("opsAcc.ap.saveSubmit")} icon="pi pi-send" onClick={() => save(true)} /></div>}>
         {form && (
           <>
             <div className="grid">
-              <Field label={t("opsAcc.ap.supplier")} col="col-12 md:col-5" required>
+              <Field label={t("opsAcc.ap.supplier")} col="col-12 md:col-5" required error={errors.supplierId}>
                 <Dropdown value={form.supplierId} options={suppliers.map((s) => ({ label: `${s.name} (${s.code})`, value: s.code }))} filter
                   onChange={(e) => { const s = suppliers.find((x) => x.code === e.value); setForm({ ...form, supplierId: e.value, lines: form.lines.map((l) => ({ ...l, accountCode: l.accountCode || s?.expenseAccount || "" })) }); }} className="w-full" />
               </Field>
-              <Field label={t("opsAcc.ap.supplierInvoice")} col="col-12 md:col-3" required><InputText value={form.supplierInvoiceNo} onChange={(e) => setForm({ ...form, supplierInvoiceNo: e.target.value })} className="w-full" /></Field>
-              <Field label={t("opsAcc.ap.invoiceDate")} col="col-12 md:col-4" required><Calendar value={form.invoiceDate} onChange={(e) => setForm({ ...form, invoiceDate: e.value })} showIcon className="w-full" /></Field>
-              <Field label={t("opsAcc.description")} col="col-12 md:col-8"><InputText value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full" /></Field>
-              <Field label={t("opsAcc.ap.ewtCode")} col="col-12 md:col-4"><InputText value={form.ewtCode ?? supplier?.ewtCode ?? ""} onChange={(e) => setForm({ ...form, ewtCode: e.target.value })} className="w-full" /></Field>
+              <Field label={t("opsAcc.ap.supplierInvoice")} col="col-12 md:col-3" required error={errors.supplierInvoiceNo}><InputText value={form.supplierInvoiceNo} maxLength={60} onChange={(e) => setForm({ ...form, supplierInvoiceNo: e.target.value })} className="w-full" /></Field>
+              <Field label={t("opsAcc.ap.invoiceDate")} col="col-12 md:col-4" required error={errors.invoiceDate}><Calendar value={form.invoiceDate} onChange={(e) => setForm({ ...form, invoiceDate: e.value })} showIcon className="w-full" /></Field>
+              <Field label={t("opsAcc.description")} col="col-12 md:col-8"><InputText value={form.description} maxLength={500} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full" /></Field>
+              <Field label={t("opsAcc.ap.ewtCode")} col="col-12 md:col-4"><InputText value={form.ewtCode ?? supplier?.ewtCode ?? ""} maxLength={20} onChange={(e) => setForm({ ...form, ewtCode: e.target.value })} className="w-full" /></Field>
             </div>
             {supplier && <p className="pe-muted mt-0">{supplier.vatRegistered === false ? t("opsAcc.ap.notVat") : t("opsAcc.ap.vatRegistered")} · {t("opsAcc.ap.terms", { days: supplier.paymentTermsDays ?? "-" })}</p>}
             <DataTable value={form.lines.map((l, i) => ({ ...l, i }))} dataKey="i" size="small">
-              <Column header={t("opsAcc.description")} body={(r) => <InputText value={r.description} onChange={(e) => setLine(r.i, { description: e.target.value })} className="w-full" />} />
-              <Column header={t("opsAcc.ap.account")} body={(r) => <InputText value={r.accountCode} disabled={!!r.assetClass} onChange={(e) => setLine(r.i, { accountCode: e.target.value })} className="w-8rem" />} />
+              <Column header={t("opsAcc.description")} body={(r) => <InputText value={r.description} maxLength={300} onChange={(e) => setLine(r.i, { description: e.target.value })} className="w-full" />} />
+              <Column header={t("opsAcc.ap.account")} body={(r) => <InputText value={r.accountCode} maxLength={20} disabled={!!r.assetClass} onChange={(e) => setLine(r.i, { accountCode: e.target.value })} className="w-8rem" />} />
               <Column header={t("opsAcc.ap.assetClass")} body={(r) => <Dropdown value={r.assetClass} options={classes.map((c) => ({ label: c.name, value: c.code }))} showClear placeholder="-" onChange={(e) => setLine(r.i, { assetClass: e.value })} className="w-10rem" />} />
               <Column header={t("opsAcc.ap.vatable")} body={(r) => <Checkbox checked={r.vatable} onChange={(e) => setLine(r.i, { vatable: e.checked })} />} />
-              <Column header={t("opsAcc.amount")} body={(r) => <InputNumber value={r.amount} mode="decimal" minFractionDigits={2} onValueChange={(e) => setLine(r.i, { amount: e.value })} />} />
+              <Column header={t("opsAcc.amount")} body={(r) => <InputNumber value={r.amount} mode="decimal" minFractionDigits={2} min={0} className={errors.lines && !(r.amount > 0) ? "p-invalid" : undefined} onValueChange={(e) => setLine(r.i, { amount: e.value })} />} />
               <Column body={(r) => <Button icon="pi pi-trash" text size="small" aria-label={t("opsAcc.remove")} disabled={form.lines.length < 2} onClick={() => setForm({ ...form, lines: form.lines.filter((_, k) => k !== r.i) })} />} />
             </DataTable>
+            {errors.lines ? <small className="p-error block mt-1" role="alert">{errors.lines}</small> : null}
             <div className="flex justify-content-between mt-2">
               <Button icon="pi pi-plus" label={t("opsAcc.ap.addLine")} text onClick={() => setForm({ ...form, lines: [...form.lines, newLine(supplier?.expenseAccount || "")] })} />
               <span>{t("opsAcc.ap.net")}: <b>{money(net)}</b></span>

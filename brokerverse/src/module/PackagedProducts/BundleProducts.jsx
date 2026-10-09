@@ -18,6 +18,8 @@ import { confirmAction, notifyError, notifySuccess } from "../../utility/dialogs
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import { PageHeader } from "../Placement/shared";
 import { usePackageOptions } from "./common";
+import FieldError from "../../components/FieldError";
+import useFieldErrors, { blank } from "../../hooks/useFieldErrors";
 import "../Placement/index.scss";
 import "../Administration/index.scss";
 import "./index.scss";
@@ -39,6 +41,8 @@ const BundleProducts = () => {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [edit, setEdit] = useState(null);
+  const { errors, check, fromApi, clear } = useFieldErrors();
+  const open = (value) => { clear(); setEdit(value); };
 
   const load = () => {
     setLoading(true);
@@ -51,7 +55,17 @@ const BundleProducts = () => {
   const propertyOptions = [{ label: k("propertyAuto"), value: null }, { label: t("common.yes", "Yes"), value: true }, { label: t("common.no", "No"), value: false }];
 
   const setSection = (i, patch) => setEdit((e) => ({ ...e, sections: e.sections.map((s, j) => (j === i ? { ...s, ...patch } : s)) }));
+  // each section needs its name, a product of the catalogue (an inactive product is not offered) and an insurer
+  const sectionProblems = () => edit.sections.map((s, i) => {
+    const missing = [blank(s.name) && k("sectionName"), !products.some((p) => p.value === s.productId) && k("product"), !s.insurerIds?.length && k("insurers")].filter(Boolean);
+    return missing.length ? k("sectionMissing", { no: i + 1, fields: missing.join(", ") }) : null;
+  }).filter(Boolean).join(" ");
   const save = async () => {
+    if (!check({
+      code: edit.id ? null : blank(edit.code) ? t("packagedProducts.required") : /^[A-Za-z0-9_-]{1,20}$/.test(edit.code) ? null : t("packagedProducts.codeFormat"),
+      name: blank(edit.name) ? t("packagedProducts.required") : null,
+      sections: sectionProblems() || null,
+    })) return;
     const body = {
       code: edit.code, name: edit.name, description: edit.description || null, customerSegment: edit.customerSegment, discountPercent: edit.discountPercent || 0,
       termMonths: edit.termMonths || 12, autoIssue: Boolean(edit.autoIssue), status: edit.status,
@@ -64,9 +78,10 @@ const BundleProducts = () => {
         await packagesService.updateBundle(edit.id, body);
       } else await packagesService.createBundle(body);
       notifySuccess(k("saved"));
-      setEdit(null);
+      open(null);
       load();
     } catch (e) {
+      fromApi(e);
       notifyError(e.message);
     }
   };
@@ -78,7 +93,7 @@ const BundleProducts = () => {
   return (
     <div className="placement-page pkg-page">
       <PageHeader title={k("title")}>
-        <Button label={k("add")} icon="pi pi-plus" onClick={() => setEdit(JSON.parse(JSON.stringify(EMPTY)))} />
+        <Button label={k("add")} icon="pi pi-plus" onClick={() => open(JSON.parse(JSON.stringify(EMPTY)))} />
       </PageHeader>
       <DataTable value={rows} loading={loading} dataKey="id" size="small" stripedRows emptyMessage={k("empty")} responsiveLayout="scroll">
         <Column field="code" header={k("code")} />
@@ -90,19 +105,19 @@ const BundleProducts = () => {
         <Column header={k("status")} body={(b) => <Tag value={t(`packagedProducts.${b.status}`)} severity={b.status === "active" ? "success" : "danger"} />} />
         <Column body={(b) => (
           <div className="admin__actions">
-            <Button icon="pi pi-pencil" rounded text aria-label={t("common.edit")} onClick={() => setEdit(JSON.parse(JSON.stringify({ ...b, description: b.description || "" })))} tooltip={t("common.edit")} tooltipOptions={{ position: "top" }} />
+            <Button icon="pi pi-pencil" rounded text aria-label={t("common.edit")} onClick={() => open(JSON.parse(JSON.stringify({ ...b, description: b.description || "" })))} tooltip={t("common.edit")} tooltipOptions={{ position: "top" }} />
             <Button icon="pi pi-trash" rounded text severity="danger" aria-label={t("common.delete")} onClick={() => remove(b)} tooltip={t("common.delete")} tooltipOptions={{ position: "top" }} />
           </div>
         )} style={{ width: "7rem" }} />
       </DataTable>
 
-      <Dialog header={edit?.id ? k("edit") : k("add")} visible={Boolean(edit)} onHide={() => setEdit(null)} style={{ width: "min(72rem, 96vw)" }} maximizable
-        footer={<><Button label={t("common.cancel")} text onClick={() => setEdit(null)} /><Button label={t("common.save")} icon="pi pi-check" onClick={save} /></>}>
+      <Dialog header={edit?.id ? k("edit") : k("add")} visible={Boolean(edit)} onHide={() => open(null)} style={{ width: "min(72rem, 96vw)" }} maximizable
+        footer={<><Button label={t("common.cancel")} text onClick={() => open(null)} /><Button label={t("common.save")} icon="pi pi-check" onClick={save} /></>}>
         {edit && (
           <>
             <div className="admin__grid">
-              <div className="admin__field"><label htmlFor="b-code">{k("code")}</label><InputText id="b-code" value={edit.code} disabled={Boolean(edit.id)} onChange={(e) => setEdit({ ...edit, code: e.target.value.toUpperCase() })} /></div>
-              <div className="admin__field"><label htmlFor="b-name">{k("name")}</label><InputText id="b-name" value={edit.name} onChange={(e) => setEdit({ ...edit, name: e.target.value })} /></div>
+              <div className="admin__field"><label htmlFor="b-code">{k("code")} *</label><InputText id="b-code" value={edit.code} maxLength={20} disabled={Boolean(edit.id)} onChange={(e) => setEdit({ ...edit, code: e.target.value.toUpperCase() })} /><FieldError error={errors.code} /></div>
+              <div className="admin__field"><label htmlFor="b-name">{k("name")} *</label><InputText id="b-name" value={edit.name} onChange={(e) => setEdit({ ...edit, name: e.target.value })} /><FieldError error={errors.name} /></div>
               <div className="admin__field"><label htmlFor="b-seg">{k("segment")}</label><Dropdown inputId="b-seg" value={edit.customerSegment} options={SEGMENTS.map((s) => ({ label: t(`packagedProducts.segments.${s}`, { defaultValue: s }), value: s }))} onChange={(e) => setEdit({ ...edit, customerSegment: e.value })} /></div>
               <div className="admin__field"><label htmlFor="b-disc">{k("discount")}</label><InputNumber inputId="b-disc" value={edit.discountPercent} suffix="%" maxFractionDigits={4} min={0} max={99.99} onValueChange={(e) => setEdit({ ...edit, discountPercent: e.value })} /></div>
               <div className="admin__field"><label htmlFor="b-term">{k("termMonths")}</label><InputNumber inputId="b-term" value={edit.termMonths} min={1} max={60} onValueChange={(e) => setEdit({ ...edit, termMonths: e.value })} /></div>
@@ -140,6 +155,7 @@ const BundleProducts = () => {
                 </tbody>
               </table>
             </div>
+            <FieldError error={errors.sections} />
             <Button label={k("addSection")} icon="pi pi-plus" text onClick={() => setEdit({ ...edit, sections: [...edit.sections, { ...EMPTY_SECTION }] })} />
             <p className="muted">{k("insurersHelp")}</p>
           </>

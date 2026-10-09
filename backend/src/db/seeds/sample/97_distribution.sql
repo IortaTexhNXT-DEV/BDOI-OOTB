@@ -76,7 +76,7 @@ SELECT 'Clients with an active policy', 'Every client with a policy in force (pe
 WHERE NOT EXISTS (SELECT 1 FROM campaign_segments WHERE name = 'Clients with an active policy');
 
 INSERT INTO campaigns(id, campaign_number, name, segment_id, template_id, status, scheduled_at, recipients, excluded, notes, created_by, updated_by, created_at)
-SELECT v.id, next_number('campaign', 'WB'), v.name, s.id, t.id, v.status, CASE WHEN v.status = 'scheduled' THEN date_trunc('day', now()) + interval '3 days 9 hours' END, 0, 0, v.notes,
+SELECT v.id, next_document_number('marketing_campaign'), v.name, s.id, t.id, v.status, CASE WHEN v.status = 'scheduled' THEN date_trunc('day', now()) + interval '3 days 9 hours' END, 0, 0, v.notes,
   (SELECT id FROM users WHERE username = 'BrokerVerse'), (SELECT id FROM users WHERE username = 'BrokerVerse'), now() - interval '2 days'
 FROM (VALUES ('cmp_seed_01', 'Motor renewals - next 60 days', 'Motor clients renewing in 60 days', 'MOTOR-RENEW', 'scheduled', 'Monthly renewal reminder to the Toyota owners'),
              ('cmp_seed_02', 'PA cross-sell to Toyota owners', 'Clients with an active policy', 'PA-TOYOTA', 'draft', 'Waiting for the PA rates of the panel for the new quarter')) AS v(id, name, segment, template, status, notes)

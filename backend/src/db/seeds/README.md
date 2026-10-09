@@ -71,6 +71,7 @@ A sample row that the purge script must remove needs a key listed in `scripts/pu
 | `83_tisph_lists.sql` | reference | the 14 lead sources of Pre-BSM M07 and the 32 reason codes of M24 that have no master of their own (decline, repudiation, lapse, refund, adjustment, non-materialise) |
 | `84_claim_document_claim_types.sql` | reference | claim types of the M14 claim documents that only some claims need (third party, collision, theft, death), so a claim lists the documents of its cause of loss |
 | `84_lead_reassignment_reasons.sql` | reference | the context reassignment on the Reason Code master and its reasons (account executive left or on leave, territory or branch change, workload balancing, customer request, not worked in time, needs a specialist, other): the reason of a prospect reassigned or sent to the reassignment queue |
+| `85_tisph_campaign_templates.sql` | reference | the TISPH campaign e-mail templates: Motor renewal reminder, Motor insurance for new Toyota owners, Personal Accident offer, Credit Life information |
 
 ### Sample files (TISPH sample business)
 

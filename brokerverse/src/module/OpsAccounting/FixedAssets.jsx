@@ -10,7 +10,7 @@ import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
 import service from "../../services/opsAccountingService";
-import { Field, OpsTag, PageHeader, date, isoOf, money, numericColumn, showError, showSuccess } from "./common";
+import { Field, OpsTag, PageHeader, blank, date, isoOf, money, numericColumn, showError, showSuccess, useFieldErrors } from "./common";
 import { DisposeAssetDialog } from "./AssetDisposals";
 import { hasPermission } from "../../utils/canOpen";
 
@@ -41,15 +41,26 @@ export const AssetRegister = () => {
   useEffect(() => { load(); }, [load]);
   useEffect(() => { service.assetClasses().then(setClasses).catch(() => {}); }, []);
 
+  const { errors, check, fromApi, clear } = useFieldErrors();
+  const openForm = (value) => { clear(); setForm(value); };
   const save = async () => {
+    const required = t("opsAcc.required");
+    if (!check({
+      name: blank(form.name) ? required : null,
+      classCode: form.classCode ? null : required,
+      acquisitionDate: form.acquisitionDate ? null : required,
+      cost: form.cost > 0 ? null : t("opsAcc.amountAboveZero"),
+      inServiceDate: form.inServiceDate && form.acquisitionDate && form.inServiceDate < form.acquisitionDate ? t("opsAcc.fa.inServiceBeforeAcquired") : null,
+    })) return;
     try {
       const a = await service.createAsset({ name: form.name, classCode: form.classCode, acquisitionDate: isoOf(form.acquisitionDate), inServiceDate: isoOf(form.inServiceDate) || undefined,
         cost: form.cost, salvageValue: form.salvageValue ?? undefined, usefulLifeMonths: form.usefulLifeMonths ?? undefined, location: form.location || null, custodian: form.custodian || null,
-        serialNumber: form.serialNumber || null, openingAccumulated: form.openingAccumulated ?? undefined, depreciateFrom: form.depreciateFrom || undefined });
+        serialNumber: form.serialNumber || null, openingAccumulated: form.openingAccumulated ?? undefined, depreciateFrom: isoOf(form.depreciateFrom)?.slice(0, 7) || undefined });
       showSuccess(toast, t("opsAcc.fa.registered", { number: a.assetNumber }));
-      setForm(null);
+      openForm(null);
       load();
     } catch (e) {
+      fromApi(e);
       showError(toast, e);
     }
   };
@@ -59,7 +70,7 @@ export const AssetRegister = () => {
       <Toast ref={toast} />
       <PageHeader title={t("opsAcc.fa.register")} section={t("opsAcc.fa.menu")} subtitle={t("opsAcc.fa.registerIntro")}>
         <Button icon="pi pi-download" label={t("opsAcc.export")} outlined onClick={() => service.downloadAssets().catch((e) => showError(toast, e))} />
-        <Button icon="pi pi-plus" label={t("opsAcc.fa.newAsset")} onClick={() => setForm({ name: "", classCode: classes[0]?.code || null, acquisitionDate: new Date(), inServiceDate: null, cost: null })} />
+        <Button icon="pi pi-plus" label={t("opsAcc.fa.newAsset")} onClick={() => openForm({ name: "", classCode: classes[0]?.code || null, acquisitionDate: new Date(), inServiceDate: null, cost: null })} />
       </PageHeader>
       {data && (
         <div className="flex gap-4 mb-3">
@@ -110,22 +121,24 @@ export const AssetRegister = () => {
         )}
       </Dialog>
       <DisposeAssetDialog asset={disposing} onHide={() => setDisposing(null)} onDisposed={() => { setDisposing(null); load(); }} />
-      <Dialog className="pe-dialog" header={t("opsAcc.fa.newAsset")} visible={!!form} style={{ width: "min(780px, 96vw)" }} onHide={() => setForm(null)}
-        footer={<div><Button label={t("opsAcc.cancel")} text onClick={() => setForm(null)} /><Button label={t("opsAcc.save")} icon="pi pi-save" onClick={save} /></div>}>
+      <Dialog className="pe-dialog" header={t("opsAcc.fa.newAsset")} visible={!!form} style={{ width: "min(780px, 96vw)" }} onHide={() => openForm(null)}
+        footer={<div><Button label={t("opsAcc.cancel")} text onClick={() => openForm(null)} /><Button label={t("opsAcc.save")} icon="pi pi-save" onClick={save} /></div>}>
         {form && (
           <div className="grid">
-            <Field label={t("opsAcc.fa.name")} col="col-12 md:col-8" required><InputText value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full" /></Field>
-            <Field label={t("opsAcc.fa.class")} col="col-12 md:col-4" required><Dropdown value={form.classCode} options={classes.map((c) => ({ label: c.name, value: c.code }))} onChange={(e) => setForm({ ...form, classCode: e.value })} className="w-full" /></Field>
-            <Field label={t("opsAcc.fa.acquired")} col="col-12 md:col-4" required><Calendar value={form.acquisitionDate} onChange={(e) => setForm({ ...form, acquisitionDate: e.value })} showIcon className="w-full" /></Field>
-            <Field label={t("opsAcc.fa.inService")} col="col-12 md:col-4"><Calendar value={form.inServiceDate} onChange={(e) => setForm({ ...form, inServiceDate: e.value })} showIcon className="w-full" /></Field>
-            <Field label={t("opsAcc.fa.cost")} col="col-12 md:col-4" required><InputNumber value={form.cost} mode="decimal" minFractionDigits={2} onValueChange={(e) => setForm({ ...form, cost: e.value })} className="w-full" /></Field>
+            <Field label={t("opsAcc.fa.name")} col="col-12 md:col-8" required error={errors.name}><InputText value={form.name} maxLength={200} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full" /></Field>
+            <Field label={t("opsAcc.fa.class")} col="col-12 md:col-4" required error={errors.classCode}><Dropdown value={form.classCode} options={classes.map((c) => ({ label: c.name, value: c.code }))} onChange={(e) => setForm({ ...form, classCode: e.value })} className="w-full" /></Field>
+            <Field label={t("opsAcc.fa.acquired")} col="col-12 md:col-4" required error={errors.acquisitionDate}><Calendar value={form.acquisitionDate} onChange={(e) => setForm({ ...form, acquisitionDate: e.value })} showIcon className="w-full" /></Field>
+            <Field label={t("opsAcc.fa.inService")} col="col-12 md:col-4" error={errors.inServiceDate}><Calendar value={form.inServiceDate} onChange={(e) => setForm({ ...form, inServiceDate: e.value })} showIcon className="w-full" /></Field>
+            <Field label={t("opsAcc.fa.cost")} col="col-12 md:col-4" required error={errors.cost}><InputNumber value={form.cost} mode="decimal" minFractionDigits={2} min={0} onValueChange={(e) => setForm({ ...form, cost: e.value })} className="w-full" /></Field>
             <Field label={t("opsAcc.fa.salvage")} col="col-12 md:col-4"><InputNumber value={form.salvageValue ?? null} mode="decimal" minFractionDigits={2} onValueChange={(e) => setForm({ ...form, salvageValue: e.value })} className="w-full" /></Field>
-            <Field label={t("opsAcc.fa.lifeMonths")} col="col-12 md:col-4"><InputNumber value={form.usefulLifeMonths ?? null} placeholder={t("opsAcc.fa.fromClass")} onValueChange={(e) => setForm({ ...form, usefulLifeMonths: e.value })} className="w-full" /></Field>
-            <Field label={t("opsAcc.fa.serial")} col="col-12 md:col-4"><InputText value={form.serialNumber || ""} onChange={(e) => setForm({ ...form, serialNumber: e.target.value })} className="w-full" /></Field>
-            <Field label={t("opsAcc.fa.location")} col="col-12 md:col-6"><InputText value={form.location || ""} onChange={(e) => setForm({ ...form, location: e.target.value })} className="w-full" /></Field>
-            <Field label={t("opsAcc.fa.custodian")} col="col-12 md:col-6"><InputText value={form.custodian || ""} onChange={(e) => setForm({ ...form, custodian: e.target.value })} className="w-full" /></Field>
+            <Field label={t("opsAcc.fa.lifeMonths")} col="col-12 md:col-4"><InputNumber value={form.usefulLifeMonths ?? null} min={1} max={600} placeholder={t("opsAcc.fa.fromClass")} onValueChange={(e) => setForm({ ...form, usefulLifeMonths: e.value })} className="w-full" /></Field>
+            <Field label={t("opsAcc.fa.serial")} col="col-12 md:col-4"><InputText value={form.serialNumber || ""} maxLength={100} onChange={(e) => setForm({ ...form, serialNumber: e.target.value })} className="w-full" /></Field>
+            <Field label={t("opsAcc.fa.location")} col="col-12 md:col-6"><InputText value={form.location || ""} maxLength={200} onChange={(e) => setForm({ ...form, location: e.target.value })} className="w-full" /></Field>
+            <Field label={t("opsAcc.fa.custodian")} col="col-12 md:col-6"><InputText value={form.custodian || ""} maxLength={200} onChange={(e) => setForm({ ...form, custodian: e.target.value })} className="w-full" /></Field>
             <Field label={t("opsAcc.fa.opening")} col="col-12 md:col-6"><InputNumber value={form.openingAccumulated ?? null} mode="decimal" minFractionDigits={2} onValueChange={(e) => setForm({ ...form, openingAccumulated: e.value })} className="w-full" /></Field>
-            <Field label={t("opsAcc.fa.depreciateFrom")} col="col-12 md:col-6"><InputText value={form.depreciateFrom || ""} placeholder="YYYY-MM" onChange={(e) => setForm({ ...form, depreciateFrom: e.target.value })} className="w-full" /></Field>
+            <Field label={t("opsAcc.fa.depreciateFrom")} col="col-12 md:col-6" error={errors.depreciateFrom}>
+              <Calendar value={form.depreciateFrom || null} view="month" dateFormat="yy-mm" placeholder="YYYY-MM" showIcon showButtonBar onChange={(e) => setForm({ ...form, depreciateFrom: e.value })} className="w-full" />
+            </Field>
           </div>
         )}
       </Dialog>

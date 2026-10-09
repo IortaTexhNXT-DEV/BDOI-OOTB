@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "primereact/button";
-import SvgAdd from "../../../../../assets/icons/SvgAdd";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../../assets/icons/SvgDot";
@@ -11,8 +9,6 @@ import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
-import SvgEyeIcon from "../../../../../assets/icons/SvgEyeIcon";
-import SvgEditIcon from "../../../../../assets/icons/SvgEditIcon";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getHierarchyPatchMiddleWare,
@@ -23,6 +19,8 @@ import {
 import MasterStatusToggle from "../../../common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
 import { formatDate as formatAppDate } from "../../../../../utility/dateFormat";
+import RowActions, { actionsColumn } from "../../../../../components/RowActions";
+import PageActions from "../../../../../components/PageActions";
 
 const HierarchyMaster = () => {
   const { t } = useTranslation();
@@ -85,33 +83,8 @@ const HierarchyMaster = () => {
     color: "#000",
     border: "none",
   };
-  const ViewheaderStyle = {
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    padding: "1rem",
-    color: "#000",
-    border: "none",
-    display: "flex",
-    justifyContent: "center",
-  };
 
-
-
-  const renderViewButton = (rowData) => {
-    return (
-      <div className="center-content">
-        <Button
-          icon={<SvgEyeIcon />}
-          className="eye__btn"
-          onClick={() => handleView(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
-        <Button
-          icon={<SvgEditIcon />}
-          className="eye__btn"
-          onClick={() => handlEdit(rowData)} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
-      </div>
-    );
-  };
+  const renderViewButton = (rowData) => <RowActions onView={() => handleView(rowData)} onEdit={() => handlEdit(rowData)} />;
 
   const template2 = {
     layout:
@@ -156,12 +129,7 @@ const HierarchyMaster = () => {
         </div>
       </div>
       <div className="col-12 md:col-6 lg:col-6 add__icon__alighn__hierarchy mb-1">
-        <button type="button" className="add__icon__view__hierarchy bv-add-button" onClick={handleNavigate}>
-          <div className="add__icon__hierarchy">
-            <SvgAdd />
-          </div>
-          <div className="add__text__hierarchy">{t("generalMasters.add")}</div>
-        </button>
+        <PageActions onAdd={handleNavigate} />
       </div>
       <div className="col-12 m-0 ">
         <div className="sub__account__sub__container__hierarchy">
@@ -248,12 +216,10 @@ const HierarchyMaster = () => {
                   className="fieldvalue_container"
                 ></Column>
                 <Column
-                  field="action"
                   body={renderViewButton}
-                  header="Action"
-                  headerStyle={{ ...ViewheaderStyle }}
-                  className="fieldvalue_container_centered"
-                ></Column>
+                  header={t("common.actions")}
+                  {...actionsColumn}
+                />
               </DataTable>
             </div>
           </div>

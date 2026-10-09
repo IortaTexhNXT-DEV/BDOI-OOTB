@@ -33,7 +33,7 @@ const initialValues = {
   AddressLine3: "",
   City: "",
   State: "",
-  Country: "",
+  Country: "Philippines",
   PhoneNumber: "",
   Fax: "",
 };
@@ -184,6 +184,7 @@ function AddBranch({ action }) {
         <div class="grid">
           <div class="col-12 md:col-6 lg:col-3">
             <InputField
+              required
               classNames="field__container"
               label={t("generalMasters.branchCode")}
               placeholder={t("generalMasters.enter")}
@@ -205,6 +206,7 @@ function AddBranch({ action }) {
           </div>
           <div class="col-12 md:col-6 lg:col-3">
             <InputField
+              required
               classNames="field__container"
               label={t("generalMasters.branchName")}
               placeholder={t("generalMasters.enter")}
@@ -226,6 +228,7 @@ function AddBranch({ action }) {
           </div>
           <div class="col-12 md:col-6 lg:col-3">
             <DropDowns
+              required
               className="dropdown__container"
               label={t("generalMasters.companyName")}
               value={
@@ -250,6 +253,7 @@ function AddBranch({ action }) {
           </div>
           <div class="col-12 md:col-6 lg:col-3">
             <InputField
+              required
               classNames="field__container"
               label={t("generalMasters.emailIdBranch")}
               placeholder={t("generalMasters.enter")}
@@ -275,6 +279,7 @@ function AddBranch({ action }) {
           <div class="sm-col-12 col-12 md:col-6 lg-col-6">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label={t("generalMasters.description")}
                 placeholder={t("generalMasters.enter")}
@@ -369,6 +374,7 @@ function AddBranch({ action }) {
           </div>
           <div class="col-12 md:col-6 lg:col-3">
             <DropDowns
+              required
               className="dropdown__container"
               label={t("generalMasters.city")}
               value={
@@ -393,6 +399,7 @@ function AddBranch({ action }) {
           </div>
           <div class="col-12 md:col-6 lg:col-3">
             <DropDowns
+              required
               className="dropdown__container"
               label={t("generalMasters.state")}
               value={
@@ -417,6 +424,7 @@ function AddBranch({ action }) {
           </div>
           <div class="col-12 md:col-6 lg:col-3">
             <DropDowns
+              required
               className="dropdown__container"
               label={t("generalMasters.country")}
               optionLabel="label"

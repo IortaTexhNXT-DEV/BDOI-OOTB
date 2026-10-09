@@ -1,6 +1,7 @@
 /**
- * Maps /roles records ({ id, code, name, description, permissions[], status }) to the Role screens'
- * fields ({ roleCode, roleName, roleDescription, menuAccess, subMenuAccess, permissions }) and back.
+ * Maps /roles records ({ id, code, name, description, permissions[], status, department, platform, modifiedBy,
+ * modifiedAt }) to the Role screens' fields ({ roleCode, roleName, roleDescription, menuAccess, subMenuAccess,
+ * permissions }) and back.
  * Menu / sub-menu access are permission modules (e.g. "masters"); the permission level is "read" or "write".
  */
 const unique = (items) => [...new Set(items.filter(Boolean))];
@@ -26,11 +27,17 @@ export const toRoleRow = (role) => {
     permissionCodes: codes,
     users: role.users,
     isSystem: role.isSystem,
-    modifiedBy: "",
-    modifiedOn: role.createdAt ? String(role.createdAt).slice(0, 10) : "",
+    department: role.department || "",
+    groupOrder: role.groupOrder ?? null,
+    platform: !!role.platform,
+    modifiedBy: role.modifiedBy || "",
+    modifiedOn: role.modifiedAt || role.createdAt ? String(role.modifiedAt || role.createdAt).slice(0, 10) : "",
     status: role.status === "inactive" ? "Inactive" : "Active",
   };
 };
+
+/** Roles of a department first, in the order of the user form (access.role_groups), then the others in creation order. */
+export const byDepartment = (a, b) => (a.groupOrder ?? Number.MAX_SAFE_INTEGER) - (b.groupOrder ?? Number.MAX_SAFE_INTEGER) || a.id - b.id;
 
 /** Permission codes granted by the chosen menu / sub-menu modules and level ("write" includes read). */
 export const accessPermissions = ({ menuAccess, subMenuAccess, permissions }) => {

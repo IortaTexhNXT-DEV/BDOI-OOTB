@@ -145,15 +145,6 @@ export const ProductTemplateManager = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
-  // Product Configurator > Create (dashboard "Create New Product") opens the create dialog over the list
-  useEffect(() => {
-    if (location.pathname.endsWith("/product-configurator/create")) {
-      setSelectedTemplate({ status: "Active" });
-      setTemplateErrors({});
-      setShowDialog(true);
-    }
-  }, [location.pathname]);
-
   useEffect(() => {
     if (id) dispatch(fetchProductTemplateByIdMiddleware({ templateId: id }));
     else {
@@ -161,6 +152,16 @@ export const ProductTemplateManager = () => {
       setSelectedTemplate(null);
     }
   }, [id, dispatch]);
+
+  // Product Configurator > Create (dashboard "Create New Product") opens the create dialog over the list; after the
+  // reset above, so the new template keeps its default status
+  useEffect(() => {
+    if (location.pathname.endsWith("/product-configurator/create")) {
+      setSelectedTemplate({ status: "Active" });
+      setTemplateErrors({});
+      setShowDialog(true);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     if (id && templateFromStore) setSelectedTemplate(templateFromStore);
@@ -336,7 +337,7 @@ export const ProductTemplateManager = () => {
             </div>
             <div className="field col-12 md:col-6">
               <label htmlFor="tpl-status">{t("productTemplateManager.status")} *</label>
-              <Dropdown inputId="tpl-status" value={selectedTemplate?.status || "Active"} options={statusOptions} onChange={(e) => setSelectedTemplate({ ...selectedTemplate, status: e.value })} />
+              <Dropdown inputId="tpl-status" value={selectedTemplate?.status ?? null} options={statusOptions} onChange={(e) => setSelectedTemplate({ ...selectedTemplate, status: e.value })} />
               <FieldError error={templateErrors.status} />
             </div>
           </div>

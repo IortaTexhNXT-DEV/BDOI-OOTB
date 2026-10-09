@@ -1,6 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Button } from "primereact/button";
-import SvgAdd from "../../../assets/icons/SvgAdd";
 import "../CurrencyMaster/index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../assets/icons/SvgDot";
@@ -9,9 +7,7 @@ import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
-import SvgUploade from "../../../assets/icons/SvgUploade";
 import SvgTable from "../../../assets/icons/SvgTable";
-import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getCurrencyDetailEdit,
@@ -19,11 +15,12 @@ import {
   getCurrencySearchList,
   getCurrencyList,
 } from "./store/currencyMasterMiddlewar";
-import SvgEditicons from "../../../assets/icons/SvgEditicons";
 import { useTranslation } from "react-i18next";
 import MasterStatusToggle from "../../GeneralMasters/common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
 import ImportDialog, { masterTarget } from "../../../components/ImportDialog";
+import RowActions, { actionsColumn } from "../../../components/RowActions";
+import PageActions from "../../../components/PageActions";
 
 const UPLOAD_TARGETS = [masterTarget("currency", "Currencies")];
 
@@ -86,20 +83,7 @@ const CurrencyMaster = () => {
     },
   };
 
-  const renderViewButton = (rowData) => {
-    return (
-      <div className="center-content">
-        <Button
-          icon={<SvgEyeIcon />}
-          className="eye__btn"
-          onClick={() => handleView(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
-        <Button
-          icon={<SvgEditicons />}
-          className="eye__btn"
-          onClick={() => handleEdit(rowData)} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
-      </div>
-    );
-  };
+  const renderViewButton = (rowData) => <RowActions onView={() => handleView(rowData)} onEdit={() => handleEdit(rowData)} />;
 
   const handleView = (rowData) => {
     dispatch(getCurrencyDetailView(rowData));
@@ -117,17 +101,6 @@ const CurrencyMaster = () => {
     padding: 6,
     color: "#000",
     border: "none",
-  };
-  const ViewheaderStyle = {
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    padding: 6,
-    color: "#000",
-    border: "none",
-    display: "flex",
-    justifyContent: "center",
-    width: "8rem",
   };
 
   const handleNavigate = () => {
@@ -159,21 +132,8 @@ const CurrencyMaster = () => {
       </div>
       <div className="col-12 md:col-6 lg:col-6 add__icon__alighn mb-1">
         <div className="btn__container">
-          <Button onClick={() => setShowUpload(true)}
-            label={t("financeMasters.upload")}
-            icon={<SvgUploade />}
-            className="upload__btn"
-            outlined
-          />
+          <PageActions onUpload={() => setShowUpload(true)} onAdd={() => handleNavigate()} />
           <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title="Upload currencies" targets={UPLOAD_TARGETS} onDone={reloadList} />
-          <Button
-            label={t("common.add")}
-            icon={<SvgAdd color={"#fff"} />}
-            className="add__btn"
-            onClick={() => {
-              handleNavigate();
-            }}
-          />
         </div>
       </div>
       <div className="col-12 m-0 ">
@@ -278,10 +238,9 @@ const CurrencyMaster = () => {
                 ></Column>
                 <Column
                   body={renderViewButton}
-                  header={t("financeMasters.view")}
-                  headerStyle={{ ...ViewheaderStyle }}
-                  className="fieldvalue_container_centered"
-                ></Column>
+                  header={t("common.actions")}
+                  {...actionsColumn}
+                />
               </DataTable>
             </div>
           </div>

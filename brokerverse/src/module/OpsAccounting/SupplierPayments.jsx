@@ -10,7 +10,7 @@ import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
 import service from "../../services/opsAccountingService";
 import { promptText } from "../../utility/dialogs";
-import { Field, OpsTag, PageHeader, date, isoOf, money, numericColumn, showError, showSuccess } from "./common";
+import { Field, OpsTag, PageHeader, date, isoOf, money, numericColumn, showError, showSuccess, useFieldErrors } from "./common";
 
 /** Accounts > Payables > Supplier Payments: pay approved invoices of a supplier from a bank account (posting rule ap.payment). */
 export const SupplierPayments = () => {
@@ -47,14 +47,21 @@ export const SupplierPayments = () => {
       showError(toast, e);
     }
   };
+  const { errors, check, fromApi, clear } = useFieldErrors();
+  const openForm = (value) => { clear(); setForm(value); };
   const pay = async () => {
+    if (!check({
+      supplierId: form.supplierId ? null : t("opsAcc.required"),
+      payFromAccount: form.payFromAccount ? null : t("opsAcc.ap.chooseAccount"),
+    })) return;
     try {
       const r = await service.createSupplierPayment({ supplierId: form.supplierId, paymentMode: form.paymentMode, payFromAccount: form.payFromAccount, chequeNumber: form.chequeNumber || null,
         paymentDate: isoOf(form.paymentDate), reference: form.reference || null, allocations: form.selected.map((i) => ({ invoiceId: i.id })) });
       showSuccess(toast, t("opsAcc.ap.paid", { number: r.paymentNumber }));
-      setForm(null);
+      openForm(null);
       load();
     } catch (e) {
+      fromApi(e);
       showError(toast, e);
     }
   };
@@ -75,7 +82,7 @@ export const SupplierPayments = () => {
     <div className="pe-page">
       <Toast ref={toast} />
       <PageHeader title={t("opsAcc.ap.payments")} section={t("opsAcc.ap.menu")} subtitle={t("opsAcc.ap.paymentsIntro")}>
-        <Button icon="pi pi-plus" label={t("opsAcc.ap.newPayment")} onClick={() => setForm({ supplierId: null, invoices: [], selected: [], paymentMode: "check", payFromAccount: accounts[0]?.value || null, chequeNumber: "", paymentDate: new Date(), reference: "" })} />
+        <Button icon="pi pi-plus" label={t("opsAcc.ap.newPayment")} onClick={() => openForm({ supplierId: null, invoices: [], selected: [], paymentMode: "check", payFromAccount: accounts.length === 1 ? accounts[0].value : null, chequeNumber: "", paymentDate: new Date(), reference: "" })} />
       </PageHeader>
       <div className="pe-card">
         <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("opsAcc.ap.searchHint")} className="w-20rem mb-2" />
@@ -96,21 +103,21 @@ export const SupplierPayments = () => {
           )} />
         </DataTable>
       </div>
-      <Dialog className="pe-dialog" header={t("opsAcc.ap.newPayment")} visible={!!form} style={{ width: "min(900px, 96vw)" }} onHide={() => setForm(null)}
-        footer={<div><Button label={t("opsAcc.cancel")} text onClick={() => setForm(null)} /><Button label={t("opsAcc.ap.pay", { amount: money(total) })} icon="pi pi-check" disabled={!form?.selected.length} onClick={pay} /></div>}>
+      <Dialog className="pe-dialog" header={t("opsAcc.ap.newPayment")} visible={!!form} style={{ width: "min(900px, 96vw)" }} onHide={() => openForm(null)}
+        footer={<div><Button label={t("opsAcc.cancel")} text onClick={() => openForm(null)} /><Button label={t("opsAcc.ap.pay", { amount: money(total) })} icon="pi pi-check" disabled={!form?.selected.length} onClick={pay} /></div>}>
         {form && (
           <>
             <div className="grid">
-              <Field label={t("opsAcc.ap.supplier")} col="col-12 md:col-6" required>
+              <Field label={t("opsAcc.ap.supplier")} col="col-12 md:col-6" required error={errors.supplierId}>
                 <Dropdown value={form.supplierId} options={suppliers.map((s) => ({ label: `${s.name} (${s.code})`, value: s.code }))} filter onChange={(e) => pickSupplier(e.value)} className="w-full" />
               </Field>
               <Field label={t("opsAcc.date")} col="col-12 md:col-3"><Calendar value={form.paymentDate} onChange={(e) => setForm({ ...form, paymentDate: e.value })} showIcon className="w-full" /></Field>
               <Field label={t("opsAcc.paymentMode")} col="col-12 md:col-3">
                 <Dropdown value={form.paymentMode} options={["check", "bank-transfer", "cash"].map((m) => ({ label: t(`opsAcc.modes.${m}`), value: m }))} onChange={(e) => setForm({ ...form, paymentMode: e.value })} className="w-full" />
               </Field>
-              <Field label={t("opsAcc.bankAccount")} col="col-12 md:col-6"><Dropdown value={form.payFromAccount} options={accounts} optionLabel="label" optionValue="value" onChange={(e) => setForm({ ...form, payFromAccount: e.value })} className="w-full" /></Field>
-              <Field label={t("opsAcc.ap.cheque")} col="col-12 md:col-3"><InputText value={form.chequeNumber} onChange={(e) => setForm({ ...form, chequeNumber: e.target.value })} className="w-full" /></Field>
-              <Field label={t("opsAcc.reference")} col="col-12 md:col-3"><InputText value={form.reference} onChange={(e) => setForm({ ...form, reference: e.target.value })} className="w-full" /></Field>
+              <Field label={t("opsAcc.bankAccount")} col="col-12 md:col-6" required error={errors.payFromAccount}><Dropdown value={form.payFromAccount} options={accounts} optionLabel="label" optionValue="value" onChange={(e) => setForm({ ...form, payFromAccount: e.value })} className="w-full" /></Field>
+              <Field label={t("opsAcc.ap.cheque")} col="col-12 md:col-3"><InputText value={form.chequeNumber} maxLength={40} onChange={(e) => setForm({ ...form, chequeNumber: e.target.value })} className="w-full" /></Field>
+              <Field label={t("opsAcc.reference")} col="col-12 md:col-3"><InputText value={form.reference} maxLength={100} onChange={(e) => setForm({ ...form, reference: e.target.value })} className="w-full" /></Field>
             </div>
             <DataTable value={form.invoices} dataKey="id" size="small" selectionMode="checkbox" selection={form.selected} onSelectionChange={(e) => setForm({ ...form, selected: e.value })} emptyMessage={t("opsAcc.ap.noOpen")}>
               <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />

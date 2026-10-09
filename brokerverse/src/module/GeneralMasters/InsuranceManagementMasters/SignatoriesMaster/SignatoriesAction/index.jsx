@@ -78,7 +78,7 @@ const SignatoriesDetailsAction = ({ action }) => {
     }
   };
   const setFormikValues = (data) => {
-    const signatoryCode = data[0]?.signatoriesCode;
+    const signatoryCode = data[0]?.signatoryCode;
     const signatoryName = data[0]?.signatoryName;
     const signatoryDescription = data[0]?.signatoryDescription;
     const modifiedBy = data[0]?.modifiedBy;
@@ -139,6 +139,7 @@ const SignatoriesDetailsAction = ({ action }) => {
         <div className="grid m-0 p-0">
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"
@@ -157,6 +158,7 @@ const SignatoriesDetailsAction = ({ action }) => {
           </div>
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"
@@ -175,6 +177,7 @@ const SignatoriesDetailsAction = ({ action }) => {
           </div>
           <div className="col-12 md:col-6 lg:col-6 xl:col-6 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"

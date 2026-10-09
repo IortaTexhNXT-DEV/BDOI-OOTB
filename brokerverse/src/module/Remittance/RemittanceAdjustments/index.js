@@ -307,6 +307,7 @@ const RemittanceAdjustments = () => {
             className="p-button-primary"
             onClick={() => {
               setAdjustmentErrors({});
+              setNewAdjustment({ ...emptyAdjustment, effectiveDate: new Date() });
               setShowAdjustmentDialog(true);
             }}
           />

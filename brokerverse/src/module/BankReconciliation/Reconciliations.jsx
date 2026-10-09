@@ -36,6 +36,19 @@ const Reconciliations = () => {
   }, [filters]);
   useEffect(() => { load(); }, [load]);
   const linked = accounts.filter((a) => a.glAccountCode);
+  // the month after the account's last reconciliation (last month at the latest), and the run already made for a period
+  const defaultPeriod = (account) => {
+    const last = rows.filter((r) => r.bankAccount === account).map((r) => r.period).sort().pop();
+    const previous = previousPeriod();
+    if (!last || last >= previous) return previous;
+    const [y, m] = last.split("-").map(Number);
+    return new Date(Date.UTC(y, m, 1)).toISOString().slice(0, 7);
+  };
+  const existing = creating ? rows.find((r) => r.bankAccount === creating.bankAccount && r.period === creating.period) : null;
+  const startNew = () => {
+    const bankAccount = linked[0]?.code || null;
+    setCreating({ bankAccount, period: defaultPeriod(bankAccount) });
+  };
 
   const create = async () => {
     setBusy(true);
@@ -54,7 +67,7 @@ const Reconciliations = () => {
       <Toast ref={toast} />
       <PageHeader title={t("bankReconciliation.reconciliations")} trail={[t("bankReconciliation.reconciliations")]}>
         <Button icon="pi pi-arrow-left" text label={t("bankReconciliation.workspace")} onClick={() => navigate("/accounts/bank-reconciliation")} />
-        <Button icon="pi pi-plus" label={t("bankReconciliation.newReconciliation")} onClick={() => setCreating({ bankAccount: linked[0]?.code || null, period: previousPeriod() })} />
+        <Button icon="pi pi-plus" label={t("bankReconciliation.newReconciliation")} onClick={startNew} />
       </PageHeader>
       <div className="pe-card">
         <div className="br-toolbar mb-3">
@@ -86,7 +99,7 @@ const Reconciliations = () => {
         footer={(
           <div>
             <Button label={t("bankReconciliation.cancel")} text onClick={() => setCreating(null)} />
-            <Button label={t("bankReconciliation.start")} icon="pi pi-play" loading={busy} disabled={!creating?.bankAccount || !creating?.period} onClick={create} />
+            <Button label={t("bankReconciliation.start")} icon="pi pi-play" loading={busy} disabled={!creating?.bankAccount || !creating?.period || !!existing} onClick={create} />
           </div>
         )}>
         {creating && (
@@ -94,11 +107,12 @@ const Reconciliations = () => {
             <div className="col-12">
               <label htmlFor="br-n-account">{t("bankReconciliation.bankAccount")} *</label>
               <Dropdown inputId="br-n-account" value={creating.bankAccount} className="w-full" options={linked.map((a) => ({ label: `${a.code} – ${a.name}`, value: a.code }))}
-                onChange={(e) => setCreating({ ...creating, bankAccount: e.value })} />
+                onChange={(e) => setCreating({ bankAccount: e.value, period: defaultPeriod(e.value) })} />
             </div>
             <div className="col-12">
               <label htmlFor="br-n-period">{t("bankReconciliation.period")} *</label>
-              <Dropdown inputId="br-n-period" value={creating.period} className="w-full" options={periods} onChange={(e) => setCreating({ ...creating, period: e.value })} />
+              <Dropdown inputId="br-n-period" value={creating.period} className={`w-full${existing ? " p-invalid" : ""}`} options={periods} onChange={(e) => setCreating({ ...creating, period: e.value })} />
+              {existing ? <small className="p-error block mt-1" role="alert">{t("bankReconciliation.alreadyStarted", { number: existing.recNumber })}</small> : null}
             </div>
           </div>
         )}

@@ -12,10 +12,13 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import SvgDot from "../../../assets/icons/SvgDot";
-import SvgAdd from "../../../assets/icons/SvgAdd";
 import accountingService from "../../../services/accountingService";
 import ImportDialog from "../../../components/ImportDialog";
+import FieldError from "../../../components/FieldError";
+import useFieldErrors, { blank } from "../../../hooks/useFieldErrors";
 import "./index.scss";
+import PageActions from "../../../components/PageActions";
+import RowActions, { actionsColumn } from "../../../components/RowActions";
 
 const COA_UPLOAD = [{ label: "Chart of accounts", templatePath: "/accounting/accounts/template", uploadPath: "/accounting/accounts/upload" }];
 
@@ -71,20 +74,18 @@ const ChartOfAccounts = ({ level = "main" }) => {
   const parentOptions = (type, code) => allAccounts.filter((a) => !a.parentCode && a.accountType === type && a.code !== code && a.status === "active")
     .map((a) => ({ label: `${a.code} – ${a.name}`, value: a.code }));
 
-  const openNew = () => setEditing({ isNew: true, values: { ...EMPTY, accountType: filters.type || EMPTY.accountType } });
-  const openEdit = (row) => setEditing({ isNew: false, values: { ...EMPTY, ...row, category: row.category || "", description: row.description || "" } });
+  const { errors, check, fromApi, clear } = useFieldErrors();
+  const openNew = () => { clear(); setEditing({ isNew: true, values: { ...EMPTY, accountType: filters.type || EMPTY.accountType } }); };
+  const openEdit = (row) => { clear(); setEditing({ isNew: false, values: { ...EMPTY, ...row, category: row.category || "", description: row.description || "" } }); };
   const setValue = (patch) => setEditing((e) => ({ ...e, values: { ...e.values, ...patch } }));
 
   const save = async () => {
     const v = editing.values;
-    if (!String(v.code).trim() || !String(v.name).trim()) {
-      toast.current?.show({ severity: "warn", summary: "Required", detail: "Enter the account code and name", life: 3000 });
-      return;
-    }
-    if (level === "sub" && !v.parentCode) {
-      toast.current?.show({ severity: "warn", summary: "Required", detail: "A sub account needs its main account", life: 3000 });
-      return;
-    }
+    if (!check({
+      code: blank(v.code) ? "Enter the account code" : null,
+      name: blank(v.name) ? "Enter the account name" : null,
+      parentCode: level === "sub" && !v.parentCode ? "A sub account needs its main account" : null,
+    })) return;
     const payload = { name: v.name.trim(), accountType: v.accountType, fsGroup: v.fsGroup || undefined, parentCode: v.parentCode || undefined, category: v.category || undefined,
       normalBalance: v.normalBalance || undefined, description: v.description || undefined, isOpenItem: !!v.isOpenItem, allowManual: v.allowManual !== false, status: v.status };
     setSaving(true);
@@ -94,6 +95,7 @@ const ChartOfAccounts = ({ level = "main" }) => {
       setEditing(null);
       load();
     } catch (e) {
+      fromApi(e);
       showError(toast, e);
     } finally {
       setSaving(false);
@@ -129,10 +131,7 @@ const ChartOfAccounts = ({ level = "main" }) => {
               model={[{ label: title, url: level === "sub" ? "/master/finance/subaccount" : "/master/finance/mainaccount" }]} separatorIcon={<SvgDot color={"#000"} />} />
           </div>
           <div className="flex gap-2">
-            <Button type="button" icon="pi pi-upload" label={t("financeMasters.upload", "Upload")} className="p-button-outlined" onClick={() => setShowUpload(true)} />
-            <Button icon={<div className="pr-2"><SvgAdd /></div>} className="main__btn__action" onClick={openNew} aria-label="Add" tooltip="Add" tooltipOptions={{ position: "top" }} >
-              {t("financeMasters.add", "Add")}
-            </Button>
+            <PageActions onUpload={() => setShowUpload(true)} onAdd={openNew} />
           </div>
           <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title="Upload chart of accounts" targets={COA_UPLOAD} onDone={load}
             note="Adds new accounts and updates existing ones (same Account Code). Put a main account before its sub accounts." />
@@ -170,13 +169,8 @@ const ChartOfAccounts = ({ level = "main" }) => {
         <Column header="Manual JV" body={(r) => (r.allowManual ? <i className="pi pi-check" /> : null)} style={{ width: "6rem" }} />
         <Column header="System Use" body={(r) => (r.systemRoles || []).map((role) => <Tag key={role} value={role.replace(/_/g, " ")} severity="info" className="mr-1 mb-1" />)} />
         <Column header="Status" body={(r) => <Tag value={r.status === "active" ? "Active" : "Inactive"} severity={r.status === "active" ? "success" : "secondary"} />} style={{ width: "6rem" }} />
-        <Column header="Actions" style={{ width: "7rem" }} body={(r) => (
-          <div className="flex gap-1">
-            <Button icon="pi pi-pencil" className="p-button-text p-button-sm" tooltip="Edit" onClick={() => openEdit(r)} aria-label="Edit" />
-            <Button icon={r.status === "active" ? "pi pi-ban" : "pi pi-check-circle"} className="p-button-text p-button-sm" tooltip={r.status === "active" ? "Deactivate" : "Activate"}
-              disabled={r.status === "active" && r.isSystem} onClick={() => toggleStatus(r)} aria-label={r.status === "active" ? "Deactivate" : "Activate"}
-              />
-          </div>
+        <Column header={t("common.actions")} {...actionsColumn} body={(r) => (
+          <RowActions onEdit={() => openEdit(r)} active={r.status === "active"} statusDisabled={r.status === "active" && r.isSystem} onStatus={() => toggleStatus(r)} />
         )} />
       </DataTable>
 
@@ -193,10 +187,12 @@ const ChartOfAccounts = ({ level = "main" }) => {
             <div className="col-12 md:col-4">
               <label>Account code *</label>
               <InputText value={v.code} disabled={!editing.isNew} onChange={(e) => setValue({ code: e.target.value })} className="w-full" />
+              <FieldError error={errors.code} />
             </div>
             <div className="col-12 md:col-8">
               <label>Account name *</label>
               <InputText value={v.name} onChange={(e) => setValue({ name: e.target.value })} className="w-full" />
+              <FieldError error={errors.name} />
             </div>
             <div className="col-12 md:col-4">
               <label>Account type *</label>
@@ -216,6 +212,7 @@ const ChartOfAccounts = ({ level = "main" }) => {
               <label>Main account{level === "sub" ? " *" : ""}</label>
               <Dropdown value={v.parentCode} options={parentOptions(v.accountType, v.code)} onChange={(e) => setValue({ parentCode: e.value })} filter
                 placeholder={level === "sub" ? "Select the main account" : "None (main account)"} showClear={level !== "sub"} disabled={!editing.isNew && !v.parentCode && level !== "sub"} className="w-full" />
+              <FieldError error={errors.parentCode} />
             </div>
             <div className="col-12 md:col-6">
               <label>Category</label>

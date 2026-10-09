@@ -48,13 +48,38 @@ describe('marketing campaigns to consenting clients', () => {
     const prev = await sales('post', `/campaigns/templates/${templateId}/preview`);
     expect(prev.body.data.subject).toBe('Hello Maria');
     expect(prev.body.data.html).toMatch(/Dear Maria Santos/);
-    expect(prev.body.data.html).toMatch(/#opt-out-link/);
+    // in the e-mail layout of the theme, with a sample opt-out link that is a link
+    expect(prev.body.data.html).toMatch(/data-bv-layout/);
+    expect(prev.body.data.html).toMatch(/<a href="[^"]+\/api\/campaigns\/opt-out\/sample">/);
+    expect(prev.body.data.hasOptOutLink).toBe(false);
     expect((await sales('post', '/campaigns/templates').send({ code: 'test', name: 'Dup', subject: 's', bodyHtml: 'b' })).status).toBe(400);
+  });
+
+  it('previews a template being written, before it is saved', async () => {
+    const prev = await sales('post', '/campaigns/templates/preview').send({ subject: 'Offer for {{firstName}}', bodyHtml: '<p>Hi {{firstName}}</p><p><a href="{{optOutLink}}">Unsubscribe</a></p>' });
+    expect(prev.status).toBe(200);
+    expect(prev.body.data).toMatchObject({ subject: 'Offer for Maria', hasOptOutLink: true });
+    expect(prev.body.data.html).toMatch(/Hi Maria/);
+    expect((await sales('post', '/campaigns/templates/preview').send({ subject: '', bodyHtml: '<p>x</p>' })).status).toBe(400);
+    expect((await claims('post', '/campaigns/templates/preview').send({ subject: 's', bodyHtml: 'b' })).status).toBe(403);
+  });
+
+  it('a segment by product reaches the clients insured for that product and the prospects interested in it', async () => {
+    const product = (await pool.query("SELECT id FROM products WHERE code = 'MOTOR'")).rows[0].id;
+    const clients = (await pool.query("SELECT count(DISTINCT client_id)::int AS n FROM policies WHERE product_id = $1 AND client_id IN (SELECT id FROM clients WHERE anonymised_at IS NULL)", [product])).rows[0].n;
+    const leads = (await pool.query('SELECT count(*)::int AS n FROM leads WHERE product_id = $1 AND deleted_at IS NULL AND anonymised_at IS NULL AND client_id IS NULL', [product])).rows[0].n;
+    const p = await sales('post', '/campaigns/segments/preview').send({ criteria: { partyType: 'both', productId: product } });
+    expect(p.status).toBe(200);
+    expect(p.body.data.total).toBe(clients + leads);
+    const s = await sales('post', '/campaigns/segments').send({ name: 'Motor product', criteria: { partyType: 'both', lob: 'MOTOR', productId: product } });
+    expect(s.body.data.criteria).toMatchObject({ lob: 'MOTOR', productId: product });
   });
 
   it('sending queues the e-mails of consenting recipients to the outbox and records the excluded', async () => {
     const c = await sales('post', '/campaigns').send({ name: 'October offer', segmentId, templateId });
     expect(c.status).toBe(201);
+    // its own number series, not the win-back campaigns' (WB)
+    expect(c.body.data.campaignNumber).toMatch(/^CPG-\d{4}-\d{5}$/);
     campaignId = c.body.data.id;
     const s = await sales('post', `/campaigns/${campaignId}/send`);
     expect(s.status).toBe(200);
@@ -103,5 +128,25 @@ describe('marketing campaigns to consenting clients', () => {
     const out = await campaignDispatch();
     expect(out).toMatchObject({ due: 1, sent: 1 });
     expect((await pool.query('SELECT status, recipients FROM campaigns WHERE id = $1', [c.body.data.id])).rows[0]).toEqual({ status: 'sent', recipients: 3 });
+  });
+
+  it('records the marketing consent of a client from the campaigns screen; the segment then reaches the client', async () => {
+    const before = (await sales('post', '/campaigns/segments/preview').send({ criteria: { partyType: 'client' } })).body.data.eligible;
+    const list = await sales('get', '/campaigns/consents?partyType=client&status=not-recorded');
+    expect(list.status).toBe(200);
+    const party = list.body.data.find((x) => /@/.test(x.email || ''));
+    expect(party).toMatchObject({ partyType: 'client', status: 'not-recorded' });
+    expect((await claims('post', '/campaigns/consents').send({ partyType: 'client', partyId: party.partyId, granted: true, channel: 'Form' })).status).toBe(403);
+    expect((await sales('post', '/campaigns/consents').send({ partyType: 'client', partyId: party.partyId, granted: true, channel: 'Fax' })).status).toBe(400);
+    const r = await sales('post', '/campaigns/consents').send({ partyType: 'client', partyId: party.partyId, granted: true, channel: 'Form', evidence: 'Signed application form' });
+    expect(r.status).toBe(201);
+    expect(r.body.data).toMatchObject({ partyId: party.partyId, status: 'granted', channel: 'Form', evidence: 'Signed application form' });
+    expect((await sales('post', '/campaigns/segments/preview').send({ criteria: { partyType: 'client' } })).body.data.eligible).toBe(before + 1);
+    // a later refusal ends the consent in force
+    expect((await sales('post', '/campaigns/consents').send({ partyType: 'client', partyId: party.partyId, granted: false, channel: 'Phone' })).body.data.status).toBe('refused');
+    const rows = (await pool.query("SELECT granted, withdrawn_at FROM privacy_consents WHERE party_id = $1 AND purpose = 'marketing' ORDER BY id", [party.partyId])).rows;
+    expect(rows[0].withdrawn_at).not.toBeNull();
+    expect((await sales('post', '/campaigns/segments/preview').send({ criteria: { partyType: 'client' } })).body.data.eligible).toBe(before);
+    expect((await sales('post', '/campaigns/consents').send({ partyType: 'lead', partyId: 'nobody', granted: true, channel: 'Form' })).status).toBe(400);
   });
 });

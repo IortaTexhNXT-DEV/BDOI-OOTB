@@ -67,7 +67,9 @@
     "total": "Total",
     "warning": "Warning",
     "information": "Information",
-    "validation": "Validation"
+    "validation": "Validation",
+    "activate": "Activate",
+    "deactivate": "Deactivate"
   },
   "login": {
     "title": "Welcome to {{name}}",
@@ -362,7 +364,8 @@
     "totalCreditRequired": "TotalCredit is required",
     "totalDebitRequired": "TotalDebit is required",
     "netRequired": "Net is required",
-    "selectTransactionCode": "Please select a transaction code"
+    "selectTransactionCode": "Please select a transaction code",
+    "wholeNumber": "Enter a whole number"
   },
   "accounts": {
     "journalVoucher": "Journal Voucher",
@@ -2087,8 +2090,7 @@
     "displayName": "Display Name",
     "password": "Password",
     "roles": "Roles",
-    "standardRoles": "Standard roles",
-    "roleGroup": "{{group}} roles",
+    "otherRoles": "Other roles",
     "searchRoles": "Search roles",
     "rolesSelected": "{{count}} selected",
     "noRolesMatch": "No role matches the search",
@@ -2162,7 +2164,33 @@
     "uploadProvinces": "Upload provinces",
     "provinceAdded": "Province added",
     "tinInvalid": "Enter the TIN as 000-000-000 or 000-000-000-00000",
-    "tin": "TIN"
+    "tin": "TIN",
+    "websiteInvalid": "Enter the address as https://www.example.com",
+    "rdoInvalid": "Choose the RDO or enter its code, e.g. 047",
+    "faxInvalid": "Invalid fax number",
+    "companySection": {
+      "details": "Company details",
+      "tax": "Tax registration",
+      "taxHint": "Printed on the BIR forms (2307, alphalists) of the letterhead company",
+      "address": "Registered address",
+      "addressHint": "As registered with the BIR; printed on the letterhead and the BIR forms",
+      "contact": "Contact",
+      "logo": "Logo",
+      "logoHint": "PNG or JPEG, printed at the top of the documents of this company"
+    },
+    "rdoCode": "RDO code",
+    "rdoPlaceholder": "Revenue District Office",
+    "letterheadCompany": "Letterhead company",
+    "letterheadHint": "Its name, address, TIN and logo head the documents, reports and BIR forms",
+    "noLogo": "No logo",
+    "uploading": "Uploading...",
+    "replaceLogo": "Replace logo",
+    "uploadLogo": "Upload logo",
+    "removeLogo": "Remove",
+    "policyTypeMaster": "Policy Type",
+    "department": "Department",
+    "systemSetup": "System set-up",
+    "includePlatformRoles": "Include the base platform roles"
   },
   "agent": {
     "createQuote": "Create Quote",
@@ -6210,7 +6238,8 @@
       "inactive": "Inactive",
       "completed": "Completed",
       "issued": "Issued"
-    }
+    },
+    "runInProgress": "This period has a close run in progress ({{number}}): open it from the list"
   },
   "birTax": {
     "withholdingReturns": "Withholding Returns",
@@ -6538,7 +6567,8 @@
       "settled": "Settled",
       "active": "Active",
       "inactive": "Inactive"
-    }
+    },
+    "linePriceRequired": "Enter the quantity and unit price of each line"
   },
   "placement": {
     "status": {
@@ -7111,7 +7141,10 @@
       "perInsurer": "per insurer",
       "decidedAtPosting": "Decided when posting",
       "else": "else"
-    }
+    },
+    "required": "Required",
+    "reasonCodeFormat": "2 to 30 letters, digits, _ or -",
+    "maxAmountAboveZero": "Leave empty or enter an amount above zero"
   },
   "bankReconciliation": {
     "downloadTemplate": "Download template (GENERIC format)",
@@ -7383,7 +7416,8 @@
       "stale": "Stale",
       "duplicate": "Duplicate",
       "new": "New"
-    }
+    },
+    "alreadyStarted": "This period is reconciled in {{number}}: open it from the list"
   },
   "followUps": {
     "adviceReference": "Remittance advice / reference",
@@ -8050,7 +8084,8 @@
       "benefits": "Benefits",
       "addSection": "Add section",
       "removeSection": "Remove",
-      "insurersHelp": "Insurers that can carry this section; the first one is proposed"
+      "insurersHelp": "Insurers that can carry this section; the first one is proposed",
+      "sectionMissing": "Section {{no}}: {{fields}}."
     },
     "gateways": {
       "saved": "{{name}} saved",
@@ -8092,7 +8127,11 @@
         "absorb": "Absorbed by the broker",
         "pass_on": "Added to the client's payment"
       }
-    }
+    },
+    "required": "Required",
+    "aboveZero": "Enter a value above zero",
+    "endBeforeStart": "The end must not be before the start",
+    "codeFormat": "Letters, digits, _ or -, up to 20"
   },
   "accessControl": {
     "reviewDetailIntro": "Due {{date}} · {{done}} of {{total}} users reviewed · {{revoked}} revoked",
@@ -9882,7 +9921,9 @@
       "batch.count": "Batch: number of payments",
       "batch.channel": "Batch: channel",
       "batch.createdDate": "Batch: created on"
-    }
+    },
+    "toBeforeFrom": "The last number must not be below the first",
+    "paymentChannels": "Payment channels"
   },
   "onboarding": {
     "title": "Onboard client",
@@ -10170,57 +10211,57 @@
       "shortPeriod": {
         "title": "Short-Period Rates",
         "section": "Insurance Management",
-        "intro": "Premium the insurer keeps when the insured cancels, by the days the policy was in force. Used by Operations > Policy Cancellation."
+        "help": "Premium the insurer keeps when a policy is cancelled, by the days it was in force."
       },
       "cancellationReasons": {
         "title": "Cancellation Reasons",
         "section": "Insurance Management",
-        "intro": "Why a policy is cancelled, who initiates it (insured: short-period scale; insurer: pro-rata) and the return premium method."
+        "help": "Why a policy is cancelled, who initiates it and how the return premium is worked out."
       },
       "claimChecklist": {
         "title": "Claim Document Checklist",
         "section": "Insurance Management",
-        "intro": "Documents a claim needs by line of business and claim type (* = all), required or optional. Copied onto each claim."
+        "help": "Documents a claim needs, by line of business and claim type."
       },
       "repairShops": {
         "title": "Repair Shops",
         "section": "Insurance Management",
-        "intro": "Repair shops that may take motor claim estimates; only accredited shops are offered."
+        "help": "Repair shops for motor claim estimates; only accredited shops are offered."
       },
       "suppliers": {
         "title": "Suppliers",
         "section": "Payables",
-        "intro": "Suppliers of goods and services: TIN, VAT registration, EWT tax code withheld, payment terms and default expense account."
+        "help": "Suppliers of goods and services, with their tax details and payment terms."
       },
       "assetClasses": {
         "title": "Asset Classes",
         "section": "Finance",
-        "intro": "Useful life (months) and the asset, accumulated depreciation and depreciation expense accounts of each class of fixed asset."
+        "help": "Useful life and accounts of each class of fixed asset."
       },
       "costCentres": {
         "title": "Cost Centres",
         "section": "Finance",
-        "intro": "Cost centres tagged on journal lines and in the SAP GL file. The one marked Default is stamped on every line that names none (TISPH: 900901 Toyota Insurance Services)."
+        "help": "Cost centres for journal lines; the default one goes on lines that name none."
       },
       "salesActivityTypes": {
         "title": "Sales Activity Types",
         "section": "Organization",
-        "intro": "Kinds of sales activity account executives log (call, meeting, e-mail, visit...), their channel and the default days to the next step."
+        "help": "Kinds of sales activity account executives log."
       },
       "salesActivityOutcomes": {
         "title": "Sales Activity Outcomes",
         "section": "Organization",
-        "intro": "Outcomes of a sales activity and whether each is positive, neutral or negative for the activity report."
+        "help": "Outcomes of a sales activity for the activity report."
       },
       "leadSources": {
         "title": "Lead Sources",
         "section": "Insurance Management",
-        "intro": "Where prospects come from: the Source of the prospect form and of the lead upload, and a lead assignment condition."
+        "help": "Where prospects come from."
       },
       "reasonCodes": {
         "title": "Reason Codes",
         "section": "Insurance Management",
-        "intro": "Coded reasons of a declined or dropped quotation, a claim repudiation, a renewal lapse, a refund, an adjustment or business that did not materialise. Cancellation and write-off reasons have their own masters."
+        "help": "Coded reasons for declined quotations, repudiated claims, lapsed renewals, refunds and adjustments."
       }
     },
     "instalments": {
@@ -10485,7 +10526,9 @@
       "notDue": "Not due",
       "over": "Over {{days}}",
       "daysPastDue": "Days past due",
-      "bucket": "Bucket"
+      "bucket": "Bucket",
+      "lineAmounts": "Enter the amount of each line",
+      "chooseAccount": "Choose the bank account the payment is made from"
     },
     "fa": {
       "menu": "Fixed Assets",
@@ -10519,8 +10562,15 @@
       "due": "Due",
       "alreadyPosted": "Already posted",
       "journalDate": "Journal date",
-      "nothingDue": "Nothing to depreciate for this period"
-    }
+      "nothingDue": "Nothing to depreciate for this period",
+      "inServiceBeforeAcquired": "The asset cannot be in service before it was acquired"
+    },
+    "required": "Required",
+    "amountAboveZero": "Enter an amount above zero",
+    "invalidEmail": "Enter a valid e-mail address",
+    "tooLong": "At most {{max}} characters",
+    "notBefore": "Must be on or after {{other}}",
+    "select": "Select"
   },
   "distribution": {
     "cp": {
@@ -10564,8 +10614,7 @@
       "noneExcluded": "Nobody is left out",
       "leftOut": "Left out because",
       "people": "People",
-      "body": "Message (HTML)",
-      "placeholders": "Placeholders: {{firstName}}, {{fullName}}, {{companyName}}, {{optOutLink}}. Without an opt-out link an unsubscribe paragraph is added.",
+      "placeholders": "The buttons insert the recipient's first name, full name, our company name and the opt-out link where the cursor is.",
       "window": "Quoted and insured count the quotations and policies of recipients within {{days}} days of sending.",
       "recipient": "Recipient",
       "email": "E-mail",
@@ -10584,6 +10633,42 @@
         "both": "Clients and prospects",
         "client": "Clients",
         "lead": "Prospects"
+      },
+      "segmentRequired": "Choose the segment",
+      "templateRequired": "Choose the template",
+      "subjectRequired": "Enter the subject of the e-mail",
+      "bodyRequired": "Write the message",
+      "channelRequired": "Choose how the person told us",
+      "ph": {
+        "firstName": "First name",
+        "fullName": "Full name",
+        "companyName": "Company name",
+        "optOutLink": "Opt-out link"
+      },
+      "consents": "Marketing consents",
+      "consentsHelp": "A campaign reaches only the clients and prospects whose agreement to receive offers is recorded here. Record what the person told us and how (the signed form, a call, an e-mail).",
+      "consentSearch": "Name, code or e-mail",
+      "consent": "Consent",
+      "consentHow": "How",
+      "recordedAt": "Recorded",
+      "agreed": "Agreed to receive offers",
+      "refused": "Refused offers",
+      "product": "Product",
+      "productHelp": "Clients insured for the product, prospects interested in it",
+      "recordConsents": "Record the consents people gave on the Marketing consents tab.",
+      "subjectHelp": "{{firstName}} in the subject is replaced by the recipient's first name",
+      "message": "Message",
+      "noOptOut": "The message has no opt-out link: the unsubscribe paragraph is added at the end of every e-mail. Use Opt-out link to place it yourself.",
+      "previewHelp": "Shown for a sample recipient, Maria Santos; the opt-out link of each e-mail is personal to its recipient.",
+      "consentChannel": "How the person told us",
+      "evidence": "Evidence",
+      "evidenceHelp": "The signed form, the call or the e-mail",
+      "channels": {
+        "Form": "Signed form",
+        "E-mail": "E-mail",
+        "Phone": "Phone call",
+        "In person": "In person",
+        "Website": "Website"
       }
     },
     "home": {
@@ -10607,7 +10692,8 @@
       "yes": "Yes",
       "search": "Search",
       "delete": "Delete",
-      "back": "Back"
+      "back": "Back",
+      "required": "Required"
     },
     "cr": {
       "clientReport": "Client comparison report",
@@ -10667,7 +10753,7 @@
       "annualPremium": "Annual premium",
       "start": "Start",
       "findClient": "Find the client",
-      "toHelp": "One year when empty",
+      "toHelp": "One year after the start, unless you change it",
       "removeVehicle": "Remove item {{item}} from the draft schedule?",
       "deleteFrom": "Delete item {{item}} by endorsement: effective date (YYYY-MM-DD)",
       "deleteReason": "Reason (vehicle sold, total loss ...)",
@@ -10706,7 +10792,11 @@
         "vehicleType": "Vehicle class (CTPL tariff)",
         "usage": "Usage",
         "mortgagee": "Mortgagee"
-      }
+      },
+      "clientRequired": "Choose the client",
+      "fromRequired": "Enter the start of the period",
+      "toAfterFrom": "The period must end after it starts",
+      "insurerHelp": "Can be chosen later, before the policy is issued"
     },
     "mp": {
       "freeYear": "First year free, paid by the {{payer}}",
@@ -11107,7 +11197,11 @@
       "done": "Done",
       "running": "Running",
       "pending": "Pending",
-      "paid": "Paid"
+      "paid": "Paid",
+      "granted": "Agreed",
+      "refused": "Refused",
+      "withdrawn": "Withdrawn",
+      "not-recorded": "Not recorded"
     }
   },
   "signature": {
@@ -11284,6 +11378,20 @@
     "intro": "BIR Form 2307 for the expanded withholding tax withheld from suppliers on their invoices, one certificate per supplier and quarter. The same figures are in the QAP, the 0619-E and 1601-EQ and the 1604-E alphalist.",
     "issueAll": "Issue all certificates",
     "issuedAll": "{{count}} certificate(s) issued"
+  },
+  "editor": {
+    "linkUrl": "Address of the link (https://...)",
+    "link": "Link",
+    "toolbar": "Formatting",
+    "formatted": "Formatted text",
+    "source": "HTML source",
+    "insert": "Insert",
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "bullets": "Bulleted list",
+    "numbers": "Numbered list",
+    "clear": "Clear formatting"
   },
   "prospectDuplicates": {
     "title": "Possible duplicate",

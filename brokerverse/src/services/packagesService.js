@@ -23,6 +23,7 @@ const request = async (method, path, body, { auth = true } = {}) => {
   if (!response.ok || json.success === false) {
     const error = new Error(apiErrorMessage(json, response.status));
     error.status = response.status;
+    error.errors = Array.isArray(json.errors) ? json.errors : [];
     throw error;
   }
   return json;

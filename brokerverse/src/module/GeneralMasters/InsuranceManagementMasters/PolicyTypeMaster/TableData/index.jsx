@@ -5,9 +5,6 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
-import SvgIconeye from "../../../../../assets/icons/SvgIconeye";
-import SvgEdit from "../../../../../assets/icons/SvgEdits";
 import SvgTable from "../../../../../assets/icons/SvgTable";
 import { useSelector, useDispatch } from "react-redux";
 import { useFormik } from "formik";
@@ -15,6 +12,7 @@ import { getSearchInsurancePolicyTypeMiddleware, getInsurancePolicyTypeMiddleWar
 import MasterStatusToggle from "../../../common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
 import { formatDate as formatAppDate } from "../../../../../utility/dateFormat";
+import RowActions, { actionsColumn } from "../../../../../components/RowActions";
 
 const TableData = ({ navigate }) => {
   const { t } = useTranslation();
@@ -70,20 +68,7 @@ const TableData = ({ navigate }) => {
       );
     },
   };
-  const renderActionButton = (rowData) => {
-    return (
-      <div className="action__button__container">
-        <Button
-          icon={<SvgIconeye />}
-          onClick={() => handleView(rowData.id)}
-          className="action__button p-0" aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
-        <Button
-          icon={<SvgEdit />}
-          onClick={() => handleEdit(rowData.id)}
-          className="action__button p-0 w-auto" aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
-      </div>
-    );
-  };
+  const renderActionButton = (rowData) => <RowActions onView={() => handleView(rowData.id)} onEdit={() => handleEdit(rowData.id)} />;
 
   const handleView = (id) => {
     navigate(`/master/generals/insurancemanagement/policytype/view/${id}`);
@@ -176,14 +161,10 @@ const TableData = ({ navigate }) => {
           body={(columnData) => <MasterStatusToggle type="policy-type" record={columnData} onChanged={reloadList} onError={showStatusError} />}
         ></Column>
         <Column
-          style={{
-            padding: "20px 1rem 17px 0px",
-          }}
-          field="id"
           body={renderActionButton}
-          header="Action"
-          className="fieldvalue_container"
-        ></Column>
+          header={t("common.actions")}
+          {...actionsColumn}
+        />
       </DataTable>
     </div>
   );

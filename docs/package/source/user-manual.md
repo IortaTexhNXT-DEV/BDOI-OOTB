@@ -458,7 +458,7 @@ Every menu: Dashboard, Operations, Accounts, Commission, Reports, Master and Pro
 2. Enter **Username** (the user ID used to sign in), **E-mail** and **Display Name**. All three are required. The e-mail is where Forgot password? sends its code.
 3. Leave **Password** empty: the system then generates a temporary password ("Leave empty for a temporary password").
 4. Choose the **Branch**, the **Designation** and **Reporting to** (the user's manager), if your organisation uses them.
-5. Under **Roles**, tick the role or roles. A person normally holds one role. The Accounting Manager role includes Accounting. When `access.sod_enforced` is on, a combination listed on Segregation of Duties with the action Block is refused.
+5. Under **Roles**, tick the role or roles. The roles are grouped by department (Sales, Operations, Cash Control, Finance and Accounting, IT, Management), each with a one-line description; a role in no department is under **Other roles**. A person normally holds one role. The roles of the base platform (System Administrator, Sales & Marketing, Processing Team, Operations, Claims, Accounting, Accounting Manager) are not offered for a new assignment; a user who still holds one sees it under **Other roles**, where it can be unticked. The departments, the descriptions and the platform roles are the settings `access.role_groups` and `access.platform_roles` (Master > Configuration). When `access.sod_enforced` is on, a combination listed on Segregation of Duties with the action Block is refused.
 6. Select **Save**. The temporary password is shown once. Hand it to the user privately.
 
 A duplicate username is refused. At the first sign-in the user must choose a new password (Getting started).
@@ -480,7 +480,7 @@ The eye opens the user, the pencil edits the display name, e-mail and roles (a r
 
 ### Roles and role permissions
 
-**Role** lists the seven broker roles and the TISPH roles (see TISPH roles under Roles and menus). **Role Permissions** shows, for each permission (for example read:receipts, write:bank-reconciliation, approve:period-end, approve:quotations), which roles hold it. A role that builds on another (the Accounting Manager on Accounting, SUPERID on the System Administrator) also has that role's permissions. **Edit roles** changes the permissions of a role; do this only with the process owner, because the menus and the server checks follow the permissions.
+**Role** lists the TISPH roles by department, with who changed each role last and when (**System set-up** for a role that has not been changed since it was set up); tick **Include the base platform roles** to list the seven broker roles of the base platform as well (see TISPH roles under Roles and menus). **Role Permissions** shows, for each permission (for example read:receipts, write:bank-reconciliation, approve:period-end, approve:quotations), which roles hold it. A role that builds on another (the Accounting Manager on Accounting, SUPERID on the System Administrator) also has that role's permissions. **Edit roles** changes the permissions of a role; do this only with the process owner, because the menus and the server checks follow the permissions.
 
 ![Master > Users and Access > Role Permissions](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-role-permissions.png)
 
@@ -572,7 +572,7 @@ All masters work alike: a list with search, **Add** (the form opens on its own p
 | Cost Centres | Master > Finance | Accounting, System Administrator |
 | Suppliers | Accounts > Payables > Suppliers | Accounting, System Administrator |
 
-Each screen lists the records with **Add**, the edit icon and activate / deactivate. The nine masters are also in the go-live configuration workbook and have upload templates. **Sales Activity Types** and **Sales Activity Outcomes** (Master > Organization) work the same way and are described under Sales activities in the Sales & Marketing chapter; **Distribution Channels** (Master > Insurance) in the chapter Distribution, programmes and products.
+Each screen lists the records with a search box, **Add**, the edit icon and activate / deactivate; the info icon next to the title says in one sentence what the master is for. A field taken from another master is a list: on Cost Centres the company, the department (Master > Organization > Department) and the responsible person (the active users). The nine masters are also in the go-live configuration workbook and have upload templates. **Sales Activity Types** and **Sales Activity Outcomes** (Master > Organization) work the same way and are described under Sales activities in the Sales & Marketing chapter; **Distribution Channels** (Master > Insurance) in the chapter Distribution, programmes and products.
 
 ![Master > Insurance > Short-Period Rates, one of the operational masters](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-ops-masters.png)
 
@@ -2302,7 +2302,7 @@ Bank charges, interest, final tax on interest and direct credits appear on the s
 
 ### Prepare the reconciliation
 
-1. Select **New reconciliation** on Reconciliations (or start it from the workspace), choose the **Bank account** and **Period** and select **Start**. The reconciliation (BRC-YYYY-NNNNN) opens as Draft with live figures.
+1. Select **New reconciliation** on Reconciliations (or start it from the workspace), choose the **Bank account** and **Period** (proposed: the month after the account's last reconciliation; a period already reconciled is flagged with its number) and select **Start**. The reconciliation (BRC-YYYY-NNNNN) opens as Draft with live figures.
 2. Check the **Bank Reconciliation Statement**: balance per bank statement, deposits in transit, outstanding cheques and bank errors give the adjusted bank balance; balance per books, bank credits and charges not yet booked and book errors give the adjusted book balance. The **Difference** must be PHP 0.00.
 3. Prepare it. The figures are frozen and the reconciliation waits for the Accounting Manager's approval.
 
@@ -2475,7 +2475,7 @@ Suppliers are kept on Accounts > Payables > Suppliers: TIN, address, VAT registr
 1. Accounts > Payables > Supplier Invoices > **New supplier invoice**: supplier, the supplier's invoice number and date, description, and one line per expense account (or an **Asset class** for an asset bought). Input VAT is computed on the vatable lines of a VAT-registered supplier at the rate of `payables.input_vat_code`; the EWT at the rate of the supplier's EWT tax code on the amount net of VAT. The due date follows the payment terms. The same supplier invoice number cannot be recorded twice.
 2. **Save and submit** sends it for approval; the Accounting Manager (another user) approves it, which posts the journal (posting rule ap.invoice: Dr expense or asset, Dr input VAT / Cr EWT payable, Cr Accounts Payable - Suppliers), or rejects it with a reason. Without `payables.maker_checker` the invoice posts when it is submitted. An asset line is registered in the fixed asset register on approval.
 3. **Print** gives the AP voucher with the journal. **Cancel** an invoice without payments; an approved one is reversed.
-4. Accounts > Payables > Supplier Payments > **New supplier payment**: the supplier, the invoices to pay (all open invoices are ticked), mode, bank account, cheque number. Posting rule ap.payment: Dr Accounts Payable - Suppliers / Cr bank. **Print** gives the payment voucher; **Cancel** reverses the payment and opens the invoices again.
+4. Accounts > Payables > Supplier Payments > **New supplier payment**: the supplier, the invoices to pay (all open invoices are ticked), mode, the bank account the payment is made from (required; proposed only when there is one), cheque number. Posting rule ap.payment: Dr Accounts Payable - Suppliers / Cr bank. **Print** gives the payment voucher; **Cancel** reverses the payment and opens the invoices again.
 5. Accounts > Payables > AP Ageing shows the open balances by supplier and by invoice, aged on the due dates (buckets of `limits.receivable_ageing_buckets`); **Export to Excel**.
 
 ### BIR Form 2307 for suppliers
@@ -2494,7 +2494,7 @@ The same generator issues the certificates of the commission payees on Accounts 
 
 ![Accounts > Fixed Assets > Asset Register](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-fixed-assets.png)
 
-Accounts > Fixed Assets > Asset Register lists the assets with their cost, accumulated depreciation and book value. **Register asset** for an asset not bought through a supplier invoice: name, asset class (Master > Finance > Asset Classes gives the useful life and the asset, accumulated depreciation and depreciation expense accounts), dates, cost, salvage value, location, custodian and serial number. For an asset carried at go-live enter the accumulated depreciation at go-live and the first period to depreciate here. Select an asset to see its straight-line schedule: each month's depreciation, accumulated depreciation and book value, and whether the month is posted.
+Accounts > Fixed Assets > Asset Register lists the assets with their cost, accumulated depreciation and book value. **Register asset** for an asset not bought through a supplier invoice: name, asset class (Master > Finance > Asset Classes gives the useful life and the asset, accumulated depreciation and depreciation expense accounts), dates, cost, salvage value, location, custodian and serial number. For an asset carried at go-live enter the accumulated depreciation at go-live and pick the first month to depreciate here. Select an asset to see its straight-line schedule: each month's depreciation, accumulated depreciation and book value, and whether the month is posted.
 
 Depreciation is straight-line from the in-service month (`fixed_assets.first_month`); the last month takes the rounding so the asset ends at its salvage value. Accounts > Fixed Assets > Depreciation Run shows what a period's depreciation is and **Post depreciation** posts one journal per asset class dated the end of the period (posting rule fa.depreciation: Dr depreciation expense / Cr accumulated depreciation). An asset is never depreciated twice for a period. The month-end close runs the same step (**(e) Depreciation**, `fixed_assets.depreciation_in_month_end`).
 
@@ -2783,7 +2783,7 @@ Choose Operations > Fleet Schedules. A fleet schedule is one motor policy coveri
 
 ![Operations > Fleet Schedules](/home/user/BDOI-OOTB/docs/package/source/manual-images/d-fleet.png)
 
-1. Select **New fleet schedule**. Choose the **Client** and **Insurer**, the **Period from** and **Period to**, and the rates: **Own damage rate %**, **Acts of nature rate %**, **Excess bodily injury**, **Property damage**.
+1. Select **New fleet schedule**. Choose the **Client** and **Insurer** (the insurer can be chosen later, before issue), the **Period from** (today) and **Period to** (one year after the start, recalculated when the start changes, unless you change it), and the rates: **Own damage rate %**, **Acts of nature rate %**, **Excess bodily injury**, **Property damage**.
 2. Add the vehicles: **Add vehicle** for one, or **Template** and **Upload vehicles** for many (Fleet Vehicles upload template). For each vehicle enter the plate number or conduction sticker, chassis and engine numbers, make, model, year model, colour, **Vehicle class (CTPL tariff)**, usage, sum insured and mortgagee if any.
 3. Each vehicle is priced on its own: own damage and acts of nature on its sum insured, the excess liability premium, the CTPL of its class and the premium taxes. The totals show under **Vehicles on cover**.
 4. Select **Issue policy**. The policy is issued for the totals of the schedule and billed with its booking journal and commission, like any policy. At least **fleet.minimum_vehicles** vehicles are needed.
@@ -2838,20 +2838,26 @@ Choose Operations > Sales & Marketing > Comparison Reports. The comparison repor
 
 ![Operations > Sales & Marketing > Campaigns](/home/user/BDOI-OOTB/docs/package/source/manual-images/d-campaigns.png)
 
-Choose Operations > Sales & Marketing > Campaigns. Campaigns e-mail offers only to clients and prospects whose marketing consent is in force in the consent register and who have an e-mail address. Everyone else is left out and recorded with the reason.
+Choose Operations > Sales & Marketing > Campaigns. Campaigns e-mail offers only to clients and prospects whose marketing consent is in force and who have an e-mail address. Everyone else is left out and recorded with the reason.
+
+### Marketing consents
+
+**Marketing consents** lists the clients and prospects with their consent: **Agreed**, **Refused**, **Withdrawn** (by an opt-out link) or **Not recorded**. Find a person by name, code or e-mail, then select **Agreed to receive offers** or **Refused offers**, choose **How the person told us** (signed form, e-mail, phone call, in person, website) and enter the **Evidence**. The new record replaces the one in force; a campaign reaches only the people marked Agreed.
 
 ### Segments
 
 1. Open **Segments** and select **New segment**.
-2. Choose **Who** (clients, prospects or both) and narrow the audience by **Line of business**, **Province**, **City / municipality**, **Distribution channel**, **Client type**, **Prospect status** and **Policy expiring within (days)**.
+2. Choose **Who** (clients, prospects or both) and narrow the audience by **Line of business**, **Product** (clients insured for the product, prospects interested in it), **Province**, **City / municipality**, **Distribution channel**, **Client type**, **Prospect status** and **Policy expiring within (days)**.
 3. Select **Who is reached**. The preview shows how many match, how many are reachable and how many are **Left out because** of a missing or withdrawn consent or a missing e-mail.
 4. Select **Save**.
 
 ### Templates
 
-1. Open **Templates** and select **New template**. Enter the **Code**, **Name**, **Subject** and the **Message (HTML)**.
-2. Use the placeholders {{firstName}}, {{fullName}}, {{companyName}} and {{optOutLink}}. A template without an opt-out link gets the unsubscribe paragraph of **campaigns.opt_out_text** added at the end.
-3. **Preview** shows the template filled in for a sample recipient.
+1. Open **Templates** and select **New template**. Enter the **Code**, **Name** and **Subject** ({{firstName}} in the subject is replaced by the recipient's first name).
+2. Write the **Message**. The toolbar sets bold, italic, underline, bulleted and numbered lists and links; **HTML source** shows the HTML. **Insert** places the recipient's **First name**, **Full name**, our **Company name** or the **Opt-out link** where the cursor is. A message without an opt-out link gets the unsubscribe paragraph of **campaigns.opt_out_text** added at the end; the screen warns about it.
+3. **Preview** shows the e-mail as the recipient receives it, in the e-mail layout of the theme (Master > System Configuration > E-mail Layout), for a sample recipient, before or after the template is saved.
+
+The templates delivered are the Motor renewal reminder, Motor insurance for new Toyota owners, the Personal Accident offer and Credit Life information.
 
 ### Send a campaign and read the results
 

@@ -88,6 +88,26 @@ describe('TISPH roles of a new database', () => {
 });
 
 describe('makers and approvers', () => {
+  it('lists each role with its department on the user form, marks the platform roles and names who changed a role last', async () => {
+    const by = Object.fromEntries((await ctx.api('get', '/roles')).body.data.map((r) => [r.code, r]));
+    expect(by['tis-sales-associate']).toMatchObject({ department: 'Sales', platform: false, modifiedBy: null });
+    expect(by['tis-sales-associate'].summary).toMatch(/no approvals/);
+    expect(by['tis-ccd-recon'].department).toBe('Cash Control');
+    expect(by['tis-finance'].department).toBe('Finance and Accounting');
+    expect(by['tis-superid'].department).toBe('IT');
+    expect(by['tis-general-manager'].department).toBe('Management');
+    expect(by['tis-sales-unit-head'].groupOrder).toBeLessThan(by['tis-ops-associate'].groupOrder);
+    for (const code of ['system-admin', 'sales', 'processing', 'operations', 'claims', 'accounting', 'accounting-manager']) {
+      expect(by[code], code).toMatchObject({ platform: true, department: null });
+    }
+    const created = await ctx.api('post', '/roles').send({ code: 'tis-test-desk', name: 'Test desk', permissions: ['read:leads'] });
+    expect((await ctx.api('put', `/roles/${created.body.data.id}`).send({ name: 'Test desk (renamed)' })).status).toBe(200);
+    const desk = (await ctx.api('get', '/roles')).body.data.find((r) => r.code === 'tis-test-desk');
+    expect(desk).toMatchObject({ name: 'Test desk (renamed)', department: null, platform: false, modifiedBy: 'BrokerVerse Administrator' });
+    expect(desk.modifiedAt).toBeTruthy();
+    expect((await q('SELECT status FROM roles WHERE code = $1', ['sales']))[0].status).toBe('active');
+  });
+
   it('Sales and Operations both raise; the approval needs approve:quotations and another user', async () => {
     const lead = await as['tis.sa']('post', '/leads').send({ firstName: 'Maker', lastName: 'Test', emailId: 'maker@example.ph', contactNumber: '09170001111', leadCategory: 'Retail' });
     expect(lead.status).toBe(201);

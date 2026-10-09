@@ -174,6 +174,7 @@ function AddCity({ action }) {
           <div class="sm-col-12 col-12 md:col-3 lg-col-3">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label={t("generalMasters.cityCode")}
                 placeholder={t("generalMasters.enter")}
@@ -193,6 +194,7 @@ function AddCity({ action }) {
           <div class="sm-col-12 col-12 md:col-3 lg-col-3">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label={t("generalMasters.cityName")}
                 placeholder={t("generalMasters.enter")}
@@ -234,6 +236,7 @@ function AddCity({ action }) {
           <div class="col-3 md:col-3 lg-col-3">
             <div>
               <DropDowns
+                required
                 className="dropdown__container"
                 label={t("generalMasters.state")}
                 value={formik.values.State}

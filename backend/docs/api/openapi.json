@@ -26282,6 +26282,241 @@
         ]
       }
     },
+    "/campaigns/consents": {
+      "get": {
+        "operationId": "getCampaignsConsents",
+        "summary": "Clients and prospects with their current marketing consent (search name, code or e-mail; partyType client / lead; status granted / refused / withdrawn / not-recorded)",
+        "tags": [
+          "Campaigns"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Campaigns > Marketing consents\n\nAccess: read:campaigns, write:campaigns",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Santos"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "not-recorded"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "partyType": {
+                            "type": "string"
+                          },
+                          "partyId": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "email": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "channel": {
+                            "type": "string"
+                          },
+                          "evidence": {
+                            "type": "string"
+                          },
+                          "recordedAt": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "partyType": "client",
+                      "partyId": "cl_1",
+                      "name": "Maria Santos",
+                      "code": "CL-2026-00012",
+                      "email": "maria.santos@example.ph",
+                      "status": "granted",
+                      "channel": "Form",
+                      "evidence": "Signed application form",
+                      "recordedAt": "2026-10-09T02:00:00Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Campaigns > Marketing consents",
+        "x-permissions": [
+          "read:campaigns",
+          "write:campaigns"
+        ]
+      },
+      "post": {
+        "operationId": "postCampaignsConsents",
+        "summary": "Record the marketing consent of a client or prospect (agreed or refused, channel, evidence); it replaces the consent in force",
+        "tags": [
+          "Campaigns"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Campaigns > Marketing consents > Record\n\nAccess: write:campaigns",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "partyType": {
+                          "type": "string"
+                        },
+                        "partyId": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "channel": {
+                          "type": "string"
+                        },
+                        "evidence": {
+                          "type": "string"
+                        },
+                        "recordedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 41,
+                    "partyType": "client",
+                    "partyId": "cl_1",
+                    "name": "Maria Santos",
+                    "code": "CL-2026-00012",
+                    "email": "maria.santos@example.ph",
+                    "status": "granted",
+                    "channel": "Form",
+                    "evidence": "Signed application form",
+                    "recordedAt": "2026-10-09T02:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Campaigns > Marketing consents > Record",
+        "x-permissions": [
+          "write:campaigns"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "partyType": {
+                    "type": "string"
+                  },
+                  "partyId": {
+                    "type": "string"
+                  },
+                  "granted": {
+                    "type": "boolean"
+                  },
+                  "channel": {
+                    "type": "string"
+                  },
+                  "evidence": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "partyType": "client",
+                "partyId": "cl_1",
+                "granted": true,
+                "channel": "Form",
+                "evidence": "Signed application form"
+              }
+            }
+          }
+        }
+      }
+    },
     "/campaigns/opt-out/{token}": {
       "get": {
         "operationId": "getCampaignsOptOutToken",
@@ -27132,7 +27367,7 @@
     "/campaigns/templates/{id}/preview": {
       "post": {
         "operationId": "postCampaignsTemplatesIdPreview",
-        "summary": "The template filled in for a sample recipient (subject and HTML)",
+        "summary": "The template filled in for a sample recipient (subject and HTML in the e-mail layout of the theme)",
         "tags": [
           "Campaigns"
         ],
@@ -27166,6 +27401,9 @@
                         },
                         "html": {
                           "type": "string"
+                        },
+                        "hasOptOutLink": {
+                          "type": "boolean"
                         }
                       }
                     }
@@ -27175,7 +27413,8 @@
                   "success": true,
                   "data": {
                     "subject": "Your car insurance renews soon, Maria",
-                    "html": "<p>Dear Maria,</p>"
+                    "html": "<div data-bv-layout=\"1\">...<p>Dear Maria,</p>...</div>",
+                    "hasOptOutLink": true
                   }
                 }
               }
@@ -27196,6 +27435,92 @@
           "read:campaigns",
           "write:campaigns"
         ]
+      }
+    },
+    "/campaigns/templates/preview": {
+      "post": {
+        "operationId": "postCampaignsTemplatesPreview",
+        "summary": "A template being written (subject and body, not saved) filled in for a sample recipient, in the e-mail layout of the theme",
+        "tags": [
+          "Campaigns"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Campaigns > Templates > Edit > Preview\n\nAccess: read:campaigns, write:campaigns",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "subject": {
+                          "type": "string"
+                        },
+                        "html": {
+                          "type": "string"
+                        },
+                        "hasOptOutLink": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "subject": "Your car insurance renews soon, Maria",
+                    "html": "<div data-bv-layout=\"1\">...<p>Dear Maria,</p>...</div>",
+                    "hasOptOutLink": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Campaigns > Templates > Edit > Preview",
+        "x-permissions": [
+          "read:campaigns",
+          "write:campaigns"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "subject": {
+                    "type": "string"
+                  },
+                  "bodyHtml": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "subject": "Your car insurance renews soon, {{firstName}}",
+                "bodyHtml": "<p>Dear {{firstName}},</p><p>...</p><p><a href=\"{{optOutLink}}\">Unsubscribe</a></p>"
+              }
+            }
+          }
+        }
       }
     },
     "/cancellations/quote": {
@@ -144249,11 +144574,11 @@
     "/roles": {
       "get": {
         "operationId": "getRoles",
-        "summary": "List roles with their permissions and user counts",
+        "summary": "List roles with their permissions, user counts, department on the user form and last change (who and when)",
         "tags": [
           "User Management"
         ],
-        "description": "Front-end touchpoint: Master > User Management > Role\n\nAccess: Any authenticated user",
+        "description": "Front-end touchpoint: Master > User Management > Role; User > Add / Edit\n\nAccess: Any authenticated user",
         "parameters": [],
         "responses": {
           "200": {
@@ -144288,6 +144613,24 @@
                           },
                           "users": {
                             "type": "integer"
+                          },
+                          "department": {
+                            "type": "string"
+                          },
+                          "summary": {
+                            "type": "string"
+                          },
+                          "groupOrder": {
+                            "type": "integer"
+                          },
+                          "platform": {
+                            "type": "boolean"
+                          },
+                          "modifiedBy": {
+                            "type": "string"
+                          },
+                          "modifiedAt": {
+                            "type": "string"
                           }
                         }
                       }
@@ -144298,13 +144641,19 @@
                   "success": true,
                   "data": [
                     {
-                      "id": 1,
-                      "code": "sales",
-                      "name": "Sales & Marketing (Account Executive)",
+                      "id": 9,
+                      "code": "tis-sales-associate",
+                      "name": "TIS Sales Associate",
                       "permissions": [
                         "read:leads"
                       ],
-                      "users": 3
+                      "users": 3,
+                      "department": "Sales",
+                      "summary": "Leads, clients, quotations, placements, policies, endorsements and renewals; no approvals",
+                      "groupOrder": 0,
+                      "platform": false,
+                      "modifiedBy": "BrokerVerse Administrator",
+                      "modifiedAt": "2026-10-09T08:00:00.000Z"
                     }
                   ]
                 }
@@ -144318,7 +144667,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > User Management > Role"
+        "x-screen": "Master > User Management > Role; User > Add / Edit"
       },
       "post": {
         "operationId": "postRoles",

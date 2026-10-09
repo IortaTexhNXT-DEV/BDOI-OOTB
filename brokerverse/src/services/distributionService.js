@@ -14,7 +14,9 @@ const qs = (params = {}) => {
 const handle = async (response) => {
   const body = await response.json().catch(() => ({}));
   if (!response.ok || body.success === false) {
-    throw new Error(apiErrorMessage(body, response.status));
+    const error = new Error(apiErrorMessage(body, response.status));
+    error.errors = Array.isArray(body.errors) ? body.errors : [];
+    throw error;
   }
   return body;
 };
@@ -154,6 +156,9 @@ const distributionService = {
   createCampaignTemplate: (body) => post(`${CP}/templates`, body),
   updateCampaignTemplate: (templateId, body) => put(`${CP}/templates/${id(templateId)}`, body),
   previewCampaignTemplate: (templateId) => post(`${CP}/templates/${id(templateId)}/preview`),
+  previewCampaignTemplateDraft: (body) => post(`${CP}/templates/preview`, body),
+  marketingConsents: (params) => request(`${CP}/consents${qs(params)}`),
+  recordMarketingConsent: (body) => post(`${CP}/consents`, body),
   campaigns: (params) => request(`${CP}${qs(params)}`),
   createCampaign: (body) => post(CP, body),
   updateCampaign: (campaignId, body) => put(`${CP}/${id(campaignId)}`, body),
