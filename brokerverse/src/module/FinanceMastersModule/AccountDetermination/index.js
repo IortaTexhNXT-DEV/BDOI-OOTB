@@ -16,7 +16,7 @@ import postingRulesService from "../../../services/postingRulesService";
 import CommissionTaxes from "./CommissionTaxes";
 import "../PostingRules/index.scss";
 
-const SECTIONS = ["premium", "customer", "miscellaneous", "ri-claims", "other"];
+const SECTIONS = ["premium", "customer", "miscellaneous", "claims", "other"];
 const EMPTY_REASON = { code: "", name: "", glAccount: null, maxAmount: "", description: "", status: "active", isNew: true };
 
 /**

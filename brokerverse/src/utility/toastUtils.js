@@ -89,14 +89,3 @@ export const showWarningMessage = (message, summary = 'Warning') => {
     });
   }
 };
-
-/**
- * Warnings of compliance controls set to warn (an insurer without a certificate of authority in force, a referrer
- * without a licence): the action went through and was recorded in the audit trail.
- */
-export const showComplianceWarnings = (warnings) => {
-  if (!globalToastRef || !globalToastRef.current) return;
-  for (const text of warnings) {
-    globalToastRef.current.show({ severity: 'warn', summary: 'Compliance warning', detail: text, life: 10000 });
-  }
-};

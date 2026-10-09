@@ -3,9 +3,8 @@ import authService from "./authService";
 
 /**
  * Distribution, programmes and products API: lead assignment (/lead-assignment), distribution channels (/channels),
- * brand-new vehicle programmes (/motor-programmes), fleet schedules (/fleet), marine open covers (/marine), facultative
- * reinsurance (/reinsurance/facultative), comparison reports (/comparison-reports), campaigns (/campaigns) and the
- * Report Builder (/report-builder).
+ * brand-new vehicle programmes (/motor-programmes), fleet schedules (/fleet), marine open covers (/marine), comparison
+ * reports (/comparison-reports), campaigns (/campaigns) and the Report Builder (/report-builder).
  */
 const qs = (params = {}) => {
   const s = new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== "")).toString();
@@ -62,7 +61,6 @@ const CH = "/channels";
 const MP = "/motor-programmes";
 const FL = "/fleet";
 const MA = "/marine";
-const FAC = "/reinsurance/facultative";
 const CR = "/comparison-reports";
 const CP = "/campaigns";
 const RB = "/report-builder";
@@ -134,22 +132,6 @@ const distributionService = {
   billDeclaration: (declarationId) => post(`${MA}/declarations/${id(declarationId)}/bill`),
   deleteDeclaration: (declarationId) => remove(`${MA}/declarations/${id(declarationId)}`),
   printDeclaration: (declarationId) => fileFrom(`${MA}/declarations/${id(declarationId)}/print`, "declaration.pdf", { open: true }),
-
-  // facultative reinsurance
-  reinsurers: () => request(`/reinsurance/reinsurers${qs({ status: "Active" })}`),
-  facPlacements: (params) => request(`${FAC}${qs(params)}`),
-  facPlacement: (placementId) => request(`${FAC}/${id(placementId)}`),
-  createFacPlacement: (body) => post(FAC, body),
-  updateFacPlacement: (placementId, body) => put(`${FAC}/${id(placementId)}`, body),
-  saveFacShare: (placementId, body) => post(`${FAC}/${id(placementId)}/shares`, body),
-  removeFacShare: (placementId, shareId) => remove(`${FAC}/${id(placementId)}/shares/${id(shareId)}`),
-  sendFacPlacement: (placementId, email) => post(`${FAC}/${id(placementId)}/send`, { email }),
-  bindFacPlacement: (placementId) => post(`${FAC}/${id(placementId)}/bind`),
-  facSettlement: (placementId, body) => post(`${FAC}/${id(placementId)}/settlements`, body),
-  cancelFacPlacement: (placementId, reason) => post(`${FAC}/${id(placementId)}/cancel`, { reason }),
-  facDocument: (placementId, kind, shareId) => fileFrom(`${FAC}/${id(placementId)}/documents/${id(kind)}${qs({ shareId })}`, `${kind}.pdf`, { open: true }),
-  facBordereau: (params) => fileFrom(`${FAC}/bordereau${qs(params)}`, `facultative-bordereau.${params.format || "xlsx"}`, { open: params.format === "pdf" }),
-  generateFacBordereau: (body) => post(`${FAC}/bordereau`, body),
 
   // comparison reports
   comparisonReports: (params) => request(`${CR}${qs(params)}`),

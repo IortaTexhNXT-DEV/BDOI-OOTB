@@ -47,7 +47,6 @@ describe("persona walk: menu grants match the API", () => {
       name: "Accounts",
       submenu: [{ name: "Incentive", submenu: [{ name: "Statement", path: "/incentive/statement", includes: ["/incentive/statement"] }] }],
     },
-    { name: "Reinsurance", submenu: [{ name: "Reconciliation", path: "/reinsurance/reconciliation", includes: ["/reinsurance/reconciliation"] }] },
     {
       name: "Reports",
       submenu: [
@@ -69,9 +68,8 @@ describe("persona walk: menu grants match the API", () => {
     }
     expect(isPathAllowed("/renewal/queue", walkMenu, ["accounting"])).toBe(false);
   });
-  it("accounting reaches incentives and reinsurance reconciliation", () => {
+  it("accounting reaches incentives", () => {
     expect(isPathAllowed("/incentive/statement", walkMenu, ["accounting"])).toBe(true);
-    expect(isPathAllowed("/reinsurance/reconciliation", walkMenu, ["accounting"])).toBe(true);
   });
   it("accounting gets the financial reports and the catalogue, not the production register", () => {
     expect(isPathAllowed("/reports/catalogue", walkMenu, ["accounting"])).toBe(true);
@@ -159,7 +157,7 @@ describe("menu structure", () => {
     expect(menuList.find((m) => m.name === "Operations").submenu.map((i) => i.name)).not.toContain("My Work");
     expect(menuList.map((m) => m.name)).not.toContain("Home");
     // the Accounting Manager inherits Accounting: the server returns both roles
-    for (const roles of [["sales"], ["processing"], ["operations"], ["claims"], ["accounting"], ["accounting", "accounting-manager"], ["compliance-officer"], ["system-admin"]]) {
+    for (const roles of [["sales"], ["processing"], ["operations"], ["claims"], ["accounting"], ["accounting", "accounting-manager"], ["system-admin"]]) {
       expect(filterMenuForRoles(menuList, roles).map((m) => m.name)).toContain("My Work");
       expect(isPathAllowed("/my-work", menuList, roles)).toBe(true);
       expect(isPathAllowed("/agent/home", menuList, roles)).toBe(true);
@@ -167,7 +165,7 @@ describe("menu structure", () => {
     }
   });
   it("every role lands on My Work (with the role preset) after sign-in", () => {
-    for (const role of ["sales", "claims", "accounting", "compliance-officer", "system-admin"]) {
+    for (const role of ["sales", "claims", "accounting", "system-admin"]) {
       expect(firstAllowedPath(menuList, [role])).toBe("/my-work");
     }
     // an entry marked landing: false is taken only when nothing else is open

@@ -5,7 +5,7 @@ import { progressValue } from "../../utility/numberFormat";
 
 /**
  * A figure out of 100 as a thin bar with the value written next to it (never inside the bar, where a short bar clips
- * it): utilisation of a treaty, completion of a checklist, share of a target. Styles: theme/bdoi/enterprise.scss
+ * it): utilisation of a limit, completion of a checklist, share of a target. Styles: theme/bdoi/enterprise.scss
  * (.bv-meter). The tone follows the value unless given: primary up to 80, warning above 80, danger above 100.
  */
 export const meterTone = (value, tone) => {

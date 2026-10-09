@@ -19,9 +19,6 @@ export const CATEGORY_ICONS = {
   claims: "pi pi-shield",
   approvals: "pi pi-check-square",
   documents: "pi pi-id-card",
-  edd: "pi pi-user-edit",
-  compliance: "pi pi-calendar-times",
-  breaches: "pi pi-exclamation-triangle",
   bankrec: "pi pi-building",
   periodClose: "pi pi-lock",
   access: "pi pi-users",
@@ -36,7 +33,7 @@ export const CATEGORY_ICONS = {
  * action of the page (a screen to open, or a category of My Items to show). The server picks the same preset for the
  * role figures (backend my-work/figures.js).
  */
-export const PRESET_ORDER = ["system-admin", "compliance-officer", "accounting-manager", "accounting", "claims", "processing", "operations", "sales"];
+export const PRESET_ORDER = ["system-admin", "accounting-manager", "accounting", "claims", "processing", "operations", "sales"];
 
 export const PRESETS = {
   sales: {
@@ -48,8 +45,8 @@ export const PRESETS = {
     agenda: ["rfq", "placements", "renewals", "approvals"], action: { key: "coverNote", path: "/operations/cover-notes" },
   },
   operations: {
-    categories: ["endorsements", "renewals", "documents", "quotes", "receivables", "approvals", "breaches", "compliance"], scope: "me",
-    agenda: ["renewals", "endorsements", "approvals", "breaches", "compliance"], action: { key: "coverNote", path: "/operations/cover-notes" },
+    categories: ["endorsements", "renewals", "documents", "quotes", "receivables", "approvals"], scope: "me",
+    agenda: ["renewals", "endorsements", "approvals"], action: { key: "coverNote", path: "/operations/cover-notes" },
   },
   claims: {
     categories: ["claims", "approvals"], scope: "me", agenda: ["claims", "approvals"], action: { key: "registerClaim", path: "/agent/claimrequest/claimdetails" },
@@ -62,13 +59,9 @@ export const PRESETS = {
     categories: ["approvals", "periodClose", "bankrec", "receivables", "collections"], scope: "all",
     agenda: ["approvals", "periodClose", "bankrec", "receivables"], action: { key: "approvals", category: "approvals" },
   },
-  "compliance-officer": {
-    categories: ["edd", "compliance", "breaches", "approvals"], scope: "me",
-    agenda: ["compliance", "edd", "breaches", "approvals"], action: { key: "newEdd", path: "/compliance/aml/edd" },
-  },
   "system-admin": {
     categories: ["access", "systems", "approvals"], scope: "me",
-    agenda: ["access", "systems", "approvals", "compliance"], action: { key: "newUser", path: "/master/generals/usermanagement/user/add" },
+    agenda: ["access", "systems", "approvals"], action: { key: "newUser", path: "/master/generals/usermanagement/user/add" },
   },
   general: { categories: [], scope: "me", agenda: null, action: null },
 };
