@@ -8,6 +8,7 @@ import AtRiskAnalysis from "./AtRiskAnalysis";
 import NegotiationWorkspace from "./NegotiationWorkspace";
 import service from "../../services/renewalsWorkspaceService";
 import myWorkService from "../../services/myWorkService";
+import { downloadCsv } from "../../utility/csvExport";
 import { claimLobOf, lobUses, lossCauseOptions } from "../../agentModule/claimsModule/shared/claimJourney";
 import { mapToApiLob } from "../../agentModule/claimsModule/claimDetails/store/claimDetailsMiddleWare";
 
@@ -20,6 +21,7 @@ jest.mock("../../services/myWorkService", () => ({
   errorMessage: (e, fallback) => e?.message || fallback,
   default: { assignees: jest.fn(), createTask: jest.fn() },
 }));
+jest.mock("../../utility/csvExport", () => ({ __esModule: true, downloadCsv: jest.fn() }));
 
 const store = configureStore({ reducer: { systemSettingsReducer: () => ({ displayCurrency: "PHP" }) } });
 const wrap = (ui) => render(<Provider store={store}><MemoryRouter>{ui}</MemoryRouter></Provider>);
@@ -86,6 +88,17 @@ describe("At-Risk Policies", () => {
     const dialog = await screen.findByRole("dialog", { name: "Escalate to the unit head" });
     fireEvent.click(within(dialog).getByRole("button", { name: "Escalate" }));
     await waitFor(() => expect(service.escalate).toHaveBeenCalledWith("rnw_1", undefined));
+  });
+
+  it("exports the policies shown as CSV with the dates in the date format", async () => {
+    wrap(<AtRiskAnalysis />);
+    await screen.findByText("2 claims in the current term");
+    fireEvent.click(screen.getByRole("button", { name: "Export" }));
+    expect(downloadCsv).toHaveBeenCalledTimes(1);
+    const [fileName, rows, columns] = downloadCsv.mock.calls[0];
+    expect(fileName).toMatch(/^at-risk-policies-\d{4}-\d{2}-\d{2}\.csv$/);
+    expect(rows).toEqual([RISK]);
+    expect(columns.find((c) => c.header === "Expiry").field(RISK)).toBe("12/11/2026");
   });
 });
 
