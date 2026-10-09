@@ -8,7 +8,7 @@ import "./index.scss";
  * size, with their tooltip and accessible name, side by side in the Actions column. Every master list uses it, so the
  * column looks the same.
  */
-const RowActions = ({ onView, onEdit, onStatus, active, viewLabel, editLabel, children }) => {
+const RowActions = ({ onView, onEdit, onStatus, active, statusDisabled = false, viewLabel, editLabel, children }) => {
   const { t } = useTranslation();
   const view = viewLabel || t("common.view", "View");
   const edit = editLabel || t("common.edit", "Edit");
@@ -19,7 +19,7 @@ const RowActions = ({ onView, onEdit, onStatus, active, viewLabel, editLabel, ch
       {onEdit ? <Button type="button" icon="pi pi-pencil" text rounded aria-label={edit} tooltip={edit} tooltipOptions={{ position: "top" }} onClick={onEdit} /> : null}
       {onStatus ? (
         <Button type="button" icon={active ? "pi pi-ban" : "pi pi-check-circle"} text rounded aria-label={status} tooltip={status} tooltipOptions={{ position: "top" }}
-          onClick={onStatus} />
+          disabled={statusDisabled} onClick={onStatus} />
       ) : null}
       {children}
     </div>

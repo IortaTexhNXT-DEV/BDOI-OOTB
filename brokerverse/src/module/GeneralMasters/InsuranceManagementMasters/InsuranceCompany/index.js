@@ -2,13 +2,11 @@ import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
-import SvgAdd from "../../../../assets/icons/SvgAdd";
-import { Button } from "primereact/button";
 import TableData from "./TableData/index";
-import SvgUploade from "../../../../assets/icons/SvgUploade";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import ImportDialog, { masterTarget } from "../../../../components/ImportDialog";
+import PageActions from "../../../../components/PageActions";
 
 const UPLOAD_TARGETS = [masterTarget("insurance-company", "Insurance companies")];
 
@@ -49,27 +47,8 @@ const Index = () => {
           />
           </div>
           <div>
-          <Button onClick={() => setShowUpload(true)}
-            icon={
-              <div className="pr-2">
-                <SvgUploade />
-              </div>
-            }
-            className="main__btn__action__upload mr-4"
-          >
-            {t("generalMasters.upload")}
-          </Button>
+          <PageActions onUpload={() => setShowUpload(true)} onAdd={() => handleAction()} />
           <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title="Upload insurance companies" targets={UPLOAD_TARGETS} />
-          <Button
-            icon={
-              <div className="pr-2">
-                <SvgAdd />
-              </div>
-            }
-            className="main__btn__action"
-            onClick={() => handleAction()} aria-label="Add" tooltip="Add" tooltipOptions={{ position: "top" }} >
-            {t("generalMasters.add")}
-          </Button>
           </div>
         </div>
        

@@ -12,6 +12,7 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { MultiSelect } from "primereact/multiselect";
 import { Toast } from "primereact/toast";
+import PageActions from "../../components/PageActions";
 import RowActions, { actionsColumn } from "../../components/RowActions";
 import mastersService from "../../services/mastersService";
 import service from "../../services/opsAccountingService";
@@ -126,7 +127,7 @@ const MasterRecordsPage = ({ type, title, group, section, help, columns }) => {
     <div className="pe-page">
       <Toast ref={toast} />
       <PageHeader title={title} group={group} section={section} help={help}>
-        <Button icon="pi pi-plus" label={t("opsAcc.masters.add")} onClick={() => open({ id: null, values: {} })} />
+        <PageActions onAdd={() => open({ id: null, values: {} })} addLabel={t("opsAcc.masters.add")} />
       </PageHeader>
       <div className="pe-card">
         <div className="bv-list-toolbar">

@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
-import SvgAdd from "../../../assets/icons/SvgAdd";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../assets/icons/SvgDot";
@@ -22,6 +21,7 @@ import remittanceService, { masterService } from "../../../services/remittanceSe
 import { showError, showSuccess } from "../../Remittance/shared";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import RowActions, { actionsColumn } from "../../../components/RowActions";
+import PageActions from "../../../components/PageActions";
 
 const RemittanceMaster = () => {
   const { t } = useTranslation();
@@ -218,16 +218,7 @@ const RemittanceMaster = () => {
           </div>
         </div>
         <div className="col-12 p-0 flex justify-content-end">
-          <Button
-            icon={
-              <div className="pr-2">
-                <SvgAdd />
-              </div>
-            }
-            className="main__btn__action"
-            onClick={handleAdd} aria-label="Add" tooltip="Add" tooltipOptions={{ position: "top" }} >
-            {t("financeMasters.add")}
-          </Button>
+          <PageActions onAdd={handleAdd} />
         </div>
         <div className="col-12 p-0">
           <BreadCrumb

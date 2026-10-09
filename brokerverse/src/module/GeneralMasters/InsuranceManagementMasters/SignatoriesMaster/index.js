@@ -2,15 +2,13 @@ import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
-import SvgAdd from "../../../../assets/icons/SvgAdd";
-import { Button } from "primereact/button";
 import TableData from "./TableData/index";
 import { useNavigate } from "react-router-dom";
+import PageActions from "../../../../components/PageActions";
 
 const Index = () => {
   const { t } = useTranslation();
   const navigation = useNavigate();
-
 
   const items = [
     {
@@ -42,16 +40,7 @@ const Index = () => {
           />
           </div>
           <div>
-          <Button
-            icon={
-              <div className="pr-2">
-                <SvgAdd />
-              </div>
-            }
-            className="main__btn__action"
-            onClick={() => handleAction()} aria-label="Add" tooltip="Add" tooltipOptions={{ position: "top" }} >
-            {t("generalMasters.add")}
-          </Button>
+          <PageActions onAdd={() => handleAction()} />
           </div>
         </div>
         <div className="col-12 p-0">

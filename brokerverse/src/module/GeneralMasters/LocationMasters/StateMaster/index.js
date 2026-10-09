@@ -4,14 +4,12 @@ import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { useNavigate } from "react-router-dom";
 import SvgDot from "../../../../assets/icons/SvgDot";
-import SvgAdd from "../../../../assets/icons/SvgAdd";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
-import SvgUpload from "../../../../assets/icons/SvgUpload";
 import { Dialog } from "primereact/dialog";
 import InputField from "../../../../components/InputField";
 import SvgTable from "../../../../assets/icons/SvgTable";
@@ -27,6 +25,7 @@ import { Toast } from "primereact/toast";
 import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 import ImportDialog, { masterTarget } from "../../../../components/ImportDialog";
 import RowActions, { actionsColumn } from "../../../../components/RowActions";
+import PageActions from "../../../../components/PageActions";
 
 const UPLOAD_TARGETS = [masterTarget("state", "Provinces")];
 
@@ -149,22 +148,9 @@ const State = () => {
           />
         </div>
         <div className="filterbutton_container">
-          <Button onClick={() => setShowUpload(true)}
-            type="button"
-            label={t("generalMasters.upload")}
-            className="uploadbutton_container"
-            icon={<SvgUpload />}
-            outlined
-          />
+          <PageActions onUpload={() => setShowUpload(true)} onAdd={handleadd} />
 
           <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title={t("generalMasters.uploadProvinces")} targets={UPLOAD_TARGETS} onDone={reloadList} />
-          <Button
-            type="button"
-            label={t("generalMasters.add")}
-            className="addbutton_container"
-            icon={<SvgAdd />}
-            onClick={handleadd}
-          />
         </div>
       </div>
 

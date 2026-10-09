@@ -2434,7 +2434,8 @@
     "uploading": "Uploading...",
     "replaceLogo": "Replace logo",
     "uploadLogo": "Upload logo",
-    "removeLogo": "Remove"
+    "removeLogo": "Remove",
+    "policyTypeMaster": "Policy Type"
   },
   "agent": {
     "createQuote": "Create Quote",

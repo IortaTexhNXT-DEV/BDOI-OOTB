@@ -1,0 +1,33 @@
+// Page actions of the list screens (components/PageActions): one row at the right, every button the same height and
+// padding with its icon centred on the text, overriding the button classes of the screen around them.
+.bv-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+
+  .p-button:not(.p-button-icon-only) {
+    height: 40px !important;
+    min-height: 40px;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 16px !important;
+    font-size: 14px !important;
+    font-weight: 600;
+    line-height: 1;
+    gap: 8px;
+    white-space: nowrap;
+
+    .p-button-icon {
+      margin: 0 !important;
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .p-button-label {
+      flex: 0 0 auto;
+      line-height: 1;
+    }
+  }
+}

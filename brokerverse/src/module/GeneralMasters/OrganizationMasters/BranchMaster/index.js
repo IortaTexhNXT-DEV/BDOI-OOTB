@@ -4,7 +4,6 @@ import "../BranchMaster/index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { useNavigate } from "react-router-dom";
 import SvgDot from "../../../../assets/icons/SvgDot";
-import SvgAdd from "../../../../assets/icons/SvgAdd";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -22,6 +21,7 @@ import { useFormik } from "formik";
 import MasterStatusToggle from "../../common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
 import RowActions, { actionsColumn } from "../../../../components/RowActions";
+import PageActions from "../../../../components/PageActions";
 
 const Index = () => {
   const { t } = useTranslation();
@@ -143,10 +143,7 @@ const Index = () => {
         </div>
         <div className="filterbutton_container">
 
-          <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
-            <SvgAdd />
-            <p className="addtext">{t("generalMasters.add")}</p>
-          </button>
+          <PageActions onAdd={handlePolicy} />
         </div>
       </div>
 

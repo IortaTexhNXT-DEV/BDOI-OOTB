@@ -19,7 +19,6 @@ import { MultiSelect } from "primereact/multiselect";
 import { ConfirmDialog } from "primereact/confirmdialog";
 import FieldError from "../../../../components/FieldError";
 import { useLocation } from "react-router-dom";
-import SvgAdd from "../../../../assets/icons/SvgAdd";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import SvgSearchIcon from "../../../../assets/icons/SvgSearchIcon";
 import InputField from "../../../../components/InputField";
@@ -30,6 +29,7 @@ import { calendarDateFormat, formatDate as formatAppDate } from "../../../../uti
 import { requiredErrors, hasErrors, errorSummary } from "../../../../utility/requiredFields";
 import "./index.scss";
 import RowActions, { actionsColumn } from "../../../../components/RowActions";
+import PageActions from "../../../../components/PageActions";
 
 const IncentiveProgramMaster = () => {
   const { t } = useTranslation();
@@ -328,12 +328,7 @@ const IncentiveProgramMaster = () => {
       <div className="top__container">
         <div className="page__title">{t("incentiveProgramMaster.pageTitle")}</div>
         <div className="add-button-container">
-          <Button
-            icon={<div className="pr-2"><SvgAdd /></div>}
-            className="main__btn__action"
-            onClick={handleAdd} aria-label="Add" tooltip="Add" tooltipOptions={{ position: "top" }} >
-            {t("incentiveProgramMaster.addProgram")}
-          </Button>
+          <PageActions onAdd={handleAdd} addLabel={t("incentiveProgramMaster.addProgram")} />
         </div>
         <BreadCrumb
           home={home}

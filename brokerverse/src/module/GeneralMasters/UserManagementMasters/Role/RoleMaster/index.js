@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import SvgAdd from "../../../../../assets/icons/SvgAdd";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../../assets/icons/SvgDot";
@@ -20,6 +19,7 @@ import { Toast } from "primereact/toast";
 import userService from "../../../../../services/userService";
 import { formatDate } from "../../../../../utility/dateFormat";
 import RowActions, { actionsColumn } from "../../../../../components/RowActions";
+import PageActions from "../../../../../components/PageActions";
 
 const RoleMaster = () => {
   const { t } = useTranslation();
@@ -132,12 +132,7 @@ const RoleMaster = () => {
         </div>
       </div>
       <div className="col-12 md:col-6 lg:col-6 add__icon__alighn__hierarchy mb-1">
-        <button type="button" className="add__icon__view__hierarchy bv-add-button" onClick={handleNavigate}>
-          <span className="add__icon__hierarchy">
-            <SvgAdd />
-          </span>
-          <span className="add__text__hierarchy">{t("generalMasters.add")}</span>
-        </button>
+        <PageActions onAdd={handleNavigate} />
       </div>
       <div className="col-12 m-0 ">
         <div className="sub__account__sub__container__hierarchy">

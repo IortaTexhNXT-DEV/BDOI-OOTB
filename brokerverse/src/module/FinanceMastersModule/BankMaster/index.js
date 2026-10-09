@@ -4,14 +4,12 @@ import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { useNavigate } from "react-router-dom";
 import SvgDot from "../../../assets/icons/SvgDot";
-import SvgAdd from "../../../assets/icons/SvgAdd";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
-import SvgUpload from "../../../assets/icons/SvgUpload";
 import { Dialog } from "primereact/dialog";
 import InputField from "../../../components/InputField";
 import SvgTable from "../../../assets/icons/SvgTable";
@@ -22,10 +20,11 @@ import {
   patchBankDetailEdit,
   getBankList,
 } from "./store/bankMasterMiddleware";
-import MenuData from "./MenuData";
 import MasterStatusToggle from "../../GeneralMasters/common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
 import ImportDialog, { masterTarget } from "../../../components/ImportDialog";
+import PageActions from "../../../components/PageActions";
+import RowActions, { actionsColumn } from "../../../components/RowActions";
 
 const UPLOAD_TARGETS = [masterTarget("bank", "Banks"), masterTarget("bank-account", "Bank accounts")];
 
@@ -45,15 +44,6 @@ const BankMaster = () => {
     dispatch(getBankList());
   }, [dispatch]);
   const navigate = useNavigate();
-  const menuitems = [
-    { label: t("financeMasters.edit"), command: (rowData) => handleEdit(rowData) },
-    { label: t("financeMasters.view"), command: (rowData) => handleView(rowData) },
-    {
-      label: t("financeMasters.addEditAccount"),
-      command: () => navigate("/master/finance/bank/accountdataview"),
-    },
-  ];
-
   const fillBankForm = (rowData) => {
     formik.setValues({
       ...formik.values,
@@ -213,10 +203,6 @@ const BankMaster = () => {
 
   const home = { label: t("financeMasters.master") };
 
-
-
-
-
   useEffect(() => {
     if (search?.length > 0) {
       dispatch(getBankSearchList(search));
@@ -237,22 +223,9 @@ const BankMaster = () => {
           />
         </div>
         <div className="filterbutton_container">
-          <Button onClick={() => setShowUpload(true)}
-            type="button"
-            label={t("financeMasters.upload")}
-            className="uploadbutton_container"
-            icon={<SvgUpload />}
-            outlined
-          />
+          <PageActions onUpload={() => setShowUpload(true)} onAdd={handleadd} />
 
           <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title="Upload banks and bank accounts" targets={UPLOAD_TARGETS} onDone={reloadList} />
-          <Button
-            type="button"
-            label={t("generalMasters.add")}
-            className="addbutton_container"
-            icon={<SvgAdd />}
-            onClick={handleadd}
-          />
         </div>
       </div>
 
@@ -343,26 +316,14 @@ const BankMaster = () => {
 
             <Column
               body={(rowData) => (
-                <MenuData menuitems={menuitems} rowData={rowData} />
-                // <div className="card flex justify-content-center">
-                //   <TieredMenu
-                //     model={menuitems.map((item) => ({
-                //       ...item,
-                //       // data: rowData
-                //     }))}
-
-                //     popup
-                //     breakpoint="767px"
-                //   />
-                //   <Button
-                //     className="menubutton_popup"
-                //   />
-                // </div>
+                <RowActions onView={() => handleView(rowData)} onEdit={() => handleEdit(rowData)} viewLabel={t("financeMasters.view")} editLabel={t("financeMasters.edit")}>
+                  <Button type="button" icon="pi pi-wallet" text rounded onClick={() => navigate("/master/finance/bank/accountdataview")}
+                    aria-label={t("financeMasters.addEditAccount")} tooltip={t("financeMasters.addEditAccount")} tooltipOptions={{ position: "top" }} />
+                </RowActions>
               )}
-              header={t("financeMasters.action")}
-              headerStyle={headerStyle}
-              className="fieldvalue_container"
-            ></Column>
+              header={t("common.actions")}
+              {...actionsColumn}
+            />
           </DataTable>
         </div>
       </Card>

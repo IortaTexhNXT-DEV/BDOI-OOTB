@@ -12,12 +12,13 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import SvgDot from "../../../assets/icons/SvgDot";
-import SvgAdd from "../../../assets/icons/SvgAdd";
 import accountingService from "../../../services/accountingService";
 import ImportDialog from "../../../components/ImportDialog";
 import FieldError from "../../../components/FieldError";
 import useFieldErrors, { blank } from "../../../hooks/useFieldErrors";
 import "./index.scss";
+import PageActions from "../../../components/PageActions";
+import RowActions, { actionsColumn } from "../../../components/RowActions";
 
 const COA_UPLOAD = [{ label: "Chart of accounts", templatePath: "/accounting/accounts/template", uploadPath: "/accounting/accounts/upload" }];
 
@@ -130,10 +131,7 @@ const ChartOfAccounts = ({ level = "main" }) => {
               model={[{ label: title, url: level === "sub" ? "/master/finance/subaccount" : "/master/finance/mainaccount" }]} separatorIcon={<SvgDot color={"#000"} />} />
           </div>
           <div className="flex gap-2">
-            <Button type="button" icon="pi pi-upload" label={t("financeMasters.upload", "Upload")} className="p-button-outlined" onClick={() => setShowUpload(true)} />
-            <Button icon={<div className="pr-2"><SvgAdd /></div>} className="main__btn__action" onClick={openNew} aria-label="Add" tooltip="Add" tooltipOptions={{ position: "top" }} >
-              {t("financeMasters.add", "Add")}
-            </Button>
+            <PageActions onUpload={() => setShowUpload(true)} onAdd={openNew} />
           </div>
           <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title="Upload chart of accounts" targets={COA_UPLOAD} onDone={load}
             note="Adds new accounts and updates existing ones (same Account Code). Put a main account before its sub accounts." />
@@ -171,13 +169,8 @@ const ChartOfAccounts = ({ level = "main" }) => {
         <Column header="Manual JV" body={(r) => (r.allowManual ? <i className="pi pi-check" /> : null)} style={{ width: "6rem" }} />
         <Column header="System Use" body={(r) => (r.systemRoles || []).map((role) => <Tag key={role} value={role.replace(/_/g, " ")} severity="info" className="mr-1 mb-1" />)} />
         <Column header="Status" body={(r) => <Tag value={r.status === "active" ? "Active" : "Inactive"} severity={r.status === "active" ? "success" : "secondary"} />} style={{ width: "6rem" }} />
-        <Column header="Actions" style={{ width: "7rem" }} body={(r) => (
-          <div className="flex gap-1">
-            <Button icon="pi pi-pencil" className="p-button-text p-button-sm" tooltip="Edit" onClick={() => openEdit(r)} aria-label="Edit" />
-            <Button icon={r.status === "active" ? "pi pi-ban" : "pi pi-check-circle"} className="p-button-text p-button-sm" tooltip={r.status === "active" ? "Deactivate" : "Activate"}
-              disabled={r.status === "active" && r.isSystem} onClick={() => toggleStatus(r)} aria-label={r.status === "active" ? "Deactivate" : "Activate"}
-              />
-          </div>
+        <Column header={t("common.actions")} {...actionsColumn} body={(r) => (
+          <RowActions onEdit={() => openEdit(r)} active={r.status === "active"} statusDisabled={r.status === "active" && r.isSystem} onStatus={() => toggleStatus(r)} />
         )} />
       </DataTable>
 

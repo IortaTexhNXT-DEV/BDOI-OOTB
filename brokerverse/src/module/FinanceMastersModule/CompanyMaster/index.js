@@ -2,12 +2,10 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../assets/icons/SvgDot";
-import { Button } from "primereact/button";
-import SvgAdd from "../../../assets/icons/SvgAdd";
 import CompanyMasterTable from "./CompanyMasterTable";
 import "./index.scss";
 import { useNavigate } from "react-router";
-
+import PageActions from "../../../components/PageActions";
 
 const CompanyMaster = () => {
   const { t } = useTranslation();
@@ -36,12 +34,7 @@ const CompanyMaster = () => {
         </div>
         <div className="col-12 md:col-6 lg:col-6">
           <div className="btn__container">
-            <Button
-              label={t("financeMasters.add")}
-              icon={<SvgAdd />}
-              className="add__btn"
-              onClick={() => {handleClick()}}
-            />
+            <PageActions onAdd={() => handleClick()} />
           </div>
         </div>
       </div>

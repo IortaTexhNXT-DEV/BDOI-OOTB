@@ -1,6 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Button } from "primereact/button";
-import SvgAdd from "../../../assets/icons/SvgAdd";
 import "../CurrencyMaster/index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../assets/icons/SvgDot";
@@ -9,7 +7,6 @@ import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
-import SvgUploade from "../../../assets/icons/SvgUploade";
 import SvgTable from "../../../assets/icons/SvgTable";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -23,6 +20,7 @@ import MasterStatusToggle from "../../GeneralMasters/common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
 import ImportDialog, { masterTarget } from "../../../components/ImportDialog";
 import RowActions, { actionsColumn } from "../../../components/RowActions";
+import PageActions from "../../../components/PageActions";
 
 const UPLOAD_TARGETS = [masterTarget("currency", "Currencies")];
 
@@ -134,21 +132,8 @@ const CurrencyMaster = () => {
       </div>
       <div className="col-12 md:col-6 lg:col-6 add__icon__alighn mb-1">
         <div className="btn__container">
-          <Button onClick={() => setShowUpload(true)}
-            label={t("financeMasters.upload")}
-            icon={<SvgUploade />}
-            className="upload__btn"
-            outlined
-          />
+          <PageActions onUpload={() => setShowUpload(true)} onAdd={() => handleNavigate()} />
           <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title="Upload currencies" targets={UPLOAD_TARGETS} onDone={reloadList} />
-          <Button
-            label={t("common.add")}
-            icon={<SvgAdd color={"#fff"} />}
-            className="add__btn"
-            onClick={() => {
-              handleNavigate();
-            }}
-          />
         </div>
       </div>
       <div className="col-12 m-0 ">
