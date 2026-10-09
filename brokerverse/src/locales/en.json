@@ -6434,6 +6434,55 @@
       "issued": "Issued"
     }
   },
+  "pageHeader": {
+    "help": "About this page",
+    "back": "Back"
+  },
+  "configStatus": {
+    "state": {
+      "ready": "Ready",
+      "incomplete": "Incomplete",
+      "off": "Off"
+    },
+    "missing": "Missing",
+    "configure": "Configure"
+  },
+  "technicalDetails": {
+    "title": "Technical details",
+    "copy": "Copy",
+    "copyNamed": "Copy {{name}}",
+    "copied": "Copied"
+  },
+  "loadingBar": {
+    "refreshing": "Refreshing"
+  },
+  "reasonPicker": {
+    "reason": "Reason",
+    "note": "Note",
+    "optional": "(optional)",
+    "choose": "Choose a reason",
+    "loading": "Loading reasons",
+    "none": "No reasons are set up for this action",
+    "reasonRequired": "Choose the reason",
+    "noteRequired": "This reason needs a note"
+  },
+  "reasonCodes": {
+    "contexts": {
+      "decline": "Quotation declined or dropped",
+      "repudiation": "Claim repudiation",
+      "lapse": "Renewal lapse",
+      "refund": "Refund",
+      "adjustment": "Adjustment",
+      "non-materialise": "Business not materialised",
+      "reassignment": "Prospect reassignment",
+      "period_close": "Period close or lock",
+      "period_reopen": "Period reopening",
+      "year_end_reverse": "Year-end close reversal",
+      "cas_print_void": "CAS book print void",
+      "cas_document_change": "CAS document change",
+      "incentive_batch_reject": "Incentive batch rejection"
+    }
+  },
   "birTax": {
     "withholdingReturns": "Withholding Returns",
     "withholdingReturnsHelp": "BIR Form 0619-E for the first and second month of each quarter, 1601-EQ per quarter (with the QAP), 2551Q for a non-VAT broker and the annual 1604-E, computed from the payment vouchers and the ledger. Open a return to see it on the BIR layout, check the reconciliation and record the filing.",
@@ -9657,6 +9706,7 @@
       "new": "New {{name}}",
       "edit": "Edit {{name}}",
       "saved": "{{name}} saved",
+      "allOf": "{{name}}: all",
       "shortPeriod": {
         "title": "Short-Period Rates",
         "section": "Insurance Management",
@@ -9710,7 +9760,7 @@
       "reasonCodes": {
         "title": "Reason Codes",
         "section": "Insurance Management",
-        "intro": "Coded reasons of a declined or dropped quotation, a claim repudiation, a renewal lapse, a refund, an adjustment or business that did not materialise. Cancellation and write-off reasons have their own masters."
+        "intro": "Coded reasons of decisions, by what they are used for: quotations, claims, renewals, prospect reassignment and the accounting decisions. Cancellation and write-off reasons have their own masters."
       }
     },
     "instalments": {

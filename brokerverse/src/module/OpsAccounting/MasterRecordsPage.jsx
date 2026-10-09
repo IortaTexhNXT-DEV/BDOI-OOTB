@@ -17,36 +17,44 @@ const HIDDEN = ["audit-user", "audit-date"];
 const display = (f, v) => {
   if (v === null || v === undefined || v === "") return "";
   if (f.type === "boolean") return v === true || v === "true" ? "Yes" : "No";
+  const option = Array.isArray(f.options) ? f.options.find((o) => o?.value === v) : null;
+  if (option) return option.label;
   return String(v);
 };
+/** A select field whose values have business labels: its options as { label, value } (the stored value stays the code). */
+const withLabels = (f, label) => (label && Array.isArray(f.options) ? { ...f, options: f.options.map((value) => ({ label: label(value), value })) } : f);
 
 /**
  * A master kept on the generic master store and maintained by the team that uses it (Repair Shops, Suppliers, Asset
  * Classes, Short-Period Rates, Cancellation Reasons, Claim Document Checklist): list, add, edit, activate / deactivate.
  * The fields come from the master type definition, so a field added on Master > Configuration shows here too.
+ * `optionLabels` gives the business labels of the values of a select field ({ field: (value) => label }); `filterBy`
+ * names a select field offered as a filter above the list.
  */
-const MasterRecordsPage = ({ type, title, group, section, intro, columns }) => {
+const MasterRecordsPage = ({ type, title, group, section, intro, columns, optionLabels, filterBy }) => {
   const { t } = useTranslation();
   const toast = useRef(null);
   const [rows, setRows] = useState([]);
   const [fields, setFields] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [filterValue, setFilterValue] = useState(null);
   const [search, setSearch] = useState("");
   const [edit, setEdit] = useState(null); // { id, values }
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const r = await service.masterRecords(type, { search: search || undefined, status: "all" });
+      const r = await service.masterRecords(type, { search: search || undefined, status: "all", ...(filterBy && filterValue ? { [filterBy]: filterValue } : {}) });
       setRows(r.rows);
-      setFields((r.type?.fields || []).filter((f) => !HIDDEN.includes(f.type)));
+      setFields((r.type?.fields || []).filter((f) => !HIDDEN.includes(f.type)).map((f) => withLabels(f, optionLabels?.[f.name])));
     } catch (e) {
       showError(toast, e);
     } finally {
       setLoading(false);
     }
-  }, [type, search]);
+  }, [type, search, filterBy, filterValue, optionLabels]);
   useEffect(() => { load(); }, [load]);
+  const filterField = filterBy ? fields.find((f) => f.name === filterBy) : null;
 
   const shown = useMemo(() => (columns ? fields.filter((f) => columns.includes(f.name)) : fields.slice(0, 6)), [fields, columns]);
   const save = async () => {
@@ -91,6 +99,10 @@ const MasterRecordsPage = ({ type, title, group, section, intro, columns }) => {
       <div className="pe-card">
         <div className="flex gap-2 mb-2">
           <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("opsAcc.search")} className="w-20rem" />
+          {filterField && (
+            <Dropdown value={filterValue} options={filterField.options || []} onChange={(e) => setFilterValue(e.value ?? null)} showClear className="w-18rem"
+              placeholder={t("opsAcc.masters.allOf", { name: filterField.label })} aria-label={filterField.label} />
+          )}
         </div>
         <DataTable value={rows} dataKey="id" loading={loading} size="small" stripedRows paginator rows={25} emptyMessage={t("opsAcc.none")}>
           {shown.map((f) => <Column key={f.name} header={f.label} body={(r) => display(f, r[f.name])} />)}

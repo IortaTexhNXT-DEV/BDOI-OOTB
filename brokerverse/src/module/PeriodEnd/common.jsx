@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { BreadCrumb } from "primereact/breadcrumb";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
 import { Tag } from "primereact/tag";
-import SvgDot from "../../assets/icons/SvgDot";
+import SharedPageHeader from "../../components/PageHeader";
 import periodEndService from "../../services/periodEndService";
 import { formatCurrency } from "../../utility/currencyConverter";
 import { formatDate } from "../../utility/dateFormat";
@@ -31,20 +30,10 @@ export const StatusTag = ({ status }) => {
   return <Tag className="pe-tag" value={t(`periodEnd.status.${status}`, { defaultValue: String(status).replace(/[_-]/g, " ") })} severity={SEVERITY[status] || "info"} />;
 };
 
-/** Page title, breadcrumb (Accounts > Period End (or `section`) > page) and action buttons. */
-export const PageHeader = ({ title, trail = [], subtitle, section, children }) => {
+/** Page title, breadcrumb (Accounts > Period End (or `section`) > page), help icon (`subtitle`) and action buttons. */
+export const PageHeader = ({ section, ...props }) => {
   const { t } = useTranslation();
-  return (
-    <div className="pe-header">
-      <div>
-        <h1 className="pe-title">{title}</h1>
-        <BreadCrumb home={{ label: t("periodEnd.accounts") }} model={[{ label: section || t("periodEnd.menu") }, ...trail.map((label) => ({ label }))]}
-          separatorIcon={<SvgDot color={"#000"} />} className="pe-breadcrumb" />
-        {subtitle && <p className="pe-subtitle">{subtitle}</p>}
-      </div>
-      <div className="pe-header-actions">{children}</div>
-    </div>
-  );
+  return <SharedPageHeader home={t("periodEnd.accounts")} {...props} section={section || t("periodEnd.menu")} />;
 };
 
 /** Journal lines of a journal (opened from the journal number links). */
