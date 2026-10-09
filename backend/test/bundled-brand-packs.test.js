@@ -14,6 +14,7 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { setup, loginAs } from './helpers.js';
 import { pool, query, one } from '../src/db/pool.js';
 import { clearLetterheadCache, getLetterhead } from '../src/lib/letterhead.js';
+import { clearSettingsCache } from '../src/lib/settings.js';
 import { DEFAULT_THEME } from '../src/modules/branding/presets.js';
 import { ACKNOWLEDGEMENT_TEXT, BUNDLED_DIR, DEPLOYMENT_NOTE, bundledPackIds, enforceDeploymentPack, loadBundledPack } from '../src/modules/branding/bundled.js';
 import { buildConfig } from '../src/config.js';
@@ -213,6 +214,7 @@ describe('brand pack named by the deployment (BRAND_PACK)', () => {
     const pub = (await request(ctx.app).get('/api/branding')).body.data;
     expect(pub.theme.colors).toMatchObject({ primary: '#1a1a1a', accent: '#eb0a1e' });
     expect(pub.theme.logo.showName).toBe(false);
+    expect(pub.theme.login.showPoweredBy).toBe(false);
     expect(pub.systemName).toBe('Toyota Insurance Services');
     expect((await image(pub.logoUrl)).equals(tisLogo)).toBe(true);
     expect((await image(pub.faviconUrl)).equals(tisFavicon)).toBe(true);
@@ -305,6 +307,17 @@ describe('brand pack named by the deployment (BRAND_PACK)', () => {
     expect((await getLetterhead()).logo.buffer.equals(tisLogo)).toBe(true);
     expect(Number((await one("SELECT count(*)::int AS n FROM brand_pack_enablements WHERE status = 'enabled'")).n)).toBe(1);
     expect(await enforceDeploymentPack(TIS, { log: logger() })).toMatchObject({ status: 'in-force' });
+  });
+
+  it('turns the "Powered by" line of the sign-in page off again when it was switched on', async () => {
+    await query(`UPDATE app_settings SET value = jsonb_set(value, '{login,showPoweredBy}', 'true') WHERE key = 'branding.theme'`);
+    clearSettingsCache();
+    expect((await request(ctx.app).get('/api/branding')).body.data.theme.login.showPoweredBy).toBe(true);
+    const files = await storedFiles();
+    const r = await enforceDeploymentPack(TIS, { log: logger() });
+    expect(r).toMatchObject({ status: 're-applied', reasons: ['the theme differs (login.showPoweredBy)'] });
+    expect(await storedFiles()).toBe(files);
+    expect((await request(ctx.app).get('/api/branding')).body.data.theme.login.showPoweredBy).toBe(false);
   });
 
   it('applies the print logo again when the primary company has none', async () => {

@@ -47,7 +47,7 @@
       "showOnMobile": false,
       "headline": "Welcome to Toyota Insurance Services",
       "tagline": "Policies, renewals and claims of our clients, in one place.",
-      "showPoweredBy": true
+      "showPoweredBy": false
     },
     "documents": {
       "accentColor": "#eb0a1e",

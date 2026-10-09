@@ -64,8 +64,8 @@ settings, and texts with `<` or `>`.
   before the application loads and the provider uses its logo and name at once. A browser with nothing kept (first
   visit, cleared data) shows a plain white page until `GET /api/branding` answers (at most 8 seconds). The page head
   carries no icon, title or colour of its own, and the front end never falls back to the product's default logo or
-  name (the "Powered by" line of the sign-in page shows when the theme's `login.showPoweredBy` is on, as in the
-  Toyota Insurance Services pack). `tokens.scss` defines the defaults (the iorta TechNXT preset, so the app looks exactly
+  name (the "Powered by" line of the sign-in page shows only when the theme's `login.showPoweredBy` is on; the
+  Toyota Insurance Services pack turns it off). `tokens.scss` defines the defaults (the iorta TechNXT preset, so the app looks exactly
   as before when no theme is loaded). A PostCSS step (`brokerverse/scripts/postcss-brand-vars.js`, wired in
   `craco.config.js`) turns every literal brand colour in the compiled CSS into `var(--bv-..., <same colour>)`, so screen
   stylesheets follow the theme without being edited. Older stylesheets use other blues (#0066cc, #001e60, #1976d2 ...): saturated blues are mapped

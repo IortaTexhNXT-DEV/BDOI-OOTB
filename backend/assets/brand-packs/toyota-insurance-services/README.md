@@ -45,7 +45,7 @@ copyright): the broker supplies its own sign-in picture (branding image upload o
 | Document and Excel table headers | Near black `#1A1A1A`, white text | |
 | Font | Inter (Google Fonts, falls back to Arial) | Toyota's corporate typeface is licensed |
 | Radius | 4 / 8 / 12 px, buttons 4 px | |
-| Sign-in page | Library picture "Motor" on a dark gradient (`#2B2B2B` to `#0D0D0D`), headline "Welcome to Toyota Insurance Services" | |
+| Sign-in page | Library picture "Motor" on a dark gradient (`#2B2B2B` to `#0D0D0D`), headline "Welcome to Toyota Insurance Services", no "Powered by" line (`login.showPoweredBy` false): only the Toyota brand shows | |
 | Side bar | The logo only: it carries the name, so the application name is not repeated under it (`logo.showName` false) | |
 
 Document footer line: "Authorized by the Insurance Commission to act as an Insurance Agent, Licence No. {{licence}}" (the
