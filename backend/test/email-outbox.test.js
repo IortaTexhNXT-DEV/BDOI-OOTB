@@ -24,7 +24,7 @@ describe('e-mail outbox', () => {
   let failedId;
   let sentId;
 
-  it('lists messages with their status, counts and whether sending is enabled (administrators only)', async () => {
+  it('lists messages with their status, counts and whether sending is enabled (settings permission)', async () => {
     failedId = await queueEmail({ to: 'failed@example.ph', subject: 'Outbox test failed', html: '<p>x</p>', entity: 'quotation', entityId: 'qt_test' });
     sentId = await queueEmail({ to: 'sent@example.ph', subject: 'Outbox test sent', html: '<p>x</p>' });
     await q("UPDATE email_outbox SET status = 'failed', attempts = 5, error = 'Connection timeout' WHERE id = $1", [failedId]);
@@ -39,6 +39,10 @@ describe('e-mail outbox', () => {
     expect((await sales('get', '/email/outbox')).status).toBe(403);
     expect((await sales('post', `/email/outbox/${failedId}/retry`)).status).toBe(403);
     expect((await sales('get', '/email/sending-status')).body.data.active).toBe(false);
+    // the IT AppSupport role (read:settings / write:settings) opens Master > E-mail Outbox
+    await ctx.api('post', '/users').send({ username: 'eo.it', password: 'Welcome@123', displayName: 'eo.it', email: 'eo.it@example.ph', roles: ['tis-it-admin'] });
+    const itToken = await loginAs(ctx.app, 'eo.it', 'Welcome@123');
+    expect((await request(ctx.app).get('/api/email/outbox').set('Authorization', `Bearer ${itToken}`)).status).toBe(200);
   });
 
   it('retry while sending is off queues the message again and says so', async () => {

@@ -1,9 +1,10 @@
 /**
  * E-mail outbox (Master > E-mail Outbox): every message the system queued, whether it went out, and Retry for a
- * failed one. The banner state (sending enabled or not) comes from emailSendingStatus.
+ * failed one. The banner state (sending enabled or not) comes from emailSendingStatus. Read with read:settings, Retry
+ * with write:settings (the System Administrator and the IT AppSupport role).
  */
 import { moduleRouter } from '../../lib/registry.js';
-import { requireAuth, requireRole, ADMIN_ROLE } from '../../lib/auth.js';
+import { requireAuth, requirePermission } from '../../lib/auth.js';
 import { audit } from '../../lib/audit.js';
 import { badRequest, notFound } from '../../lib/errors.js';
 import { paging } from '../../lib/respond.js';
@@ -12,7 +13,8 @@ import { emailSendingStatus, sendQueuedEmails } from '../../lib/mailer.js';
 
 const { router, define } = moduleRouter('E-mail outbox', '/email');
 const SCREEN = 'Master > E-mail Outbox';
-const admin = [requireAuth, requireRole(ADMIN_ROLE)];
+const canRead = [requireAuth, requirePermission('read:settings', 'write:settings')];
+const canWrite = [requireAuth, requirePermission('write:settings')];
 const STATUSES = ['queued', 'sent', 'failed'];
 
 const row = (m) => ({
@@ -23,7 +25,7 @@ const row = (m) => ({
 });
 
 define({
-  method: 'GET', path: '/outbox', summary: 'E-mail outbox (status queued / sent / failed, search on recipient or subject; paging) with whether sending is enabled', screen: SCREEN, middleware: admin,
+  method: 'GET', path: '/outbox', summary: 'E-mail outbox (status queued / sent / failed, search on recipient or subject; paging) with whether sending is enabled', screen: SCREEN, middleware: canRead,
   query: { status: 'failed', search: 'juan@', page: 1, pageSize: 20 },
   response: { success: true, data: [{ id: 12, status: 'failed', to: 'juan@example.com', subject: 'Official receipt OR-2026-00001 for policy POL-2026-00001', attempts: 5, lastError: 'Connection timeout', createdAt: '2026-09-30T02:00:00Z',
       attachments: [{ fileName: 'receipt-OR-2026-00001.pdf', contentType: 'application/pdf', kind: 'document', document: 'official-receipt' }] }],
@@ -42,7 +44,7 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/outbox/:id/retry', summary: 'Queue a failed (or still queued) e-mail again with a fresh attempt count; sent at once when sending is enabled', screen: `${SCREEN} > Retry`, middleware: admin,
+  method: 'POST', path: '/outbox/:id/retry', summary: 'Queue a failed (or still queued) e-mail again with a fresh attempt count; sent at once when sending is enabled', screen: `${SCREEN} > Retry`, middleware: canWrite,
   response: { success: true, message: 'E-mail sent', data: { id: 12, status: 'sent', attempts: 1 } },
   handler: async (req, res) => {
     const m = await one('SELECT * FROM email_outbox WHERE id = $1', [Number(req.params.id) || 0]);
