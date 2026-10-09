@@ -3,9 +3,8 @@
  * key facts (label above value, formatted by type) and the record's actions at the right.
  *
  *   <DetailHeader title={r.remittanceNo} status={{ code: r.statusCode, label: r.status }} subtitle={r.insurerName}
- *     meta={[{ label: t("remittance.netAmount"), value: r.netAmount, type: "amount" },
- *            { label: t("remittance.dueDate"), value: r.dueDate, type: "date" }]}
- *     actions={<Button label={t("remittance.print")} icon="pi pi-print" outlined onClick={print} />} />
+ *     meta={[{ label: netAmountLabel, value: r.netAmount, type: "amount" }, { label: dueDateLabel, value: r.dueDate, type: "date" }]}
+ *     actions={<Button label={printLabel} icon="pi pi-print" outlined onClick={print} />} />
  */
 import React from "react";
 import PropTypes from "prop-types";

@@ -4969,6 +4969,14 @@
       "yearEndReversal": "ยกเลิกการปิดบัญชีสิ้นปี"
     }
   },
+  "print": {
+    "failed": "ไม่สามารถพิมพ์เอกสารได้",
+    "empty": "เอกสารว่างเปล่า",
+    "printedBy": "พิมพ์เมื่อ {{at}} โดย {{name}}",
+    "number": "เลขที่ {{number}}",
+    "tin": "เลขประจำตัวผู้เสียภาษี {{tin}}",
+    "frameTitle": "เอกสารที่กำลังพิมพ์"
+  },
   "customerResponse": {
     "waiting": "Waiting for customer approval",
     "copyLink": "Copy approval link",

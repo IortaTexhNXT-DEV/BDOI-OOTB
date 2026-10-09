@@ -3,7 +3,7 @@
  * pop-ups stack sections in one view rather than spreading a few lines over tabs; a list says how many rows it has
  * itself, so the heading carries no count.
  *
- *   <DetailSection title={t("remittance.policies")} flush actions={<Button label={t("remittance.export")} text />}>
+ *   <DetailSection title={policiesLabel} flush actions={<Button label={exportLabel} text />}>
  *     <DataTable value={r.policies} ... />
  *   </DetailSection>
  */

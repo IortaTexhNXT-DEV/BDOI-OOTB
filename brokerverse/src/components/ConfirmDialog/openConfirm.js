@@ -36,9 +36,9 @@ const mountHost = () => {
  * its props (title, severity, message, facts, note, input, confirmLabel, onConfirm ...) or PrimeReact confirmDialog()
  * names (header, acceptLabel, accept, reject).
  *
- *   if (!(await openConfirm({ title, message, facts, confirmLabel: t("remittance.processAction") }))) return;
+ *   if (!(await openConfirm({ title, message, facts, confirmLabel }))) return;
  *   await openConfirm({ ..., onConfirm: () => service.process(ids) });   // runs inside the dialog, errors shown there
- *   const reason = await openConfirm({ ..., input: { type: "textarea", label: t("common.reason"), required: true } });
+ *   const reason = await openConfirm({ ..., input: { type: "textarea", label: reasonLabel, required: true } });
  *
  * Resolves true once confirmed (and the action, when given, has succeeded), false when cancelled; with `input`, the
  * value entered instead of true and null when cancelled.

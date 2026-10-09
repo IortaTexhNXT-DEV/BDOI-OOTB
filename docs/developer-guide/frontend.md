@@ -127,9 +127,14 @@ acceptable for data no other screen needs.
 | Need | Use |
 | --- | --- |
 | Success / error / warning message | `notifySuccess`, `notifyError`, `notifyWarn`, `notifyInfo` from `utility/dialogs` |
-| Confirm or ask for text | `confirmAction`, `promptText` from `utility/dialogs` (never `window.confirm`) |
+| Confirm an action | `components/ConfirmDialog`, or `openConfirm({ title, severity, message, facts, note, input, confirmLabel, onConfirm })` from an event handler: the facts in an aligned table, a button named after the action (never Yes / No), the action run inside the dialog with its error shown there; never `window.confirm` |
+| Ask for text (older screens) | `confirmAction`, `promptText` from `utility/dialogs`; new confirmations use `openConfirm` (its `input` asks for a reason, date, amount or choice) |
+| Record detail pop-up | `components/DetailDialog` (centred, footer actions right-aligned) with `DetailHeader` (number, `StatusChip`, key facts, actions), `DetailSection` (titled card) and `KeyValueGrid` (label above value, formatted by type); sections in one view, tabs only for substantial, distinct content |
+| Approve / Reject under maker-checker | `components/ApprovalActions` (disabled with the reason for the user who initiated the record), `useMakerChecker` |
+| Activity log | `components/ActivityLog` with an adapter of `ActivityLog/adapters` for the API's history rows, or `RecordActivityLog entity id` (business events of `GET /api/audit/records/:entity/:id`) |
+| Print | `printPdf(path)` for a PDF of the API, `printView(<PrintableDocument>)` for a page of the screen's own, from `components/Print`; never `window.print()` of the screen |
 | Amounts | `useFormatCurrency()` in components, `formatCurrency` / `formatNumber` from `utility/currencyConverter` elsewhere |
-| Dates | `formatDate(value, { withTime, empty })`, `toIsoDate`, `calendarDateFormat()` from `utility/dateFormat` |
+| Dates | `formatDate(value, { withTime, empty })`, `toIsoDate`, `calendarDateFormat()` from `utility/dateFormat`; an instant (date and time) in the business time zone with `formatInstant` / `instantParts` |
 | Date fields | `Calendar` from `primereact/calendar` resolves to `components/Calendar` (craco alias): the configured format and the calendar button on every screen; `components/DateField` in place of `<input type="date">` (ISO text in and out) |
 | Error text of a failed request | `apiErrorMessage(body, status, fallback)` from `utility/apiError` in services (field messages, no "Validation failed" or field paths); the application toast cleans older text with `readableError` |
 | Percentages, rounding | `utility/numberFormat` |
@@ -139,7 +144,7 @@ acceptable for data no other screen needs.
 | Bulk upload template | `agentModule/component/bulkUploadTemplate` |
 | Required-field checks without Formik | `utility/requiredFields` |
 | Lists | `components/DataTable` (skeleton rows while loading, paging, numeric alignment) |
-| Record history | `components/AuditTrail/AuditTimeline` (business events of `GET /api/audit/records/:entity/:id`) |
+| Record history | `components/AuditTrail/AuditTimeline` (business events of `GET /api/audit/records/:entity/:id`) on the screens that have it; in a detail pop-up, `RecordActivityLog` |
 | Philippine address | `agentModule/component/PhAddressFields` (region, province, city or municipality, barangay, ZIP code) |
 | Colours and logo | the theme tokens; the saved theme is applied at run time by `theme/runtime/themeEngine.js` and `BrandingProvider`; never hard-code a brand colour |
 | Chart colours | `useChartTheme()` from `theme/chartTheme`: `series(n)` (primary, tints, accent once), `statuses(values)` for status charts, `options(o)` for axes and legends |

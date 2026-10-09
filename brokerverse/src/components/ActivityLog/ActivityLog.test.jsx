@@ -44,7 +44,7 @@ describe("ActivityLog", () => {
     const days = screen.getAllByRole("region");
     expect(days.map((d) => d.getAttribute("aria-label"))).toEqual(["10/10/2026", "09/10/2026"]);
     const items = within(days[0]).getAllByRole("listitem");
-    expect(within(items[0]).getByText("Approved", { selector: ".bv-activity__action" })).toBeInTheDocument();
+    expect(within(items[0]).getByText("Approved", { selector: ".bv-activity-log__action" })).toBeInTheDocument();
     expect(within(items[0]).getByText("10/10/2026 13:30")).toBeInTheDocument();
     expect(within(items[0]).getByText("Fe Head")).toBeInTheDocument();
     expect(within(items[0]).getByText("Finance Manager")).toBeInTheDocument();

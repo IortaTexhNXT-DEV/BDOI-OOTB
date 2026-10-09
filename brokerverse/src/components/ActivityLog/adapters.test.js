@@ -66,10 +66,14 @@ describe("activity log adapters", () => {
     const [w] = fromWarrantyActions([{ id: 2, action: "request-cancellation", notes: "Unpaid", endorsementNumber: "END-1", createdBy: "Rosa Finance", createdAt: "2026-10-01T00:00:00Z" }],
       { actionLabels: { "request-cancellation": "Cancellation requested" } });
     expect(w).toMatchObject({ actionLabel: "Cancellation requested", user: { displayName: "Rosa Finance" }, remarks: "Unpaid" });
-    const [f] = fromCollectionActions([{ id: 3, actionType: "Call", actionDate: "2026-10-01T03:00:00Z", actionBy: "c.agent", callOutcome: "WrongNumber", notes: "No answer", commitmentDate: "2026-10-15" }]);
+    const [f] = fromCollectionActions([{ id: 3, actionType: "Call", actionDate: "2026-10-01T03:00:00Z", actionBy: "c.agent", actionByName: "Carla Agent", actionByRoles: ["Collections"],
+      callOutcome: "WrongNumber", notes: "No answer", commitmentDate: "2026-10-15" }]);
+    expect(f).toMatchObject({ actionCode: "Call", user: { displayName: "Carla Agent", username: "c.agent", role: "Collections" } });
     expect(f.changes.map((c) => c.after)).toEqual(["Wrong number", "15/10/2026"]);
     const [r] = fromJobRuns([{ id: 9, startedAt: "2026-10-01T22:00:00Z", status: "failed", error: "SMTP refused", triggeredBy: "schedule" }]);
     expect(r).toMatchObject({ actionCode: "run", toStatus: "Failed", remarks: "SMTP refused", user: { displayName: null }, source: { channel: "job", label: "Scheduled job" } });
+    const [manual] = fromJobRuns([{ id: 10, startedAt: "2026-10-02T01:00:00Z", status: "success", triggeredBy: "r.finance", triggeredByName: "Rosa Finance" }]);
+    expect(manual).toMatchObject({ toStatus: "Success", user: { displayName: "Rosa Finance", username: "r.finance" }, source: null });
   });
 
   it("builds the lifecycle of a record from its own fields, the steps that happened only", () => {

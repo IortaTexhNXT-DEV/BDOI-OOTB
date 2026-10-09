@@ -52,16 +52,16 @@ export const groupByDay = (entries, order = "desc") => {
 
 const Value = ({ value, masked }) => {
   const { t } = useTranslation();
-  if (masked) return <span className="bv-activity__value bv-activity__value--muted">{t("activityLog.hidden")}</span>;
+  if (masked) return <span className="bv-activity-log__value bv-activity-log__value--muted">{t("activityLog.hidden")}</span>;
   if (value === null || value === undefined || value === "" || (Array.isArray(value) && !value.length)) {
-    return <span className="bv-activity__value bv-activity__value--muted">{DASH}</span>;
+    return <span className="bv-activity-log__value bv-activity-log__value--muted">{DASH}</span>;
   }
   let text;
   if (typeof value === "boolean") text = value ? t("detailView.yes") : t("detailView.no");
   else if (Array.isArray(value)) text = value.map((v) => (v && typeof v === "object" ? JSON.stringify(v) : String(v))).join(", ");
   else if (typeof value === "object") text = Object.entries(value).map(([k, v]) => `${humanize(k)}: ${v ?? DASH}`).join("; ");
   else text = String(value);
-  return <span className="bv-activity__value">{text}</span>;
+  return <span className="bv-activity-log__value">{text}</span>;
 };
 
 Value.propTypes = { value: PropTypes.any, masked: PropTypes.bool };
@@ -82,38 +82,38 @@ const ActivityEntry = ({ entry, expanded }) => {
   const changes = entry.changes || [];
   const { fromStatus: from, toStatus: to } = entry;
   return (
-    <li className={`bv-activity__entry bv-activity__entry--${actionTone(entry.actionCode)}`}>
-      <span className="bv-activity__marker" aria-hidden="true" />
-      <div className="bv-activity__body">
-        <div className="bv-activity__head">
-          <span className="bv-activity__action">{entry.actionLabel || actionText(entry.actionCode)}</span>
-          <time className="bv-activity__time" dateTime={entry.when.iso || undefined}>{entry.when.text}</time>
+    <li className={`bv-activity-log__entry bv-activity-log__entry--${actionTone(entry.actionCode)}`}>
+      <span className="bv-activity-log__marker" aria-hidden="true" />
+      <div className="bv-activity-log__body">
+        <div className="bv-activity-log__head">
+          <span className="bv-activity-log__action">{entry.actionLabel || actionText(entry.actionCode)}</span>
+          <time className="bv-activity-log__time" dateTime={entry.when.iso || undefined}>{entry.when.text}</time>
         </div>
-        <div className="bv-activity__who">
-          <span className="bv-activity__name">{who}</span>
-          {role ? <span className="bv-activity__role">{role}</span> : null}
-          {source ? <span className="bv-activity__source">{source}</span> : null}
+        <div className="bv-activity-log__who">
+          <span className="bv-activity-log__name">{who}</span>
+          {role ? <span className="bv-activity-log__role">{role}</span> : null}
+          {source ? <span className="bv-activity-log__source">{source}</span> : null}
         </div>
         {from || to ? (
-          <div className="bv-activity__status" role="group" aria-label={from && to ? t("activityLog.statusChange", { from, to }) : to || from}>
+          <div className="bv-activity-log__status" role="group" aria-label={from && to ? t("activityLog.statusChange", { from, to }) : to || from}>
             {from ? <StatusChip label={from} /> : null}
-            {from && to ? <i className="pi pi-arrow-right bv-activity__arrow" aria-hidden="true" /> : null}
+            {from && to ? <i className="pi pi-arrow-right bv-activity-log__arrow" aria-hidden="true" /> : null}
             {to ? <StatusChip label={to} /> : null}
           </div>
         ) : null}
         {entry.remarks ? (
-          <div className="bv-activity__remarks">
-            <span className="bv-activity__remarks-label">{t("activityLog.remarks")}</span>
+          <div className="bv-activity-log__remarks">
+            <span className="bv-activity-log__remarks-label">{t("activityLog.remarks")}</span>
             <p>{entry.remarks}</p>
           </div>
         ) : null}
         {changes.length ? (
-          <div className="bv-activity__changes">
-            <button type="button" className="bv-activity__toggle" aria-expanded={open} aria-controls={changesId} onClick={() => setOpen(!open)}>
+          <div className="bv-activity-log__changes">
+            <button type="button" className="bv-activity-log__toggle" aria-expanded={open} aria-controls={changesId} onClick={() => setOpen(!open)}>
               <i className={`pi ${open ? "pi-chevron-down" : "pi-chevron-right"}`} aria-hidden="true" />
               {t("activityLog.whatChanged")}
             </button>
-            <table id={changesId} className="bv-activity__table" hidden={!open}>
+            <table id={changesId} className="bv-activity-log__table" hidden={!open}>
               <thead>
                 <tr>
                   <th scope="col">{t("activityLog.field")}</th>
@@ -156,15 +156,15 @@ ActivityEntry.propTypes = { entry: entryShape.isRequired, expanded: PropTypes.bo
 const ActivityLog = ({ entries, loading, error, onRetry, emptyText, order, expandChanges, className }) => {
   const { t } = useTranslation();
   const days = useMemo(() => groupByDay(entries, order), [entries, order]);
-  const classes = ["bv-activity", className].filter(Boolean).join(" ");
+  const classes = ["bv-activity-log", className].filter(Boolean).join(" ");
 
   if (loading && !days.length) {
     return (
       <div className={classes} aria-busy="true">
         {[0, 1, 2].map((i) => (
-          <div key={i} className="bv-activity__skeleton">
+          <div key={i} className="bv-activity-log__skeleton">
             <Skeleton shape="circle" size="0.75rem" />
-            <div className="bv-activity__skeleton-lines">
+            <div className="bv-activity-log__skeleton-lines">
               <Skeleton width="45%" height="1rem" />
               <Skeleton width="30%" height="0.8rem" />
               <Skeleton width="70%" height="0.8rem" />
@@ -177,7 +177,7 @@ const ActivityLog = ({ entries, loading, error, onRetry, emptyText, order, expan
 
   if (error) {
     return (
-      <div className={`${classes} bv-activity__state bv-activity__state--error`} role="alert">
+      <div className={`${classes} bv-activity-log__state bv-activity-log__state--error`} role="alert">
         <i className="pi pi-exclamation-circle" aria-hidden="true" />
         <span>{typeof error === "string" && error ? error : t("activityLog.failed")}</span>
         {onRetry ? <Button type="button" label={t("activityLog.retry")} text size="small" onClick={onRetry} /> : null}
@@ -185,22 +185,22 @@ const ActivityLog = ({ entries, loading, error, onRetry, emptyText, order, expan
     );
   }
 
-  if (!days.length) return <div className={`${classes} bv-activity__state`}>{emptyText || t("activityLog.empty")}</div>;
+  if (!days.length) return <div className={`${classes} bv-activity-log__state`}>{emptyText || t("activityLog.empty")}</div>;
 
   const today = instantParts(new Date())?.day;
   const yesterday = instantParts(new Date(Date.now() - 86400000))?.day;
   return (
     <div className={classes} aria-busy={loading || undefined}>
       {days.map((d) => (
-        <section key={d.day || "undated"} className="bv-activity__day" aria-label={d.date || undefined}>
+        <section key={d.day || "undated"} className="bv-activity-log__day" aria-label={d.date || undefined}>
           {d.date ? (
-            <h4 className="bv-activity__day-label">
-              {d.day === today ? <span className="bv-activity__relative">{t("activityLog.today")}</span> : null}
-              {d.day === yesterday ? <span className="bv-activity__relative">{t("activityLog.yesterday")}</span> : null}
+            <h4 className="bv-activity-log__day-label">
+              {d.day === today ? <span className="bv-activity-log__relative">{t("activityLog.today")}</span> : null}
+              {d.day === yesterday ? <span className="bv-activity-log__relative">{t("activityLog.yesterday")}</span> : null}
               <span>{d.date}</span>
             </h4>
           ) : null}
-          <ol className="bv-activity__list">
+          <ol className="bv-activity-log__list">
             {d.entries.map((e, i) => <ActivityEntry key={e.id ?? i} entry={e} expanded={expandChanges} />)}
           </ol>
         </section>

@@ -5957,6 +5957,14 @@
       "yearEndReversal": "Year-end close reversed"
     }
   },
+  "print": {
+    "failed": "The document could not be printed.",
+    "empty": "The document is empty.",
+    "printedBy": "Printed {{at}} by {{name}}",
+    "number": "No. {{number}}",
+    "tin": "TIN {{tin}}",
+    "frameTitle": "Document being printed"
+  },
   "security": {
     "changePassword": "Change password",
     "twoFactor": "Two-step verification",

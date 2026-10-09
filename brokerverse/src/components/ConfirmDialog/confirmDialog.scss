@@ -82,14 +82,15 @@
     color: var(--color-text-muted);
   }
 
+  // values line up on the right edge, as on a statement
   td {
+    text-align: right;
     color: var(--color-heading);
     overflow-wrap: anywhere;
   }
 }
 
 .bv-confirm__num {
-  text-align: right;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }

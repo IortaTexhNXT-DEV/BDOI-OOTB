@@ -23741,7 +23741,7 @@
     }
   }
 }"
-1190,Schedules,GET,/api/schedules/:code/runs,Run history of a job,Master > Schedules > History,Bearer JWT,read:schedules,,"{
+1190,Schedules,GET,/api/schedules/:code/runs,"Run history of a job (who started a run: triggeredBy, triggeredByName)",Master > Schedules > History,Bearer JWT,read:schedules,,"{
   ""success"": true,
   ""data"": [
     {
@@ -23750,7 +23750,9 @@
       ""startedAt"": ""2026-01-01T06:00:00Z"",
       ""output"": {
         ""notifications"": 3
-      }
+      },
+      ""triggeredBy"": ""r.finance"",
+      ""triggeredByName"": ""Rosa Finance""
     }
   ]
 }"

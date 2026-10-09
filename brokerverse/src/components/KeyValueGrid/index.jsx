@@ -4,9 +4,9 @@
  * are formatted by `type` (./formatValue).
  *
  *   <KeyValueGrid columns={3} items={[
- *     { label: t("remittance.remittanceDate"), value: r.remittanceDate, type: "date" },
- *     { label: t("remittance.netAmount"), value: r.netAmount, type: "amount" },
- *     { label: t("remittance.remarks"), value: r.remarks, span: "full" },
+ *     { label: dateLabel, value: r.remittanceDate, type: "date" },
+ *     { label: netAmountLabel, value: r.netAmount, type: "amount" },
+ *     { label: remarksLabel, value: r.remarks, span: "full" },
  *   ]} />
  */
 import React from "react";

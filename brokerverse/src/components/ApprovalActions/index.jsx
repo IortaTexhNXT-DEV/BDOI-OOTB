@@ -3,8 +3,7 @@
  * the reason next to them; any other user can decide. The server applies the same rule; this shows it before the click.
  *
  *   <ApprovalActions initiator={{ id: r.createdById, username: r.createdByUsername }}
- *     approveLabel={t("remittance.approveRemittance")} rejectLabel={t("remittance.rejectRemittance")}
- *     onApprove={approve} onReject={reject} />
+ *     approveLabel={approveLabel} rejectLabel={rejectLabel} onApprove={approve} onReject={reject} />
  *
  * `useMakerChecker(initiator)` gives { blocked, reason } for screens that place their own buttons.
  */

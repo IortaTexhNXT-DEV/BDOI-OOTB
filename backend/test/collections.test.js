@@ -47,6 +47,7 @@ describe('collections', () => {
     const f = await ctx.as('maker')('post', `/collections/${id}/follow-up`).send({ actionType: 'Call', notes: 'Promised Friday', callOutcome: 'Answered' });
     expect(f.status).toBe(200);
     expect(f.body.data.followUpActions[0].actionType).toBe('Call');
+    expect(f.body.data.followUpActions[0]).toMatchObject({ actionBy: 'fin.maker', actionByName: 'maker user', actionByRoles: ['Accounting'] });
     const future = new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10);
     const c = await ctx.as('maker')('patch', `/collections/${id}/commitment`).send({ commitmentDate: future, reason: 'Payroll' });
     expect(c.status).toBe(200);

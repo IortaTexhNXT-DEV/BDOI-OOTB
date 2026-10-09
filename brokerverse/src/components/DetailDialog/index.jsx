@@ -2,11 +2,11 @@
  * Centred pop-up for viewing a record, sized to its content (never the full-height side panel of the add and edit
  * forms): a header, the content, and the footer actions right-aligned, with Close when the screen gives no footer.
  *
- *   <DetailDialog visible={open} onHide={close} header={t("remittance.detailsTitle")} size="lg"
- *     footer={<><Button label={t("detailView.close")} text onClick={close} /><Button label={t("remittance.print")} onClick={print} /></>}>
+ *   <DetailDialog visible={open} onHide={close} header={header} size="lg"
+ *     footer={<><Button label={closeLabel} text onClick={close} /><Button label={printLabel} onClick={print} /></>}>
  *     <DetailHeader ... />
- *     <DetailSection title={t("remittance.general")}><KeyValueGrid items={...} /></DetailSection>
- *     <DetailSection title={t("remittance.activity")}><ActivityLog entries={...} /></DetailSection>
+ *     <DetailSection title={generalLabel}><KeyValueGrid items={...} /></DetailSection>
+ *     <DetailSection title={activityLabel}><ActivityLog entries={...} /></DetailSection>
  *   </DetailDialog>
  */
 import React from "react";

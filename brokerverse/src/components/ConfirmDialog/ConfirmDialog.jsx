@@ -6,10 +6,11 @@
  * the action succeeds and stays open with the error when it fails. An optional field asks for a reason, a date, an
  * amount or a choice with the confirmation.
  *
- *   <ConfirmDialog visible={open} onHide={() => setOpen(false)} severity="danger"
- *     title={t("suppliers.deleteTitle")} message={t("suppliers.deleteMessage", { name })}
- *     facts={[{ label: t("suppliers.code"), value: code }, { label: t("suppliers.balance"), value: balance, type: "amount" }]}
- *     confirmLabel={t("suppliers.delete")} onConfirm={() => supplierService.remove(id)} />
+ *   <ConfirmDialog visible={open} onHide={() => setOpen(false)} severity="danger" title={title} message={message}
+ *     facts={[{ label: codeLabel, value: code }, { label: balanceLabel, value: balance, type: "amount" }]}
+ *     confirmLabel={deleteSupplierLabel} onConfirm={() => supplierService.remove(id)} />
+ *
+ * (the texts are the screen's translations)
  *
  * From an event handler, without state of its own: `await openConfirm({ ...the same props })` (./openConfirm).
  */
