@@ -2,12 +2,12 @@ import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
 import { moduleRouter } from '../../lib/registry.js';
 import { loadUser, publicUser, revokeSessions, signAccess, signRefresh, signToken, verify } from '../../lib/auth.js';
-import { badRequest, conflict, forbidden, unauthorized } from '../../lib/errors.js';
+import { badRequest, conflict, forbidden, notFound, unauthorized } from '../../lib/errors.js';
 import { validate, z } from '../../lib/validate.js';
 import { query, withTransaction } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
 import { audit } from '../../lib/audit.js';
-import { config } from '../../config.js';
+import { config, entraConfigured } from '../../config.js';
 import { assertPasswordAllowed, passwordExpired, passwordPolicy, savePassword } from '../../lib/password.js';
 import { loginHistory, recordLogin } from '../../lib/loginHistory.js';
 import { clearKey, hit, ipKey, isLimited, loginLimits, userKey } from '../../lib/rateLimit.js';
@@ -16,6 +16,8 @@ import { decryptSecret, encryptSecret, hashCode, sameHash } from '../../lib/secr
 import { renderTemplate } from '../documents/common.js';
 import { companyName } from '../../lib/letterhead.js';
 import { loadProfile, profileSchema, saveProfile } from './profile.js';
+import { identityOf, openTransaction, redeemCode, startSignIn, verifyIdToken } from '../../lib/entraId.js';
+import { passwordSignInAllowed, passwordSignInEnabled, resolveSsoUser } from './sso.js';
 
 const { router, define } = moduleRouter('Auth', '/auth');
 
@@ -50,13 +52,13 @@ async function passwordChangeState(user) {
 }
 
 /**
- * Finish a sign-in (password, two-factor code or forced enrolment). When the password must be changed, only a
- * restricted token is issued (no refresh token): it reaches /auth/change-password, which then returns the normal
- * payload.
+ * Finish a sign-in (password, two-factor code, forced enrolment or Microsoft Entra ID). When the password must be
+ * changed, only a restricted token is issued (no refresh token): it reaches /auth/change-password, which then returns
+ * the normal payload. A sign-in with Microsoft uses no password, so its age is not checked (passwordCheck false).
  */
-async function completeSignIn(req, user, { deviceId, method }) {
+async function completeSignIn(req, user, { deviceId, method, passwordCheck = true }) {
   await query('UPDATE users SET failed_logins = 0, last_login_at = now() WHERE id = $1', [user.id]);
-  const change = await passwordChangeState(user);
+  const change = passwordCheck ? await passwordChangeState(user) : { required: false };
   if (change.required) {
     await recordLogin(req, { userId: user.id, username: user.username, success: false, reason: change.expired ? 'password-expired' : 'password-change-required', method });
     return {
@@ -117,6 +119,10 @@ define({
       await query('UPDATE users SET failed_logins = failed_logins + 1, status = CASE WHEN failed_logins + 1 >= $2 THEN \'locked\' ELSE status END WHERE id = $1', [user.id, max]);
       return fail(user, 'bad-password', 'Invalid username or password');
     }
+    if (!(await passwordSignInAllowed(user))) {
+      await recordLogin(req, { userId: user.id, username: user.username, success: false, reason: 'password-sign-in-off' });
+      throw forbidden('Sign in with your Microsoft account');
+    }
     clearKey(userKey('login', username));
     if (user.totp_enabled) {
       const minutes = Number(await getSetting('security.two_factor_challenge_minutes', 5)) || 5;
@@ -133,6 +139,73 @@ define({
         accessToken: signAccess(user, { restrict: 'enrol2fa', expiresIn: await restrictedTtl() }), expiresIn: await restrictedTtl(), user: publicUser(user) });
     }
     return res.json(await completeSignIn(req, user, { deviceId, method: 'password' }));
+  },
+});
+
+define({
+  method: 'GET', path: '/options', auth: false,
+  summary: 'Sign-in methods offered by the sign-in page: user ID and password (security.password_sign_in_enabled) and "Sign in with Microsoft" (Entra ID, when the ENTRA_* variables are set)',
+  screen: 'Sign-in',
+  response: { success: true, data: { passwordSignIn: true, sso: { enabled: true, provider: 'entra-id' } } },
+  handler: async (_req, res) => res.json({ success: true, data: { passwordSignIn: await passwordSignInEnabled(), sso: { enabled: entraConfigured(), provider: 'entra-id' } } }),
+});
+
+/** 404 when sign-in with Microsoft is not configured in this environment. */
+const ssoConfigured = (_req, _res, next) => next(entraConfigured() ? undefined : notFound('Sign-in with Microsoft is not configured'));
+
+define({
+  method: 'POST', path: '/sso/start', auth: false,
+  summary: 'Start "Sign in with Microsoft" (Entra ID, authorization code flow with PKCE): the address of the Microsoft sign-in page and a transaction token, kept by the browser and sent back to /auth/sso/callback with the code (valid 10 minutes)',
+  screen: 'Sign-in > Sign in with Microsoft',
+  request: { deviceId: 'device-1' },
+  response: { success: true, data: { authorizationUrl: 'https://login.microsoftonline.com/<tenant>/oauth2/v2.0/authorize?client_id=...&code_challenge=...', transaction: '<jwt>' } },
+  middleware: [ssoConfigured, validate(z.object({ deviceId: z.string().max(200).optional() }))],
+  handler: async (req, res) => res.json({ success: true, data: await startSignIn({ deviceId: req.body.deviceId || null }) }),
+});
+
+const ssoRefusal = {
+  unknown: ['sso-unknown-user', 'Your Microsoft account is not set up for this application. Contact the administrator'],
+  ambiguous: ['sso-ambiguous-user', 'Your Microsoft account matches more than one user. Contact the administrator'],
+  'other-account': ['sso-other-account', 'Your user is linked to another Microsoft account. Contact the administrator'],
+  registered: ['sso-registered', 'Your Microsoft account has been registered. An administrator must activate it before you can sign in'],
+};
+
+define({
+  method: 'POST', path: '/sso/callback', auth: false,
+  summary: 'Finish "Sign in with Microsoft": the code and state Microsoft returned to the sign-in page and the transaction token from /auth/sso/start. The ID token is verified (tenant keys, issuer, audience, nonce) and matched to an active user by e-mail or user principal name; answers the normal token payload (rate limited, logged in the sign-in history)',
+  screen: 'Sign-in > Sign in with Microsoft',
+  request: { code: '<authorization code>', state: '<state>', transaction: '<jwt from /auth/sso/start>', deviceId: 'device-1' },
+  response: loginExample,
+  middleware: [ssoConfigured, validate(z.object({ code: z.string().min(1).max(4000), state: z.string().min(1).max(200), transaction: z.string().min(10).max(4000), deviceId: z.string().max(200).optional() }))],
+  handler: async (req, res) => {
+    const t = await throttle(req, res, 'sso', null);
+    if (t.limited) return;
+    let identity;
+    try {
+      const tx = openTransaction(req.body.transaction, req.body.state);
+      const claims = await verifyIdToken(await redeemCode(req.body.code, tx.verifier), { nonce: tx.nonce });
+      identity = { ...identityOf(claims), deviceId: req.body.deviceId || tx.deviceId };
+    } catch (e) {
+      if (e.status === 401) {
+        hit(t.keys);
+        await recordLogin(req, { success: false, reason: 'sso-invalid', method: 'sso' });
+      }
+      throw e;
+    }
+    const username = identity.addresses[0] || null;
+    const { user, reason } = await resolveSsoUser(identity, req);
+    if (!user) {
+      hit(t.keys);
+      const [code, message] = ssoRefusal[reason];
+      await recordLogin(req, { username, success: false, reason: code, method: 'sso' });
+      throw reason === 'registered' ? forbidden(message) : unauthorized(message);
+    }
+    if (user.status !== 'active') {
+      hit(t.keys);
+      await recordLogin(req, { userId: user.id, username: user.username, success: false, reason: user.status === 'locked' ? 'locked' : 'inactive', method: 'sso' });
+      throw unauthorized(user.status === 'locked' ? 'Account locked. Contact the administrator' : 'Account inactive');
+    }
+    res.json(await completeSignIn(req, user, { deviceId: identity.deviceId, method: 'sso', passwordCheck: false }));
   },
 });
 
@@ -299,7 +372,7 @@ define({
     if (t.limited) return;
     hit(t.keys);
     const user = await loadUser(username ? 'lower(u.username) = lower($1)' : 'lower(u.email) = lower($1)', [username || email]);
-    if (user && user.status !== 'inactive' && user.email) {
+    if (user && user.status !== 'inactive' && user.email && (await passwordSignInAllowed(user))) {
       const code = String(crypto.randomInt(100000, 1000000));
       // Lifetime and wording from System Settings (security.reset_code_minutes, security.reset_email_subject / _body)
       const minutes = Number(await getSetting('security.reset_code_minutes', 15)) || 15;
