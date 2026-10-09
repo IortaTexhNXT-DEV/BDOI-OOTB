@@ -6,6 +6,7 @@ import { Button } from "primereact/button";
 import { Menu } from "primereact/menu";
 import { Sidebar } from "primereact/sidebar";
 import { Tag } from "primereact/tag";
+import { Tooltip } from "primereact/tooltip";
 import SvgDot from "../../assets/icons/SvgDot";
 import { statusLabel, statusSeverity } from "../../utils/statusSeverity";
 import "./index.scss";
@@ -66,14 +67,27 @@ KeyFacts.propTypes = {
 };
 KeyFacts.defaultProps = { className: "" };
 
-/** A card with a section heading, actions on the heading line and the content below. */
+/** A short explanation behind an info icon next to a title (hover or keyboard focus), instead of a line of text. */
+export const InfoTip = ({ text }) => {
+  const ref = useRef(null);
+  return (
+    <>
+      <Tooltip target={ref} content={text} position="top" event="both" />
+      <i ref={ref} className="pi pi-info-circle bv-info-tip" tabIndex={0} role="img" aria-label={text} />
+    </>
+  );
+};
+InfoTip.propTypes = { text: PropTypes.string.isRequired };
+
+/** A card with a section heading (`hint`: its explanation, behind an info icon), actions on the heading line and the content below. */
 export const SectionCard = ({ title, hint, actions, children, className, flush }) => (
   <section className={`bv-section-card ${flush ? "bv-section-card--flush" : ""} ${className}`}>
     {title || actions ? (
       <div className="bv-section-card__head">
         <h2 className="bv-section-card__title">
           {title}
-          {hint ? <span className="bv-section-card__hint">{hint}</span> : null}
+          {hint && typeof hint === "string" ? <InfoTip text={hint} /> : null}
+          {hint && typeof hint !== "string" ? <span className="bv-section-card__hint">{hint}</span> : null}
         </h2>
         {actions ? <div className="bv-section-card__actions">{actions}</div> : null}
       </div>

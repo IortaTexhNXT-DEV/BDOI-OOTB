@@ -73,7 +73,6 @@ const RequestApproval = ({ flow }) => {
       {loadError && <FormErrorSummary serverError={loadError} />}
       {claim && (
         <>
-          <div className="claim-journey__notice">{editable ? t("claimFlow.reviewNotice") : t("claimFlow.reviewDone", { status: claim.claimStatus })}</div>
           <ClaimSection title={t("claimFlow.asReported")}>
             <dl className="claim-journey__facts">
               {reported.map(([label, value]) => (
@@ -87,7 +86,8 @@ const RequestApproval = ({ flow }) => {
           </ClaimSection>
         </>
       )}
-      <ClaimActions>
+      <ClaimActions next={claim ? (editable ? t("claimFlow.next.review") : t("claimFlow.next.reviewDone", { status: claim.claimStatus })) : null}>
+        <Button type="button" label={t("claimJourney.back")} outlined onClick={() => navigate(`/agent/claimrequest/documents/${claimId}`, { state: { claimId } })} disabled={busy || !claim} />
         <Button type="button" label={t("claimFlow.editNotification")} icon="pi pi-pencil" outlined disabled={busy || !claim || !editable}
           onClick={() => navigate(`/agent/claimrequest/claimdetails/${claimId}`)} />
         <Button type="button" label={t("claimFlow.proceedToAdjuster")} icon="pi pi-arrow-right" iconPos="right" onClick={proceed} loading={busy}

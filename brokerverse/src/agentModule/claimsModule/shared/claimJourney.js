@@ -7,6 +7,7 @@
 export const CLAIM_STEPS = [
   "notification",
   "insurerAdvice",
+  "documents",
   "review",
   "adjuster",
   "assessment",
@@ -17,11 +18,14 @@ export const CLAIM_STEPS = [
 
 export const stepIndex = (key) => Math.max(0, CLAIM_STEPS.indexOf(key));
 
-/** Step a claim has reached, from its lifecycle status (used where a screen shows a claim that is further on). */
-export const stepForStatus = (status) => {
+/**
+ * Step a claim has reached, from its lifecycle status (used where a screen shows a claim that is further on): a
+ * registered claim whose file has not gone to the insurer is at its documents.
+ */
+export const stepForStatus = (status, claim = null) => {
   switch (status) {
     case "registered":
-      return "review";
+      return claim && claim.submittedToInsurerAt === null ? "documents" : "review";
     case "in-review":
       return "adjuster";
     case "pending-approval":
@@ -34,6 +38,14 @@ export const stepForStatus = (status) => {
     default:
       return "notification";
   }
+};
+
+/** Screen of the step a claim is at, to carry on with it (steps without a screen of their own are left out). */
+export const CONTINUE_ROUTE = {
+  documents: (id) => `/agent/claimrequest/documents/${id}`,
+  review: (id) => `/agent/claimrequest/requestapproval/${id}`,
+  adjuster: (id) => `/agent/claimrequest/adjustersubmission/${id}`,
+  approval: (id) => `/agent/claimrequest/settlementapproval/${id}`,
 };
 
 /** Statuses in which the claim details and the adjuster report can still be changed (server: updateClaim). */

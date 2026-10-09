@@ -151,7 +151,6 @@ const SettlementDetails = () => {
       <CustomToast ref={toastRef} />
       {!claim && !loadError && <p className="claim-journey__hint">{t("claimJourney.loadingClaim")}</p>}
       {loadError && <FormErrorSummary serverError={loadError} />}
-      {claim && !editable && <div className="claim-journey__notice">{t("claimJourney.settlementLocked", { status: claim.claimStatus })}</div>}
       {claim && (
         <>
           <ClaimSection title={t("claimJourney.settlementSection")}>
@@ -244,7 +243,7 @@ const SettlementDetails = () => {
           <FormErrorSummary errors={formik.errors} labels={labels} show={showErrors} serverError={serverError} />
         </>
       )}
-      <ClaimActions>
+      <ClaimActions next={claim ? (editable ? t("claimFlow.next.settlement") : t("claimJourney.settlementLocked", { status: claim.claimStatus })) : null}>
         <Button
           type="button"
           label={t("claimJourney.back")}
@@ -252,7 +251,11 @@ const SettlementDetails = () => {
           onClick={() => navigate(`/agent/claimrequest/settlementapproval/${claimId}`, { state: { claimId } })}
           disabled={saving}
         />
-        <Button type="button" label={t("claimJourney.submitSettlement")} onClick={formik.handleSubmit} loading={saving} disabled={saving || !claim || !editable} />
+        {claim && !editable ? (
+          <Button type="button" label={t("claimFlow.viewClaim")} icon="pi pi-eye" onClick={() => navigate(`/agent/claimdetail/${claim.id || claimId}`)} />
+        ) : (
+          <Button type="button" label={t("claimJourney.submitSettlement")} onClick={formik.handleSubmit} loading={saving} disabled={saving || !claim} />
+        )}
       </ClaimActions>
     </ClaimJourneyLayout>
   );

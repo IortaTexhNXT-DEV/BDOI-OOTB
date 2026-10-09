@@ -352,9 +352,6 @@ const AdjusterSubmission = () => {
       {claimDetailsError && !claim && (
         <FormErrorSummary serverError={claimDetailsError} />
       )}
-      {claim && !editable && (
-        <div className="claim-journey__notice">{t("claimJourney.adjusterLocked", { status: claim.claimStatus })}</div>
-      )}
       {claim && (
         <>
           <ClaimSection title={t("claimJourney.adjusterReport")}>
@@ -491,7 +488,7 @@ const AdjusterSubmission = () => {
           <FormErrorSummary errors={formik.errors} labels={labels} show={showErrors} serverError={serverError} />
         </>
       )}
-      <ClaimActions>
+      <ClaimActions next={claim && !editable ? t("claimJourney.adjusterLocked", { status: claim.claimStatus }) : t("claimFlow.next.adjuster")}>
         <Button type="button" label={t("claimJourney.back")} outlined onClick={backToReview} disabled={isSubmitting} />
         <Button
           type="button"

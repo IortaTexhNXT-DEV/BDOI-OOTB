@@ -78,6 +78,7 @@ const opsAccountingService = {
   pdcAction: (pdcId, action, payload = {}) => post(`/pdc/${id(pdcId)}/${action}`, payload),
   downloadPdcs: (params) => openFile(`/pdc${qs({ ...params, format: "xlsx" })}`, "post-dated-cheques.xlsx", { download: true }),
   // claim documents
+  claimsAwaitingDocuments: (params) => request(`/claim-documents/awaiting${qs(params)}`),
   claimChecklist: (claimRef) => request(`/claim-documents/claims/${id(claimRef)}`),
   updateChecklistItem: (claimRef, itemId, payload) => patch(`/claim-documents/claims/${id(claimRef)}/items/${id(itemId)}`, payload),
   addChecklistItem: (claimRef, payload) => post(`/claim-documents/claims/${id(claimRef)}/items`, payload),

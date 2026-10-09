@@ -10,7 +10,7 @@ import { getClaimDetails } from "../adjusterSubmission/store/adjusterSubmissionM
 import claimsService from "../../../services/claimsService";
 import { formatCurrency } from "../../../utility/currencyConverter";
 import { formatDate } from "../../../utility/dateFormat";
-import ClaimJourneyLayout, { ClaimSection } from "../shared/ClaimJourneyLayout";
+import ClaimJourneyLayout, { ClaimActions, ClaimSection } from "../shared/ClaimJourneyLayout";
 import FormErrorSummary from "../shared/FormErrorSummary";
 import { stepForStatus } from "../shared/claimJourney";
 import SettlementCash from "./SettlementCash";
@@ -37,6 +37,7 @@ const ClaimSettlement = () => {
   const toast = useRef(null);
   const claimId = params.id || location.state?.claimId || location.state?.id;
   const [downloading, setDownloading] = useState(null);
+  const [cash, setCash] = useState(null);
 
   const { claimDetails, claimDetailsError } = useSelector(({ adjusterSubmissionReducers }) => ({
     claimDetails: adjusterSubmissionReducers?.claimDetails || {},
@@ -81,6 +82,13 @@ const ClaimSettlement = () => {
     claim.rejectedReason ? [t("claimJourney.rejectReason"), claim.rejectedReason] : null,
   ].filter(Boolean) : [];
 
+  const outstanding = cash?.paidThroughBroker ? cash.insurers.reduce((sum, i) => sum + i.outstanding, 0) : 0;
+  let next = null;
+  if (claim && cash?.paidThroughBroker && outstanding > 0) next = t("claimFlow.next.fundsDue", { amount: formatCurrency(outstanding) });
+  else if (claim && cash?.paidThroughBroker && cash.payableToClaimant > 0) next = t("claimFlow.next.payClaimant", { amount: formatCurrency(cash.payableToClaimant) });
+  else if (claim && ["approved", "pending-approval"].includes(status)) next = t("claimFlow.next.toSettle", { status: claim.claimStatus });
+  else if (claim) next = t("claimFlow.next.done", { status: claim.claimStatus });
+
   return (
     <ClaimJourneyLayout
       claim={claim}
@@ -115,9 +123,12 @@ const ClaimSettlement = () => {
               )} />
             </DataTable>
           </ClaimSection>
-          <SettlementCash claimId={claim.id || claimId} />
+          <SettlementCash claimId={claim.id || claimId} onPosition={setCash} />
         </>
       )}
+      <ClaimActions next={next} tone={next && !outstanding && !(cash?.payableToClaimant > 0) && ["settled", "closed"].includes(status) ? "success" : "info"}>
+        <Button type="button" label={t("claimFlow.viewClaim")} icon="pi pi-eye" outlined onClick={() => navigate(`/agent/claimdetail/${claim?.id || claimId}`)} disabled={!claim} />
+      </ClaimActions>
     </ClaimJourneyLayout>
   );
 };

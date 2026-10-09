@@ -8,6 +8,8 @@ import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
+import PropTypes from "prop-types";
+import StatCards from "../../../components/StatCards";
 import claimSettlementCashService from "../../../services/claimSettlementCashService";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
@@ -20,10 +22,11 @@ const PAYMENT_MODES = [
 ];
 
 /**
- * Cash of a settlement paid through the broker: money received from each insurer and the payment to the claimant.
- * Only shown for such settlements; the buttons follow the finance permissions the API checks.
+ * Cash of a settlement paid through the broker: the figures (settlement, received from the insurers, paid to and still
+ * payable to the claimant), the money received from each insurer and the payment to the claimant. Only shown for such
+ * settlements; the buttons follow the finance permissions the API checks. `onPosition` receives the cash position.
  */
-const SettlementCash = ({ claimId }) => {
+const SettlementCash = ({ claimId, onPosition }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const toast = useRef(null);
@@ -36,6 +39,7 @@ const SettlementCash = ({ claimId }) => {
     claimSettlementCashService.getPosition(claimId).then(setPos).catch(() => setPos(null));
   }, [claimId]);
   useEffect(() => { load(); }, [load]);
+  useEffect(() => { if (onPosition) onPosition(pos); }, [pos, onPosition]);
 
   if (!pos || !pos.paidThroughBroker) return null;
 
@@ -84,16 +88,18 @@ const SettlementCash = ({ claimId }) => {
         </div>
       </div>
       {!pos.canRecord && <small className="block mt-2">{t("followUps.settlementNotBooked", "Cash can be recorded once the settlement through the broker is booked.")}</small>}
+      <StatCards className="mt-3" items={[
+        { key: "settlement", label: t("claimFlow.cash.settlement"), value: formatCurrency(pos.settlementAmount) },
+        { key: "received", label: t("claimFlow.cash.received"), value: formatCurrency(pos.insurers.reduce((sum, i) => sum + i.received, 0)) },
+        { key: "paid", label: t("followUps.claimantPaid", "Paid to claimant"), value: formatCurrency(pos.paidToClaimant) },
+        { key: "payable", label: t("followUps.stillPayable", "Still payable"), value: formatCurrency(pos.payableToClaimant) },
+      ]} />
       <DataTable value={pos.insurers} size="small" className="mt-3">
         <Column field="insurer" header={t("followUps.insurer", "Insurer")} />
         <Column header={t("followUps.recoverable", "Recoverable")} body={(r) => formatCurrency(r.recoverable)} />
         <Column header={t("followUps.received", "Received")} body={(r) => formatCurrency(r.received)} />
         <Column header={t("followUps.outstanding", "Outstanding")} body={(r) => formatCurrency(r.outstanding)} />
       </DataTable>
-      <div className="mt-3">
-        {t("followUps.claimantPaid", "Paid to claimant")}: <b>{formatCurrency(pos.paidToClaimant)}</b> / {formatCurrency(pos.settlementAmount)}
-        {" · "}{t("followUps.stillPayable", "Still payable")}: <b>{formatCurrency(pos.payableToClaimant)}</b>
-      </div>
       {pos.movements.length > 0 && (
         <DataTable value={pos.movements} size="small" className="mt-3">
           <Column header={t("followUps.date", "Date")} body={(m) => formatAppDate(m.date)} />
@@ -126,5 +132,8 @@ const SettlementCash = ({ claimId }) => {
     </section>
   );
 };
+
+SettlementCash.propTypes = { claimId: PropTypes.string.isRequired, onPosition: PropTypes.func };
+SettlementCash.defaultProps = { onPosition: null };
 
 export default SettlementCash;

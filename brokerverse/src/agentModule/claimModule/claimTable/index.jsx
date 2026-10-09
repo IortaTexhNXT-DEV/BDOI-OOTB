@@ -12,18 +12,13 @@ import { formatDate } from "../../../utility/dateFormat";
 import { useServerList } from "../../../hooks/useServerList";
 import { statusLabel } from "../../../utils/statusSeverity";
 import { EmptyState, FilterBar, RowActions, StatusChip } from "../../../components/RecordPage";
-import { stepForStatus } from "../../claimsModule/shared/claimJourney";
+import { CONTINUE_ROUTE as STEP_ROUTE, stepForStatus } from "../../claimsModule/shared/claimJourney";
 
 // claim status codes of the server (it also accepts "open" for every status still being worked on)
 const STATUSES = ["open", "registered", "in-review", "pending-approval", "approved", "settled", "closed", "rejected"];
 
 /** Screen of the step a claim is at, to carry on with it. */
-const CONTINUE_ROUTE = {
-  review: (id) => `/agent/claimrequest/requestapproval/${id}`,
-  adjuster: (id) => `/agent/claimrequest/adjustersubmission/${id}`,
-  approval: (id) => `/agent/claimrequest/settlementapproval/${id}`,
-  payment: (id) => `/agent/claimdetailedview/${id}`,
-};
+const CONTINUE_ROUTE = { ...STEP_ROUTE, payment: (id) => `/agent/claimdetailedview/${id}` };
 
 /**
  * Operations > Claims list: paged, searched (claim number, policy number, client) and filtered by status on the
@@ -46,7 +41,7 @@ const ClaimTable = ({ state, patch }) => {
 
   const lobOf = (r) => r.lob || r.productType;
   const open = (r) => navigate(`/agent/claimdetail/${r.id}`, { state: lobOf(r) ? { lob: lobOf(r), productType: lobOf(r) } : undefined });
-  const next = (r) => CONTINUE_ROUTE[stepForStatus(r.lifecycleStatus)];
+  const next = (r) => CONTINUE_ROUTE[stepForStatus(r.lifecycleStatus, r)];
   const actions = (r) => (
     <RowActions
       actions={[{ icon: "pi pi-eye", label: t("claimFlow.viewClaim"), onClick: () => open(r) }]}

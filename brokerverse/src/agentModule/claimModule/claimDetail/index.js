@@ -1,23 +1,19 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "primereact/button";
+import { Toast } from "primereact/toast";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
+import opsService from "../../../services/opsAccountingService";
 import { getClaimDetails } from "../../claimsModule/adjusterSubmission/store/adjusterSubmissionMiddleWare";
-import ClaimJourneyLayout, { ClaimSection } from "../../claimsModule/shared/ClaimJourneyLayout";
+import ClaimJourneyLayout, { ClaimActions, ClaimSection } from "../../claimsModule/shared/ClaimJourneyLayout";
+import ClaimDocumentChecklist, { useClaimChecklist } from "../../claimsModule/shared/ClaimDocumentChecklist";
 import FormErrorSummary from "../../claimsModule/shared/FormErrorSummary";
 import useClaimsConfig from "../../claimsModule/shared/useClaimsConfig";
-import { claimLobOf, lobUses, stepForStatus } from "../../claimsModule/shared/claimJourney";
+import { CONTINUE_ROUTE, claimLobOf, lobUses, stepForStatus } from "../../claimsModule/shared/claimJourney";
 import { formatDate } from "../../../utility/dateFormat";
 import "./index.scss";
-
-/** Screen of the step a claim is at, to carry on with it (none once it is settled, closed or rejected). */
-const CONTINUE_ROUTE = {
-  review: (id) => `/agent/claimrequest/requestapproval/${id}`,
-  adjuster: (id) => `/agent/claimrequest/adjustersubmission/${id}`,
-  approval: (id) => `/agent/claimrequest/settlementapproval/${id}`,
-};
 
 /** Label / value list of a claim section; empty values show a dash. */
 const Facts = ({ rows }) => (
@@ -33,8 +29,9 @@ const Facts = ({ rows }) => (
 
 /**
  * Operations > Claims > claim: the whole claim on one page, under the claim header, the journey steps and the key
- * facts: the loss, the policy and insured, the driver and the third party (motor), the adjuster, the settlement and
- * each co-insurer's share. Sections that do not apply to the claim's line of business (claims.lob_fields) are left out.
+ * facts: the loss, the policy and insured, the driver and the third party (motor), the adjuster, the settlement, each
+ * co-insurer's share and the claim's documents, with the next step at the foot. Sections that do not apply to the
+ * claim's line of business (claims.lob_fields) are left out.
  */
 const ClaimDetail = () => {
   const { t } = useTranslation();
@@ -43,6 +40,7 @@ const ClaimDetail = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const config = useClaimsConfig();
+  const toast = useRef(null);
 
   const { claimDetails, error } = useSelector(({ adjusterSubmissionReducers }) => ({
     claimDetails: adjusterSubmissionReducers?.claimDetails || {},
@@ -58,8 +56,33 @@ const ClaimDetail = () => {
   const lob = claim ? claimLobOf(claim.lob, claim.policy?.lob, claim.productType) : "";
   const usesDriver = lobUses(config, lob, "driver");
   const usesVehicle = lobUses(config, lob, "vehicle");
-  const step = claim ? stepForStatus(claim.lifecycleStatus) : "notification";
+  const step = claim ? stepForStatus(claim.lifecycleStatus, claim) : "notification";
   const next = claim ? CONTINUE_ROUTE[step] : null;
+  const docs = useClaimChecklist(claim?.id);
+  const notify = (severity, detail) => toast.current?.show({ severity, summary: t("claimDocs.title"), detail, life: severity === "error" ? 6000 : 3000 });
+  const missing = docs.list?.summary?.missingRequired || 0;
+  const remind = async () => {
+    try {
+      const r = await opsService.remindClaimant(claim.id);
+      notify("success", t("claimDocs.reminded", { to: r.to }));
+      docs.reload();
+    } catch (e) {
+      notify("error", e.message);
+    }
+  };
+  const terminal = claim && ["settled", "closed", "rejected"].includes(claim.lifecycleStatus);
+  const paid = claim && ["settled", "closed", "approved"].includes(claim.lifecycleStatus);
+  let nextText = null;
+  let tone = "info";
+  if (claim && step === "documents" && docs.list) {
+    nextText = missing ? t("claimDocs.next.missing", { count: missing }) : t("claimDocs.next.ready");
+    tone = missing ? "warning" : "success";
+  } else if (claim && next) nextText = t("claimFlow.next.continueAt", { step: t(`claimJourney.steps.${step}`) });
+  else if (claim && paid && !terminal) nextText = t("claimFlow.next.toSettle", { status: claim.claimStatus });
+  else if (claim) {
+    nextText = t("claimFlow.next.done", { status: claim.claimStatus });
+    if (["settled", "closed"].includes(claim.lifecycleStatus)) tone = "success";
+  }
   const tp = claim?.thirdPartyDetails || claim?.thirdPartyWitnessDetails?.[0] || {};
   const policy = claim?.policy || {};
   const insurers = claim?.participatingInsurers || [];
@@ -74,16 +97,10 @@ const ClaimDetail = () => {
       actions={claim ? (
         <>
           <Button type="button" icon="pi pi-history" outlined label={t("claimFlow.history")} onClick={() => navigate(`/agent/claimaudittrail/${claim.id}`)} />
-          {next ? (
-            <Button type="button" icon="pi pi-arrow-right" iconPos="right" label={t("claimFlow.continue", { step: t(`claimJourney.steps.${step}`) })}
-              onClick={() => navigate(next(claim.id), { state: { claimId: claim.id, clientId: claim.clientId } })} />
-          ) : null}
-          {["settled", "closed", "approved"].includes(claim.lifecycleStatus) ? (
-            <Button type="button" icon="pi pi-wallet" label={t("claimFlow.paymentTitle")} onClick={() => navigate(`/agent/claimdetailedview/${claim.id}`)} />
-          ) : null}
         </>
       ) : null}
     >
+      <Toast ref={toast} />
       {!claim && !error && <p className="claim-journey__hint">{t("claimJourney.loadingClaim")}</p>}
       {error && !claim && <FormErrorSummary serverError={String(error)} />}
       {claim && (
@@ -188,6 +205,13 @@ const ClaimDetail = () => {
               </ClaimSection>
             </div>
           ) : null}
+          {docs.list ? (
+            <div className="col-12">
+              <ClaimSection title={t("claimDocs.title")}>
+                <ClaimDocumentChecklist claimId={claim.id} list={docs.list} onChanged={docs.reload} notify={notify} readOnly={!!terminal} />
+              </ClaimSection>
+            </div>
+          ) : null}
           <div className="col-12">
             <p className="claim-detail__record">
               {t("claimFlow.recordLine", {
@@ -197,6 +221,17 @@ const ClaimDetail = () => {
           </div>
         </div>
       )}
+      {claim ? (
+        <ClaimActions next={nextText} tone={tone}>
+          {paid ? <Button type="button" icon="pi pi-wallet" outlined={!!next} label={t("claimFlow.paymentTitle")} onClick={() => navigate(`/agent/claimdetailedview/${claim.id}`)} /> : null}
+          {next ? (
+            <Button type="button" icon="pi pi-arrow-right" iconPos="right" label={t("claimFlow.continue", { step: t(`claimJourney.steps.${step}`) })}
+              outlined={step === "documents" && missing > 0}
+              onClick={() => navigate(next(claim.id), { state: { claimId: claim.id, clientId: claim.clientId } })} />
+          ) : null}
+          {step === "documents" && missing > 0 ? <Button type="button" icon="pi pi-envelope" label={t("claimDocs.remind")} onClick={remind} /> : null}
+        </ClaimActions>
+      ) : null}
     </ClaimJourneyLayout>
   );
 };

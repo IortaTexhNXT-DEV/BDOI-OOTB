@@ -101,10 +101,27 @@ export const ClaimSection = ({ title, hint, children }) => (
 
 ClaimSection.propTypes = { title: PropTypes.node, hint: PropTypes.node, children: PropTypes.node };
 
-/** Back and forward buttons at the foot of a claim screen. */
-export const ClaimActions = ({ children }) => <div className="claim-journey__actions">{children}</div>;
+/**
+ * Next step panel at the foot of every claim screen: what happens next in one line (`next`) and the buttons for it,
+ * the primary one doing it. `tone` colours the panel: info (default), warning (something is missing) or success (ready).
+ */
+export const ClaimActions = ({ next, tone, children }) => {
+  const { t } = useTranslation();
+  return (
+    <div className={`claim-journey__next claim-journey__next--${tone}`} role="region" aria-label={t("claimFlow.nextStep")}>
+      {next ? (
+        <p className="claim-journey__next-text">
+          <span className="claim-journey__next-label">{t("claimFlow.nextStep")}</span>
+          <span className="claim-journey__next-message">{next}</span>
+        </p>
+      ) : null}
+      <div className="claim-journey__actions">{children}</div>
+    </div>
+  );
+};
 
-ClaimActions.propTypes = { children: PropTypes.node };
+ClaimActions.propTypes = { next: PropTypes.node, tone: PropTypes.oneOf(["info", "warning", "success"]), children: PropTypes.node };
+ClaimActions.defaultProps = { next: null, tone: "info", children: null };
 
 /** Column classes of a claim form field: three fields a row on a wide screen, two on a laptop, one on a phone. */
 export const FIELD_COL = "col-12 md:col-6 xl:col-4";

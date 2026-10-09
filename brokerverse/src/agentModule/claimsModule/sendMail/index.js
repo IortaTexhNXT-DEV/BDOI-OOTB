@@ -108,9 +108,9 @@ const SendMail = () => {
           fullResponse: result.payload,
         };
 
-        // Navigate to next page with claim ID in URL
+        // the claim is registered: on to its documents
         if (claimId) {
-          navigate(`/agent/claimrequest/requestapproval/${claimId}`, {
+          navigate(`/agent/claimrequest/documents/${claimId}`, {
             state: approvalState,
           });
         } else {
@@ -176,7 +176,7 @@ const SendMail = () => {
         </div>
       </ClaimSection>
       {error ? <FormErrorSummary serverError={error} /> : null}
-      <ClaimActions>
+      <ClaimActions next={t("claimFlow.next.insurerAdvice")}>
         <Button type="button" label={t("claimJourney.back")} outlined onClick={handleBackNavigation} disabled={loading} />
         <Button type="button" label={t("claimFlow.registerAndSend")} icon="pi pi-send" onClick={formik.handleSubmit} loading={loading} disabled={loading} />
       </ClaimActions>

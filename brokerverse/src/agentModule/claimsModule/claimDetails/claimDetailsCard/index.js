@@ -497,7 +497,7 @@ const ClaimDetailsCard = ({
         </div>
       </ClaimSection>
 
-      <ClaimActions>
+      <ClaimActions next={t("claimFlow.next.notification")}>
         <Button type="button" label={t("claimJourney.next")} icon="pi pi-arrow-right" iconPos="right" onClick={formik.handleSubmit} />
       </ClaimActions>
     </>

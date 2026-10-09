@@ -21,7 +21,7 @@ import { notifyError } from "../../../../utility/dialogs";
 import { EmptyState, FilterBar, RowActions, StatusChip } from "../../../../components/RecordPage";
 import { setPolicyHolderData } from "../../../claimsModule/claimDetails/store/claimDetailsReducers";
 import { getCategoriesForLob } from "../../../endorsementModule/constants/endorsementCategories";
-import { stepForStatus } from "../../../claimsModule/shared/claimJourney";
+import { CONTINUE_ROUTE, stepForStatus } from "../../../claimsModule/shared/claimJourney";
 
 /**
  * The record lists of the client view (Operations > Clients > client): policies, quotations, claims, renewals,
@@ -198,18 +198,12 @@ const loadClaims = async (clientId) => {
   return Array.isArray(data) ? data : [];
 };
 const CLAIM_FIELDS = ["claimNumber", "policyNumber", "lossType", "typeOfIncident", "claimStatus"];
-const CONTINUE_ROUTE = {
-  review: (id) => `/agent/claimrequest/requestapproval/${id}`,
-  adjuster: (id) => `/agent/claimrequest/adjustersubmission/${id}`,
-  approval: (id) => `/agent/claimrequest/settlementapproval/${id}`,
-};
-
 export const ClaimTab = ({ clientId }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { formatCurrency } = useFormatCurrency();
   const list = useClientRows(clientId, loadClaims, CLAIM_FIELDS);
-  const next = (c) => CONTINUE_ROUTE[stepForStatus(c.lifecycleStatus)];
+  const next = (c) => CONTINUE_ROUTE[stepForStatus(c.lifecycleStatus, c)];
   return (
     <>
       <Search value={list.search} onChange={list.setSearch} placeholder={t("client360.search.claims")} />

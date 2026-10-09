@@ -84,6 +84,12 @@ const SettlementApproval = () => {
     detailView();
   };
 
+  let nextText = null;
+  if (claim && isPendingApproval) nextText = mayDecide ? t("claimFlow.next.approve") : t("claimFlow.next.awaitingApproval");
+  else if (claim && canDecide) nextText = t("claimFlow.next.assessment");
+  else if (claim && ["registered", "in-review"].includes(status)) nextText = t("claimFlow.next.awaitingDecision");
+  else if (claim) nextText = t("claimJourney.decisionTaken", { status: claim.claimStatus });
+
   // the claim's key facts are in the strip above; the assessment adds what the adjuster and the settlement recorded
   const rows = claim
     ? [
@@ -119,14 +125,10 @@ const SettlementApproval = () => {
               </div>
             ))}
           </dl>
-          {isPendingApproval && <p className="claim-journey__hint">{t("claimJourney.checkerHint")}</p>}
-          {!isPendingApproval && !canDecide && (
-            <div className="claim-journey__notice">{t("claimJourney.decisionTaken", { status: claim.claimStatus })}</div>
-          )}
         </ClaimSection>
       )}
       <FormErrorSummary serverError={actionError} />
-      <ClaimActions>
+      <ClaimActions next={nextText}>
         <Button
           type="button"
           label={t("claimJourney.back")}
