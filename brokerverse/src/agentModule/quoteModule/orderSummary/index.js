@@ -34,6 +34,7 @@ import leadService from "../../../services/leadService";
 import { defaultCommissionDetails } from "./CommissionReferralSection";
 import { notifyError } from "../../../utility/dialogs";
 import logger from "../../../utility/logger";
+import QuoteSteps from "../quoteSteps";
 
 // Helper function to transform Redux currentQuoteCreation to component format
 const transformReduxToComponentFormat = (currentQuoteCreation) => {
@@ -791,6 +792,7 @@ const OrderSummary = ({ action, flow }) => {
         <div className="order__summary__title">
           {flow === "renewal" ? t("agent.renewalDetails") : t("agent.createQuote")}
         </div>
+        {flow !== "renewal" && <QuoteSteps current="summary" />}
         <div className="order__summary__subtitle mb-2 mt-2">{t("agent.orderSummary")}</div>
         <div class="grid mt-2 nested-grid">
           {/* Left column: premiums / taxes / totals */}

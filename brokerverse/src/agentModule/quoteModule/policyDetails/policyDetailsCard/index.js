@@ -26,6 +26,7 @@ import useMotorTariff, { findVehicleClass } from "../../utils/useMotorTariff";
 import { confirmAction, notifyWarn } from "../../../../utility/dialogs";
 import useQuoteSetup, { missingRiskFields, riskFieldsToAsk } from "../../utils/useQuoteSetup";
 import RiskFactsFields from "./RiskFactsFields";
+import QuoteSteps from "../../quoteSteps";
 
 const PolicyDetailsCard = ({ action, flow, lead }) => {
   const { t } = useTranslation();
@@ -322,6 +323,7 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
             </div>
           )}
         </div>
+        <QuoteSteps current="policy" />
         {/* //changes */}
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <div className="policy__details__card__container__sub__title mt-2 mb-2">

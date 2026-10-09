@@ -1,0 +1,82 @@
+@import "../../../theme/bdoi/tokens";
+
+// Steps of the motor quote: numbered markers joined by a line, the current step in the primary colour, the steps done
+// with a check. Folds to the markers alone on narrow screens.
+.bv-quote-steps {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 8px;
+  padding: 0 0 16px;
+  list-style: none;
+  border-bottom: 1px solid $color-border;
+
+  .bv-quote-steps__step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: $color-text-muted;
+
+    & + .bv-quote-steps__step::before {
+      content: "";
+      flex: 0 0 auto;
+      width: 32px;
+      height: 1px;
+      margin-right: 0;
+      background: $color-border-strong;
+    }
+  }
+
+  .bv-quote-steps__marker {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    border: 1px solid $color-border-strong;
+    border-radius: 50%;
+    background: $color-surface;
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+
+    .pi {
+      font-size: 11px;
+    }
+  }
+
+  .bv-quote-steps__label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .is-current {
+    color: $color-heading;
+
+    .bv-quote-steps__marker {
+      border-color: $brand-blue;
+      background: $brand-blue;
+      color: var(--bv-primary-text, #ffffff);
+    }
+  }
+
+  .is-done {
+    color: $color-text;
+
+    .bv-quote-steps__marker {
+      border-color: $brand-blue;
+      color: $brand-blue;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .bv-quote-steps__step:not(.is-current) .bv-quote-steps__label {
+      display: none;
+    }
+  }
+}

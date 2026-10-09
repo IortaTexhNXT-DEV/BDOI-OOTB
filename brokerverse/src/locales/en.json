@@ -10957,6 +10957,13 @@
       "cancelled": "Cancelled"
     }
   },
+  "quoteSteps": {
+    "label": "Steps of the quote",
+    "policy": "Policy details",
+    "coverage": "Coverage",
+    "accessories": "Accessories",
+    "summary": "Summary"
+  },
   "quoteRisk": {
     "title": "Risk details for the product rules",
     "intro": "The acceptance rules and rating factors of {{template}} use these details: fields marked * are required so that every rule is checked.",

@@ -31,6 +31,7 @@ import logger from "../../../../utility/logger";
 import coverageInputErrors from "./coverageInputErrors";
 import useQuoteSetup from "../../utils/useQuoteSetup";
 import ProductCovers from "./ProductCovers";
+import QuoteSteps from "../../quoteSteps";
 
 const CoverageDetailsCard = ({
   action,
@@ -906,6 +907,7 @@ const CoverageDetailsCard = ({
         <div className="coverage__details__card__container__title">
           {flow === "renewal" ? t("coverageDetailsCard.renewalDetails") : t("coverageDetailsCard.createQuote")}
         </div>
+        {flow !== "renewal" && <QuoteSteps current="coverage" />}
         <ProductCovers setup={quoteSetup} isSelected={coverSelected} onToggle={toggleCover} />
         <div className="coverage__details__card__container__sub__title mt-2 mb-2">
           {t("coverageDetailsCard.coveragesDetails")}

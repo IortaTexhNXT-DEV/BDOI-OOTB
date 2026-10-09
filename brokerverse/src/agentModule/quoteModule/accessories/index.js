@@ -16,6 +16,7 @@ import policyRenewalService from "../../../services/policyRenewalService";
 import leadService from "../../../services/leadService";
 import { notifyError } from "../../../utility/dialogs";
 import logger from "../../../utility/logger";
+import QuoteSteps from "../quoteSteps";
 
 const Accessories = ({ action, flow }) => {
   const { t } = useTranslation();
@@ -242,6 +243,7 @@ const Accessories = ({ action, flow }) => {
           <div className="table__header">
             {flow === "renewal" ? t("agent.renewalDetails") : t("agent.createQuote")}
           </div>
+          {flow !== "renewal" && <QuoteSteps current="accessories" />}
           <div className="sub__heading mt-2 mb-2">Accessories</div>
           <div class="grid mt-2">
             <div class="col-6">

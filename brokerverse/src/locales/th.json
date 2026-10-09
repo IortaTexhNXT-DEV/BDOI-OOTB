@@ -4898,6 +4898,13 @@
       "both": "Retail and corporate"
     }
   },
+  "quoteSteps": {
+    "label": "ขั้นตอนของใบเสนอราคา",
+    "policy": "รายละเอียดกรมธรรม์",
+    "coverage": "ความคุ้มครอง",
+    "accessories": "อุปกรณ์เสริม",
+    "summary": "สรุป"
+  },
   "placement": {
     "brokerSlip": {
       "title": "Request for Quotation (Broker Slip)",
