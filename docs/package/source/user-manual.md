@@ -1339,8 +1339,10 @@ When the insurer sends the issued policy, select **Upload e-policy** (or use **R
 - **Insurer policy number** (required) and **BrokerVerse policy number** (blank: numbered by the system at booking);
 - **Participant name** (the insured named on the policy), **Sum insured**, **Net premium**, **Gross premium** and **Commission**;
 - **Issue date** and **Effective date** (required), **Issuance date**, **Expiry date** and **Production date**;
-- the **Deductible**, and for motor the **Chassis**, **Engine / motor**, **Plate** and **MV file** numbers. They are carried from the quotation; the plate number or the MV file number is required here even where the quotation said TBA;
-- the **References of the co-insurers**, an optional **Vehicle photo** and **Remarks**.
+- the **Deductible**, and for motor and CTPL only the **Chassis**, **Engine / motor**, **Plate** and **MV file** numbers. They are carried from the quotation; the plate number or the MV file number is required here even where the quotation said TBA;
+- the **References of the co-insurers**, for motor and CTPL only an optional **Vehicle photo**, and **Remarks**.
+
+Credit Life, Personal Accident, Group Personal Accident, Travel, Parcel and the other lines have no vehicle: the window shows neither the vehicle identifiers nor the vehicle photo, and the check against the slip compares the amounts, the period, the insured and the deductible only. In the same way the policy view shows the vehicle details, vehicle photos and motor coverage only for a motor or CTPL policy, an endorsement of another line offers only **Personal Details Change**, **Policy Extend** and **Policy Cancel**, and a claim of another line has no driver, plate number or repair shop and offers the causes of loss of its line (`claims.loss_causes`).
 
 The system compares the e-policy with the slip at once; the status becomes **e-Policy received** and the e-policy card shows **Matches the slip** or **Differs from the slip**.
 

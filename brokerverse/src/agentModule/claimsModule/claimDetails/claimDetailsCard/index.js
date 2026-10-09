@@ -17,6 +17,8 @@ import DatepickerField from "../../../component/datePicker";
 import InputNumberField from "../../../component/inputNumberField";
 import PhAddressFields from "../../../component/PhAddressFields";
 import { FieldsSkeleton } from "../../../../components/Skeletons";
+import useClaimsConfig from "../../shared/useClaimsConfig";
+import { claimLobOf, lobUses, lossCauseOptions } from "../../shared/claimJourney";
 
 const ClaimDetailsCard = ({
   leadRefId,
@@ -67,6 +69,13 @@ const ClaimDetailsCard = ({
       claimDetailsViewData?.productType ||
       initialLob
   );
+  // the driver and vehicle sections apply only to the lines that use them (claims.lob_fields: motor and CTPL); the
+  // causes of loss of another line come from claims.loss_causes
+  const claimsConfig = useClaimsConfig();
+  const claimLob = claimLobOf(claimDetailsViewData?.lob, claimDetailsViewData?.productType, initialLob);
+  const usesDriver = lobUses(claimsConfig, claimLob, "driver");
+  const usesVehicle = lobUses(claimsConfig, claimLob, "vehicle");
+  const incidentTypes = isFire ? FIRE_INCIDENT_TYPES : usesVehicle ? MOTOR_INCIDENT_TYPES : lossCauseOptions(claimsConfig, claimLob);
 
   const formInitialValue = {
     InsuranceCompanyName: claimDetailsViewData?.InsuranceCompanyName || "",
@@ -133,7 +142,7 @@ const ClaimDetailsCard = ({
         claimDetailsViewData?.productType ||
         initialLob
     );
-    const holderAsDriver = !isFire && checked;
+    const holderAsDriver = usesDriver && checked;
     const payload = {
       ...values,
       ...(holderAsDriver ? holderToDriver(values) : {}),
@@ -156,7 +165,7 @@ const ClaimDetailsCard = ({
   const customValidation = (values) => {
     const errors = {};
     if (
-      !isFire &&
+      usesDriver &&
       (!values.driverName || values.driverName.trim() === "")
     ) {
       errors.driverName = t("claimDetails.driversNameRequired");
@@ -589,7 +598,7 @@ const ClaimDetailsCard = ({
                   onChange={(e) =>
                     formik.setFieldValue("typeOfIncident", e.value)
                   }
-                  options={isFire ? FIRE_INCIDENT_TYPES : MOTOR_INCIDENT_TYPES}
+                  options={incidentTypes}
                   optionLabel="label"
                   optionValue="value"
                   placeholder={t("claimDetails.select")}
@@ -626,7 +635,7 @@ const ClaimDetailsCard = ({
           </>
         )}
 
-        {!isFire && (
+        {usesDriver && (
           <>
             <div className="check__box__container mt-3">
               <Checkbox
@@ -690,7 +699,7 @@ const ClaimDetailsCard = ({
             </div>
           </div>
 
-          {!isFire && (
+          {usesVehicle && (
             <div className="grid mt-2">
               <div className="col-12 md:col-6 lg:col-6">
                 <InputTextField
@@ -720,7 +729,7 @@ const ClaimDetailsCard = ({
           )}
 
           <div className="grid mt-2">
-            {!isFire && (
+            {usesVehicle && (
               <div className="col-12 md:col-6 lg:col-6">
                 <InputTextField
                   label={t("claimDetails.shop")}

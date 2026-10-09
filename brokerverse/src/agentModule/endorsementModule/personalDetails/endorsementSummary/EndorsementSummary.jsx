@@ -19,7 +19,7 @@ import ShareOption from "../../../quoteModule/quoteDetailView/Modal/ShareOption"
 import { formatDate } from "@fullcalendar/core/index.js";
 import axios from "axios";
 import { validateAccountingEquation } from "../../../../utility/accountingValidation";
-import { isFireLob } from "../../constants/endorsementCategories";
+import { isFireLob, isOtherLob } from "../../constants/endorsementCategories";
 
 import { numberLocale } from "../../../../utility/currencyConverter";
 import useTaxRates from "../../../quoteModule/utils/useTaxRates";
@@ -210,6 +210,9 @@ const EndorsementSummary = ({ action }) => {
     [state?.endorsementData]
   );
 
+  const summaryLob = state?.lob || state?.productType || state?.endorsementData?.productType || state?.endorsementData?.lob || policyData?.product || quotationData?.productType;
+  // a line without a vehicle (Personal Accident, Credit Life ...) has no motor details or motor coverage
+  const isOtherLOB = isOtherLob(summaryLob);
   const isFireLOB = useMemo(() => {
     const lob =
       state?.lob ||
@@ -542,7 +545,7 @@ const EndorsementSummary = ({ action }) => {
             </label>
           </div>
         </div>
-        {!isFireLOB && (
+        {!isFireLOB && !isOtherLOB && (
           <div className="sub_title">
             <label className="policy_text">Motor Details</label>
             <div className="quote_details">
@@ -693,7 +696,7 @@ const EndorsementSummary = ({ action }) => {
             )}
           </>
         )}
-        {!isFireLOB && (
+        {!isFireLOB && !isOtherLOB && (
           <div className="sub_title">
             <label className="policy_text">Coverage details</label>
             <div className="quote_details">

@@ -54,7 +54,9 @@ the e-policy are `documents` rows (entity `placement`).
    `placement-slip`) and, for a direct CTPL, the LTO document. The insurer acknowledges it.
 5. The e-policy is recorded with both policy numbers, participant name, sum insured, premium, commission and the
    issue / issuance / effective / production dates; motor registration (plate or MV file) is required even where the
-   quotation said TBA. `compareWithSlip` lists the differences beyond the tolerance.
+   quotation said TBA. Only a motor or CTPL placement (lob MOTOR) keeps vehicle identifiers and a vehicle photo; on
+   another line they are dropped and the check has no vehicle items. `compareWithSlip` lists the differences beyond
+   the tolerance.
 6. Another user confirms the check, an approver accepts the differences with a reason, or the e-policy goes back to the
    lead insurer (`email.template.placement_discrepancy`) and the placement waits for a corrected one.
 7. `book` issues the policy through `policies/service.js#issuePolicy` (participants, bill or direct-bill commission,
