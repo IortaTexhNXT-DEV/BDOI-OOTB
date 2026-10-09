@@ -1,7 +1,8 @@
 -- SAMPLE / DEMO DATA: runs only when SEED_SAMPLE_DATA is true (never in a production go-live). See ../README.md.
 -- Distribution and products samples: a dealer group with two branches and a financing bank (Distribution Channels), a
--- brand-new vehicle programme, a lead assignment rule, campaign segments and templates, and a shared Report Builder
--- report. Fictional dealers; the bank is the BDO entry of the Bank master.
+-- brand-new vehicle programme, a lead assignment rule, campaign segments (the campaign templates are reference seed
+-- 84_tisph_campaign_templates.sql) and a shared Report Builder report. Fictional dealers; the bank is the BDO entry of
+-- the Bank master.
 
 INSERT INTO distribution_channels(id, code, name, channel_type, parent_id, referrer_id, comsub_pct, bank_id, branch_code, province, city, address, contact_person,
     contact_email, contact_phone, mortgagee_clause, letter_addressee, created_by, updated_by) VALUES
@@ -38,13 +39,6 @@ SELECT 'Website motor prospects', 10, 'round_robin', '{"source":"Website","lob":
   ARRAY(SELECT id FROM users WHERE username IN ('agent.jdelacruz', 'agent.msantos') ORDER BY username), 'Prospects from the Makati Motors web enquiry form go to the Makati team in turn', 'seed', 'seed'
 WHERE NOT EXISTS (SELECT 1 FROM lead_assignment_rules WHERE name = 'Website motor prospects');
 
-INSERT INTO campaign_templates(code, name, subject, body_html, created_by, updated_by) VALUES
- ('MOTOR-RENEW', 'Motor renewal reminder', 'Your car insurance renews soon, {{firstName}}',
-  '<p>Dear {{firstName}},</p><p>Your car insurance is due for renewal. Reply to this e-mail or call your account executive and we will compare the best offers of our insurers for you.</p><p>{{companyName}}</p><p style="font-size:12px">To stop receiving offers by e-mail, <a href="{{optOutLink}}">unsubscribe here</a>.</p>',
-  'seed', 'seed'),
- ('HOME-PROTECT', 'Home protection offer', 'Protect your home this typhoon season',
-  '<p>Dear {{firstName}},</p><p>Typhoon season is here. Ask us about fire and allied perils cover for your home, with acts of nature included.</p><p>{{companyName}}</p>', 'seed', 'seed')
-ON CONFLICT DO NOTHING;
 INSERT INTO campaign_segments(name, description, criteria, created_by, updated_by)
 SELECT 'Metro Manila clients and prospects', 'Everyone in Metro Manila who agreed to receive offers', '{"partyType":"both","province":"Metro Manila"}', 'seed', 'seed'
 WHERE NOT EXISTS (SELECT 1 FROM campaign_segments WHERE name = 'Metro Manila clients and prospects');

@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1207 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1210 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -15652,6 +15652,152 @@
           ]
         },
         {
+          "name": "Clients and prospects with their current marketing consent (search name, code or e-mail; partyType client / lead; status granted / refused / withdrawn / not-recorded)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/consents?search=Santos&status=not-recorded",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "campaigns",
+                "consents"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "Santos"
+                },
+                {
+                  "key": "status",
+                  "value": "not-recorded"
+                }
+              ]
+            },
+            "description": "Clients and prospects with their current marketing consent (search name, code or e-mail; partyType client / lead; status granted / refused / withdrawn / not-recorded)\n\nFront-end touchpoint: Operations > Sales & Marketing > Campaigns > Marketing consents\n\nAccess: read:campaigns, write:campaigns"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/campaigns/consents?search=Santos&status=not-recorded",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "campaigns",
+                    "consents"
+                  ],
+                  "query": [
+                    {
+                      "key": "search",
+                      "value": "Santos"
+                    },
+                    {
+                      "key": "status",
+                      "value": "not-recorded"
+                    }
+                  ]
+                },
+                "description": "Clients and prospects with their current marketing consent (search name, code or e-mail; partyType client / lead; status granted / refused / withdrawn / not-recorded)\n\nFront-end touchpoint: Operations > Sales & Marketing > Campaigns > Marketing consents\n\nAccess: read:campaigns, write:campaigns"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"partyType\": \"client\",\n      \"partyId\": \"cl_1\",\n      \"name\": \"Maria Santos\",\n      \"code\": \"CL-2026-00012\",\n      \"email\": \"maria.santos@example.ph\",\n      \"status\": \"granted\",\n      \"channel\": \"Form\",\n      \"evidence\": \"Signed application form\",\n      \"recordedAt\": \"2026-10-09T02:00:00Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record the marketing consent of a client or prospect (agreed or refused, channel, evidence); it replaces the consent in force",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/consents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "campaigns",
+                "consents"
+              ]
+            },
+            "description": "Record the marketing consent of a client or prospect (agreed or refused, channel, evidence); it replaces the consent in force\n\nFront-end touchpoint: Operations > Sales & Marketing > Campaigns > Marketing consents > Record\n\nAccess: write:campaigns",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"partyType\": \"client\",\n  \"partyId\": \"cl_1\",\n  \"granted\": true,\n  \"channel\": \"Form\",\n  \"evidence\": \"Signed application form\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/campaigns/consents",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "campaigns",
+                    "consents"
+                  ]
+                },
+                "description": "Record the marketing consent of a client or prospect (agreed or refused, channel, evidence); it replaces the consent in force\n\nFront-end touchpoint: Operations > Sales & Marketing > Campaigns > Marketing consents > Record\n\nAccess: write:campaigns",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"partyType\": \"client\",\n  \"partyId\": \"cl_1\",\n  \"granted\": true,\n  \"channel\": \"Form\",\n  \"evidence\": \"Signed application form\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 41,\n    \"partyType\": \"client\",\n    \"partyId\": \"cl_1\",\n    \"name\": \"Maria Santos\",\n    \"code\": \"CL-2026-00012\",\n    \"email\": \"maria.santos@example.ph\",\n    \"status\": \"granted\",\n    \"channel\": \"Form\",\n    \"evidence\": \"Signed application form\",\n    \"recordedAt\": \"2026-10-09T02:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Public opt-out page of a campaign e-mail (asks to confirm; nothing changes until confirmed)",
           "request": {
             "method": "GET",
@@ -16311,7 +16457,7 @@
           ]
         },
         {
-          "name": "The template filled in for a sample recipient (subject and HTML)",
+          "name": "The template filled in for a sample recipient (subject and HTML in the e-mail layout of the theme)",
           "request": {
             "method": "POST",
             "header": [],
@@ -16334,7 +16480,7 @@
                 }
               ]
             },
-            "description": "The template filled in for a sample recipient (subject and HTML)\n\nFront-end touchpoint: Operations > Sales & Marketing > Campaigns > Templates > Preview\n\nAccess: read:campaigns, write:campaigns"
+            "description": "The template filled in for a sample recipient (subject and HTML in the e-mail layout of the theme)\n\nFront-end touchpoint: Operations > Sales & Marketing > Campaigns > Templates > Preview\n\nAccess: read:campaigns, write:campaigns"
           },
           "response": [
             {
@@ -16361,7 +16507,7 @@
                     }
                   ]
                 },
-                "description": "The template filled in for a sample recipient (subject and HTML)\n\nFront-end touchpoint: Operations > Sales & Marketing > Campaigns > Templates > Preview\n\nAccess: read:campaigns, write:campaigns"
+                "description": "The template filled in for a sample recipient (subject and HTML in the e-mail layout of the theme)\n\nFront-end touchpoint: Operations > Sales & Marketing > Campaigns > Templates > Preview\n\nAccess: read:campaigns, write:campaigns"
               },
               "status": "OK",
               "code": 200,
@@ -16373,7 +16519,86 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"subject\": \"Your car insurance renews soon, Maria\",\n    \"html\": \"<p>Dear Maria,</p>\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"subject\": \"Your car insurance renews soon, Maria\",\n    \"html\": \"<div data-bv-layout=\\\"1\\\">...<p>Dear Maria,</p>...</div>\",\n    \"hasOptOutLink\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "A template being written (subject and body, not saved) filled in for a sample recipient, in the e-mail layout of the theme",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/templates/preview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "campaigns",
+                "templates",
+                "preview"
+              ]
+            },
+            "description": "A template being written (subject and body, not saved) filled in for a sample recipient, in the e-mail layout of the theme\n\nFront-end touchpoint: Operations > Sales & Marketing > Campaigns > Templates > Edit > Preview\n\nAccess: read:campaigns, write:campaigns",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"Your car insurance renews soon, {{firstName}}\",\n  \"bodyHtml\": \"<p>Dear {{firstName}},</p><p>...</p><p><a href=\\\"{{optOutLink}}\\\">Unsubscribe</a></p>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/campaigns/templates/preview",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "campaigns",
+                    "templates",
+                    "preview"
+                  ]
+                },
+                "description": "A template being written (subject and body, not saved) filled in for a sample recipient, in the e-mail layout of the theme\n\nFront-end touchpoint: Operations > Sales & Marketing > Campaigns > Templates > Edit > Preview\n\nAccess: read:campaigns, write:campaigns",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"subject\": \"Your car insurance renews soon, {{firstName}}\",\n  \"bodyHtml\": \"<p>Dear {{firstName}},</p><p>...</p><p><a href=\\\"{{optOutLink}}\\\">Unsubscribe</a></p>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"subject\": \"Your car insurance renews soon, Maria\",\n    \"html\": \"<div data-bv-layout=\\\"1\\\">...<p>Dear Maria,</p>...</div>\",\n    \"hasOptOutLink\": true\n  }\n}"
             }
           ]
         }

@@ -15,7 +15,7 @@ const canWrite = [requireAuth, requirePermission('write:campaigns')];
 
 const text = (n) => z.string().max(n).optional().nullable();
 const criteria = z.object({
-  partyType: z.enum(['client', 'lead', 'both']).optional(), lob: text(40), province: text(120), city: text(120), channelId: text(40), clientType: text(40), leadStatus: text(40),
+  partyType: z.enum(['client', 'lead', 'both']).optional(), lob: text(40), productId: z.coerce.number().int().positive().optional().nullable(), province: text(120), city: text(120), channelId: text(40), clientType: text(40), leadStatus: text(40),
   expiringWithinDays: z.coerce.number().int().min(0).max(366).optional().nullable(), hasActivePolicy: z.boolean().optional(),
 });
 const segmentBody = z.object({ name: z.string().trim().min(1).max(120), description: text(500), criteria: criteria.optional(), status: z.enum(['active', 'inactive']).optional() });
@@ -76,13 +76,36 @@ define({
     res.json({ success: true, message: 'Template saved', data: after });
   },
 });
+const consent = { partyType: 'client', partyId: 'cl_1', name: 'Maria Santos', code: 'CL-2026-00012', email: 'maria.santos@example.ph', status: 'granted', channel: 'Form',
+  evidence: 'Signed application form', recordedAt: '2026-10-09T02:00:00Z' };
 define({
-  method: 'POST', path: '/templates/:id/preview', summary: 'The template filled in for a sample recipient (subject and HTML)', screen: `${SCREEN} > Templates > Preview`, middleware: canRead,
-  response: { success: true, data: { subject: 'Your car insurance renews soon, Maria', html: '<p>Dear Maria,</p>' } },
+  method: 'GET', path: '/consents', summary: 'Clients and prospects with their current marketing consent (search name, code or e-mail; partyType client / lead; status granted / refused / withdrawn / not-recorded)',
+  screen: `${SCREEN} > Marketing consents`, middleware: canRead, query: { search: 'Santos', status: 'not-recorded' }, response: { success: true, data: [consent] },
+  handler: async (req, res) => res.json({ success: true, data: await svc.marketingConsents(req.query) }),
+});
+define({
+  method: 'POST', path: '/consents', summary: 'Record the marketing consent of a client or prospect (agreed or refused, channel, evidence); it replaces the consent in force',
+  screen: `${SCREEN} > Marketing consents > Record`,
+  middleware: [...canWrite, validate(z.object({ partyType: z.enum(['client', 'lead']), partyId: z.string().trim().min(1).max(60), granted: z.boolean(), channel: z.enum(svc.CONSENT_CHANNELS),
+    evidence: text(500) }))],
+  request: { partyType: 'client', partyId: 'cl_1', granted: true, channel: 'Form', evidence: 'Signed application form' }, response: { success: true, data: { id: 41, ...consent } },
   handler: async (req, res) => {
-    const t = await svc.getTemplate(req.params.id);
-    res.json({ success: true, data: await svc.renderMessage(t, { first_name: 'Maria', name: 'Maria Santos' }, '#opt-out-link') });
+    const out = await svc.recordMarketingConsent(req.body, req.user.id);
+    await audit(req, { entity: 'privacy_consent', entityId: out.id, action: 'create', after: out });
+    res.status(201).json({ success: true, message: out.status === 'granted' ? `Marketing consent of ${out.name} recorded` : `Refusal of ${out.name} recorded`, data: out });
   },
+});
+const previewExample = { success: true, data: { subject: 'Your car insurance renews soon, Maria', html: '<div data-bv-layout="1">...<p>Dear Maria,</p>...</div>', hasOptOutLink: true } };
+define({
+  method: 'POST', path: '/templates/preview', summary: 'A template being written (subject and body, not saved) filled in for a sample recipient, in the e-mail layout of the theme',
+  screen: `${SCREEN} > Templates > Edit > Preview`, middleware: [...canRead, validate(templateBody.pick({ subject: true, bodyHtml: true }))],
+  request: { subject: template.subject, bodyHtml: template.bodyHtml }, response: previewExample,
+  handler: async (req, res) => res.json({ success: true, data: await svc.previewMessage({ subject: req.body.subject, body_html: req.body.bodyHtml }) }),
+});
+define({
+  method: 'POST', path: '/templates/:id/preview', summary: 'The template filled in for a sample recipient (subject and HTML in the e-mail layout of the theme)', screen: `${SCREEN} > Templates > Preview`,
+  middleware: canRead, response: previewExample,
+  handler: async (req, res) => res.json({ success: true, data: await svc.previewMessage(await svc.getTemplate(req.params.id)) }),
 });
 define({
   method: 'GET', path: '/', summary: 'Campaigns (filter status draft / scheduled / sent / cancelled)', screen: SCREEN, middleware: canRead, query: { status: 'sent' }, response: { success: true, data: [campaign] },
