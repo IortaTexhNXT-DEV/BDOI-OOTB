@@ -3,8 +3,9 @@ import authService from "./authService";
 import { apiErrorMessage } from "../utility/apiError";
 
 /**
- * Access control API (/access-control): user access matrix, role permissions, authority matrix and its limits,
- * delegations, segregation-of-duties rules, access reviews and ending a user's sessions.
+ * Access control API (/access-control): user access matrix, role permissions and the changes of a role's access
+ * waiting for approval, authority matrix and its limits, delegations, segregation-of-duties rules, access reviews and
+ * ending a user's sessions.
  */
 const queryString = (params = {}) => {
   const entries = Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== "");
@@ -43,7 +44,14 @@ const download = async (path, fallbackName) => {
 const accessControlService = {
   userMatrix: (params) => request("GET", `/user-matrix${queryString(params)}`).then((r) => r.data),
   downloadUserMatrix: () => download("/user-matrix?format=xlsx", "user-access-matrix.xlsx"),
-  roleMatrix: () => request("GET", "/role-matrix").then((r) => r.data),
+
+  roleAccess: () => request("GET", "/role-access").then((r) => r.data),
+  checkRoleAccess: (role, { grant, revoke }) => request("POST", "/role-access/check", { role, grant, revoke }).then((r) => r.data),
+  proposeRoleAccess: (role, body) => request("POST", `/role-access/${encodeURIComponent(role)}/changes`, body),
+  downloadRoleAccess: (params) => download(`/role-access/export${queryString(params)}`, "role-permissions.xlsx"),
+  accessChanges: (params) => request("GET", `/changes${queryString(params)}`).then((r) => r.data),
+  decideAccessChange: (id, decision, remarks) => request("POST", `/changes/${id}/decision`, { decision, remarks }),
+  withdrawAccessChange: (id) => request("POST", `/changes/${id}/withdraw`),
 
   transactionTypes: () => request("GET", "/transaction-types").then((r) => r.data),
   authorityMatrix: () => request("GET", "/authority-matrix").then((r) => r.data),

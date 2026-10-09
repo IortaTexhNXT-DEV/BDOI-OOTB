@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
@@ -23,7 +24,9 @@ const UserAccessMatrix = () => {
   const toast = useRef(null);
   const [data, setData] = useState({ roles: [], rows: [], dormantDays: 90 });
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({ status: null, role: null, search: "", flag: null });
+  // Role Permissions links here with ?role=<code>: the users of that role
+  const [params] = useSearchParams();
+  const [filters, setFilters] = useState({ status: null, role: params.get("role") || null, search: "", flag: null });
 
   const load = useCallback(async () => {
     setLoading(true);
