@@ -20,17 +20,12 @@ export const viewDateFormat = (view) => {
   return date.replace(/d+[^a-zA-Z]*/i, "").replace(/[^a-zA-Z]+$/, "");
 };
 
-export const Calendar = forwardRef(({ dateFormat, view, timeOnly, inline, showIcon, ...props }, ref) => (
-  <PrimeCalendar
-    ref={ref}
-    {...props}
-    view={view}
-    timeOnly={timeOnly}
-    inline={inline}
-    dateFormat={timeOnly ? dateFormat : viewDateFormat(view)}
-    showIcon={showIcon ?? !(inline || timeOnly)}
-  />
-));
+export const Calendar = forwardRef((props, ref) => {
+  const { view, timeOnly, inline, showIcon } = props;
+  // only the props set here are added: an explicit undefined would replace the component's own defaults (view "date")
+  const format = timeOnly ? {} : { dateFormat: viewDateFormat(view) };
+  return <PrimeCalendar ref={ref} {...props} {...format} showIcon={showIcon ?? !(inline || timeOnly)} />;
+});
 
 Calendar.displayName = "Calendar";
 

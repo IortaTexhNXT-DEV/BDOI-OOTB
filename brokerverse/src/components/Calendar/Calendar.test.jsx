@@ -23,6 +23,12 @@ describe("date fields", () => {
     expect(screen.queryByRole("button", { hidden: true })).toBeNull();
   });
 
+  it("leave an inline calendar showing the days of the month", () => {
+    render(<Calendar inline value={new Date(2026, 9, 9)} onChange={() => {}} />);
+    expect(screen.getByText("31")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { hidden: true, name: /choose date/i })).toBeNull();
+  });
+
   it("replace the browser date input: ISO text in and out, an input-like change event", () => {
     const onChange = jest.fn();
     render(<DateField id="from" name="effectiveFrom" value="2026-10-09" onChange={onChange} />);
