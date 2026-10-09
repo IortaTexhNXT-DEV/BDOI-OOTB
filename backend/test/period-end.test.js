@@ -278,7 +278,7 @@ describe('year-end close', () => {
       expect(r.status, `${p} ${r.body.message}`).toBe(200);
     }
     const ok = await maker('post', `/period-end/year-end/${ye.id}/check`).send({});
-    expect(ok.body.data.checks.filter((c) => c.status !== 'passed')).toEqual([]);
+    expect(ok.body.data.checks.filter((c) => c.status === 'failed')).toEqual([]);
     expect(ok.body.data.status).toBe('checked');
   });
 
@@ -331,9 +331,12 @@ describe('year-end close', () => {
     expect(reopen.status).toBe(409);
     expect(reopen.body.message).toMatch(/locked/);
     await expect(query('UPDATE accounting_periods SET status = \'open\' WHERE period = \'2025-06\'')).rejects.toThrow(/locked/);
-    expect((await maker('post', `/period-end/year-end/${ye.id}/reverse`).send({ reason: 'x' })).status).toBe(403);
-    expect((await admin('post', `/period-end/year-end/${ye.id}/reverse`).send({})).status).toBe(400);
-    const rev = await admin('post', `/period-end/year-end/${ye.id}/reverse`).send({ reason: 'late audit adjustment' });
+    expect((await maker('post', `/period-end/year-end/${ye.id}/reverse`).send({})).status).toBe(403);
+    expect((await maker('post', `/period-end/year-end/${ye.id}/reverse-request`).send({})).status).toBe(400);
+    expect((await admin('post', `/period-end/year-end/${ye.id}/reverse`).send({})).status).toBe(409);
+    const asked = await maker('post', `/period-end/year-end/${ye.id}/reverse-request`).send({ reasonCode: 'YER-AUDITADJ', note: 'late audit adjustment' });
+    expect(asked.status, JSON.stringify(asked.body)).toBe(200);
+    const rev = await admin('post', `/period-end/year-end/${ye.id}/reverse`).send({});
     expect(rev.status, JSON.stringify(rev.body)).toBe(200);
     expect(rev.body.data.status).toBe('reversed');
     expect(rev.body.data.fiscalYearInfo.status).toBe('closing');
@@ -357,7 +360,7 @@ describe('year-end close', () => {
 
     const jan = await admin('post', '/period-end/periods/2026-01/status').send({ status: 'closed', remarks: 'January' });
     expect(jan.status, jan.body.message).toBe(200);
-    const late = await admin('post', `/period-end/year-end/${again.id}/reverse`).send({ reason: 'too late' });
+    const late = await maker('post', `/period-end/year-end/${again.id}/reverse-request`).send({ reasonCode: 'YER-AUDITADJ' });
     expect(late.status).toBe(409);
     expect(late.body.message).toMatch(/2026-01/);
   });

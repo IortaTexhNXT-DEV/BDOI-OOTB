@@ -35,7 +35,7 @@ export const TRANSACTION_TABLES = [
   // the ledger and period-end processing: journals, periods and fiscal years (regenerated open on demand), closes
   'journal_vouchers', 'journal_lines', 'accounting_periods', 'fiscal_years',
   'period_status_history', 'period_close_runs', 'period_close_run_checks', 'period_close_entries',
-  'recurring_journals', 'recurring_journal_runs', 'year_end_runs', 'bir_2307_certificates',
+  'recurring_journals', 'recurring_journal_runs', 'year_end_runs', 'year_end_run_history', 'bir_2307_certificates',
   // bank reconciliation (statement formats, transaction types and match rules are configuration)
   'bank_statements', 'bank_statement_lines', 'bank_rec_matches', 'bank_rec_match_items', 'bank_reconciliations', 'bank_reconciliation_history',
   // comsub adjustments on return premium, claim settlement cash, refunds due from insurers, direct-bill client payments

@@ -480,6 +480,7 @@ export const ALLOW_LIST = {
   'accounting_periods.remarks': 'period-end note of the accounting team (swept)', 'fiscal_years.remarks': 'year-end note of the accounting team (swept)',
   'period_close_runs.remarks': 'period-end note (swept)', 'period_close_run_checks.remarks': 'period-end check note (swept)',
   'period_status_history.remarks': 'period-end note (swept)', 'year_end_runs.remarks': 'year-end note (swept)',
+  'year_end_run_history.remarks': 'year-end reason or approval remark (swept)',
   'accounting_periods.*': 'accounting calendar', 'incentive_calculations.description': 'description of the calculation run (swept)',
   'bank_statement_lines.line_hash': 'hash of the statement line (duplicate detection)', 'bank_statements.file_hash': 'hash of the file',
   'insurer_statements.file_hash': 'hash of the file', 'renewal_activities.outcome': 'outcome code', 'quote_customer_responses.outcome': 'outcome code',

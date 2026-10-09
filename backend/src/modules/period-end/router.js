@@ -279,16 +279,29 @@ define({
 
 // ---------- year-end close ----------
 const yeExample = { id: 'yec_1', runNumber: 'YEC-2026-00001', fiscalYear: 'FY2025', status: 'closed', netIncome: 1250000, nextFiscalYear: 'FY2026' };
+const yeLink = (fiscalYear) => `/accounts/period-end/year-end?fiscalYear=${fiscalYear}`;
 define({
   method: 'GET', path: '/year-end', summary: 'Fiscal years with their year-end close runs', screen: `${S} > Year-End Close`, middleware: read,
   response: { success: true, data: [{ code: 'FY2025', status: 'closed', runs: [yeExample] }] }, handler: async (_req, res) => ok(res, await tx((db) => ye.listYearEnd(db))),
 });
 define({
-  method: 'POST', path: '/year-end', summary: 'Start the year-end close of a fiscal year (the year becomes "closing")', screen: `${S} > Year-End Close`,
+  method: 'GET', path: '/year-end/overview', summary: 'The Year-End Close screen of a fiscal year (default: the year being closed, else the oldest open year): run, the five steps with their checks, adjustment journals, closing entries and opening balances (previewed until the close), history of the runs and the actions the user may take with the reason when not',
+  screen: `${S} > Year-End Close`, middleware: read, query: { fiscalYear: 'FY2026' },
+  response: { success: true, data: { fiscalYear: { code: 'FY2026', status: 'closing', adjustmentPeriod: '2026-13' }, run: { ...yeExample, status: 'checked', preparedByName: 'Ana Santos' },
+    steps: [{ key: 'prerequisites', status: 'passed' }, { key: 'adjustments', status: 'passed' }, { key: 'closing', status: 'pending' }, { key: 'approval', status: 'pending-approval' }, { key: 'opening', status: 'pending' }],
+    currentStep: 'approval', checks: [{ code: 'periods_closed', step: 'prerequisites', status: 'passed', data: { total: 12, closed: 12 } }],
+    closing: { source: 'preview', netIncome: 1250000, lines: [{ accountCode: '3201001', accountType: 'income', balance: -1800000, debit: 1800000, credit: 0 }] },
+    opening: { source: 'preview', fiscalYear: 'FY2027', totalDebit: 2102400, totalCredit: 2102400, lines: [] },
+    actions: { close: { allowed: false, reason: 'maker-checker' } } } },
+  handler: async (req, res) => ok(res, await tx((db) => ye.yearEndOverview(db, req.query.fiscalYear ? String(req.query.fiscalYear) : null, req.user))),
+});
+define({
+  method: 'POST', path: '/year-end', summary: 'Start the year-end close of a fiscal year (the year becomes "closing"); the pre-checks run at once (status checked when they all pass)', screen: `${S} > Year-End Close`,
   middleware: [...write, validate(z.object({ fiscalYear: z.string().regex(/^FY\d{4}$/) }))], request: { fiscalYear: 'FY2025' }, response: { success: true, data: yeExample },
   handler: async (req, res) => {
     const r = await tx((db) => ye.createYearEnd(db, req.body.fiscalYear, req.user));
-    await audit(req, { entity: 'year_end_run', entityId: r.id, action: 'create', after: { runNumber: r.run_number, fiscalYear: r.fiscal_year } });
+    await audit(req, { entity: 'year_end_run', entityId: r.id, action: 'create', after: { runNumber: r.run_number, fiscalYear: r.fiscal_year, status: r.status } });
+    if (r.status === 'checked') await notifyYearEnd('ready', { id: r.id, runNumber: r.run_number, fiscalYear: r.fiscal_year }, req);
     created(res, await ye.getYearEnd(pool, r.id));
   },
 });
@@ -296,20 +309,46 @@ define({
   method: 'GET', path: '/year-end/:id', summary: 'A year-end close run with its checks, closing journals and opening balances', screen: `${S} > Year-End Close`, middleware: read,
   response: { success: true, data: yeExample }, handler: async (req, res) => ok(res, await ye.getYearEnd(pool, req.params.id)),
 });
-const yeAction = (path, summary, schema, fn, action, mw = write) => define({
-  method: 'POST', path, summary, screen: `${S} > Year-End Close`, middleware: [...mw, validate(schema)], request: {}, response: { success: true, data: yeExample },
+// Approval notifications: a run ready to close and a reversal request go to approve:period-end, the decisions to the maker.
+async function notifyYearEnd(event, r, req, before = {}) {
+  const base = { document: 'Year-end close', number: r.runNumber, link: yeLink(r.fiscalYear), entity: 'year_end_run', entityId: r.id };
+  if (event === 'ready') {
+    await notifyApprovers({ ...base, audience: APPROVE, by: req.user.username, message: `${r.runNumber}: fiscal year ${r.fiscalYear} is ready to close (started by ${req.user.username})` });
+  } else if (event === 'reverse-request') {
+    await notifyApprovers({ ...base, audience: APPROVE, by: req.user.username, title: `Reversal of year-end close ${r.runNumber} awaiting approval`,
+      message: `${req.user.username} requested the reversal of the close of ${r.fiscalYear}: ${r.reverseReason}` });
+  } else if (event === 'close') {
+    await notifyDecision({ ...base, userId: r.preparedBy, decidedBy: req.user.id, approved: true, status: 'closed', by: req.user.username,
+      message: `Fiscal year ${r.fiscalYear} closed by ${req.user.username}` });
+  } else if (event === 'reverse') {
+    await notifyDecision({ ...base, userId: before.reverseRequestedBy, decidedBy: req.user.id, approved: true, status: 'reversed', by: req.user.username,
+      message: `The close of ${r.fiscalYear} was reversed; approved by ${req.user.username}` });
+  }
+}
+const yeAction = (path, summary, schema, fn, action, mw = write, request = {}) => define({
+  method: 'POST', path, summary, screen: `${S} > Year-End Close`, middleware: [...mw, validate(schema)], request, response: { success: true, data: yeExample },
   handler: async (req, res) => {
+    const before = (await pool.query('SELECT status, reverse_requested_by FROM year_end_runs WHERE id = $1 OR run_number = $1', [req.params.id])).rows[0] || {};
     const r = await tx((db) => fn(db, req));
-    await audit(req, { entity: 'year_end_run', entityId: r.id, action, after: { runNumber: r.runNumber, status: r.status, fiscalYear: r.fiscalYear, netIncome: r.netIncome, ...req.body } });
+    await audit(req, { entity: 'year_end_run', entityId: r.id, action, before: { status: before.status },
+      after: { runNumber: r.runNumber, status: r.status, fiscalYear: r.fiscalYear, netIncome: r.netIncome, reverseReasonCode: r.reverseReasonCode, ...req.body } });
+    if (action === 'check' && before.status === 'draft' && r.status === 'checked') await notifyYearEnd('ready', r, req);
+    if (['close', 'reverse-request', 'reverse'].includes(action)) await notifyYearEnd(action, r, req, { reverseRequestedBy: before.reverse_requested_by });
     ok(res, r);
   },
 });
-yeAction('/year-end/:id/check', 'Run the year-end pre-checks', z.object({}).passthrough(), (db, req) => ye.checkYearEnd(db, req.params.id), 'check');
-yeAction('/year-end/:id/close', 'Close the fiscal year: closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year (approve:period-end)',
-  z.object({}).passthrough(), (db, req) => ye.closeYearEnd(db, req.params.id, req.user), 'close', approve);
-yeAction('/year-end/:id/reverse', 'Reverse a year-end close until the first period of the next year is closed (approve:period-end; reason required)', z.object({ reason: z.string().min(1).max(1000) }),
-  (db, req) => ye.reverseYearEnd(db, req.params.id, req.user, req.body), 'reverse', approve);
-yeAction('/year-end/:id/cancel', 'Cancel a year-end close run that has not closed the year', z.object({}).passthrough(), (db, req) => ye.cancelYearEnd(db, req.params.id), 'cancel');
+const remarks = z.object({ remarks: z.string().trim().max(1000).optional() });
+yeAction('/year-end/:id/check', 'Run the year-end pre-checks again and keep the result on the run', z.object({}).passthrough(), (db, req) => ye.checkYearEnd(db, req.params.id, req.user), 'check');
+yeAction('/year-end/:id/close', 'Close the fiscal year (approve:period-end; maker-checker: not the user who started the run): closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year',
+  remarks, (db, req) => ye.closeYearEnd(db, req.params.id, req.user, req.body), 'close', approve, { remarks: 'Audit adjustments reviewed' });
+yeAction('/year-end/:id/reverse-request', 'Request the reversal of a closed year with a reason (Reason Codes master, context year_end_reverse); possible until the first period of the next year is closed',
+  z.object({ reasonCode: z.string().trim().min(1).max(60), note: z.string().trim().max(1000).optional() }), (db, req) => ye.requestReversal(db, req.params.id, req.user, req.body), 'reverse-request', write,
+  { reasonCode: 'YER-AUDITADJ', note: 'Adjustments of the external auditor' });
+yeAction('/year-end/:id/reverse-request/withdraw', 'Withdraw a reversal request (the requester, or a user with approve:period-end)', z.object({}).passthrough(),
+  (db, req) => ye.withdrawReversal(db, req.params.id, req.user), 'reverse-withdraw', [requireAuth, requirePermission('write:period-end', APPROVE)]);
+yeAction('/year-end/:id/reverse', 'Approve the requested reversal and reverse the close (approve:period-end; maker-checker: not the requester): closing entries reversed, opening balances removed, periods unlocked',
+  remarks, (db, req) => ye.reverseYearEnd(db, req.params.id, req.user, req.body), 'reverse', approve, { remarks: 'Reversal agreed with the external auditor' });
+yeAction('/year-end/:id/cancel', 'Cancel a year-end close run that has not closed the year', z.object({}).passthrough(), (db, req) => ye.cancelYearEnd(db, req.params.id, req.user), 'cancel');
 define({
   method: 'POST', path: '/adjustments', summary: 'Year-end adjustment journal in adjustment period 13 (pending; approved and posted by a second user through POST /accounting/transactions/:id/post)',
   screen: `${S} > Year-End Close`, middleware: [...write, validate(z.object({ fiscalYear: z.string(), description: z.string().min(2).max(500), lines: z.array(lineSchema).min(2) }))],
