@@ -204,7 +204,7 @@ const ElectronicTransfer = () => {
 
       <Card title={t("remittance.pendingTransfers")} className="mt-4">
         <div className="toolbar mb-3">
-          <Button label={t("remittance.newTransfer")} icon="pi pi-plus" onClick={() => setShowTransferDialog(true)} />
+          <Button label={t("remittance.newTransfer")} icon="pi pi-plus" onClick={() => { setForm(emptyTransfer); setShowTransferDialog(true); }} />
           <Button label={t("remittance.batchProcess")} icon="pi pi-forward" className="p-button-success ml-2" onClick={handleBatchProcess} />
           <Button label={t("remittance.export")} icon="pi pi-download" className="p-button-secondary ml-2" onClick={handleExport} />
         </div>

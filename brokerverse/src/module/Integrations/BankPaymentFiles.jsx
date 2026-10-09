@@ -218,7 +218,7 @@ const BankPaymentFiles = () => {
           <Column header={t("integrations.created")} body={(b) => <div><div>{dateTime(b.createdAt)}</div><div className="pe-muted">{b.createdBy}</div></div>} />
         </DataTable>
       </div>
-      <NewBatch visible={creating} toast={toast} onHide={() => setCreating(false)} onCreated={(b) => { setCreating(false); list.reload(); setOpenId(b.id); }} />
+      {creating ? <NewBatch visible toast={toast} onHide={() => setCreating(false)} onCreated={(b) => { setCreating(false); list.reload(); setOpenId(b.id); }} /> : null}
       <BatchDialog batchId={openId} toast={toast} onHide={() => setOpenId(null)} onChanged={list.reload} />
     </div>
   );
