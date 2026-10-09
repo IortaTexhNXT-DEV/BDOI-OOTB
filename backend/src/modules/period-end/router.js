@@ -23,6 +23,10 @@ import { generateDue, rjRow, saveRecurring } from './journals.js';
 import { importOpeningBalances, listOpeningBalances, OPENING_BALANCE_COLUMNS } from './opening.js';
 import { mapColumns, parseUploadedRows, uploadFile } from '../documents/tabular.js';
 import { sendTemplate } from '../documents/uploadTemplates.js';
+import { buildPdf, printContext, sendPdf } from '../../lib/pdf/index.js';
+import { writeXlsx } from '../../lib/xlsx.js';
+import { companyName } from '../../lib/letterhead.js';
+import * as st from './statements.js';
 
 const { router, define } = moduleRouter('Period End', '/period-end');
 const read = [requireAuth, requirePermission('read:period-end', 'read:journal-vouchers')];
@@ -327,17 +331,73 @@ define({
 });
 
 // ---------- financial statements (catalogue reports shaped for the statement screens) ----------
-const STATEMENTS = { 'income-statement': 'income-statement', 'balance-sheet': 'balance-sheet', 'trial-balance': 'trial-balance-ocm', 'gl-detail': 'gl-detail' };
+const readStatements = [requireAuth, requirePermission('read:period-end', 'read:journal-vouchers', 'read:reports')];
+const FS = 'Accounts > Period End > Financial Statements';
+const XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date must be YYYY-MM-DD');
+const statementFields = { FromDate: day.optional(), ToDate: day.optional(), Account: z.string().trim().max(20).optional(), ReportCriteria: z.string().max(40).optional() };
+const fromBeforeTo = (q) => !q.FromDate || !q.ToDate || q.FromDate <= q.ToDate;
+const rangeError = { message: 'From date must be on or before To date', path: ['ToDate'] };
+const statementQuery = z.object(statementFields).refine(fromBeforeTo, rangeError);
+const exportQuery = z.object({ ...statementFields, format: z.enum(['xlsx', 'pdf']).default('xlsx') }).refine(fromBeforeTo, rangeError);
+const statementType = (type) => {
+  if (!st.STATEMENT_TYPES[type]) throw notFound('Unknown statement');
+  return st.STATEMENT_TYPES[type];
+};
+
+/** Run the catalogue report of a statement and lay it out (statements.js). */
+async function loadStatement(type, q, user) {
+  const def = statementType(type);
+  const { runReport } = await import('../reports/service.js');
+  const r = await runReport(def.report, { ...q, ReportCriteria: def.criteria }, { user, page: 1, perPage: 5000 });
+  const ranges = await st.statementRanges(pool, r.params.from, r.params.to);
+  return { report: r, statement: st.buildStatement(type, r, ranges) };
+}
+
 define({
-  method: 'GET', path: '/statements/:type', summary: 'Financial statement (income-statement, balance-sheet, trial-balance, gl-detail) for FromDate / ToDate, from the report catalogue',
-  screen: 'Accounts > Period End > Financial Statements', middleware: [requireAuth, requirePermission('read:period-end', 'read:journal-vouchers', 'read:reports')], query: { FromDate: '2026-01-01', ToDate: '2026-09-30' },
-  response: { success: true, data: { rows: [{ accountType: 'income', fsGroup: 'Revenue', accountCode: '3201001', currentPeriod: 183803.75 }], summary: { netIncome: 120000 } } },
+  method: 'GET', path: '/statements/periods', summary: 'Fiscal years with their twelve periods for the period choice of the financial statements, and the default period (the one containing today)',
+  screen: FS, middleware: readStatements,
+  response: { success: true, data: { today: '2026-10-09', current: { fiscalYear: 'FY2027', period: '2026-10' }, fiscalYears: [{ code: 'FY2027', startDate: '2026-04-01', endDate: '2027-03-31', status: 'open', periods: [{ period: '2026-10', periodNo: 7, startDate: '2026-10-01', endDate: '2026-10-31', status: 'open' }] }] } },
+  handler: async (_req, res) => ok(res, await tx((db) => st.statementCalendar(db))),
+});
+define({
+  method: 'GET', path: '/statements/:type', summary: 'Financial statement (income-statement, balance-sheet, trial-balance; gl-detail: postings of an Account with the opening and running balance) for FromDate / ToDate, from the report catalogue; statement: the layout (sections, groups, lines, totals, the date range of each column, the card figures)',
+  screen: FS, middleware: [...readStatements, validate(statementQuery, 'query')], query: { FromDate: '2026-10-01', ToDate: '2026-10-31' },
+  response: { success: true, data: { rows: [{ accountType: 'income', fsGroup: 'Revenue', accountCode: '3201001', currentPeriod: 183803.75 }], summary: { netIncome: 120000 },
+    statement: { type: 'income-statement', title: 'Income Statement', from: '2026-10-01', to: '2026-10-31', measures: [{ key: 'currentPeriod', label: 'This period', from: '2026-10-01', to: '2026-10-31' }],
+      sections: [{ key: 'income', label: 'Income', groups: [{ label: 'Revenue', lines: [{ accountCode: '3201001', accountName: 'Brokerage Commission Income', values: { currentPeriod: 183803.75 }, drill: true }], total: { currentPeriod: 183803.75 } }] }],
+      result: { key: 'netIncome', label: 'Net income (loss)', values: { currentPeriod: 120000 } }, cards: { totalIncome: 183803.75, totalExpense: 63803.75, netIncome: 120000 } } } },
   handler: async (req, res) => {
-    const code = STATEMENTS[req.params.type];
-    if (!code) throw notFound('Unknown statement');
-    const { runReport } = await import('../reports/service.js');
-    const r = await runReport(code, req.query, { user: req.user, page: 1, perPage: 5000 });
-    ok(res, { report: r.report, columns: r.columns, rows: r.rows, totals: r.totals, summary: r.summary, params: r.params, total: r.total });
+    if (req.params.type === 'gl-detail') {
+      const { runReport } = await import('../reports/service.js');
+      const r = await runReport('gl-detail', { ...req.query, ReportCriteria: 'Account' }, { user: req.user, page: 1, perPage: 5000 });
+      return ok(res, { report: r.report, columns: r.columns, rows: r.rows, totals: r.totals, summary: r.summary, params: r.params, total: r.total });
+    }
+    const { report: r, statement } = await loadStatement(req.params.type, req.query, req.user);
+    return ok(res, { report: r.report, columns: r.columns, rows: r.rows, totals: r.totals, summary: r.summary, params: r.params, total: r.total, statement });
+  },
+});
+define({
+  method: 'GET', path: '/statements/:type/export', summary: 'Financial statement file: format=xlsx (default) or pdf, with the company, the statement title, the period, printed by / at and the currency',
+  screen: `${FS} > Export, Print`, middleware: [...readStatements, validate(exportQuery, 'query')],
+  query: { FromDate: '2026-10-01', ToDate: '2026-10-31', format: 'pdf' }, response: '(application/pdf | application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)',
+  handler: async (req, res) => {
+    const { format, ...q } = req.query;
+    const { statement } = await loadStatement(req.params.type, q, req.user);
+    const print = await printContext({ user: req.user });
+    const currency = (await getSetting('currency.default', 'PHP')) || 'PHP';
+    const name = `${req.params.type}_${statement.from || statement.to}_${statement.to}`;
+    await audit(req, { entity: 'financial_statement', entityId: req.params.type, action: 'export', after: { format, from: statement.from, to: statement.to } });
+    if (format === 'pdf') {
+      sendPdf(res, buildPdf({ ...print, ...st.statementPdfSpec(statement, { ...print, currency }) }), `${name}.pdf`, 'attachment');
+      return;
+    }
+    const { excelBrand } = await import('../reports/service.js');
+    const sheet = st.statementSheet(statement, { companyName: print.letterhead?.name || (await companyName()), generatedBy: print.generatedBy, generatedAt: print.generatedAt,
+      currency, format: print.format, logo: !!print.brand?.excel?.logo });
+    res.setHeader('Content-Type', XLSX);
+    res.setHeader('Content-Disposition', `attachment; filename="${name}.xlsx"`);
+    res.send(writeXlsx({ sheets: [sheet], title: statement.title, brand: excelBrand(print) }));
   },
 });
 
