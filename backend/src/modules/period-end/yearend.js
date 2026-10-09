@@ -28,6 +28,7 @@ import { hasPermission } from '../../lib/auth.js';
 import { round2 } from '../../lib/money.js';
 import { addDays } from '../../lib/dates.js';
 import { getSetting } from '../../lib/settings.js';
+import { assertChecker } from '../../lib/makerChecker.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { account, createJournal } from '../accounting/lib/ledger.js';
 import { requiredReason } from '../ops-masters/records.js';
@@ -79,6 +80,7 @@ async function record(db, r, action, { from = r.status, to = null, reasonCode = 
   [r.id, r.fiscal_year, action, from, to, reasonCode, remarks, user?.id ?? null]);
 }
 
+/** Whether maker-checker applies (finance.maker_checker_enabled, the switch of assertChecker), to tell the user before acting. */
 const makerChecker = () => getSetting('finance.maker_checker_enabled', true);
 
 export async function listYearEnd(db) {
@@ -392,9 +394,7 @@ export async function yearEndOverview(db, fiscalYear, user) {
 export async function closeYearEnd(db, id, user, { remarks = null } = {}) {
   const r = await lockRun(db, id);
   if (!ACTIVE.includes(r.status)) throw conflict(`Run ${r.run_number} is ${r.status}`);
-  if ((await makerChecker()) && r.prepared_by && r.prepared_by === user?.id) {
-    throw forbidden('Maker-checker: the year must be closed by a different user than the one who started the year-end close');
-  }
+  await assertChecker(user, r.prepared_by, 'year-end close');
   const fy = await getFiscalYear(db, r.fiscal_year);
   const checks = await yearEndChecks(db, fy);
   await db.query('UPDATE year_end_runs SET checks = $2, updated_at = now() WHERE id = $1', [r.id, JSON.stringify(checks)]);
@@ -473,9 +473,7 @@ export async function reverseYearEnd(db, id, user, { remarks = null } = {}) {
   const r = await lockRun(db, id);
   if (r.status !== 'closed') throw conflict(`Run ${r.run_number} is ${r.status}; only a closed year can be reversed`);
   if (!r.reverse_requested_at) throw conflict(`Request the reversal of ${r.run_number} with a reason first; another user approves it`);
-  if ((await makerChecker()) && r.reverse_requested_by === user.id) {
-    throw forbidden('Maker-checker: the reversal must be approved by a different user than the one who requested it');
-  }
+  await assertChecker(user, r.reverse_requested_by, 'reversal of the year-end close');
   const block = await reversalBlock(db, r);
   if (block) throw conflict(block.message);
   const reason = r.reverse_reason;
