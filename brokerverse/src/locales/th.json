@@ -91,7 +91,14 @@
     "verify": "ยืนยัน",
     "forgotPasswordTitle": "ลืมรหัสผ่าน",
     "sendResetLink": "ส่งลิงก์รีเซ็ต",
-    "cover": "Cover"
+    "cover": "Cover",
+    "subtitleMicrosoft": "ลงชื่อเข้าใช้ด้วยบัญชี Microsoft 365 ของคุณ",
+    "signInWithMicrosoft": "ลงชื่อเข้าใช้ด้วย Microsoft",
+    "microsoftSigningIn": "กำลังลงชื่อเข้าใช้ด้วย Microsoft...",
+    "microsoftCancelled": "การลงชื่อเข้าใช้ด้วย Microsoft ถูกยกเลิกหรือถูกปฏิเสธ โปรดลองอีกครั้ง หรือติดต่อผู้ดูแลระบบ",
+    "microsoftFailed": "ลงชื่อเข้าใช้ด้วย Microsoft ไม่สำเร็จ โปรดลองอีกครั้ง",
+    "or": "หรือ",
+    "useLocalAccount": "ลงชื่อเข้าใช้ด้วยรหัสผู้ใช้และรหัสผ่าน"
   },
   "sidebar": {
     "Dashboard": "แดชบอร์ด",

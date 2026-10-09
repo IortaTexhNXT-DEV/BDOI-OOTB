@@ -2,6 +2,8 @@ import { BASE_URL } from "../utility/constant";
 import { refreshAccessToken } from "../utility/sessionRefresh";
 import logger from "../utility/logger";
 
+const SSO_TRANSACTION_KEY = "bvSsoTransaction";
+
 /**
  * Authentication Service
  * Handles login API calls and localStorage token management
@@ -114,6 +116,34 @@ class AuthService {
   async verifyTwoFactor(challengeToken, code) {
     const data = await this.authCall("/auth/login/2fa", {
       body: { challengeToken, code: String(code).trim(), deviceId: this.storeDeviceId() },
+    });
+    return this.signInStep(data);
+  }
+
+  /** Sign-in methods of this environment: { passwordSignIn, sso: { enabled, provider } }. */
+  async signInOptions() {
+    const data = await this.authCall("/auth/options", { method: "GET" });
+    return data.data || {};
+  }
+
+  /**
+   * "Sign in with Microsoft": go to the Microsoft sign-in page. The transaction token of this sign-in waits in
+   * sessionStorage (this tab only) until Microsoft sends the browser back to /login with the code.
+   */
+  async startMicrosoftSignIn() {
+    const data = await this.authCall("/auth/sso/start", { body: { deviceId: this.storeDeviceId() } });
+    sessionStorage.setItem(SSO_TRANSACTION_KEY, data.data.transaction);
+    window.location.assign(data.data.authorizationUrl);
+  }
+
+  /** Back from Microsoft with ?code=&state=: the API verifies the sign-in and answers like the password sign-in. */
+  async completeMicrosoftSignIn(code, state) {
+    const transaction = sessionStorage.getItem(SSO_TRANSACTION_KEY);
+    sessionStorage.removeItem(SSO_TRANSACTION_KEY);
+    if (!transaction) throw new Error("The Microsoft sign-in was interrupted; sign in again");
+    const data = await this.authCall("/auth/sso/callback", {
+      body: { code, state, transaction, deviceId: this.storeDeviceId() },
+      timeout: 20000,
     });
     return this.signInStep(data);
   }

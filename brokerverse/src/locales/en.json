@@ -98,7 +98,14 @@
     "verify": "Verify",
     "forgotPasswordTitle": "Forgot password",
     "sendResetLink": "Send reset link",
-    "cover": "Cover"
+    "cover": "Cover",
+    "subtitleMicrosoft": "Sign in with your Microsoft 365 account.",
+    "signInWithMicrosoft": "Sign in with Microsoft",
+    "microsoftSigningIn": "Signing in with Microsoft...",
+    "microsoftCancelled": "The Microsoft sign-in was cancelled or refused. Try again, or contact the administrator.",
+    "microsoftFailed": "Sign-in with Microsoft failed. Please try again.",
+    "or": "or",
+    "useLocalAccount": "Sign in with a user ID and password"
   },
   "sidebar": {
     "Dashboard": "Dashboard",

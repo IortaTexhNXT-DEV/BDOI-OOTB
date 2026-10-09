@@ -264,4 +264,62 @@
   .bv-security__steps {
     font-size: 14px;
   }
+
+  // "Sign in with Microsoft" (Entra ID): below the form, or alone when the password sign-in is off
+  .bv-auth__sso-block {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    margin-top: 18px;
+  }
+
+  .bv-auth__divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: $color-text-muted;
+
+    &::before,
+    &::after {
+      content: "";
+      flex: 1;
+      border-top: 1px solid $brand-field-blue;
+    }
+  }
+
+  .p-button.bv-auth__sso {
+    width: 100%;
+    height: $control-height;
+    justify-content: center;
+    gap: 10px;
+    background: #fff;
+    border: 1px solid $brand-field-blue;
+    border-radius: $radius-sm;
+    color: $color-text;
+    font-family: $font-heading;
+    font-size: 15px;
+    font-weight: 700;
+
+    &:enabled:hover {
+      background: #f5f7fa;
+      border-color: $brand-blue;
+      color: $color-text;
+    }
+
+    .p-button-label {
+      flex: 0 0 auto;
+    }
+  }
+
+  .bv-auth__sso-logo {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .bv-auth__sso-local {
+    align-self: center;
+  }
 }
