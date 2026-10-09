@@ -136,6 +136,12 @@ variable "trust_proxy" {
   default     = "4"
 }
 
+variable "brand_pack" {
+  description = "BRAND_PACK of the API: bundled brand pack enabled once at the first start (toyota-insurance-services); empty keeps the default branding."
+  type        = string
+  default     = ""
+}
+
 # ---------------------------------------------------------------------------------------------------- documents
 variable "uploads_replication" {
   description = "Redundancy of the documents share: LRS, ZRS, GRS or GZRS (geo-redundant in production)."

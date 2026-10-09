@@ -5,15 +5,19 @@
  * enables one on Master > System Settings > Theme and Branding > Brand packs after acknowledging that the environment
  * belongs to the client engagement whose contract with iorta TechNXT covers the use of the marks the pack carries. The enablement is recorded (who, when, the
  * acknowledgement, the branding before it) so the broker can go back to the iorta TechNXT default at any time.
+ * A deployment made for that client may name its pack in BRAND_PACK instead: the API enables it once at start-up
+ * (enableDeploymentPack), recorded the same way with the deployment configuration as the source of the acknowledgement.
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { one, query } from '../../db/pool.js';
+import { one, pool, query } from '../../db/pool.js';
+import { audit } from '../../lib/audit.js';
 import { badRequest, notFound } from '../../lib/errors.js';
 import { getSetting, setSetting } from '../../lib/settings.js';
 import { clearLetterheadCache, primaryCompany, ASSETS_DIR } from '../../lib/letterhead.js';
+import { saveFile } from '../masters/helpers.js';
 import { DEFAULT_THEME } from './presets.js';
-import { PACK_FORMAT, currentTheme, importBrandPack, saveTheme, validateTheme } from './service.js';
+import { PACK_FORMAT, assertBrandImage, currentTheme, importBrandPack, saveTheme, validateTheme } from './service.js';
 
 export const BUNDLED_DIR = path.join(ASSETS_DIR, 'brand-packs');
 
@@ -22,6 +26,12 @@ export const PREVIEW_COLORS = ['primary', 'headerBg', 'sidebarBg', 'tableHeaderB
 
 /** The sentence the administrator acknowledges when enabling a pack (kept with the enablement record). */
 export const ACKNOWLEDGEMENT_TEXT = 'This environment belongs to the client engagement whose contract with iorta TechNXT covers the use of these marks.';
+
+/** Added to the acknowledgement of an enablement made at start-up from the BRAND_PACK variable. */
+export const DEPLOYMENT_NOTE = 'Given by the deployment configuration (BRAND_PACK).';
+
+/** Who an enablement made at start-up is recorded against (no signed-in user). */
+const SYSTEM_USER = { id: null, username: 'system' };
 
 const str = (v) => (v === null || v === undefined ? '' : String(v).trim());
 const ID_RE = /^[a-z0-9][a-z0-9-]{1,60}$/;
@@ -136,7 +146,7 @@ async function brandingSnapshot() {
  * acknowledgement, which the request must carry as true, and the enablement record. Returns the import summary with
  * the enablement. dryRun checks only (nothing applied, nothing recorded).
  */
-export async function enableBundledPack(id, { user, acknowledgedPermission, dryRun = false, applyDocumentLogo = true, applySystemName = true, storeImage }) {
+export async function enableBundledPack(id, { user, acknowledgedPermission, acknowledgementText = ACKNOWLEDGEMENT_TEXT, dryRun = false, applyDocumentLogo = true, applySystemName = true, storeImage }) {
   const pack = loadBundledPack(id);
   if (!dryRun && pack.bundled.requiresAcknowledgement && acknowledgedPermission !== true) {
     throw badRequest('Acknowledge the engagement first', [{ path: 'acknowledgedPermission', message: `Tick "${ACKNOWLEDGEMENT_TEXT}" to enable ${pack.bundled.name}; the marks of this pack belong to ${pack.bundled.trademarkOwner || 'their owner'}` }]);
@@ -149,8 +159,50 @@ export async function enableBundledPack(id, { user, acknowledgedPermission, dryR
   await query(`UPDATE brand_pack_enablements SET status = 'replaced', reverted_by_user_id = $1, reverted_by = $2, reverted_at = now() WHERE status = 'enabled'`, [user?.id ?? null, user?.username ?? null]);
   const row = await one(`INSERT INTO brand_pack_enablements(pack_id, pack_name, pack_version, trademark_owner, acknowledged_permission, acknowledgement_text, applied, previous, enabled_by_user_id, enabled_by)
     VALUES ($1, $2, $3, $4, true, $5, $6::jsonb, $7::jsonb, $8, $9) RETURNING *`,
-  [pack.bundled.id, pack.bundled.name, pack.bundled.version, pack.bundled.trademarkOwner, ACKNOWLEDGEMENT_TEXT, JSON.stringify(result.applied), JSON.stringify(previous), user?.id ?? null, user?.username ?? null]);
+  [pack.bundled.id, pack.bundled.name, pack.bundled.version, pack.bundled.trademarkOwner, acknowledgementText, JSON.stringify(result.applied), JSON.stringify(previous), user?.id ?? null, user?.username ?? null]);
   return { ...result, pack: pack.bundled, enablement: await currentEnablement() || enablementView(row) };
+}
+
+/** Store an image of a bundled pack (logo, favicon, sign-in picture) in the uploads storage, as an uploaded one. */
+export async function storeBundledImage(file, _category, userId, ref) {
+  const asset = String(ref).endsWith('favicon') ? 'favicon' : String(ref).endsWith('loginPanel') ? 'login-panel' : 'logo';
+  const contentType = assertBrandImage(asset, file);
+  return saveFile({ category: asset === 'favicon' ? 'favicon' : 'logo', fileName: file.originalname || `${asset}.png`, content: file.buffer, contentType, entity: 'branding', entityId: asset, userId });
+}
+
+const DEPLOYMENT_LOCK = "hashtext('brokerverse.brand_pack')";
+
+/**
+ * Enable the pack named by BRAND_PACK at start-up (after migrations and seed), once per environment: nothing is done
+ * when a pack is already in force or when the pack was ever enabled here (by this start-up or on the screen), so an
+ * administrator's later Back to default stands across restarts. The acknowledgement is recorded with a note that the
+ * deployment configuration gave it, against the user "system", and audited. Several instances starting together take
+ * an advisory lock so only one of them enables it. log is the application logger (info, warn). Returns { status: 'enabled' | 'skipped' | 'unknown', ... }.
+ */
+export async function enableDeploymentPack(id, { log = { info() {}, warn() {} }, storeImage = storeBundledImage } = {}) {
+  const packId = str(id);
+  if (!packId) return { status: 'skipped', reason: 'not set' };
+  if (!bundledPackIds().includes(packId)) {
+    log.warn(`BRAND_PACK=${packId} is not a bundled brand pack (${bundledPackIds().join(', ') || 'none shipped'}); the branding is left as it is`);
+    return { status: 'unknown', packId };
+  }
+  const lock = await pool.connect();
+  try {
+    await lock.query(`SELECT pg_advisory_lock(${DEPLOYMENT_LOCK})`);
+    const current = await currentEnablement();
+    if (current) return { status: 'skipped', packId, reason: `${current.packName} is in force` };
+    if (await one('SELECT id FROM brand_pack_enablements WHERE pack_id = $1 LIMIT 1', [packId])) return { status: 'skipped', packId, reason: 'enabled before in this environment' };
+    const before = await currentTheme();
+    const acknowledgementText = `${ACKNOWLEDGEMENT_TEXT} ${DEPLOYMENT_NOTE}`;
+    const result = await enableBundledPack(packId, { user: SYSTEM_USER, acknowledgedPermission: true, acknowledgementText, storeImage });
+    await audit({ user: SYSTEM_USER, auditSource: { channel: 'job', name: 'BRAND_PACK' } }, { entity: 'branding', entityId: `bundled-pack:${packId}`, action: 'enable-pack', before,
+      after: { pack: packId, name: result.pack.name, version: result.pack.version, trademarkOwner: result.pack.trademarkOwner, acknowledgedPermission: true, acknowledgementText, applied: result.applied, theme: result.theme } });
+    log.info(`Brand pack ${result.pack.name} enabled from BRAND_PACK=${packId} (${result.applied.join(', ')})`);
+    return { status: 'enabled', packId, enablement: result.enablement };
+  } finally {
+    await lock.query(`SELECT pg_advisory_unlock(${DEPLOYMENT_LOCK})`).catch(() => {});
+    lock.release();
+  }
 }
 
 /**

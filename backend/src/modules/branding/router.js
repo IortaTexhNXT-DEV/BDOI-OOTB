@@ -189,7 +189,6 @@ const bundledExample = { id: 'toyota-insurance-services', name: 'Toyota Insuranc
   preview: { primary: '#1a1a1a', headerBg: '#ffffff', sidebarBg: '#ffffff', tableHeaderBg: '#eeeeee', buttonBg: '#1a1a1a', accent: '#eb0a1e' }, theme: themeExample, warnings: [], status: 'available', enablement: null };
 const enablementExample = { id: 1, packId: 'toyota-insurance-services', packName: 'Toyota Insurance Services', acknowledgedPermission: true, acknowledgementText: bundled.ACKNOWLEDGEMENT_TEXT,
   applied: ['theme', 'logo', 'documentLogo', 'systemName'], status: 'enabled', enabledAt: '2026-10-04T08:00:00.000Z', enabledBy: 'admin', enabledByName: 'System Administrator' };
-const storeBundledImage = async (file, _category, userId, ref) => storeBrandImage(String(ref).endsWith('favicon') ? 'favicon' : String(ref).endsWith('loginPanel') ? 'login-panel' : 'logo', file, userId);
 const enableOptions = (body) => ({ applyDocumentLogo: body.applyDocumentLogo === undefined ? true : truthy(body.applyDocumentLogo), applySystemName: body.applySystemName === undefined ? true : truthy(body.applySystemName) });
 
 define({
@@ -205,7 +204,7 @@ define({
   handler: async (req, res) => {
     const pack = bundled.loadBundledPack(req.params.id);
     for (const [role, file] of Object.entries(pack.manifest.assets || {})) if (file) svc.assertBrandImage(role === 'favicon' ? 'favicon' : role === 'loginPanel' ? 'login-panel' : 'logo', { buffer: pack.files.get(file), originalname: file });
-    ok(res, await bundled.enableBundledPack(req.params.id, { user: req.user, dryRun: true, storeImage: storeBundledImage }), 'Brand pack checked (nothing applied)');
+    ok(res, await bundled.enableBundledPack(req.params.id, { user: req.user, dryRun: true, storeImage: bundled.storeBundledImage }), 'Brand pack checked (nothing applied)');
   },
 });
 define({
@@ -217,7 +216,7 @@ define({
     const pack = bundled.loadBundledPack(req.params.id);
     for (const [role, file] of Object.entries(pack.manifest.assets || {})) if (file) svc.assertBrandImage(role === 'favicon' ? 'favicon' : role === 'loginPanel' ? 'login-panel' : 'logo', { buffer: pack.files.get(file), originalname: file });
     const before = await svc.currentTheme();
-    const result = await bundled.enableBundledPack(req.params.id, { user: req.user, acknowledgedPermission: body.acknowledgedPermission === true, ...enableOptions(body), storeImage: storeBundledImage });
+    const result = await bundled.enableBundledPack(req.params.id, { user: req.user, acknowledgedPermission: body.acknowledgedPermission === true, ...enableOptions(body), storeImage: bundled.storeBundledImage });
     await audit(req, { entity: 'branding', entityId: `bundled-pack:${pack.bundled.id}`, action: 'enable-pack', before,
       after: { pack: pack.bundled.id, name: pack.bundled.name, version: pack.bundled.version, trademarkOwner: pack.bundled.trademarkOwner, acknowledgedPermission: true, acknowledgementText: bundled.ACKNOWLEDGEMENT_TEXT, applied: result.applied, theme: result.theme } });
     ok(res, result, `Brand pack ${result.name} enabled`);

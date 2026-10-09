@@ -66,6 +66,21 @@ records the purge in the audit trail. Uploaded files of removed documents stay i
 directory too if nothing real was uploaded. Then set `SEED_SAMPLE_DATA=false` (or remove it) before starting the API
 again, or the demo data is seeded back.
 
+## Brand pack of the deployment
+
+A deployment made for a client whose brand pack ships with the product (`backend/assets/brand-packs/<id>/`) names it
+in `BRAND_PACK`, so the environment opens in the client's branding without a manual step. After the migrations and
+the seed, the API enables the pack once, exactly as Master > System Settings > Theme and Branding > Brand packs does:
+the enablement is recorded against the user `system` with the trademark acknowledgement and the note "Given by the
+deployment configuration (BRAND_PACK)", and audited (entity `branding`, action `enable-pack`). It logs one line.
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `BRAND_PACK` | empty | Id of a bundled brand pack, e.g. `toyota-insurance-services` (TISPH environments). Applied only when no pack is in force and the pack was never enabled in this environment, so an administrator's Back to default is kept across restarts and a pack enabled on the screen is never replaced. An unknown id logs a warning; the API starts with the branding it has. |
+
+Set it only in the client's own environments: the client's contract with iorta TechNXT covers the use of its marks
+there, and setting the variable is the acknowledgement the screen otherwise asks for.
+
 ## Scheduled jobs and several API instances
 
 | Variable | Default | Meaning |

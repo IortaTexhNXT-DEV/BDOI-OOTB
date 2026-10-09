@@ -111,7 +111,10 @@ Repeat for `dev`, `sit`, `uat` and `prod`, in that order.
    `az containerapp revision restart -g rg-tisph-bv-<env> -n ca-tisph-bv-<env>-api --revision <latest>` (or deploy).
 5. **DNS** (section 8), then open the address, sign in as `BrokerVerse` with the `admin-password` secret
    (`az keyvault secret show --vault-name <key_vault_name> -n admin-password --query value -o tsv`) and choose a new
-   password when asked.
+   password when asked. The site already shows the Toyota Insurance Services branding: the API enabled the bundled
+   brand pack named by `BRAND_PACK` at its first start (REFERENCE.md, "Brand pack of the deployment"); Master > System
+   Settings > Theme and Branding > Brand packs shows the enablement by `system`. Back to default there is kept across
+   restarts.
 6. **GitHub environment** (section 9): copy the output `github_variables` into the environment's variables and set
    `DEPLOY_ENABLED=true`.
 7. Continue with the smoke tests and go-live data of [README.md](README.md), sections 4 to 6, and the security
@@ -143,6 +146,7 @@ Set in `environments/<env>.tfvars`. Defaults are in `deploy/azure/modules/enviro
 | `waf_mode` | Detection | Prevention | Prevention | Prevention | Front Door WAF; Detection only logs |
 | `sign_in_rate_limit_per_minute` | 60 | 60 | 60 | 60 | Front Door limit on `/api/auth/` per client address |
 | `trust_proxy` | 4 | 4 | 4 | 4 | `TRUST_PROXY` of the API (section 13) |
+| `brand_pack` | toyota-insurance-services | toyota-insurance-services | toyota-insurance-services | toyota-insurance-services | `BRAND_PACK` of the API: the Toyota Insurance Services brand pack is enabled at the first start (default empty: none) |
 | `key_vault_admins` | TISPH | TISPH | TISPH | TISPH | Entra ID group that manages secrets |
 | `operator_ips` | TISPH | TISPH | TISPH | TISPH | addresses allowed through the Key Vault and storage firewalls |
 | `alert_emails` | TISPH | TISPH | TISPH | TISPH | availability and database alerts |
@@ -152,7 +156,7 @@ Set in `environments/<env>.tfvars`. Defaults are in `deploy/azure/modules/enviro
 The API receives the settings of [REFERENCE.md](REFERENCE.md) from Terraform: `NODE_ENV=production`,
 `UPLOAD_DIR=/app/uploads`, `CORS_ORIGINS` and `PUBLIC_BASE_URL` set to the public address (the browser reaches the API
 on the web address, `/api` is proxied), `SEED_SAMPLE_DATA=false`, `SCHEDULER_ENABLED=true`, `APP_ENVIRONMENT`,
-`TRUST_PROXY`, and the `ENTRA_*` variables when sign-in with Microsoft is on. The web app receives `API_UPSTREAM`
+`TRUST_PROXY`, `BRAND_PACK` when `brand_pack` is set, and the `ENTRA_*` variables when sign-in with Microsoft is on. The web app receives `API_UPSTREAM`
 (the API's internal address), `ENVIRONMENT_NAME` and `FRONT_DOOR_ID`.
 
 ## 6. Secrets
@@ -418,5 +422,6 @@ automatic failover and zone-redundant storage, so the loss of one zone does not 
 | Sign-in page loads, sign-in fails with 502/504 | `API_UPSTREAM` on the web app must be `https://<api internal FQDN>`; the web app's log shows the nginx error. |
 | `Sign in with Microsoft` answers "not set up for this application" | No BrokerVerse user has that Microsoft 365 address as e-mail or user ID; add it in User Management. |
 | Microsoft says the redirect URI does not match | The app registration's redirect must be exactly `https://<public host>/login`. |
+| The site shows the iorta TechNXT branding | The API log at start-up says why: `BRAND_PACK=... is not a bundled brand pack` (a typing error in `brand_pack`), or nothing because the pack was enabled before and an administrator went back to the default; enable it on Theme and Branding > Brand packs. |
 | Every user shares one address in the sign-in history | `trust_proxy` too low (section 13). |
 | Pipeline: `AADSTS70021` / no matching federated identity | The job's GitHub environment differs from `github_environment` in the tfvars, or the variables belong to another environment. |

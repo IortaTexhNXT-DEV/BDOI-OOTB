@@ -37,6 +37,11 @@ export function buildConfig(source = process.env) {
     uploadDir: env('UPLOAD_DIR', './uploads'),
     publicBaseUrl: env('PUBLIC_BASE_URL', 'http://localhost:8000').replace(/\/+$/, ''),
     smtpUrl: env('SMTP_URL', ''),
+    /**
+     * Bundled brand pack (backend/assets/brand-packs/<id>) enabled at start-up in a deployment made for its client, once:
+     * an administrator's Back to default is kept across restarts (modules/branding/bundled.js, enableDeploymentPack).
+     */
+    brandPack: env('BRAND_PACK', '').trim(),
     logLevel: env('LOG_LEVEL', 'info'),
     /** Lifetime of signed file links (GET /api/s3/object/... ?exp=&sig=). */
     fileUrlTtl: num('FILE_URL_TTL_SECONDS', 1800),

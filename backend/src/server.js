@@ -7,6 +7,7 @@ import { seed } from './db/seed.js';
 import { pool } from './db/pool.js';
 import { startScheduler, stopScheduler, watchSchedules } from './jobs/scheduler.js';
 import { setReady } from './lib/health.js';
+import { enableDeploymentPack } from './modules/branding/bundled.js';
 
 try {
   assertProductionConfig();
@@ -18,6 +19,10 @@ fs.mkdirSync(config.uploadDir, { recursive: true });
 setReady(false); // GET /api/health answers 503 until migrations and seed are applied
 await migrate({ log: (m) => logger.info(m) });
 await seed({ log: (m) => logger.info(m) });
+if (config.brandPack) {
+  // the branding is not worth refusing to start for: a pack that cannot be applied leaves the current branding
+  await enableDeploymentPack(config.brandPack, { log: logger }).catch((e) => logger.warn({ err: e }, `BRAND_PACK=${config.brandPack} was not applied: ${e.message}`));
+}
 const app = await createApp();
 const server = app.listen(config.port, () => logger.info(`BrokerVerse API listening on :${config.port}`));
 // Idle keep-alive connections stay open longer than the proxy in front keeps its own (load balancers and the Container

@@ -76,6 +76,7 @@ locals {
       APP_ENVIRONMENT     = local.prod ? "Production" : upper(var.environment)
       SHUTDOWN_TIMEOUT_MS = "25000"
     },
+    var.brand_pack != "" ? { BRAND_PACK = var.brand_pack } : {},
     var.entra_sign_in.enabled ? {
       ENTRA_TENANT_ID    = var.entra_sign_in.tenant_id
       ENTRA_CLIENT_ID    = var.entra_sign_in.client_id

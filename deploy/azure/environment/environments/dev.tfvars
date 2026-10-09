@@ -35,6 +35,9 @@ smtp_enabled  = false
 entra_sign_in = { enabled = false, tenant_id = "", client_id = "" }
 sftp_enabled  = false
 
+# Toyota Insurance Services brand pack, enabled once at the first start (deploy/REFERENCE.md)
+brand_pack = "toyota-insurance-services"
+
 waf_mode           = "Detection"
 log_retention_days = 30
 

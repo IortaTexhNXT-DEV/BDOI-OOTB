@@ -29,6 +29,7 @@ module "environment" {
   api            = var.api
   web            = var.web
   trust_proxy    = var.trust_proxy
+  brand_pack     = var.brand_pack
 
   uploads_replication = var.uploads_replication
   uploads_quota_gb    = var.uploads_quota_gb

@@ -2,19 +2,21 @@
  * Bundled brand packs (Master > System Settings > Theme and Branding > Brand packs > Bundled packs): the Toyota
  * Insurance Services pack ships with the product but is never on by default; a System Administrator enables it after
  * acknowledging the client engagement whose contract covers the marks, the enablement is recorded and audited, and Back to default returns
- * the environment to the iorta TechNXT branding.
+ * the environment to the iorta TechNXT branding. A deployment for the client may name the pack in BRAND_PACK: the API
+ * enables it once at start-up, and an administrator's later Back to default stands.
  */
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import request from 'supertest';
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { setup, loginAs } from './helpers.js';
 import { pool, query, one } from '../src/db/pool.js';
 import { clearLetterheadCache, getLetterhead } from '../src/lib/letterhead.js';
 import { DEFAULT_THEME } from '../src/modules/branding/presets.js';
-import { ACKNOWLEDGEMENT_TEXT, BUNDLED_DIR, bundledPackIds, loadBundledPack } from '../src/modules/branding/bundled.js';
+import { ACKNOWLEDGEMENT_TEXT, BUNDLED_DIR, DEPLOYMENT_NOTE, bundledPackIds, enableDeploymentPack, loadBundledPack } from '../src/modules/branding/bundled.js';
+import { buildConfig } from '../src/config.js';
 import { buildBrandPack } from '../scripts/build-brand-pack.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -172,5 +174,68 @@ describe('bundled brand packs on the screen', () => {
     expect(plain.status).toBe(200);
     expect(plain.body.data.enablement).toBeNull();
     expect(plain.body.data.restored).toEqual(['theme', 'logo', 'favicon']);
+  });
+});
+
+describe('brand pack named by the deployment (BRAND_PACK)', () => {
+  const logger = () => ({ info: vi.fn(), warn: vi.fn() });
+
+  it('reads BRAND_PACK from the environment, empty when not set', () => {
+    expect(buildConfig({}).brandPack).toBe('');
+    expect(buildConfig({ BRAND_PACK: ' toyota-insurance-services ' }).brandPack).toBe(TIS);
+  });
+
+  it('warns about a pack that is not shipped and changes nothing', async () => {
+    const log = logger();
+    const before = Number((await one('SELECT count(*)::int AS n FROM brand_pack_enablements')).n);
+    expect(await enableDeploymentPack('acme-brokers', { log })).toMatchObject({ status: 'unknown', packId: 'acme-brokers' });
+    expect(log.warn).toHaveBeenCalledTimes(1);
+    expect(log.warn.mock.calls[0][0]).toMatch(/BRAND_PACK=acme-brokers is not a bundled brand pack/);
+    expect(log.info).not.toHaveBeenCalled();
+    expect(Number((await one('SELECT count(*)::int AS n FROM brand_pack_enablements')).n)).toBe(before);
+    expect(await enableDeploymentPack('', { log })).toMatchObject({ status: 'skipped' });
+  });
+
+  it('enables the pack once at start-up, recorded against "system" with the deployment as the source, then respects Back to default', async () => {
+    await ctx.api('post', '/branding/packs/reset-default').send({});
+    await query('DELETE FROM brand_pack_enablements');
+    const log = logger();
+    const first = await enableDeploymentPack(TIS, { log });
+    expect(first).toMatchObject({ status: 'enabled', packId: TIS });
+    expect(log.info).toHaveBeenCalledTimes(1);
+    expect(log.info.mock.calls[0][0]).toMatch(/Brand pack Toyota Insurance Services enabled from BRAND_PACK=toyota-insurance-services/);
+    const pub = (await request(ctx.app).get('/api/branding')).body.data;
+    expect(pub.theme.colors).toMatchObject({ primary: '#1a1a1a', accent: '#eb0a1e' });
+    expect(pub.systemName).toBe('Toyota Insurance Services');
+    const row = await one('SELECT * FROM brand_pack_enablements ORDER BY id DESC LIMIT 1');
+    expect(row).toMatchObject({ pack_id: TIS, status: 'enabled', acknowledged_permission: true, enabled_by: 'system', enabled_by_user_id: null });
+    expect(row.acknowledgement_text).toBe(`${ACKNOWLEDGEMENT_TEXT} ${DEPLOYMENT_NOTE}`);
+    const audit = await one("SELECT * FROM audit_log WHERE entity = 'branding' AND action = 'enable-pack' ORDER BY id DESC LIMIT 1");
+    expect(audit).toMatchObject({ username: 'system', entity_id: `bundled-pack:${TIS}` });
+    expect(audit.after_data).toMatchObject({ pack: TIS, acknowledgedPermission: true, acknowledgementText: expect.stringContaining('BRAND_PACK') });
+    expect(audit.source).toMatchObject({ channel: 'job', name: 'BRAND_PACK' });
+    const list = (await ctx.api('get', '/branding/packs/bundled')).body.data;
+    expect(list.current).toMatchObject({ packId: TIS, enabledBy: 'system', enabledByName: 'system' });
+
+    // a restart with the pack in force records nothing new
+    const restart = logger();
+    expect(await enableDeploymentPack(TIS, { log: restart })).toMatchObject({ status: 'skipped' });
+    expect(restart.info).not.toHaveBeenCalled();
+    expect(Number((await one('SELECT count(*)::int AS n FROM brand_pack_enablements')).n)).toBe(1);
+
+    // the administrator goes back to the default: later restarts keep it
+    expect((await ctx.api('post', '/branding/packs/reset-default').send({})).status).toBe(200);
+    expect(await enableDeploymentPack(TIS, { log: logger() })).toMatchObject({ status: 'skipped', reason: 'enabled before in this environment' });
+    const after = (await request(ctx.app).get('/api/branding')).body.data;
+    expect(after.theme.preset).toBe('iorta-technxt');
+    expect(Number((await one("SELECT count(*)::int AS n FROM brand_pack_enablements WHERE status = 'enabled'")).n)).toBe(0);
+  });
+
+  it('takes turns when several instances start together: the pack is enabled once', async () => {
+    await query('DELETE FROM brand_pack_enablements');
+    const results = await Promise.all([enableDeploymentPack(TIS), enableDeploymentPack(TIS)]);
+    expect(results.map((r) => r.status).sort()).toEqual(['enabled', 'skipped']);
+    expect(Number((await one('SELECT count(*)::int AS n FROM brand_pack_enablements')).n)).toBe(1);
+    await ctx.api('post', '/branding/packs/reset-default').send({});
   });
 });
