@@ -39,11 +39,11 @@ export const stepForStatus = (status) => {
 /** Statuses in which the claim details and the adjuster report can still be changed (server: updateClaim). */
 export const EDITABLE_STATUSES = ["registered", "in-review"];
 
-const KNOWN_LINES = ["MOTOR", "FIRE", "IAR", "MARINE", "ACCIDENT", "CASUALTY", "ENGINEERING", "HEALTH", "EB", "BOND", "AVIATION"];
+const KNOWN_LINES = ["MOTOR", "FIRE", "IAR", "MARINE", "ACCIDENT", "LIFE", "CASUALTY", "ENGINEERING", "HEALTH", "EB", "BOND", "AVIATION"];
 
 /**
- * Line of business code (MOTOR, FIRE, MARINE ...) from the first candidate that names one: a code, a product line or a
- * product name such as "Fire and Allied Perils" or "Private Car Comprehensive".
+ * Line of business code (MOTOR, FIRE, MARINE, LIFE ...) from the first candidate that names one: a code, a product line
+ * or a product name such as "Fire and Allied Perils", "Credit Life - Voluntary" or "Private Car Comprehensive".
  */
 export const claimLobOf = (...candidates) => {
   for (const raw of candidates) {
@@ -54,6 +54,7 @@ export const claimLobOf = (...candidates) => {
     if (/FIRE/.test(upper)) return "FIRE";
     if (/MARINE|CARGO|HULL/.test(upper)) return "MARINE";
     if (/ACCIDENT|\bPA\b/.test(upper)) return "ACCIDENT";
+    if (/\bLIFE\b/.test(upper)) return "LIFE";
     if (/MOTOR|CAR|VEHICLE|CTPL/.test(upper)) return "MOTOR";
     if (/ENGINEERING|CONTRACTOR/.test(upper)) return "ENGINEERING";
     if (/LIABILITY|CASUALTY/.test(upper)) return "CASUALTY";

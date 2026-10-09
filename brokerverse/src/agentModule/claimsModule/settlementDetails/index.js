@@ -15,7 +15,7 @@ import CustomToast from "../../../components/Toast";
 import { postSettlementClaimMiddleware } from "./Store/claimSettlementMiddleware";
 import claimsService from "../../../services/claimsService";
 import { formatCurrency } from "../../../utility/currencyConverter";
-import ClaimJourneyLayout, { ClaimActions, ClaimSection } from "../shared/ClaimJourneyLayout";
+import ClaimJourneyLayout, { ClaimActions, ClaimSection, FIELD_COL } from "../shared/ClaimJourneyLayout";
 import FormErrorSummary from "../shared/FormErrorSummary";
 import useClaimsConfig from "../shared/useClaimsConfig";
 import { EDITABLE_STATUSES, errorText, fromIsoDate, toIsoDate } from "../shared/claimJourney";
@@ -126,7 +126,7 @@ const SettlementDetails = () => {
     </>
   );
   const dateField = (name) => (
-    <div className="col-12 md:col-6">
+    <div className={FIELD_COL}>
       <DatepickerField
         label={req(labels[name])}
         value={fromIsoDate(formik.values[name])}
@@ -140,6 +140,7 @@ const SettlementDetails = () => {
 
   return (
     <ClaimJourneyLayout
+      claim={claim}
       step="settlement"
       holderName={claim?.policyHolderName}
       reference={claim?.claimNumber ? t("claimJourney.claimRef", { number: claim.claimNumber }) : ""}
@@ -155,7 +156,7 @@ const SettlementDetails = () => {
         <>
           <ClaimSection title={t("claimJourney.settlementSection")}>
             <div className="grid">
-              <div className="col-12 md:col-6">
+              <div className={FIELD_COL}>
                 <DropdownField
                   label={req(labels.settlementType)}
                   value={formik.values.settlementType}
@@ -168,7 +169,7 @@ const SettlementDetails = () => {
                 />
                 <FieldError error={fieldError("settlementType")} />
               </div>
-              <div className="col-12 md:col-6">
+              <div className={FIELD_COL}>
                 <InputTextField
                   label={req(labels.settlementAmount)}
                   value={formik.values.settlementAmount}

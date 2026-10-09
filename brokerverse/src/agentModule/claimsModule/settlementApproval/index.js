@@ -84,23 +84,21 @@ const SettlementApproval = () => {
     detailView();
   };
 
+  // the claim's key facts are in the strip above; the assessment adds what the adjuster and the settlement recorded
   const rows = claim
     ? [
-        [t("claimJourney.claimNumber"), claim.claimNumber],
-        [t("claimJourney.policyNumber"), claim.policyNumber || claim.policy?.policyNumber],
-        [t("claimJourney.insurer"), claim.insuranceCompanyName || claim.policy?.insuranceCompanyName],
-        [t("claimJourney.insurerClaimNumber"), claim.insuranceCompanyClaimNumber],
-        [t("claimJourney.dateOfLoss"), formatDate(claim.dateOfIncident)],
         [t("claimJourney.dateReported"), formatDate(claim.reportedDate)],
-        [t("claimJourney.causeOfLoss"), claim.typeOfIncident],
         [t("claimJourney.adjusterName"), claim.adjusterName],
-        [t("claimJourney.estimatedAmount"), formatCurrency(claim.estimatedClaimAmount)],
-        ...(isPendingApproval ? [[t("claimJourney.settlementAmount"), formatCurrency(claim.settlementAmount)]] : []),
+        [t("claimFlow.adjusterStatus"), claim.adjusterStatus],
+        ...(isPendingApproval
+          ? [[t("claimJourney.settlementType"), claim.settlementType], [t("claimJourney.settlementAmount"), formatCurrency(claim.settlementAmount)]]
+          : []),
       ]
     : [];
 
   return (
     <ClaimJourneyLayout
+      claim={claim}
       step={isPendingApproval ? "approval" : "assessment"}
       holderName={claim?.policyHolderName}
       reference={claim?.claimNumber ? t("claimJourney.claimRef", { number: claim.claimNumber }) : ""}
@@ -112,7 +110,7 @@ const SettlementApproval = () => {
       {!claim && !loadError && <p className="claim-journey__hint">{t("claimJourney.loadingClaim")}</p>}
       {loadError && <FormErrorSummary serverError={loadError} />}
       {claim && (
-        <ClaimSection title={t("claimJourney.claimSummary")}>
+        <ClaimSection title={isPendingApproval ? t("claimFlow.settlementToApprove") : t("claimFlow.assessmentBasis")}>
           <dl className="claim-journey__facts">
             {rows.map(([label, value]) => (
               <div key={label} className="claim-journey__fact">

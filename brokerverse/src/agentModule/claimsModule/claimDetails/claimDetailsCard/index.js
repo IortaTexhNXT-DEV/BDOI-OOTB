@@ -1,22 +1,23 @@
-import { Card } from "primereact/card";
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import InputTextField from "../../../component/inputText";
 import { Checkbox } from "primereact/checkbox";
 import { Button } from "primereact/button";
-import { Tooltip } from "primereact/tooltip";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import { postClaimDetailsData } from "../store/claimDetailsMiddleWare";
 import { mapToApiLob } from "../store/claimDetailsMiddleWare";
-import { isFireLob } from "../../../endorsementModule/constants/endorsementCategories";
 import DropdownField from "../../../component/DropdownField";
 import DatepickerField from "../../../component/datePicker";
 import InputNumberField from "../../../component/inputNumberField";
 import PhAddressFields from "../../../component/PhAddressFields";
 import { FieldsSkeleton } from "../../../../components/Skeletons";
+import FieldError from "../../../../components/FieldError";
+import { ClaimActions, ClaimSection, FIELD_COL } from "../../shared/ClaimJourneyLayout";
+import useClaimsConfig from "../../shared/useClaimsConfig";
+import { claimLobOf, lobUses, lossCauseOptions } from "../../shared/claimJourney";
 
 const ClaimDetailsCard = ({
   leadRefId,
@@ -27,24 +28,7 @@ const ClaimDetailsCard = ({
   const { t } = useTranslation();
   const location = useLocation();
 
-  // Fire incident/cause-of-loss options (translated)
-  const FIRE_INCIDENT_TYPES = [
-    { label: t("claimDetails.fire"), value: "Fire" },
-    { label: t("claimDetails.flood"), value: "Flood" },
-    { label: t("claimDetails.typhoon"), value: "Typhoon" },
-    { label: t("claimDetails.earthquake"), value: "Earthquake" },
-    { label: t("claimDetails.lightning"), value: "Lightning" },
-    { label: t("claimDetails.other"), value: "Other" },
-  ];
-  const MOTOR_INCIDENT_TYPES = [
-    { label: "Collision", value: "Collision" },
-    { label: "Theft / Carnapping", value: "Theft" },
-    { label: "Fire", value: "Fire" },
-    { label: "Flood / Typhoon (Acts of Nature)", value: "Acts of Nature" },
-    { label: "Third-party liability", value: "Third-party liability" },
-    { label: "Glass / windshield damage", value: "Glass damage" },
-    { label: t("claimDetails.other"), value: "Other" },
-  ];
+  const config = useClaimsConfig();
   const [lastUpdatedData, setLastUpdatedData] = useState(null);
   const navigate = useNavigate();
 
@@ -62,11 +46,11 @@ const ClaimDetailsCard = ({
     claimThirdParty?.isPolicyHolderTheDriver === true
   );
 
-  const isFire = isFireLob(
-    claimDetailsViewData?.lob ||
-      claimDetailsViewData?.productType ||
-      initialLob
-  );
+  // sections and causes of loss of the claim's line of business (claims.lob_fields, claims.loss_causes)
+  const lob = claimLobOf(claimDetailsViewData?.lob, claimDetailsViewData?.productType, initialLob);
+  const usesDriver = lobUses(config, lob, "driver");
+  const usesVehicle = lobUses(config, lob, "vehicle");
+  const causeOptions = lossCauseOptions(config, lob);
 
   const formInitialValue = {
     InsuranceCompanyName: claimDetailsViewData?.InsuranceCompanyName || "",
@@ -133,7 +117,7 @@ const ClaimDetailsCard = ({
         claimDetailsViewData?.productType ||
         initialLob
     );
-    const holderAsDriver = !isFire && checked;
+    const holderAsDriver = usesDriver && checked;
     const payload = {
       ...values,
       ...(holderAsDriver ? holderToDriver(values) : {}),
@@ -152,11 +136,11 @@ const ClaimDetailsCard = ({
     });
   };
 
-  // Custom validation: driverName required only for Motor
+  // the driver's name is required where the line of business has a driver section (motor)
   const customValidation = (values) => {
     const errors = {};
     if (
-      !isFire &&
+      usesDriver &&
       (!values.driverName || values.driverName.trim() === "")
     ) {
       errors.driverName = t("claimDetails.driversNameRequired");
@@ -429,331 +413,94 @@ const ClaimDetailsCard = ({
     }
   };
 
-  // Show loading state while fetching data
   if (loading) {
-    return (
-      <div className="claim__details__card__container mt-4">
-        <Card>
-          <div className="claim__details__card__container__title">
-            {t("claimDetails.claimRequest")}
-          </div>
-          <div className="p-4">
-            <FieldsSkeleton rows={3} columns={3} />
-          </div>
-        </Card>
-      </div>
-    );
+    return <FieldsSkeleton rows={3} columns={3} />;
   }
 
+  const showErrors = formik.submitCount > 0;
+  const fieldError = (name) => (showErrors || formik.touched[name] ? formik.errors[name] : undefined);
+  const text = (name, label, props = {}) => (
+    <div className={FIELD_COL}>
+      <InputTextField label={label} value={formik.values[name]} onChange={formik.handleChange(name)} {...props} />
+      <FieldError error={fieldError(name)} />
+    </div>
+  );
+
   return (
-    <div className="claim__details__card__container mt-4">
-      <Card>
-        <div className="claim__details__card__container__title">
-          {t("claimDetails.claimRequest")}
+    <>
+      <ClaimSection title={t("claimFlow.policySection")}>
+        <div className="grid">
+          {text("InsuranceCompanyName", t("claimDetails.insuranceCompanyName"), { disabled: true })}
+          {text("policyNumber", t("claimDetails.policyNumber"), { disabled: true })}
+          {text("PolicyHolderName", t("claimDetails.policyHolderName"))}
         </div>
-        <div className="grid mt-2">
-          <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              label={t("claimDetails.insuranceCompanyName")}
-              value={formik.values.InsuranceCompanyName}
-              disabled={true}
-            />
-          </div>
-        </div>
+        {claimDetailsViewData?.isCoInsurance && (
+          <p className="claim-journey__hint mt-2">
+            {t("claimFlow.coInsured", { count: claimDetailsViewData?.participatingInsurersCount ?? 0 })}
+          </p>
+        )}
+      </ClaimSection>
 
-        <div className="grid mt-2">
-          <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              label={t("claimDetails.policyNumber")}
-              value={formik.values.policyNumber}
-              disabled={true}
-            />
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              label={t("claimDetails.policyHolderName")}
-              value={formik.values.PolicyHolderName}
-              onChange={(e) => {
-                formik.handleChange("PolicyHolderName")(e);
-              }}
-            />
-          </div>
-        </div>
-
+      <ClaimSection title={t("claimFlow.holderAddress")}>
         {/* Policy holder's Philippine address: Region -> Province -> City / Municipality -> Barangay, House / Unit No., Street, ZIP code */}
         <PhAddressFields formik={formik} names={{ country: "CountryName", region: "Region", province: "Province", city: "CityName", barangay: "Barangay", houseNo: "HouseNo", street: "RoadThanon", zipCode: "ZipCode" }} />
+      </ClaimSection>
 
-        {claimDetailsViewData?.isCoInsurance && (
-          <div className="co-insurance-info-section mt-4">
-            <div className="co-insurance-info-section__header">
-              <div className="claim__details__card__sub__title ml-2">
-                {t("claimDetails.coInsuranceInformation")}
-              </div>
-              <i
-                className="pi pi-question-circle co-insurance-info-icon"
-                data-pr-tooltip={t("claimDetails.coInsuranceInfoTooltip")}
-                data-pr-position="right"
-              />
-              <Tooltip target=".co-insurance-info-icon" />
-            </div>
-            <div className="grid mt-2 ml-1">
-              <div className="col-12 md:col-6 lg:col-6">
-                <div className="co-insurance-info-field">
-                  <div className="co-insurance-info-field__label">
-                    {t("claimDetails.coInsurancePolicy")}
-                  </div>
-                  <span className="co-insurance-policy-yes-pill">
-                    {t("claimDetails.yes")}
-                  </span>
-                </div>
-              </div>
-              <div className="col-12 md:col-6 lg:col-6">
-                <div className="co-insurance-info-field">
-                  <div className="co-insurance-info-field__label">
-                    {t("claimDetails.numberOfParticipatingInsurers")}
-                  </div>
-                  <div className="co-insurance-info-field__value">
-                    {claimDetailsViewData?.participatingInsurersCount ?? 0}
-                  </div>
-                </div>
-              </div>
-            </div>
+      <ClaimSection title={t("claimDetails.incidentDetails")}>
+        <div className="grid">
+          <div className={FIELD_COL}>
+            <DatepickerField label={t("claimDetails.dateOfIncident")} value={formik.values.dateOfIncident}
+              onChange={(e) => formik.setFieldValue("dateOfIncident", e.value)} maxDate={new Date()} />
+            <FieldError error={fieldError("dateOfIncident")} />
           </div>
-        )}
-
-        {(
-          <>
-            <div className="claim__details__card__sub__title mt-4 ml-2">
-              {t("claimDetails.incidentDetails")}
-            </div>
-            <div className="grid mt-2">
-              <div className="col-12 md:col-6 lg:col-6">
-                <DatepickerField
-                  label={t("claimDetails.dateOfIncident")}
-                  value={formik.values.dateOfIncident}
-                  onChange={(e) =>
-                    formik.setFieldValue("dateOfIncident", e.value)
-                  }
-                  dateFormat="dd/mm/yy"
-                  maxDate={new Date()}
-                />
-                {formik.touched.dateOfIncident && formik.errors.dateOfIncident && (
-                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors.dateOfIncident}</div>
-                )}
-              </div>
-              <div className="col-12 md:col-6 lg:col-6">
-                <InputTextField
-                  label={t("claimDetails.timeOfIncident")}
-                  value={formik.values.timeOfIncident}
-                  onChange={(e) =>
-                    formik.setFieldValue("timeOfIncident", e.target.value)
-                  }
-                  placeholder={t("claimDetails.timePlaceholder")}
-                />
-              </div>
-            </div>
-            <div className="grid mt-2">
-              <div className="col-12 md:col-6 lg:col-6">
-                <InputTextField
-                  label={t("claimDetails.addressOfIncident")}
-                  value={formik.values.addressOfIncident}
-                  onChange={(e) =>
-                    formik.setFieldValue("addressOfIncident", e.target.value)
-                  }
-                />
-              </div>
-              <div className="col-12 md:col-6 lg:col-6">
-                <InputTextField
-                  label={t("claimDetails.city")}
-                  value={formik.values.cityOfIncident}
-                  onChange={(e) =>
-                    formik.setFieldValue("cityOfIncident", e.target.value)
-                  }
-                />
-              </div>
-            </div>
-            <div className="grid mt-2">
-              <div className="col-12 md:col-6 lg:col-6">
-                <InputTextField
-                  label={t("claimDetails.province")}
-                  value={formik.values.provinceOfIncident}
-                  onChange={(e) =>
-                    formik.setFieldValue("provinceOfIncident", e.target.value)
-                  }
-                />
-              </div>
-              <div className="col-12 md:col-6 lg:col-6">
-                <DropdownField
-                  label={t("claimDetails.typeOfIncident")}
-                  value={formik.values.typeOfIncident}
-                  onChange={(e) =>
-                    formik.setFieldValue("typeOfIncident", e.value)
-                  }
-                  options={isFire ? FIRE_INCIDENT_TYPES : MOTOR_INCIDENT_TYPES}
-                  optionLabel="label"
-                  optionValue="value"
-                  placeholder={t("claimDetails.select")}
-                />
-                {formik.touched.typeOfIncident && formik.errors.typeOfIncident && (
-                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors.typeOfIncident}</div>
-                )}
-              </div>
-            </div>
-            <div className="grid mt-2">
-              <div className="col-12 md:col-6 lg:col-6">
-                <InputNumberField
-                  label={t("claimDetails.estimatedClaimAmount")}
-                  value={formik.values.estimatedClaimAmount}
-                  onValueChange={(e) =>
-                    formik.setFieldValue("estimatedClaimAmount", e.value)
-                  }
-                  inputId="estimatedClaimAmount"
-                />
-              </div>
-              <div className="col-12 md:col-6 lg:col-6">
-                <InputTextField
-                  label={t("claimDetails.insuranceCompanyClaimNumber")}
-                  value={formik.values.insuranceCompanyClaimNumber}
-                  onChange={(e) =>
-                    formik.setFieldValue(
-                      "insuranceCompanyClaimNumber",
-                      e.target.value
-                    )
-                  }
-                />
-              </div>
-            </div>
-          </>
-        )}
-
-        {!isFire && (
-          <>
-            <div className="check__box__container mt-3">
-              <Checkbox
-                onChange={handleCheckboxChange}
-                checked={checked}
-              ></Checkbox>
-              <div className="check__box__container__title">
-                {t("claimDetails.sameAsPolicyHolder")}
-              </div>
-            </div>
-            <div className="grid mt-3">
-              <div className="col-12 md:col-6 lg:col-6">
-                <InputTextField
-                  label={t("claimDetails.driversNameLabel")}
-              value={formik.values.driverName}
-              onChange={(e) => {
-                formik.handleChange("driverName")(e);
-              }}
-            />
-            {formik.touched.driverName && formik.errors.driverName && (
-              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
-                {formik.errors.driverName}
-              </div>
-            )}
+          {text("timeOfIncident", t("claimDetails.timeOfIncident"))}
+          <div className={FIELD_COL}>
+            <DropdownField label={t("claimDetails.typeOfIncident")} value={formik.values.typeOfIncident}
+              onChange={(e) => formik.setFieldValue("typeOfIncident", e.value)} options={causeOptions} optionLabel="label" optionValue="value"
+              placeholder={t("claimDetails.select")} />
+            <FieldError error={fieldError("typeOfIncident")} />
           </div>
+          {text("addressOfIncident", t("claimDetails.addressOfIncident"))}
+          {text("cityOfIncident", t("claimDetails.city"))}
+          {text("provinceOfIncident", t("claimDetails.province"))}
+          <div className={FIELD_COL}>
+            <InputNumberField label={t("claimDetails.estimatedClaimAmount")} value={formik.values.estimatedClaimAmount}
+              onValueChange={(e) => formik.setFieldValue("estimatedClaimAmount", e.value)} inputId="estimatedClaimAmount" />
+            <FieldError error={fieldError("estimatedClaimAmount")} />
+          </div>
+          {text("insuranceCompanyClaimNumber", t("claimDetails.insuranceCompanyClaimNumber"))}
         </div>
+      </ClaimSection>
 
-        {/* Driver's Philippine address: Region -> Province -> City / Municipality -> Barangay, House / Unit No., Street, ZIP code */}
-        <PhAddressFields formik={formik} names={{ country: "driverCountry", region: "driverRegion", province: "driverProvince", city: "driverCity", barangay: "driverBarangay", houseNo: "driverHouseNo", street: "driverRoadThanon", zipCode: "driverZipCode" }} />
-          </>
-        )}
+      {usesDriver && (
+        <ClaimSection title={t("claimJourney.driverSection")}>
+          <div className="claim-journey__check">
+            <Checkbox inputId="holder-driver" onChange={handleCheckboxChange} checked={checked} />
+            <label htmlFor="holder-driver">{t("claimDetails.sameAsPolicyHolder")}</label>
+          </div>
+          <div className="grid">
+            {text("driverName", t("claimDetails.driversNameLabel"))}
+          </div>
+          {/* Driver's Philippine address: Region -> Province -> City / Municipality -> Barangay, House / Unit No., Street, ZIP code */}
+          <PhAddressFields formik={formik} names={{ country: "driverCountry", region: "driverRegion", province: "driverProvince", city: "driverCity", barangay: "driverBarangay", houseNo: "driverHouseNo", street: "driverRoadThanon", zipCode: "driverZipCode" }} />
+        </ClaimSection>
+      )}
 
-        <div className="claim__details__card__sub__title mt-3 ml-2">
-          {isFire ? t("claimDetails.thirdPartyDetailsWitness") : t("claimDetails.thirdPartyDetails")}
+      <ClaimSection title={usesDriver ? t("claimJourney.thirdParty") : t("claimJourney.thirdPartyWitness")} hint={t("claimJourney.ifApplicable")}>
+        <div className="grid">
+          {text("name", t("claimDetails.name"))}
+          {text("contactNumber", t("claimDetails.contactNumber"))}
+          {usesVehicle && text("plateNumber", t("claimDetails.plateNumber"))}
+          {usesVehicle && text("unit", t("claimDetails.unit"))}
+          {usesVehicle && text("shop", t("claimDetails.shop"))}
+          {text("InsuranceCompanyN", t("claimDetails.insuranceCompanyNameOptional"))}
         </div>
-        <div>
-          <div className="grid mt-2">
-            <div className="col-12 md:col-6 lg:col-6">
-              <InputTextField
-                label={t("claimDetails.name")}
-                value={formik.values.name}
-                onChange={formik.handleChange("name")}
-              />
-              {formik.touched.name && formik.errors.name && (
-                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
-                  {formik.errors.name}
-                </div>
-              )}
-            </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <InputTextField
-                label={t("claimDetails.contactNumber")}
-                value={formik.values.contactNumber}
-                onChange={formik.handleChange("contactNumber")}
-              />
-              {formik.touched.contactNumber && formik.errors.contactNumber && (
-                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
-                  {formik.errors.contactNumber}
-                </div>
-              )}
-            </div>
-          </div>
+      </ClaimSection>
 
-          {!isFire && (
-            <div className="grid mt-2">
-              <div className="col-12 md:col-6 lg:col-6">
-                <InputTextField
-                  label={t("claimDetails.plateNumber")}
-                  value={formik.values.plateNumber}
-                  onChange={formik.handleChange("plateNumber")}
-                />
-                {formik.touched.plateNumber && formik.errors.plateNumber && (
-                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
-                    {formik.errors.plateNumber}
-                  </div>
-                )}
-              </div>
-              <div className="col-12 md:col-6 lg:col-6">
-                <InputTextField
-                  label={t("claimDetails.unit")}
-                  value={formik.values.unit}
-                  onChange={formik.handleChange("unit")}
-                />
-                {formik.touched.unit && formik.errors.unit && (
-                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
-                    {formik.errors.unit}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          <div className="grid mt-2">
-            {!isFire && (
-              <div className="col-12 md:col-6 lg:col-6">
-                <InputTextField
-                  label={t("claimDetails.shop")}
-                  value={formik.values.shop}
-                  onChange={formik.handleChange("shop")}
-                />
-                {formik.touched.shop && formik.errors.shop && (
-                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
-                    {formik.errors.shop}
-                  </div>
-                )}
-              </div>
-            )}
-            <div className="col-12 md:col-6 lg:col-6">
-              <InputTextField
-                label={t("claimDetails.insuranceCompanyNameOptional")}
-                value={formik.values.InsuranceCompanyN}
-                onChange={formik.handleChange("InsuranceCompanyN")}
-              />
-              {formik.touched.InsuranceCompanyN &&
-                formik.errors.InsuranceCompanyN && (
-                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
-                    {formik.errors.InsuranceCompanyN}
-                  </div>
-                )}
-            </div>
-          </div>
-          <div className="next_but_container">
-            <Button label={t("claimDetails.next")} onClick={formik.handleSubmit} />
-          </div>
-        </div>
-      </Card>
-    </div>
+      <ClaimActions>
+        <Button type="button" label={t("claimJourney.next")} icon="pi pi-arrow-right" iconPos="right" onClick={formik.handleSubmit} />
+      </ClaimActions>
+    </>
   );
 };
 

@@ -1,207 +1,103 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
-import { Card } from "primereact/card";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import useClaimHeader from "../useClaimHeader";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
-import { useRef } from "react";
 import claimsService from "../../../services/claimsService";
-import { useSelector } from "react-redux";
-import "./index.scss";
-import StatusIllustration from "../../component/StatusIllustration";
+import { formatDate } from "../../../utility/dateFormat";
+import ClaimJourneyLayout, { ClaimActions, ClaimSection } from "../shared/ClaimJourneyLayout";
+import FormErrorSummary from "../shared/FormErrorSummary";
+import { EDITABLE_STATUSES } from "../shared/claimJourney";
 
+/**
+ * Review: the claim is registered and the insurer has been advised. The claims officer checks what was reported, can go
+ * back and correct it, and moves the claim to processing (adjuster report) once the insurer has acknowledged it.
+ */
 const RequestApproval = ({ flow }) => {
   const { t } = useTranslation();
-  const params = useParams();
-  const { id } = params;
+  const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
   const toast = useRef(null);
+  const claimId = location.state?.claimId || id;
+  const [claim, setClaim] = useState(null);
+  const [loadError, setLoadError] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  // Get data from navigation state
-  const navigationState = location.state || {};
-  const policyNumber = navigationState.policyNumber || t("claimAuditTrail.nA");
-  const claimId = navigationState.claimId || id;
-  const fullResponse = navigationState.fullResponse || {};
+  useEffect(() => {
+    if (!claimId) return;
+    claimsService.getClaimDetails(claimId).then((result) => {
+      if (result.success) setClaim(result.data?.data || result.data);
+      else setLoadError(result.error || t("claimRequestApproval.failedToLoadClaimDetails"));
+    });
+  }, [claimId, t]);
 
-  // Get policy holder data from Redux
-  const {
-    policyHolderName: reduxPolicyHolderName,
-    claimNumber: reduxClaimNumber,
-  } = useSelector(({ claimDetailsMainReducers }) => ({
-    policyHolderName: claimDetailsMainReducers?.policyHolderName || "",
-    policyNumber: claimDetailsMainReducers?.policyNumber || "",
-    claimNumber: claimDetailsMainReducers?.claimNumber || "",
-  }));
-
-  // Try to get policy holder name from Redux first, then navigation state, then fullResponse or use fallback
-  const header = useClaimHeader(claimId);
-  const policyHolderName =
-    header.policyHolderName ||
-    reduxPolicyHolderName ||
-    navigationState.policyHolderName ||
-    fullResponse?.data?.policyHolderName ||
-    fullResponse?.data?.claim?.policyHolderName ||
-    fullResponse?.data?.claim?.PolicyHolderName ||
-    t("claimRequestApproval.loading");
-
-  // Use Redux claim number instead of navigation state
-  const claimNumber = header.claimNumber || reduxClaimNumber || "";
-
-  const handleEdit = async () => {
-    try {
-      setIsLoading(true);
-
-      // Get claim details using the claim ID from URL
-      const claimId = id;
-
-      const result = await claimsService.getClaimDetails(claimId);
-
-      if (result.success) {
-
-
-        // Navigate to claim details page with claimId in URL
-
-        navigate(`/agent/claimrequest/claimdetails/${claimId}`);
-      } else {
-        toast.current.show({
-          severity: "error",
-          summary: t("claimRequestApproval.error"),
-          detail: t("claimRequestApproval.failedToLoadClaimDetails"),
-          life: 5000,
-        });
-      }
-    } catch (error) {
-      toast.current.show({
-        severity: "error",
-        summary: t("claimRequestApproval.error"),
-        detail: t("claimRequestApproval.unexpectedErrorLoading"),
-        life: 5000,
-      });
-    } finally {
-      setIsLoading(false);
+  const proceed = async () => {
+    const next = () => navigate(flow === "quotation" ? "/agent/quotedetailedit" : `/agent/claimrequest/adjustersubmission/${claimId}`, { state: { claimId, clientId: claim?.clientId } });
+    // a claim already in processing goes straight on to the adjuster report
+    if (claim?.lifecycleStatus !== "registered") {
+      next();
+      return;
     }
+    setBusy(true);
+    const result = await claimsService.updateClaimStatus(claimId, "Processing");
+    setBusy(false);
+    if (!result.success) {
+      toast.current?.show({ severity: "error", summary: t("claimRequestApproval.error"), detail: result.error || t("claimRequestApproval.failedToUpdateStatus"), life: 5000 });
+      return;
+    }
+    toast.current?.show({ severity: "success", summary: t("claimRequestApproval.success"), detail: t("claimRequestApproval.claimStatusUpdated"), life: 3000 });
+    next();
   };
 
-  const handleSubmit = async () => {
-    setIsLoading(true);
-    try {
-      // Use the claim ID from the URL parameter (id)
-      const claimId = id; // This should be the claim ID from the previous screen
+  const editable = !claim || EDITABLE_STATUSES.includes(claim.lifecycleStatus);
+  const reported = claim ? [
+    [t("claimJourney.dateReported"), formatDate(claim.reportedDate)],
+    [t("claimFlow.timeOfLoss"), claim.timeOfIncident],
+    [t("claimFlow.placeOfLoss"), [claim.addressOfIncident, claim.cityOfIncident, claim.provinceOfIncident].filter(Boolean).join(", ")],
+    [t("claimFlow.driver"), claim.driverName],
+    [t("claimFlow.thirdParty"), claim.thirdPartyDetails?.thirdPartyName],
+    [t("claimFlow.reportedBy"), claim.reportedByName || claim.createdBy],
+  ].filter(([, v]) => v) : [];
 
-      const result = await claimsService.updateClaimStatus(
-        claimId,
-        "Processing"
-      );
-
-      if (result.success) {
-        toast.current.show({
-          severity: "success",
-          summary: t("claimRequestApproval.success"),
-          detail: t("claimRequestApproval.claimStatusUpdated"),
-          life: 3000,
-        });
-
-        // Navigate after successful update
-        setTimeout(() => {
-          if (flow === "quotation") {
-            navigate("/agent/quotedetailedit");
-          } else {
-            navigate(`/agent/claimrequest/adjustersubmission/${claimId}`);
-          }
-        }, 1000);
-      } else {
-        toast.current.show({
-          severity: "error",
-          summary: t("claimRequestApproval.error"),
-          detail: result.error || t("claimRequestApproval.failedToUpdateStatus"),
-          life: 5000,
-        });
-      }
-    } catch (error) {
-      toast.current.show({
-        severity: "error",
-        summary: t("claimRequestApproval.error"),
-        detail: t("claimRequestApproval.unexpectedError"),
-        life: 5000,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleClientViewNavigation = () => {
-    const clientId =
-      navigationState.clientId ||
-      fullResponse?.data?.policy?.clientId ||
-      fullResponse?.data?.claim?.policy?.clientId ||
-      fullResponse?.data?.clientId;
-
-    if (clientId) {
-      navigate(`/agent/clientview/${clientId}`);
-    } else {
-      navigate(-1);
-    }
-  };
   return (
-    <div className="claim__approval__overall">
+    <ClaimJourneyLayout
+      claim={claim}
+      step="review"
+      onBack={() => navigate(claim?.clientId ? `/agent/clientview/${claim.clientId}` : "/agent/claim")}
+      title={t("claimFlow.reviewTitle")}
+    >
       <Toast ref={toast} />
-      <div className="claim__requestapproval__upload__main__title">{t("claimRequestApproval.clients")}</div>
-      <div
-        className="claim__request__uploadarrow__back__btn mt-3 cursor-pointer"
-        onClick={handleClientViewNavigation}
-      >
-        <SvgLeftArrow />
-        <div className="claim__request__upload__back__btn__title">
-          {(() => {
-            return `${policyHolderName} / ${
-              claimNumber ? t("claimRequestApproval.claimLabel", { claimNumber }) : t("claimRequestApproval.loading")
-            }`;
-          })()}
-        </div>
-      </div>
-      <Card className="mt-4 claimrequest__overall__card">
-        <div>
-          <div className="claim__title_txt mt-6">{t("claimRequestApproval.waitingForUpdate")}</div>
-          <div className="claimtitle__img__overallcontainer mt-4">
-            <StatusIllustration variant="waiting" className="claimtitle__img__container" />
-          </div>
-          <div className="claimtitle__txt_container mt-6">
-            <div>
-              {" "}
-              {t("claimRequestApproval.claimRequestRaised", { policyNumber })}
-            </div>
-            <div>
-              {" "}
-              {t("claimRequestApproval.kindlyBePatient")}
-            </div>
-          </div>
-        </div>
-        <div className="claimtitle__butt_container mt-6">
-          <Button
-            link
-            onClick={handleEdit}
-            className="claim__back__but"
-            disabled={isLoading}
-            loading={isLoading}
-          >
-            {isLoading ? t("claimRequestApproval.loading") : t("claimRequestApproval.edit")}
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            className="claim__snd__but"
-            loading={isLoading}
-            disabled={isLoading}
-          >
-            {isLoading ? t("claimRequestApproval.updating") : t("claimRequestApproval.proceed")}
-          </Button>
-        </div>
-      </Card>
-    </div>
+      {!claim && !loadError && <p className="claim-journey__hint">{t("claimJourney.loadingClaim")}</p>}
+      {loadError && <FormErrorSummary serverError={loadError} />}
+      {claim && (
+        <>
+          <div className="claim-journey__notice">{editable ? t("claimFlow.reviewNotice") : t("claimFlow.reviewDone", { status: claim.claimStatus })}</div>
+          <ClaimSection title={t("claimFlow.asReported")}>
+            <dl className="claim-journey__facts">
+              {reported.map(([label, value]) => (
+                <div key={label}>
+                  <dt>{label}</dt>
+                  <dd>{value}</dd>
+                </div>
+              ))}
+            </dl>
+            {claim.description ? <p className="claim-journey__hint mt-3">{claim.description}</p> : null}
+          </ClaimSection>
+        </>
+      )}
+      <ClaimActions>
+        <Button type="button" label={t("claimFlow.editNotification")} icon="pi pi-pencil" outlined disabled={busy || !claim || !editable}
+          onClick={() => navigate(`/agent/claimrequest/claimdetails/${claimId}`)} />
+        <Button type="button" label={t("claimFlow.proceedToAdjuster")} icon="pi pi-arrow-right" iconPos="right" onClick={proceed} loading={busy}
+          disabled={busy || !claim || !editable} />
+      </ClaimActions>
+    </ClaimJourneyLayout>
   );
 };
+
+RequestApproval.propTypes = { flow: PropTypes.string };
+RequestApproval.defaultProps = { flow: "normal" };
 
 export default RequestApproval;

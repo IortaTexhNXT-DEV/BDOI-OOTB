@@ -24,7 +24,7 @@ import {
   isValidPhilippineZip,
   normalizeCountryName,
 } from "../../../utility/addressHelpers";
-import ClaimJourneyLayout, { ClaimActions, ClaimSection } from "../shared/ClaimJourneyLayout";
+import ClaimJourneyLayout, { ClaimActions, ClaimSection, FIELD_COL } from "../shared/ClaimJourneyLayout";
 import FormErrorSummary from "../shared/FormErrorSummary";
 import useClaimsConfig from "../shared/useClaimsConfig";
 import {
@@ -308,7 +308,7 @@ const AdjusterSubmission = () => {
     </>
   );
   const input = (name, label, props = {}) => (
-    <div className="col-12 md:col-6">
+    <div className={FIELD_COL}>
       <InputTextField
         label={label}
         value={formik.values[name]}
@@ -321,7 +321,7 @@ const AdjusterSubmission = () => {
     </div>
   );
   const dateField = (name, label) => (
-    <div className="col-12 md:col-6">
+    <div className={FIELD_COL}>
       <DatepickerField
         label={label}
         value={fromIsoDate(formik.values[name])}
@@ -340,6 +340,7 @@ const AdjusterSubmission = () => {
 
   return (
     <ClaimJourneyLayout
+      claim={claim}
       step="adjuster"
       holderName={claim?.policyHolderName}
       reference={claim?.claimNumber ? t("claimJourney.claimRef", { number: claim.claimNumber }) : ""}
@@ -372,7 +373,7 @@ const AdjusterSubmission = () => {
                 {input("driversName", req(labels.driversName))}
                 {input("houseNumber", t("claimJourney.houseNo"))}
                 {input("barangay", t("claimJourney.barangay"))}
-                <div className="col-12 md:col-6">
+                <div className={FIELD_COL}>
                   <DropdownField
                     label={t("claimJourney.country")}
                     value={formik.values.country}
@@ -387,7 +388,7 @@ const AdjusterSubmission = () => {
                     disabled={!editable}
                   />
                 </div>
-                <div className="col-12 md:col-6">
+                <div className={FIELD_COL}>
                   <DropdownField
                     label={t("claimJourney.province")}
                     value={formik.values.province}
@@ -401,7 +402,7 @@ const AdjusterSubmission = () => {
                     disabled={!editable || !formik.values.country}
                   />
                 </div>
-                <div className="col-12 md:col-6">
+                <div className={FIELD_COL}>
                   <DropdownField
                     label={t("claimJourney.city")}
                     value={formik.values.city}

@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
@@ -75,13 +74,13 @@ const SettlementCash = ({ claimId }) => {
   const canPay = pos.canRecord && pos.payableToClaimant > 0 && hasPermission("write:disbursements");
 
   return (
-    <Card className="mt-3">
+    <section className="claim-journey__section">
       <Toast ref={toast} />
       <div className="flex justify-content-between align-items-center flex-wrap gap-2">
-        <div className="claim__title">{t("followUps.settlementCash", "Settlement cash")}</div>
+        <h3 className="claim-journey__section-title">{t("followUps.settlementCash", "Settlement cash")}</h3>
         <div className="flex gap-2">
-          {canReceive && <Button icon="pi pi-download" label={t("followUps.recordFundsReceived", "Record funds received")} onClick={() => open("funds-received")} />}
-          {canPay && <Button icon="pi pi-upload" severity="success" label={t("followUps.payClaimant", "Pay claimant")} onClick={() => open("paid-to-claimant")} />}
+          {canReceive && <Button icon="pi pi-download" outlined label={t("followUps.recordFundsReceived", "Record funds received")} onClick={() => open("funds-received")} />}
+          {canPay && <Button icon="pi pi-upload" label={t("followUps.payClaimant", "Pay claimant")} onClick={() => open("paid-to-claimant")} />}
         </div>
       </div>
       {!pos.canRecord && <small className="block mt-2">{t("followUps.settlementNotBooked", "Cash can be recorded once the settlement through the broker is booked.")}</small>}
@@ -124,7 +123,7 @@ const SettlementCash = ({ claimId }) => {
           </div>
         )}
       </Dialog>
-    </Card>
+    </section>
   );
 };
 

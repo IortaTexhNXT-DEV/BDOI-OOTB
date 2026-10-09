@@ -9,13 +9,16 @@ import claimsService from "../../../../services/claimsService";
 import { isFireLob } from "../../../endorsementModule/constants/endorsementCategories";
 import { normalizeCountryName } from "../../../../utility/addressHelpers";
 import logger from "../../../../utility/logger";
+import { claimLobOf } from "../../shared/claimJourney";
 
 /**
- * Map productType/lob to API LOB value (MOTOR | FIRE)
+ * Line of business sent with a claim (MOTOR, FIRE, ACCIDENT, LIFE, MARINE ...) from the policy's line or product name;
+ * fire-type products (Industrial All Risks included) are FIRE as on the policy, an unknown product is MOTOR.
  */
 export const mapToApiLob = (lobOrProductType) => {
   if (!lobOrProductType) return "MOTOR";
-  return isFireLob(lobOrProductType) ? "FIRE" : "MOTOR";
+  if (isFireLob(lobOrProductType)) return "FIRE";
+  return claimLobOf(lobOrProductType) || "MOTOR";
 };
 
 export const getClaimDetailsViewData = createAsyncThunk(
@@ -159,6 +162,7 @@ export const getClaimDetailsForEdit = createAsyncThunk(
             claimData.lead?.insuranceCompanyName ||
             "",
           policyNumber: claimData.policy?.policyNumber || "",
+          claimNumber: claimData.claimNumber || "",
           PolicyHolderName:
             claimData.policy?.insuredName ||
             claimData.policy?.policyHolderName ||
