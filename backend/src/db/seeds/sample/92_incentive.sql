@@ -1,17 +1,17 @@
 -- SAMPLE / DEMO DATA: runs only when SEED_SAMPLE_DATA is true (never in a production go-live). See ../README.md.
--- Incentive programs and calculation batches for the sample agents (seeded in 53_remittance.sql). Idempotent.
+-- Incentive programmes of the account executives (seeded in 10_masters.sql) and their calculation batches. Idempotent.
 INSERT INTO incentive_programs(name, description, metric, target, period_from, period_to, status, program_code, program_type, applicable_to, target_metric, stretch_target, currency,
                                calculation_frequency, structure, created_by)
 SELECT v.name, v.descr, v.metric, v.target, v.f::date, v.t::date, v.status, v.code, v.ptype, v.applicable::jsonb, v.tmetric, v.stretch,
        COALESCE((SELECT value #>> '{}' FROM app_settings WHERE key = 'currency.default'), 'PHP'), v.freq, v.structure::jsonb, (SELECT id FROM users WHERE username = 'BrokerVerse')
 FROM (VALUES
-  ('Q3 Premium Achievers', 'Quarterly incentive for premium targets', 'premium', 500000, '2026-07-01', '2026-09-30', 'Active', 'INC-2026-001', 'Target Based', '["Individual Agent"]', 'Premium Volume', 750000, 'Quarterly',
+  ('Q3 TFS Motor Premium Achievers', 'Quarterly incentive on the motor premium of TFS-referred buyers', 'premium', 500000, '2026-07-01', '2026-09-30', 'Active', 'INC-2026-001', 'Target Based', '["Individual Agent"]', 'Premium Volume', 750000, 'Quarterly',
    '[{"level":"80-90%","type":"Percentage","value":2,"maxPayout":20000},{"level":"90-100%","type":"Percentage","value":3,"maxPayout":30000},{"level":"100-110%","type":"Percentage","value":4,"maxPayout":50000},{"level":"110%+","type":"Percentage","value":5,"maxPayout":75000}]'),
-  ('New Business Champion', 'Monthly incentive for new policy acquisition', 'policies', 20, '2026-01-01', '2026-12-31', 'Active', 'INC-2026-002', 'Commission Based', '["Individual Agent","Team"]', 'Policy Count', 30, 'Monthly',
+  ('New Business Champion', 'Monthly incentive for new policies booked (motor, PA, credit life)', 'policies', 20, '2026-01-01', '2026-12-31', 'Active', 'INC-2026-002', 'Commission Based', '["Individual Agent","Team"]', 'Policy Count', 30, 'Monthly',
    '[{"level":"0-10 policies","type":"Fixed Amount","value":500,"maxPayout":5000},{"level":"11-20 policies","type":"Fixed Amount","value":750,"maxPayout":15000},{"level":"21-30 policies","type":"Fixed Amount","value":1000,"maxPayout":30000},{"level":"31+ policies","type":"Fixed Amount","value":1500,"maxPayout":50000}]'),
-  ('Renewal Excellence', 'Incentive for maintaining high renewal rates', 'renewal-rate', 85, '2026-01-01', '2026-06-30', 'Completed', 'INC-2026-003', 'Hybrid', '["Individual Agent","Branch"]', 'Renewal Rate', 95, 'Semi-Annual',
+  ('Renewal Excellence', 'Incentive for keeping the motor renewals of paid-off TFS loans', 'renewal-rate', 85, '2026-01-01', '2026-06-30', 'Completed', 'INC-2026-003', 'Hybrid', '["Individual Agent","Branch"]', 'Renewal Rate', 95, 'Semi-Annual',
    '[{"level":"85-90%","type":"Fixed Amount","value":10000,"maxPayout":10000},{"level":"90-95%","type":"Fixed Amount","value":20000,"maxPayout":20000},{"level":"95%+","type":"Fixed Amount","value":35000,"maxPayout":35000}]'),
-  ('Q4 Motor Sales Contest', 'Year-end contest for motor premium', 'premium', 1000000, '2026-10-01', '2026-12-31', 'Draft', 'INC-2026-004', 'Contest', '["Individual Agent"]', 'Premium Volume', 1500000, 'Quarterly',
+  ('Q4 Toyota Dealer Sales Contest', 'Year-end contest on the motor premium of buyers referred by the Toyota dealers', 'premium', 1000000, '2026-10-01', '2026-12-31', 'Draft', 'INC-2026-004', 'Contest', '["Individual Agent"]', 'Premium Volume', 1500000, 'Quarterly',
    '[{"level":"100-120%","type":"Percentage","value":3,"maxPayout":40000},{"level":"120%+","type":"Percentage","value":5,"maxPayout":80000}]')
 ) AS v(name, descr, metric, target, f, t, status, code, ptype, applicable, tmetric, stretch, freq, structure)
 WHERE NOT EXISTS (SELECT 1 FROM incentive_programs p WHERE p.program_code = v.code);

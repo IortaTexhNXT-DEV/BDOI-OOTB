@@ -92,7 +92,7 @@ describe('generic master (company)', () => {
     expect(badEmail.body.errors.map((e) => e.path)).toEqual(['EmailID']);
     const bad = await ctx.api('post', '/masters/taxation').send({ taxCode: 'T1', taxName: 'x', taxRate: 'abc', basis: 'Premium', effectiveFrom: '2026-01-01' });
     expect(bad.status).toBe(400);
-    const dup = await ctx.api('post', '/masters/company').send({ CompanyCode: 'bvb', CompanyName: 'Dup', LicenseNumber: '1', EmailID: 'd@x.example', PhoneNumber: '1' });
+    const dup = await ctx.api('post', '/masters/company').send({ CompanyCode: 'tisph', CompanyName: 'Dup', LicenseNumber: '1', EmailID: 'd@x.example', PhoneNumber: '1' });
     expect(dup.status).toBe(409);
     expect((await ctx.api('get', '/masters/nope')).status).toBe(404);
   });

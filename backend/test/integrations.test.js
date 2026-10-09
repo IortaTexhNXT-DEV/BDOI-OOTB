@@ -219,27 +219,27 @@ describe('CTPL authentication', () => {
   }
 
   it('a CTPL cover issued gets the next COC number and is authenticated through the provider; the code is printed', async () => {
-    issued = await issueCtpl('MALAYAN', { plateNumber: 'NCA 4521', chassisNumber: 'MHFXR41G5J0012345', engineNumber: 'ENG-1' });
+    issued = await issueCtpl('PIONEER', { plateNumber: 'NCA 4521', chassisNumber: 'MHFXR41G5J0012345', engineNumber: 'ENG-1' });
     const a = await one('SELECT * FROM ctpl_authentications WHERE policy_id = $1', [issued.id]);
-    expect(a).toMatchObject({ coc_number: 'MIC00010000', status: 'requested' });
+    expect(a).toMatchObject({ coc_number: 'PIO00020000', status: 'requested' });
     await outbox.processOutbox({ ids: [Number(a.outbox_id)] });
     const after = (await ctx.as('sales')('get', `/ctpl/authentications/${a.id}`)).body.data;
     expect(after).toMatchObject({ status: 'authenticated', method: 'api' });
     expect(after.authCode).toMatch(/^[0-9A-F]{12}$/);
     const pol = await one('SELECT doc FROM policies WHERE id = $1', [issued.id]);
-    expect(pol.doc).toMatchObject({ cocNumber: 'MIC00010000', ctplAuthenticationCode: after.authCode });
+    expect(pol.doc).toMatchObject({ cocNumber: 'PIO00020000', ctplAuthenticationCode: after.authCode });
     const { toPolicy } = await import('../src/modules/policies/service.js');
     const { policyScheduleDoc } = await import('../src/modules/documents/templates.js');
     const spec = await policyScheduleDoc(toPolicy({ ...issued, doc: pol.doc }));
-    expect(spec.meta).toEqual(expect.arrayContaining([['COC no.', 'MIC00010000'], ['CTPL authentication code', after.authCode]]));
-    const series = (await ctx.as('sales')('get', '/ctpl/coc-series')).body.data.find((s) => s.prefix === 'MIC');
-    expect(series).toMatchObject({ nextNumber: 10001, used: 1, remaining: 499 });
+    expect(spec.meta).toEqual(expect.arrayContaining([['COC no.', 'PIO00020000'], ['CTPL authentication code', after.authCode]]));
+    const series = (await ctx.as('sales')('get', '/ctpl/coc-series')).body.data.find((s) => s.prefix === 'PIO');
+    expect(series).toMatchObject({ nextNumber: 20001, used: 1, remaining: 499 });
   });
 
   it('missing vehicle details hold the request; the provider refusing it leaves a failure; the code is keyed in by hand', async () => {
-    const p = await issueCtpl('PIONEER', {});
+    const p = await issueCtpl('MAAGAP', {});
     const a = (await ctx.as('sales')('get', `/ctpl/authentications?search=${p.policy_number}`)).body.data[0];
-    expect(a).toMatchObject({ status: 'pending', cocNumber: 'PIS00020000' });
+    expect(a).toMatchObject({ status: 'pending', cocNumber: 'MAA00030000' });
     const r = await ctx.as('sales')('post', `/ctpl/authentications/${a.id}/authenticate`);
     expect(r.status).toBe(400);
     expect(r.body.message).toMatch(/plate number or MV file number/);
@@ -285,7 +285,7 @@ describe('CTPL authentication', () => {
   });
 
   it('an authentication result pushed by the provider is verified and applied through the inbox', async () => {
-    const p = await issueCtpl('MALAYAN', { plateNumber: 'XYZ 9', chassisNumber: 'CH-9' });
+    const p = await issueCtpl('STRONGHOLD', { plateNumber: 'XYZ 9', chassisNumber: 'CH-9' });
     const a = await one('SELECT * FROM ctpl_authentications WHERE policy_id = $1', [p.id]);
     await query("UPDATE integration_outbox SET status = 'cancelled' WHERE id = $1", [a.outbox_id]);
     const c = await one("SELECT * FROM integration_connectors WHERE code = 'CTPL_AUTH'");
@@ -360,10 +360,14 @@ describe('bank payment files', () => {
   });
 
   it('pays an insurer remittance and a referrer payout by file: approval, file, status file, journals; a rejected payment frees its voucher', async () => {
-    // insurer remittance voucher (MALAYAN has a bank account in the sample payee accounts)
-    const m = await makePolicy({ net: 40000, insurer: 'MALAYAN' });
+    // the BDO account the broker pays from (its own record: the sample has only the Metrobank operating account)
+    await query(`INSERT INTO master_records(type_code, code, name, data, status, created_by) VALUES ('bank-account', 'ACC-BDO-PAY', 'Disbursement Account', $1, 'active', 'test')`,
+      [JSON.stringify({ accountCode: 'ACC-BDO-PAY', glAccount: '1102001', accountName: 'Disbursement Account', bankCode: 'BDO', bankName: 'Banco de Oro', accountNumber: '001234567890',
+        accountType: 'Current Account', currency: 'PHP' })]);
+    // insurer remittance voucher (MAAGAP has a bank account in the sample payee accounts)
+    const m = await makePolicy({ net: 40000, insurer: 'MAAGAP' });
     expect((await maker('post', '/receipts').send({ policyId: m.policy.id, amount: m.gross })).status).toBe(201);
-    const rem = (await maker('post', '/disbursements/insurer-remittance').send({ insurerName: 'MALAYAN' })).body.data;
+    const rem = (await maker('post', '/disbursements/insurer-remittance').send({ insurerName: 'MAAGAP' })).body.data;
     expect((await maker('put', `/disbursements/${rem.disbursementId}`).send({ status: 'for-approval' })).status).toBe(200);
     // referrer payout voucher (bank account on the referrer record)
     const c = await maker('post', '/commission/referrer-accounts').send({ name: 'Bank File Referrer', type: 'Agent', level: 'L1', bankName: 'BDO', bankAccountNo: '009988776655' });
@@ -384,19 +388,19 @@ describe('bank payment files', () => {
     expect(eligible.find((v) => v.disbursementId === rem.disbursementId)).toMatchObject({ ready: true, bankCode: 'MBT' });
     expect(eligible.find((v) => v.disbursementId === payout.disbursementId)).toMatchObject({ ready: true, bankCode: 'BDO', accountNumber: '009988776655' });
     expect(eligible.find((v) => v.disbursementId === refund.disbursementId)).toMatchObject({ ready: false });
-    const refused = await maker('post', '/bank-payments/batches').send({ layoutCode: 'BDO-BULK', bankAccountCode: 'ACC-BDO-001', channel: 'pesonet', disbursementIds: [refund.disbursementId] });
+    const refused = await maker('post', '/bank-payments/batches').send({ layoutCode: 'BDO-BULK', bankAccountCode: 'ACC-BDO-PAY', channel: 'pesonet', disbursementIds: [refund.disbursementId] });
     expect(refused.status).toBe(400);
     expect(JSON.stringify(refused.body.errors)).toMatch(/no bank account on file/);
-    const insta = await maker('post', '/bank-payments/batches').send({ layoutCode: 'BDO-BULK', bankAccountCode: 'ACC-BDO-001', channel: 'instapay', disbursementIds: [rem.disbursementId] });
+    const insta = await maker('post', '/bank-payments/batches').send({ layoutCode: 'BDO-BULK', bankAccountCode: 'ACC-BDO-PAY', channel: 'instapay', disbursementIds: [rem.disbursementId] });
     expect(insta.status).toBe(400);
     expect(JSON.stringify(insta.body.errors)).toMatch(/InstaPay limit/);
 
     const valueDate = await today();
-    const cr = await maker('post', '/bank-payments/batches').send({ layoutCode: 'BDO-BULK', bankAccountCode: 'ACC-BDO-001', channel: 'pesonet', valueDate, disbursementIds: [rem.disbursementId, payout.disbursementId] });
+    const cr = await maker('post', '/bank-payments/batches').send({ layoutCode: 'BDO-BULK', bankAccountCode: 'ACC-BDO-PAY', channel: 'pesonet', valueDate, disbursementIds: [rem.disbursementId, payout.disbursementId] });
     expect(cr.status).toBe(201);
     const batch = cr.body.data;
     expect(batch).toMatchObject({ status: 'draft', lineCount: 2 });
-    expect((await maker('post', '/bank-payments/batches').send({ layoutCode: 'BDO-BULK', bankAccountCode: 'ACC-BDO-001', channel: 'pesonet', disbursementIds: [rem.disbursementId] })).status).toBe(400);
+    expect((await maker('post', '/bank-payments/batches').send({ layoutCode: 'BDO-BULK', bankAccountCode: 'ACC-BDO-PAY', channel: 'pesonet', disbursementIds: [rem.disbursementId] })).status).toBe(400);
     expect((await maker('post', `/bank-payments/batches/${batch.id}/generate`)).status).toBe(409);
     expect((await maker('post', `/bank-payments/batches/${batch.id}/submit`)).status).toBe(200);
     expect((await maker('post', `/bank-payments/batches/${batch.id}/approve`)).status).toBe(403);
@@ -428,7 +432,7 @@ describe('bank payment files', () => {
     expect((await one("SELECT * FROM integration_inbox WHERE message_type = 'bank.status_file' ORDER BY id DESC LIMIT 1")).status).toBe('processed');
 
     // the rejected payout goes on a new batch; its result is entered by hand
-    const b2 = (await maker('post', '/bank-payments/batches').send({ layoutCode: 'GENERIC-CSV', bankAccountCode: 'ACC-BDO-001', channel: 'instapay', disbursementIds: [payout.disbursementId] })).body.data;
+    const b2 = (await maker('post', '/bank-payments/batches').send({ layoutCode: 'GENERIC-CSV', bankAccountCode: 'ACC-BDO-PAY', channel: 'instapay', disbursementIds: [payout.disbursementId] })).body.data;
     await maker('post', `/bank-payments/batches/${b2.id}/submit`);
     await checker('post', `/bank-payments/batches/${b2.id}/approve`);
     await maker('post', `/bank-payments/batches/${b2.id}/generate`);

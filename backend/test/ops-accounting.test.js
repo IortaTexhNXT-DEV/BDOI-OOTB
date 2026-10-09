@@ -181,8 +181,8 @@ describe('post-dated cheque register', () => {
     expect((await pdcDepositDue()).due).toBeGreaterThanOrEqual(1);
   });
   it('deposits a cheque on its date: the receipt is created and posted; not before its date', async () => {
-    expect((await ctx.as('maker')('post', `/pdc/${second.id}/deposit`).send({ depositAccount: 'ACC-BDO-001' })).status).toBe(409);
-    const r = await ctx.as('maker')('post', `/pdc/${first.id}/deposit`).send({ depositAccount: 'ACC-BDO-001' });
+    expect((await ctx.as('maker')('post', `/pdc/${second.id}/deposit`).send({ depositAccount: 'ACC-MBT-001' })).status).toBe(409);
+    const r = await ctx.as('maker')('post', `/pdc/${first.id}/deposit`).send({ depositAccount: 'ACC-MBT-001' });
     expect(r.status).toBe(200);
     expect(r.body.data.pdc.status).toBe('deposited');
     expect(r.body.data.receiptNumber).toMatch(/^OR-/);
@@ -300,16 +300,16 @@ describe('claims settlements from the Accounting menu', () => {
     await postBrokerSettlement(claimId, admin);
     const list = (await ctx.as('maker')('get', '/claim-payments?status=outstanding')).body.data;
     expect(list.rows.find((r) => r.claimId === claimId)).toMatchObject({ stage: 'awaiting-funds', toReceive: 20000, payableToClaimant: 20000 });
-    expect((await ctx.as('maker')('post', `/claim-payments/claims/${claimId}/funds-received`).send({ amount: 20000, bankAccount: 'ACC-BDO-001', reference: 'RA-9' })).status).toBe(200);
-    const pay = await ctx.as('maker')('post', `/claim-payments/claims/${claimId}/pay`).send({ amount: 20000, bankAccount: 'ACC-BDO-001', paymentMode: 'check', reference: 'Chq 77', payee: 'Test Claimant' });
+    expect((await ctx.as('maker')('post', `/claim-payments/claims/${claimId}/funds-received`).send({ amount: 20000, bankAccount: 'ACC-MBT-001', reference: 'RA-9' })).status).toBe(200);
+    const pay = await ctx.as('maker')('post', `/claim-payments/claims/${claimId}/pay`).send({ amount: 20000, bankAccount: 'ACC-MBT-001', paymentMode: 'check', reference: 'Chq 77', payee: 'Test Claimant' });
     expect(pay.status).toBe(200);
     expect(pay.body.data.voucherNumber).toMatch(/^CPV-\d{4}-\d{5}$/);
-    expect(await jvLines(pay.body.data.journalId)).toEqual([{ a: '2205003', d: 20000, c: 0 }, { a: '1102001', d: 0, c: 20000 }]);
+    expect(await jvLines(pay.body.data.journalId)).toEqual([{ a: '2205003', d: 20000, c: 0 }, { a: '106010', d: 0, c: 20000 }]);
     pdfOk(await pdfGet(ctx.as('maker'), `/claim-payments/movements/${pay.body.data.movementId}/voucher`));
     pdfOk(await pdfGet(ctx.as('maker'), `/claim-payments/claims/${claimId}/release-form`));
     const done = (await ctx.as('maker')('get', '/claim-payments?status=completed')).body.data;
     expect(done.rows.find((r) => r.claimId === claimId).stage).toBe('completed');
-    expect((await ctx.as('claims')('post', `/claim-payments/claims/${claimId}/pay`).send({ amount: 1, bankAccount: 'ACC-BDO-001' })).status).toBe(403);
+    expect((await ctx.as('claims')('post', `/claim-payments/claims/${claimId}/pay`).send({ amount: 1, bankAccount: 'ACC-MBT-001' })).status).toBe(403);
   });
 });
 
@@ -384,9 +384,9 @@ describe('accounts payable', () => {
   it('pays the invoice (ap.payment), ages what is open and reopens it when the payment is cancelled', async () => {
     const ageing = (await ctx.as('maker')('get', '/payables/ageing')).body.data;
     expect(ageing.rows.find((x) => x.invoiceId === inv.id)).toMatchObject({ balance: 11100, bucket: 'current' });
-    const p = await ctx.as('maker')('post', '/payables/payments').send({ supplierId: 'SUP-T1', payFromAccount: 'ACC-BDO-001', chequeNumber: '000781', allocations: [{ invoiceId: inv.id }] });
+    const p = await ctx.as('maker')('post', '/payables/payments').send({ supplierId: 'SUP-T1', payFromAccount: 'ACC-MBT-001', chequeNumber: '000781', allocations: [{ invoiceId: inv.id }] });
     expect(p.status).toBe(201);
-    expect(await jvLines(p.body.data.journalId)).toEqual([{ a: '2206001', d: 11100, c: 0 }, { a: '1102001', d: 0, c: 11100 }]);
+    expect(await jvLines(p.body.data.journalId)).toEqual([{ a: '2206001', d: 11100, c: 0 }, { a: '106010', d: 0, c: 11100 }]);
     expect((await ctx.as('maker')('get', `/payables/invoices/${inv.id}`)).body.data).toMatchObject({ status: 'paid', balance: 0 });
     pdfOk(await pdfGet(ctx.as('maker'), `/payables/payments/${p.body.data.id}/pdf`));
     expect((await ctx.as('maker')('post', `/payables/payments/${p.body.data.id}/cancel`).send({ reason: 'Spoiled cheque' })).status).toBe(200);

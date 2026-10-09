@@ -47,7 +47,8 @@ describe('TISPH product catalogue', () => {
     const templates = await q(`SELECT DISTINCT p.code FROM product_templates t JOIN products p ON p.id = t.product_id WHERE t.status = 'Active'`);
     expect(templates.map((r) => r.code).every((c) => ACTIVE.includes(c))).toBe(true);
     expect(await q("SELECT 1 FROM insurer_rate_tables r JOIN products p ON p.id = r.product_id WHERE r.active AND p.status <> 'active'")).toEqual([]);
-    expect(await q("SELECT code FROM package_bundles WHERE status = 'active'")).toEqual([]);
+    expect(await q(`SELECT b.code FROM package_bundles b JOIN package_bundle_sections s ON s.bundle_id = b.id JOIN products p ON p.id = s.product_id
+      WHERE b.status = 'active' AND p.status <> 'active'`)).toEqual([]);
   });
 
   it('has Pioneer, Maagap and AXA on the insurer master', async () => {

@@ -137,7 +137,10 @@ describe('activity report and access', () => {
     expect(r.status).toBe(200);
     const mine = r.body.data.rows.find((x) => x.accountExecutive === aeId);
     expect(mine).toMatchObject({ total: 3, call: 1, email: 1, other: 1, prospects: 2, nextSteps: 1, followUpsDone: 1, followUpsOpen: 0, positive: 2 });
-    expect(r.body.data.totals).toMatchObject({ activities: 4, accountExecutives: 2 });
+    // the sample activities of the same period are counted as well
+    const sample = await one(`SELECT count(*)::int AS n, count(DISTINCT account_executive)::int AS aes FROM sales_activities
+      WHERE id LIKE 'sac_seed_%' AND status = 'logged' AND activity_at >= $1::date AND activity_at < ($2::date + interval '1 day')`, [`${asOf.slice(0, 7)}-01`, asOf]);
+    expect(r.body.data.totals).toMatchObject({ activities: 4 + sample.n, accountExecutives: 2 + sample.aes });
     expect(r.body.data.byType.map((t) => t.activityType)).toEqual(expect.arrayContaining(['CALL', 'EMAIL', 'MEETING']));
     const x = await binary(ae('get', `/sales-activities/report?from=${asOf.slice(0, 7)}-01&to=${asOf}&format=xlsx`));
     expect(x.status).toBe(200);

@@ -1,5 +1,5 @@
 -- Sales and policy administration reference data: configuration keys and address lookups (districts / postal codes).
--- The fictional insurers and the linked sample (lead -> client -> quotation -> policy -> ...) are in sample/20_sales.sql.
+-- The linked sample (lead -> client -> quotation -> policy -> ...) is in sample/84_sales.sql.
 -- Idempotent: settings ON CONFLICT DO NOTHING, lookups by natural key.
 
 -- ---------- Configuration ----------

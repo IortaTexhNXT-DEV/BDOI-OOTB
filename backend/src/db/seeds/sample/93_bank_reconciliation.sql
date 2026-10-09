@@ -1,13 +1,12 @@
 -- SAMPLE / DEMO DATA: runs only when SEED_SAMPLE_DATA is true (never in a production go-live). See ../README.md.
--- Bank reconciliation demo: the sample bank accounts are linked to their GL cash accounts, and the BDO operating account
--- (GL 1102001) gets last month's bank statement built from the sample ledger: deposits of the official receipts (the
--- last two days' deposits still in transit), encashed cheques and fund transfers, plus bank items not yet in the books
--- (interest, final tax, service charge). Runs once (marker: a statement of the account).
-UPDATE master_records SET data = data || '{"glAccountCode":"1102001","statementFormat":"BDO-SAMPLE"}'::jsonb
-WHERE type_code = 'bank-account' AND code = 'ACC-BDO-001' AND COALESCE(data->>'glAccountCode', '') = '';
-UPDATE master_records SET data = data || '{"glAccountCode":"1102003","statementFormat":"MBT-SAMPLE"}'::jsonb
+-- Bank reconciliation demo: the sample Metrobank operating account is linked to the cash in bank account of the chart
+-- (accounting.account.cash_in_bank, where the receipts by cheque and bank transfer and the cheque payments post) and
+-- gets last month's bank statement built from the sample ledger: deposits of the official receipts (the last two days'
+-- deposits still in transit), encashed cheques and fund transfers, plus bank items not yet in the books (interest,
+-- final tax, service charge). Runs once (marker: a statement of the account).
+UPDATE master_records SET data = data || jsonb_build_object('glAccountCode', (SELECT value #>> '{}' FROM app_settings WHERE key = 'accounting.account.cash_in_bank'), 'statementFormat', 'MBT-SAMPLE')
 WHERE type_code = 'bank-account' AND code = 'ACC-MBT-001' AND COALESCE(data->>'glAccountCode', '') = ''
-  AND NOT EXISTS (SELECT 1 FROM master_records m WHERE m.type_code = 'bank-account' AND m.data->>'glAccountCode' = '1102003');
+  AND NOT EXISTS (SELECT 1 FROM master_records m WHERE m.type_code = 'bank-account' AND m.data->>'glAccountCode' = (SELECT value #>> '{}' FROM app_settings WHERE key = 'accounting.account.cash_in_bank'));
 
 DO $$
 DECLARE
@@ -21,7 +20,7 @@ DECLARE
   v_run numeric;
   r record;
 BEGIN
-  SELECT * INTO acct FROM bank_account_links WHERE bank_account_code = 'ACC-BDO-001' AND gl_account_code IS NOT NULL;
+  SELECT * INTO acct FROM bank_account_links WHERE bank_account_code = 'ACC-MBT-001' AND gl_account_code IS NOT NULL;
   IF acct IS NULL OR EXISTS (SELECT 1 FROM bank_statements WHERE bank_account_id = acct.bank_account_id) THEN RETURN; END IF;
   SELECT COALESCE(sum(l.debit - l.credit), 0) INTO v_open FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id
    WHERE l.account_code = acct.gl_account_code AND j.status IN ('posted', 'reversed') AND j.jv_date < v_from;
@@ -46,7 +45,7 @@ BEGIN
   INSERT INTO bank_statements(statement_number, bank_account_id, bank_account_code, gl_account_code, statement_ref, period_from, period_to, opening_balance, closing_balance,
     total_debits, total_credits, line_count, format_code, file_name, source, remarks, created_by)
   SELECT v_sid, acct.bank_account_id, acct.bank_account_code, acct.gl_account_code, 'SOA ' || to_char(v_from, 'Mon YYYY'), v_from, v_to, v_open, v_open + COALESCE(sum(amt), 0),
-    COALESCE(sum(-amt) FILTER (WHERE amt < 0), 0), COALESCE(sum(amt) FILTER (WHERE amt > 0), 0), count(*), 'BDO-SAMPLE', 'bdo-sample-statement.csv', 'import', 'Sample statement (demo data)', admin_id
+    COALESCE(sum(-amt) FILTER (WHERE amt < 0), 0), COALESCE(sum(amt) FILTER (WHERE amt > 0), 0), count(*), 'MBT-SAMPLE', 'mbt-sample-statement.csv', 'import', 'Sample statement (demo data)', admin_id
   FROM tmp_bank_lines
   RETURNING id INTO v_sid;
   v_run := v_open;

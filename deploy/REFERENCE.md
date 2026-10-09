@@ -37,10 +37,18 @@ administrator edits are kept). The seed has two parts (classification per file i
   vehicle master, covers, the head office branch, master screen definitions and reference master records, the chart
   of accounts, product templates with the motor / CTPL tariff, the report catalogue, direct-bill and security
   configuration.
-- **Sample / demo data**, only when `SEED_SAMPLE_DATA` is on: fictional leads, clients, quotations, policies,
-  endorsements, receivables, receipts, collections, disbursements, petty cash, commissions and referrers,
-  remittances, reinsurers / treaties / cessions, incentive programmes and calculations, claims, renewals, journal
-  vouchers, demo branches / signatories / master records and six sample users (`agent.*`, `fin.approver`).
+- **Sample / demo data**, only when `SEED_SAMPLE_DATA` is on: a fictional TISPH book of business on the panel
+  insurers (motor comprehensive and CTPL of Toyota vehicles financed by TFS or referred by Toyota dealers, personal
+  accident, group PA, travel, compulsory and voluntary credit life, a parcel open policy): prospects, clients,
+  quotations, placement slips, policies, endorsements, receivables, receipts, post-dated cheques, collections,
+  disbursements, petty cash, commissions and referrers, remittances, incentive programmes, dealer programmes,
+  campaigns, sales activities, claims, renewals, journal vouchers, demo branches / signatories / master records and
+  six sample users (`agent.*`, `fin.approver`).
+
+A database seeded with the sample data of an earlier release (fictional insurers, fire / engineering / liability
+policies) is converted by migration `0365_tisph_sample_data.sql` on the next start: it removes the earlier sample
+business, keeps any record a user worked on (and the sample clients and prospects those records use) and records
+the conversion in the audit trail; the seed then adds the TISPH sample business. Non-sample data is never touched.
 
 | Variable | Default | Meaning |
 |---|---|---|

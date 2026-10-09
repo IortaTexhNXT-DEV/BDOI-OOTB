@@ -1,23 +1,6 @@
 -- SAMPLE / DEMO DATA: runs only when SEED_SAMPLE_DATA is true (never in a production go-live). See ../README.md.
--- Sample Account Executives (Sales & Marketing) and an Accounting approver (used by agency bills, incentives and maker-checker samples). Passwords are random and
--- unusable; administrators set real ones through Master > User. Idempotent by username.
-INSERT INTO users(username, password_hash, display_name, first_name, last_name, email, employee_code, branch_code, designation, status, must_change_password, created_by)
-SELECT v.u, crypt(gen_random_uuid()::text, gen_salt('bf', 8)), v.f || ' ' || v.l, v.f, v.l, v.e, v.code, v.branch, v.des, 'active', true, 'seed'
-FROM (VALUES
-  ('agent.jdelacruz', 'Juan', 'Dela Cruz', 'juan.delacruz@agents.example', 'AG001', 'HO', 'Senior Account Executive'),
-  ('agent.msantos', 'Maria', 'Santos', 'maria.santos@agents.example', 'AG002', 'HO', 'Account Executive'),
-  ('agent.preyes', 'Pedro', 'Reyes', 'pedro.reyes@agents.example', 'AG003', 'HO', 'Account Executive'),
-  ('agent.agarcia', 'Ana', 'Garcia', 'ana.garcia@agents.example', 'AG004', 'CEB', 'Sales Unit Manager'),
-  ('agent.jmartinez', 'Jose', 'Martinez', 'jose.martinez@agents.example', 'AG005', 'DAV', 'Account Executive'),
-  ('fin.approver', 'Ramon', 'Aquino', 'ramon.aquino@brokerverse.example', 'EMP-0004', 'HO', 'Accounting Supervisor')
-) AS v(u, f, l, e, code, branch, des)
-ON CONFLICT (username) DO NOTHING;
-INSERT INTO user_roles(user_id, role_id)
-SELECT u.id, r.id FROM users u JOIN roles r ON r.code = CASE WHEN u.username = 'fin.approver' THEN 'accounting' ELSE 'sales' END
-WHERE u.username IN ('agent.jdelacruz', 'agent.msantos', 'agent.preyes', 'agent.agarcia', 'agent.jmartinez', 'fin.approver')
-ON CONFLICT DO NOTHING;
-
--- Remittances, bills, work items and approvals built from the seeded policies. Runs once (marker in remittances.data).
+-- Remittances to the panel insurers, agency bills, work items and approvals built from the sample policies; the account
+-- executives and the Accounting approver are seeded in 10_masters.sql. Runs once (marker in remittances.data).
 DO $$
 DECLARE
   admin_id text := (SELECT id FROM users WHERE username = 'BrokerVerse');
@@ -42,7 +25,7 @@ BEGIN
     GROUP BY 1, 2 ORDER BY 2, 1
   LOOP
     n := n + 1;
-    st := CASE WHEN rec.yr < '2026' THEN (CASE WHEN n % 3 = 0 THEN 'approved' ELSE 'settled' END)
+    st := CASE WHEN rec.yr < to_char(current_date, 'YYYY') THEN (CASE WHEN n % 3 = 0 THEN 'approved' ELSE 'settled' END)
                ELSE (CASE n % 4 WHEN 0 THEN 'draft' WHEN 1 THEN 'for-approval' WHEN 2 THEN 'approved' ELSE 'draft' END) END;
     INSERT INTO remittances(remittance_number, insurance_company_id, kind, period, gross_premium, commission, tax, net_due, status, remarks, created_by, remittance_date, due_date,
                             policy_count, currency, submitted_by, submitted_at, approved_by, approved_at, settled_at, data, updated_by)
@@ -77,19 +60,20 @@ BEGIN
   n := 0;
   FOR ag IN SELECT id, employee_code, display_name FROM users WHERE username IN ('agent.jdelacruz', 'agent.msantos', 'agent.preyes') ORDER BY employee_code LOOP
     n := n + 1;
-    bill_ins := (SELECT insurance_company_id FROM policies WHERE inception_date >= DATE '2026-04-01' AND insurance_company_id IS NOT NULL
+    bill_ins := (SELECT insurance_company_id FROM policies WHERE inception_date >= current_date - 210 AND insurance_company_id IS NOT NULL
                  GROUP BY 1 HAVING count(*) >= 2 ORDER BY 1 OFFSET n - 1 LIMIT 1);
+    CONTINUE WHEN bill_ins IS NULL;
     INSERT INTO remittances(remittance_number, insurance_company_id, kind, period, gross_premium, commission, tax, net_due, status, created_by, remittance_date, due_date, policy_count, currency,
                             bill_number, agent_user_id, agency_code, agency_name, previous_balance, config_code, delivery_method, sent_at, settled_at, data, updated_by)
-    SELECT next_number('remittance', pfx), bill_ins, 'agency-bill', '2026-08', sum(p.premium_total), sum(p.commission_amount), 0, sum(p.premium_total) - sum(p.commission_amount),
-           CASE n WHEN 3 THEN 'settled' ELSE 'draft' END, admin_id, DATE '2026-09-01', DATE '2026-10-01', count(*), cur, next_number('remittance_bill', bill_pfx),
+    SELECT next_number('remittance', pfx), bill_ins, 'agency-bill', to_char(current_date - 40, 'YYYY-MM'), sum(p.premium_total), sum(p.commission_amount), 0, sum(p.premium_total) - sum(p.commission_amount),
+           CASE n WHEN 3 THEN 'settled' ELSE 'draft' END, admin_id, date_trunc('month', current_date - 10)::date, date_trunc('month', current_date - 10)::date + 30, count(*), cur, next_number('remittance_bill', bill_pfx),
            ag.id, ag.employee_code, ag.display_name, CASE n WHEN 2 THEN 5000 ELSE 0 END, 'ABL-001', '["email"]', CASE WHEN n >= 2 THEN now() - interval '20 days' END,
            CASE n WHEN 3 THEN now() - interval '5 days' END, '{"seed":"remittance-v1"}', admin_id
-    FROM (SELECT * FROM policies WHERE inception_date >= DATE '2026-04-01' AND insurance_company_id IS NOT DISTINCT FROM bill_ins ORDER BY policy_number LIMIT 2) p
+    FROM (SELECT * FROM policies WHERE inception_date >= current_date - 210 AND insurance_company_id IS NOT DISTINCT FROM bill_ins ORDER BY policy_number LIMIT 2) p
     RETURNING id INTO rid;
     INSERT INTO remittance_lines(remittance_id, policy_id, premium, commission, net, policy_number, insured_name, product, tax, effective_date)
     SELECT rid, p.id, p.premium_total, p.commission_amount, p.premium_total - p.commission_amount, p.policy_number, c.display_name, initcap(pr.line), 0, p.inception_date
-    FROM (SELECT * FROM policies WHERE inception_date >= DATE '2026-04-01' AND insurance_company_id IS NOT DISTINCT FROM bill_ins ORDER BY policy_number LIMIT 2) p
+    FROM (SELECT * FROM policies WHERE inception_date >= current_date - 210 AND insurance_company_id IS NOT DISTINCT FROM bill_ins ORDER BY policy_number LIMIT 2) p
     LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN products pr ON pr.id = p.product_id;
   END LOOP;
 END $$;
@@ -120,17 +104,17 @@ BEGIN
   -- adjustments
   INSERT INTO remittance_items(kind, reference_no, amount, status, data, created_by, updated_by, approved_by, approved_at, created_at)
   VALUES
-   ('adjustment', next_number('adjustment', numbering_prefix('adjustment', 'ADJ')), -5000, 'Pending Approval', '{"seed":"remittance-v1","adjustmentType":"Premium Adjustment","adjustmentCode":"ADJ-002","policyNo":"POL-2026-90002","clientName":"Malayan Insurance Co., Inc.","originalAmount":121125,"adjustmentAmount":-5000,"newAmount":116125,"reason":"Policy correction due to coverage change","description":"Removed acts of nature cover","effectiveDate":"2026-09-26","requestedBy":"BrokerVerse","approvalLevel":1,"dueDate":"2026-09-30"}', admin_id, admin_id, NULL, NULL, now() - interval '2 days'),
-   ('adjustment', next_number('adjustment', numbering_prefix('adjustment', 'ADJ')), 2500, 'Approved', '{"seed":"remittance-v1","adjustmentType":"Commission Adjustment","adjustmentCode":"ADJ-003","policyNo":"POL-2026-90006","clientName":"Mercantile Insurance Co., Inc.","originalAmount":142800,"adjustmentAmount":2500,"newAmount":145300,"reason":"Additional commission for renewal incentive","description":"Renewal override","effectiveDate":"2026-09-20","requestedBy":"BrokerVerse","approvalLevel":2}', admin_id, checker_id, checker_id, now() - interval '5 days', now() - interval '6 days'),
-   ('adjustment', next_number('adjustment', numbering_prefix('adjustment', 'ADJ')), 1500, 'Completed', '{"seed":"remittance-v1","adjustmentType":"Tax Adjustment","adjustmentCode":"ADJ-004","policyNo":"POL-2026-90003","clientName":"Pioneer Insurance & Surety Corp.","originalAmount":25823,"adjustmentAmount":1500,"newAmount":27323,"reason":"LGT recomputation","effectiveDate":"2026-09-10","requestedBy":"BrokerVerse","approvalLevel":1}', admin_id, checker_id, checker_id, now() - interval '12 days', now() - interval '14 days'),
-   ('adjustment', next_number('adjustment', numbering_prefix('adjustment', 'ADJ')), -800, 'Rejected', '{"seed":"remittance-v1","adjustmentType":"Penalty Adjustment","adjustmentCode":"ADJ-006","policyNo":"POL-2026-90005","clientName":"FPG Insurance Co., Inc.","originalAmount":55080,"adjustmentAmount":-800,"newAmount":54280,"reason":"Penalty waiver request","effectiveDate":"2026-09-05","requestedBy":"BrokerVerse","approvalLevel":1}', admin_id, checker_id, NULL, NULL, now() - interval '20 days');
+   ('adjustment', next_number('adjustment', numbering_prefix('adjustment', 'ADJ')), -5000, 'Pending Approval', '{"seed":"remittance-v1","adjustmentType":"Premium Adjustment","adjustmentCode":"ADJ-002","policyNo":"POL-2026-90002","clientName":"Maagap Insurance, Inc.","originalAmount":36580,"adjustmentAmount":-5000,"newAmount":31580,"reason":"Policy correction due to coverage change","description":"Excess bodily injury limit reduced on the fleet pick-up","effectiveDate":"2026-09-26","requestedBy":"BrokerVerse","approvalLevel":1,"dueDate":"2026-09-30"}', admin_id, admin_id, NULL, NULL, now() - interval '2 days'),
+   ('adjustment', next_number('adjustment', numbering_prefix('adjustment', 'ADJ')), 2500, 'Approved', '{"seed":"remittance-v1","adjustmentType":"Commission Adjustment","adjustmentCode":"ADJ-003","policyNo":"POL-2025-90020","clientName":"Pioneer Insurance & Surety Corp.","originalAmount":19950,"adjustmentAmount":2500,"newAmount":22450,"reason":"Additional commission for renewal incentive","description":"Group PA renewal override","effectiveDate":"2026-09-20","requestedBy":"BrokerVerse","approvalLevel":2}', admin_id, checker_id, checker_id, now() - interval '5 days', now() - interval '6 days'),
+   ('adjustment', next_number('adjustment', numbering_prefix('adjustment', 'ADJ')), 1500, 'Completed', '{"seed":"remittance-v1","adjustmentType":"Tax Adjustment","adjustmentCode":"ADJ-004","policyNo":"POL-2026-90003","clientName":"Stronghold Insurance Company, Inc.","originalAmount":45823,"adjustmentAmount":1500,"newAmount":27323,"reason":"LGT recomputation","effectiveDate":"2026-09-10","requestedBy":"BrokerVerse","approvalLevel":1}', admin_id, checker_id, checker_id, now() - interval '12 days', now() - interval '14 days'),
+   ('adjustment', next_number('adjustment', numbering_prefix('adjustment', 'ADJ')), -800, 'Rejected', '{"seed":"remittance-v1","adjustmentType":"Penalty Adjustment","adjustmentCode":"ADJ-006","policyNo":"POL-2026-90005","clientName":"AXA Philippines Life and General Insurance Corporation","originalAmount":7008,"adjustmentAmount":-800,"newAmount":6208,"reason":"Penalty waiver request","effectiveDate":"2026-09-05","requestedBy":"BrokerVerse","approvalLevel":1}', admin_id, checker_id, NULL, NULL, now() - interval '20 days');
 
   -- electronic transfers
   INSERT INTO remittance_items(kind, reference_no, amount, status, data, created_by, updated_by, approved_by, approved_at, created_at) VALUES
-   ('transfer', next_number('transfer', numbering_prefix('transfer', 'TRF')), 125000, 'Pending', '{"seed":"remittance-v1","beneficiary":"Malayan Insurance Co., Inc.","method":"PESONet","accountNumber":"0012-3456-78","bankName":"Banco de Oro","purpose":"September premium remittance","scheduledDate":"2026-09-29"}', admin_id, admin_id, NULL, NULL, now() - interval '1 day'),
-   ('transfer', next_number('transfer', numbering_prefix('transfer', 'TRF')), 87500, 'Approved', '{"seed":"remittance-v1","beneficiary":"Pioneer Insurance & Surety Corp.","method":"RTGS","accountNumber":"3081-0456-78","bankName":"Bank of the Philippine Islands","purpose":"August premium remittance","scheduledDate":"2026-09-26"}', admin_id, checker_id, checker_id, now() - interval '2 days', now() - interval '3 days'),
-   ('transfer', next_number('transfer', numbering_prefix('transfer', 'TRF')), 156000, 'Completed', '{"seed":"remittance-v1","beneficiary":"FPG Insurance Co., Inc.","method":"Wire","purpose":"July premium remittance","scheduledDate":"2026-09-20","bankReference":"WIRE-20260920-1182"}', admin_id, checker_id, checker_id, now() - interval '9 days', now() - interval '10 days'),
-   ('transfer', next_number('transfer', numbering_prefix('transfer', 'TRF')), 34500, 'Failed', '{"seed":"remittance-v1","beneficiary":"Standard Insurance Co., Inc.","method":"InstaPay","purpose":"Refund","scheduledDate":"2026-09-18","failureReason":"Beneficiary account closed"}', admin_id, checker_id, checker_id, now() - interval '11 days', now() - interval '12 days');
+   ('transfer', next_number('transfer', numbering_prefix('transfer', 'TRF')), 125000, 'Pending', '{"seed":"remittance-v1","beneficiary":"Pioneer Insurance & Surety Corp.","method":"PESONet","accountNumber":"3081-9988-01","bankName":"Bank of the Philippine Islands","purpose":"September premium remittance","scheduledDate":"2026-09-29"}', admin_id, admin_id, NULL, NULL, now() - interval '1 day'),
+   ('transfer', next_number('transfer', numbering_prefix('transfer', 'TRF')), 87500, 'Approved', '{"seed":"remittance-v1","beneficiary":"Maagap Insurance, Inc.","method":"RTGS","accountNumber":"0071-5566-12","bankName":"Metrobank","purpose":"August premium remittance","scheduledDate":"2026-09-26"}', admin_id, checker_id, checker_id, now() - interval '2 days', now() - interval '3 days'),
+   ('transfer', next_number('transfer', numbering_prefix('transfer', 'TRF')), 156000, 'Completed', '{"seed":"remittance-v1","beneficiary":"AXA Philippines Life and General Insurance Corporation","method":"Wire","purpose":"July premium remittance","scheduledDate":"2026-09-20","bankReference":"WIRE-20260920-1182"}', admin_id, checker_id, checker_id, now() - interval '9 days', now() - interval '10 days'),
+   ('transfer', next_number('transfer', numbering_prefix('transfer', 'TRF')), 34500, 'Failed', '{"seed":"remittance-v1","beneficiary":"Stronghold Insurance Company, Inc.","method":"InstaPay","purpose":"Refund","scheduledDate":"2026-09-18","failureReason":"Beneficiary account closed"}', admin_id, checker_id, checker_id, now() - interval '11 days', now() - interval '12 days');
   INSERT INTO remittance_approvals(entity, entity_id, reference_no, transaction_type, amount, description, priority, sla_hours, required_levels, initiator_id, history, created_at)
   SELECT 'item', x.id, x.reference_no, CASE x.kind WHEN 'transfer' THEN 'Electronic Transfer' ELSE 'Adjustment' END, x.amount,
          COALESCE(x.data->>'purpose', (x.data->>'adjustmentType') || ': ' || (x.data->>'reason')), CASE WHEN abs(x.amount) >= 20000 THEN 'Normal' ELSE 'Low' END,
@@ -160,9 +144,9 @@ BEGIN
   INSERT INTO remittance_items(kind, reference_no, status, priority, data, created_by, updated_by, created_at)
   SELECT 'notification', next_number('remittance_notice', numbering_prefix('remittance_notice', 'NTF')), 'Sent', v.p,
          jsonb_build_object('seed', 'remittance-v1', 'type', v.t, 'subject', v.s, 'content', v.c, 'recipients', jsonb_build_array(v.r), 'recipientType', v.rt, 'channel', 'Email', 'queuedEmails', 1), admin_id, admin_id, now() - (v.age || ' days')::interval
-  FROM (VALUES ('Payment Reminder', 'High', 'Payment overdue - POL-2026-90002', 'Your premium payment is overdue. Please settle to avoid lapse.', 'accounts@client.example', 'Client', 3),
-               ('Settlement Alert', 'Normal', 'Settlement completed - September', 'Premium settlement for September has been remitted.', 'uw@malayan.example', 'Insurer', 5),
-               ('Statement Ready', 'Normal', 'Remittance statement available', 'The August remittance statement is ready for download.', 'uw@pioneer.example', 'Insurer', 12)) AS v(t, p, s, c, r, rt, age);
+  FROM (VALUES ('Payment Reminder', 'High', 'Payment overdue - POL-2026-90003', 'Your premium payment is overdue. Please settle to avoid lapse.', 'jose.reyes@example.ph', 'Client', 3),
+               ('Settlement Alert', 'Normal', 'Settlement completed - September', 'Premium settlement for September has been remitted.', 'placement@pioneer.example.ph', 'Insurer', 5),
+               ('Statement Ready', 'Normal', 'Remittance statement available', 'The August remittance statement is ready for download.', 'placement@maagap.example.ph', 'Insurer', 12)) AS v(t, p, s, c, r, rt, age);
 
   -- bank statement lines (the one bank statement line table; remittance lines have no bank account): two match
   -- approved remittances exactly, others are unmatched

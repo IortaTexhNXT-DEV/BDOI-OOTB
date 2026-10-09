@@ -46,7 +46,7 @@ describe('agreements, computation, approval and settlement', () => {
   let agreement;
   it('creates an agreement with tiers (validated) and lists the sample agreements', async () => {
     const list = (await maker('get', '/insurer-overrides/agreements')).body.data;
-    expect(list.map((a) => a.agreementCode)).toEqual(expect.arrayContaining(['MERC-OVR-SAMPLE', 'PIONEER-LR-SAMPLE']));
+    expect(list.map((a) => a.agreementCode)).toEqual(expect.arrayContaining(['PIONEER-OVR-SAMPLE', 'AXA-LR-SAMPLE']));
     const id = await insurerId('STANDARD');
     const bad = await maker('post', '/insurer-overrides/agreements').send({ agreementCode: 'STD-OVR', name: 'Standard override', insurerId: id, effectiveFrom: '2025-01-01',
       tiers: [{ fromValue: 0, toValue: 100, rate: 1 }, { fromValue: 50, rate: 2 }] });
@@ -120,7 +120,7 @@ describe('agreements, computation, approval and settlement', () => {
   });
 
   it('reads the loss ratio (system claims or the insurer\'s figure) and the growth against the prior year', async () => {
-    const lr = (await maker('get', '/insurer-overrides/agreements')).body.data.find((a) => a.agreementCode === 'PIONEER-LR-SAMPLE');
+    const lr = (await maker('get', '/insurer-overrides/agreements')).body.data.find((a) => a.agreementCode === 'AXA-LR-SAMPLE');
     const id = lr.insurerId;
     const year = Number(String((await query('SELECT max(COALESCE(issued_date, inception_date))::text AS d FROM policies WHERE insurance_company_id = $1', [id])).rows[0].d).slice(0, 4));
     const prod = await productionOf(id, `${year}-01-01`, `${year}-12-31`);
@@ -133,7 +133,7 @@ describe('agreements, computation, approval and settlement', () => {
     expect(c).toMatchObject({ claimsSource: 'insurer', tierNo: 2, rate: 2.5, claimsNote: 'Insurer bordereau' });
     expect((await maker('post', `/insurer-overrides/computations/${c.id}/cancel`).send({ reason: 'Recompute later' })).body.data.status).toBe('cancelled');
 
-    const g = await maker('post', '/insurer-overrides/agreements').send({ agreementCode: 'PIO-GROWTH', name: 'Pioneer growth bonus', insurerId: id, commissionType: 'contingent', basis: 'growth',
+    const g = await maker('post', '/insurer-overrides/agreements').send({ agreementCode: 'AXA-GROWTH', name: 'AXA growth bonus', insurerId: id, commissionType: 'contingent', basis: 'growth',
       periodType: 'annual', effectiveFrom: '2025-01-01', tiers: [{ fromValue: -100, toValue: 0, rate: 0 }, { fromValue: 0, toValue: null, rate: 1 }] });
     expect(g.status, JSON.stringify(g.body)).toBe(201);
     const gp = (await maker('get', `/insurer-overrides/agreements/${g.body.data.id}/preview?year=${year}&periodLabel=${year}`)).body.data;

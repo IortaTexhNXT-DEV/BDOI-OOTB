@@ -118,11 +118,11 @@ describe('fixed asset disposal', () => {
   it('sells an asset for cash: fa.disposal removes cost and accumulated depreciation, books the loss and the output VAT, and issues the sales invoice', async () => {
     expect((await maker('post', `/fixed-assets/assets/${laptop.id}/dispose`).send({ disposalType: 'sale', disposalDate: asOf, proceeds: 50000 })).status).toBe(400);
     const r = await maker('post', `/fixed-assets/assets/${laptop.id}/dispose`).send({ disposalType: 'sale', disposalDate: asOf, proceeds: 50000, buyerName: 'Juan dela Cruz Trading Inc.',
-      buyerTin: '401-555-666-00000', buyerAddress: '1 Rizal St, Pasig City', bankAccount: 'ACC-BDO-001' });
+      buyerTin: '401-555-666-00000', buyerAddress: '1 Rizal St, Pasig City', bankAccount: 'ACC-MBT-001' });
     expect(r.status, JSON.stringify(r.body)).toBe(201);
     sold = r.body.data;
     expect(sold).toMatchObject({ disposalNumber: expect.stringMatching(/^FAD-/), status: 'posted', gainLoss: -10000, outputVat: 6000, grossProceeds: 56000, salesInvoiceNumber: expect.any(String) });
-    expect(await jvLines(sold.journalId)).toEqual([{ a: '1402003', d: 60000, c: 0 }, { a: '1102001', d: 56000, c: 0 }, { a: '4501004', d: 10000, c: 0 },
+    expect(await jvLines(sold.journalId)).toEqual([{ a: '1402003', d: 60000, c: 0 }, { a: '106010', d: 56000, c: 0 }, { a: '4501004', d: 10000, c: 0 },
       { a: '1401003', d: 0, c: 120000 }, { a: '235000', d: 0, c: 6000 }]);
     const inv = (await maker('get', `/bir/invoices/${sold.salesInvoiceId}`)).body.data;
     expect(inv).toMatchObject({ sourceType: 'asset_disposal', sourceReference: sold.disposalNumber, buyerName: 'Juan dela Cruz Trading Inc.', vatableSales: 50000, vatAmount: 6000,
@@ -143,7 +143,7 @@ describe('fixed asset disposal', () => {
     expect(r.body.data).toMatchObject({ gainLoss: 2000, amountDue: 2240 });
     expect(await jvLines(r.body.data.journalId)).toEqual([{ a: '1402003', d: 10000, c: 0 }, { a: '1205003', d: 2240, c: 0 }, { a: '1401003', d: 0, c: 10000 },
       { a: '235000', d: 0, c: 240 }, { a: '3301004', d: 0, c: 2000 }]);
-    const pay = await maker('post', `/bir/invoices/${r.body.data.salesInvoiceId}/payments`).send({ amount: 2240, paymentDate: asOf, paymentMode: 'bank-transfer', bankAccount: 'ACC-BDO-001' });
+    const pay = await maker('post', `/bir/invoices/${r.body.data.salesInvoiceId}/payments`).send({ amount: 2240, paymentDate: asOf, paymentMode: 'bank-transfer', bankAccount: 'ACC-MBT-001' });
     expect(pay.status, JSON.stringify(pay.body)).toBe(201);
     expect((await maker('get', `/fixed-assets/disposals/${r.body.data.id}`)).body.data.amountDue).toBe(0);
     // the paid invoice cannot be cancelled, so neither can the disposal

@@ -31,7 +31,7 @@ describe('clients', () => {
     expect(r.body.data.pagination).toMatchObject({ page: 1, pageSize: 5 });
     expect(r.body.data.pagination.totalCount).toBeGreaterThanOrEqual(10);
     const s = await sales('get', '/clients?search=Kalayaan');
-    expect(s.body.data.clients[0].companyName).toBe('Kalayaan Foods Corp.');
+    expect(s.body.data.clients[0].companyName).toBe('Kalayaan Foods Distribution Corp.');
   });
   it('filters the list by client type on the server (the Individual / Company tabs page through all clients)', async () => {
     const all = (await sales('get', '/clients?page=1&pageSize=500')).body.data;

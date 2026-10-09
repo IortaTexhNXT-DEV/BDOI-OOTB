@@ -101,7 +101,8 @@ describe('parsing helpers', () => {
 describe('bank account set-up and masters', () => {
   it('links the bank account to its GL cash account; finance reads, agents may not', async () => {
     expect((await admin('put', `/bank-reconciliation/bank-accounts/${ACCT}`).send({ glAccountCode: '3201001' })).status).toBe(400);
-    expect((await admin('put', `/bank-reconciliation/bank-accounts/${ACCT}`).send({ glAccountCode: '1102001' })).status).toBe(409); // linked to ACC-BDO-001 by the sample data
+    const sampleGl = (await query("SELECT value #>> '{}' AS code FROM app_settings WHERE key = 'accounting.account.cash_in_bank'")).rows[0].code;
+    expect((await admin('put', `/bank-reconciliation/bank-accounts/${ACCT}`).send({ glAccountCode: sampleGl })).status).toBe(409); // linked to ACC-MBT-001 by the sample data
     // reconcile from January: the stale January cheque is an opening outstanding item (default: the first statement's start)
     const r = await maker('put', `/bank-reconciliation/bank-accounts/${ACCT}`).send({ glAccountCode: GL, statementFormat: 'GENERIC', reconcileFrom: '2026-01-01' });
     expect(r.status, JSON.stringify(r.body)).toBe(200);
@@ -435,8 +436,8 @@ describe('reports, remittance view and job', () => {
   it('the scheduled auto-match job runs over the linked accounts', async () => {
     const r = await bankAutoMatch();
     expect(r.results.find((x) => x.bankAccount === ACCT)).toBeUndefined(); // nothing left to match
-    const bdo = r.results.find((x) => x.bankAccount === 'ACC-BDO-001'); // sample statement of last month
-    expect(bdo.error).toBeUndefined();
-    expect(bdo.matched).toBeGreaterThanOrEqual(0);
+    const mbt = r.results.find((x) => x.bankAccount === 'ACC-MBT-001'); // sample statement of last month
+    expect(mbt.error).toBeUndefined();
+    expect(mbt.matched).toBeGreaterThanOrEqual(0);
   });
 });

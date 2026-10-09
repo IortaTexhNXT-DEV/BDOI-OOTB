@@ -101,7 +101,7 @@ describe('quotations: create, premium, workflow, conversion', () => {
     const bi = await sales('get', '/biCoverage/get-bi-coverage?PolicyTypeId=COMP');
     expect(bi.body.data.length).toBeGreaterThan(0);
     const ins = await sales('get', '/master/insurancecompany/get-insurance-companies');
-    expect(ins.body.data.map((i) => i.name)).toContain('SecureGuard Insurance');
+    expect(ins.body.data.map((i) => i.name)).toContain('Pioneer Insurance & Surety Corp.');
     expect((await sales('get', '/master/banks/get-all-banks')).body.data.length).toBeGreaterThan(0);
     expect((await sales('get', '/master/signatory/get-all-signatory')).body.data.length).toBeGreaterThan(0);
     const codes = await sales('get', '/master/account-codes');
@@ -240,9 +240,9 @@ describe('quotations: create, premium, workflow, conversion', () => {
     expect((await sales('post', '/email/send').send({ to: 'not-an-email', subject: 'x' })).status).toBe(400);
     const share = await sales('post', '/email/share-quote').send({ to: 'friend@example.ph', quotationData: { quotationId: quoteId }, message: 'FYI' });
     expect(share.body.success).toBe(true);
-    const ins = await sales('post', '/email/share-quote-to-insurers').send({ quotationId: quoteId, insuranceCompanies: ['SecureGuard Insurance', 'Unknown Mutual'] });
+    const ins = await sales('post', '/email/share-quote-to-insurers').send({ quotationId: quoteId, insuranceCompanies: ['Pioneer Insurance & Surety Corp.', 'Unknown Mutual'] });
     expect(ins.body.partial).toBe(true);
-    expect(ins.body.data.sent[0].email).toBe('placement@secureguard.example');
+    expect(ins.body.data.sent[0].email).toBe('uw@pioneer.example');
     expect(ins.body.data.failed[0].insurer).toBe('Unknown Mutual');
   });
 

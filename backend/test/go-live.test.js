@@ -52,10 +52,11 @@ describe('SEED_SAMPLE_DATA', () => {
     expect(ref.every((f) => f.kind === 'reference')).toBe(true);
     expect(ref.map((f) => f.name)).toContain('60_reports.sql');
     const all = seedFiles({ sample: true }).map((f) => f.name);
-    expect(all).toContain('sample/20_sales.sql');
-    expect(all.indexOf('20_sales.sql')).toBe(all.indexOf('sample/20_sales.sql') - 1);
-    expect(all.indexOf('sample/31_claims_renewals_base.sql')).toBeGreaterThan(all.indexOf('30_claims_renewals_settings.sql'));
-    expect(all.indexOf('sample/31_claims_renewals_base.sql')).toBeLessThan(all.indexOf('40_finance.sql'));
+    expect(all).toContain('sample/84_sales.sql');
+    expect(all.indexOf('10_masters.sql')).toBe(all.indexOf('sample/10_masters.sql') - 1);
+    // the sample business runs after the TISPH configuration it prices and posts with
+    expect(all.indexOf('sample/84_sales.sql')).toBeGreaterThan(all.indexOf('83_tisph_lists.sql'));
+    expect(all.indexOf('sample/85_claims_renewals_base.sql')).toBeLessThan(all.indexOf('sample/89_finance.sql'));
   });
 });
 

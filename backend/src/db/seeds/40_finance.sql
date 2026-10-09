@@ -1,5 +1,5 @@
 -- Finance & accounting reference data: configuration keys and the chart of accounts.
--- The fictional commission referrers and the linked sample ledger are in sample/40_finance.sql.
+-- The fictional commission referrers are in sample/10_masters.sql, the linked sample ledger in sample/89_finance.sql.
 -- Idempotent: settings / accounts use ON CONFLICT DO NOTHING (accounts are classified once, admin edits kept).
 INSERT INTO app_settings(key, value, "group", label, type) VALUES
  ('accounting.auto_post_system_entries', 'true', 'accounting', 'Post system-generated journals (receipts, bookings, payouts) immediately', 'boolean'),
