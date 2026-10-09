@@ -107,3 +107,30 @@
     grid-template-columns: 1fr;
   }
 }
+
+// KPI tiles of a dialog (segment reach, campaign results): the dialog is outside .pe-page, which styles them on a page
+.pe-dialog {
+  .pe-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .pe-kpi {
+    border: 1px solid #e5e9f0;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+
+    .pe-kpi-label {
+      color: #6c737f;
+      font-size: 0.85rem;
+    }
+
+    .pe-kpi-value {
+      color: #111927;
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-top: 0.25rem;
+    }
+  }
+}
