@@ -1,779 +1,267 @@
-import { useState, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { BreadCrumb } from "primereact/breadcrumb";
-import { Card } from "primereact/card";
-import { Tag } from "primereact/tag";
-import { InputText } from "primereact/inputtext";
-import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
-import { Toast } from "primereact/toast";
-import { Dialog } from "primereact/dialog";
+import { Column } from "primereact/column";
 import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
-import { TabView, TabPanel } from "primereact/tabview";
-import { ProgressBar } from "primereact/progressbar";
-import { Avatar } from "primereact/avatar";
+import { DataTable } from "primereact/datatable";
+import { Dialog } from "primereact/dialog";
+import { Dropdown } from "primereact/dropdown";
+import { InputText } from "primereact/inputtext";
+import { InputTextarea } from "primereact/inputtextarea";
+import { Toast } from "primereact/toast";
+import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
-import SvgDot from "../../../assets/icons/SvgDot";
-import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
+import StatCards from "../../../components/StatCards";
+import { EmptyState, FilterBar, KeyFacts, PanelSection, RowActions, SectionCard, SidePanel } from "../../../components/RecordPage";
+import { calendarDateFormat, formatDate } from "../../../utility/dateFormat";
+import { ExpiryCell, PolicyCell, RenewalHeader, RiskChip, StageChip } from "../shared";
 import "./index.scss";
-import { formatPercent, progressValue } from "../../../utility/numberFormat";
 
+const METHODS = ["Email", "SMS", "Phone", "Letter"];
+
+/**
+ * Operations > Renewals > Renewal Queue: open renewals with their expiry, premium, stage, retention risk and contacts so
+ * far. Row actions follow the stage: prepare the renewal quote, send the next notice, record a reminder, complete an
+ * approved renewal; the detail opens on the right.
+ */
 const RenewalQueue = () => {
   const { t } = useTranslation();
-  const { formatCurrency } = useFormatCurrency();
   const navigate = useNavigate();
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("All");
-  const [dateRange, setDateRange] = useState([null, null]);
-  const [riskLevel, setRiskLevel] = useState("All");
-  const [agent, setAgent] = useState("All");
-  const [loading, setLoading] = useState(false);
-  const [selectedPolicy, setSelectedPolicy] = useState(null);
-  const [detailsVisible, setDetailsVisible] = useState(false);
-  const [sendReminderVisible, setSendReminderVisible] = useState(false);
-  const [reminderMethod, setReminderMethod] = useState("Email");
-  const [dashboardData, setDashboardData] = useState({
-    totalPolicies: 0,
-    dueSoon: 0,
-    atRisk: 0,
-    inGracePeriod: 0
-  });
-  const [filteredPolicies, setFilteredPolicies] = useState([]);
-  const [policies, setPolicies] = useState([]);
+  const location = useLocation();
+  const { formatCurrency } = useFormatCurrency();
   const toast = useRef(null);
+  const table = useRef(null);
+  const [rows, setRows] = useState([]);
+  const [dashboard, setDashboard] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState(location.state?.search || "");
+  const [stage, setStage] = useState("");
+  const [risk, setRisk] = useState("");
+  const [agent, setAgent] = useState("");
+  const [range, setRange] = useState(null);
+  const [due, setDue] = useState("");
+  const [panelId, setPanelId] = useState(null);
+  const [reminder, setReminder] = useState(null);
 
-  const statusOptions = [
-    { label: t("renewal.allStatuses"), value: "All" },
-    { label: t("renewal.pending"), value: "Pending" },
-    { label: t("renewal.quoteSent"), value: "Quote Sent" },
-    { label: t("renewal.atRisk"), value: "At Risk" },
-    { label: t("renewal.underNegotiation"), value: "Under Negotiation" },
-    { label: t("renewal.inGracePeriod"), value: "In Grace Period" }
-  ];
+  const showError = useCallback((e) => toast.current?.show({ severity: "error", summary: t("common.error", "Error"), detail: e?.message || String(e), life: 5000 }), [t]);
+  const done = (summary, detail) => toast.current?.show({ severity: "success", summary, detail, life: 3000 });
 
-  const riskOptions = [
-    { label: t("renewal.allRiskLevels"), value: "All" },
-    { label: t("renewal.low"), value: "Low" },
-    { label: t("renewal.medium"), value: "Medium" },
-    { label: t("renewal.high"), value: "High" },
-    { label: t("renewal.critical"), value: "Critical" }
-  ];
-
-  const agentOptions = [
-    { label: t("renewal.allAgents"), value: "All" },
-    ...[...new Set(policies.map(p => p.assignedAgent).filter(Boolean))].map(name => ({ label: name, value: name }))
-  ];
-
-  const reminderMethods = [
-    { label: "Email", value: "Email" },
-    { label: "SMS", value: "SMS" },
-    { label: "Phone", value: "Phone" },
-    { label: "Letter", value: "Letter" }
-  ];
-
-  const items = [
-    { label: t("renewal.renewals"), url: "#" },
-    { label: t("renewal.queueManagement"), url: "#" }
-  ];
-
-  const home = { icon: <SvgDot />, url: "#" };
-
-  useEffect(() => {
-    loadInitialData();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [search, status, dateRange, riskLevel, agent, policies]);
-
-  const loadInitialData = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
-      const { items } = await renewalsWorkspaceService.getQueue();
-      setPolicies(items);
-    } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: t("common.error"),
-        detail: error?.message || t("renewal.failedToLoadRenewalData"),
-        life: 3000
-      });
+      const { items, dashboard: d } = await renewalsWorkspaceService.getQueue();
+      setRows(items);
+      setDashboard(d || {});
+    } catch (e) {
+      showError(e);
     } finally {
       setLoading(false);
     }
-  };
+  }, [showError]);
+  useEffect(() => { load(); }, [load]);
 
-  const showError = (error, fallbackKey) => {
-    toast.current.show({
-      severity: 'error',
-      summary: t("common.error"),
-      detail: error?.message || t(fallbackKey),
-      life: 3000
-    });
-  };
-
-  const handleRefresh = async () => {
+  const refreshPipeline = async () => {
     try {
-      const result = await renewalsWorkspaceService.refreshPipeline();
-      toast.current.show({
-        severity: 'success',
-        summary: t("renewal.dataLoaded"),
-        detail: t("renewal.pipelineRefreshed", "Pipeline refreshed: {{created}} added, {{lapsed}} lapsed", result),
-        life: 3000
-      });
-    } catch (error) {
-      showError(error, "renewal.failedToLoadRenewalData");
+      const r = await renewalsWorkspaceService.refreshPipeline();
+      done(t("queue.pipelineRefreshed"), t("queue.pipelineResult", { created: r?.created ?? 0, lapsed: r?.lapsed ?? 0 }));
+    } catch (e) {
+      showError(e);
     }
-    loadInitialData();
+    load();
   };
 
-  const handleSendNotice = async (rowData) => {
+  const stages = useMemo(() => [...new Set(rows.map((r) => r.status).filter(Boolean))].sort(), [rows]);
+  const agents = useMemo(() => [...new Set(rows.map((r) => r.assignedAgent).filter(Boolean))].sort(), [rows]);
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const [from, to] = range || [];
+    return rows.filter((r) => (!stage || r.status === stage) && (!risk || r.retentionRisk === risk) && (!agent || r.assignedAgent === agent)
+      && (!due || (due === "soon" && r.daysToExpiry > 0 && r.daysToExpiry <= 30) || (due === "risk" && ["High", "Critical"].includes(r.retentionRisk)) || (due === "grace" && r.inGracePeriod))
+      && (!from || !to || (new Date(`${r.expiryDate}T00:00:00`) >= from && new Date(`${r.expiryDate}T00:00:00`) <= to))
+      && (!q || [r.policyNumber, r.insuredName, r.renewalNumber, r.product].some((v) => String(v || "").toLowerCase().includes(q))));
+  }, [rows, search, stage, risk, agent, range, due]);
+  const selected = rows.find((r) => r.id === panelId) || null;
+
+  const toggleDue = (key) => setDue(due === key ? "" : key);
+  const figures = [
+    { key: "all", label: t("queue.figures.open"), value: dashboard.totalPolicies ?? rows.length, onClick: () => setDue(""), active: !due },
+    { key: "soon", label: t("queue.figures.dueSoon"), value: dashboard.dueSoon ?? null, onClick: () => toggleDue("soon"), active: due === "soon" },
+    { key: "risk", label: t("queue.figures.atRisk"), value: dashboard.atRisk ?? null, onClick: () => toggleDue("risk"), active: due === "risk" },
+    { key: "grace", label: t("queue.figures.grace"), value: dashboard.inGracePeriod ?? null, onClick: () => toggleDue("grace"), active: due === "grace" },
+    { key: "premium", label: t("queue.figures.premium"), value: formatCurrency(dashboard.totalPremium || 0) },
+  ];
+
+  const sendNotice = async (r) => {
     try {
-      await renewalsWorkspaceService.sendNotice(rowData.id);
-      toast.current.show({
-        severity: 'success',
-        summary: t("renewal.reminderSent"),
-        detail: `${rowData.nextNotice?.label}: ${rowData.policyNumber}`,
-        life: 3000
-      });
-      loadInitialData();
-    } catch (error) {
-      showError(error, "renewal.failedToSendReminder");
+      await renewalsWorkspaceService.sendNotice(r.id);
+      done(t("queue.noticeSent"), `${r.nextNotice?.label}: ${r.policyNumber}`);
+      load();
+    } catch (e) {
+      showError(e);
     }
   };
-
-  const handleComplete = (rowData) => {
-    confirmDialog({
-      message: t("renewal.confirmCompleteRenewal", "Renew policy {{policy}} for a new term?", { policy: rowData.policyNumber }),
-      header: t("renewal.completeRenewal", "Complete Renewal"),
-      icon: 'pi pi-check-circle',
-      accept: async () => {
-        try {
-          const result = await renewalsWorkspaceService.complete(rowData.id);
-          toast.current.show({
-            severity: 'success',
-            summary: t("renewal.completeRenewal", "Complete Renewal"),
-            detail: result?.newPolicy?.policyNumber,
-            life: 3000
-          });
-          loadInitialData();
-        } catch (error) {
-          showError(error, "renewal.failedToLoadRenewalData");
-        }
-      }
-    });
-  };
-
-  const calculateDashboard = (data) => {
-    const dueSoon = data.filter(p => p.daysToExpiry <= 30 && p.daysToExpiry > 0);
-    const atRisk = data.filter(p => p.retentionRisk === 'High' || p.retentionRisk === 'Critical');
-    const inGrace = data.filter(p => p.status === 'In Grace Period');
-
-    setDashboardData({
-      totalPolicies: data.length,
-      dueSoon: dueSoon.length,
-      atRisk: atRisk.length,
-      inGracePeriod: inGrace.length
-    });
-  };
-
-  const applyFilters = () => {
-    let filtered = [...policies];
-
-    if (search) {
-      filtered = filtered.filter(p =>
-        p.policyNumber.toLowerCase().includes(search.toLowerCase()) ||
-        p.insuredName.toLowerCase().includes(search.toLowerCase()) ||
-        p.product.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-
-    if (status !== 'All') {
-      filtered = filtered.filter(p => p.status === status);
-    }
-
-    if (riskLevel !== 'All') {
-      filtered = filtered.filter(p => p.retentionRisk === riskLevel);
-    }
-
-    if (agent !== 'All') {
-      filtered = filtered.filter(p => p.assignedAgent === agent);
-    }
-
-    if (dateRange[0] && dateRange[1]) {
-      filtered = filtered.filter(p => {
-        const expiry = new Date(p.expiryDate);
-        return expiry >= dateRange[0] && expiry <= dateRange[1];
-      });
-    }
-
-    setFilteredPolicies(filtered);
-    calculateDashboard(filtered);
-  };
-
-  const handleClear = () => {
-    setSearch("");
-    setStatus("All");
-    setDateRange([null, null]);
-    setRiskLevel("All");
-    setAgent("All");
-    toast.current.show({
-      severity: 'info',
-      summary: t("renewal.filtersCleared"),
-      detail: t("renewal.allFiltersReset"),
-      life: 2000
-    });
-  };
-
-  const handleView = (rowData) => {
-    setSelectedPolicy(rowData);
-    setDetailsVisible(true);
-  };
-
-  const handleGenerateQuote = (rowData) => {
-    navigate(`/renewal/generate-quote/${rowData.id}`, { state: { policy: rowData } });
-  };
-
-  const handleSendReminder = (rowData) => {
-    setSelectedPolicy(rowData);
-    setSendReminderVisible(true);
-  };
-
-  const handleSendReminderConfirm = async () => {
-    setLoading(true);
+  const saveReminder = async () => {
     try {
-      await renewalsWorkspaceService.sendReminder(selectedPolicy.id, reminderMethod);
-      loadInitialData();
-
-      setSendReminderVisible(false);
-      toast.current.show({
-        severity: 'success',
-        summary: t("renewal.reminderSent"),
-        detail: t("renewal.renewalReminderSentVia", { method: reminderMethod, name: selectedPolicy.insuredName }),
-        life: 3000
-      });
-    } catch (error) {
-      showError(error, "renewal.failedToSendReminder");
-    } finally {
-      setLoading(false);
+      await renewalsWorkspaceService.sendReminder(reminder.row.id, reminder.method, reminder.note.trim() || undefined);
+      done(t("queue.reminderRecorded"), reminder.row.policyNumber);
+      setReminder(null);
+      load();
+    } catch (e) {
+      showError(e);
     }
   };
-
-
-  const daysToExpiryBodyTemplate = (rowData) => {
-    const days = rowData.daysToExpiry;
-    let severity = 'success';
-    let icon = 'pi-calendar';
-
-    if (days < 0) {
-      severity = 'danger';
-      icon = 'pi-exclamation-triangle';
-    } else if (days <= 7) {
-      severity = 'danger';
-      icon = 'pi-clock';
-    } else if (days <= 15) {
-      severity = 'warning';
-      icon = 'pi-clock';
-    } else if (days <= 30) {
-      severity = 'info';
-    }
-
-    return (
-      <div className="days-to-expiry">
-        <i className={`pi ${icon} expiry-icon ${severity}`}></i>
-        <span className={`expiry-text ${severity}`}>
-          {days < 0 ? t("renewal.daysOverdue", { days: Math.abs(days) }) : t("renewal.days", { days })}
-        </span>
-      </div>
-    );
-  };
-
-  const statusBodyTemplate = (rowData) => {
-    const getSeverity = (status) => {
-      switch (status) {
-        case 'Quote Sent': return 'info';
-        case 'Under Negotiation': return 'warning';
-        case 'At Risk': return 'danger';
-        case 'In Grace Period': return 'danger';
-        case 'Pending': return 'secondary';
-        default: return 'secondary';
+  const complete = (r) => confirmDialog({
+    header: t("queue.complete"),
+    message: t("queue.completeConfirm", { policy: r.policyNumber }),
+    acceptLabel: t("queue.complete"),
+    rejectLabel: t("common.cancel", "Cancel"),
+    accept: async () => {
+      try {
+        const result = await renewalsWorkspaceService.complete(r.id);
+        done(t("queue.completed"), result?.newPolicy?.policyNumber || r.policyNumber);
+        load();
+      } catch (e) {
+        showError(e);
       }
-    };
+    },
+  });
 
-    return <Tag value={rowData.status} severity={getSeverity(rowData.status)} />;
-  };
-
-  const riskBodyTemplate = (rowData) => {
-    const getSeverity = (risk) => {
-      switch (risk) {
-        case 'Low': return 'success';
-        case 'Medium': return 'warning';
-        case 'High': return 'danger';
-        case 'Critical': return 'danger';
-        default: return 'secondary';
-      }
-    };
-
-    return <Tag value={rowData.retentionRisk} severity={getSeverity(rowData.retentionRisk)} />;
-  };
-
-  const premiumBodyTemplate = (rowData) => {
-    return formatCurrency(rowData.currentPremium);
-  };
-
-  const agentBodyTemplate = (rowData) => {
-    return (
-      <div className="agent-cell">
-        <Avatar label={(rowData.assignedAgent || '').split(' ').map(n => n[0]).join('')}
-                size="small" shape="circle" />
-        <span>{rowData.assignedAgent}</span>
-      </div>
-    );
-  };
-
-  const attemptsBodyTemplate = (rowData) => {
-    const maxAttempts = 3;
-    const percentage = (rowData.renewalAttempts / maxAttempts) * 100;
-
-    return (
-      <div className="bv-meter">
-        <ProgressBar value={progressValue(percentage)} showValue={false} />
-        <span className="bv-meter__value">{`${rowData.renewalAttempts} of ${maxAttempts}`}</span>
-      </div>
-    );
-  };
-
-  const actionBodyTemplate = (rowData) => {
-    return (
-      <div className="action-buttons">
-        <Button
-          icon="pi pi-eye"
-          className="p-button-text"
-          onClick={() => handleView(rowData)}
-          tooltip={t("renewal.viewDetails")} aria-label={t("renewal.viewDetails")}
-        />
-        <Button
-          icon="pi pi-file-o"
-          className="p-button-text"
-          onClick={() => handleGenerateQuote(rowData)}
-          tooltip={t("renewal.generateQuote")}
-          disabled={!rowData.isOpen || rowData.statusCode === 'pending-approval'} aria-label={t("renewal.generateQuote")}
-        />
-        <Button
-          icon="pi pi-send"
-          className="p-button-text"
-          onClick={() => handleSendReminder(rowData)}
-          tooltip={t("renewal.sendReminder")} aria-label={t("renewal.sendReminder")}
-        />
-        <Button
-          icon="pi pi-envelope"
-          className="p-button-text"
-          onClick={() => handleSendNotice(rowData)}
-          tooltip={rowData.nextNotice?.label || t("renewal.allNoticesSent", "All notices sent")}
-          disabled={!rowData.nextNotice} aria-label={rowData.nextNotice?.label || t("renewal.allNoticesSent", "All notices sent")}
-        />
-        {rowData.statusCode === 'approved' && (
-          <Button
-            icon="pi pi-check-circle"
-            className="p-button-text p-button-success"
-            onClick={() => handleComplete(rowData)}
-            tooltip={t("renewal.completeRenewal", "Complete Renewal")} aria-label={t("renewal.completeRenewal", "Complete Renewal")}
-          />
-        )}
-      </div>
-    );
-  };
-
-  const policyLinkTemplate = (rowData) => {
-    return (
-      <a href="#" className="policy-link" onClick={(e) => {
-        e.preventDefault();
-        handleView(rowData);
-      }}>
-        {rowData.policyNumber}
-      </a>
-    );
-  };
-
-  const reminderDialogFooter = (
-    <div className="dialog-footer">
-      <Button
-        label={t("renewal.cancel")}
-        icon="pi pi-times"
-        className="p-button-text"
-        onClick={() => setSendReminderVisible(false)}
-      />
-      <Button
-        label={t("renewal.sendReminder")}
-        icon="pi pi-send"
-        onClick={handleSendReminderConfirm}
-        loading={loading}
-      />
-    </div>
+  const canQuote = (r) => r.isOpen && r.statusCode !== "pending-approval";
+  const menuOf = (r) => [
+    { label: r.nextNotice ? t("queue.sendNotice", { notice: r.nextNotice.label }) : t("queue.allNoticesSent"), icon: "pi pi-envelope", command: () => sendNotice(r), disabled: !r.nextNotice },
+    { label: t("queue.recordReminder"), icon: "pi pi-phone", command: () => setReminder({ row: r, method: "Email", note: "" }) },
+    { label: t("queue.complete"), icon: "pi pi-check-circle", command: () => complete(r), hidden: r.statusCode !== "approved" },
+    { label: t("queue.openPolicy"), icon: "pi pi-file", command: () => navigate(`/agent/policydetail/${r.policyId}`), hidden: !r.policyId },
+  ];
+  const actionsBody = (r) => (
+    <RowActions
+      actions={[
+        { icon: "pi pi-eye", label: t("queue.view"), onClick: () => setPanelId(r.id) },
+        { icon: "pi pi-file-edit", label: t("queue.prepareQuote"), onClick: () => navigate(`/renewal/generate-quote/${r.id}`, { state: { policy: r } }), disabled: !canQuote(r) },
+      ]}
+      menu={menuOf(r)} />
   );
 
   return (
-    <div className="container__renewal__queue__master">
+    <div className="bv-ops-page renewal-queue-page">
       <Toast ref={toast} />
       <ConfirmDialog />
+      <RenewalHeader title={t("queue.title")}
+        actions={(
+          <>
+            <Button icon="pi pi-download" outlined label={t("queue.export")} onClick={() => table.current?.exportCSV()} disabled={!filtered.length} />
+            <Button icon="pi pi-sync" label={t("queue.refreshPipeline")} onClick={refreshPipeline} />
+          </>
+        )} />
+      <StatCards items={figures} />
 
-      <div className="top__container">
-        <h1 className="page__title">{t("renewal.renewalQueue")}</h1>
-        <BreadCrumb model={items} home={home} />
-      </div>
+      <SectionCard>
+        <FilterBar active={!!(search || stage || risk || agent || range || due)}
+          onClear={() => { setSearch(""); setStage(""); setRisk(""); setAgent(""); setRange(null); setDue(""); }}>
+          <span className="p-input-icon-left bv-filter-bar__search">
+            <i className="pi pi-search" />
+            <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("queue.searchHint")} aria-label={t("queue.searchHint")} />
+          </span>
+          <Dropdown value={stage} onChange={(e) => setStage(e.value || "")} aria-label={t("queue.col.stage")}
+            options={[{ label: t("queue.allStages"), value: "" }, ...stages.map((s) => ({ label: s, value: s }))]} />
+          <Dropdown value={risk} onChange={(e) => setRisk(e.value || "")} aria-label={t("queue.col.risk")}
+            options={[{ label: t("queue.allRisks"), value: "" }, ...["Low", "Medium", "High", "Critical"].map((l) => ({ label: t(`renewalPages.risk.${l}`, l), value: l }))]} />
+          <Dropdown value={agent} onChange={(e) => setAgent(e.value || "")} filter aria-label={t("queue.col.agent")}
+            options={[{ label: t("queue.allAgents"), value: "" }, ...agents.map((a) => ({ label: a, value: a }))]} />
+          <Calendar value={range} onChange={(e) => setRange(e.value)} selectionMode="range" readOnlyInput showIcon dateFormat={calendarDateFormat()}
+            placeholder={t("queue.expiryRange")} aria-label={t("queue.expiryRange")} />
+        </FilterBar>
+        <DataTable ref={table} value={filtered} dataKey="id" loading={loading} paginator rows={20} size="small" sortField="daysToExpiry" sortOrder={1}
+          exportFilename="renewal-queue"
+          emptyMessage={<EmptyState icon="pi-calendar" title={t("queue.emptyTitle")} text={rows.length ? t("queue.emptyFiltered") : t("queue.emptyText")} />}>
+          <Column field="policyNumber" header={t("queue.col.policy")} sortable body={(r) => <PolicyCell policyNumber={r.policyNumber} insured={r.insuredName} onOpen={() => setPanelId(r.id)} />} />
+          <Column field="insuredName" header={t("queue.col.insured")} hidden exportable />
+          <Column field="product" header={t("queue.col.product")} sortable body={(r) => <span className="bv-cell-stack"><span>{r.product}</span><small>{r.insurer}</small></span>} />
+          <Column field="daysToExpiry" header={t("queue.col.expiry")} sortable body={(r) => <ExpiryCell date={r.expiryDate} days={r.daysToExpiry} />} />
+          <Column field="currentPremium" header={t("queue.col.premium")} sortable body={(r) => formatCurrency(r.currentPremium)} className="bv-num" headerClassName="bv-num" />
+          <Column field="status" header={t("queue.col.stage")} sortable body={(r) => <StageChip row={r} />} />
+          <Column field="retentionRisk" header={t("queue.col.risk")} sortable body={(r) => <RiskChip level={r.retentionRisk} />} />
+          <Column field="assignedAgent" header={t("queue.col.agent")} sortable />
+          <Column header={t("queue.col.actions")} body={actionsBody} exportable={false} className="bv-actions" headerClassName="bv-actions" />
+        </DataTable>
+      </SectionCard>
 
-      <div className="content-container">
-        <div className="search-section">
-          <Card>
-            <div className="search-grid">
-              <div className="search-field">
-                <label>{t("renewal.policyInsuredName")}</label>
-                <InputText
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder={t("renewal.searchPoliciesOrNames")}
-                />
-              </div>
+      <SidePanel visible={!!selected} onHide={() => setPanelId(null)} title={selected ? `${selected.policyNumber} · ${selected.insuredName || ""}` : ""}
+        meta={selected ? (
+          <>
+            <StageChip row={selected} />
+            <RiskChip level={selected.retentionRisk} />
+            <span>{selected.renewalNumber}</span>
+          </>
+        ) : null}
+        footer={selected ? (
+          <>
+            <Button outlined icon="pi pi-phone" label={t("queue.recordReminder")} onClick={() => setReminder({ row: selected, method: "Email", note: "" })} />
+            <Button icon="pi pi-file-edit" label={t("queue.prepareQuote")} disabled={!canQuote(selected)}
+              onClick={() => navigate(`/renewal/generate-quote/${selected.id}`, { state: { policy: selected } })} />
+          </>
+        ) : null}>
+        {selected ? (
+          <>
+            <PanelSection title={t("queue.policy")}>
+              <KeyFacts className="bv-key-facts--plain" items={[
+                { key: "product", label: t("queue.col.product"), value: selected.product },
+                { key: "insurer", label: t("queue.insurer"), value: selected.insurer },
+                { key: "expiry", label: t("queue.col.expiry"), value: <ExpiryCell date={selected.expiryDate} days={selected.daysToExpiry} /> },
+                { key: "premium", label: t("queue.col.premium"), value: formatCurrency(selected.currentPremium) },
+                { key: "renewal", label: t("queue.renewalPremium"), value: selected.renewalPremium ? formatCurrency(selected.renewalPremium) : null },
+                { key: "si", label: t("queue.sumInsured"), value: selected.sumInsured ? formatCurrency(selected.sumInsured) : null },
+                { key: "terms", label: t("queue.termsRenewed"), value: selected.loyaltyYears },
+                { key: "claims", label: t("queue.claims"), value: selected.claimsHistory ? `${selected.claimsHistory.totalClaims} · ${formatCurrency(selected.claimsHistory.claimsAmount)}` : null },
+              ]} />
+            </PanelSection>
+            <PanelSection title={t("queue.contact")}>
+              <KeyFacts className="bv-key-facts--plain" items={[
+                { key: "mobile", label: t("queue.mobile"), value: selected.insuredContact?.mobile },
+                { key: "email", label: t("queue.email"), value: selected.insuredContact?.email },
+                { key: "notice", label: t("queue.lastNotice"), value: selected.lastNoticeAt ? formatDate(selected.lastNoticeAt) : t("queue.none") },
+                { key: "next", label: t("queue.nextNotice"), value: selected.nextNotice?.label || t("queue.allNoticesSent") },
+                { key: "contact", label: t("queue.lastContact"), value: selected.lastContactDate ? formatDate(selected.lastContactDate) : t("queue.none") },
+                { key: "contacts", label: t("queue.col.contacts"), value: selected.renewalAttempts },
+                { key: "agent", label: t("queue.col.agent"), value: selected.assignedAgent },
+              ]} />
+            </PanelSection>
+          </>
+        ) : null}
+      </SidePanel>
 
-              <div className="search-field">
-                <label>{t("renewal.status")}</label>
-                <Dropdown
-                  value={status}
-                  onChange={(e) => setStatus(e.value)}
-                  options={statusOptions}
-                  placeholder={t("renewal.selectStatus")}
-                />
-              </div>
-
-              <div className="search-field">
-                <label>{t("renewal.riskLevel")}</label>
-                <Dropdown
-                  value={riskLevel}
-                  onChange={(e) => setRiskLevel(e.value)}
-                  options={riskOptions}
-                  placeholder={t("renewal.selectRiskLevel")}
-                />
-              </div>
-
-              <div className="search-field">
-                <label>{t("renewal.agent")}</label>
-                <Dropdown
-                  value={agent}
-                  onChange={(e) => setAgent(e.value)}
-                  options={agentOptions}
-                  placeholder={t("renewal.selectAgent")}
-                />
-              </div>
-
-              <div className="search-field">
-                <label>{t("renewal.expiryDateRange")}</label>
-                <Calendar
-                  value={dateRange}
-                  onChange={(e) => setDateRange(e.value)}
-                  selectionMode="range"
-                  dateFormat={calendarDateFormat()}
-                  placeholder={t("renewal.selectDateRange")}
-                />
-              </div>
-
-              <div className="search-actions">
-                <Button label={t("renewal.search")} icon="pi pi-search" onClick={applyFilters} />
-                <Button label={t("renewal.clear")} className="p-button-secondary" onClick={handleClear} />
-              </div>
+      <Dialog header={t("queue.recordReminder")} visible={!!reminder} onHide={() => setReminder(null)} style={{ width: "32rem" }} breakpoints={{ "768px": "95vw" }}
+        footer={(
+          <div>
+            <Button label={t("common.cancel", "Cancel")} text onClick={() => setReminder(null)} />
+            <Button label={t("queue.save")} icon="pi pi-check" onClick={saveReminder} />
+          </div>
+        )}>
+        {reminder ? (
+          <div className="grid">
+            <div className="col-12"><p className="bv-panel-text">{`${reminder.row.policyNumber} · ${reminder.row.insuredName || ""}`}</p></div>
+            <div className="col-12 md:col-6">
+              <label htmlFor="rq-method">{t("queue.channel")}</label>
+              <Dropdown inputId="rq-method" value={reminder.method} onChange={(e) => setReminder({ ...reminder, method: e.value })} className="w-full"
+                options={METHODS.map((m) => ({ label: t(`lapse.channels.${m}`, m), value: m }))} />
             </div>
-          </Card>
-        </div>
-
-        <div className="dashboard-cards">
-          <Card className="dashboard-card">
-            <div className="card-content">
-              <i className="pi pi-list card-icon blue"></i>
-              <div className="card-info">
-                <span className="card-value">{dashboardData.totalPolicies}</span>
-                <span className="card-label">{t("renewal.totalPolicies")}</span>
-              </div>
+            <div className="col-12 md:col-6">
+              <label>{t("queue.sentTo")}</label>
+              <p className="bv-panel-text">
+                {reminder.method === "Email" ? reminder.row.insuredContact?.email || t("queue.noEmail") : null}
+                {["SMS", "Phone"].includes(reminder.method) ? reminder.row.insuredContact?.mobile || t("queue.noMobile") : null}
+                {reminder.method === "Letter" ? t("queue.mailingAddress") : null}
+              </p>
             </div>
-          </Card>
-
-          <Card className="dashboard-card clickable" onClick={() => setStatus('Pending')}>
-            <div className="card-content">
-              <i className="pi pi-clock card-icon orange"></i>
-              <div className="card-info">
-                <span className="card-value">{dashboardData.dueSoon}</span>
-                <span className="card-label">{t("renewal.dueSoon30Days")}</span>
-              </div>
+            <div className="col-12">
+              <label htmlFor="rq-note">{t("queue.note")}</label>
+              <InputTextarea id="rq-note" value={reminder.note} onChange={(e) => setReminder({ ...reminder, note: e.target.value })} rows={3} autoResize className="w-full" maxLength={2000} />
             </div>
-          </Card>
-
-          <Card className="dashboard-card clickable" onClick={() => setRiskLevel('High')}>
-            <div className="card-content">
-              <i className="pi pi-exclamation-triangle card-icon red"></i>
-              <div className="card-info">
-                <span className="card-value">{dashboardData.atRisk}</span>
-                <span className="card-label">{t("renewal.atRisk")}</span>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="dashboard-card clickable" onClick={() => setStatus('In Grace Period')}>
-            <div className="card-content">
-              <i className="pi pi-ban card-icon dark-red"></i>
-              <div className="card-info">
-                <span className="card-value">{dashboardData.inGracePeriod}</span>
-                <span className="card-label">{t("renewal.inGracePeriod")}</span>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        <div className="table-section">
-          <Card>
-            <div className="table-header">
-              <h3>{t("renewal.policiesDueForRenewal")}</h3>
-              <div className="table-actions">
-                <Button
-                  icon="pi pi-refresh"
-                  className="p-button-text"
-                  onClick={handleRefresh}
-                  tooltip={t("renewal.refresh")} aria-label={t("renewal.refresh")}
-                />
-                <Button
-                  icon="pi pi-file-excel"
-                  className="p-button-text"
-                  onClick={() => {
-                    toast.current.show({
-                      severity: 'success',
-                      summary: t("renewal.exportStarted"),
-                      detail: t("renewal.renewalQueueExportedToExcel"),
-                      life: 3000
-                    });
-                  }}
-                  tooltip={t("renewal.exportToExcel")} aria-label={t("renewal.exportToExcel")}
-                />
-              </div>
-            </div>
-
-            <DataTable
-              value={filteredPolicies}
-              className="renewal-table"
-              stripedRows
-              paginator
-              rows={20}
-              loading={loading}
-              emptyMessage={t("renewal.noPoliciesFound")}
-              sortMode="multiple"
-            >
-              <Column
-                body={policyLinkTemplate}
-                header={t("renewal.policyNumber")}
-                style={{ width: '12%' }}
-                sortable
-                sortField="policyNumber"
-              />
-              <Column
-                field="insuredName"
-                header={t("renewal.insuredName")}
-                style={{ width: '14%' }}
-                sortable
-              />
-              <Column
-                field="product"
-                header={t("renewal.product")}
-                style={{ width: '12%' }}
-                sortable
-              />
-              <Column
-                field="insurer"
-                header={t("renewal.insurer")}
-                style={{ width: '10%' }}
-                sortable
-              />
-              <Column
-                body={daysToExpiryBodyTemplate}
-                header={t("renewal.daysToExpiry")}
-                style={{ width: '10%' }}
-                sortable
-                sortField="daysToExpiry"
-              />
-              <Column
-                body={premiumBodyTemplate}
-                header={t("renewal.premium")}
-                style={{ width: '10%', textAlign: 'right' }}
-                sortable
-                sortField="currentPremium"
-              />
-              <Column
-                body={statusBodyTemplate}
-                header={t("renewal.status")}
-                style={{ width: '10%' }}
-              />
-              <Column
-                body={riskBodyTemplate}
-                header={t("renewal.risk")}
-                style={{ width: '8%' }}
-              />
-              <Column
-                body={agentBodyTemplate}
-                header={t("renewal.agent")}
-                style={{ width: '10%' }}
-              />
-              <Column
-                body={attemptsBodyTemplate}
-                header={t("renewal.attempts")}
-                style={{ width: '8%' }}
-              />
-              <Column
-                body={actionBodyTemplate}
-                header={t("renewal.actions")}
-                style={{ width: '6%' }}
-              />
-            </DataTable>
-          </Card>
-        </div>
-
-        {/* Policy Details Dialog */}
-        <Dialog
-          header={t("renewal.policyDetails")}
-          visible={detailsVisible}
-          onHide={() => setDetailsVisible(false)}
-          style={{ width: '70vw' }}
-        >
-          {selectedPolicy && (
-            <TabView>
-              <TabPanel header={t("renewal.policyInformation")}>
-                <div className="detail-grid">
-                  <div className="detail-item">
-                    <label>{t("renewal.policyNumberLabel")}</label>
-                    <span>{selectedPolicy.policyNumber}</span>
-                  </div>
-                  <div className="detail-item">
-                    <label>{t("renewal.insuredNameLabel")}</label>
-                    <span>{selectedPolicy.insuredName}</span>
-                  </div>
-                  <div className="detail-item">
-                    <label>{t("renewal.productLabel")}</label>
-                    <span>{selectedPolicy.product}</span>
-                  </div>
-                  <div className="detail-item">
-                    <label>{t("renewal.insurerLabel")}</label>
-                    <span>{selectedPolicy.insurer}</span>
-                  </div>
-                  <div className="detail-item">
-                    <label>{t("renewal.expiryDate")}</label>
-                    <span>{formatAppDate(selectedPolicy.expiryDate)}</span>
-                  </div>
-                  <div className="detail-item">
-                    <label>{t("renewal.currentPremium")}</label>
-                    <span>{formatCurrency(selectedPolicy.currentPremium)}</span>
-                  </div>
-                  <div className="detail-item">
-                    <label>{t("renewal.sumInsured")}</label>
-                    <span>{formatCurrency(selectedPolicy.sumInsured)}</span>
-                  </div>
-                  <div className="detail-item">
-                    <label>{t("renewal.loyaltyYears")}</label>
-                    <span>{selectedPolicy.loyaltyYears} {t("renewal.years")}</span>
-                  </div>
-                </div>
-              </TabPanel>
-
-              <TabPanel header={t("renewal.contactInformation")}>
-                <div className="detail-grid">
-                  <div className="detail-item">
-                    <label>{t("renewal.mobile")}</label>
-                    <span>{selectedPolicy.insuredContact?.mobile}</span>
-                  </div>
-                  <div className="detail-item">
-                    <label>{t("renewal.email")}</label>
-                    <span>{selectedPolicy.insuredContact?.email}</span>
-                  </div>
-                  <div className="detail-item">
-                    <label>{t("renewal.preferredContact")}</label>
-                    <span>{selectedPolicy.insuredContact?.preferredContact}</span>
-                  </div>
-                  <div className="detail-item">
-                    <label>{t("renewal.lastContact")}</label>
-                    <span>{selectedPolicy.lastContactDate || t("renewal.notContacted")}</span>
-                  </div>
-                  <div className="detail-item">
-                    <label>{t("renewal.renewalAttempts")}</label>
-                    <span>{selectedPolicy.renewalAttempts}</span>
-                  </div>
-                  <div className="detail-item">
-                    <label>{t("renewal.assignedAgent")}</label>
-                    <span>{selectedPolicy.assignedAgent}</span>
-                  </div>
-                </div>
-              </TabPanel>
-
-              {selectedPolicy.claimsHistory && (
-                <TabPanel header={t("renewal.claimsHistory")}>
-                  <div className="detail-grid">
-                    <div className="detail-item">
-                      <label>{t("renewal.claimsLastYear")}</label>
-                      <span>{selectedPolicy.claimsHistory.hasClaimsLastYear ? t("renewal.yes") : t("renewal.no")}</span>
-                    </div>
-                    <div className="detail-item">
-                      <label>{t("renewal.totalClaims")}</label>
-                      <span>{selectedPolicy.claimsHistory.totalClaims}</span>
-                    </div>
-                    <div className="detail-item">
-                      <label>{t("renewal.claimsAmount")}</label>
-                      <span>{formatCurrency(selectedPolicy.claimsHistory.claimsAmount)}</span>
-                    </div>
-                    {selectedPolicy.claimsHistory.claimsRatio && (
-                      <div className="detail-item">
-                        <label>{t("renewal.claimsRatio")}</label>
-                        <span>{formatPercent(selectedPolicy.claimsHistory.claimsRatio)}</span>
-                      </div>
-                    )}
-                  </div>
-                </TabPanel>
-              )}
-            </TabView>
-          )}
-        </Dialog>
-
-        <Dialog
-          header={t("renewal.sendRenewalReminder")}
-          visible={sendReminderVisible}
-          onHide={() => setSendReminderVisible(false)}
-          style={{ width: '400px' }}
-          footer={reminderDialogFooter}
-        >
-          {selectedPolicy && (
-            <div className="reminder-form">
-              <div className="form-field">
-                <label>{t("renewal.policy")}</label>
-                <span>{selectedPolicy.policyNumber} - {selectedPolicy.insuredName}</span>
-              </div>
-              <div className="form-field">
-                <label>{t("renewal.reminderMethod")}</label>
-                <Dropdown
-                  value={reminderMethod}
-                  onChange={(e) => setReminderMethod(e.value)}
-                  options={reminderMethods}
-                  style={{ width: '100%' }}
-                />
-              </div>
-              <div className="form-field">
-                <label>{t("renewal.contactInfo")}</label>
-                <span>
-                  {reminderMethod === 'Email' && selectedPolicy.insuredContact?.email}
-                  {reminderMethod === 'SMS' && selectedPolicy.insuredContact?.mobile}
-                  {reminderMethod === 'Phone' && selectedPolicy.insuredContact?.mobile}
-                  {reminderMethod === 'Letter' && t("renewal.mailingAddressOnFile")}
-                </span>
-              </div>
-            </div>
-          )}
-        </Dialog>
-      </div>
+          </div>
+        ) : null}
+      </Dialog>
     </div>
   );
 };

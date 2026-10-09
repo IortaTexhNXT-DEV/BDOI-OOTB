@@ -12,7 +12,9 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
 import service from "../../services/opsAccountingService";
 import { promptText } from "../../utility/dialogs";
-import { Field, OpsTag, PageHeader, date, isoOf, money, numericColumn, showError, showSuccess } from "./common";
+import StatCards from "../../components/StatCards";
+import { EmptyState, FilterBar, PageHeader as RecordHeader, RowActions, SectionCard } from "../../components/RecordPage";
+import { Field, OpsTag, date, isoOf, money, numericColumn, showError, showSuccess } from "./common";
 
 const STATUSES = ["active", "superseded", "expired", "cancelled", "all"];
 
@@ -81,42 +83,56 @@ const CoverNotes = () => {
     if (to !== null) act(() => service.sendCoverNote(r.id, to || undefined), t("opsAcc.coverNotes.sent", { number: r.coverNoteNumber }));
   };
 
+  const rows = data?.rows || [];
+  const statusOptions = STATUSES.map((s) => ({ label: t(`opsAcc.status.${s}`), value: s }));
+  const issueButton = <Button icon="pi pi-plus" label={t("opsAcc.coverNotes.issue")} onClick={() => openIssue()} />;
+  const actionsBody = (r) => (
+    <RowActions
+      actions={[{ icon: "pi pi-print", label: t("opsAcc.print"), onClick: () => act(() => service.printCoverNote(r.id)) },
+        { icon: "pi pi-envelope", label: t("opsAcc.coverNotes.send"), onClick: () => send(r), hidden: r.status !== "active" }]}
+      menu={[{ label: t("coverNotePage.cancel"), icon: "pi pi-times", command: () => cancel(r), className: "bv-menu-danger", hidden: r.status !== "active" }]} />
+  );
+
   return (
-    <div className="pe-page">
+    <div className="bv-ops-page cover-notes-page">
       <Toast ref={toast} />
-      <PageHeader title={t("opsAcc.coverNotes.title")} group={t("opsAcc.operations")} subtitle={t("opsAcc.coverNotes.intro")}>
-        <Button icon="pi pi-plus" label={t("opsAcc.coverNotes.issue")} onClick={() => openIssue()} />
-      </PageHeader>
-      {data && (
-        <div className="flex gap-4 mb-3">
-          <span>{t("opsAcc.coverNotes.active")}: <b>{data.summary.active}</b></span>
-          <span>{t("opsAcc.coverNotes.expiringSoon")}: <b>{data.summary.expiringSoon}</b></span>
-        </div>
-      )}
-      <div className="pe-card">
-        <div className="flex gap-2 mb-2">
-          <Dropdown value={status} options={STATUSES.map((s) => ({ label: t(`opsAcc.status.${s}`), value: s }))} onChange={(e) => setStatus(e.value)} className="w-12rem" />
-          <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("opsAcc.coverNotes.searchHint")} className="w-20rem" />
-        </div>
-        <DataTable value={data?.rows || []} dataKey="id" loading={loading} size="small" stripedRows paginator rows={20} emptyMessage={t("opsAcc.none")}>
-          <Column field="coverNoteNumber" header={t("opsAcc.coverNotes.number")} />
-          <Column header={t("opsAcc.coverNotes.insured")} body={(r) => r.insuredName || r.clientName} />
+      <RecordHeader title={t("opsAcc.coverNotes.title")} actions={issueButton}
+        crumbs={[{ label: t("opsAcc.operations") }, { label: t("opsAcc.coverNotes.title") }]} />
+      <StatCards items={[
+        { key: "active", label: t("opsAcc.coverNotes.active"), value: data ? data.summary.active : null, onClick: () => setStatus("active"), active: status === "active" },
+        { key: "soon", label: t("opsAcc.coverNotes.expiringSoon"), value: data ? data.summary.expiringSoon : null, note: t("coverNotePage.soonNote") },
+        { key: "shown", label: t("coverNotePage.shown", { status: t(`opsAcc.status.${status}`) }), value: data ? rows.length : null },
+      ]} />
+      <SectionCard title={t("coverNotePage.list")} hint={t("opsAcc.coverNotes.intro")}>
+        <FilterBar active={status !== "active" || !!search} onClear={() => { setStatus("active"); setSearch(""); }}>
+          <span className="p-input-icon-left bv-filter-bar__search">
+            <i className="pi pi-search" />
+            <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("opsAcc.coverNotes.searchHint")} aria-label={t("opsAcc.coverNotes.searchHint")} />
+          </span>
+          <Dropdown value={status} options={statusOptions} onChange={(e) => setStatus(e.value)} aria-label={t("opsAcc.statusLabel")} />
+        </FilterBar>
+        <DataTable value={rows} dataKey="id" loading={loading} size="small" paginator rows={20}
+          emptyMessage={(
+            <EmptyState icon="pi-file" title={t("coverNotePage.emptyTitle", { status: t(`opsAcc.status.${status}`) })} text={t("coverNotePage.emptyText")}
+              action={status === "active" && !search ? <Button outlined icon="pi pi-plus" label={t("opsAcc.coverNotes.issue")} onClick={() => openIssue()} /> : null} />
+          )}>
+          <Column field="coverNoteNumber" header={t("coverNotePage.col.note")}
+            body={(r) => <span className="bv-cell-stack"><span className="bv-nowrap">{r.coverNoteNumber}</span><small>{r.insuredName || r.clientName}</small></span>} />
           <Column field="insurerName" header={t("opsAcc.insurer")} />
-          <Column header={t("opsAcc.coverNotes.source")} body={(r) => r.quoteNumber || r.placementNumber} />
-          <Column header={t("opsAcc.coverNotes.period")} body={(r) => `${date(r.coverFrom)} - ${date(r.coverTo)}`} />
-          <Column header={t("opsAcc.coverNotes.daysLeft")} body={(r) => (r.daysLeft === null ? "" : r.daysLeft)} {...numericColumn} />
+          <Column header={t("opsAcc.coverNotes.source")} body={(r) => r.quoteNumber || r.placementNumber} className="bv-nowrap" />
+          <Column header={t("opsAcc.coverNotes.period")}
+            body={(r) => (
+              <span className="bv-cell-stack">
+                <span className="bv-nowrap">{`${date(r.coverFrom)} - ${date(r.coverTo)}`}</span>
+                {r.daysLeft !== null && r.status === "active" ? <small>{t("coverNotePage.daysLeft", { count: r.daysLeft })}</small> : null}
+              </span>
+            )} />
           <Column header={t("opsAcc.premium")} body={(r) => money(r.premiumTotal)} {...numericColumn} />
           <Column header={t("opsAcc.statusLabel")} body={(r) => <OpsTag status={r.status} />} />
-          <Column field="policyNumber" header={t("opsAcc.policy")} />
-          <Column body={(r) => (
-            <span className="flex gap-1">
-              <Button icon="pi pi-print" text size="small" aria-label={t("opsAcc.print")} tooltip={t("opsAcc.print")} onClick={() => act(() => service.printCoverNote(r.id))} />
-              {r.status === "active" && <Button icon="pi pi-envelope" text size="small" aria-label={t("opsAcc.coverNotes.send")} tooltip={t("opsAcc.coverNotes.send")} onClick={() => send(r)} />}
-              {r.status === "active" && <Button icon="pi pi-times" text size="small" severity="danger" aria-label={t("opsAcc.cancel")} tooltip={t("opsAcc.cancel")} onClick={() => cancel(r)} />}
-            </span>
-          )} />
+          <Column field="policyNumber" header={t("opsAcc.policy")} body={(r) => r.policyNumber || <span className="bv-muted">—</span>} className="bv-nowrap" />
+          <Column header={t("coverNotePage.col.actions")} body={actionsBody} className="bv-actions" headerClassName="bv-actions" />
         </DataTable>
-      </div>
+      </SectionCard>
 
       <Dialog className="pe-dialog" header={t("opsAcc.coverNotes.issue")} visible={!!issue} style={{ width: "min(860px, 96vw)" }} onHide={() => setIssue(null)}
         footer={<div><Button label={t("opsAcc.cancel")} text onClick={() => setIssue(null)} /><Button label={t("opsAcc.coverNotes.issue")} icon="pi pi-check" disabled={!issue?.source} onClick={doIssue} /></div>}>
