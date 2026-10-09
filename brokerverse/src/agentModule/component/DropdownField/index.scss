@@ -1,152 +1,43 @@
-.dropdown__container {
-  position: relative;
+@import "../../../theme/bdoi/fields";
 
-  .dropdown__field {
-    height: 64px;
-    padding-top: 20px;
-    width: 100%;
-    font-size: 16px;
-    font-weight: 500;
-    font-family: "Nunito", Arial, sans-serif;
-    line-height: 24px;
-    color: #111927;
-    border-radius: 10px;
-    border: 1px solid #ced4da;
-
-    &:focus {
-      outline: 0 none;
-      outline-offset: 0;
-      box-shadow: 0 0 0 0.1rem #e5e7eb;
-      border-color: #e5e7eb;
-    }
-  }
-  .p-inputwrapper-filled {
-    border: 1px solid #0072d8 !important;
-  }
-
-  .label {
-    position: absolute;
-    top: 25px;
-    left: 10px;
-    color: #6c737f;
-    pointer-events: none;
-    transition: 0.2s ease all;
-    font-size: 14px;
-    font-weight: 400;
-    font-family: "Nunito", Arial, sans-serif;
-    line-height: 21px;
-
-    &.focused {
-      top: 4px;
-      left: 10px;
-      font-size: 14px;
-      color: #0072d8;
-      font-weight: 400;
-      font-family: "Nunito", Arial, sans-serif;
-      line-height: 21px;
-    }
-  }
-  .p-dropdown {
-    background: #ffffff;
-    border: 1px solid #d1d5db;
-    transition: background-color 0.2s, color 0.2s, border-color 0.2s,
-      box-shadow 0.2s;
-    border-radius: 10px;
-    margin-top: 0rem !important;
-    width: 100%;
-  }
-  .p-dropdown .p-dropdown-trigger {
-    background: transparent;
-    color: #6b7280;
-    width: 3rem;
-    border-top-right-radius: 10px;
-    border-bottom-right-radius: 10px;
-    padding-bottom: 25px !important;
-  }
-  .p-dropdown .p-dropdown-label {
-    // color: #0072d8;
-  }
-  .p-inputwrapper-focus {
-    border-color: #0072d8;
-  }
-  .p-inputwrapper-filled {
-    // border-color: #0072d8;
-  }
-}
-
+// Drop-down with its label above (theme/bdoi/_fields.scss); the focus class of the component changes nothing.
+.dropdown__container,
 .dropdown__container__changed {
-  position: relative;
+  @include bv-field-stack;
 
-  .dropdown__field {
-    height: 64px;
-    padding-top: 20px;
+  .dropdown__field.p-dropdown {
     width: 100%;
-    font-size: 16px;
-    font-weight: 500;
-    font-family: "Nunito", Arial, sans-serif;
-    line-height: 24px;
-    color: #111927;
-    border-radius: 10px;
-    border: 1px solid #ced4da;
+    min-height: $control-height - 4px;
+    margin-top: 0 !important;
+    border: 1px solid $brand-field-blue;
+    border-radius: $radius-sm;
+    background: $color-surface;
 
-    &:focus {
-      outline: 0 none;
-      outline-offset: 0;
-      box-shadow: 0 0 0 0.1rem #e5e7eb;
-      border-color: #e5e7eb;
+    &.p-focus {
+      border-color: $brand-blue;
+      box-shadow: $focus-ring;
     }
-  }
-  .p-inputwrapper-filled {
-    border: 1px solid #0072d8 !important;
-  }
 
-  .label {
-    position: absolute;
-    top: 25px;
-    left: 10px;
-    color: #6c737f;
-    pointer-events: none;
-    transition: 0.2s ease all;
-    font-size: 14px;
-    font-weight: 400;
-    font-family: "Nunito", Arial, sans-serif;
-    line-height: 21px;
-
-    &.focused {
-      top: 4px;
-      left: 10px;
+    .p-dropdown-label {
+      padding: 8px 12px;
       font-size: 14px;
-      color: #0072d8;
-      font-weight: 400;
-      font-family: "Nunito", Arial, sans-serif;
-      line-height: 21px;
+      line-height: 20px;
+      color: $color-heading;
+    }
+
+    .p-dropdown-label.p-placeholder {
+      color: $color-placeholder;
+    }
+
+    .p-dropdown-trigger {
+      width: 2.75rem;
+      background: transparent;
+      color: $color-text-muted;
     }
   }
-  .p-dropdown {
-    background: #ffffff;
-    border: 1px solid #d1d5db;
-    transition: background-color 0.2s, color 0.2s, border-color 0.2s,
-      box-shadow 0.2s;
-    border-radius: 10px;
-    margin-top: 0rem !important;
-    width: 100%;
-  }
-  .p-dropdown .p-dropdown-trigger {
-    background: transparent;
-    color: #6b7280;
-    width: 3rem;
-    border-top-right-radius: 10px;
-    border-bottom-right-radius: 10px;
-    padding-bottom: 25px !important;
-  }
-  .p-dropdown .p-dropdown-label {
-    // color: #0072d8;
-  }
 
-  .p-inputwrapper-focus {
-    border-color: #0072d8;
-  }
-  .p-inputwrapper-filled {
-    // border-color: #0072d8;
+  .label,
+  .label.focused {
+    @include bv-field-label;
   }
 }

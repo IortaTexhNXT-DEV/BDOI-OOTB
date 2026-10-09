@@ -41,9 +41,6 @@ const InputField = ({
           className={classNames}
           disabled={disabled}
           maxLength={length || 100}
-          style={{
-            borderRadius:10
-          }}
         />
         {error && <div className="formik__error">{error}</div>}
       </LabelWrapper>

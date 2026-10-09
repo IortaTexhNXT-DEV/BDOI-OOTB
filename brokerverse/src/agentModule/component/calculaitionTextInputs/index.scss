@@ -1,48 +1,27 @@
+@import "../../../theme/bdoi/fields";
+
+// A computed figure shown as a read-only field: the label above, the figure at the right of the box.
 .calculaition__inputfield__container {
-  position: relative;
+  > div {
+    @include bv-field-stack;
+  }
 
   .input__field {
-    position: relative;
-    height: 64px;
-    padding-top: 30px;
-    width: 100%;
-    font-size: 16px;
-    font-weight: 500;
-    font-family: "Nunito", Arial, sans-serif;
-    line-height: 24px;
-    color: #111927;
-    border-radius: 10px;
-    border: 1px solid #d1d5db;
-    width: 100%;
-    &:focus {
-      outline: 0 none;
-      outline-offset: 0;
-      box-shadow: 0 0 0 0.1rem #e5e7eb;
-      border-color: #d1d5db;
-    }
+    @include bv-field-control;
+    background: $color-surface-muted;
   }
 
   .label {
-    position: absolute;
-    top: 5px;
-    left: 10px;
-    color: #6c737f;
-    pointer-events: none;
-    transition: 0.2s ease all;
-    font-size: 14px;
-    font-weight: 400;
-    font-family: "Nunito", Arial, sans-serif;
-    line-height: 21px;
+    @include bv-field-label;
   }
 
   .input__value {
     position: absolute;
-    bottom: 10px;
-    right: 15px;
-    color: #0072d8;
-    font-size: 16px;
-    font-weight: 400;
-    font-family: "Nunito", Arial, sans-serif;
-    line-height: 24px;
+    bottom: 8px;
+    right: 12px;
+    color: $color-heading;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
   }
 }

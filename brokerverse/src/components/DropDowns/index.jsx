@@ -50,9 +50,6 @@ function DropDowns({
           filter
           dropdownIcon={dropdownIcon}
           defaultValue={defaultValue}
-          style={{
-            borderRadius:10
-          }}
         />
         </div>
         {error && <div className="formik__error">{error}</div>}

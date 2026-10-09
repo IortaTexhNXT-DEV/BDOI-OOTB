@@ -124,8 +124,10 @@ $text-strong: #1f2937;
 }
 
 // ---------------------------------------------------------------- tables
+// The tables of a page and the small tables of dialogs and side panels (rendered outside the page) look the same.
 
-#{$shell} .p-datatable {
+#{$shell} .p-datatable,
+.p-dialog .p-datatable {
   font-size: 14px;
   border-radius: $radius-md;
 

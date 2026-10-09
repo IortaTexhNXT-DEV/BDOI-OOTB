@@ -133,11 +133,130 @@ svg {
 }
 
 // ---------------------------------------------------------------- form fields
-// The required mark after a field label, the same on the older field components (required__label, required-marker).
+// One field on every form: the label above the control, the required mark after it, help and error text under it
+// (theme/bdoi/_fields.scss for the older field components).
+
+.bv-field-label {
+  display: inline-block;
+  margin-bottom: 6px !important;
+  font-family: $font-body;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  color: $color-text;
+}
 
 .bv-required,
 .required__label,
 .required-marker {
   margin-left: 2px;
   color: $color-danger;
+}
+
+small.p-error,
+.p-error.block,
+.formik__error {
+  font-size: 12px;
+  line-height: 16px;
+  color: $color-danger;
+}
+
+// one control height and text size, on the page and in dialogs and side panels (rendered outside the page); a date
+// field with its calendar button is as high as the other fields
+.p-dialog {
+  .p-inputtext,
+  .p-dropdown,
+  .p-multiselect,
+  .p-calendar,
+  .p-inputnumber {
+    font-size: 14px;
+  }
+
+  .p-inputtext:not(textarea),
+  .p-dropdown,
+  .p-multiselect {
+    min-height: 40px;
+  }
+}
+
+.p-calendar .p-inputtext {
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+
+// a checkbox or radio button and its label on one line, the box centred on the text
+.p-checkbox,
+.p-radiobutton {
+  flex: 0 0 auto;
+  vertical-align: middle;
+}
+
+.p-checkbox + label,
+.p-radiobutton + label {
+  margin-left: 8px;
+  margin-bottom: 0;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.field-checkbox,
+.field-radiobutton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  > label {
+    margin: 0;
+  }
+}
+
+// ---------------------------------------------------------------- dialog and side panel footers
+// Secondary actions on the left as quiet outlined buttons, the main action last on the right, every button at least
+// the same width; a footer that arranges its own content (justify-content utilities) keeps it.
+
+.p-dialog .p-dialog-footer,
+.p-dialog .p-dialog-footer > div:only-child {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.p-dialog .p-dialog-footer {
+  > div:only-child {
+    flex: 1 1 auto;
+  }
+
+  .p-button {
+    margin: 0;
+  }
+
+  .p-button:not(.p-button-icon-only):not(.p-button-link) {
+    min-width: 6.5rem;
+    justify-content: center;
+  }
+
+  .p-button:is(.p-button-text, .p-button-outlined, .p-button-secondary):not(.p-button-danger):not(.p-button-link) {
+    background: $color-surface;
+    border: 1px solid $color-border-strong;
+    color: $color-heading;
+
+    &:enabled:hover {
+      background: $color-bg;
+      border-color: $color-placeholder;
+      color: $color-heading;
+    }
+  }
+
+  .p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-secondary):not(.p-button-link) {
+    order: 1;
+  }
+}
+
+// small tables of dialogs: a long value (an e-mail address) breaks inside its cell instead of running into the next
+// column; a table wider than the panel scrolls sideways
+.p-dialog .p-datatable .p-datatable-tbody > tr > td {
+  overflow-wrap: break-word;
+  word-break: normal;
 }
