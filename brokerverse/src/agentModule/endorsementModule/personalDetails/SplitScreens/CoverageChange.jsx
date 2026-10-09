@@ -56,7 +56,7 @@ const withStoredAmount = (options, stored) => {
  * rates (defaults for BI / PD / APPA), flat premiums kept where a cover has no sum insured or rate, taxes at the
  * configured rates, each rounded to cents.
  */
-const priceCoverage = (details, taxRates, fallbackOwnDamageRate, appaTerms = {}) => {
+export const priceCoverage = (details, taxRates, fallbackOwnDamageRate, appaTerms = {}) => {
   const odRate = details.LossandDamagecoverageRate || fallbackOwnDamageRate || "";
   const c = computeAllPremiums({
     lossAndDamageCoverage: details.LossandDamagecoverage,
@@ -88,16 +88,18 @@ const priceCoverage = (details, taxRates, fallbackOwnDamageRate, appaTerms = {})
   const ra = keep(details.RoadsideAssistanceRate, c.roadsideAssistancePremium, details.RoadsideAssistancePremium);
   const pac = keep(details.PersonalAccidentCoverRate, c.personalAccidentCoverPremium, details.PersonalAccidentCoverPremium);
   const net = round2(
-    [c.lossAndDamageCoveragePremium, aon, c.ctplCoveragePremium, ra, pac, bi, pd, appa]
+    [c.lossAndDamageCoveragePremium, aon, ra, pac, bi, pd, appa]
       .map((v) => round2(parseNumericValue(v)))
       .reduce((s, v) => s + v, 0)
   );
   const vat = round2(net * taxRates.valueAddedTax);
   const dst = round2(net * taxRates.documentaryStampTax);
   const lgt = round2(net * taxRates.localGovernmentTax);
+  // the CTPL tariff carries its taxes and fees: it is added to the gross, not taxed again (as on the quotation)
+  const ctpl = round2(parseNumericValue(c.ctplCoveragePremium));
   const others = round2(parseNumericValue(details.OthersPremium));
   const discount = round2(parseNumericValue(details.Discount));
-  const gross = Math.max(0, round2(net + vat + dst + lgt + others - discount));
+  const gross = Math.max(0, round2(net + vat + dst + lgt + ctpl + others - discount));
   return {
     ...details,
     LossandDamagecoverageRate: odRate,

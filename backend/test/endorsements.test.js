@@ -154,7 +154,8 @@ describe('coverage change endorsements (premium delta)', () => {
     const net = r2(1180000 * 0.0175);
     const delta = r2((await grossOf(net)) - before);
     const rcvBefore = await receivableCount('pol_sls_02');
-    const e = await cs('post', '/endorsements/create-endorsement').send({ policyId: 'pol_sls_02', endorsementTypeIds: [3], coverageChanges: screen(1180000), premiumDelta: delta });
+    // the screen's flat-rate taxes may be centavos from the engine's (documentary stamp tax rounded per PHP 4): the server's figure is kept
+    const e = await cs('post', '/endorsements/create-endorsement').send({ policyId: 'pol_sls_02', endorsementTypeIds: [3], coverageChanges: screen(1180000), premiumDelta: r2(delta - 0.37) });
     expect(e.status).toBe(201);
     expect(e.body.premiumDelta).toBeCloseTo(delta, 2);
     expect(e.body.coverageChanges.LossandDamagecoveragepremium).toBe(net.toFixed(2));

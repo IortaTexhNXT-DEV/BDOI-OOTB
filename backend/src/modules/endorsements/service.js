@@ -78,7 +78,9 @@ const POLICY_RATES = ['roadsideAssistanceRate', 'personalAccidentCoverRate', 'bo
 const FLAT_PREMIUMS = [['bodilyInjuryCoveragePremium', 'bodilyInjury'], ['propertyDamageCoveragePremium', 'propertyDamage'], ['APPAcoveragePremium', 'APPAtotalCoverage'],
   ['roadsideAssistancePremium', 'roadsideAssistanceRate'], ['personalAccidentCoverPremium', 'personalAccidentCoverRate'], ['actsOfNaturePremium', 'actsOfNatureRate']];
 const given = (v) => v !== undefined && v !== null && v !== '';
-const TOLERANCE = 0.01 + 1e-9;
+// The screen prices the taxes at their flat rates; the charge engine rounds the documentary stamp tax per PHP 4 of
+// premium: a figure within a peso of the server's is the same price (the server's is kept), a larger gap is refused.
+const TOLERANCE = 1 + 1e-9;
 
 /**
  * Price a coverage change on the server with the quotation premium routine (premium.default_rates and the premium tax
