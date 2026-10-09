@@ -78,11 +78,11 @@ const LineBusinessDetailsAction = ({ action }) => {
     }
   };
   const setFormikValues = (data) => {
-    const lineofBusinessCode = data[0]?.businessCode;
+    const lineofBusinessCode = data[0]?.lineofBusinessCode;
     const LOBName = data[0]?.LOBName;
-    const LOBDescription = data[0]?.description;
-    const modifiedBy = "Johnson";
-    const modifiedOn = "12/12/23";
+    const LOBDescription = data[0]?.LOBDescription;
+    const modifiedBy = data[0]?.modifiedBy;
+    const modifiedOn = data[0]?.modifiedOn;
 
     const updatedValues = {
       lineofBusinessCode: lineofBusinessCode ?? "",

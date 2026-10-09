@@ -78,7 +78,7 @@ const SignatoriesDetailsAction = ({ action }) => {
     }
   };
   const setFormikValues = (data) => {
-    const signatoryCode = data[0]?.signatoriesCode;
+    const signatoryCode = data[0]?.signatoryCode;
     const signatoryName = data[0]?.signatoryName;
     const signatoryDescription = data[0]?.signatoryDescription;
     const modifiedBy = data[0]?.modifiedBy;

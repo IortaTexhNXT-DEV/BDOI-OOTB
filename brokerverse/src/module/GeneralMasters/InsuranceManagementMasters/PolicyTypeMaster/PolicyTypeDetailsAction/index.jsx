@@ -81,12 +81,12 @@ const PolicyTypeDetailsAction = ({ action }) => {
     }
   };
   const setFormikValues = (data) => {
-    const policyTypeCode = data[0]?.policytypeCode;
+    const policyTypeCode = data[0]?.policyTypeCode;
     const policyTypeName = data[0]?.policyTypeName;
     const policyTypeDescription = data[0]?.policyTypeDescription;
-    const modifiedBy = "Johnson";
-    const modifiedOn = "12/12/23";
-    const Product = data[0]?.product;
+    const modifiedBy = data[0]?.modifiedBy;
+    const modifiedOn = data[0]?.modifiedOn;
+    const Product = data[0]?.Product;
 
     const updatedValues = {
       policyTypeCode: policyTypeCode ?? "",

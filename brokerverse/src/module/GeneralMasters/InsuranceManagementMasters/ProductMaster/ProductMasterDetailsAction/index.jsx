@@ -105,7 +105,7 @@ const ProductMatserDetailsAction = ({ action }) => {
   const setFormikValues = (data) => {
     const productCode = data[0]?.productCode;
     const productName = data[0]?.productName;
-    const productDescription = data[0]?.description;
+    const productDescription = data[0]?.productDescription;
     const modifiedBy = data[0]?.modifiedBy;
     const modifiedOn = data[0]?.modifiedOn;
     const lineofBusiness = data[0]?.lineofBusiness;
