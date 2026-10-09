@@ -13,7 +13,7 @@ forms and i18next for text. It talks only to the BrokerVerse API (`backend/`, se
 | `components/SideBar/list.js` | The side menu: one tree of `{ name, path, includes, submenu }` |
 | `utils/menuPermissions.js`, `utils/canOpen.js` | Which role sees which menu entry, route guard, `hasPermission` |
 | `agentModule/` | Operations screens (leads, clients, quotations, policies, endorsements, claims, renewals, payments, open items); routes under `/agent/...` |
-| `module/` | Everything else: masters, accounts and finance, placement, remittance, reinsurance, commission, incentive, product configurator, reports, system settings |
+| `module/` | Everything else: masters, accounts and finance, placement, remittance, commission, incentive, product configurator, reports, system settings |
 | `services/` | One file per API area; every HTTP call of a screen goes through a service |
 | `utility/`, `utils/` | Shared helpers (formatting, dialogs, session, validation); `utils/` holds the permission helpers |
 | `components/` | Shared UI pieces (error boundary, dialogs host, notification drawer, file upload, status badge, stats cards) |
@@ -67,7 +67,7 @@ opens one item of a section.
 | --- | --- | --- | --- | --- |
 | Dashboards | `/executive/dashboard`, `/claims/dashboard`, `/processing/dashboard`, `/agent/home` | `module/ExecutiveDashboard`, `module/ClaimsModule`, `agentModule/dashBoardModule` | `dashboardService` | `dashboard` |
 | Leads | `/agent/leadlisting`, `/agent/createlead` | `agentModule/leadModule` | `leadService` | `leads` |
-| Clients | `/agent/clientlisting`, `/agent/clientview` | `agentModule/quoteModule/clientListing`, `clientView` | `clientService` | `clients` |
+| Clients | `/agent/clientlisting`, `/agent/clientview`, `/agent/client-onboarding` | `agentModule/quoteModule/clientListing`, `clientView`, `clientOnboarding` | `clientService`, `clientOnboarding/onboardingService` | `clients` |
 | Quotations | `/agent/Quotation`, `/agent/createquote`, `/agent/editquote`, `/agent/quotedetailview` | `agentModule/quoteModule`, `agentModule/quotationModule` | `quotationService`, `emailService` | `quotations` |
 | Placement | `/placement/broker-slips`, `/placement/placement-slips` | `module/Placement` | `placementService` | `placement` |
 | Policies | `/agent/policy`, `/agent/policydetail` | `agentModule/policyModule` | `policyService` | `policies` |
@@ -84,7 +84,6 @@ opens one item of a section.
 | Remittance | `/finance/remittance`, `/master/finance/remittance` | `module/Remittance`, `module/FinanceMastersModule/RemittanceMaster` | `remittanceService` | `remittance` |
 | Commission | `/commission` | `module/Commission` | `commissionService` | `commission`, `commission-rates` |
 | Incentive | `/incentive`, `/master/incentive` | `module/Incentive` | `incentiveService` | `incentive` |
-| Reinsurance | `/reinsurance`, `/master/reinsurance` | `module/Reinsurance` | `reinsuranceService` | `reinsurance` |
 | Product configurator | `/product-configurator` | `module/ProductConfigurator` | `productConfiguratorService` | `product-configurator` |
 | Masters | `/master/generals`, `/master/finance` | `module/GeneralMasters`, `module/FinanceMastersModule` | `mastersService` | `masters` |
 | Users and roles | `/master/generals/usermanagement` | `module/GeneralMasters/UserManagementMasters` | `userService`, `adminService` | `users` |
@@ -230,7 +229,7 @@ tab title. The Docker images (`brokerverse/Dockerfile`, `Dockerfile.railway`) se
 
 Tests live next to the code they test (`*.test.js`, 31 suites, 162 tests on 04 October 2026): formatting
 helpers, menu tree, permissions and route guard, help routes, the theme engine, the Philippine address
-fields, Product Configurator rules, My Work, BIR Tax, Compliance, Distribution and Integrations screens,
+fields, Product Configurator rules, My Work, BIR Tax, client onboarding, Distribution and Integrations screens,
 placement helpers, the lead and masters services and an application smoke test. `npm run lint` on
 04 October 2026: no errors, 256 warnings (mostly `react-hooks/exhaustive-deps` and `eqeqeq`); new code
 should add none. End-to-end scenarios are

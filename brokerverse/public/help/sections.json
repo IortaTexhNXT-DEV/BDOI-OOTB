@@ -1,7 +1,7 @@
 {
  "title": "BrokerVerse User Manual",
- "version": "1.2.3",
- "date": "04 October 2026",
+ "version": "1.2.4",
+ "date": "09 October 2026",
  "sections": [
   {
    "id": "about-this-manual",
@@ -424,8 +424,8 @@
    "chapter": "System Administrator"
   },
   {
-   "id": "reinsurance-treaties-and-incentive-programmes",
-   "title": "Reinsurance treaties and incentive programmes",
+   "id": "incentive-programmes",
+   "title": "Incentive programmes",
    "level": 2,
    "chapter": "System Administrator"
   },
@@ -736,12 +736,6 @@
    "chapter": "Processing Team"
   },
   {
-   "id": "processing-team-reinsurance",
-   "title": "Reinsurance",
-   "level": 2,
-   "chapter": "Processing Team"
-  },
-  {
    "id": "processing-team-approvals",
    "title": "Approvals",
    "level": 2,
@@ -942,12 +936,6 @@
   {
    "id": "motor-claim-repairs-and-letters-of-authority",
    "title": "Motor claim repairs and letters of authority",
-   "level": 2,
-   "chapter": "Claims"
-  },
-  {
-   "id": "reinsurance-recoveries",
-   "title": "Reinsurance recoveries",
    "level": 2,
    "chapter": "Claims"
   },
@@ -1324,102 +1312,6 @@
    "chapter": "Accounting Manager"
   },
   {
-   "id": "compliance-officer",
-   "title": "Compliance Officer",
-   "level": 1,
-   "chapter": null
-  },
-  {
-   "id": "compliance-officer-role-summary",
-   "title": "Role summary",
-   "level": 2,
-   "chapter": "Compliance Officer"
-  },
-  {
-   "id": "compliance-officer-menus-available",
-   "title": "Menus available",
-   "level": 2,
-   "chapter": "Compliance Officer"
-  },
-  {
-   "id": "compliance-officer-daily-and-periodic-tasks",
-   "title": "Daily and periodic tasks",
-   "level": 2,
-   "chapter": "Compliance Officer"
-  },
-  {
-   "id": "aml-dashboard",
-   "title": "AML dashboard",
-   "level": 2,
-   "chapter": "Compliance Officer"
-  },
-  {
-   "id": "client-due-diligence-and-risk-rating",
-   "title": "Client due diligence and risk rating",
-   "level": 2,
-   "chapter": "Compliance Officer"
-  },
-  {
-   "id": "enhanced-due-diligence-edd-reviews",
-   "title": "Enhanced due diligence (EDD) reviews",
-   "level": 2,
-   "chapter": "Compliance Officer"
-  },
-  {
-   "id": "kyc-refresh",
-   "title": "KYC refresh",
-   "level": 2,
-   "chapter": "Compliance Officer"
-  },
-  {
-   "id": "screening-hits",
-   "title": "Screening hits",
-   "level": 2,
-   "chapter": "Compliance Officer"
-  },
-  {
-   "id": "screening-lists-and-the-screening-provider",
-   "title": "Screening lists and the screening provider",
-   "level": 2,
-   "chapter": "Compliance Officer"
-  },
-  {
-   "id": "transaction-alerts",
-   "title": "Transaction alerts",
-   "level": 2,
-   "chapter": "Compliance Officer"
-  },
-  {
-   "id": "aml-cases",
-   "title": "AML cases",
-   "level": 2,
-   "chapter": "Compliance Officer"
-  },
-  {
-   "id": "amlc-reports",
-   "title": "AMLC reports",
-   "level": 2,
-   "chapter": "Compliance Officer"
-  },
-  {
-   "id": "aml-settings",
-   "title": "AML settings",
-   "level": 2,
-   "chapter": "Compliance Officer"
-  },
-  {
-   "id": "compliance-officer-approvals",
-   "title": "Approvals",
-   "level": 2,
-   "chapter": "Compliance Officer"
-  },
-  {
-   "id": "insurance-commission-registers-complaints-and-the-breach-register",
-   "title": "Insurance Commission registers, complaints and the breach register",
-   "level": 2,
-   "chapter": "Compliance Officer"
-  },
-  {
    "id": "distribution-programmes-and-products",
    "title": "Distribution, programmes and products",
    "level": 1,
@@ -1510,12 +1402,6 @@
    "chapter": "Distribution, programmes and products"
   },
   {
-   "id": "facultative-placements",
-   "title": "Facultative Placements",
-   "level": 2,
-   "chapter": "Distribution, programmes and products"
-  },
-  {
    "id": "comparison-reports",
    "title": "Comparison Reports",
    "level": 2,
@@ -1556,54 +1442,6 @@
    "title": "BI extract",
    "level": 3,
    "chapter": "Distribution, programmes and products"
-  },
-  {
-   "id": "compliance",
-   "title": "Compliance",
-   "level": 1,
-   "chapter": null
-  },
-  {
-   "id": "licence-register",
-   "title": "Licence register",
-   "level": 2,
-   "chapter": "Compliance"
-  },
-  {
-   "id": "fit-and-proper-records",
-   "title": "Fit and proper records",
-   "level": 2,
-   "chapter": "Compliance"
-  },
-  {
-   "id": "insurer-authority",
-   "title": "Insurer authority",
-   "level": 2,
-   "chapter": "Compliance"
-  },
-  {
-   "id": "complaints-register",
-   "title": "Complaints register",
-   "level": 2,
-   "chapter": "Compliance"
-  },
-  {
-   "id": "ic-annual-statement",
-   "title": "IC annual statement",
-   "level": 2,
-   "chapter": "Compliance"
-  },
-  {
-   "id": "ic-production-report",
-   "title": "IC production report",
-   "level": 2,
-   "chapter": "Compliance"
-  },
-  {
-   "id": "personal-data-breach-register",
-   "title": "Personal data breach register",
-   "level": 2,
-   "chapter": "Compliance"
   },
   {
    "id": "module-reference",
@@ -1672,18 +1510,6 @@
    "chapter": "Module reference"
   },
   {
-   "id": "module-reference-reinsurance",
-   "title": "Reinsurance",
-   "level": 2,
-   "chapter": "Module reference"
-  },
-  {
-   "id": "module-reference-compliance",
-   "title": "Compliance",
-   "level": 2,
-   "chapter": "Module reference"
-  },
-  {
    "id": "module-reference-reports",
    "title": "Reports",
    "level": 2,
@@ -1714,8 +1540,8 @@
    "chapter": "Module reference"
   },
   {
-   "id": "incentive-and-reinsurance-masters",
-   "title": "Incentive and reinsurance masters",
+   "id": "incentive-masters",
+   "title": "Incentive masters",
    "level": 3,
    "chapter": "Module reference"
   },

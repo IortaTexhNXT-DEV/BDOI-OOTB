@@ -52,7 +52,6 @@ with the API collection exported by `npm run export:api`). The table is written 
 | Designation master upload | No Upload button: Master > Generals > Employee Management > Designation | `POST /api/masters/designation/upload` | `Designation_Upload_Template.xlsx` |
 | Write-off Reason master upload | No Upload button: Master > Finance > Account Determination (write-off reasons) | `POST /api/masters/write-off-reason/upload` | `Write_off_Reason_Upload_Template.xlsx` |
 | Account Category master upload | No Upload button: Master > Finance > Account Category | `POST /api/masters/account-category/upload` | `Account_Category_Upload_Template.xlsx` |
-| Security Rating master upload | No Upload button: Master > Finance > Reinsurance Treaty (security ratings of reinsurers) | `POST /api/masters/security-rating/upload` | `Security_Rating_Upload_Template.xlsx` |
 | Product Category master upload | No Upload button: Product Configurator > Product Templates (product categories) | `POST /api/masters/product-category/upload` | `Product_Category_Upload_Template.xlsx` |
 | Risk Section master upload | No Upload button: Product Configurator > Risk Mapping (risk sections) | `POST /api/masters/risk-section/upload` | `Risk_Section_Upload_Template.xlsx` |
 | Schedule master upload | No Upload button: Accounts > Remittance > Scheduling | `POST /api/masters/remittance-schedule/upload` | `Remittance_Schedule_Upload_Template.xlsx` |
@@ -65,7 +64,6 @@ with the API collection exported by `npm run export:api`). The table is written 
 | Notification Template master upload | No Upload button: Master > Finance > Remittance Master > Notification Template | `POST /api/masters/remittance-notification-template/upload` | `Remittance_Notification_Template_Upload_Template.xlsx` |
 | Statement Template master upload | No Upload button: Master > Finance > Remittance Master > Statement Template | `POST /api/masters/remittance-statement-template/upload` | `Remittance_Statement_Template_Upload_Template.xlsx` |
 | Incentive Report Template master upload | No Upload button: Accounts > Incentive (incentive report templates; no menu screen of their own) | `POST /api/masters/incentive-report-template/upload` | `Incentive_Report_Template_Upload_Template.xlsx` |
-| Reinsurance Report Template master upload | No Upload button: Reinsurance (reinsurance report templates; no menu screen of their own) | `POST /api/masters/reinsurance-report-template/upload` | `Reinsurance_Report_Template_Upload_Template.xlsx` |
 | Salutation master upload | No Upload button: Master > Configuration (reference list, API /api/masters/salutation; no screen of its own) | `POST /api/masters/salutation/upload` | `Salutation_Upload_Template.xlsx` |
 | Civil Status master upload | No Upload button: Master > Configuration (reference list, API /api/masters/civil-status; no screen of its own) | `POST /api/masters/civil-status/upload` | `Civil_Status_Upload_Template.xlsx` |
 | Gender master upload | No Upload button: Master > Configuration (reference list, API /api/masters/gender; no screen of its own) | `POST /api/masters/gender/upload` | `Gender_Upload_Template.xlsx` |
