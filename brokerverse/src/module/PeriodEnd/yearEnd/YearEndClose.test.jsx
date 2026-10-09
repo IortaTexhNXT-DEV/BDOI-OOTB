@@ -6,7 +6,7 @@ import periodEndService from "../../../services/periodEndService";
 import { stepTone } from "./Stepper";
 import { checkResult } from "./CheckList";
 
-jest.mock("react-i18next", () => ({ useTranslation: () => ({ t: (k, o) => (o && o.defaultValue) || k }) }));
+jest.mock("react-i18next", () => ({ useTranslation: () => ({ t: (k, o) => (o && o.defaultValue) || k }), initReactI18next: { type: "3rdParty", init: () => {} } }));
 jest.mock("../../../services/periodEndService");
 jest.mock("../../../services/opsAccountingService", () => ({ masterRecords: jest.fn(() => Promise.resolve({ rows: [] })) }));
 

@@ -6393,15 +6393,7 @@
       "empty": "No balance-sheet balances"
     },
     "activity": {
-      "title": "Activity",
-      "when": "Date and time",
-      "run": "Run",
-      "action": "Action",
-      "user": "User",
-      "role": "Role",
-      "from": "From",
-      "to": "To",
-      "remarks": "Remarks"
+      "title": "Activity"
     },
     "action": {
       "start": "Year-end close started",
@@ -6413,6 +6405,10 @@
       "cancel": "Run cancelled"
     },
     "dialog": {
+      "closeMessage": "The closing entries are posted in {{period}}, dated {{date}}, and the balances are carried into {{fiscalYear}}.",
+      "reverseMessage": "The close of {{fiscalYear}} is reversed with the reason of the request.",
+      "withdrawMessage": "The reversal request is withdrawn; {{fiscalYear}} stays closed.",
+      "cancelMessage": "Run {{runNumber}} is cancelled.",
       "closeTitle": "Close fiscal year {{fiscalYear}}",
       "closeConsequence": "The periods of {{fiscalYear}} are locked; no journal can be posted in them until the close is reversed.",
       "requestTitle": "Request reversal of the {{fiscalYear}} close",

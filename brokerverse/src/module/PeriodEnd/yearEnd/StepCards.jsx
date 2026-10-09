@@ -4,10 +4,11 @@ import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
+import KeyValueGrid from "../../../components/KeyValueGrid";
 import { canOpen } from "../../../utils/canOpen";
-import { JournalLink, StatusTag, date, dateTime, money } from "../common";
+import { formatInstant } from "../../../utility/dateFormat";
+import { JournalLink, StatusTag, date, money } from "../common";
 import CheckList from "./CheckList";
-import Facts from "./Facts";
 
 const JV_DETAIL = "/accounts/journalvoucher/detailsjournalvocture";
 const amount = (v) => (Number(v) ? money(v) : "");
@@ -16,9 +17,12 @@ const sumOf = (rows, key) => Math.round(rows.reduce((s, r) => s + Number(r[key] 
 /** "Net income" or "Net loss" with the amount without its sign. */
 export const netFact = (t, net) => ({
   label: Number(net) < 0 ? t("periodEnd.netLoss") : t("periodEnd.netIncome"),
-  value: net === null || net === undefined ? null : money(Math.abs(Number(net))),
-  numeric: true,
+  value: net === null || net === undefined ? null : Math.abs(Number(net)),
+  type: "amount",
 });
+
+/** Who did something and when, in the business time zone: "Ana Santos, 10/10/2026 09:15". */
+export const byAt = (name, at) => [name, formatInstant(at, { empty: "" })].filter(Boolean).join(", ") || null;
 
 /** Why an action is not available, under its button. */
 export const Reason = ({ text }) => (text ? <p className="ye-reason"><i className="pi pi-lock" aria-hidden="true" /> {text}</p> : null);
@@ -71,11 +75,11 @@ export const ClosingStep = ({ data, onOpenJournal }) => {
   const type = (r) => (r.accountType === "result" ? t("yearEndClose.closing.netToCurrentYear") : t(`yearEndClose.accountType.${r.accountType}`, { defaultValue: r.accountType }));
   return (
     <>
-      <Facts items={[
+      <KeyValueGrid columns="auto" items={[
         { label: t("periodEnd.period"), value: c.period },
         { label: t("yearEndClose.closing.journalDate"), value: date(c.date) },
-        { label: t("yearEndClose.closing.totalIncome"), value: money(c.totalIncome), numeric: true },
-        { label: t("yearEndClose.closing.totalExpense"), value: money(c.totalExpense), numeric: true },
+        { label: t("yearEndClose.closing.totalIncome"), value: c.totalIncome, type: "amount" },
+        { label: t("yearEndClose.closing.totalExpense"), value: c.totalExpense, type: "amount" },
         netFact(t, c.netIncome),
       ]} />
       {c.journals.length > 0 && (
@@ -122,18 +126,18 @@ export const reasonText = (t, name, action, values = {}) => {
 };
 
 /** Step 4: the close by an Accounting Manager other than the preparer, then the reversal of the close. */
-export const ApprovalStep = ({ data, busy, onClose, onRequestReversal, onApproveReversal, onWithdrawReversal }) => {
+export const ApprovalStep = ({ data, onClose, onRequestReversal, onApproveReversal, onWithdrawReversal }) => {
   const { t } = useTranslation();
   const { run, actions } = data;
   const closed = run.status === "closed";
   const request = run.reverseRequest;
   const nextYear = data.nextYear?.code;
-  const prepared = { label: t("yearEndClose.approval.preparedBy"), value: run.preparedByName ? `${run.preparedByName}, ${dateTime(run.preparedAt)}` : dateTime(run.preparedAt) };
+  const prepared = { label: t("yearEndClose.approval.preparedBy"), value: byAt(run.preparedByName, run.preparedAt) };
   if (!closed) {
     const checksOk = !data.steps.some((s) => ["prerequisites", "adjustments"].includes(s.key) && s.status !== "passed");
     return (
       <>
-        <Facts items={[
+        <KeyValueGrid columns="auto" items={[
           prepared,
           { label: t("yearEndClose.approval.approver"), value: t("yearEndClose.approval.accountingManager") },
           { label: t("yearEndClose.approval.checks"), value: <StatusTag status={checksOk ? "passed" : "failed"} /> },
@@ -142,7 +146,7 @@ export const ApprovalStep = ({ data, busy, onClose, onRequestReversal, onApprove
         ]} />
         {actions.close && (
           <div className="ye-actions">
-            <Button type="button" icon="pi pi-lock" label={t("yearEndClose.approval.close")} disabled={!actions.close.allowed} loading={busy === "close"} onClick={onClose} />
+            <Button type="button" icon="pi pi-lock" label={t("yearEndClose.approval.close")} disabled={!actions.close.allowed} onClick={onClose} />
             <Reason text={reasonText(t, "close", actions.close)} />
           </div>
         )}
@@ -151,9 +155,9 @@ export const ApprovalStep = ({ data, busy, onClose, onRequestReversal, onApprove
   }
   return (
     <>
-      <Facts items={[
+      <KeyValueGrid columns="auto" items={[
         prepared,
-        { label: t("yearEndClose.approval.closedBy"), value: run.closedByName ? `${run.closedByName}, ${dateTime(run.closedAt)}` : dateTime(run.closedAt) },
+        { label: t("yearEndClose.approval.closedBy"), value: byAt(run.closedByName, run.closedAt) },
         { label: t("yearEndClose.approval.remark"), value: run.remarks },
         netFact(t, run.netIncome),
         { label: t("periodEnd.nextFiscalYear"), value: run.nextFiscalYear },
@@ -164,17 +168,17 @@ export const ApprovalStep = ({ data, busy, onClose, onRequestReversal, onApprove
             <span className="ye-request__title">{t("yearEndClose.reversal.pending")}</span>
             <StatusTag status="pending-approval" />
           </div>
-          <Facts items={[
-            { label: t("yearEndClose.reversal.requestedBy"), value: request.byName ? `${request.byName}, ${dateTime(request.at)}` : dateTime(request.at) },
+          <KeyValueGrid columns="auto" items={[
+            { label: t("yearEndClose.reversal.requestedBy"), value: byAt(request.byName, request.at) },
             { label: t("yearEndClose.reversal.reason"), value: request.reason },
           ]} />
           <div className="ye-actions">
             {actions.approveReversal && (
               <Button type="button" icon="pi pi-undo" severity="warning" label={t("yearEndClose.reversal.approve")} disabled={!actions.approveReversal.allowed}
-                loading={busy === "reverse"} onClick={onApproveReversal} />
+                onClick={onApproveReversal} />
             )}
             {actions.withdrawReversal?.allowed && (
-              <Button type="button" text severity="secondary" label={t("yearEndClose.reversal.withdraw")} loading={busy === "withdraw"} onClick={onWithdrawReversal} />
+              <Button type="button" text severity="secondary" label={t("yearEndClose.reversal.withdraw")} onClick={onWithdrawReversal} />
             )}
             <Reason text={reasonText(t, "approveReversal", actions.approveReversal)} />
           </div>
@@ -196,11 +200,11 @@ export const OpeningStep = ({ data }) => {
   const o = data.opening;
   return (
     <>
-      <Facts items={[
+      <KeyValueGrid columns="auto" items={[
         { label: t("periodEnd.fiscalYear"), value: o.fiscalYear },
-        { label: t("yearEndClose.opening.accounts"), value: String(o.lines.length) },
-        { label: t("yearEndClose.opening.totalDebit"), value: money(o.totalDebit), numeric: true },
-        { label: t("yearEndClose.opening.totalCredit"), value: money(o.totalCredit), numeric: true },
+        { label: t("yearEndClose.opening.accounts"), value: o.lines.length, type: "number" },
+        { label: t("yearEndClose.opening.totalDebit"), value: o.totalDebit, type: "amount" },
+        { label: t("yearEndClose.opening.totalCredit"), value: o.totalCredit, type: "amount" },
       ]} />
       <DataTable value={o.lines} dataKey="accountCode" size="small" stripedRows paginator={o.lines.length > 20} rows={20} emptyMessage={t("yearEndClose.opening.empty")}>
         <Column field="accountCode" header={t("periodEnd.account")} style={{ width: "8rem" }} footer={t("yearEndClose.total")} />

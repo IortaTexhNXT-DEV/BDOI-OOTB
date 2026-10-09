@@ -2,13 +2,14 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import Facts from "./Facts";
+import KeyValueGrid from "../../../components/KeyValueGrid";
 
 /**
- * Confirmation pop-up of a year-end action: what is acted on (facts), the fields of the decision, one line on what
- * follows, and a button that names the action.
+ * Pop-up with a form of the year-end close (the reason of a reversal request, an adjustment journal): what it applies
+ * to (facts), the fields, one line on what follows, and a button that names the action. Plain confirmations use
+ * components/ConfirmDialog.
  */
-const ActionDialog = ({ visible, title, facts = [], consequence, children, cancelLabel, confirmLabel, confirmIcon, severity, busy = false, disabled = false, onConfirm, onHide, width = 560 }) => (
+const FormDialog = ({ visible, title, facts = [], consequence, children, cancelLabel, confirmLabel, confirmIcon, severity, busy = false, disabled = false, onConfirm, onHide, width = 560 }) => (
   <Dialog className="pe-dialog ye-dialog" header={title} visible={visible} onHide={onHide} style={{ width: `min(${width}px, 95vw)` }} draggable={false}
     footer={(
       <div className="ye-dialog__footer">
@@ -16,13 +17,13 @@ const ActionDialog = ({ visible, title, facts = [], consequence, children, cance
         <Button type="button" label={confirmLabel} icon={confirmIcon} severity={severity} loading={busy} disabled={disabled} onClick={onConfirm} />
       </div>
     )}>
-    {facts.length > 0 && <Facts items={facts} className="ye-dialog__facts" />}
+    {facts.length > 0 && <KeyValueGrid columns={facts.length > 2 ? 3 : 2} items={facts} className="ye-dialog__facts" />}
     {children}
     {consequence && <p className="ye-consequence"><i className="pi pi-info-circle" aria-hidden="true" /> {consequence}</p>}
   </Dialog>
 );
 
-ActionDialog.propTypes = {
+FormDialog.propTypes = {
   visible: PropTypes.bool.isRequired,
   title: PropTypes.string.isRequired,
   facts: PropTypes.array,
@@ -39,4 +40,4 @@ ActionDialog.propTypes = {
   width: PropTypes.number,
 };
 
-export default ActionDialog;
+export default FormDialog;
