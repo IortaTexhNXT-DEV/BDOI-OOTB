@@ -244,11 +244,15 @@ describe('fire co-insurance: Broker Slip -> Quotation Slip -> placement chain ->
   });
 
   it('records the e-policy (maker), checked by another user (checker), then books: the policy exists only now', async () => {
-    const body = await epolicyOf(sales, placement, { insurerPolicyNumber: 'MAL-FI-2026-0001', participants: [{ insuranceCompanyId: ic.PIONEER, insurerReference: 'PIO-FI-2026-0002' }] });
+    // a fire placement keeps no vehicle identifiers or vehicle photo, and the check against the slip has no vehicle items
+    const photo = await upload(sales, 'vehicle.pdf', 'vehicle-photos');
+    const body = await epolicyOf(sales, placement, { insurerPolicyNumber: 'MAL-FI-2026-0001', participants: [{ insuranceCompanyId: ic.PIONEER, insurerReference: 'PIO-FI-2026-0002' }],
+      vehicle: { plateNumber: 'NCA 4521' }, vehiclePhotoKey: photo.key, vehiclePhotoName: 'vehicle.pdf' });
     const ep = await sales('post', `/placements/${placement.id}/epolicy`).send(body);
     expect(ep.status, JSON.stringify(ep.body)).toBe(200);
     expect(ep.body).toMatchObject({ status: 'epolicy_received', placementStatus: 'EPolicyReceived', check: { status: 'match', differences: [] } });
-    expect(ep.body.epolicy).toMatchObject({ insurerPolicyNumber: 'MAL-FI-2026-0001', documentKey: body.documentKey, participantName: 'Tarlac Rice Mills Corp.' });
+    expect(ep.body.epolicy).toMatchObject({ insurerPolicyNumber: 'MAL-FI-2026-0001', documentKey: body.documentKey, participantName: 'Tarlac Rice Mills Corp.', vehicle: null, vehiclePhotoKey: null });
+    expect(ep.body.check.items.map((i) => i.key)).not.toContain('plateNumber');
     expect(ep.body.participants.map((p) => [p.insurerReference, p.status])).toEqual([['MAL-FI-2026-0001', 'confirmed'], ['PIO-FI-2026-0002', 'confirmed']]);
     expect(await policiesOf(placement.id)).toBe(0);
     // maker-checker: the user who keyed the e-policy cannot confirm the check

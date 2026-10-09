@@ -89,6 +89,12 @@ define({
   },
 });
 define({
+  method: 'GET', path: '/duplicates', summary: 'Possible duplicates of a new prospect: clients and open prospects with the same e-mail, mobile number, or name and date of birth (clientId: the open prospects of that client); off with leads.duplicate_check',
+  screen: `${SCREEN} > Create Prospect`, middleware: canRead, query: { firstName: 'Juan', lastName: 'Dela Cruz', DOB: '1990-05-01', emailId: 'juan@example.com', contactNumber: '09171234567' },
+  response: { success: true, data: [{ kind: 'client', id: 'cli_1', number: 'CL-2026-00004', name: 'Juan Dela Cruz', ownerName: 'Ana Garcia', matchedOn: ['email', 'name', 'birthDate'] }] },
+  handler: async (req, res) => res.json({ success: true, data: await svc.possibleDuplicates(req.query) }),
+});
+define({
   method: 'GET', path: '/:id', summary: 'Get one lead (by id or lead number)', screen: `${SCREEN} > View`, middleware: [...canRead, ownRecord('lead')],
   response: { ...example, success: true, data: example },
   handler: async (req, res) => sendEntity(res, svc.toLead(await svc.getLead(req.params.id))),

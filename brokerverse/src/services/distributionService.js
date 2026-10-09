@@ -72,11 +72,14 @@ const distributionService = {
   updateRule: (ruleId, body) => put(`${LA}/rules/${id(ruleId)}`, body),
   deleteRule: (ruleId) => remove(`${LA}/rules/${id(ruleId)}`),
   assignmentQueue: (params) => request(`${LA}/queue${qs(params)}`),
+  reorderRules: (ids) => put(`${LA}/rules/order`, { ids }),
+  runRules: (dryRun) => post(`${LA}/rules/run`, { dryRun }),
   reassign: (body) => post(`${LA}/reassign`, body),
   sendToQueue: (body) => post(`${LA}/queue`, body),
+  takeFromQueue: (leadIds) => post(`${LA}/queue/take`, { leadIds }),
   assignmentHistory: (leadId) => request(`${LA}/history/${id(leadId)}`),
   teamView: (params) => request(`${LA}/team${qs(params)}`),
-  assignees: () => request(`${LA}/assignees`),
+  assignees: (leadIds) => request(`${LA}/assignees${qs({ leadIds: leadIds?.length ? leadIds.join(",") : undefined })}`),
 
   // distribution channels
   channels: (params) => request(`${CH}${qs(params)}`),

@@ -904,12 +904,13 @@ Choose Operations > Sales & Marketing > Prospects. The cards count **Total Prosp
 ### Create a prospect
 
 1. Select **Create Prospect**. The **Create prospect** panel asks whether the customer is new or already a client.
-2. Choose **New customer** (enter the customer's details on the prospect form) or **Existing client** (find the client by name, mobile number or e-mail; the prospect is linked to that client), then select **Continue**.
+2. Choose **New customer** (enter the customer's details on the prospect form) or **Existing client**, then select **Continue**. For an existing client, type at least three characters of the client's name, mobile number or e-mail. The clients found are listed with their **Client code**, **Name** (with the city), **Mobile** and **E-mail**; a long value is cut short and shown in full when you point at it. Select a client with a click (or the arrow keys from the search box): its row is highlighted and its radio button set. Select **Use this client** (or press Enter, or double-click the row). When no client matches, select **Create a new customer instead**. The prospect form then starts from the client's details and the prospect is linked to that client: no second client is created when its quotation becomes a policy.
 3. Choose the product the prospect is for: first the **Line of Business** (only the lines that have active products are listed), then the **Product** (the active products of that line; a line with a single product selects it). Select **Continue**. A motor product opens the prospect form; Fire and Allied Perils, Industrial All Risks and Employee Benefits open their own forms while those products are active; any other product opens a Request for Quotation for the new prospect.
 4. If the customer has not chosen a product yet, select **Skip - tag product later** instead: the prospect form opens without a product.
 
 Every way of starting a new prospect goes through this panel: **Create Prospect** on Prospects, **Create Lead** on Clients, **New Quote** on the Executive Dashboard, the Underwriting Dashboard buttons and a prospect form opened from a link or the side bar. Editing a prospect or adding a quotation to an existing prospect opens its form at once.
-5. Fill in the prospect form and select **Save & Continue**.
+5. Fill in the prospect form and select **Save & Continue**. The form has the sections **Customer**, **Contact**, **Address** and **Source and product**, each field with its label above it, a red asterisk when it is required and the message of a wrong value under it.
+6. Before a new prospect is saved, the system looks for possible duplicates: clients and open prospects with the same e-mail, the same mobile number, or the same name with the same date of birth. When it finds some, the **Possible duplicate** window lists them with what matched. Select **Use this client** to link the prospect to an existing client (the form takes the client's details), **Open prospect** to work on the existing prospect instead, or **Save anyway** to create the new prospect. For an existing client, the window lists the client's open prospects. The check can be switched off with `leads.duplicate_check` (System Settings, group leads).
 
 ![Create prospect: new customer or existing client](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-prospect-create.png)
 
@@ -919,16 +920,18 @@ Every way of starting a new prospect goes through this panel: **Create Prospect*
 
 | Field | Required | Rules |
 |---|---|---|
-| **Select Category** | Yes | **Retail** (a person) or **Corporate** (a company). Corporate asks for the company name and TIN. |
-| **First Name**, **Last Name** | Yes | The prospect or the contact person. |
-| **Preferred Name** | Yes | The name used in letters and e-mails. |
-| **Date of Birth** | Yes | Not in the future; age 18 to 100 (`leads.min_age_years`, `leads.max_age_years`). |
-| **Select Gender** | Yes | **Male** or **Female**. |
-| **Email ID** | Yes | A valid e-mail address. Quotations and approval links are sent there. |
-| **Contact Number** | Yes | A Philippine mobile number: 0917 123 4567 or +63 917 123 4567. |
-| **Country**, **Region**, **Province**, **City / Municipality**, **Barangay** | Yes (Region optional) | From the PSGC address masters; choose the country first (Philippines by default), then the region or the province, then the city or municipality, then the barangay. |
-| **ZIP Code** | Yes | 4 digits; filled in from the barangay or city when known. |
+| **Category** (Customer) | Yes | **Retail** (a person) or **Corporate** (a company). |
+| **Company name**, **TIN** (Customer, Corporate) | Yes | The TIN as 9 digits, or 12 to 14 digits with the branch code (000-000-000-000). |
+| **First name**, **Last name** | Yes | The prospect, or for a corporate prospect its **Contact person**. |
+| **Preferred name** | Yes | The name used in letters and e-mails. |
+| **Date of birth** | Retail only | Not in the future; age 18 to 100 (`leads.min_age_years`, `leads.max_age_years`). Optional for the contact person of a corporate prospect. |
+| **Gender** | Retail only | **Male** or **Female**. |
+| **E-mail** (Contact) | Yes | A valid e-mail address. Quotations and approval links are sent there. |
+| **Mobile number** (Contact) | Yes | A Philippine mobile number: 0917 123 4567 or +63 917 123 4567. |
+| **Country**, **Region**, **Province**, **City / Municipality**, **Barangay** (Address) | Yes (Region optional) | From the PSGC address masters; choose the country first (Philippines by default), then the region or the province (the province fills its region), then the city or municipality (listed once the province is chosen), then the barangay. |
+| **ZIP Code** | Yes | 4 digits; suggested from the city. A ZIP code typed first fills the city, province and region. |
 | **House / Unit No.**, **Street / Subdivision** | House / Unit No. yes | The street address. |
+| **Source** (Source and product) | No | From Master > Insurance Management > Lead Sources. **Product** shows the product chosen, or **Product not yet tagged**. |
 
 The system gives the prospect its number (LD-YYYY-NNNNN) with status New and, for a motor prospect, opens **Create Quote** for it. Fire and Allied Perils and Industrial All Risks prospects also ask for the risk location and the sums insured. A prospect created with **Skip - tag product later** opens on its **Prospect Details**, with the note that its product is not yet tagged, and is listed on the tab **Product not yet tagged**.
 
@@ -1334,8 +1337,10 @@ When the insurer sends the issued policy, select **Upload e-policy** (or use **R
 - **Insurer policy number** (required) and **BrokerVerse policy number** (blank: numbered by the system at booking);
 - **Participant name** (the insured named on the policy), **Sum insured**, **Net premium**, **Gross premium** and **Commission**;
 - **Issue date** and **Effective date** (required), **Issuance date**, **Expiry date** and **Production date**;
-- the **Deductible**, and for motor the **Chassis**, **Engine / motor**, **Plate** and **MV file** numbers. They are carried from the quotation; the plate number or the MV file number is required here even where the quotation said TBA;
-- the **References of the co-insurers**, an optional **Vehicle photo** and **Remarks**.
+- the **Deductible**, and for motor and CTPL only the **Chassis**, **Engine / motor**, **Plate** and **MV file** numbers. They are carried from the quotation; the plate number or the MV file number is required here even where the quotation said TBA;
+- the **References of the co-insurers**, for motor and CTPL only an optional **Vehicle photo**, and **Remarks**.
+
+Credit Life, Personal Accident, Group Personal Accident, Travel, Parcel and the other lines have no vehicle: the window shows neither the vehicle identifiers nor the vehicle photo, and the check against the slip compares the amounts, the period, the insured and the deductible only. In the same way the policy view shows the vehicle details, vehicle photos and motor coverage only for a motor or CTPL policy, an endorsement of another line offers only **Personal Details Change**, **Policy Extend** and **Policy Cancel**, and a claim of another line has no driver, plate number or repair shop and offers the causes of loss of its line (`claims.loss_causes`).
 
 The system compares the e-policy with the slip at once; the status becomes **e-Policy received** and the e-policy card shows **Matches the slip** or **Differs from the slip**.
 
@@ -2632,34 +2637,43 @@ The Sales Activities screen, also under Operations > Sales & Marketing, is descr
 
 ![Operations > Sales & Marketing > Lead Assignment](/home/user/BDOI-OOTB/docs/package/source/manual-images/d-lead-assignment.png)
 
-Choose Operations > Sales & Marketing > Lead Assignment. The screen has three tabs: **Team View**, **Queue** and **Assignment Rules**. Users without the lead assignment permissions see only the team view.
+Choose Operations > Sales & Marketing > Lead Assignment. The screen has three tabs: **Team View**, **Reassignment Queue** and **Assignment Rules**. Users without the lead assignment permissions (read / write:lead-assignment) see only the team view.
 
 ### Team view
 
-The team view lists each account executive of the reporting line (the users who report to the signed-in manager, and their own reports) with the prospects they hold: **Open**, **Converted**, **Lost**, **Last 30 days** and **In queue**. Choose a manager to see that manager's line (the default is your own team) or a **Team member** to see one person. Below the team, the open prospects of the selection are listed, with their **Assignment** status.
+The team view lists each account executive of the reporting line (the users who report to the signed-in manager, and their own reports) with the prospects they hold: **Open**, **New**, **Converted**, **Lost**, **In queue** and **Last 30 days**. Choose a manager to see that manager's line (the default is your own team) or a **Team member** to see one person. Below the team, the prospects of the selection are listed with their line and product (or **Product not yet tagged**), territory, channel, account executive and **Assignment** status. The history icon opens the prospect's **Assignment history**.
 
 ### Assignment rules
 
 Every new prospect, whether entered on the prospect screen, uploaded or created from a dealer sale, is given an account executive by the first active rule that matches it.
 
 1. Open **Assignment Rules** and select **Add rule**.
-2. Enter the **Name** and the **Priority** (lower numbers are tried first).
+2. Enter the **Name** and the **Priority** (lower numbers are checked first).
 3. Choose the **Method**: **Round robin** (each matching prospect goes to the next account executive in turn), **Fewest open prospects** (to whoever holds the fewest open prospects) or **Fixed account executive** (always the first one listed).
 4. Choose the **Account executives** who share the work. Only active users can receive prospects.
-5. Set the conditions the prospect must meet: **Line of business**, **Distribution channel**, **Province**, **City / municipality**, **Branch**, **Source** and **Category**. An empty condition matches anything.
+5. Set the **Conditions** the prospect must meet, each chosen from a list: **Line of business** (or **Product not yet tagged**, for the prospects created without a product), **Product** (the products of the line chosen), **Distribution channel**, **Branch** (Branch master), **Source** (Lead Sources master), **Category** (Retail or Corporate), **Province** and **City / municipality** (the cities of the province chosen). An empty condition matches anything.
 6. Select **Save**.
+
+On the list, the **Active** switch activates or deactivates a rule, the arrows move it up or down (the rules are renumbered 10, 20, 30 ... in the new order), the pencil edits it and the bin removes it (a rule that already assigned prospects is made inactive instead, its history refers to it).
 
 When rules exist but none matches, the setting **leads.assignment_fallback** decides: **creator** (the person who entered the prospect keeps it) or **queue** (the prospect waits in the reassignment queue). Assignment can be switched off with **leads.assignment_enabled**. Every assignment is written to the prospect's **Assignment history** (rule, from, to, reason, who and when).
 
-### Reassignment queue and bulk reassignment
+### Reassignment queue
 
-The **Queue** tab lists prospects waiting for an account executive: those no rule matched (with fallback queue), those sent to the queue by a manager, and those left untouched longer than **leads.assignment_sla_hours** (the **lead-assignment-sla** job moves them each morning once it is switched on in Master > Schedules).
+The **Reassignment Queue** tab lists the prospects waiting for an account executive: those no rule matched (with fallback queue), those whose rule had no active account executive, those sent to the queue by hand, and those left untouched longer than **leads.assignment_sla_hours** (the **lead-assignment-sla** job moves them each morning once it is switched on in Master > Schedules). Narrow the list by prospect name or number, **Line of business** (or **Product not yet tagged**), **Reason** and **Branch**.
 
-1. Tick one or more prospects (on the queue or on the team view).
-2. Select **Reassign**, choose **To account executive** and enter the **Reason**.
-3. Select **Save**. Each prospect changes owner, the history records a manual or bulk reassignment and the new owner is notified when **leads.assignment_notify** is on.
+- **Take** (on a row, or for the ticked prospects) assigns the prospects to you; the history records **Taken from the queue**.
+- **Reassign** gives them to another account executive (see below).
+- **Assign by rules** runs the queue through the active rules: a preview lists each prospect a rule now matches, with the rule and the account executive it would go to, and how many stay in the queue. Select **Assign** to apply it; use it after adding or changing a rule.
 
-**Send to queue** returns prospects to the queue with a reason, for example when an account executive leaves.
+### Reassign prospects
+
+1. Tick one or more prospects on the team view or the queue and select **Reassign** (or the reassign icon of one row).
+2. Choose **To account executive** from the list of active users who may own prospects; each shows the designation, branch and number of open prospects. The account executives of the assignment rule that matches the prospects are listed first, under **Suggested by the assignment rules**. Type in the list to search.
+3. Choose the **Reason** from the reassignment reasons of Master > Insurance Management > Reason Codes (Account executive left the company, Account executive on leave, Territory or branch change, Workload balancing, Customer request, Not worked in time, Needs a specialist for the product, Other) and add a **Note** if needed (**Other** needs one). A reason or a note is required while **leads.reassignment_reason_required** is on.
+4. Select **Reassign**. Each prospect changes owner, the history records a manual or bulk reassignment with the reason, and the new owner is notified when **leads.assignment_notify** is on.
+
+**Send to queue** (team view) returns the ticked prospects to the queue, with a reason and note chosen the same way, for example when an account executive leaves.
 
 ## Distribution Channels
 
@@ -2752,7 +2766,9 @@ Declarations are due **marine.declaration_due_days** days after the period ends.
 
 Choose Operations > Sales & Marketing > Comparison Reports. The comparison report is the printed, branded document given to the client comparing the insurers' offers, with the option the broker recommends and why. It never shows commission.
 
-1. Select **New report**. Choose what is **Compared**: a **Request for quotation** (its insurers' offers become the options) or two or more **Quotations** of the same client or prospect (enter their numbers). From a request for quotation the report can also be opened with the address /sales/comparison-reports?brokerSlipId= followed by the slip.
+1. Select **New report**. Choose what is **Compared**:
+   - a **Request for quotation**: its insurers' offers become the options. The list shows each request with its number of offers; a request with fewer than two offers is greyed out (**needs two offers**) and cannot be chosen until a second insurer has offered. On a request for quotation, **Client comparison report** opens this window with the request chosen; it is disabled, with the number of offers so far, until two insurers have offered.
+   - two or more **Quotations** of the same client or prospect: search by quotation number or customer and pick them; once the first is picked, only the quotations of the same client or prospect are offered.
 2. Select **Prepare**. The options are ranked by total premium.
 3. Edit **Prepared for**, **Title** and **Introduction** (defaults in the **comparison.*** settings). For each option enter **What stands out**.
 4. Choose the option to **Recommend** and write **Why we recommend it**, one reason per line; the suggested reasons of **comparison.default_reasons** can be added with one click. Adjust the **Disclaimer**.

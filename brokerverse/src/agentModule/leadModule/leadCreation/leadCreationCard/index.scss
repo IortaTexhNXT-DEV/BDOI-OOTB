@@ -1,0 +1,70 @@
+// Prospect form (Create / Edit Prospect): the card and sections of the newer forms (FormSection), as on client onboarding.
+.prospect-form {
+  .prospect-form__card {
+    background: var(--surface-card, #ffffff);
+    border: 1px solid var(--surface-border, #e5e7eb);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem 1.5rem;
+  }
+
+  .prospect-form__title {
+    margin: 0 0 0.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  .prospect-form__subtitle {
+    margin: 0.5rem 0 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-color-secondary, #5f6b7a);
+  }
+
+  .prospect-form__readonly {
+    display: flex;
+    align-items: center;
+    min-height: 2.5rem;
+  }
+
+  .prospect-form__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+  }
+
+  @media (max-width: 640px) {
+    .prospect-form__card {
+      padding: 1rem;
+    }
+  }
+}
+
+.prospect-duplicates {
+  .prospect-duplicates__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .prospect-duplicates__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-top: 1px solid var(--surface-border, #e5e7eb);
+  }
+
+  .prospect-duplicates__who {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .prospect-duplicates__meta {
+    color: var(--text-color-secondary, #5f6b7a);
+    font-size: 0.875rem;
+  }
+}
