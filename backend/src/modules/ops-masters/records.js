@@ -30,3 +30,22 @@ export async function decisionReason(db, contexts, { reasonCode, reason } = {}) 
   if (['true', 'yes', '1'].includes(String(r.requiresNote).toLowerCase()) && !note) throw badRequest('Validation failed', [{ path: 'reason', message: `Reason ${r.code} (${r.name}) needs a note` }]);
   return { code: r.code, text: note ? `${r.name}: ${note}` : r.name };
 }
+
+/**
+ * The reason a decision cannot be taken without (a period close or reopening, a year-end reversal, a void of a
+ * printed book, an incentive batch rejection; the contexts of seed 88_accounting_reasons.sql): reasonCode must be an
+ * active code of the context, and a code marked "requires note" needs the note as well. Returns
+ * { code, name, note, text }: text is the reason's name followed by the note, the form kept in the remarks and the
+ * audit trail beside the code.
+ */
+export async function requiredReason(db, context, { reasonCode, note } = {}) {
+  const code = String(reasonCode ?? '').trim();
+  const remark = String(note ?? '').trim() || null;
+  if (!code) throw badRequest('Validation failed', [{ path: 'reasonCode', message: 'Choose the reason' }]);
+  const r = await activeRecord(db, 'reason-code', code);
+  if (!r || r.context !== context) {
+    throw badRequest('Validation failed', [{ path: 'reasonCode', message: `${code} is not a reason for this action` }]);
+  }
+  if (['true', 'yes', '1'].includes(String(r.requiresNote).toLowerCase()) && !remark) throw badRequest('Validation failed', [{ path: 'note', message: `Reason ${r.name} needs a note` }]);
+  return { code: r.code, name: r.name, note: remark, text: remark ? `${r.name}: ${remark}` : r.name };
+}
