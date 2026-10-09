@@ -9823,7 +9823,8 @@
       "refundClient": "Refund to the client",
       "dueFromInsurer": "Due from the insurer",
       "commissionNote": "net of {{amount}} commission reversed",
-      "scaleLink": "Short-period rates (Master)"
+      "scaleLink": "Short-period rates (Master)",
+      "grossBasisNote": "premium remitted gross: the whole return"
     },
     "pdc": {
       "title": "Post-Dated Cheques",

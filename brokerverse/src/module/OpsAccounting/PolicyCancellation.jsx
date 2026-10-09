@@ -29,7 +29,6 @@ export const keptPercent = (quote) => {
 export const resultCards = (quote, t) => {
   const taxes = Object.values(quote.taxes || {}).reduce((s, v) => s + Number(v || 0), 0);
   const kept = keptPercent(quote);
-  const fromInsurer = Math.round((Number(quote.grossReturn) - Number(quote.commissionReversed)) * 100) / 100;
   return [
     { key: "inForce", label: t("opsAcc.cancellation.inForce"), value: `${quote.daysInForce} / ${quote.totalDays}`, note: t("opsAcc.cancellation.daysLeftNote", { count: quote.daysLeft }) },
     { key: "band", label: t("opsAcc.cancellation.bandApplied"), value: quote.shortPeriodBand?.description || t(`opsAcc.cancellation.methods.${quote.method}`), note: t(`opsAcc.cancellation.methods.${quote.method}`) },
@@ -38,7 +37,8 @@ export const resultCards = (quote, t) => {
     { key: "returnNet", label: t("opsAcc.cancellation.returnNet"), value: money(quote.returnNetPremium) },
     { key: "taxes", label: t("opsAcc.cancellation.taxesReturned"), value: money(taxes), note: t("opsAcc.cancellation.taxesNote", { vat: money(quote.taxes.vat), lgt: money(quote.taxes.lgt) }) },
     { key: "client", label: t("opsAcc.cancellation.refundClient"), value: money(quote.grossReturn) },
-    { key: "insurer", label: t("opsAcc.cancellation.dueFromInsurer"), value: money(fromInsurer), note: t("opsAcc.cancellation.commissionNote", { amount: money(quote.commissionReversed) }) },
+    { key: "insurer", label: t("opsAcc.cancellation.dueFromInsurer"), value: money(quote.insurerReturn),
+      note: quote.remittanceBasis === "gross" ? t("opsAcc.cancellation.grossBasisNote") : t("opsAcc.cancellation.commissionNote", { amount: money(quote.commissionReversed) }) },
   ];
 };
 
@@ -120,7 +120,7 @@ const PolicyCancellation = () => {
             <Dropdown value={form.reason} options={reasons.map((r) => ({ label: `${r.name} (${t(`opsAcc.cancellation.by.${r.initiatedBy}`)})`, value: r.code }))} onChange={(e) => set({ reason: e.value })} className="w-full" />
           </Field>
           <Field label={t("opsAcc.cancellation.method")} col="col-12 md:col-3">
-            <Dropdown value={form.method} options={METHODS.map((m) => ({ label: m === "auto" && reason ? t("opsAcc.cancellation.fromReason", { method: t(`opsAcc.cancellation.methods.${reason.method}`) }) : t(`opsAcc.cancellation.methods.${m}`), value: m }))}
+            <Dropdown value={form.method} options={METHODS.map((m) => ({ label: m === "auto" && reason && reason.method !== "auto" ? t("opsAcc.cancellation.fromReason", { method: t(`opsAcc.cancellation.methods.${reason.method}`) }) : t(`opsAcc.cancellation.methods.${m}`), value: m }))}
               onChange={(e) => set({ method: e.value })} className="w-full" />
           </Field>
           <Field label={t("opsAcc.cancellation.type")} col="col-12 md:col-3">

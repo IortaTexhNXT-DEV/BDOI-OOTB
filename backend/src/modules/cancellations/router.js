@@ -37,7 +37,7 @@ define({
   method: 'POST', path: '/quote', summary: 'Compute the return premium of cancelling a policy on a date (method from the reason: pro-rata, short-period or flat), with taxes and commission; nothing is saved',
   screen: S, middleware: [...read, validate(quoteBody), ownRecord('policy', (req) => req.body.policyId)],
   request: { policyId: 'pol_1', effectiveDate: '2026-12-01', reason: 'INSURED_REQUEST' },
-  response: { success: true, data: { method: 'short-period', totalDays: 365, daysInForce: 120, daysLeft: 245, returnNetPremium: 5000, taxes: { vat: 600, dst: 0, lgt: 37.5 }, grossReturn: 5637.5, commissionReversed: 750 } },
+  response: { success: true, data: { method: 'short-period', totalDays: 365, daysInForce: 120, daysLeft: 245, returnNetPremium: 5000, taxes: { vat: 600, dst: 0, lgt: 37.5 }, grossReturn: 5637.5, commissionReversed: 750, remittanceBasis: 'net', insurerReturn: 4872.5 } },
   handler: async (req, res) => ok(res, await svc.computeReturn(pool, await getPolicyRow(req.body.policyId), req.body)),
 });
 

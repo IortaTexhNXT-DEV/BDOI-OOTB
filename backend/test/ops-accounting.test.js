@@ -98,6 +98,8 @@ describe('cancellation return premium', () => {
     expect(sp.taxes.dst).toBe(0);
     expect(sp.grossReturn).toBe(r2(8000 + sp.taxes.vat + sp.taxes.lgt + sp.taxes.fst + sp.taxes.other));
     expect(sp.commissionReversed).toBe(1200);
+    // the insurer gives back the return less the commission taken back and its VAT, plus the EWT withheld on it (net basis)
+    expect(sp).toMatchObject({ remittanceBasis: 'net', insurerReturn: r2(sp.grossReturn - 1200 - 1200 * 0.12 + 1200 * 0.1) });
     const pr = (await q({ reason: 'NON_PAYMENT' })).body.data;
     expect(pr).toMatchObject({ method: 'pro-rata', returnNetPremium: r2((10000 * 355) / 365) });
     const flat = (await q({ reason: 'NOT_TAKEN_UP' })).body.data;

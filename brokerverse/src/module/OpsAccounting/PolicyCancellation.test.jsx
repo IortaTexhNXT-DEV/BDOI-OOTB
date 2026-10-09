@@ -13,7 +13,7 @@ jest.mock("../../services/opsAccountingService", () => ({
 const QUOTE = {
   policyId: "pol_1", policyNumber: "POL-2026-00001", inceptionDate: "2026-01-01", expiryDate: "2027-01-01", effectiveDate: "2026-04-11", totalDays: 365, daysInForce: 100,
   daysLeft: 265, method: "short-period", factor: 0.6, shortPeriodBand: { code: "SP04", maxDays: 122, retainedPercent: 40, description: "Not exceeding 4 months" },
-  basePremium: 10000, retainedNetPremium: 4000, returnNetPremium: 6000, taxes: { vat: 720, dst: 0, lgt: 45, fst: 0, other: 0 }, grossReturn: 6765, commissionReversed: 900,
+  basePremium: 10000, retainedNetPremium: 4000, returnNetPremium: 6000, taxes: { vat: 720, dst: 0, lgt: 45, fst: 0, other: 0 }, grossReturn: 6765, commissionReversed: 900, remittanceBasis: "net", insurerReturn: 5847,
 };
 const t = (key, opts) => (opts ? `${key} ${JSON.stringify(opts)}` : key);
 
@@ -32,6 +32,8 @@ describe("Policy Cancellation", () => {
     expect(cards.band.value).toBe("Not exceeding 4 months");
     expect(cards.kept.value).toBe("40%");
     expect(Object.keys(cards)).toEqual(["inForce", "band", "kept", "retained", "returnNet", "taxes", "client", "insurer"]);
+    expect(cards.insurer.value).toContain("5,847");
+    expect(resultCards({ ...QUOTE, remittanceBasis: "gross", insurerReturn: 6765 }, t).find((c) => c.key === "insurer").note).toBe("opsAcc.cancellation.grossBasisNote");
   });
 
   it("shows only the result of the policy, not the short-period scale", async () => {
