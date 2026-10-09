@@ -3,7 +3,8 @@
 Paying premium collected from clients over to the insurers, billing insurers for commission on direct-bill
 policies, and the remittance work items around them (settlements, adjustments, transfers, statements, exceptions,
 approvals). Routes are under `/remittance` (Accounts > Remittance, about 16 screens, and Master > Finance >
-Remittance Master). Permissions: `read:remittance`, `write:remittance`.
+Remittance Master). Permissions: `read:remittance`, `write:remittance` (prepare, submit) and `approve:remittance`
+(decide an approval; migration 0400).
 
 ## Files
 
@@ -58,7 +59,15 @@ Authority Matrix's (Master > User Management > Authority Matrix): transaction ty
 agency bills, `remittance_settlement` for settlements, adjustments and electronic transfers. Approving checks the
 approver's limit (`assertAuthority`, delegations of Master > User Management > Delegations included); one approval
 within the limit decides. Only while the matrix has no limit for the type are the fallback levels of
-`remittance.approval_levels` used. The approver must differ from the maker. The `remittance_delegations` table of
+`remittance.approval_levels` used. The approver must differ from the maker. Deciding (approve, reject, delegate) needs
+`approve:remittance`, on the routes and again in `decide()`: System Administrator, Accounting (so the Accounting
+Manager) and, for TISPH, TIS Finance and the TIS General Manager. With `remittance.require_authority_limit` on (TISPH),
+a user without a remittance limit (own, role or delegated) decides nothing and gets `NO_AUTHORITY` (403,
+`errors[0].code`), whatever `access.authority_without_limit` says. Each decision on the approval history keeps
+`limitAtDecision` (null: no limit) and `limitSource` (`user limit`, `role <code>`, `delegated by <name> (...)`), and a
+rejection the reason of context `remittance_reject` (`reasonCode`, the note an Other needs; free-text `comments` is
+still accepted). While `remittance.item_delegation_enabled` is off (TISPH), `POST /approvals/:id/delegate` returns 409:
+an absent approver is covered by a dated delegation. The `remittance_delegations` table of
 earlier releases is no longer read or written.
 
 Activity log and print: GET `/remittance/remittances/:id` returns `activityLog` oldest first, built by
@@ -77,7 +86,8 @@ active schedules whose next run date has come, in the business time zone, and mo
 
 ## Key settings
 
-`remittance.approval_levels` (fallback only), `remittance.priority_thresholds`, `remittance.priority_sla_hours`,
+`remittance.approval_levels` (fallback only), `remittance.require_authority_limit` (default false, TISPH true),
+`remittance.item_delegation_enabled` (default true, TISPH false), `remittance.priority_thresholds`, `remittance.priority_sla_hours`,
 `remittance.default_due_days` (due date of a new remittance when the insurer has no `remittance_terms_days`), `remittance.transfer_methods`, `remittance.status_labels`,
 `remittance.advice_title` / `remittance.agency_bill_title` (titles of the printed remittance advice and agency bill),
 `remittance.default_basis`, `remittance.basis_rules` (`[{ "insurer": "MALAYAN", "product": "MOTOR", "basis": "gross" }]`; the most
@@ -103,3 +113,7 @@ before approval).
 - "... is above your approval authority": the approver's Authority Matrix limit for `remittance` or
   `remittance_settlement` is below the amount. A user with a higher limit approves, or the limit is changed (and
   approved) in Master > User Management > Authority Matrix.
+- "You have no approval limit for Remittance approval": `remittance.require_authority_limit` is on and the user has
+  no limit for the type, neither their own, nor a role's, nor one delegated to them today. Add (and approve) a limit in
+  the Authority Matrix, or record a dated delegation from an approver in Master > User Management > Delegations.
+- A user sees the approvals but no decision: they lack `approve:remittance` (preparers such as TIS CCD-Recon).

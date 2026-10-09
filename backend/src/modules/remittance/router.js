@@ -1,6 +1,7 @@
 import { importUpload } from '../../lib/uploadLimits.js';
 import { moduleRouter } from '../../lib/registry.js';
 import { audit } from '../../lib/audit.js';
+import { requireAuth, requirePermission } from '../../lib/auth.js';
 import { badRequest } from '../../lib/errors.js';
 import { created, ok, paging } from '../../lib/respond.js';
 import { canRead, canWrite, sendList } from '../masters/helpers.js';
@@ -19,6 +20,8 @@ import { commissionDebitNoteDoc, remittanceAdviceDoc } from '../documents/templa
 const { router, define } = moduleRouter('Remittance', '/remittance');
 const read = canRead('remittance');
 const write = canWrite('remittance');
+// deciding an approval is the checker's permission, without the maker's write:remittance
+const approve = [requireAuth, requirePermission('approve:remittance')];
 const upload = importUpload();
 const singleFile = (req, res, next) => upload.single('file')(req, res, (e) => next(e ? badRequest(e.message) : undefined));
 const S = (name) => `Accounts > Remittance > ${name}`;
@@ -94,12 +97,13 @@ define({
 });
 for (const action of ['approve', 'reject']) {
   define({
-    method: 'POST', path: `/remittances/:id/${action}`, summary: `${action === 'approve' ? 'Approve' : 'Reject'} a remittance (maker-checker: not the submitter)`, screen: S('Approval'), middleware: write,
-    request: { comments: action === 'approve' ? 'Verified' : 'Missing documents' }, response: { success: true, data: { status: action === 'approve' ? 'Approved' : 'Rejected' } },
+    method: 'POST', path: `/remittances/:id/${action}`,
+    summary: `${action === 'approve' ? 'Approve' : 'Reject'} a remittance (approve:remittance; maker-checker: not the submitter; within the approver's Authority Matrix limit)`, screen: S('Approval'), middleware: approve,
+    request: action === 'approve' ? { comments: 'Verified' } : { reasonCode: 'RRJ-OTHER', note: 'Missing documents' }, response: { success: true, data: { status: action === 'approve' ? 'Approved' : 'Rejected' } },
     handler: async (req, res) => {
       const r = await svc.getRemittanceRow(req.params.id);
-      const { before, after } = await svc.decideFor('remittance', r.id, action, req.body || {}, req.user);
-      await audit(req, { entity: 'remittance', entityId: r.id, action, before, after: { ...after, remarks: req.body?.comments } });
+      const { before, after, decision } = await svc.decideFor('remittance', r.id, action, req.body || {}, req.user);
+      await audit(req, { entity: 'remittance', entityId: r.id, action, before, after: { ...after, ...decision } });
       ok(res, await svc.getRemittance(r.id), `Remittance ${action === 'approve' ? 'approved' : 'rejected'}`);
     },
   });
@@ -319,7 +323,7 @@ define({
   handler: async (req, res) => ok(res, await svc.listApprovals(req.query)),
 });
 define({
-  method: 'GET', path: '/approvals/approvers', summary: 'Users who may take over a remittance approval (active, hold write:remittance or an administrator role; not the caller), for the delegation drop-down',
+  method: 'GET', path: '/approvals/approvers', summary: 'Users who may take over a remittance approval (active, hold approve:remittance or an administrator role; not the caller), for the delegation drop-down',
   screen: S('Approval > Delegate'), middleware: read,
   response: { success: true, data: [{ userId: 'usr_1', username: 'fe.approver', displayName: 'Fe Approver' }] },
   handler: async (req, res) => ok(res, await svc.approvers(req.user)),
@@ -331,12 +335,15 @@ define({
 });
 for (const action of ['approve', 'reject', 'delegate']) {
   define({
-    method: 'POST', path: `/approvals/:id/${action}`, summary: `${action[0].toUpperCase()}${action.slice(1)} an approval (maker-checker: the initiator cannot decide)`, screen: S('Approval'), middleware: write,
-    request: action === 'delegate' ? { delegateTo: 'finance.head', comments: 'On leave' } : { comments: action === 'approve' ? 'Verified' : 'Missing documents' },
+    method: 'POST', path: `/approvals/:id/${action}`,
+    summary: action === 'delegate' ? 'Hand a pending approval to another approver (approve:remittance; 409 while remittance.item_delegation_enabled is off)'
+      : `${action[0].toUpperCase()}${action.slice(1)} an approval (approve:remittance; maker-checker: the initiator cannot decide; within the approver's Authority Matrix limit)`,
+    screen: S('Approval'), middleware: approve,
+    request: action === 'delegate' ? { delegateTo: 'finance.head', comments: 'On leave' } : action === 'approve' ? { comments: 'Verified' } : { reasonCode: 'RRJ-OTHER', note: 'Missing documents' },
     response: { success: true, data: { id: 1, status: action === 'approve' ? 'Approved' : action === 'reject' ? 'Rejected' : 'Pending' } },
     handler: async (req, res) => {
-      const { before, after } = await svc.decide(req.params.id, action, req.body || {}, req.user);
-      await audit(req, { entity: 'remittance_approval', entityId: req.params.id, action, before, after: { ...after, comments: req.body?.comments } });
+      const { before, after, decision } = await svc.decide(req.params.id, action, req.body || {}, req.user);
+      await audit(req, { entity: 'remittance_approval', entityId: req.params.id, action, before, after: { ...after, comments: req.body?.comments, ...decision } });
       ok(res, after, `Approval ${action === 'delegate' ? 'delegated' : after.status === 'Pending' ? 'recorded; next level pending' : after.status.toLowerCase()}`);
     },
   });

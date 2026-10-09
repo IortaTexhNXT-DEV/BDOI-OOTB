@@ -251,7 +251,8 @@ async function approvals(ctx) {
         FROM petty_cash_requests pc WHERE pc.status = 'submitted' AND ${notMine(ctx, 'pc.created_by')}`);
     }
   }
-  if (ctx.can('write:remittance')) {
+  // remittance approvals are decided with approve:remittance (migration 0400); debit notes stay with write:remittance
+  if (ctx.can('approve:remittance')) {
     const remit = await withinAuthority(ctx, 'remittance', 'a.amount');
     const settle = await withinAuthority(ctx, 'remittance_settlement', 'a.amount');
     out.push(`SELECT ${select({ ...base, kind: "COALESCE(a.transaction_type, 'Remittance')", id: 'a.id', ref: 'a.reference_no', title: "COALESCE(a.description, a.transaction_type, 'Remittance')",
@@ -260,6 +261,8 @@ async function approvals(ctx) {
       FROM remittance_approvals a WHERE a.status = 'Pending' AND ${notMine(ctx, 'a.initiator_id')}
         AND NOT EXISTS (SELECT 1 FROM jsonb_array_elements(COALESCE(a.history, '[]'::jsonb)) h WHERE h->>'action' = 'Approved' AND h->>'by' = ANY(${ctx.ME}::text[]))
         AND (CASE WHEN a.entity = 'remittance' THEN ${remit} ELSE ${settle} END)`);
+  }
+  if (ctx.can('write:remittance')) {
     if (await has('commission_debit_notes')) {
       out.push(`SELECT ${select({ ...base, kind: "'Commission debit note'", id: 'dn.id', ref: 'dn.dn_number', title: "COALESCE(ic.name, 'Commission debit note')", due_date: due('COALESCE(dn.submitted_at, dn.created_at)'),
         status: 'dn.status', link: "'/finance/remittance/directbill'", amount: 'dn.amount', created_at: 'dn.created_at' })}

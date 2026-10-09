@@ -2,11 +2,11 @@
  * Remittance core: remittances / bills to insurers and agencies, their lines, the approval queue (maker-checker)
  * and automated remittance generation from policies not yet remitted.
  */
-import { ADMIN_ROLES, isAdmin } from '../../lib/auth.js';
+import { ADMIN_ROLES, hasPermission, isAdmin } from '../../lib/auth.js';
 import { baseCurrency } from '../../lib/currency.js';
 import { many, one, pool, query, withTransaction } from '../../db/pool.js';
 import { allocate, isCoInsured, policyParticipants } from '../accounting/lib/coinsurance.js';
-import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
+import { HttpError, badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { renderTemplate } from '../documents/common.js';
 import { today as businessToday } from '../../lib/dates.js';
@@ -19,7 +19,8 @@ import { nextDocumentNumber } from '../../lib/numbering.js';
 import { postEvent } from '../accounting/lib/posting.js';
 import { companyName } from '../../lib/letterhead.js';
 import { resolveCreditTerms } from '../commission-rates/terms.js';
-import { assertAuthority } from '../access-control/service.js';
+import { assertAuthority, effectiveAuthority } from '../access-control/service.js';
+import { requiredReason } from '../ops-masters/records.js';
 import { GROSS_BILLED_SQL } from './basis.js';
 import { activityEntries } from '../../lib/auditEvents.js';
 
@@ -363,12 +364,12 @@ export async function postItemJournal(c, item, user) {
   return jv;
 }
 
-// Remittance > Approval: every approval of the workflow is decided there with write:remittance.
+// Remittance > Approval: every approval of the workflow is decided there with approve:remittance.
 export const APPROVAL_LINK = '/finance/remittance/approval';
 
-/** Tell the approvers (write:remittance) that a transaction opened with openApproval awaits them; call after the commit. */
+/** Tell the approvers (approve:remittance) that a transaction opened with openApproval awaits them; call after the commit. */
 export async function askApproval({ transactionType, referenceNo, amount, description, user, entity = 'item', entityId }) {
-  await notifyApprovers({ audience: 'write:remittance', document: transactionType, number: referenceNo, by: user.username,
+  await notifyApprovers({ audience: 'approve:remittance', document: transactionType, number: referenceNo, by: user.username,
     detail: `${description ? `${description}, ` : ''}${await formatMoney(amount)}`, link: APPROVAL_LINK, entity, entityId });
 }
 
@@ -401,7 +402,7 @@ export async function processRemittances(ids, user) {
     await c.query(`INSERT INTO remittance_items(kind, reference_no, amount, status, data, created_by, updated_by) VALUES ('batch', $1, $2, 'Pending Approval', $3, $4, $4)`,
       [batchId, round2(total), JSON.stringify({ processedIds: ok.map((x) => x.id), itemCount: ok.length, durationMs: Date.now() - started }), user.id]);
   });
-  await notifyApprovers({ audience: 'write:remittance', document: 'Remittance batch', number: batchId, by: user.username, link: APPROVAL_LINK, entity: 'remittance_batch', entityId: batchId,
+  await notifyApprovers({ audience: 'approve:remittance', document: 'Remittance batch', number: batchId, by: user.username, link: APPROVAL_LINK, entity: 'remittance_batch', entityId: batchId,
     message: `${user.username} submitted ${ok.length} remittance(s) in batch ${batchId} (${await formatMoney(round2(total))})` });
   return { success: true, message: `Successfully submitted ${ok.length} remittance(s) for approval`, processedIds: ok.map((x) => x.id), failed: v.results.filter((x) => !x.valid), batchId, processedAt: new Date().toISOString() };
 }
@@ -495,7 +496,8 @@ export async function approvalHistory(limit = 200) {
                              (SELECT display_name FROM users u WHERE u.id = h.value->>'by') AS by_name
                            FROM remittance_approvals a, jsonb_array_elements(a.history) h
                            WHERE h.value->>'action' <> 'Submitted' ORDER BY (h.value->>'at') DESC LIMIT $1`, [limit]);
-  return rows.map((r) => ({ referenceNo: r.reference_no, transactionType: r.transaction_type, amount: r.amount, action: r.h.action, actionDate: ts(r.h.at), actionBy: r.by_name, remarks: r.h.remarks || null, level: r.h.level ?? null }));
+  return rows.map((r) => ({ referenceNo: r.reference_no, transactionType: r.transaction_type, amount: r.amount, action: r.h.action, actionDate: ts(r.h.at), actionBy: r.by_name, remarks: r.h.remarks || null,
+    level: r.h.level ?? null, reasonCode: r.h.reasonCode ?? null, limitAtDecision: r.h.limitAtDecision ?? null, limitSource: r.h.limitSource ?? null }));
 }
 
 export async function getApproval(id) {
@@ -504,19 +506,53 @@ export async function getApproval(id) {
   return a;
 }
 
-/** Approve / reject / delegate a pending approval. The approver must not be the initiator nor an earlier approver. */
+/** A refused decision: the message, with the code the screens key on as errors[0].code. */
+const refusal = (code, message) => new HttpError(403, message, [{ path: 'approval', code, message }]);
+
+/**
+ * The approver's Authority Matrix limit for a decision (own, role or delegated through Master > User Management >
+ * Delegations), kept with the decision as limitAtDecision (null: no limit) and limitSource ("user limit",
+ * "role accounting", "delegated by A. Santos (role accounting)"). With remittance.require_authority_limit on, a user
+ * without a limit for the type decides nothing, whatever access.authority_without_limit says; an approval above the
+ * limit is refused by assertAuthority.
+ */
+async function decisionAuthority(user, type, amount, action) {
+  const authority = await effectiveAuthority(pool, user.id, type);
+  if (!authority.found && await getSetting('remittance.require_authority_limit', false)) {
+    const name = (await one('SELECT name FROM authority_transaction_types WHERE code = $1', [type]))?.name || type;
+    throw refusal('NO_AUTHORITY', `You have no approval limit for ${name}. Ask an administrator to set one in the Authority Matrix.`);
+  }
+  if (action === 'approve') await assertAuthority(pool, user, type, amount);
+  return { limitAtDecision: authority.found ? authority.limit : null, limitSource: authority.source };
+}
+
+/**
+ * Approve / reject / delegate a pending approval, with approve:remittance. The approver must not be the initiator nor
+ * an earlier approver, and needs an Authority Matrix limit (decisionAuthority). A rejection takes a reason of the
+ * remittance_reject context (reasonCode, and the note an Other needs), or the free-text comments. Returns the approval
+ * before and after, and the decision kept on its history (remarks, reasonCode, limitAtDecision, limitSource).
+ */
 export async function decide(id, action, body, user) {
   const a = await getApproval(id);
   if (a.status !== 'Pending') throw conflict(`Approval is already ${a.status.toLowerCase()}`);
+  if (!hasPermission(user, 'approve:remittance')) throw refusal('NO_PERMISSION', 'You can view approvals but not decide them.');
+  if (action === 'delegate' && !(await getSetting('remittance.item_delegation_enabled', true))) {
+    throw conflict('Approvals are not delegated one by one. An absent approver is covered by a dated delegation of authority.');
+  }
   if (a.delegated_to && a.delegated_to !== user.id && !isAdmin(user)) throw forbidden('This approval has been delegated to another user');
-  const remarks = body.comments ?? body.remarks ?? body.reason ?? null;
+  let remarks = body.comments ?? body.remarks ?? body.reason ?? null;
+  let reasonCode = null;
   if (action !== 'delegate') {
     if (a.initiator_id === user.id) throw forbidden('Maker-checker: you cannot approve or reject a transaction you initiated');
     if ((a.history || []).some((h) => h.action === 'Approved' && h.by === user.id)) throw forbidden('Maker-checker: you have already approved an earlier level of this transaction');
   }
+  if (action === 'reject' && body.reasonCode) {
+    const reason = await requiredReason(pool, 'remittance_reject', { reasonCode: body.reasonCode, note: body.note ?? remarks });
+    reasonCode = reason.code;
+    remarks = reason.text;
+  }
   if (action === 'reject' && !remarks) throw badRequest('Validation failed', [{ path: 'comments', message: 'A reason is required to reject' }]);
-  // the approver's limit in the Authority Matrix (own, role or delegated through Master > User Management > Delegations)
-  if (action === 'approve') await assertAuthority(pool, user, authorityTypeOf(a.entity), Number(a.amount));
+  const decision = action === 'delegate' ? {} : { remarks, ...(reasonCode ? { reasonCode } : {}), ...(await decisionAuthority(user, authorityTypeOf(a.entity), Number(a.amount), action)) };
   const hist = [...(a.history || [])];
   await withTransaction(async (c) => {
     if (action === 'delegate') {
@@ -528,12 +564,12 @@ export async function decide(id, action, body, user) {
       return;
     }
     if (action === 'approve' && a.current_level < a.required_levels) {
-      hist.push({ action: 'Approved', by: user.id, at: new Date().toISOString(), remarks, level: a.current_level });
+      hist.push({ action: 'Approved', by: user.id, at: new Date().toISOString(), level: a.current_level, ...decision });
       await c.query('UPDATE remittance_approvals SET current_level = current_level + 1, delegated_to = NULL, history = $2 WHERE id = $1', [a.id, JSON.stringify(hist)]);
       return;
     }
     const status = action === 'approve' ? 'Approved' : 'Rejected';
-    hist.push({ action: status, by: user.id, at: new Date().toISOString(), remarks, level: a.current_level });
+    hist.push({ action: status, by: user.id, at: new Date().toISOString(), level: a.current_level, ...decision });
     await c.query('UPDATE remittance_approvals SET status = $2, action_by = $3, action_at = now(), remarks = $4, history = $5 WHERE id = $1', [a.id, status, user.id, remarks, JSON.stringify(hist)]);
     await applyDecision(c, a, action, user, remarks);
   });
@@ -542,7 +578,7 @@ export async function decide(id, action, body, user) {
     await notifyDecision({ userId: a.initiator_id, decidedBy: user.id, document: a.transaction_type, number: a.reference_no, approved: after.status === 'Approved', by: await userName(user.id),
       reason: after.status === 'Rejected' ? remarks : null, link: APPROVAL_LINK, entity: a.entity, entityId: a.entity_id });
   }
-  return { before: approvalOut(a), after };
+  return { before: approvalOut(a), after, decision };
 }
 
 /** Approve / reject through the underlying record (remittance or item) instead of the approval id. */
@@ -561,15 +597,15 @@ export async function settleRemittance(id, b, user) {
 }
 
 /**
- * Users an approval can be delegated to: active users who hold write:remittance through a role, or an administrator role,
- * other than the caller. Accounting reads this without read:users.
+ * Users an approval can be delegated to: active users who hold approve:remittance through a role, or an administrator
+ * role, other than the caller. Accounting reads this without read:users.
  */
 export async function approvers(user) {
   const rows = await many(`SELECT u.id, u.username, u.display_name FROM users u
     WHERE u.status = 'active' AND u.id <> $1 AND EXISTS (
       SELECT 1 FROM user_effective_roles(u.id) er JOIN roles r ON r.id = er.role_id
       WHERE (r.code = ANY($2) OR EXISTS (
-        SELECT 1 FROM role_permissions rp JOIN permissions p ON p.id = rp.permission_id WHERE rp.role_id = r.id AND p.code = 'write:remittance')))
+        SELECT 1 FROM role_permissions rp JOIN permissions p ON p.id = rp.permission_id WHERE rp.role_id = r.id AND p.code = 'approve:remittance')))
     ORDER BY lower(COALESCE(u.display_name, u.username))`, [user?.id || '', ADMIN_ROLES]);
   return rows.map((u) => ({ userId: u.id, username: u.username, displayName: u.display_name || u.username }));
 }

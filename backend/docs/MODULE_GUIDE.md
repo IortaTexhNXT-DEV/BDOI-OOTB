@@ -30,7 +30,8 @@ minimal, clearly-correct front-end fix.
   `approve:period-end`, `approve:bank-reconciliation`, `approve:insurer-reconciliation`, `approve:credit-control`,
   `write:posting-rules`, `approve:posting-rules` and `view:pii` (full personal identifiers), and the approvals of the front office
   (migration 0348): `approve:quotations` (quotation approval), `approve:policies` (check of a placement against the slip),
-  `approve:renewals` (renewal terms) and `approve:claims` (claim decisions). An approval route requires the approval
+  `approve:renewals` (renewal terms) and `approve:claims` (claim decisions), and `approve:remittance` (remittance
+  approvals, migration 0400; an approver needs no `write:remittance`). An approval route requires the approval
   permission besides the write permission, and the service keeps its maker-checker rule. Which role holds which
   permission is `ROLE_PERMS` in the same file (the broker roles and the TISPH roles `tis-*` of the RBAC v4 sheet); a
   role added there for databases in use also needs a migration, as `0348_tisph_roles.sql` does. Roles that include

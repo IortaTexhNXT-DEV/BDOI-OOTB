@@ -20873,7 +20873,7 @@
     }
   ]
 }"
-1046,Remittance,POST,/api/remittance/approvals/:id/approve,Approve an approval (maker-checker: the initiator cannot decide),Accounts > Remittance > Approval,Bearer JWT,write:remittance,"{
+1046,Remittance,POST,/api/remittance/approvals/:id/approve,Approve an approval (approve:remittance; maker-checker: the initiator cannot decide; within the approver's Authority Matrix limit),Accounts > Remittance > Approval,Bearer JWT,approve:remittance,"{
   ""comments"": ""Verified""
 }","{
   ""success"": true,
@@ -20882,7 +20882,7 @@
     ""status"": ""Approved""
   }
 }"
-1047,Remittance,POST,/api/remittance/approvals/:id/delegate,Delegate an approval (maker-checker: the initiator cannot decide),Accounts > Remittance > Approval,Bearer JWT,write:remittance,"{
+1047,Remittance,POST,/api/remittance/approvals/:id/delegate,Hand a pending approval to another approver (approve:remittance; 409 while remittance.item_delegation_enabled is off),Accounts > Remittance > Approval,Bearer JWT,approve:remittance,"{
   ""delegateTo"": ""finance.head"",
   ""comments"": ""On leave""
 }","{
@@ -20892,8 +20892,9 @@
     ""status"": ""Pending""
   }
 }"
-1048,Remittance,POST,/api/remittance/approvals/:id/reject,Reject an approval (maker-checker: the initiator cannot decide),Accounts > Remittance > Approval,Bearer JWT,write:remittance,"{
-  ""comments"": ""Missing documents""
+1048,Remittance,POST,/api/remittance/approvals/:id/reject,Reject an approval (approve:remittance; maker-checker: the initiator cannot decide; within the approver's Authority Matrix limit),Accounts > Remittance > Approval,Bearer JWT,approve:remittance,"{
+  ""reasonCode"": ""RRJ-OTHER"",
+  ""note"": ""Missing documents""
 }","{
   ""success"": true,
   ""data"": {
@@ -20901,7 +20902,7 @@
     ""status"": ""Rejected""
   }
 }"
-1049,Remittance,GET,/api/remittance/approvals/approvers,"Users who may take over a remittance approval (active, hold write:remittance or an administrator role; not the caller), for the delegation drop-down",Accounts > Remittance > Approval > Delegate,Bearer JWT,"read:remittance, write:remittance",,"{
+1049,Remittance,GET,/api/remittance/approvals/approvers,"Users who may take over a remittance approval (active, hold approve:remittance or an administrator role; not the caller), for the delegation drop-down",Accounts > Remittance > Approval > Delegate,Bearer JWT,"read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": [
     {
@@ -21913,7 +21914,7 @@
     ]
   }
 }"
-1101,Remittance,POST,/api/remittance/remittances/:id/approve,Approve a remittance (maker-checker: not the submitter),Accounts > Remittance > Approval,Bearer JWT,write:remittance,"{
+1101,Remittance,POST,/api/remittance/remittances/:id/approve,Approve a remittance (approve:remittance; maker-checker: not the submitter; within the approver's Authority Matrix limit),Accounts > Remittance > Approval,Bearer JWT,approve:remittance,"{
   ""comments"": ""Verified""
 }","{
   ""success"": true,
@@ -21922,8 +21923,9 @@
   }
 }"
 1102,Remittance,GET,/api/remittance/remittances/:id/pdf,"Printable remittance advice (agency bill for an agency bill): broker letterhead, the policies, the amount due and the signatures (PDF; download=1 for an attachment)",Accounts > Remittance > Tracking > Print,Bearer JWT,"read:remittance, write:remittance",Query: ?download=1,application/pdf
-1103,Remittance,POST,/api/remittance/remittances/:id/reject,Reject a remittance (maker-checker: not the submitter),Accounts > Remittance > Approval,Bearer JWT,write:remittance,"{
-  ""comments"": ""Missing documents""
+1103,Remittance,POST,/api/remittance/remittances/:id/reject,Reject a remittance (approve:remittance; maker-checker: not the submitter; within the approver's Authority Matrix limit),Accounts > Remittance > Approval,Bearer JWT,approve:remittance,"{
+  ""reasonCode"": ""RRJ-OTHER"",
+  ""note"": ""Missing documents""
 }","{
   ""success"": true,
   ""data"": {

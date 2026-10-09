@@ -125230,11 +125230,11 @@
     "/remittance/approvals/{id}/approve": {
       "post": {
         "operationId": "postRemittanceApprovalsIdApprove",
-        "summary": "Approve an approval (maker-checker: the initiator cannot decide)",
+        "summary": "Approve an approval (approve:remittance; maker-checker: the initiator cannot decide; within the approver's Authority Matrix limit)",
         "tags": [
           "Remittance"
         ],
-        "description": "Front-end touchpoint: Accounts > Remittance > Approval\n\nAccess: write:remittance",
+        "description": "Front-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
         "parameters": [
           {
             "name": "id",
@@ -125291,7 +125291,7 @@
         },
         "x-screen": "Accounts > Remittance > Approval",
         "x-permissions": [
-          "write:remittance"
+          "approve:remittance"
         ],
         "requestBody": {
           "required": true,
@@ -125316,11 +125316,11 @@
     "/remittance/approvals/{id}/delegate": {
       "post": {
         "operationId": "postRemittanceApprovalsIdDelegate",
-        "summary": "Delegate an approval (maker-checker: the initiator cannot decide)",
+        "summary": "Hand a pending approval to another approver (approve:remittance; 409 while remittance.item_delegation_enabled is off)",
         "tags": [
           "Remittance"
         ],
-        "description": "Front-end touchpoint: Accounts > Remittance > Approval\n\nAccess: write:remittance",
+        "description": "Front-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
         "parameters": [
           {
             "name": "id",
@@ -125377,7 +125377,7 @@
         },
         "x-screen": "Accounts > Remittance > Approval",
         "x-permissions": [
-          "write:remittance"
+          "approve:remittance"
         ],
         "requestBody": {
           "required": true,
@@ -125406,11 +125406,11 @@
     "/remittance/approvals/{id}/reject": {
       "post": {
         "operationId": "postRemittanceApprovalsIdReject",
-        "summary": "Reject an approval (maker-checker: the initiator cannot decide)",
+        "summary": "Reject an approval (approve:remittance; maker-checker: the initiator cannot decide; within the approver's Authority Matrix limit)",
         "tags": [
           "Remittance"
         ],
-        "description": "Front-end touchpoint: Accounts > Remittance > Approval\n\nAccess: write:remittance",
+        "description": "Front-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
         "parameters": [
           {
             "name": "id",
@@ -125467,7 +125467,7 @@
         },
         "x-screen": "Accounts > Remittance > Approval",
         "x-permissions": [
-          "write:remittance"
+          "approve:remittance"
         ],
         "requestBody": {
           "required": true,
@@ -125476,13 +125476,17 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "comments": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
                     "type": "string"
                   }
                 }
               },
               "example": {
-                "comments": "Missing documents"
+                "reasonCode": "RRJ-OTHER",
+                "note": "Missing documents"
               }
             }
           }
@@ -125492,7 +125496,7 @@
     "/remittance/approvals/approvers": {
       "get": {
         "operationId": "getRemittanceApprovalsApprovers",
-        "summary": "Users who may take over a remittance approval (active, hold write:remittance or an administrator role; not the caller), for the delegation drop-down",
+        "summary": "Users who may take over a remittance approval (active, hold approve:remittance or an administrator role; not the caller), for the delegation drop-down",
         "tags": [
           "Remittance"
         ],
@@ -131658,11 +131662,11 @@
     "/remittance/remittances/{id}/approve": {
       "post": {
         "operationId": "postRemittanceRemittancesIdApprove",
-        "summary": "Approve a remittance (maker-checker: not the submitter)",
+        "summary": "Approve a remittance (approve:remittance; maker-checker: not the submitter; within the approver's Authority Matrix limit)",
         "tags": [
           "Remittance"
         ],
-        "description": "Front-end touchpoint: Accounts > Remittance > Approval\n\nAccess: write:remittance",
+        "description": "Front-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
         "parameters": [
           {
             "name": "id",
@@ -131715,7 +131719,7 @@
         },
         "x-screen": "Accounts > Remittance > Approval",
         "x-permissions": [
-          "write:remittance"
+          "approve:remittance"
         ],
         "requestBody": {
           "required": true,
@@ -131796,11 +131800,11 @@
     "/remittance/remittances/{id}/reject": {
       "post": {
         "operationId": "postRemittanceRemittancesIdReject",
-        "summary": "Reject a remittance (maker-checker: not the submitter)",
+        "summary": "Reject a remittance (approve:remittance; maker-checker: not the submitter; within the approver's Authority Matrix limit)",
         "tags": [
           "Remittance"
         ],
-        "description": "Front-end touchpoint: Accounts > Remittance > Approval\n\nAccess: write:remittance",
+        "description": "Front-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
         "parameters": [
           {
             "name": "id",
@@ -131853,7 +131857,7 @@
         },
         "x-screen": "Accounts > Remittance > Approval",
         "x-permissions": [
-          "write:remittance"
+          "approve:remittance"
         ],
         "requestBody": {
           "required": true,
@@ -131862,13 +131866,17 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "comments": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
                     "type": "string"
                   }
                 }
               },
               "example": {
-                "comments": "Missing documents"
+                "reasonCode": "RRJ-OTHER",
+                "note": "Missing documents"
               }
             }
           }

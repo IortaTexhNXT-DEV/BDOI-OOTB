@@ -77557,7 +77557,7 @@
           ]
         },
         {
-          "name": "Approve an approval (maker-checker: the initiator cannot decide)",
+          "name": "Approve an approval (approve:remittance; maker-checker: the initiator cannot decide; within the approver's Authority Matrix limit)",
           "request": {
             "method": "POST",
             "header": [
@@ -77585,7 +77585,7 @@
                 }
               ]
             },
-            "description": "Approve an approval (maker-checker: the initiator cannot decide)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: write:remittance",
+            "description": "Approve an approval (approve:remittance; maker-checker: the initiator cannot decide; within the approver's Authority Matrix limit)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"comments\": \"Verified\"\n}",
@@ -77626,7 +77626,7 @@
                     }
                   ]
                 },
-                "description": "Approve an approval (maker-checker: the initiator cannot decide)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: write:remittance",
+                "description": "Approve an approval (approve:remittance; maker-checker: the initiator cannot decide; within the approver's Authority Matrix limit)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"comments\": \"Verified\"\n}",
@@ -77652,7 +77652,7 @@
           ]
         },
         {
-          "name": "Delegate an approval (maker-checker: the initiator cannot decide)",
+          "name": "Hand a pending approval to another approver (approve:remittance; 409 while remittance.item_delegation_enabled is off)",
           "request": {
             "method": "POST",
             "header": [
@@ -77680,7 +77680,7 @@
                 }
               ]
             },
-            "description": "Delegate an approval (maker-checker: the initiator cannot decide)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: write:remittance",
+            "description": "Hand a pending approval to another approver (approve:remittance; 409 while remittance.item_delegation_enabled is off)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"delegateTo\": \"finance.head\",\n  \"comments\": \"On leave\"\n}",
@@ -77721,7 +77721,7 @@
                     }
                   ]
                 },
-                "description": "Delegate an approval (maker-checker: the initiator cannot decide)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: write:remittance",
+                "description": "Hand a pending approval to another approver (approve:remittance; 409 while remittance.item_delegation_enabled is off)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"delegateTo\": \"finance.head\",\n  \"comments\": \"On leave\"\n}",
@@ -77747,7 +77747,7 @@
           ]
         },
         {
-          "name": "Reject an approval (maker-checker: the initiator cannot decide)",
+          "name": "Reject an approval (approve:remittance; maker-checker: the initiator cannot decide; within the approver's Authority Matrix limit)",
           "request": {
             "method": "POST",
             "header": [
@@ -77775,10 +77775,10 @@
                 }
               ]
             },
-            "description": "Reject an approval (maker-checker: the initiator cannot decide)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: write:remittance",
+            "description": "Reject an approval (approve:remittance; maker-checker: the initiator cannot decide; within the approver's Authority Matrix limit)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"comments\": \"Missing documents\"\n}",
+              "raw": "{\n  \"reasonCode\": \"RRJ-OTHER\",\n  \"note\": \"Missing documents\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -77816,10 +77816,10 @@
                     }
                   ]
                 },
-                "description": "Reject an approval (maker-checker: the initiator cannot decide)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: write:remittance",
+                "description": "Reject an approval (approve:remittance; maker-checker: the initiator cannot decide; within the approver's Authority Matrix limit)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"comments\": \"Missing documents\"\n}",
+                  "raw": "{\n  \"reasonCode\": \"RRJ-OTHER\",\n  \"note\": \"Missing documents\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -77842,7 +77842,7 @@
           ]
         },
         {
-          "name": "Users who may take over a remittance approval (active, hold write:remittance or an administrator role; not the caller), for the delegation drop-down",
+          "name": "Users who may take over a remittance approval (active, hold approve:remittance or an administrator role; not the caller), for the delegation drop-down",
           "request": {
             "method": "GET",
             "header": [],
@@ -77857,7 +77857,7 @@
                 "approvers"
               ]
             },
-            "description": "Users who may take over a remittance approval (active, hold write:remittance or an administrator role; not the caller), for the delegation drop-down\n\nFront-end touchpoint: Accounts > Remittance > Approval > Delegate\n\nAccess: read:remittance, write:remittance"
+            "description": "Users who may take over a remittance approval (active, hold approve:remittance or an administrator role; not the caller), for the delegation drop-down\n\nFront-end touchpoint: Accounts > Remittance > Approval > Delegate\n\nAccess: read:remittance, write:remittance"
           },
           "response": [
             {
@@ -77876,7 +77876,7 @@
                     "approvers"
                   ]
                 },
-                "description": "Users who may take over a remittance approval (active, hold write:remittance or an administrator role; not the caller), for the delegation drop-down\n\nFront-end touchpoint: Accounts > Remittance > Approval > Delegate\n\nAccess: read:remittance, write:remittance"
+                "description": "Users who may take over a remittance approval (active, hold approve:remittance or an administrator role; not the caller), for the delegation drop-down\n\nFront-end touchpoint: Accounts > Remittance > Approval > Delegate\n\nAccess: read:remittance, write:remittance"
               },
               "status": "OK",
               "code": 200,
@@ -81694,7 +81694,7 @@
           ]
         },
         {
-          "name": "Approve a remittance (maker-checker: not the submitter)",
+          "name": "Approve a remittance (approve:remittance; maker-checker: not the submitter; within the approver's Authority Matrix limit)",
           "request": {
             "method": "POST",
             "header": [
@@ -81722,7 +81722,7 @@
                 }
               ]
             },
-            "description": "Approve a remittance (maker-checker: not the submitter)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: write:remittance",
+            "description": "Approve a remittance (approve:remittance; maker-checker: not the submitter; within the approver's Authority Matrix limit)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"comments\": \"Verified\"\n}",
@@ -81763,7 +81763,7 @@
                     }
                   ]
                 },
-                "description": "Approve a remittance (maker-checker: not the submitter)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: write:remittance",
+                "description": "Approve a remittance (approve:remittance; maker-checker: not the submitter; within the approver's Authority Matrix limit)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"comments\": \"Verified\"\n}",
@@ -81868,7 +81868,7 @@
           ]
         },
         {
-          "name": "Reject a remittance (maker-checker: not the submitter)",
+          "name": "Reject a remittance (approve:remittance; maker-checker: not the submitter; within the approver's Authority Matrix limit)",
           "request": {
             "method": "POST",
             "header": [
@@ -81896,10 +81896,10 @@
                 }
               ]
             },
-            "description": "Reject a remittance (maker-checker: not the submitter)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: write:remittance",
+            "description": "Reject a remittance (approve:remittance; maker-checker: not the submitter; within the approver's Authority Matrix limit)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"comments\": \"Missing documents\"\n}",
+              "raw": "{\n  \"reasonCode\": \"RRJ-OTHER\",\n  \"note\": \"Missing documents\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -81937,10 +81937,10 @@
                     }
                   ]
                 },
-                "description": "Reject a remittance (maker-checker: not the submitter)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: write:remittance",
+                "description": "Reject a remittance (approve:remittance; maker-checker: not the submitter; within the approver's Authority Matrix limit)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"comments\": \"Missing documents\"\n}",
+                  "raw": "{\n  \"reasonCode\": \"RRJ-OTHER\",\n  \"note\": \"Missing documents\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
