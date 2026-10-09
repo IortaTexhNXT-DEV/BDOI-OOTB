@@ -4881,6 +4881,19 @@
       "addSlot": "เพิ่มช่อง"
     }
   },
+  "confirmDialog": {
+    "cancel": "ยกเลิก",
+    "confirm": "ยืนยัน",
+    "required": "ต้องระบุ{{label}}",
+    "minLength": "กรอกอย่างน้อย {{count}} ตัวอักษร",
+    "invalidDate": "กรอกวันที่ให้ถูกต้อง",
+    "failed": "ไม่สามารถดำเนินการได้ โปรดลองอีกครั้ง"
+  },
+  "detailView": {
+    "close": "ปิด",
+    "yes": "ใช่",
+    "no": "ไม่ใช่"
+  },
   "customerResponse": {
     "waiting": "Waiting for customer approval",
     "copyLink": "Copy approval link",
