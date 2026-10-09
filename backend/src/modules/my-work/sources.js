@@ -128,15 +128,17 @@ function rfq(ctx) {
 function placements(ctx) {
   return `SELECT ${select({
     category: "'placements'",
-    kind: "CASE pl.status WHEN 'draft' THEN 'Draft placement' WHEN 'sent' THEN 'Awaiting insurer confirmation' WHEN 'bound' THEN 'Bound, policy to issue' ELSE 'Declined by the insurer' END",
+    kind: `CASE pl.status WHEN 'draft' THEN 'Placement raised' WHEN 'sent' THEN 'Awaiting insurer acknowledgement' WHEN 'acknowledged' THEN 'Awaiting the e-policy'
+      WHEN 'epolicy_received' THEN 'e-Policy to check against the slip' WHEN 'checked' THEN 'Checked, policy to book' ELSE 'Declined by the insurer' END`,
     id: 'pl.id', ref: 'pl.placement_number', title: "COALESCE(ic.name, pl.lob, 'Placement slip')", client_name: CLIENT('c', 'l', 'pl.insured_name'),
     due_date: 'pl.inception_date', status: 'pl.status',
-    next_action: `CASE pl.status WHEN 'draft' THEN 'Send to the insurers' WHEN 'sent' THEN 'Obtain the insurer''s confirmation'
-      WHEN 'bound' THEN 'Issue the policy' ELSE 'Place with another insurer' END`,
-    priority: "CASE WHEN pl.status = 'bound' THEN 'high' ELSE 'normal' END",
+    next_action: `CASE pl.status WHEN 'draft' THEN 'Send to the insurer' WHEN 'sent' THEN 'Obtain the insurer''s acknowledgement'
+      WHEN 'acknowledged' THEN 'Obtain and upload the e-policy' WHEN 'epolicy_received' THEN 'Check the e-policy against the slip'
+      WHEN 'checked' THEN 'Book the policy (Insurer issued)' ELSE 'Place with another insurer' END`,
+    priority: "CASE WHEN pl.status IN ('epolicy_received', 'checked') THEN 'high' ELSE 'normal' END",
     owner_id: 'COALESCE(pl.owner_user_id, pl.created_by)', link: "'/placement/placement-slips/' || pl.id", amount: 'pl.premium_total', created_at: 'pl.created_at',
   })} FROM placements pl LEFT JOIN clients c ON c.id = pl.client_id LEFT JOIN leads l ON l.id = pl.lead_id LEFT JOIN insurance_companies ic ON ic.id = pl.insurance_company_id
-  WHERE pl.status IN ('draft', 'sent', 'bound', 'declined') AND ${rec(ctx, 'placement', 'pl')}`;
+  WHERE pl.status IN ('draft', 'sent', 'acknowledged', 'epolicy_received', 'checked', 'declined') AND ${rec(ctx, 'placement', 'pl')}`;
 }
 
 const RENEWAL_OPEN = ['pipeline', 'notice-1', 'notice-2', 'final-notice', 'quoted', 'pending-approval', 'approved'];

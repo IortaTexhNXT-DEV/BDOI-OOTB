@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { setup, loginAs, withoutCommissionTaxes } from './helpers.js';
 import { pool, query, one } from '../src/db/pool.js';
+import { clearSettingsCache } from '../src/lib/settings.js';
 
 let ctx;
 const tok = {};
@@ -264,7 +265,7 @@ describe('renewal quote wizard -> customer approval -> new policy term', () => {
     expect(detail.body.insuranceCompanyName || detail.body.data?.insuranceCompanyName).toMatch(/Malayan/i);
   });
 
-  it('issues the accepted renewal quotation as the new term: old policy renewed, receivable and balanced journal, commission', async () => {
+  it('books the accepted renewal quotation through its placement as the new term: old policy renewed, receivable and balanced journal, commission', async () => {
     const sent = await ctx.api('post', `/quotations/${quoteId}/send-for-approval`).send({});
     expect(sent.status).toBe(200);
     expect(sent.body.sentTo).toBe('miguel.aquino@example.ph');
@@ -272,11 +273,24 @@ describe('renewal quote wizard -> customer approval -> new policy term', () => {
     expect(acc.status).toBe(200);
     expect(acc.body.quotationStatus).toBe('CustomerAccepted');
     const old = await one('SELECT * FROM policies WHERE id = \'pol_sls_01\'');
-    // the expiring policy holds no ID or vehicle identifiers, so issuance asks for them (policy.kyc_required_fields)
-    const refused = await ctx.api('post', `/quotations/${quoteId}/convert-to-policy`).send({ additionalPolicyData: { paymentStatus: 'Pending' } });
-    expect(refused.status).toBe(400);
-    const conv = await ctx.api('post', `/quotations/${quoteId}/convert-to-policy`).send({ additionalPolicyData: { paymentStatus: 'Pending', ...{ idType: 'PhilSys ID', idCardNumber: '1234-5678-9012-3456', idCardImage: 'id-cards/renewal.jpg', chassisNumber: 'MHFXW42G5P0099999', motorNumber: '2NRX999999', plateNumber: 'NBC 1234' } } });
-    expect(conv.status).toBe(201);
+    // placement.journey_applies_to_renewals: the renewal is placed with the insurer like new business, never converted directly
+    expect((await ctx.api('post', `/quotations/${quoteId}/convert-to-policy`).send({})).status).toBe(400);
+    const placement = await one('SELECT id, inception_date FROM placements WHERE quote_id = $1', [quoteId]);
+    const next = new Date(`${old.expiry_date}T00:00:00Z`);
+    next.setUTCDate(next.getUTCDate() + 1);
+    expect(placement.inception_date).toBe(next.toISOString().slice(0, 10));
+    const p = (await ctx.api('get', `/placements/${placement.id}`)).body;
+    expect((await ctx.api('post', `/placements/${p.id}/send`).send({})).status).toBe(200);
+    const file = await ctx.api('post', '/s3/upload').field('folder', 'placement-epolicies').attach('file', Buffer.from('%PDF-1.4\n%%EOF\n'), 'renewal-e-policy.pdf');
+    const ep = await ctx.api('post', `/placements/${p.id}/epolicy`).send({ documentKey: file.body.data.key, insurerPolicyNumber: 'MAL-MC-RN-0001', participantName: p.insuredName,
+      sumInsured: p.sumInsured, netPremium: p.netPremium, issueDate: p.inceptionDate, effectiveDate: p.inceptionDate, expiryDate: p.expiryDate });
+    expect(ep.status, JSON.stringify(ep.body)).toBe(200);
+    expect((await as('u.checker', 'post', `/placements/${p.id}/check`).send({ decision: 'confirm' })).status).toBe(200);
+    // the expiring policy holds no ID or vehicle identifiers, so booking asks for them (policy.kyc_required_fields)
+    expect((await as('u.checker', 'post', `/placements/${p.id}/book`).send({})).status).toBe(400);
+    const conv = await as('u.checker', 'post', `/placements/${p.id}/book`).send({ additionalPolicyData: { idType: 'PhilSys ID', idCardNumber: '1234-5678-9012-3456', idCardImage: 'id-cards/renewal.jpg',
+      chassisNumber: 'MHFXW42G5P0099999', motorNumber: '2NRX999999' } });
+    expect(conv.status, JSON.stringify(conv.body)).toBe(201);
     const newId = conv.body.policyId;
     expect(newId).not.toBe('pol_sls_01');
     const oldAfter = await one('SELECT status, renewed_to FROM policies WHERE id = \'pol_sls_01\'');
@@ -286,11 +300,9 @@ describe('renewal quote wizard -> customer approval -> new policy term', () => {
     expect(np.policy_number).not.toBe(old.policy_number);
     expect(np.client_id).toBe(old.client_id);
     expect(np.insurance_company_id).toBe(old.insurance_company_id);
-    const next = new Date(`${old.expiry_date}T00:00:00Z`);
-    next.setUTCDate(next.getUTCDate() + 1);
     expect(np.inception_date).toBe(next.toISOString().slice(0, 10));
     expect(np.details.businessType).toBe('Renewal');
-    expect(conv.body.policy.renewedFrom).toBe('pol_sls_01');
+    expect(conv.body.data.policy.renewedFrom).toBe('pol_sls_01');
     const rcv = await one('SELECT * FROM receivables WHERE policy_id = $1', [newId]);
     expect(rcv.source).toBe('renewal');
     expect(Number(rcv.amount)).toBe(Number(np.premium_total));
@@ -306,7 +318,9 @@ describe('renewal quote wizard -> customer approval -> new policy term', () => {
     expect((await ctx.api('post', '/policy-renewals/policies/pol_sls_01/quotation').send({})).status).toBe(409);
   });
 
-  it('renews a seeded policy without quotation or lead (client e-mail, client-based conversion)', async () => {
+  it('renews a seeded policy without quotation or lead (client e-mail, client-based conversion where renewals convert directly)', async () => {
+    await query("UPDATE app_settings SET value = 'false' WHERE key = 'placement.journey_applies_to_renewals'");
+    clearSettingsCache();
     const c = await ctx.api('post', '/policy-renewals/policies/pol_crs_21/quotation').send({ coverageDetails: { lossAndDamageCoverage: '1300000', lossAndDamageCoverageRate: '1.5' } });
     expect(c.status).toBe(201);
     const q = await one('SELECT * FROM quotes WHERE id = $1', [c.body.data.quotationId]);
@@ -323,5 +337,7 @@ describe('renewal quote wizard -> customer approval -> new policy term', () => {
     expect(conv.status).toBe(201);
     expect((await one('SELECT status, renewed_to FROM policies WHERE id = \'pol_crs_21\'')).renewed_to).toBe(conv.body.policyId);
     expect((await one('SELECT status FROM renewals WHERE id = \'rnw_crs_21\'')).status).toBe('renewed');
+    await query("UPDATE app_settings SET value = 'true' WHERE key = 'placement.journey_applies_to_renewals'");
+    clearSettingsCache();
   });
 });

@@ -1,12 +1,14 @@
 /**
- * Placement journey API: Broker Slips (market submission, insurer offers, comparison), Placement Slips (firm order,
- * binding per participant, policy issuance), direct policy entry and the journey configuration per line of business.
- * Access follows the quotation permissions (Sales & Marketing, Processing Team, Operations);
- * issuing a policy also needs write:policies.
+ * Placement journey API: Broker Slips (market submission, insurer offers, comparison), Placement Slips (raised, sent to
+ * the insurer with the slip, acknowledged, e-policy received, checked against the slip by a second user, booked once
+ * the insurer has issued) and the journey configuration per line of business. Access follows the quotation permissions
+ * (Sales & Marketing, Processing Team, Operations); booking the policy, and accepting an e-policy that differs from the
+ * slip, also need write:policies.
  */
 import { moduleRouter } from '../../lib/registry.js';
 import { requireAuth, requirePermission } from '../../lib/auth.js';
 import { validate, z } from '../../lib/validate.js';
+import { badRequest } from '../../lib/errors.js';
 import { audit } from '../../lib/audit.js';
 import { paging } from '../../lib/respond.js';
 import { ownRecord, withScope } from '../../lib/scope.js';
@@ -178,7 +180,7 @@ bs.define({
 const { router, define } = moduleRouter('Placement Slips', '/placements');
 const PS = 'Operations > Sales & Marketing > Placement Slips';
 const participantExample = { participantId: 11, insuranceCompanyId: 2, insuranceCompanyName: 'Malayan Insurance Co., Inc.', isLead: true, sharePercent: 60, sumInsured: 51000000, premium: 127500, taxes: 18933.75, premiumTotal: 146433.75, commissionAmount: 19125, insurerReference: null, status: 'pending' };
-const placementExample = { placementId: 'plc_1', placementNumber: 'PS-2026-00001', source: 'quote', status: 'draft', placementStatus: 'Draft', quotationNumber: 'QT-2026-00007', insuredName: 'Cebu Cold Storage Corp.',
+const placementExample = { placementId: 'plc_1', placementNumber: 'PS-2026-00001', source: 'quote', status: 'draft', placementStatus: 'PlacementRaised', quotationNumber: 'QT-2026-00007', insuredName: 'Cebu Cold Storage Corp.',
   productType: 'Fire and Allied Perils', lob: 'FIRE', sumInsured: 85000000, netPremium: 212500, grossPremium: 244056.25, inceptionDate: '2026-10-01', expiryDate: '2027-10-01', participants: [participantExample] };
 const placementBody = z.object({
   quoteId: z.string().optional(), brokerSlipId: z.string().optional(), offerIds: z.array(z.string()).optional(), leadOfferId: z.string().optional().nullable(), shares: z.record(z.union([z.number(), z.string()])).optional(),
@@ -239,27 +241,13 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/record-issued-policy', summary: 'Record Issued Policy (direct policy entry): a policy the insurer already issued, with its participants and their policy / certificate numbers; creates a bound placement slip and issues the policy in one step',
-  screen: `${PS} / Policy > Record Issued Policy`, middleware: [...canIssue, validate(placementBody.extend({ policyNumber: z.string().max(60).optional().nullable(), issuedDate: z.string().optional().nullable(),
-    inceptionDate: z.string().min(1, 'inceptionDate is required'), paymentMethod: z.string().optional() })), ownRecord('lead', (req) => req.body.leadRefId), ownRecord('client', (req) => req.body.clientId)],
-  request: { companyName: 'Visayas Logistics Inc.', productType: 'Comprehensive General Liability', policyNumber: 'PIO-CGL-2026-0415', inceptionDate: '2026-09-01', expiryDate: '2027-09-01', sumInsured: 20000000, netPremium: 85000,
-    participants: [{ insuranceCompanyId: 3, sharePercent: 100, insurerReference: 'PIO-CGL-2026-0415' }] },
-  response: { success: true, data: { policyId: 'pol_1', policyNumber: 'PIO-CGL-2026-0415', placement: placementExample } },
-  handler: async (req, res) => {
-    const r = await plc.recordIssuedPolicy(req.body, req.user);
-    const policy = toPolicy(await getPolicyRow(r.policyId));
-    await audit(req, { entity: 'placement', entityId: r.placementId, action: 'record-issued-policy', after: { placementNumber: r.placement.placementNumber, policyNumber: policy.policyNumber } });
-    await audit(req, { entity: 'policy', entityId: policy.id, action: 'issue', after: { policyNumber: policy.policyNumber, placement: r.placement.placementNumber, grossPremium: policy.grossPremium } });
-    res.status(201).json({ success: true, message: `Policy ${policy.policyNumber} recorded`, policyId: policy.id, policyNumber: policy.policyNumber, data: { policy, placement: r.placement, receivable: r.receivable || null } });
-  },
-});
-define({
-  method: 'GET', path: '/:id', summary: 'Placement slip with participants (shares, amounts, confirmations), journey and timeline (Broker Slip -> Quotation Slip -> Placement Slip -> Policy)', screen: `${PS} > Detail`,
-  middleware: [...canRead, ownRecord('placement')], response: { success: true, ...placementExample, timeline: [{ key: 'quotationSlip', label: 'Quotation Slip', done: true, reference: 'QT-2026-00007' }] },
+  method: 'GET', path: '/:id', summary: 'Placement slip with participants (shares, amounts, insurer references), acknowledgement, e-policy, check against the slip, journey and timeline (Placement raised -> Sent to insurer -> Acknowledged -> e-Policy received -> Checked against slip -> Insurer issued)',
+  screen: `${PS} > Detail`, middleware: [...canRead, ownRecord('placement')],
+  response: { success: true, ...placementExample, timeline: [{ key: 'quotationSlip', label: 'Quotation Slip', done: true, reference: 'QT-2026-00007' }, { key: 'acknowledged', label: 'Acknowledged', done: false }] },
   handler: async (req, res) => sendEntity(res, await plc.placementById(req.params.id)),
 });
 define({
-  method: 'PUT', path: '/:id', summary: 'Edit a draft / declined placement slip: participants (validated: one lead, shares total 100%), period, billing mode, agreed premium, remarks', screen: `${PS} > Edit`,
+  method: 'PUT', path: '/:id', summary: 'Edit a draft / declined placement slip: participants (validated: one lead, shares total 100%), period, billing mode, agreed premium, remarks; the stored slip PDF is generated again', screen: `${PS} > Edit`,
   middleware: [...canWrite, ownRecord('placement'), validate(placementBody)], request: { participants: [{ insuranceCompanyId: 2, sharePercent: 50, isLead: true }, { insuranceCompanyId: 4, sharePercent: 50 }] },
   response: { success: true, ...placementExample },
   handler: async (req, res) => {
@@ -269,7 +257,7 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/:id/send', summary: 'Send the firm order to the participating insurers (queued e-mail per participant showing its share); insurerIds limits it to some', screen: `${PS} > Detail > Send to insurer(s)`,
+  method: 'POST', path: '/:id/send', summary: 'Send the firm order to the participating insurers: one queued e-mail per participant with its placement slip PDF (its own share) and any LTO document attached; insurerIds limits it to some. A sent or acknowledged placement can be sent again', screen: `${PS} > Detail > Send to insurer`,
   middleware: [...canWrite, ownRecord('placement'), validate(z.object({ insurerIds: z.array(z.union([z.number(), z.string()])).optional() }))], request: {},
   response: { success: true, data: { ...placementExample, status: 'sent' }, sent: [{ insurer: 'Malayan Insurance Co., Inc.', email: 'uw@malayan.example' }] },
   handler: async (req, res) => {
@@ -279,20 +267,69 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/:id/confirm', summary: 'Record insurer confirmation (binding) per participant with the insurer\'s policy / certificate number; when all have confirmed the placement is Bound',
-  screen: `${PS} > Detail > Record confirmation`, middleware: [...canWrite, ownRecord('placement'), validate(z.object({ confirmations: z.array(z.object({
-    participantId: z.union([z.number(), z.string()]).optional(), insuranceCompanyId: z.union([z.number(), z.string()]).optional(),
-    insurerReference: z.string().trim().min(1, 'insurerReference (the insurer\'s policy / certificate number) is required').max(80), confirmedAt: z.string().optional().nullable(), remarks: z.string().max(1000).optional().nullable(),
-  }).refine((c) => c.participantId || c.insuranceCompanyId, { message: 'participantId or insuranceCompanyId is required' })).min(1) }))],
-  request: { confirmations: [{ insuranceCompanyId: 2, insurerReference: 'MAL-FI-2026-11881' }] }, response: { success: true, data: { ...placementExample, status: 'bound' } },
+  method: 'POST', path: '/:id/acknowledge', summary: 'Record the insurer\'s acknowledgement of the order (Sent to insurer -> Acknowledged): its reference, date and remark', screen: `${PS} > Detail > Record acknowledgement`,
+  middleware: [...canWrite, ownRecord('placement'), validate(z.object({ reference: z.string().trim().max(80).optional().nullable(), acknowledgedAt: z.string().optional().nullable(),
+    remarks: z.string().max(1000).optional().nullable() }))],
+  request: { reference: 'MAL-ACK-2026-0412', remarks: 'Acknowledged by the motor underwriting desk' }, response: { success: true, data: { ...placementExample, status: 'acknowledged', placementStatus: 'Acknowledged' } },
   handler: async (req, res) => {
-    const p = await plc.confirmPlacement(req.params.id, req.body.confirmations, req.user);
-    await audit(req, { entity: 'placement', entityId: p.id, action: 'confirm', after: { status: p.status, confirmations: req.body.confirmations } });
-    sendEntity(res, p, { message: p.status === 'bound' ? 'All insurers confirmed: the placement is bound' : 'Confirmation recorded' });
+    const p = await plc.acknowledgePlacement(req.params.id, req.body, req.user);
+    await audit(req, { entity: 'placement', entityId: p.id, action: 'acknowledge', before: { status: 'sent' }, after: { status: p.status, reference: req.body.reference || null, remarks: req.body.remarks || null } });
+    sendEntity(res, p, { message: 'Insurer acknowledgement recorded' });
+  },
+});
+const vehicleBody = z.object({ chassisNumber: z.string().max(60).optional().nullable(), motorNumber: z.string().max(60).optional().nullable(),
+  plateNumber: z.string().max(20).optional().nullable(), mvFileNumber: z.string().max(40).optional().nullable() });
+const epolicyBody = z.object({
+  documentKey: z.string().min(1, 'documentKey (the e-policy file uploaded through /s3/upload) is required').max(500), documentName: z.string().max(255).optional().nullable(),
+  insurerPolicyNumber: z.string().trim().min(1, 'insurerPolicyNumber is required').max(60), brokerPolicyNumber: z.string().trim().max(60).optional().nullable(),
+  participantName: z.string().trim().min(1, 'participantName (the insured named on the policy) is required').max(200),
+  sumInsured: z.coerce.number().min(0), netPremium: z.coerce.number().positive('netPremium must be more than 0'), grossPremium: money, commissionAmount: money,
+  issueDate: z.string().min(1, 'issueDate is required'), issuanceDate: z.string().optional().nullable(), effectiveDate: z.string().min(1, 'effectiveDate is required'),
+  expiryDate: z.string().optional().nullable(), productionDate: z.string().optional().nullable(), deductible: z.string().max(500).optional().nullable(),
+  vehicle: vehicleBody.optional().nullable(), vehiclePhotoKey: z.string().max(500).optional().nullable(), vehiclePhotoName: z.string().max(255).optional().nullable(),
+  participants: z.array(z.object({ insuranceCompanyId: z.union([z.number(), z.string()]), insurerReference: z.string().trim().max(80).optional().nullable() })).optional(),
+  remarks: z.string().max(2000).optional().nullable(),
+});
+const checkExample = { result: 'mismatch', tolerance: { amount: 1, percent: 0 }, differences: ['netPremium'],
+  items: [{ key: 'netPremium', label: 'Net premium', slip: 18250, epolicy: 18400, difference: 150, status: 'mismatch' }, { key: 'plateNumber', label: 'Plate number', slip: null, epolicy: 'NCA 4521', difference: null, status: 'captured' }] };
+define({
+  method: 'POST', path: '/:id/epolicy', summary: 'Record the e-policy returned by the insurer (Sent / Acknowledged -> e-Policy received): the uploaded PDF (documentKey from /s3/upload), insurer and BrokerVerse policy numbers, participant name, sum insured, premium, commission, issue / issuance / effective / expiry / production dates, deductible, vehicle identifiers (plate or MV file mandatory for motor, TBA not accepted), optional vehicle photo; compared with the slip at once',
+  screen: `${PS} > Detail > Upload e-policy / Record e-Policy`, middleware: [...canWrite, ownRecord('placement'), validate(epolicyBody)],
+  request: { documentKey: 'placement-epolicies/1767225600-ab12-e-policy.pdf', documentName: 'MAL-MC-2026-004512.pdf', insurerPolicyNumber: 'MAL-MC-2026-004512', participantName: 'Maria Santos',
+    sumInsured: 1250000, netPremium: 18250, grossPremium: 22813.13, commissionAmount: 2737.5, issueDate: '2026-10-05', effectiveDate: '2026-10-06', expiryDate: '2027-10-06',
+    vehicle: { chassisNumber: 'MHFXW42G5P0077777', motorNumber: '2NRX777777', plateNumber: 'NCA 4521' } },
+  response: { success: true, data: { ...placementExample, status: 'epolicy_received', placementStatus: 'EPolicyReceived', check: checkExample } },
+  handler: async (req, res) => {
+    const p = await plc.recordEpolicy(req.params.id, req.body, req.user);
+    await audit(req, { entity: 'placement', entityId: p.id, action: 'record-epolicy', after: { status: p.status, insurerPolicyNumber: p.epolicy.insurerPolicyNumber, document: p.epolicy.documentName,
+      check: p.check?.status, differences: p.check?.differences } });
+    sendEntity(res, p, { message: p.check?.status === 'match' ? 'e-Policy recorded: it matches the slip' : 'e-Policy recorded: it differs from the slip' });
   },
 });
 define({
-  method: 'POST', path: '/:id/decline', summary: 'Record that an insurer declined its line (the placement is Declined until the participants are re-arranged)', screen: `${PS} > Detail > Insurer declined`,
+  method: 'GET', path: '/:id/check', summary: 'Check against slip: the slip and the e-policy side by side with the differences (tolerance placement.check_tolerance_amount / placement.check_tolerance_pct, items placement.check_fields)',
+  screen: `${PS} > Detail > Check against slip`, middleware: [...canRead, ownRecord('placement')], response: { success: true, data: checkExample },
+  handler: async (req, res) => {
+    const row = await plc.getPlacementRow(req.params.id);
+    if (!row.epolicy_received_at) throw badRequest('No e-policy has been recorded for this placement slip');
+    res.json({ success: true, data: await plc.compareWithSlip(row) });
+  },
+});
+define({
+  method: 'POST', path: '/:id/check', summary: 'Decide the check against the slip (never the user who recorded the e-policy): confirm (matches -> Checked), accept (differences accepted with a reason by an approver with write:policies -> Checked) or return (back to the insurer with the differences -> Acknowledged)',
+  screen: `${PS} > Detail > Confirm check / Return to insurer`, middleware: [...canWrite, ownRecord('placement'), validate(z.object({ decision: z.enum(['confirm', 'accept', 'return']), reason: z.string().max(2000).optional().nullable() }))],
+  request: { decision: 'return', reason: 'Premium on the e-policy is PHP 150.00 above the agreed premium' },
+  response: { success: true, data: { ...placementExample, status: 'acknowledged' }, comparison: checkExample, mail: { to: 'uw@malayan.example', emailId: 812 } },
+  handler: async (req, res) => {
+    const r = await plc.checkPlacement(req.params.id, req.body, req.user);
+    await audit(req, { entity: 'placement', entityId: r.placement.id, action: `check-${req.body.decision}`, before: { status: 'epolicy_received' },
+      after: { status: r.placement.status, result: r.comparison.result, differences: r.comparison.differences, reason: req.body.reason || null, mailedTo: r.mail?.to || null } });
+    const message = { confirm: 'Checked against the slip', accept: 'Differences accepted: checked against the slip', return: 'e-Policy returned to the insurer' }[req.body.decision];
+    sendEntity(res, r.placement, { message, extra: { comparison: r.comparison, mail: r.mail } });
+  },
+});
+define({
+  method: 'POST', path: '/:id/decline', summary: 'Record that an insurer declined its line before issuing (the placement is Declined until the participants are re-arranged)', screen: `${PS} > Detail > Insurer declined`,
   middleware: [...canWrite, ownRecord('placement'), validate(z.object({ insuranceCompanyId: z.union([z.number(), z.string()]), reason: z.string().max(1000).optional().nullable() }))],
   request: { insuranceCompanyId: 4, reason: 'Capacity exhausted' }, response: { success: true, data: { ...placementExample, status: 'declined' } },
   handler: async (req, res) => {
@@ -311,20 +348,21 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/:id/issue-policy', summary: 'Issue the policy from a bound placement slip (client from the lead, policy number, receivable or direct-bill commission, commission accrual, participants copied to the policy)',
-  screen: `${PS} > Detail > Issue Policy`, middleware: [...canIssue, ownRecord('placement'), validate(z.object({ policyNumber: z.string().max(60).optional().nullable() }).passthrough())],
-  request: { additionalPolicyData: { insuredName: 'Cebu Cold Storage Corp.', paymentMethod: 'Bank transfer' } },
-  response: { success: true, data: { policy: { policyId: 'pol_1', policyNumber: 'POL-2026-00012' }, placement: { ...placementExample, status: 'issued' } } },
+  method: 'POST', path: '/:id/book', summary: 'Book the checked placement (Insurer issued): the policy is created with the e-policy numbers and dates and comes into force; bill or direct-bill commission, journal, commission accrual, participants copied, cover notes superseded, policy schedule e-mailed to the client. The only way a policy is issued for TISPH',
+  screen: `${PS} > Detail > Book (Insurer issued)`, middleware: [...canIssue, ownRecord('placement'), validate(z.object({ additionalPolicyData: z.record(z.any()).optional() }).passthrough())],
+  request: { additionalPolicyData: { idType: 'PhilSys ID', idCardNumber: '1234-5678-9012-3456', idCardImage: 'id-cards/maria.jpg', paymentMethod: 'Bank transfer' } },
+  response: { success: true, data: { policy: { policyId: 'pol_1', policyNumber: 'POL-2026-00012' }, placement: { ...placementExample, status: 'issued', placementStatus: 'InsurerIssued' }, schedule: { emailId: 813, to: 'maria.santos@example.ph' } } },
   handler: async (req, res) => {
-    const r = await plc.issueFromPlacement(req.params.id, req.body || {}, req.user);
+    const r = await plc.bookPlacement(req.params.id, req.body || {}, req.user);
     const policy = toPolicy(await getPolicyRow(r.policyId));
-    await audit(req, { entity: 'placement', entityId: r.placement.id, action: 'issue-policy', after: { policyNumber: policy.policyNumber } });
-    await audit(req, { entity: 'policy', entityId: policy.id, action: 'issue', after: { policyNumber: policy.policyNumber, placement: r.placement.placementNumber, grossPremium: policy.grossPremium } });
-    res.status(201).json({ success: true, message: `Policy ${policy.policyNumber} issued`, policyId: policy.id, data: { policy, placement: r.placement, receivable: r.receivable || null, commission: r.commission || null } });
+    await audit(req, { entity: 'placement', entityId: r.placement.id, action: 'book', before: { status: 'checked' }, after: { status: 'issued', policyNumber: policy.policyNumber, insurerPolicyNumber: r.placement.epolicy?.insurerPolicyNumber } });
+    await audit(req, { entity: 'policy', entityId: policy.id, action: 'issue', after: { policyNumber: policy.policyNumber, placement: r.placement.placementNumber, grossPremium: policy.grossPremium, scheduleEmailedTo: r.schedule?.to || null } });
+    res.status(201).json({ success: true, message: `Policy ${policy.policyNumber} booked`, policyId: policy.id,
+      data: { policy, placement: r.placement, receivable: r.receivable || null, commission: r.commission || null, schedule: r.schedule } });
   },
 });
 define({
-  method: 'GET', path: '/:id/documents/placement-slip', summary: 'Placement Slip PDF: insurerId= gives that participant\'s slip showing its own share (default: the lead insurer)', screen: `${PS} > Detail > Placement Slip PDF`,
+  method: 'GET', path: '/:id/documents/placement-slip', summary: 'Placement Slip PDF: insurerId= gives that participant\'s slip showing its own share (default: the lead insurer); the file stored when the placement was raised is slipDocument.key', screen: `${PS} > Detail > Placement Slip PDF`,
   middleware: [...canRead, ownRecord('placement')], query: { insurerId: 2 }, response: 'application/pdf',
   handler: async (req, res) => {
     const p = await plc.placementById(req.params.id);

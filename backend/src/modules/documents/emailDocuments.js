@@ -6,6 +6,7 @@
  *   premium-invoice        { receivableId }  premium invoice / statement of account of one bill
  *   commission-debit-note  { debitNoteId }   commission debit note to the insurer (direct bill)
  *   policy-schedule        { policyId }      policy schedule
+ *   placement-slip         { placementId, insurerId }  placement slip (firm order) showing that insurer's share
  *   bank-endorsement-letter { saleId }       letter to the financing bank of a dealer sale (motor programmes)
  *   comparison-report      { reportId }      client comparison and recommendation report
  *   fac-slip               { placementId, kind, shareId }  facultative slip, cover note, debit or credit note
@@ -39,6 +40,12 @@ const GENERATORS = {
     const row = await getPolicyRow(String(policyId));
     const p = await printablePolicy(toPolicy(row), row);
     return { fileName: `policy-schedule-${p.policyNumber}.pdf`, content: buildPdf(await policyScheduleDoc(p)) };
+  },
+  'placement-slip': async ({ placementId, insurerId = null }) => {
+    const { placementById } = await import('../placement/placements.js');
+    const { placementSlipDoc } = await import('./templates.js');
+    const p = await placementById(placementId);
+    return { fileName: `placement-slip-${p.placementNumber}${insurerId ? `-${insurerId}` : ''}.pdf`, content: buildPdf(await placementSlipDoc(p, insurerId)) };
   },
   // distribution and product documents (motor programmes, comparison reports, facultative reinsurance, marine)
   'bank-endorsement-letter': async ({ saleId }) => {

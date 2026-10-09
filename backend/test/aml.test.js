@@ -6,7 +6,7 @@
  */
 import { beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, placeAndBook } from './helpers.js';
 import { query } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { jaroWinkler, nameScore, normalizeName, matchEntry } from '../src/modules/aml/matching.js';
@@ -35,8 +35,8 @@ const individual = (over = {}) => ({
 
 async function issueFor(clientId, number) {
   const [ins] = await q('SELECT id FROM insurance_companies ORDER BY id LIMIT 1');
-  return ctx.api('post', '/placements/record-issued-policy').send({ clientId, productType: 'Comprehensive General Liability', policyNumber: number, inceptionDate: '2026-09-01',
-    expiryDate: '2027-09-01', sumInsured: 1000000, netPremium: 10000, participants: [{ insuranceCompanyId: ins.id, sharePercent: 100, isLead: true }] });
+  return placeAndBook(ctx.api, { clientId, productType: 'Comprehensive General Liability', inceptionDate: '2026-09-01',
+    expiryDate: '2027-09-01', sumInsured: 1000000, netPremium: 10000, participants: [{ insuranceCompanyId: ins.id, sharePercent: 100, isLead: true }] }, { policyNumber: number });
 }
 
 beforeAll(async () => {
@@ -99,10 +99,10 @@ describe('client onboarding before the first policy (1.01, 1.02, 1.05)', () => {
     expect(c.kycNextReviewOn > '2029-01-01').toBe(true);
   });
 
-  it('keeps the creation at policy issue working (direct entry for a new insured)', async () => {
+  it('keeps the creation at policy issue working (direct placement for a new insured)', async () => {
     const [ins] = await q('SELECT id FROM insurance_companies ORDER BY id LIMIT 1');
-    const r = await ctx.api('post', '/placements/record-issued-policy').send({ companyName: 'Walk-in Bakery Inc.', productType: 'Comprehensive General Liability', policyNumber: 'AML-WALKIN-1',
-      inceptionDate: '2026-09-01', netPremium: 5000, participants: [{ insuranceCompanyId: ins.id, sharePercent: 100, isLead: true }] });
+    const r = await placeAndBook(ctx.api, { companyName: 'Walk-in Bakery Inc.', productType: 'Comprehensive General Liability',
+      inceptionDate: '2026-09-01', netPremium: 5000, participants: [{ insuranceCompanyId: ins.id, sharePercent: 100, isLead: true }] }, { policyNumber: 'AML-WALKIN-1' });
     expect(r.status, JSON.stringify(r.body)).toBe(201);
     const [c] = await q('SELECT c.onboarded_via, c.risk_rating, c.kyc_status FROM clients c JOIN policies p ON p.client_id = c.id WHERE p.policy_number = $1', ['AML-WALKIN-1']);
     expect(c).toEqual({ onboarded_via: 'policy-issue', risk_rating: 'low', kyc_status: 'pending' });

@@ -88,7 +88,7 @@ describe('journals of a document keyed in late are dated with the document', () 
 });
 
 describe('a quotation keeps its product', () => {
-  it('a Householder quotation prepared from a broker slip stays a package product and converts without a placement slip', async () => {
+  it('a Householder quotation prepared from a broker slip stays a package product through its placement to the booked policy', async () => {
     const sales = ctx.as('sales');
     const lead = await sales('post', '/leads').send({ firstName: 'Rosario', lastName: 'Lacson', emailId: 'rosario.l@example.ph', contactNumber: '09170001111', leadCategory: 'Retail' });
     const home = await idOf('products', 'HOME');
@@ -103,12 +103,19 @@ describe('a quotation keeps its product', () => {
     const quote = await one('SELECT product_id, lob FROM quotes WHERE id = $1', [prepared.body.quotationId]);
     expect(quote.product_id).toBe(home);
     const detail = await sales('get', `/quotations/${prepared.body.quotationId}`);
-    expect(detail.body.journey).toMatchObject({ businessType: 'package', placementSlip: 'optional' });
+    expect(detail.body.journey).toMatchObject({ businessType: 'package', placementSlip: 'required' });
     await sales('put', `/quotations/${prepared.body.quotationId}/status`).send({ status: 'PendingCustomer' });
-    await sales('put', `/quotations/${prepared.body.quotationId}/status`).send({ status: 'CustomerAccepted' });
-    const conv = await sales('post', `/quotations/${prepared.body.quotationId}/convert-to-policy`).send({ additionalPolicyData: { insuredName: 'Rosario Lacson' } });
-    expect(conv.status, JSON.stringify(conv.body)).toBe(201);
-    expect((await one('SELECT product_id FROM policies WHERE id = $1', [conv.body.policyId])).product_id).toBe(home);
+    const accepted = await sales('put', `/quotations/${prepared.body.quotationId}/status`).send({ status: 'CustomerAccepted' });
+    const placement = (await sales('get', `/placements/${accepted.body.placementId}`)).body;
+    expect(placement.productId).toBe(home);
+    await sales('post', `/placements/${placement.id}/send`).send({});
+    const file = await sales('post', '/s3/upload').field('folder', 'placement-epolicies').attach('file', Buffer.from('%PDF-1.4\n%%EOF\n'), 'home-e-policy.pdf');
+    await sales('post', `/placements/${placement.id}/epolicy`).send({ documentKey: file.body.data.key, insurerPolicyNumber: 'MAL-HH-0001', participantName: 'Rosario Lacson',
+      sumInsured: placement.sumInsured, netPremium: placement.netPremium, issueDate: placement.inceptionDate, effectiveDate: placement.inceptionDate, expiryDate: placement.expiryDate });
+    expect((await ctx.api('post', `/placements/${placement.id}/check`).send({ decision: 'confirm' })).status).toBe(200);
+    const booked = await ctx.api('post', `/placements/${placement.id}/book`).send({});
+    expect(booked.status, JSON.stringify(booked.body)).toBe(201);
+    expect((await one('SELECT product_id FROM policies WHERE id = $1', [booked.body.policyId])).product_id).toBe(home);
   });
 
   it('a CTPL quotation is linked to the CTPL product; a quotation given only a product is priced on its line', async () => {

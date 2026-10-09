@@ -40,14 +40,16 @@ describe('product classification', () => {
 });
 
 describe('journey defaults from the business type', () => {
-  it('the seeded line entries equal to the business-type defaults were removed', async () => {
+  it('TISPH entries: the default, Motor (quotation required) and CTPL (may be placed without a quotation)', async () => {
     const [row] = await q("SELECT value FROM app_settings WHERE key = 'placement.journey'");
-    expect(Object.keys(row.value)).toEqual(['default']);
+    expect(Object.keys(row.value).sort()).toEqual(['CTPL', 'MOTOR', 'default']);
+    expect(await journey({ productType: 'Motor' })).toMatchObject({ businessType: 'package', source: 'entry', key: 'MOTOR', quotationSlip: 'required', placementSlip: 'required' });
+    expect(await journey({ productType: 'CTPL' })).toMatchObject({ source: 'entry', key: 'CTPL', quotationSlip: 'optional', placementSlip: 'required' });
   });
 
-  it('package: quotation required, broker and placement slips optional', async () => {
-    for (const productType of ['Personal Accident', 'Travel Insurance', 'Householder Insurance', 'Motor']) {
-      expect(await journey({ productType })).toMatchObject({ businessType: 'package', source: 'businessType', quotationSlip: 'required', placementSlip: 'optional', brokerSlip: 'optional' });
+  it('package: quotation and placement slip required, broker slip optional', async () => {
+    for (const productType of ['Personal Accident', 'Travel Insurance', 'Householder Insurance']) {
+      expect(await journey({ productType })).toMatchObject({ businessType: 'package', source: 'businessType', quotationSlip: 'required', placementSlip: 'required', brokerSlip: 'optional' });
     }
     // a line known only by its code takes the type of its products
     expect(await journey({ lob: 'ACCIDENT' })).toMatchObject({ businessType: 'package', lob: 'ACCIDENT' });
@@ -64,9 +66,9 @@ describe('journey defaults from the business type', () => {
   it('a placement.journey entry for the line or product type still overrides the business type', async () => {
     const [saved] = await q("SELECT value FROM app_settings WHERE key = 'placement.journey'");
     try {
-      await setSettings({ 'placement.journey': { ...saved.value, ACCIDENT: { placementSlip: 'required' }, 'Travel Insurance': { brokerSlip: 'skip' } } });
-      expect(await journey({ productType: 'Personal Accident' })).toMatchObject({ source: 'entry', key: 'ACCIDENT', placementSlip: 'required', quotationSlip: 'required' });
-      expect(await journey({ productType: 'Travel Insurance' })).toMatchObject({ source: 'entry', key: 'Travel Insurance', brokerSlip: 'skip', placementSlip: 'optional' });
+      await setSettings({ 'placement.journey': { ...saved.value, ACCIDENT: { placementSlip: 'optional' }, 'Travel Insurance': { brokerSlip: 'skip' } } });
+      expect(await journey({ productType: 'Personal Accident' })).toMatchObject({ source: 'entry', key: 'ACCIDENT', placementSlip: 'optional', quotationSlip: 'required' });
+      expect(await journey({ productType: 'Travel Insurance' })).toMatchObject({ source: 'entry', key: 'Travel Insurance', brokerSlip: 'skip', placementSlip: 'required' });
     } finally {
       await setSettings({ 'placement.journey': saved.value });
     }

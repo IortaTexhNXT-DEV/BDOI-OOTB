@@ -3,13 +3,14 @@
  * product or line of business requires. Each step is required | optional | skip. Three layers, later ones winning:
  *   1. the "default" entry of placement.journey;
  *   2. placement.journey_by_business_type for the product's business type (package / non_package, Product master);
- *   3. the placement.journey entry for the product type (e.g. "Marine Cargo"), else for its LOB code (MOTOR, FIRE ...).
+ *   3. the placement.journey entry for the product type (e.g. "Marine Cargo") or the product's code or name (CTPL), else
+ *      for its LOB code (MOTOR, FIRE ...).
  *
  *   brokerSlip:    required = a quotation must come from a broker slip; skip = no broker slips for the line
  *   quotationSlip: required = no direct placement without a quotation; skip = the broker slip goes straight to placement
  *   placementSlip: required = a quotation cannot be converted directly (a placement slip issues the policy);
  *                  skip = quotations convert directly and no placement slip can be created
- *   directPolicy:  skip = "Record Issued Policy" is not allowed for the line
+ *   directPolicy:  kept for configurations that still name it; no screen enters an issued policy directly any more
  */
 import { query } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
@@ -84,7 +85,7 @@ export async function journeyFor({ lob = null, productType = null, productId = n
   const code = await lobFrom(product, { lob, productType });
   const businessType = await businessTypeOf(product, code, c);
   const typeSteps = businessType && byType[businessType] && typeof byType[businessType] === 'object' ? byType[businessType] : null;
-  const entry = find(productType) || find(code);
+  const entry = find(productType) || find(product?.code) || find(product?.name) || find(code);
   const steps = { ...FALLBACK, ...(find('default')?.[1] || {}), ...(typeSteps || {}), ...(entry?.[1] || {}) };
   for (const s of STEPS) if (!MODES.includes(steps[s])) steps[s] = FALLBACK[s];
   const source = entry ? 'entry' : typeSteps ? 'businessType' : 'default';

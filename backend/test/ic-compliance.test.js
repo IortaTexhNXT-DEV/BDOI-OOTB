@@ -6,6 +6,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { setupFinance, makePolicy } from './accounting.fixtures.js';
+import { placeAndBook } from './helpers.js';
 import { pool, query, one } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { addDays, today } from '../src/lib/dates.js';
@@ -165,7 +166,7 @@ describe('insurers authorised by the IC (4.08)', () => {
     const x = await ctx.as('maker')('get', '/compliance/insurer-authority/export?state=expired').buffer(true).parse(binary);
     expect(sheet(x.body, 'Certificates of authority').rows.flat()).toContain('CA-2024-07');
   });
-  it('block: the request for quotation and the policy issue are refused with an insurer whose certificate expired', async () => {
+  it('block: the request for quotation and the firm order of a placement are refused with an insurer whose certificate expired', async () => {
     await setting('compliance.insurer_authority_check', 'block');
     const lead = await admin('post', '/leads').send({ firstName: 'Tess', lastName: 'Aquino', lob: 'FIRE' });
     const slip = await admin('post', '/broker-slips').send({ leadRefId: lead.body.leadId, productType: 'Fire and Allied Perils', riskDetails: { location: 'Pasig' },
@@ -174,18 +175,18 @@ describe('insurers authorised by the IC (4.08)', () => {
     const sub = await admin('post', `/broker-slips/${slip.body.id || slip.body.data.id}/submit`);
     expect(sub.status).toBe(409);
     expect(sub.body.message).toMatch(/expired on/);
-    const rec = await admin('post', '/placements/record-issued-policy').send({ companyName: 'Authority Test Corp.', productType: 'Comprehensive General Liability', policyNumber: 'AUTH-1',
-      inceptionDate: '2026-09-01', expiryDate: '2027-09-01', sumInsured: 1000000, netPremium: 5000, participants: [{ insuranceCompanyId: ids.PIONEER, sharePercent: 100, isLead: true }] });
+    const rec = await placeAndBook(admin, { companyName: 'Authority Test Corp.', productType: 'Comprehensive General Liability',
+      inceptionDate: '2026-09-01', expiryDate: '2027-09-01', sumInsured: 1000000, netPremium: 5000, participants: [{ insuranceCompanyId: ids.PIONEER, sharePercent: 100, isLead: true }] }, { policyNumber: 'AUTH-1' });
     expect(rec.status).toBe(409);
-    expect(rec.body.message).toMatch(/Cannot issue a policy with/);
-    const ok = await admin('post', '/placements/record-issued-policy').send({ companyName: 'Authority Test Corp.', productType: 'Comprehensive General Liability', policyNumber: 'AUTH-2',
-      inceptionDate: '2026-09-01', expiryDate: '2027-09-01', sumInsured: 1000000, netPremium: 5000, participants: [{ insuranceCompanyId: ids.MALAYAN, sharePercent: 100, isLead: true }] });
+    expect(rec.body.message).toMatch(/Cannot send the firm order to an insurer/);
+    const ok = await placeAndBook(admin, { companyName: 'Authority Test Corp.', productType: 'Comprehensive General Liability',
+      inceptionDate: '2026-09-01', expiryDate: '2027-09-01', sumInsured: 1000000, netPremium: 5000, participants: [{ insuranceCompanyId: ids.MALAYAN, sharePercent: 100, isLead: true }] }, { policyNumber: 'AUTH-2' });
     expect(ok.status, JSON.stringify(ok.body)).toBe(201);
   });
   it('warn: allowed, with the warning in the answer and the audit trail', async () => {
     await setting('compliance.insurer_authority_check', 'warn');
-    const rec = await admin('post', '/placements/record-issued-policy').send({ companyName: 'Authority Warn Corp.', productType: 'Comprehensive General Liability', policyNumber: 'AUTH-3',
-      inceptionDate: '2026-09-01', expiryDate: '2027-09-01', sumInsured: 1000000, netPremium: 5000, participants: [{ insuranceCompanyId: ids.PIONEER, sharePercent: 100, isLead: true }] });
+    const rec = await placeAndBook(admin, { companyName: 'Authority Warn Corp.', productType: 'Comprehensive General Liability',
+      inceptionDate: '2026-09-01', expiryDate: '2027-09-01', sumInsured: 1000000, netPremium: 5000, participants: [{ insuranceCompanyId: ids.PIONEER, sharePercent: 100, isLead: true }] }, { policyNumber: 'AUTH-3' });
     expect(rec.status, JSON.stringify(rec.body)).toBe(201);
     expect(rec.body.complianceWarnings.join(' ')).toMatch(/expired on/);
     expect((await query("SELECT 1 FROM audit_log WHERE action = 'compliance-warning' AND after_data->>'kind' = 'insurer-authority'")).rows.length).toBeGreaterThan(0);

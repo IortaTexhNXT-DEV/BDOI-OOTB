@@ -160,12 +160,19 @@ export async function changeStatus(id, label, user) {
   }
   const stamps = { approved: ', approved_by = $3, approved_at = now()', accepted: ', customer_accepted_at = now()', submitted: ', submitted_to_insurer_at = now(), submitted_by = $3' };
   await query(`UPDATE quotes SET status = $2, updated_by = $3, updated_at = now()${stamps[target] || ''} WHERE id = $1`, [q.id, target, user.id]);
+  const placement = await raisePlacement(q.id, user);
   if (to === 'Approved') {
     const owner = q.created_by;
     await notifyDecision({ userId: owner, decidedBy: user.id, document: 'Quotation', number: q.quote_number, approved: true, by: user.username,
       message: `Quotation ${q.quote_number} was approved by ${user.username} and can be converted to a policy`, link: `/agent/quotedetailview/${q.id}`, entity: 'quotation', entityId: q.id });
   }
-  return { before: q, after: await getQuoteRow(q.id) };
+  return { before: q, after: await getQuoteRow(q.id), placement };
+}
+
+/** The placement slip raised automatically when the client accepts (placement/placements.js#autoRaisePlacement). */
+async function raisePlacement(quoteId, user) {
+  const { autoRaisePlacement } = await import('../placement/placements.js');
+  return autoRaisePlacement(quoteId, user);
 }
 
 const sha = (s) => crypto.createHash('sha256').update(s).digest('hex');
@@ -271,7 +278,9 @@ export async function approveByCustomer(token, preview) {
     await notify({ userId: q.created_by, type: 'task', title: 'Customer accepted quotation', message: `The customer accepted quotation ${q.quote_number}; you can proceed to policy`,
       link: `/agent/quotedetailview/${q.id}`, entity: 'quotation', entityId: q.id });
   }
-  return { quote: await getQuoteRow(q.id), before: q, changed: true };
+  // accepted through the public link: the placement is raised in the name of the quotation's owner
+  const placement = await raisePlacement(q.id, { id: q.created_by });
+  return { quote: await getQuoteRow(q.id), before: q, changed: true, placement };
 }
 
 /** CustomerAccepted -> SubmittedToInsurer, e-mailing the insurer's underwriting contact. */
@@ -287,6 +296,34 @@ export async function submitToInsurer(id, user) {
   }
   await query("UPDATE quotes SET status = 'submitted', submitted_to_insurer_at = now(), submitted_by = $2, updated_by = $2, updated_at = now() WHERE id = $1", [q.id, user.id]);
   return { insurer: ic, before: q, after: await getQuoteRow(q.id) };
+}
+
+/**
+ * Renewal quotation (renewals/service.js#createRenewalQuote): the expiring policy it renews, locked, and the first day of
+ * the new term (the day after the expiry). { renewalOf: null } for a new-business quotation.
+ */
+export async function renewalTerm(db, q) {
+  const renewalOf = q.doc?.renewal?.policyId ? q.doc.renewal : null;
+  if (!renewalOf) return { renewalOf: null, expiring: null, inception: null };
+  const expiring = (await db.query('SELECT id, policy_number, status, renewed_to, expiry_date, billing_mode FROM policies WHERE id = $1 FOR UPDATE', [renewalOf.policyId])).rows[0];
+  if (!expiring) throw badRequest(`Policy ${renewalOf.policyNumber || renewalOf.policyId} being renewed was not found`);
+  if (expiring.renewed_to || expiring.status === 'renewed') throw conflict(`Policy ${expiring.policy_number} has already been renewed`);
+  if (expiring.status === 'cancelled') throw conflict(`Policy ${expiring.policy_number} is cancelled`);
+  return { renewalOf, expiring, inception: addDays(expiring.expiry_date, 1) };
+}
+
+/** The policy issued for a renewal quotation becomes the next term: the expiring policy is Renewed and the renewal closed. */
+export async function linkRenewal(db, { q, renewalOf, expiring, policyId, user }) {
+  const link = { businessType: 'Renewal', renewal: { renewalId: renewalOf.renewalId, renewalNumber: renewalOf.renewalNumber, previousPolicyId: expiring.id, previousPolicyNumber: expiring.policy_number, quoteId: q.id } };
+  await db.query('UPDATE policies SET renewed_from = $2, details = details || $3::jsonb WHERE id = $1', [policyId, expiring.id, JSON.stringify(link)]);
+  await db.query("UPDATE policies SET status = 'renewed', renewed_to = $2, updated_by = $3, updated_at = now() WHERE id = $1", [expiring.id, policyId, user.id]);
+  const rn = (await db.query(`UPDATE renewals SET status = 'renewed', new_policy_id = $2, premium_new = $3, renewed_at = now(), updated_at = now()
+    WHERE policy_id = $1 AND status <> ALL($4) RETURNING id`, [expiring.id, policyId, q.premium_total, ['renewed', 'lapsed']])).rows[0];
+  if (rn) {
+    const number = (await db.query('SELECT policy_number FROM policies WHERE id = $1', [policyId])).rows[0].policy_number;
+    await db.query(`INSERT INTO renewal_activities(renewal_id, by_user, activity_type, description, details) VALUES ($1,$2,'Renewed',$3,$4)`,
+      [rn.id, user.username ?? null, `Renewed as policy ${number} from quotation ${q.quote_number}`, JSON.stringify({ quoteId: q.id, newPolicyId: policyId })]);
+  }
 }
 
 /**
@@ -327,20 +364,8 @@ export async function convertToPolicy(id, body, user) {
     const clientId = q.client_id || (q.lead_id ? await clientFromLead(db, q.lead_id, extra.customerInfo || {}, q.created_by || user.id) : null);
     if (!clientId) throw badRequest('Quotation has no lead or client to insure');
     const doc = q.doc || {};
-    // Renewal quotation (renewals/service.js#createRenewalQuote): the policy becomes the next term of the expiring one.
-    const renewalOf = doc.renewal?.policyId ? doc.renewal : null;
-    let expiring = null;
-    if (renewalOf) {
-      expiring = (await db.query('SELECT id, policy_number, status, renewed_to, expiry_date, billing_mode FROM policies WHERE id = $1 FOR UPDATE', [renewalOf.policyId])).rows[0];
-      if (!expiring) throw badRequest(`Policy ${renewalOf.policyNumber || renewalOf.policyId} being renewed was not found`);
-      if (expiring.renewed_to || expiring.status === 'renewed') throw conflict(`Policy ${expiring.policy_number} has already been renewed`);
-      if (expiring.status === 'cancelled') throw conflict(`Policy ${expiring.policy_number} is cancelled`);
-      if (!extra.inception && !extra.inceptionDate) {
-        const next = new Date(`${expiring.expiry_date}T00:00:00Z`);
-        next.setUTCDate(next.getUTCDate() + 1);
-        extra.inception = next.toISOString().slice(0, 10);
-      }
-    }
+    const { renewalOf, expiring, inception } = await renewalTerm(db, q);
+    if (renewalOf && !extra.inception && !extra.inceptionDate) extra.inception = inception;
     const issued = await issuePolicy(db, {
       quoteId: q.id, clientId, leadId: q.lead_id, productId: q.product_id, policyTypeId: q.policy_type_id, insuranceCompanyId: q.insurance_company_id,
       ownerUserId: q.created_by, agentUserId: q.agent_user_id || q.created_by, sumInsured: q.sum_insured, netPremium: q.premium_base,
@@ -350,18 +375,7 @@ export async function convertToPolicy(id, body, user) {
       billingMode: expiring?.billing_mode || null, participants: await participantInputs('quote', q.id, db),
       taxes: round2(num(q.vat) + num(q.dst) + num(q.lgt) + num(q.fst)),
     }, extra, user.id);
-    if (renewalOf) {
-      const link = { businessType: 'Renewal', renewal: { renewalId: renewalOf.renewalId, renewalNumber: renewalOf.renewalNumber, previousPolicyId: expiring.id, previousPolicyNumber: expiring.policy_number, quoteId: q.id } };
-      await db.query('UPDATE policies SET renewed_from = $2, details = details || $3::jsonb WHERE id = $1', [issued.policyId, expiring.id, JSON.stringify(link)]);
-      await db.query("UPDATE policies SET status = 'renewed', renewed_to = $2, updated_by = $3, updated_at = now() WHERE id = $1", [expiring.id, issued.policyId, user.id]);
-      const rn = (await db.query(`UPDATE renewals SET status = 'renewed', new_policy_id = $2, premium_new = $3, renewed_at = now(), updated_at = now()
-        WHERE policy_id = $1 AND status <> ALL($4) RETURNING id`, [expiring.id, issued.policyId, q.premium_total, ['renewed', 'lapsed']])).rows[0];
-      if (rn) {
-        const number = (await db.query('SELECT policy_number FROM policies WHERE id = $1', [issued.policyId])).rows[0].policy_number;
-        await db.query(`INSERT INTO renewal_activities(renewal_id, by_user, activity_type, description, details) VALUES ($1,$2,'Renewed',$3,$4)`,
-          [rn.id, user.username ?? null, `Renewed as policy ${number} from quotation ${q.quote_number}`, JSON.stringify({ quoteId: q.id, newPolicyId: issued.policyId })]);
-      }
-    }
+    if (renewalOf) await linkRenewal(db, { q, renewalOf, expiring, policyId: issued.policyId, user });
     await db.query("UPDATE quotes SET status = 'converted', policy_id = $2, client_id = $3, updated_by = $4, updated_at = now() WHERE id = $1", [q.id, issued.policyId, clientId, user.id]);
     return { ...issued, clientId };
   });
@@ -517,7 +531,7 @@ export async function quoteFromRow(db, row, userId) {
 /** Journey rule for a direct quotation -> policy conversion (renewals follow placement.journey_applies_to_renewals). */
 export async function assertDirectConversion(q) {
   const renewal = Boolean(q.doc?.renewal?.policyId);
-  if (renewal && !(await getSetting('placement.journey_applies_to_renewals', false))) return;
+  if (renewal && !(await getSetting('placement.journey_applies_to_renewals', true))) return;
   const journey = await journeyFor({ lob: q.lob, productType: q.product_type, productId: q.product_id });
   assertStep(journey, 'placementSlip', ['required'],
     `The ${journey.lob} placement journey requires a Placement Slip: create the placement slip from this quotation and issue the policy from it once the insurer(s) confirm`);
