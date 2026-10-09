@@ -10167,9 +10167,8 @@
       "email": "E-mail to the client",
       "prepare": "Prepare",
       "quotations": "Quotations",
-      "rfqHelp": "Its insurer offers become the options of the report",
-      "quoteNumbers": "Quotation numbers",
-      "quoteHelp": "Two or more quotations of the same prospect or client, separated by commas",
+      "rfqHelp": "Its insurer offers become the options of the report; a request with fewer than two offers cannot be compared yet",
+      "quoteHelp": "Two or more quotations of the same prospect or client",
       "titleLabel": "Title",
       "intro": "Introduction",
       "recommend": "Recommend",
@@ -10180,7 +10179,15 @@
       "highlights": "What stands out",
       "chosen": "Client chose",
       "reasons": "Why we recommend it (one reason per line)",
-      "disclaimer": "Disclaimer"
+      "disclaimer": "Disclaimer",
+      "chooseRfq": "Choose the request for quotation",
+      "noRfq": "No request for quotation has insurer offers yet",
+      "offerCount": "{{count}} offer(s)",
+      "needsTwo": "needs two offers",
+      "needsOffers": "{{number}} has {{count}} insurer offer(s); a comparison needs at least two",
+      "needsQuotes": "Choose at least two quotations",
+      "searchQuotes": "Quotation number or customer",
+      "notYet": "A comparison report needs at least two insurer offers ({{count}} so far)"
     },
     "fl": {
       "sumInsured": "Sum insured",

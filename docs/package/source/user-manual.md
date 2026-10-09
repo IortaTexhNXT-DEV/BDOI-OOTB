@@ -2766,7 +2766,9 @@ Declarations are due **marine.declaration_due_days** days after the period ends.
 
 Choose Operations > Sales & Marketing > Comparison Reports. The comparison report is the printed, branded document given to the client comparing the insurers' offers, with the option the broker recommends and why. It never shows commission.
 
-1. Select **New report**. Choose what is **Compared**: a **Request for quotation** (its insurers' offers become the options) or two or more **Quotations** of the same client or prospect (enter their numbers). From a request for quotation the report can also be opened with the address /sales/comparison-reports?brokerSlipId= followed by the slip.
+1. Select **New report**. Choose what is **Compared**:
+   - a **Request for quotation**: its insurers' offers become the options. The list shows each request with its number of offers; a request with fewer than two offers is greyed out (**needs two offers**) and cannot be chosen until a second insurer has offered. On a request for quotation, **Client comparison report** opens this window with the request chosen; it is disabled, with the number of offers so far, until two insurers have offered.
+   - two or more **Quotations** of the same client or prospect: search by quotation number or customer and pick them; once the first is picked, only the quotations of the same client or prospect are offered.
 2. Select **Prepare**. The options are ranked by total premium.
 3. Edit **Prepared for**, **Title** and **Introduction** (defaults in the **comparison.*** settings). For each option enter **What stands out**.
 4. Choose the option to **Recommend** and write **Why we recommend it**, one reason per line; the suggested reasons of **comparison.default_reasons** can be added with one click. Adjust the **Disclaimer**.
