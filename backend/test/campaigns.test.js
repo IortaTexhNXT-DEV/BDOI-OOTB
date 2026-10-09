@@ -78,6 +78,8 @@ describe('marketing campaigns to consenting clients', () => {
   it('sending queues the e-mails of consenting recipients to the outbox and records the excluded', async () => {
     const c = await sales('post', '/campaigns').send({ name: 'October offer', segmentId, templateId });
     expect(c.status).toBe(201);
+    // its own number series, not the win-back campaigns' (WB)
+    expect(c.body.data.campaignNumber).toMatch(/^CPG-\d{4}-\d{5}$/);
     campaignId = c.body.data.id;
     const s = await sales('post', `/campaigns/${campaignId}/send`);
     expect(s.status).toBe(200);

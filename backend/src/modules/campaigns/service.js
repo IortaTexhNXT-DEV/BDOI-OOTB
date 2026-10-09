@@ -215,7 +215,7 @@ export async function createCampaign(b, userId) {
   await getSegment(b.segmentId);
   const t = await getTemplate(b.templateId);
   if (t.status !== 'active') throw badRequest('Validation failed', [{ path: 'templateId', message: 'The template is inactive' }]);
-  const number = await nextDocumentNumber('campaign', { unique: { table: 'campaigns', column: 'campaign_number' } });
+  const number = await nextDocumentNumber('marketing_campaign', { unique: { table: 'campaigns', column: 'campaign_number' } });
   const r = await one('INSERT INTO campaigns(campaign_number, name, segment_id, template_id, notes, created_by, updated_by) VALUES ($1,$2,$3,$4,$5,$6,$6) RETURNING id',
     [number, b.name, b.segmentId, b.templateId, b.notes || null, userId]);
   return campaignOut(await getCampaignRow(r.id));
