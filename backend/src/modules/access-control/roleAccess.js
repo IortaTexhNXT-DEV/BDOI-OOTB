@@ -18,7 +18,7 @@ import { hasPermission, isAdmin } from '../../lib/auth.js';
 import { today } from '../../lib/dates.js';
 import { formatDateTime } from '../../lib/pdf/format.js';
 import { requiredReason } from '../ops-masters/records.js';
-import { AREAS, BASELINE, LEVEL_NAMES, businessName, catalogue } from './catalogue.js';
+import { AREAS, BASELINE, LEVEL_NAMES, LEVELS, businessName, catalogue } from './catalogue.js';
 import { roleDirectory } from './roles.js';
 import { changeApproval, listAccessChanges, registerAccessKind, requestAccessChange } from './changes.js';
 import { breaksAccessRule as breaks, listSodRules } from './service.js';
@@ -321,7 +321,9 @@ export async function exportSheets(db, { roles = [], base = false } = {}, user, 
         c.requestedBy || '', formatDateTime(c.requestedAt, fmt), (c.payload.warnings || []).map((w) => w.name).join('; ')]);
     }
   }
-  const codes = cat.permissions.map((p) => [p.code, area(p.area), cat.modules.find((m) => m.code === p.module)?.name || p.module, LEVEL_NAMES[p.level], p.meaning, yesNo(p.checked)]);
+  const moduleOrder = (p) => cat.modules.find((m) => m.code === p.module)?.order ?? 0;
+  const codes = [...cat.permissions].sort((a, b) => moduleOrder(a) - moduleOrder(b) || LEVELS.indexOf(a.level) - LEVELS.indexOf(b.level))
+    .map((p) => [p.code, area(p.area), cat.modules.find((m) => m.code === p.module)?.name || p.module, LEVEL_NAMES[p.level], p.meaning, yesNo(p.checked)]);
   const col = (header, width = 18) => ({ header, width });
   return [
     { name: 'Access by role', rows: byRole, columns: [col('Role', 34), col('Department', 24), col('Role status', 12), col('Area', 26), col('Module', 34), col('Level', 16),

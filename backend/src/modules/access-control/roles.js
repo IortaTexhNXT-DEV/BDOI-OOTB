@@ -27,7 +27,7 @@ export async function roleDirectory(db) {
   const fullAccess = new Set(await adminEquivalentRoles(db));
   const { rows } = await db.query('SELECT id, code, name, description, status, inherits FROM roles ORDER BY id');
   const roles = rows.map((r) => ({
-    code: r.code, name: r.name, description: r.description, status: r.status, inherits: r.inherits || [],
+    id: r.id, code: r.code, name: r.name, description: r.description, status: r.status, inherits: r.inherits || [],
     department: place.get(r.code)?.department || null, summary: place.get(r.code)?.summary || null,
     order: place.get(r.code)?.order ?? 100000 + r.id, platform: platformRoles.has(r.code), fullAccess: fullAccess.has(r.code),
   }));
