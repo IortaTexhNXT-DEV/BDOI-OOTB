@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1209 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1211 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -23479,7 +23479,7 @@
           ]
         },
         {
-          "name": "Issue a cover note from an accepted quotation (quoteId) or a sent / bound placement slip (placementId) for cover_note.validity_days",
+          "name": "Issue a cover note from an accepted quotation (quoteId) or a placement slip with the insurer (placementId) for cover_note.validity_days",
           "request": {
             "method": "POST",
             "header": [
@@ -23497,7 +23497,7 @@
                 "cover-notes"
               ]
             },
-            "description": "Issue a cover note from an accepted quotation (quoteId) or a sent / bound placement slip (placementId) for cover_note.validity_days\n\nFront-end touchpoint: Operations > Cover Notes > Issue\n\nAccess: write:policies",
+            "description": "Issue a cover note from an accepted quotation (quoteId) or a placement slip with the insurer (placementId) for cover_note.validity_days\n\nFront-end touchpoint: Operations > Cover Notes > Issue\n\nAccess: write:policies",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"quoteId\": \"qt_1\",\n  \"coverFrom\": \"2026-10-04\",\n  \"validityDays\": 30,\n  \"insurerReference\": \"MIC-BND-2231\"\n}",
@@ -23528,7 +23528,7 @@
                     "cover-notes"
                   ]
                 },
-                "description": "Issue a cover note from an accepted quotation (quoteId) or a sent / bound placement slip (placementId) for cover_note.validity_days\n\nFront-end touchpoint: Operations > Cover Notes > Issue\n\nAccess: write:policies",
+                "description": "Issue a cover note from an accepted quotation (quoteId) or a placement slip with the insurer (placementId) for cover_note.validity_days\n\nFront-end touchpoint: Operations > Cover Notes > Issue\n\nAccess: write:policies",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"quoteId\": \"qt_1\",\n  \"coverFrom\": \"2026-10-04\",\n  \"validityDays\": 30,\n  \"insurerReference\": \"MIC-BND-2231\"\n}",
@@ -23868,7 +23868,7 @@
           ]
         },
         {
-          "name": "Accepted quotations and sent / bound placement slips a cover note can be issued from (search)",
+          "name": "Accepted quotations and placement slips with the insurer a cover note can be issued from (search)",
           "request": {
             "method": "GET",
             "header": [],
@@ -23888,7 +23888,7 @@
                 }
               ]
             },
-            "description": "Accepted quotations and sent / bound placement slips a cover note can be issued from (search)\n\nFront-end touchpoint: Operations > Cover Notes > Issue\n\nAccess: read:policies"
+            "description": "Accepted quotations and placement slips with the insurer a cover note can be issued from (search)\n\nFront-end touchpoint: Operations > Cover Notes > Issue\n\nAccess: read:policies"
           },
           "response": [
             {
@@ -23912,7 +23912,7 @@
                     }
                   ]
                 },
-                "description": "Accepted quotations and sent / bound placement slips a cover note can be issued from (search)\n\nFront-end touchpoint: Operations > Cover Notes > Issue\n\nAccess: read:policies"
+                "description": "Accepted quotations and placement slips with the insurer a cover note can be issued from (search)\n\nFront-end touchpoint: Operations > Cover Notes > Issue\n\nAccess: read:policies"
               },
               "status": "OK",
               "code": 200,
@@ -59468,7 +59468,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"placementId\": \"plc_1\",\n      \"placementNumber\": \"PS-2026-00001\",\n      \"source\": \"quote\",\n      \"status\": \"draft\",\n      \"placementStatus\": \"Draft\",\n      \"quotationNumber\": \"QT-2026-00007\",\n      \"insuredName\": \"Cebu Cold Storage Corp.\",\n      \"productType\": \"Fire and Allied Perils\",\n      \"lob\": \"FIRE\",\n      \"sumInsured\": 85000000,\n      \"netPremium\": 212500,\n      \"grossPremium\": 244056.25,\n      \"inceptionDate\": \"2026-10-01\",\n      \"expiryDate\": \"2027-10-01\",\n      \"participants\": [\n        {\n          \"participantId\": 11,\n          \"insuranceCompanyId\": 2,\n          \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n          \"isLead\": true,\n          \"sharePercent\": 60,\n          \"sumInsured\": 51000000,\n          \"premium\": 127500,\n          \"taxes\": 18933.75,\n          \"premiumTotal\": 146433.75,\n          \"commissionAmount\": 19125,\n          \"insurerReference\": null,\n          \"status\": \"pending\"\n        }\n      ]\n    }\n  ],\n  \"total\": 1,\n  \"counts\": {\n    \"draft\": 1\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"placementId\": \"plc_1\",\n      \"placementNumber\": \"PS-2026-00001\",\n      \"source\": \"quote\",\n      \"status\": \"draft\",\n      \"placementStatus\": \"PlacementRaised\",\n      \"quotationNumber\": \"QT-2026-00007\",\n      \"insuredName\": \"Cebu Cold Storage Corp.\",\n      \"productType\": \"Fire and Allied Perils\",\n      \"lob\": \"FIRE\",\n      \"sumInsured\": 85000000,\n      \"netPremium\": 212500,\n      \"grossPremium\": 244056.25,\n      \"inceptionDate\": \"2026-10-01\",\n      \"expiryDate\": \"2027-10-01\",\n      \"participants\": [\n        {\n          \"participantId\": 11,\n          \"insuranceCompanyId\": 2,\n          \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n          \"isLead\": true,\n          \"sharePercent\": 60,\n          \"sumInsured\": 51000000,\n          \"premium\": 127500,\n          \"taxes\": 18933.75,\n          \"premiumTotal\": 146433.75,\n          \"commissionAmount\": 19125,\n          \"insurerReference\": null,\n          \"status\": \"pending\"\n        }\n      ]\n    }\n  ],\n  \"total\": 1,\n  \"counts\": {\n    \"draft\": 1\n  }\n}"
             }
           ]
         },
@@ -59543,12 +59543,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"placementId\": \"plc_1\",\n  \"placementNumber\": \"PS-2026-00001\",\n  \"source\": \"quote\",\n  \"status\": \"draft\",\n  \"placementStatus\": \"Draft\",\n  \"quotationNumber\": \"QT-2026-00007\",\n  \"insuredName\": \"Cebu Cold Storage Corp.\",\n  \"productType\": \"Fire and Allied Perils\",\n  \"lob\": \"FIRE\",\n  \"sumInsured\": 85000000,\n  \"netPremium\": 212500,\n  \"grossPremium\": 244056.25,\n  \"inceptionDate\": \"2026-10-01\",\n  \"expiryDate\": \"2027-10-01\",\n  \"participants\": [\n    {\n      \"participantId\": 11,\n      \"insuranceCompanyId\": 2,\n      \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n      \"isLead\": true,\n      \"sharePercent\": 60,\n      \"sumInsured\": 51000000,\n      \"premium\": 127500,\n      \"taxes\": 18933.75,\n      \"premiumTotal\": 146433.75,\n      \"commissionAmount\": 19125,\n      \"insurerReference\": null,\n      \"status\": \"pending\"\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"placementId\": \"plc_1\",\n  \"placementNumber\": \"PS-2026-00001\",\n  \"source\": \"quote\",\n  \"status\": \"draft\",\n  \"placementStatus\": \"PlacementRaised\",\n  \"quotationNumber\": \"QT-2026-00007\",\n  \"insuredName\": \"Cebu Cold Storage Corp.\",\n  \"productType\": \"Fire and Allied Perils\",\n  \"lob\": \"FIRE\",\n  \"sumInsured\": 85000000,\n  \"netPremium\": 212500,\n  \"grossPremium\": 244056.25,\n  \"inceptionDate\": \"2026-10-01\",\n  \"expiryDate\": \"2027-10-01\",\n  \"participants\": [\n    {\n      \"participantId\": 11,\n      \"insuranceCompanyId\": 2,\n      \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n      \"isLead\": true,\n      \"sharePercent\": 60,\n      \"sumInsured\": 51000000,\n      \"premium\": 127500,\n      \"taxes\": 18933.75,\n      \"premiumTotal\": 146433.75,\n      \"commissionAmount\": 19125,\n      \"insurerReference\": null,\n      \"status\": \"pending\"\n    }\n  ]\n}"
             }
           ]
         },
         {
-          "name": "Placement slip with participants (shares, amounts, confirmations), journey and timeline (Broker Slip -> Quotation Slip -> Placement Slip -> Policy)",
+          "name": "Placement slip with participants (shares, amounts, insurer references), acknowledgement, e-policy, check against the slip, journey and timeline (Placement raised -> Sent to insurer -> Acknowledged -> e-Policy received -> Checked against slip -> Insurer issued)",
           "request": {
             "method": "GET",
             "header": [],
@@ -59569,7 +59569,7 @@
                 }
               ]
             },
-            "description": "Placement slip with participants (shares, amounts, confirmations), journey and timeline (Broker Slip -> Quotation Slip -> Placement Slip -> Policy)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail\n\nAccess: read:quotations"
+            "description": "Placement slip with participants (shares, amounts, insurer references), acknowledgement, e-policy, check against the slip, journey and timeline (Placement raised -> Sent to insurer -> Acknowledged -> e-Policy received -> Checked against slip -> Insurer issued)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail\n\nAccess: read:quotations"
           },
           "response": [
             {
@@ -59594,7 +59594,7 @@
                     }
                   ]
                 },
-                "description": "Placement slip with participants (shares, amounts, confirmations), journey and timeline (Broker Slip -> Quotation Slip -> Placement Slip -> Policy)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail\n\nAccess: read:quotations"
+                "description": "Placement slip with participants (shares, amounts, insurer references), acknowledgement, e-policy, check against the slip, journey and timeline (Placement raised -> Sent to insurer -> Acknowledged -> e-Policy received -> Checked against slip -> Insurer issued)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail\n\nAccess: read:quotations"
               },
               "status": "OK",
               "code": 200,
@@ -59606,12 +59606,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"placementId\": \"plc_1\",\n  \"placementNumber\": \"PS-2026-00001\",\n  \"source\": \"quote\",\n  \"status\": \"draft\",\n  \"placementStatus\": \"Draft\",\n  \"quotationNumber\": \"QT-2026-00007\",\n  \"insuredName\": \"Cebu Cold Storage Corp.\",\n  \"productType\": \"Fire and Allied Perils\",\n  \"lob\": \"FIRE\",\n  \"sumInsured\": 85000000,\n  \"netPremium\": 212500,\n  \"grossPremium\": 244056.25,\n  \"inceptionDate\": \"2026-10-01\",\n  \"expiryDate\": \"2027-10-01\",\n  \"participants\": [\n    {\n      \"participantId\": 11,\n      \"insuranceCompanyId\": 2,\n      \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n      \"isLead\": true,\n      \"sharePercent\": 60,\n      \"sumInsured\": 51000000,\n      \"premium\": 127500,\n      \"taxes\": 18933.75,\n      \"premiumTotal\": 146433.75,\n      \"commissionAmount\": 19125,\n      \"insurerReference\": null,\n      \"status\": \"pending\"\n    }\n  ],\n  \"timeline\": [\n    {\n      \"key\": \"quotationSlip\",\n      \"label\": \"Quotation Slip\",\n      \"done\": true,\n      \"reference\": \"QT-2026-00007\"\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"placementId\": \"plc_1\",\n  \"placementNumber\": \"PS-2026-00001\",\n  \"source\": \"quote\",\n  \"status\": \"draft\",\n  \"placementStatus\": \"PlacementRaised\",\n  \"quotationNumber\": \"QT-2026-00007\",\n  \"insuredName\": \"Cebu Cold Storage Corp.\",\n  \"productType\": \"Fire and Allied Perils\",\n  \"lob\": \"FIRE\",\n  \"sumInsured\": 85000000,\n  \"netPremium\": 212500,\n  \"grossPremium\": 244056.25,\n  \"inceptionDate\": \"2026-10-01\",\n  \"expiryDate\": \"2027-10-01\",\n  \"participants\": [\n    {\n      \"participantId\": 11,\n      \"insuranceCompanyId\": 2,\n      \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n      \"isLead\": true,\n      \"sharePercent\": 60,\n      \"sumInsured\": 51000000,\n      \"premium\": 127500,\n      \"taxes\": 18933.75,\n      \"premiumTotal\": 146433.75,\n      \"commissionAmount\": 19125,\n      \"insurerReference\": null,\n      \"status\": \"pending\"\n    }\n  ],\n  \"timeline\": [\n    {\n      \"key\": \"quotationSlip\",\n      \"label\": \"Quotation Slip\",\n      \"done\": true,\n      \"reference\": \"QT-2026-00007\"\n    },\n    {\n      \"key\": \"acknowledged\",\n      \"label\": \"Acknowledged\",\n      \"done\": false\n    }\n  ]\n}"
             }
           ]
         },
         {
-          "name": "Edit a draft / declined placement slip: participants (validated: one lead, shares total 100%), period, billing mode, agreed premium, remarks",
+          "name": "Edit a draft / declined placement slip: participants (validated: one lead, shares total 100%), period, billing mode, agreed premium, remarks; the stored slip PDF is generated again",
           "request": {
             "method": "PUT",
             "header": [
@@ -59637,7 +59637,7 @@
                 }
               ]
             },
-            "description": "Edit a draft / declined placement slip: participants (validated: one lead, shares total 100%), period, billing mode, agreed premium, remarks\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Edit\n\nAccess: write:quotations",
+            "description": "Edit a draft / declined placement slip: participants (validated: one lead, shares total 100%), period, billing mode, agreed premium, remarks; the stored slip PDF is generated again\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Edit\n\nAccess: write:quotations",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"participants\": [\n    {\n      \"insuranceCompanyId\": 2,\n      \"sharePercent\": 50,\n      \"isLead\": true\n    },\n    {\n      \"insuranceCompanyId\": 4,\n      \"sharePercent\": 50\n    }\n  ]\n}",
@@ -59676,7 +59676,7 @@
                     }
                   ]
                 },
-                "description": "Edit a draft / declined placement slip: participants (validated: one lead, shares total 100%), period, billing mode, agreed premium, remarks\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Edit\n\nAccess: write:quotations",
+                "description": "Edit a draft / declined placement slip: participants (validated: one lead, shares total 100%), period, billing mode, agreed premium, remarks; the stored slip PDF is generated again\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Edit\n\nAccess: write:quotations",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"participants\": [\n    {\n      \"insuranceCompanyId\": 2,\n      \"sharePercent\": 50,\n      \"isLead\": true\n    },\n    {\n      \"insuranceCompanyId\": 4,\n      \"sharePercent\": 50\n    }\n  ]\n}",
@@ -59697,7 +59697,193 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"placementId\": \"plc_1\",\n  \"placementNumber\": \"PS-2026-00001\",\n  \"source\": \"quote\",\n  \"status\": \"draft\",\n  \"placementStatus\": \"Draft\",\n  \"quotationNumber\": \"QT-2026-00007\",\n  \"insuredName\": \"Cebu Cold Storage Corp.\",\n  \"productType\": \"Fire and Allied Perils\",\n  \"lob\": \"FIRE\",\n  \"sumInsured\": 85000000,\n  \"netPremium\": 212500,\n  \"grossPremium\": 244056.25,\n  \"inceptionDate\": \"2026-10-01\",\n  \"expiryDate\": \"2027-10-01\",\n  \"participants\": [\n    {\n      \"participantId\": 11,\n      \"insuranceCompanyId\": 2,\n      \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n      \"isLead\": true,\n      \"sharePercent\": 60,\n      \"sumInsured\": 51000000,\n      \"premium\": 127500,\n      \"taxes\": 18933.75,\n      \"premiumTotal\": 146433.75,\n      \"commissionAmount\": 19125,\n      \"insurerReference\": null,\n      \"status\": \"pending\"\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"placementId\": \"plc_1\",\n  \"placementNumber\": \"PS-2026-00001\",\n  \"source\": \"quote\",\n  \"status\": \"draft\",\n  \"placementStatus\": \"PlacementRaised\",\n  \"quotationNumber\": \"QT-2026-00007\",\n  \"insuredName\": \"Cebu Cold Storage Corp.\",\n  \"productType\": \"Fire and Allied Perils\",\n  \"lob\": \"FIRE\",\n  \"sumInsured\": 85000000,\n  \"netPremium\": 212500,\n  \"grossPremium\": 244056.25,\n  \"inceptionDate\": \"2026-10-01\",\n  \"expiryDate\": \"2027-10-01\",\n  \"participants\": [\n    {\n      \"participantId\": 11,\n      \"insuranceCompanyId\": 2,\n      \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n      \"isLead\": true,\n      \"sharePercent\": 60,\n      \"sumInsured\": 51000000,\n      \"premium\": 127500,\n      \"taxes\": 18933.75,\n      \"premiumTotal\": 146433.75,\n      \"commissionAmount\": 19125,\n      \"insurerReference\": null,\n      \"status\": \"pending\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record the insurer's acknowledgement of the order (Sent to insurer -> Acknowledged): its reference, date and remark",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/placements/:id/acknowledge",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                ":id",
+                "acknowledge"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Record the insurer's acknowledgement of the order (Sent to insurer -> Acknowledged): its reference, date and remark\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Record acknowledgement\n\nAccess: write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reference\": \"MAL-ACK-2026-0412\",\n  \"remarks\": \"Acknowledged by the motor underwriting desk\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/:id/acknowledge",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    ":id",
+                    "acknowledge"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record the insurer's acknowledgement of the order (Sent to insurer -> Acknowledged): its reference, date and remark\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Record acknowledgement\n\nAccess: write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reference\": \"MAL-ACK-2026-0412\",\n  \"remarks\": \"Acknowledged by the motor underwriting desk\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"placementId\": \"plc_1\",\n    \"placementNumber\": \"PS-2026-00001\",\n    \"source\": \"quote\",\n    \"status\": \"acknowledged\",\n    \"placementStatus\": \"Acknowledged\",\n    \"quotationNumber\": \"QT-2026-00007\",\n    \"insuredName\": \"Cebu Cold Storage Corp.\",\n    \"productType\": \"Fire and Allied Perils\",\n    \"lob\": \"FIRE\",\n    \"sumInsured\": 85000000,\n    \"netPremium\": 212500,\n    \"grossPremium\": 244056.25,\n    \"inceptionDate\": \"2026-10-01\",\n    \"expiryDate\": \"2027-10-01\",\n    \"participants\": [\n      {\n        \"participantId\": 11,\n        \"insuranceCompanyId\": 2,\n        \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n        \"isLead\": true,\n        \"sharePercent\": 60,\n        \"sumInsured\": 51000000,\n        \"premium\": 127500,\n        \"taxes\": 18933.75,\n        \"premiumTotal\": 146433.75,\n        \"commissionAmount\": 19125,\n        \"insurerReference\": null,\n        \"status\": \"pending\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Book the checked placement (Insurer issued): the policy is created with the e-policy numbers and dates and comes into force; bill or direct-bill commission, journal, commission accrual, participants copied, cover notes superseded, policy schedule e-mailed to the client. The only way a policy is issued for TISPH",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/placements/:id/book",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                ":id",
+                "book"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Book the checked placement (Insurer issued): the policy is created with the e-policy numbers and dates and comes into force; bill or direct-bill commission, journal, commission accrual, participants copied, cover notes superseded, policy schedule e-mailed to the client. The only way a policy is issued for TISPH\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Book (Insurer issued)\n\nAccess: write:quotations, write:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"additionalPolicyData\": {\n    \"idType\": \"PhilSys ID\",\n    \"idCardNumber\": \"1234-5678-9012-3456\",\n    \"idCardImage\": \"id-cards/maria.jpg\",\n    \"paymentMethod\": \"Bank transfer\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/:id/book",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    ":id",
+                    "book"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Book the checked placement (Insurer issued): the policy is created with the e-policy numbers and dates and comes into force; bill or direct-bill commission, journal, commission accrual, participants copied, cover notes superseded, policy schedule e-mailed to the client. The only way a policy is issued for TISPH\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Book (Insurer issued)\n\nAccess: write:quotations, write:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"additionalPolicyData\": {\n    \"idType\": \"PhilSys ID\",\n    \"idCardNumber\": \"1234-5678-9012-3456\",\n    \"idCardImage\": \"id-cards/maria.jpg\",\n    \"paymentMethod\": \"Bank transfer\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"policy\": {\n      \"policyId\": \"pol_1\",\n      \"policyNumber\": \"POL-2026-00012\"\n    },\n    \"placement\": {\n      \"placementId\": \"plc_1\",\n      \"placementNumber\": \"PS-2026-00001\",\n      \"source\": \"quote\",\n      \"status\": \"issued\",\n      \"placementStatus\": \"InsurerIssued\",\n      \"quotationNumber\": \"QT-2026-00007\",\n      \"insuredName\": \"Cebu Cold Storage Corp.\",\n      \"productType\": \"Fire and Allied Perils\",\n      \"lob\": \"FIRE\",\n      \"sumInsured\": 85000000,\n      \"netPremium\": 212500,\n      \"grossPremium\": 244056.25,\n      \"inceptionDate\": \"2026-10-01\",\n      \"expiryDate\": \"2027-10-01\",\n      \"participants\": [\n        {\n          \"participantId\": 11,\n          \"insuranceCompanyId\": 2,\n          \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n          \"isLead\": true,\n          \"sharePercent\": 60,\n          \"sumInsured\": 51000000,\n          \"premium\": 127500,\n          \"taxes\": 18933.75,\n          \"premiumTotal\": 146433.75,\n          \"commissionAmount\": 19125,\n          \"insurerReference\": null,\n          \"status\": \"pending\"\n        }\n      ]\n    },\n    \"schedule\": {\n      \"emailId\": 813,\n      \"to\": \"maria.santos@example.ph\"\n    }\n  }\n}"
             }
           ]
         },
@@ -59790,29 +59976,24 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"placementId\": \"plc_1\",\n    \"placementNumber\": \"PS-2026-00001\",\n    \"source\": \"quote\",\n    \"status\": \"cancelled\",\n    \"placementStatus\": \"Draft\",\n    \"quotationNumber\": \"QT-2026-00007\",\n    \"insuredName\": \"Cebu Cold Storage Corp.\",\n    \"productType\": \"Fire and Allied Perils\",\n    \"lob\": \"FIRE\",\n    \"sumInsured\": 85000000,\n    \"netPremium\": 212500,\n    \"grossPremium\": 244056.25,\n    \"inceptionDate\": \"2026-10-01\",\n    \"expiryDate\": \"2027-10-01\",\n    \"participants\": [\n      {\n        \"participantId\": 11,\n        \"insuranceCompanyId\": 2,\n        \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n        \"isLead\": true,\n        \"sharePercent\": 60,\n        \"sumInsured\": 51000000,\n        \"premium\": 127500,\n        \"taxes\": 18933.75,\n        \"premiumTotal\": 146433.75,\n        \"commissionAmount\": 19125,\n        \"insurerReference\": null,\n        \"status\": \"pending\"\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"placementId\": \"plc_1\",\n    \"placementNumber\": \"PS-2026-00001\",\n    \"source\": \"quote\",\n    \"status\": \"cancelled\",\n    \"placementStatus\": \"PlacementRaised\",\n    \"quotationNumber\": \"QT-2026-00007\",\n    \"insuredName\": \"Cebu Cold Storage Corp.\",\n    \"productType\": \"Fire and Allied Perils\",\n    \"lob\": \"FIRE\",\n    \"sumInsured\": 85000000,\n    \"netPremium\": 212500,\n    \"grossPremium\": 244056.25,\n    \"inceptionDate\": \"2026-10-01\",\n    \"expiryDate\": \"2027-10-01\",\n    \"participants\": [\n      {\n        \"participantId\": 11,\n        \"insuranceCompanyId\": 2,\n        \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n        \"isLead\": true,\n        \"sharePercent\": 60,\n        \"sumInsured\": 51000000,\n        \"premium\": 127500,\n        \"taxes\": 18933.75,\n        \"premiumTotal\": 146433.75,\n        \"commissionAmount\": 19125,\n        \"insurerReference\": null,\n        \"status\": \"pending\"\n      }\n    ]\n  }\n}"
             }
           ]
         },
         {
-          "name": "Record insurer confirmation (binding) per participant with the insurer's policy / certificate number; when all have confirmed the placement is Bound",
+          "name": "Check against slip: the slip and the e-policy side by side with the differences (tolerance placement.check_tolerance_amount / placement.check_tolerance_pct, items placement.check_fields)",
           "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/placements/:id/confirm",
+              "raw": "{{baseUrl}}/placements/:id/check",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "placements",
                 ":id",
-                "confirm"
+                "check"
               ],
               "variable": [
                 {
@@ -59822,10 +60003,80 @@
                 }
               ]
             },
-            "description": "Record insurer confirmation (binding) per participant with the insurer's policy / certificate number; when all have confirmed the placement is Bound\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Record confirmation\n\nAccess: write:quotations",
+            "description": "Check against slip: the slip and the e-policy side by side with the differences (tolerance placement.check_tolerance_amount / placement.check_tolerance_pct, items placement.check_fields)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Check against slip\n\nAccess: read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/:id/check",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    ":id",
+                    "check"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Check against slip: the slip and the e-policy side by side with the differences (tolerance placement.check_tolerance_amount / placement.check_tolerance_pct, items placement.check_fields)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Check against slip\n\nAccess: read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"result\": \"mismatch\",\n    \"tolerance\": {\n      \"amount\": 1,\n      \"percent\": 0\n    },\n    \"differences\": [\n      \"netPremium\"\n    ],\n    \"items\": [\n      {\n        \"key\": \"netPremium\",\n        \"label\": \"Net premium\",\n        \"slip\": 18250,\n        \"epolicy\": 18400,\n        \"difference\": 150,\n        \"status\": \"mismatch\"\n      },\n      {\n        \"key\": \"plateNumber\",\n        \"label\": \"Plate number\",\n        \"slip\": null,\n        \"epolicy\": \"NCA 4521\",\n        \"difference\": null,\n        \"status\": \"captured\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Decide the check against the slip (never the user who recorded the e-policy): confirm (matches -> Checked), accept (differences accepted with a reason by an approver with write:policies -> Checked) or return (back to the insurer with the differences -> Acknowledged)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/placements/:id/check",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                ":id",
+                "check"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Decide the check against the slip (never the user who recorded the e-policy): confirm (matches -> Checked), accept (differences accepted with a reason by an approver with write:policies -> Checked) or return (back to the insurer with the differences -> Acknowledged)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Confirm check / Return to insurer\n\nAccess: write:quotations",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"confirmations\": [\n    {\n      \"insuranceCompanyId\": 2,\n      \"insurerReference\": \"MAL-FI-2026-11881\"\n    }\n  ]\n}",
+              "raw": "{\n  \"decision\": \"return\",\n  \"reason\": \"Premium on the e-policy is PHP 150.00 above the agreed premium\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -59845,14 +60096,14 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/placements/:id/confirm",
+                  "raw": "{{baseUrl}}/placements/:id/check",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "placements",
                     ":id",
-                    "confirm"
+                    "check"
                   ],
                   "variable": [
                     {
@@ -59862,10 +60113,10 @@
                     }
                   ]
                 },
-                "description": "Record insurer confirmation (binding) per participant with the insurer's policy / certificate number; when all have confirmed the placement is Bound\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Record confirmation\n\nAccess: write:quotations",
+                "description": "Decide the check against the slip (never the user who recorded the e-policy): confirm (matches -> Checked), accept (differences accepted with a reason by an approver with write:policies -> Checked) or return (back to the insurer with the differences -> Acknowledged)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Confirm check / Return to insurer\n\nAccess: write:quotations",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"confirmations\": [\n    {\n      \"insuranceCompanyId\": 2,\n      \"insurerReference\": \"MAL-FI-2026-11881\"\n    }\n  ]\n}",
+                  "raw": "{\n  \"decision\": \"return\",\n  \"reason\": \"Premium on the e-policy is PHP 150.00 above the agreed premium\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -59883,12 +60134,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"placementId\": \"plc_1\",\n    \"placementNumber\": \"PS-2026-00001\",\n    \"source\": \"quote\",\n    \"status\": \"bound\",\n    \"placementStatus\": \"Draft\",\n    \"quotationNumber\": \"QT-2026-00007\",\n    \"insuredName\": \"Cebu Cold Storage Corp.\",\n    \"productType\": \"Fire and Allied Perils\",\n    \"lob\": \"FIRE\",\n    \"sumInsured\": 85000000,\n    \"netPremium\": 212500,\n    \"grossPremium\": 244056.25,\n    \"inceptionDate\": \"2026-10-01\",\n    \"expiryDate\": \"2027-10-01\",\n    \"participants\": [\n      {\n        \"participantId\": 11,\n        \"insuranceCompanyId\": 2,\n        \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n        \"isLead\": true,\n        \"sharePercent\": 60,\n        \"sumInsured\": 51000000,\n        \"premium\": 127500,\n        \"taxes\": 18933.75,\n        \"premiumTotal\": 146433.75,\n        \"commissionAmount\": 19125,\n        \"insurerReference\": null,\n        \"status\": \"pending\"\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"placementId\": \"plc_1\",\n    \"placementNumber\": \"PS-2026-00001\",\n    \"source\": \"quote\",\n    \"status\": \"acknowledged\",\n    \"placementStatus\": \"PlacementRaised\",\n    \"quotationNumber\": \"QT-2026-00007\",\n    \"insuredName\": \"Cebu Cold Storage Corp.\",\n    \"productType\": \"Fire and Allied Perils\",\n    \"lob\": \"FIRE\",\n    \"sumInsured\": 85000000,\n    \"netPremium\": 212500,\n    \"grossPremium\": 244056.25,\n    \"inceptionDate\": \"2026-10-01\",\n    \"expiryDate\": \"2027-10-01\",\n    \"participants\": [\n      {\n        \"participantId\": 11,\n        \"insuranceCompanyId\": 2,\n        \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n        \"isLead\": true,\n        \"sharePercent\": 60,\n        \"sumInsured\": 51000000,\n        \"premium\": 127500,\n        \"taxes\": 18933.75,\n        \"premiumTotal\": 146433.75,\n        \"commissionAmount\": 19125,\n        \"insurerReference\": null,\n        \"status\": \"pending\"\n      }\n    ]\n  },\n  \"comparison\": {\n    \"result\": \"mismatch\",\n    \"tolerance\": {\n      \"amount\": 1,\n      \"percent\": 0\n    },\n    \"differences\": [\n      \"netPremium\"\n    ],\n    \"items\": [\n      {\n        \"key\": \"netPremium\",\n        \"label\": \"Net premium\",\n        \"slip\": 18250,\n        \"epolicy\": 18400,\n        \"difference\": 150,\n        \"status\": \"mismatch\"\n      },\n      {\n        \"key\": \"plateNumber\",\n        \"label\": \"Plate number\",\n        \"slip\": null,\n        \"epolicy\": \"NCA 4521\",\n        \"difference\": null,\n        \"status\": \"captured\"\n      }\n    ]\n  },\n  \"mail\": {\n    \"to\": \"uw@malayan.example\",\n    \"emailId\": 812\n  }\n}"
             }
           ]
         },
         {
-          "name": "Record that an insurer declined its line (the placement is Declined until the participants are re-arranged)",
+          "name": "Record that an insurer declined its line before issuing (the placement is Declined until the participants are re-arranged)",
           "request": {
             "method": "POST",
             "header": [
@@ -59915,7 +60166,7 @@
                 }
               ]
             },
-            "description": "Record that an insurer declined its line (the placement is Declined until the participants are re-arranged)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Insurer declined\n\nAccess: write:quotations",
+            "description": "Record that an insurer declined its line before issuing (the placement is Declined until the participants are re-arranged)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Insurer declined\n\nAccess: write:quotations",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"insuranceCompanyId\": 4,\n  \"reason\": \"Capacity exhausted\"\n}",
@@ -59955,7 +60206,7 @@
                     }
                   ]
                 },
-                "description": "Record that an insurer declined its line (the placement is Declined until the participants are re-arranged)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Insurer declined\n\nAccess: write:quotations",
+                "description": "Record that an insurer declined its line before issuing (the placement is Declined until the participants are re-arranged)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Insurer declined\n\nAccess: write:quotations",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"insuranceCompanyId\": 4,\n  \"reason\": \"Capacity exhausted\"\n}",
@@ -59976,12 +60227,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"placementId\": \"plc_1\",\n    \"placementNumber\": \"PS-2026-00001\",\n    \"source\": \"quote\",\n    \"status\": \"declined\",\n    \"placementStatus\": \"Draft\",\n    \"quotationNumber\": \"QT-2026-00007\",\n    \"insuredName\": \"Cebu Cold Storage Corp.\",\n    \"productType\": \"Fire and Allied Perils\",\n    \"lob\": \"FIRE\",\n    \"sumInsured\": 85000000,\n    \"netPremium\": 212500,\n    \"grossPremium\": 244056.25,\n    \"inceptionDate\": \"2026-10-01\",\n    \"expiryDate\": \"2027-10-01\",\n    \"participants\": [\n      {\n        \"participantId\": 11,\n        \"insuranceCompanyId\": 2,\n        \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n        \"isLead\": true,\n        \"sharePercent\": 60,\n        \"sumInsured\": 51000000,\n        \"premium\": 127500,\n        \"taxes\": 18933.75,\n        \"premiumTotal\": 146433.75,\n        \"commissionAmount\": 19125,\n        \"insurerReference\": null,\n        \"status\": \"pending\"\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"placementId\": \"plc_1\",\n    \"placementNumber\": \"PS-2026-00001\",\n    \"source\": \"quote\",\n    \"status\": \"declined\",\n    \"placementStatus\": \"PlacementRaised\",\n    \"quotationNumber\": \"QT-2026-00007\",\n    \"insuredName\": \"Cebu Cold Storage Corp.\",\n    \"productType\": \"Fire and Allied Perils\",\n    \"lob\": \"FIRE\",\n    \"sumInsured\": 85000000,\n    \"netPremium\": 212500,\n    \"grossPremium\": 244056.25,\n    \"inceptionDate\": \"2026-10-01\",\n    \"expiryDate\": \"2027-10-01\",\n    \"participants\": [\n      {\n        \"participantId\": 11,\n        \"insuranceCompanyId\": 2,\n        \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n        \"isLead\": true,\n        \"sharePercent\": 60,\n        \"sumInsured\": 51000000,\n        \"premium\": 127500,\n        \"taxes\": 18933.75,\n        \"premiumTotal\": 146433.75,\n        \"commissionAmount\": 19125,\n        \"insurerReference\": null,\n        \"status\": \"pending\"\n      }\n    ]\n  }\n}"
             }
           ]
         },
         {
-          "name": "Placement Slip PDF: insurerId= gives that participant's slip showing its own share (default: the lead insurer)",
+          "name": "Placement Slip PDF: insurerId= gives that participant's slip showing its own share (default: the lead insurer); the file stored when the placement was raised is slipDocument.key",
           "request": {
             "method": "GET",
             "header": [],
@@ -60010,7 +60261,7 @@
                 }
               ]
             },
-            "description": "Placement Slip PDF: insurerId= gives that participant's slip showing its own share (default: the lead insurer)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Placement Slip PDF\n\nAccess: read:quotations"
+            "description": "Placement Slip PDF: insurerId= gives that participant's slip showing its own share (default: the lead insurer); the file stored when the placement was raised is slipDocument.key\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Placement Slip PDF\n\nAccess: read:quotations"
           },
           "response": [
             {
@@ -60043,7 +60294,7 @@
                     }
                   ]
                 },
-                "description": "Placement Slip PDF: insurerId= gives that participant's slip showing its own share (default: the lead insurer)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Placement Slip PDF\n\nAccess: read:quotations"
+                "description": "Placement Slip PDF: insurerId= gives that participant's slip showing its own share (default: the lead insurer); the file stored when the placement was raised is slipDocument.key\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Placement Slip PDF\n\nAccess: read:quotations"
               },
               "status": "OK",
               "code": 200,
@@ -60060,7 +60311,7 @@
           ]
         },
         {
-          "name": "Issue the policy from a bound placement slip (client from the lead, policy number, receivable or direct-bill commission, commission accrual, participants copied to the policy)",
+          "name": "Record the e-policy returned by the insurer (Sent / Acknowledged -> e-Policy received): the uploaded PDF (documentKey from /s3/upload), insurer and BrokerVerse policy numbers, participant name, sum insured, premium, commission, issue / issuance / effective / expiry / production dates, deductible, vehicle identifiers (plate or MV file mandatory for motor, TBA not accepted), optional vehicle photo; compared with the slip at once",
           "request": {
             "method": "POST",
             "header": [
@@ -60070,14 +60321,14 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/placements/:id/issue-policy",
+              "raw": "{{baseUrl}}/placements/:id/epolicy",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "placements",
                 ":id",
-                "issue-policy"
+                "epolicy"
               ],
               "variable": [
                 {
@@ -60087,10 +60338,10 @@
                 }
               ]
             },
-            "description": "Issue the policy from a bound placement slip (client from the lead, policy number, receivable or direct-bill commission, commission accrual, participants copied to the policy)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Issue Policy\n\nAccess: write:quotations, write:policies",
+            "description": "Record the e-policy returned by the insurer (Sent / Acknowledged -> e-Policy received): the uploaded PDF (documentKey from /s3/upload), insurer and BrokerVerse policy numbers, participant name, sum insured, premium, commission, issue / issuance / effective / expiry / production dates, deductible, vehicle identifiers (plate or MV file mandatory for motor, TBA not accepted), optional vehicle photo; compared with the slip at once\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Upload e-policy / Record e-Policy\n\nAccess: write:quotations",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"additionalPolicyData\": {\n    \"insuredName\": \"Cebu Cold Storage Corp.\",\n    \"paymentMethod\": \"Bank transfer\"\n  }\n}",
+              "raw": "{\n  \"documentKey\": \"placement-epolicies/1767225600-ab12-e-policy.pdf\",\n  \"documentName\": \"MAL-MC-2026-004512.pdf\",\n  \"insurerPolicyNumber\": \"MAL-MC-2026-004512\",\n  \"participantName\": \"Maria Santos\",\n  \"sumInsured\": 1250000,\n  \"netPremium\": 18250,\n  \"grossPremium\": 22813.13,\n  \"commissionAmount\": 2737.5,\n  \"issueDate\": \"2026-10-05\",\n  \"effectiveDate\": \"2026-10-06\",\n  \"expiryDate\": \"2027-10-06\",\n  \"vehicle\": {\n    \"chassisNumber\": \"MHFXW42G5P0077777\",\n    \"motorNumber\": \"2NRX777777\",\n    \"plateNumber\": \"NCA 4521\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -60110,14 +60361,14 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/placements/:id/issue-policy",
+                  "raw": "{{baseUrl}}/placements/:id/epolicy",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "placements",
                     ":id",
-                    "issue-policy"
+                    "epolicy"
                   ],
                   "variable": [
                     {
@@ -60127,10 +60378,10 @@
                     }
                   ]
                 },
-                "description": "Issue the policy from a bound placement slip (client from the lead, policy number, receivable or direct-bill commission, commission accrual, participants copied to the policy)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Issue Policy\n\nAccess: write:quotations, write:policies",
+                "description": "Record the e-policy returned by the insurer (Sent / Acknowledged -> e-Policy received): the uploaded PDF (documentKey from /s3/upload), insurer and BrokerVerse policy numbers, participant name, sum insured, premium, commission, issue / issuance / effective / expiry / production dates, deductible, vehicle identifiers (plate or MV file mandatory for motor, TBA not accepted), optional vehicle photo; compared with the slip at once\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Upload e-policy / Record e-Policy\n\nAccess: write:quotations",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"additionalPolicyData\": {\n    \"insuredName\": \"Cebu Cold Storage Corp.\",\n    \"paymentMethod\": \"Bank transfer\"\n  }\n}",
+                  "raw": "{\n  \"documentKey\": \"placement-epolicies/1767225600-ab12-e-policy.pdf\",\n  \"documentName\": \"MAL-MC-2026-004512.pdf\",\n  \"insurerPolicyNumber\": \"MAL-MC-2026-004512\",\n  \"participantName\": \"Maria Santos\",\n  \"sumInsured\": 1250000,\n  \"netPremium\": 18250,\n  \"grossPremium\": 22813.13,\n  \"commissionAmount\": 2737.5,\n  \"issueDate\": \"2026-10-05\",\n  \"effectiveDate\": \"2026-10-06\",\n  \"expiryDate\": \"2027-10-06\",\n  \"vehicle\": {\n    \"chassisNumber\": \"MHFXW42G5P0077777\",\n    \"motorNumber\": \"2NRX777777\",\n    \"plateNumber\": \"NCA 4521\"\n  }\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -60148,12 +60399,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"policy\": {\n      \"policyId\": \"pol_1\",\n      \"policyNumber\": \"POL-2026-00012\"\n    },\n    \"placement\": {\n      \"placementId\": \"plc_1\",\n      \"placementNumber\": \"PS-2026-00001\",\n      \"source\": \"quote\",\n      \"status\": \"issued\",\n      \"placementStatus\": \"Draft\",\n      \"quotationNumber\": \"QT-2026-00007\",\n      \"insuredName\": \"Cebu Cold Storage Corp.\",\n      \"productType\": \"Fire and Allied Perils\",\n      \"lob\": \"FIRE\",\n      \"sumInsured\": 85000000,\n      \"netPremium\": 212500,\n      \"grossPremium\": 244056.25,\n      \"inceptionDate\": \"2026-10-01\",\n      \"expiryDate\": \"2027-10-01\",\n      \"participants\": [\n        {\n          \"participantId\": 11,\n          \"insuranceCompanyId\": 2,\n          \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n          \"isLead\": true,\n          \"sharePercent\": 60,\n          \"sumInsured\": 51000000,\n          \"premium\": 127500,\n          \"taxes\": 18933.75,\n          \"premiumTotal\": 146433.75,\n          \"commissionAmount\": 19125,\n          \"insurerReference\": null,\n          \"status\": \"pending\"\n        }\n      ]\n    }\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"placementId\": \"plc_1\",\n    \"placementNumber\": \"PS-2026-00001\",\n    \"source\": \"quote\",\n    \"status\": \"epolicy_received\",\n    \"placementStatus\": \"EPolicyReceived\",\n    \"quotationNumber\": \"QT-2026-00007\",\n    \"insuredName\": \"Cebu Cold Storage Corp.\",\n    \"productType\": \"Fire and Allied Perils\",\n    \"lob\": \"FIRE\",\n    \"sumInsured\": 85000000,\n    \"netPremium\": 212500,\n    \"grossPremium\": 244056.25,\n    \"inceptionDate\": \"2026-10-01\",\n    \"expiryDate\": \"2027-10-01\",\n    \"participants\": [\n      {\n        \"participantId\": 11,\n        \"insuranceCompanyId\": 2,\n        \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n        \"isLead\": true,\n        \"sharePercent\": 60,\n        \"sumInsured\": 51000000,\n        \"premium\": 127500,\n        \"taxes\": 18933.75,\n        \"premiumTotal\": 146433.75,\n        \"commissionAmount\": 19125,\n        \"insurerReference\": null,\n        \"status\": \"pending\"\n      }\n    ],\n    \"check\": {\n      \"result\": \"mismatch\",\n      \"tolerance\": {\n        \"amount\": 1,\n        \"percent\": 0\n      },\n      \"differences\": [\n        \"netPremium\"\n      ],\n      \"items\": [\n        {\n          \"key\": \"netPremium\",\n          \"label\": \"Net premium\",\n          \"slip\": 18250,\n          \"epolicy\": 18400,\n          \"difference\": 150,\n          \"status\": \"mismatch\"\n        },\n        {\n          \"key\": \"plateNumber\",\n          \"label\": \"Plate number\",\n          \"slip\": null,\n          \"epolicy\": \"NCA 4521\",\n          \"difference\": null,\n          \"status\": \"captured\"\n        }\n      ]\n    }\n  }\n}"
             }
           ]
         },
         {
-          "name": "Send the firm order to the participating insurers (queued e-mail per participant showing its share); insurerIds limits it to some",
+          "name": "Send the firm order to the participating insurers: one queued e-mail per participant with its placement slip PDF (its own share) and any LTO document attached; insurerIds limits it to some. A sent or acknowledged placement can be sent again",
           "request": {
             "method": "POST",
             "header": [
@@ -60180,7 +60431,7 @@
                 }
               ]
             },
-            "description": "Send the firm order to the participating insurers (queued e-mail per participant showing its share); insurerIds limits it to some\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Send to insurer(s)\n\nAccess: write:quotations",
+            "description": "Send the firm order to the participating insurers: one queued e-mail per participant with its placement slip PDF (its own share) and any LTO document attached; insurerIds limits it to some. A sent or acknowledged placement can be sent again\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Send to insurer\n\nAccess: write:quotations",
             "body": {
               "mode": "raw",
               "raw": "{}",
@@ -60220,7 +60471,7 @@
                     }
                   ]
                 },
-                "description": "Send the firm order to the participating insurers (queued e-mail per participant showing its share); insurerIds limits it to some\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Send to insurer(s)\n\nAccess: write:quotations",
+                "description": "Send the firm order to the participating insurers: one queued e-mail per participant with its placement slip PDF (its own share) and any LTO document attached; insurerIds limits it to some. A sent or acknowledged placement can be sent again\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Send to insurer\n\nAccess: write:quotations",
                 "body": {
                   "mode": "raw",
                   "raw": "{}",
@@ -60241,7 +60492,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"placementId\": \"plc_1\",\n    \"placementNumber\": \"PS-2026-00001\",\n    \"source\": \"quote\",\n    \"status\": \"sent\",\n    \"placementStatus\": \"Draft\",\n    \"quotationNumber\": \"QT-2026-00007\",\n    \"insuredName\": \"Cebu Cold Storage Corp.\",\n    \"productType\": \"Fire and Allied Perils\",\n    \"lob\": \"FIRE\",\n    \"sumInsured\": 85000000,\n    \"netPremium\": 212500,\n    \"grossPremium\": 244056.25,\n    \"inceptionDate\": \"2026-10-01\",\n    \"expiryDate\": \"2027-10-01\",\n    \"participants\": [\n      {\n        \"participantId\": 11,\n        \"insuranceCompanyId\": 2,\n        \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n        \"isLead\": true,\n        \"sharePercent\": 60,\n        \"sumInsured\": 51000000,\n        \"premium\": 127500,\n        \"taxes\": 18933.75,\n        \"premiumTotal\": 146433.75,\n        \"commissionAmount\": 19125,\n        \"insurerReference\": null,\n        \"status\": \"pending\"\n      }\n    ]\n  },\n  \"sent\": [\n    {\n      \"insurer\": \"Malayan Insurance Co., Inc.\",\n      \"email\": \"uw@malayan.example\"\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"placementId\": \"plc_1\",\n    \"placementNumber\": \"PS-2026-00001\",\n    \"source\": \"quote\",\n    \"status\": \"sent\",\n    \"placementStatus\": \"PlacementRaised\",\n    \"quotationNumber\": \"QT-2026-00007\",\n    \"insuredName\": \"Cebu Cold Storage Corp.\",\n    \"productType\": \"Fire and Allied Perils\",\n    \"lob\": \"FIRE\",\n    \"sumInsured\": 85000000,\n    \"netPremium\": 212500,\n    \"grossPremium\": 244056.25,\n    \"inceptionDate\": \"2026-10-01\",\n    \"expiryDate\": \"2027-10-01\",\n    \"participants\": [\n      {\n        \"participantId\": 11,\n        \"insuranceCompanyId\": 2,\n        \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n        \"isLead\": true,\n        \"sharePercent\": 60,\n        \"sumInsured\": 51000000,\n        \"premium\": 127500,\n        \"taxes\": 18933.75,\n        \"premiumTotal\": 146433.75,\n        \"commissionAmount\": 19125,\n        \"insurerReference\": null,\n        \"status\": \"pending\"\n      }\n    ]\n  },\n  \"sent\": [\n    {\n      \"insurer\": \"Malayan Insurance Co., Inc.\",\n      \"email\": \"uw@malayan.example\"\n    }\n  ]\n}"
             }
           ]
         },
@@ -60372,83 +60623,6 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"insurers\": [\n      {\n        \"id\": 2,\n        \"code\": \"MALAYAN\",\n        \"name\": \"Malayan Insurance Co., Inc.\",\n        \"commissionRate\": 0.15\n      }\n    ],\n    \"products\": [\n      {\n        \"id\": 3,\n        \"code\": \"FIRE\",\n        \"name\": \"Fire and Allied Perils\",\n        \"lob\": \"FIRE\",\n        \"businessType\": \"non_package\",\n        \"customerSegment\": \"corporate\",\n        \"journey\": {\n          \"placementSlip\": \"required\"\n        }\n      }\n    ],\n    \"defaultBillingMode\": \"broker\"\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Record Issued Policy (direct policy entry): a policy the insurer already issued, with its participants and their policy / certificate numbers; creates a bound placement slip and issues the policy in one step",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/placements/record-issued-policy",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "placements",
-                "record-issued-policy"
-              ]
-            },
-            "description": "Record Issued Policy (direct policy entry): a policy the insurer already issued, with its participants and their policy / certificate numbers; creates a bound placement slip and issues the policy in one step\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips / Policy > Record Issued Policy\n\nAccess: write:quotations, write:policies",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"companyName\": \"Visayas Logistics Inc.\",\n  \"productType\": \"Comprehensive General Liability\",\n  \"policyNumber\": \"PIO-CGL-2026-0415\",\n  \"inceptionDate\": \"2026-09-01\",\n  \"expiryDate\": \"2027-09-01\",\n  \"sumInsured\": 20000000,\n  \"netPremium\": 85000,\n  \"participants\": [\n    {\n      \"insuranceCompanyId\": 3,\n      \"sharePercent\": 100,\n      \"insurerReference\": \"PIO-CGL-2026-0415\"\n    }\n  ]\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/placements/record-issued-policy",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "placements",
-                    "record-issued-policy"
-                  ]
-                },
-                "description": "Record Issued Policy (direct policy entry): a policy the insurer already issued, with its participants and their policy / certificate numbers; creates a bound placement slip and issues the policy in one step\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips / Policy > Record Issued Policy\n\nAccess: write:quotations, write:policies",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"companyName\": \"Visayas Logistics Inc.\",\n  \"productType\": \"Comprehensive General Liability\",\n  \"policyNumber\": \"PIO-CGL-2026-0415\",\n  \"inceptionDate\": \"2026-09-01\",\n  \"expiryDate\": \"2027-09-01\",\n  \"sumInsured\": 20000000,\n  \"netPremium\": 85000,\n  \"participants\": [\n    {\n      \"insuranceCompanyId\": 3,\n      \"sharePercent\": 100,\n      \"insurerReference\": \"PIO-CGL-2026-0415\"\n    }\n  ]\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"policyId\": \"pol_1\",\n    \"policyNumber\": \"PIO-CGL-2026-0415\",\n    \"placement\": {\n      \"placementId\": \"plc_1\",\n      \"placementNumber\": \"PS-2026-00001\",\n      \"source\": \"quote\",\n      \"status\": \"draft\",\n      \"placementStatus\": \"Draft\",\n      \"quotationNumber\": \"QT-2026-00007\",\n      \"insuredName\": \"Cebu Cold Storage Corp.\",\n      \"productType\": \"Fire and Allied Perils\",\n      \"lob\": \"FIRE\",\n      \"sumInsured\": 85000000,\n      \"netPremium\": 212500,\n      \"grossPremium\": 244056.25,\n      \"inceptionDate\": \"2026-10-01\",\n      \"expiryDate\": \"2027-10-01\",\n      \"participants\": [\n        {\n          \"participantId\": 11,\n          \"insuranceCompanyId\": 2,\n          \"insuranceCompanyName\": \"Malayan Insurance Co., Inc.\",\n          \"isLead\": true,\n          \"sharePercent\": 60,\n          \"sumInsured\": 51000000,\n          \"premium\": 127500,\n          \"taxes\": 18933.75,\n          \"premiumTotal\": 146433.75,\n          \"commissionAmount\": 19125,\n          \"insurerReference\": null,\n          \"status\": \"pending\"\n        }\n      ]\n    }\n  }\n}"
             }
           ]
         }

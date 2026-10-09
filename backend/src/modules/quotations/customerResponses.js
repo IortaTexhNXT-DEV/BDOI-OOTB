@@ -74,6 +74,8 @@ export async function recordResponse(quoteId, body, user) {
     await notify({ userId: q.created_by, type: 'task', title: 'Customer accepted quotation', message: `The customer accepted quotation ${q.quote_number} (${body.channel}); you can proceed to policy`,
       link: `/agent/quotedetailview/${q.id}`, entity: 'quotation', entityId: q.id });
   }
+  const { autoRaisePlacement } = await import('../placement/placements.js');
+  const placement = target === 'accepted' ? await autoRaisePlacement(q.id, user) : null;
   const recordedBy = await one('SELECT display_name FROM users WHERE id = $1', [user.id]);
-  return { before: q, after: await getQuoteRow(q.id), response: toResponse({ ...response, recorded_by_name: recordedBy?.display_name }) };
+  return { before: q, after: await getQuoteRow(q.id), response: toResponse({ ...response, recorded_by_name: recordedBy?.display_name }), placement };
 }

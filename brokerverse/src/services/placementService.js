@@ -2,8 +2,9 @@ import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
 
 /**
- * Placement journey API: Broker Slips (/broker-slips), Placement Slips (/placements), Record Issued Policy and the
- * journey configuration per line of business (placement.journey).
+ * Placement journey API: Broker Slips (/broker-slips), Placement Slips (/placements: raised, sent to the insurer,
+ * acknowledged, e-policy received, checked against the slip, booked once the insurer has issued) and the journey
+ * configuration per line of business (placement.journey).
  */
 const queryString = (params = {}) => {
   const entries = Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== "");
@@ -42,6 +43,9 @@ const openPdf = async (path) => {
 
 const enc = encodeURIComponent;
 
+/** Placement statuses from raised to booked: a quotation has at most one placement in these. */
+export const OPEN_STATUSES = ["draft", "sent", "acknowledged", "epolicy_received", "checked", "issued"];
+
 const placementService = {
   // reference data and configuration
   options: async (params) => (await request("GET", `/placements/options${queryString(params)}`)).data,
@@ -72,22 +76,28 @@ const placementService = {
   createPlacement: async (body) => (await request("POST", "/placements", body)).data,
   updatePlacement: async (id, body) => (await request("PUT", `/placements/${enc(id)}`, body)).data,
   sendPlacement: (id, insurerIds) => request("POST", `/placements/${enc(id)}/send`, insurerIds ? { insurerIds } : {}),
-  confirmPlacement: async (id, confirmations) => (await request("POST", `/placements/${enc(id)}/confirm`, { confirmations })).data,
+  acknowledgePlacement: async (id, body) => (await request("POST", `/placements/${enc(id)}/acknowledge`, body)).data,
+  recordEpolicy: async (id, body) => (await request("POST", `/placements/${enc(id)}/epolicy`, body)).data,
+  slipCheck: async (id) => (await request("GET", `/placements/${enc(id)}/check`)).data,
+  decideCheck: (id, decision, reason) => request("POST", `/placements/${enc(id)}/check`, { decision, reason: reason || undefined }),
   declineParticipant: async (id, insuranceCompanyId, reason) => (await request("POST", `/placements/${enc(id)}/decline`, { insuranceCompanyId, reason })).data,
   cancelPlacement: async (id, reason) => (await request("POST", `/placements/${enc(id)}/cancel`, { reason })).data,
-  issuePolicy: (id, body) => request("POST", `/placements/${enc(id)}/issue-policy`, body || {}),
-  recordIssuedPolicy: (body) => request("POST", "/placements/record-issued-policy", body),
+  bookPolicy: (id, body) => request("POST", `/placements/${enc(id)}/book`, body || {}),
   /**
-   * The placement slip of a quotation: created from the quotation, or the open one it already has. Used where the
-   * journey refuses the direct conversion (PLACEMENT_JOURNEY) and by "Send to Insurance Company".
+   * The placement slip of a quotation: the open one it already has (raised when the client accepted), else created
+   * from the quotation. Used where the journey refuses the direct conversion (PLACEMENT_JOURNEY) and by "Send to
+   * Insurance Company".
    */
   placeQuotation: async (quoteId, extra = {}) => {
     try {
       return (await request("POST", "/placements", { quoteId, ...extra })).data;
     } catch (e) {
       if (e.status !== 409) throw e;
-      const open = (await request("GET", `/placements${queryString({ quoteId, status: "draft,sent,bound,issued" })}`)).data || [];
+      const open = (await request("GET", `/placements${queryString({ quoteId, status: OPEN_STATUSES.join(",") })}`)).data || [];
       if (!open.length) throw e;
+      // the placement raised on acceptance takes what the user chose since (period, billing mode, insured) while not yet sent
+      const edits = Object.fromEntries(Object.entries(extra).filter(([, v]) => v !== undefined && v !== null && v !== ""));
+      if (open[0].status === "draft" && Object.keys(edits).length) return (await request("PUT", `/placements/${enc(open[0].id)}`, edits)).data;
       return open[0];
     }
   },

@@ -32,6 +32,9 @@ const quoteBody = z.object({
 const statusBody = z.object({ status: z.string().min(1), updatedBy: z.string().optional(), reason: z.string().optional() });
 const example = { quotationId: 'qt_1', quotationNumber: 'QT-2026-00001', quotationStatus: 'Draft', leadRefId: 'ld_1', productType: 'Motor', netPremium: 18500, valueAddedTax: 2220, documentaryStampTax: 2312.5, localGovernmentTax: 138.75, grossPremium: 23171.25, totalSumInsured: 1200000, lead: { firstName: 'Juan', lastName: 'Dela Cruz' } };
 const out = (r) => toQuote(r);
+/** Audit entry of a placement slip raised automatically when the client accepted the quotation. */
+const auditRaised = (req, p) => audit(req, { entity: 'placement', entityId: p.id, action: 'create-on-acceptance',
+  after: { placementNumber: p.placementNumber, source: p.source, quotationNumber: p.quotationNumber, participants: p.participants.map((x) => `${x.insuranceCompanyName} ${x.sharePercent}%`) } });
 
 async function listHandler(req, res) {
   const pg = paging(req.query);
@@ -110,8 +113,9 @@ define({
     // the customer sees the vehicle class name, not its code
     quote.vehicleTypeLabel = vehicleClass(await motorTariff(), vehicleOf(quote).vehicleType)?.label || null;
     if (r.changed) {
-      await audit({ ip: req.ip, user: { id: null, username: `customer:${r.quote.approval_sent_to || ''}` } },
-        { entity: 'quotation', entityId: quote.id, action: 'customer-accept', before: { quotationStatus: 'PendingCustomer' }, after: { quotationStatus: quote.quotationStatus } });
+      const customer = { ip: req.ip, user: { id: null, username: `customer:${r.quote.approval_sent_to || ''}` } };
+      await audit(customer, { entity: 'quotation', entityId: quote.id, action: 'customer-accept', before: { quotationStatus: 'PendingCustomer' }, after: { quotationStatus: quote.quotationStatus } });
+      if (r.placement) await auditRaised(customer, r.placement);
     }
     res.json({ ...quote, success: true, message: req.body.preview ? 'Quotation preview' : 'Quotation approved', data: quote });
   },
@@ -150,9 +154,11 @@ define({
   },
 });
 const statusHandler = async (req, res) => {
-  const { before, after } = await svc.changeStatus(req.params.id, req.body.status, req.user);
+  const { before, after, placement } = await svc.changeStatus(req.params.id, req.body.status, req.user);
   await audit(req, { entity: 'quotation', entityId: after.id, action: 'status', before: { quotationStatus: out(before).quotationStatus }, after: { quotationStatus: out(after).quotationStatus, reason: req.body.reason } });
-  sendEntity(res, out(after), { message: `Status changed to ${out(after).quotationStatus}` });
+  if (placement) await auditRaised(req, placement);
+  sendEntity(res, out(after), { message: `Status changed to ${out(after).quotationStatus}${placement ? `; placement slip ${placement.placementNumber} raised` : ''}`,
+    extra: placement ? { placementId: placement.id, placementNumber: placement.placementNumber } : {} });
 };
 for (const method of ['PUT', 'PATCH']) {
   define({
@@ -215,7 +221,9 @@ define({
     const after = out(r.after);
     await audit(req, { entity: 'quotation', entityId: after.id, action: 'customer-response', before: { quotationStatus: out(r.before).quotationStatus },
       after: { quotationStatus: after.quotationStatus, outcome: r.response.outcome, channel: r.response.channel, responseDate: r.response.responseDate, reference: r.response.reference, responseId: r.response.id } });
-    res.json({ success: true, message: `Customer response recorded: ${after.quotationStatus}`, data: after, response: r.response });
+    if (r.placement) await auditRaised(req, r.placement);
+    res.json({ success: true, message: `Customer response recorded: ${after.quotationStatus}${r.placement ? `; placement slip ${r.placement.placementNumber} raised` : ''}`, data: after, response: r.response,
+      placement: r.placement ? { placementId: r.placement.id, placementNumber: r.placement.placementNumber } : null });
   },
 });
 define({

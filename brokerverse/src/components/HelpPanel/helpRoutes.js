@@ -29,7 +29,7 @@ export const HELP_ROUTES = [
   ["/agent/employee-benefit", "quotations"],
   ["/placement/broker-slips", "requests-for-quotation-broker-slips"],
   ["/placement/placement-slips", "placement-slips"],
-  ["/placement/record-issued-policy", "record-issued-policy"],
+  ["/placement/record-epolicy", "record-e-policy"],
   // servicing
   ["/agent/clientlisting", "clients"],
   ["/agent/clientview", "clients"],

@@ -1,8 +1,8 @@
 /**
  * Cover notes (binders): temporary evidence of cover while the insurer's policy is pending.
  *
- * Issued from a quotation the customer accepted (cover_note.quote_statuses) or from a placement slip sent to or bound
- * by the insurers (cover_note.placement_statuses), for cover_note.validity_days from the cover start date (at most
+ * Issued from a quotation the customer accepted (cover_note.quote_statuses) or from a placement slip with the insurer
+ * and not yet booked (cover_note.placement_statuses), for cover_note.validity_days from the cover start date (at most
  * cover_note.max_validity_days). One active cover note per quotation or placement slip.
  *
  * Status: active -> superseded when the policy of the quotation / placement is issued (the policy is linked), expired
@@ -87,7 +87,7 @@ async function sourceOf(db, { quoteId, placementId }) {
     const p = (await db.query(`SELECT pl.*, c.display_name AS client_name, l.first_name AS lead_first, l.last_name AS lead_last
       FROM placements pl LEFT JOIN clients c ON c.id = pl.client_id LEFT JOIN leads l ON l.id = pl.lead_id WHERE pl.id = $1 OR pl.placement_number = $1`, [String(placementId)])).rows[0];
     if (!p) throw notFound(`Placement slip ${placementId} not found`);
-    const allowed = (await getSetting('cover_note.placement_statuses', ['sent', 'bound'])) || [];
+    const allowed = (await getSetting('cover_note.placement_statuses', ['sent', 'acknowledged', 'epolicy_received', 'checked'])) || [];
     if (!allowed.includes(p.status)) throw conflict(`A cover note is issued from a placement slip that is ${allowed.join(' or ')} (placement ${p.placement_number} is ${p.status})`);
     if (p.policy_id) throw conflict(`The policy of placement ${p.placement_number} is already issued; no cover note is needed`);
     return { source: 'placement', quote_id: p.quote_id || null, placement_id: p.id, ref: p.placement_number, client_id: p.client_id, insurance_company_id: p.insurance_company_id,
@@ -141,7 +141,7 @@ export async function cancelCoverNote(db, id, reason, user) {
 /** Quotations and placement slips a cover note can be issued from (no active cover note, no policy yet). */
 export async function eligibleSources(db, { search = '' } = {}) {
   const qs = (await getSetting('cover_note.quote_statuses', ['accepted', 'approved', 'submitted'])) || [];
-  const ps = (await getSetting('cover_note.placement_statuses', ['sent', 'bound'])) || [];
+  const ps = (await getSetting('cover_note.placement_statuses', ['sent', 'acknowledged', 'epolicy_received', 'checked'])) || [];
   const like = `%${search}%`;
   const quotes = (await db.query(`SELECT q.id, q.quote_number AS ref, q.status, c.display_name AS client_name, ic.name AS insurer_name, q.premium_total FROM quotes q
     LEFT JOIN clients c ON c.id = q.client_id LEFT JOIN insurance_companies ic ON ic.id = q.insurance_company_id

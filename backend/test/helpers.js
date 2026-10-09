@@ -61,3 +61,34 @@ export async function withoutConfigurationApproval() {
   await query('UPDATE app_settings SET value = \'false\' WHERE key = \'accounting.configuration_maker_checker\'');
   clearSettingsCache();
 }
+/**
+ * A policy through the placement chain, the only way a policy is issued (TIS-BRD-ISSUE-01): a direct placement is
+ * raised, sent, its e-policy (insurer number = policyNumber) recorded, checked against the slip and booked. The check is
+ * confirmed by `checker`; without one the maker-checker of the check is switched off for that step (suites that only
+ * need an issued policy). Returns the response of the first step that fails, else the booking's.
+ */
+export async function placeAndBook(api, body, { policyNumber = null, checker = null } = {}) {
+  const { query } = await import('../src/db/pool.js');
+  const { clearSettingsCache } = await import('../src/lib/settings.js');
+  const raised = await api('post', '/placements').send(body);
+  if (raised.status !== 201) return raised;
+  const p = raised.body;
+  const sent = await api('post', `/placements/${p.id}/send`).send({});
+  if (sent.status !== 200) return sent;
+  const file = await api('post', '/s3/upload').field('folder', 'placement-epolicies')
+    .attach('file', Buffer.from('%PDF-1.4\n1 0 obj << /Type /Catalog >> endobj\ntrailer << /Root 1 0 R >>\n%%EOF\n'), 'e-policy.pdf');
+  const number = policyNumber || `INS-${p.placementNumber}`;
+  const ep = await api('post', `/placements/${p.id}/epolicy`).send({ documentKey: file.body.data.key, insurerPolicyNumber: number, brokerPolicyNumber: policyNumber || undefined,
+    participantName: p.insuredName, sumInsured: p.sumInsured, netPremium: p.netPremium, issueDate: p.inceptionDate, effectiveDate: p.inceptionDate, expiryDate: p.expiryDate,
+    vehicle: body.vehicle });
+  if (ep.status !== 200) return ep;
+  const setCheck = async (on) => { await query("UPDATE app_settings SET value = $1 WHERE key = 'placement.check_maker_checker'", [JSON.stringify(on)]); clearSettingsCache(); };
+  if (!checker) await setCheck(false);
+  try {
+    const checked = await (checker || api)('post', `/placements/${p.id}/check`).send({ decision: 'confirm' });
+    if (checked.status !== 200) return checked;
+  } finally {
+    if (!checker) await setCheck(true);
+  }
+  return (checker || api)('post', `/placements/${p.id}/book`).send({});
+}

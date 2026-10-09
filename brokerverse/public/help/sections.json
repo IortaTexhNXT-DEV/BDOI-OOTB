@@ -694,20 +694,32 @@
    "chapter": "Processing Team"
   },
   {
-   "id": "send-the-firm-order-and-record-confirmations",
-   "title": "Send the firm order and record confirmations",
+   "id": "send-to-the-insurer-and-record-the-acknowledgement",
+   "title": "Send to the insurer and record the acknowledgement",
    "level": 3,
    "chapter": "Processing Team"
   },
   {
-   "id": "issue-the-policy",
-   "title": "Issue the policy",
+   "id": "upload-the-e-policy",
+   "title": "Upload the e-policy",
    "level": 3,
    "chapter": "Processing Team"
   },
   {
-   "id": "record-issued-policy",
-   "title": "Record Issued Policy",
+   "id": "check-against-the-slip",
+   "title": "Check against the slip",
+   "level": 3,
+   "chapter": "Processing Team"
+  },
+  {
+   "id": "book-the-policy-insurer-issued",
+   "title": "Book the policy (Insurer issued)",
+   "level": 3,
+   "chapter": "Processing Team"
+  },
+  {
+   "id": "record-e-policy",
+   "title": "Record e-Policy",
    "level": 2,
    "chapter": "Processing Team"
   },

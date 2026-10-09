@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { setup, loginAs } from './helpers.js';
 import { pool } from '../src/db/pool.js';
+import { clearSettingsCache } from '../src/lib/settings.js';
 
 let ctx;
 let sales;
@@ -25,6 +26,10 @@ beforeAll(async () => {
   sales = s.api; salesId = s.id; uw = u.api; underwriterId = u.id;
   claims = (await persona('t.claims', ['claims'])).api;
   finance = (await persona('t.finance', ['accounting'])).api;
+  // the conversion itself (KYC, bill, commission) under a journey where the motor placement slip is optional; every
+  // TISPH line requires it, and test/placement.test.js covers that chain
+  await q(`UPDATE app_settings SET value = value || '{"MOTOR": {"quotationSlip": "required", "placementSlip": "optional"}}'::jsonb WHERE key = 'placement.journey'`);
+  clearSettingsCache();
 });
 afterAll(async () => { await pool.end(); });
 

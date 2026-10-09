@@ -14,10 +14,15 @@ import { PageHeader, StatusTag, formatDate } from "./shared";
 import StatCards from "../../components/StatCards";
 import "./index.scss";
 
-const STATUSES = ["draft", "sent", "bound", "declined", "issued", "cancelled"];
+const STATUSES = ["draft", "sent", "acknowledged", "epolicy_received", "checked", "issued", "declined", "cancelled"];
+/** One stat card per step of the chain, from raised to booked. */
+const STEPS = ["draft", "sent", "acknowledged", "epolicy_received", "checked", "issued"];
 const SOURCES = ["quote", "broker-slip", "direct", "direct-policy"];
 
-/** Operations > Placement Slips: firm orders to the insurers, their binding status and the policies issued from them. */
+/**
+ * Operations > Placement Slips: firm orders to the insurers and where each stands in the chain (raised, sent,
+ * acknowledged, e-policy received, checked against the slip, booked once the insurer has issued).
+ */
 const PlacementList = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -61,14 +66,16 @@ const PlacementList = () => {
     <div className="placement-page">
       <Toast ref={toast} />
       <PageHeader title={t("placement.placementSlip.listTitle")}>
-        {hasPermission("write:policies") && (
-          <Button label={t("placement.recordPolicy.title")} icon="pi pi-file-import" severity="secondary" outlined onClick={() => navigate("/placement/record-issued-policy")} className="mr-2" />
+        {hasPermission("write:quotations") && (
+          <>
+            <Button label={t("placement.recordEpolicy.title")} icon="pi pi-file-import" severity="secondary" outlined onClick={() => navigate("/placement/record-epolicy")} className="mr-2" />
+            <Button label={t("placement.placementSlip.newDirect")} icon="pi pi-plus" onClick={() => navigate("/placement/placement-slips/new")} />
+          </>
         )}
-        <Button label={t("placement.placementSlip.newDirect")} icon="pi pi-plus" onClick={() => navigate("/placement/placement-slips/new")} />
       </PageHeader>
 
       {/* the counts per status double as a status filter */}
-      <StatCards items={["draft", "sent", "bound", "issued"].map((s) => ({
+      <StatCards items={STEPS.map((s) => ({
         key: s, label: t(`placement.status.${s}`), value: countsLoaded ? counts[s] || 0 : null, active: status === s,
         onClick: () => { setStatus(status === s ? "all" : s); setPage({ ...page, first: 0 }); },
       }))} />
@@ -98,7 +105,6 @@ const PlacementList = () => {
           )} />
           <Column field="grossPremium" header={t("placement.fields.grossPremium")} body={(r) => formatCurrency(r.grossPremium)} className="num" headerClassName="num" />
           <Column header={t("placement.fields.period")} body={(r) => <span className="period-cell"><span className="nowrap">{formatDate(r.inceptionDate)}</span> - <span className="nowrap">{formatDate(r.expiryDate)}</span></span>} />
-          <Column header={t("placement.fields.confirmed")} body={(r) => <span className="nowrap">{`${r.confirmedCount || 0} / ${r.participantsCount || 0}`}</span>} className="num" headerClassName="num" />
           <Column field="source" header={t("placement.fields.source")} body={(r) => t(`placement.source.${r.source}`)} />
           <Column field="status" header={t("placement.fields.status")} body={(r) => <StatusTag status={r.status} />} />
           <Column header={t("placement.fields.policy")} body={(r) => <span className="nowrap">{r.policyNumber || "-"}</span>} />

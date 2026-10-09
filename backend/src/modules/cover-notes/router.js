@@ -32,7 +32,7 @@ define({
   handler: async (req, res) => ok(res, await svc.listCoverNotes(pool, req.query)),
 });
 define({
-  method: 'GET', path: '/sources', summary: 'Accepted quotations and sent / bound placement slips a cover note can be issued from (search)', screen: `${S} > Issue`, middleware: read,
+  method: 'GET', path: '/sources', summary: 'Accepted quotations and placement slips with the insurer a cover note can be issued from (search)', screen: `${S} > Issue`, middleware: read,
   query: { search: 'QT-2026' }, response: { success: true, data: [{ kind: 'quote', id: 'qt_1', reference: 'QT-2026-00012', status: 'accepted', clientName: 'Maria Santos', insurerName: 'Malayan', premiumTotal: 18250 }] },
   handler: async (req, res) => ok(res, await svc.eligibleSources(pool, req.query)),
 });
@@ -50,7 +50,7 @@ define({
 const issueBody = z.object({ quoteId: z.string().optional(), placementId: z.string().optional(), coverFrom: date.optional(), validityDays: z.number().int().min(1).max(366).optional(),
   conditions: z.string().max(4000).optional().nullable(), insurerReference: z.string().max(100).optional().nullable(), riskDescription: z.string().max(1000).optional().nullable() });
 define({
-  method: 'POST', path: '/', summary: 'Issue a cover note from an accepted quotation (quoteId) or a sent / bound placement slip (placementId) for cover_note.validity_days', screen: `${S} > Issue`,
+  method: 'POST', path: '/', summary: 'Issue a cover note from an accepted quotation (quoteId) or a placement slip with the insurer (placementId) for cover_note.validity_days', screen: `${S} > Issue`,
   middleware: [...write, validate(issueBody)], request: { quoteId: 'qt_1', coverFrom: '2026-10-04', validityDays: 30, insurerReference: 'MIC-BND-2231' }, response: { success: true, data: example },
   handler: async (req, res) => {
     const cn = await withTransaction((db) => svc.issueCoverNote(db, req.body, req.user));

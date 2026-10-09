@@ -55,7 +55,7 @@ const FIGURES = {
     const policy = scopeSql(c.recordScope, 'policy', 'p', p);
     const issued = await c.figure(`SELECT count(*)::int AS n FROM policies p WHERE ${policy} AND p.status IN ('active', 'issued')
       AND COALESCE(p.issued_date, (p.created_at AT TIME ZONE $2)::date) >= date_trunc('month', $1::date)::date`, p);
-    const pending = await c.figure(`SELECT (SELECT count(*)::int FROM placements pl WHERE pl.status = 'bound')
+    const pending = await c.figure(`SELECT (SELECT count(*)::int FROM placements pl WHERE pl.status IN ('epolicy_received', 'checked'))
       + (SELECT count(*)::int FROM quotes q WHERE q.deleted_at IS NULL AND q.status = 'approved') AS n`);
     const rfq = await c.figure("SELECT count(*)::int AS n FROM broker_slips b WHERE b.status = 'submitted'");
     return [

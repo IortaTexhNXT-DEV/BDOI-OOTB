@@ -186,7 +186,7 @@ export const QUERIES = {
   ...PERIOD_END_QUERIES,
   placementPipeline: {
     sql: placementPipeline, extras: [setting('reports.placement_age_buckets', [7, 14, 30, 60], 'int[]'),
-      setting('reports.placement_open_statuses', ['draft', 'submitted', 'responses-in', 'sent', 'bound', 'declined'], 'text[]')],
+      setting('reports.placement_open_statuses', ['draft', 'submitted', 'responses-in', 'sent', 'acknowledged', 'epolicy_received', 'checked', 'declined'], 'text[]')],
     filters: ['agent', 'insurer', 'branch', 'client', 'product', 'status'],
     criteria: { Overall: {}, 'Slip Type': { groupBy: 'slipType' }, Status: { groupBy: 'status' }, 'Open by Age': { where: 't.status = ANY($4::text[])', groupBy: 'ageBucket' },
       Agent: { groupBy: 'agent' } },

@@ -142,11 +142,11 @@ export const menuList = [
             permissions: ["read:quotations"],
           },
           {
-            // firm orders to the insurers, binding and policy issuance; direct policy entry
+            // firm orders to the insurers through to the e-policy, its check against the slip and the booking
             id: 34,
             name: "Placement Slips",
             path: "/placement/placement-slips",
-            includes: ["/placement/placement-slips", "/placement/record-issued-policy"],
+            includes: ["/placement/placement-slips", "/placement/record-epolicy"],
             permissions: ["read:quotations"],
           },
           // distribution: lead assignment and team view, brand-new vehicle programmes of dealers and banks, client

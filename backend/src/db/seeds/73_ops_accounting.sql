@@ -10,7 +10,7 @@ INSERT INTO app_settings(key, value, "group", label, type) VALUES
  ('cover_note.max_validity_days', '90', 'policies', 'Cover notes: longest cover period that may be entered (days)', 'number'),
  ('cover_note.reminder_days_before', '7', 'policies', 'Cover notes: remind the policy owner this many days before the cover note expires', 'number'),
  ('cover_note.quote_statuses', '["accepted","approved","submitted"]', 'policies', 'Cover notes: quotation statuses a cover note may be issued from', 'json'),
- ('cover_note.placement_statuses', '["sent","bound"]', 'policies', 'Cover notes: placement slip statuses a cover note may be issued from', 'json'),
+ ('cover_note.placement_statuses', '["sent","acknowledged","epolicy_received","checked"]', 'policies', 'Cover notes: placement slip statuses a cover note may be issued from (sent to the insurer and not yet booked)', 'json'),
  ('cover_note.wording', $j$"This cover note confirms that the insurance described below is in force for the period shown, subject to the terms, conditions and exclusions of the insurer's usual form of policy for this class of insurance. It ceases at the end of the cover period or when the policy is issued, whichever is earlier, and may be cancelled by the insurer by notice."$j$, 'policies', 'Cover notes: wording printed on the cover note', 'string'),
  ('endorsements.compute_cancellation_return', 'true', 'endorsements', 'Cancellations: compute the return premium (pro-rata, short-period or flat) instead of taking the amount entered', 'boolean'),
  ('endorsements.cancellation_allow_manual', 'false', 'endorsements', 'Cancellations: allow a return premium entered by hand (method manual)', 'boolean'),

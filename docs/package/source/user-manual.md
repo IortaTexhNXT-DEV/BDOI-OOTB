@@ -286,7 +286,7 @@ Status tags are coloured: green for completed, active or paid; amber for pending
 
 ## Statuses, approvals and maker-checker
 
-Every record carries a status that tells where it is in its life: a quotation goes from Draft to Pending Customer to Customer Accepted to Converted to Policy; a placement slip from Draft to Sent to insurer to Bound to Policy issued. The persona chapters give the statuses of each record and the module reference lists them all.
+Every record carries a status that tells where it is in its life: a quotation goes from Draft to Pending Customer to Customer Accepted to Converted to Policy; a placement slip from Placement raised to Sent to insurer, Acknowledged, e-Policy received, Checked against slip and Insurer issued (Booked). The persona chapters give the statuses of each record and the module reference lists them all.
 
 Maker-checker means that the user who enters a transaction cannot approve it. BrokerVerse refuses the approval with a message when the maker tries, and notifies the users who may approve. The maker-checker points are:
 
@@ -332,8 +332,8 @@ Every piece of business passes through the same cycle. Each step is done on its 
 3. **Insurer offers and comparison.** Each insurer's offer or decline is recorded against the request (OFR-YYYY-NNNNN). The offers are ranked by gross premium and compared, and the security is chosen: one insurer at 100%, or a lead insurer and co-insurers with shares that total 100%.
 4. **Quotation.** The chosen terms are priced for the client in a Quotation Slip: net premium, VAT, documentary stamp tax, local government tax, fire service tax where it applies, CTPL for motor, gross premium and commission. Number QT-YYYY-NNNNN.
 5. **Customer response.** The quotation is sent to the client for approval. The client accepts through the approval link, or the account executive records the answer received by e-mail, phone, Viber or WhatsApp, meeting or signed form: Accepted, Declined or Revise.
-6. **Placement slip.** For a risk that needs a firm order, the placement slip goes to the lead insurer and the co-insurers. Each insurer confirms its share with its policy or certificate number; when all have confirmed the slip is Bound. Number PS-YYYY-NNNNN.
-7. **Policy issuance.** The policy is issued from the bound placement slip, from the accepted quotation (motor and package lines) or recorded after the insurer issued it. The client record is created from the prospect. Numbers POL-YYYY-NNNNN and CL-YYYY-NNNNN.
+6. **Placement slip.** When the client accepts a quotation the placement slip is raised automatically and its PDF is kept with it. It is e-mailed to the lead insurer and the co-insurers with the slip attached, the insurer acknowledges it and later returns the e-policy, which is checked against the slip by a second user. Number PS-YYYY-NNNNN.
+7. **Policy issuance.** The broker never issues cover: the policy comes into force only when a checked placement slip is booked as **Insurer issued**. The bill, journal and commission are booked then, the cover notes end and the policy schedule is e-mailed to the client. The client record is created from the prospect. Numbers POL-YYYY-NNNNN and CL-YYYY-NNNNN.
 8. **Billing.** At issue the system raises the premium bill to the client (broker billed) or books the commission due from the insurer (direct bill), and posts the journal with each insurer's payable and commission on its own line. Numbers INV-YYYY-NNNNN and JV-YYYY-NNNNN.
 9. **Receipt and collection.** Operations or the account executive records how the client paid; Accounting verifies the payment and posts the official receipt against the bill. Collections follows unpaid premium by ageing bucket and sends reminders. Numbers OR-YYYY-NNNNN and RT-YYYY-NNNNN.
 10. **Remittance to the insurer.** Collected premium, net of the broker's commission and its taxes, is remitted to each insurer by its share, through a remittance, an insurer settlement and a payment voucher, each approved by a second user. Numbers REM-, SET- and PV-.
@@ -356,7 +356,7 @@ Every piece of business passes through the same cycle. Each step is done on its 
 | 4 | Quotation | Sales & Marketing, Operations; Processing Team for quotation slips from a request | Operations > Sales & Marketing > Quotations |
 | 5 | Customer response | Client (approval link); Sales & Marketing records other answers | Quotation: **Send for Customer Approval**, **Record customer response** |
 | 6 | Placement slip | Processing Team | Operations > Sales & Marketing > Placement Slips |
-| 7 | Policy issuance | Processing Team; Sales & Marketing and Operations for motor and package quotations | Placement Slip: **Issue Policy**; Quotation: **Proceed to Policy**; Placement Slips: **Record Issued Policy** |
+| 7 | Policy issuance | Processing Team | Placement Slip: **Book (Insurer issued)** |
 | 8 | Billing | System, at issue; Accounting for direct-bill debit notes | Policy: Premium Accounting Entries; Accounts > Remittance > Direct Bill Processing |
 | 9 | Receipt and collection | Operations or Sales record the payment; Accounting posts the receipt | Policy: **Proceed to Payment**; Accounts > Receipts; Accounts > Collections |
 | 10 | Remittance to insurer | Accounting, maker and checker | Accounts > Remittance; Accounts > Disbursement |
@@ -370,9 +370,9 @@ Every piece of business passes through the same cycle. Each step is done on its 
 
 ## The placement journey by line
 
-Not every line uses every step. The steps a line must, may or does not use are set in `placement.journey` (Master > Configuration, area Sales, Quotations & Placement). In the delivered configuration every step is optional for every line: a risk can be quoted and issued from a quotation, marketed with a request for quotation, bound with a placement slip, or recorded after the insurer issued the policy. When the System Administrator makes a step Required for a line, the policy of that line cannot be issued without it, and a step set to Not used is refused with a message that names the line.
+Not every line uses every step. The steps a line must, may or does not use are set in `placement.journey` and `placement.journey_by_business_type` (Master > Configuration, area Sales, Quotations & Placement). In the delivered configuration every line, renewals included, is placed through a placement slip: no quotation converts to a policy directly and no policy is entered after the fact. Motor comprehensive needs a quotation; CTPL may be placed directly with its LTO document or official receipt. A step set to Not used is refused with a message that names the line.
 
-Each quotation, request for quotation and placement slip shows its journey as a progress bar: **Request for Quotation**, **Quotation Slip**, **Placement Slip**, **Sent to insurer(s)**, **Bound / confirmed**, **Policy**. Each step shows the number of its record, or Optional, Required or Not used.
+Each quotation, request for quotation and placement slip shows its journey as a progress bar: **Request for Quotation**, **Quotation Slip**, **Placement raised**, **Sent to insurer**, **Acknowledged**, **e-Policy received**, **Checked against slip**, **Insurer issued (Booked)**. Each step shows the number of its record or its date, or Optional, Required or Not used.
 
 ## What the system posts
 
@@ -1118,8 +1118,8 @@ Choose Operations > Sales & Marketing > Quotations. The cards count **Total Quot
 |---|---|---|
 | Draft | Saved, not sent; can still be edited. | **Send for Customer Approval** |
 | Pending Customer | Sent to the client; waiting for the answer. | The client accepts, or **Record customer response** |
-| Customer Accepted | The client accepted. | **Proceed to Policy** or **Create Placement Slip** |
-| Approved | Approved by a user other than the creator. | **Proceed to Policy** |
+| Customer Accepted | The client accepted; the placement slip is raised automatically. | **Open Placement Slip** |
+| Approved | Approved by a user other than the creator. | Placement slip |
 | Rejected, Dropped | Not taken up; can be reopened as Draft. | |
 | Expired | Not converted within its validity (Quotation expiry job, daily 00:30). | Reopen as Draft |
 | Converted to Policy | The policy is issued; the quotation can no longer be edited. | |
@@ -1137,7 +1137,7 @@ Choose Operations > Sales & Marketing > Quotations. The cards count **Total Quot
 
 | Answer | Resulting status (`quotations.customer_response_status`) |
 |---|---|
-| Accepted | Customer Accepted: the quotation can go on to placement or policy. |
+| Accepted | Customer Accepted: the placement slip is raised. |
 | Declined | Rejected. |
 | Revise | Draft: change the quotation and send it again. |
 
@@ -1147,16 +1147,13 @@ Choose Operations > Sales & Marketing > Quotations. The cards count **Total Quot
 
 ### From the accepted quotation to the policy
 
-For motor and package lines, select **Proceed to Policy** on the accepted quotation:
+When the client accepts, the placement slip is raised automatically (setting `placement.auto_raise`) and the quotation shows it in its journey; the Processing Team continues as described in its chapter. If it could not be raised (for example no insurer is named on the quotation), the owner is notified with the reason and selects **Create Placement Slip** once it is fixed. The quotation itself never becomes a policy: the policy is booked from the placement slip once the insurer has issued it.
 
-1. **Customer information**: the government ID (**ID Type**, ID card number and a scan of the ID card), **Motor Number**, **Chassis Number** and **Plate Number** or **MV File Number**, and the optional mortgagee, CTPL certificate number and authentication code. The server refuses to issue a motor policy without the fields in `policy.kyc_required_fields`. The accepted ID types are PhilSys ID, UMID, Passport, Driver's License, PRC ID, SSS ID, GSIS ID, TIN ID, Postal ID, Voter's ID and Senior Citizen ID (`policy.kyc_id_types`).
+For motor lines, select **Proceed to Policy** on the accepted quotation to capture what the policy needs, so that it is not keyed again later:
+
+1. **Customer information**: the government ID (**ID Type**, ID card number and a scan of the ID card), **Motor Number**, **Chassis Number** and **Plate Number** or **MV File Number**, and the optional mortgagee, CTPL certificate number and authentication code. The plate or MV file number may still be TBA on the quotation; it is required when the e-policy is recorded. The accepted ID types are PhilSys ID, UMID, Passport, Driver's License, PRC ID, SSS ID, GSIS ID, TIN ID, Postal ID, Voter's ID and Senior Citizen ID (`policy.kyc_id_types`); the policy is not booked without the fields in `policy.kyc_required_fields`.
 2. **Vehicle photos**: left side, right side, front, rear and interior.
-3. **Review**: the policy, assured, vehicle, coverage, premium and the participating insurers with their shares. Choose the billing mode next to **Send to Insurance Company**: broker billed (the client pays the broker) or direct bill (the client pays the insurer). The default is the insurer's default billing mode, else `direct_bill.default_billing_mode` (broker). Select **Send to Insurance Company**: the policy is issued.
-4. **Upload policy**: check the policy number, insurer and dates, upload the insurer's policy document (PDF, PNG, JPG or JPEG, at most 10 MB) and choose **Pay Later** or **Proceed to Payment**.
-
-At issue the system gives the policy number, creates the client from the prospect (CL-YYYY-NNNNN), copies the participants, raises the premium bill (broker billed) or books the commission due from the insurer (direct bill), posts the journal and accrues the referrer's commission. The quotation becomes **Converted to Policy**.
-
-For a line that needs a firm order, select **Create Placement Slip** instead; the Processing Team continues as described in its chapter. When the placement slip is optional, **Send to insurance company** asks which way to go: place with the insurer(s) through a placement slip, or **Issue the policy directly**.
+3. **Review**: the policy, assured, vehicle, coverage, premium and the participating insurers with their shares, and the billing mode (broker billed or direct bill). **Send to Insurance Company** opens the placement slip of the quotation.
 
 ## Sales activities
 
@@ -1283,10 +1280,10 @@ The Processing Team reads prospects and their sales activities but does not crea
 | Daily | Work the submissions and open tasks | Processing Dashboard |
 | Daily | Send requests for quotation; record offers and declines | Requests for Quotation (Broker Slips) |
 | Daily | Compare offers and prepare Quotation Slips or Placement Slips | Request for Quotation > Compare offers |
-| Daily | Send placement slips, record confirmations, issue policies | Placement Slips |
+| Daily | Send placement slips, record acknowledgements and e-policies, check them against the slip, book the policies the insurers issued | Placement Slips |
 | Daily | Complete endorsements with the insurer's document | Policy > endorsement |
 | Daily | Approve renewal terms | Notification; Renewals > Negotiations |
-| On request | Record a policy the insurer issued | Placement Slips > **Record Issued Policy** |
+| On receipt | Record the e-policy an insurer sent | Placement Slips > **Record e-Policy** |
 | On request | Issue a cover note while the insurer issues the policy; issue a fleet schedule or a marine open cover | Operations > Cover Notes, Fleet Schedules, Marine Open Covers |
 | When rates change | Maintain the motor tariff and product templates | Product Configurator |
 
@@ -1354,7 +1351,7 @@ The request is then Closed and its progress bar links to the next records. **Ris
 
 ## Quotation Slips
 
-A Quotation Slip prepared from a request is a quotation (QT-YYYY-NNNNN) with the chosen insurer or insurers and their shares. It opens on Quotations like any other quotation, shows its placement journey and follows the statuses and the customer response described in the Sales & Marketing chapter. The account executive sends it to the client; when the client accepts, select **Create Placement Slip** on it.
+A Quotation Slip prepared from a request is a quotation (QT-YYYY-NNNNN) with the chosen insurer or insurers and their shares. It opens on Quotations like any other quotation, shows its placement journey and follows the statuses and the customer response described in the Sales & Marketing chapter. The account executive sends it to the client; when the client accepts, its placement slip is raised automatically.
 
 ![A Quotation Slip converted to a policy, with its placement journey](/home/user/BDOI-OOTB/docs/package/source/manual-images/p-quotation-slip.png)
 
@@ -1362,67 +1359,82 @@ A Quotation Slip prepared from a request is a quotation (QT-YYYY-NNNNN) with the
 
 ![Operations > Sales & Marketing > Placement Slips](/home/user/BDOI-OOTB/docs/package/source/manual-images/p-ps-list.png)
 
-Choose Operations > Sales & Marketing > Placement Slips. The cards count **Draft**, **Sent to insurer**, **Bound** and **Policy issued**; the filters choose a status and a source. Each row shows **Placement No.**, **Insured**, **Product**, **Lead insurer**, **Gross premium**, **Period**, **Confirmed** (insurers confirmed / participants), **Source** (From quotation slip, From broker slip, Direct placement or Recorded policy), **Status** and the **Policy** issued.
+The broker never issues cover. A placement slip goes to the insurer, the insurer acknowledges it and returns the e-policy, the e-policy is checked against the slip and only then is the policy booked. No screen lets a user complete cover without the insurer.
+
+Choose Operations > Sales & Marketing > Placement Slips. The cards count each step: **Placement raised**, **Sent to insurer**, **Acknowledged**, **e-Policy received**, **Checked against slip** and **Insurer issued (Booked)**; a card filters the list. The filters choose a status and a source. Each row shows **Placement No.**, **Insured**, **Product**, **Lead insurer**, **Gross premium**, **Period**, **Source** (From quotation slip, From broker slip, Direct placement, or Recorded policy for older records), **Status** and the **Policy** booked.
 
 | Status | Meaning |
 |---|---|
-| Draft | Prepared, not yet sent; participants can still be changed. |
-| Sent to insurer | The firm order was e-mailed to each participant. |
-| Bound | Every participant has confirmed; the policy can be issued. |
+| Placement raised | Prepared and its slip PDF stored; participants can still be changed. |
+| Sent to insurer | The firm order was e-mailed to each participant with its placement slip attached. |
+| Acknowledged | The insurer confirmed receipt of the order. |
+| e-Policy received | The e-policy the insurer issued was uploaded and its figures keyed; it waits for the check. |
+| Checked against slip | A second user confirmed that the e-policy matches the slip, or an approver accepted the differences. |
+| Insurer issued (Booked) | The policy is in force: bill, journal and commission booked, schedule e-mailed to the client. |
 | Declined | A participant declined its line: edit the participants or cancel the slip. |
-| Policy issued | The policy has been issued from the slip. |
 | Cancelled | Withdrawn with a reason. |
 
-A placement slip comes from **Prepare Placement Slip** on a request, from **Create Placement Slip** on an accepted quotation, or from **New direct placement** when the client instructs placement with named insurers and no quotation slip is needed.
+A placement slip is raised automatically when the client accepts a quotation, from **Prepare Placement Slip** on a request, or from **New direct placement** when the client instructs placement with named insurers and no quotation is needed (CTPL).
 
 ### Create a direct placement
 
 ![Direct Placement](/home/user/BDOI-OOTB/docs/package/source/manual-images/p-ps-direct.png)
 
 1. Select **New direct placement**.
-2. Fill in **Customer and risk** (**Customer**: Client, Prospect or New insured; **Product**; **Insured**; **Risk details**).
+2. Fill in **Customer and risk** (**Customer**: Client, Prospect or New insured; **Product**; **Insured**; **Risk details**). For CTPL attach the **LTO document / official receipt**; it is required (setting `placement.direct_document_products`) and goes to the insurer with the slip.
 3. Under **Period and premium**, enter **Inception** (required), **Expiry**, **Sum insured**, **Net premium** (required), **Commission rate** (empty: the insurer's default) and **Billing mode** (empty: System default), and **Remarks**.
 4. Under **Security (participating insurers)**, choose each insurer with **Add insurer**, enter its **Share** and tick **Lead** for one of them. The line under the table says whether the shares total 100% and whether the placement is a co-insurance or a single insurer.
 5. Select **Create Placement Slip**.
 
-The rules: at least one insurer; an insurer can take part only once; every share above 0%; exactly one lead; shares total exactly 100%.
+The rules: at least one insurer; an insurer can take part only once; every share above 0%; exactly one lead; shares total exactly 100%. Motor comprehensive cannot be placed without a quotation.
 
-### Send the firm order and record confirmations
+### Send to the insurer and record the acknowledgement
 
 ![Placement Slip PS-2026-00023 with its security, premium and summary](/home/user/BDOI-OOTB/docs/package/source/manual-images/p-ps-detail.png)
 
-1. Open the placement slip. **Security (participating insurers)** lists each insurer with role (Lead or Co-insurer), **Share**, **Sum insured**, **Premium**, **Taxes**, **Gross**, **Commission**, **Policy / certificate no.** and **Status**. Below are the **Premium** breakdown (sum insured, net premium, VAT, documentary stamp tax, local government tax, gross premium, commission), the **Summary** and the **Risk**.
-2. Select **Send to insurer(s)**. Each participant receives a placing slip showing its own share; the status becomes **Sent to insurer**. **Resend to insurers** sends it again.
-3. When an insurer confirms, select **Confirm** on its row, enter the **Insurer policy / certificate number** and save. The row becomes **Confirmed**.
-4. When an insurer declines its line, select **Declined** on its row and record the reason. Then use **Edit participants** to replace the insurer or change the shares so that they total 100% again.
+1. Open the placement slip. **Security (participating insurers)** lists each insurer with role (Lead or Co-insurer), **Share**, **Sum insured**, **Premium**, **Taxes**, **Gross**, **Commission**, **Policy / certificate no.** and **Status**. Below are the **Premium** breakdown, the **Summary** (with the stored **Placement file**) and the **Risk**.
+2. Select **Send to insurer(s)**. Each participant receives an e-mail with its own placement slip PDF attached (and the LTO document of a direct CTPL); the status becomes **Sent to insurer**. **Resend to insurers** sends it again, for example after the e-policy was returned.
+3. When the insurer confirms receipt, select **Record acknowledgement**, enter its reference and a remark, and save. The status becomes **Acknowledged**.
+4. When an insurer declines its line, select **Declined** on its row and record the reason. Then use **Edit participants** to replace the insurer or change the shares so that they total 100% again, and send again.
 
-When every participant has confirmed, the slip becomes **Bound** and the progress bar ticks **Bound / confirmed**. **Slip PDF** prints the placing slip; the PDF icon on a participant's row prints the placement slip for that insurer's share.
+**Slip PDF** prints the placement slip; the PDF icon on a participant's row prints the slip for that insurer's share.
 
-### Issue the policy
+### Upload the e-policy
 
-On a bound placement slip, select **Issue Policy**. Check the identifiers the system fills in from the client, the quotation and earlier policies, enter the **Policy number** (blank: numbered by the system) and confirm. The system:
+When the insurer sends the issued policy, select **Upload e-policy** (or use **Record e-Policy**, below). Attach the e-policy file and key what it says:
 
-- issues the policy and copies the participants, shares and insurer references to it;
+- **Insurer policy number** (required) and **BrokerVerse policy number** (blank: numbered by the system at booking);
+- **Participant name** (the insured named on the policy), **Sum insured**, **Net premium**, **Gross premium** and **Commission**;
+- **Issue date** and **Effective date** (required), **Issuance date**, **Expiry date** and **Production date**;
+- the **Deductible**, and for motor the **Chassis**, **Engine / motor**, **Plate** and **MV file** numbers. They are carried from the quotation; the plate number or the MV file number is required here even where the quotation said TBA;
+- the **References of the co-insurers**, an optional **Vehicle photo** and **Remarks**.
+
+The system compares the e-policy with the slip at once; the status becomes **e-Policy received** and the e-policy card shows **Matches the slip** or **Differs from the slip**.
+
+### Check against the slip
+
+The check is made by a user other than the one who uploaded the e-policy (maker-checker, setting `placement.check_maker_checker`).
+
+1. Select **Check against slip**. The slip and the e-policy are shown side by side: net premium, gross premium, sum insured, commission, effective and expiry dates, insured, vehicle identifiers and deductible (setting `placement.check_fields`). An amount within the tolerance matches: the larger of `placement.check_tolerance_amount` (1.00) and `placement.check_tolerance_pct` of the slip amount. Differences are highlighted; a value the quotation did not have (a plate number given as TBA) shows as **Captured**.
+2. When everything matches, select **Confirm check**. The status becomes **Checked against slip**.
+3. When there are differences, enter a reason and either select **Return to insurer**, which e-mails the differences to the lead insurer and sets the slip back to **Acknowledged** until a corrected e-policy is uploaded, or, for an approver with policy issuance rights, **Accept differences**, which records the reason and sets the slip to **Checked against slip**.
+
+### Book the policy (Insurer issued)
+
+On a checked placement slip, a user with policy issuance rights selects **Book (Insurer issued)**, checks the ID details proposed for a motor risk and confirms. The system:
+
+- creates the policy with the e-policy's numbers, insured name and dates, copies the participants, shares and insurer references to it, and makes it active;
 - creates the client from the prospect if the insured is not yet a client;
-- raises the premium bill to the client (broker billed) or books the commission due from the insurers (direct bill);
-- posts the journal with each insurer's payable and commission on its own line;
-- sets the slip to **Policy issued** and links the policy. The message reads Policy (number) issued.
+- raises the premium bill to the client (broker billed) or books the commission due from the insurers (direct bill), posts the journal and accrues the commission;
+- ends the active cover notes of the quotation or placement;
+- e-mails the policy schedule, with the insurer's e-policy, to the client's registered e-mail address (setting `placement.schedule_email_on_booking`);
+- sets the slip to **Insurer issued (Booked)** and links the policy. The message reads Policy (number) booked.
 
-A user without policy issuing rights sees that all insurers confirmed and that a user with policy issuance rights can now issue the policy. A line that requires a placement slip refuses issue from the quotation with the message This line requires a Placement Slip before the policy is issued.
+Nothing is booked before this step: there is no policy, bill or commission for a placement that is not yet checked. A quotation of a line that requires a placement slip is refused at **Proceed to Policy** with the message This line requires a Placement Slip before the policy is issued.
 
-## Record Issued Policy
+## Record e-Policy
 
-Use **Record Issued Policy** when the insurer has already issued the policy, for example a renewal the insurer processed itself or a policy placed before the account came to BrokerVerse. The policy, the bill and the commission are created in one step.
-
-![Record Issued Policy](/home/user/BDOI-OOTB/docs/package/source/manual-images/p-record-issued.png)
-
-1. Choose Placement Slips and select **Record Issued Policy**.
-2. Fill in **Customer and risk**.
-3. Under **Policy, period and premium**, enter the **Insurer policy number** (blank: numbered by the system), **Issued date**, **Inception**, **Expiry**, **Sum insured**, **Net premium**, **Commission rate**, **Billing mode** and **Remarks**.
-4. Under **Security (participating insurers)**, add each participant with its share and its own **Policy / certificate no.**.
-5. Select **Record policy**.
-
-A line whose journey does not allow a direct policy entry refuses it; place those risks through a placement slip.
+Use **Record e-Policy** to key the e-policies the insurers send back without searching for each placement slip. Choose Placement Slips and select **Record e-Policy**: the list shows the placement slips sent to the insurer or acknowledged. Select a row, then fill in the e-policy as described in Upload the e-policy. The placement slip opens afterwards for the check against the slip by another user.
 
 ## Co-insured policies and premium accounting entries
 
@@ -1641,10 +1653,10 @@ After sending, the endorsement waits for the insurer (**Waiting for Update**). T
 
 ![Operations > Cover Notes](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-cover-notes.png)
 
-A cover note is temporary evidence of cover that the broker gives the client while the insurer issues the policy. It is issued from a quotation the customer accepted or from a placement slip sent to (or bound by) the insurers, and it stays in force for the cover period (30 days by default, setting `cover_note.validity_days`).
+A cover note is temporary evidence of cover that the broker gives the client while the insurer issues the policy. It is issued from a quotation the customer accepted or from a placement slip that is with the insurer and not yet booked, and it stays in force for the cover period (30 days by default, setting `cover_note.validity_days`).
 
 1. Choose Operations > Cover Notes and select **Issue cover note**.
-2. Search the quotation, placement slip or client and select the row. Only quotations whose status is in `cover_note.quote_statuses` (accepted, approved, submitted) and placement slips in `cover_note.placement_statuses` (sent, bound) without a policy or an active cover note are listed.
+2. Search the quotation, placement slip or client and select the row. Only quotations whose status is in `cover_note.quote_statuses` (accepted, approved, submitted) and placement slips in `cover_note.placement_statuses` (sent, acknowledged, e-policy received, checked) without a policy or an active cover note are listed.
 3. Check **Cover from** (the inception of the placement, else today), the **Cover period (days)** (empty: the default; at most `cover_note.max_validity_days`), the **Insurer binder reference** and any **Special conditions**.
 4. Select **Issue cover note**. The number is CVN-YYYY-NNNNN (Master > Document Numbering, series cover_note).
 
@@ -2868,7 +2880,7 @@ The landing page of every role after sign-in: My Work with the role preset (cate
 | Compare Insurers | Compare insurers' premiums for a package product. | Product, sum insured, location of the risk, inception date; rates from Insurer Rate Tables. | Sales & Marketing |
 | Requests for Quotation (Broker Slips) | Present a risk to several insurers (BS-) and record offers (OFR-). | Customer, product, insured, period, response due, risk details, covers, insurers to approach (required); statuses Draft, Submitted, Responses in, Closed, Cancelled. | Processing Team |
 | Quotations | Price cover for the client (QT-). | Server re-pricing; validity 30 days; statuses Draft, Pending Customer, Customer Accepted, Approved, Rejected, Dropped, Expired, Converted to Policy; customer response Accepted, Declined, Revise. | Sales & Marketing |
-| Placement Slips | Firm order to the insurers (PS-). | Participants with shares totalling exactly 100% and one lead; statuses Draft, Sent to insurer, Bound, Declined, Policy issued, Cancelled; **New direct placement**, **Record Issued Policy**. | Processing Team |
+| Placement Slips | Firm order to the insurers (PS-). | Participants with shares totalling exactly 100% and one lead; statuses Placement raised, Sent to insurer, Acknowledged, e-Policy received, Checked against slip, Insurer issued (Booked), Declined, Cancelled; **New direct placement**, **Record e-Policy**. | Processing Team |
 | Lead Assignment | Give each prospect an account executive. | Tabs Team View, Queue, Assignment Rules; methods round robin, fewest open prospects, fixed; `leads.assignment_fallback`, `leads.assignment_sla_hours`. | Distribution, programmes and products |
 | Dealer Programmes | Brand-new vehicle programmes with dealers and financing banks. | Rates, who pays (free first year, subsidy), what the upload creates; Dealer Sales upload (DSB-); bank endorsement letters. | Distribution, programmes and products |
 | Comparison Reports | The branded comparison of insurers' offers given to the client (CMP-). | From a request for quotation or several quotations; recommended option and reasons; never shows commission; **Client report (PDF)**, **E-mail to the client**, **Client chose**. | Distribution, programmes and products |
@@ -3187,8 +3199,9 @@ BrokerVerse runs its daily work through scheduled jobs, in Manila time: policy e
 | A required field is empty | Fill in every field marked with an asterisk. |
 | Shares must total exactly 100% (now ...%) | Correct the participants' shares so that they total 100%, with exactly one lead. |
 | Exactly one participant must be the lead insurer | Tick Lead for one participant only. |
-| This line requires a Placement Slip before the policy is issued | Create the placement slip, send it and record the confirmations, then issue from the slip. |
-| The policy cannot be issued from the placement slip | An insurer has not confirmed, or your role cannot issue policies. |
+| This line requires a Placement Slip before the policy is issued | Open the placement slip raised when the client accepted, send it, record the e-policy, have it checked and book it. |
+| The policy is booked only once the insurer has issued it | The e-policy has not been recorded or checked against the slip yet, or your role cannot book policies. |
+| Maker-checker: the check against the slip must be confirmed by a user other than the one who recorded the e-policy | Ask another user to make the check. |
 | Issue refused for missing KYC or vehicle identifiers | Complete the ID type, ID number and image, chassis number, motor number and plate or MV file number. |
 | Only Draft quotations can be sent for approval | The quotation was already sent. Wait for the client, or record the response Revise to return it to Draft. |
 | A quotation converted to a policy cannot be edited | Raise an endorsement on the policy instead. |
@@ -3240,7 +3253,8 @@ BrokerVerse runs its daily work through scheduled jobs, in Manila time: policy e
 | ATC | Alphanumeric Tax Code of the BIR, for example WI515 or WC139. |
 | BIR Form 2307 | Certificate of Creditable Tax Withheld at Source, issued by the withholding agent to the payee each quarter. |
 | Billing mode | How the premium is paid: broker billed or direct bill. |
-| Bound | All insurers of a placement slip have confirmed their shares. |
+| Checked against slip | The e-policy returned by the insurer was compared with the placement slip and confirmed by a second user. |
+| e-Policy | The issued policy the insurer sends back to the broker, recorded against the placement slip. |
 | Brand pack | The branding of one environment in one file (theme, application name, logo, favicon, sign-in picture, print logo), exported and imported on Theme and Branding. A bundled pack is delivered with the product and enabled on the same screen after the administrator confirms that the environment belongs to the client engagement whose contract with iorta TechNXT covers its marks; nothing is enabled by default. |
 | Broker billed | The client pays the premium to the broker, who remits it to the insurer net of commission. |
 | Broker slip | The request for quotation that presents a risk to several insurers. |
