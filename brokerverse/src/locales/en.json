@@ -6422,7 +6422,8 @@
       "inactive": "Inactive",
       "completed": "Completed",
       "issued": "Issued"
-    }
+    },
+    "runInProgress": "This period has a close run in progress ({{number}}): open it from the list"
   },
   "birTax": {
     "withholdingReturns": "Withholding Returns",

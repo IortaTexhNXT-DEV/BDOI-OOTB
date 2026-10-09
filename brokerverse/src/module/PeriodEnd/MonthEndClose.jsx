@@ -11,6 +11,9 @@ import { Toast } from "primereact/toast";
 import periodEndService from "../../services/periodEndService";
 import { PageHeader, StatusTag, dateTime, previousPeriod, showError } from "./common";
 
+/** Run statuses of a close still in progress (the API allows one per period). */
+const ACTIVE_RUN = ["draft", "in-progress", "blocked", "ready", "pending-approval", "soft-closed"];
+
 /** Accounts > Period End > Month-End Close: close runs per period (MEC numbers) and a new run for an open period. */
 const MonthEndClose = () => {
   const { t } = useTranslation();
@@ -48,6 +51,9 @@ const MonthEndClose = () => {
   const openPeriods = useMemo(() => periods.filter((p) => !p.isAdjustment && ["open", "soft_closed"].includes(p.status))
     .map((p) => ({ label: `${p.period} (${t(`periodEnd.status.${p.status}`)})`, value: p.period })), [periods, t]);
 
+  // a period with a run still in progress has no second run: the run is opened from the list instead
+  const openRun = (period) => runs.find((r) => r.period === period && ACTIVE_RUN.includes(r.status));
+  const running = creating ? openRun(creating.period) : null;
   const create = async () => {
     setBusy(true);
     try {
@@ -67,7 +73,8 @@ const MonthEndClose = () => {
         <Dropdown value={fiscalYear} options={years.map((y) => ({ label: y.code, value: y.code }))} onChange={(e) => setFiscalYear(e.value)} style={{ minWidth: 160 }} />
         <Button icon="pi pi-plus" label={t("periodEnd.newCloseRun")} onClick={() => {
           const prev = previousPeriod();
-          setCreating({ period: openPeriods.find((o) => o.value === prev)?.value || openPeriods[0]?.value || null, remarks: "" });
+          const free = openPeriods.filter((o) => !openRun(o.value));
+          setCreating({ period: free.find((o) => o.value === prev)?.value || free[0]?.value || openPeriods[0]?.value || null, remarks: "" });
         }} />
       </PageHeader>
 
@@ -90,7 +97,7 @@ const MonthEndClose = () => {
         footer={(
           <div>
             <Button label={t("periodEnd.cancel")} text onClick={() => setCreating(null)} />
-            <Button label={t("periodEnd.startRun")} icon="pi pi-play" loading={busy} disabled={!creating?.period} onClick={create} />
+            <Button label={t("periodEnd.startRun")} icon="pi pi-play" loading={busy} disabled={!creating?.period || !!running} onClick={create} />
           </div>
         )}>
         {creating && (
@@ -99,6 +106,7 @@ const MonthEndClose = () => {
               <label htmlFor="pe-run-period">{t("periodEnd.period")} *</label>
               <Dropdown inputId="pe-run-period" value={creating.period} options={openPeriods} onChange={(e) => setCreating({ ...creating, period: e.value })} className="w-full"
                 placeholder={t("periodEnd.selectPeriod")} emptyMessage={t("periodEnd.noOpenPeriods")} />
+              {running ? <small className="p-error block mt-1" role="alert">{t("periodEnd.runInProgress", { number: running.runNumber })}</small> : null}
             </div>
             <div className="col-12">
               <label htmlFor="pe-run-remarks">{t("periodEnd.remarks")}</label>
