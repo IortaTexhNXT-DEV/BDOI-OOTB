@@ -23,7 +23,7 @@ import { getUserRoles, isPathAllowed } from "../../utils/menuPermissions";
 import { calendarDateFormat, toDate, toIsoDate } from "../../utility/dateFormat";
 import { formatPercent, progressValue } from "../../utility/numberFormat";
 
-const SETTINGS_PATH = "/master/configuration/system-settings";
+const SETTINGS_PATH = "/master/configuration/settings";
 /**
  * [from, today] of the calendar period the KPIs use: This Month = 1st of the month, This Quarter = 1st of the
  * calendar quarter, This Year = 1 January (the server sends the same range in Manila time as data.period).
@@ -77,7 +77,7 @@ const ExecutiveDashboard = () => {
     return QUICK_ACTIONS.filter((a) => isPathAllowed(a.path, menuList, roles));
   });
   const toast = useRef(null);
-  // Settings opens System Settings (dashboard targets live there); only for roles that may open it
+  // Settings opens Configuration > Reports & Dashboards (the dashboard targets); only for roles that may open it
   const [canOpenSettings] = useState(() => isPathAllowed(SETTINGS_PATH, menuList, getUserRoles()));
   const [selectedPeriod, setSelectedPeriod] = useState("month");
   // export range: follows the chosen period (the KPIs cover the same rolling window) and can be changed
@@ -269,7 +269,7 @@ const ExecutiveDashboard = () => {
                 label={t("executiveDashboard.settings")}
                 icon="pi pi-cog"
                 severity="secondary"
-                onClick={() => navigate(SETTINGS_PATH)}
+                onClick={() => navigate(`${SETTINGS_PATH}?area=reports`)}
               />
             )}
           </div>
@@ -290,7 +290,7 @@ const ExecutiveDashboard = () => {
           />
           <Button label={t("executiveDashboard.exportReport")} icon="pi pi-download" severity="info" onClick={handleExport} />
           {canOpenSettings && (
-            <Button label={t("executiveDashboard.settings")} icon="pi pi-cog" severity="secondary" onClick={() => navigate(SETTINGS_PATH)} />
+            <Button label={t("executiveDashboard.settings")} icon="pi pi-cog" severity="secondary" onClick={() => navigate(`${SETTINGS_PATH}?area=reports`)} />
           )}
         </div>
       </div>
