@@ -22,7 +22,7 @@ const MODES = ['required', 'optional', 'skip'];
 const FALLBACK = { brokerSlip: 'optional', quotationSlip: 'optional', placementSlip: 'optional', directPolicy: 'optional' };
 
 /** LOB code of a product line from the product master (fire lines named "Industrial All Risks" are IAR). */
-const fromLine = (line, name) => (line ? (line === 'fire' && /industrial/i.test(name || '') ? 'IAR' : String(line).toUpperCase()) : null);
+export const fromLine = (line, name) => (line ? (line === 'fire' && /industrial/i.test(name || '') ? 'IAR' : String(line).toUpperCase()) : null);
 
 /** The product master row of a risk: by id, else by code or name (the product type). */
 async function findProduct({ productId = null, productType = null }, c) {

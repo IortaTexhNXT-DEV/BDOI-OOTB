@@ -24,10 +24,16 @@ const leadBody = z.object({
   DOB: z.string().optional().nullable(), gender: z.string().max(20).optional().nullable(), emailId: optionalEmail,
   contactNumber: z.string().max(40).optional().nullable(), leadCategory: z.string().max(40).optional().nullable(),
   lob: z.string().max(60).optional().nullable(), status: z.string().max(40).optional().nullable(),
+  productId: z.union([z.number().int(), z.string().max(60)]).optional().nullable(),
 }).passthrough();
+const tagBody = z.object({
+  lob: z.string().trim().min(1, 'Choose the line of business').max(60),
+  productId: z.union([z.number().int(), z.string().trim().min(1, 'Choose the product').max(60)]),
+});
 const createBody = leadBody.refine((b) => b.firstName || b.companyName, { message: 'firstName or companyName is required', path: ['firstName'] });
 
-const example = { leadId: 'ld_1', generatedLeadId: 'LD-2026-00001', firstName: 'Juan', lastName: 'Dela Cruz', leadCategory: 'Retail', lob: 'MOTOR', emailId: 'juan@example.com', contactNumber: '09171234567', city: 'Makati', province: 'Metro Manila', country: 'Philippines', status: 'New', quotationsCount: 0 };
+const example = { leadId: 'ld_1', generatedLeadId: 'LD-2026-00001', firstName: 'Juan', lastName: 'Dela Cruz', leadCategory: 'Retail', lob: 'MOTOR', productId: 1,
+  productName: 'Motor Vehicle Insurance', productTagged: true, emailId: 'juan@example.com', contactNumber: '09171234567', city: 'Makati', province: 'Metro Manila', country: 'Philippines', status: 'New', quotationsCount: 0 };
 
 async function listHandler(req, res) {
   const pg = paging(req.query);
@@ -36,7 +42,7 @@ async function listHandler(req, res) {
 }
 
 define({
-  method: 'GET', path: '/', summary: 'List leads (filters leadCategory, country, province, city, lob, status; search query; paging)', screen: SCREEN,
+  method: 'GET', path: '/', summary: 'List leads (filters leadCategory, country, province, city, lob (none: product not yet tagged), status; search query; paging)', screen: SCREEN,
   middleware: canRead, query: { page: 1, pageSize: 10, leadCategory: 'Retail', lob: 'FIRE', query: 'juan' },
   response: { success: true, data: [example], page: 1, pageSize: 10, total: 1 }, handler: listHandler,
 });
@@ -61,7 +67,7 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/bulk-upload', summary: 'Bulk upload leads from CSV or XLSX (multipart field "file"; header row with First Name, Last Name, Email, Contact Number ...)',
+  method: 'POST', path: '/bulk-upload', summary: 'Bulk upload leads from CSV or XLSX (multipart field "file"; header row with First Name, Last Name, Email, Contact Number ...; LOB and Product optional: empty, the product is tagged later)',
   screen: `${SCREEN} > Bulk Upload`, middleware: [...canWrite, uploadFile], request: 'multipart/form-data file',
   response: { success: true, data: { message: 'Processed 3 rows: 3 created, 0 failed', total: 3, created: 3, failed: 0, errors: [] } },
   handler: async (req, res) => {
@@ -76,7 +82,7 @@ define({
         const lead = await withTransaction((c) => svc.createLead(parsed.data, actor(req), c));
         await audit(req, { entity: 'lead', entityId: lead.id, action: 'bulk-create', after: svc.toLead(lead) });
         created += 1;
-      } catch (e) { errors.push({ row: i + 2, message: e.message }); }
+      } catch (e) { errors.push({ row: i + 2, message: e.details?.length ? e.details.map((d) => d.message).join('; ') : e.message }); }
     }
     const data = { message: `Processed ${rows.length} rows: ${created} created, ${errors.length} failed`, total: rows.length, created, failed: errors.length, errors };
     res.json({ success: true, message: data.message, data });
@@ -88,7 +94,7 @@ define({
   handler: async (req, res) => sendEntity(res, svc.toLead(await svc.getLead(req.params.id))),
 });
 define({
-  method: 'POST', path: '/', summary: 'Create a lead (Motor / Fire / IAR lead forms)', screen: `${SCREEN} > Create Lead`, middleware: [...canWrite, validate(createBody)],
+  method: 'POST', path: '/', summary: 'Create a lead (Motor / Fire / IAR lead forms); lob and productId optional (the product is tagged later) unless leads.product_required', screen: `${SCREEN} > Create Lead`, middleware: [...canWrite, validate(createBody)],
   request: { firstName: 'Juan', lastName: 'Dela Cruz', preferredName: 'Juan', DOB: '1990-05-01', gender: 'Male', emailId: 'juan@example.com', contactNumber: '09171234567', houseNo: '12 Rizal St', barangay: 'Poblacion', city: 'Makati', province: 'Metro Manila', country: 'Philippines', zipCode: '1210', leadCategory: 'Retail', lob: 'FIRE' },
   response: { ...example, success: true, data: example },
   handler: async (req, res) => {
@@ -105,6 +111,17 @@ define({
     const lead = svc.toLead(after);
     await audit(req, { entity: 'lead', entityId: lead.id, action: 'update', before: svc.toLead(before), after: lead });
     sendEntity(res, lead, { message: 'Lead updated' });
+  },
+});
+define({
+  method: 'PUT', path: '/:id/product', summary: 'Tag or change the line of business and product of a lead; the product must be an active product of the line (audit action tag-product)',
+  screen: `${SCREEN} > Tag product`, middleware: [...canWrite, ownRecord('lead'), validate(tagBody)],
+  request: { lob: 'MOTOR', productId: 1 }, response: { ...example, success: true, data: example, message: 'Product tagged' },
+  handler: async (req, res) => {
+    const { before, after } = await svc.tagProduct(req.params.id, req.body, actor(req));
+    const lead = svc.toLead(after);
+    await audit(req, { entity: 'lead', entityId: lead.id, action: 'tag-product', before: svc.productTagOf(before), after: svc.productTagOf(after) });
+    sendEntity(res, lead, { message: before.lob ? 'Product changed' : 'Product tagged' });
   },
 });
 define({

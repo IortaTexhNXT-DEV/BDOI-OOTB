@@ -16,6 +16,7 @@ import { nextDocumentNumber } from '../../lib/numbering.js';
 import { insurerId } from '../policies/service.js';
 import { quotationCharges } from '../premium-charges/service.js';
 import { journeyFor, resolveLob, assertStep } from './journey.js';
+import { productOfLine } from './productLines.js';
 import { createLead } from '../leads/service.js';
 import { assertOnMarket, evaluate, assertNotDeclined } from '../product-configurator/underwriting.js';
 
@@ -164,10 +165,12 @@ export async function createSlip(input, userId) {
   const id = await withTransaction(async (db) => {
     const body = { ...input };
     const productId = body.productId ? Number(body.productId) : null;
+    if (productId && body.lob) await productOfLine(db, { lob: body.lob, product: productId, active: false });
     const lob = await resolveLob({ lob: body.lob, productId, productType: body.productType }, db);
     if (!body.leadRefId && !body.clientId && body.prospect) {
       const p = body.prospect;
-      const lead = await createLead({ ...p, leadCategory: p.companyName ? 'Corporate' : 'Retail', lob }, userId, db);
+      // the new prospect is tagged with the product of the request
+      const lead = await createLead({ ...p, leadCategory: p.companyName ? 'Corporate' : 'Retail', lob, ...(productId ? { productId } : {}) }, userId, db);
       newProspectId = lead.id;
       body.leadRefId = lead.id;
     }

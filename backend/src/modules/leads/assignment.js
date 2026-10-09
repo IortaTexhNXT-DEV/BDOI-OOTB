@@ -6,7 +6,9 @@
  * (Province, City / Municipality); an empty condition matches anything. The first active rule by priority (then id)
  * that matches picks an active assignee: round_robin (the next one after the last assigned), load (fewest open
  * prospects) or fixed (the first one). With no active rule at all the creator keeps the prospect; when rules exist
- * but none matches, leads.assignment_fallback decides (queue or creator).
+ * but none matches, leads.assignment_fallback decides (queue or creator). A rule with a line of business does not match
+ * a prospect whose product is not yet tagged; once tagged, a prospect queued because no rule matched is offered to the
+ * rules again.
  */
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { badRequest, forbidden, notFound } from '../../lib/errors.js';
@@ -17,6 +19,8 @@ import { notify } from '../notifications/service.js';
 
 export const METHODS = ['round_robin', 'load', 'fixed'];
 export const CONDITION_KEYS = ['branchCode', 'lob', 'source', 'leadCategory', 'channelId', 'province', 'city'];
+/** Queue reason of a new prospect that no rule matched. */
+const NO_RULE_MATCHED = 'No assignment rule matched';
 /** Prospect statuses that are no longer worked (not counted as open, never queued). */
 const CLOSED = ['Converted', 'Lost', 'converted', 'lost'];
 
@@ -165,8 +169,21 @@ export async function assignNewLead(db, leadId, creatorId) {
     return { userId, ruleId: rule.id, queued: false };
   }
   if ((await getSetting('leads.assignment_fallback', 'creator')) !== 'queue') return { userId: creatorId, ruleId: null, queued: false };
-  await queueLead(db, lead, 'No assignment rule matched', creatorId);
+  await queueLead(db, lead, NO_RULE_MATCHED, creatorId);
   return { userId: null, ruleId: null, queued: true };
+}
+
+/**
+ * A prospect whose product was just tagged: when it waits in the queue because no rule matched it, the rules run again
+ * and assign it if one now matches (a rule for its line). Returns the assignment, or null when nothing changed.
+ */
+export async function assignTaggedLead(db, leadId, by) {
+  const lead = (await db.query('SELECT * FROM leads WHERE id = $1', [leadId])).rows[0];
+  if (lead?.assignment_status !== 'queued' || lead.queue_reason !== NO_RULE_MATCHED) return null;
+  if ((await getSetting('leads.assignment_enabled', true)) === false) return null;
+  const rules = (await db.query("SELECT * FROM lead_assignment_rules WHERE status = 'active'")).rows;
+  if (!rules.some((r) => ruleMatches(r, lead))) return null;
+  return assignNewLead(db, leadId, by);
 }
 
 /** Reassign prospects to a user (one, a bulk selection, or from the queue). */

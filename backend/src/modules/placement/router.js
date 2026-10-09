@@ -19,6 +19,7 @@ import { getPolicyRow, toPolicy } from '../policies/service.js';
 import * as slips from './brokerSlips.js';
 import * as plc from './placements.js';
 import { journeyFor } from './journey.js';
+import { productLines } from './productLines.js';
 import { many } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
 
@@ -218,6 +219,16 @@ define({
     }
     const defaultBillingMode = (await getSetting('direct_bill.default_billing_mode', 'broker')) || 'broker';
     res.json({ success: true, data: { insurers: insurers.map((i) => ({ ...i, commissionRate: i.commissionRate === null ? null : Number(i.commissionRate) })), products, defaultBillingMode } });
+  },
+});
+define({
+  method: 'GET', path: '/product-lines', summary: 'Products grouped by line of business for the product pickers: active lines (Line of Business master) with their active products (Product master); businessType=package | non_package filters the products',
+  screen: 'Operations > Sales & Marketing > Prospects (Create Prospect, Tag product), Quick Quote, Quotations (Create Quote), Request for Quotation, Placement Slips',
+  middleware: [requireAuth, requirePermission('read:quotations', 'read:leads')], query: { businessType: 'package' },
+  response: { success: true, data: { lines: [{ code: 'ACCIDENT', name: 'Personal Accident', products: [{ id: 9, code: 'PA', name: 'Personal Accident', line: 'ACCIDENT', lob: 'ACCIDENT', businessType: 'package', customerSegment: 'retail' }] }] } },
+  handler: async (req, res) => {
+    const businessType = ['package', 'non_package'].includes(req.query.businessType) ? req.query.businessType : null;
+    res.json({ success: true, data: { lines: await productLines({ businessType }) } });
   },
 });
 define({

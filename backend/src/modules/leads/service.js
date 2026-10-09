@@ -9,7 +9,8 @@ import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { isoDate } from '../../lib/dates.js';
 import { fillRegion } from '../../lib/address.js';
-import { assignNewLead } from './assignment.js';
+import { productOfLine } from '../placement/productLines.js';
+import { assignNewLead, assignTaggedLead } from './assignment.js';
 
 /** Fields the lead screens send, mapped to columns. Anything else is kept in `extra`. */
 const FIELD_MAP = {
@@ -19,7 +20,7 @@ const FIELD_MAP = {
   mooVillage: 'moo', street: 'road', leadCategory: 'lead_category', taxInformationNumber: 'tax_number', source: 'source', notes: 'notes',
   productType: 'product_interest', status: 'status', channelId: 'channel_id', branchCode: 'branch_code',
 };
-const KNOWN = new Set([...Object.keys(FIELD_MAP), 'DOB', 'lob', 'email', 'mobileNumber', 'createdBy', 'updatedBy', 'leadId', 'id',
+const KNOWN = new Set([...Object.keys(FIELD_MAP), 'DOB', 'lob', 'productId', 'product', 'productName', 'email', 'mobileNumber', 'createdBy', 'updatedBy', 'leadId', 'id',
   'generatedLeadId', 'createdAt', 'updatedAt', 'quotationsCount', 'clientId', 'ownerUserId', 'ownerName', 'channelName', 'assignmentStatus', 'queueReason']);
 
 /** Row -> the lead object the screens read (leadId, generatedLeadId, emailId, contactNumber, DOB ...). */
@@ -32,13 +33,19 @@ export function toLead(r) {
     DOB: r.birth_date, gender: r.gender, emailId: r.email, email: r.email, contactNumber: r.phone, mobileNumber: r.phone,
     houseNo: r.house_no, barangay: r.barangay, city: r.city, province: r.state, region: r.region, country: r.country, zipCode: r.postal_code,
     street: r.road, roadThanon: r.road, soiAlley: r.soi, mooVillage: r.moo, leadCategory: r.lead_category, companyName: r.company_name,
-    taxInformationNumber: r.tax_number, lob: r.lob, productType: r.product_interest, source: r.source, notes: r.notes,
+    taxInformationNumber: r.tax_number, lob: r.lob, productType: r.product_interest, productId: r.product_id ?? null, productName: r.product_name ?? null,
+    productTagged: Boolean(r.lob), source: r.source, notes: r.notes,
     status: r.status, clientId: r.client_id, ownerUserId: r.owner_user_id, quotationsCount: r.quotations_count ?? 0,
     channelId: r.channel_id ?? null, channelName: r.channel_name ?? null, branchCode: r.branch_code ?? null, ownerName: r.owner_name ?? null,
     assignmentStatus: r.assignment_status ?? null, queueReason: r.queue_reason ?? null,
     createdBy: r.created_by_name || r.created_by, updatedBy: r.updated_by, createdAt: r.created_at, updatedAt: r.updated_at,
   };
 }
+
+/** lob filter of the prospects whose product is not yet tagged (the Prospects tab Product not yet tagged). */
+export const UNTAGGED = 'none';
+/** How a prospect without a product reads on the report, the stats and the lead funnel. */
+export const UNTAGGED_LABEL = 'Product not yet tagged';
 
 const displayName = (b) => [b.firstName, b.lastName].filter(Boolean).join(' ').trim() || b.companyName || b.preferredName || 'Unnamed lead';
 
@@ -48,7 +55,7 @@ function columnsFrom(body) {
   if (body.emailId === undefined && body.email !== undefined) cols.email = body.email || null;
   if (body.contactNumber === undefined && body.mobileNumber !== undefined) cols.phone = body.mobileNumber || null;
   if (body.DOB !== undefined) cols.birth_date = isoDate(body.DOB);
-  if (body.lob !== undefined) cols.lob = lobOf(body.lob);
+  if (body.lob !== undefined) cols.lob = body.lob ? lobOf(body.lob) : null;
   const extra = Object.fromEntries(Object.entries(body).filter(([k]) => !KNOWN.has(k)));
   return { cols, extra };
 }
@@ -56,7 +63,22 @@ function columnsFrom(body) {
 const SELECT = `SELECT l.*, (SELECT count(*)::int FROM quotes q WHERE q.lead_id = l.id AND q.deleted_at IS NULL) AS quotations_count,
   (SELECT u.display_name FROM users u WHERE u.id = l.created_by) AS created_by_name,
   (SELECT u.display_name FROM users u WHERE u.id = l.owner_user_id) AS owner_name,
-  (SELECT ch.name FROM distribution_channels ch WHERE ch.id = l.channel_id) AS channel_name FROM leads l`;
+  (SELECT ch.name FROM distribution_channels ch WHERE ch.id = l.channel_id) AS channel_name,
+  (SELECT p.name FROM products p WHERE p.id = l.product_id) AS product_name FROM leads l`;
+
+/**
+ * Line of business and product columns from a body naming a product (productId, else `product` by code or name): the
+ * product must be an active product of the line given, and the line follows the product. {} when no product is named.
+ */
+async function productColumns(db, body) {
+  const ref = body.productId ?? body.product;
+  if (ref === undefined || ref === null || String(ref).trim() === '') return {};
+  const p = await productOfLine(db, { lob: body.lob, product: ref }, body.productId !== undefined ? 'productId' : 'product');
+  return { lob: p.lob, product_id: p.id, product_interest: p.name };
+}
+
+/** The line and product of a prospect as the audit trail records them. */
+export const productTagOf = (r) => ({ lob: r.lob, productId: r.product_id, productName: r.product_name || r.product_interest || null });
 
 export async function getLead(id, db = null) {
   const r = (await (db || { query }).query(`${SELECT} WHERE (l.id = $1 OR l.lead_number = $1) AND l.deleted_at IS NULL`, [id])).rows[0];
@@ -91,6 +113,11 @@ export async function createLead(body, userId, db = null) {
   const { cols, extra } = columnsFrom(body);
   if (!cols.first_name && !cols.company_name) throw badRequest('firstName or companyName is required');
   if (cols.source !== undefined) cols.source = await leadSource(db || { query }, cols.source);
+  // the product may be tagged later (Create Prospect > Skip - tag product later) unless leads.product_required is on
+  Object.assign(cols, await productColumns(db || { query }, body));
+  if (!cols.lob && await getSetting('leads.product_required', false)) {
+    throw badRequest('Validation failed', [{ path: 'lob', message: 'Choose the line of business and the product of the prospect' }]);
+  }
   await assertBirthDate(cols.birth_date);
   await fillRegion(cols, undefined, db);
   const run = async (c) => {
@@ -106,7 +133,7 @@ export async function createLead(body, userId, db = null) {
     const number = await nextDocumentNumber('lead', { db: c, unique: { table: 'leads', column: 'lead_number' } });
     const status = cols.status || await getSetting('leads.default_status', 'New');
     const data = { ...cols, status, lead_number: number, display_name: displayName(body), extra: JSON.stringify(extra),
-      lob: cols.lob || 'MOTOR', lead_category: cols.lead_category || 'Retail', created_by: userId, owner_user_id: userId, assigned_at: new Date() };
+      lob: cols.lob || null, lead_category: cols.lead_category || 'Retail', created_by: userId, owner_user_id: userId, assigned_at: new Date() };
     const keys = Object.keys(data);
     const r = await c.query(`INSERT INTO leads(${keys.join(',')}) VALUES (${keys.map((_, i) => `$${i + 1}`).join(',')}) RETURNING id`, Object.values(data));
     // lead assignment rules (Operations > Sales & Marketing > Lead Assignment) choose the account executive
@@ -121,6 +148,9 @@ export async function updateLead(id, body, userId) {
   const before = await getLead(id);
   const { cols, extra } = columnsFrom(body);
   if (cols.source !== undefined && cols.source !== before.source) cols.source = await leadSource({ query }, cols.source);
+  Object.assign(cols, await productColumns({ query }, body));
+  // a new line without a product drops the product of the old line
+  if (cols.lob !== undefined && cols.lob !== before.lob && cols.product_id === undefined) cols.product_id = null;
   if (cols.channel_id) await assertChannel({ query }, cols.channel_id);
   await assertBirthDate(cols.birth_date);
   await fillRegion(cols);
@@ -131,6 +161,22 @@ export async function updateLead(id, body, userId) {
   const keys = Object.keys(data);
   await query(`UPDATE leads SET ${keys.map((k, i) => `${k} = $${i + 2}`).join(', ')} WHERE id = $1`, [before.id, ...Object.values(data)]);
   return { before, after: await getLead(before.id) };
+}
+
+/**
+ * Tag or change the line of business and product of a prospect (Prospects > Tag product, or the product asked for
+ * before its first quotation). A prospect waiting in the reassignment queue because no rule matched is offered to the
+ * assignment rules again with its line.
+ */
+export async function tagProduct(id, { lob, productId }, userId) {
+  const before = await getLead(id);
+  return withTransaction(async (c) => {
+    const p = await productOfLine(c, { lob, product: productId });
+    await c.query('UPDATE leads SET lob = $2, product_id = $3, product_interest = $4, updated_by = $5, updated_at = now() WHERE id = $1',
+      [before.id, p.lob, p.id, p.name, userId]);
+    const assignment = await assignTaggedLead(c, before.id, userId);
+    return { before, after: await getLead(before.id, c), assignment };
+  });
 }
 
 /** A distribution channel given on a prospect must exist and be active (Master > Insurance Management > Distribution Channels). */
@@ -159,7 +205,8 @@ function filters(q) {
   if (q.province) add('l.state ILIKE ?', q.province);
   if (q.city) add('l.city ILIKE ?', q.city);
   if (q.status) add('l.status = ?', q.status);
-  if (q.lob) add('l.lob = ?', lobOf(q.lob));
+  if (q.lob === UNTAGGED) where.push('l.lob IS NULL');
+  else if (q.lob) add('l.lob = ?', lobOf(q.lob));
   if (q.channelId) add('l.channel_id = ?', q.channelId);
   if (q.ownerUserId) add('l.owner_user_id = ?', q.ownerUserId);
   if (q.assignmentStatus) add('l.assignment_status = ?', q.assignmentStatus);
@@ -189,16 +236,18 @@ export async function leadStats(q) {
       count(*) FILTER (WHERE l.created_at >= now() - interval '30 days')::int AS last30,
       count(*) FILTER (WHERE l.created_at >= now() - interval '60 days' AND l.created_at < now() - interval '30 days')::int AS prev30,
       count(*) FILTER (WHERE l.status = 'Converted')::int AS converted,
+      count(*) FILTER (WHERE l.lob IS NULL)::int AS untagged,
       count(*) FILTER (WHERE EXISTS (SELECT 1 FROM quotes q WHERE q.lead_id = l.id AND q.deleted_at IS NULL))::int AS with_quotes
     FROM leads l WHERE ${where}`, [...params, recentDays]);
-  const group = (col, alias) => many(`SELECT COALESCE(${col}, 'Unknown') AS "${alias}", count(*)::int AS count FROM leads l WHERE ${where} GROUP BY 1 ORDER BY 2 DESC`, params);
+  const group = (col, alias, none = 'Unknown') => many(`SELECT COALESCE(${col}, $${params.length + 1}) AS "${alias}", count(*)::int AS count FROM leads l WHERE ${where}
+    GROUP BY 1 ORDER BY 2 DESC`, [...params, none]);
   const pct = (a, b) => (b ? Math.round((a / b) * 1000) / 10 : 0);
   return {
     totalLeads: s.total, recentLeads: s.recent, last30DaysLeads: s.last30, convertedLeads: s.converted,
-    leadsWithQuotations: s.with_quotes, conversionRate: pct(s.converted, s.total), quotationRate: pct(s.with_quotes, s.total),
+    leadsWithQuotations: s.with_quotes, untaggedLeads: s.untagged, conversionRate: pct(s.converted, s.total), quotationRate: pct(s.with_quotes, s.total),
     growthRate: s.prev30 ? pct(s.last30 - s.prev30, s.prev30) : (s.last30 ? 100 : 0),
     leadsByCategory: await group('l.lead_category', 'category'), leadsByCountry: await group('l.country', 'country'),
-    leadsByStatus: await group('l.status', 'status'), leadsByLob: await group('l.lob', 'lob'),
+    leadsByStatus: await group('l.status', 'status'), leadsByLob: await group('l.lob', 'lob', UNTAGGED_LABEL),
   };
 }
 
@@ -216,9 +265,10 @@ export async function leadReport(category, scope = null) {
   if (scope) cond += ` AND ${scopeSql(scope, 'lead', 'l', params)}`;
   const rows = await many(`${SELECT} WHERE ${cond} ORDER BY l.created_at DESC LIMIT 50000`, params);
   const header = ['Lead Number', 'First Name', 'Last Name', 'Company', 'Category', 'LOB', 'Status', 'Email', 'Contact Number',
-    'City', 'Province', 'Country', 'Quotations', 'Created At'];
-  return { header, rows: rows.map((r) => [r.lead_number, r.first_name, r.last_name, r.company_name, r.lead_category, r.lob, r.status,
-    r.email, r.phone, r.city, r.state, r.country, r.quotations_count, r.created_at ? new Date(r.created_at).toISOString().slice(0, 10) : '']) };
+    'City', 'Province', 'Country', 'Quotations', 'Created At', 'Product'];
+  return { header, rows: rows.map((r) => [r.lead_number, r.first_name, r.last_name, r.company_name, r.lead_category, r.lob || UNTAGGED_LABEL, r.status,
+    r.email, r.phone, r.city, r.state, r.country, r.quotations_count, r.created_at ? new Date(r.created_at).toISOString().slice(0, 10) : '',
+    r.product_name || r.product_interest || '']) };
 }
 
 /** Map one uploaded spreadsheet row (any common header spelling) to the create-lead body. */
@@ -242,7 +292,8 @@ export const LEAD_UPLOAD_COLUMNS = [
   { key: 'zipCode', header: 'ZIP Code', aliases: ['zip', 'postal code', 'postalcode'], format: 'Four digits', example: '1600' },
   { key: 'leadCategory', header: 'Lead Category', aliases: ['category'], format: 'Text', allowed: ['Retail', 'Corporate'], example: 'Retail' },
   { key: 'taxInformationNumber', header: 'TIN', aliases: ['taxInformationNumber', 'tax number'], format: 'Tax identification number', example: '123-456-789-000' },
-  { key: 'lob', header: 'LOB', aliases: ['line of business', 'product'], format: 'Line of business', allowed: ['MOTOR', 'FIRE', 'IAR'], example: 'MOTOR' },
+  { key: 'lob', header: 'LOB', aliases: ['line of business'], format: 'Line of business (Line of Business master code or name); empty: the product is tagged later', example: 'MOTOR' },
+  { key: 'product', header: 'Product', aliases: ['product code', 'product name'], format: 'Active product of Master > Product (code or name) of the LOB; empty: the product is tagged later', example: 'CTPL' },
   { key: 'source', header: 'Source', aliases: ['lead source'], format: 'Lead source of Master > Insurance Management > Lead Sources (code or name); bulk-upload when empty', example: 'Referral' },
 ];
 

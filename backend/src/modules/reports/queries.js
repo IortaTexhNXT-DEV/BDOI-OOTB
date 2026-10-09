@@ -398,7 +398,7 @@ export const QUERIES = {
   leadFunnel: {
     sql: `SELECT l.status AS stage, l.created_at::date AS "createdDate", u.id AS _agent_id, u.username AS _agent_username, u.display_name AS agent,
         u.branch_code AS _branch_code, COALESCE(b.name, u.branch_code) AS branch,
-        pr.id::text AS _product_id, pr.code AS _product_code, COALESCE(pr.name, l.product_interest) AS product, l.source
+        pr.id::text AS _product_id, pr.code AS _product_code, COALESCE(pr.name, l.product_interest, CASE WHEN l.lob IS NULL THEN 'Product not yet tagged' END) AS product, l.source
       FROM leads l LEFT JOIN users u ON u.id = l.owner_user_id LEFT JOIN branches b ON b.code = u.branch_code
       LEFT JOIN products pr ON pr.id = l.product_id
       WHERE l.created_at::date BETWEEN $1 AND $2`,

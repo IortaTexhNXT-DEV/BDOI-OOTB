@@ -24,6 +24,7 @@ import { addDays, today } from '../../lib/dates.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { participantsFromDoc, writeParticipants, legacyParticipantDetails, leadOf, participantsOf, participantInputs } from '../placement/participants.js';
 import { journeyFor, assertStep, resolveLob } from '../placement/journey.js';
+import { productOfLine } from '../placement/productLines.js';
 import { companyName } from '../../lib/letterhead.js';
 import { assertNotDeclined, assertFactsCaptured, referralFor, assertReferralCleared, assertMayDecide } from '../product-configurator/underwriting.js';
 import { assertAuthority } from '../access-control/service.js';
@@ -77,8 +78,13 @@ export async function createQuote(body, userId, db = null) {
   delete raw.brokerSlipId;
   const leadId = body.leadRefId || body.leadId || null;
   const run = async (c) => {
-    if (leadId && !(await c.query('SELECT 1 FROM leads WHERE id = $1 AND deleted_at IS NULL', [leadId])).rows[0]) throw badRequest(`Lead ${leadId} not found`);
+    const lead = leadId ? (await c.query('SELECT lob FROM leads WHERE id = $1 AND deleted_at IS NULL', [leadId])).rows[0] : null;
+    if (leadId && !lead) throw badRequest(`Lead ${leadId} not found`);
     if (!leadId && !body.clientId) throw badRequest('leadRefId (or clientId) is required');
+    // a prospect whose product is not yet tagged is quoted only for a product (or line) the quotation names
+    if (lead && !lead.lob && !body.productId && !body.productType && !raw.lob) {
+      throw badRequest('Validation failed', [{ path: 'productId', message: 'The prospect has no product yet: choose the line of business and the product of the quotation' }]);
+    }
     // placement journey: a line that requires a broker slip only takes quotations prepared from one (renewals excepted)
     if (!body.brokerSlipId && !raw.renewal?.policyId) {
       const journey = await journeyFor({ lob: body.lob, productType: body.productType, productId: body.productId }, c);
@@ -87,6 +93,7 @@ export async function createQuote(body, userId, db = null) {
     // the product the quotation is for (Quick Quote, broker slip): its line of business prices the quotation when none is
     // given (a Personal Accident quotation is not priced as motor); without a product the database links one by type or line
     const productId = body.productId ? (await c.query('SELECT id FROM products WHERE id::text = $1::text', [String(body.productId)])).rows[0]?.id ?? null : null;
+    if (productId && raw.lob) await productOfLine(c, { lob: raw.lob, product: productId, active: false });
     if (productId && !raw.lob) raw.lob = await resolveLob({ productId, productType: body.productType }, c);
     const { parts, icId, doc } = await quoteParticipants(c, raw, body.participants, null);
     const b = await premiumBreakdown(doc, { insurerId: icId });
@@ -521,7 +528,7 @@ export async function quoteFromRow(db, row, userId) {
     leadRefId = l.id;
   } else {
     const lead = await createLead({ firstName: v.firstName, lastName: v.lastName, companyName: v.companyName, emailId: v.emailId, contactNumber: v.contactNumber,
-      lob: v.productType, source: 'bulk-upload' }, userId, db);
+      lob: v.productType || 'Motor', source: 'bulk-upload' }, userId, db);
     leadRefId = lead.id;
   }
   return {
