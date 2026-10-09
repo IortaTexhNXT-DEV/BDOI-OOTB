@@ -3474,7 +3474,12 @@
     "vehiclePhotoFrontSide": "Front Side",
     "vehiclePhotoRearSide": "Rear Side",
     "vehiclePhotoInterior": "Interior Dashboard",
-    "expiringWithin5Days": "Expiring within 5 days",
+    "expiresInDays": "Renewal due: expires in {{count}} days",
+    "expiresInDays_one": "Renewal due: expires in {{count}} day",
+    "expiresInDays_other": "Renewal due: expires in {{count}} days",
+    "expiredDaysAgo": "Expired {{count}} days ago",
+    "expiredDaysAgo_one": "Expired {{count}} day ago",
+    "expiredDaysAgo_other": "Expired {{count}} days ago",
     "issued": "Issued",
     "clientId": "Client ID",
     "policyNumber": "Policy Number",
@@ -5751,6 +5756,7 @@
     "sendPaymentRemindersNow": "Send Payment Reminders Now",
     "title": "Collections",
     "kpiOutstanding": "Outstanding",
+    "kpiItems": "{{count}} items",
     "kpiItems_one": "{{count}} item",
     "kpiItems_other": "{{count}} items",
     "kpiCollected": "Collected this month"
@@ -9813,6 +9819,7 @@
       "fromReason": "From the reason ({{method}})",
       "resultTitle": "Return premium of {{number}}",
       "periodLine": "Policy {{from}} - {{to}}, cancelled on {{on}}",
+      "daysLeftNote": "{{count}} days left",
       "daysLeftNote_one": "{{count}} day left",
       "daysLeftNote_other": "{{count}} days left",
       "bandApplied": "Band applied",
@@ -9867,6 +9874,7 @@
       "cancelDone": "Cheque registration cancelled",
       "against": "Against",
       "billNumber": "Bill number",
+      "chequesCount": "{{count}} cheques",
       "chequesCount_one": "{{count}} cheque",
       "chequesCount_other": "{{count}} cheques"
     },
@@ -10077,6 +10085,7 @@
       "alreadyPosted": "Already posted",
       "journalDate": "Journal date",
       "nothingDue": "Nothing to depreciate for this period",
+      "assetsCount": "{{count}} assets",
       "assetsCount_one": "{{count}} asset",
       "assetsCount_other": "{{count}} assets"
     }

@@ -20,6 +20,7 @@ import { isFireLob, isOtherLob } from "../../endorsementModule/constants/endorse
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import s3Service, { browserFileUrl } from "../../../services/s3Service";
 import billingService from "../../../services/billingService";
+import BatchRenewalService from "../../../services/batchRenewalService";
 import documentTemplateService from "../../../services/documentTemplateService";
 import authService from "../../../services/authService";
 import { BASE_URL } from "../../../utility/constant";
@@ -324,6 +325,7 @@ const PolicyDetailView = () => {
   const [insurancePlacingSlipLoading, setInsurancePlacingSlipLoading] =
     useState(false);
   const [policyScheduleLoading, setPolicyScheduleLoading] = useState(false);
+  const [renewalWindow, setRenewalWindow] = useState(null);
 
   const { policyDetails, rawPolicyData, loading, error } = useSelector(
     ({ policyMainReducers }) => ({
@@ -399,6 +401,13 @@ const PolicyDetailView = () => {
   }, [policyId, dispatch]);
 
   useEffect(() => {
+    if (!hasPermission("write:renewals") && !hasPermission("write:quotations")) return;
+    BatchRenewalService.getRenewalOptions()
+      .then((o) => setRenewalWindow({ pipelineDays: Number(o.pipelineDays) || 0, graceDays: Number(o.graceDays) || 0, lapsedRenewalDays: Number(o.lapsedRenewalDays) || 0 }))
+      .catch((e) => logger.warn("Renewal window not loaded", e));
+  }, []);
+
+  useEffect(() => {
     if (!rawPolicyData) {
       return;
     }
@@ -454,10 +463,11 @@ const PolicyDetailView = () => {
   const formatDate = (dateString) => formatConfiguredDate(dateString, { empty: "N/A" });
   const formatDateTime = (dateString) => formatConfiguredDate(dateString, { withTime: true, empty: "N/A" });
 
-  const isPolicyExpiringOrExpired = () => {
+  // days to expiry (negative once expired), null without an expiry date
+  const daysUntilExpiry = () => {
     const expiryDate = policyDetails?.PolicyExpiry || rawPolicyData?.expiry;
     if (!expiryDate) {
-      return false;
+      return null;
     }
 
     const today = new Date();
@@ -466,10 +476,22 @@ const PolicyDetailView = () => {
     const expiry = new Date(expiryDate);
     expiry.setHours(0, 0, 0, 0);
 
-    const diffTime = expiry.getTime() - today.getTime();
-    const daysUntilExpiry = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  };
 
-    return daysUntilExpiry <= 5;
+  // Renew is offered while the policy is in the renewal window of the renewal settings: from renewals.pipeline_days
+  // before expiry, through the grace period and the lapsed-renewal days after it
+  const isRenewable = () => {
+    const days = daysUntilExpiry();
+    if (!renewalWindow || days === null || rawPolicyData?.renewedTo) return false;
+    if (["Cancelled", "Renewed"].includes(rawPolicyData?.status)) return false;
+    return days <= renewalWindow.pipelineDays && -days <= renewalWindow.graceDays + renewalWindow.lapsedRenewalDays;
+  };
+
+  const expiryHelper = () => {
+    const days = daysUntilExpiry();
+    if (days === null || !isRenewable()) return `${t("policyDetail.issued")} ${formatDate(policyDetails.PolicyIssued)}`;
+    return days >= 0 ? t("policyDetail.expiresInDays", { count: days }) : t("policyDetail.expiredDaysAgo", { count: -days });
   };
 
   // back to where the policy was opened from (the list reopens with its search and page), or to the list itself
@@ -1121,10 +1143,8 @@ const PolicyDetailView = () => {
       key: "expiry",
       label: t("policyDetail.expiryDate"),
       value: formatDate(policyDetails.PolicyExpiry),
-      helper: isPolicyExpiringOrExpired()
-        ? t("policyDetail.expiringWithin5Days")
-        : `${t("policyDetail.issued")} ${formatDate(policyDetails.PolicyIssued)}`,
-      tone: isPolicyExpiringOrExpired() ? "warning" : undefined,
+      helper: expiryHelper(),
+      tone: isRenewable() ? "warning" : undefined,
     },
     {
       key: "client",
@@ -1623,7 +1643,7 @@ const PolicyDetailView = () => {
             />
           </div>
           <div className="header-actions">
-            {isPolicyExpiringOrExpired() && (
+            {isRenewable() && (
               <Button
                 label={t("policyDetail.renew")}
                 icon="pi pi-refresh"
