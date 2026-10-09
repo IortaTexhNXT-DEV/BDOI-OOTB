@@ -1,196 +1,264 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
-import { Column } from "primereact/column";
-import { DataTable } from "primereact/datatable";
-import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
 import periodEndService from "../../services/periodEndService";
-import { JournalDialog, JournalLink, PageHeader, StatusTag, date, dateTime, money, showError, showSuccess } from "./common";
+import { useStableLoad } from "../../hooks/useStableLoad";
+import LoadingBar from "../../components/LoadingBar";
+import { FieldsSkeleton } from "../../components/Skeletons";
+import ReasonPicker, { reasonPayload, reasonProblem } from "../../components/ReasonPicker";
+import { JournalDialog, PageHeader, StatusTag, date, dateTime, showError, showSuccess } from "./common";
 import LinesEditor, { emptyLines } from "./LinesEditor";
-import { hasPermission } from "../../utils/canOpen";
+import ActionDialog from "./yearEnd/ActionDialog";
+import ActivityCard from "./yearEnd/ActivityCard";
+import CheckList from "./yearEnd/CheckList";
+import Facts from "./yearEnd/Facts";
+import Stepper from "./yearEnd/Stepper";
+import { AdjustmentsStep, ApprovalStep, ClosingStep, OpeningStep, PrerequisitesStep, netFact } from "./yearEnd/StepCards";
+import "./yearEnd/YearEnd.scss";
+
+const REMARK_MAX = 1000;
+const cents = (v) => Math.round(Number(v || 0) * 100);
+const balanced = (lines) => {
+  const used = lines.filter((l) => l.accountCode || Number(l.debit) || Number(l.credit));
+  const debit = used.reduce((s, l) => s + cents(l.debit), 0);
+  return used.length >= 2 && used.every((l) => l.accountCode) && debit > 0 && debit === used.reduce((s, l) => s + cents(l.credit), 0);
+};
 
 /**
- * Accounts > Period End > Year-End Close: pre-checks (twelve periods closed, adjustment period posted), closing entries
- * (income and expense to current year P/L, then to retained earnings) in adjustment period 13, opening balances of the
- * next fiscal year, lock of the year; reversible by a finance manager until the next year's first period is closed.
+ * Accounts > Period End > Year-End Close: a guided process in five steps (prerequisites, year-end adjustments,
+ * closing entries, close of the year by an Accounting Manager other than the preparer, opening balances of the next
+ * fiscal year), each a card with its checks and where to resolve them, and the reversal of a close (requested with a
+ * reason, approved by another Accounting Manager). One overview request per fiscal year feeds the screen; it is
+ * reloaded after every action and the content stays on screen while it reloads.
  */
 const YearEndClose = () => {
   const { t } = useTranslation();
-  // Approving, rejecting, reopening and year-end close / reverse need approve:period-end (the server refuses them otherwise)
-  const canApprove = hasPermission("approve:period-end");
   const toast = useRef(null);
-  const [years, setYears] = useState([]);
-  const [selected, setSelected] = useState(null);
-  const [run, setRun] = useState(null);
+  const [params, setParams] = useSearchParams();
+  // the year asked for (from the link or the drop-down); without one the server picks the year being closed
+  const [requested, setRequested] = useState(params.get("fiscalYear") || null);
+  const [stepKey, setStepKey] = useState(null);
+  const [dialog, setDialog] = useState(null);
   const [busy, setBusy] = useState(null);
-  const [journal, setJournal] = useState(null);
-  const [reverse, setReverse] = useState(null);
+  const [remark, setRemark] = useState("");
+  const [reason, setReason] = useState(null);
+  const [tried, setTried] = useState(false);
   const [adjustment, setAdjustment] = useState(null);
+  const [journal, setJournal] = useState(null);
 
-  const loadYears = useCallback(async () => {
-    try {
-      const list = await periodEndService.yearEnd();
-      setYears(list);
-      setSelected((s) => s || (list.find((y) => y.status === "closing") || list.slice().reverse().find((y) => y.status !== "closed") || list[0])?.code);
-      return list;
-    } catch (e) {
-      showError(toast, e);
-      return [];
-    }
-  }, []);
-  useEffect(() => { loadYears(); }, [loadYears]);
-  const fy = years.find((y) => y.code === selected);
-  const latest = fy?.runs?.find((r) => r.status !== "cancelled") || null;
-  useEffect(() => {
-    setRun(null);
-    if (latest?.id) periodEndService.yearEndRun(latest.id).then(setRun).catch((e) => showError(toast, e));
-  }, [latest?.id]);
+  const years = useStableLoad(useCallback(() => periodEndService.yearEnd(), []), { initialData: [] });
+  const { data, loading, refreshing, error, reload } = useStableLoad(useCallback(() => periodEndService.yearEndOverview(requested), [requested]));
+  const fy = data?.fiscalYear;
+  const run = data?.run;
+  const actions = data?.actions || {};
+  const shown = requested || fy?.code || null;
 
-  const act = async (name, fn, message) => {
+  const selectYear = (code) => {
+    setRequested(code);
+    setStepKey(null);
+    setParams({ fiscalYear: code }, { replace: true });
+  };
+
+  /** Run an action, then reload the year (kept on screen meanwhile) and say it is done. */
+  const act = async (name, fn, message, { resetStep = false } = {}) => {
     setBusy(name);
     try {
-      const r = await fn();
-      if (r?.id) setRun(await periodEndService.yearEndRun(r.id));
-      await loadYears();
+      await fn();
+      if (resetStep) setStepKey(null);
+      if (requested) await Promise.all([reload(), years.reload()]);
+      else {
+        setRequested(shown);
+        await years.reload();
+      }
+      setDialog(null);
       if (message) showSuccess(toast, message);
-      return r;
     } catch (e) {
       showError(toast, e);
-      return null;
     } finally {
       setBusy(null);
     }
   };
 
-  const saveAdjustment = async () => {
-    const r = await act("adjust", () => periodEndService.createAdjustment({ fiscalYear: selected, description: adjustment.description,
-      lines: adjustment.lines.filter((l) => l.accountCode).map((l) => ({ accountCode: l.accountCode, debit: Number(l.debit || 0), credit: Number(l.credit || 0), memo: l.memo || undefined })) }),
-    t("periodEnd.adjustmentCreated"));
-    if (r) setAdjustment(null);
+  const open = (name) => {
+    setRemark("");
+    setReason(null);
+    setTried(false);
+    setDialog(name);
+  };
+  const confirmReversalRequest = () => {
+    setTried(true);
+    if (reasonProblem(reason)) return;
+    act("request", () => periodEndService.requestYearEndReversal(run.id, reasonPayload(reason)), t("yearEndClose.toast.reversalRequested"));
+  };
+  const saveAdjustment = () => act("adjust", () => periodEndService.createAdjustment({
+    fiscalYear: fy.code,
+    description: adjustment.description.trim(),
+    lines: adjustment.lines.filter((l) => l.accountCode).map((l) => ({ accountCode: l.accountCode, debit: Number(l.debit || 0), credit: Number(l.credit || 0), memo: l.memo || undefined })),
+  }), t("periodEnd.adjustmentCreated"));
+
+  const yearOptions = (years.data || []).map((y) => ({ label: `${y.code} · ${t(`periodEnd.status.${y.status}`)}`, value: y.code }));
+  if (fy && !yearOptions.some((o) => o.value === fy.code)) yearOptions.push({ label: `${fy.code} · ${t(`periodEnd.status.${fy.status}`)}`, value: fy.code });
+
+  const remarkField = (
+    <div className="ye-field">
+      <label htmlFor="ye-remark" className="bv-field-label">{t("yearEndClose.remark")}<span className="ye-optional">{t("reasonPicker.optional", "(optional)")}</span></label>
+      <InputTextarea id="ye-remark" value={remark} onChange={(e) => setRemark(e.target.value)} rows={2} autoResize maxLength={REMARK_MAX} className="w-full" />
+    </div>
+  );
+  const runFacts = run ? [
+    { label: t("periodEnd.fiscalYear"), value: fy.code },
+    { label: t("yearEndClose.run"), value: run.runNumber },
+  ] : [];
+
+  const renderStep = (key) => {
+    const checks = (data.checks || []).filter((c) => c.step === key);
+    if (key === "prerequisites") return <PrerequisitesStep checks={checks} onOpenYear={selectYear} />;
+    if (key === "adjustments") return <AdjustmentsStep data={data} checks={checks} onOpenYear={selectYear} onOpenJournal={setJournal} />;
+    if (key === "closing") return <ClosingStep data={data} onOpenJournal={setJournal} />;
+    if (key === "approval") {
+      return <ApprovalStep data={data} busy={busy} onClose={() => open("close")} onRequestReversal={() => open("requestReversal")}
+        onApproveReversal={() => open("approveReversal")} onWithdrawReversal={() => open("withdraw")} />;
+    }
+    return <OpeningStep data={data} />;
+  };
+  const stepActions = (key) => {
+    if (key === "prerequisites" && actions.check?.allowed) {
+      return <Button type="button" icon="pi pi-refresh" outlined label={t("yearEndClose.runChecks")} loading={busy === "check"}
+        onClick={() => act("check", () => periodEndService.checkYearEnd(run.id), t("yearEndClose.toast.checked"))} />;
+    }
+    if (key === "adjustments" && actions.adjust?.allowed) {
+      return <Button type="button" icon="pi pi-plus" outlined label={t("yearEndClose.adjustments.add")} onClick={() => { setAdjustment({ description: "", lines: emptyLines() }); setDialog("adjustment"); }} />;
+    }
+    return null;
   };
 
-  const checks = run?.checks?.length ? run.checks : [];
-  const status = run?.status;
-  const profit = Number(run?.netIncome || 0);
+  const renderRun = () => {
+    const active = data.steps.some((s) => s.key === stepKey) ? stepKey : data.currentStep;
+    const index = data.steps.findIndex((s) => s.key === active);
+    const step = data.steps[index];
+    return (
+      <>
+        <section className="pe-card ye-summary" aria-label={t("yearEndClose.summary")}>
+          <Facts items={[
+            { label: t("periodEnd.fiscalYear"), value: `${fy.code} · ${date(fy.startDate)} – ${date(fy.endDate)}` },
+            { label: t("periodEnd.yearStatus"), value: <StatusTag status={fy.status} /> },
+            { label: t("yearEndClose.run"), value: <span className="ye-inline">{run.runNumber} <StatusTag status={run.status} /></span> },
+            { label: t("yearEndClose.approval.preparedBy"), value: run.preparedByName ? `${run.preparedByName}, ${date(run.preparedAt)}` : date(run.preparedAt) },
+            netFact(t, run.status === "closed" ? run.netIncome : data.closing?.netIncome),
+            { label: t("periodEnd.nextFiscalYear"), value: data.opening?.fiscalYear },
+          ]} />
+        </section>
+        <Stepper steps={data.steps} active={active} onSelect={setStepKey} />
+        <section className="pe-card ye-step" aria-labelledby="ye-step-title">
+          <header className="ye-step__head">
+            <h2 className="ye-step__title" id="ye-step-title">{`${index + 1}. ${t(`yearEndClose.step.${active}`)}`}</h2>
+            <StatusTag status={step.status} />
+            <div className="ye-step__actions">{stepActions(active)}</div>
+          </header>
+          {renderStep(active)}
+          <footer className="ye-step__nav">
+            <Button type="button" text icon="pi pi-arrow-left" label={t("yearEndClose.previous")} disabled={index === 0} onClick={() => setStepKey(data.steps[index - 1].key)} />
+            <Button type="button" text icon="pi pi-arrow-right" iconPos="right" label={t("yearEndClose.next")} disabled={index === data.steps.length - 1}
+              onClick={() => setStepKey(data.steps[index + 1].key)} />
+          </footer>
+        </section>
+      </>
+    );
+  };
+
+  const renderEmpty = () => (
+    <section className="pe-card ye-empty" aria-labelledby="ye-empty-title">
+      <div className="ye-empty__line">
+        <h2 className="ye-empty__text" id="ye-empty-title">{t("yearEndClose.empty", { fiscalYear: fy.code, from: date(fy.startDate), to: date(fy.endDate) })}</h2>
+        {actions.start?.allowed && (
+          <Button type="button" icon="pi pi-play" label={t("yearEndClose.start")} loading={busy === "start"}
+            onClick={() => act("start", () => periodEndService.createYearEnd(fy.code), t("periodEnd.yearEndStarted"), { resetStep: true })} />
+        )}
+      </div>
+      <h3 className="ye-subtitle">{t("yearEndClose.step.prerequisites")}</h3>
+      <CheckList checks={(data.checks || []).filter((c) => c.step === "prerequisites")} onOpenYear={selectYear} />
+    </section>
+  );
 
   return (
-    <div className="pe-page">
+    <div className="pe-page ye-page">
       <Toast ref={toast} />
-      <PageHeader title={t("periodEnd.yearEndClose")} trail={[t("periodEnd.yearEndClose")]}>
-        <Dropdown value={selected} options={years.map((y) => ({ label: `${y.code} (${t(`periodEnd.status.${y.status}`)})`, value: y.code }))} onChange={(e) => setSelected(e.value)} style={{ minWidth: 220 }} />
-        {fy && fy.status !== "closed" && (!latest || ["reversed", "cancelled"].includes(latest.status)) && (
-          <Button icon="pi pi-play" label={t("periodEnd.startYearEnd")} loading={busy === "create"} onClick={() => act("create", () => periodEndService.createYearEnd(selected), t("periodEnd.yearEndStarted"))} />
-        )}
-        {fy && fy.status !== "closed" && (
-          <Button icon="pi pi-plus" outlined label={t("periodEnd.adjustmentJournal")} onClick={() => setAdjustment({ description: "", lines: emptyLines() })} />
-        )}
+      <PageHeader title={t("periodEnd.yearEndClose")} trail={[t("periodEnd.yearEndClose")]} help={t("yearEndClose.help")}>
+        <Dropdown value={shown} options={yearOptions} onChange={(e) => selectYear(e.value)} aria-label={t("periodEnd.fiscalYear")} className="ye-year" />
+        {actions.cancel?.allowed && <Button type="button" text severity="secondary" icon="pi pi-ban" label={t("periodEnd.cancelRun")} onClick={() => open("cancel")} />}
       </PageHeader>
 
-      {fy && (
-        <div className="pe-kpis">
-          <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.fiscalYear")}</div><div className="pe-kpi-value">{fy.code}</div><div className="pe-muted">{date(fy.startDate)} – {date(fy.endDate)}</div></div>
-          <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.yearStatus")}</div><div className="pe-kpi-value"><StatusTag status={fy.status} /></div></div>
-          <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.yearEndRun")}</div><div className="pe-kpi-value" style={{ fontSize: "1.05rem" }}>{run?.runNumber || "-"}</div><div>{run && <StatusTag status={run.status} />}</div></div>
-          <div className="pe-kpi"><div className="pe-kpi-label">{profit >= 0 ? t("periodEnd.netIncome") : t("periodEnd.netLoss")}</div><div className="pe-kpi-value">{run?.netIncome === null || run?.netIncome === undefined ? "-" : money(Math.abs(profit))}</div></div>
-          <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.nextFiscalYear")}</div><div className="pe-kpi-value">{run?.nextFiscalYear || "-"}</div><div className="pe-muted">{run?.openingAccounts ? `${run.openingAccounts} ${t("periodEnd.openingAccounts")}` : ""}</div></div>
-        </div>
-      )}
-
-      {run && (
-        <div className="pe-card">
-          <div className="pe-card-title">
-            <span>{t("periodEnd.preChecks")}</span>
-            <span className="flex gap-2 flex-wrap">
-              {["draft", "checked"].includes(status) && <Button icon="pi pi-check-square" outlined label={t("periodEnd.runChecks")} loading={busy === "check"} onClick={() => act("check", () => periodEndService.checkYearEnd(run.id))} />}
-              {canApprove && ["draft", "checked"].includes(status) && <Button icon="pi pi-lock" severity="danger" label={t("periodEnd.closeYear")} loading={busy === "close"} onClick={() => act("close", () => periodEndService.closeYearEnd(run.id), t("periodEnd.yearClosed"))} />}
-              {canApprove && status === "closed" && <Button icon="pi pi-undo" severity="warning" outlined label={t("periodEnd.reverseClose")} onClick={() => setReverse({ reason: "" })} />}
-              {["draft", "checked"].includes(status) && <Button icon="pi pi-ban" text severity="secondary" label={t("periodEnd.cancelRun")} onClick={() => act("cancel", () => periodEndService.cancelYearEnd(run.id))} />}
-            </span>
-          </div>
-          <DataTable value={checks} size="small" stripedRows emptyMessage={t("periodEnd.runChecksFirst")}>
-            <Column field="label" header={t("periodEnd.item")} />
-            <Column header={t("periodEnd.statusLabel")} body={(r) => <StatusTag status={r.status} />} style={{ width: "8rem" }} />
-            <Column field="message" header={t("periodEnd.result")} />
-          </DataTable>
-          {run.reverseReason && <p className="pe-muted mt-2">{t("periodEnd.reversedBecause")}: {run.reverseReason} ({dateTime(run.reversedAt)})</p>}
-        </div>
-      )}
-
-      {run && run.journals?.length > 0 && (
-        <div className="pe-card">
-          <div className="pe-card-title">{t("periodEnd.closingEntries")}</div>
-          <DataTable value={run.journals} size="small" stripedRows dataKey="journalId">
-            <Column header={t("periodEnd.journal")} body={(r) => <JournalLink journal={r} onOpen={setJournal} />} />
-            <Column header={t("periodEnd.date")} body={(r) => date(r.date)} />
-            <Column field="period" header={t("periodEnd.period")} />
-            <Column field="description" header={t("periodEnd.description")} />
-            <Column header={t("periodEnd.amount")} body={(r) => money(r.amount)} className="bv-num" headerClassName="bv-num" />
-            <Column header={t("periodEnd.statusLabel")} body={(r) => <StatusTag status={r.status} />} />
-          </DataTable>
-        </div>
-      )}
-
-      {run && (
-        <div className="grid mt-1">
-          <div className="col-12 lg:col-5">
-            <div className="pe-card">
-              <div className="pe-card-title">{t("periodEnd.periods")}</div>
-              <DataTable value={run.periods} size="small" dataKey="period">
-                <Column field="period" header={t("periodEnd.period")} />
-                <Column header={t("periodEnd.end")} body={(r) => date(r.endDate)} />
-                <Column header={t("periodEnd.statusLabel")} body={(r) => <StatusTag status={r.status} />} />
-              </DataTable>
-            </div>
-          </div>
-          <div className="col-12 lg:col-7">
-            <div className="pe-card">
-              <div className="pe-card-title">{t("periodEnd.openingBalances")} {run.nextFiscalYear || ""}</div>
-              <DataTable value={run.openingBalances} size="small" stripedRows paginator rows={20} emptyMessage={t("periodEnd.openingBalancesHelp")}>
-                <Column field="accountCode" header={t("periodEnd.account")} />
-                <Column field="accountName" header={t("periodEnd.accountName")} />
-                <Column header={t("periodEnd.debit")} body={(r) => (r.balance > 0 ? money(r.balance) : "")} className="bv-num" headerClassName="bv-num" />
-                <Column header={t("periodEnd.credit")} body={(r) => (r.balance < 0 ? money(-r.balance) : "")} className="bv-num" headerClassName="bv-num" />
-              </DataTable>
-            </div>
-          </div>
-        </div>
-      )}
+      <div className="ye-body bv-loading-host">
+        <LoadingBar active={refreshing} />
+        {error && <div className="pe-error" role="alert">{error}</div>}
+        {loading && !data && <div className="pe-card"><FieldsSkeleton rows={2} columns={3} /></div>}
+        {data && (run ? renderRun() : renderEmpty())}
+        {data && <ActivityCard activity={data.activity} />}
+      </div>
 
       <JournalDialog journal={journal} onHide={() => setJournal(null)} />
 
-      <Dialog className="pe-dialog" header={t("periodEnd.reverseClose")} visible={!!reverse} style={{ width: "min(520px, 95vw)" }} onHide={() => setReverse(null)}
-        footer={(
-          <div>
-            <Button label={t("periodEnd.cancel")} text onClick={() => setReverse(null)} />
-            <Button label={t("periodEnd.confirm")} icon="pi pi-undo" severity="warning" disabled={!reverse?.reason?.trim()} loading={busy === "reverse"}
-              onClick={async () => { const r = await act("reverse", () => periodEndService.reverseYearEnd(run.id, reverse.reason), t("periodEnd.yearReversed")); if (r) setReverse(null); }} />
-          </div>
-        )}>
-        <p className="pe-muted">{t("periodEnd.reverseHelp")}</p>
-        <label htmlFor="pe-rev-reason">{t("periodEnd.reason")} *</label>
-        <InputTextarea id="pe-rev-reason" value={reverse?.reason || ""} onChange={(e) => setReverse({ reason: e.target.value })} rows={3} className="w-full" />
-      </Dialog>
+      {run && (
+        <>
+          <ActionDialog visible={dialog === "close"} title={t("yearEndClose.dialog.closeTitle", { fiscalYear: fy.code })} onHide={() => setDialog(null)}
+            facts={[...runFacts, netFact(t, data.closing?.netIncome), { label: t("yearEndClose.closing.journalDate"), value: `${date(fy.endDate)} (${fy.adjustmentPeriod})` },
+              { label: t("periodEnd.nextFiscalYear"), value: data.opening?.fiscalYear }, { label: t("yearEndClose.opening.accounts"), value: String(data.opening?.lines.length ?? 0) }]}
+            consequence={t("yearEndClose.dialog.closeConsequence", { fiscalYear: fy.code })} cancelLabel={t("periodEnd.cancel")} confirmLabel={t("yearEndClose.approval.close")}
+            confirmIcon="pi pi-lock" busy={busy === "close"} onConfirm={() => act("close", () => periodEndService.closeYearEnd(run.id, remark.trim()), t("periodEnd.yearClosed"))}>
+            {remarkField}
+          </ActionDialog>
 
-      <Dialog className="pe-dialog" header={`${t("periodEnd.adjustmentJournal")} ${selected || ""}`} visible={!!adjustment} style={{ width: "min(980px, 96vw)" }} onHide={() => setAdjustment(null)}
-        footer={(
-          <div>
-            <Button label={t("periodEnd.cancel")} text onClick={() => setAdjustment(null)} />
-            <Button label={t("periodEnd.save")} icon="pi pi-save" loading={busy === "adjust"} onClick={saveAdjustment} disabled={!adjustment?.description?.trim()} />
-          </div>
-        )}>
-        {adjustment && (
-          <div>
-            <p className="pe-muted">{t("periodEnd.adjustmentHelp")}</p>
-            <label htmlFor="pe-adj-desc">{t("periodEnd.description")} *</label>
-            <InputText id="pe-adj-desc" value={adjustment.description} onChange={(e) => setAdjustment({ ...adjustment, description: e.target.value })} className="w-full mb-3" />
-            <LinesEditor lines={adjustment.lines} onChange={(lines) => setAdjustment({ ...adjustment, lines })} />
-          </div>
-        )}
-      </Dialog>
+          <ActionDialog visible={dialog === "requestReversal"} title={t("yearEndClose.dialog.requestTitle", { fiscalYear: fy.code })} onHide={() => setDialog(null)}
+            facts={[...runFacts, { label: t("yearEndClose.approval.closedBy"), value: run.closedByName ? `${run.closedByName}, ${dateTime(run.closedAt)}` : dateTime(run.closedAt) }]}
+            consequence={t("yearEndClose.dialog.requestConsequence")} cancelLabel={t("periodEnd.cancel")} confirmLabel={t("yearEndClose.reversal.request")}
+            confirmIcon="pi pi-send" busy={busy === "request"} onConfirm={confirmReversalRequest}>
+            <ReasonPicker context="year_end_reverse" value={reason} onChange={setReason} showErrors={tried} />
+          </ActionDialog>
+
+          <ActionDialog visible={dialog === "approveReversal"} title={t("yearEndClose.dialog.reverseTitle", { fiscalYear: fy.code })} onHide={() => setDialog(null)}
+            facts={[...runFacts,
+              { label: t("yearEndClose.reversal.requestedBy"), value: run.reverseRequest ? `${run.reverseRequest.byName || "-"}, ${dateTime(run.reverseRequest.at)}` : null },
+              { label: t("yearEndClose.reversal.reason"), value: run.reverseRequest?.reason }]}
+            consequence={t("yearEndClose.dialog.reverseConsequence", { fiscalYear: run.nextFiscalYear })} cancelLabel={t("periodEnd.cancel")} confirmLabel={t("yearEndClose.reversal.approve")}
+            confirmIcon="pi pi-undo" severity="warning" busy={busy === "reverse"}
+            onConfirm={() => act("reverse", () => periodEndService.reverseYearEnd(run.id, remark.trim()), t("periodEnd.yearReversed"), { resetStep: true })}>
+            {remarkField}
+          </ActionDialog>
+
+          <ActionDialog visible={dialog === "withdraw"} title={t("yearEndClose.dialog.withdrawTitle")} onHide={() => setDialog(null)}
+            facts={[...runFacts, { label: t("yearEndClose.reversal.reason"), value: run.reverseRequest?.reason }]}
+            cancelLabel={t("yearEndClose.dialog.keepRequest")} confirmLabel={t("yearEndClose.reversal.withdraw")} busy={busy === "withdraw"}
+            onConfirm={() => act("withdraw", () => periodEndService.withdrawYearEndReversal(run.id), t("yearEndClose.toast.reversalWithdrawn"))} />
+
+          <ActionDialog visible={dialog === "cancel"} title={t("yearEndClose.dialog.cancelTitle", { runNumber: run.runNumber })} onHide={() => setDialog(null)}
+            facts={[...runFacts, { label: t("yearEndClose.approval.preparedBy"), value: run.preparedByName }]}
+            consequence={t("yearEndClose.dialog.cancelConsequence", { fiscalYear: fy.code })} cancelLabel={t("yearEndClose.dialog.keepRun")} confirmLabel={t("periodEnd.cancelRun")}
+            severity="danger" busy={busy === "cancel"} onConfirm={() => act("cancel", () => periodEndService.cancelYearEnd(run.id), t("yearEndClose.toast.cancelled"), { resetStep: true })} />
+        </>
+      )}
+
+      {fy && (
+        <ActionDialog visible={dialog === "adjustment" && !!adjustment} width={980} title={t("yearEndClose.dialog.adjustmentTitle", { fiscalYear: fy.code })} onHide={() => setDialog(null)}
+          facts={[{ label: t("periodEnd.fiscalYear"), value: fy.code }, { label: t("periodEnd.period"), value: fy.adjustmentPeriod },
+            { label: t("yearEndClose.closing.journalDate"), value: date(fy.endDate) }]}
+          consequence={t("yearEndClose.dialog.adjustmentConsequence")} cancelLabel={t("periodEnd.cancel")} confirmLabel={t("yearEndClose.dialog.submitAdjustment")}
+          confirmIcon="pi pi-send" busy={busy === "adjust"} disabled={!adjustment || adjustment.description.trim().length < 2 || !balanced(adjustment.lines)} onConfirm={saveAdjustment}>
+          {adjustment && (
+            <>
+              <div className="ye-field">
+                <label htmlFor="ye-adj-desc" className="bv-field-label">{t("periodEnd.description")}<span className="required-marker">*</span></label>
+                <InputText id="ye-adj-desc" value={adjustment.description} maxLength={500} onChange={(e) => setAdjustment({ ...adjustment, description: e.target.value })} className="w-full" />
+              </div>
+              <LinesEditor lines={adjustment.lines} onChange={(lines) => setAdjustment({ ...adjustment, lines })} />
+            </>
+          )}
+        </ActionDialog>
+      )}
     </div>
   );
 };

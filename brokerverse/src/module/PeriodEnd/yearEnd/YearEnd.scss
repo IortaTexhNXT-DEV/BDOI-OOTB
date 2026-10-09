@@ -1,0 +1,423 @@
+@import "../../../theme/bdoi/tokens";
+
+// Year-End Close (module/PeriodEnd/YearEndClose.jsx): summary, stepper, step card, checks, pop-ups. Colours come from
+// the theme tokens; the cards and tables are the Period End ones (index.scss).
+
+.ye-page {
+  .ye-year {
+    min-width: 13rem;
+  }
+
+  .ye-body {
+    min-height: 12rem;
+  }
+
+  .ye-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .ye-subtitle {
+    margin: 20px 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: $color-heading;
+  }
+
+  .ye-row-total td {
+    font-weight: 700;
+  }
+}
+
+// ---------------------------------------------------------------- label / value grid
+
+.ye-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px 24px;
+  margin: 0;
+
+  .ye-fact {
+    min-width: 0;
+  }
+
+  dt {
+    margin-bottom: 2px;
+    font-size: 12px;
+    font-weight: 600;
+    color: $color-text-muted;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 14px;
+    color: $color-heading;
+    overflow-wrap: anywhere;
+  }
+
+  .ye-fact--numeric dd {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// ---------------------------------------------------------------- stepper
+
+.ye-stepper {
+  margin-top: 16px;
+  overflow-x: auto;
+
+  ol {
+    display: flex;
+    min-width: 640px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ye-stepper__item {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+
+    // line to the previous step, through the middle of the marker
+    &:not(:first-child)::before {
+      content: "";
+      position: absolute;
+      top: 15px;
+      left: -50%;
+      right: 50%;
+      height: 2px;
+      background: $color-border;
+    }
+
+    &.ye-stepper__item--done:not(:first-child)::before {
+      background: $color-success;
+    }
+  }
+
+  button {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 0 4px 10px;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: center;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: $focus-ring;
+      border-radius: $radius-sm;
+    }
+  }
+
+  .ye-stepper__marker {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 2px solid $color-border-strong;
+    border-radius: 50%;
+    background: $color-surface;
+    color: $color-text-muted;
+    font-size: 13px;
+    font-weight: 700;
+
+    .pi {
+      font-size: 13px;
+    }
+  }
+
+  .ye-stepper__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .ye-stepper__label {
+    font-size: 13px;
+    font-weight: 600;
+    color: $color-heading;
+  }
+
+  .ye-stepper__status {
+    font-size: 12px;
+    color: $color-text-muted;
+  }
+
+  .ye-stepper__item--done .ye-stepper__marker {
+    border-color: $color-success;
+    background: $color-success;
+    color: $color-surface;
+  }
+
+  .ye-stepper__item--attention .ye-stepper__marker {
+    border-color: $color-danger;
+    color: $color-danger;
+  }
+
+  .ye-stepper__item--attention .ye-stepper__status {
+    color: $color-danger;
+  }
+
+  .ye-stepper__item--waiting .ye-stepper__marker {
+    border-color: $color-warning;
+    color: $color-warning;
+  }
+
+  .is-active button {
+    border-bottom-color: $marker;
+  }
+
+  .is-active .ye-stepper__marker {
+    box-shadow: 0 0 0 3px $brand-blue-050;
+  }
+}
+
+// ---------------------------------------------------------------- step card
+
+.ye-step {
+  .ye-step__head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    margin-bottom: 16px;
+  }
+
+  .ye-step__title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: $color-heading;
+  }
+
+  .ye-step__actions {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  .ye-step__nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid $color-border;
+  }
+}
+
+.ye-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-top: 16px;
+}
+
+.ye-reason {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 13px;
+  color: $color-text-muted;
+}
+
+.ye-journals {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 16px;
+
+  .ye-journals__label {
+    font-size: 12px;
+    font-weight: 600;
+    color: $color-text-muted;
+  }
+
+  .ye-journals__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+.ye-request {
+  margin-top: 16px;
+  padding: 12px 16px;
+  border: 1px solid $color-border;
+  border-left: 3px solid $color-warning;
+  border-radius: $radius-sm;
+  background: $color-warning-050;
+
+  .ye-request__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .ye-request__title {
+    font-weight: 700;
+    color: $color-heading;
+  }
+}
+
+// ---------------------------------------------------------------- empty state
+
+.ye-empty {
+  .ye-empty__line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .ye-empty__text {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: $color-heading;
+  }
+}
+
+// ---------------------------------------------------------------- checks
+
+.ye-checks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  .ye-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid $color-border;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  .ye-check__icon {
+    margin-top: 2px;
+    font-size: 16px;
+    color: $color-text-muted;
+  }
+
+  .ye-check--passed .ye-check__icon {
+    color: $color-success;
+  }
+
+  .ye-check--failed .ye-check__icon {
+    color: $color-danger;
+  }
+
+  .ye-check__main {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .ye-check__label {
+    font-weight: 600;
+    color: $color-heading;
+  }
+
+  .ye-check__result {
+    margin-top: 2px;
+    font-size: 13px;
+    color: $color-text;
+    overflow-wrap: anywhere;
+  }
+
+  .ye-check__side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .ye-check__link {
+    padding: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: $brand-blue;
+  }
+}
+
+// ---------------------------------------------------------------- pop-ups
+
+.ye-dialog {
+  .ye-dialog__facts {
+    padding: 12px 16px;
+    border-radius: $radius-sm;
+    background: $color-surface-muted;
+  }
+
+  .ye-field {
+    display: flex;
+    flex-direction: column;
+    margin-top: 16px;
+  }
+
+  .ye-optional {
+    margin-left: 4px;
+    font-weight: 400;
+    color: $color-text-muted;
+  }
+
+  .bv-reason {
+    margin-top: 16px;
+  }
+
+  .pe-lines {
+    margin-top: 16px;
+    overflow-x: auto;
+  }
+
+  .ye-consequence {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin: 16px 0 0;
+    font-size: 13px;
+    color: $color-text-muted;
+  }
+
+  .ye-dialog__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  .ye-checks .ye-check {
+    flex-wrap: wrap;
+  }
+
+  .ye-checks .ye-check__side {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    padding-left: 28px;
+  }
+}
