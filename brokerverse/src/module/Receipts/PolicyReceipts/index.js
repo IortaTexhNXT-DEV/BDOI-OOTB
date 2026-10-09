@@ -36,6 +36,7 @@ import clientService from "../../../services/clientService";
 import BulkUploadModal from "../BulkUploadModal";
 import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
 import logger from "../../../utility/logger";
+import { hasPermission } from "../../../utils/canOpen";
 
 const CONVERTED = "Converted";
 
@@ -570,6 +571,8 @@ const PolicyReceipts = () => {
   };
 
   // Real buttons (keyboard focus, Enter / Space) for the header actions; rendered for desktop and mobile layouts.
+  // Recording and uploading receipts are for the collection users (write:receipts); the others only read them.
+  const canRecord = hasPermission("write:receipts");
   const headerActions = (
     <>
       <div className="filter_bulk_button_container">
@@ -577,17 +580,21 @@ const PolicyReceipts = () => {
           <span className="addtext">{t("accounts.receipts.bulkPrint")}</span>
         </Button>
       </div>
-      <div className="filter_bulk_button_container">
-        <Button type="button" className="bulk_button_container" outlined onClick={handleBulkUploadModal}>
-          <span className="addtext">{t("accounts.receipts.bulkUpload")}</span>
-        </Button>
-      </div>
-      <div className="filterbutton_container">
-        <Button type="button" className="addbutton_container" onClick={handlePolicy}>
-          <SvgAdd className="addicon" aria-hidden="true" />
-          <span className="addtext">{t("accounts.receipts.receipt")}</span>
-        </Button>
-      </div>
+      {canRecord && (
+        <>
+          <div className="filter_bulk_button_container">
+            <Button type="button" className="bulk_button_container" outlined onClick={handleBulkUploadModal}>
+              <span className="addtext">{t("accounts.receipts.bulkUpload")}</span>
+            </Button>
+          </div>
+          <div className="filterbutton_container">
+            <Button type="button" className="addbutton_container" onClick={handlePolicy}>
+              <SvgAdd className="addicon" aria-hidden="true" />
+              <span className="addtext">{t("accounts.receipts.receipt")}</span>
+            </Button>
+          </div>
+        </>
+      )}
     </>
   );
 

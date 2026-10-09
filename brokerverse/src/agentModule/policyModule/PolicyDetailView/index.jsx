@@ -1652,12 +1652,14 @@ const PolicyDetailView = () => {
               />
             )}
 
-            <Button
-              label={t("policyDetail.claim")}
-              icon="pi pi-file"
-              onClick={handleClaim}
-              className="p-button-outlined"
-            />
+            {hasPermission("write:claims") && (
+              <Button
+                label={t("policyDetail.claim")}
+                icon="pi pi-file"
+                onClick={handleClaim}
+                className="p-button-outlined"
+              />
+            )}
             <Button
               label={t("policyDetail.viewPolicy")}
               icon="pi pi-external-link"

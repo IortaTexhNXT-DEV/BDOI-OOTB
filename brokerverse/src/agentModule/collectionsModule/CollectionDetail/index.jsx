@@ -13,6 +13,7 @@ import emailService from "../../../services/emailService";
 import EmailDocumentDialog from "../../../components/EmailDocumentDialog";
 import LoadState from "../../../components/LoadState";
 import NextStep from "../../../components/NextStep";
+import { hasPermission } from "../../../utils/canOpen";
 import FollowUpModal from "../FollowUpModal";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
@@ -247,8 +248,8 @@ const CollectionDetail = () => {
 
       {collection.outstandingAmount > 0 && (
         <NextStep title={t("collectionDetail.nextStepTitle")} text={t("collectionDetail.nextStepText", { amount: formatCurrency(collection.outstandingAmount), bill: collection.billNumber })}
-          actions={[{ key: "receipt", label: t("collectionDetail.recordReceipt"),
-            to: `/accounts/receipts/addreceipts?client=${encodeURIComponent(client.clientId || "")}&policy=${encodeURIComponent(collection.policyNumber || "")}` }]} />
+          actions={hasPermission("write:receipts") ? [{ key: "receipt", label: t("collectionDetail.recordReceipt"),
+            to: `/accounts/receipts/addreceipts?client=${encodeURIComponent(client.clientId || "")}&policy=${encodeURIComponent(collection.policyNumber || "")}` }] : []} />
       )}
 
       {/* Client and Policy Information */}
