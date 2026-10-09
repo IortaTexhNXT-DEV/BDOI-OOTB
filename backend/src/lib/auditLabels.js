@@ -74,7 +74,7 @@ const ACTION_VERBS = {
   run: 'run', status: 'status changed', assign: 'assigned', renew: 'renewed', lapse: 'lapsed', endorse: 'endorsed', print: 'printed', email: 'e-mailed',
   'payment-capture': 'payment captured', 'pay-later': 'set to pay later', 'payment-confirm': 'payment confirmed', 'payment-reject': 'payment rejected',
   'payment-status': 'payment status changed', 'funds-received': 'funds received from the insurer', 'paid-to-claimant': 'paid to the claimant',
-  purge: 'purged', reset: 'reset', complete: 'completed', reassign: 'reassigned',
+  purge: 'purged', reset: 'reset', complete: 'completed', reassign: 'reassigned', 'access-change': 'access changed',
 };
 
 /** Sign-in events read as what the user did. */

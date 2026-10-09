@@ -313,6 +313,8 @@ export const configurationReview = async () => (await getSetting('accounting.con
 
 export const CHANGE_LABELS = { 'posting-rule-version': 'New posting rule version', 'posting-rule-status': 'Posting rule version (de)activated',
   'account-role': 'Account role', 'account-map': 'Account map', 'commission-taxes': 'Commission taxes' };
+// the same table holds the changes of access (access-control/changes.js): they are listed and decided there
+const KINDS = Object.keys(CHANGE_LABELS);
 
 async function assertNoPending(db, kind, target) {
   const p = (await db.query('SELECT id FROM accounting_config_changes WHERE kind = $1 AND target = $2 AND status = \'pending\'', [kind, target])).rows[0];
@@ -336,7 +338,7 @@ async function changeOut(db, c) {
 }
 
 export async function getChange(db, id) {
-  const c = (await db.query(`${CHANGE_SELECT} WHERE c.id = $1`, [Number(id) || 0])).rows[0];
+  const c = (await db.query(`${CHANGE_SELECT} WHERE c.id = $1 AND c.kind = ANY($2)`, [Number(id) || 0, KINDS])).rows[0];
   if (!c) throw notFound('Configuration change not found');
   return changeOut(db, c);
 }
@@ -344,7 +346,7 @@ export async function getChange(db, id) {
 /** Configuration changes (status pending by default, or approved / rejected / withdrawn / all). */
 export async function listChanges(db, q = {}) {
   const status = q.status || 'pending';
-  const rows = (await db.query(`${CHANGE_SELECT} WHERE ($1 = 'all' OR c.status = $1) ORDER BY c.requested_at DESC LIMIT 200`, [status])).rows;
+  const rows = (await db.query(`${CHANGE_SELECT} WHERE ($1 = 'all' OR c.status = $1) AND c.kind = ANY($2) ORDER BY c.requested_at DESC LIMIT 200`, [status, KINDS])).rows;
   const out = [];
   for (const c of rows) out.push(await changeOut(db, c));
   return out;
@@ -355,7 +357,7 @@ export async function listChanges(db, q = {}) {
  * (checked by the route) and is never the requester, whatever finance.maker_checker_enabled says.
  */
 export async function decideChange(db, id, action, remarks, user) {
-  const c = (await db.query('SELECT * FROM accounting_config_changes WHERE id = $1 FOR UPDATE', [Number(id) || 0])).rows[0];
+  const c = (await db.query('SELECT * FROM accounting_config_changes WHERE id = $1 AND kind = ANY($2) FOR UPDATE', [Number(id) || 0, KINDS])).rows[0];
   if (!c) throw notFound('Configuration change not found');
   if (c.status !== 'pending') throw conflict(`Change ${c.id} is already ${c.status}`);
   await assertChecker(user, c.requested_by, 'posting rule or account determination change', { configurable: false });
@@ -382,7 +384,7 @@ export async function decideChange(db, id, action, remarks, user) {
 
 /** Withdraw a pending change (the requester, or a user who may approve it). */
 export async function withdrawChange(db, id, user) {
-  const c = (await db.query('SELECT * FROM accounting_config_changes WHERE id = $1 FOR UPDATE', [Number(id) || 0])).rows[0];
+  const c = (await db.query('SELECT * FROM accounting_config_changes WHERE id = $1 AND kind = ANY($2) FOR UPDATE', [Number(id) || 0, KINDS])).rows[0];
   if (!c) throw notFound('Configuration change not found');
   if (c.status !== 'pending') throw conflict(`Change ${c.id} is already ${c.status}`);
   const approver = user?.permissions?.includes('approve:posting-rules') || user?.roles?.includes('system-admin');

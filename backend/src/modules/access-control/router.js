@@ -1,9 +1,11 @@
 /**
- * Access control (Master > User Management): user access matrix, role / permission matrix, authority matrix with
- * maker-checker approval of limits, delegation of authority, segregation-of-duties rules, access reviews, and ending a
- * user's sessions. Rules and their use by the approval steps: service.js.
+ * Access control (Master > User Management): user access matrix, role permissions (with changes of a role's access
+ * through approval, roleAccess.js and changes.js), authority matrix with maker-checker approval of limits, delegation of
+ * authority, segregation-of-duties rules, access reviews, and ending a user's sessions. Rules and their use by the
+ * approval steps: service.js.
  * Permissions: read:access-control (System Administrator, Accounting Manager read), write:access-control and
- * approve:access-control (System Administrator; the approver of a limit is not the one who proposed it).
+ * approve:access-control (System Administrator; the approver of a limit or of a change of access is not the one who
+ * proposed it); a change of a role's access is requested with write:roles.
  */
 import { moduleRouter } from '../../lib/registry.js';
 import { requireAuth, requirePermission } from '../../lib/auth.js';
@@ -12,14 +14,22 @@ import { pool, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created } from '../../lib/respond.js';
 import { sendTable } from '../documents/tabular.js';
+import { toCsv } from '../../lib/csv.js';
+import { writeXlsx } from '../../lib/xlsx.js';
+import { printContext } from '../documents/pdf.js';
+import { excelBrand } from '../reports/service.js';
 import { formatMoney } from '../../lib/money.js';
+import { today } from '../../lib/dates.js';
 import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import * as svc from './service.js';
+import * as roleAccess from './roleAccess.js';
+import * as changes from './changes.js';
 
 const { router, define } = moduleRouter('Access Control', '/access-control');
 const read = [requireAuth, requirePermission('read:access-control')];
 const write = [requireAuth, requirePermission('write:access-control')];
 const approve = [requireAuth, requirePermission('approve:access-control')];
+const roleWrite = [requireAuth, requirePermission('write:roles')];
 const S = 'Master > User Management';
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const format = (q) => (String(q.format || '').toLowerCase() === 'csv' ? 'csv' : 'xlsx');
@@ -45,6 +55,100 @@ define({
   method: 'GET', path: '/role-matrix', summary: 'Permissions down, roles across: what each role may do (inherited roles listed per role)', screen: `${S} > Role Permissions`, middleware: read,
   response: { success: true, data: { roles: [{ code: 'accounting', name: 'Accounting', inherits: [] }], rows: [{ code: 'read:policies', module: 'policies', grants: { accounting: true } }] } },
   handler: async (_req, res) => ok(res, await svc.roleMatrix(pool)),
+});
+
+// ---------- role permissions and changes of access ----------
+const codes = z.array(z.string().max(80)).max(300).default([]);
+const roleAccessExample = { approval: true, catalogue: { areas: [{ code: 'accounts', name: 'Accounts', order: 3 }], modules: [{ code: 'receipts', area: 'accounts', name: 'Receipts',
+  screens: ['Receipts', 'Post-Dated Cheques'], levels: ['view', 'edit'] }], permissions: [{ code: 'read:receipts', area: 'accounts', module: 'receipts', level: 'view',
+  meaning: 'See receipts and post-dated cheques', checked: true, baseline: false }] }, departments: [{ name: 'Cash Control', order: 3 }],
+roles: [{ code: 'tis-ccd-bp', name: 'CCD-BP / QRPh (Receipting)', department: 'Cash Control', platform: false, fullAccess: false, status: 'active', inherits: [], includedBy: [],
+  users: { active: 2, inactive: 0 }, own: ['read:receipts', 'write:receipts'], included: {}, pending: null, editBlocked: null }], pendingCount: 0, abilities: { edit: true, approve: true } };
+const changeExample = { id: 12, ref: 'CFG-12', kind: 'role-access', kindLabel: 'Role access', target: 'tis-finance', targetLabel: 'TIS Finance & General Accounting',
+  summary: ['Added: Accounts › Bank reconciliation › Approve'], status: 'pending', requestedBy: 'IT administrator', requestedAt: '2026-10-09T02:15:00Z', canDecide: true, canWithdraw: true,
+  link: '/master/generals/usermanagement/role-permissions?view=pending&change=12' };
+define({
+  method: 'GET', path: '/role-access', summary: 'Role permissions in business words: the access catalogue (areas, modules, levels), the departments, and each role with its own and included access, users and change waiting for approval',
+  screen: `${S} > Role Permissions`, middleware: read, response: { success: true, data: roleAccessExample },
+  handler: async (req, res) => ok(res, await roleAccess.overview(pool, req.user)),
+});
+define({
+  method: 'POST', path: '/role-access/check', summary: 'What a change of a role\'s access would do (dry run): the change without no-ops, segregation-of-duties warnings for the role and its users, who is affected',
+  screen: `${S} > Role Permissions`, middleware: [...roleWrite, validate(z.object({ role: z.string(), grant: codes, revoke: codes }))],
+  request: { role: 'tis-finance', grant: ['approve:bank-reconciliation'], revoke: [] },
+  response: { success: true, data: { grant: ['approve:bank-reconciliation'], revoke: [], added: ['Accounts › Bank reconciliation › Approve'], removed: [], warnings: [], blocked: false,
+    affected: { users: 6, throughUsers: 0, throughRoles: [] } } },
+  handler: async (req, res) => ok(res, await roleAccess.checkChange(pool, req.body.role, req.body)),
+});
+define({
+  method: 'POST', path: '/role-access/:role/changes', summary: 'Change the access of a role (reason required); it applies once another administrator approves it (or at once with access.change_approval off)',
+  screen: `${S} > Role Permissions`, middleware: [...roleWrite, validate(z.object({ grant: codes, revoke: codes, reasonCode: z.string().max(40).optional(), note: z.string().max(1000).optional() }))],
+  request: { grant: ['approve:bank-reconciliation'], revoke: ['write:fixed-assets'], reasonCode: 'ACC-REDESIGN', note: 'Bank reconciliation approval moves to Finance' },
+  response: { success: true, data: { change: changeExample, applied: null } },
+  handler: async (req, res) => {
+    const r = await withTransaction((db) => roleAccess.proposeRoleAccess(db, req.params.role, req.body, req.user));
+    if (r.change) {
+      await audit(req, { entity: 'accounting_config_change', entityId: r.change.id, action: 'request', after: r.change });
+      await changes.askAccessApproval(r.change, req.user);
+      return created(res, { change: r.change, applied: null, warnings: r.check.warnings }, `Change ${r.change.ref} sent for approval; it applies once another administrator approves it`);
+    }
+    await audit(req, r.applied.audit);
+    return ok(res, { change: null, applied: r.applied, warnings: r.check.warnings }, `Access of ${r.applied.roleName} changed`);
+  },
+});
+define({
+  method: 'GET', path: '/role-access/export', summary: 'Role permissions for audit (?roles=a,b&base=1&format=xlsx|csv): access by role x module x level, the matrix, the changes waiting for approval and the permission codes',
+  screen: `${S} > Role Permissions`, middleware: read, query: { roles: 'tis-sales-associate,tis-sales-officer', base: 0, format: 'xlsx' },
+  handler: async (req, res) => {
+    const ctx = await printContext();
+    const roles = String(req.query.roles || '').split(',').map((x) => x.trim()).filter(Boolean);
+    const sheets = await roleAccess.exportSheets(pool, { roles, base: ['1', 'true'].includes(String(req.query.base)) }, req.user, ctx.format);
+    const base = `role-permissions-${(await today()).replace(/-/g, '')}`;
+    if (format(req.query) === 'csv') {
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="${base}.csv"`);
+      return res.send(toCsv(sheets[0].columns, sheets[0].rows));
+    }
+    const banner = [ctx.letterhead?.name, 'Role permissions', `As at ${ctx.generatedAt} · exported by ${ctx.generatedBy}`].filter(Boolean);
+    const buf = writeXlsx({ title: 'Role permissions', brand: excelBrand(ctx), sheets: sheets.map((sh, i) => (i === 0 ? { ...sh, banner, logo: true } : sh)) });
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${base}.xlsx"`);
+    return res.send(buf);
+  },
+});
+define({
+  method: 'GET', path: '/changes', summary: 'Changes of access (role access) with their summary in business words and what the signed-in user may do (?status=pending|approved|rejected|withdrawn|all&kind&target)',
+  screen: `${S} > Role Permissions`, middleware: read, query: { status: 'pending', kind: 'role-access' }, response: { success: true, data: [changeExample] },
+  handler: async (req, res) => ok(res, await changes.listAccessChanges(pool, { kind: req.query.kind || null, status: req.query.status || 'pending', target: req.query.target || null }, req.user)),
+});
+define({
+  method: 'GET', path: '/changes/:id', summary: 'One change of access', screen: `${S} > Role Permissions`, middleware: read, response: { success: true, data: changeExample },
+  handler: async (req, res) => ok(res, await changes.getAccessChange(pool, req.params.id, req.user)),
+});
+define({
+  method: 'POST', path: '/changes/:id/decision', summary: 'Approve (applies it) or reject (remarks required) a change of access; never by the requester',
+  screen: `${S} > Role Permissions`, middleware: [...approve, validate(z.object({ decision: z.enum(['approve', 'reject']), remarks: z.string().max(1000).optional() }))],
+  request: { decision: 'approve' }, response: { success: true, data: { ...changeExample, status: 'approved' } },
+  handler: async (req, res) => {
+    const r = await withTransaction((db) => changes.decideAccessChange(db, req.params.id, req.body, req.user));
+    const c = r.change;
+    const approved = req.body.decision === 'approve';
+    await audit(req, { entity: 'accounting_config_change', entityId: c.id, action: req.body.decision, after: c });
+    if (r.result?.audit) await audit(req, r.result.audit);
+    await notifyDecision({ userId: c.requestedById, decidedBy: req.user.id, document: `${c.kindLabel} change`, number: c.ref, approved, by: req.user.username,
+      reason: approved ? null : c.decisionRemarks, message: approved ? `The access of ${c.targetLabel} is changed, approved by ${req.user.username}` : null,
+      link: c.link, entity: 'accounting_config_change', entityId: c.id });
+    ok(res, c, approved ? `Change ${c.ref} approved; the access of ${c.targetLabel} is changed` : `Change ${c.ref} rejected`);
+  },
+});
+define({
+  method: 'POST', path: '/changes/:id/withdraw', summary: 'Withdraw a change of access waiting for approval (the requester or an approver)', screen: `${S} > Role Permissions`,
+  middleware: [requireAuth, requirePermission('write:roles', 'write:access-control', 'approve:access-control')], response: { success: true, data: { ...changeExample, status: 'withdrawn' } },
+  handler: async (req, res) => {
+    const c = await withTransaction((db) => changes.withdrawAccessChange(db, req.params.id, req.user));
+    await audit(req, { entity: 'accounting_config_change', entityId: c.id, action: 'withdraw', after: c });
+    ok(res, c, `Change ${c.ref} withdrawn`);
+  },
 });
 
 // ---------- authority matrix ----------

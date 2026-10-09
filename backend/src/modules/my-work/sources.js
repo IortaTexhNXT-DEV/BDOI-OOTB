@@ -18,6 +18,8 @@ import { getSetting } from '../../lib/settings.js';
 import { scopeSql } from '../../lib/scope.js';
 import { KYC_ITEMS, KYC_DEFAULT_REQUIRED } from '../policies/kyc.js';
 import { effectiveAuthority } from '../access-control/service.js';
+import { CHANGE_LABELS } from '../posting-rules/service.js';
+import { APPROVER as ACCESS_APPROVER } from '../access-control/changes.js';
 
 /** Categories in screen order: code, label, icon, permission needed to see it. */
 export const CATEGORIES = [
@@ -276,7 +278,13 @@ async function approvals(ctx) {
   if (ctx.can('approve:posting-rules') && await has('accounting_config_changes')) {
     out.push(`SELECT ${select({ ...base, kind: "'Configuration change'", id: 'cc.id', ref: "'CFG-' || cc.id", title: "initcap(replace(cc.kind, '_', ' ')) || COALESCE(' - ' || cc.target, '')",
       due_date: due('cc.requested_at'), status: 'cc.status', link: "'/master/finance/configuration-approvals'", created_at: 'cc.requested_at' })}
-      FROM accounting_config_changes cc WHERE cc.status = 'pending' AND ${notMine(ctx, 'cc.requested_by')}`);
+      FROM accounting_config_changes cc WHERE cc.status = 'pending' AND cc.kind = ANY(${ctx.P(Object.keys(CHANGE_LABELS))}) AND ${notMine(ctx, 'cc.requested_by')}`);
+  }
+  // changes of access (role access) are approved on their own screen with approve:access-control
+  if (ctx.can(ACCESS_APPROVER) && await has('accounting_config_changes')) {
+    out.push(`SELECT ${select({ ...base, kind: "'Role access change'", id: 'cc.id', ref: "'CFG-' || cc.id", title: "COALESCE(r.name, cc.target)",
+      due_date: due('cc.requested_at'), status: 'cc.status', link: "'/master/generals/usermanagement/role-permissions?view=pending&change=' || cc.id", created_at: 'cc.requested_at' })}
+      FROM accounting_config_changes cc LEFT JOIN roles r ON r.code = cc.target WHERE cc.status = 'pending' AND cc.kind = 'role-access' AND ${notMine(ctx, 'cc.requested_by')}`);
   }
   if (ctx.can('approve:period-end') && await has('period_close_runs')) {
     out.push(`SELECT ${select({ ...base, kind: "'Month-end close'", id: 'pr.id', ref: 'pr.run_number', title: "'Close of period ' || pr.period", due_date: due('COALESCE(pr.submitted_at, pr.created_at)'),
