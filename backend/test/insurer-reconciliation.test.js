@@ -108,7 +108,8 @@ describe('insurer statement reconciliation', () => {
     const jv = (await query('SELECT j.*, p.event_code FROM journal_vouchers j JOIN posting_rules p ON p.id = j.posting_rule_id WHERE j.id = $1', [res.journalId])).rows[0];
     expect(jv.event_code).toBe('insurer_statement.adjustment');
     const lines = (await query('SELECT account_code, debit::float AS d, credit::float AS c FROM journal_lines WHERE jv_id = $1 ORDER BY line_no', [res.journalId])).rows;
-    expect(lines).toEqual([{ account_code: '3201001', d: 100, c: 0 }, { account_code: '2201001', d: 0, c: 100 }]);
+    // premium payable to the insurer: Accounts Payable - Insurance Company (TISPH chart, payable account of the Insurer payee)
+    expect(lines).toEqual([{ account_code: '3201001', d: 100, c: 0 }, { account_code: '210245', d: 0, c: 100 }]);
     expect((await ledgerIntegrity()).unbalanced).toBe(0);
     expect((await ctx.as('maker')('post', `/insurer-reconciliation/statements/${s.id}/resolutions`).send({ lineId: ap.body.data.amountDifferences[0].id, kind: 'note', note: 'late' })).status).toBe(409);
   });

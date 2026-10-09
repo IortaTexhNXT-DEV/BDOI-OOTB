@@ -12,7 +12,8 @@ Remittance Master). Permissions: `read:remittance`, `write:remittance`.
 | `router.js` | All routes. |
 | `service.js` | Remittances and bills to insurers and agencies, the approval queue (Authority Matrix limits, maker-checker), automated remittance generation and schedule runs, and the journal of an approved work item (`postItemJournal`). |
 | `items.js` | Work items stored in `remittance_items` by kind: settlement, adjustment, transfer, statement, exception, notification, bulk upload, bank transaction; remittance schedules (`runSchedule`, `runDueSchedules`), analytics and history. |
-| `directbill.js` | Direct bill: billing mode of a policy, commission booked at issue, commission debit notes (`DN-`), collections from the insurer (`DNC-`) with creditable withholding tax. |
+| `directbill.js` | Direct bill: billing mode of a policy, commission booked at issue, commission debit notes (`DN-`), collections from the insurer (`DNC-`) with creditable withholding tax; the commission billing statements of gross-remittance business (`CBS-`). |
+| `basis.js` | Remittance basis of broker-billed premium (net or gross) by insurer and product (`remittance.basis_rules`, `remittance.default_basis`). |
 | `clientPayments.js` | Direct bill: the client's payment to the insurer (date, amount, insurer OR / reference, proof), the payment status of a policy and the check before a debit note is approved. |
 | `insurerCredits.js` | Refunds due from insurers after a return premium on premium already remitted; netted against the next remittance voucher. |
 
@@ -31,6 +32,19 @@ collected premium, net of the commission and the output VAT on it, plus the EWT 
 commission (`receivables.commission_vat` / `commission_ewt`, pro rata to the premium collected; the invoice list shows
 them in `vat` and `wht`). The cheque approval there posts the payment journal. Settlement credit and debit notes post
 through the posting rule `remittance.settlement`.
+
+Gross remittance (`remittance/basis.js`, migration 0344; FGA.09): for an insurer and product whose basis is `gross`,
+the bill is booked Dr Premium Receivable / Cr Due to Insurer for the whole premium (no commission, no commission VAT or
+EWT; `receivables.remittance_basis` = gross, `commission_amount` 0), so the insurer voucher pays the whole premium
+collected and the remittance lines show no commission. The commission of the bill becomes an unbilled
+`direct_bill_items` row of basis `gross`, without a journal (a return premium books a negative one at the policy's
+commission ratio). Finance bills it on Direct Bill Processing with "Commission of: Gross remittance": the note is a
+**billing statement** numbered from the `billing_statement` series (`CBS-`), and its approval by a second user posts
+`commission.billing_statement` (Dr Commission Receivable / Cr Commission Income / Cr Output VAT, dated the statement
+date). Cancelling an approved statement without collections reverses that journal and makes the commission unbilled
+again. The insurer's payment is recorded like a debit note collection (Dr Cash, Dr Creditable Withholding Tax / Cr
+Commission Receivable). A note bills one basis only. The default basis is `net`: the build's broker-billed booking
+(commission kept, premium remitted net), unchanged.
 
 Direct bill: the client pays the insurer. At issue the broker books commission receivable from the insurer
 (`directbill.commission`). Finance raises a commission debit note for a period, a second user approves it, and
@@ -56,7 +70,8 @@ active schedules whose next run date has come, in the business time zone, and mo
 
 `remittance.approval_levels` (fallback only), `remittance.priority_thresholds`, `remittance.priority_sla_hours`,
 `remittance.default_due_days` (due date of a new remittance when the insurer has no `remittance_terms_days`), `remittance.transfer_methods`, `remittance.status_labels`,
-`remittance.bill_email_subject` / `_body`, `remittance.statement_email_subject` / `_body`,
+`remittance.default_basis`, `remittance.basis_rules` (`[{ "insurer": "MALAYAN", "product": "MOTOR", "basis": "gross" }]`; the most
+specific matching rule wins), `remittance.bill_email_subject` / `_body`, `remittance.statement_email_subject` / `_body`,
 `remittance.reconciliation_bank_account`, `remittance.reconciliation_tolerance`, and the `direct_bill.*` group
 (default billing mode, VAT registration, insurer EWT rate, debit note due days, e-mail text, client payment required
 before approval).

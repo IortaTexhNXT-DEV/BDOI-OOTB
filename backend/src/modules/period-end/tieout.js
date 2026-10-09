@@ -3,7 +3,9 @@
  * sub-ledger that should explain it:
  *   premium receivable     open bills: sum of receivables.balance
  *   commission receivable  direct-bill commission not yet on a debit note, plus the balance of debit notes not yet
- *                          collected (draft, pending approval, open, partially collected)
+ *                          collected (draft, pending approval, open, partially collected); gross-remittance commission
+ *                          reaches the GL only when its billing statement is approved, so only the balance of approved
+ *                          billing statements counts
  *   due to insurers        postings made by operations (bookings, returns, payments, adjustments): everything except
  *                          manual and correction journals and their reversals
  * The comparison is on current balances: sub-ledger and GL move together, so a difference means something reached one
@@ -35,8 +37,8 @@ export async function subledgerTieOut(db) {
   const codes = { receivable: await account('premium_receivable'), commission: await account('commission_receivable'), insurer: await account('due_to_insurer') };
   const premium = round2((await db.query('SELECT COALESCE(sum(balance), 0) AS b FROM receivables WHERE status <> \'cancelled\'')).rows[0].b);
   const commission = round2((await db.query(`SELECT
-      COALESCE((SELECT sum(amount) FROM direct_bill_items WHERE status = 'unbilled' AND debit_note_id IS NULL), 0)
-    + COALESCE((SELECT sum(balance) FROM commission_debit_notes WHERE status IN ('draft', 'for-approval', 'open', 'partial')), 0) AS b`)).rows[0].b);
+      COALESCE((SELECT sum(amount) FROM direct_bill_items WHERE status = 'unbilled' AND debit_note_id IS NULL AND basis = 'direct'), 0)
+    + COALESCE((SELECT sum(balance) FROM commission_debit_notes WHERE status IN ('open', 'partial') OR (basis = 'direct' AND status IN ('draft', 'for-approval'))), 0) AS b`)).rows[0].b);
   const insurer = round2(-(await db.query(`SELECT COALESCE(sum(l.debit - l.credit), 0) AS b FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id
     WHERE l.account_code = $1 AND ${POSTED} AND ${EFFECTIVE_SOURCE} NOT IN ${MANUAL}`, [codes.insurer])).rows[0].b);
   const rows = [];

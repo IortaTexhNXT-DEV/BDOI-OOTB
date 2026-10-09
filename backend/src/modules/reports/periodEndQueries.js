@@ -61,12 +61,13 @@ const trialBalanceOcm = `SELECT a.code AS "accountCode", a.name AS "accountName"
 
 // General ledger detail: per account an opening balance line, the movements of the period and a running balance
 const glDetail = `WITH u AS (
-    SELECT account_code, $1::date AS d, NULL::text AS jv_number, 'Opening balance' AS descr, NULL::text AS source, NULL::text AS period,
+    SELECT account_code, $1::date AS d, NULL::text AS jv_number, 'Opening balance' AS descr, NULL::text AS source, NULL::text AS period, NULL::text AS cost_centre,
       GREATEST(balance, 0) AS debit, GREATEST(-balance, 0) AS credit, 0::bigint AS seq, true AS is_open FROM pe_balance_before($1::date)
     UNION ALL
-    SELECT l.account_code, j.jv_date, j.jv_number, COALESCE(NULLIF(l.memo, ''), j.description), j.source, j.period, l.debit, l.credit, l.id, false
+    SELECT l.account_code, j.jv_date, j.jv_number, COALESCE(NULLIF(l.memo, ''), j.description), j.source, j.period, l.cost_centre, l.debit, l.credit, l.id, false
       FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id WHERE ${POSTED} AND j.jv_date BETWEEN $1::date AND $2::date)
   SELECT u.account_code AS "accountCode", a.name AS "accountName", u.account_code AS _account, u.d AS "date", u.period, u.jv_number AS "journalNumber", u.descr AS description, u.source,
+    u.cost_centre AS "costCentre",
     CASE WHEN u.is_open THEN u.debit - u.credit END AS "openingBalance",
     CASE WHEN u.is_open THEN NULL ELSE u.debit END AS debit, CASE WHEN u.is_open THEN NULL ELSE u.credit END AS credit,
     sum(u.debit - u.credit) OVER (PARTITION BY u.account_code ORDER BY u.is_open DESC, u.d, u.seq) AS "runningBalance", u.seq AS _seq, u.is_open AS _open

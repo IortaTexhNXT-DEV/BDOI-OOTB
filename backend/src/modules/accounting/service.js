@@ -13,7 +13,7 @@ export const ENTRY_SQL = `SELECT l.id, l.jv_id, l.line_no, l.account_code, COALE
   l.memo, COALESCE(l.due_date, j.due_date) AS due_date, l.currency_code, j.jv_number, j.jv_date, j.description, j.status, j.source, j.entry_type, j.entry_sub_type,
   j.transaction_code, j.reference_type, j.reference_id, j.currency, COALESCE(l.client_id, j.client_id) AS client_id, COALESCE(l.policy_id, j.policy_id) AS policy_id,
   COALESCE(p.policy_number, j.policy_number) AS policy_number, c.client_code, c.first_name, c.last_name, c.display_name,
-  l.insurance_company_id, (SELECT name FROM insurance_companies WHERE id = l.insurance_company_id) AS line_insurer_name
+  l.insurance_company_id, (SELECT name FROM insurance_companies WHERE id = l.insurance_company_id) AS line_insurer_name, l.cost_centre
   FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id LEFT JOIN gl_accounts a ON a.code = l.account_code
   LEFT JOIN clients c ON c.id = COALESCE(l.client_id, j.client_id) LEFT JOIN policies p ON p.id = COALESCE(l.policy_id, j.policy_id)`;
 
@@ -28,7 +28,7 @@ export const entryRow = (e) => {
     motherPolicyId: e.policy_id, motherPolicyNumber: e.policy_number, policyId: e.policy_id, policyNumber: e.policy_number, clientId: e.client_id,
     client: e.client_id ? { id: e.client_id, clientId: e.client_code, firstName: e.first_name, lastName: e.last_name, displayName: e.display_name } : null,
     referenceType: e.reference_type, referenceId: e.reference_id, source: e.source, currency: e.currency_code || e.currency,
-    insurerId: e.insurance_company_id ?? null, insurerName: e.line_insurer_name ?? null,
+    insurerId: e.insurance_company_id ?? null, insurerName: e.line_insurer_name ?? null, costCentre: e.cost_centre || null,
   };
 };
 
@@ -48,6 +48,7 @@ export function entryWhere(q) {
   }
   if (q.glCode) add('(l.account_code LIKE ? || \'%\')', q.glCode);
   if (q.accountCode) add('l.account_code = ?', q.accountCode);
+  if (q.costCentre) add('l.cost_centre = ?', q.costCentre);
   if (q.debitCredit === 'DEBIT') where.push('l.debit > 0');
   if (q.debitCredit === 'CREDIT') where.push('l.credit > 0');
   if (q.currency) add('COALESCE(l.currency_code, j.currency) = ?', q.currency);

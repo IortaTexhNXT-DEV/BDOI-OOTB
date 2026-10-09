@@ -23,7 +23,8 @@ describe('accounting flow', () => {
     const issue = byCode['policy.issue.broker_billed'];
     expect(issue).toMatchObject({ version: 2, trigger: expect.stringContaining('Policy issued') });
     expect(issue.debits.map((l) => [l.amountKey, l.account.glCode])).toEqual(expect.arrayContaining([['gross', '1202001'], ['commission_ewt', '1302001']]));
-    expect(issue.credits.map((l) => l.account.glCode)).toEqual(expect.arrayContaining(['2201001', '3201001', '235000']));
+    // premiums payable to insurers: Accounts Payable - Insurance Company of the TISPH chart (seed 81_tisph_finance.sql)
+    expect(issue.credits.map((l) => l.account.glCode)).toEqual(expect.arrayContaining(['210245', '3201001', '235000']));
     expect(byCode['receipt.apply'].debits[0].account).toMatchObject({ kind: 'resolver', resolver: 'bank_account' });
   });
 

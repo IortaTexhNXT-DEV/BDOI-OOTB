@@ -234,7 +234,15 @@ export async function remittedPremiumTaxes(db, { invoiceListId, disbursementId }
     [invoiceListId || null, disbursementId || null])).rows;
   if (!lists.length) return zero;
   const { account } = await import('../accounting/lib/ledger.js');
-  const codes = { vat: await account('premium_vat_payable'), dst: await account('premium_dst_payable'), lgt: await account('premium_lgt_payable') };
+  // a tax account shared by several taxes counts once; one that is the premium payable account itself is paid as premium
+  const seen = new Set([await account('due_to_insurer')]);
+  const codes = {};
+  for (const [k, role] of [['vat', 'premium_vat_payable'], ['dst', 'premium_dst_payable'], ['lgt', 'premium_lgt_payable']]) {
+    const code = await account(role);
+    if (!seen.has(code)) codes[k] = code;
+    seen.add(code);
+  }
+  if (!Object.keys(codes).length) return zero;
   const rows = (await db.query(`SELECT x.ratio, x.insurer, l.account_code, l.credit, l.insurance_company_id FROM (
       SELECT a.amount / r.amount AS ratio, NULL::int AS insurer, r.booking_jv_id FROM receipt_applications a JOIN receivables r ON r.id = a.receivable_id
         WHERE a.remitted_invoice_id = ANY($1)

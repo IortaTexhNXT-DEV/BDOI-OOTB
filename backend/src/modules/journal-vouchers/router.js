@@ -10,6 +10,10 @@ import { pageParams, sendList } from '../accounting/lib/http.js';
 import * as svc from './service.js';
 import { buildPdf, sendPdf } from '../documents/pdf.js';
 import { journalVoucherDoc } from '../documents/finance.js';
+import { mapColumns, parseUploadedRows, uploadFile } from '../documents/tabular.js';
+import { sendTemplate } from '../documents/uploadTemplates.js';
+import { getSetting } from '../../lib/settings.js';
+import { badRequest } from '../../lib/errors.js';
 
 const { router, define } = moduleRouter('Journal Vouchers', '/journal-vouchers');
 const read = [requireAuth, requirePermission('read:journal-vouchers')];
@@ -19,7 +23,7 @@ const header = { id: 'jv_1', transactionCode: 'JV01', transactionNumber: 'JV-202
 const entrySchema = z.object({
   mainAccount: z.string().min(1), subAccount: z.string().optional().nullable(), entryType: z.string(), foreignAmount: z.union([z.number(), z.string()]).optional(),
   localAmount: z.union([z.number(), z.string()]).optional(), currencyCode: z.string().optional(), remarks: z.string().optional(), branchCode: z.string().optional().nullable(),
-  departmentCode: z.string().optional().nullable(),
+  departmentCode: z.string().optional().nullable(), costCentre: z.string().optional().nullable(),
 }).passthrough();
 const entryExample = [{ mainAccount: '4401003', subAccount: '4401003001', entryType: 'Debit', currencyCode: 'PHP', foreignAmount: 25000, remarks: 'Statutory audit FY2026', branchCode: 'PHP', departmentCode: 'FI' },
   { mainAccount: '2206001', entryType: 'Credit', currencyCode: 'PHP', foreignAmount: 25000, remarks: 'Accrued audit fee' }];
@@ -32,8 +36,9 @@ async function askApproval(jv, req) {
 }
 
 define({
-  method: 'GET', path: '/history', summary: 'Journal voucher register (manual, correction and reversal JVs; all=true for system journals too)', screen: SCREEN, middleware: read,
-  query: { page: 1, pageSize: 20, transactionCode: 'JV01', transactionNumber: 'JV-2026', status: 'posted' },
+  method: 'GET', path: '/history', summary: 'Journal voucher register (manual, correction and reversal JVs; all=true for system journals too; parked=true for the system journals parked for approval)',
+  screen: SCREEN, middleware: read,
+  query: { page: 1, pageSize: 20, transactionCode: 'JV01', transactionNumber: 'JV-2026', status: 'posted', parked: false },
   response: { success: true, data: [header], pagination: { currentPage: 1, pageSize: 20, totalRecords: 1, totalPages: 1 } },
   handler: async (req, res) => { const pg = pageParams(req.query, 20); const r = await svc.history(pool, req.query, pg); sendList(res, r.rows, r.total, pg); },
 });
@@ -80,6 +85,27 @@ define({
     await audit(req, { entity: 'journal_voucher', entityId: jv.id, action: 'create-correction', after: req.body });
     await askApproval(jv, req);
     created(res, svc.headerRow(jv), `Transaction Number ${jv.jv_number} is created`);
+  },
+});
+define({
+  method: 'GET', path: '/upload/template', summary: 'Journal voucher upload template (XLSX: Data, Columns and Instructions sheets)', screen: `${SCREEN} > Upload > Download template`, middleware: read,
+  response: '(xlsx file)', handler: async (_req, res) => sendTemplate(res, 'journal-vouchers'),
+});
+define({
+  method: 'POST', path: '/upload', summary: 'Upload journal vouchers from CSV / XLSX (multipart "file"): rows grouped by Voucher Ref, the whole file checked first (balanced, accounts active and open to manual entries, cost centres, period open); each voucher is parked for approval by a different user',
+  screen: `${SCREEN} > Upload`, middleware: [...write, uploadFile], request: 'multipart/form-data file',
+  response: { success: true, message: '2 journal vouchers uploaded for approval', data: { total: 4, vouchers: [{ voucherRef: 'ACCR-2026-10-01', ...header, lineCount: 2 }] } },
+  handler: async (req, res) => {
+    const rows = parseUploadedRows(req.file);
+    const max = Number(await getSetting('limits.bulk_upload_max_rows', 1000));
+    if (rows.length > max) throw badRequest(`The file has ${rows.length} rows; the limit is ${max}`);
+    const created = await withTransaction((db) => svc.uploadVouchers(db, rows.map((r) => mapColumns(r, svc.JV_UPLOAD_COLUMNS)), req.user));
+    for (const jv of created) {
+      await audit(req, { entity: 'journal_voucher', entityId: jv.id, action: 'upload', after: { voucherRef: jv.voucher_ref, file: req.file.originalname, lines: jv.line_count } });
+      await askApproval(jv, req);
+    }
+    const vouchers = created.map((jv) => ({ voucherRef: jv.voucher_ref, ...svc.headerRow(jv), lineCount: jv.line_count }));
+    ok(res, { total: rows.length, vouchers }, `${vouchers.length} journal voucher${vouchers.length === 1 ? '' : 's'} uploaded for approval`);
   },
 });
 define({

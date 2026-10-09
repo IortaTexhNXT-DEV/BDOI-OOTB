@@ -145,3 +145,9 @@ export { claimDocumentReminders } from '../modules/claim-documents/jobs.js';
 export { leadAssignmentSla } from '../modules/leads/assignment.js';
 export { campaignDispatch } from '../modules/campaigns/service.js';
 export { biExtract } from '../modules/report-builder/service.js';
+
+/** SAP GL text files of the day (TIS-BRD-INTG-04): header and line file of the entries posted up to the cut-off (sap_gl.cut_off). */
+export async function sapGlExport() {
+  if (!(await tableExists('sap_gl_exports'))) return { skipped: 'sap_gl_exports table missing' };
+  return (await import('../modules/sap-gl/service.js')).scheduledExport();
+}

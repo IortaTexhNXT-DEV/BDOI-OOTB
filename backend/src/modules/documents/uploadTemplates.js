@@ -16,6 +16,7 @@ import { RECEIPT_UPLOAD_COLUMNS } from '../receipts/service.js';
 import { OPEN_ITEM_COLUMNS } from '../receipts/opening.js';
 import { DISBURSEMENT_UPLOAD_COLUMNS } from '../disbursements/service.js';
 import { ACCOUNT_UPLOAD_COLUMNS } from '../accounting/service.js';
+import { JV_UPLOAD_COLUMNS } from '../journal-vouchers/service.js';
 import { OPENING_BALANCE_COLUMNS } from '../period-end/opening.js';
 import { uploadColumns } from '../masters/service.js';
 import { masterTemplateInfo } from '../masters/uploadSamples.js';
@@ -137,6 +138,22 @@ export function staticUploads() {
         { code: '4401030001', name: 'Training – Compliance Seminars', accountType: 'expense', parentCode: '4401030', fsGroup: 'Operating Expenses', category: 'Operating Expenses', normalBalance: 'debit', isOpenItem: 'No', allowManual: 'Yes', status: 'active', description: 'Seminars required by the Insurance Commission' },
       ],
       notes: ['BrokerVerse ships a Philippine broker chart of accounts. Use this upload to add your own accounts or rename existing ones; an existing Account Code updates that account. Put a main account before its sub accounts. Accounts used by the system settings cannot be deactivated here.'],
+    },
+    {
+      id: 'journal-vouchers', file: 'Journal_Vouchers_Upload_Template.xlsx', title: 'Journal vouchers upload (manual adjusting entries)', menu: 'Accounts > Journal Voucher > Upload',
+      route: 'POST /api/journal-vouchers/upload (multipart field "file")', columns: JV_UPLOAD_COLUMNS, maxRows: BULK_ROWS, onError: `${ALL_OR_NOTHING} Each voucher must balance.`,
+      samples: [
+        { voucherRef: 'ACCR-2026-10-01', date: '2026-10-31', transactionCode: 'JV01', description: 'Accrual of audit fees October 2026', accountCode: '658000', debit: '25000', remarks: 'Statutory audit FY2026' },
+        { voucherRef: 'ACCR-2026-10-01', date: '2026-10-31', transactionCode: 'JV01', description: 'Accrual of audit fees October 2026', accountCode: '210030', credit: '25000', remarks: 'Accrued audit fee' },
+        { voucherRef: 'BANK-2026-10-02', date: '2026-10-31', transactionCode: 'JV01', description: 'Bank charges per October statement', accountCode: '650010', debit: '150', remarks: 'Service charge' },
+        { voucherRef: 'BANK-2026-10-02', date: '2026-10-31', transactionCode: 'JV01', description: 'Bank charges per October statement', accountCode: '106010', credit: '150', remarks: 'Service charge' },
+      ],
+      notes: [
+        'One row per journal line. The rows with the same Voucher Ref make one journal voucher, numbered from the journal series (Master > Document Numbering) when it is saved.',
+        'Every voucher is parked for approval: a user other than the one who uploaded it approves it on Accounts > Journal Voucher or My Work > Approvals, which posts it.',
+        'Use it for accruals, prepayments, bank reconciliation adjustments, income tax accruals and the entries of the non-insurance processes until their own screens are delivered.',
+        'The sample account codes are from the TISPH chart of accounts; replace them with the accounts of your entries.',
+      ],
     },
     {
       id: 'opening-balances', file: 'Opening_Balances_Upload_Template.xlsx', title: 'GL opening balances (go-live trial balance)', menu: 'Accounts > Period End > Period Management > Import opening balances',

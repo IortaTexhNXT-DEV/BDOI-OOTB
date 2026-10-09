@@ -9,7 +9,7 @@ Rules) and `/account-determination` (Master > Finance > Account Determination). 
 | File | What it does |
 |---|---|
 | `router.js` | Routes of both screens, the configuration approvals and the accounting flow. |
-| `flow.js` | Accounting flow help screen (Master > Finance > Accounting Flow): trigger and approval of every event (`EVENT_FLOW`) with the debit and credit lines of the rule in force and today's GL accounts. A new event needs its `EVENT_FLOW` entry (a test checks it). |
+| `flow.js` | Accounting flow help screen (Master > Finance > Accounting Flow): trigger and approval of every event (`EVENT_FLOW`), whether its journal is parked for approval or posted at once (`accounting.parked_events`), with the debit and credit lines of the rule in force and today's GL accounts. A new event needs its `EVENT_FLOW` entry (a test checks it). |
 | `service.js` | Event catalogue, rule versions (validation, simulation, activation), account roles and maps, commission tax set-up, write-off reasons, the maker-checker on configuration changes. |
 
 ## Main tables
@@ -42,7 +42,8 @@ maps are settings: `accounting.account.<role>`, `accounting.payable_account_by_p
 ## Key settings
 
 `accounting.account.*`, `accounting.payable_account_by_payee`, `accounting.cash_account_by_payment_mode`,
-`accounting.split_premium_taxes`, `accounting.broker_billed_commission_vat`, `accounting.broker_billed_commission_ewt`,
+`accounting.split_premium_taxes`, `accounting.parked_events` (checked on save by `assertParkedEvents`: known events, none
+that always posts), `accounting.broker_billed_commission_vat`, `accounting.broker_billed_commission_ewt`,
 `tax.commission_vat_code`, `tax.commission_ewt_code`, `accounting.configuration_maker_checker`.
 
 ## Debugging

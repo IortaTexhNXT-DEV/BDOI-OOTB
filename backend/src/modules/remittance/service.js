@@ -20,6 +20,7 @@ import { postEvent } from '../accounting/lib/posting.js';
 import { companyName } from '../../lib/letterhead.js';
 import { resolveCreditTerms } from '../commission-rates/terms.js';
 import { assertAuthority } from '../access-control/service.js';
+import { GROSS_BILLED_SQL } from './basis.js';
 
 // ---------------- configuration helpers ----------------
 
@@ -171,7 +172,9 @@ export async function eligiblePolicies({ insurerId, agentUserId, from, to, produ
   if (to) conds.push(`p.inception_date <= ${p.add(to)}::date`);
   if (productLine && productLine !== 'All') conds.push(`(pr.line ILIKE ${p.add(productLine)} OR pr.name ILIKE $${p.values.length})`);
   if (policyIds) conds.push(`(p.id = ANY(${p.add(policyIds.map(String))}) OR p.policy_number = ANY($${p.values.length}))`);
-  return many(`SELECT p.id, p.policy_number, p.premium_total, p.commission_amount, p.inception_date, p.insurance_company_id, p.owner_user_id, p.details,
+  // gross remittance (remittance/basis.js): the whole premium is remitted, the commission is billed to the insurer separately
+  return many(`SELECT p.id, p.policy_number, p.premium_total, CASE WHEN ${GROSS_BILLED_SQL} THEN 0 ELSE p.commission_amount END AS commission_amount,
+                 ${GROSS_BILLED_SQL} AS gross_billed, p.inception_date, p.insurance_company_id, p.owner_user_id, p.details,
                  c.display_name AS insured_name, pr.name AS product_name, pr.line AS product_line,
                  COALESCE((SELECT sum(balance) FROM receivables rv WHERE rv.policy_id = p.id AND rv.status <> 'paid'), 0) AS outstanding,
                  EXISTS (SELECT 1 FROM receivables rv WHERE rv.policy_id = p.id) AS billed,
@@ -200,7 +203,7 @@ export async function insurerShare(policy, insurerId) {
 async function withShares(rows, insurerId) {
   for (const r of rows) {
     const sh = await insurerShare(r, insurerId);
-    if (sh) Object.assign(r, { premium_total: sh.premium, commission_amount: sh.commission, tax_share: sh.tax, share_percent: sh.share, participant_insurer_id: insurerId });
+    if (sh) Object.assign(r, { premium_total: sh.premium, commission_amount: r.gross_billed ? 0 : sh.commission, tax_share: sh.tax, share_percent: sh.share, participant_insurer_id: insurerId });
   }
   return rows;
 }
@@ -213,13 +216,15 @@ async function buildLines(lines, insurerId = null) {
   for (const l of lines || []) {
     let pol = null;
     if (l.policyId || l.policyNo) {
-      pol = await one(`SELECT p.*, c.display_name AS insured_name, pr.line AS product_line FROM policies p LEFT JOIN clients c ON c.id = p.client_id
+      pol = await one(`SELECT p.*, CASE WHEN ${GROSS_BILLED_SQL} THEN 0 ELSE p.commission_amount END AS commission_amount, ${GROSS_BILLED_SQL} AS gross_billed,
+                         c.display_name AS insured_name, pr.line AS product_line
+                       FROM policies p LEFT JOIN clients c ON c.id = p.client_id
                        LEFT JOIN products pr ON pr.id = p.product_id WHERE p.id = $1 OR p.policy_number = $1`, [String(l.policyId || l.policyNo)]);
       if (!pol && l.policyId) throw badRequest('Validation failed', [{ path: 'lines', message: `Policy ${l.policyId} was not found` }]);
     }
     const share = pol && insurerId ? await insurerShare(pol, insurerId) : null;
     const premium = toNumber(l.premium ?? share?.premium ?? pol?.premium_total, NaN);
-    const commission = toNumber(l.commission ?? share?.commission ?? pol?.commission_amount, 0);
+    const commission = toNumber(l.commission ?? (pol?.gross_billed ? 0 : share?.commission) ?? pol?.commission_amount, 0);
     const tax = toNumber(l.tax ?? share?.tax ?? pol?.details?.taxTotal, 0);
     if (!Number.isFinite(premium)) throw badRequest('Validation failed', [{ path: 'lines', message: 'Each line needs a premium' }]);
     out.push({ policyId: pol?.id || null, policyNo: pol?.policy_number || l.policyNo || null, insuredName: pol?.insured_name || l.insuredName || null,

@@ -7,7 +7,7 @@ import { many, one, query } from '../../db/pool.js';
 import { ok, paging } from '../../lib/respond.js';
 import { badRequest } from '../../lib/errors.js';
 import { businessTimeZone, today } from '../../lib/dates.js';
-import { assertNotControlled } from '../posting-rules/service.js';
+import { assertNotControlled, assertParkedEvents } from '../posting-rules/service.js';
 import { assertNotOwnedElsewhere, settingOwner } from '../../lib/settingOwners.js';
 import { EXPORT_COLUMNS, exportRows } from '../../lib/auditEvents.js';
 import { sendSheet } from '../claims/docs.js';
@@ -39,6 +39,7 @@ define({
     const changes = Object.entries(req.body.settings).map(([k, v]) => [k, v, before[k]]);
     assertNotOwnedElsewhere(changes);
     await assertNotControlled(changes);
+    assertParkedEvents(changes);
     for (const [k, v] of Object.entries(req.body.settings)) {
       const exists = (await query('SELECT editable FROM app_settings WHERE key = $1', [k])).rows[0];
       if (!exists || !exists.editable) continue;

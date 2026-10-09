@@ -3,7 +3,7 @@
  * it, the approval that comes before the posting, and the debit and credit lines of the posting rule in force, with the
  * GL accounts the lines resolve to today. Built from the live rules, so it follows every approved rule change.
  */
-import { EVENTS, RESOLVERS, activeRule } from '../accounting/lib/posting.js';
+import { ALWAYS_POSTED, EVENTS, RESOLVERS, activeRule, parksOnSave } from '../accounting/lib/posting.js';
 import { today } from '../accounting/lib/http.js';
 import { commissionTaxAccount } from '../accounting/lib/commissionTax.js';
 
@@ -17,6 +17,7 @@ export const EVENT_FLOW = {
   'receipt.apply': { trigger: 'Accounts > Receipts: official receipt applied to a bill, or a verified payment capture', approval: 'Finance only (write:receipts)' },
   'directbill.commission': { trigger: 'Direct-bill policy issued or endorsed with additional premium', approval: 'None: commission booked at issue' },
   'directbill.commission_return': { trigger: 'Direct-bill policy with return premium or cancellation', approval: 'None' },
+  'commission.billing_statement': { trigger: 'Accounts > Remittance > Direct Bill Processing: commission billing statement of gross-remittance business approved (reversed when an approved statement is cancelled)', approval: 'The statement is approved by a second user' },
   'directbill.collection': { trigger: 'Accounts > Remittance > Direct Bill Processing: insurer payment recorded on a debit note', approval: 'The debit note is approved by a second user before it can be collected' },
   'commission.approve': { trigger: 'Commission: comsub of an agent or referrer approved', approval: 'Maker-checker (finance.maker_checker_enabled)' },
   'commission.payout': { trigger: 'Accounts > Disbursement: comsub payment voucher paid', approval: 'Cheque approved by a user other than the voucher maker' },
@@ -76,7 +77,9 @@ export async function accountingFlow(db) {
       lines.push({ lineNo: l.line_no, side: l.side, amountKey: l.amount_key, perParticipant: l.per_participant, narration: l.narration, account: describeAccount(l, roles, gl, taxGl) });
     }
     const flow = EVENT_FLOW[code] || { trigger: `${ev.module} module`, approval: 'Not documented' };
-    out.push({ eventCode: code, label: ev.label, module: ev.module, trigger: flow.trigger, approval: flow.approval, ruleId: current?.rule.id || null, version: current?.rule.version || null,
+    // posting: parked on save until another user approves (accounting.parked_events), or posted at once
+    out.push({ eventCode: code, label: ev.label, module: ev.module, trigger: flow.trigger, approval: flow.approval, posting: (await parksOnSave(code)) ? 'parked' : 'posted',
+      alwaysPosted: ALWAYS_POSTED[code] || null, ruleId: current?.rule.id || null, version: current?.rule.version || null,
       description: current?.rule.description || null, debits: lines.filter((l) => l.side === 'Dr'), credits: lines.filter((l) => l.side === 'Cr') });
   }
   return { asOf: date, events: out };

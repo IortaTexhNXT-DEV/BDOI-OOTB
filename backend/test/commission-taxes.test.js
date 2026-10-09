@@ -4,11 +4,11 @@ import { pool, query, withTransaction } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { findPolicy, premiumSplit, returnPremium } from '../src/modules/receipts/receivables.js';
 import { commissionTaxes } from '../src/modules/accounting/lib/commissionTax.js';
-import { withoutConfigurationApproval } from './helpers.js';
+import { withStarterInsurerAccounts, withoutConfigurationApproval } from './helpers.js';
 
 let ctx;
 // set-up changes apply at once here; their approval is covered in configuration-controls.test.js
-beforeAll(async () => { ctx = await setupFinance(); await withoutConfigurationApproval(); });
+beforeAll(async () => { ctx = await setupFinance(); await withoutConfigurationApproval(); await withStarterInsurerAccounts(); });
 afterAll(async () => { await pool.end(); });
 
 const r2 = (n) => Math.round(n * 100) / 100;

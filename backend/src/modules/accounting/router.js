@@ -59,7 +59,7 @@ for (const [path, summary] of [['/policies/:id/ledger-view', 'Policy ledger (run
   });
 }
 define({
-  method: 'GET', path: '/entries/search', summary: 'Search accounting entries (policyId, clientId, clientName, entryType, referenceType, status, glCode, startDate, endDate; paging)', screen: Q, middleware: read,
+  method: 'GET', path: '/entries/search', summary: 'Search accounting entries (policyId, clientId, clientName, entryType, referenceType, status, glCode, costCentre, startDate, endDate; paging)', screen: Q, middleware: read,
   query: { clientId: 'CL-2026-00001', status: 'Posted', page: 1, pageSize: 20 }, response: { success: true, data: [entry], pagination },
   handler: async (req, res) => {
     const pg = pageParams(req.query, 20);
@@ -125,7 +125,7 @@ define({
 const tellMaker = (jv, user) => (jv?.requires_approval ? notifyDecision({ userId: jv.created_by, decidedBy: user.id, document: 'Journal voucher', number: jv.jv_number, approved: true,
   by: user.username, message: `Approved and posted by ${user.username}`, link: `/accounts/journalvoucher/detailsjournalvocture/${jv.id}`, entity: 'journal_voucher', entityId: jv.id }) : null);
 const TX = { post: ['Post a pending journal (maker-checker for vouchers that require approval)', postJournal, 'Posted'],
-  reverse: ['Reverse a posted journal with a mirror journal', (db, id, user) => reverseJournal(db, id, user), 'Reversed'],
+  reverse: ['Reverse a posted journal with a mirror journal', (db, id, user) => reverseJournal(db, id, user, { cancelUnposted: false }), 'Reversed'],
   cancel: ['Cancel an unposted journal', cancelJournal, 'Cancelled'] };
 for (const [action, [summary, fn, label]] of Object.entries(TX)) {
   define({
@@ -149,7 +149,7 @@ define({
   handler: async (req, res) => {
     const r = await svc.searchEntries(pool, req.query, null);
     if (!r.rows.length) throw notFound('No accounting entries found matching the filters');
-    const cols = [['documentDate', 'Date'], ['transactionCode', 'Transaction'], ['entryType', 'Entry type'], ['accountCode', 'GL code'], ['accountName', 'Account'], ['debit', 'Debit'], ['credit', 'Credit'],
+    const cols = [['documentDate', 'Date'], ['transactionCode', 'Transaction'], ['entryType', 'Entry type'], ['accountCode', 'GL code'], ['accountName', 'Account'], ['costCentre', 'Cost centre'], ['debit', 'Debit'], ['credit', 'Credit'],
       ['motherPolicyNumber', 'Policy'], ['clientCode', 'Client code'], ['clientName', 'Client'], ['description', 'Description'], ['status', 'Status'], ['referenceType', 'Reference type'], ['referenceId', 'Reference']]
       .map(([key, label]) => ({ key, label }));
     const csv = toCsv(cols, r.rows.map((e) => ({ ...e, clientCode: e.client?.clientId, clientName: e.client?.displayName })));

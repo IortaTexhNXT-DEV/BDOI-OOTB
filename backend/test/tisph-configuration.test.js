@@ -79,7 +79,8 @@ describe('TISPH configuration of a new database', () => {
   });
 
   it('loads the 319 accounts of the TISPH chart and points the clear account roles to them', async () => {
-    expect((await q("SELECT count(*)::int AS n FROM gl_accounts WHERE code ~ '^[0-9]{6}$'"))[0].n).toBe(319);
+    // 319 FGA.01 accounts and the placeholder 210245 for the FGA.09 Accounts Payable - Insurance Company
+    expect((await q("SELECT count(*)::int AS n FROM gl_accounts WHERE code ~ '^[0-9]{6}$' AND code <> '210245'"))[0].n).toBe(319);
     const accounts = await q("SELECT code, name, account_type, fs_group, normal_balance, is_open_item FROM gl_accounts WHERE code IN ('106010', '110032', '170070', '800000') ORDER BY code");
     expect(accounts).toEqual([
       { code: '106010', name: 'MBT Bank Balance Php_561', account_type: 'asset', fs_group: 'Current Assets', normal_balance: 'debit', is_open_item: false },
@@ -91,9 +92,9 @@ describe('TISPH configuration of a new database', () => {
     expect(await setting('accounting.account.cash_in_bank')).toBe('106010');
     expect(await setting('accounting.account.output_vat')).toBe('235000');
     expect(await setting('accounting.account.retained_earnings')).toBe('340000');
+    expect(await setting('accounting.account.due_to_insurer')).toBe('210245');
     // roles waiting for Finance keep the starter accounts
     expect(await setting('accounting.account.premium_receivable')).toBe('1202001');
-    expect(await setting('accounting.account.due_to_insurer')).toBe('2201001');
     expect(await setting('accounting.cash_account_by_payment_mode')).toMatchObject({ cash: '100000', check: '106010', gcash: '1102002' });
   });
 

@@ -333,6 +333,14 @@ FROM (VALUES
 ) AS v(code, name, account_type, fs_group, normal_balance, is_open_item, description)
 ON CONFLICT (code) DO NOTHING;
 
+-- FGA.09 credits "Accounts Payable to Insurance Company" with the premium collected and debits it when the premium is
+-- settled with the insurer, but FGA.01 has no such account. 210245 (between AP-Dealer and AP-Stale Checks) stands in
+-- for it until TISPH Finance gives the SAP account; the name says so, so it is not mistaken for a confirmed account.
+INSERT INTO gl_accounts(code, name, account_type, fs_group, is_open_item, allow_manual, description)
+VALUES ('210245', 'Accounts Payable - Insurance Company (placeholder)', 'liability', 'Current Liabilities', true, true,
+        'Placeholder for the FGA.09 account "Accounts Payable to Insurance Company", missing from FGA.01: premium collected for the insurers. SAP account to be confirmed by TISPH Finance. SAP subledger: Vendor')
+ON CONFLICT (code) DO NOTHING;
+
 -- Main Account master mirror of the new accounts (as 56_chart_of_accounts_masters.sql does for the reference chart).
 INSERT INTO master_records(type_code, code, name, data, status, created_by)
 SELECT 'main-account', a.code, a.name, jsonb_build_object('mainAccountCode', a.code, 'mainAccountName', a.name, 'description', COALESCE(a.description, a.name),
@@ -342,10 +350,10 @@ SELECT 'main-account', a.code, a.name, jsonb_build_object('mainAccountCode', a.c
 FROM gl_accounts a WHERE a.parent_code IS NULL AND a.code ~ '^[0-9]{6}$'
   AND NOT EXISTS (SELECT 1 FROM master_records m WHERE m.type_code = 'main-account' AND lower(m.code) = lower(a.code) AND m.status <> 'deleted');
 
--- Account determination: the roles with one TISPH account named for them. The other roles keep the starter accounts
--- until Finance confirms them (premium receivable and the insurer and premium tax payables depend on the remittance
--- model; commission income is one account per line in the TISPH chart; CWT, EWT payable, supplier payable, accrued
--- expenses, commission expense and service fee income have two candidate accounts; the rest have none).
+-- Account determination: the roles with one TISPH account named for them (the insurer and premium tax payables below,
+-- after the FGA.09 account). The other roles keep the starter accounts until Finance confirms them (premium receivable
+-- has no FGA.09 entry; commission income is one account per line in the TISPH chart; CWT, EWT payable, supplier payable,
+-- accrued expenses, commission expense and service fee income have two candidate accounts; the rest have none).
 UPDATE app_settings s SET value = to_jsonb(v.code), updated_at = now()
 FROM (VALUES ('accounting.account.cash_on_hand', '1101001', '100000'),
              ('accounting.account.cash_in_bank', '1102001', '106010'),
@@ -359,6 +367,17 @@ FROM (VALUES ('accounting.account.cash_on_hand', '1101001', '100000'),
              ('accounting.account.interest_income', '3301001', '740000'),
              ('accounting.account.retained_earnings', '5101001', '340000'),
              ('accounting.account.current_year_pl', '5102001', '340020')) AS v(key, starter, code)
+WHERE s.key = v.key AND s.value = to_jsonb(v.starter) AND s.updated_by IS NULL
+  AND EXISTS (SELECT 1 FROM gl_accounts a WHERE a.code = v.code AND a.status = 'active');
+
+-- Premium payable to the insurers (FGA.09): the premium collected, its taxes included, is credited to Accounts Payable -
+-- Insurance Company and settled from it. The premium receivable, the refunds due from insurers and the remittance
+-- adjustments have no FGA.09 entry and keep their starter accounts until Finance names them.
+UPDATE app_settings s SET value = to_jsonb(v.code), updated_at = now()
+FROM (VALUES ('accounting.account.due_to_insurer', '2201001', '210245'),
+             ('accounting.account.premium_vat_payable', '2201002', '210245'),
+             ('accounting.account.premium_dst_payable', '2201003', '210245'),
+             ('accounting.account.premium_lgt_payable', '2201004', '210245')) AS v(key, starter, code)
 WHERE s.key = v.key AND s.value = to_jsonb(v.starter) AND s.updated_by IS NULL
   AND EXISTS (SELECT 1 FROM gl_accounts a WHERE a.code = v.code AND a.status = 'active');
 
@@ -377,6 +396,9 @@ UPDATE app_settings SET value = value
     || CASE WHEN value->>'Customer' = '2205001' THEN '{"Customer": "210230"}'::jsonb ELSE '{}'::jsonb END,
   updated_at = now()
  WHERE key = 'accounting.payable_account_by_payee' AND updated_by IS NULL AND '2205001' IN (value->>'Client', value->>'Customer');
+UPDATE app_settings SET value = value || '{"Insurer": "210245"}'::jsonb, updated_at = now()
+ WHERE key = 'accounting.payable_account_by_payee' AND updated_by IS NULL AND value->>'Insurer' = '2201001'
+   AND EXISTS (SELECT 1 FROM gl_accounts a WHERE a.code = '210245' AND a.status = 'active');
 
 -- Tax codes book to the accounts of their roles.
 UPDATE tax_codes SET gl_account = v.code, updated_at = now()
@@ -423,9 +445,22 @@ WHERE NOT EXISTS (SELECT 1 FROM tax_codes t WHERE t.code = v.atc OR t.atc = v.at
 UPDATE tax_codes SET remarks = v.remarks, updated_at = now()
 FROM (VALUES ('WC010', 'TISPH tax code 01 (FGA.06)'), ('WC100', 'TISPH tax code 02 (FGA.06)'), ('WC011', 'TISPH tax code 03 (FGA.06)'),
              ('WC120', 'TISPH tax code 04 (FGA.06)'),
-             ('WC140', 'TISPH tax code 05 (FGA.06) at 10%: the rate stays as listed until TISPH Finance confirms it'),
+             ('WC140', 'TISPH tax code 05 (FGA.06): 15% by TISPH decision (FGA.06 lists 10%); the rate is edited here'),
              ('WC158', 'TISPH tax code 09 (FGA.06)'), ('WI010', 'TISPH tax code 10 (FGA.06)'), ('WI100', 'TISPH tax code 19 (FGA.06)'),
              ('WI140', 'TISPH tax code 23 (FGA.06) at 5%: the rate stays as listed until TISPH Finance confirms it'),
              ('WI158', 'TISPH tax code 28 (FGA.06)'), ('WI160', 'TISPH tax code 30 (FGA.06)'), ('WC160', 'TISPH tax code 31 (FGA.06)'),
              ('WI011', 'TISPH tax code 32 (FGA.06)'), ('WI515', 'TISPH tax code 39 (FGA.06)'), ('WC515', 'TISPH tax code 40 (FGA.06)')) AS v(atc, remarks)
 WHERE tax_codes.atc = v.atc AND tax_codes.remarks IS NULL AND tax_codes.updated_by IS NULL;
+UPDATE tax_codes SET remarks = 'TISPH tax code 05 (FGA.06): 15% by TISPH decision (FGA.06 lists 10%); the rate is edited here', updated_at = now()
+WHERE atc = 'WC140' AND updated_by IS NULL AND remarks = 'TISPH tax code 05 (FGA.06) at 10%: the rate stays as listed until TISPH Finance confirms it';
+
+-- ---------------------------------------------------------------- FGA.04 Cost Center
+-- One cost centre for the company, stamped on every journal line and on the SAP GL file (KOSTL, PRCTR, XREF1). FGA.04
+-- notes that the cost centres need an internal discussion with BMIS: more can be added on Master > Finance > Cost Centres.
+INSERT INTO master_records(type_code, code, name, data, status, created_by)
+SELECT 'cost-centre', '900901', 'Toyota Insurance Services',
+       jsonb_build_object('code', '900901', 'name', 'Toyota Insurance Services', 'companyCode', 'TISPH', 'isDefault', true,
+         'description', 'FGA.04: the cost centre of TISPH'),
+       'active', 'system'
+WHERE EXISTS (SELECT 1 FROM master_types WHERE code = 'cost-centre')
+  AND NOT EXISTS (SELECT 1 FROM master_records WHERE type_code = 'cost-centre' AND lower(code) = '900901');

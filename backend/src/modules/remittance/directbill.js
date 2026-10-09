@@ -21,6 +21,11 @@
  *   eligible (commission.require_full_payment).
  * - The client's payment to the insurer is recorded without posting (clientPayments.js); the unbilled grid and the
  *   note's lines show it, and direct_bill.client_payment_required can hold the approval of a note until it is recorded.
+ * - Gross remittance (remittance/basis.js): a broker-billed policy whose premium is remitted in full books its commission
+ *   as an unbilled item of basis 'gross' without a journal. It is billed on a commission billing statement
+ *   (billing_statement series, one basis per note): approval posts commission.billing_statement (Dr Commission
+ *   Receivable / Cr Commission Income / Cr Output VAT), cancelling an approved statement reverses it, and collection
+ *   works as for a debit note. The client paid the broker, so no client payment to the insurer is checked.
  */
 import { many, one, pool, withTransaction } from '../../db/pool.js';
 import { baseCurrency } from '../../lib/currency.js';
@@ -44,6 +49,9 @@ import { assertClientPaid, clientPaymentStatus } from './clientPayments.js';
 export const BILLING_MODES = ['broker', 'direct'];
 export const BILLING_MODE_LABELS = { broker: 'Broker billed', direct: 'Direct bill' };
 export const DN_STATUS_LABELS = { draft: 'Draft', 'for-approval': 'Pending Approval', open: 'Open', partial: 'Partially Collected', collected: 'Collected', rejected: 'Rejected', cancelled: 'Cancelled' };
+export const ITEM_BASES = ['direct', 'gross'];
+/** Number series of a note by the basis of its items: commission debit note (direct bill) or billing statement (gross remittance). */
+const SERIES = { direct: 'commission_debit_note', gross: 'billing_statement' };
 const EPS = 0.005;
 
 /** broker | direct from API input ('direct', 'Direct Bill', 'DIRECT_BILLED', 'broker', 'Broker billed'); null when not given. */
@@ -98,8 +106,10 @@ async function policyRow(db, id) {
  * return premium); breakdown = { netPremium, commissionAmount }. Returns the direct_bill_items row, or null when the
  * commission is nil. On a co-insured policy one item (and journal) is booked per participating insurer for its share, so
  * each insurer receives its own commission debit note; the lead insurer's item is returned with all of them in `items`.
+ * basis 'gross' (gross remittance of a broker-billed policy, remittance/basis.js): the item is booked without a journal;
+ * the billing statement it is billed on posts the commission when it is approved.
  */
-export async function bookDirectBill(db, { policy, amount, breakdown = {}, source = 'policy', reference = null, endorsementId = null, date = null, user = null }) {
+export async function bookDirectBill(db, { policy, amount, breakdown = {}, source = 'policy', reference = null, endorsementId = null, date = null, user = null, basis = 'direct' }) {
   const p = await policyRow(db, policy.id || policy);
   const gross = round2(amount);
   if (!gross) throw badRequest('Premium amount is required to book direct-bill commission');
@@ -107,7 +117,7 @@ export async function bookDirectBill(db, { policy, amount, breakdown = {}, sourc
   const parts = await policyParticipants(p.id, db);
   if (!isCoInsured(parts)) {
     return bookDirectBillShare(db, p, { insurerId: p.insurance_company_id, insurerName: p.insurer_name, commissionPolicy: p, gross, breakdown, coInsured: false },
-      { source, reference, endorsementId, bookedOn, user });
+      { source, reference, endorsementId, bookedOn, user, basis });
   }
   const w = parts.map((x) => x.share);
   const grossS = allocate(gross, w);
@@ -122,13 +132,13 @@ export async function bookDirectBill(db, { policy, amount, breakdown = {}, sourc
       insurerId: part.insurerId, insurerName: part.insurerName, gross: grossS[i], coInsured: true,
       commissionPolicy: { ...p, insurer_commission_rate: part.insurerCommissionRate, commission_amount: part.commissionAmount, premium_total: part.premiumTotal },
       breakdown: { netPremium: netS[i] || undefined, commissionAmount },
-    }, { source, reference, endorsementId, bookedOn, user });
+    }, { source, reference, endorsementId, bookedOn, user, basis });
     if (item) items.push(item);
   }
   return items.length ? { ...items[0], items } : null;
 }
 
-async function bookDirectBillShare(db, p, { insurerId, insurerName, commissionPolicy, gross, breakdown, coInsured }, { source, reference, endorsementId, bookedOn, user }) {
+async function bookDirectBillShare(db, p, { insurerId, insurerName, commissionPolicy, gross, breakdown, coInsured }, { source, reference, endorsementId, bookedOn, user, basis }) {
   const sign = gross < 0 ? -1 : 1;
   const { commissionFor } = await import('../receipts/receivables.js');
   const net = Math.abs(num(breakdown.netPremium));
@@ -137,13 +147,14 @@ async function bookDirectBillShare(db, p, { insurerId, insurerName, commissionPo
     : await commissionFor(commissionPolicy, Math.abs(gross), { ...breakdown, netPremium: net }, source);
   if (!(base > 0)) return null;
   const tax = await commissionTax(base);
-  const basis = net > 0 ? net : Math.abs(gross);
-  const rate = basis ? Math.round((base / basis) * 1e6) / 1e6 : null;
+  const premiumBase = net > 0 ? net : Math.abs(gross);
+  const rate = premiumBase ? Math.round((base / premiumBase) * 1e6) / 1e6 : null;
   const it = (await db.query(`INSERT INTO direct_bill_items(policy_id, endorsement_id, insurance_company_id, source, reference, booked_on, currency, gross_premium, net_premium,
-      commission_rate, commission, vat, amount, created_by)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
+      commission_rate, commission, vat, amount, created_by, basis)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING *`,
   [p.id, endorsementId, insurerId, source, reference || p.policy_number, bookedOn, p.currency || (await baseCurrency()), gross,
-    round2(sign * (net || Math.abs(gross))), rate, round2(sign * tax.commission), round2(sign * tax.vat), round2(sign * tax.amount), user?.id ?? null])).rows[0];
+    round2(sign * (net || Math.abs(gross))), rate, round2(sign * tax.commission), round2(sign * tax.vat), round2(sign * tax.amount), user?.id ?? null, basis])).rows[0];
+  if (basis === 'gross') return it;
   const insurer = insurerName || 'insurer';
   const refSuffix = reference && reference !== p.policy_number ? ` (${reference})` : '';
   const jv = await postEvent(sign > 0 ? 'directbill.commission' : 'directbill.commission_return', {
@@ -201,6 +212,10 @@ export async function changeBillingModeIn(db, policyRef, requested, user, { reas
     if (pending) throw conflict(`A payment on ${p.policy_number} is awaiting finance verification`);
     const remitted = (await db.query(`SELECT count(*)::int AS n FROM remittance_lines l JOIN remittances r ON r.id = l.remittance_id WHERE l.policy_id = $1 AND r.status NOT IN ('rejected','cancelled')`, [p.id])).rows[0].n;
     if (remitted) throw conflict(`${p.policy_number} is on an insurer remittance; it cannot become direct bill`);
+    // gross remittance: the commission to bill to the insurer is booked again as direct-bill commission below
+    const gross = (await db.query('SELECT id, debit_note_id FROM direct_bill_items WHERE policy_id = $1 AND basis = \'gross\' AND status <> \'cancelled\' FOR UPDATE', [p.id])).rows;
+    if (gross.some((i) => i.debit_note_id)) throw conflict(`Commission on ${p.policy_number} is already on a billing statement; it cannot become direct bill`);
+    if (gross.length) await db.query('UPDATE direct_bill_items SET status = \'cancelled\' WHERE id = ANY($1)', [gross.map((i) => i.id)]);
     for (const r of rcvs) {
       if (r.booking_jv_id) await reverseJournal(db, r.booking_jv_id, user, { description: `${note} – bill ${r.bill_number} cancelled` });
       await db.query('UPDATE receivables SET status = \'cancelled\', balance = 0, updated_at = now() WHERE id = $1', [r.id]);
@@ -251,6 +266,7 @@ export const itemOut = (it, ewt = 0) => ({
   grossPremium: Number(it.gross_premium), netPremium: Number(it.net_premium), commissionRate: pctOf(it.commission_rate),
   commission: Number(it.commission), vat: Number(it.vat), totalDue: Number(it.amount), expectedEwt: round2(Number(it.commission) * ewt),
   netReceivable: round2(Number(it.amount) - Number(it.commission) * ewt), bookingJournal: it.booking_jv_number, debitNoteId: it.debit_note_id, status: it.status,
+  basis: it.basis,
 });
 
 /** The client's payment to the insurer on the row's policy (see clientPayments.js). */
@@ -277,6 +293,7 @@ export async function unbilledItems(qs) {
   const vals = [];
   const add = (sql, v) => { vals.push(v); conds.push(sql.replaceAll('?', `$${vals.length}`)); };
   if (ins) add('it.insurance_company_id = ?', ins.id);
+  if (ITEM_BASES.includes(qs.basis)) add('it.basis = ?', qs.basis);
   if (isoDate(qs.from)) add('it.booked_on >= ?::date', isoDate(qs.from));
   if (isoDate(qs.to)) add('it.booked_on <= ?::date', isoDate(qs.to));
   const lines = [].concat(qs.productLine || []).flatMap((x) => String(x).split(',')).map((x) => x.trim()).filter((x) => x && x !== 'All');
@@ -295,7 +312,8 @@ export async function unbilledItems(qs) {
 const DN_SELECT = `SELECT d.*, i.code AS insurer_code, i.name AS insurer_name, i.address AS insurer_address, i.tin AS insurer_tin, i.contact_email AS insurer_email,
     (SELECT display_name FROM users u WHERE u.id = d.created_by) AS created_by_name, (SELECT display_name FROM users u WHERE u.id = d.approved_by) AS approved_by_name,
     (SELECT display_name FROM users u WHERE u.id = d.rejected_by) AS rejected_by_name,
-    (SELECT count(*)::int FROM commission_debit_note_lines l WHERE l.debit_note_id = d.id) AS line_count
+    (SELECT count(*)::int FROM commission_debit_note_lines l WHERE l.debit_note_id = d.id) AS line_count,
+    (SELECT jv_number FROM journal_vouchers j WHERE j.id = d.journal_id) AS journal_number
   FROM commission_debit_notes d JOIN insurance_companies i ON i.id = d.insurance_company_id`;
 
 export function debitNoteOut(d) {
@@ -311,6 +329,7 @@ export function debitNoteOut(d) {
     createdBy: d.created_by_name || d.created_by, createdById: d.created_by, createdAt: d.created_at, submittedAt: d.submitted_at,
     approvedBy: d.approved_by_name || d.approved_by, approvedAt: d.approved_at, rejectedBy: d.rejected_by_name || d.rejected_by, rejectedAt: d.rejected_at,
     rejectionReason: d.rejection_reason, sentTo: d.sent_to, sentAt: d.sent_at, updatedAt: d.updated_at,
+    basis: d.basis, documentType: d.basis === 'gross' ? 'Billing Statement' : 'Commission Debit Note', journalNumber: d.journal_number || null,
   };
 }
 
@@ -353,6 +372,7 @@ export async function listDebitNotes(qs, pg) {
     const wanted = String(qs.status).split(',').map((s) => s.trim()).map((s) => Object.entries(DN_STATUS_LABELS).find(([k, l]) => k === s || l.toLowerCase() === s.toLowerCase())?.[0] || s.toLowerCase());
     add('d.status = ANY(?)', wanted);
   }
+  if (ITEM_BASES.includes(qs.basis)) add('d.basis = ?', qs.basis);
   if (isoDate(qs.from)) add('d.dn_date >= ?::date', isoDate(qs.from));
   if (isoDate(qs.to)) add('d.dn_date <= ?::date', isoDate(qs.to));
   if (qs.search) add('(d.dn_number ILIKE \'%\' || ? || \'%\' OR i.name ILIKE \'%\' || $' + (vals.length + 1) + ' || \'%\')', qs.search);
@@ -365,7 +385,9 @@ export async function listDebitNotes(qs, pg) {
 
 /**
  * Raise a commission debit note to an insurer for unbilled items: itemIds (or policyIds) selected on screen, else every
- * unbilled item of the insurer booked in the period. submit=true sends it for approval at once.
+ * unbilled item of the insurer booked in the period (of basis b.basis when given). submit=true sends it for approval at
+ * once. A note bills items of one basis: direct-bill commission (debit note) or gross-remittance commission (billing
+ * statement, numbered from the billing_statement series).
  */
 export async function raiseDebitNote(b, user) {
   const ins = await findInsurer(b.insurerCode ?? b.insurerId);
@@ -382,23 +404,27 @@ export async function raiseDebitNote(b, user) {
       LEFT JOIN endorsements e ON e.id = it.endorsement_id
       WHERE it.insurance_company_id = $1 AND it.debit_note_id IS NULL AND it.status = 'unbilled'
         AND ($2::text[] IS NULL OR it.id = ANY($2)) AND ($3::text[] IS NULL OR it.policy_id = ANY($3) OR p.policy_number = ANY($3))
-        AND ($4::date IS NULL OR it.booked_on >= $4) AND ($5::date IS NULL OR it.booked_on <= $5)
-      ORDER BY it.booked_on, p.policy_number FOR UPDATE OF it`, [ins.id, itemIds, policyIds, from, to])).rows;
+        AND ($4::date IS NULL OR it.booked_on >= $4) AND ($5::date IS NULL OR it.booked_on <= $5) AND ($6::text IS NULL OR it.basis = $6)
+      ORDER BY it.booked_on, p.policy_number FOR UPDATE OF it`, [ins.id, itemIds, policyIds, from, to, ITEM_BASES.includes(b.basis) ? b.basis : null])).rows;
     if (itemIds && items.length !== new Set(itemIds).size) throw badRequest('Validation failed', [{ path: 'itemIds', message: 'Some items are not unbilled direct-bill commission of this insurer (already on a debit note?)' }]);
     if (!items.length) throw badRequest('Validation failed', [{ path: 'itemIds', message: `No unbilled direct-bill commission for ${ins.name} in the period` }]);
+    const bases = [...new Set(items.map((x) => x.basis))];
+    if (bases.length > 1) {
+      throw badRequest('Validation failed', [{ path: 'basis', message: 'The items mix direct-bill and gross-remittance commission: raise a debit note and a billing statement separately (choose the basis)' }]);
+    }
     const sum = (k) => round2(items.reduce((s, x) => s + Number(x[k]), 0));
     const amount = sum('amount');
     if (!(amount > 0)) throw badRequest('Validation failed', [{ path: 'itemIds', message: 'The debit note total must be greater than zero' }]);
     const rate = await ewtRate();
     const commission = sum('commission');
-    const number = await nextDocumentNumber('commission_debit_note', { db });
+    const number = await nextDocumentNumber(SERIES[bases[0]], { db });
     const due = isoDate(b.dueDate) || addDays(dnDate, Number(await getSetting('direct_bill.debit_note_due_days', 30)) || 0);
     const submit = b.submit === true || b.submit === 'true';
     const d = (await db.query(`INSERT INTO commission_debit_notes(dn_number, insurance_company_id, period_from, period_to, dn_date, due_date, currency, gross_premium, commission, vat, amount,
-        ewt_rate, expected_ewt, balance, status, remarks, created_by, updated_by, submitted_by, submitted_at)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$11,$14,$15,$16,$16,$17,$18) RETURNING id`,
+        ewt_rate, expected_ewt, balance, status, remarks, created_by, updated_by, submitted_by, submitted_at, basis)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$11,$14,$15,$16,$16,$17,$18,$19) RETURNING id`,
     [number, ins.id, from, to, dnDate, due, items[0].currency || (await baseCurrency()), sum('gross_premium'), commission, sum('vat'), amount,
-      rate, round2(commission * rate), submit ? 'for-approval' : 'draft', b.remarks || null, user.id, submit ? user.id : null, submit ? new Date() : null])).rows[0];
+      rate, round2(commission * rate), submit ? 'for-approval' : 'draft', b.remarks || null, user.id, submit ? user.id : null, submit ? new Date() : null, bases[0]])).rows[0];
     let n = 0;
     for (const it of items) {
       n += 1;
@@ -416,7 +442,7 @@ export async function raiseDebitNote(b, user) {
 }
 
 // approved with write:remittance (Remittance > Direct Bill)
-const askApproval = async (dn, user) => notifyApprovers({ audience: 'write:remittance', document: 'Commission debit note', number: dn.dnNumber, by: user?.username || 'system',
+const askApproval = async (dn, user) => notifyApprovers({ audience: 'write:remittance', document: dn.documentType, number: dn.dnNumber, by: user?.username || 'system',
   detail: `${dn.insurerName}, ${await formatMoney(dn.amount, dn.currency)}`, link: '/finance/remittance/directbill', entity: 'commission_debit_note', entityId: dn.id });
 
 /** Release the items of a rejected / cancelled note so they can be billed again. */
@@ -447,21 +473,33 @@ export async function decideDebitNote(id, action, body, user) {
     await assertChecker(user, d.created_by, 'debit note');
     await assertChecker(user, d.submitted_by, 'debit note');
     if (action === 'approve') {
-      await assertClientPaid(db, d.id, d.dn_number);
+      if (d.basis === 'direct') await assertClientPaid(db, d.id, d.dn_number);
+      const journalId = d.basis === 'gross' ? (await postBillingStatement(db, d, user)).id : null;
       // the approver's remarks go to the audit trail (logged by the route), not onto the printed note
-      await db.query('UPDATE commission_debit_notes SET status = \'open\', approved_by = $2, approved_at = now(), updated_by = $2, updated_at = now() WHERE id = $1', [d.id, user.id]);
+      await db.query('UPDATE commission_debit_notes SET status = \'open\', approved_by = $2, approved_at = now(), journal_id = COALESCE($3, journal_id), updated_by = $2, updated_at = now() WHERE id = $1',
+        [d.id, user.id, journalId]);
     } else {
       await db.query(`UPDATE commission_debit_notes SET status = 'rejected', rejected_by = $2, rejected_at = now(), rejection_reason = $3, updated_by = $2, updated_at = now() WHERE id = $1`, [d.id, user.id, reason]);
       await releaseItems(db, d.id);
     }
   });
   const after = await getDebitNote(id);
-  await notifyDecision({ userId: before.createdById, decidedBy: user.id, document: 'Commission debit note', number: after.dnNumber, approved: action === 'approve', by: user.username,
+  await notifyDecision({ userId: before.createdById, decidedBy: user.id, document: after.documentType, number: after.dnNumber, approved: action === 'approve', by: user.username,
     reason: action === 'approve' ? null : reason, link: '/finance/remittance/directbill', entity: 'commission_debit_note', entityId: after.id });
   return { before, after: { ...after, decisionRemarks: reason } };
 }
 
-/** Cancel a draft / pending note, or an open one with no collection; its items become unbilled again. */
+/** Commission of an approved billing statement (gross remittance): Dr Commission Receivable / Cr Commission Income / Cr Output VAT. */
+async function postBillingStatement(db, d, user) {
+  const insurer = (await db.query('SELECT name FROM insurance_companies WHERE id = $1', [d.insurance_company_id])).rows[0]?.name || 'insurer';
+  return postEvent('commission.billing_statement', {
+    source: 'booking', entryType: 'COMMISSION_BILLING', transactionCode: d.dn_number, referenceType: 'CommissionDebitNote', referenceId: d.id, date: isoDate(d.dn_date),
+    description: `Billing statement ${d.dn_number} – ${insurer}`, amounts: { amount: Number(d.amount), commission: Number(d.commission), vat: Number(d.vat) },
+    insuranceCompanyId: d.insurance_company_id, vars: { statementNumber: d.dn_number, insurer },
+  }, { db, user });
+}
+
+/** Cancel a draft / pending note, or an open one with no collection; its items become unbilled again (an approved billing statement's journal is reversed). */
 export async function cancelDebitNote(id, body, user) {
   const before = await getDebitNote(id);
   const reason = body?.reason ?? body?.remarks ?? null;
@@ -471,7 +509,9 @@ export async function cancelDebitNote(id, body, user) {
     const posted = (await db.query('SELECT count(*)::int AS n FROM commission_debit_note_collections WHERE debit_note_id = $1 AND status = \'posted\'', [d.id])).rows[0].n;
     if (posted) throw conflict(`Debit note ${d.dn_number} has collections; reverse them first`);
     if (d.status === 'open' && !String(reason || '').trim()) throw badRequest('Validation failed', [{ path: 'reason', message: 'A reason is required to cancel an approved debit note' }]);
-    await db.query(`UPDATE commission_debit_notes SET status = 'cancelled', cancelled_by = $2, cancelled_at = now(), remarks = COALESCE($3, remarks), balance = 0, updated_by = $2, updated_at = now() WHERE id = $1`, [d.id, user.id, reason]);
+    const reversal = d.journal_id ? await reverseJournal(db, d.journal_id, user, { description: `Cancellation of billing statement ${d.dn_number}: ${reason}` }) : null;
+    await db.query(`UPDATE commission_debit_notes SET status = 'cancelled', cancelled_by = $2, cancelled_at = now(), remarks = COALESCE($3, remarks), balance = 0, reversal_jv_id = $4,
+      updated_by = $2, updated_at = now() WHERE id = $1`, [d.id, user.id, reason, reversal?.id ?? null]);
     await releaseItems(db, d.id);
   });
   return { before, after: await getDebitNote(id) };
@@ -538,9 +578,13 @@ export async function collectDebitNote(id, b, user) {
   return { ...(await getDebitNote(id)), collection: out };
 }
 
-/** Fully collected: items collected; agent commission on the policies becomes eligible once all their items are collected. */
+/**
+ * Fully collected: items collected; agent commission on direct-bill policies becomes eligible once all their items are
+ * collected (on gross-remittance policies it became eligible when the client's premium was collected).
+ */
 async function onCollected(db, dnId) {
   await db.query('UPDATE direct_bill_items SET status = \'collected\' WHERE debit_note_id = $1', [dnId]);
+  if ((await db.query('SELECT basis FROM commission_debit_notes WHERE id = $1', [dnId])).rows[0]?.basis === 'gross') return;
   const policies = (await db.query('SELECT DISTINCT policy_id, (SELECT dn_number FROM commission_debit_notes WHERE id = $1) AS dn FROM direct_bill_items WHERE debit_note_id = $1', [dnId])).rows;
   const { onPolicyPremiumCollected } = await import('../commission/service.js');
   for (const p of policies) if (await isDirectBillCollected(db, p.policy_id)) await onPolicyPremiumCollected(db, p.policy_id, p.dn);

@@ -10,9 +10,12 @@ import { badRequest, conflict, forbidden, notFound } from '../../../lib/errors.j
 import { round2, today } from './http.js';
 import { nextDocumentNumber } from '../../../lib/numbering.js';
 import { assertPostingAllowed } from '../../period-end/posting.js';
+import { assertCostCentres, defaultCostCentre } from './costCentre.js';
 
 export const periodOf = (date) => String(date).slice(0, 7);
 const OPEN_STATES = ['draft', 'for-approval', 'approved', 'pending'];
+/** Journals keyed by a user on Accounts > Journal Voucher (manual, correction and reversal vouchers). */
+export const MANUAL_SOURCES = ['manual', 'correction', 'reversal'];
 
 /** GL account code configured for a role, e.g. account('cash_in_bank') reads accounting.account.cash_in_bank. */
 export async function account(key) {
@@ -73,13 +76,18 @@ export async function validateLines(db, rawLines, { manual = false } = {}) {
 /**
  * Create a journal. j = { date, description, source, kind, transactionCode, entryType, entrySubType, referenceType,
  * referenceId, clientId, policyId, policyNumber, currency, dueDate, status, requiresApproval, reversalOf, correctionOf,
- * manual, period, lines: [{ accountCode, debit, credit, memo, clientId, policyId, dueDate, ...manual line fields }] }.
- * status defaults to posted (or pending when accounting.auto_post_system_entries is false). period defaults to the
- * month of the date (YYYY-MM); year-end entries pass the adjustment period (yyyy-13, see modules/period-end).
+ * manual, period, costCentre, lines: [{ accountCode, debit, credit, memo, clientId, policyId, dueDate, costCentre, ...manual
+ * line fields }] }. status defaults to posted (or pending when accounting.auto_post_system_entries is false). period
+ * defaults to the month of the date (YYYY-MM); year-end entries pass the adjustment period (yyyy-13, see modules/period-end).
+ * The cost centre of a line is its own, else the journal's, else the default cost centre (lib/costCentre.js); the cost
+ * centres keyed on a manual voucher must be active and valid on its date (a reversal keeps those of the original).
  */
 export async function createJournal(db, j, user) {
   const { lines, totalDebit, totalCredit, accounts } = await validateLines(db, j.lines, { manual: j.manual });
   const date = j.date || (await today());
+  const given = [j.costCentre, ...lines.map((l) => l.costCentre)].filter(Boolean).map(String);
+  const centres = j.manual ? await assertCostCentres(db, given, date) : new Map(given.map((c) => [c, c]));
+  const fallbackCentre = j.costCentre ? centres.get(String(j.costCentre)) : await defaultCostCentre(db, date);
   const autoPost = await getSetting('accounting.auto_post_system_entries', true);
   const status = j.status || (autoPost ? 'posted' : 'pending');
   const period = j.period || periodOf(date);
@@ -100,12 +108,13 @@ export async function createJournal(db, j, user) {
     const acct = accounts.get(String(l.accountCode));
     await db.query(`INSERT INTO journal_lines(jv_id, line_no, account_code, account_name, debit, credit, memo, main_account, sub_account,
         main_account_description, sub_account_description, branch_code, branch_description, department_code, department_description,
-        currency_code, foreign_amount, exchange_rate, client_id, policy_id, due_date, insurance_company_id)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)`,
+        currency_code, foreign_amount, exchange_rate, client_id, policy_id, due_date, insurance_company_id, cost_centre)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23)`,
     [h.id, n, String(l.accountCode), acct.name, l.debit, l.credit, l.memo || null, l.mainAccount || null, l.subAccount || null,
       l.mainAccountDescription || null, l.subAccountDescription || null, l.branchCode || null, l.branchDescription || null,
       l.departmentCode || null, l.departmentDescription || null, l.currencyCode || currency, l.foreignAmount ?? null, l.exchangeRate || 1,
-      l.clientId ?? j.clientId ?? null, l.policyId ?? j.policyId ?? null, l.dueDate ?? j.dueDate ?? null, l.insuranceCompanyId ?? null]);
+      l.clientId ?? j.clientId ?? null, l.policyId ?? j.policyId ?? null, l.dueDate ?? j.dueDate ?? null, l.insuranceCompanyId ?? null,
+      (l.costCentre ? centres.get(String(l.costCentre)) : fallbackCentre) || null]);
   }
   if (status === 'posted') {
     await db.query('UPDATE journal_vouchers SET status = \'posted\', posted_by = $2, posted_at = now() WHERE id = $1', [h.id, user?.id ?? null]);
@@ -152,9 +161,16 @@ export async function postJournal(db, id, user) {
   return posted;
 }
 
-/** Reverse a posted journal with a mirror journal (debits and credits swapped). */
-export async function reverseJournal(db, id, user, { date, description, transactionCode, status = 'posted', kind = 'reversal', requiresApproval = false } = {}) {
+/**
+ * Reverse a posted journal with a mirror journal (debits and credits swapped). A system journal that was never posted
+ * (parked for approval, or pending) is cancelled instead when its source document is cancelled (cancelUnposted, the
+ * default; the result is the cancelled journal with cancelledUnposted: true); manual vouchers are rejected, not reversed.
+ */
+export async function reverseJournal(db, id, user, { date, description, transactionCode, status = 'posted', kind = 'reversal', requiresApproval = false, cancelUnposted = true } = {}) {
   const jv = await lockJournal(db, id);
+  if (cancelUnposted && OPEN_STATES.includes(jv.status) && !MANUAL_SOURCES.includes(jv.source)) {
+    return { ...(await cancelJournal(db, jv.id, user)), cancelledUnposted: true };
+  }
   if (jv.status !== 'posted') throw conflict(`Only posted journals can be reversed (journal ${jv.jv_number} is ${jv.status})`);
   if (jv.reversed_by_jv) throw conflict(`Journal ${jv.jv_number} is already reversed`);
   const matched = (await db.query(`SELECT 1 FROM entry_matches m JOIN journal_lines l ON l.id IN (m.debit_line_id, m.credit_line_id)
@@ -169,7 +185,7 @@ export async function reverseJournal(db, id, user, { date, description, transact
     lines: lines.map((l) => ({ accountCode: l.account_code, debit: l.credit, credit: l.debit, memo: l.memo, clientId: l.client_id, policyId: l.policy_id,
       dueDate: l.due_date, mainAccount: l.main_account, subAccount: l.sub_account, mainAccountDescription: l.main_account_description,
       subAccountDescription: l.sub_account_description, branchCode: l.branch_code, departmentCode: l.department_code, currencyCode: l.currency_code,
-      foreignAmount: l.foreign_amount, exchangeRate: l.exchange_rate, insuranceCompanyId: l.insurance_company_id })),
+      foreignAmount: l.foreign_amount, exchangeRate: l.exchange_rate, insuranceCompanyId: l.insurance_company_id, costCentre: l.cost_centre })),
   }, user);
   if (status === 'posted') await markReversed(db, jv.id, rev.id);
   return rev;
@@ -183,5 +199,5 @@ export async function markReversed(db, originalId, reversalId) {
 export async function cancelJournal(db, id, user) {
   const jv = await lockJournal(db, id);
   if (!OPEN_STATES.includes(jv.status)) throw conflict(`Journal ${jv.jv_number} is ${jv.status}; only unposted journals can be cancelled (reverse posted ones)`);
-  return (await db.query('UPDATE journal_vouchers SET status = \'cancelled\', cancelled_by = $2, cancelled_at = now(), updated_at = now() WHERE id = $1 RETURNING *', [id, user.id])).rows[0];
+  return (await db.query('UPDATE journal_vouchers SET status = \'cancelled\', cancelled_by = $2, cancelled_at = now(), updated_at = now() WHERE id = $1 RETURNING *', [id, user?.id ?? null])).rows[0];
 }

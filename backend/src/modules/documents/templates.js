@@ -355,12 +355,13 @@ export async function acknowledgementReceiptDoc(c) {
 }
 
 /**
- * Commission debit note to an insurer (direct bill): one line per policy / endorsement, commission, VAT, total due, the
- * expanded withholding tax the insurer deducts and the net amount payable. `dn` and `lines` are the API shapes
- * (remittance/directbill.js#debitNoteOut).
+ * Commission debit note to an insurer (direct bill), or commission billing statement (gross remittance, basis gross):
+ * one line per policy / endorsement, commission, VAT, total due, the expanded withholding tax the insurer deducts and
+ * the net amount payable. `dn` and `lines` are the API shapes (remittance/directbill.js#debitNoteOut).
  */
 export async function commissionDebitNoteDoc(dn, lines) {
-  const h = await header(await getSetting('direct_bill.debit_note_title', 'Commission Debit Note'), dn.dnNumber);
+  const gross = dn.basis === 'gross';
+  const h = await header(gross ? 'Billing Statement' : await getSetting('direct_bill.debit_note_title', 'Commission Debit Note'), dn.dnNumber);
   const f = formatters(h);
   const pct = (r) => `${(num(r) * 100).toFixed(2)}%`;
   const totals = [['Commission', money(dn.commission)], [`Output VAT${dn.vatRate ? ` (${pct(dn.vatRate)})` : ''}`, money(dn.vat)], ['Total amount due', money(dn.amount)],
@@ -373,7 +374,7 @@ export async function commissionDebitNoteDoc(dn, lines) {
     ['Address', dn.insurerAddress], ['Period', dn.periodFrom || dn.periodTo ? `${f.date(dn.periodFrom) || '-'} to ${f.date(dn.periodTo) || '-'}` : ''],
     ['Currency', dn.currency], ['Status', dn.status ? humanize(dn.status) : ''], ['Policies', String(lines.length)]]),
   sections: [
-    { heading: 'Commission on direct-bill policies (premium paid by the insured to the insurer)',
+    { heading: gross ? 'Commission on policies whose premium was remitted in full' : 'Commission on direct-bill policies (premium paid by the insured to the insurer)',
       table: { columns: [{ label: 'Policy / reference', wrap: true }, 'Insured', 'Product', { label: 'Gross premium', type: 'money' }, { label: 'Rate', align: 'right' },
         { label: 'Commission', type: 'money' }, { label: 'VAT', type: 'money' }, { label: 'Total', type: 'money' }],
       rows: [...lines.map((l) => [l.reference && l.reference !== l.policyNo ? `${l.policyNo} / ${l.reference}` : l.policyNo, val(l.insuredName), val(l.product), money(l.grossPremium),

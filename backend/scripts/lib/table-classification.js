@@ -103,6 +103,9 @@ export const SYSTEM_RESET_ACTIONS = {
   password_history: 'keep', // part of the user accounts (password reuse rule)
   schema_migrations: 'keep',
   bi_extract_runs: 'remove', // BI extract history (the CSV files in the storage folder stay)
+  // SAP GL file runs and their file copies: they describe journals the reset removes (the files in the SAP folder stay)
+  sap_gl_exports: 'remove',
+  sap_gl_export_files: 'remove',
 };
 export const SYSTEM_TABLES = Object.keys(SYSTEM_RESET_ACTIONS);
 

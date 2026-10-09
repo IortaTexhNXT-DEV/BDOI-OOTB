@@ -7,11 +7,11 @@ import { allocate, policyParticipants } from '../src/modules/accounting/lib/coin
 import { returnPremium, findPolicy } from '../src/modules/receipts/receivables.js';
 import { bookDirectBill } from '../src/modules/remittance/directbill.js';
 import { eligiblePolicies } from '../src/modules/remittance/service.js';
-import { withoutCommissionTaxes, withoutConfigurationApproval } from './helpers.js';
+import { withStarterInsurerAccounts, withoutCommissionTaxes, withoutConfigurationApproval } from './helpers.js';
 
 let ctx;
 // these suites check the journals of the original rules; commission taxes (rule version 2) are in commission-taxes.test.js
-beforeAll(async () => { ctx = await setupFinance(); await withoutCommissionTaxes(); await withoutConfigurationApproval(); });
+beforeAll(async () => { ctx = await setupFinance(); await withoutCommissionTaxes(); await withoutConfigurationApproval(); await withStarterInsurerAccounts(); });
 afterAll(async () => { await pool.end(); });
 
 const r2 = (n) => Math.round(n * 100) / 100;

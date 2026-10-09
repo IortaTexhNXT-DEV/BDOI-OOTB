@@ -63,6 +63,20 @@ export async function withCalendarFiscalYear() {
   clearSettingsCache();
 }
 /**
+ * The starter accounts of the premium payable roles (seed 40_finance.sql, migration 0131: premiums payable to insurers
+ * and the VAT, DST and LGT on premium in their own accounts), for suites whose expected journals name them. The TISPH
+ * mapping of these roles to Accounts Payable - Insurance Company (seed 81_tisph_finance.sql) is covered by
+ * test/remittance-basis.test.js.
+ */
+export async function withStarterInsurerAccounts() {
+  const { query } = await import('../src/db/pool.js');
+  const { clearSettingsCache } = await import('../src/lib/settings.js');
+  await query(`UPDATE app_settings s SET value = to_jsonb(v.code) FROM (VALUES ('accounting.account.due_to_insurer', '2201001'), ('accounting.account.premium_vat_payable', '2201002'),
+    ('accounting.account.premium_dst_payable', '2201003'), ('accounting.account.premium_lgt_payable', '2201004')) AS v(key, code) WHERE s.key = v.key`);
+  await query('UPDATE app_settings SET value = value || \'{"Insurer": "2201001"}\'::jsonb WHERE key = \'accounting.payable_account_by_payee\'');
+  clearSettingsCache();
+}
+/**
  * Apply posting rule and account determination changes at once (no second approver, migration 0174), for suites that
  * test the effect of a change. test/configuration-controls.test.js covers the approval.
  */

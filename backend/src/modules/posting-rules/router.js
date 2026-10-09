@@ -48,10 +48,10 @@ define({
   handler: async (req, res) => ok(res, await svc.meta(pool)),
 });
 define({
-  method: 'GET', path: '/flow', summary: 'Accounting flow: for every business event, the screen that triggers it, the approval before posting and the debit / credit lines of the rule in force (GL accounts resolved today)',
+  method: 'GET', path: '/flow', summary: 'Accounting flow: for every business event, the screen that triggers it, the approval before posting, whether its journal is parked for approval or posted at once (accounting.parked_events) and the debit / credit lines of the rule in force (GL accounts resolved today)',
   screen: 'Master > Finance > Accounting Flow', middleware: read,
   response: { success: true, data: { asOf: '2026-09-30', events: [{ eventCode: 'receipt.apply', label: 'Premium collection applied', trigger: 'Accounts > Receipts', approval: 'Finance only',
-    version: 1, debits: [{ side: 'Dr', amountKey: 'amount', account: { kind: 'resolver', label: 'Bank account of the receipt', glCode: null } }],
+    posting: 'posted', alwaysPosted: 'Posts with its sub-ledger: the bill, collection, commission or refund it records is used at once by the next steps', version: 1, debits: [{ side: 'Dr', amountKey: 'amount', account: { kind: 'resolver', label: 'Bank account of the receipt', glCode: null } }],
     credits: [{ side: 'Cr', amountKey: 'amount', account: { kind: 'role', label: 'Premiums receivable', glCode: '1202001', glName: 'Premiums Receivable' } }] }] } },
   handler: async (_req, res) => ok(res, await accountingFlow(pool)),
 });

@@ -201,6 +201,8 @@ describe('sales invoices under the EOPT Act (13.10)', () => {
     expect(inv.seller).toMatchObject({ registeredName: expect.any(String), tin: expect.stringMatching(/^\d{9}$/), branchCode: expect.stringMatching(/^\d{5}$/), vatRegistered: true });
     expect(await bal('1205003', inv.journalId)).toBe(11700);
     expect(await bal('235000', inv.journalId)).toBe(-1200);
+    // TISPH parks the service invoice journal (accounting.parked_events) until a user other than the maker approves it
+    expect((await query('SELECT status FROM journal_vouchers WHERE id = $1', [inv.journalId])).rows[0].status).toBe('for-approval');
     const b = (await maker('post', '/bir/invoices').send(manual())).body.data;
     expect(Number(b.invoiceNumber.slice(3))).toBe(Number(inv.invoiceNumber.slice(3)) + 1);
 
@@ -222,8 +224,9 @@ describe('sales invoices under the EOPT Act (13.10)', () => {
     const c = await maker('post', `/bir/invoices/${inv.id}/cancel`).send({ reason: 'Wrong buyer' });
     expect(c.status).toBe(200);
     expect(c.body.data).toMatchObject({ status: 'cancelled', cancelReason: 'Wrong buyer', balance: 0 });
+    // the journal was still parked: it is cancelled with the invoice instead of reversed
     const j = (await query('SELECT status FROM journal_vouchers WHERE id = $1', [inv.journalId])).rows[0];
-    expect(j.status).toBe('reversed');
+    expect(j.status).toBe('cancelled');
     const pdf = await file('get', `/bir/invoices/${inv.id}/pdf`);
     expect(pdf.body.subarray(0, 4).toString()).toBe('%PDF');
     expect((await maker('get', `/bir/invoices?search=${inv.invoiceNumber}`)).body.data[0].printCount).toBe(1);

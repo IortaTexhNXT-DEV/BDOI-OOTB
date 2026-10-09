@@ -430,6 +430,7 @@ export const ALLOW_LIST = {
   'bank_reconciliations.bank_account_code': 'the broker\'s own bank account (chart of accounts code)',
   'bank_payment_batches.bank_account_code': 'the broker\'s own bank account (bank account master code)',
   'bank_payment_batches.file_name': 'file name built from the bank, batch number and value date',
+  'sap_gl_export_files.file_name': 'file name built from the SAP layout and the export date',
   'bank_file_layouts.file_name_pattern': 'configuration: pattern of a bank file name',
   'coc_series.remarks': 'remarks on a COC number series received from an insurer (business data)',
   'insurer_api_mappings.remarks': 'remarks on an insurer API mapping (configuration)',

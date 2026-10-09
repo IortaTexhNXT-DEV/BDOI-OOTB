@@ -18,6 +18,7 @@ import { resolveCreditTerms } from '../commission-rates/terms.js';
 import { commissionTaxSetup, commissionTaxes, ratesOf } from '../accounting/lib/commissionTax.js';
 import { syncDueDate } from '../credit-control/instalments.js';
 import { autoEmailBill } from './email.js';
+import { policyBasis, remittanceBasis } from '../remittance/basis.js';
 
 export const POLICY_SQL = `SELECT p.*, c.display_name AS client_name, c.client_code, c.email AS client_email, c.first_name, c.last_name,
   ic.name AS insurer_name, ic.short_name AS insurer_short, ic.commission_rate AS insurer_commission_rate, pr.name AS product_name, pr.line AS product_line
@@ -113,6 +114,26 @@ export async function premiumSplit(db, policy, gross, breakdown = {}, source = '
 }
 
 /**
+ * The split of a bill on the gross remittance basis (remittance/basis.js): each insurer is due its whole premium (less
+ * the premium taxes booked in their own accounts) and no commission is taken; the commission of the split it is made
+ * from is billed to the insurer on a billing statement instead (an unbilled commission item, bookGrossCommission).
+ */
+export function grossBasisSplit(split) {
+  const parts = split.parts.map((p) => {
+    const a = p.amounts;
+    return { ...p, amounts: { ...a, commission: 0, commission_vat: 0, commission_ewt: 0, due_to_insurer: round2(a.gross - a.vat - a.dst - a.lgt) } };
+  });
+  return { ...split, commission: 0, commissionTaxes: { commission_vat: 0, commission_ewt: 0 }, parts };
+}
+
+/** Gross basis: the commission of a bill becomes an unbilled item to bill to the insurer (no journal until the statement is approved). */
+async function bookGrossCommission(db, { policy, rcv, commission, netPremium, date, user }) {
+  if (!(commission > 0)) return;
+  const { bookDirectBill } = await import('../remittance/directbill.js');
+  await bookDirectBill(db, { policy, amount: Number(rcv.amount), breakdown: { netPremium, commissionAmount: commission }, source: rcv.source, reference: rcv.bill_number, date, user, basis: 'gross' });
+}
+
+/**
  * Create a receivable for a policy and post its booking journal. breakdown: { netPremium, vat, dst, lgt, other, discount,
  * commissionAmount }. date: the date of the billing event (policy issue date, endorsement issue date); the booking journal
  * is dated with it (never later than today) and the credit days run from it, or from the inception when that is later.
@@ -126,18 +147,21 @@ export async function createReceivable(db, { policy, amount, breakdown = {}, sou
   const creditDays = (await resolveCreditTerms(policy.insurance_company_id, { db })).premiumWarrantyDays;
   const billNumber = await nextDocumentNumber('invoice', { db, unique: { table: 'receivables', column: 'bill_number' } });
   // a package gives its own split (each insurer carries its own sections); otherwise the premium is split by share
-  const split = given || await premiumSplit(db, policy, gross, breakdown, source);
+  const computed = given || await premiumSplit(db, policy, gross, breakdown, source);
+  const basis = await remittanceBasis(db, policy);
+  const split = basis === 'gross' ? grossBasisSplit(computed) : computed;
   const { commission } = split;
   const bookedOn = await postingDate(date);
   const due = dueDate || (await db.query('SELECT (GREATEST($1::date, $3::date) + $2::int)::date AS d', [policy.inception_date || bookedOn, creditDays, bookedOn])).rows[0].d;
   const r = (await db.query(`INSERT INTO receivables(bill_number, policy_id, client_id, amount, balance, due_date, status, source, reference, currency,
-      net_premium, vat, dst, lgt, other_charges, discount, commission_amount, created_by, commission_vat, commission_ewt)
-    VALUES ($1,$2,$3,$4,$4,$5,'open',$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) RETURNING *`,
+      net_premium, vat, dst, lgt, other_charges, discount, commission_amount, created_by, commission_vat, commission_ewt, remittance_basis)
+    VALUES ($1,$2,$3,$4,$4,$5,'open',$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) RETURNING *`,
   [billNumber, policy.id, policy.client_id, gross, due, source, reference, policy.currency || (await baseCurrency()), round2(breakdown.netPremium || gross),
     round2(breakdown.vat), round2(breakdown.dst), round2(breakdown.lgt), round2(breakdown.other), round2(breakdown.discount), commission, user?.id ?? null,
-    split.commissionTaxes.commission_vat, split.commissionTaxes.commission_ewt])).rows[0];
+    split.commissionTaxes.commission_vat, split.commissionTaxes.commission_ewt, basis])).rows[0];
   const jv = await postBooking(db, r, policy, split, user, bookedOn);
   await db.query('UPDATE receivables SET booking_jv_id = $2 WHERE id = $1', [r.id, jv.id]);
+  if (basis === 'gross') await bookGrossCommission(db, { policy, rcv: r, commission: computed.commission, netPremium: breakdown.netPremium, date: bookedOn, user });
   await db.query('INSERT INTO collection_items(receivable_id, policy_id, client_id) VALUES ($1,$2,$3) ON CONFLICT (receivable_id) DO NOTHING', [r.id, policy.id, policy.client_id]);
   await autoEmailBill(db, r);
   return { ...r, booking_jv_id: jv.id };
@@ -176,11 +200,15 @@ export async function ensureBooked(db, rcv, policy, user) {
   if (!(bookable > 0)) return rcv;
   const commission = round2(Number(rcv.commission_amount) > 0 ? Number(rcv.commission_amount) * (bookable / Number(rcv.amount)) : await commissionFor(policy, bookable, { netPremium: Number(rcv.net_premium) * (bookable / Number(rcv.amount)) }, rcv.source));
   const ratio = bookable / Number(rcv.amount);
-  const split = await premiumSplit(db, policy, bookable, { vat: Number(rcv.vat) * ratio, dst: Number(rcv.dst) * ratio, lgt: Number(rcv.lgt) * ratio, netPremium: Number(rcv.net_premium) * ratio },
+  const computed = await premiumSplit(db, policy, bookable, { vat: Number(rcv.vat) * ratio, dst: Number(rcv.dst) * ratio, lgt: Number(rcv.lgt) * ratio, netPremium: Number(rcv.net_premium) * ratio },
     rcv.source, { commission: Math.min(commission, bookable) });
+  const basis = await remittanceBasis(db, policy);
+  const split = basis === 'gross' ? grossBasisSplit(computed) : computed;
   const jv = await postBooking(db, { ...rcv, amount: bookable }, policy, split, user);
-  const upd = (await db.query(`UPDATE receivables SET booking_jv_id = $2, commission_amount = CASE WHEN commission_amount > 0 THEN commission_amount ELSE $3 END,
-    commission_vat = $4, commission_ewt = $5 WHERE id = $1 RETURNING *`, [rcv.id, jv.id, commission, split.commissionTaxes.commission_vat, split.commissionTaxes.commission_ewt])).rows[0];
+  const upd = (await db.query(`UPDATE receivables SET booking_jv_id = $2, commission_amount = CASE WHEN $6 = 'gross' THEN 0 WHEN commission_amount > 0 THEN commission_amount ELSE $3 END,
+    commission_vat = $4, commission_ewt = $5, remittance_basis = $6 WHERE id = $1 RETURNING *`,
+  [rcv.id, jv.id, commission, split.commissionTaxes.commission_vat, split.commissionTaxes.commission_ewt, basis])).rows[0];
+  if (basis === 'gross') await bookGrossCommission(db, { policy, rcv: { ...upd, amount: bookable }, commission: computed.commission, netPremium: Number(rcv.net_premium) * ratio, user });
   await db.query('INSERT INTO collection_items(receivable_id, policy_id, client_id) VALUES ($1,$2,$3) ON CONFLICT (receivable_id) DO NOTHING', [rcv.id, rcv.policy_id, rcv.client_id]);
   return upd;
 }
@@ -275,12 +303,20 @@ async function bookedRatios(db, policyId) {
     WHERE policy_id = $1 AND status <> 'cancelled' AND booking_jv_id IS NOT NULL`, [policyId])).rows[0];
   const per = (await db.query(`SELECT rp.insurance_company_id, sum(rp.commission) AS c, sum(rp.gross) AS a FROM receivable_participants rp
     JOIN receivables r ON r.id = rp.receivable_id WHERE r.policy_id = $1 AND r.status <> 'cancelled' GROUP BY rp.insurance_company_id`, [policyId])).rows;
-  // premium taxes booked in their own accounts on the bills' booking journals (none when they were not split)
+  // premium taxes booked in their own accounts on the bills' booking journals (none when they were not split). A tax account
+  // shared by several taxes is taken back once, and one that is the premium payable account itself not at all: the
+  // return then debits that account for the taxes and the premium alike.
   const { account } = await import('../accounting/lib/ledger.js');
+  const due = await account('due_to_insurer');
   const codes = { vat: await account('premium_vat_payable'), dst: await account('premium_dst_payable'), lgt: await account('premium_lgt_payable') };
   const booked = (await db.query(`SELECT l.account_code, sum(l.credit) AS c FROM journal_lines l JOIN receivables r ON r.booking_jv_id = l.jv_id
     WHERE r.policy_id = $1 AND r.status <> 'cancelled' AND l.account_code = ANY($2) GROUP BY l.account_code`, [policyId, Object.values(codes)])).rows;
-  const taxes = Object.fromEntries(Object.entries(codes).map(([k, code]) => [k, Number(all.a) > 0 ? Number(booked.find((b) => b.account_code === code)?.c || 0) / Number(all.a) : 0]));
+  const taxes = {};
+  const seen = new Set([due]);
+  for (const [k, code] of Object.entries(codes)) {
+    taxes[k] = Number(all.a) > 0 && !seen.has(code) ? Number(booked.find((b) => b.account_code === code)?.c || 0) / Number(all.a) : 0;
+    seen.add(code);
+  }
   // commission VAT and EWT go back at the rates they were booked (none on bills booked before they were taxed)
   const commissionTaxRates = Number(all.c) > 0 ? { vat: Number(all.cv) / Number(all.c), ewt: Number(all.ce) / Number(all.c) } : null;
   return { overall: Number(all.a) > 0 ? Number(all.c) / Number(all.a) : null, commissionTaxRates, byInsurer: new Map(per.filter((x) => Number(x.a) > 0).map((x) => [x.insurance_company_id, Number(x.c) / Number(x.a)])), taxes };
@@ -311,7 +347,9 @@ export async function returnPremium(db, { policy, amount, breakdown = {}, kind =
   const taxes = { netPremium: Math.abs(num(breakdown.netPremium)) || undefined,
     vat: given3 ? Math.abs(num(breakdown.vat)) : round2(gross * ratios.taxes.vat), dst: given3 ? Math.abs(num(breakdown.dst)) : round2(gross * ratios.taxes.dst),
     lgt: given3 ? Math.abs(num(breakdown.lgt)) : round2(gross * ratios.taxes.lgt) };
-  const split = await premiumSplit(db, policy, gross, taxes, 'endorsement', { commission: given, ratios: ratios.byInsurer, taxRates: ratios.commissionTaxRates });
+  const computed = await premiumSplit(db, policy, gross, taxes, 'endorsement', { commission: given, ratios: ratios.byInsurer, taxRates: ratios.commissionTaxRates });
+  const basis = await policyBasis(db, policy);
+  const split = basis === 'gross' ? grossBasisSplit(computed) : computed;
   let remaining = gross;
   const credits = [];
   for (const r of open) {
@@ -335,6 +373,7 @@ export async function returnPremium(db, { policy, amount, breakdown = {}, kind =
     participants: split.parts,
     vars: { policyNumber: policy.policy_number, reference: reference || '', billNumber: billNumbers || policy.bill_number || '', clientName: policy.client_name || 'client', insurer: policy.insurer_name || 'insurer', participantSuffix: '' },
   }, { db, user });
+  if (basis === 'gross') await returnGrossCommission(db, { policy, gross, reference, endorsementId, date, user });
   for (const c of credits) {
     await db.query(`INSERT INTO receivable_credits(receivable_id, policy_id, endorsement_id, kind, amount, refund_amount, journal_id, created_by) VALUES ($1,$2,$3,$4,$5,0,$6,$7)`,
       [c.receivable.id, policy.id, endorsementId, kind, c.amount, jv.id, user?.id ?? null]);
@@ -352,6 +391,19 @@ export async function returnPremium(db, { policy, amount, breakdown = {}, kind =
   const insurerRefunds = await raiseInsurerRefunds(db, { policy, split, gross, refund, kind, reference, endorsementId, user });
   return { journalId: jv.id, journalNumber: jv.jv_number, amount: gross, credited, refund, commission: split.commission, refundPayableId: refundPayable?.id || null,
     credits: credits.map((c) => ({ billNumber: c.receivable.bill_number, amount: c.amount })), insurerRefunds };
+}
+
+/**
+ * Gross basis: the commission on a return premium is credited to the insurer on the next billing statement (a negative
+ * unbilled item), at the ratio of commission to premium of the policy's commission items.
+ */
+async function returnGrossCommission(db, { policy, gross, reference, endorsementId, date, user }) {
+  const r = (await db.query(`SELECT COALESCE(sum(commission) FILTER (WHERE gross_premium > 0), 0) AS c, COALESCE(sum(gross_premium) FILTER (WHERE gross_premium > 0), 0) AS g
+    FROM direct_bill_items WHERE policy_id = $1 AND basis = 'gross' AND status <> 'cancelled'`, [policy.id])).rows[0];
+  const commission = Number(r.g) > 0 ? round2(Math.min(gross * (Number(r.c) / Number(r.g)), gross)) : 0;
+  if (!(commission > 0)) return;
+  const { bookDirectBill } = await import('../remittance/directbill.js');
+  await bookDirectBill(db, { policy, amount: -gross, breakdown: { commissionAmount: commission }, source: 'endorsement', reference, endorsementId, date: await postingDate(date), user, basis: 'gross' });
 }
 
 /** Undo every application of a receipt: reversing journals and restoring receivable balances. */

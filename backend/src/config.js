@@ -35,6 +35,8 @@ export function buildConfig(source = process.env) {
     piiEncryptionKeyPrevious: env('PII_ENCRYPTION_KEY_PREVIOUS', ''),
     corsOrigins: env('CORS_ORIGINS', '*').split(',').map((s) => s.trim()).filter(Boolean),
     uploadDir: env('UPLOAD_DIR', './uploads'),
+    /** Folder of the SAP GL text files when it is outside the storage area (e.g. a share SAP reads); empty: sap_gl.folder under UPLOAD_DIR. */
+    sapGlExportDir: env('SAP_GL_EXPORT_DIR', ''),
     publicBaseUrl: env('PUBLIC_BASE_URL', 'http://localhost:8000').replace(/\/+$/, ''),
     smtpUrl: env('SMTP_URL', ''),
     /**

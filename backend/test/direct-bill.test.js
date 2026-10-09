@@ -177,6 +177,13 @@ describe('commission debit note', () => {
     expect(c1.body.data).toMatchObject({ statusCode: 'partial', status: 'Partially Collected', collectedCash: 7650, collectedEwt: 750, balance: 8400 });
     expect(c1.body.data.collection.collectionNumber).toMatch(/^DNC-\d{4}-\d{5}$/);
     expect(await lines(c1.body.data.collection.journalId)).toEqual([{ a: '106010', d: 7650, c: 0 }, { a: '1302001', d: 750, c: 0 }, { a: '110400', d: 0, c: 8400 }]);
+    // TISPH parks the collection journal (accounting.parked_events): a user other than the one who recorded it posts it
+    const post = async (jvId) => {
+      expect((await query('SELECT status FROM journal_vouchers WHERE id = $1', [jvId])).rows[0].status).toBe('for-approval');
+      expect((await ctx.as('maker')('post', `/journal-vouchers/${jvId}/approve`)).status).toBe(403);
+      expect((await ctx.as('checker')('post', `/journal-vouchers/${jvId}/approve`)).body.data.status).toBe('posted');
+    };
+    await post(c1.body.data.collection.journalId);
     // cannot collect more than the balance
     expect((await ctx.as('maker')('post', `/remittance/direct-bill/${dn.id}/collections`).send({ cashAmount: 9000, ewtAmount: 0 })).status).toBe(400);
     // the Account Executive's commission waits for the insurer's payment
@@ -185,6 +192,7 @@ describe('commission debit note', () => {
     const c2 = await ctx.as('maker')('post', `/remittance/direct-bill/${dn.id}/collections`).send({ receivedDate: '2026-02-20', cashAmount: 7650, ewtAmount: 750, paymentMode: 'check', referenceNo: 'FPG-PAY-2', form2307No: '2307-001' });
     expect(c2.body.data).toMatchObject({ statusCode: 'collected', status: 'Collected', collectedCash: 15300, collectedEwt: 1500, balance: 0 });
     expect(c2.body.data.collections).toHaveLength(2);
+    await post(c2.body.data.collection.journalId);
     expect((await query('SELECT status FROM direct_bill_items WHERE policy_id = $1', [d.policyId])).rows[0].status).toBe('collected');
     expect((await query('SELECT status FROM commissions WHERE policy_id = $1', [d.policyId])).rows[0].status).toBe('Eligible');
     // commission receivable of the policy is cleared: 16,800 booked, 8,400 + 8,400 collected

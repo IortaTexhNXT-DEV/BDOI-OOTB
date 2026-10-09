@@ -37,6 +37,8 @@ export const EVENTS = {
   'directbill.commission': { label: 'Direct bill – commission booked', module: 'remittance', amounts: ['amount', 'commission', 'vat', 'gross_premium'], vars: ['policyNumber', 'referenceSuffix', 'insurer'],
     sample: { amounts: { amount: 1680, commission: 1500, vat: 180, gross_premium: 11200 }, vars: { policyNumber: 'POL-SAMPLE', referenceSuffix: '', insurer: 'Sample Insurer' } } },
   'directbill.commission_return': { label: 'Direct bill – commission returned', module: 'remittance', sameAs: 'directbill.commission' },
+  'commission.billing_statement': { label: 'Commission billing statement approved (gross remittance)', module: 'remittance', amounts: ['amount', 'commission', 'vat'], vars: ['statementNumber', 'insurer'],
+    sample: { amounts: { amount: 5097.9, commission: 4551.7, vat: 546.2 }, vars: { statementNumber: 'CBS-SAMPLE', insurer: 'Sample Insurer' } } },
   'directbill.collection': { label: 'Direct bill – commission collected', module: 'remittance', amounts: ['cash', 'ewt', 'applied'], vars: ['dnNumber', 'insurer', 'referenceSuffix', 'memoRef', 'form2307Suffix'],
     sample: { amounts: { cash: 1530, ewt: 150, applied: 1680 }, vars: { dnNumber: 'DN-SAMPLE', insurer: 'Sample Insurer', referenceSuffix: '', memoRef: 'Collection DNC-SAMPLE', form2307Suffix: '' } } },
   'commission.approve': { label: 'Comsub approved', module: 'commission', amounts: ['amount'], vars: ['referrerName', 'policyNumber'],
@@ -121,6 +123,23 @@ for (const e of Object.values(EVENTS)) {
   const lead = {}; const co = {};
   for (const [k, v] of Object.entries(e.sample.amounts)) { lead[k] = round2(v * 0.6); co[k] = round2(v - round2(v * 0.6)); }
   e.sampleCoInsurance = { ...e.sample, participants: [P('Lead Insurer', 60, lead), P('Co-Insurer', 40, co)] };
+}
+
+/**
+ * Events whose journal always posts at once, whatever accounting.parked_events says: a sub-ledger moves with them and
+ * later steps read it (the bill and the premium payable to the insurer, the collection applied to a bill, direct-bill
+ * commission billed on debit notes, refunds netted against remittances, matched open items).
+ */
+const SUBLEDGER = 'Posts with its sub-ledger: the bill, collection, commission or refund it records is used at once by the next steps';
+export const ALWAYS_POSTED = Object.fromEntries(['policy.issue.broker_billed', 'endorsement.additional_premium', 'policy.renewal.broker_billed', 'endorsement.return_premium',
+  'policy.cancel', 'receipt.apply', 'directbill.commission', 'directbill.commission_return', 'insurer.refund_due', 'insurer.refund_applied', 'write_off',
+  'write_off.credit_balance'].map((code) => [code, SUBLEDGER]));
+
+/** Whether the journal of an event is parked on save (accounting.parked_events), to be posted on another user's approval. */
+export async function parksOnSave(eventCode) {
+  if (ALWAYS_POSTED[eventCode]) return false;
+  const listed = (await getSetting('accounting.parked_events', [])) || [];
+  return Array.isArray(listed) && listed.includes(eventCode);
 }
 
 /** Every amount key an event may supply (the whitelist offered by the rule editor). */
@@ -250,11 +269,15 @@ export async function buildJournal(db, eventCode, ctx, { user = null, rule: give
   return { rule, lines: out, header };
 }
 
-/** Build the journal of an event from its active posting rule and post it (createJournal validates balance and accounts). */
+/**
+ * Build the journal of an event from its active posting rule and post it (createJournal validates balance and accounts).
+ * An event listed in accounting.parked_events is saved for approval instead (requires_approval: posted by another user).
+ */
 export async function postEvent(eventCode, ctx, { db, user = null }) {
   if (!EVENTS[eventCode]) throw badRequest(`Unknown posting event ${eventCode}`);
   const { rule, lines, header } = await buildJournal(db, eventCode, ctx, { user });
-  const jv = await createJournal(db, { ...header, lines }, user);
+  const parked = !header.status && (await parksOnSave(eventCode)) ? { status: 'for-approval', requiresApproval: true } : {};
+  const jv = await createJournal(db, { ...header, ...parked, lines }, user);
   await db.query('UPDATE journal_vouchers SET posting_rule_id = $2 WHERE id = $1', [jv.id, rule.id]);
   return jv;
 }

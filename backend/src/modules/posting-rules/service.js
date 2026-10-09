@@ -11,7 +11,7 @@
  */
 import { getSetting, setSetting } from '../../lib/settings.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
-import { AMOUNT_KEYS, EVENTS, RESOLVERS, activeRule, ruleOut, simulate } from '../accounting/lib/posting.js';
+import { ALWAYS_POSTED, AMOUNT_KEYS, EVENTS, RESOLVERS, activeRule, ruleOut, simulate } from '../accounting/lib/posting.js';
 import { today } from '../accounting/lib/http.js';
 import { commissionTaxSetup } from '../accounting/lib/commissionTax.js';
 import { assertChecker } from '../../lib/makerChecker.js';
@@ -434,4 +434,19 @@ export async function assertNotControlled(changes) {
   if (!(await configurationReview())) return;
   const blocked = changes.filter(([k, v, before]) => isControlledSetting(k) && JSON.stringify(v) !== JSON.stringify(before)).map(([k]) => k);
   if (blocked.length) throw conflict(`${blocked.join(', ')} can only be changed on Master > Finance > Account Determination, where the change is approved by a second user`);
+}
+
+/**
+ * accounting.parked_events (changes = [[key, newValue]]): a list of known event codes, none of the events that always
+ * post with their sub-ledger (ALWAYS_POSTED).
+ */
+export function assertParkedEvents(changes) {
+  const change = changes.find(([k]) => k === 'accounting.parked_events');
+  if (!change) return;
+  const list = change[1];
+  if (!Array.isArray(list) || list.some((c) => typeof c !== 'string')) throw badRequest('accounting.parked_events must be a list of event codes');
+  const unknown = list.filter((c) => !EVENTS[c]);
+  if (unknown.length) throw badRequest(`accounting.parked_events: unknown event(s) ${unknown.join(', ')}`);
+  const fixed = list.filter((c) => ALWAYS_POSTED[c]);
+  if (fixed.length) throw badRequest(`accounting.parked_events: ${fixed.join(', ')} always post with their sub-ledger and cannot be parked`);
 }

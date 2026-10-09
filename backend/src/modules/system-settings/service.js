@@ -200,8 +200,9 @@ export async function updateConfiguration(changes, userId) {
   }
   if (errors.length) throw badRequest('Validation failed', errors);
   assertNotOwnedElsewhere(apply);
-  const { assertNotControlled } = await import('../posting-rules/service.js');
+  const { assertNotControlled, assertParkedEvents } = await import('../posting-rules/service.js');
   await assertNotControlled(apply);
+  assertParkedEvents(apply);
   for (const [k, v] of apply) await setSetting(k, v, userId);
   return { before: Object.fromEntries(apply.map(([k, , b]) => [k, b])), after: Object.fromEntries(apply.map(([k, v]) => [k, v])) };
 }

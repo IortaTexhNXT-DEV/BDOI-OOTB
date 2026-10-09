@@ -249,6 +249,13 @@ export const MASTER_TEMPLATES = [
     samples: [{ code: 'OFFICE-FITOUT', name: 'Office fit-out', usefulLifeMonths: '84', salvagePercent: '0', assetAccount: '1401005', accumulatedAccount: '1402005', expenseAccount: '4406002' }],
   },
   {
+    type: 'cost-centre', menu: 'Master > Finance > Cost Centres',
+    formats: { companyCode: 'Company code of the company master, e.g. TISPH', department: 'Department code of the department master', validFrom: 'Date YYYY-MM-DD; empty = no start',
+      validTo: 'Date YYYY-MM-DD; empty = no end', isDefault: 'Yes for the cost centre stamped on journal lines that name none (one per company)' },
+    samples: [{ code: '900902', name: 'Toyota Insurance Services - Sales', companyCode: 'TISPH', controllingArea: '4F29', responsiblePerson: 'Sales Head', validFrom: '2026-10-01', isDefault: 'No' }],
+    notes: ['FGA.04 lists one cost centre, 900901 Toyota Insurance Services, shipped as the default. Add others only when TISPH and BMIS agree on them.'],
+  },
+  {
     type: 'short-period-rate', menu: 'Master > Insurance Management > Short-Period Rates',
     notes: ['Premium the insurer keeps when the insured cancels, by the days the policy was in force (annual policies). The common Philippine non-life scale is shipped; replace it with the scale of your insurers if it differs.'],
     formats: { maxDays: 'Upper limit of the band in days in force, e.g. 31 for not exceeding 1 month', retainedPercent: 'Percent of the annual premium kept by the insurer, e.g. 20' },
