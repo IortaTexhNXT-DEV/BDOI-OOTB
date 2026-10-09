@@ -7,7 +7,11 @@
  *   supplier                                     Accounts > Payables > Suppliers (write:masters or write:payables)
  *   asset-class                                  Master > Finance > Asset Classes (write:masters or write:fixed-assets)
  *   sales-activity-type, sales-activity-outcome  Master > Organization (write:masters only; read with read:sales-activities)
- * Reading needs the read permission of the owning module (or read:masters).
+ *   lead-source                                  Master > Insurance Management (write:masters only; read with read:leads)
+ *   reason-code                                  Master > Insurance Management (write:masters only; read with the read
+ *                                                permission of a module that records a coded reason: quotations,
+ *                                                claims, renewals)
+ * Reading needs the read permission of an owning module (or read:masters).
  */
 import { moduleRouter } from '../../lib/registry.js';
 import { requireAuth, hasPermission } from '../../lib/auth.js';
@@ -19,11 +23,12 @@ import { parseStatus } from '../masters/helpers.js';
 
 const { router, define } = moduleRouter('Operational Masters', '/ops-masters');
 
-/** Type -> the module whose permissions read and write it (besides read:masters / write:masters); write: false = masters only. */
+/** Type -> the module(s) whose permissions read and write it (besides read:masters / write:masters); write: false = masters only. */
 export const OWNERS = {
   'short-period-rate': { module: 'endorsements', write: false }, 'cancellation-reason': { module: 'endorsements', write: false },
   'claim-document-requirement': { module: 'claims' }, 'repair-shop': { module: 'claims' }, supplier: { module: 'payables' }, 'asset-class': { module: 'fixed-assets' },
   'sales-activity-type': { module: 'sales-activities', write: false }, 'sales-activity-outcome': { module: 'sales-activities', write: false },
+  'lead-source': { module: 'leads', write: false }, 'reason-code': { module: ['quotations', 'claims', 'renewals'], write: false },
 };
 const SCREEN = 'Master > Insurance Management / Accounts > Payables / Master > Finance (operational masters)';
 
@@ -35,8 +40,9 @@ const typeOf = async (req) => {
 const may = (kind) => (req, _res, next) => {
   const owner = OWNERS[req.params.type];
   if (!owner) return next(notFound(`Unknown operational master ${req.params.type}`));
-  const m = owner.module;
-  const perms = kind === 'read' ? [`read:${m}`, `write:${m}`, 'read:masters', 'write:masters'] : [...(owner.write === false ? [] : [`write:${m}`]), 'write:masters'];
+  const mods = [].concat(owner.module);
+  const perms = kind === 'read' ? [...mods.flatMap((m) => [`read:${m}`, `write:${m}`]), 'read:masters', 'write:masters']
+    : [...(owner.write === false ? [] : mods.map((m) => `write:${m}`)), 'write:masters'];
   return perms.some((p) => hasPermission(req.user, p)) ? next() : next(forbidden(`Requires permission: ${perms.join(' or ')}`));
 };
 const readMw = [requireAuth, may('read')];

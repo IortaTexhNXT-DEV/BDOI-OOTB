@@ -76,7 +76,7 @@ define({
 });
 define({
   method: 'GET', path: '/lapsed', summary: 'Lapsed renewals with win-back attempts and reinstatement eligibility', screen: 'Operations > Renewals > Lapse Management', middleware: read,
-  response: { success: true, data: [{ policyNumber: 'POL-2025-00007', insuredName: 'Tech Solutions Ltd', lapseDate: '2026-09-01', daysLapsed: 27, premiumLost: 85000, lapseReason: 'Premium too high', reinstatementEligible: true, winBackAttempts: [] }] },
+  response: { success: true, data: [{ policyNumber: 'POL-2025-00007', insuredName: 'Tech Solutions Ltd', lapseDate: '2026-09-01', daysLapsed: 27, premiumLost: 85000, lapseReason: 'Customer No Longer Needs Coverage: sold the vehicle', lapseReasonCode: 'LAP-COV', reinstatementEligible: true, winBackAttempts: [] }] },
   handler: async (_req, res) => ok(res, await an.lapsed()),
 });
 define({
@@ -169,10 +169,15 @@ define({
   handler: command('complete', async (req) => { const r = await svc.completeRenewal(req.params.id, req.user, req.body); return { before: r.before, renewal: r.renewal, data: { newPolicy: r.newPolicy, renewal: r.renewal }, audit: { status: 'renewed', newPolicy: r.newPolicy } }; }, 'Policy renewed'),
 });
 define({
-  method: 'POST', path: '/:id/lapse', summary: 'Lapse a renewal (reason required)', screen: 'Operations > Renewals > Lapse Management',
-  middleware: [...write, validate(z.object({ reason: z.string().min(3).max(2000) }))], request: { reason: 'Client moved to another broker' },
+  method: 'POST', path: '/:id/lapse', summary: 'Lapse a renewal: reason (text), or reasonCode of the Reason Codes master (lapse) with the reason as its note', screen: 'Operations > Renewals > Lapse Management',
+  middleware: [...write, validate(z.object({ reason: z.string().max(2000).optional().nullable(), reasonCode: z.string().max(40).optional().nullable() })
+    .refine((b) => (b.reasonCode && String(b.reasonCode).trim()) || String(b.reason || '').trim().length >= 3, { message: 'Give the reason of the lapse (at least 3 characters) or a reason code', path: ['reason'] }))],
+  request: { reasonCode: 'LAP-NONRENEW', reason: 'Client moved to another broker' },
   response: { success: true, data: { ...queueItem, status: 'Lapsed', statusCode: 'lapsed' } },
-  handler: command('lapse', (req) => svc.lapseRenewal(req.params.id, req.user, req.body.reason), 'Renewal lapsed'),
+  handler: command('lapse', async (req) => {
+    const r = await svc.lapseRenewal(req.params.id, req.user, req.body.reason, req.body.reasonCode);
+    return { ...r, audit: { status: 'lapsed', reason: r.renewal?.lapseReason, reasonCode: r.renewal?.lapseReasonCode } };
+  }, 'Renewal lapsed'),
 });
 define({
   method: 'POST', path: '/:id/reinstate', summary: 'Reinstate a lapsed renewal within the reinstatement window', screen: 'Operations > Renewals > Lapse Management',

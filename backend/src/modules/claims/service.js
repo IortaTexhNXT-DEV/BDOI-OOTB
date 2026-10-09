@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { config } from '../../config.js';
 import { many, one, pool, withTransaction } from '../../db/pool.js';
+import { decisionReason } from '../ops-masters/records.js';
 import { allocate, isCoInsured, policyParticipants } from '../accounting/lib/coinsurance.js';
 import { postEvent } from '../accounting/lib/posting.js';
 import { getSetting } from '../../lib/settings.js';
@@ -112,7 +113,7 @@ export function toApi(r, labels, todayStr, open) {
     settlement, settlementType: settlement.settlementType || '', settlementAmount: settlement.settlementAmount ?? null,
     settlementIssueDate: settlement.settlementIssueDate || null, settlementDate: settlement.settlementDate || null,
     settlementRequestedBy: r.settlement_requested_by, settlementApprovedBy: r.settlement_approved_by, settlementApprovedAt: r.settlement_approved_at,
-    rejectedReason: r.rejected_reason, handlerUserId: r.handler_user_id, handlerName: r.handler_name, reportedByName: r.reported_by_name || null,
+    rejectedReason: r.rejected_reason, rejectedReasonCode: r.rejected_reason_code ?? null, handlerUserId: r.handler_user_id, handlerName: r.handler_name, reportedByName: r.reported_by_name || null,
     claimDueDate: r.due_date, daysOverdue, isOpen, closedAt: r.closed_at,
     isCoInsurance: false, isCoInsurancePolicy: false, participatingInsurersCount: 0,
     policy: {
@@ -482,23 +483,31 @@ async function transition(row, to, user, { note, sets = {}, action } = {}) {
   await import('../integrations/messaging.js').then((m) => m.claimStatusChanged(row, to, labels[to])).catch(() => null);
 }
 
-/** PUT /claims/updatestatus/:id: only statuses without their own workflow step (review, close, reject). */
-export async function updateStatus(id, requested, user, note) {
+/**
+ * PUT /claims/updatestatus/:id: only statuses without their own workflow step (review, close, reject). A rejection
+ * (repudiation) may carry a repudiation reason code of the Reason Codes master, with the note as its detail.
+ */
+export async function updateStatus(id, requested, user, note, reasonCode = null) {
   const to = await toStatusCode(requested);
   if (!to) throw badRequest(`Unknown claim status "${requested}"`);
   if (['pending-approval', 'approved', 'settled'].includes(to)) throw conflict(`Use the settlement endpoints to move a claim to ${to}`);
   const row = await loadRow(id);
   const from = row.status;
   if (to === 'closed') await transition(row, to, user, { note, sets: { closed_at: new Date() } });
-  else if (to === 'rejected') await transition(row, to, user, { note, sets: { rejected_reason: note || null }, action: 'Claim Rejected' });
+  else if (to === 'rejected') {
+    const why = await decisionReason(pool, ['repudiation'], { reasonCode, reason: note });
+    await transition(row, to, user, { note: why.text, sets: { rejected_reason: why.text, rejected_reason_code: why.code }, action: 'Claim Rejected' });
+  }
   else await transition(row, to, user, { note });
   return { from, claim: await getClaim(row.id) };
 }
 
-export async function rejectClaim(id, user, reason) {
+/** Reject (repudiate) a claim: the reason as text, or a repudiation reason code of the Reason Codes master with its note. */
+export async function rejectClaim(id, user, reason, reasonCode = null) {
   const row = await loadRow(id);
   const from = row.status;
-  await transition(row, 'rejected', user, { note: reason || 'Claim rejected', sets: { rejected_reason: reason || null }, action: 'Claim Rejected' });
+  const why = await decisionReason(pool, ['repudiation'], { reasonCode, reason });
+  await transition(row, 'rejected', user, { note: why.text || 'Claim rejected', sets: { rejected_reason: why.text, rejected_reason_code: why.code }, action: 'Claim Rejected' });
   return { from, claim: await getClaim(row.id) };
 }
 

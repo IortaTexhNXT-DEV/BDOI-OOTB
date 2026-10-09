@@ -80,6 +80,8 @@ with the API collection exported by `npm run export:api`). The table is written 
 | Repair Shop master upload | No Upload button: Master > Insurance Management > Repair Shops | `POST /api/masters/repair-shop/upload` | `Repair_Shop_Upload_Template.xlsx` |
 | Sales Activity Type master upload | No Upload button: Master > Organization > Sales Activity Types | `POST /api/masters/sales-activity-type/upload` | `Sales_Activity_Type_Upload_Template.xlsx` |
 | Sales Activity Outcome master upload | No Upload button: Master > Organization > Sales Activity Outcomes | `POST /api/masters/sales-activity-outcome/upload` | `Sales_Activity_Outcome_Upload_Template.xlsx` |
+| Lead Source master upload | No Upload button: Master > Insurance Management > Lead Sources | `POST /api/masters/lead-source/upload` | `Lead_Source_Upload_Template.xlsx` |
+| Reason Code master upload | No Upload button: Master > Insurance Management > Reason Codes | `POST /api/masters/reason-code/upload` | `Reason_Code_Upload_Template.xlsx` |
 | Leads upload | Operations > Sales & Marketing > Prospects > Bulk Upload | `POST /api/leads/bulk-upload` | `Leads_Upload_Template.xlsx` |
 | Quotations upload | Operations > Sales & Marketing > Quotations > Bulk Upload | `POST /api/quotations/bulk-upload` | `Quotations_Upload_Template.xlsx` |
 | Policies upload | Operations > Policy > Bulk Upload | `POST /api/policies/bulk-upload` | `Policies_Upload_Template.xlsx` |

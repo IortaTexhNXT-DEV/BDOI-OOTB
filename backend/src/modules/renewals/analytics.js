@@ -142,7 +142,7 @@ export async function lapsed() {
     const deadline = new Date(`${lapseDate}T00:00:00Z`); deadline.setUTCDate(deadline.getUTCDate() + days);
     return {
       id: a.id, renewalId: a.id, policyNumber: a.policyNumber, insuredName: a.insuredName, product: a.product, lapseDate, daysLapsed,
-      premiumLost: a.renewalPremium ?? a.currentPremium, lapseReason: r.lapse_reason, winBackAttempts: attempts,
+      premiumLost: a.renewalPremium ?? a.currentPremium, lapseReason: r.lapse_reason, lapseReasonCode: r.lapse_reason_code ?? null, winBackAttempts: attempts,
       reinstatementEligible: daysLapsed <= days, reinstatementDeadline: deadline.toISOString().slice(0, 10),
       winBackStatus: attempts.length ? 'In Progress' : 'Not Started',
     };

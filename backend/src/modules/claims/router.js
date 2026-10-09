@@ -89,20 +89,22 @@ define({
 });
 define({
   method: 'PUT', path: '/updatestatus/:id', summary: 'Move a claim to review / closed / rejected (claimStatus accepts a code or label, e.g. Processing)', screen: 'Operations > Claims > Request approval',
-  middleware: [...decide, ownRecord('claim'), validate(z.object({ claimStatus: z.string().min(1), note: z.string().max(2000).optional() }).passthrough())],
+  middleware: [...decide, ownRecord('claim'), validate(z.object({ claimStatus: z.string().min(1), note: z.string().max(2000).optional(), reasonCode: z.string().max(40).optional().nullable() }).passthrough())],
   request: { claimStatus: 'Processing', note: 'Documents complete' }, response: { success: true, message: 'Claim status updated', data: claimExample },
   handler: async (req, res) => {
-    const r = await svc.updateStatus(req.params.id, req.body.claimStatus, req.user, req.body.note);
-    await audit(req, { entity: 'claim', entityId: r.claim.id, action: 'status', before: { status: r.from }, after: { status: r.claim.lifecycleStatus } });
+    const r = await svc.updateStatus(req.params.id, req.body.claimStatus, req.user, req.body.note, req.body.reasonCode);
+    await audit(req, { entity: 'claim', entityId: r.claim.id, action: 'status', before: { status: r.from },
+      after: { status: r.claim.lifecycleStatus, ...(r.claim.lifecycleStatus === 'rejected' ? { reason: r.claim.rejectedReason, reasonCode: r.claim.rejectedReasonCode } : {}) } });
     ok(res, r.claim, 'Claim status updated');
   },
 });
 define({
-  method: 'PUT', path: '/rejectclaim/:id', summary: 'Reject a claim', screen: 'Operations > Claims > Settlement approval', middleware: [...decide, ownRecord('claim')],
-  request: { reason: 'Loss not covered' }, response: { success: true, message: 'Claim rejected', data: { ...claimExample, status: 'Rejected' } },
+  method: 'PUT', path: '/rejectclaim/:id', summary: 'Reject (repudiate) a claim: reason as text, or reasonCode of the Reason Codes master (repudiation) with the reason as its note',
+  screen: 'Operations > Claims > Settlement approval', middleware: [...decide, ownRecord('claim')],
+  request: { reasonCode: 'REP-NOTCOVERED', reason: 'Flood damage excluded from the motor policy' }, response: { success: true, message: 'Claim rejected', data: { ...claimExample, status: 'Rejected' } },
   handler: async (req, res) => {
-    const r = await svc.rejectClaim(req.params.id, req.user, req.body?.reason);
-    await audit(req, { entity: 'claim', entityId: r.claim.id, action: 'reject', before: { status: r.from }, after: { status: 'rejected', reason: req.body?.reason } });
+    const r = await svc.rejectClaim(req.params.id, req.user, req.body?.reason, req.body?.reasonCode);
+    await audit(req, { entity: 'claim', entityId: r.claim.id, action: 'reject', before: { status: r.from }, after: { status: 'rejected', reason: r.claim.rejectedReason, reasonCode: r.claim.rejectedReasonCode } });
     ok(res, r.claim, 'Claim rejected');
   },
 });

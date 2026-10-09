@@ -8,6 +8,7 @@ import { getSetting } from '../../lib/settings.js';
 import { formatMoney } from '../../lib/money.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
+import { decisionReason } from '../ops-masters/records.js';
 import { notify } from '../notifications/service.js';
 import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
@@ -125,7 +126,7 @@ export function toApi(r, ctx) {
     loyaltyYears: r.loyalty_years, coverageDetails: r.coverage_details || {}, accessories: r.accessories, orderSummary: r.order_summary,
     policyLimits: r.policy_limits, premiumBreakdown: r.premium_breakdown, effectiveDate: r.effective_date, newExpiryDate: r.expiry_date,
     newPolicyId: r.new_policy_id, submittedBy: r.submitted_by_name, submittedAt: r.submitted_at, approvedBy: r.approved_by_name,
-    approvedAt: r.approved_at, approvalNote: r.approval_note, lapseReason: r.lapse_reason, lapsedAt: r.lapsed_at, renewedAt: r.renewed_at,
+    approvedAt: r.approved_at, approvalNote: r.approval_note, lapseReason: r.lapse_reason, lapseReasonCode: r.lapse_reason_code ?? null, lapsedAt: r.lapsed_at, renewedAt: r.renewed_at,
     remarks: r.remarks, createdAt: r.created_at, updatedAt: r.updated_at,
     policy: {
       id: r.policy_id, policyId: r.policy_id, policyNumber: r.policy_number, clientId: r.client_id || r.policy_client_id,
@@ -565,13 +566,16 @@ export async function completeRenewal(id, user, input = {}) {
   return { before: r, newPolicy: { id: result.id, policyNumber: result.policy_number, inceptionDate: inception, expiryDate: expiry, premium, receivableId }, renewal: await getRenewal(r.id) };
 }
 
-export async function lapseRenewal(id, user, reason) {
+/** Lapse a renewal: the reason as text, or a lapse reason code of the Reason Codes master with the reason as its note. */
+export async function lapseRenewal(id, user, reason, reasonCode = null) {
   const r = await loadRow(id);
   if (!OPEN.includes(r.status)) throw conflict(`Renewal is ${r.status}; it cannot be lapsed`);
-  await query(`UPDATE renewals SET status = 'lapsed', lapse_reason = $2, lapsed_at = now(), updated_at = now() WHERE id = $1`, [r.id, reason]);
+  const why = await decisionReason({ query }, ['lapse'], { reasonCode, reason });
+  if (!why.text) throw badRequest('Validation failed', [{ path: 'reason', message: 'Give the reason of the lapse' }]);
+  await query(`UPDATE renewals SET status = 'lapsed', lapse_reason = $2, lapse_reason_code = $3, lapsed_at = now(), updated_at = now() WHERE id = $1`, [r.id, why.text, why.code]);
   await query('UPDATE policies SET status = \'expired\', updated_at = now() WHERE id = $1 AND expiry_date < $2::date AND status IN (\'active\', \'issued\')', [r.policy_id, await today()]);
-  await activity(null, r.id, user, { type: 'Lapsed', description: reason });
-  if (r.policy_owner) await notify({ userId: r.policy_owner, type: 'alert', title: `Policy lapsed: ${r.policy_number}`, message: reason, link: '/renewal/lapse-management', entity: 'renewal', entityId: r.id });
+  await activity(null, r.id, user, { type: 'Lapsed', description: why.text });
+  if (r.policy_owner) await notify({ userId: r.policy_owner, type: 'alert', title: `Policy lapsed: ${r.policy_number}`, message: why.text, link: '/renewal/lapse-management', entity: 'renewal', entityId: r.id });
   return { before: r, renewal: await getRenewal(r.id) };
 }
 
@@ -581,7 +585,7 @@ export async function reinstateRenewal(id, user, note) {
   const days = Number(await getSetting('renewals.reinstatement_days', 90));
   if (r.lapsed_at && (Date.now() - new Date(r.lapsed_at).getTime()) / 86400000 > days) throw unprocessable(`Reinstatement window of ${days} days has passed`);
   try {
-    await query(`UPDATE renewals SET status = CASE WHEN premium_new IS NULL THEN 'pipeline' ELSE 'quoted' END, lapse_reason = NULL, lapsed_at = NULL, updated_at = now() WHERE id = $1`, [r.id]);
+    await query(`UPDATE renewals SET status = CASE WHEN premium_new IS NULL THEN 'pipeline' ELSE 'quoted' END, lapse_reason = NULL, lapse_reason_code = NULL, lapsed_at = NULL, updated_at = now() WHERE id = $1`, [r.id]);
   } catch (e) {
     if (e.code === '23505') throw conflict('The policy already has an open renewal');
     throw e;

@@ -282,6 +282,20 @@ export const MASTER_TEMPLATES = [
     formats: { result: 'positive, neutral or negative (counted in the activity report)', sortOrder: 'Order in the list' },
     samples: [{ code: 'REFERRAL', name: 'Gave a referral', result: 'positive', sortOrder: '90' }],
   },
+  // lead sources and reason codes (seed 77_lead_sources_reason_codes.sql)
+  {
+    type: 'lead-source', menu: 'Master > Insurance Management > Lead Sources',
+    notes: ['Where a prospect came from: the Source of the prospect form and of the lead upload (matched by code or name) and a lead assignment condition.'],
+    formats: { channelType: 'Direct, Bancassurance / Affinity, Digital ...', branchCode: 'Branch code of the office the source belongs to (Branch master)', sortOrder: 'Order in the list' },
+    samples: [{ code: 'EVENT', name: 'Motor show / event', channelType: 'Direct', branchCode: 'HO', sortOrder: '150' }],
+  },
+  {
+    type: 'reason-code', menu: 'Master > Insurance Management > Reason Codes',
+    notes: ['Coded reasons of the decisions that have no master of their own. Cancellation reasons and write-off reasons have their own masters.'],
+    formats: { context: 'decline (quotation rejected or dropped), repudiation (claim rejected), lapse (renewal lapsed), refund, adjustment or non-materialise',
+      requiresNote: 'Yes when the user must also write the detail' },
+    samples: [{ code: 'LAP-PRICE', name: 'Found a cheaper premium elsewhere', context: 'lapse', requiresNote: 'Yes', sortOrder: '300' }],
+  },
 ];
 
 export const masterTemplateInfo = (code) => MASTER_TEMPLATES.find((m) => m.type === code) || null;
