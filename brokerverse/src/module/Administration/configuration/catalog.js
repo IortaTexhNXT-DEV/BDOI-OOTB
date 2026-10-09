@@ -122,12 +122,9 @@ export const AREAS = [
     id: "maintenance",
     title: "Data Retention, Privacy & Uploads",
     icon: "pi pi-database",
-    summary: "How long logs and messages are kept, the data privacy notice version, request due days and record retention, the size limits of uploaded files and the go-live lock.",
+    summary: "How long logs and messages are kept, the masking of personal identifiers and the privacy notice version, the size limits of uploaded files and the go-live lock.",
     groups: ["housekeeping", "privacy", "uploads", "golive"],
-    links: [
-      { label: "Audit trail", path: "/master/configuration/audit-trail" },
-      { label: "Data subject requests", path: "/master/data-privacy/requests" },
-    ],
+    links: [{ label: "Audit trail", path: "/master/configuration/audit-trail" }],
   },
 ];
 

@@ -6,7 +6,6 @@ import ClientListingViewPolicyTable from "./ClientListingViewPolicyTable";
 import ClientListingViewClaimTable from "./ClientListingViewClaimTable";
 import ClientListingViewRenewalTable from "./ClientListingViewRenewaleTable";
 import ClientListingViewEndorsementTable from "./ClientListingViewEndorsementTable";
-import PartyPrivacyPanel from "../../../../module/DataPrivacy/PartyPrivacyPanel";
 
 import "../../clientView/index.scss";
 import SvgLeftArrow from "../../../../assets/agentIcon/SvgLeftArrow";
@@ -121,9 +120,6 @@ const ClientListingCard = ({ action, clientId, onClient }) => {
           </TabPanel>
           <TabPanel header={t("clientView.tabEndorsement")} className="policy__header">
             <ClientListingViewEndorsementTable clientId={clientId} />
-          </TabPanel>
-          <TabPanel header={t("clientView.tabPrivacy")} className="policy__header">
-            {clientId ? <PartyPrivacyPanel partyType="client" partyId={clientId} /> : null}
           </TabPanel>
         </TabView>
       </Card>

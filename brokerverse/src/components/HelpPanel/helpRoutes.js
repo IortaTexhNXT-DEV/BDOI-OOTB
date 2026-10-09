@@ -150,7 +150,6 @@ export const HELP_ROUTES = [
   ["/master/finance/bank-file-layouts", "bank-file-layouts-and-payee-bank-accounts"],
   ["/accounts/bank-payment-files", "bank-payment-files"],
   ["/accounts/sap-gl-export", "sap-gl-export"],
-  ["/master/data-privacy", "data-privacy"],
   // client onboarding (Operations chapter of the user manual)
   ["/agent/client-onboarding", "onboard-a-client-before-the-first-policy"],
   ["/master/go-live-data-load", "go-live-data-load"],

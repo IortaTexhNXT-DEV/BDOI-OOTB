@@ -1535,25 +1535,6 @@ export const menuList = [
         ],
       },
       {
-        id: 25,
-        name: "Data Privacy",
-        section: true,
-        submenu: [
-          {
-            id: 1,
-            name: "Data Subject Requests",
-            path: "/master/data-privacy/requests",
-            includes: ["/master/data-privacy/requests"],
-          },
-          {
-            id: 2,
-            name: "Consent Register",
-            path: "/master/data-privacy/consents",
-            includes: ["/master/data-privacy/consents"],
-          },
-        ],
-      },
-      {
         // configuration and migration workbooks loaded before go-live
         name: "Go-Live and Data",
         section: true,

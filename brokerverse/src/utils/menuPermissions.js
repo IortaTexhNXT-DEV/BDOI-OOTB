@@ -88,8 +88,8 @@ export const roleMenuPermissions = {
     "my work": true,
     operations: OPERATIONS_ALL,
     reports: ["All Reports", "Operational Reports", "Report Builder"],
-    // data subject requests and the consent register (read:privacy / write:privacy); distribution channels (read:channels)
-    master: ["Data Privacy", "Insurance Management > Distribution Channels"],
+    // distribution channels (read:channels)
+    master: ["Insurance Management > Distribution Channels"],
   },
   claims: {
     dashboard: ["Claims Dashboard"],
@@ -173,7 +173,7 @@ const TIS_OPERATIONS = {
   operations: [...OPERATIONS_ALL, "Claim Documents", "Motor Claim Repairs"],
   accounts: ["Receipts", "Collections"],
   reports: ["All Reports", "Operational Reports", "Report Builder"],
-  master: ["Data Privacy", "Insurance Management > Distribution Channels", "Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops"],
+  master: ["Insurance Management > Distribution Channels", "Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops"],
 };
 Object.assign(roleMenuPermissions, {
   "tis-sales-associate": TIS_SALES,

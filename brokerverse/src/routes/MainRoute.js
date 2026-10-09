@@ -299,8 +299,6 @@ import AuthorityMatrix from "../module/AccessControl/AuthorityMatrix";
 import Delegations from "../module/AccessControl/Delegations";
 import SodRules from "../module/AccessControl/SodRules";
 import AccessReviews from "../module/AccessControl/AccessReviews";
-import DataSubjectRequests from "../module/DataPrivacy/DataSubjectRequests";
-import ConsentRegister from "../module/DataPrivacy/ConsentRegister";
 // client onboarding before the first policy (customer due diligence)
 import ClientOnboarding from "../agentModule/quoteModule/clientOnboarding";
 import GoLiveDataLoad from "../module/GoLiveDataLoad";
@@ -1141,8 +1139,6 @@ const Maincomponent = () => {
           <Route path="/master/generals/usermanagement/delegations" element={<Delegations />} />
           <Route path="/master/generals/usermanagement/segregation-of-duties" element={<SodRules />} />
           <Route path="/master/generals/usermanagement/access-reviews" element={<AccessReviews />} />
-          <Route path="/master/data-privacy/requests" element={<DataSubjectRequests />} />
-          <Route path="/master/data-privacy/consents" element={<ConsentRegister />} />
           {/* client onboarding before the first policy */}
           <Route path="/agent/client-onboarding" element={<ClientOnboarding />} />
           <Route path="/agent/client-onboarding/:id" element={<ClientOnboarding />} />

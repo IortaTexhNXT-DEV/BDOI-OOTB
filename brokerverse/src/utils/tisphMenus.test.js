@@ -60,4 +60,15 @@ describe("TISPH roles (RBAC v4): menus", () => {
     expect(helpSectionFor("/master/insurance/lead-sources").id).toBe("lead-sources-and-reason-codes");
     expect(helpSectionFor("/master/insurance/reason-codes").id).toBe("lead-sources-and-reason-codes");
   });
+
+  it("System Configuration offers the e-mail and document layouts and the signatures, without the theme editor or Data Privacy", () => {
+    const master = menuList.find((m) => m.name === "Master");
+    const system = master.submenu.find((s) => s.name === "System Configuration").submenu.map((i) => i.name);
+    expect(system).toEqual(expect.arrayContaining(["System Settings", "E-mail Layout", "Documents and Reports Layout", "Document Signatures"]));
+    expect(master.submenu.map((s) => s.name)).not.toContain("Data Privacy");
+    const layouts = ["/master/configuration/email-layout", "/master/configuration/documents-layout", "/master/configuration/document-signatures"];
+    expect(layouts.filter((p) => !isPathAllowed(p, menuList, ["tis-it-admin"]))).toEqual([]);
+    expect(layouts.filter((p) => isPathAllowed(p, menuList, ["tis-general-manager"]) || isPathAllowed(p, menuList, ["tis-ops-unit-head"]))).toEqual([]);
+    expect(layouts.map((p) => helpSectionFor(p).matched)).toEqual([true, true, true]);
+  });
 });
