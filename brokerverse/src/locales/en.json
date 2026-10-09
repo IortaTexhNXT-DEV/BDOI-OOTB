@@ -59,7 +59,10 @@
     "total": "Total",
     "warning": "Warning",
     "information": "Information",
-    "validation": "Validation"
+    "validation": "Validation",
+    "loadFailedTitle": "This record could not be loaded",
+    "notFoundTitle": "Record not found",
+    "notFoundText": "The record of this link does not exist or is no longer available. It may have been replaced; open it again from its list."
   },
   "login": {
     "title": "Welcome to {{name}}",
@@ -3555,7 +3558,10 @@
     "valueAddedTaxRate": "Value Added Tax ({{rate}})",
     "localGovernmentTaxRate": "Local Government Tax ({{rate}})",
     "directBill": "Direct bill",
-    "directBillDescription": "The client pays the premium directly to the insurer. No premium payment is collected by the broker; the broker bills the insurer for its commission."
+    "directBillDescription": "The client pays the premium directly to the insurer. No premium payment is collected by the broker; the broker bills the insurer for its commission.",
+    "nextStepCollect": "Next step: collect the premium",
+    "nextStepCollectText": "The policy is booked and its bill {{bill}} is open. Record the receipt when the client pays.",
+    "recordReceipt": "Record receipt"
   },
   "uploadPolicy": {
     "title": "Prospects",
@@ -5517,7 +5523,10 @@
     "leadInsurer": "Lead Insurer",
     "coInsurer": "Co-Insurer",
     "total": "TOTAL",
-    "outstandingNote": "* Outstanding amount shown above is the total across all insurers."
+    "outstandingNote": "* Outstanding amount shown above is the total across all insurers.",
+    "nextStepTitle": "Next step: record the premium received",
+    "nextStepText": "{{amount}} is outstanding on {{bill}}. Record the receipt when the client pays; it is applied to this bill.",
+    "recordReceipt": "Record receipt"
   },
   "agingReport": {
     "backToCollections": "Back to Collections",

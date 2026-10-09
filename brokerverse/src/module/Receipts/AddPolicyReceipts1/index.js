@@ -12,7 +12,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputNumber } from "primereact/inputnumber";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useFormik } from "formik";
 import { Calendar } from "primereact/calendar";
 import LabelWrapper from "../../../components/LabelWrapper";
@@ -61,6 +61,8 @@ function BranchAdding() {
   const { formatCurrency } = useFormatCurrency();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  // opened from a policy or a collection ("Collect the premium"): ?client=<client code>&policy=<policy number>
+  const [params] = useSearchParams();
   const { loading, draftReceiptsList } = useSelector(({ receiptsTableReducers }) => ({
     loading: receiptsTableReducers?.loading,
     draftReceiptsList: receiptsTableReducers?.draftReceiptsList,
@@ -246,6 +248,18 @@ function BranchAdding() {
     if (policyBills.length === 1) setSelectedBillId(policyBills[0].receivableId);
     else if (!policyBills.some((b) => b.receivableId === selectedBillId)) setSelectedBillId(null);
   }, [policyBills, selectedBillId]);
+
+  // Preselect the client and policy of the link once their open bills are listed.
+  const preselectClient = params.get("client");
+  const preselectPolicy = params.get("policy");
+  useEffect(() => {
+    if (!preselectClient || values.customerCode) return;
+    const customer = customers.find((c) => c.code === preselectClient);
+    if (!customer) return;
+    setFieldValue("customerCode", customer.code);
+    setFieldValue("customerName", customer.customerName || "");
+    if (preselectPolicy) setFieldValue("policyNumber", preselectPolicy);
+  }, [customers, preselectClient, preselectPolicy, values.customerCode, setFieldValue]);
 
   const handleCustomerCodeChange = (e) => {
     const customer = customers.find((c) => c.code === e.value);

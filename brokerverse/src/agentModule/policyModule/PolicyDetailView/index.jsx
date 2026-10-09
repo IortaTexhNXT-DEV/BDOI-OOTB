@@ -29,6 +29,8 @@ import "./index.scss";
 import { numberLocale } from "../../../utility/currencyConverter";
 import { formatDate as formatConfiguredDate } from "../../../utility/dateFormat";
 import logger from "../../../utility/logger";
+import NextStep from "../../../components/NextStep";
+import { hasPermission } from "../../../utils/canOpen";
 const ENDORSEMENT_TYPE_KEYS = {
   1: "policyDetail.endorsementTypePersonalDetails",
   2: "policyDetail.endorsementTypeMotorDetails",
@@ -1670,6 +1672,11 @@ const PolicyDetailView = () => {
             )}
           </div>
         </div>
+        {paymentStatusIsPending && hasPermission("write:receipts") && (
+          <NextStep title={t("policyDetail.nextStepCollect")} text={t("policyDetail.nextStepCollectText", { bill: rawPolicyData?.billNumber || "" })}
+            actions={[{ key: "receipt", label: t("policyDetail.recordReceipt"),
+              to: `/accounts/receipts/addreceipts?client=${encodeURIComponent(rawPolicyData?.client?.clientCode || "")}&policy=${encodeURIComponent(policyDetails.policyNumber || "")}` }]} />
+        )}
 
         <div className="policy-highlights">
           {highlightCards.map((card) => (

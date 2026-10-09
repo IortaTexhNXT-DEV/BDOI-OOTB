@@ -11,6 +11,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import collectionService from "../../../services/collectionService";
 import emailService from "../../../services/emailService";
 import EmailDocumentDialog from "../../../components/EmailDocumentDialog";
+import LoadState from "../../../components/LoadState";
+import NextStep from "../../../components/NextStep";
 import FollowUpModal from "../FollowUpModal";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
@@ -24,31 +26,28 @@ const CollectionDetail = () => {
   const toast = useRef(null);
 
   const [collection, setCollection] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [loadingFollowUp, setLoadingFollowUp] = useState(false);
   const [showFollowUpModal, setShowFollowUpModal] = useState(false);
   const [followUpType, setFollowUpType] = useState("");
   const [showInvoiceEmail, setShowInvoiceEmail] = useState(false);
 
+  // The page leaves its loading state on every answer: the record, "not found" (an old link or task) or the error.
   const loadCollectionDetails = useCallback(async () => {
-    setLoading(true);
+    setLoadError(null);
     try {
       const result = await collectionService.getCollectionById(id);
-      if (result.success) {
-        setCollection(result.data);
-      }
+      setCollection(result?.success ? result.data || null : null);
+      if (!result?.success) setLoadError(result?.message || t("collectionDetail.failedToLoadCollection"));
     } catch (error) {
       logger.error("Load collection details error:", error);
-      toast.current?.show({
-        severity: "error",
-        summary: t("accounting.error"),
-        detail: t("collectionDetail.failedToLoadCollection"),
-        life: 3000,
-      });
+      setCollection(null);
+      if (error?.response?.status !== 404) setLoadError(error?.response?.data?.message || t("collectionDetail.failedToLoadCollection"));
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   useEffect(() => {
     loadCollectionDetails();
@@ -116,9 +115,8 @@ const CollectionDetail = () => {
   if (loading || !collection) {
     return (
       <div className="collection-detail-container">
-        <Card>
-          <div className="p-4 text-center">Loading collection details...</div>
-        </Card>
+        <LoadState loading={loading} error={loadError} notFound={!collection} onRetry={() => { setLoading(true); loadCollectionDetails(); }}
+          backLabel={t("collectionDetail.backToCollections")} onBack={() => navigate("/agent/collections")} />
       </div>
     );
   }
@@ -246,6 +244,12 @@ const CollectionDetail = () => {
         />
         <h2>{t("collectionDetail.collectionDetails")}</h2>
       </div>
+
+      {collection.outstandingAmount > 0 && (
+        <NextStep title={t("collectionDetail.nextStepTitle")} text={t("collectionDetail.nextStepText", { amount: formatCurrency(collection.outstandingAmount), bill: collection.billNumber })}
+          actions={[{ key: "receipt", label: t("collectionDetail.recordReceipt"),
+            to: `/accounts/receipts/addreceipts?client=${encodeURIComponent(client.clientId || "")}&policy=${encodeURIComponent(collection.policyNumber || "")}` }]} />
+      )}
 
       {/* Client and Policy Information */}
       <Card title={t("collectionDetail.clientPolicyInfo")} className="info-card">

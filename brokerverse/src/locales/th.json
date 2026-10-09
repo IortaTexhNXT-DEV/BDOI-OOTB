@@ -52,7 +52,10 @@
     "apply": "นำไปใช้",
     "reset": "รีเซ็ต",
     "required": "จำเป็น",
-    "optional": "ไม่บังคับ"
+    "optional": "ไม่บังคับ",
+    "loadFailedTitle": "ไม่สามารถโหลดรายการนี้ได้",
+    "notFoundTitle": "ไม่พบรายการ",
+    "notFoundText": "ไม่พบรายการของลิงก์นี้หรือไม่มีให้ใช้งานแล้ว กรุณาเปิดอีกครั้งจากรายการ"
   },
   "login": {
     "title": "ยินดีต้อนรับสู่ {{name}}",
@@ -3014,7 +3017,10 @@
     "availableOnRequest": "มีให้ตามคำขอ",
     "relatedRecords": "บันทึกที่เกี่ยวข้อง",
     "documentPreview": "แสดงตัวอย่างเอกสาร",
-    "noDocumentToPreview": "ไม่มีเอกสารให้แสดงตัวอย่าง"
+    "noDocumentToPreview": "ไม่มีเอกสารให้แสดงตัวอย่าง",
+    "nextStepCollect": "ขั้นตอนถัดไป: เก็บเบี้ยประกัน",
+    "nextStepCollectText": "กรมธรรม์ถูกบันทึกแล้วและใบแจ้งหนี้ {{bill}} ยังค้างอยู่ บันทึกใบเสร็จเมื่อลูกค้าชำระเงิน",
+    "recordReceipt": "บันทึกใบเสร็จ"
   },
   "uploadPolicy": {
     "title": "ลีด",
@@ -4600,7 +4606,10 @@
     "leadInsurer": "บริษัทประกันหลัก",
     "coInsurer": "บริษัทประกันร่วม",
     "total": "รวม",
-    "outstandingNote": "* จำนวนค้างชำระที่แสดงด้านบนคือยอดรวมของทุกบริษัทประกัน"
+    "outstandingNote": "* จำนวนค้างชำระที่แสดงด้านบนคือยอดรวมของทุกบริษัทประกัน",
+    "nextStepTitle": "ขั้นตอนถัดไป: บันทึกเบี้ยประกันที่ได้รับ",
+    "nextStepText": "ยอดค้างชำระ {{amount}} ของ {{bill}} บันทึกใบเสร็จเมื่อลูกค้าชำระเงิน",
+    "recordReceipt": "บันทึกใบเสร็จ"
   },
   "agingReport": {
     "backToCollections": "กลับไปที่ Collections",
