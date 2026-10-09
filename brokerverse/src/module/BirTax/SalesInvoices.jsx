@@ -26,6 +26,7 @@ const NewInvoice = ({ seller, onHide, onIssued, toast }) => {
   const { t } = useTranslation();
   const [v, setV] = useState({ ...EMPTY, lines: [{ ...EMPTY_LINE }] });
   const [candidates, setCandidates] = useState([]);
+  const [linesError, setLinesError] = useState(null);
   const set = (p) => setV((x) => ({ ...x, ...p }));
   useEffect(() => {
     if (!["debit_note", "override_commission"].includes(v.sourceType)) { setCandidates([]); return; }
@@ -34,6 +35,10 @@ const NewInvoice = ({ seller, onHide, onIssued, toast }) => {
   const setLine = (i, p) => set({ lines: v.lines.map((l, j) => (j === i ? { ...l, ...p } : l)) });
   const manual = v.sourceType === "manual";
   const issue = async () => {
+    // a described line needs its price: an amount of zero is refused by the invoice register
+    const priced = !manual || v.lines.filter((l) => l.description).every((l) => Number(l.quantity || 0) > 0 && Number(l.unitPrice || 0) > 0);
+    setLinesError(priced ? null : t("birTax.linePriceRequired"));
+    if (!priced) return;
     const body = { sourceType: v.sourceType, invoiceDate: toIsoDate(v.invoiceDate), remarks: v.remarks || undefined };
     if (v.sourceType === "policy_commission") body.sourceId = v.policyNumber.trim();
     else if (!manual) body.sourceId = v.sourceId;
@@ -80,11 +85,12 @@ const NewInvoice = ({ seller, onHide, onIssued, toast }) => {
             <div className="col-12">
               <DataTable value={v.lines} size="small">
                 <Column header={t("birTax.description")} body={(l, o) => <InputText value={l.description} onChange={(e) => setLine(o.rowIndex, { description: e.target.value })} className="w-full" />} />
-                <Column header={t("birTax.quantity")} style={{ width: "7rem" }} body={(l, o) => <InputNumber value={l.quantity} onValueChange={(e) => setLine(o.rowIndex, { quantity: e.value })} inputStyle={{ width: "5rem" }} />} />
-                <Column header={t("birTax.unitPrice")} style={{ width: "10rem" }} body={(l, o) => <InputNumber value={l.unitPrice} onValueChange={(e) => setLine(o.rowIndex, { unitPrice: e.value })} minFractionDigits={2} inputStyle={{ width: "8rem" }} />} />
+                <Column header={t("birTax.quantity")} style={{ width: "7rem" }} body={(l, o) => <InputNumber value={l.quantity} min={0} onValueChange={(e) => setLine(o.rowIndex, { quantity: e.value })} inputStyle={{ width: "5rem" }} />} />
+                <Column header={t("birTax.unitPrice")} style={{ width: "10rem" }} body={(l, o) => <InputNumber value={l.unitPrice} min={0} onValueChange={(e) => setLine(o.rowIndex, { unitPrice: e.value })} minFractionDigits={2} inputStyle={{ width: "8rem" }} />} />
                 <Column header={t("birTax.vatClass")} style={{ width: "10rem" }} body={(l, o) => <Dropdown value={l.vatClass} options={VAT_CLASSES.map((x) => ({ label: t(`birTax.vat.${x}`), value: x }))} onChange={(e) => setLine(o.rowIndex, { vatClass: e.value })} />} />
                 <Column style={{ width: "3rem" }} body={(l, o) => <Button icon="pi pi-trash" text severity="danger" aria-label={t("birTax.removeLine")} onClick={() => set({ lines: v.lines.filter((_, j) => j !== o.rowIndex) })} disabled={v.lines.length === 1} />} />
               </DataTable>
+              {linesError ? <small className="p-error block mt-1" role="alert">{linesError}</small> : null}
               <div className="flex justify-content-between mt-2">
                 <Button icon="pi pi-plus" text label={t("birTax.addLine")} onClick={() => set({ lines: [...v.lines, { ...EMPTY_LINE }] })} />
                 <span>{t("birTax.salesNetOfVat")}: <strong>{money(total)}</strong></span>

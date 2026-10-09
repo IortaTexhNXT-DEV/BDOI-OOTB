@@ -237,7 +237,7 @@ const PayeeAccounts = ({ toast, banks }) => {
             </div>
             <div className="col-12 md:col-6"><label>{t("integrations.bank")} *</label><Dropdown value={form.bankCode} options={banks} filter onChange={(e) => setForm({ ...form, bankCode: e.value })} className="w-full" /></div>
             <div className="col-12 md:col-6"><label>{t("integrations.bankBranch")}</label><InputText value={form.bankBranch} onChange={(e) => setForm({ ...form, bankBranch: e.target.value })} className="w-full" /></div>
-            <div className="col-12 md:col-6"><label>{t("integrations.accountNumber")} *</label><InputText value={form.accountNumber} onChange={(e) => setForm({ ...form, accountNumber: e.target.value })} className="w-full" /></div>
+            <div className="col-12 md:col-6"><label>{t("integrations.accountNumber")} *</label><InputText value={form.accountNumber} maxLength={34} keyfilter={/[0-9 -]/} onChange={(e) => setForm({ ...form, accountNumber: e.target.value })} className="w-full" /></div>
             <div className="col-12 md:col-6"><label>{t("integrations.accountName")} *</label><InputText value={form.accountName} onChange={(e) => setForm({ ...form, accountName: e.target.value })} className="w-full" /></div>
             <div className="col-12 md:col-4"><label>{t("integrations.accountType")}</label>
               <Dropdown value={form.accountType} options={["savings", "current"].map((x) => ({ label: t(`integrations.accountTypes.${x}`), value: x }))} onChange={(e) => setForm({ ...form, accountType: e.value })} className="w-full" /></div>

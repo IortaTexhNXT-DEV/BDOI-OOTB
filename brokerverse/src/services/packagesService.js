@@ -23,6 +23,7 @@ const request = async (method, path, body, { auth = true } = {}) => {
     const detail = Array.isArray(json.errors) ? json.errors.map((e) => e.message).filter(Boolean).join(", ") : "";
     const error = new Error(json.message && detail && json.message === "Validation failed" ? detail : json.message || detail || `Request failed (${response.status})`);
     error.status = response.status;
+    error.errors = Array.isArray(json.errors) ? json.errors : [];
     throw error;
   }
   return json;

@@ -101,12 +101,12 @@ const TaxCodes = () => {
         )}>
         {editing && (
           <div className="grid">
-            <div className="col-12 md:col-4"><label>{t("periodEnd.code")} *</label><InputText value={v.code} disabled={!editing.isNew} onChange={(e) => setValue({ code: e.target.value.toUpperCase() })} className="w-full" /></div>
+            <div className="col-12 md:col-4"><label>{t("periodEnd.code")} *</label><InputText value={v.code} maxLength={20} keyfilter={/[A-Za-z0-9-]/} disabled={!editing.isNew} onChange={(e) => setValue({ code: e.target.value.toUpperCase() })} className="w-full" /></div>
             <div className="col-12 md:col-4"><label>{t("periodEnd.taxType")}</label><Dropdown value={v.taxType} options={TYPES.map((x) => ({ label: x, value: x }))} onChange={(e) => setValue({ taxType: e.value })} className="w-full" /></div>
-            <div className="col-12 md:col-4"><label>{t("periodEnd.rate")} (%)</label><InputNumber value={v.rate} onValueChange={(e) => setValue({ rate: e.value })} minFractionDigits={0} maxFractionDigits={4} className="w-full" /></div>
+            <div className="col-12 md:col-4"><label>{t("periodEnd.rate")} (%)</label><InputNumber value={v.rate} onValueChange={(e) => setValue({ rate: e.value })} min={0} max={100} minFractionDigits={0} maxFractionDigits={4} className="w-full" /></div>
             <div className="col-12"><label>{t("periodEnd.description")} *</label><InputText value={v.description} onChange={(e) => setValue({ description: e.target.value })} className="w-full" /></div>
-            <div className="col-12 md:col-4"><label>ATC</label><InputText value={v.atc} onChange={(e) => setValue({ atc: e.target.value.toUpperCase() })} className="w-full" /></div>
-            <div className="col-12 md:col-8"><label>{t("periodEnd.natureOfPayment")}</label><InputText value={v.natureOfPayment} onChange={(e) => setValue({ natureOfPayment: e.target.value })} className="w-full" /></div>
+            <div className="col-12 md:col-4"><label>ATC</label><InputText value={v.atc} maxLength={10} onChange={(e) => setValue({ atc: e.target.value.toUpperCase() })} className="w-full" /></div>
+            <div className="col-12 md:col-8"><label>{t("periodEnd.natureOfPayment")}</label><InputText value={v.natureOfPayment} maxLength={200} onChange={(e) => setValue({ natureOfPayment: e.target.value })} className="w-full" /></div>
             <div className="col-12 md:col-6"><label>{t("periodEnd.glAccount")}</label><Dropdown value={v.glAccount} options={accounts} filter showClear onChange={(e) => setValue({ glAccount: e.value })} className="w-full" /></div>
             <div className="col-12 md:col-3"><label>{t("periodEnd.appliesTo")}</label>
               <Dropdown value={v.appliesTo} options={["sales", "purchases", "both"].map((x) => ({ label: t(`periodEnd.appliesToValue.${x}`), value: x }))} onChange={(e) => setValue({ appliesTo: e.value })} className="w-full" /></div>

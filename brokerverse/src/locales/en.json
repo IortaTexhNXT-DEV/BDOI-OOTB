@@ -353,7 +353,8 @@
     "totalCreditRequired": "TotalCredit is required",
     "totalDebitRequired": "TotalDebit is required",
     "netRequired": "Net is required",
-    "selectTransactionCode": "Please select a transaction code"
+    "selectTransactionCode": "Please select a transaction code",
+    "wholeNumber": "Enter a whole number"
   },
   "accounts": {
     "journalVoucher": "Journal Voucher",
@@ -6749,7 +6750,8 @@
       "settled": "Settled",
       "active": "Active",
       "inactive": "Inactive"
-    }
+    },
+    "linePriceRequired": "Enter the quantity and unit price of each line"
   },
   "placement": {
     "status": {
@@ -7322,7 +7324,10 @@
       "perInsurer": "per insurer",
       "decidedAtPosting": "Decided when posting",
       "else": "else"
-    }
+    },
+    "required": "Required",
+    "reasonCodeFormat": "2 to 30 letters, digits, _ or -",
+    "maxAmountAboveZero": "Leave empty or enter an amount above zero"
   },
   "bankReconciliation": {
     "title": "Bank Reconciliation",
@@ -7593,7 +7598,8 @@
       "stale": "Stale",
       "duplicate": "Duplicate",
       "new": "New"
-    }
+    },
+    "alreadyStarted": "This period is reconciled in {{number}}: open it from the list"
   },
   "followUps": {
     "adviceReference": "Remittance advice / reference",
@@ -8267,7 +8273,8 @@
       "benefits": "Benefits",
       "addSection": "Add section",
       "removeSection": "Remove",
-      "insurersHelp": "Insurers that can carry this section; the first one is proposed"
+      "insurersHelp": "Insurers that can carry this section; the first one is proposed",
+      "sectionMissing": "Section {{no}}: {{fields}}."
     },
     "gateways": {
       "saved": "{{name}} saved",
@@ -8309,7 +8316,11 @@
         "absorb": "Absorbed by the broker",
         "pass_on": "Added to the client's payment"
       }
-    }
+    },
+    "required": "Required",
+    "aboveZero": "Enter a value above zero",
+    "endBeforeStart": "The end must not be before the start",
+    "codeFormat": "Letters, digits, _ or -, up to 20"
   },
   "accessControl": {
     "reviewDetailIntro": "Due {{date}} · {{done}} of {{total}} users reviewed · {{revoked}} revoked",
@@ -9989,7 +10000,8 @@
       "over": "Over {{days}}",
       "daysPastDue": "Days past due",
       "bucket": "Bucket",
-      "lineAmounts": "Enter the amount of each line"
+      "lineAmounts": "Enter the amount of each line",
+      "chooseAccount": "Choose the bank account the payment is made from"
     },
     "fa": {
       "menu": "Fixed Assets",
@@ -10029,7 +10041,8 @@
     "required": "Required",
     "amountAboveZero": "Enter an amount above zero",
     "invalidEmail": "Enter a valid e-mail address",
-    "tooLong": "At most {{max}} characters"
+    "tooLong": "At most {{max}} characters",
+    "notBefore": "Must be on or after {{other}}"
   },
   "distribution": {
     "cp": {

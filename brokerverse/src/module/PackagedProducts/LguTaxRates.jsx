@@ -13,6 +13,8 @@ import { TabView, TabPanel } from "primereact/tabview";
 import { Tag } from "primereact/tag";
 import packagesService from "../../services/packagesService";
 import { confirmAction, notifyError, notifySuccess } from "../../utility/dialogs";
+import FieldError from "../../components/FieldError";
+import useFieldErrors, { blank } from "../../hooks/useFieldErrors";
 import { formatDate } from "../../utility/dateFormat";
 import { PageHeader } from "../Placement/shared";
 import { ChargesBreakdown, PRODUCT_LINES, RULE_KINDS, RULE_METHODS, TAX_REGIMES, todayIso, usePackageOptions, lguOptions } from "./common";
@@ -20,6 +22,7 @@ import "../Placement/index.scss";
 import "../Administration/index.scss";
 import "./index.scss";
 
+const CODE = /^[A-Za-z0-9_-]{1,20}$/;
 const EMPTY_LGU = { code: "", name: "", province: "Metro Manila", rate: 0.2, effectiveFrom: todayIso(), effectiveTo: "", active: true, remarks: "" };
 const EMPTY_RULE = { code: "", name: "", kind: "other", method: "flat", rate: 0, unitAmount: 0, unitSize: 0, fractionRule: "round_up", lines: [], regimes: [], minimumAmount: 0,
   sortOrder: 100, active: true, effectiveFrom: todayIso(), effectiveTo: "", remarks: "" };
@@ -40,6 +43,11 @@ const LguTaxRates = () => {
   const [rule, setRule] = useState(null);
   const [calc, setCalc] = useState({ premium: 10000, productId: null, lguCode: null });
   const [result, setResult] = useState(null);
+  const { errors, check, fromApi, clear } = useFieldErrors();
+  const openLgu = (value) => { clear(); setLgu(value); };
+  const openRule = (value) => { clear(); setRule(value); };
+  const codeProblem = (code) => (blank(code) ? t("packagedProducts.required") : CODE.test(code) ? null : t("packagedProducts.codeFormat"));
+  const periodProblem = (x) => (x.effectiveTo && x.effectiveFrom && x.effectiveTo < x.effectiveFrom ? t("packagedProducts.endBeforeStart") : null);
 
   const load = () => {
     setLoading(true);
@@ -51,15 +59,23 @@ const LguTaxRates = () => {
   useEffect(load, []);
 
   const saveLgu = async () => {
+    if (!check({
+      code: lgu.id ? null : codeProblem(lgu.code),
+      name: blank(lgu.name) ? t("packagedProducts.required") : null,
+      rate: lgu.rate === null || lgu.rate === undefined ? t("packagedProducts.required") : null,
+      effectiveFrom: lgu.effectiveFrom ? null : t("packagedProducts.required"),
+      effectiveTo: periodProblem(lgu),
+    })) return;
     const body = { ...lgu, effectiveTo: lgu.effectiveTo || null, remarks: lgu.remarks || null };
     delete body.id; delete body.cityName; delete body.updatedBy; delete body.updatedAt; delete body.cityId;
     try {
       if (lgu.id) await packagesService.updateLguRate(lgu.id, body);
       else await packagesService.createLguRate(body);
       notifySuccess(k("saved"));
-      setLgu(null);
+      openLgu(null);
       load();
     } catch (e) {
+      fromApi(e);
       notifyError(e.message);
     }
   };
@@ -68,6 +84,15 @@ const LguTaxRates = () => {
     packagesService.deleteLguRate(row.id).then(load).catch((e) => notifyError(e.message));
   };
   const saveRule = async () => {
+    if (!check({
+      code: rule.original ? null : codeProblem(rule.code),
+      name: blank(rule.name) ? t("packagedProducts.required") : null,
+      rate: rule.method === "percent" && !(rule.rate > 0) ? t("packagedProducts.aboveZero") : null,
+      unitAmount: rule.method !== "percent" && !(rule.unitAmount > 0) ? t("packagedProducts.aboveZero") : null,
+      unitSize: rule.method === "per_unit" && !(rule.unitSize > 0) ? t("packagedProducts.aboveZero") : null,
+      effectiveFrom: rule.effectiveFrom ? null : t("packagedProducts.required"),
+      effectiveTo: periodProblem(rule),
+    })) return;
     const body = { ...rule, effectiveTo: rule.effectiveTo || null, remarks: rule.remarks || null, lines: rule.lines?.length ? rule.lines : null, regimes: rule.regimes?.length ? rule.regimes : null };
     const existing = rules.some((r) => r.code === rule.code) && rule.original;
     delete body.original; delete body.updatedBy; delete body.updatedAt;
@@ -77,9 +102,10 @@ const LguTaxRates = () => {
         await packagesService.updateChargeRule(rule.code, body);
       } else await packagesService.createChargeRule(body);
       notifySuccess(k("saved"));
-      setRule(null);
+      openRule(null);
       load();
     } catch (e) {
+      fromApi(e);
       notifyError(e.message);
     }
   };
@@ -98,7 +124,7 @@ const LguTaxRates = () => {
       <PageHeader title={k("title")} />
       <TabView>
         <TabPanel header={k("lguTab")}>
-          <div className="pkg-toolbar"><Button label={k("addLgu")} icon="pi pi-plus" onClick={() => setLgu({ ...EMPTY_LGU })} /></div>
+          <div className="pkg-toolbar"><Button label={k("addLgu")} icon="pi pi-plus" onClick={() => openLgu({ ...EMPTY_LGU })} /></div>
           <DataTable value={lgus} loading={loading} dataKey="id" size="small" stripedRows paginator rows={20} emptyMessage={k("noLgu")} responsiveLayout="scroll">
             <Column field="code" header={k("code")} sortable />
             <Column field="name" header={k("lguName")} sortable />
@@ -109,7 +135,7 @@ const LguTaxRates = () => {
             <Column header={t("packagedProducts.active")} body={active} />
             <Column body={(r) => (
               <div className="admin__actions">
-                <Button icon="pi pi-pencil" rounded text aria-label={t("common.edit")} onClick={() => setLgu({ ...r, effectiveTo: r.effectiveTo || "", remarks: r.remarks || "" })} tooltip={t("common.edit")} tooltipOptions={{ position: "top" }} />
+                <Button icon="pi pi-pencil" rounded text aria-label={t("common.edit")} onClick={() => openLgu({ ...r, effectiveTo: r.effectiveTo || "", remarks: r.remarks || "" })} tooltip={t("common.edit")} tooltipOptions={{ position: "top" }} />
                 <Button icon="pi pi-trash" rounded text severity="danger" aria-label={t("common.delete")} onClick={() => removeLgu(r)} tooltip={t("common.delete")} tooltipOptions={{ position: "top" }} />
               </div>
             )} style={{ width: "7rem" }} />
@@ -117,7 +143,7 @@ const LguTaxRates = () => {
         </TabPanel>
         <TabPanel header={k("rulesTab")}>
           <p className="muted">{k("rulesHelp")}</p>
-          <div className="pkg-toolbar"><Button label={k("addRule")} icon="pi pi-plus" onClick={() => setRule({ ...EMPTY_RULE })} /></div>
+          <div className="pkg-toolbar"><Button label={k("addRule")} icon="pi pi-plus" onClick={() => openRule({ ...EMPTY_RULE })} /></div>
           <DataTable value={rules} loading={loading} dataKey="code" size="small" stripedRows emptyMessage={k("noRule")} responsiveLayout="scroll">
             <Column field="code" header={k("code")} />
             <Column field="name" header={k("ruleName")} />
@@ -128,7 +154,7 @@ const LguTaxRates = () => {
             <Column header={t("packagedProducts.active")} body={active} />
             <Column body={(r) => (
               <div className="admin__actions">
-                <Button icon="pi pi-pencil" rounded text aria-label={t("common.edit")} onClick={() => setRule({ ...r, lines: r.lines || [], regimes: r.regimes || [], effectiveTo: r.effectiveTo || "", remarks: r.remarks || "", original: true })} tooltip={t("common.edit")} tooltipOptions={{ position: "top" }} />
+                <Button icon="pi pi-pencil" rounded text aria-label={t("common.edit")} onClick={() => openRule({ ...r, lines: r.lines || [], regimes: r.regimes || [], effectiveTo: r.effectiveTo || "", remarks: r.remarks || "", original: true })} tooltip={t("common.edit")} tooltipOptions={{ position: "top" }} />
                 {r.kind === "other" && <Button icon="pi pi-trash" rounded text severity="danger" aria-label={t("common.delete")} onClick={() => removeRule(r)} tooltip={t("common.delete")} tooltipOptions={{ position: "top" }} />}
               </div>
             )} style={{ width: "7rem" }} />
@@ -152,38 +178,38 @@ const LguTaxRates = () => {
         </TabPanel>
       </TabView>
 
-      <Dialog header={lgu?.id ? k("editLgu") : k("addLgu")} visible={Boolean(lgu)} onHide={() => setLgu(null)} style={{ width: "34rem" }} breakpoints={{ "640px": "95vw" }}
-        footer={<><Button label={t("common.cancel")} text onClick={() => setLgu(null)} /><Button label={t("common.save")} icon="pi pi-check" onClick={saveLgu} /></>}>
+      <Dialog header={lgu?.id ? k("editLgu") : k("addLgu")} visible={Boolean(lgu)} onHide={() => openLgu(null)} style={{ width: "34rem" }} breakpoints={{ "640px": "95vw" }}
+        footer={<><Button label={t("common.cancel")} text onClick={() => openLgu(null)} /><Button label={t("common.save")} icon="pi pi-check" onClick={saveLgu} /></>}>
         {lgu && (
           <div className="admin__grid">
-            <div className="admin__field"><label htmlFor="lgu-code">{k("code")}</label><InputText id="lgu-code" value={lgu.code} disabled={Boolean(lgu.id)} onChange={(e) => setLgu({ ...lgu, code: e.target.value.toUpperCase() })} /></div>
-            <div className="admin__field"><label htmlFor="lgu-name">{k("lguName")}</label><InputText id="lgu-name" value={lgu.name} onChange={(e) => setLgu({ ...lgu, name: e.target.value })} /></div>
+            <div className="admin__field"><label htmlFor="lgu-code">{k("code")} *</label><InputText id="lgu-code" value={lgu.code} maxLength={20} disabled={Boolean(lgu.id)} onChange={(e) => setLgu({ ...lgu, code: e.target.value.toUpperCase() })} /><FieldError error={errors.code} /></div>
+            <div className="admin__field"><label htmlFor="lgu-name">{k("lguName")} *</label><InputText id="lgu-name" value={lgu.name} onChange={(e) => setLgu({ ...lgu, name: e.target.value })} /><FieldError error={errors.name} /></div>
             <div className="admin__field"><label htmlFor="lgu-province">{k("province")}</label><InputText id="lgu-province" value={lgu.province || ""} onChange={(e) => setLgu({ ...lgu, province: e.target.value })} /></div>
-            <div className="admin__field"><label htmlFor="lgu-rate">{k("rate")}</label><InputNumber inputId="lgu-rate" value={lgu.rate} suffix="%" maxFractionDigits={4} min={0} max={100} onValueChange={(e) => setLgu({ ...lgu, rate: e.value })} /></div>
-            <div className="admin__field"><label htmlFor="lgu-from">{k("effectiveFrom")}</label><InputText id="lgu-from" type="date" value={lgu.effectiveFrom || ""} onChange={(e) => setLgu({ ...lgu, effectiveFrom: e.target.value })} /></div>
-            <div className="admin__field"><label htmlFor="lgu-to">{k("effectiveTo")}</label><InputText id="lgu-to" type="date" value={lgu.effectiveTo || ""} onChange={(e) => setLgu({ ...lgu, effectiveTo: e.target.value })} /></div>
+            <div className="admin__field"><label htmlFor="lgu-rate">{k("rate")} *</label><InputNumber inputId="lgu-rate" value={lgu.rate} suffix="%" maxFractionDigits={4} min={0} max={100} onValueChange={(e) => setLgu({ ...lgu, rate: e.value })} /><FieldError error={errors.rate} /></div>
+            <div className="admin__field"><label htmlFor="lgu-from">{k("effectiveFrom")} *</label><InputText id="lgu-from" type="date" value={lgu.effectiveFrom || ""} onChange={(e) => setLgu({ ...lgu, effectiveFrom: e.target.value })} /><FieldError error={errors.effectiveFrom} /></div>
+            <div className="admin__field"><label htmlFor="lgu-to">{k("effectiveTo")}</label><InputText id="lgu-to" type="date" value={lgu.effectiveTo || ""} onChange={(e) => setLgu({ ...lgu, effectiveTo: e.target.value })} /><FieldError error={errors.effectiveTo} /></div>
             <div className="admin__field"><label htmlFor="lgu-active">{t("packagedProducts.active")}</label><InputSwitch inputId="lgu-active" checked={Boolean(lgu.active)} onChange={(e) => setLgu({ ...lgu, active: e.value })} /></div>
           </div>
         )}
       </Dialog>
 
-      <Dialog header={rule?.original ? k("editRule") : k("addRule")} visible={Boolean(rule)} onHide={() => setRule(null)} style={{ width: "44rem" }} breakpoints={{ "760px": "95vw" }}
-        footer={<><Button label={t("common.cancel")} text onClick={() => setRule(null)} /><Button label={t("common.save")} icon="pi pi-check" onClick={saveRule} /></>}>
+      <Dialog header={rule?.original ? k("editRule") : k("addRule")} visible={Boolean(rule)} onHide={() => openRule(null)} style={{ width: "44rem" }} breakpoints={{ "760px": "95vw" }}
+        footer={<><Button label={t("common.cancel")} text onClick={() => openRule(null)} /><Button label={t("common.save")} icon="pi pi-check" onClick={saveRule} /></>}>
         {rule && (
           <div className="admin__grid">
-            <div className="admin__field"><label htmlFor="rule-code">{k("code")}</label><InputText id="rule-code" value={rule.code} disabled={rule.original} onChange={(e) => setRule({ ...rule, code: e.target.value.toUpperCase() })} /></div>
-            <div className="admin__field"><label htmlFor="rule-name">{k("ruleName")}</label><InputText id="rule-name" value={rule.name} onChange={(e) => setRule({ ...rule, name: e.target.value })} /></div>
+            <div className="admin__field"><label htmlFor="rule-code">{k("code")} *</label><InputText id="rule-code" value={rule.code} maxLength={20} disabled={rule.original} onChange={(e) => setRule({ ...rule, code: e.target.value.toUpperCase() })} /><FieldError error={errors.code} /></div>
+            <div className="admin__field"><label htmlFor="rule-name">{k("ruleName")} *</label><InputText id="rule-name" value={rule.name} onChange={(e) => setRule({ ...rule, name: e.target.value })} /><FieldError error={errors.name} /></div>
             <div className="admin__field"><label htmlFor="rule-kind">{k("kind")}</label><Dropdown inputId="rule-kind" value={rule.kind} options={opt(RULE_KINDS, "packagedProducts.kinds")} disabled={rule.original} onChange={(e) => setRule({ ...rule, kind: e.value })} /></div>
             <div className="admin__field"><label htmlFor="rule-method">{k("method")}</label><Dropdown inputId="rule-method" value={rule.method} options={opt(RULE_METHODS, "packagedProducts.methods")} onChange={(e) => setRule({ ...rule, method: e.value })} /></div>
             {rule.method === "percent" && (
-              <div className="admin__field"><label htmlFor="rule-rate">{k("rate")}</label><InputNumber inputId="rule-rate" value={rule.rate} suffix="%" maxFractionDigits={4} min={0} max={100} onValueChange={(e) => setRule({ ...rule, rate: e.value })} /></div>
+              <div className="admin__field"><label htmlFor="rule-rate">{k("rate")}</label><InputNumber inputId="rule-rate" value={rule.rate} suffix="%" maxFractionDigits={4} min={0} max={100} onValueChange={(e) => setRule({ ...rule, rate: e.value })} /><FieldError error={errors.rate} /></div>
             )}
             {rule.method !== "percent" && (
-              <div className="admin__field"><label htmlFor="rule-unit-amount">{rule.method === "flat" ? k("flatAmount") : k("unitAmount")}</label><InputNumber inputId="rule-unit-amount" value={rule.unitAmount} minFractionDigits={2} maxFractionDigits={2} min={0} onValueChange={(e) => setRule({ ...rule, unitAmount: e.value })} /></div>
+              <div className="admin__field"><label htmlFor="rule-unit-amount">{rule.method === "flat" ? k("flatAmount") : k("unitAmount")}</label><InputNumber inputId="rule-unit-amount" value={rule.unitAmount} minFractionDigits={2} maxFractionDigits={2} min={0} onValueChange={(e) => setRule({ ...rule, unitAmount: e.value })} /><FieldError error={errors.unitAmount} /></div>
             )}
             {rule.method === "per_unit" && (
               <>
-                <div className="admin__field"><label htmlFor="rule-unit-size">{k("unitSize")}</label><InputNumber inputId="rule-unit-size" value={rule.unitSize} minFractionDigits={2} maxFractionDigits={2} min={0} onValueChange={(e) => setRule({ ...rule, unitSize: e.value })} /></div>
+                <div className="admin__field"><label htmlFor="rule-unit-size">{k("unitSize")}</label><InputNumber inputId="rule-unit-size" value={rule.unitSize} minFractionDigits={2} maxFractionDigits={2} min={0} onValueChange={(e) => setRule({ ...rule, unitSize: e.value })} /><FieldError error={errors.unitSize} /></div>
                 <div className="admin__field"><label htmlFor="rule-fraction">{k("fractionRule")}</label><Dropdown inputId="rule-fraction" value={rule.fractionRule} options={opt(["round_up", "prorate"], "packagedProducts.fraction")} onChange={(e) => setRule({ ...rule, fractionRule: e.value })} /></div>
               </>
             )}
@@ -191,8 +217,8 @@ const LguTaxRates = () => {
             <div className="admin__field"><label htmlFor="rule-regimes">{k("regimes")}</label><MultiSelect inputId="rule-regimes" value={rule.regimes} options={opt(TAX_REGIMES, "packagedProducts.regimes")} placeholder={k("allRegimes")} onChange={(e) => setRule({ ...rule, regimes: e.value })} /></div>
             <div className="admin__field"><label htmlFor="rule-min">{k("minimumAmount")}</label><InputNumber inputId="rule-min" value={rule.minimumAmount} minFractionDigits={2} maxFractionDigits={2} min={0} onValueChange={(e) => setRule({ ...rule, minimumAmount: e.value })} /></div>
             <div className="admin__field"><label htmlFor="rule-sort">{k("sortOrder")}</label><InputNumber inputId="rule-sort" value={rule.sortOrder} min={0} onValueChange={(e) => setRule({ ...rule, sortOrder: e.value })} /></div>
-            <div className="admin__field"><label htmlFor="rule-from">{k("effectiveFrom")}</label><InputText id="rule-from" type="date" value={rule.effectiveFrom || ""} onChange={(e) => setRule({ ...rule, effectiveFrom: e.target.value })} /></div>
-            <div className="admin__field"><label htmlFor="rule-to">{k("effectiveTo")}</label><InputText id="rule-to" type="date" value={rule.effectiveTo || ""} onChange={(e) => setRule({ ...rule, effectiveTo: e.target.value })} /></div>
+            <div className="admin__field"><label htmlFor="rule-from">{k("effectiveFrom")} *</label><InputText id="rule-from" type="date" value={rule.effectiveFrom || ""} onChange={(e) => setRule({ ...rule, effectiveFrom: e.target.value })} /><FieldError error={errors.effectiveFrom} /></div>
+            <div className="admin__field"><label htmlFor="rule-to">{k("effectiveTo")}</label><InputText id="rule-to" type="date" value={rule.effectiveTo || ""} onChange={(e) => setRule({ ...rule, effectiveTo: e.target.value })} /><FieldError error={errors.effectiveTo} /></div>
             <div className="admin__field"><label htmlFor="rule-active">{t("packagedProducts.active")}</label><InputSwitch inputId="rule-active" checked={Boolean(rule.active)} onChange={(e) => setRule({ ...rule, active: e.value })} /></div>
           </div>
         )}
