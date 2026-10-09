@@ -30,18 +30,17 @@ const CoverageDeatails = ({ action, flow }) => {
     );
   }, []);
 
+  // Only a renewal opens on a policy; on a new quotation the route parameter is the prospect or quotation.
   useEffect(() => {
-    if (policyId) {
+    if (policyId && flow === "renewal") {
       dispatch(getpolicyDetailedMiddleware({ policyId }));
-      if (flow === "renewal") {
-        dispatch(
-          getPolicyRenewalCoverageMiddleware({
-            policyId,
-            page: 1,
-            limit: 20,
-          })
-        );
-      }
+      dispatch(
+        getPolicyRenewalCoverageMiddleware({
+          policyId,
+          page: 1,
+          limit: 20,
+        })
+      );
     }
   }, [dispatch, policyId, flow]);
 

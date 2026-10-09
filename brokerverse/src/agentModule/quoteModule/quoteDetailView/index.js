@@ -1239,8 +1239,9 @@ const QuoteDetailView = ({ action }) => {
             className="download_button"
             onClick={() => setModalVisible(true)}
           />
-          {quotationData?.quotationStatus === "CustomerAccepted" ||
-          quotationData?.quotationStatus === "Approved" ? (
+          {(quotationData?.quotationStatus === "CustomerAccepted" ||
+            quotationData?.quotationStatus === "Approved") &&
+          quotationData?.journey?.directPolicy !== "skip" ? (
             <Button
               onClick={handleclick}
               label={t("quoteDetailView.proceedToPolicy")}
