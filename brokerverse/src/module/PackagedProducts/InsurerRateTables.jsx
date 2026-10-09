@@ -16,6 +16,7 @@ import { formatDate } from "../../utility/dateFormat";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import { PageHeader } from "../Placement/shared";
 import { RATE_BASES, todayIso, usePackageOptions } from "./common";
+import DateField from "../../components/DateField";
 import "../Placement/index.scss";
 import "../Administration/index.scss";
 import "./index.scss";
@@ -115,8 +116,8 @@ const InsurerRateTables = () => {
             <div className="admin__field"><label htmlFor="rt-comm">{k("commissionPercent")}</label><InputNumber inputId="rt-comm" value={edit.commissionPercent} suffix="%" maxFractionDigits={2} min={0} max={100} placeholder={k("matrix")} onValueChange={(e) => set({ commissionPercent: e.value })} /></div>
             <div className="admin__field"><label htmlFor="rt-ded">{k("deductible")}</label><InputText id="rt-ded" value={edit.deductible} onChange={(e) => set({ deductible: e.target.value })} /></div>
             <div className="admin__field"><label htmlFor="rt-ded-amt">{k("deductibleAmount")}</label><InputNumber inputId="rt-ded-amt" value={edit.deductibleAmount} minFractionDigits={2} maxFractionDigits={2} min={0} onValueChange={(e) => set({ deductibleAmount: e.value })} /></div>
-            <div className="admin__field"><label htmlFor="rt-from">{k("effectiveFrom")}</label><InputText id="rt-from" type="date" value={edit.effectiveFrom || ""} onChange={(e) => set({ effectiveFrom: e.target.value })} /></div>
-            <div className="admin__field"><label htmlFor="rt-to">{k("effectiveTo")}</label><InputText id="rt-to" type="date" value={edit.effectiveTo || ""} onChange={(e) => set({ effectiveTo: e.target.value })} /></div>
+            <div className="admin__field"><label htmlFor="rt-from">{k("effectiveFrom")}</label><DateField id="rt-from" value={edit.effectiveFrom || ""} onChange={(e) => set({ effectiveFrom: e.target.value })} /></div>
+            <div className="admin__field"><label htmlFor="rt-to">{k("effectiveTo")}</label><DateField id="rt-to" value={edit.effectiveTo || ""} onChange={(e) => set({ effectiveTo: e.target.value })} /></div>
             <div className="admin__field"><label htmlFor="rt-active">{t("packagedProducts.active")}</label><InputSwitch inputId="rt-active" checked={Boolean(edit.active)} onChange={(e) => set({ active: e.value })} /></div>
             <div className="admin__field pkg-wide"><label htmlFor="rt-benefits">{k("benefits")}</label><Chips inputId="rt-benefits" value={edit.keyBenefits} onChange={(e) => set({ keyBenefits: e.value })} separator="," placeholder={k("benefitsHelp")} /></div>
           </div>

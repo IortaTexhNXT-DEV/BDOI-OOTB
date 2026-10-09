@@ -15,6 +15,7 @@ import documentTemplateService from "../../services/documentTemplateService";
 import S3FileUpload from "../S3FileUpload";
 import { formatDate as formatAppDate } from "../../utility/dateFormat";
 import { promptText } from "../../utility/dialogs";
+import DateField from "../DateField";
 
 const todayIso = () => new Date().toISOString().slice(0, 10);
 const EMPTY_FORM = { referenceNo: "", amount: null, paymentDate: todayIso(), proofKey: "", proofFileName: "", remarks: "" };
@@ -261,10 +262,8 @@ const PolicyPaymentCapture = ({ policyId, receivableId = null, onSummary, onPayL
                 </div>
                 <div className="col-12 md:col-6">
                   <label htmlFor="pay-date" className="block mb-2">Payment date *</label>
-                  <InputText
+                  <DateField
                     id="pay-date"
-                    type="date"
-                    className="w-full"
                     max={todayIso()}
                     value={form.paymentDate}
                     onChange={(e) => setForm({ ...form, paymentDate: e.target.value })}

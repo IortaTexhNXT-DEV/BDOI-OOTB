@@ -17,6 +17,7 @@ import ImportStatementDialog from "./ImportStatementDialog";
 import AdjustmentDialog from "./AdjustmentDialog";
 import StaleChequesDialog from "./StaleChequesDialog";
 import { hasPermission } from "../../utils/canOpen";
+import DateField from "../../components/DateField";
 
 const text = (s) => String(s || "").toLowerCase();
 
@@ -322,7 +323,7 @@ const Workspace = () => {
             </div>
             <div className="col-12 md:col-6">
               <label htmlFor="br-from">{t("bankReconciliation.reconcileFrom")}</label>
-              <InputText id="br-from" type="date" value={form.reconcileFrom || ""} onChange={(e) => setForm({ ...form, reconcileFrom: e.target.value })} className="w-full" />
+              <DateField id="br-from" value={form.reconcileFrom || ""} onChange={(e) => setForm({ ...form, reconcileFrom: e.target.value })} />
             </div>
             <div className="col-12 md:col-6 flex align-items-end"><span className="pe-muted">{t("bankReconciliation.reconcileFromHelp")}</span></div>
           </div>

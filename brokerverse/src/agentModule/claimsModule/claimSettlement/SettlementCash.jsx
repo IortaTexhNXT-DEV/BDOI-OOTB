@@ -13,6 +13,7 @@ import claimSettlementCashService from "../../../services/claimSettlementCashSer
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import { hasPermission } from "../../../utils/canOpen";
+import DateField from "../../../components/DateField";
 
 const PAYMENT_MODES = [
   { label: "Cheque", value: "check" },
@@ -120,7 +121,7 @@ const SettlementCash = ({ claimId }) => {
             {dialog.kind === "paid-to-claimant" && field(t("followUps.payee", "Payee"), <InputText className="w-full" value={dialog.payee} onChange={(e) => setDialog({ ...dialog, payee: e.target.value })} />)}
             {field(dialog.kind === "funds-received" ? t("followUps.adviceReference", "Remittance advice / reference") : t("followUps.voucherReference", "Voucher / cheque number"),
               <InputText className="w-full" value={dialog.reference} onChange={(e) => setDialog({ ...dialog, reference: e.target.value })} />)}
-            {field(t("followUps.date", "Date"), <InputText className="w-full" type="date" value={dialog.date} onChange={(e) => setDialog({ ...dialog, date: e.target.value })} />)}
+            {field(t("followUps.date", "Date"), <DateField value={dialog.date} onChange={(e) => setDialog({ ...dialog, date: e.target.value })} />)}
           </div>
         )}
       </Dialog>

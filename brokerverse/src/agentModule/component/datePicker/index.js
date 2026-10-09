@@ -1,7 +1,6 @@
 import { Calendar } from "primereact/calendar";
 import React, { useId, useState } from "react";
 import "./index.scss";
-import SvgCalender from "../../../assets/agentIcon/SvgCalender";
 import { calendarDateFormat } from "../../../utility/dateFormat";
 
 /**
@@ -26,10 +25,7 @@ const DatepickerField = ({ value, onChange, label, disabled, inputId, name, ...r
   };
 
   return (
-    <div style={{ position: "relative" }} className="datepicker__container">
-      <div className="icon__calender">
-        <SvgCalender />
-      </div>
+    <div className="datepicker__container">
       <Calendar
         {...calendarProps}
         value={value}
@@ -38,7 +34,6 @@ const DatepickerField = ({ value, onChange, label, disabled, inputId, name, ...r
         className="datepicker__field"
         onFocus={handleFocus}
         onBlur={handleBlur}
-        showIcon={false}
         dateFormat={calendarDateFormat()}
         inputId={fieldId}
         name={name}
