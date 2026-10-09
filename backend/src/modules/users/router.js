@@ -2,6 +2,9 @@ import bcrypt from 'bcryptjs';
 import { moduleRouter } from '../../lib/registry.js';
 import { ADMIN_ROLES, adminEquivalentRoles, isAdmin, loadUser, publicUser, requireAuth, requirePermission, revokeSessions } from '../../lib/auth.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
+import { askAccessApproval, changeApproval } from '../access-control/changes.js';
+import { proposeRoleAccess } from '../access-control/roleAccess.js';
+import { BASELINE } from '../access-control/catalogue.js';
 import { validate, z } from '../../lib/validate.js';
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
@@ -344,23 +347,40 @@ rolesRouter.define({
   },
 });
 rolesRouter.define({
-  method: 'PUT', path: '/:id', summary: 'Update a role and its permissions', screen: 'Master > User Management > Role > Edit', middleware: [...roleAdmin, validate(roleSchema.partial())],
+  method: 'PUT', path: '/:id', summary: 'Update a role and its permissions (with access.change_approval, a new permission list waits for approval as a change of the role\'s access)',
+  screen: 'Master > User Management > Role > Edit', middleware: [...roleAdmin, validate(roleSchema.partial())],
   request: { name: 'Branch Manager', permissions: ['read:leads'] }, response: { success: true },
   handler: async (req, res) => {
     const role = await one('SELECT * FROM roles WHERE id::text = $1 OR code = $1', [req.params.id]);
     if (!role) throw notFound('Role not found');
     await assertCanEditRole(req, role);
     const b = req.body;
-    await withTransaction(async (c) => {
+    // a change of access goes through the approval of another administrator (Role Permissions); Basic access stays
+    const review = !!b.permissions && await changeApproval();
+    const change = await withTransaction(async (c) => {
       await c.query('UPDATE roles SET name = COALESCE($2, name), description = COALESCE($3, description), status = COALESCE($4, status) WHERE id = $1', [role.id, b.name, b.description, b.status]);
+      if (review) {
+        const own = (await c.query('SELECT p.code FROM role_permissions rp JOIN permissions p ON p.id = rp.permission_id WHERE rp.role_id = $1', [role.id])).rows.map((r) => r.code);
+        const grant = b.permissions.filter((x) => !own.includes(x));
+        const revoke = own.filter((x) => !b.permissions.includes(x) && !BASELINE.includes(x));
+        if (!grant.length && !revoke.length) return null;
+        return (await proposeRoleAccess(c, role.code, { grant, revoke }, req.user, { reason: { code: null, text: 'Changed on the Role form' } })).change;
+      }
       if (b.permissions) {
         await setPerms(c, role.id, b.permissions);
         // Permissions travel in the access token: users of the role get new tokens (refreshed automatically).
         await c.query('UPDATE users SET token_version = token_version + 1 WHERE id IN (SELECT user_id FROM user_roles WHERE role_id = $1)', [role.id]);
       }
+      return null;
     });
-    await audit(req, { entity: 'role', entityId: role.id, action: 'update', before: role, after: b });
-    ok(res, { id: role.id, ...b }, 'Role updated');
+    const { permissions, ...saved } = b;
+    await audit(req, { entity: 'role', entityId: role.id, action: 'update', before: role, after: review ? saved : b });
+    if (change) {
+      await audit(req, { entity: 'accounting_config_change', entityId: change.id, action: 'request', after: change });
+      await askAccessApproval(change, req.user);
+      return ok(res, { id: role.id, ...saved, change }, `Role saved; the access change waits for approval (request ${change.ref})`);
+    }
+    return ok(res, { id: role.id, ...(review ? saved : { ...saved, permissions }) }, 'Role updated');
   },
 });
 rolesRouter.define({

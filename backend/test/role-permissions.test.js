@@ -1,8 +1,8 @@
 /**
  * Role Permissions (Master > Users and Access): the access catalogue in business words, the roles by department with
  * their own and included access, changes of a role's access through the approval of another administrator
- * (approve:access-control, never the requester), segregation-of-duties access rules, the export for audit, My Work, and
- * migrations 0391-0393 run twice.
+ * (approve:access-control, never the requester), segregation-of-duties access rules, the Role form's permission list
+ * as a change waiting for approval, the export for audit, My Work, and migrations 0391-0393 run twice.
  */
 import fs from 'node:fs';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
@@ -268,6 +268,21 @@ describe('segregation of duties on access', () => {
       'tis-ccd-pdu', 'tis-ccd-pdc', 'tis-ccd-bp', 'tis-ccd-recon', 'tis-it-admin', 'tis-general-manager']) {
       expect((await ctx.api('post', '/access-control/sod-check').send({ roles: [code] })).body.data.filter((s) => s.kind === 'access'), code).toEqual([]);
     }
+  });
+});
+
+describe('the Role form', () => {
+  it('sends a new permission list for approval while the approval is on, keeping Basic access', async () => {
+    const before = await own('tis-ccd-pdc');
+    const r = await as['ra.it']('put', '/roles/tis-ccd-pdc').send({ name: 'CCD-PDC / CCD-ADA', permissions: ['read:receipts', 'write:receipts'] });
+    expect(r.status, JSON.stringify(r.body)).toBe(200);
+    expect(r.body.message).toMatch(/waits for approval \(request CFG-\d+\)/);
+    expect(r.body.data.change).toMatchObject({ changeNote: 'Changed on the Role form', payload: { grant: [] } });
+    expect(r.body.data.change.payload.revoke).not.toContain('read:profile');
+    expect(await own('tis-ccd-pdc')).toEqual(before);
+    await as['ra.it']('post', `/access-control/changes/${r.body.data.change.id}/withdraw`);
+    // the name alone is saved at once
+    expect((await as['ra.it']('put', '/roles/tis-ccd-pdc').send({ name: 'CCD-PDC / CCD-ADA' })).body.message).toBe('Role updated');
   });
 });
 

@@ -13,6 +13,7 @@ import request from 'supertest';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { setup, loginAs, createUserDeskRole } from './helpers.js';
 import { pool, query } from '../src/db/pool.js';
+import { clearSettingsCache } from '../src/lib/settings.js';
 import { buildConfig, config, productionConfigProblems } from '../src/config.js';
 import { REDACT_PATHS, redactRequest, redactUrl } from '../src/lib/logger.js';
 import { ROUTES } from '../src/lib/registry.js';
@@ -277,7 +278,15 @@ describe('sessions', () => {
     expect(created.status).toBe(201);
     await makeUser('hd.role', ['hd-role']);
     expect((await bearer(tokens['hd.role'], 'get', '/leads')).status).toBe(200);
-    expect((await ctx.api('put', '/roles/hd-role').send({ permissions: ['read:clients'] })).status).toBe(200);
+    // applied at once: without the approval of access changes (test/role-permissions.test.js covers the approval)
+    await query("UPDATE app_settings SET value = 'false' WHERE key = 'access.change_approval'");
+    clearSettingsCache();
+    try {
+      expect((await ctx.api('put', '/roles/hd-role').send({ permissions: ['read:clients'] })).status).toBe(200);
+    } finally {
+      await query("UPDATE app_settings SET value = 'true' WHERE key = 'access.change_approval'");
+      clearSettingsCache();
+    }
     expect((await bearer(tokens['hd.role'], 'get', '/leads')).status).toBe(401);
   });
 
