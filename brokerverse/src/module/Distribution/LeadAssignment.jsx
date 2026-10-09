@@ -242,7 +242,7 @@ const LeadAssignment = () => {
     <Column key="owner" field="ownerName" header={t("distribution.la.owner", "Account executive")} />,
     <Column key="asg" header={t("distribution.la.assignment", "Assignment")} body={(r) => (<span><StatusTag status={r.assignmentStatus} />{r.queueReason ? <><br /><span className="pe-muted text-sm">{r.queueReason}</span></> : null}</span>)} />,
     ...(list === "queue" ? [<Column key="queued" header={t("distribution.la.queuedAt", "Queued")} body={(r) => dateTime(r.queuedAt)} />] : []),
-    <Column key="act" body={(r) => (
+    <Column key="act" style={{ width: "8.5rem" }} body={(r) => (
       <div className="dist-actions">
         <Button icon="pi pi-history" text size="small" tooltip={t("distribution.la.history", "Assignment history")} aria-label={t("distribution.la.history", "Assignment history")} onClick={() => openHistory(r)} />
         {write && list === "queue" ? <Button icon="pi pi-download" text size="small" tooltip={t("distribution.la.take", "Take")} aria-label={t("distribution.la.take", "Take")} onClick={() => take([r])} /> : null}
@@ -332,7 +332,7 @@ const LeadAssignment = () => {
                 <Column header={t("distribution.la.active", "Active")} body={(r) => (write
                   ? <InputSwitch checked={r.status === "active"} onChange={(e) => setStatus(r, e.value)} aria-label={t("distribution.la.active", "Active")} />
                   : <StatusTag status={r.status} />)} style={{ width: "6rem" }} />
-                {write ? <Column body={(r, { rowIndex }) => (
+                {write ? <Column style={{ width: "10.5rem" }} body={(r, { rowIndex }) => (
                   <div className="dist-actions">
                     <Button icon="pi pi-arrow-up" text size="small" disabled={rowIndex === 0} tooltip={t("distribution.la.moveUp", "Check earlier")} aria-label={t("distribution.la.moveUp", "Check earlier")} onClick={() => move(r, -1)} />
                     <Button icon="pi pi-arrow-down" text size="small" disabled={rowIndex === rules.length - 1} tooltip={t("distribution.la.moveDown", "Check later")} aria-label={t("distribution.la.moveDown", "Check later")} onClick={() => move(r, 1)} />

@@ -128,7 +128,7 @@ const ReassignDialog = ({ leads, mode = "reassign", onHide, onDone, onError }) =
             <Field label={`${t("distribution.la.to", "To account executive")} *`} full htmlFor="la-reassign-to"
               help={groups.length > 1 || assignees.some((a) => a.suggested) ? t("distribution.la.suggestedHelp", "The account executives of the assignment rule for these prospects come first") : null}>
               <Dropdown inputId="la-reassign-to" value={toUserId} options={groups} optionGroupLabel="label" optionGroupChildren="items" itemTemplate={assigneeItem}
-                filter filterBy="label,branchCode,designation" placeholder={t("distribution.la.chooseAssignee", "Choose the account executive")}
+                filter filterBy="label,branchCode,designation" scrollHeight="20rem" placeholder={t("distribution.la.chooseAssignee", "Choose the account executive")}
                 emptyMessage={t("distribution.la.noAssignee", "No active user can own prospects")} onChange={(e) => setToUserId(e.value)} />
             </Field>
           )}
