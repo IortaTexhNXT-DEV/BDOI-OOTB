@@ -242,7 +242,7 @@ Done once in **Settings** of `IortaTexhNXT-DEV/BDOI-OOTB`; none of it is in the 
 |---|---|
 | Comparison report, `backend/scripts/compare-environments.js` (configuration mirrored check) | After every promotion of configuration: UAT against Pre-Prod before the rehearsal, Pre-Prod (or UAT) against Production before the go/no-go and after each release. Run it from a machine that can reach both APIs; keep its output with the release record. A difference that is not in the approved change list stops the promotion |
 | Data masking, `backend/scripts/mask-data.js` | Whenever a database is copied from Production to a lower environment: the temporary Pre-Prod when the rehearsal team may not see personal data, SIT or training copies. Run on the restored copy **before** the environment is opened to users and before `DEPLOY_ENABLED` is set; never on Production |
-| Go-live workbench (configuration workbook, Master > Go-Live Data Load) | Moves configuration between environments; its validation of a "Current data" workbook is the on-screen comparison |
+| Go-live workbench (configuration workbook, API /api/data-load) | Moves configuration between environments; its validation of a "Current data" workbook is the on-screen comparison |
 
 Both scripts are owned by their own changes; this pipeline only calls for them at the points above. Neither runs
 automatically in `deploy.yml`, because both need decisions (which pair of environments, which data may be seen).

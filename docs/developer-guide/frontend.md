@@ -53,7 +53,7 @@ Three layers decide what a user can do. They must agree.
 When a role must see a new screen: add the menu entry, add it to the role in `roleMenuPermissions`,
 and make sure the backend role has the permission the screen's API calls need. Master is organised in
 sections (Organization, Insurance Management, Location, Employee Management, User Management, Finance,
-System Configuration, Data Privacy, Go-Live and Data); a grant such as `"Finance > Bank File Layouts"`
+System Configuration); a grant such as `"Finance > Bank File Layouts"`
 opens one item of a section.
 
 4. **Help** (`components/HelpPanel/helpRoutes.js`). Every screen maps its address prefix to a heading

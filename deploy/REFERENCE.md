@@ -70,8 +70,8 @@ again, or the demo data is seeded back.
 
 A deployment made for a client whose brand pack ships with the product (`backend/assets/brand-packs/<id>/`) names it
 in `BRAND_PACK`, so the environment opens in the client's branding without a manual step. After the migrations and
-the seed, the API enables the pack once, exactly as Master > System Settings > Theme and Branding > Brand packs does:
-the enablement is recorded against the user `system` with the trademark acknowledgement and the note "Given by the
+the seed, the API enables the pack once, as the bundled pack enablement of the API (POST /api/branding/packs/bundled/:id/enable)
+does: the enablement is recorded against the user `system` with the trademark acknowledgement and the note "Given by the
 deployment configuration (BRAND_PACK)", and audited (entity `branding`, action `enable-pack`). It logs one line.
 
 | Variable | Default | Meaning |

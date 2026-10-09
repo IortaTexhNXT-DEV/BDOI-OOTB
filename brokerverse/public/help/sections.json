@@ -1,6 +1,6 @@
 {
  "title": "BrokerVerse User Manual",
- "version": "1.2.4",
+ "version": "1.2.5",
  "date": "09 October 2026",
  "sections": [
   {
@@ -316,57 +316,21 @@
    "chapter": "System Administrator"
   },
   {
-   "id": "theme-and-branding",
-   "title": "Theme and Branding",
+   "id": "e-mail-layout",
+   "title": "E-mail Layout",
    "level": 2,
    "chapter": "System Administrator"
   },
   {
-   "id": "theme-presets-layout-and-colours",
-   "title": "Theme: presets, layout and colours",
-   "level": 3,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "contrast-check",
-   "title": "Contrast check",
-   "level": 3,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "sign-in-page",
-   "title": "Sign-in page",
-   "level": 3,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "documents-and-reports",
-   "title": "Documents and reports",
-   "level": 3,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "e-mail",
-   "title": "E-mail",
-   "level": 3,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "name-and-images",
-   "title": "Name and images",
-   "level": 3,
+   "id": "documents-and-reports-layout",
+   "title": "Documents and Reports Layout",
+   "level": 2,
    "chapter": "System Administrator"
   },
   {
    "id": "document-signatures",
-   "title": "Document signatures",
-   "level": 3,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "brand-packs",
-   "title": "Brand packs",
-   "level": 3,
+   "title": "Document Signatures",
+   "level": 2,
    "chapter": "System Administrator"
   },
   {
@@ -424,8 +388,8 @@
    "chapter": "System Administrator"
   },
   {
-   "id": "data-privacy",
-   "title": "Data privacy",
+   "id": "personal-identifiers",
+   "title": "Personal identifiers",
    "level": 2,
    "chapter": "System Administrator"
   },
@@ -456,36 +420,6 @@
   {
    "id": "the-two-workbooks",
    "title": "The two workbooks",
-   "level": 2,
-   "chapter": "Go-Live Data Load"
-  },
-  {
-   "id": "download-the-template",
-   "title": "Download the template",
-   "level": 2,
-   "chapter": "Go-Live Data Load"
-  },
-  {
-   "id": "upload-and-validate",
-   "title": "Upload and validate",
-   "level": 2,
-   "chapter": "Go-Live Data Load"
-  },
-  {
-   "id": "correct-the-errors",
-   "title": "Correct the errors",
-   "level": 2,
-   "chapter": "Go-Live Data Load"
-  },
-  {
-   "id": "load",
-   "title": "Load",
-   "level": 2,
-   "chapter": "Go-Live Data Load"
-  },
-  {
-   "id": "history",
-   "title": "History",
    "level": 2,
    "chapter": "Go-Live Data Load"
   },

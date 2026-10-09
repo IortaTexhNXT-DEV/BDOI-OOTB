@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1218 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1205 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -4970,7 +4970,7 @@
       "name": "Audit Trail",
       "item": [
         {
-          "name": "History of one record as business events, newest first (sort=asc for oldest first): who (display name and roles), when (date and time in general.timezone, general.date_format), from where (screen / API / system job), the event and its changed fields as label, old value, new value (formatted; secrets never shown; ID numbers masked without read:privacy). :id is the id or the record number",
+          "name": "History of one record as business events, newest first (sort=asc for oldest first): who (display name and roles), when (date and time in general.timezone, general.date_format), from where (screen / API / system job), the event and its changed fields as label, old value, new value (formatted; secrets never shown; ID numbers masked without view:pii). :id is the id or the record number",
           "request": {
             "method": "GET",
             "header": [],
@@ -5004,7 +5004,7 @@
                 }
               ]
             },
-            "description": "History of one record as business events, newest first (sort=asc for oldest first): who (display name and roles), when (date and time in general.timezone, general.date_format), from where (screen / API / system job), the event and its changed fields as label, old value, new value (formatted; secrets never shown; ID numbers masked without read:privacy). :id is the id or the record number\n\nFront-end touchpoint: Detail screens > History (policy, quotation, claim, client, endorsement, receipt, master records)\n\nAccess: Any authenticated user"
+            "description": "History of one record as business events, newest first (sort=asc for oldest first): who (display name and roles), when (date and time in general.timezone, general.date_format), from where (screen / API / system job), the event and its changed fields as label, old value, new value (formatted; secrets never shown; ID numbers masked without view:pii). :id is the id or the record number\n\nFront-end touchpoint: Detail screens > History (policy, quotation, claim, client, endorsement, receipt, master records)\n\nAccess: Any authenticated user"
           },
           "response": [
             {
@@ -5042,7 +5042,7 @@
                     }
                   ]
                 },
-                "description": "History of one record as business events, newest first (sort=asc for oldest first): who (display name and roles), when (date and time in general.timezone, general.date_format), from where (screen / API / system job), the event and its changed fields as label, old value, new value (formatted; secrets never shown; ID numbers masked without read:privacy). :id is the id or the record number\n\nFront-end touchpoint: Detail screens > History (policy, quotation, claim, client, endorsement, receipt, master records)\n\nAccess: Any authenticated user"
+                "description": "History of one record as business events, newest first (sort=asc for oldest first): who (display name and roles), when (date and time in general.timezone, general.date_format), from where (screen / API / system job), the event and its changed fields as label, old value, new value (formatted; secrets never shown; ID numbers masked without view:pii). :id is the id or the record number\n\nFront-end touchpoint: Detail screens > History (policy, quotation, claim, client, endorsement, receipt, master records)\n\nAccess: Any authenticated user"
               },
               "status": "OK",
               "code": 200,
@@ -13103,7 +13103,7 @@
                 }
               ]
             },
-            "description": "Export the brand pack of this environment (theme incl. layout, sign-in page, documents and e-mail; application name; logo, favicon, sign-in picture, print logo): format=zip (default) or json\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Export brand pack\n\nAccess: read:settings, write:settings"
+            "description": "Export the brand pack of this environment (theme incl. layout, sign-in page, documents and e-mail; application name; logo, favicon, sign-in picture, print logo): format=zip (default) or json\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Export\n\nAccess: read:settings, write:settings"
           },
           "response": [
             {
@@ -13127,7 +13127,7 @@
                     }
                   ]
                 },
-                "description": "Export the brand pack of this environment (theme incl. layout, sign-in page, documents and e-mail; application name; logo, favicon, sign-in picture, print logo): format=zip (default) or json\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Export brand pack\n\nAccess: read:settings, write:settings"
+                "description": "Export the brand pack of this environment (theme incl. layout, sign-in page, documents and e-mail; application name; logo, favicon, sign-in picture, print logo): format=zip (default) or json\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Export\n\nAccess: read:settings, write:settings"
               },
               "status": "OK",
               "code": 200,
@@ -13173,7 +13173,7 @@
                 }
               ]
             },
-            "description": "Import a brand pack (multipart \"file\": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Import brand pack\n\nAccess: write:settings",
+            "description": "Import a brand pack (multipart \"file\": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Import\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"file\": \"(binary .zip or .json)\"\n}",
@@ -13215,7 +13215,7 @@
                     }
                   ]
                 },
-                "description": "Import a brand pack (multipart \"file\": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Import brand pack\n\nAccess: write:settings",
+                "description": "Import a brand pack (multipart \"file\": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Import\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"file\": \"(binary .zip or .json)\"\n}",
@@ -13256,7 +13256,7 @@
                 "bundled"
               ]
             },
-            "description": "Brand packs shipped with the product (backend/assets/brand-packs): manifest (name, description, trademark owner, the contract covering the marks, version), the theme, a colour preview and the status in this environment (enabled, with who and when, or available). None is enabled by default\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Brand packs > Bundled packs\n\nAccess: read:settings, write:settings"
+            "description": "Brand packs shipped with the product (backend/assets/brand-packs): manifest (name, description, trademark owner, the contract covering the marks, version), the theme, a colour preview and the status in this environment (enabled, with who and when, or available). None is enabled by default\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Bundled packs\n\nAccess: read:settings, write:settings"
           },
           "response": [
             {
@@ -13275,7 +13275,7 @@
                     "bundled"
                   ]
                 },
-                "description": "Brand packs shipped with the product (backend/assets/brand-packs): manifest (name, description, trademark owner, the contract covering the marks, version), the theme, a colour preview and the status in this environment (enabled, with who and when, or available). None is enabled by default\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Brand packs > Bundled packs\n\nAccess: read:settings, write:settings"
+                "description": "Brand packs shipped with the product (backend/assets/brand-packs): manifest (name, description, trademark owner, the contract covering the marks, version), the theme, a colour preview and the status in this environment (enabled, with who and when, or available). None is enabled by default\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Bundled packs\n\nAccess: read:settings, write:settings"
               },
               "status": "OK",
               "code": 200,
@@ -13316,7 +13316,7 @@
                 }
               ]
             },
-            "description": "Check a bundled brand pack without applying it (dry run): the same checks as an import (theme rules, WCAG AA contrast, image types), the resolved theme and contrast warnings\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Brand packs > Bundled packs > Check\n\nAccess: read:settings, write:settings"
+            "description": "Check a bundled brand pack without applying it (dry run): the same checks as an import (theme rules, WCAG AA contrast, image types), the resolved theme and contrast warnings\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Bundled packs > Check\n\nAccess: read:settings, write:settings"
           },
           "response": [
             {
@@ -13344,7 +13344,7 @@
                     }
                   ]
                 },
-                "description": "Check a bundled brand pack without applying it (dry run): the same checks as an import (theme rules, WCAG AA contrast, image types), the resolved theme and contrast warnings\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Brand packs > Bundled packs > Check\n\nAccess: read:settings, write:settings"
+                "description": "Check a bundled brand pack without applying it (dry run): the same checks as an import (theme rules, WCAG AA contrast, image types), the resolved theme and contrast warnings\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Bundled packs > Check\n\nAccess: read:settings, write:settings"
               },
               "status": "OK",
               "code": 200,
@@ -13390,7 +13390,7 @@
                 }
               ]
             },
-            "description": "Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Brand packs > Bundled packs > Enable\n\nAccess: write:settings",
+            "description": "Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Bundled packs > Enable\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"acknowledgedPermission\": true,\n  \"applyDocumentLogo\": true,\n  \"applySystemName\": true\n}",
@@ -13432,7 +13432,7 @@
                     }
                   ]
                 },
-                "description": "Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Brand packs > Bundled packs > Enable\n\nAccess: write:settings",
+                "description": "Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Bundled packs > Enable\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"acknowledgedPermission\": true,\n  \"applyDocumentLogo\": true,\n  \"applySystemName\": true\n}",
@@ -13473,7 +13473,7 @@
                 "reset-default"
               ]
             },
-            "description": "Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Brand packs > Back to default\n\nAccess: write:settings"
+            "description": "Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Back to default\n\nAccess: write:settings"
           },
           "response": [
             {
@@ -13492,7 +13492,7 @@
                     "reset-default"
                   ]
                 },
-                "description": "Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Brand packs > Back to default\n\nAccess: write:settings"
+                "description": "Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Back to default\n\nAccess: write:settings"
               },
               "status": "OK",
               "code": 200,
@@ -13528,7 +13528,7 @@
                 "preview-document"
               ]
             },
-            "description": "Sample document (PDF) printed with a theme that is not saved yet (body: { theme })\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Sample document\n\nAccess: read:settings, write:settings",
+            "description": "Sample document (PDF) printed with a theme that is not saved yet (body: { theme })\n\nFront-end touchpoint: Master > System Configuration > Documents and Reports Layout > Sample document\n\nAccess: read:settings, write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"theme\": {\n    \"preset\": \"iorta-technxt\",\n    \"name\": \"iorta TechNXT (default)\",\n    \"colors\": {\n      \"primary\": \"#0072d8\",\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"tableHeaderBg\": \"#004ea8\",\n      \"tableHeaderText\": \"#ffffff\"\n    },\n    \"layout\": {\n      \"headerStyle\": \"light\",\n      \"sidebarStyle\": \"light\",\n      \"density\": \"comfortable\",\n      \"tableHeaderStyle\": \"solid\"\n    },\n    \"font\": \"nunito\",\n    \"radius\": {\n      \"sm\": 8,\n      \"md\": 12,\n      \"lg\": 16,\n      \"button\": 8\n    },\n    \"logo\": {\n      \"appHeight\": 36,\n      \"loginHeight\": 56,\n      \"documentHeight\": 46\n    },\n    \"login\": {\n      \"panel\": \"library\",\n      \"library\": \"philippines\",\n      \"panelImageUrl\": \"\",\n      \"focalX\": 50,\n      \"focalY\": 50,\n      \"overlay\": 0,\n      \"showOnMobile\": false,\n      \"headline\": \"\",\n      \"tagline\": \"\"\n    },\n    \"documents\": {\n      \"accentColor\": \"\",\n      \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n    },\n    \"email\": {\n      \"enabled\": true,\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"accentColor\": \"#0072d8\",\n      \"showLogo\": true,\n      \"footerText\": \"{{companyName}} | {{address}}\"\n    }\n  }\n}",
@@ -13560,7 +13560,7 @@
                     "preview-document"
                   ]
                 },
-                "description": "Sample document (PDF) printed with a theme that is not saved yet (body: { theme })\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Sample document\n\nAccess: read:settings, write:settings",
+                "description": "Sample document (PDF) printed with a theme that is not saved yet (body: { theme })\n\nFront-end touchpoint: Master > System Configuration > Documents and Reports Layout > Sample document\n\nAccess: read:settings, write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"theme\": {\n    \"preset\": \"iorta-technxt\",\n    \"name\": \"iorta TechNXT (default)\",\n    \"colors\": {\n      \"primary\": \"#0072d8\",\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"tableHeaderBg\": \"#004ea8\",\n      \"tableHeaderText\": \"#ffffff\"\n    },\n    \"layout\": {\n      \"headerStyle\": \"light\",\n      \"sidebarStyle\": \"light\",\n      \"density\": \"comfortable\",\n      \"tableHeaderStyle\": \"solid\"\n    },\n    \"font\": \"nunito\",\n    \"radius\": {\n      \"sm\": 8,\n      \"md\": 12,\n      \"lg\": 16,\n      \"button\": 8\n    },\n    \"logo\": {\n      \"appHeight\": 36,\n      \"loginHeight\": 56,\n      \"documentHeight\": 46\n    },\n    \"login\": {\n      \"panel\": \"library\",\n      \"library\": \"philippines\",\n      \"panelImageUrl\": \"\",\n      \"focalX\": 50,\n      \"focalY\": 50,\n      \"overlay\": 0,\n      \"showOnMobile\": false,\n      \"headline\": \"\",\n      \"tagline\": \"\"\n    },\n    \"documents\": {\n      \"accentColor\": \"\",\n      \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n    },\n    \"email\": {\n      \"enabled\": true,\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"accentColor\": \"#0072d8\",\n      \"showLogo\": true,\n      \"footerText\": \"{{companyName}} | {{address}}\"\n    }\n  }\n}",
@@ -13605,7 +13605,7 @@
                 "preview-email"
               ]
             },
-            "description": "Sample e-mail (HTML) in the e-mail layout of a theme that is not saved yet (body: { theme })\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > E-mail\n\nAccess: read:settings, write:settings",
+            "description": "Sample e-mail (HTML) in the e-mail layout of a theme that is not saved yet (body: { theme })\n\nFront-end touchpoint: Master > System Configuration > E-mail Layout > Show a sample e-mail\n\nAccess: read:settings, write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"theme\": {\n    \"preset\": \"iorta-technxt\",\n    \"name\": \"iorta TechNXT (default)\",\n    \"colors\": {\n      \"primary\": \"#0072d8\",\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"tableHeaderBg\": \"#004ea8\",\n      \"tableHeaderText\": \"#ffffff\"\n    },\n    \"layout\": {\n      \"headerStyle\": \"light\",\n      \"sidebarStyle\": \"light\",\n      \"density\": \"comfortable\",\n      \"tableHeaderStyle\": \"solid\"\n    },\n    \"font\": \"nunito\",\n    \"radius\": {\n      \"sm\": 8,\n      \"md\": 12,\n      \"lg\": 16,\n      \"button\": 8\n    },\n    \"logo\": {\n      \"appHeight\": 36,\n      \"loginHeight\": 56,\n      \"documentHeight\": 46\n    },\n    \"login\": {\n      \"panel\": \"library\",\n      \"library\": \"philippines\",\n      \"panelImageUrl\": \"\",\n      \"focalX\": 50,\n      \"focalY\": 50,\n      \"overlay\": 0,\n      \"showOnMobile\": false,\n      \"headline\": \"\",\n      \"tagline\": \"\"\n    },\n    \"documents\": {\n      \"accentColor\": \"\",\n      \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n    },\n    \"email\": {\n      \"enabled\": true,\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"accentColor\": \"#0072d8\",\n      \"showLogo\": true,\n      \"footerText\": \"{{companyName}} | {{address}}\"\n    }\n  }\n}",
@@ -13637,7 +13637,7 @@
                     "preview-email"
                   ]
                 },
-                "description": "Sample e-mail (HTML) in the e-mail layout of a theme that is not saved yet (body: { theme })\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > E-mail\n\nAccess: read:settings, write:settings",
+                "description": "Sample e-mail (HTML) in the e-mail layout of a theme that is not saved yet (body: { theme })\n\nFront-end touchpoint: Master > System Configuration > E-mail Layout > Show a sample e-mail\n\nAccess: read:settings, write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"theme\": {\n    \"preset\": \"iorta-technxt\",\n    \"name\": \"iorta TechNXT (default)\",\n    \"colors\": {\n      \"primary\": \"#0072d8\",\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"tableHeaderBg\": \"#004ea8\",\n      \"tableHeaderText\": \"#ffffff\"\n    },\n    \"layout\": {\n      \"headerStyle\": \"light\",\n      \"sidebarStyle\": \"light\",\n      \"density\": \"comfortable\",\n      \"tableHeaderStyle\": \"solid\"\n    },\n    \"font\": \"nunito\",\n    \"radius\": {\n      \"sm\": 8,\n      \"md\": 12,\n      \"lg\": 16,\n      \"button\": 8\n    },\n    \"logo\": {\n      \"appHeight\": 36,\n      \"loginHeight\": 56,\n      \"documentHeight\": 46\n    },\n    \"login\": {\n      \"panel\": \"library\",\n      \"library\": \"philippines\",\n      \"panelImageUrl\": \"\",\n      \"focalX\": 50,\n      \"focalY\": 50,\n      \"overlay\": 0,\n      \"showOnMobile\": false,\n      \"headline\": \"\",\n      \"tagline\": \"\"\n    },\n    \"documents\": {\n      \"accentColor\": \"\",\n      \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n    },\n    \"email\": {\n      \"enabled\": true,\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"accentColor\": \"#0072d8\",\n      \"showLogo\": true,\n      \"footerText\": \"{{companyName}} | {{address}}\"\n    }\n  }\n}",
@@ -13677,7 +13677,7 @@
                 "theme"
               ]
             },
-            "description": "Theme editor: the theme in force, presets, fonts, sign-in picture library, upload rules, contrast checks, application name and images\n\nFront-end touchpoint: Master > System Settings > Theme and Branding\n\nAccess: read:settings, write:settings"
+            "description": "Theme editor: the theme in force, presets, fonts, sign-in picture library, upload rules, contrast checks, application name and images\n\nFront-end touchpoint: Master > System Configuration > E-mail Layout / Documents and Reports Layout\n\nAccess: read:settings, write:settings"
           },
           "response": [
             {
@@ -13695,7 +13695,7 @@
                     "theme"
                   ]
                 },
-                "description": "Theme editor: the theme in force, presets, fonts, sign-in picture library, upload rules, contrast checks, application name and images\n\nFront-end touchpoint: Master > System Settings > Theme and Branding\n\nAccess: read:settings, write:settings"
+                "description": "Theme editor: the theme in force, presets, fonts, sign-in picture library, upload rules, contrast checks, application name and images\n\nFront-end touchpoint: Master > System Configuration > E-mail Layout / Documents and Reports Layout\n\nAccess: read:settings, write:settings"
               },
               "status": "OK",
               "code": 200,
@@ -13731,7 +13731,7 @@
                 "theme"
               ]
             },
-            "description": "Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA\n\nFront-end touchpoint: Master > System Settings > Theme and Branding\n\nAccess: write:settings",
+            "description": "Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA\n\nFront-end touchpoint: Master > System Configuration > E-mail Layout / Documents and Reports Layout\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"theme\": {\n    \"preset\": \"iorta-technxt\",\n    \"name\": \"iorta TechNXT (default)\",\n    \"colors\": {\n      \"primary\": \"#0072d8\",\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"tableHeaderBg\": \"#004ea8\",\n      \"tableHeaderText\": \"#ffffff\"\n    },\n    \"layout\": {\n      \"headerStyle\": \"light\",\n      \"sidebarStyle\": \"light\",\n      \"density\": \"comfortable\",\n      \"tableHeaderStyle\": \"solid\"\n    },\n    \"font\": \"nunito\",\n    \"radius\": {\n      \"sm\": 8,\n      \"md\": 12,\n      \"lg\": 16,\n      \"button\": 8\n    },\n    \"logo\": {\n      \"appHeight\": 36,\n      \"loginHeight\": 56,\n      \"documentHeight\": 46\n    },\n    \"login\": {\n      \"panel\": \"library\",\n      \"library\": \"philippines\",\n      \"panelImageUrl\": \"\",\n      \"focalX\": 50,\n      \"focalY\": 50,\n      \"overlay\": 0,\n      \"showOnMobile\": false,\n      \"headline\": \"\",\n      \"tagline\": \"\"\n    },\n    \"documents\": {\n      \"accentColor\": \"\",\n      \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n    },\n    \"email\": {\n      \"enabled\": true,\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"accentColor\": \"#0072d8\",\n      \"showLogo\": true,\n      \"footerText\": \"{{companyName}} | {{address}}\"\n    }\n  },\n  \"systemName\": \"BrokerVerse\"\n}",
@@ -13763,7 +13763,7 @@
                     "theme"
                   ]
                 },
-                "description": "Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA\n\nFront-end touchpoint: Master > System Settings > Theme and Branding\n\nAccess: write:settings",
+                "description": "Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA\n\nFront-end touchpoint: Master > System Configuration > E-mail Layout / Documents and Reports Layout\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"theme\": {\n    \"preset\": \"iorta-technxt\",\n    \"name\": \"iorta TechNXT (default)\",\n    \"colors\": {\n      \"primary\": \"#0072d8\",\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"tableHeaderBg\": \"#004ea8\",\n      \"tableHeaderText\": \"#ffffff\"\n    },\n    \"layout\": {\n      \"headerStyle\": \"light\",\n      \"sidebarStyle\": \"light\",\n      \"density\": \"comfortable\",\n      \"tableHeaderStyle\": \"solid\"\n    },\n    \"font\": \"nunito\",\n    \"radius\": {\n      \"sm\": 8,\n      \"md\": 12,\n      \"lg\": 16,\n      \"button\": 8\n    },\n    \"logo\": {\n      \"appHeight\": 36,\n      \"loginHeight\": 56,\n      \"documentHeight\": 46\n    },\n    \"login\": {\n      \"panel\": \"library\",\n      \"library\": \"philippines\",\n      \"panelImageUrl\": \"\",\n      \"focalX\": 50,\n      \"focalY\": 50,\n      \"overlay\": 0,\n      \"showOnMobile\": false,\n      \"headline\": \"\",\n      \"tagline\": \"\"\n    },\n    \"documents\": {\n      \"accentColor\": \"\",\n      \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n    },\n    \"email\": {\n      \"enabled\": true,\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"accentColor\": \"#0072d8\",\n      \"showLogo\": true,\n      \"footerText\": \"{{companyName}} | {{address}}\"\n    }\n  },\n  \"systemName\": \"BrokerVerse\"\n}",
@@ -13809,7 +13809,7 @@
                 "validate"
               ]
             },
-            "description": "Check a theme without saving it: resolved theme, errors (refused: AA failures on buttons, header, table header) and warnings\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Live preview\n\nAccess: read:settings, write:settings",
+            "description": "Check a theme without saving it: resolved theme, errors (refused: AA failures on buttons, header, table header) and warnings\n\nFront-end touchpoint: Master > System Configuration > E-mail Layout / Documents and Reports Layout\n\nAccess: read:settings, write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"theme\": {\n    \"preset\": \"iorta-technxt\",\n    \"name\": \"iorta TechNXT (default)\",\n    \"colors\": {\n      \"primary\": \"#0072d8\",\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"tableHeaderBg\": \"#004ea8\",\n      \"tableHeaderText\": \"#ffffff\"\n    },\n    \"layout\": {\n      \"headerStyle\": \"light\",\n      \"sidebarStyle\": \"light\",\n      \"density\": \"comfortable\",\n      \"tableHeaderStyle\": \"solid\"\n    },\n    \"font\": \"nunito\",\n    \"radius\": {\n      \"sm\": 8,\n      \"md\": 12,\n      \"lg\": 16,\n      \"button\": 8\n    },\n    \"logo\": {\n      \"appHeight\": 36,\n      \"loginHeight\": 56,\n      \"documentHeight\": 46\n    },\n    \"login\": {\n      \"panel\": \"library\",\n      \"library\": \"philippines\",\n      \"panelImageUrl\": \"\",\n      \"focalX\": 50,\n      \"focalY\": 50,\n      \"overlay\": 0,\n      \"showOnMobile\": false,\n      \"headline\": \"\",\n      \"tagline\": \"\"\n    },\n    \"documents\": {\n      \"accentColor\": \"\",\n      \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n    },\n    \"email\": {\n      \"enabled\": true,\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"accentColor\": \"#0072d8\",\n      \"showLogo\": true,\n      \"footerText\": \"{{companyName}} | {{address}}\"\n    }\n  }\n}",
@@ -13842,7 +13842,7 @@
                     "validate"
                   ]
                 },
-                "description": "Check a theme without saving it: resolved theme, errors (refused: AA failures on buttons, header, table header) and warnings\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Live preview\n\nAccess: read:settings, write:settings",
+                "description": "Check a theme without saving it: resolved theme, errors (refused: AA failures on buttons, header, table header) and warnings\n\nFront-end touchpoint: Master > System Configuration > E-mail Layout / Documents and Reports Layout\n\nAccess: read:settings, write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"theme\": {\n    \"preset\": \"iorta-technxt\",\n    \"name\": \"iorta TechNXT (default)\",\n    \"colors\": {\n      \"primary\": \"#0072d8\",\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"tableHeaderBg\": \"#004ea8\",\n      \"tableHeaderText\": \"#ffffff\"\n    },\n    \"layout\": {\n      \"headerStyle\": \"light\",\n      \"sidebarStyle\": \"light\",\n      \"density\": \"comfortable\",\n      \"tableHeaderStyle\": \"solid\"\n    },\n    \"font\": \"nunito\",\n    \"radius\": {\n      \"sm\": 8,\n      \"md\": 12,\n      \"lg\": 16,\n      \"button\": 8\n    },\n    \"logo\": {\n      \"appHeight\": 36,\n      \"loginHeight\": 56,\n      \"documentHeight\": 46\n    },\n    \"login\": {\n      \"panel\": \"library\",\n      \"library\": \"philippines\",\n      \"panelImageUrl\": \"\",\n      \"focalX\": 50,\n      \"focalY\": 50,\n      \"overlay\": 0,\n      \"showOnMobile\": false,\n      \"headline\": \"\",\n      \"tagline\": \"\"\n    },\n    \"documents\": {\n      \"accentColor\": \"\",\n      \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n    },\n    \"email\": {\n      \"enabled\": true,\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"accentColor\": \"#0072d8\",\n      \"showLogo\": true,\n      \"footerText\": \"{{companyName}} | {{address}}\"\n    }\n  }\n}",
@@ -13895,7 +13895,7 @@
                 }
               ]
             },
-            "description": "Upload a branding image (multipart \"file\"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Upload\n\nAccess: write:settings",
+            "description": "Upload a branding image (multipart \"file\"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Upload\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"file\": \"(binary)\"\n}",
@@ -13935,7 +13935,7 @@
                     }
                   ]
                 },
-                "description": "Upload a branding image (multipart \"file\"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Upload\n\nAccess: write:settings",
+                "description": "Upload a branding image (multipart \"file\"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Upload\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"file\": \"(binary)\"\n}",
@@ -13983,7 +13983,7 @@
                 }
               ]
             },
-            "description": "Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library)\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Reset image\n\nAccess: write:settings"
+            "description": "Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library)\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Reset image\n\nAccess: write:settings"
           },
           "response": [
             {
@@ -14009,7 +14009,7 @@
                     }
                   ]
                 },
-                "description": "Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library)\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Reset image\n\nAccess: write:settings"
+                "description": "Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library)\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Reset image\n\nAccess: write:settings"
               },
               "status": "OK",
               "code": 200,
@@ -20120,7 +20120,7 @@
           ]
         },
         {
-          "name": "Customer codes for dropdowns",
+          "name": "Customer codes for dropdowns (read:clients, read:receipts or read:disbursements)",
           "request": {
             "method": "GET",
             "header": [],
@@ -20134,7 +20134,7 @@
                 "codes"
               ]
             },
-            "description": "Customer codes for dropdowns\n\nFront-end touchpoint: Accounts > Disbursement / Receipts\n\nAccess: read:clients"
+            "description": "Customer codes for dropdowns (read:clients, read:receipts or read:disbursements)\n\nFront-end touchpoint: Accounts > Disbursement / Receipts\n\nAccess: read:clients, read:receipts, read:disbursements"
           },
           "response": [
             {
@@ -20152,7 +20152,7 @@
                     "codes"
                   ]
                 },
-                "description": "Customer codes for dropdowns\n\nFront-end touchpoint: Accounts > Disbursement / Receipts\n\nAccess: read:clients"
+                "description": "Customer codes for dropdowns (read:clients, read:receipts or read:disbursements)\n\nFront-end touchpoint: Accounts > Disbursement / Receipts\n\nAccess: read:clients, read:receipts, read:disbursements"
               },
               "status": "OK",
               "code": 200,
@@ -26992,1127 +26992,6 @@
       ]
     },
     {
-      "name": "Data Privacy",
-      "item": [
-        {
-          "name": "Active users who work the data privacy registers (read:privacy)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/privacy/assignees",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "privacy",
-                "assignees"
-              ]
-            },
-            "description": "Active users who work the data privacy registers (read:privacy)\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: read:privacy"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/privacy/assignees",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "privacy",
-                    "assignees"
-                  ]
-                },
-                "description": "Active users who work the data privacy registers (read:privacy)\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: read:privacy"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"usr_1\",\n      \"name\": \"Ana Reyes\",\n      \"username\": \"ana.reyes\"\n    }\n  ]\n}"
-            }
-          ]
-        },
-        {
-          "name": "Consent status of a client or prospect per purpose (processing, marketing, sharing) with the full history",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/privacy/consents?partyType=client&partyId=cl_1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "privacy",
-                "consents"
-              ],
-              "query": [
-                {
-                  "key": "partyType",
-                  "value": "client"
-                },
-                {
-                  "key": "partyId",
-                  "value": "cl_1"
-                }
-              ]
-            },
-            "description": "Consent status of a client or prospect per purpose (processing, marketing, sharing) with the full history\n\nFront-end touchpoint: Operations > Clients > Client view > Data privacy; Sales & Marketing > Prospects > Prospect view\n\nAccess: read:clients, read:leads, read:privacy"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/privacy/consents?partyType=client&partyId=cl_1",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "privacy",
-                    "consents"
-                  ],
-                  "query": [
-                    {
-                      "key": "partyType",
-                      "value": "client"
-                    },
-                    {
-                      "key": "partyId",
-                      "value": "cl_1"
-                    }
-                  ]
-                },
-                "description": "Consent status of a client or prospect per purpose (processing, marketing, sharing) with the full history\n\nFront-end touchpoint: Operations > Clients > Client view > Data privacy; Sales & Marketing > Prospects > Prospect view\n\nAccess: read:clients, read:leads, read:privacy"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"partyType\": \"client\",\n    \"partyId\": \"cl_1\",\n    \"partyName\": \"Juan Dela Cruz\",\n    \"noticeVersion\": \"1.0\",\n    \"purposes\": [\n      {\n        \"id\": 1,\n        \"partyType\": \"client\",\n        \"partyId\": \"cl_1\",\n        \"purpose\": \"marketing\",\n        \"granted\": true,\n        \"status\": \"granted\",\n        \"channel\": \"Form\",\n        \"noticeVersion\": \"1.0\",\n        \"evidence\": \"Signed client information sheet\",\n        \"recordedBy\": \"Ana Reyes\",\n        \"recordedAt\": \"2026-10-01T02:00:00.000Z\",\n        \"withdrawnAt\": null\n      }\n    ],\n    \"history\": [\n      {\n        \"id\": 1,\n        \"partyType\": \"client\",\n        \"partyId\": \"cl_1\",\n        \"purpose\": \"marketing\",\n        \"granted\": true,\n        \"status\": \"granted\",\n        \"channel\": \"Form\",\n        \"noticeVersion\": \"1.0\",\n        \"evidence\": \"Signed client information sheet\",\n        \"recordedBy\": \"Ana Reyes\",\n        \"recordedAt\": \"2026-10-01T02:00:00.000Z\",\n        \"withdrawnAt\": null\n      }\n    ]\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Record consent given or refused for a purpose (the notice version defaults to privacy.notice_version)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/privacy/consents",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "privacy",
-                "consents"
-              ]
-            },
-            "description": "Record consent given or refused for a purpose (the notice version defaults to privacy.notice_version)\n\nFront-end touchpoint: Operations > Clients > Client view > Data privacy; Sales & Marketing > Prospects > Prospect view\n\nAccess: write:clients, write:leads, write:privacy",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"partyType\": \"client\",\n  \"partyId\": \"cl_1\",\n  \"purpose\": \"marketing\",\n  \"granted\": true,\n  \"channel\": \"Form\",\n  \"evidence\": \"Signed client information sheet\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/privacy/consents",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "privacy",
-                    "consents"
-                  ]
-                },
-                "description": "Record consent given or refused for a purpose (the notice version defaults to privacy.notice_version)\n\nFront-end touchpoint: Operations > Clients > Client view > Data privacy; Sales & Marketing > Prospects > Prospect view\n\nAccess: write:clients, write:leads, write:privacy",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"partyType\": \"client\",\n  \"partyId\": \"cl_1\",\n  \"purpose\": \"marketing\",\n  \"granted\": true,\n  \"channel\": \"Form\",\n  \"evidence\": \"Signed client information sheet\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"partyType\": \"client\",\n    \"partyId\": \"cl_1\",\n    \"purpose\": \"marketing\",\n    \"granted\": true,\n    \"status\": \"granted\",\n    \"channel\": \"Form\",\n    \"noticeVersion\": \"1.0\",\n    \"evidence\": \"Signed client information sheet\",\n    \"recordedBy\": \"Ana Reyes\",\n    \"recordedAt\": \"2026-10-01T02:00:00.000Z\",\n    \"withdrawnAt\": null\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Withdraw a consent in force (the record stays in the history)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/privacy/consents/:id/withdraw",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "privacy",
-                "consents",
-                ":id",
-                "withdraw"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                }
-              ]
-            },
-            "description": "Withdraw a consent in force (the record stays in the history)\n\nFront-end touchpoint: Operations > Clients > Client view > Data privacy; Sales & Marketing > Prospects > Prospect view\n\nAccess: write:clients, write:leads, write:privacy",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"reason\": \"Client asked by e-mail to stop marketing messages\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/privacy/consents/:id/withdraw",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "privacy",
-                    "consents",
-                    ":id",
-                    "withdraw"
-                  ],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    }
-                  ]
-                },
-                "description": "Withdraw a consent in force (the record stays in the history)\n\nFront-end touchpoint: Operations > Clients > Client view > Data privacy; Sales & Marketing > Prospects > Prospect view\n\nAccess: write:clients, write:leads, write:privacy",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"reason\": \"Client asked by e-mail to stop marketing messages\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"partyType\": \"client\",\n    \"partyId\": \"cl_1\",\n    \"purpose\": \"marketing\",\n    \"granted\": true,\n    \"status\": \"withdrawn\",\n    \"channel\": \"Form\",\n    \"noticeVersion\": \"1.0\",\n    \"evidence\": \"Signed client information sheet\",\n    \"recordedBy\": \"Ana Reyes\",\n    \"recordedAt\": \"2026-10-01T02:00:00.000Z\",\n    \"withdrawnAt\": \"2026-10-03T01:00:00.000Z\"\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Consent register across clients and prospects (filters: purpose, status granted / withdrawn / refused, partyType, channel, current, from, to, search)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/privacy/consents/register?purpose=marketing&status=granted&current=true",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "privacy",
-                "consents",
-                "register"
-              ],
-              "query": [
-                {
-                  "key": "purpose",
-                  "value": "marketing"
-                },
-                {
-                  "key": "status",
-                  "value": "granted"
-                },
-                {
-                  "key": "current",
-                  "value": "true"
-                }
-              ]
-            },
-            "description": "Consent register across clients and prospects (filters: purpose, status granted / withdrawn / refused, partyType, channel, current, from, to, search)\n\nFront-end touchpoint: Master > Data Privacy > Consent Register\n\nAccess: read:privacy"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/privacy/consents/register?purpose=marketing&status=granted&current=true",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "privacy",
-                    "consents",
-                    "register"
-                  ],
-                  "query": [
-                    {
-                      "key": "purpose",
-                      "value": "marketing"
-                    },
-                    {
-                      "key": "status",
-                      "value": "granted"
-                    },
-                    {
-                      "key": "current",
-                      "value": "true"
-                    }
-                  ]
-                },
-                "description": "Consent register across clients and prospects (filters: purpose, status granted / withdrawn / refused, partyType, channel, current, from, to, search)\n\nFront-end touchpoint: Master > Data Privacy > Consent Register\n\nAccess: read:privacy"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"partyType\": \"client\",\n      \"partyId\": \"cl_1\",\n      \"purpose\": \"marketing\",\n      \"granted\": true,\n      \"status\": \"granted\",\n      \"channel\": \"Form\",\n      \"noticeVersion\": \"1.0\",\n      \"evidence\": \"Signed client information sheet\",\n      \"recordedBy\": \"Ana Reyes\",\n      \"recordedAt\": \"2026-10-01T02:00:00.000Z\",\n      \"withdrawnAt\": null,\n      \"partyCode\": \"CL-2026-00001\",\n      \"partyName\": \"Juan Dela Cruz\",\n      \"current\": true\n    }\n  ]\n}"
-            }
-          ]
-        },
-        {
-          "name": "Clients and prospects by name, code, e-mail or phone (at least 2 characters), for the request register",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/privacy/parties?search=dela cruz",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "privacy",
-                "parties"
-              ],
-              "query": [
-                {
-                  "key": "search",
-                  "value": "dela cruz"
-                }
-              ]
-            },
-            "description": "Clients and prospects by name, code, e-mail or phone (at least 2 characters), for the request register\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: read:privacy"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/privacy/parties?search=dela cruz",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "privacy",
-                    "parties"
-                  ],
-                  "query": [
-                    {
-                      "key": "search",
-                      "value": "dela cruz"
-                    }
-                  ]
-                },
-                "description": "Clients and prospects by name, code, e-mail or phone (at least 2 characters), for the request register\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: read:privacy"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"partyType\": \"client\",\n      \"partyId\": \"cl_1\",\n      \"code\": \"CL-2026-00001\",\n      \"name\": \"Juan Dela Cruz\",\n      \"email\": \"juan@example.com\",\n      \"phone\": \"09171234567\"\n    }\n  ]\n}"
-            }
-          ]
-        },
-        {
-          "name": "Anonymise a client or prospect: personal fields overwritten in the party, its prospects, policies, quotations, claims and slips; amounts, numbers and dates kept. Refused (409, with the reasons) while records must be kept",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/privacy/parties/:type/:id/anonymise",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "privacy",
-                "parties",
-                ":type",
-                ":id",
-                "anonymise"
-              ],
-              "variable": [
-                {
-                  "key": "type",
-                  "value": "",
-                  "description": "type (path parameter)"
-                },
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                }
-              ]
-            },
-            "description": "Anonymise a client or prospect: personal fields overwritten in the party, its prospects, policies, quotations, claims and slips; amounts, numbers and dates kept. Refused (409, with the reasons) while records must be kept\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests > Anonymise\n\nAccess: write:privacy",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"reason\": \"Erasure request DSR-2026-00004; retention period over\",\n  \"requestId\": \"DSR-2026-00004\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/privacy/parties/:type/:id/anonymise",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "privacy",
-                    "parties",
-                    ":type",
-                    ":id",
-                    "anonymise"
-                  ],
-                  "variable": [
-                    {
-                      "key": "type",
-                      "value": "",
-                      "description": "type (path parameter)"
-                    },
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    }
-                  ]
-                },
-                "description": "Anonymise a client or prospect: personal fields overwritten in the party, its prospects, policies, quotations, claims and slips; amounts, numbers and dates kept. Refused (409, with the reasons) while records must be kept\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests > Anonymise\n\nAccess: write:privacy",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"reason\": \"Erasure request DSR-2026-00004; retention period over\",\n  \"requestId\": \"DSR-2026-00004\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"partyType\": \"client\",\n    \"partyCode\": \"CL-2014-00001\",\n    \"label\": \"Anonymised client CL-2014-00001\",\n    \"cleared\": {\n      \"clients\": {\n        \"rows\": 1,\n        \"fields\": [\n          \"email\",\n          \"phone\"\n        ]\n      }\n    }\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "What anonymising the party would do: the reasons it is refused (open business, retention period) and the fields that would be cleared",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/privacy/parties/:type/:id/anonymise/dry-run",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "privacy",
-                "parties",
-                ":type",
-                ":id",
-                "anonymise",
-                "dry-run"
-              ],
-              "variable": [
-                {
-                  "key": "type",
-                  "value": "",
-                  "description": "type (path parameter)"
-                },
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                }
-              ]
-            },
-            "description": "What anonymising the party would do: the reasons it is refused (open business, retention period) and the fields that would be cleared\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests > Anonymise\n\nAccess: read:privacy"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/privacy/parties/:type/:id/anonymise/dry-run",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "privacy",
-                    "parties",
-                    ":type",
-                    ":id",
-                    "anonymise",
-                    "dry-run"
-                  ],
-                  "variable": [
-                    {
-                      "key": "type",
-                      "value": "",
-                      "description": "type (path parameter)"
-                    },
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    }
-                  ]
-                },
-                "description": "What anonymising the party would do: the reasons it is refused (open business, retention period) and the fields that would be cleared\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests > Anonymise\n\nAccess: read:privacy"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"allowed\": false,\n    \"blockers\": [\n      {\n        \"code\": \"retention-period\",\n        \"message\": \"Insurance and tax records are kept until 2035-10-01\"\n      }\n    ],\n    \"retention\": {\n      \"years\": 10,\n      \"lastPolicyExpiry\": \"2025-10-01\",\n      \"retainedUntil\": \"2035-10-01\"\n    },\n    \"cleared\": {\n      \"clients\": {\n        \"rows\": 1,\n        \"fields\": [\n          \"email\",\n          \"phone\"\n        ]\n      }\n    }\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Personal data held about a client or prospect (access / portability): JSON, or ?format=xlsx; ?requestId= notes it on the request",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/privacy/parties/:type/:id/export?format=json&requestId=DSR-2026-00001",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "privacy",
-                "parties",
-                ":type",
-                ":id",
-                "export"
-              ],
-              "query": [
-                {
-                  "key": "format",
-                  "value": "json"
-                },
-                {
-                  "key": "requestId",
-                  "value": "DSR-2026-00001"
-                }
-              ],
-              "variable": [
-                {
-                  "key": "type",
-                  "value": "",
-                  "description": "type (path parameter)"
-                },
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                }
-              ]
-            },
-            "description": "Personal data held about a client or prospect (access / portability): JSON, or ?format=xlsx; ?requestId= notes it on the request\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests > Export personal data\n\nAccess: read:privacy"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/privacy/parties/:type/:id/export?format=json&requestId=DSR-2026-00001",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "privacy",
-                    "parties",
-                    ":type",
-                    ":id",
-                    "export"
-                  ],
-                  "query": [
-                    {
-                      "key": "format",
-                      "value": "json"
-                    },
-                    {
-                      "key": "requestId",
-                      "value": "DSR-2026-00001"
-                    }
-                  ],
-                  "variable": [
-                    {
-                      "key": "type",
-                      "value": "",
-                      "description": "type (path parameter)"
-                    },
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    }
-                  ]
-                },
-                "description": "Personal data held about a client or prospect (access / portability): JSON, or ?format=xlsx; ?requestId= notes it on the request\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests > Export personal data\n\nAccess: read:privacy"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"party\": {\n      \"type\": \"client\",\n      \"code\": \"CL-2026-00001\",\n      \"name\": \"Juan Dela Cruz\"\n    },\n    \"personalData\": {\n      \"firstName\": \"Juan\",\n      \"email\": \"juan@example.com\"\n    },\n    \"consents\": [],\n    \"policies\": [],\n    \"claims\": [],\n    \"receipts\": []\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Data subject requests (filters: status, requestType, overdue=true, partyType, partyId, assignedTo, search) with counts",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/privacy/requests?status=open,in-progress&overdue=true",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "privacy",
-                "requests"
-              ],
-              "query": [
-                {
-                  "key": "status",
-                  "value": "open,in-progress"
-                },
-                {
-                  "key": "overdue",
-                  "value": "true"
-                }
-              ]
-            },
-            "description": "Data subject requests (filters: status, requestType, overdue=true, partyType, partyId, assignedTo, search) with counts\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: read:privacy"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/privacy/requests?status=open,in-progress&overdue=true",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "privacy",
-                    "requests"
-                  ],
-                  "query": [
-                    {
-                      "key": "status",
-                      "value": "open,in-progress"
-                    },
-                    {
-                      "key": "overdue",
-                      "value": "true"
-                    }
-                  ]
-                },
-                "description": "Data subject requests (filters: status, requestType, overdue=true, partyType, partyId, assignedTo, search) with counts\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: read:privacy"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"items\": [\n      {\n        \"id\": \"dsr_1\",\n        \"requestNumber\": \"DSR-2026-00001\",\n        \"partyType\": \"client\",\n        \"partyId\": \"cl_1\",\n        \"partyName\": \"Juan Dela Cruz\",\n        \"requesterName\": \"Juan Dela Cruz\",\n        \"requesterContact\": \"juan@example.com\",\n        \"requestType\": \"access\",\n        \"receivedOn\": \"2026-10-01\",\n        \"dueOn\": \"2026-10-16\",\n        \"status\": \"open\",\n        \"overdue\": false,\n        \"assignedTo\": null,\n        \"outcome\": null\n      }\n    ],\n    \"summary\": {\n      \"open\": 1,\n      \"overdue\": 0,\n      \"completed\": 0,\n      \"rejected\": 0\n    },\n    \"today\": \"2026-10-03\"\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Log a data subject request; numbered from the DSR series, due privacy.request_due_days after receipt",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/privacy/requests",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "privacy",
-                "requests"
-              ]
-            },
-            "description": "Log a data subject request; numbered from the DSR series, due privacy.request_due_days after receipt\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: write:privacy",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"partyType\": \"client\",\n  \"partyId\": \"cl_1\",\n  \"requesterName\": \"Juan Dela Cruz\",\n  \"requesterContact\": \"juan@example.com\",\n  \"requestType\": \"access\",\n  \"receivedOn\": \"2026-10-01\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/privacy/requests",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "privacy",
-                    "requests"
-                  ]
-                },
-                "description": "Log a data subject request; numbered from the DSR series, due privacy.request_due_days after receipt\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: write:privacy",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"partyType\": \"client\",\n  \"partyId\": \"cl_1\",\n  \"requesterName\": \"Juan Dela Cruz\",\n  \"requesterContact\": \"juan@example.com\",\n  \"requestType\": \"access\",\n  \"receivedOn\": \"2026-10-01\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"dsr_1\",\n    \"requestNumber\": \"DSR-2026-00001\",\n    \"partyType\": \"client\",\n    \"partyId\": \"cl_1\",\n    \"partyName\": \"Juan Dela Cruz\",\n    \"requesterName\": \"Juan Dela Cruz\",\n    \"requesterContact\": \"juan@example.com\",\n    \"requestType\": \"access\",\n    \"receivedOn\": \"2026-10-01\",\n    \"dueOn\": \"2026-10-16\",\n    \"status\": \"open\",\n    \"overdue\": false,\n    \"assignedTo\": null,\n    \"outcome\": null\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "One data subject request (by id or number)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/privacy/requests/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "privacy",
-                "requests",
-                ":id"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                }
-              ]
-            },
-            "description": "One data subject request (by id or number)\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: read:privacy"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/privacy/requests/:id",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "privacy",
-                    "requests",
-                    ":id"
-                  ],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    }
-                  ]
-                },
-                "description": "One data subject request (by id or number)\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: read:privacy"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"dsr_1\",\n    \"requestNumber\": \"DSR-2026-00001\",\n    \"partyType\": \"client\",\n    \"partyId\": \"cl_1\",\n    \"partyName\": \"Juan Dela Cruz\",\n    \"requesterName\": \"Juan Dela Cruz\",\n    \"requesterContact\": \"juan@example.com\",\n    \"requestType\": \"access\",\n    \"receivedOn\": \"2026-10-01\",\n    \"dueOn\": \"2026-10-16\",\n    \"status\": \"open\",\n    \"overdue\": false,\n    \"assignedTo\": null,\n    \"outcome\": null\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Update an open request: party, requester, type, date received (due date follows), status open / in-progress, assignee, notes",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/privacy/requests/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "privacy",
-                "requests",
-                ":id"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                }
-              ]
-            },
-            "description": "Update an open request: party, requester, type, date received (due date follows), status open / in-progress, assignee, notes\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: write:privacy",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"status\": \"in-progress\",\n  \"assignedTo\": \"usr_1\",\n  \"responseNotes\": \"Identity verified with a valid ID\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "PUT",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/privacy/requests/:id",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "privacy",
-                    "requests",
-                    ":id"
-                  ],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    }
-                  ]
-                },
-                "description": "Update an open request: party, requester, type, date received (due date follows), status open / in-progress, assignee, notes\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: write:privacy",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"status\": \"in-progress\",\n  \"assignedTo\": \"usr_1\",\n  \"responseNotes\": \"Identity verified with a valid ID\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"dsr_1\",\n    \"requestNumber\": \"DSR-2026-00001\",\n    \"partyType\": \"client\",\n    \"partyId\": \"cl_1\",\n    \"partyName\": \"Juan Dela Cruz\",\n    \"requesterName\": \"Juan Dela Cruz\",\n    \"requesterContact\": \"juan@example.com\",\n    \"requestType\": \"access\",\n    \"receivedOn\": \"2026-10-01\",\n    \"dueOn\": \"2026-10-16\",\n    \"status\": \"in-progress\",\n    \"overdue\": false,\n    \"assignedTo\": null,\n    \"outcome\": null\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Close a request as completed or rejected, with the outcome told to the data subject",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/privacy/requests/:id/close",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "privacy",
-                "requests",
-                ":id",
-                "close"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                }
-              ]
-            },
-            "description": "Close a request as completed or rejected, with the outcome told to the data subject\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: write:privacy",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"status\": \"completed\",\n  \"outcome\": \"Personal data sent to the client by e-mail on 2026-10-05\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/privacy/requests/:id/close",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "privacy",
-                    "requests",
-                    ":id",
-                    "close"
-                  ],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    }
-                  ]
-                },
-                "description": "Close a request as completed or rejected, with the outcome told to the data subject\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: write:privacy",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"status\": \"completed\",\n  \"outcome\": \"Personal data sent to the client by e-mail on 2026-10-05\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"dsr_1\",\n    \"requestNumber\": \"DSR-2026-00001\",\n    \"partyType\": \"client\",\n    \"partyId\": \"cl_1\",\n    \"partyName\": \"Juan Dela Cruz\",\n    \"requesterName\": \"Juan Dela Cruz\",\n    \"requesterContact\": \"juan@example.com\",\n    \"requestType\": \"access\",\n    \"receivedOn\": \"2026-10-01\",\n    \"dueOn\": \"2026-10-16\",\n    \"status\": \"completed\",\n    \"overdue\": false,\n    \"assignedTo\": null,\n    \"outcome\": null,\n    \"closedOn\": \"2026-10-05\"\n  }\n}"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "name": "Dealer programmes",
       "item": [
         {
@@ -31962,7 +30841,7 @@
                 }
               ]
             },
-            "description": "E-mail outbox (status queued / sent / failed, search on recipient or subject; paging) with whether sending is enabled\n\nFront-end touchpoint: Master > E-mail Outbox\n\nAccess: role:system-admin"
+            "description": "E-mail outbox (status queued / sent / failed, search on recipient or subject; paging) with whether sending is enabled\n\nFront-end touchpoint: Master > E-mail Outbox\n\nAccess: read:settings, write:settings"
           },
           "response": [
             {
@@ -31998,7 +30877,7 @@
                     }
                   ]
                 },
-                "description": "E-mail outbox (status queued / sent / failed, search on recipient or subject; paging) with whether sending is enabled\n\nFront-end touchpoint: Master > E-mail Outbox\n\nAccess: role:system-admin"
+                "description": "E-mail outbox (status queued / sent / failed, search on recipient or subject; paging) with whether sending is enabled\n\nFront-end touchpoint: Master > E-mail Outbox\n\nAccess: read:settings, write:settings"
               },
               "status": "OK",
               "code": 200,
@@ -32038,7 +30917,7 @@
                 }
               ]
             },
-            "description": "Queue a failed (or still queued) e-mail again with a fresh attempt count; sent at once when sending is enabled\n\nFront-end touchpoint: Master > E-mail Outbox > Retry\n\nAccess: role:system-admin"
+            "description": "Queue a failed (or still queued) e-mail again with a fresh attempt count; sent at once when sending is enabled\n\nFront-end touchpoint: Master > E-mail Outbox > Retry\n\nAccess: write:settings"
           },
           "response": [
             {
@@ -32065,7 +30944,7 @@
                     }
                   ]
                 },
-                "description": "Queue a failed (or still queued) e-mail again with a fresh attempt count; sent at once when sending is enabled\n\nFront-end touchpoint: Master > E-mail Outbox > Retry\n\nAccess: role:system-admin"
+                "description": "Queue a failed (or still queued) e-mail again with a fresh attempt count; sent at once when sending is enabled\n\nFront-end touchpoint: Master > E-mail Outbox > Retry\n\nAccess: write:settings"
               },
               "status": "OK",
               "code": 200,
@@ -32519,7 +31398,7 @@
                 "slots"
               ]
             },
-            "description": "Document signature mapping: document types, slot sources and conditions, and the slots\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Document signatures\n\nAccess: read:settings, write:settings"
+            "description": "Document signature mapping: document types, slot sources and conditions, and the slots\n\nFront-end touchpoint: Master > System Configuration > Document Signatures\n\nAccess: read:settings, write:settings"
           },
           "response": [
             {
@@ -32537,7 +31416,7 @@
                     "slots"
                   ]
                 },
-                "description": "Document signature mapping: document types, slot sources and conditions, and the slots\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Document signatures\n\nAccess: read:settings, write:settings"
+                "description": "Document signature mapping: document types, slot sources and conditions, and the slots\n\nFront-end touchpoint: Master > System Configuration > Document Signatures\n\nAccess: read:settings, write:settings"
               },
               "status": "OK",
               "code": 200,
@@ -32573,7 +31452,7 @@
                 "slots"
               ]
             },
-            "description": "Save the signature mapping of the document types sent ({ slots: [{ documentType, slot, label, source, signatoryId?, condition, active }] })\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Document signatures\n\nAccess: write:settings",
+            "description": "Save the signature mapping of the document types sent ({ slots: [{ documentType, slot, label, source, signatoryId?, condition, active }] })\n\nFront-end touchpoint: Master > System Configuration > Document Signatures\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"slots\": [\n    {\n      \"documentType\": \"payment-voucher\",\n      \"slot\": \"approved-by\",\n      \"label\": \"Approved by\",\n      \"source\": \"approving-user\",\n      \"condition\": \"approved\",\n      \"active\": true\n    }\n  ]\n}",
@@ -32605,7 +31484,7 @@
                     "slots"
                   ]
                 },
-                "description": "Save the signature mapping of the document types sent ({ slots: [{ documentType, slot, label, source, signatoryId?, condition, active }] })\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Document signatures\n\nAccess: write:settings",
+                "description": "Save the signature mapping of the document types sent ({ slots: [{ documentType, slot, label, source, signatoryId?, condition, active }] })\n\nFront-end touchpoint: Master > System Configuration > Document Signatures\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"slots\": [\n    {\n      \"documentType\": \"payment-voucher\",\n      \"slot\": \"approved-by\",\n      \"label\": \"Approved by\",\n      \"source\": \"approving-user\",\n      \"condition\": \"approved\",\n      \"active\": true\n    }\n  ]\n}",
@@ -36205,7 +35084,7 @@
                 }
               ]
             },
-            "description": "Load history: batches with status (validated, failed, loaded), who, when and counts (kit, status, paging)\n\nFront-end touchpoint: Master > Go-Live Data Load > History\n\nAccess: read:data-load, write:data-load"
+            "description": "Load history: batches with status (validated, failed, loaded), who, when and counts (kit, status, paging)\n\nFront-end touchpoint: API (go-live scripts) > History\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -36237,7 +35116,7 @@
                     }
                   ]
                 },
-                "description": "Load history: batches with status (validated, failed, loaded), who, when and counts (kit, status, paging)\n\nFront-end touchpoint: Master > Go-Live Data Load > History\n\nAccess: read:data-load, write:data-load"
+                "description": "Load history: batches with status (validated, failed, loaded), who, when and counts (kit, status, paging)\n\nFront-end touchpoint: API (go-live scripts) > History\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -36273,7 +35152,7 @@
                 "batches"
               ]
             },
-            "description": "Upload a workbook (multipart \"file\", field kit): creates a load batch and validates it without saving (all sheets in load order in one transaction that is rolled back)\n\nFront-end touchpoint: Master > Go-Live Data Load > Upload and validate\n\nAccess: write:data-load",
+            "description": "Upload a workbook (multipart \"file\", field kit): creates a load batch and validates it without saving (all sheets in load order in one transaction that is rolled back)\n\nFront-end touchpoint: API (go-live scripts) > Upload and validate\n\nAccess: write:data-load",
             "body": {
               "mode": "raw",
               "raw": "\"multipart/form-data file, kit=configuration|migration\"",
@@ -36305,7 +35184,7 @@
                     "batches"
                   ]
                 },
-                "description": "Upload a workbook (multipart \"file\", field kit): creates a load batch and validates it without saving (all sheets in load order in one transaction that is rolled back)\n\nFront-end touchpoint: Master > Go-Live Data Load > Upload and validate\n\nAccess: write:data-load",
+                "description": "Upload a workbook (multipart \"file\", field kit): creates a load batch and validates it without saving (all sheets in load order in one transaction that is rolled back)\n\nFront-end touchpoint: API (go-live scripts) > Upload and validate\n\nAccess: write:data-load",
                 "body": {
                   "mode": "raw",
                   "raw": "\"multipart/form-data file, kit=configuration|migration\"",
@@ -36353,7 +35232,7 @@
                 }
               ]
             },
-            "description": "One batch: result per sheet and the errors (sheet, row, column, message)\n\nFront-end touchpoint: Master > Go-Live Data Load > Validation result\n\nAccess: read:data-load, write:data-load"
+            "description": "One batch: result per sheet and the errors (sheet, row, column, message)\n\nFront-end touchpoint: API (go-live scripts) > Validation result\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -36379,7 +35258,7 @@
                     }
                   ]
                 },
-                "description": "One batch: result per sheet and the errors (sheet, row, column, message)\n\nFront-end touchpoint: Master > Go-Live Data Load > Validation result\n\nAccess: read:data-load, write:data-load"
+                "description": "One batch: result per sheet and the errors (sheet, row, column, message)\n\nFront-end touchpoint: API (go-live scripts) > Validation result\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -36419,7 +35298,7 @@
                 }
               ]
             },
-            "description": "The rows in error of a batch as a workbook in the kit layout with an Errors column, to fix and upload again\n\nFront-end touchpoint: Master > Go-Live Data Load > Download errors\n\nAccess: read:data-load, write:data-load"
+            "description": "The rows in error of a batch as a workbook in the kit layout with an Errors column, to fix and upload again\n\nFront-end touchpoint: API (go-live scripts) > Download errors\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -36446,7 +35325,7 @@
                     }
                   ]
                 },
-                "description": "The rows in error of a batch as a workbook in the kit layout with an Errors column, to fix and upload again\n\nFront-end touchpoint: Master > Go-Live Data Load > Download errors\n\nAccess: read:data-load, write:data-load"
+                "description": "The rows in error of a batch as a workbook in the kit layout with an Errors column, to fix and upload again\n\nFront-end touchpoint: API (go-live scripts) > Download errors\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -36491,7 +35370,7 @@
                 }
               ]
             },
-            "description": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation\n\nFront-end touchpoint: Master > Go-Live Data Load > Load\n\nAccess: write:data-load",
+            "description": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation\n\nFront-end touchpoint: API (go-live scripts) > Load\n\nAccess: write:data-load",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"validRowsOnly\": false\n}",
@@ -36532,7 +35411,7 @@
                     }
                   ]
                 },
-                "description": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation\n\nFront-end touchpoint: Master > Go-Live Data Load > Load\n\nAccess: write:data-load",
+                "description": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation\n\nFront-end touchpoint: API (go-live scripts) > Load\n\nAccess: write:data-load",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"validRowsOnly\": false\n}",
@@ -36581,7 +35460,7 @@
                 }
               ]
             },
-            "description": "Reconciliation of a migration batch (XLSX): counts and totals per sheet and the control checks (trial balance, receivables control account)\n\nFront-end touchpoint: Master > Go-Live Data Load > History > Reconciliation\n\nAccess: read:data-load, write:data-load"
+            "description": "Reconciliation of a migration batch (XLSX): counts and totals per sheet and the control checks (trial balance, receivables control account)\n\nFront-end touchpoint: API (go-live scripts) > History > Reconciliation\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -36608,7 +35487,7 @@
                     }
                   ]
                 },
-                "description": "Reconciliation of a migration batch (XLSX): counts and totals per sheet and the control checks (trial balance, receivables control account)\n\nFront-end touchpoint: Master > Go-Live Data Load > History > Reconciliation\n\nAccess: read:data-load, write:data-load"
+                "description": "Reconciliation of a migration batch (XLSX): counts and totals per sheet and the control checks (trial balance, receivables control account)\n\nFront-end touchpoint: API (go-live scripts) > History > Reconciliation\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -36648,7 +35527,7 @@
                 }
               ]
             },
-            "description": "Validate a batch again (dry run), e.g. after a correction on screen or a change of the cutover date\n\nFront-end touchpoint: Master > Go-Live Data Load > Validation result\n\nAccess: write:data-load"
+            "description": "Validate a batch again (dry run), e.g. after a correction on screen or a change of the cutover date\n\nFront-end touchpoint: API (go-live scripts) > Validation result\n\nAccess: write:data-load"
           },
           "response": [
             {
@@ -36675,7 +35554,7 @@
                     }
                   ]
                 },
-                "description": "Validate a batch again (dry run), e.g. after a correction on screen or a change of the cutover date\n\nFront-end touchpoint: Master > Go-Live Data Load > Validation result\n\nAccess: write:data-load"
+                "description": "Validate a batch again (dry run), e.g. after a correction on screen or a change of the cutover date\n\nFront-end touchpoint: API (go-live scripts) > Validation result\n\nAccess: write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -36716,7 +35595,7 @@
                 }
               ]
             },
-            "description": "Environment comparisons made, newest first (paging)\n\nFront-end touchpoint: Master > Go-Live Data Load > Compare environments\n\nAccess: read:data-load, write:data-load"
+            "description": "Environment comparisons made, newest first (paging)\n\nFront-end touchpoint: API (go-live scripts) > Compare environments\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -36744,7 +35623,7 @@
                     }
                   ]
                 },
-                "description": "Environment comparisons made, newest first (paging)\n\nFront-end touchpoint: Master > Go-Live Data Load > Compare environments\n\nAccess: read:data-load, write:data-load"
+                "description": "Environment comparisons made, newest first (paging)\n\nFront-end touchpoint: API (go-live scripts) > Compare environments\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -36780,7 +35659,7 @@
                 "compare"
               ]
             },
-            "description": "Compare environments (never loads): the configuration workbook exported from another environment (\"Current data\") compared with this environment, or with a second workbook (fileB: file A vs file B, this environment not read). Result per sheet: identical, different (field-level differences), only in the file, only here; environment-specific values apart\n\nFront-end touchpoint: Master > Go-Live Data Load > Compare environments\n\nAccess: read:data-load, write:data-load",
+            "description": "Compare environments (never loads): the configuration workbook exported from another environment (\"Current data\") compared with this environment, or with a second workbook (fileB: file A vs file B, this environment not read). Result per sheet: identical, different (field-level differences), only in the file, only here; environment-specific values apart\n\nFront-end touchpoint: API (go-live scripts) > Compare environments\n\nAccess: read:data-load, write:data-load",
             "body": {
               "mode": "raw",
               "raw": "\"multipart/form-data file [, fileB], includeNumbering=true|false\"",
@@ -36812,7 +35691,7 @@
                     "compare"
                   ]
                 },
-                "description": "Compare environments (never loads): the configuration workbook exported from another environment (\"Current data\") compared with this environment, or with a second workbook (fileB: file A vs file B, this environment not read). Result per sheet: identical, different (field-level differences), only in the file, only here; environment-specific values apart\n\nFront-end touchpoint: Master > Go-Live Data Load > Compare environments\n\nAccess: read:data-load, write:data-load",
+                "description": "Compare environments (never loads): the configuration workbook exported from another environment (\"Current data\") compared with this environment, or with a second workbook (fileB: file A vs file B, this environment not read). Result per sheet: identical, different (field-level differences), only in the file, only here; environment-specific values apart\n\nFront-end touchpoint: API (go-live scripts) > Compare environments\n\nAccess: read:data-load, write:data-load",
                 "body": {
                   "mode": "raw",
                   "raw": "\"multipart/form-data file [, fileB], includeNumbering=true|false\"",
@@ -36860,7 +35739,7 @@
                 }
               ]
             },
-            "description": "One comparison: verdict, counts per sheet, environment-specific values and the rules that set them apart\n\nFront-end touchpoint: Master > Go-Live Data Load > Compare environments\n\nAccess: read:data-load, write:data-load"
+            "description": "One comparison: verdict, counts per sheet, environment-specific values and the rules that set them apart\n\nFront-end touchpoint: API (go-live scripts) > Compare environments\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -36886,7 +35765,7 @@
                     }
                   ]
                 },
-                "description": "One comparison: verdict, counts per sheet, environment-specific values and the rules that set them apart\n\nFront-end touchpoint: Master > Go-Live Data Load > Compare environments\n\nAccess: read:data-load, write:data-load"
+                "description": "One comparison: verdict, counts per sheet, environment-specific values and the rules that set them apart\n\nFront-end touchpoint: API (go-live scripts) > Compare environments\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -36948,7 +35827,7 @@
                 }
               ]
             },
-            "description": "Rows of a comparison with their field-level differences (filters sheet, status = different, only-in-file, only-here, identical (comma list; default all but identical), search; paging)\n\nFront-end touchpoint: Master > Go-Live Data Load > Compare environments\n\nAccess: read:data-load, write:data-load"
+            "description": "Rows of a comparison with their field-level differences (filters sheet, status = different, only-in-file, only-here, identical (comma list; default all but identical), search; paging)\n\nFront-end touchpoint: API (go-live scripts) > Compare environments\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -36997,7 +35876,7 @@
                     }
                   ]
                 },
-                "description": "Rows of a comparison with their field-level differences (filters sheet, status = different, only-in-file, only-here, identical (comma list; default all but identical), search; paging)\n\nFront-end touchpoint: Master > Go-Live Data Load > Compare environments\n\nAccess: read:data-load, write:data-load"
+                "description": "Rows of a comparison with their field-level differences (filters sheet, status = different, only-in-file, only-here, identical (comma list; default all but identical), search; paging)\n\nFront-end touchpoint: API (go-live scripts) > Compare environments\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -37037,7 +35916,7 @@
                 }
               ]
             },
-            "description": "Comparison workbook (XLSX): Summary with the counts per sheet and the verdict (Mirrored / Differences found), one sheet per object with a Difference column (only in the file green, only here amber, changed cells highlighted), environment-specific values and rules\n\nFront-end touchpoint: Master > Go-Live Data Load > Compare environments > Download\n\nAccess: read:data-load, write:data-load"
+            "description": "Comparison workbook (XLSX): Summary with the counts per sheet and the verdict (Mirrored / Differences found), one sheet per object with a Difference column (only in the file green, only here amber, changed cells highlighted), environment-specific values and rules\n\nFront-end touchpoint: API (go-live scripts) > Compare environments > Download\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -37064,7 +35943,7 @@
                     }
                   ]
                 },
-                "description": "Comparison workbook (XLSX): Summary with the counts per sheet and the verdict (Mirrored / Differences found), one sheet per object with a Difference column (only in the file green, only here amber, changed cells highlighted), environment-specific values and rules\n\nFront-end touchpoint: Master > Go-Live Data Load > Compare environments > Download\n\nAccess: read:data-load, write:data-load"
+                "description": "Comparison workbook (XLSX): Summary with the counts per sheet and the verdict (Mirrored / Differences found), one sheet per object with a Difference column (only in the file green, only here amber, changed cells highlighted), environment-specific values and rules\n\nFront-end touchpoint: API (go-live scripts) > Compare environments > Download\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -37095,7 +35974,7 @@
                 "kits"
               ]
             },
-            "description": "The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date and go-live lock\n\nFront-end touchpoint: Master > Go-Live Data Load\n\nAccess: read:data-load, write:data-load"
+            "description": "The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date and go-live lock\n\nFront-end touchpoint: API (go-live scripts)\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -37113,7 +35992,7 @@
                     "kits"
                   ]
                 },
-                "description": "The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date and go-live lock\n\nFront-end touchpoint: Master > Go-Live Data Load\n\nAccess: read:data-load, write:data-load"
+                "description": "The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date and go-live lock\n\nFront-end touchpoint: API (go-live scripts)\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -37159,7 +36038,7 @@
                 }
               ]
             },
-            "description": "Workbook of a kit (XLSX): Instructions, Lists and one sheet per object; prefill=true fills it with the current data of this environment (promotion to the next environment)\n\nFront-end touchpoint: Master > Go-Live Data Load > Download template\n\nAccess: read:data-load, write:data-load"
+            "description": "Workbook of a kit (XLSX): Instructions, Lists and one sheet per object; prefill=true fills it with the current data of this environment (promotion to the next environment)\n\nFront-end touchpoint: API (go-live scripts) > Download template\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -37192,7 +36071,7 @@
                     }
                   ]
                 },
-                "description": "Workbook of a kit (XLSX): Instructions, Lists and one sheet per object; prefill=true fills it with the current data of this environment (promotion to the next environment)\n\nFront-end touchpoint: Master > Go-Live Data Load > Download template\n\nAccess: read:data-load, write:data-load"
+                "description": "Workbook of a kit (XLSX): Instructions, Lists and one sheet per object; prefill=true fills it with the current data of this environment (promotion to the next environment)\n\nFront-end touchpoint: API (go-live scripts) > Download template\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -48517,7 +47396,7 @@
           ]
         },
         {
-          "name": "Reassign an open item to yourself or someone in your team where its module supports it: claim handler (write:claims), data subject request (write:privacy), task",
+          "name": "Reassign an open item to yourself or someone in your team where its module supports it: claim handler (write:claims), task",
           "request": {
             "method": "POST",
             "header": [
@@ -48537,7 +47416,7 @@
                 "reassign"
               ]
             },
-            "description": "Reassign an open item to yourself or someone in your team where its module supports it: claim handler (write:claims), data subject request (write:privacy), task\n\nFront-end touchpoint: Operations > My Work > My Team\n\nAccess: Any authenticated user",
+            "description": "Reassign an open item to yourself or someone in your team where its module supports it: claim handler (write:claims), task\n\nFront-end touchpoint: Operations > My Work > My Team\n\nAccess: Any authenticated user",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"category\": \"claims\",\n  \"id\": \"clm_1\",\n  \"assignTo\": \"usr_3\"\n}",
@@ -48570,7 +47449,7 @@
                     "reassign"
                   ]
                 },
-                "description": "Reassign an open item to yourself or someone in your team where its module supports it: claim handler (write:claims), data subject request (write:privacy), task\n\nFront-end touchpoint: Operations > My Work > My Team\n\nAccess: Any authenticated user",
+                "description": "Reassign an open item to yourself or someone in your team where its module supports it: claim handler (write:claims), task\n\nFront-end touchpoint: Operations > My Work > My Team\n\nAccess: Any authenticated user",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"category\": \"claims\",\n  \"id\": \"clm_1\",\n  \"assignTo\": \"usr_3\"\n}",
@@ -86449,6 +85328,57 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"label\": \"Maria Santos\",\n      \"value\": \"usr_1\",\n      \"code\": \"AE001\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Clients a report Client filter can use (not anonymised, within the reader's record scope, first 500 by name), as { label, value, code }",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/filters/clients",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "filters",
+                "clients"
+              ]
+            },
+            "description": "Clients a report Client filter can use (not anonymised, within the reader's record scope, first 500 by name), as { label, value, code }\n\nFront-end touchpoint: Reports > * (Client filter)\n\nAccess: read:reports"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/reports/filters/clients",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "reports",
+                    "filters",
+                    "clients"
+                  ]
+                },
+                "description": "Clients a report Client filter can use (not anonymised, within the reader's record scope, first 500 by name), as { label, value, code }\n\nFront-end touchpoint: Reports > * (Client filter)\n\nAccess: read:reports"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"label\": \"Angela Ramos\",\n      \"value\": \"cl_1\",\n      \"code\": \"CL-2026-00001\"\n    }\n  ]\n}"
             }
           ]
         },

@@ -66,7 +66,9 @@ Finance > Cost Centres, the letterhead company's first). TISPH ships 900901 Toyo
 (seed `81_tisph_finance.sql`). A cost centre keyed on a manual voucher must be active and valid on the voucher date; a
 reversal keeps the cost centres of the original. The accounting query (filter `costCentre`), its export, the journal
 voucher and the general ledger detail report show it, and the SAP GL file carries it (`modules/sap-gl`). Lines posted
-before migration 0346 have none.
+before migration 0346 have none. The screen keeps the master through `/ops-masters/cost-centre` (read with the journal
+voucher or masters permissions, maintained with `write:journal-vouchers` or `write:masters`); `/masters/cost-centre`
+and the upload template serve the same records.
 
 ## Key settings
 

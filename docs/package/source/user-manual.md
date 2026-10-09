@@ -1,10 +1,10 @@
 ---
 title: User Manual
 subtitle: BrokerVerse OOTB, by persona
-version: 1.2.4
+version: 1.2.5
 date: 09 October 2026
 prepared: iorta TechNXT
-change: Version 1.2.4 (09 October 2026): Reinsurance and the Compliance menu withdrawn (AML/CFT programme, Insurance Commission registers, complaints and breach registers, the Compliance Officer role); client onboarding keeps the identification, signatories, beneficial owners and KYC documents. Version 1.2.3 (04 October 2026): Home is the role-aware landing page built on My Work (presets per role, role figures, the new My Work categories of the compliance officer, accounting manager and system administrator); the Home dashboard and Open Items sections withdrawn. Version 1.2.2: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.2.1: release figures aligned (eight roles on the Role screen). Version 1.2 (release 1.1): Theme and Branding, the menus of every persona as delivered, My Work, the Compliance Officer with the Insurance Commission registers, the complaints register and the breach register, the operational masters, Help panel sections for every screen, screenshots recaptured
+change: Version 1.2.5 (09 October 2026): Theme and Branding withdrawn, the brand of the TISPH build comes from its brand pack; E-mail Layout, Documents and Reports Layout and Document Signatures are entries of Master > System; System Settings keeps the display currency and the language; Data Privacy (data subject requests, consent register, privacy panels) and the Go-Live Data Load screen withdrawn, the go-live workbooks are loaded through the API. Version 1.2.4 (09 October 2026): Reinsurance and the Compliance menu withdrawn (AML/CFT programme, Insurance Commission registers, complaints and breach registers, the Compliance Officer role); client onboarding keeps the identification, signatories, beneficial owners and KYC documents. Version 1.2.3 (04 October 2026): Home is the role-aware landing page built on My Work (presets per role, role figures, the new My Work categories of the compliance officer, accounting manager and system administrator); the Home dashboard and Open Items sections withdrawn. Version 1.2.2: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.2.1: release figures aligned (eight roles on the Role screen). Version 1.2 (release 1.1): Theme and Branding, the menus of every persona as delivered, My Work, the Compliance Officer with the Insurance Commission registers, the complaints register and the breach register, the operational masters, Help panel sections for every screen, screenshots recaptured
 reviewed:
 approved:
 acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal Revenue; LTO=Land Transportation Office; RFQ=Request for quotation; CTPL=Compulsory third party liability; DST=Documentary stamp tax; LGT=Local government tax; LGU=Local government unit; FST=Fire service tax; VAT=Value-added tax; EWT=Expanded withholding tax; CWT=Creditable withholding tax; ATC=Alphanumeric tax code; OR=Official receipt; SOA=Statement of account; PV=Payment voucher; JV=Journal voucher; GL=General ledger; DN=Debit note; KYC=Know your customer; TIN=Taxpayer identification number; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; IAR=Industrial all risks; PA=Personal accident; APPA=Auto passenger personal accident; SoD=Segregation of duties; PEP=Politically exposed person; NPC=National Privacy Commission; COC=Certificate of cover; PDC=Post-dated cheque; LOA=Letter of authority; EIS=Electronic Invoicing System; CAS=Computerized accounting system; WCAG=Web Content Accessibility Guidelines
@@ -25,7 +25,7 @@ This manual tells each user how to do his or her work in BrokerVerse. It is orga
 | Getting started | Signing in, passwords, two-step verification, the screen layout, notifications, My Profile and account security, lists, forms, statuses and approvals, the audit trail. |
 | The business process end to end | The broking cycle from prospect to reports, with who does each step and on which screen. |
 | One chapter per persona | System Administrator; Sales & Marketing (Account Executive); Processing Team; Operations (client servicing); Claims; Accounting; Accounting Manager. |
-| Go-Live Data Load | The configuration and migration workbooks the System Administrator loads before go-live. |
+| Go-Live Data Load | The configuration and migration workbooks loaded before go-live through the go-live data load API. |
 | Distribution, programmes and products | Lead assignment, distribution channels, dealer programmes, fleet schedules, marine open covers, comparison reports, campaigns and the Report Builder: screens shared by Sales, Processing and Operations. |
 | Module reference | Every menu screen in menu order: purpose, main fields and rules. |
 | Reports, dashboards, schedules and notifications | A short guide; the Reports Book and the Schedules and Batch Jobs document hold the detail. |
@@ -55,7 +55,7 @@ Every person has his or her own user ID. Never share a user ID or a password: ev
 
 ![The sign-in page](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-login.png)
 
-1. Open the BrokerVerse address given by your System Administrator in Chrome, Edge or Firefox. The sign-in page shows an illustration on the left and the sign-in panel on the right, with the logo and name set on Master > System Settings.
+1. Open the BrokerVerse address given by your System Administrator in Chrome, Edge or Firefox. The sign-in page shows an illustration on the left and the sign-in panel on the right, with the logo and name of the brand pack of your environment.
 2. In **User ID**, type your user name, for example maria.rivera.
 3. In **Password**, type your password. Select the eye icon to show the password while you type; select it again to hide it.
 4. Select **Sign in**.
@@ -136,9 +136,9 @@ After 30 minutes without activity BrokerVerse signs you out (`limits.session_idl
 
 | Area | What it does |
 |---|---|
-| Logo and name | The logo and application name set on Master > System Settings. |
+| Logo and name | The logo and application name of the brand pack of your environment. |
 | **Search menu...** | Type part of a screen name, for example quot. The list shows each matching screen of your menu with its path; select one to open it. |
-| Sidebar menu | The menus of your role, in business order: Home, Dashboard, Operations, Accounts, Commission, Reports, Master, Product Configurator. Select a menu to open its items; the menu you used last stays open. Master lists its screens under headings (Organization, Insurance, Location, Employees, Users and Access, Finance, System, Data Privacy, Go-Live and Data). A shortened name shows in full when you point at it. Press **/** to jump to **Search menu...**. |
+| Sidebar menu | The menus of your role, in business order: Home, Dashboard, Operations, Accounts, Commission, Reports, Master, Product Configurator. Select a menu to open its items; the menu you used last stays open. Master lists its screens under headings (Organization, Insurance, Location, Employees, Users and Access, Finance, System). A shortened name shows in full when you point at it. Press **/** to jump to **Search menu...**. |
 | Notification bell | The red badge shows the number of unread notifications, up to 99; above that it shows 99+. Select the bell to see the latest. |
 | Your initials | The initials of your display name in a circle. Select them for the account menu. |
 | Work area | The screen you opened, with its title and the breadcrumb (for example Operations • Prospects). |
@@ -247,7 +247,7 @@ Your role decides which menus you see and which screens you may open. The server
 | System Administrator (Super Admin Access) | BrokerVerse, beatriz.lacson | Every menu |
 | Sales & Marketing (Account Executive) | maria.rivera, paolo.dizon | Dashboard, Operations, Commission, Reports, Master (Distribution Channels), Product Configurator |
 | Processing Team (Placement & Policy Processing) | jose.bernardo, rica.fernandez | Dashboard, Operations, Reports, Master (Distribution Channels), Product Configurator |
-| Operations (Client Servicing) | ana.buenaventura | Dashboard, Operations, Reports, Master (Distribution Channels, Data Privacy), Product Configurator |
+| Operations (Client Servicing) | ana.buenaventura | Dashboard, Operations, Reports, Master (Distribution Channels), Product Configurator |
 | Claims | carlo.estrada, joy.macaraeg | Dashboard, Operations, Reports, Master (Claim Document Checklist, Repair Shops) |
 | Accounting | liza.quiambao, nestor.pangilinan | Dashboard, Operations, Accounts, Commission, Reports, Master |
 | Accounting Manager | teresa.villaroman, ramon.almario | The menus of Accounting |
@@ -260,7 +260,7 @@ The TISPH roles follow the RBAC v4 sheet of the Pre-BSM workbook: thirteen TIS p
 
 | Role | Code | May change | Approves (never own work) | Menus |
 |---|---|---|---|---|
-| TIS Sales Associate | `tis-sales-associate` | Prospects, clients, quotations, placement slips, policies, endorsements, renewals, sales activities, data privacy requests | Nothing | Those of Sales & Marketing, plus Accounts (Receipts, Collections) to read |
+| TIS Sales Associate | `tis-sales-associate` | Prospects, clients, quotations, placement slips, policies, endorsements, renewals, sales activities | Nothing | Those of Sales & Marketing, plus Accounts (Receipts, Collections) to read |
 | TIS Sales Officer | `tis-sales-officer` | As the Sales Associate, plus lead assignment and campaigns | Quotations, placement checks, renewal terms | As the Sales Associate |
 | TIS Sales Unit Head | `tis-sales-unit-head` | As the Sales Officer, plus telesales incentives | As the Sales Officer, plus supplier invoices | As the Sales Associate, plus Disbursement, Payables and Incentive |
 | TIS Operations Associate | `tis-ops-associate` | Quotations, placement slips, policies, endorsements, renewals, claims (register, follow up, documents), fleet schedules, open covers | Nothing | Operations, claim screens and masters, Accounts (Receipts, Collections) to read |
@@ -271,7 +271,7 @@ The TISPH roles follow the RBAC v4 sheet of the Pre-BSM workbook: thirteen TIS p
 | CCD-BP / QRPh (Receipting) | `tis-ccd-bp` | Receipts and collections | Nothing | As CCD-PDC |
 | CCD-Recon (Reconciliation and Reversals) | `tis-ccd-recon` | Receipts (reversals), collections (adjustments), bank and insurer statement reconciliation | Insurer statement reconciliations | As CCD-BP, plus Open Entry Matching and Unmatching, Disbursement |
 | TIS Finance & General Accounting | `tis-finance` | Commission, remittance, disbursements, journal vouchers, payables, fixed assets, period end, bank reconciliation | Supplier invoices, period close, bank reconciliations, posting rule changes, credit control | Those of Accounting, plus Audit Trail and Schedules |
-| TIS IT AppSupport / Admin | `tis-it-admin` | Users, roles, access control, settings, reference masters, product configurator, schedules and interfaces; no business transaction | Authority limits | Master (without Go-Live Data Load and Data Privacy), Product Configurator; business screens to read |
+| TIS IT AppSupport / Admin | `tis-it-admin` | Users, roles, access control, settings, reference masters, product configurator, schedules and interfaces; no business transaction | Authority limits | Master, Product Configurator; business screens to read |
 | TIS General Manager | `tis-general-manager` | Prospects to claims, as the Sales Unit Head and the Operations Unit Head together | Quotations, placement checks, renewal terms, claim decisions, supplier invoices | Every front-office and accounting screen; User Management and Audit Trail to read |
 | SUPERID (UAT only) | `tis-superid` | Everything: the role includes the System Administrator | Everything | Every menu |
 
@@ -428,8 +428,7 @@ Every menu: Dashboard, Operations, Accounts, Commission, Reports, Master and Pro
 
 | Menu | Items |
 |---|---|
-| Master > System | System Settings (with Theme and Branding), Configuration, Document Numbering, Schedules, Audit Trail, E-mail Outbox, Integrations, Message Templates, Insurer Integration |
-| Master > Data Privacy, Go-Live and Data | Data Subject Requests, Consent Register; Go-Live Data Load |
+| Master > System | System Settings, E-mail Layout, Documents and Reports Layout, Document Signatures, Configuration, Document Numbering, Schedules, Audit Trail, E-mail Outbox, Integrations, Message Templates, Insurer Integration |
 | Master | Organization (Company, Branch, Sales Activity Types, Sales Activity Outcomes); Insurance (Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Claim Document Checklist, Repair Shops, Distribution Channels); Location (Country, Province, City / Municipality); Employees (Hierarchy, Designation); Users and Access (User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews) |
 | Master > Finance | Account Determination, Posting Rules, Configuration Approvals, Accounting Flow, Package Bundles, Insurer Rate Tables, Premium Taxes & LGU Rates, Payment Gateways, Commission Rate Matrix, Transaction Code, Currency, Exchange Rate, Bank, Account Category, Main Account, Sub Account, Taxation, Close Checklist, Asset Classes, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats, Bank File Layouts, Remittance Master, Incentive Programs |
 
@@ -443,12 +442,12 @@ Every menu: Dashboard, Operations, Accounts, Commission, Reports, Master and Pro
 | On request | Add a user, change a role, deactivate a leaver | Users and Access > User |
 | On request | Add or change insurers, products, covers, banks and other masters | Master > Insurance, Master > Finance |
 | On request | Change a business setting agreed with the process owner | Master > Configuration |
-| On request | Change the theme, the sign-in page, the document and e-mail branding, the signature mapping; import a brand pack; enable a bundled brand pack (with the trademark acknowledgement) or go back to the default | Master > System Settings > Theme and Branding |
+| On request | Change the e-mail layout, the layout of the documents and reports, the signature mapping | Master > System > E-mail Layout, Documents and Reports Layout, Document Signatures |
 | On request | Set up or switch on a connector (SMS, CTPL authentication, insurer API, bank files) with the server administrator | Master > Integrations |
 | Monthly | Review users without two-step verification, dormant users and segregation-of-duties conflicts | Users and Access > User Access Matrix |
 | Quarterly | Run an access review | Users and Access > Access Reviews |
 | Before go-live | Company and letterhead, official receipt numbering to match the Authority to Print, security settings, e-mail settings | Company, Document Numbering, Configuration |
-| Before go-live | Load the configuration and migration workbooks, reconcile, set the go-live lock | Master > Go-Live Data Load (chapter Go-Live Data Load) |
+| Before go-live | Check the reconciliation of the configuration and migration workbooks loaded by the implementation team, set the go-live lock | Master > Configuration (chapter Go-Live Data Load) |
 
 ## Users
 
@@ -529,7 +528,7 @@ Every printed document and report PDF (quotation, request for quotation, placeme
 3. Tick **Letterhead company - used on documents and reports** for the company whose letterhead the documents use. Only one company holds it.
 4. Select **Save**, then print any statement or report as PDF to check the letterhead.
 
-The application name and logo of the sign-in page and the sidebar come from Master > System Settings, not from the Company master. Branches are kept on Master > Organization > Branch in the same way.
+The application name and logo of the sign-in page and the sidebar come from the brand pack of the environment, not from the Company master. Branches are kept on Master > Organization > Branch in the same way.
 
 ## Insurers and the other masters
 
@@ -628,88 +627,48 @@ The group **Go-live** (area Company & Branding) holds the cutover date `golive.c
 
 > Change tax rates, GL accounts and maker-checker switches only with the agreement of the Accounting Manager. Settings that control postings are protected: the system refuses a change that must go through Configuration Approvals.
 
-**System Settings** (Master > System > System Settings) holds the quick branding and localisation: **Application name** (shown on the sign-in page, the sidebar and the browser tab), **Application logo (screen)** with **Upload Logo** or **Add Company Logo**, **Favicon** with **Upload Favicon**, **Display Currency**, **Default Language**, **Primary Color** and **Secondary Color**. **Save** applies them to every user, including the sign-in page. The **Theme** group links to **Theme and Branding (full theme, sign-in page, documents, e-mail, signatures, brand packs)**, described in the next section. Printed documents use the logo of the letterhead company in Master > Organization > Company.
+**System Settings** (Master > System > System Settings) holds the localisation: **Display Currency** (amounts are labelled in it; the accounts stay in the base currency of the Currency master) and **Default Language**. **Save** applies them to every user. The application name, the logo, the favicon and the colours of the screens and the sign-in page come from the brand pack of the environment (the Toyota Insurance Services pack in the TISPH environments), set when the environment is deployed; they are not changed on a screen. Printed documents use the logo of the letterhead company in Master > Organization > Company.
 
 ![Master > System Settings](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-system-settings.png)
 
-## Theme and Branding
+## E-mail Layout
 
-Master > System > System Settings > **Theme and Branding** sets the look of the screens, the sign-in page, the printed documents, the report files and the e-mails of the broker, as data: no new release is needed. Opening the page needs the settings permission of the System Administrator; a saved theme reaches every signed-in user on their next page and the documents, reports and e-mails at once.
+Master > System > **E-mail Layout** sets the layout every e-mail of the system is sent in (quotation links, notices, receipts, reminders, debit notes). The three screens below need the settings permission (System Administrator, TIS IT AppSupport / Admin).
 
-![Master > System Settings > Theme and Branding: the Theme tab, the live preview and the contrast list](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-theme.png)
+![Master > System > E-mail Layout](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-email-layout.png)
 
-The editor on the left has seven tabs: **Theme**, **Sign-in page**, **Documents and reports**, **E-mail**, **Name and images**, **Document signatures** and **Brand packs**. The right-hand side shows the **Live preview** (the header, side bar, a table, buttons and the sign-in panel in the colours being edited) and the **Contrast (WCAG AA 4.5:1)** list. At the top, **Sample document** opens a PDF printed with the theme as it is on the screen, saved or not; **Discard changes** returns to the saved theme; **Save** stores the theme. Save is disabled while a blocking contrast check fails, and the red message **Cannot save** names the check.
+1. Switch **Send e-mails in the branded layout (header with the logo, footer line)** on or off.
+2. Set the **Header background**, the **Header text** and the **Line under the header** with the colour picker or by typing the hex value (#rrggbb). The badge next to the header text shows its contrast against the background: green from 4.5:1, red below.
+3. Choose whether the **Logo in the header** is shown and write the **Footer** with the placeholders {{companyName}}, {{address}}, {{licence}} and {{tin}}.
+4. **Show a sample e-mail** renders a sample message in the layout being edited, saved or not.
+5. Select **Save**. Every e-mail sent from then on uses the layout, queued ones included. **Discard changes** returns to the saved layout.
 
-### Theme: presets, layout and colours
+## Documents and Reports Layout
 
-1. On **Theme**, select a preset under **Presets**: **iorta TechNXT (default)**, **Classic Blue**, **Corporate Grey** or **Teal**. The preset fills every colour, the layout and the font; the sign-in picture already uploaded is kept. As soon as a value is changed the preset reads **Custom**. Enter a **Theme name**.
-2. Under **Layout**, choose the **Header style** (**White** or **Coloured (secondary colour)**), the **Side bar style** (**White** or **Dark**), the **Density** (**Comfortable** or **Compact**), the **Table header style** (**Solid (secondary colour)** or **Light**) and the **Font**: Nunito (bundled, the default), Arial / Helvetica and System UI from the user's computer, or Roboto, Open Sans, Lato, Source Sans 3, Inter, Montserrat, Poppins and Noto Sans from Google Fonts, only through this list. The sliders set the corner radius of fields, cards, panels and buttons in pixels.
-3. Under **Colours**, set each colour of the groups **Brand** (primary, primary hover, text on primary, light tint, secondary, accent), **Header**, **Side bar**, **Tables**, **Buttons, links and fields** and **Page**, with the colour picker or by typing the hex value (#rrggbb). The badge next to a text colour shows its contrast against its background: green from 4.5:1, red below. **Reset to default** on a group returns the values of the preset.
-4. Select **Save**. The message confirms that every signed-in user gets the theme on the next page and that documents, reports and e-mails use it from now on.
+Master > System > **Documents and Reports Layout** sets how every printed document (quotation, policy schedule, slips, endorsement, receipts, billing statements, vouchers, debit notes, claim letters) and every report PDF or Excel file is printed, together with the logo, legal name, TIN, licence and address of the primary company (Master > Organization > Company).
 
-### Contrast check
-
-The server checks the theme while it is edited, with the rules it applies on Save. Text on the buttons (normal and hover), on the primary colour, in the header, in the table headers and in the document table headers must reach WCAG AA, 4.5:1; below that the theme cannot be saved and the message reads, for example, Button text on button colour: contrast 2.1:1 is below WCAG AA 4.5:1. The other pairs (side bar text and active item, links on white cards, page headings, the e-mail header and the document section headings) only warn: the theme is saved and the warning is shown after Save. The list on the right shows every pair with its ratio and a tick, a warning triangle or a cross.
-
-### Sign-in page
-
-![Theme and Branding: the Sign-in page tab](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-theme-login.png)
-
-1. On **Sign-in page**, choose the **Picture**: **Picture library** (the pictures delivered with the product: Philippine insurance (default), Motor: road and city, Property: homes and buildings, Travel and accident: islands, Neutral pattern), **Own picture (upload)** or **Colour only**.
-2. For an own picture select **Upload picture**: JPG, PNG, WebP or SVG (a plain drawing), up to 5 MB, at least 1600 x 1200 px for sharp desktops. Set the **Focal point** sliders (left to right, top to bottom) so that the important part of the picture stays visible on a narrow screen. **Remove picture** goes back to the library.
-3. Set **Gradient from** and **Gradient to** (the colours behind the picture), **Darken the picture** (0 to 80%) and **Show the picture on phones (as a banner)**. The frame below shows the panel as a desktop or, with **Phone**, as a phone.
-4. Under **Texts**, enter the **Headline** (empty: the delivered title, Welcome to followed by the application name), the **Tagline** (empty: Sign in with your user ID and password.), whether to **Show "Powered by iorta TechNXT"** and the **Logo height on the sign-in page (px)** (24 to 140).
-5. Select **Save**.
-
-### Documents and reports
-
-Every printed document (quotation, policy schedule, slips, endorsement, receipts, billing statements, vouchers, debit notes, claim letters) and every report PDF or Excel file is printed with these values together with the logo, legal name, TIN, licence and address of the primary company (Master > Organization > Company).
+![Master > System > Documents and Reports Layout](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-documents-layout.png)
 
 1. Under **Print colours**, set the **Accent (rules, marker)**, the **Titles and section headings**, the **Section heading band**, the **Table header** and the **Table header text** (an empty colour follows the accent), the **Logo height on documents (pt)** (24 to 80) and whether to **Print the logo on documents**.
 2. Under **Footer lines**, write the **Footer on every document and report**, with the placeholders {{licence}}, {{tin}} and {{companyName}} (delivered: Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}), and an optional **Extra line on report files**.
 3. Under **Excel report files**, set the colour and text of the **Header row** and whether the **Logo and company banner above the table** are printed (the header row then moves down).
 4. Select **Sample document** to check the result as a PDF, then **Save**.
 
-### E-mail
+The server checks the colours with the rules it applies on Save: text in the document table headers must reach WCAG AA, 4.5:1. Below that **Save** is disabled and the red message **Cannot save** names the check; the section heading colours below 4.5:1 only warn after Save. Every save is in the audit trail.
 
-On **E-mail**, switch **Send e-mails in the branded layout (header with the logo, footer line)** on or off, set the **Header background**, the **Header text** and the **Line under the header**, whether the **Logo in the header** is shown, and the **Footer** with the placeholders {{companyName}}, {{address}}, {{licence}} and {{tin}}. **Show a sample e-mail** renders a sample message in the layout. Every e-mail the system sends (quotation links, notices, receipts, reminders, debit notes) uses it.
-
-### Name and images
-
-On **Name and images**, enter the **Application name (sign-in page, side bar, browser tab)** and keep the images: the **Application logo (side bar, sign-in page)** (PNG, JPG, WebP or SVG, up to 2 MB) and the **Favicon (browser tab)** (PNG, ICO or SVG, up to 512 KB), each with **Upload** and **Use default**, and the **Logo height in the side bar (px)** (20 to 80). An uploaded image applies at once; an SVG must be a plain drawing, so a file with scripts or links is refused. The logo on printed documents is the logo of the primary company in Master > Organization > Company; a brand pack import can set it.
-
-### Document signatures
+## Document Signatures
 
 Signatures are captured in Master > Insurance > Signatories (the company's signatories: the **E-signature** icon on the row opens the capture: **Draw** the signature or **Upload image**, PNG with a transparent background or JPEG up to 512 KB, set **Effective from**, tick the consent statement and select **Save signature**; every version is kept under **Versions** and **Revoke** ends one with a reason) and on My Profile (**My e-signature**: a user's own signature, printed where a document is signed by the user who issued or approved it).
 
-![Theme and Branding: the Document signatures tab](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-theme-signatures.png)
+![Master > System > Document Signatures](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-document-signatures.png)
 
-The tab **Document signatures** says which signature prints on which document:
+Master > System > **Document Signatures** says which signature prints on which document:
 
 1. Choose the **Document**: Quotation slip, Policy schedule, Endorsement, Official receipt, Acknowledgement receipt, Payment voucher, Commission debit note, Billing statement / invoice, Statement of account, Journal voucher or Claim settlement letter.
 2. For each slot set the **Slot** code (lower-case letters, digits and hyphens; fixed once saved), the **Label** printed under the signature (for example Prepared by, Approved by), **Signed by** (Signatory chosen on the document (else the default signatory); A named signatory, with the signatory chosen next to it; The default signatory (documents.default_signatory); The user who approved the document; The user who issued / prepared the document) and **Prints** (Once the document is issued; Once the document is approved; Always (also on drafts)). **Active** switches a slot off without deleting it; the bin removes it.
 3. **Add slot** adds one more; **Save** stores the mapping of the document chosen.
 
 A draft prints its slots unsigned with an UNSIGNED DRAFT watermark; a cancelled document prints a CANCELLED watermark and no signature. In an uploaded document template (Product Configurator > Document Manager) a signature is placed with {{signature:slot}}, slot being the slot code.
-
-### Brand packs
-
-A brand pack is the whole branding of an environment in one file: the theme (colours, layout, sign-in page, documents, e-mail), the application name, the logo, the favicon, the sign-in picture and the print logo.
-
-![Theme and Branding: the Brand packs tab](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-theme-packs.png)
-
-- **Export .zip** or **Export .json** downloads the pack of this environment. Import it in another environment to promote the branding, for example from UAT to Production.
-- **Choose brand pack** checks the file first without changing anything: the message says that the pack is valid, what it contains (theme, logo, favicon, sign-in picture, document logo) and any contrast warnings, with swatches of its main colours. Tick **Also use the logo on printed documents (print logo of the primary company)** and **Also set the application name of the pack** as needed, then select **Apply brand pack**. The message lists what was applied, and the theme, images and name are in force at once.
-
-A pack that the application would refuse (a colour that is not a hex value, a font outside the list, text on buttons, header or table headers below WCAG AA) is refused at the check. A client brand pack carries the marks of a client of iorta TechNXT and is applied only in that client's environments, under the client's contract with iorta TechNXT, which covers the use of its marks there. Every save, upload, import, enablement and return to the default of this screen is in the audit trail.
-
-**Bundled packs.** The top of the tab lists the brand packs delivered with the product, so a client pack is enabled from the screen and not by uploading a file. Each card shows the pack's name, **Marks owned by** (the owner of the trademarks it carries), **Version**, a description, swatches of its main colours and the status **Enabled** or **Available**. Nothing is enabled by default: a new environment runs the iorta TechNXT default branding, and the line above the cards says **The iorta TechNXT default branding is in force.** The Toyota Insurance Services pack is delivered this way: it stays optional and is used only in that client's environments.
-
-- **Sample document** and **Sample e-mail** on a card open the sample PDF and the sample e-mail printed with the pack's theme, without saving anything.
-- **Enable** opens a confirmation. It states that the name, emblem and logo in the pack are trademarks of their owner, a client of iorta TechNXT, and that their use is covered by the client's contract with iorta TechNXT for the environments of that engagement; it shows **Basis:** followed by the contract reference from the pack manifest; it checks the pack first (valid, what it contains, any contrast warnings); and it asks the administrator to tick **This environment belongs to the client engagement whose contract with iorta TechNXT covers these marks**. The **Enable** button of the dialog stays disabled until the box is ticked. The options **Also use the logo on printed documents** and **Also set the application name of the pack** work as for an import. Enabling applies the theme, the application name and the images at once, like an import, and records the enablement: the card then shows **Enabled on <date> by <user>**, and the same line, with the pack's name, appears above the cards. The enablement is in the audit trail with the acknowledgement.
-- **Back to default** (on the enabled card and in the status line) asks for a confirmation, then restores the iorta TechNXT default theme, logo and favicon, returns the application name and the print logo of the primary company to what they were before the pack was enabled, and closes the enablement. **History** below the cards lists every enablement with its outcome (Enabled, Back to default, Replaced), who and when.
-
-A bundled pack needs the settings permission to be seen and enabled, like the rest of the screen. Enabling it without the acknowledgement is refused by the server as well, so the acknowledgement cannot be skipped by calling the API directly.
 
 ## Schedules
 
@@ -809,7 +768,7 @@ To change a template, select the pencil:
 3. Leave **Connector** empty to use the default connector of the channel, or choose another one.
 4. Save. **Send a test** sends the template with example values to a mobile number you enter.
 
-**Consent check.** Before a message is queued the system reads the client's consents (Master > Data Privacy). A marketing message needs a granted marketing consent. A service message is sent unless the client refused or withdrew consent for processing; with `messaging.service_consent` set to `opt-in` it needs a granted consent. A message that fails the check, or a client without a valid mobile number, is recorded in the outbox as **Not sent** with the reason.
+**Consent check.** Before a message is queued the system reads the client's consents in the consent register (the refusals recorded by a campaign opt-out among them). A marketing message needs a granted marketing consent. A service message is sent unless the client refused or withdrew consent for processing; with `messaging.service_consent` set to `opt-in` it needs a granted consent. A message that fails the check, or a client without a valid mobile number, is recorded in the outbox as **Not sent** with the reason.
 
 The jobs `sms-renewal-notices` and `sms-payment-reminders` are delivered switched off: switch them on in Master > Schedules when the SMS connector is live. Each notice is sent once per policy and day; running a job again sends nothing twice. The **Messages sent** tab lists every SMS and Viber message.
 
@@ -843,23 +802,7 @@ Master > System > Insurer Integration connects BrokerVerse to the insurers' syst
 
 Use it for investigations, access reviews and to show that maker and checker were different people.
 
-## Data privacy
-
-The Data Privacy menu supports the broker's Data Protection Officer under the Data Privacy Act. The System Administrator and Operations roles hold the privacy permissions (`read:privacy`, `write:privacy`).
-
-**Consent.** Consent is recorded on the client (tab **Data privacy**) and on the prospect view, per purpose: **Processing** (privacy notice acknowledged), **Marketing** and **Sharing with insurers**. Select **Record consent**, choose the purpose, **Given** or **Refused**, the channel (Form, E-mail, Phone, Portal, In person), the evidence and the notice version (the version in force, `privacy.notice_version`, by default). **Withdraw** ends a consent with a reason; the record stays in the history. Master > Data Privacy > Consent Register lists every consent of every client and prospect, with **Current status only** to see the latest per purpose.
-
-![Master > Data Privacy > Data Subject Requests](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-privacy-requests.png)
-
-**Requests.** Master > Data Privacy > Data Subject Requests is the register of requests:
-
-1. Select **Log request**. Enter the requester name and contact, the request type (Access, Rectification, Erasure or blocking, Objection, Data portability, Withdraw consent), the request details and the date received. Search the client or prospect, or leave it empty while the requester is not yet identified.
-2. Save. The request takes a number from the DSR series and a due date `privacy.request_due_days` (15) calendar days after the date received. The cards count **Open**, **Overdue**, **Completed** and **Rejected**.
-3. Use the download icon (**Export personal data**) to give the data subject a copy, as JSON or Excel; the export is noted on the request.
-4. For an erasure, use **Anonymise**. The dry run shows what would be cleared per record type, or why the data must be kept for now (for example policies in force, open bills or claims, or less than `privacy.retention_years` (10) years since the last policy expiry). Names are replaced by an anonymised label and contact details, addresses, ID numbers, birth date and personal notes are cleared; policy, receipt and claim numbers, amounts and dates are kept for the books.
-5. Select **Close**, record the outcome told to the data subject, and close the request as Completed or Rejected.
-
-The job `privacy-requests-due` (Master > Schedules, delivered switched off) notifies the privacy team every morning of open requests past their due date.
+## Personal identifiers
 
 **Masking of personal identifiers.** A user whose role does not hold **View full personal identifiers** (`view:pii`) sees TIN, government ID numbers, mobile numbers, e-mail addresses, bank account numbers and birth dates partially masked on every list and view, for example ***-***-**9-000, j***@example.ph or 1984-**-**, and in every Excel, CSV and PDF listing. Delivered to the System Administrator, Sales, Operations, Accounting and the Accounting Manager; Processing and Claims see masked values unless the role is given the permission (Master > Users and Access > Roles). A form opened with masked values keeps the stored values when it is saved. Which fields are personal comes from the personal data catalogue of the masking tool. Settings: `privacy.masking_enabled`, `privacy.masking_exempt_paths` and `privacy.pii_reveal_mode`. With **on-request**, holders of the permission also see masked values until they choose **Show full identifiers** in the user menu (top right; **Hide full identifiers** turns it off); each screen opened with full identifiers is recorded in the audit trail (record type personal_data, action unmask).
 
@@ -879,7 +822,7 @@ The System Administrator approves posting rule and account determination changes
 
 # Go-Live Data Load
 
-This chapter is for the System Administrator and the migration lead. Master > Go-Live Data Load loads the broker's go-live data with two Excel workbooks instead of one upload per master. Only the System Administrator holds the permissions of the screen (`read:data-load` to download and see the history, `write:data-load` to upload, validate and load).
+This chapter is for the System Administrator and the migration lead. The broker's go-live data is loaded with two Excel workbooks instead of one upload per master. The implementation team loads them through the go-live data load API and its scripts (there is no screen for it): each workbook is validated as a trial run, the rows in error come back in an errors workbook with the sheet, row, column and message, the corrected workbook is loaded again without creating duplicates, and every load is in the audit trail. Only the System Administrator holds the permissions (`read:data-load`, `write:data-load`).
 
 ## The two workbooks
 
@@ -888,76 +831,15 @@ This chapter is for the System Administrator and the migration lead. Master > Go
 | **Configuration** | Everything needed to run new business: company, settings, countries, states, cities, branches, departments, hierarchy, designations, users, currencies, exchange rates, chart of accounts, banks, bank accounts, signatories, transaction codes, write-off reasons, insurers, lines of business, products, policy types, covers, vehicle brands, models, variants and vehicles, commission rates, premium taxes, LGU rates, authority limits and document numbering. |
 | **Migration** | The open business of the old system at cutover: clients, in-force policies (with their old numbers), open premium receivables, open claims and the GL opening balances. |
 
-The blank workbooks are also delivered with the upload templates as GoLive_Configuration_Workbook.xlsx and GoLive_Migration_Workbook.xlsx.
-
-Choose the workbook with **Configuration** or **Migration** at the top right of the screen. Next to it the screen shows the cutover date (**Cutover** and the date, or **No cutover date**) and, once go-live is locked, **Go-live locked**.
+The blank workbooks are delivered with the upload templates as GoLive_Configuration_Workbook.xlsx and GoLive_Migration_Workbook.xlsx; the workbook with the current data of an environment is how configuration moves from one environment to the next (test, UAT, production).
 
 Each workbook has an **Instructions** sheet (load order, rules, every column), a **Lists** sheet with the allowed values, and one sheet per object in load order. Row 1 holds the headers; a required column ends with *. Row 2 is a sample row: a row whose first cell starts with SAMPLE is never loaded. Enter data from row 3. Dates are written YYYY-MM-DD.
 
 Some set-up is not in the workbooks and is entered on its own screen: roles and permissions, segregation of duties, delegations, access reviews, the approval of authority limits, tax codes, account determination and posting rules, statement formats, the close checklist, product templates and the motor tariff, package bundles, payment gateways, System Settings, schedules, fiscal years and periods, remittance masters, incentive programmes, referrer accounts and petty cash funds. The Instructions sheet lists them.
 
-## Download the template
-
-![Master > Go-Live Data Load, tab Download Template (configuration workbook)](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-golive-template.png)
-
-1. Choose Master > Go-Live Data Load and the workbook (**Configuration** or **Migration**).
-2. On the tab **Download Template**, the table lists each sheet with **Sheet**, **Screen** (the screen that holds the same data), **Key** (the columns that identify a record), **Columns** and **Required columns**.
-3. Select **Blank template** for an empty workbook, or **Current data** for a workbook filled with the data already in BrokerVerse.
-
-![The migration workbook: clients, policies, open items, open claims and opening balances](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-golive-migration.png)
-
-**Current data** is also how configuration moves from one environment to the next (test, UAT, production): download it in the source environment and upload it in the target. Rows equal to the target are reported as unchanged, differences update the target and missing records are created. The go-live lock setting is never exported or loaded.
-
-## Upload and validate
-
-1. Fill in the workbook and save it as .xlsx.
-2. On the tab **Upload and Validate**, select **Upload and validate** and choose the file.
-3. BrokerVerse reads the workbook as a new batch (**Batch 1**, **Batch 2** and so on) and validates every sheet in load order as a trial run. Nothing is saved yet. A policy may refer to a client or an insurer added by the same workbook: the trial run checks the sheets together, as they will load.
-
-![Upload and Validate: the result of a batch](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-golive-validate.png)
-
-The result shows the batch number, the file name and the status, the cards **Rows read**, **Valid rows** and **Rows with errors**, and a line per sheet:
-
-| Column | Meaning |
-|---|---|
-| **Read**, **Valid**, **Errors** | Rows read from the sheet, rows that pass every check, rows with at least one error. |
-| **New** | Records that the load will create. |
-| **Changed** | Existing records that the load will update. |
-| **Unchanged** | Rows equal to the record in BrokerVerse; they are not written. |
-| **For approval** | Authority limits, which another System Administrator approves on Master > Users and Access > Authority Matrix. |
-| **Skipped** | Rows in error left out by a load with **Load valid rows only**. |
-
-Under the sheets, **Errors** lists each error with **Sheet**, **Row** (the row number in Excel), **Column** and **Message**.
-
-![Errors of a batch](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-golive-errors.png)
-
-## Correct the errors
-
-1. Select the Excel icon next to the batch (**Download errors**). The file has the same layout with only the rows in error and an **Errors** column that gives the reason.
-2. Correct those rows in the errors file or in the full workbook.
-3. Upload the corrected file again with **Upload and validate**. A record is identified by its key (for example the branch code, the insurer code, the legacy policy number), so loading the same or a corrected workbook again updates the record and never creates a duplicate.
-
-**Validate again** (the circular arrow) runs the checks on the same batch once more, for example after a master was added on its own screen.
-
-## Load
-
-1. Open the batch on **Upload and Validate** (or with the eye on **History**).
-2. If some rows still have errors, decide whether to load the valid rows now: **Load valid rows only** is ticked by default for the configuration workbook and not for the migration workbook. Without it, a batch with errors cannot be loaded.
-3. Select **Load**. The dialog **Load the workbook** asks you to confirm the number of valid rows of the batch. Select **Load** again, or **Cancel**.
-
-The load runs in one transaction. If a row now fails because the data changed since the validation, nothing is saved and the errors are shown. The load is written to the audit trail and the batch status becomes **Loaded**. After a load of the valid rows only, the rows left out keep their errors: the batch still lists them and **Download errors** still gives them, to correct and upload again.
-
-When the configuration workbook creates users, the dialog **Temporary passwords of the new users** shows each new user's temporary password once. The passwords are not stored: select **Copy**, hand each password to its user privately, then select **Done**. Each user chooses a new password at the first sign-in. A load cannot change your own account, and only a System Administrator can give the System Administrator role.
-
-## History
-
-![History of the go-live batches](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-golive-history.png)
-
-The tab **History** lists the batches of the workbook chosen with **Batch**, **File**, **Status** (**Validated**, **Errors** or **Loaded**), **Read**, **Valid**, **Errors**, **Uploaded** (user and time) and **Loaded** (user and time). The eye (**View result**) opens the result of a batch, the Excel icon downloads its errors and, for the migration workbook, the chart icon downloads its reconciliation.
-
 ## Migration rules and reconciliation
 
-The migration workbook is refused until the cutover date is set: the tab **Upload and Validate** then says **Set the cutover date (golive.cutover_date) first**. The cutover date is the first day of live transactions and is set on Master > Configuration, area Company & Branding, group **Go-live**, or on the Settings sheet of the configuration workbook.
+The migration workbook is refused until the cutover date is set, with the message **Set the cutover date (golive.cutover_date) first**. The cutover date is the first day of live transactions and is set on Master > Configuration, area Company & Branding, group **Go-live**, or on the Settings sheet of the configuration workbook.
 
 ![Master > Configuration: the Go-live settings](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-config-golive.png)
 
@@ -969,11 +851,11 @@ The migration workbook is refused until the cutover date is set: the tab **Uploa
 - A migrated policy is renewed like any other policy; its renewal is new business in BrokerVerse.
 - Migrated records post nothing: no bill, booking journal or commission accrual for a policy, no booking journal for an open item (the GL carries it in the opening balance), no e-mail, notification or journal for an open claim. Migrated policies count as policies in force but not as premium written or new business on the Executive Dashboard.
 
-Every validation and load of the migration workbook shows a **Reconciliation**: per sheet the **Workbook rows** and **Workbook totals** (premium, sum insured, open balance, claim estimate, debits and credits) against the records and totals **In BrokerVerse**, and the checks that the trial balance balances and that the premiums receivable control account equals the open items of the cutover date, each with **Agrees** or **Difference**. Compare these totals with the old system before go-live; **Download reconciliation** gives them as a workbook.
+Every validation and load of the migration workbook shows a **Reconciliation**: per sheet the **Workbook rows** and **Workbook totals** (premium, sum insured, open balance, claim estimate, debits and credits) against the records and totals **In BrokerVerse**, and the checks that the trial balance balances and that the premiums receivable control account equals the open items of the cutover date, each with **Agrees** or **Difference**. Compare these totals with the old system before go-live; the implementation team hands them over as a workbook.
 
 ## Go-live lock
 
-When the data is loaded and reconciled, switch on the go-live lock on Master > Configuration, group **Go-live** (`golive.locked`). From then on the migration workbook can no longer be uploaded, validated or loaded, and the reset of test transactions refuses to run. The configuration workbook stays available for new masters. Agree the moment with the project lead: the lock is the formal end of the migration.
+When the data is loaded and reconciled, switch on the go-live lock on Master > Configuration, group **Go-live** (`golive.locked`). From then on the migration workbook can no longer be validated or loaded, and the reset of test transactions refuses to run. The configuration workbook stays available for new masters. Agree the moment with the project lead: the lock is the formal end of the migration.
 
 # Sales & Marketing (Account Executive)
 
@@ -1534,10 +1416,10 @@ Operations (role Operations (Client Servicing)) looks after the clients once the
 | Dashboard | Executive Dashboard |
 | Operations | Home; Sales & Marketing (Prospects, Quick Quote, Request for Quotation (Broker Slip), Quotations, Placement Slips, Lead Assignment, Dealer Programmes, Comparison Reports, Campaigns, Sales Activities); Clients; Policy; Fleet Schedules; Marine Open Covers; Claims; Renewals (Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management, Performance); My Work; Payments; CTPL Authentication; Cover Notes; Policy Cancellation |
 | Reports | All Reports; Operational Reports; Report Builder |
-| Master | Insurance > Distribution Channels; Data Privacy (Data Subject Requests, Consent Register) |
+| Master | Insurance > Distribution Channels |
 | Product Configurator | Dashboard, Product Templates |
 
-Data Privacy is described in the System Administrator chapter, and Lead Assignment, Dealer Programmes, Comparison Reports, Campaigns, Fleet Schedules and Marine Open Covers in the chapter Distribution, programmes and products.
+Lead Assignment, Dealer Programmes, Comparison Reports, Campaigns, Fleet Schedules and Marine Open Covers in the chapter Distribution, programmes and products.
 
 ## Daily and periodic tasks
 
@@ -1583,7 +1465,7 @@ The screen has four tabs:
 | Tab | What it shows |
 |---|---|
 | My Items | Every open item you own or may act on, by category: quotations, Requests for Quotation, placement slips, renewals and expiring policies, premiums due, collection follow-ups, endorsements, claims, approvals waiting for you, missing documents, bank reconciliations in progress, period close (checklist items to sign off and failed checks of the open close runs), users and access (open access reviews, users who have not signed in since their account was created), system health (scheduled jobs whose last run failed, failed integration messages) and your tasks. Only the categories your role may read appear; the role preset of Home puts the categories of the role first. |
-| My Team | For managers only: one row per person reporting to you (directly or below), with open, overdue and due-today counts, and the team's items. **Reassign** moves a claim, a data subject request or a task to yourself or to someone in your team. |
+| My Team | For managers only: one row per person reporting to you (directly or below), with open, overdue and due-today counts, and the team's items. **Reassign** moves a claim or a task to yourself or to someone in your team. |
 | My Tasks | Your work diary: tasks you created, tasks given to you and, for managers, tasks given to others. |
 | Calendar | The tasks and items falling due by day, for one day or the next 7 days, with an **Overdue** strip above. |
 
@@ -1622,7 +1504,6 @@ A client is a person or company that holds or has held a policy, or that was onb
 | **Claim** | The client's claims with status. |
 | **Renewal** | Renewals due and quoted. |
 | **Endorsement** | The client's endorsements with number, type, policy, status and payment. |
-| **Data privacy** | Consent per purpose (Processing, Marketing, Sharing with insurers) with channel, evidence and notice version; **Record consent**, **Withdraw**, **Show history**. |
 
 To correct the name, address or contact details of a client with an issued policy, raise a Personal Details Change endorsement, so the change is recorded against the policy and sent to the insurer.
 
@@ -2872,7 +2753,7 @@ Choose Operations > Sales & Marketing > Comparison Reports. The comparison repor
 
 ![Operations > Sales & Marketing > Campaigns](/home/user/BDOI-OOTB/docs/package/source/manual-images/d-campaigns.png)
 
-Choose Operations > Sales & Marketing > Campaigns. Campaigns e-mail offers only to clients and prospects whose marketing consent is in force in the consent register (Master > Data Privacy) and who have an e-mail address. Everyone else is left out and recorded with the reason.
+Choose Operations > Sales & Marketing > Campaigns. Campaigns e-mail offers only to clients and prospects whose marketing consent is in force in the consent register and who have an e-mail address. Everyone else is left out and recorded with the reason.
 
 ### Segments
 
@@ -2953,7 +2834,7 @@ The landing page of every role after sign-in: My Work with the role preset (cate
 
 | Screen | Purpose | Fields and rules | Procedure |
 |---|---|---|---|
-| Clients | The client record (CL-) with tabs Policy, Claim, Renewal, Endorsement, Data privacy. | Created at the first policy; details changed by Personal Details Change endorsement. | Operations |
+| Clients | The client record (CL-) with tabs Policy, Claim, Renewal, Endorsement. | Created at the first policy; details changed by Personal Details Change endorsement. | Operations |
 | Policy | Policies (POL-) with payment status; **More actions**: Claim, Endorsement; **Bulk Upload**. | Policy statuses Active, Expired, Renewed, Lapsed, Cancelled; payment statuses Pending, Reviewing, Partial, Completed, Refunded; motor issue needs the KYC fields. | Sales & Marketing, Operations |
 | Claims | Claims (CLM-) and their journey. | Date of loss inside the policy period and not in the future; blocked while premium unpaid; settlement maker-checker; statuses Pending, Processing, Pending Approval, Approved, Settled, Rejected, Closed. | Claims |
 | Fleet Schedules | One motor policy covering many vehicles (FLT-). | Vehicles priced one by one (own damage, acts of nature, excess liability, CTPL by class, taxes); **Issue policy**; add or delete a vehicle by endorsement pro-rata; `fleet.minimum_vehicles`. | Distribution, programmes and products |
@@ -3064,8 +2945,10 @@ See the chapter Reports, dashboards, schedules and notifications.
 
 | Screen | Purpose |
 |---|---|
-| System Settings | Branding (app title, logo, favicon), display currency, default language, theme colours; link to Theme and Branding. |
-| System Settings > Theme and Branding | Theme presets, layout, font and colours with the WCAG AA contrast check; sign-in page picture and texts; document, report and Excel branding; e-mail layout; application name and images; document signature mapping; brand pack export and import (System Administrator chapter). |
+| System Settings | Display currency and default language. |
+| E-mail Layout | The layout of every e-mail: header colours, logo, footer line; sample e-mail. |
+| Documents and Reports Layout | Print colours, logo, footer lines and Excel header of every document and report file, with the WCAG AA contrast check; sample document. |
+| Document Signatures | Which signature prints on which document: slots, signed by, prints when. |
 | Configuration | Every business setting by area; changes audited. |
 | Document Numbering | Number series: prefix, format tokens, digits, counter reset, next number. |
 | Schedules | Scheduled jobs: timetable, status, next and last run; **Run now**, **Run history**, **Edit schedule**. |
@@ -3074,9 +2957,6 @@ See the chapter Reports, dashboards, schedules and notifications.
 | Integrations | Connectors (SMS, Viber, CTPL authentication, LTO feed, insurer API, bank files) with mode, credentials by environment variable name, retries and **Test connection**; the outbox and inbox of every message; job `integration-outbox`. |
 | Message Templates | SMS and Viber texts with placeholders, consent needed and connector; **Send a test**; the messages sent. |
 | Insurer Integration | Mapping per insurer (broker code, product codes, request and answer maps, claim statuses); requests for policy issuance, premium data and claim status; claim status file import. |
-| Go-Live Data Load | Configuration and migration workbooks: **Blank template**, **Current data**, **Upload and validate**, errors download, **Load**, reconciliation, history (chapter Go-Live Data Load). |
-| Data Privacy > Data Subject Requests | Requests of data subjects (DSR-) with due dates; **Log request**, **Export personal data**, **Anonymise**, **Close**. |
-| Data Privacy > Consent Register | Consents given, refused and withdrawn by clients and prospects. |
 
 ### Organization, Insurance, Location, Employees, Users and Access
 
@@ -3165,7 +3045,6 @@ Numbers follow their series on Master > Document Numbering. The delivered format
 | CWT | BIR Form 2307 |
 | PC, PCR, PCRC | Petty cash transaction, request, receipt |
 | CALC, INC | Incentive calculation, incentive programme |
-| DSR | Data subject request |
 | CVN, LOA, CPV | Cover note, letter of authority, claim payment voucher |
 | PDC, BPB | Post-dated cheque, bank payment batch |
 | APV, SPV, FA, FAD | Supplier invoice voucher, supplier payment, fixed asset, asset disposal |
@@ -3234,10 +3113,9 @@ BrokerVerse runs its daily work through scheduled jobs, in Manila time: policy e
 | Renewal | Renewal notices sent; renewal terms to approve; renewed; lapsed. |
 | Remittance and commission | Remittance, settlement and debit note approvals; incentive batch approvals. |
 | Finance | Journal voucher and petty cash approvals; month-end reminders; close run to approve; supplier invoices to approve; post-dated cheques due; bounced cheques. |
-| Data privacy | Data subject requests overdue. |
 | My Work | Task reminders at the time chosen; one alert for an overdue task. |
 
-**E-mails** are queued in the E-mail Outbox and sent by the E-mail outbox job when sending is switched on, in the branded layout of Theme and Branding. The main e-mails are the quotation approval request and shared quotation to clients, the request for quotation and the placement slip to insurers, the policy issued and endorsement notices to clients, the renewal notices (First, Second and Final Notice), the premium payment reminders, the Preliminary Loss Advice and the missing document reminders of claims, the commission debit note and the remittance statements to insurers, the cover note, the comparison report and the bank endorsement letter, campaign e-mails, scheduled reports to staff and the password reset code. Official receipts, premium invoices, cover notes, debit notes, comparison reports and bank letters travel as PDF attachments (up to `email.max_attachment_mb`); other documents as download links. **SMS and Viber** messages (renewal notices, payment reminders, claim updates, CTPL authentication) are sent through the connectors of Master > System > Integrations with the texts of Message Templates, once a connector is live and the jobs are switched on; until then, and for WhatsApp, phone and letter, the action is only recorded. The wording of each e-mail is a template in Master > Configuration; the BrokerVerse Communication Templates and Touchpoints document lists every e-mail and notification with its trigger, recipient and text.
+**E-mails** are queued in the E-mail Outbox and sent by the E-mail outbox job when sending is switched on, in the layout of Master > System > E-mail Layout. The main e-mails are the quotation approval request and shared quotation to clients, the request for quotation and the placement slip to insurers, the policy issued and endorsement notices to clients, the renewal notices (First, Second and Final Notice), the premium payment reminders, the Preliminary Loss Advice and the missing document reminders of claims, the commission debit note and the remittance statements to insurers, the cover note, the comparison report and the bank endorsement letter, campaign e-mails, scheduled reports to staff and the password reset code. Official receipts, premium invoices, cover notes, debit notes, comparison reports and bank letters travel as PDF attachments (up to `email.max_attachment_mb`); other documents as download links. **SMS and Viber** messages (renewal notices, payment reminders, claim updates, CTPL authentication) are sent through the connectors of Master > System > Integrations with the texts of Message Templates, once a connector is live and the jobs are switched on; until then, and for WhatsApp, phone and letter, the action is only recorded. The wording of each e-mail is a template in Master > Configuration; the BrokerVerse Communication Templates and Touchpoints document lists every e-mail and notification with its trigger, recipient and text.
 
 ![Notifications under the bell](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-bell.png)
 
@@ -3255,7 +3133,7 @@ BrokerVerse runs its daily work through scheduled jobs, in Manila time: policy e
 | You were signed out | 30 minutes without activity. Sign in again. |
 | The new password does not meet all the rules below. | Choose a password that ticks every rule under **New password**. |
 | The two new passwords do not match. | Type the same password in **New password** and **Confirm new password**. |
-| Set the cutover date (golive.cutover_date) first | Go-Live Data Load refuses the migration workbook until the cutover date is set on Master > Configuration, group Go-live. |
+| Set the cutover date (golive.cutover_date) first | The go-live data load refuses the migration workbook until the cutover date is set on Master > Configuration, group Go-live. |
 | Go-live is locked: the migration workbook can no longer be loaded | The go-live lock is on. Only the configuration workbook can still be loaded. |
 | Invalid mobile number | Use a Philippine mobile number: 0917 123 4567, +63 917 123 4567 or 9171234567. |
 | A required field is empty | Fill in every field marked with an asterisk. |
@@ -3281,7 +3159,7 @@ BrokerVerse runs its daily work through scheduled jobs, in Manila time: policy e
 | Commission payout blocked: no bank account | Add the referrer's bank account first. |
 | A discount above the role's limit is refused | The Authority Matrix limits the discount of your role. Ask a role with a higher limit. |
 | E-mails are not received | Sending is switched off or the mail server is not set; the E-mail Outbox says which. Ask the System Administrator. |
-| Cannot save: ... contrast ... is below WCAG AA 4.5:1 | Theme and Branding refuses a theme whose button, header or table header text does not reach 4.5:1. Change the text or background colour until the badge is green. |
+| Cannot save: ... contrast ... is below WCAG AA 4.5:1 | Documents and Reports Layout refuses a table header text that does not reach 4.5:1 against its background. Change the text or background colour until the badge is green. |
 | Submit to insurer is disabled on a claim | A required document of the checklist is still missing (`claims.require_documents_before_submission`). Mark it received, upload it or waive it with a reason. |
 | The disposal is refused: a month before it is not depreciated | Run the Depreciation Run up to the month before the disposal first (`fixed_assets.disposal_requires_depreciation_to_date`). |
 | Something went wrong on this screen | Reload the screen. If it persists, report the screen, the record number, the time and the request ID to support. |
@@ -3317,7 +3195,7 @@ BrokerVerse runs its daily work through scheduled jobs, in Manila time: policy e
 | Billing mode | How the premium is paid: broker billed or direct bill. |
 | Checked against slip | The e-policy returned by the insurer was compared with the placement slip and confirmed by a second user. |
 | e-Policy | The issued policy the insurer sends back to the broker, recorded against the placement slip. |
-| Brand pack | The branding of one environment in one file (theme, application name, logo, favicon, sign-in picture, print logo), exported and imported on Theme and Branding. A bundled pack is delivered with the product and enabled on the same screen after the administrator confirms that the environment belongs to the client engagement whose contract with iorta TechNXT covers its marks; nothing is enabled by default. |
+| Brand pack | The branding of one environment in one file (theme, application name, logo, favicon, sign-in picture, print logo). A bundled pack is delivered with the product and enabled when the environment is deployed (BRAND_PACK), for the client engagement whose contract with iorta TechNXT covers its marks; nothing is enabled by default. |
 | Broker billed | The client pays the premium to the broker, who remits it to the insurer net of commission. |
 | Broker slip | The request for quotation that presents a risk to several insurers. |
 | Brokerage | The commission the insurer pays the broker. |

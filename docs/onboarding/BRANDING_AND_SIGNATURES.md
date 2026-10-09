@@ -1,6 +1,10 @@
 # Broker branding and e-signatures
 
-Version 1.2.2, 09 October 2026, iorta TechNXT. Changes: the `BRAND_PACK` deployment variable enables a bundled pack once at start-up (section 3); the theme's font, side bar colours and marker reach every screen (section 1). 1.2.1: client brand packs are used under the client's contract with iorta TechNXT (no separate permission letter); 1.2: bundled brand packs (shipped with the product, enabled on the
+Version 1.3, 09 October 2026, iorta TechNXT. Changes: the Theme and Branding screen is withdrawn; the look of an
+environment comes from its brand pack (`BRAND_PACK` of the deployment, or the brand pack API), and the e-mail and
+document sections of the theme and the signature mapping have their own screens under Master > System Configuration
+(E-mail Layout, Documents and Reports Layout, Document Signatures); brand packs are exported, imported, enabled and
+reset through the API (section 3). 1.2.2: the `BRAND_PACK` deployment variable enables a bundled pack once at start-up (section 3); the theme's font, side bar colours and marker reach every screen (section 1). 1.2.1: client brand packs are used under the client's contract with iorta TechNXT (no separate permission letter); 1.2: bundled brand packs (shipped with the product, enabled on the
 screen with the trademark acknowledgement, Back to default), their support procedure in section 5. Version 1.1:
 section 5, support procedures for brand pack import and e-signature revocation.
 
@@ -8,8 +12,9 @@ How to brand a broker's BrokerVerse environment, what changes automatically, how
 to documents, how brand packs move branding between environments, and the trademark rule for client brand packs.
 
 **Short answer to "if I change the logo and theme for a broker, does everything change?"** Yes. Since this release the
-theme is data (setting `branding.theme`), not compiled styles. Saving it in **Master > System Settings > Theme and
-Branding** changes, for every signed-in user on their next navigation and without a rebuild or a reload:
+theme is data (setting `branding.theme`), not compiled styles. Enabling or importing a brand pack (section 3), and
+saving the e-mail or document layout on Master > System Configuration, changes, for every signed-in user on their next
+navigation and without a rebuild or a reload:
 
 | Area | What follows the theme |
 | --- | --- |
@@ -26,21 +31,18 @@ BIR returns printed from Period End) are not restyled.
 
 1. **Company master** (Master > Company): the primary company's legal name, TIN, IC licence number, registered address
    and print logo. These print on every document and report.
-2. **Theme and Branding** (Master > System Settings > Theme and Branding, System Administrator, `write:settings`):
-   - *Theme*: pick a preset (iorta TechNXT default, Classic Blue, Corporate Grey, Teal) or edit any colour (the theme
-     becomes Custom); header / side bar style, density, table header style, font, corner radius. **Reset to default**
-     on each section goes back to the preset's values.
-   - *Sign-in page*: library picture (Philippine insurance default, Motor, Property, Travel, Neutral pattern: original
-     artwork shipped with the product) drawn over the theme's gradient, or an uploaded picture (JPG, PNG, WebP or a plain
-     SVG, up to 5 MB, with focal point and a desktop / phone preview), or colour only; darkening; phone banner;
-     headline and tagline.
-   - *Documents and reports*: print colours, footer line, extra report line, logo on documents, Excel header colours
-     and the optional Excel logo / banner. **Sample document** opens a PDF printed with the unsaved theme.
-   - *E-mail*: layout on/off, header colours, logo, footer. **Show a sample e-mail** renders it.
-   - *Name and images*: application name, application logo, favicon, side bar logo height.
-3. **Save.** The live preview and the contrast panel show the result first. Saving is refused when text on the
-   buttons, the primary colour, the header, the table header or the document table header does not reach WCAG AA
-   (4.5:1); other pairs (side bar, links, headings, e-mail header) give a warning.
+2. **Brand pack** of the environment: the theme (colours, layout, font, sign-in page, documents, e-mail), the
+   application name, the logo, the favicon and the sign-in picture. A client whose pack ships with the product gets it
+   from the `BRAND_PACK` variable of its deployment; any other pack is imported through the API (section 3). Build a
+   pack from a folder with `build-brand-pack.js` and check it with the dry run of the import before applying it.
+3. **Layout screens** (Master > System Configuration, System Administrator or IT AppSupport, `write:settings`):
+   - *E-mail Layout*: layout on/off, header colours, logo, footer. **Show a sample e-mail** renders it.
+   - *Documents and Reports Layout*: print colours, footer line, extra report line, logo on documents, Excel header
+     colours and the optional Excel logo / banner. **Sample document** opens a PDF printed with the unsaved values.
+   - *Document Signatures*: the signature mapping (section 2).
+   Each screen saves its own section of the theme and keeps the rest (preset, colours, sign-in page) as the brand pack
+   set it. Saving is refused when text on the document table header does not reach WCAG AA (4.5:1); the e-mail header
+   and the document headings give a warning.
 
 Validation also refuses: fonts outside the safe list (Google Fonts only from `fonts.googleapis.com`, through the list),
 images from other web sites (images are uploaded), SVGs with scripts, event handlers or external references, unknown
@@ -87,7 +89,7 @@ settings, and texts with `<` or `>`.
 
 ### Mapping to documents
 
-Theme and Branding > **Document signatures**: per document type, its slots: label, who signs (signatory chosen on
+Master > System Configuration > **Document Signatures**: per document type, its slots: label, who signs (signatory chosen on
 the document, a named signatory, the default signatory `documents.default_signatory`, the approving user, the issuing
 user) and when it prints (once issued, once approved, always).
 
@@ -119,10 +121,11 @@ designation, date and the image, or nothing when the slot is not mapped).
 A brand pack is the whole branding of an environment in one file: the theme (all sections), the application name,
 the logo, the favicon, the sign-in picture and the print logo.
 
-* **Export**: Theme and Branding > Brand packs > Export .zip (theme.json + images) or .json (images embedded).
-* **Import**: choose the file; it is checked first (theme rules, contrast, image types and SVG safety) and shows the
-  colours and contents; **Apply** saves it. Options: also set the print logo of the primary company (Master > Company);
-  also set the application name.
+* **Export**: `GET /api/branding/brand-pack?format=zip` (theme.json + images) or `format=json` (images embedded).
+* **Import**: `POST /api/branding/brand-pack?dryRun=true` with the file (multipart `file`) checks it first (theme rules,
+  contrast, image types and SVG safety) and returns the colours and contents; the same call with `dryRun=false` saves
+  it. Options (form fields): `applyDocumentLogo` (also set the print logo of the primary company, Master > Company) and
+  `applySystemName` (also set the application name).
 * **Promotion**: brand UAT, export the pack, import it in Production (with the configuration workbook of the go-live
   data load: the workbook carries settings and masters; the brand pack carries the branding and its images). The
   import is audited (entity `branding`, action `import`).
@@ -143,12 +146,11 @@ them and checks that the built zip is in step with the folder); change the docs 
 
 * **Nothing is enabled by default**: a fresh database runs the iorta TechNXT default theme, name and images; the
   bundled packs are only listed. The generic seed does not name any client.
-* **Screen**: Theme and Branding > Brand packs > **Bundled packs** lists each pack with its owner, description, colour
-  preview and status (Enabled / Available), with **Sample document** and **Sample e-mail** (the pack's theme, unsaved),
-  **Enable** and, once enabled, **Enabled on <date> by <user>** and **Back to default**.
-* **Enable** = the import logic (`importBrandPack()`), preceded by a dry run and by the acknowledgement: the dialog
-  states who owns the marks and the contract that covers them, and the administrator must tick **This environment belongs to th
-   client engagement whose contract with iorta TechNXT covers these marks** before the button activates. The API refuses the call without `acknowledgedPermission: true`
+* **List**: `GET /api/branding/packs/bundled` gives each pack with its owner, description, colour preview and status
+  (enabled / available), the enablement in force and the history.
+* **Enable** = the import logic (`importBrandPack()`), preceded by a dry run (`POST .../bundled/<id>/check`) and by the
+  acknowledgement: the call states that the environment belongs to the client engagement whose contract with iorta
+  TechNXT covers the marks. The API refuses it without `acknowledgedPermission: true`
   (`POST /api/branding/packs/bundled/<id>/enable`), so the acknowledgement cannot be skipped.
 * **Record**: table `brand_pack_enablements` (pack, version, owner, the acknowledgement text, who, when, what was
   applied, the branding before the pack; status enabled / replaced / reverted) and the audit trail (entity `branding`,
@@ -174,9 +176,9 @@ its marks** there (keep the contract reference with the engagement records). Do 
 prospects. Do not copy photographs from a client's web site into the repository; the
 broker uploads its own sign-in picture.
 
-The Toyota Insurance Services pack is delivered as a bundled pack (section 3): it is enabled from Theme and Branding
-> Brand packs > Bundled packs, with the acknowledgement that the environment belongs to that engagement, or by the
-`BRAND_PACK` variable of a TISPH deployment, and never by default. The
+The Toyota Insurance Services pack is delivered as a bundled pack (section 3): it is enabled by the `BRAND_PACK`
+variable of a TISPH deployment, or through the API with the acknowledgement that the environment belongs to that
+engagement, and never by default. The
 importable zip in `Brand_Packs/` remains for an environment that cannot reach the bundled list (an older release).
 
 The Toyota Insurance Services pack: white header and side bar, near-black text and buttons, light grey backgrounds,
@@ -188,14 +190,15 @@ an Insurance Agent, Licence No. {{licence}}". See its README.
 
 ### Brand pack import in an environment in use
 
-1. **Before**: export the current pack (Theme and Branding > Brand packs > Export .zip) and keep it with the change
+1. **Before**: export the current pack (`GET /api/branding/brand-pack?format=zip`) and keep it with the change
    record. In Production the import is a normal change approved by the broker.
-2. **Import** the new pack. Nothing is saved until **Apply**: the check shows the colours, the contents and any
-   refusal (contrast below WCAG AA on buttons, primary colour, header, table header or document table header; unsafe
-   SVG; unknown image type).
-3. **Apply** with the options chosen (print logo of the primary company, application name). The import is in the
+2. **Check** the new pack with the dry run of the import: nothing is saved; the answer gives the colours, the contents
+   and any refusal (contrast below WCAG AA on buttons, primary colour, header, table header or document table header;
+   unsafe SVG; unknown image type).
+3. **Apply** it (`dryRun=false`) with the options chosen (print logo of the primary company, application name). The import is in the
    audit trail (entity `branding`, action `import`).
-4. **Check** the sign-in page, one screen, **Sample document** and **Show a sample e-mail**. Users see the new theme on
+4. **Check** the sign-in page, one screen, **Sample document** (Documents and Reports Layout) and **Show a sample
+   e-mail** (E-mail Layout). Users see the new theme on
    their next navigation; no reload or rebuild is needed.
 5. **Rollback**: import the pack exported in step 1.
 
@@ -205,16 +208,17 @@ Support refuses the change in any other environment.
 ### Enabling a bundled brand pack
 
 1. **Engagement**: confirm the environment belongs to that client's engagement, whose contract covers its marks
-   (section 4). The administrator who enables the pack acknowledges it on the screen; the acknowledgement is stored with the enablement and in the audit trail, so
-   the record must be true.
-2. **Before**: export the current pack (Brand packs > Export .zip) and keep it with the change record, as for an
-   import. Back to default does not restore a custom theme saved before the pack (it restores the product default),
+   (section 4). The administrator who enables the pack acknowledges it in the call; the acknowledgement is stored with
+   the enablement and in the audit trail, so the record must be true. A TISPH deployment does this through
+   `BRAND_PACK` at its first start.
+2. **Before**: export the current pack (`GET /api/branding/brand-pack?format=zip`) and keep it with the change
+   record, as for an import. Back to default does not restore a custom theme saved before the pack (it restores the product default),
    so the export is the way back to a custom theme.
-3. **Enable**: Brand packs > Bundled packs > the pack's **Enable**; read the check result, tick the acknowledgement,
-   choose the options (print logo, application name), **Enable**. The card shows **Enabled on <date> by <user>**.
+3. **Enable**: check the pack (`POST /api/branding/packs/bundled/<id>/check`), then enable it with the
+   acknowledgement and the options (print logo, application name). The list shows it enabled with who and when.
 4. **Check** the sign-in page, one screen, Sample document and Sample e-mail, as after an import.
-5. **Rollback**: **Back to default** on the card (the product default, the name and print logo as before the pack),
-   or import the pack exported in step 2 to return to a custom theme. Both are audited.
+5. **Rollback**: Back to default (`POST /api/branding/packs/reset-default`: the product default, the name and print
+   logo as before the pack), or import the pack exported in step 2 to return to a custom theme. Both are audited.
 
 ### Revoking an e-signature
 
@@ -224,7 +228,7 @@ Support refuses the change in any other environment.
    reason. **User**: the administrator revokes it from the user; only the user can capture a new one.
 3. The version stops printing at once on every document, including reprints of older documents. A slot mapped to that
    signatory prints the name without an image until a new version is captured or the slot is mapped to someone else
-   (Theme and Branding > Document signatures).
+   (Master > System Configuration > Document Signatures).
 4. Check the audit trail (entity `e-signature`, action `revoke`). For suspected misuse, open a security incident and
    list the documents issued with the version since the suspected date.
 

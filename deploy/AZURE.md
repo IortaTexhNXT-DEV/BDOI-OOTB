@@ -112,8 +112,8 @@ Repeat for `dev`, `sit`, `uat` and `prod`, in that order.
 5. **DNS** (section 8), then open the address, sign in as `BrokerVerse` with the `admin-password` secret
    (`az keyvault secret show --vault-name <key_vault_name> -n admin-password --query value -o tsv`) and choose a new
    password when asked. The site already shows the Toyota Insurance Services branding: the API enabled the bundled
-   brand pack named by `BRAND_PACK` at its first start (REFERENCE.md, "Brand pack of the deployment"); Master > System
-   Settings > Theme and Branding > Brand packs shows the enablement by `system`. Back to default there is kept across
+   brand pack named by `BRAND_PACK` at its first start (REFERENCE.md, "Brand pack of the deployment"); GET
+   /api/branding/packs/bundled shows the enablement by `system`. A later Back to default through the API is kept across
    restarts.
 6. **GitHub environment** (section 9): copy the output `github_variables` into the environment's variables and set
    `DEPLOY_ENABLED=true`.
