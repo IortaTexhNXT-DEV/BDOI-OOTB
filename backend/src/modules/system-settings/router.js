@@ -18,7 +18,7 @@ const { router, define } = moduleRouter('System Settings', '/system-settings');
 // Files are held in memory and validated against uploads.image_max_bytes before being written to UPLOAD_DIR.
 const upload = memoryUpload({ files: 1 });
 const singleFile = (req, res, next) => upload.single('file')(req, res, (e) => next(e ? badRequest(e.message) : undefined));
-const SCREEN = 'App shell (API only)';
+const SCREEN = 'System settings (API only)';
 const example = {
   logoUrl: '/bdoi/iorta-technxt.png', logoPresets: [{ id: 'iorta-technxt', label: 'iorta TechNXT (BrokerVerse)', url: '/bdoi/iorta-technxt.png', builtIn: true }], displayCurrency: 'PHP',
   primaryColor: '#0072d8', secondaryColor: '#004ea8', defaultLanguage: 'en', faviconUrl: '/favicon.ico', systemName: 'BrokerVerse',

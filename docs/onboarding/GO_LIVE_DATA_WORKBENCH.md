@@ -270,7 +270,7 @@ never point it at a live database.
 Entered on screen (also listed on the Instructions sheet): roles and permissions; segregation of duties, delegations,
 access reviews; approval of authority limits; tax codes; account determination and posting rules; bank statement,
 bank transaction type and insurer statement formats; close checklist; product templates, rating and the motor tariff;
-package bundles; payment gateway credentials; System Settings (name, logo, colours); company logo files; schedules;
+package bundles; payment gateway credentials; the brand pack (name, logo, colours: `BRAND_PACK`); company logo files; schedules;
 fiscal years and periods; remittance masters, reinsurance, incentive programs; referrer accounts; petty cash funds.
 
 Not migrated: premium due to insurers and commission due to referrers (opening balances, then payment vouchers);

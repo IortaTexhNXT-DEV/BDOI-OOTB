@@ -2851,7 +2851,7 @@
 }"
 193,Branding,GET,/api/branding/assets/:name,"A branding image (logo, favicon, login-panel) uploaded for this environment; public, versioned by ?v=",Sign-in; App shell,Public,Public,,(image)
 194,Branding,GET,/api/branding/brand-pack,"Export the brand pack of this environment (theme incl. layout, sign-in page, documents and e-mail; application name; logo, favicon, sign-in picture, print logo): format=zip (default) or json","Brand pack (BRAND_PACK, API only) > Export",Bearer JWT,"read:settings, write:settings",Query: ?format=zip,(application/zip | application/json)
-195,Branding,POST,/api/branding/brand-pack,"Import a brand pack (multipart ""file"": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name","Brand pack (BRAND_PACK, API only) > Import",Bearer JWT,write:settings,"Query: ?dryRun=true&applyDocumentLogo=true
+195,Branding,POST,/api/branding/brand-pack,"Import a brand pack (multipart ""file"": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name. Only the dry run while BRAND_PACK is set","Brand pack (BRAND_PACK, API only) > Import",Bearer JWT,write:settings,"Query: ?dryRun=true&applyDocumentLogo=true
 {
   ""file"": ""(binary .zip or .json)""
 }","{
@@ -3116,7 +3116,7 @@
     }
   }
 }"
-198,Branding,POST,/api/branding/packs/bundled/:id/enable,"Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name","Brand pack (BRAND_PACK, API only) > Bundled packs > Enable",Bearer JWT,write:settings,"{
+198,Branding,POST,/api/branding/packs/bundled/:id/enable,"Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name. Refused while BRAND_PACK is set (the API enforces that pack at start-up)","Brand pack (BRAND_PACK, API only) > Bundled packs > Enable",Bearer JWT,write:settings,"{
   ""acknowledgedPermission"": true,
   ""applyDocumentLogo"": true,
   ""applySystemName"": true
@@ -3280,7 +3280,7 @@
     }
   }
 }"
-199,Branding,POST,/api/branding/packs/reset-default,"Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited","Brand pack (BRAND_PACK, API only) > Back to default",Bearer JWT,write:settings,,"{
+199,Branding,POST,/api/branding/packs/reset-default,"Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited. Refused while BRAND_PACK is set","Brand pack (BRAND_PACK, API only) > Back to default",Bearer JWT,write:settings,,"{
   ""success"": true,
   ""data"": {
     ""theme"": {
@@ -3606,7 +3606,7 @@
     ""systemName"": ""BrokerVerse""
   }
 }"
-203,Branding,PUT,/api/branding/theme,"Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA",Master > System Configuration > E-mail Layout / Documents and Reports Layout,Bearer JWT,write:settings,"{
+203,Branding,PUT,/api/branding/theme,"Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA. While BRAND_PACK is set, only the e-mail and document sections (and the logo height on documents) can change: the request is laid over the theme in force and a change to anything else is refused",Master > System Configuration > E-mail Layout / Documents and Reports Layout,Bearer JWT,write:settings,"{
   ""theme"": {
     ""preset"": ""iorta-technxt"",
     ""name"": ""iorta TechNXT (default)"",
@@ -3839,7 +3839,7 @@
     ]
   }
 }"
-205,Branding,POST,/api/branding/upload/:asset,"Upload a branding image (multipart ""file""): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing","Brand pack (BRAND_PACK, API only) > Upload",Bearer JWT,write:settings,"{
+205,Branding,POST,/api/branding/upload/:asset,"Upload a branding image (multipart ""file""): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing. Refused while BRAND_PACK is set","Brand pack (BRAND_PACK, API only) > Upload",Bearer JWT,write:settings,"{
   ""file"": ""(binary)""
 }","{
   ""success"": true,
@@ -3898,7 +3898,7 @@
     }
   }
 }"
-206,Branding,DELETE,/api/branding/upload/:asset,Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library),"Brand pack (BRAND_PACK, API only) > Reset image",Bearer JWT,write:settings,,"{
+206,Branding,DELETE,/api/branding/upload/:asset,Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library). Refused while BRAND_PACK is set,"Brand pack (BRAND_PACK, API only) > Reset image",Bearer JWT,write:settings,,"{
   ""success"": true,
   ""data"": {
     ""theme"": {
@@ -23653,7 +23653,7 @@
     ""branding.primary_color"": ""#0072d8""
   }
 }"
-1184,System Settings,GET,/api/system-settings,"System settings (branding, display currency, language, application name); public because the sign-in page needs them",Master > System Settings; Sign-in; App shell,Public,Public,,"{
+1184,System Settings,GET,/api/system-settings,"System settings (branding, display currency, language, application name); public because the sign-in page needs them",System settings (API only); Sign-in; App shell,Public,Public,,"{
   ""success"": true,
   ""data"": {
     ""logoUrl"": ""/bdoi/iorta-technxt.png"",
@@ -23686,7 +23686,7 @@
     ""updatedAt"": ""2026-09-28T00:00:00.000Z""
   }
 }"
-1185,System Settings,PUT,/api/system-settings,"Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName)",Master > System Settings,Bearer JWT,write:settings,"{
+1185,System Settings,PUT,/api/system-settings,"Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName); while BRAND_PACK is set a change to logoUrl, faviconUrl, the colours or systemName is refused",System settings (API only),Bearer JWT,write:settings,"{
   ""systemName"": ""BrokerVerse"",
   ""displayCurrency"": ""PHP"",
   ""primaryColor"": ""#0072d8"",
@@ -23752,7 +23752,7 @@
     ""total"": 1
   }
 }"
-1187,System Settings,PUT,/api/system-settings/configuration,"Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked; settings owned by another screen are refused",Master > Configuration,Bearer JWT,write:settings,"{
+1187,System Settings,PUT,/api/system-settings/configuration,"Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked (the display currency must be an active currency); settings owned by another screen are refused",Master > Configuration,Bearer JWT,write:settings,"{
   ""settings"": {
     ""limits.bulk_upload_max_rows"": 1000,
     ""notification.email_enabled"": true
@@ -23765,7 +23765,7 @@
     ""total"": 0
   }
 }"
-1188,System Settings,POST,/api/system-settings/logo-presets,"Add a company logo preset (JSON { label, url, setActive } or multipart label + file + setActive)",Master > System Settings > Add Company Logo,Bearer JWT,write:settings,"{
+1188,System Settings,POST,/api/system-settings/logo-presets,"Add a company logo preset (JSON { label, url, setActive } or multipart label + file + setActive); setActive is refused while BRAND_PACK is set",System settings (API only) > Add Company Logo,Bearer JWT,write:settings,"{
   ""label"": ""Sample Bank"",
   ""url"": ""https://example.com/logo.png"",
   ""setActive"": true
@@ -23802,7 +23802,7 @@
     ""updatedAt"": ""2026-09-28T00:00:00.000Z""
   }
 }"
-1189,System Settings,DELETE,/api/system-settings/logo-presets/:id,Remove a custom logo preset (built-in presets cannot be removed),Master > System Settings > Remove Logo,Bearer JWT,write:settings,,"{
+1189,System Settings,DELETE,/api/system-settings/logo-presets/:id,Remove a custom logo preset (built-in presets cannot be removed),System settings (API only) > Remove Logo,Bearer JWT,write:settings,,"{
   ""success"": true,
   ""data"": {
     ""logoUrl"": ""/bdoi/iorta-technxt.png"",
@@ -23835,7 +23835,7 @@
     ""updatedAt"": ""2026-09-28T00:00:00.000Z""
   }
 }"
-1190,System Settings,POST,/api/system-settings/upload/:field,"Upload the logo or favicon (multipart ""file""); stored under UPLOAD_DIR and recorded in documents",Master > System Settings > Upload,Bearer JWT,write:settings,"{
+1190,System Settings,POST,/api/system-settings/upload/:field,"Upload the logo or favicon (multipart ""file""); stored under UPLOAD_DIR and recorded in documents. Refused while BRAND_PACK is set",System settings (API only) > Upload,Bearer JWT,write:settings,"{
   ""file"": ""(binary)""
 }","{
   ""success"": true,

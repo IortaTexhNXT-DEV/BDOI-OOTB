@@ -13144,7 +13144,7 @@
           ]
         },
         {
-          "name": "Import a brand pack (multipart \"file\": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name",
+          "name": "Import a brand pack (multipart \"file\": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name. Only the dry run while BRAND_PACK is set",
           "request": {
             "method": "POST",
             "header": [
@@ -13173,7 +13173,7 @@
                 }
               ]
             },
-            "description": "Import a brand pack (multipart \"file\": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Import\n\nAccess: write:settings",
+            "description": "Import a brand pack (multipart \"file\": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name. Only the dry run while BRAND_PACK is set\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Import\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"file\": \"(binary .zip or .json)\"\n}",
@@ -13215,7 +13215,7 @@
                     }
                   ]
                 },
-                "description": "Import a brand pack (multipart \"file\": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Import\n\nAccess: write:settings",
+                "description": "Import a brand pack (multipart \"file\": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name. Only the dry run while BRAND_PACK is set\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Import\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"file\": \"(binary .zip or .json)\"\n}",
@@ -13361,7 +13361,7 @@
           ]
         },
         {
-          "name": "Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name",
+          "name": "Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name. Refused while BRAND_PACK is set (the API enforces that pack at start-up)",
           "request": {
             "method": "POST",
             "header": [
@@ -13390,7 +13390,7 @@
                 }
               ]
             },
-            "description": "Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Bundled packs > Enable\n\nAccess: write:settings",
+            "description": "Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name. Refused while BRAND_PACK is set (the API enforces that pack at start-up)\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Bundled packs > Enable\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"acknowledgedPermission\": true,\n  \"applyDocumentLogo\": true,\n  \"applySystemName\": true\n}",
@@ -13432,7 +13432,7 @@
                     }
                   ]
                 },
-                "description": "Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Bundled packs > Enable\n\nAccess: write:settings",
+                "description": "Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name. Refused while BRAND_PACK is set (the API enforces that pack at start-up)\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Bundled packs > Enable\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"acknowledgedPermission\": true,\n  \"applyDocumentLogo\": true,\n  \"applySystemName\": true\n}",
@@ -13458,7 +13458,7 @@
           ]
         },
         {
-          "name": "Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited",
+          "name": "Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited. Refused while BRAND_PACK is set",
           "request": {
             "method": "POST",
             "header": [],
@@ -13473,7 +13473,7 @@
                 "reset-default"
               ]
             },
-            "description": "Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Back to default\n\nAccess: write:settings"
+            "description": "Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited. Refused while BRAND_PACK is set\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Back to default\n\nAccess: write:settings"
           },
           "response": [
             {
@@ -13492,7 +13492,7 @@
                     "reset-default"
                   ]
                 },
-                "description": "Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Back to default\n\nAccess: write:settings"
+                "description": "Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited. Refused while BRAND_PACK is set\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Back to default\n\nAccess: write:settings"
               },
               "status": "OK",
               "code": 200,
@@ -13712,7 +13712,7 @@
           ]
         },
         {
-          "name": "Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA",
+          "name": "Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA. While BRAND_PACK is set, only the e-mail and document sections (and the logo height on documents) can change: the request is laid over the theme in force and a change to anything else is refused",
           "request": {
             "method": "PUT",
             "header": [
@@ -13731,7 +13731,7 @@
                 "theme"
               ]
             },
-            "description": "Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA\n\nFront-end touchpoint: Master > System Configuration > E-mail Layout / Documents and Reports Layout\n\nAccess: write:settings",
+            "description": "Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA. While BRAND_PACK is set, only the e-mail and document sections (and the logo height on documents) can change: the request is laid over the theme in force and a change to anything else is refused\n\nFront-end touchpoint: Master > System Configuration > E-mail Layout / Documents and Reports Layout\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"theme\": {\n    \"preset\": \"iorta-technxt\",\n    \"name\": \"iorta TechNXT (default)\",\n    \"colors\": {\n      \"primary\": \"#0072d8\",\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"tableHeaderBg\": \"#004ea8\",\n      \"tableHeaderText\": \"#ffffff\"\n    },\n    \"layout\": {\n      \"headerStyle\": \"light\",\n      \"sidebarStyle\": \"light\",\n      \"density\": \"comfortable\",\n      \"tableHeaderStyle\": \"solid\"\n    },\n    \"font\": \"nunito\",\n    \"radius\": {\n      \"sm\": 8,\n      \"md\": 12,\n      \"lg\": 16,\n      \"button\": 8\n    },\n    \"logo\": {\n      \"appHeight\": 36,\n      \"loginHeight\": 56,\n      \"documentHeight\": 46\n    },\n    \"login\": {\n      \"panel\": \"library\",\n      \"library\": \"philippines\",\n      \"panelImageUrl\": \"\",\n      \"focalX\": 50,\n      \"focalY\": 50,\n      \"overlay\": 0,\n      \"showOnMobile\": false,\n      \"headline\": \"\",\n      \"tagline\": \"\"\n    },\n    \"documents\": {\n      \"accentColor\": \"\",\n      \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n    },\n    \"email\": {\n      \"enabled\": true,\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"accentColor\": \"#0072d8\",\n      \"showLogo\": true,\n      \"footerText\": \"{{companyName}} | {{address}}\"\n    }\n  },\n  \"systemName\": \"BrokerVerse\"\n}",
@@ -13763,7 +13763,7 @@
                     "theme"
                   ]
                 },
-                "description": "Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA\n\nFront-end touchpoint: Master > System Configuration > E-mail Layout / Documents and Reports Layout\n\nAccess: write:settings",
+                "description": "Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA. While BRAND_PACK is set, only the e-mail and document sections (and the logo height on documents) can change: the request is laid over the theme in force and a change to anything else is refused\n\nFront-end touchpoint: Master > System Configuration > E-mail Layout / Documents and Reports Layout\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"theme\": {\n    \"preset\": \"iorta-technxt\",\n    \"name\": \"iorta TechNXT (default)\",\n    \"colors\": {\n      \"primary\": \"#0072d8\",\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"tableHeaderBg\": \"#004ea8\",\n      \"tableHeaderText\": \"#ffffff\"\n    },\n    \"layout\": {\n      \"headerStyle\": \"light\",\n      \"sidebarStyle\": \"light\",\n      \"density\": \"comfortable\",\n      \"tableHeaderStyle\": \"solid\"\n    },\n    \"font\": \"nunito\",\n    \"radius\": {\n      \"sm\": 8,\n      \"md\": 12,\n      \"lg\": 16,\n      \"button\": 8\n    },\n    \"logo\": {\n      \"appHeight\": 36,\n      \"loginHeight\": 56,\n      \"documentHeight\": 46\n    },\n    \"login\": {\n      \"panel\": \"library\",\n      \"library\": \"philippines\",\n      \"panelImageUrl\": \"\",\n      \"focalX\": 50,\n      \"focalY\": 50,\n      \"overlay\": 0,\n      \"showOnMobile\": false,\n      \"headline\": \"\",\n      \"tagline\": \"\"\n    },\n    \"documents\": {\n      \"accentColor\": \"\",\n      \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n    },\n    \"email\": {\n      \"enabled\": true,\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"accentColor\": \"#0072d8\",\n      \"showLogo\": true,\n      \"footerText\": \"{{companyName}} | {{address}}\"\n    }\n  },\n  \"systemName\": \"BrokerVerse\"\n}",
@@ -13868,7 +13868,7 @@
           ]
         },
         {
-          "name": "Upload a branding image (multipart \"file\"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing",
+          "name": "Upload a branding image (multipart \"file\"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing. Refused while BRAND_PACK is set",
           "request": {
             "method": "POST",
             "header": [
@@ -13895,7 +13895,7 @@
                 }
               ]
             },
-            "description": "Upload a branding image (multipart \"file\"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Upload\n\nAccess: write:settings",
+            "description": "Upload a branding image (multipart \"file\"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing. Refused while BRAND_PACK is set\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Upload\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"file\": \"(binary)\"\n}",
@@ -13935,7 +13935,7 @@
                     }
                   ]
                 },
-                "description": "Upload a branding image (multipart \"file\"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Upload\n\nAccess: write:settings",
+                "description": "Upload a branding image (multipart \"file\"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing. Refused while BRAND_PACK is set\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Upload\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"file\": \"(binary)\"\n}",
@@ -13961,7 +13961,7 @@
           ]
         },
         {
-          "name": "Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library)",
+          "name": "Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library). Refused while BRAND_PACK is set",
           "request": {
             "method": "DELETE",
             "header": [],
@@ -13983,7 +13983,7 @@
                 }
               ]
             },
-            "description": "Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library)\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Reset image\n\nAccess: write:settings"
+            "description": "Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library). Refused while BRAND_PACK is set\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Reset image\n\nAccess: write:settings"
           },
           "response": [
             {
@@ -14009,7 +14009,7 @@
                     }
                   ]
                 },
-                "description": "Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library)\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Reset image\n\nAccess: write:settings"
+                "description": "Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library). Refused while BRAND_PACK is set\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Reset image\n\nAccess: write:settings"
               },
               "status": "OK",
               "code": 200,
@@ -87985,7 +87985,7 @@
                 "system-settings"
               ]
             },
-            "description": "System settings (branding, display currency, language, application name); public because the sign-in page needs them\n\nFront-end touchpoint: Master > System Settings; Sign-in; App shell\n\nAccess: Public",
+            "description": "System settings (branding, display currency, language, application name); public because the sign-in page needs them\n\nFront-end touchpoint: System settings (API only); Sign-in; App shell\n\nAccess: Public",
             "auth": {
               "type": "noauth"
             }
@@ -88005,7 +88005,7 @@
                     "system-settings"
                   ]
                 },
-                "description": "System settings (branding, display currency, language, application name); public because the sign-in page needs them\n\nFront-end touchpoint: Master > System Settings; Sign-in; App shell\n\nAccess: Public",
+                "description": "System settings (branding, display currency, language, application name); public because the sign-in page needs them\n\nFront-end touchpoint: System settings (API only); Sign-in; App shell\n\nAccess: Public",
                 "auth": {
                   "type": "noauth"
                 }
@@ -88025,7 +88025,7 @@
           ]
         },
         {
-          "name": "Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName)",
+          "name": "Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName); while BRAND_PACK is set a change to logoUrl, faviconUrl, the colours or systemName is refused",
           "request": {
             "method": "PUT",
             "header": [
@@ -88043,7 +88043,7 @@
                 "system-settings"
               ]
             },
-            "description": "Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName)\n\nFront-end touchpoint: Master > System Settings\n\nAccess: write:settings",
+            "description": "Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName); while BRAND_PACK is set a change to logoUrl, faviconUrl, the colours or systemName is refused\n\nFront-end touchpoint: System settings (API only)\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"systemName\": \"BrokerVerse\",\n  \"displayCurrency\": \"PHP\",\n  \"primaryColor\": \"#0072d8\",\n  \"secondaryColor\": \"#004ea8\",\n  \"defaultLanguage\": \"en\",\n  \"logoUrl\": \"/iorta.png\"\n}",
@@ -88074,7 +88074,7 @@
                     "system-settings"
                   ]
                 },
-                "description": "Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName)\n\nFront-end touchpoint: Master > System Settings\n\nAccess: write:settings",
+                "description": "Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName); while BRAND_PACK is set a change to logoUrl, faviconUrl, the colours or systemName is refused\n\nFront-end touchpoint: System settings (API only)\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"systemName\": \"BrokerVerse\",\n  \"displayCurrency\": \"PHP\",\n  \"primaryColor\": \"#0072d8\",\n  \"secondaryColor\": \"#004ea8\",\n  \"defaultLanguage\": \"en\",\n  \"logoUrl\": \"/iorta.png\"\n}",
@@ -88161,7 +88161,7 @@
           ]
         },
         {
-          "name": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked; settings owned by another screen are refused",
+          "name": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked (the display currency must be an active currency); settings owned by another screen are refused",
           "request": {
             "method": "PUT",
             "header": [
@@ -88180,7 +88180,7 @@
                 "configuration"
               ]
             },
-            "description": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked; settings owned by another screen are refused\n\nFront-end touchpoint: Master > Configuration\n\nAccess: write:settings",
+            "description": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked (the display currency must be an active currency); settings owned by another screen are refused\n\nFront-end touchpoint: Master > Configuration\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"settings\": {\n    \"limits.bulk_upload_max_rows\": 1000,\n    \"notification.email_enabled\": true\n  }\n}",
@@ -88212,7 +88212,7 @@
                     "configuration"
                   ]
                 },
-                "description": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked; settings owned by another screen are refused\n\nFront-end touchpoint: Master > Configuration\n\nAccess: write:settings",
+                "description": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked (the display currency must be an active currency); settings owned by another screen are refused\n\nFront-end touchpoint: Master > Configuration\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"settings\": {\n    \"limits.bulk_upload_max_rows\": 1000,\n    \"notification.email_enabled\": true\n  }\n}",
@@ -88238,7 +88238,7 @@
           ]
         },
         {
-          "name": "Add a company logo preset (JSON { label, url, setActive } or multipart label + file + setActive)",
+          "name": "Add a company logo preset (JSON { label, url, setActive } or multipart label + file + setActive); setActive is refused while BRAND_PACK is set",
           "request": {
             "method": "POST",
             "header": [
@@ -88257,7 +88257,7 @@
                 "logo-presets"
               ]
             },
-            "description": "Add a company logo preset (JSON { label, url, setActive } or multipart label + file + setActive)\n\nFront-end touchpoint: Master > System Settings > Add Company Logo\n\nAccess: write:settings",
+            "description": "Add a company logo preset (JSON { label, url, setActive } or multipart label + file + setActive); setActive is refused while BRAND_PACK is set\n\nFront-end touchpoint: System settings (API only) > Add Company Logo\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"label\": \"Sample Bank\",\n  \"url\": \"https://example.com/logo.png\",\n  \"setActive\": true\n}",
@@ -88289,7 +88289,7 @@
                     "logo-presets"
                   ]
                 },
-                "description": "Add a company logo preset (JSON { label, url, setActive } or multipart label + file + setActive)\n\nFront-end touchpoint: Master > System Settings > Add Company Logo\n\nAccess: write:settings",
+                "description": "Add a company logo preset (JSON { label, url, setActive } or multipart label + file + setActive); setActive is refused while BRAND_PACK is set\n\nFront-end touchpoint: System settings (API only) > Add Company Logo\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"label\": \"Sample Bank\",\n  \"url\": \"https://example.com/logo.png\",\n  \"setActive\": true\n}",
@@ -88337,7 +88337,7 @@
                 }
               ]
             },
-            "description": "Remove a custom logo preset (built-in presets cannot be removed)\n\nFront-end touchpoint: Master > System Settings > Remove Logo\n\nAccess: write:settings"
+            "description": "Remove a custom logo preset (built-in presets cannot be removed)\n\nFront-end touchpoint: System settings (API only) > Remove Logo\n\nAccess: write:settings"
           },
           "response": [
             {
@@ -88363,7 +88363,7 @@
                     }
                   ]
                 },
-                "description": "Remove a custom logo preset (built-in presets cannot be removed)\n\nFront-end touchpoint: Master > System Settings > Remove Logo\n\nAccess: write:settings"
+                "description": "Remove a custom logo preset (built-in presets cannot be removed)\n\nFront-end touchpoint: System settings (API only) > Remove Logo\n\nAccess: write:settings"
               },
               "status": "OK",
               "code": 200,
@@ -88380,7 +88380,7 @@
           ]
         },
         {
-          "name": "Upload the logo or favicon (multipart \"file\"); stored under UPLOAD_DIR and recorded in documents",
+          "name": "Upload the logo or favicon (multipart \"file\"); stored under UPLOAD_DIR and recorded in documents. Refused while BRAND_PACK is set",
           "request": {
             "method": "POST",
             "header": [
@@ -88407,7 +88407,7 @@
                 }
               ]
             },
-            "description": "Upload the logo or favicon (multipart \"file\"); stored under UPLOAD_DIR and recorded in documents\n\nFront-end touchpoint: Master > System Settings > Upload\n\nAccess: write:settings",
+            "description": "Upload the logo or favicon (multipart \"file\"); stored under UPLOAD_DIR and recorded in documents. Refused while BRAND_PACK is set\n\nFront-end touchpoint: System settings (API only) > Upload\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"file\": \"(binary)\"\n}",
@@ -88447,7 +88447,7 @@
                     }
                   ]
                 },
-                "description": "Upload the logo or favicon (multipart \"file\"); stored under UPLOAD_DIR and recorded in documents\n\nFront-end touchpoint: Master > System Settings > Upload\n\nAccess: write:settings",
+                "description": "Upload the logo or favicon (multipart \"file\"); stored under UPLOAD_DIR and recorded in documents. Refused while BRAND_PACK is set\n\nFront-end touchpoint: System settings (API only) > Upload\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"file\": \"(binary)\"\n}",

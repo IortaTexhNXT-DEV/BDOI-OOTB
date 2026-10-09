@@ -122,7 +122,8 @@ ones where they are used). The important ones:
 The full list with comments is `backend/.env.example`.
 
 **Settings** (`app_settings` table) hold every business parameter: tax rates, account codes, limits, e-mail text,
-switches. Administrators edit them on Master > Configuration (and System Settings for branding). Code reads them with
+switches. Administrators edit them on Master > Configuration (the branding comes from the brand pack of the deployment,
+`BRAND_PACK`). Code reads them with
 `getSetting('group.key', fallback)`; the fallback must equal the seeded value (a test checks it). A change saved on
 one instance reaches the others within about five seconds.
 

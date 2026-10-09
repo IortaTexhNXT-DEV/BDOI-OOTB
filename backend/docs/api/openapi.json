@@ -19040,7 +19040,7 @@
       },
       "post": {
         "operationId": "postBrandingBrandPack",
-        "summary": "Import a brand pack (multipart \"file\": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name",
+        "summary": "Import a brand pack (multipart \"file\": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name. Only the dry run while BRAND_PACK is set",
         "tags": [
           "Branding"
         ],
@@ -20150,7 +20150,7 @@
     "/branding/packs/bundled/{id}/enable": {
       "post": {
         "operationId": "postBrandingPacksBundledIdEnable",
-        "summary": "Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name",
+        "summary": "Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name. Refused while BRAND_PACK is set (the API enforces that pack at start-up)",
         "tags": [
           "Branding"
         ],
@@ -20807,7 +20807,7 @@
     "/branding/packs/reset-default": {
       "post": {
         "operationId": "postBrandingPacksResetDefault",
-        "summary": "Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited",
+        "summary": "Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited. Refused while BRAND_PACK is set",
         "tags": [
           "Branding"
         ],
@@ -22174,7 +22174,7 @@
       },
       "put": {
         "operationId": "putBrandingTheme",
-        "summary": "Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA",
+        "summary": "Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA. While BRAND_PACK is set, only the e-mail and document sections (and the logo height on documents) can change: the request is laid over the theme in force and a change to anything else is refused",
         "tags": [
           "Branding"
         ],
@@ -23157,7 +23157,7 @@
     "/branding/upload/{asset}": {
       "post": {
         "operationId": "postBrandingUploadAsset",
-        "summary": "Upload a branding image (multipart \"file\"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing",
+        "summary": "Upload a branding image (multipart \"file\"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing. Refused while BRAND_PACK is set",
         "tags": [
           "Branding"
         ],
@@ -23433,7 +23433,7 @@
       },
       "delete": {
         "operationId": "deleteBrandingUploadAsset",
-        "summary": "Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library)",
+        "summary": "Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library). Refused while BRAND_PACK is set",
         "tags": [
           "Branding"
         ],
@@ -141827,7 +141827,7 @@
         "tags": [
           "System Settings"
         ],
-        "description": "Front-end touchpoint: Master > System Settings; Sign-in; App shell\n\nAccess: Public",
+        "description": "Front-end touchpoint: System settings (API only); Sign-in; App shell\n\nAccess: Public",
         "parameters": [],
         "responses": {
           "200": {
@@ -141960,16 +141960,16 @@
             }
           }
         },
-        "x-screen": "Master > System Settings; Sign-in; App shell",
+        "x-screen": "System settings (API only); Sign-in; App shell",
         "security": []
       },
       "put": {
         "operationId": "putSystemSettings",
-        "summary": "Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName)",
+        "summary": "Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName); while BRAND_PACK is set a change to logoUrl, faviconUrl, the colours or systemName is refused",
         "tags": [
           "System Settings"
         ],
-        "description": "Front-end touchpoint: Master > System Settings\n\nAccess: write:settings",
+        "description": "Front-end touchpoint: System settings (API only)\n\nAccess: write:settings",
         "parameters": [],
         "responses": {
           "200": {
@@ -142111,7 +142111,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > System Settings",
+        "x-screen": "System settings (API only)",
         "x-permissions": [
           "write:settings"
         ],
@@ -142294,7 +142294,7 @@
       },
       "put": {
         "operationId": "putSystemSettingsConfiguration",
-        "summary": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked; settings owned by another screen are refused",
+        "summary": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked (the display currency must be an active currency); settings owned by another screen are refused",
         "tags": [
           "System Settings"
         ],
@@ -142388,11 +142388,11 @@
     "/system-settings/logo-presets": {
       "post": {
         "operationId": "postSystemSettingsLogoPresets",
-        "summary": "Add a company logo preset (JSON { label, url, setActive } or multipart label + file + setActive)",
+        "summary": "Add a company logo preset (JSON { label, url, setActive } or multipart label + file + setActive); setActive is refused while BRAND_PACK is set",
         "tags": [
           "System Settings"
         ],
-        "description": "Front-end touchpoint: Master > System Settings > Add Company Logo\n\nAccess: write:settings",
+        "description": "Front-end touchpoint: System settings (API only) > Add Company Logo\n\nAccess: write:settings",
         "parameters": [],
         "responses": {
           "200": {
@@ -142534,7 +142534,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > System Settings > Add Company Logo",
+        "x-screen": "System settings (API only) > Add Company Logo",
         "x-permissions": [
           "write:settings"
         ],
@@ -142573,7 +142573,7 @@
         "tags": [
           "System Settings"
         ],
-        "description": "Front-end touchpoint: Master > System Settings > Remove Logo\n\nAccess: write:settings",
+        "description": "Front-end touchpoint: System settings (API only) > Remove Logo\n\nAccess: write:settings",
         "parameters": [
           {
             "name": "id",
@@ -142724,7 +142724,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > System Settings > Remove Logo",
+        "x-screen": "System settings (API only) > Remove Logo",
         "x-permissions": [
           "write:settings"
         ]
@@ -142733,11 +142733,11 @@
     "/system-settings/upload/{field}": {
       "post": {
         "operationId": "postSystemSettingsUploadField",
-        "summary": "Upload the logo or favicon (multipart \"file\"); stored under UPLOAD_DIR and recorded in documents",
+        "summary": "Upload the logo or favicon (multipart \"file\"); stored under UPLOAD_DIR and recorded in documents. Refused while BRAND_PACK is set",
         "tags": [
           "System Settings"
         ],
-        "description": "Front-end touchpoint: Master > System Settings > Upload\n\nAccess: write:settings",
+        "description": "Front-end touchpoint: System settings (API only) > Upload\n\nAccess: write:settings",
         "parameters": [
           {
             "name": "field",
@@ -142888,7 +142888,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > System Settings > Upload",
+        "x-screen": "System settings (API only) > Upload",
         "x-permissions": [
           "write:settings"
         ],

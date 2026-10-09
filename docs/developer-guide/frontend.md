@@ -143,8 +143,8 @@ acceptable for data no other screen needs.
 | Masked identifiers (package B) | `utility/piiReveal.js`: the "Show full identifiers" switch for holders of `view:pii` |
 | Diagnostics | `utility/logger` (silent in production, see section 8) |
 
-The display currency and the date format come from System Settings. `module/SystemSettings/store`
-loads them after sign-in and `utility/applySystemSettings` passes them to the formatting helpers,
+The display currency and the date format come from the configuration (Master > Configuration, served by GET
+/api/system-settings). `module/SystemSettings/store` loads them at start-up and `utility/applySystemSettings` passes them to the formatting helpers,
 so formatted values follow the configuration without screens reading the settings. Do not format
 dates with `toLocaleDateString` or amounts with a fixed currency symbol.
 
@@ -152,7 +152,7 @@ dates with `toLocaleDateString` or amounts with a fixed currency symbol.
 
 Text is in `src/locales/en.json` and `th.json`, loaded by `src/i18n.js`, and read with
 `const { t } = useTranslation()`. Keys are grouped by screen (`"quoteDetailView.title"`). The
-language pickers offer the languages configured in System Settings that have a bundled translation
+language pickers offer the languages configured in Master > Configuration that have a bundled translation
 (`utility/languages.js`).
 
 - Add every new key to `en.json`; add the Thai text to `th.json` when known (English is shown

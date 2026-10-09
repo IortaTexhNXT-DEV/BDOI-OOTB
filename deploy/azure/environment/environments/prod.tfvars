@@ -39,7 +39,7 @@ sftp_enabled     = true
 sftp_users       = {} # TISPH: SAP pick-up and bank accounts with their SSH public keys
 sftp_allowed_ips = []
 
-# Toyota Insurance Services brand pack, enabled once at the first start (deploy/REFERENCE.md)
+# Toyota Insurance Services brand pack, enforced at every start (deploy/REFERENCE.md)
 brand_pack = "toyota-insurance-services"
 
 waf_mode           = "Prevention"

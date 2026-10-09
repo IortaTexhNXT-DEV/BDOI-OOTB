@@ -49,9 +49,10 @@ Do the steps in order. Put secrets only in Railway's variables, never in the rep
    - `CORS_ORIGINS` and `PUBLIC_BASE_URL` are filled in after step 4 gives the addresses. Write several web addresses
      separated by commas (for example the Railway address and the BrokerVerse URL).
    - In the SMTP address, write the `@` of the user name as `%40` and URL-encode special characters of the password.
-   - A TISPH environment adds `BRAND_PACK=toyota-insurance-services`: the API enables the Toyota Insurance Services
-     brand pack once at its first start (deploy/REFERENCE.md, "Brand pack of the deployment"). A later Back to default
-     through the API (POST /api/branding/packs/reset-default) is kept afterwards.
+   - A TISPH environment adds `BRAND_PACK=toyota-insurance-services`: the API enforces the Toyota Insurance Services
+     brand pack, enabling it at its first start and applying it again at any later start when the screens differ from
+     it (deploy/REFERENCE.md, "Brand pack of the deployment"). Redeploy or restart the API to bring back a branding that
+     was changed: the start-up log names what differed.
 6. **Settings > Networking > Generate Domain** (target port 8000). Note the address, e.g.
    `https://api-production-xxxx.up.railway.app`.
 
