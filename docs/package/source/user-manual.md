@@ -961,10 +961,10 @@ Select the eye (**View**) on a prospect row. **Prospect Details** shows **Person
 ### Upload many prospects
 
 1. Select **Bulk Upload**.
-2. Select **Download Template** and fill in one prospect per row. **LOB** (line of business) and **Product** (code or name of an active product of that line) are optional: a row without them creates a prospect whose product is tagged later; a product that is not a product of the row's LOB is refused with the reason.
-3. Select **Choose File**, choose the file (.xlsx or .csv, at most 10 MB) and select **Upload**.
+2. Select **Download template**. The workbook has a **Data** sheet (the header row and sample rows), a **Columns** sheet with the rules of each column and an **Instructions** sheet. Delete the sample rows and fill in one prospect per row. **LOB** (line of business) and **Product** (code or name of an active product of that line) are optional: a row without them creates a prospect whose product is tagged later; a product that is not a product of the row's LOB is refused with the reason.
+3. Select **Choose file**, choose the file (.xlsx or .csv, at most 10 MB) and select **Upload**.
 
-The system checks every row and reports the rows it could not load with the reason. **Generate Report** downloads the prospect list as a spreadsheet.
+The dialog shows "Processed n rows: c created, f failed" and lists each row it could not load with its row number and the reason, named by the column of the template. Fix those rows and upload only them again. Quotations, Policy, Receipts and Disbursement **Bulk Upload** work the same way; on Policy, **Upload into** chooses new business or existing policies (go-live), which need the policy number, insurer, inception and expiry dates. **Generate Report** downloads the prospect list as a spreadsheet.
 
 ![Bulk upload prospects](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-prospect-bulk.png)
 
@@ -1681,7 +1681,7 @@ BrokerVerse puts every policy into the renewal pipeline 90 days before expiry (`
 
 ![Operations > Renewals > Renewal Queue](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-renewal-queue.png)
 
-The queue filters by **Policy/Insured Name**, **Status**, **Risk Level**, **Sales person** and **Expiry Date Range**; the cards count **Total Policies**, **Due Soon (30 days)**, **At Risk** and **In Grace Period**. The renewal statuses include Pending, First Notice Sent, Second Notice Sent, Final Notice Sent, Quote Sent, Approved, Renewed and Lapsed. **Attempts** counts the notices sent out of three.
+The queue filters by **Policy/Insured Name**, **Status**, **Risk Level**, **Sales person** and **Expiry Date Range**; the cards count **Total Policies**, **Due Soon (30 days)**, **At Risk** and **In Grace Period**. **Export to CSV** downloads the rows the filters show (also on At-Risk Policies and Lapse Management). The renewal statuses include Pending, First Notice Sent, Second Notice Sent, Final Notice Sent, Quote Sent, Approved, Renewed and Lapsed. **Attempts** counts the notices sent out of three.
 
 The risk score on **At-Risk Policies** adds weights for claims in the term (25), unpaid premium (20), a premium increase above 10% (20), a first renewal (15), expiry within 15 days (10) and no contact within 30 days of expiry (10) (`renewals.risk_weights`, `renewals.risk_thresholds`). The levels start at 30 (Medium), 55 (High) and 75 (Critical).
 
@@ -1703,7 +1703,7 @@ Select a policy under **Active Negotiations** to see its **Timeline**, **Details
 
 **Lapse Management** lists lapsed policies and policies in the grace period with days lapsed, premium lost, reason and win-back status. **Create Campaign** sets up a win-back campaign: **Campaign Name**, **Target Segment**, **Start Date**, **End Date**, **Discount (%)**, **Budget** and the **Campaign Benefits** offered.
 
-**Retention Analytics** and **Performance** show the renewal rate, premium retention and cycle time for the period, product line and sales person chosen, against the targets (renewal rate 85%, premium retention 90%, cycle time 15 days), with recommended actions. **Export Report** downloads the figures.
+**Retention Analytics** and **Performance** show the renewal rate, premium retention and cycle time for the period, product line and sales person chosen, against the targets (renewal rate 85%, premium retention 90%, cycle time 15 days), with recommended actions. **Export Report** downloads the figures as CSV: the sales leaderboard on Retention Analytics, the KPI scorecard against the targets on Performance.
 
 ![Operations > Renewals > Retention Analytics](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-renewal-analytics.png)
 
@@ -2224,7 +2224,7 @@ Choose the **Bank account** and the **Period**. The cards show **Balance per ban
 ### Import a bank statement
 
 1. Select **Import statement**.
-2. Choose the **Statement format** (BDO, BPI, Metrobank samples, GENERIC or one of your own) and the **Statement file (CSV / XLSX)** downloaded from online banking.
+2. Choose the **Statement format** (BDO, BPI, Metrobank samples, GENERIC or one of your own) and the **Statement file (CSV / XLSX)** downloaded from online banking. **Download template (GENERIC format)** gives the workbook of the GENERIC format for a bank without its own export.
 3. Enter the **Bank statement no.** (for example SOA Sep 2026), and the **Opening balance** and **Closing balance** if the file does not carry them. **Leave out lines already on file** skips duplicates.
 4. Select **Preview**: the opening and closing balance, the lines read and the rows that could not be read.
 5. Select **Import**. The statement gets its number (BST-YYYY-NNNNN).
@@ -2255,7 +2255,7 @@ Bank charges, interest, final tax on interest and direct credits appear on the s
 
 Insurers send statements of account: premium remittance confirmations (broker-billed premium the insurer received) and commission statements (direct-bill commission the insurer recognises). BrokerVerse matches them to the remittances, debit notes and policies.
 
-1. Select **Import statement**. Choose the **Insurer**, the **Statement type**, **Period from** and **Period to**, the **Insurer reference**, the **Tolerance (PHP)** (default PHP 1.00, `insurer_reconciliation.amount_tolerance`), the **Statement format** (the insurer's own, else generic) and the **File (CSV or XLSX)**.
+1. Select **Import statement**. Choose the **Insurer**, the **Statement type**, **Period from** and **Period to**, the **Insurer reference**, the **Tolerance (PHP)** (default PHP 1.00, `insurer_reconciliation.amount_tolerance`), the **Statement format** (the insurer's own, else generic) and the **File (CSV or XLSX)**. **Download template (GENERIC format)** gives the workbook of the generic format.
 2. Select **Preview**, then **Import and match**. The statement gets its number (ISR-YYYY-NNNNN).
 3. Open the statement. The counts show **Lines**, **Matched**, **Amount differences**, **Not found at the broker**, **Missing on the statement** and **Unresolved**. Resolve each difference (for example accept the insurer's commission and post the adjustment).
 4. Submit it for approval. Every difference must be resolved first (`insurer_reconciliation.require_resolved`). The Accounting Manager approves it.
@@ -2918,8 +2918,8 @@ The landing page of every role after sign-in: My Work with the role preset (cate
 | Tracking | Remittances (REM-) with insurer, policies, gross amount, commission, net amount and status. |
 | Statements | Remittance statements for insurers, prepared in steps (**Previous**, **Next**) and e-mailed as a download link. |
 | Settlement | Insurer settlements (SET-): insurer, policies, calculation, adjustments, payment, workflow; **Save draft**, **Submit for approval**, **Print**. |
-| Reconciliation | Match imported bank transactions with remittances within PHP 0.50 (`remittance.reconciliation_tolerance`); **Import**, **Auto Match**, **Match Selected**, **Force Match**. |
-| Bulk Processing | Upload remittance data in bulk. |
+| Reconciliation | Match imported bank transactions with remittances within PHP 0.50 (`remittance.reconciliation_tolerance`); **Download template** (CSV: TransDate, Reference, Amount, Description), **Import** (a line without a date, reference or amount refuses the file), **Auto Match**, **Match Selected**, **Force Match**. |
+| Bulk Processing | Upload remittance data in bulk; **Download template** gives the workbook of the columns of the bulk processing configuration. |
 | Scheduling | Remittance schedules per insurer (insurers, cut-off days, frequency, next run date); **New schedule**, **Run now**. The `remittance-schedules` job in Master > Schedules runs the due schedules daily once it is switched on. |
 | Electronic Transfer | Transfers by InstaPay, PESONet or RTGS (PhilPaSS) within their limits; **New transfer**, **Batch process**, **Export**. |
 | Approval Workflow | Approvals of remittances, settlements, transfers and adjustments within the approver's Authority Matrix limit; pending, overdue and history. |
