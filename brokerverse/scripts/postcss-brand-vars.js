@@ -7,6 +7,10 @@
  * src/theme/runtime/themeEngine.js) restyles every screen, including the ~1,000 colour literals in screen
  * stylesheets, without touching those files and without a rebuild. With no theme loaded the output looks exactly
  * as before (the fallbacks are the original colours). Declarations of the --bv-* properties themselves are left alone.
+ *
+ * The same goes for the font: ~1,400 screen rules name the default font ("Nunito", Arial, sans-serif) literally, so a
+ * theme with another font (Inter for Toyota Insurance Services) showed two typefaces side by side. Those declarations
+ * become `var(--bv-font-family, "Nunito", Arial, sans-serif)`.
  */
 const HEX = {
   "#0072d8": "--bv-primary", // CTA Blue
@@ -64,6 +68,13 @@ function themeValue(value) {
   return out;
 }
 
+// a font stack that starts with the default font, not already a var()
+const DEFAULT_FONT_RE = /^\s*["']?Nunito["']?\s*(,|$)/i;
+
+function themeFont(value) {
+  return DEFAULT_FONT_RE.test(value) ? `var(--bv-font-family, ${value.trim()})` : value;
+}
+
 // One pass at the very end (OnceExit), not a Declaration visitor: postcss-preset-env adds a plain-colour fallback
 // before every var() declaration, and a visitor would turn that fallback into a var() again, forever.
 const plugin = () => ({
@@ -71,6 +82,12 @@ const plugin = () => ({
   OnceExit(root) {
     root.walkDecls((decl) => {
       if (decl.prop.startsWith("--bv-")) return;
+      // the name of a @font-face is a name, not a font to theme
+      if (decl.prop === "font-family" && decl.parent?.name !== "font-face") {
+        const font = themeFont(decl.value);
+        if (font !== decl.value) decl.value = font;
+        return;
+      }
       if (!/#[0-9a-f]{6}|rgba\(/i.test(decl.value)) return;
       const next = themeValue(decl.value);
       if (next !== decl.value) decl.value = next;
@@ -79,4 +96,5 @@ const plugin = () => ({
 });
 plugin.postcss = true;
 plugin.themeValue = themeValue;
+plugin.themeFont = themeFont;
 module.exports = plugin;

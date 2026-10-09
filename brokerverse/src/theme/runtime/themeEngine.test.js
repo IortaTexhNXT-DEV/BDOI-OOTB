@@ -77,6 +77,14 @@ describe("theme engine", () => {
     expect(postcssBrandVars.themeValue("#00c851")).toBe("#00c851");
     expect(postcssBrandVars.themeValue("#3b82f6")).toBe("#3b82f6");
   });
+
+  it("the build plugin makes the default font follow the theme's font", () => {
+    expect(postcssBrandVars.themeFont('"Nunito", Arial, sans-serif')).toBe('var(--bv-font-family, "Nunito", Arial, sans-serif)');
+    expect(postcssBrandVars.themeFont("Nunito")).toBe("var(--bv-font-family, Nunito)");
+    expect(postcssBrandVars.themeFont('var(--bv-font-family, "Nunito", Arial, sans-serif)')).toBe('var(--bv-font-family, "Nunito", Arial, sans-serif)');
+    expect(postcssBrandVars.themeFont("ui-monospace, Menlo, monospace")).toBe("ui-monospace, Menlo, monospace");
+    expect(postcssBrandVars.themeFont("NunitoSans, Arial")).toBe("NunitoSans, Arial");
+  });
 });
 
 describe("branding provider", () => {
