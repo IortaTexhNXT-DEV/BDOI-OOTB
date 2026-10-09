@@ -1,8 +1,8 @@
 /**
  * Claim document checklist (Operations > Claim Documents).
  *
- * The documents a claim needs come from the checklist master (claim-document-requirement: line of business and claim
- * type, * for any, required or optional), copied onto the claim the first time its checklist is opened; documents added
+ * The documents a claim needs come from the checklist master (claim-document-requirement: line of business, and claim
+ * type or cause of loss, * for any, required or optional), copied onto the claim the first time its checklist is opened; documents added
  * to the master later are added to open claims, nothing is removed (an item that does not apply is waived with a
  * reason). An uploaded claim document whose name matches an item marks it received. A reminder lists the missing
  * documents to the claimant (e-mail template claim_missing_documents), by hand or every claims.document_reminder_days
@@ -29,10 +29,13 @@ async function loadClaim(db, ref) {
   return c;
 }
 
-/** Checklist master rows that apply to a line of business and claim type. */
-export async function requirementsFor(db, lob, claimType) {
+/**
+ * Checklist master rows that apply to a line of business and a claim. The master's claim type names the claim type or
+ * the cause of loss of the claim (a motor claim is of type Motor; Theft or Collision is its cause of loss).
+ */
+export async function requirementsFor(db, lob, claimType, cause = null) {
   return (await activeRecords(db, 'claim-document-requirement'))
-    .filter((r) => matches(r.lineOfBusiness, lob) && matches(r.claimType, claimType))
+    .filter((r) => matches(r.lineOfBusiness, lob) && (matches(r.claimType, claimType) || (Boolean(cause) && matches(r.claimType, cause))))
     .map((r) => ({ code: r.code, documentName: r.documentName || r.name, required: r.required !== false, sortOrder: Number(r.sortOrder) || 100 }))
     .sort((a, b) => a.sortOrder - b.sortOrder);
 }
@@ -40,7 +43,7 @@ export async function requirementsFor(db, lob, claimType) {
 /** Copy the applicable master documents onto the claim (missing ones only) and mark uploaded documents received. */
 async function syncChecklist(db, c) {
   const lob = c.lob || c.policy_lob || c.product_line;
-  for (const r of await requirementsFor(db, lob, c.claim_type)) {
+  for (const r of await requirementsFor(db, lob, c.claim_type, c.loss_type)) {
     await db.query(`INSERT INTO claim_document_items(claim_id, requirement_code, document_name, required, sort_order) VALUES ($1,$2,$3,$4,$5)
       ON CONFLICT (claim_id, document_name) DO NOTHING`, [c.id, r.code, r.documentName, r.required, r.sortOrder]);
   }

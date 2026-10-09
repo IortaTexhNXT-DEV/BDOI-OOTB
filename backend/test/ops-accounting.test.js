@@ -261,6 +261,17 @@ describe('claim document checklist', () => {
     expect(names).not.toContain('Notice of Default');
     expect(r.body.data.summary.complete).toBe(false);
   });
+  it('applies a document of a cause of loss to the claims with that cause only', async () => {
+    await query(`INSERT INTO master_records(type_code, code, name, data, status, created_by) VALUES ('claim-document-requirement', 'T-HPG', 'PNP-HPG alarm sheet',
+      '{"code": "T-HPG", "lineOfBusiness": "MOTOR", "claimType": "Theft", "documentName": "PNP-HPG alarm sheet", "required": true, "sortOrder": 900}', 'active', 'test')`);
+    const add = async (number, cause) => (await one(`INSERT INTO claims(claim_number, policy_id, client_id, status, loss_date, lob, claim_type, loss_type)
+      VALUES ($1, $2, $3, 'registered', current_date - 3, 'MOTOR', 'Motor', $4) RETURNING id`, [number, m.policy.id, m.client.id, cause])).id;
+    const names = async (id) => (await ctx.as('claims')('get', `/claim-documents/claims/${id}`)).body.data.items.map((i) => i.documentName);
+    expect(await names(await add('CLM-T-DOC2', 'Theft'))).toContain('PNP-HPG alarm sheet');
+    const collision = await names(await add('CLM-T-DOC3', 'Collision'));
+    expect(collision).toContain('Claim Form');
+    expect(collision).not.toContain('PNP-HPG alarm sheet');
+  });
   it('refuses the submission to the insurer while a required document is missing', async () => {
     const r = await ctx.as('claims')('post', `/claim-documents/claims/${claimId}/submit-to-insurer`).send({});
     expect(r.status).toBe(409);
