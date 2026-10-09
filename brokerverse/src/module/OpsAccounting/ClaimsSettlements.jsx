@@ -9,6 +9,7 @@ import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
+import StatCards from "../../components/StatCards";
 import service from "../../services/opsAccountingService";
 import { Field, OpsTag, PageHeader, date, isoOf, money, numericColumn, showError, showSuccess } from "./common";
 
@@ -67,13 +68,11 @@ const ClaimsSettlements = () => {
     <div className="pe-page">
       <Toast ref={toast} />
       <PageHeader title={t("opsAcc.claimPay.title")} subtitle={t("opsAcc.claimPay.intro")} />
-      {data && (
-        <div className="flex gap-4 mb-3">
-          <span>{t("opsAcc.claimPay.toReceive")}: <b>{money(data.summary.toReceive)}</b></span>
-          <span>{t("opsAcc.claimPay.held")}: <b>{money(data.summary.heldForClaimant)}</b></span>
-          <span>{t("opsAcc.claimPay.payable")}: <b>{money(data.summary.payableToClaimant)}</b></span>
-        </div>
-      )}
+      <StatCards items={[
+        { key: "toReceive", label: t("opsAcc.claimPay.toReceive"), value: data ? money(data.summary.toReceive) : null },
+        { key: "held", label: t("opsAcc.claimPay.held"), value: data ? money(data.summary.heldForClaimant) : null },
+        { key: "payable", label: t("opsAcc.claimPay.payable"), value: data ? money(data.summary.payableToClaimant) : null },
+      ]} />
       <div className="pe-card">
         <div className="flex gap-2 mb-2">
           <Dropdown value={stage} options={STAGES.map((s) => ({ label: t(`opsAcc.status.${s}`), value: s }))} onChange={(e) => setStage(e.value)} className="w-12rem" />

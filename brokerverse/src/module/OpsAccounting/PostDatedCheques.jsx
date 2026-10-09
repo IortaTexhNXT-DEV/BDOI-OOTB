@@ -10,6 +10,7 @@ import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
+import StatCards from "../../components/StatCards";
 import service from "../../services/opsAccountingService";
 import { promptText } from "../../utility/dialogs";
 import { Field, OpsTag, PageHeader, date, isoOf, money, numericColumn, showError, showSuccess } from "./common";
@@ -110,11 +111,11 @@ const PostDatedCheques = () => {
         <Button icon="pi pi-plus" label={t("opsAcc.pdc.register")} onClick={() => setForm({ ...emptyCheque, mode: "register", targetKind: "receivableId", target: "" })} />
       </PageHeader>
       {data && (
-        <div className="flex gap-4 mb-3">
-          <span>{t("opsAcc.pdc.onHand")}: <b>{data.summary.onHand}</b> ({money(data.summary.onHandAmount)})</span>
-          <span>{t("opsAcc.pdc.dueNow")}: <b>{data.summary.dueNow}</b> ({money(data.summary.dueNowAmount)})</span>
-          <span>{t("opsAcc.pdc.bounced")}: <b>{data.summary.bounced}</b></span>
-        </div>
+        <StatCards items={[
+          { key: "onHand", label: t("opsAcc.pdc.onHand"), value: money(data.summary.onHandAmount), note: t("opsAcc.pdc.chequesCount", { count: data.summary.onHand }) },
+          { key: "dueNow", label: t("opsAcc.pdc.dueNow"), value: money(data.summary.dueNowAmount), note: t("opsAcc.pdc.chequesCount", { count: data.summary.dueNow }) },
+          { key: "bounced", label: t("opsAcc.pdc.bounced"), value: data.summary.bounced },
+        ]} />
       )}
       <div className="pe-card">
         <TabView>

@@ -5748,7 +5748,12 @@
     "partiallyPaid": "Partially Paid",
     "committed": "Committed",
     "escalated": "Escalated",
-    "sendPaymentRemindersNow": "Send Payment Reminders Now"
+    "sendPaymentRemindersNow": "Send Payment Reminders Now",
+    "title": "Collections",
+    "kpiOutstanding": "Outstanding",
+    "kpiItems_one": "{{count}} item",
+    "kpiItems_other": "{{count}} items",
+    "kpiCollected": "Collected this month"
   },
   "iarLead": {
     "lead": "Prospect",
@@ -9860,7 +9865,9 @@
       "cancelReason": "Why is the registration cancelled?",
       "cancelDone": "Cheque registration cancelled",
       "against": "Against",
-      "billNumber": "Bill number"
+      "billNumber": "Bill number",
+      "chequesCount_one": "{{count}} cheque",
+      "chequesCount_other": "{{count}} cheques"
     },
     "claimPay": {
       "title": "Claims Settlements",
@@ -10068,7 +10075,9 @@
       "due": "Due",
       "alreadyPosted": "Already posted",
       "journalDate": "Journal date",
-      "nothingDue": "Nothing to depreciate for this period"
+      "nothingDue": "Nothing to depreciate for this period",
+      "assetsCount_one": "{{count}} asset",
+      "assetsCount_other": "{{count}} assets"
     }
   },
   "distribution": {

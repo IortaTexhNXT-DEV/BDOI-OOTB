@@ -15,6 +15,7 @@ import "./index.scss";
 import logger from "../../../utility/logger";
 import ImportDialog from "../../../components/ImportDialog";
 import { hasPermission } from "../../../utils/canOpen";
+import StatCards from "../../../components/StatCards";
 
 const OPEN_ITEMS_UPLOAD = [{ label: "Open items", templatePath: "/receipts/opening-items/template", uploadPath: "/receipts/opening-items/import" }];
 
@@ -39,6 +40,7 @@ const CollectionsList = () => {
 
   const toast = useRef(null);
   const navigate = useNavigate();
+  const [stats, setStats] = useState(null);
   const [sendingReminders, setSendingReminders] = useState(false);
   const [showOpenItems, setShowOpenItems] = useState(false);
 
@@ -62,6 +64,11 @@ const CollectionsList = () => {
   useEffect(() => {
     loadCollections();
   }, [lazyState, filters]);
+
+  const loadStats = () => collectionService.getDashboardStats().then((r) => setStats(r?.data || null)).catch(() => setStats(null));
+  useEffect(() => {
+    loadStats();
+  }, []);
 
   const loadCollections = async () => {
     setLoading(true);
@@ -255,6 +262,7 @@ const CollectionsList = () => {
   return (
     <div className="collections-list-container">
       <Toast ref={toast} />
+      <h2 className="collections-title">{t("collectionsList.title")}</h2>
 
       <div className="reminder-button-section">
         <Button
@@ -271,6 +279,18 @@ const CollectionsList = () => {
       </div>
       <ImportDialog visible={showOpenItems} onHide={() => setShowOpenItems(false)} title="Import open items (go-live)" targets={OPEN_ITEMS_UPLOAD} goLiveDate onDone={() => loadCollections()}
         note="Unpaid premium bills of the old system, loaded against policies already in BrokerVerse. No journal is posted: the GL opening balance carries them. Rows already loaded for the same go-live date are skipped." />
+
+      <StatCards items={[
+        { key: "outstanding", label: t("collectionsList.kpiOutstanding"), value: stats ? formatCurrency(stats.totalOutstanding) : null,
+          note: stats ? t("collectionsList.kpiItems", { count: stats.totalItems }) : null, onClick: () => handleFilterChange("status", ""), active: !filters.status },
+        { key: "overdue", label: t("collectionsList.overdue"), value: stats ? formatCurrency(stats.overdueAmount) : null,
+          note: stats ? t("collectionsList.kpiItems", { count: stats.overdueCount }) : null, onClick: () => handleFilterChange("status", "Overdue"), active: filters.status === "Overdue" },
+        { key: "committed", label: t("collectionsList.committed"), value: stats ? stats.committedCount : null,
+          onClick: () => handleFilterChange("status", "Committed"), active: filters.status === "Committed" },
+        { key: "escalated", label: t("collectionsList.escalated"), value: stats ? stats.escalatedCount : null,
+          onClick: () => handleFilterChange("status", "Escalated"), active: filters.status === "Escalated" },
+        { key: "collected", label: t("collectionsList.kpiCollected"), value: stats ? formatCurrency(stats.collectedThisMonth) : null },
+      ]} />
 
       <Card>
         <div className="filter-section">
