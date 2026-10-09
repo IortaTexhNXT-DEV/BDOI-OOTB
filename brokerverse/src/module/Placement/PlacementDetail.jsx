@@ -73,6 +73,8 @@ const PlacementDetail = () => {
   if (!p) return <div className="placement-page"><Toast ref={toast} /><div className="placement-card">{t("placement.messages.loading")}</div></div>;
   const write = hasPermission("write:quotations");
   const approver = hasPermission("write:policies");
+  // the check against the slip is the checker's step (approve:policies)
+  const checker = write && hasPermission("approve:policies");
   const editable = write && ["draft", "declined"].includes(p.status);
   const keyedByMe = Boolean(p.epolicy?.receivedById) && String(p.epolicy.receivedById) === userId;
   const canBook = p.status === "checked" && write && approver;
@@ -220,10 +222,10 @@ const PlacementDetail = () => {
         footer={checking && (
           <>
             <Button label={t("placement.actions.cancel")} text onClick={() => setChecking(null)} />
-            <Button label={t("placement.check.returnToInsurer")} icon="pi pi-replay" severity="warning" outlined loading={busy} disabled={keyedByMe || !write || !checking.reason.trim()} onClick={() => decide("return")} />
+            <Button label={t("placement.check.returnToInsurer")} icon="pi pi-replay" severity="warning" outlined loading={busy} disabled={keyedByMe || !checker || !checking.reason.trim()} onClick={() => decide("return")} />
             {checking.comparison.result === "mismatch"
-              ? <Button label={t("placement.check.acceptDifferences")} icon="pi pi-check" severity="danger" loading={busy} disabled={keyedByMe || !approver || !checking.reason.trim()} onClick={() => decide("accept")} />
-              : <Button label={t("placement.check.confirm")} icon="pi pi-check" severity="success" loading={busy} disabled={keyedByMe || !write} onClick={() => decide("confirm")} />}
+              ? <Button label={t("placement.check.acceptDifferences")} icon="pi pi-check" severity="danger" loading={busy} disabled={keyedByMe || !approver || !checker || !checking.reason.trim()} onClick={() => decide("accept")} />
+              : <Button label={t("placement.check.confirm")} icon="pi pi-check" severity="success" loading={busy} disabled={keyedByMe || !checker} onClick={() => decide("confirm")} />}
           </>
         )}>
         {checking && (

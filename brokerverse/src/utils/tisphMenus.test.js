@@ -1,0 +1,63 @@
+import { filterMenuForRoles, isPathAllowed, roleMenuPermissions } from "./menuPermissions";
+import { menuList } from "../components/SideBar/list";
+import { helpSectionFor } from "../components/HelpPanel/helpRoutes";
+
+const TIS_ROLES = ["tis-sales-associate", "tis-sales-officer", "tis-sales-unit-head", "tis-ops-associate", "tis-ops-officer", "tis-ops-unit-head", "tis-ccd-pdu",
+  "tis-ccd-pdc", "tis-ccd-bp", "tis-ccd-recon", "tis-finance", "tis-it-admin", "tis-general-manager"];
+const norm = (s) => String(s).trim().toLowerCase();
+
+/** A grant ("Item", "Group > Item") that names no screen of the menu. */
+const deadGrants = (role) => Object.entries(roleMenuPermissions[role]).flatMap(([top, grants]) => {
+  const menu = menuList.find((m) => norm(m.name) === top);
+  if (!menu) return [`${role}: ${top}`];
+  if (grants === true) return [];
+  return grants.filter((g) => {
+    let items = menu.submenu || [];
+    for (const part of g.split(">").map(norm)) {
+      const hit = items.find((i) => norm(i.name) === part);
+      if (!hit) return true;
+      items = hit.submenu || [];
+    }
+    return false;
+  }).map((g) => `${role}: ${top} > ${g}`);
+});
+
+describe("TISPH roles (RBAC v4): menus", () => {
+  it("every TIS persona has menus, and each grant names a screen of the menu", () => {
+    expect(TIS_ROLES.filter((role) => !filterMenuForRoles(menuList, [role]).length)).toEqual([]);
+    expect(TIS_ROLES.flatMap(deadGrants)).toEqual([]);
+  });
+
+  it("Sales and Operations both reach quotations, placement slips, policies and renewals", () => {
+    const refused = ["tis-sales-associate", "tis-sales-officer", "tis-ops-associate", "tis-ops-unit-head"].flatMap((role) =>
+      ["/agent/Quotation", "/placement/placement-slips", "/agent/policy", "/renewal/queue", "/operations/policy-cancellation"]
+        .filter((p) => !isPathAllowed(p, menuList, [role])).map((p) => `${role} ${p}`));
+    expect(refused).toEqual([]);
+    expect(isPathAllowed("/agent/claim", menuList, ["tis-ops-associate"])).toBe(true);
+    expect(isPathAllowed("/operations/claim-documents", menuList, ["tis-sales-officer"])).toBe(false);
+  });
+
+  it("Cash Control sees its cash screens only; Finance the accounting menus with the audit trail", () => {
+    expect(isPathAllowed("/accounts/post-dated-cheques", menuList, ["tis-ccd-pdu"])).toBe(true);
+    expect(isPathAllowed("/accounts/journalvoucher", menuList, ["tis-ccd-pdu"])).toBe(false);
+    expect(isPathAllowed("/accounts/bank-reconciliation", menuList, ["tis-ccd-recon"])).toBe(true);
+    expect(isPathAllowed("/accounts/bank-reconciliation", menuList, ["tis-ccd-pdu"])).toBe(false);
+    expect(isPathAllowed("/agent/policy", menuList, ["tis-ccd-bp"])).toBe(false);
+    expect(["/accounts/journalvoucher", "/accounts/period-end/close", "/master/configuration/audit-trail"].filter((p) => !isPathAllowed(p, menuList, ["tis-finance"]))).toEqual([]);
+  });
+
+  it("the IT administrator reaches users, roles and masters, not the go-live data load; SUPERID (System Administrator included) sees every menu", () => {
+    expect(["/master/generals/usermanagement/user", "/master/generals/usermanagement/role", "/master/insurance/lead-sources", "/master/insurance/reason-codes",
+      "/master/configuration/system-settings"].filter((p) => !isPathAllowed(p, menuList, ["tis-it-admin"]))).toEqual([]);
+    expect(isPathAllowed("/master/go-live-data-load", menuList, ["tis-it-admin"])).toBe(false);
+    expect(isPathAllowed("/master/generals/usermanagement/user", menuList, ["tis-general-manager"])).toBe(true);
+    expect(isPathAllowed("/master/configuration/system-settings", menuList, ["tis-general-manager"])).toBe(false);
+    expect(filterMenuForRoles(menuList, ["tis-superid", "system-admin"])).toEqual(menuList);
+  });
+
+  it("the Lead Sources and Reason Codes masters have their manual section", () => {
+    expect(isPathAllowed("/master/insurance/lead-sources", menuList, ["tis-sales-officer"])).toBe(false);
+    expect(helpSectionFor("/master/insurance/lead-sources").id).toBe("lead-sources-and-reason-codes");
+    expect(helpSectionFor("/master/insurance/reason-codes").id).toBe("lead-sources-and-reason-codes");
+  });
+});
