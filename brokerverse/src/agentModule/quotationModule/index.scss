@@ -468,3 +468,30 @@
     }
   }
 }
+
+// "Create Quote" is the main action of the screen: a menu button in the theme's button colours at button height, next
+// to the outlined Bulk Upload.
+.claim__table__container__quotation .p-dropdown.dropdown__createlead {
+  height: 40px;
+  background: var(--bv-button-bg, #0072d8);
+  border-color: var(--bv-button-bg, #0072d8) !important;
+  border-radius: var(--bv-radius-button, 8px) !important;
+
+  .p-dropdown-label,
+  .p-dropdown-label.p-placeholder {
+    display: flex;
+    align-items: center;
+    padding: 0 4px 0 16px;
+    font-weight: 600;
+    color: var(--bv-button-text, #ffffff);
+  }
+
+  .p-dropdown-trigger {
+    color: var(--bv-button-text, #ffffff);
+  }
+
+  &:not(.p-disabled):hover {
+    background: var(--bv-button-hover-bg, #005fb4);
+    border-color: var(--bv-button-hover-bg, #005fb4) !important;
+  }
+}

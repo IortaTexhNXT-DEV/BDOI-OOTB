@@ -22,24 +22,12 @@ $tablet-md: 1024px;
 }
 
 .policy-detail-container {
-  background: #f5f7fb;
-  min-height: 100vh;
-  padding: 2rem 2.5rem;
-
-  @include tablet-sm {
-    padding: 1.5rem;
-  }
-
-  @include mobile-sm {
-    padding: 1rem;
-  }
+  padding: 0 0 24px;
 
   .policy-detail-view {
-    max-width: 1240px;
-    margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 1.75rem;
+    gap: 24px;
   }
 
   .policy-header {
@@ -48,13 +36,14 @@ $tablet-md: 1024px;
     justify-content: space-between;
     align-items: flex-start;
     background: #ffffff;
-    border-radius: 18px;
-    padding: 2rem;
-    box-shadow: 0 18px 36px rgba(31, 45, 61, 0.08);
+    border-radius: $radius-md;
+    padding: 24px;
+    box-shadow: $shadow-sm;
+    border: 1px solid $color-border;
 
     @include tablet-md {
       flex-direction: column;
-      padding: 1.75rem;
+      padding: 20px;
     }
 
     @include mobile-sm {
@@ -67,31 +56,38 @@ $tablet-md: 1024px;
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 16px;
   }
 
+  // the way back reads as a quiet link above the title, not a bar across the card
   .header-back {
+    align-self: flex-start;
     display: inline-flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem 0.9rem;
-    border-radius: 999px;
+    gap: 8px;
+    padding: 4px 8px 4px 4px;
+    border-radius: $radius-sm;
     border: none;
-    background: #eef8ff;
-    color: #1f3a8a;
-    font-size: 0.95rem;
+    background: transparent;
+    color: $color-text-muted;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 0.15s ease, color 0.15s ease;
 
     svg {
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
     }
 
     &:hover {
-      background: #e5f5ff;
-      color: #1e40af;
+      background: $color-bg;
+      color: $color-heading;
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: $focus-ring;
     }
   }
 
@@ -102,9 +98,10 @@ $tablet-md: 1024px;
 
     h1 {
       margin: 0;
-      font-size: 2rem;
+      font-size: 24px;
+      line-height: 32px;
       font-weight: 700;
-      color: #0f172a;
+      color: $color-heading;
 
       @include mobile-sm {
         font-size: 1.65rem;
@@ -167,7 +164,6 @@ $tablet-md: 1024px;
     flex-wrap: wrap;
 
     .p-button {
-      min-width: 9rem;
       font-weight: 600;
     }
   }
@@ -175,7 +171,7 @@ $tablet-md: 1024px;
   .policy-highlights {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1rem;
+    gap: 16px;
 
     @include tablet-md {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -207,16 +203,18 @@ $tablet-md: 1024px;
     }
 
     .highlight-label {
-      font-size: 0.85rem;
-      letter-spacing: 0.08rem;
-      color: #64748b;
+      font-size: 13px;
+      letter-spacing: 0;
+      color: $color-text-muted;
       font-weight: 600;
     }
 
     .highlight-value {
-      font-size: 1.4rem;
+      font-size: 24px;
+      line-height: 32px;
       font-weight: 700;
-      color: #0f172a;
+      color: $color-heading;
+      font-variant-numeric: tabular-nums;
     }
 
     .highlight-helper {
@@ -249,9 +247,10 @@ $tablet-md: 1024px;
 
   .policy-section {
     background: #ffffff;
-    border-radius: 18px;
+    border-radius: $radius-md;
     padding: 1.75rem;
-    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.06);
+    box-shadow: $shadow-sm;
+    border: 1px solid $color-border;
 
     @include mobile-sm {
       padding: 1.25rem;
@@ -279,9 +278,10 @@ $tablet-md: 1024px;
 
       h3 {
         margin: 0;
-        font-size: 1.35rem;
+        font-size: 18px;
+        line-height: 26px;
         font-weight: 700;
-        color: #0f172a;
+        color: $color-heading;
       }
 
       .section-subtitle {
@@ -325,16 +325,16 @@ $tablet-md: 1024px;
     }
 
     .info-label {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: #64748b;
-      letter-spacing: 0.08rem;
+      font-size: 13px;
+      font-weight: 500;
+      color: $color-text-muted;
+      letter-spacing: 0;
     }
 
     .info-value {
-      font-size: 0.98rem;
+      font-size: 15px;
       font-weight: 600;
-      color: #0f172a;
+      color: $color-heading;
 
       &--emphasis {
         font-size: 1.05rem;
@@ -513,9 +513,10 @@ $tablet-md: 1024px;
 
   .sidebar-section {
     background: #ffffff;
-    border-radius: 18px;
+    border-radius: $radius-md;
     padding: 1.6rem;
-    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
+    box-shadow: $shadow-sm;
+    border: 1px solid $color-border;
 
     @include mobile-sm {
       padding: 1.3rem;
@@ -742,7 +743,7 @@ $tablet-md: 1024px;
 
   .policy-state {
     background: #ffffff;
-    border-radius: 16px;
+    border-radius: $radius-md;
     padding: 3rem 2rem;
     display: flex;
     flex-direction: column;
@@ -750,7 +751,8 @@ $tablet-md: 1024px;
     justify-content: center;
     gap: 1rem;
     text-align: center;
-    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.05);
+    box-shadow: $shadow-sm;
+    border: 1px solid $color-border;
 
     h3 {
       margin: 0;

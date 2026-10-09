@@ -310,14 +310,13 @@
     font-family: "Nunito", Arial, sans-serif;
     font-weight: 400;
   }
+  // the action cell stays a table cell (a flex cell left the row one column short, so the last columns slid under it)
   .fieldvalue_containers {
     font-size: 16px;
     font-family: "Nunito", Arial, sans-serif;
     font-weight: 400;
     cursor: pointer;
-    align-items: center;
-    justify-content: center;
-    display: flex;
+    text-align: center;
   }
   .p-datatable .p-datatable-tbody > tr > td {
     text-align: left;

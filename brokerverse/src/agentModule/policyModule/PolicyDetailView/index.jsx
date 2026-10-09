@@ -1625,7 +1625,7 @@ const PolicyDetailView = () => {
                 label={t("policyDetail.renew")}
                 icon="pi pi-refresh"
                 onClick={handleRenew}
-                className="p-button-success p-button-rounded"
+                className="p-button-outlined"
               />
             )}
 
@@ -1633,13 +1633,12 @@ const PolicyDetailView = () => {
               label={t("policyDetail.claim")}
               icon="pi pi-file"
               onClick={handleClaim}
-              className="p-button-warning p-button-rounded"
+              className="p-button-outlined"
             />
             <Button
               label={t("policyDetail.viewPolicy")}
               icon="pi pi-external-link"
               onClick={handlePolicyDocumentOpen}
-              className="p-button-info p-button-rounded"
               loading={policyScheduleLoading}
               disabled={policyScheduleLoading}
             />
@@ -1665,7 +1664,7 @@ const PolicyDetailView = () => {
                     },
                   })
                 }
-                className="p-button-success p-button-rounded"
+                className="p-button-outlined"
               />
             )}
           </div>
@@ -2133,7 +2132,6 @@ const PolicyDetailView = () => {
                     <Button
                       label={t("policyDetail.proceedToPayment")}
                       icon="pi pi-credit-card"
-                      className="p-button-success"
                       onClick={() =>
                         navigate(`/agent/policy/paymentoptions/${policyId}`, {
                           state: {
@@ -2176,7 +2174,7 @@ const PolicyDetailView = () => {
                   <Button
                     label={t("policyDetail.premiumAccountingEntries")}
                     icon="pi pi-calculator"
-                    className="p-button-rounded p-button-success"
+                    className="p-button-outlined"
                     onClick={handlePremiumAccountingEntries}
                   />
                 </div>
