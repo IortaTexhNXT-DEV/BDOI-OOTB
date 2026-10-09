@@ -27,8 +27,6 @@ export const TRANSACTION_TABLES = [
   // commission, direct bill, remittance
   'commissions', 'commission_debit_notes', 'commission_debit_note_lines', 'commission_debit_note_collections', 'direct_bill_items',
   'remittances', 'remittance_lines', 'remittance_items', 'remittance_approvals',
-  // reinsurance movements (treaties and reinsurers are masters)
-  'cessions', 'reinsurance_recoveries', 'reinsurance_bordereaux', 'reinsurance_reconciliations', 'reinsurance_exceptions',
   // incentive results (programmes are masters)
   'incentive_calculations', 'incentive_results',
   // claims and renewals
@@ -60,24 +58,20 @@ export const TRANSACTION_TABLES = [
   'bir_return_filings', 'sales_invoices', 'sales_invoice_lines', 'sales_invoice_payments', 'eis_submissions', 'cas_book_prints',
   // overriding commission from insurers: computations and settlements (the agreements are configuration)
   'override_computations', 'override_settlements',
-  // AML/CFT: due diligence of the clients (signatories, beneficial owners, KYC documents, ratings, EDD), screenings and
-  // their hits, provider requests, transaction alerts, cases and AMLC report files
-  'client_signatories', 'client_beneficial_owners', 'client_kyc_documents', 'aml_risk_assessments', 'aml_edd_reviews', 'aml_screenings', 'aml_screening_hits',
-  'aml_provider_requests', 'aml_alerts', 'aml_cases', 'aml_reports', 'aml_report_items',
+  // due diligence of the clients: signatories, beneficial owners, KYC documents
+  'client_signatories', 'client_beneficial_owners', 'client_kyc_documents',
   // operations and accounting (migrations 0290 to 0297): cover notes, post-dated cheques, claim document checklist and
   // reminders, motor claim repairs, accounts payable, fixed assets and their depreciation (masters are generic types)
   'cover_notes', 'post_dated_cheques', 'claim_document_items', 'claim_document_reminders', 'claim_repair_estimates', 'claim_loas', 'claim_vehicle_releases',
   'supplier_invoices', 'supplier_invoice_lines', 'supplier_payments', 'supplier_payment_allocations', 'fixed_assets', 'fixed_asset_depreciation',
   // distribution and products: lead assignments, channel billing accounts, dealer sales, fleet schedules, marine open
-  // covers, facultative reinsurance, comparison reports, marketing campaigns (assignment rules, channels, programmes,
-  // segments, templates and saved reports are masters)
+  // covers, comparison reports, marketing campaigns (assignment rules, channels, programmes, segments, templates and
+  // saved reports are masters)
   'lead_assignment_history', 'channel_billing_accounts', 'dealer_sales_batches', 'dealer_sales', 'fleet_schedules', 'fleet_vehicles',
-  'open_covers', 'open_cover_declarations', 'open_cover_certificates', 'fac_placements', 'fac_placement_shares', 'fac_settlements',
+  'open_covers', 'open_cover_declarations', 'open_cover_certificates',
   'comparison_reports', 'campaigns', 'campaign_recipients',
   // sales activities of account executives and fixed asset disposals (migrations 0320 and 0321)
   'sales_activities', 'fixed_asset_disposals',
-  // compliance: complaints (they belong to the clients, policies and claims that go) and the breach register of a test run
-  'complaints', 'complaint_reminders', 'personal_data_breaches', 'personal_data_breach_reminders',
 ];
 
 /**
@@ -118,13 +112,13 @@ export const MASTER_CONFIG_TABLES = [
   'app_settings', 'document_numbering', 'users', 'user_roles', 'roles', 'role_permissions', 'permissions',
   'authority_limits', 'authority_transaction_types', 'sod_rules', 'user_delegations', 'remittance_delegations',
   // generic and dedicated masters
-  'master_types', 'master_records', 'branches', 'signatories', 'e_signatures', 'document_signature_slots', 'brand_pack_enablements', 'banks', 'insurance_companies', 'reinsurers', 'commission_referrers',
+  'master_types', 'master_records', 'branches', 'signatories', 'e_signatures', 'document_signature_slots', 'brand_pack_enablements', 'banks', 'insurance_companies', 'commission_referrers',
   'countries', 'regions', 'states', 'cities', 'districts', 'postal_codes', 'currencies',
   'vehicle_brands', 'vehicle_models', 'vehicle_variants', 'write_off_reasons',
   // products and pricing: product configurator, covers, commission rate matrix, taxes and charges, packages
   'products', 'policy_types', 'coverages', 'product_templates', 'product_components', 'product_risk_mappings', 'product_risk_sections',
   'commission_rates', 'tax_codes', 'lgu_tax_rates', 'premium_charge_rules', 'package_bundles', 'package_bundle_sections', 'insurer_rate_tables',
-  'incentive_programs', 'reinsurance_treaties', 'payment_gateways',
+  'incentive_programs', 'payment_gateways',
   // accounting configuration: chart of accounts, posting rules and their change requests, period-end checklist, petty cash funds
   'gl_accounts', 'posting_rules', 'posting_rule_lines', 'accounting_config_changes', 'period_close_checklist', 'petty_cash_funds',
   'bank_statement_formats', 'bank_transaction_types', 'bank_match_rules', 'insurer_statement_formats',
@@ -134,14 +128,9 @@ export const MASTER_CONFIG_TABLES = [
   'integration_connectors', 'message_templates', 'insurer_api_mappings', 'coc_series', 'bank_file_layouts', 'payee_bank_accounts',
   // overriding / contingent commission agreements with insurers and their tiers
   'override_agreements', 'override_agreement_tiers',
-  // AML/CFT configuration: risk factors, monitoring rules, screening lists with their versions and entries
-  'aml_risk_factors', 'aml_rules', 'aml_screening_lists', 'aml_list_versions', 'aml_list_entries',
   // distribution and reporting configuration: lead assignment rules, distribution channels, brand-new vehicle
   // programmes, campaign segments and templates, Report Builder saved reports
   'lead_assignment_rules', 'distribution_channels', 'motor_programmes', 'campaign_segments', 'campaign_templates', 'report_builder_reports',
-  // Insurance Commission compliance: licences of the firm, its officers and referrers, fit and proper records, the
-  // reminders already sent for them, and the mapping of the ledger to the IC annual statement
-  'compliance_licences', 'compliance_licence_reminders', 'compliance_fit_proper', 'ic_statement_lines',
 ];
 
 /**
@@ -149,25 +138,23 @@ export const MASTER_CONFIG_TABLES = [
  * records it numbered stay (restarting it would issue a code that already exists):
  *   petty_cash_fund     Petty Cash Code (petty_cash_funds, Accounts > Petty Cash > Initiate)
  *   product_template    product template codes (Product Configurator)
- *   reinsurer           reinsurer codes (Reinsurance > Reinsurers)
- *   treaty              treaty numbers (reinsurance_treaties)
  *   incentive_program   incentive programme numbers (incentive_programs)
  *   commission_master   Commission Code of the retired commission master (records kept, inactive)
  *   employee            Employee Code of the retired employee master (records kept, inactive)
  * Every other series numbers transactions and restarts at its configured start number.
  */
-export const MASTER_SERIES = ['petty_cash_fund', 'product_template', 'reinsurer', 'treaty', 'incentive_program', 'commission_master', 'employee'];
+export const MASTER_SERIES = ['petty_cash_fund', 'product_template', 'incentive_program', 'commission_master', 'employee'];
 
 /**
  * Storage folders (first segment of a storage key, uploads/storage.js) that hold transaction files: policy, quotation,
- * endorsement, claim and payment attachments, printed receipts and vouchers, generated reports and bordereaux.
+ * endorsement, claim and payment attachments, printed receipts and vouchers, generated reports.
  * Their documents rows are removed by the reset, the files themselves with --purge-files.
  */
 export const TRANSACTION_FILE_FOLDERS = [
   'vehicle-photos', 'id-cards', 'policy-documents', 'quotation-responses', 'insurer-offers', 'endorsement', 'endorsement-documents',
-  'claim', 'claims', 'payment-proofs', 'direct-bill-payments', 'print', 'generated', 'reports', 'bordereaux',
-  'incentive-reports', 'reinsurance-reports', 'remittance-statements', 'remittance-bulk',
-  // KYC documents of the clients (AML/CFT)
+  'claim', 'claims', 'payment-proofs', 'direct-bill-payments', 'print', 'generated', 'reports',
+  'incentive-reports', 'remittance-statements', 'remittance-bulk',
+  // KYC documents of the clients (onboarding)
   'kyc',
   'bi-extract',
 ];
@@ -176,11 +163,11 @@ export const CONFIG_FILE_FOLDERS = ['logo', 'favicon', 'company-logo', 'product-
 
 /**
  * Tables the sample-data purge (scripts/purge-sample-data.js) also empties: technical records, and configuration the
- * sample seed fills with demo rows (bundles, insurer rate tables, treaties, petty cash funds, delegations).
+ * sample seed fills with demo rows (bundles, insurer rate tables, petty cash funds, delegations).
  */
 export const PURGE_SYSTEM_TABLES = ['notifications', 'email_outbox', 'generated_reports', 'job_runs', 'job_queue', 'sequences', 'documents', 'opening_balances',
   'integration_outbox', 'integration_attempts', 'integration_inbox'];
-export const PURGE_DEMO_CONFIG_TABLES = ['petty_cash_funds', 'package_bundles', 'package_bundle_sections', 'insurer_rate_tables', 'reinsurance_treaties',
+export const PURGE_DEMO_CONFIG_TABLES = ['petty_cash_funds', 'package_bundles', 'package_bundle_sections', 'insurer_rate_tables',
   'user_delegations', 'remittance_delegations',
   // demo COC series, payee bank accounts and insurer API mapping of seeds/sample/75_integrations.sql
   'coc_series', 'payee_bank_accounts', 'insurer_api_mappings'];

@@ -194,7 +194,6 @@ async function documents() {
   await linked(E, 'Remittance statement (default layout)', 'POST', '/remittance/statements/generate', { period, statementType: 'Account Statement', selectionType: 'all' }, 'csv', link);
   for (const t of await templates('remittance-statement-template')) await linked(E, `Remittance statement - ${t.name}`, 'POST', '/remittance/statements/generate', { period, statementType: 'Account Statement', selectionType: 'all', templateCode: t.code }, 'csv', link);
   for (const t of await templates('remittance-report-template')) await linked(E, `Remittance report - ${t.name}`, 'POST', '/remittance/reports/generate', { templateCode: t.code, from: `${yr}-01-01`, to: `${yr}-12-31`, insurers: [] }, 'csv', link);
-  for (const t of await templates('reinsurance-report-template')) await linked(E, `Reinsurance report - ${t.name}`, 'POST', '/reinsurance/reports/generate', { templateId: t.code }, 'csv', link);
   for (const t of await templates('incentive-report-template')) await linked(E, `Incentive report - ${t.name}`, 'POST', '/incentive/reports/generate', { templateId: t.code, parameters: { period } }, 'csv', link);
 }
 

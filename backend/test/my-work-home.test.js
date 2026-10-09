@@ -1,6 +1,6 @@
-// Home (My Work with a role preset): the sources of the compliance officer (EDD reviews, compliance deadlines, breach
-// register), the system administrator (users and access, system health) and the accounting manager (bank
-// reconciliations, period close), permission-filtered on the server, and the role figures of GET /my-work/figures.
+// Home (My Work with a role preset): the sources of the system administrator (users and access, system health) and the
+// accounting manager (bank reconciliations, period close), permission-filtered on the server, and the role figures of
+// GET /my-work/figures.
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { setup, loginAs } from './helpers.js';
@@ -36,8 +36,6 @@ const figures = async (who) => {
 beforeAll(async () => {
   ctx = await setup();
   now = await today();
-  await makeUser('mw.officer', ['compliance-officer']);
-  await makeUser('mw.ops', ['operations']);
   await makeUser('mw.acctmgr', ['accounting-manager']);
   await makeUser('mw.acct', ['accounting'], { reportingTo: 'mw.acctmgr' });
   await makeUser('mw.sales', ['sales']);
@@ -47,23 +45,6 @@ beforeAll(async () => {
 
   await query(`INSERT INTO clients(id, client_code, display_name, first_name, last_name, owner_user_id, created_by)
     VALUES ('cl_home1', 'CL-HOME-0001', 'Home Client', 'Home', 'Client', $1, $1)`, [ids['mw.sales']]);
-  // EDD reviews: one being prepared by Operations, one submitted by Operations and waiting for the compliance officer
-  await query(`INSERT INTO aml_edd_reviews(id, review_number, client_id, status, reason, created_by)
-    VALUES ('edd_home1', 'EDD-HOME-0001', 'cl_home1', 'open', 'High-risk rating', $1)`, [ids['mw.ops']]);
-  await query(`INSERT INTO aml_edd_reviews(id, review_number, client_id, status, reason, created_by, submitted_by, submitted_at)
-    VALUES ('edd_home2', 'EDD-HOME-0002', 'cl_home1', 'submitted', 'Politically exposed person', $1, $1, now())`, [ids['mw.ops']]);
-  // compliance deadlines: a licence expiring in 20 days, a renewed one (not listed), a fit and proper review due in 10 days,
-  // an insurer whose certificate of authority runs out in 12 days
-  await query(`INSERT INTO compliance_licences(id, holder_type, holder_name, licence_type, licence_number, expiry_date, renewal_status)
-    VALUES ('lic_home1', 'firm', 'Home Brokers Inc.', 'Insurance broker licence', 'IB-HOME-1', $1::date + 20, 'due'),
-           ('lic_home2', 'firm', 'Home Brokers Inc.', 'Reinsurance broker licence', 'RB-HOME-1', $1::date + 20, 'renewed')`, [now]);
-  await query(`INSERT INTO compliance_fit_proper(id, person_name, role_category, position, next_review_on)
-    VALUES ('fp_home1', 'Jose Reyes', 'officer', 'Chief Operating Officer', $1::date + 10)`, [now]);
-  await query(`UPDATE insurance_companies SET attrs = COALESCE(attrs, '{}'::jsonb) || jsonb_build_object('icCertificateNumber', 'CA-HOME-1', 'icCertificateValidUntil', ($1::date + 12)::text)
-    WHERE code = 'MAPFRE'`, [now]);
-  // a personal data breach discovered today, not yet assessed, no data protection officer assigned
-  await query(`INSERT INTO personal_data_breaches(id, breach_number, title, discovered_at, npc_due_at, created_by)
-    VALUES ('pdb_home1', 'PDB-HOME-0001', 'Laptop with client schedules lost', now(), now() + interval '72 hours', $1)`, [ids['mw.ops']]);
   // a bank reconciliation of the accountant still in draft with unmatched lines; a period close run with a manual item and a failed check
   await query(`INSERT INTO bank_reconciliations(id, rec_number, bank_account_id, bank_account_code, gl_account_code, period, as_of_date, status, unmatched_bank_lines, unmatched_book_lines, difference, created_by)
     VALUES ('brc_home1', 'BRC-HOME-0001', 1, 'BPI-001', '1010', '2026-09', '2026-09-30', 'draft', 3, 1, 1250.00, $1)`, [ids['mw.acct']]);
@@ -88,45 +69,6 @@ afterAll(async () => {
 });
 
 describe('role sources', () => {
-  it('the compliance officer sees the EDD reviews: the submitted one in their queue, the one in preparation with everyone', async () => {
-    const mine = await items('mw.officer', 'category=edd');
-    expect(refs(mine)).toEqual(['EDD-HOME-0002']);
-    expect(mine.data[0]).toMatchObject({ queue: true, kind: 'EDD review awaiting decision', clientName: 'Home Client', link: '/compliance/aml/edd', priority: 'high' });
-    const all = await items('mw.officer', 'category=edd&scope=all');
-    expect(refs(all).sort()).toEqual(['EDD-HOME-0001', 'EDD-HOME-0002']);
-    expect(all.data.find((i) => i.ref === 'EDD-HOME-0001')).toMatchObject({ ownerId: ids['mw.ops'], kind: 'EDD review in preparation' });
-    // the categories of the officer's summary are the compliance ones, not the sales ones
-    const s = await as('mw.officer', 'get', '/my-work/summary');
-    const codes = s.body.data.categories.map((c) => c.code);
-    expect(codes).toEqual(expect.arrayContaining(['edd', 'compliance', 'breaches', 'approvals', 'tasks']));
-    expect(codes).not.toContain('quotes');
-    expect(s.body.data.categories.find((c) => c.code === 'edd').count).toBe(1);
-  });
-
-  it('compliance deadlines: licence expiring, fit and proper review due, insurer certificate of authority expiring', async () => {
-    const body = await items('mw.officer', 'category=compliance&pageSize=50');
-    const kinds = Object.fromEntries(body.data.map((i) => [i.ref, i]));
-    expect(kinds['IB-HOME-1']).toMatchObject({ kind: 'Licence expiring', clientName: 'Home Brokers Inc.', dueDate: addDays(now, 20), queue: true, link: '/compliance/licences',
-      nextAction: 'File the licence renewal with the Insurance Commission' });
-    expect(kinds['RB-HOME-1']).toBeUndefined();
-    expect(kinds['Jose Reyes']).toMatchObject({ kind: 'Fit and proper review', dueDate: addDays(now, 10), link: '/compliance/fit-and-proper' });
-    expect(kinds.MAPFRE).toMatchObject({ kind: 'Insurer certificate of authority expiring', dueDate: addDays(now, 12), priority: 'high', link: '/compliance/insurer-authority' });
-    // Sales holds no compliance permission: the category is not theirs
-    expect((await items('mw.sales', 'category=compliance')).total).toBe(0);
-    expect((await as('mw.sales', 'get', '/my-work/summary')).body.data.categories.map((c) => c.code)).not.toContain('compliance');
-  });
-
-  it('breach register: an unassigned breach waits in the queue of the privacy team, with the NPC deadline as due date', async () => {
-    const body = await items('mw.officer', 'category=breaches');
-    expect(body.data[0]).toMatchObject({ ref: 'PDB-HOME-0001', kind: 'Personal data breach', priority: 'urgent', queue: true, link: '/compliance/breaches', nextAction: 'Assess the breach: is it notifiable to the NPC?' });
-    expect(body.data[0].dueDate >= now).toBe(true);
-    // Operations (write:privacy) has the same queue; once a data protection officer is assigned it is theirs alone
-    expect(refs(await items('mw.ops', 'category=breaches'))).toEqual(['PDB-HOME-0001']);
-    await query("UPDATE personal_data_breaches SET dpo_user_id = $1 WHERE id = 'pdb_home1'", [ids['mw.officer']]);
-    expect((await items('mw.ops', 'category=breaches')).total).toBe(0);
-    expect(refs(await items('mw.officer', 'category=breaches'))).toEqual(['PDB-HOME-0001']);
-  });
-
   it('the accounting manager sees the bank reconciliations in progress and the period close items of the team', async () => {
     const recs = await items('mw.acctmgr', 'category=bankrec&scope=all');
     expect(recs.data[0]).toMatchObject({ ref: 'BRC-HOME-0001', ownerId: ids['mw.acct'], amount: 1250, dueDate: '2026-10-10', link: '/accounts/bank-reconciliation/reconciliations/brc_home1',
@@ -157,13 +99,13 @@ describe('role sources', () => {
   });
 
   it('a user limited to their own book gets nothing from the sources that are not part of a book', async () => {
-    const r = await ctx.api('post', '/roles').send({ code: 'mw-home-own', name: 'Own book compliance (test)', permissions: ['read:compliance', 'read:privacy', 'read:profile'] });
+    const r = await ctx.api('post', '/roles').send({ code: 'mw-home-own', name: 'Own book accounting (test)', permissions: ['read:bank-reconciliation', 'read:period-end', 'read:profile'] });
     expect(r.status).toBe(201);
     await makeUser('mw.scoped', ['mw-home-own']);
     await ctx.api('put', '/settings').send({ settings: { 'security.scoped_roles': ['mw-home-own'] } });
-    expect((await items('mw.scoped', 'scope=all&category=compliance,breaches&pageSize=50')).total).toBe(0);
+    expect((await items('mw.scoped', 'scope=all&category=bankrec,periodClose&pageSize=50')).total).toBe(0);
     await ctx.api('put', '/settings').send({ settings: { 'security.scoped_roles': [] } });
-    expect((await items('mw.scoped', 'scope=all&category=compliance,breaches&pageSize=50')).total).toBeGreaterThan(0);
+    expect((await items('mw.scoped', 'scope=all&category=bankrec,periodClose&pageSize=50')).total).toBeGreaterThan(0);
   });
 });
 
@@ -171,7 +113,7 @@ describe('role figures (GET /my-work/figures)', () => {
   it('picks the most specific preset of the roles a user holds', () => {
     expect(presetOf({ roles: ['sales'] })).toBe('sales');
     expect(presetOf({ roles: ['accounting', 'accounting-manager'] })).toBe('accounting-manager');
-    expect(presetOf({ roles: ['operations', 'compliance-officer'] })).toBe('compliance-officer');
+    expect(presetOf({ roles: ['operations', 'accounting'] })).toBe('accounting');
     expect(presetOf({ roles: ['mw-home-own'] })).toBe('general');
     expect(PRESETS[0]).toBe('system-admin');
   });
@@ -189,7 +131,7 @@ describe('role figures (GET /my-work/figures)', () => {
     expect(by.renewals30).toMatchObject({ value: 1, format: 'count' });
   });
 
-  it('claims, accounting manager, compliance officer and administrator figures', async () => {
+  it('claims, accounting manager and administrator figures', async () => {
     await query(`INSERT INTO claims(id, claim_number, policy_id, client_id, status, loss_date, reported_date, estimate_amount, handler_user_id)
       VALUES ('clm_home1', 'CLM-HOME-0001', 'pol_home1', 'cl_home1', 'in-review', $1::date - 12, $1::date - 10, 30000, $2)`, [now, ids['mw.claims']]);
     // the whole book (the sample seed adds claims): compare with the database
@@ -213,10 +155,6 @@ describe('role figures (GET /my-work/figures)', () => {
     expect(amBy.collectedMonth).toMatchObject({ value: Number(money.collected), format: 'amount' });
     expect(amBy.vouchersForApproval).toMatchObject({ value: money.vouchers, format: 'count' });
     expect((await figures('mw.acct')).figures.map((x) => x.key)).toEqual(['overdueReceivables', 'collectedMonth']);
-
-    const co = Object.fromEntries((await figures('mw.officer')).figures.map((x) => [x.key, x.value]));
-    expect(co.deadlines30).toBeGreaterThanOrEqual(3);
-    expect(co.eddOpen).toBeGreaterThanOrEqual(2);
 
     const admin = await figures('admin');
     expect(admin.preset).toBe('system-admin');

@@ -1,0 +1,47 @@
+// Client onboarding form. Page frame, filters and fields come from ../../../module/Administration/index.scss (admin__*),
+// tables from ../../../module/AccessControl/index.scss (access__*).
+
+.onboarding__page {
+  .onboarding__section {
+    margin: 1.25rem 0 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .onboarding__summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 0.75rem 1.5rem;
+    margin-bottom: 1rem;
+
+    label {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-size: 0.75rem;
+      color: var(--text-color-secondary, #6b7280);
+    }
+  }
+
+  .onboarding__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 0.75rem 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .onboarding__upload {
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .onboarding__error {
+    color: var(--color-danger, #b91c1c);
+  }
+}
+
+.onboarding__row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}

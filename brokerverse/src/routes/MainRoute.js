@@ -299,26 +299,8 @@ import SodRules from "../module/AccessControl/SodRules";
 import AccessReviews from "../module/AccessControl/AccessReviews";
 import DataSubjectRequests from "../module/DataPrivacy/DataSubjectRequests";
 import ConsentRegister from "../module/DataPrivacy/ConsentRegister";
-// AML/CFT: Compliance menu and client onboarding before the first policy
-import AmlDashboard from "../module/Compliance/AmlDashboard";
-import ClientDueDiligence from "../module/Compliance/ClientDueDiligence";
-import ClientAmlProfile from "../module/Compliance/ClientAmlProfile";
-import EddReviews from "../module/Compliance/EddReviews";
-import KycRefresh from "../module/Compliance/KycRefresh";
-import ScreeningHits from "../module/Compliance/ScreeningHits";
-import ScreeningLists from "../module/Compliance/ScreeningLists";
-import TransactionAlerts from "../module/Compliance/TransactionAlerts";
-import AmlCases from "../module/Compliance/AmlCases";
-import AmlReports from "../module/Compliance/AmlReports";
-import AmlSettings from "../module/Compliance/AmlSettings";
+// client onboarding before the first policy (customer due diligence)
 import ClientOnboarding from "../agentModule/quoteModule/clientOnboarding";
-import LicenceRegister from "../module/Compliance/LicenceRegister";
-import FitAndProper from "../module/Compliance/FitAndProper";
-import InsurerAuthority from "../module/Compliance/InsurerAuthority";
-import Complaints from "../module/Compliance/Complaints";
-import IcAnnualStatement from "../module/Compliance/IcAnnualStatement";
-import IcProductionReport from "../module/Compliance/IcProductionReport";
-import BreachRegister from "../module/Compliance/BreachRegister";
 import GoLiveDataLoad from "../module/GoLiveDataLoad";
 import CompareInsurers from "../module/PackagedProducts/CompareInsurers";
 import BundleProducts from "../module/PackagedProducts/BundleProducts";
@@ -346,16 +328,6 @@ import BankPaymentFiles from "../module/Integrations/BankPaymentFiles";
 import CommissionDashboard from "../module/Commission/CommissionDashboard";
 import ReferrerAccounts from "../module/Commission/ReferrerAccounts";
 import ReferrerAccountDetail from "../module/Commission/ReferrerAccountDetail";
-
-// Reinsurance Module Imports
-import TreatyMaster from "../module/FinanceMastersModule/ReinsuranceMaster/TreatyMaster";
-import TreatyDashboard from "../module/Reinsurance/TreatyDashboard";
-import TreatyDetail from "../module/Reinsurance/TreatyDetail";
-import CessionDashboard from "../module/Reinsurance/CessionDashboard";
-import RecoveryDashboard from "../module/Reinsurance/RecoveryDashboard";
-import ReinsuranceReports from "../module/Reinsurance/ReinsuranceReports";
-import ReconciliationDashboard from "../module/Reinsurance/ReconciliationDashboard";
-import ReinsuranceAnalytics from "../module/Reinsurance/ReinsuranceAnalytics";
 
 // Product Configurator Module Imports
 import ProductDashboard from "../module/ProductConfigurator/ProductDashboard";
@@ -404,7 +376,6 @@ import DistributionChannels from "../module/Distribution/DistributionChannels";
 import DealerProgrammes from "../module/Distribution/DealerProgrammes";
 import FleetSchedules from "../module/Distribution/FleetSchedules";
 import OpenCovers from "../module/Distribution/OpenCovers";
-import FacultativePlacements from "../module/Distribution/FacultativePlacements";
 import ComparisonReports from "../module/Distribution/ComparisonReports";
 import Campaigns from "../module/Distribution/Campaigns";
 import ReportBuilder from "../module/Distribution/ReportBuilder";
@@ -1061,7 +1032,7 @@ const Maincomponent = () => {
           />
           <Route
             path="master/finance/ri-claim-account-setup"
-            element={<AccountDetermination section="ri-claims" />}
+            element={<AccountDetermination section="claims" />}
           />
           <Route
             path="master/finance/posting-rules"
@@ -1167,27 +1138,9 @@ const Maincomponent = () => {
           <Route path="/master/generals/usermanagement/access-reviews" element={<AccessReviews />} />
           <Route path="/master/data-privacy/requests" element={<DataSubjectRequests />} />
           <Route path="/master/data-privacy/consents" element={<ConsentRegister />} />
-          {/* AML/CFT: Compliance menu and client onboarding */}
-          <Route path="/compliance/aml/dashboard" element={<AmlDashboard />} />
-          <Route path="/compliance/aml/clients" element={<ClientDueDiligence />} />
-          <Route path="/compliance/aml/clients/:id" element={<ClientAmlProfile />} />
-          <Route path="/compliance/aml/edd" element={<EddReviews />} />
-          <Route path="/compliance/aml/kyc-refresh" element={<KycRefresh />} />
-          <Route path="/compliance/aml/hits" element={<ScreeningHits />} />
-          <Route path="/compliance/aml/lists" element={<ScreeningLists />} />
-          <Route path="/compliance/aml/alerts" element={<TransactionAlerts />} />
-          <Route path="/compliance/aml/cases" element={<AmlCases />} />
-          <Route path="/compliance/aml/reports" element={<AmlReports />} />
-          <Route path="/compliance/aml/settings" element={<AmlSettings />} />
+          {/* client onboarding before the first policy */}
           <Route path="/agent/client-onboarding" element={<ClientOnboarding />} />
           <Route path="/agent/client-onboarding/:id" element={<ClientOnboarding />} />
-          <Route path="/compliance/licences" element={<LicenceRegister />} />
-          <Route path="/compliance/fit-and-proper" element={<FitAndProper />} />
-          <Route path="/compliance/insurer-authority" element={<InsurerAuthority />} />
-          <Route path="/compliance/complaints" element={<Complaints />} />
-          <Route path="/compliance/ic-annual-statement" element={<IcAnnualStatement />} />
-          <Route path="/compliance/ic-production-report" element={<IcProductionReport />} />
-          <Route path="/compliance/breaches" element={<BreachRegister />} />
           <Route path="/master/go-live-data-load" element={<GoLiveDataLoad />} />
           <Route path="/sales/compare-insurers" element={<CompareInsurers />} />
           <Route path="/master/finance/package-bundles" element={<BundleProducts />} />
@@ -1271,25 +1224,6 @@ const Maincomponent = () => {
           <Route
             path="commission/referrer-accounts/:id"
             element={<ReferrerAccountDetail />}
-          />
-
-          {/* Reinsurance Module Routes */}
-          {/* Reinsurance Master */}
-          <Route path="master/reinsurance/treaty" element={<TreatyMaster />} />
-
-          {/* Reinsurance User Screens */}
-          <Route path="reinsurance/treaties" element={<TreatyDashboard />} />
-          <Route path="reinsurance/treaty/:id" element={<TreatyDetail />} />
-          <Route path="reinsurance/cessions" element={<CessionDashboard />} />
-          <Route path="reinsurance/claims" element={<RecoveryDashboard />} />
-          <Route path="reinsurance/reports" element={<ReinsuranceReports />} />
-          <Route
-            path="reinsurance/reconciliation"
-            element={<ReconciliationDashboard />}
-          />
-          <Route
-            path="reinsurance/analytics"
-            element={<ReinsuranceAnalytics />}
           />
 
           {/* Product Configurator Module Routes */}
@@ -1922,8 +1856,6 @@ const Maincomponent = () => {
           <Route path="/operations/fleet-schedules/:id" element={<FleetSchedules />} />
           <Route path="/operations/open-covers" element={<OpenCovers />} />
           <Route path="/operations/open-covers/:id" element={<OpenCovers />} />
-          <Route path="/reinsurance/facultative" element={<FacultativePlacements />} />
-          <Route path="/reinsurance/facultative/:id" element={<FacultativePlacements />} />
           <Route path="/reports/builder" element={<ReportBuilder />} />
 
           {/* Any other address inside the application */}

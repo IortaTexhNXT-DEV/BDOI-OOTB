@@ -3,7 +3,7 @@
 BrokerVerse is the insurance broking platform of iorta TechNXT for brokers in the Philippines: leads, quotations,
 placement with insurers, policies, endorsements, claims, renewals, and the broker's accounting (billing, collection,
 remittance to insurers, commission, payables and fixed assets, general ledger, period end, bank reconciliation, BIR
-returns and invoicing), AML/CFT compliance, distribution and marketing, integrations with SMS gateways, CTPL, insurers
+returns and invoicing), client onboarding and KYC, distribution and marketing, integrations with SMS gateways, CTPL, insurers
 and banks, and the go-live data workbench. Updated 04 October 2026 for the current conventions.
 
 This folder is for two readers: developers who change or extend the system, and the support team who look into

@@ -9,8 +9,8 @@ import { canRead, canWrite, parseStatus, sendList } from './helpers.js';
 import * as svc from './service.js';
 
 /**
- * Generic, metadata-driven masters: every Master screen (General, Finance, Remittance, Reinsurance, Incentive,
- * Product) reads and writes its records through these endpoints, keyed by the master type code.
+ * Generic, metadata-driven masters: every Master screen (General, Finance, Remittance, Incentive, Product) reads and
+ * writes its records through these endpoints, keyed by the master type code.
  */
 const { router, define } = moduleRouter('Masters', '/masters');
 const SCREEN = 'Master > (any master screen)';

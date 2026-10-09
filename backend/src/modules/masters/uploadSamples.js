@@ -140,11 +140,6 @@ export const MASTER_TEMPLATES = [
     samples: [{ categoryCode: 'AC-CONTRA', categoryName: 'Contra Asset', description: 'Allowance for doubtful accounts and accumulated depreciation' }],
   },
   {
-    type: 'security-rating', menu: 'Master > Finance > Reinsurance Treaty (security ratings of reinsurers)',
-    formats: { rank: 'Whole number; a higher rank is a stronger rating (AAA is 22)' },
-    samples: [{ rating: 'A++', rank: '21', agency: 'AM Best', description: 'Superior financial strength (AM Best)' }],
-  },
-  {
     type: 'product-category', menu: 'Product Configurator > Product Templates (product categories)',
     samples: [{ categoryCode: 'BONDS', categoryName: 'Surety Bonds', description: 'Performance, bid and payment bonds' }],
   },
@@ -205,10 +200,6 @@ export const MASTER_TEMPLATES = [
   {
     type: 'incentive-report-template', menu: 'Accounts > Incentive (incentive report templates; no menu screen of their own)',
     samples: [{ code: 'IRT-006', name: 'Quarterly producer ranking', category: 'Performance Reports', description: 'Top producers by premium for the quarter', parameters: 'Period, Branch', formats: 'PDF, Excel' }],
-  },
-  {
-    type: 'reinsurance-report-template', menu: 'Reinsurance (reinsurance report templates; no menu screen of their own)',
-    samples: [{ code: 'RPT005', name: 'Quarterly claims recovery statement', type: 'Claims', frequency: 'Quarterly', format: 'Excel, PDF', recipients: 'All Treaty Reinsurers', nextDue: '2027-01-10' }],
   },
   {
     type: 'salutation', menu: 'Master > Configuration (reference list, API /api/masters/salutation; no screen of its own)',

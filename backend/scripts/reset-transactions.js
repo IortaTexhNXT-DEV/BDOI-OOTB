@@ -9,17 +9,17 @@
  *
  * What it removes:
  *   - every transaction table (leads, clients, quotations, policies, endorsements, receivables, receipts, payments,
- *     collections, disbursements, petty cash movements, commissions, remittances, reinsurance movements, incentive
- *     results, claims, renewals, journals, accounting periods and fiscal years, period-end closes, bank and insurer
- *     reconciliations, credit control, package sales, payment links, access reviews, privacy records);
+ *     collections, disbursements, petty cash movements, commissions, remittances, incentive results, claims, renewals,
+ *     journals, accounting periods and fiscal years, period-end closes, bank and insurer reconciliations, credit control,
+ *     package sales, payment links, access reviews, privacy records);
  *   - notifications, the e-mail outbox, generated report records, job run history and queue, sign-in history,
  *     sign-in sessions and password reset codes;
  *   - the document records of transaction storage folders (with --purge-files also the files of those folders);
  *   - the document number counters of transaction series: each series restarts at the next number configured for the
  *     current period (Master > Document Numbering > Set next number, or the Numbering sheet of the go-live configuration
  *     workbook: the old system's last number + 1), else at its start number; the dry run lists the restart per series.
- *     Counters of series that number master records (MASTER_SERIES: petty cash fund, product template, reinsurer,
- *     treaty, incentive programme, commission and employee codes) are kept, since the records they numbered stay;
+ *     Counters of series that number master records (MASTER_SERIES: petty cash fund, product template, incentive
+ *     programme, commission and employee codes) are kept, since the records they numbered stay;
  *   - the go-live opening balances, unless --keep-opening-balances (the migration is normally reloaded after the reset).
  * The trial balance is then empty and every period is open again: the accounting calendar is regenerated, open, from
  * the first posting or opening balance load. Petty cash funds stay; their establishment journal goes with the ledger,

@@ -19,13 +19,13 @@ describe('masters catalogue', () => {
     expect(r.status).toBe(200);
     const codes = r.body.data.map((t) => t.code);
     for (const c of ['company', 'branch', 'insurance-company', 'line-of-business', 'product', 'cover', 'signatory', 'vehicle', 'country', 'state', 'city', 'commission', 'hierarchy', 'designation', 'employee',
-      'transaction-code', 'currency', 'exchange-rate', 'bank', 'account-category', 'main-account', 'sub-account', 'taxation', 'petty-cash', 'remittance-automated', 'remittance-analytics-config', 'security-rating']) expect(codes).toContain(c);
+      'transaction-code', 'currency', 'exchange-rate', 'bank', 'account-category', 'main-account', 'sub-account', 'taxation', 'petty-cash', 'remittance-automated', 'remittance-analytics-config']) expect(codes).toContain(c);
     expect(r.body.data.find((t) => t.code === 'country').count).toBeGreaterThanOrEqual(5);
     expect(r.body.data.find((t) => t.code === 'taxation').fields.find((f) => f.name === 'taxRate')).toMatchObject({ type: 'number', required: true });
     const fin = await ctx.api('get', '/masters?category=remittance');
     expect(fin.body.data).toHaveLength(16);
   });
-  it('delivers a designation in the Designation master for every broker role, the compliance officer included', async () => {
+  it('delivers a designation in the Designation master for every broker role and the compliance officer of the Compliance department', async () => {
     const rows = (await ctx.api('get', '/masters/designation?perPage=100')).body.data;
     const names = rows.map((r) => r.designationName);
     for (const d of ['System Administrator', 'Account Executive', 'Placement Officer', 'Client Service Officer', 'Claims Officer', 'Accounting Officer', 'Accounting Manager', 'Compliance Officer']) expect(names).toContain(d);

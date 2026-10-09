@@ -262,10 +262,9 @@ async function maskTable(client, table, plan, m, execute) {
   });
 }
 
-/** Names of institutions (insurers, reinsurers, banks, the broker's own companies and branches): kept wherever they appear. */
+/** Names of institutions (insurers, banks, the broker's own companies and branches): kept wherever they appear. */
 const INSTITUTION_SQL = {
   insurance_companies: 'SELECT name AS n FROM insurance_companies UNION SELECT short_name FROM insurance_companies',
-  reinsurers: 'SELECT name AS n FROM reinsurers UNION SELECT short_name FROM reinsurers',
   banks: 'SELECT name AS n FROM banks',
   branches: 'SELECT name AS n FROM branches',
   master_records: "SELECT name AS n FROM master_records WHERE type_code IN ('company', 'insurance-company', 'bank', 'branch') UNION SELECT data->>'CompanyName' FROM master_records WHERE type_code = 'company'",

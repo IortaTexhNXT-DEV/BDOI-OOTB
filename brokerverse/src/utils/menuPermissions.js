@@ -60,11 +60,9 @@ export const roleMenuPermissions = {
     commission: ["Commission Dashboard"],
     reports: ["All Reports", "Operational Reports", "Report Builder"],
     master: ["Insurance Management > Distribution Channels"],
-    // the complaints register, read only (read:complaints)
-    compliance: ["Insurance Commission > Complaints"],
   },
   // Processing Team (Placement & Policy Processing): broker slips, offer comparison, quotation / placement slips,
-  // insurer confirmation, policy checking and issuance, endorsement processing, reinsurance, product templates
+  // insurer confirmation, policy checking and issuance, endorsement processing, product templates
   processing: {
     dashboard: ["Processing Dashboard", "Executive Dashboard"],
     "product configurator": [
@@ -80,14 +78,6 @@ export const roleMenuPermissions = {
     ],
     "my work": true,
     operations: OPERATIONS_PROCESSING,
-    reinsurance: [
-      "Treaty Dashboard",
-      "Cession Tracking",
-      "Claims Recovery",
-      "Reconciliation",
-      "Analytics",
-      "Facultative Placements",
-    ],
     reports: ["All Reports", "Operational Reports", "Report Builder"],
     master: ["Insurance Management > Distribution Channels"],
   },
@@ -100,19 +90,6 @@ export const roleMenuPermissions = {
     reports: ["All Reports", "Operational Reports", "Report Builder"],
     // data subject requests and the consent register (read:privacy / write:privacy); distribution channels (read:channels)
     master: ["Data Privacy", "Insurance Management > Distribution Channels"],
-    // prepares the EDD reviews of High-risk clients (approval: compliance officer, approve:aml); the Insurance Commission
-    // registers and complaints (read/write:compliance, read/write:complaints) and the breach register (write:privacy)
-    compliance: ["EDD Reviews", "Insurance Commission", "Data Privacy (NPC)"],
-  },
-  // Compliance Officer (AML/CFT): the Compliance menu (read:aml, write:aml, approve:aml), client onboarding and the client,
-  // policy and claim records it reviews
-  "compliance-officer": {
-    "my work": true,
-    compliance: true,
-    operations: ["Clients", "Policy", "Claims"],
-    reports: ["All Reports", "Operational Reports"],
-    // data subject requests and the consent register (read:privacy / write:privacy)
-    master: ["Data Privacy"],
   },
   claims: {
     dashboard: ["Claims Dashboard"],
@@ -121,10 +98,7 @@ export const roleMenuPermissions = {
       // claim document checklist and motor claim repairs (write:claims); their masters below
       "Claim Documents", "Motor Claim Repairs"],
     master: ["Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops"],
-    reinsurance: ["Claims Recovery"],
     reports: ["All Reports", "Operational Reports", "Report Builder"],
-    // complaints about claims are logged and handled by the Claims team (write:complaints)
-    compliance: ["Insurance Commission > Complaints"],
   },
   // Accounting: billing, collection, official receipts, remittance, commission, period end, BIR. The Accounting Manager
   // inherits Accounting (the server returns both roles), so it needs no entry of its own.
@@ -177,12 +151,8 @@ export const roleMenuPermissions = {
     commission: ["Commission Dashboard", "Agents/Referrer Accounts",
       // overriding, profit and contingent commission from insurers (read:commission / write:commission)
       "Insurer Overrides"],
-    // reinsurer statement reconciliation is an Accounting task
-    reinsurance: ["Reconciliation"],
     // the production, claims and renewal registers are not accounting reports (report catalogue roles)
     reports: ["All Reports", "Financial Reports", "Operational Reports > Remittance", "Operational Reports > Broker Commission", "Report Builder"],
-    // licence register (commission payout check), IC annual statement and production report (read:compliance)
-    compliance: ["Insurance Commission > Licence Register", "Insurance Commission > Insurer Authority", "Insurance Commission > IC Annual Statement", "Insurance Commission > IC Production Report"],
   },
 };
 

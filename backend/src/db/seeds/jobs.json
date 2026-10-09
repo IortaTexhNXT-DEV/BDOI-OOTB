@@ -65,7 +65,7 @@
   {
     "code": "housekeeping",
     "name": "Housekeeping",
-    "description": "Purge old job runs, sent e-mails, sign-in history, expired sessions and reset codes, read notifications, completed queue jobs, finished integration messages and attempts, inbound messages, EIS submissions, AML provider requests and go-live workbook rows after the retention periods in Master > Configuration (Data Retention); pending rows and the audit trail are kept",
+    "description": "Purge old job runs, sent e-mails, sign-in history, expired sessions and reset codes, read notifications, completed queue jobs, finished integration messages and attempts, inbound messages, EIS submissions and go-live workbook rows after the retention periods in Master > Configuration (Data Retention); pending rows and the audit trail are kept",
     "cron": "45 2 * * *",
     "handler": "housekeeping"
   },

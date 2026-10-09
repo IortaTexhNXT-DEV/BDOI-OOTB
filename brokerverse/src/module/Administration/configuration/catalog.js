@@ -37,8 +37,8 @@ export const AREAS = [
     id: "policy",
     title: "Policies, Endorsements & Renewals",
     icon: "pi pi-file",
-    summary: "Policy term and KYC documents, endorsement types, renewal notices, loyalty discounts and claims loading.",
-    groups: ["policies", "policy", "endorsements", "renewals"],
+    summary: "Client onboarding, policy term and KYC documents, endorsement types, renewal notices, loyalty discounts and claims loading.",
+    groups: ["clients", "policies", "policy", "endorsements", "renewals"],
     links: [{ label: "Document numbering", path: "/master/configuration/document-numbering" }],
   },
   {
@@ -61,8 +61,8 @@ export const AREAS = [
     id: "remittance",
     title: "Remittance & Reconciliation",
     icon: "pi pi-sync",
-    summary: "Remittance to insurers, direct billing of commission, bank and insurer statement reconciliation, reinsurance.",
-    groups: ["remittance", "direct_bill", "disbursements", "bank_reconciliation", "insurer_reconciliation", "reinsurance"],
+    summary: "Remittance to insurers, direct billing of commission, bank and insurer statement reconciliation.",
+    groups: ["remittance", "direct_bill", "disbursements", "bank_reconciliation", "insurer_reconciliation"],
     links: [
       { label: "Bank statement formats", path: "/master/finance/bank-statement-formats" },
       { label: "Insurer statement formats", path: "/master/finance/insurer-statement-formats" },
@@ -141,7 +141,7 @@ export const GROUP_TITLES = {
   policies: "Policies", policy: "Policy issuance and KYC", endorsements: "Endorsements", renewals: "Renewals",
   claims: "Claims", receivables: "Billing", collections: "Collections", credit: "Credit control", payments: "Online payments",
   receipts: "Receipts", remittance: "Remittance to insurers", direct_bill: "Direct bill", disbursements: "Disbursements",
-  bank_reconciliation: "Bank reconciliation", insurer_reconciliation: "Insurer statement reconciliation", reinsurance: "Reinsurance",
+  bank_reconciliation: "Bank reconciliation", insurer_reconciliation: "Insurer statement reconciliation", clients: "Client onboarding",
   commission: "Commission", incentive: "Incentives", accounting: "Accounting", finance: "Finance", tax: "Taxes",
   bir: "BIR forms", invoice: "Sales invoices (EOPT)", eis: "E-invoicing (EIS)", cas: "CAS books and documents", period_end: "Month-end close", notification: "Notifications", email: "E-mail templates",
   security: "Security", access: "Approval authority and accounts", limits: "Limits and validity",
@@ -172,7 +172,6 @@ export const CHOICES = {
   "receipts.default_payment_mode": [["cash", "Cash"], ["check", "Cheque"], ["bank-transfer", "Bank transfer"], ["online", "Online"], ["card", "Card"]],
   "disbursements.default_payment_mode": [["check", "Cheque"], ["bank-transfer", "Bank transfer"], ["cash", "Cash"]],
   "commission.initial_status": [["Accrued", "Accrued"], ["Pending", "Pending"]],
-  "reinsurance.min_security_rating": [["AAA", "AAA"], ["AA", "AA"], ["A+", "A+"], ["A", "A"], ["A-", "A-"], ["BBB", "BBB"]],
 };
 
 /**

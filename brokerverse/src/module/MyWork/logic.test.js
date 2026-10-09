@@ -99,7 +99,7 @@ describe("role presets of Home", () => {
   it("takes the most specific preset of the roles the user holds, else the plain My Work", () => {
     expect(presetFor(["sales"])).toBe("sales");
     expect(presetFor(["Accounting", "accounting-manager"])).toBe("accounting-manager");
-    expect(presetFor(["operations", "compliance-officer"])).toBe("compliance-officer");
+    expect(presetFor(["operations", "accounting"])).toBe("accounting");
     expect(presetFor(["system-admin", "sales"])).toBe("system-admin");
     expect(presetFor(["custom-role"])).toBe("general");
     expect(presetFor(undefined)).toBe("general");

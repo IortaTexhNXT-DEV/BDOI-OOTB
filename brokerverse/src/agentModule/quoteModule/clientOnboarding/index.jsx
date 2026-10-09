@@ -15,12 +15,12 @@ import { MultiSelect } from "primereact/multiselect";
 import { SelectButton } from "primereact/selectbutton";
 import { Toast } from "primereact/toast";
 import PhAddressFields from "../../component/PhAddressFields";
-import amlService, { errorMessage, fieldErrors } from "../../../services/amlService";
-import { AmlTag, PageHeader } from "../../../module/Compliance/common";
-import KycDocuments from "../../../module/Compliance/KycDocuments";
+import onboardingService, { errorMessage, fieldErrors } from "./onboardingService";
+import { AUTHORITY_DOCUMENTS, CONTROL_TYPES, KycStatusTag, PageHeader } from "./common";
+import KycDocuments from "./KycDocuments";
 import "../../../module/Administration/index.scss";
 import "../../../module/AccessControl/index.scss";
-import "../../../module/Compliance/index.scss";
+import "./index.scss";
 
 /** Philippine mobile number (09XXXXXXXXX or +639XXXXXXXXX) and TIN (000-000-000 with an optional branch code). */
 export const PH_MOBILE = /^(\+639|09)\d{9}$/;
@@ -86,8 +86,9 @@ const clean = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, v 
  * customer due diligence needs. Individual: name, birth date and place, nationality, civil status, occupation and source
  * of funds, the government ID presented, mobile number, TIN and the Philippine address. Juridical: registered and trade
  * name, SEC / DTI / CDA registration, TIN, nature of business, its authorised signatories with the board resolution or
- * secretary's certificate, and its beneficial owners. On saving the client is rated and screened; the result shows here.
- * With an id the screen edits the identification of an existing client (also of a client created at policy issue).
+ * secretary's certificate, and its beneficial owners. On saving the KYC status shows what identification is still
+ * missing. With an id the screen edits the identification of an existing client (also of a client created at policy
+ * issue) and takes its KYC documents.
  */
 const ClientOnboarding = () => {
   const { t } = useTranslation();
@@ -98,7 +99,6 @@ const ClientOnboarding = () => {
   const [signatories, setSignatories] = useState([]);
   const [owners, setOwners] = useState([]);
   const [profile, setProfile] = useState(null);
-  const [result, setResult] = useState(null);
   const [party, setParty] = useState(null);
   const [saving, setSaving] = useState(false);
 
@@ -109,15 +109,13 @@ const ClientOnboarding = () => {
       setSaving(true);
       try {
         if (id) {
-          const r = await amlService.updateKyc(id, toBody(v));
+          const r = await onboardingService.updateKyc(id, toBody(v));
           toast.current?.show({ severity: "success", summary: r.message });
-          setResult({ client: r.data.client, assessment: r.data.assessment });
           loadProfile(id);
         } else {
           const body = { ...toBody(v), ...(v.clientType === "corporate" ? { signatories: signatories.map(clean), beneficialOwners: owners.map(clean) } : {}) };
-          const r = await amlService.onboard(body);
-          toast.current?.show({ severity: r.data.aml?.screening?.openHits ? "warn" : "success", summary: r.message });
-          setResult({ client: r.data.client, assessment: r.data.aml.assessment, screening: r.data.aml.screening });
+          const r = await onboardingService.onboard(body);
+          toast.current?.show({ severity: "success", summary: r.message });
           navigate(`/agent/client-onboarding/${r.data.client.id}`, { replace: true });
         }
       } catch (e) {
@@ -132,7 +130,7 @@ const ClientOnboarding = () => {
 
   const loadProfile = useCallback(async (clientId) => {
     try {
-      const p = await amlService.profile(clientId);
+      const p = await onboardingService.profile(clientId);
       setProfile(p);
       setSignatories(p.signatories);
       setOwners(p.beneficialOwners);
@@ -143,20 +141,20 @@ const ClientOnboarding = () => {
 
   useEffect(() => {
     Promise.all([
-      amlService.options("nationality"), amlService.options("government-id-type"), amlService.options("civil-status"), amlService.options("customer-type", "code"),
-      amlService.options("payment-mode", "code"), amlService.options("product", "code"), amlService.options("gender"),
+      onboardingService.options("nationality"), onboardingService.options("government-id-type"), onboardingService.options("civil-status"), onboardingService.options("customer-type", "code"),
+      onboardingService.options("payment-mode", "code"), onboardingService.options("product", "code"), onboardingService.options("gender"),
     ]).then(([nationality, idTypes, civil, customerTypes, paymentModes, lines, genders]) => setOptions({ nationality, idTypes, civil, customerTypes, paymentModes, lines, genders }));
   }, []);
   useEffect(() => {
     if (!id) return;
-    amlService.client(id).then((c) => formik.resetForm({ values: fromClient(c) })).catch((e) => toast.current?.show({ severity: "error", summary: errorMessage(e, t("onboarding.loadFailed")) }));
+    onboardingService.client(id).then((c) => formik.resetForm({ values: fromClient(c) })).catch((e) => toast.current?.show({ severity: "error", summary: errorMessage(e, t("onboarding.loadFailed")) }));
     loadProfile(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const v = formik.values;
   const corporate = v.clientType === "corporate";
-  const err = (k) => (formik.submitCount || formik.touched[k]) && formik.errors[k] ? <small className="aml__error">{formik.errors[k]}</small> : null;
+  const err = (k) => (formik.submitCount || formik.touched[k]) && formik.errors[k] ? <small className="onboarding__error">{formik.errors[k]}</small> : null;
   const text = (k, label, extra = {}) => (
     <div className="admin__field" key={k}>
       <label htmlFor={`ob-${k}`}>{t(label)}</label>
@@ -180,8 +178,8 @@ const ClientOnboarding = () => {
     </div>
   );
   const types = useMemo(() => [{ value: "individual", label: t("onboarding.individual") }, { value: "corporate", label: t("onboarding.juridical") }], [t]);
-  const authorityDocs = ["board-resolution", "secretary-certificate", "partnership-resolution", "special-power-of-attorney", "other"].map((value) => ({ value, label: t(`aml.authority.${value}`) }));
-  const controls = ["ownership", "control", "senior-management"].map((value) => ({ value, label: t(`aml.control.${value}`) }));
+  const authorityDocs = AUTHORITY_DOCUMENTS.map((value) => ({ value, label: t(`onboarding.authorityDocument.${value}`) }));
+  const controls = CONTROL_TYPES.map((value) => ({ value, label: t(`onboarding.control.${value}`) }));
 
   const saveParty = async () => {
     const body = clean(party.row);
@@ -195,8 +193,8 @@ const ClientOnboarding = () => {
     try {
       const { id: rowId, clientId: _c, updatedAt: _u, status: _s, ...rest } = body;
       const r = party.kind === "signatory"
-        ? (rowId ? await amlService.saveSignatory(id, rowId, rest) : await amlService.addSignatory(id, rest))
-        : (rowId ? await amlService.saveOwner(id, rowId, rest) : await amlService.addOwner(id, rest));
+        ? (rowId ? await onboardingService.saveSignatory(id, rowId, rest) : await onboardingService.addSignatory(id, rest))
+        : (rowId ? await onboardingService.saveOwner(id, rowId, rest) : await onboardingService.addOwner(id, rest));
       toast.current?.show({ severity: "success", summary: r.message });
       setParty(null);
       loadProfile(id);
@@ -212,7 +210,7 @@ const ClientOnboarding = () => {
       return;
     }
     try {
-      const r = kind === "signatory" ? await amlService.saveSignatory(id, row.id, { status: "revoked" }) : await amlService.saveOwner(id, row.id, { status: "removed" });
+      const r = kind === "signatory" ? await onboardingService.saveSignatory(id, row.id, { status: "revoked" }) : await onboardingService.saveOwner(id, row.id, { status: "removed" });
       toast.current?.show({ severity: "success", summary: r.message });
       loadProfile(id);
     } catch (e) {
@@ -226,7 +224,7 @@ const ClientOnboarding = () => {
   const c = profile?.client;
 
   return (
-    <div className="admin__page access__page aml__page">
+    <div className="admin__page access__page onboarding__page">
       <Toast ref={toast} />
       <PageHeader title={id ? t("onboarding.editTitle") : t("onboarding.title")} intro={t("onboarding.intro")} home={t("sidebar.Operations")}
         actions={<>
@@ -235,15 +233,12 @@ const ClientOnboarding = () => {
         </>} />
 
       {c ? (
-        <div className="aml__summary">
-          <div><label>{t("aml.colClient")}</label>{c.displayName} ({c.clientCode})</div>
-          <div><label>{t("aml.colRating")}</label><AmlTag value={c.riskRating} group="rating" /></div>
-          <div><label>{t("aml.colKycStatus")}</label><AmlTag value={c.kycStatus} group="kycStatus" /></div>
-          <div><label>{t("aml.colNextReview")}</label>{c.kycNextReviewOn || "-"}</div>
+        <div className="onboarding__summary">
+          <div><label>{t("onboarding.colClient")}</label>{c.displayName} ({c.clientCode})</div>
+          <div><label>{t("onboarding.colKycStatus")}</label><KycStatusTag value={c.kycStatus} /></div>
         </div>
       ) : null}
-      {result?.screening?.openHits ? <Message severity="warn" className="w-full mb-2" text={t("onboarding.screeningHit", { count: result.screening.openHits })} /> : null}
-      {profile?.missing?.length ? <Message severity="warn" className="w-full mb-2" text={`${t("aml.missing")}: ${profile.missing.join(", ")}`} /> : null}
+      {profile?.missing?.length ? <Message severity="warn" className="w-full mb-2" text={`${t("onboarding.missing")}: ${profile.missing.join(", ")}`} /> : null}
       {profile?.ownerWarnings?.map((w) => <Message key={w} severity="warn" className="w-full mb-2" text={w} />)}
 
       <form onSubmit={formik.handleSubmit} noValidate>
@@ -253,8 +248,8 @@ const ClientOnboarding = () => {
             onChange={(e) => { formik.setFieldValue("clientType", e.value); formik.setFieldValue("customerType", e.value === "corporate" ? "CORPORATION" : "INDIVIDUAL"); }} />
         </div>
 
-        <h3 className="aml__section">{t(corporate ? "onboarding.secEntity" : "onboarding.secIdentity")}</h3>
-        <div className="aml__settings-grid">
+        <h3 className="onboarding__section">{t(corporate ? "onboarding.secEntity" : "onboarding.secIdentity")}</h3>
+        <div className="onboarding__grid">
           {corporate ? [
             text("companyName", "onboarding.registeredName"), text("tradeName", "onboarding.tradeName"), list("customerType", "onboarding.customerType", options.customerTypes),
             list("registrationAuthority", "onboarding.registrationAuthority", ["SEC", "DTI", "CDA", "Other"].map((x) => ({ value: x, label: t(`onboarding.authority.${x}`) }))),
@@ -271,8 +266,8 @@ const ClientOnboarding = () => {
 
         {!corporate ? (
           <>
-            <h3 className="aml__section">{t("onboarding.secId")}</h3>
-            <div className="aml__settings-grid">
+            <h3 className="onboarding__section">{t("onboarding.secId")}</h3>
+            <div className="onboarding__grid">
               {list("idType", "onboarding.idType", options.idTypes)}
               {text("idNumber", "onboarding.idNumber")}
               {date("idExpiry", "onboarding.idExpiry")}
@@ -280,16 +275,16 @@ const ClientOnboarding = () => {
           </>
         ) : null}
 
-        <h3 className="aml__section">{t("onboarding.secContact")}</h3>
-        <div className="aml__settings-grid">
+        <h3 className="onboarding__section">{t("onboarding.secContact")}</h3>
+        <div className="onboarding__grid">
           {text("contactNumber", "onboarding.mobile", { placeholder: "09XXXXXXXXX", keyfilter: /[0-9+\s-]/ })}
           {text("emailId", "onboarding.email", { type: "email" })}
         </div>
         <PhAddressFields formik={formik} required={{ city: true }} />
         {err("City")}
 
-        <h3 className="aml__section">{t("onboarding.secProfile")}</h3>
-        <div className="aml__settings-grid">
+        <h3 className="onboarding__section">{t("onboarding.secProfile")}</h3>
+        <div className="onboarding__grid">
           <div className="admin__field">
             <label htmlFor="ob-lines">{t("onboarding.expectedLines")}</label>
             <MultiSelect inputId="ob-lines" value={v.expectedLines} options={options.lines} optionLabel="label" optionValue="value" display="chip" filter
@@ -309,31 +304,31 @@ const ClientOnboarding = () => {
 
         {corporate ? (
           <>
-            <h3 className="aml__section">{t("onboarding.secSignatories")}</h3>
+            <h3 className="onboarding__section">{t("onboarding.secSignatories")}</h3>
             <DataTable value={signatories.filter((s) => (s.status || "active") === "active")} size="small" className="access__table mb-2" emptyMessage={t("onboarding.noSignatories")}>
-              <Column field="fullName" header={t("aml.colName")} />
-              <Column field="position" header={t("aml.colPosition")} />
-              <Column header={t("aml.colAuthority")} body={(s) => `${t(`aml.authority.${s.authorityDocument}`)} ${s.authorityReference || ""} ${s.authorityDate || ""}`} />
+              <Column field="fullName" header={t("onboarding.colName")} />
+              <Column field="position" header={t("onboarding.colPosition")} />
+              <Column header={t("onboarding.colAuthority")} body={(s) => `${t(`onboarding.authorityDocument.${s.authorityDocument}`)} ${s.authorityReference || ""} ${s.authorityDate || ""}`} />
               <Column header="" body={(s, o) => (
-                <div className="aml__row-actions">
-                  <Button type="button" icon="pi pi-pencil" text rounded size="small" aria-label={t("aml.edit")} onClick={() => setParty({ kind: "signatory", index: o.rowIndex, row: { ...EMPTY_SIGNATORY, ...s } })} />
-                  <Button type="button" icon="pi pi-trash" text rounded size="small" severity="danger" aria-label={t("aml.remove")} onClick={() => removeParty("signatory", s, o.rowIndex)} />
+                <div className="onboarding__row-actions">
+                  <Button type="button" icon="pi pi-pencil" text rounded size="small" aria-label={t("onboarding.edit")} onClick={() => setParty({ kind: "signatory", index: o.rowIndex, row: { ...EMPTY_SIGNATORY, ...s } })} />
+                  <Button type="button" icon="pi pi-trash" text rounded size="small" severity="danger" aria-label={t("onboarding.remove")} onClick={() => removeParty("signatory", s, o.rowIndex)} />
                 </div>
               )} />
             </DataTable>
             <Button type="button" icon="pi pi-plus" outlined label={t("onboarding.addSignatory")} onClick={() => setParty({ kind: "signatory", row: { ...EMPTY_SIGNATORY } })} />
 
-            <h3 className="aml__section">{t("onboarding.secOwners", { threshold: profile?.beneficialOwnerThreshold ?? 25 })}</h3>
+            <h3 className="onboarding__section">{t("onboarding.secOwners", { threshold: profile?.beneficialOwnerThreshold ?? 25 })}</h3>
             <DataTable value={owners.filter((o) => (o.status || "active") === "active")} size="small" className="access__table mb-2" emptyMessage={t("onboarding.noOwners")}>
-              <Column field="fullName" header={t("aml.colName")} />
-              <Column header={t("aml.colOwnership")} body={(o) => (o.ownershipPercent === null || o.ownershipPercent === undefined ? "" : `${o.ownershipPercent}%`)} />
-              <Column header={t("aml.colControl")} body={(o) => t(`aml.control.${o.controlType}`)} />
-              <Column field="nationality" header={t("aml.colNationality")} />
-              <Column header={t("aml.colPep")} body={(o) => (o.isPep ? t("aml.yes") : "")} />
+              <Column field="fullName" header={t("onboarding.colName")} />
+              <Column header={t("onboarding.colOwnership")} body={(o) => (o.ownershipPercent === null || o.ownershipPercent === undefined ? "" : `${o.ownershipPercent}%`)} />
+              <Column header={t("onboarding.colControl")} body={(o) => t(`onboarding.control.${o.controlType}`)} />
+              <Column field="nationality" header={t("onboarding.colNationality")} />
+              <Column header={t("onboarding.colPep")} body={(o) => (o.isPep ? t("onboarding.yes") : "")} />
               <Column header="" body={(o, x) => (
-                <div className="aml__row-actions">
-                  <Button type="button" icon="pi pi-pencil" text rounded size="small" aria-label={t("aml.edit")} onClick={() => setParty({ kind: "owner", index: x.rowIndex, row: { ...EMPTY_OWNER, ...o } })} />
-                  <Button type="button" icon="pi pi-trash" text rounded size="small" severity="danger" aria-label={t("aml.remove")} onClick={() => removeParty("owner", o, x.rowIndex)} />
+                <div className="onboarding__row-actions">
+                  <Button type="button" icon="pi pi-pencil" text rounded size="small" aria-label={t("onboarding.edit")} onClick={() => setParty({ kind: "owner", index: x.rowIndex, row: { ...EMPTY_OWNER, ...o } })} />
+                  <Button type="button" icon="pi pi-trash" text rounded size="small" severity="danger" aria-label={t("onboarding.remove")} onClick={() => removeParty("owner", o, x.rowIndex)} />
                 </div>
               )} />
             </DataTable>
@@ -342,37 +337,37 @@ const ClientOnboarding = () => {
         ) : null}
 
         <div className="admin__actions mt-4">
-          <Button type="button" label={t("aml.cancel")} text onClick={() => navigate("/agent/clientlisting")} />
+          <Button type="button" label={t("onboarding.cancel")} text onClick={() => navigate("/agent/clientlisting")} />
           <Button type="submit" icon="pi pi-check" label={id ? t("onboarding.saveChanges") : t("onboarding.onboard")} loading={saving} />
         </div>
       </form>
 
       {id ? (
         <>
-          <h3 className="aml__section">{t("onboarding.secDocuments")}</h3>
+          <h3 className="onboarding__section">{t("onboarding.secDocuments")}</h3>
           <KycDocuments clientId={id} documents={profile?.documents || []} signatories={signatories} owners={owners} onUploaded={() => loadProfile(id)} />
         </>
       ) : <p className="access__muted mt-3">{t("onboarding.documentsAfterSave")}</p>}
 
       <Dialog header={party?.kind === "signatory" ? t("onboarding.signatory") : t("onboarding.owner")} visible={!!party} style={{ width: "36rem" }} modal onHide={() => setParty(null)}
         footer={<>
-          <Button label={t("aml.cancel")} text onClick={() => setParty(null)} />
-          <Button label={t("aml.save")} icon="pi pi-check" loading={saving} disabled={(party?.row.fullName || "").trim().length < 2} onClick={saveParty} />
+          <Button label={t("onboarding.cancel")} text onClick={() => setParty(null)} />
+          <Button label={t("onboarding.save")} icon="pi pi-check" loading={saving} disabled={(party?.row.fullName || "").trim().length < 2} onClick={saveParty} />
         </>}>
         {party ? (
           <div className="admin__grid admin__grid--single">
-            {partyField("fullName", "aml.colName", <InputText id="pt-fullName" value={party.row.fullName} onChange={(e) => setRow("fullName", e.target.value)} />)}
+            {partyField("fullName", "onboarding.colName", <InputText id="pt-fullName" value={party.row.fullName} onChange={(e) => setRow("fullName", e.target.value)} />)}
             {party.kind === "signatory" ? (
               <>
-                {partyField("position", "aml.colPosition", <InputText id="pt-position" value={party.row.position || ""} onChange={(e) => setRow("position", e.target.value)} />)}
-                {partyField("authorityDocument", "aml.colAuthority", <Dropdown inputId="pt-authorityDocument" value={party.row.authorityDocument} options={authorityDocs} onChange={(e) => setRow("authorityDocument", e.value)} />)}
+                {partyField("position", "onboarding.colPosition", <InputText id="pt-position" value={party.row.position || ""} onChange={(e) => setRow("position", e.target.value)} />)}
+                {partyField("authorityDocument", "onboarding.colAuthority", <Dropdown inputId="pt-authorityDocument" value={party.row.authorityDocument} options={authorityDocs} onChange={(e) => setRow("authorityDocument", e.value)} />)}
                 {partyField("authorityReference", "onboarding.authorityReference", <InputText id="pt-authorityReference" value={party.row.authorityReference || ""} onChange={(e) => setRow("authorityReference", e.target.value)} />)}
                 {partyField("authorityDate", "onboarding.authorityDate", <InputText id="pt-authorityDate" type="date" value={party.row.authorityDate || ""} onChange={(e) => setRow("authorityDate", e.target.value)} />)}
               </>
             ) : (
               <>
-                {partyField("ownershipPercent", "aml.colOwnership", <InputNumber inputId="pt-ownershipPercent" value={party.row.ownershipPercent} suffix="%" min={0} max={100} maxFractionDigits={4} onValueChange={(e) => setRow("ownershipPercent", e.value)} />)}
-                {partyField("controlType", "aml.colControl", <Dropdown inputId="pt-controlType" value={party.row.controlType} options={controls} onChange={(e) => setRow("controlType", e.value)} />)}
+                {partyField("ownershipPercent", "onboarding.colOwnership", <InputNumber inputId="pt-ownershipPercent" value={party.row.ownershipPercent} suffix="%" min={0} max={100} maxFractionDigits={4} onValueChange={(e) => setRow("ownershipPercent", e.value)} />)}
+                {partyField("controlType", "onboarding.colControl", <Dropdown inputId="pt-controlType" value={party.row.controlType} options={controls} onChange={(e) => setRow("controlType", e.value)} />)}
                 {partyField("address", "onboarding.address", <InputText id="pt-address" value={party.row.address || ""} onChange={(e) => setRow("address", e.target.value)} />)}
                 <div className="access__toggle"><InputSwitch inputId="pt-pep" checked={!!party.row.isPep} onChange={(e) => setRow("isPep", e.value)} /><label htmlFor="pt-pep">{t("onboarding.isPep")}</label></div>
                 {party.row.isPep ? partyField("pepDetails", "onboarding.pepDetails", <InputText id="pt-pepDetails" value={party.row.pepDetails || ""} onChange={(e) => setRow("pepDetails", e.target.value)} />) : null}

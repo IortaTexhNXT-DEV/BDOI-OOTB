@@ -244,7 +244,7 @@ describe('log redaction', () => {
 describe('sessions', () => {
   it('ends access at once on deactivation and on role change; refresh issues a token with the new roles', async () => {
     const s = await login('hd.uw', PW);
-    expect((await bearer(s.body.accessToken, 'get', '/reinsurance/treaties')).status).not.toBe(401);
+    expect((await bearer(s.body.accessToken, 'get', '/policies')).status).not.toBe(401);
     expect((await ctx.api('put', `/users/${ids['hd.uw']}`).send({ roles: ['claims'] })).status).toBe(200);
     expect((await bearer(s.body.accessToken, 'get', '/policies')).status).toBe(401);
     const r = await request(ctx.app).post('/api/auth/refresh').send({ refreshToken: s.body.refreshToken });

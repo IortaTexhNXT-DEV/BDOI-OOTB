@@ -4,7 +4,6 @@ import { config } from '../../config.js';
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { notFound, badRequest, forbidden, conflict } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
-import { assertInsurersAuthorised } from '../ic-compliance/insurerAuthority.js';
 import { formatMoney } from '../../lib/money.js';
 import { queueEmail, emailSendingStatus } from '../../lib/mailer.js';
 import { notify } from '../notifications/service.js';
@@ -278,7 +277,6 @@ export async function approveByCustomer(token, preview) {
 export async function submitToInsurer(id, user) {
   const q = await getQuoteRow(id);
   if (!['accepted', 'approved'].includes(q.status)) throw badRequest(`Only CustomerAccepted quotations can be submitted to the insurer (current: ${quoteStatusOut(q.status)})`);
-  await assertInsurersAuthorised([q.insurance_company_id], 'rfq', { entity: 'quotation', entityId: q.id });
   const ic = q.insurance_company_id ? await one('SELECT name, contact_email FROM insurance_companies WHERE id = $1', [q.insurance_company_id]) : null;
   if (ic?.contact_email) {
     const t = await emailTemplate('insurer_submission');
@@ -305,9 +303,6 @@ export async function convertToPolicy(id, body, user) {
   if (!allowed.includes(quoteStatusOut(existing.status))) throw badRequest(`Cannot convert quotation with status "${quoteStatusOut(existing.status)}". Quote must be CustomerAccepted or Approved`);
   // placement journey: a line that requires a Placement Slip issues its policy from the placement slip
   await assertDirectConversion(existing);
-  // the policy is issued only with insurers holding an IC certificate of authority in force (compliance.insurer_authority_check)
-  const quoteInsurers = await many("SELECT insurance_company_id FROM risk_participants WHERE entity_type = 'quote' AND entity_id = $1", [existing.id]);
-  await assertInsurersAuthorised(quoteInsurers.length ? quoteInsurers.map((r) => r.insurance_company_id) : [existing.insurance_company_id], 'issue', { entity: 'quotation', entityId: existing.id });
   // KYC and vehicle identifiers (policy.kyc_required_fields): saved on the quotation by the convert steps or sent with the request
   const qdoc = existing.doc || {};
   // Issuance never marks the premium paid: the bill stays open until a payment is captured and confirmed (receipts).

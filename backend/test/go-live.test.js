@@ -22,7 +22,7 @@ import { purgeSampleData, parseArgs, SAMPLE_USERS } from '../scripts/purge-sampl
 const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const count = async (t, where = 'true') => (await query(`SELECT count(*)::int AS n FROM ${t} WHERE ${where}`)).rows[0].n;
 const TRANSACTIONS = ['leads', 'clients', 'quotes', 'policies', 'endorsements', 'receivables', 'receipts', 'claims', 'renewals', 'remittances',
-  'journal_vouchers', 'journal_lines', 'commissions', 'disbursements', 'cessions', 'reinsurance_treaties', 'incentive_calculations', 'collection_items'];
+  'journal_vouchers', 'journal_lines', 'commissions', 'disbursements', 'incentive_calculations', 'collection_items'];
 
 async function snapshot() {
   const tables = (await query("SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY 1")).rows.map((r) => r.tablename);
@@ -102,7 +102,7 @@ describe('production start on a fresh database', () => {
 
   it('the database holds reference data and the administrator, and no demo transactions', async () => {
     for (const t of TRANSACTIONS) expect(await count(t), t).toBe(0);
-    for (const t of ['reinsurers', 'incentive_programs', 'commission_referrers', 'signatories', 'petty_cash_funds', 'checkbooks']) expect(await count(t), t).toBe(0);
+    for (const t of ['incentive_programs', 'commission_referrers', 'signatories', 'petty_cash_funds', 'checkbooks']) expect(await count(t), t).toBe(0);
     expect(await count('users')).toBe(1);
     expect(await count('users', "username = 'BrokerVerse'")).toBe(1);
     expect(await count('users', `username = ANY('{${SAMPLE_USERS.join(',')}}')`)).toBe(0);
@@ -115,7 +115,7 @@ describe('production start on a fresh database', () => {
     expect(await count('report_definitions')).toBeGreaterThan(10);
     expect(await count('app_settings')).toBeGreaterThan(100);
     expect(await count('app_settings', "key = 'numbering.policy.prefix'")).toBe(1);
-    expect(await count('roles')).toBe(8); // system-admin, the six broker roles and the compliance officer (AML/CFT)
+    expect(await count('roles')).toBe(7); // system-admin and the six broker roles
     expect(await count('scheduled_jobs')).toBeGreaterThan(0);
     expect(await count('gl_accounts')).toBeGreaterThan(50);
     expect(await count('product_templates')).toBeGreaterThan(0);
@@ -194,7 +194,6 @@ describe('production start on a fresh database', () => {
       expect(byTable.leads).toBe(before.leads);
       expect(byTable.policies).toBe(before.policies);
       expect(byTable.users).toBe(SAMPLE_USERS.length);
-      expect(byTable.reinsurers).toBe(6);
       expect(dry.total).toBeGreaterThan(100);
       expect(await snapshot()).toEqual(before); // dry run changes nothing
 

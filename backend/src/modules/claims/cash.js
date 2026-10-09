@@ -85,9 +85,6 @@ export async function recordMovement(id, kind, b, user) {
       }, { db, user });
     } else if (kind === 'paid-to-claimant') {
       if (amount > pos.payableToClaimant + 0.005) throw conflict(`Only ${pos.payableToClaimant.toFixed(2)} is still payable to the claimant`);
-      // AML/CFT: the claimant and the insured are screened; an undecided or confirmed match stops the payment
-      const { atPayout } = await import('../aml/hooks.js');
-      await atPayout({ clientId: c.client_id || c.policy_client_id, payeeName: b.payee || pos.claimant || null, referenceType: 'claim', referenceId: c.id, userId: user?.id ?? null, db });
       jv = await postEvent('claim.paid_to_claimant', {
         date: date || undefined, source: 'claims', entryType: 'CLAIM_SETTLEMENT', transactionCode: b.reference || c.claim_number, referenceType: 'Claim', referenceId: c.id,
         clientId: c.client_id || c.policy_client_id, policyId: c.policy_id, policyNumber: c.policy_number, bankAccount: b.bankAccount, paymentMode: b.paymentMode || 'check',

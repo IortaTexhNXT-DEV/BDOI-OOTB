@@ -31,10 +31,7 @@ export const CATEGORIES = [
   { code: 'claims', label: 'Claims', icon: 'pi pi-shield', permission: 'read:claims' },
   { code: 'approvals', label: 'Approvals', icon: 'pi pi-check-square', permission: null },
   { code: 'documents', label: 'Missing documents', icon: 'pi pi-id-card', permission: 'read:policies' },
-  // the work of the compliance officer, the accounting manager and the system administrator (Home presets)
-  { code: 'edd', label: 'EDD reviews', icon: 'pi pi-user-edit', permission: 'read:aml' },
-  { code: 'compliance', label: 'Compliance deadlines', icon: 'pi pi-calendar-times', permission: 'read:compliance' },
-  { code: 'breaches', label: 'Breach register', icon: 'pi pi-exclamation-triangle', permission: 'read:privacy' },
+  // the work of the accounting manager and the system administrator (Home presets)
   { code: 'bankrec', label: 'Bank reconciliations', icon: 'pi pi-building', permission: 'read:bank-reconciliation' },
   { code: 'periodClose', label: 'Period close', icon: 'pi pi-lock', permission: 'read:period-end' },
   { code: 'access', label: 'Users and access', icon: 'pi pi-users', permission: 'read:users' },
@@ -305,11 +302,6 @@ async function approvals(ctx) {
       status: 'ic.status', link: "'/incentive/approvals'", amount: 'ic.total_amount', created_at: 'ic.created_at' })}
       FROM incentive_calculations ic WHERE ic.status = 'Pending Approval' AND ${notMine(ctx, 'ic.submitted_by')}`);
   }
-  if (ctx.can('write:reinsurance') && await has('reinsurance_treaties')) {
-    out.push(`SELECT ${select({ ...base, kind: "'Reinsurance treaty'", id: 'rt.id::text', ref: 'COALESCE(rt.treaty_number, rt.name)', title: 'rt.name', due_date: due('COALESCE(rt.updated_at, rt.created_at)'),
-      status: 'rt.status', link: "'/reinsurance/treaty/' || rt.id", created_at: 'rt.created_at' })}
-      FROM reinsurance_treaties rt WHERE rt.status = 'Pending Approval' AND ${notMine(ctx, 'rt.submitted_by')}`);
-  }
   // claim settlements: decided by the Claims role (claims/service.js), never by the officer who requested them
   if (ctx.can('write:claims') && (ctx.roles.includes('claims') || isAdmin(ctx.user))) {
     out.push(`SELECT ${select({ ...base, kind: "'Claim settlement'", id: 'cs.id', ref: 'cs.claim_number', title: "COALESCE(p.policy_number, 'Claim')", client_name: CLIENT('c'),
@@ -370,71 +362,9 @@ async function documents(ctx) {
     WHERE p.status IN ('active', 'issued') AND ${rec(ctx, 'policy', 'p')}) x WHERE x.missing <> ''`;
 }
 
-// ------------------------------------------------------------------------- sources of the compliance officer, the
-// accounting manager and the system administrator. Their records are not part of anyone's book: a user limited to
-// their own book (lib/scope.js) gets nothing from them.
-
-/** EDD reviews of High-risk clients: in preparation (owned by whoever opened them) or awaiting the compliance officer's decision. */
-async function edd(ctx) {
-  const reviewDays = await daysSetting('aml.edd_review_days', 30);
-  const decide = ctx.can('approve:aml');
-  return `SELECT ${select({
-    category: "'edd'", kind: "CASE e.status WHEN 'open' THEN 'EDD review in preparation' ELSE 'EDD review awaiting decision' END",
-    id: 'e.id', ref: 'e.review_number', title: "COALESCE(e.reason, 'Enhanced due diligence')", client_name: CLIENT('c'),
-    due_date: `CASE e.status WHEN 'open' THEN ${localDate(ctx, 'e.created_at')} + ${ctx.P(reviewDays)}::int
-      ELSE ${localDate(ctx, 'COALESCE(e.submitted_at, e.updated_at)')} + ${ctx.P(ctx.slaDays)}::int END`,
-    status: 'e.status', priority: "CASE e.status WHEN 'submitted' THEN 'high' ELSE 'normal' END",
-    next_action: "CASE e.status WHEN 'open' THEN 'Record the findings and submit the review' ELSE 'Approve or reject the EDD review' END",
-    owner_id: `CASE e.status WHEN 'open' THEN ${userOf('e.created_by')} END`,
-    queue: decide ? `(e.status = 'submitted' AND ${notMine(ctx, 'e.submitted_by')})` : 'false',
-    link: "'/compliance/aml/edd'", created_at: 'e.created_at',
-  })} FROM aml_edd_reviews e JOIN clients c ON c.id = e.client_id WHERE e.status IN ('open', 'submitted') AND ${rec(ctx, 'client', 'c')}`;
-}
-
-/** Compliance deadlines: licences expiring or expired, fit and proper reviews due, insurers whose IC certificate of authority runs out. */
-async function compliance(ctx) {
-  if (ctx.scope) return null;
-  const licenceDays = await daysSetting('compliance.licence_expiring_days', 90);
-  const authorityDays = await daysSetting('compliance.insurer_authority_expiring_days', 60);
-  const queue = ctx.can('write:compliance') ? 'true' : 'false';
-  const base = { category: "'compliance'", queue };
-  const licences = `SELECT ${select({
-    ...base, kind: `CASE WHEN l.expiry_date < ${ctx.T}::date THEN 'Licence expired' ELSE 'Licence expiring' END`, id: 'l.id', ref: 'COALESCE(l.licence_number, l.licence_type)',
-    title: 'l.licence_type', client_name: 'l.holder_name', due_date: 'l.expiry_date', status: 'l.renewal_status',
-    priority: `CASE WHEN l.expiry_date <= ${ctx.T}::date + 15 THEN 'high' ELSE 'normal' END`,
-    next_action: `CASE l.renewal_status WHEN 'in-progress' THEN 'Complete the licence renewal' WHEN 'filed' THEN 'Record the renewed licence'
-      ELSE 'File the licence renewal with the ' || l.issuing_authority END`,
-    link: "'/compliance/licences'", created_at: 'l.created_at',
-  })} FROM compliance_licences l WHERE l.status = 'active' AND l.expiry_date IS NOT NULL AND l.renewal_status <> 'renewed'
-    AND l.expiry_date <= ${ctx.T}::date + ${ctx.P(licenceDays)}::int`;
-  const fitProper = `SELECT ${select({
-    ...base, kind: "'Fit and proper review'", id: 'f.id', ref: 'f.person_name', title: "f.position || ' (' || replace(f.role_category, '-', ' ') || ')'", client_name: 'f.person_name',
-    due_date: 'f.next_review_on', status: 'f.review_outcome', next_action: "'Review the fit and proper declaration'", link: "'/compliance/fit-and-proper'", created_at: 'f.created_at',
-  })} FROM compliance_fit_proper f WHERE f.status = 'active' AND f.next_review_on IS NOT NULL AND f.next_review_on <= ${ctx.T}::date + ${ctx.P(licenceDays)}::int`;
-  const validUntil = "CASE WHEN (ic.attrs->>'icCertificateValidUntil') ~ '^\\d{4}-\\d{2}-\\d{2}' THEN substr(ic.attrs->>'icCertificateValidUntil', 1, 10)::date END";
-  const insurers = `SELECT ${select({
-    ...base, kind: `CASE WHEN x.valid_until < ${ctx.T}::date THEN 'Insurer certificate of authority expired' ELSE 'Insurer certificate of authority expiring' END`,
-    id: "'ic-' || x.id", ref: 'x.code', title: "'Certificate ' || COALESCE(x.attrs->>'icCertificateNumber', '')", client_name: 'x.name', due_date: 'x.valid_until', status: 'x.status',
-    priority: `CASE WHEN x.valid_until <= ${ctx.T}::date + 15 THEN 'high' ELSE 'normal' END`,
-    next_action: "'Obtain the insurer''s renewed certificate of authority and update the insurer master'", link: "'/compliance/insurer-authority'", created_at: 'x.created_at',
-  })} FROM (SELECT ic.id, ic.code, ic.name, ic.status, ic.attrs, ic.created_at, ${validUntil} AS valid_until FROM insurance_companies ic WHERE ic.status = 'active') x
-    WHERE x.valid_until IS NOT NULL AND x.valid_until <= ${ctx.T}::date + ${ctx.P(authorityDays)}::int`;
-  return [licences, fitProper, insurers].join(' UNION ALL ');
-}
-
-/** Personal data breaches and security incidents not yet closed: the data protection officer's, or the privacy team's queue. */
-function breaches(ctx) {
-  if (ctx.scope) return null;
-  return `SELECT ${select({
-    category: "'breaches'", kind: "CASE b.incident_type WHEN 'security-incident' THEN 'Security incident' ELSE 'Personal data breach' END",
-    id: 'b.id', ref: 'b.breach_number', title: 'b.title', due_date: `CASE WHEN b.npc_notified_at IS NULL AND b.status IN ('open', 'assessed') THEN ${localDate(ctx, 'b.npc_due_at')} END`,
-    status: 'b.status', priority: "CASE b.status WHEN 'open' THEN 'urgent' WHEN 'assessed' THEN 'high' ELSE 'normal' END",
-    next_action: `CASE b.status WHEN 'open' THEN 'Assess the breach: is it notifiable to the NPC?'
-      WHEN 'assessed' THEN CASE WHEN b.notifiable AND b.npc_notified_at IS NULL THEN 'Notify the NPC and the data subjects within 72 hours' ELSE 'Complete the remediation and close the record' END
-      ELSE 'Close the breach record' END`,
-    owner_id: 'b.dpo_user_id', queue: ctx.can('write:privacy') ? 'b.dpo_user_id IS NULL' : 'false', link: "'/compliance/breaches'", created_at: 'b.created_at',
-  })} FROM personal_data_breaches b WHERE b.status <> 'closed'`;
-}
+// ------------------------------------------------------------------------- sources of the accounting manager and the
+// system administrator. Their records are not part of anyone's book: a user limited to their own book (lib/scope.js)
+// gets nothing from them.
 
 /** Bank reconciliations still being worked (a prepared one waits in Approvals for the accounting manager). */
 async function bankrec(ctx) {
@@ -533,7 +463,7 @@ function tasks() {
   })} FROM work_tasks t WHERE t.status = 'open'`;
 }
 
-const BUILDERS = { quotes, rfq, placements, renewals, receivables, collections, endorsements, claims, approvals, documents, edd, compliance, breaches, bankrec, periodClose, access, systems, tasks };
+const BUILDERS = { quotes, rfq, placements, renewals, receivables, collections, endorsements, claims, approvals, documents, bankrec, periodClose, access, systems, tasks };
 
 /** The categories the user may see (approvals and tasks: everyone; the rest by permission). */
 export const visibleCategories = (user) => CATEGORIES.filter((c) => !c.permission || hasPermission(user, c.permission));

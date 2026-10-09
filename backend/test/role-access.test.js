@@ -109,19 +109,6 @@ describe('finance incentives', () => {
   });
 });
 
-describe('reinsurance reconciliation is a finance task', () => {
-  it('finance reads and works reconciliations; treaties and cessions stay with reinsurance users', async () => {
-    expect((await as('pw.finance', 'get', '/reinsurance/reconciliation')).status).toBe(200);
-    expect((await as('pw.finance', 'get', '/reinsurance/reinsurers')).status).toBe(200);
-    const ex = await as('pw.finance', 'post', '/reinsurance/exceptions').send({ type: 'Missing Policy', description: 'Not in the reinsurer statement', amount: 4500 });
-    expect(ex.status).toBe(201);
-    expect((await as('pw.finance', 'post', '/reinsurance/exceptions').send({})).status).toBe(400);
-    expect((await as('pw.finance', 'get', '/reinsurance/treaties')).status).toBe(403);
-    expect((await as('pw.finance', 'post', '/reinsurance/cessions').send({})).status).toBe(403);
-    expect((await as('pw.sales', 'get', '/reinsurance/reconciliation')).status).toBe(403);
-  });
-});
-
 describe('look-ups without read:users', () => {
   it('GET /reports/filters/agents serves the report Agent filter to every report reader', async () => {
     for (const who of ['pw.finance', 'pw.sales', 'pw.uw', 'pw.claims']) {
@@ -150,7 +137,7 @@ describe('empty forms are refused with field messages', () => {
     const cases = [
       ['/product-configurator/coverages', 'coverageCode'], ['/product-configurator/rating-factors', 'factorCode'], ['/product-configurator/underwriting-rules', 'ruleCode'],
       ['/renewals/campaigns', 'campaignName'], [`/renewals/${rn}/activities`, 'type'], ['/remittance/adjustments', 'adjustmentType'],
-      ['/masters/remittance-automated', 'code'], ['/incentive/programs', 'programName'], ['/reinsurance/treaties', 'name'], ['/remittance/exceptions', 'type'],
+      ['/masters/remittance-automated', 'code'], ['/incentive/programs', 'programName'], ['/remittance/exceptions', 'type'],
       ['/remittance/schedules', 'code'],
     ];
     for (const [p, field] of cases) {

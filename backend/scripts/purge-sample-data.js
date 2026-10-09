@@ -9,13 +9,13 @@
  *
  * What it removes:
  *   - every business transaction: leads, clients, quotations, policies, endorsements, receivables, receipts, payments,
- *     collections, disbursements, petty cash, commissions, remittances, reinsurance treaties / cessions, incentive
- *     calculations, claims, renewals, journal vouchers, accounting period closes, notifications, documents and
- *     generated-report records, job history and the document-number counters (numbering restarts at 1).
+ *     collections, disbursements, petty cash, commissions, remittances, incentive calculations, claims, renewals,
+ *     journal vouchers, accounting period closes, notifications, documents and generated-report records, job history
+ *     and the document-number counters (numbering restarts at 1).
  *     This is ALL transaction data, not only the seeded rows: run it before go-live, never on a live book.
  *   - the sample master rows seeded from seeds/sample/*.sql: fictional insurers, demo branches (Cebu, Davao),
- *     signatories, commission referrers, reinsurers, incentive programmes and demo master records (companies,
- *     employees, bank accounts, petty cash funds, exchange rates, commission rates).
+ *     signatories, commission referrers, incentive programmes and demo master records (companies, employees, bank
+ *     accounts, petty cash funds, exchange rates, commission rates).
  *   - the sample users (agent.*, fin.approver), or, with --keep-users, every user except the BrokerVerse administrator
  *     and the users listed.
  * The audit trail is kept (the purge itself is recorded in it) unless --purge-audit is given.
@@ -37,8 +37,7 @@ import { PURGE_DEMO_CONFIG_TABLES, PURGE_SYSTEM_TABLES, TRANSACTION_TABLES as BU
  * Tables emptied completely (one TRUNCATE, so foreign keys among them are satisfied): every business transaction
  * (scripts/lib/table-classification.js, shared with npm run reset:transactions), the technical records (notifications,
  * e-mail outbox, generated reports, job history, document records, number counters, opening balances) and the
- * configuration tables the sample seed fills with demo rows (bundles, insurer rate tables, treaties, petty cash funds,
- * delegations). Tax and charge rules, LGU rates, gateway settings, the authority matrix and segregation-of-duties
+ * configuration tables the sample seed fills with demo rows (bundles, insurer rate tables, petty cash funds, delegations). Tax and charge rules, LGU rates, gateway settings, the authority matrix and segregation-of-duties
  * rules stay.
  */
 export const TRANSACTION_TABLES = [...BUSINESS_TABLES, ...PURGE_SYSTEM_TABLES, ...PURGE_DEMO_CONFIG_TABLES];
@@ -55,14 +54,10 @@ export const SAMPLE_MASTERS = [
   { table: 'lead_assignment_rules', label: 'sample lead assignment rules', where: "created_by = 'seed'" },
   { table: 'motor_programmes', label: 'sample vehicle programmes', where: "created_by = 'seed'" },
   { table: 'distribution_channels', label: 'sample distribution channels', where: "created_by = 'seed'" },
-  // sample licences and fit and proper records (seeds/sample/71_compliance.sql) go before the referrers they belong to
-  { table: 'compliance_licences', label: 'sample licences', where: "created_by = 'seed'" },
-  { table: 'compliance_fit_proper', label: 'sample fit and proper records', where: "created_by = 'seed'" },
   { table: 'insurance_companies', label: 'fictional insurers', where: "code IN ('SECUREGUARD','APEX','LIBERTYSHIELD','SENTINEL','GOLDENHORIZON','INTEGRITY','EVERSAFE')" },
   { table: 'branches', label: 'demo branches', where: "code IN ('CEB','DAV')" },
   { table: 'signatories', label: 'fictional signatories', where: "name IN ('Maria Regina Cruz','Jose Antonio Reyes','Ana Patricia Lim')" },
   { table: 'commission_referrers', label: 'fictional referrers', where: "id IN ('ref-jdelacruz','ref-rbautista','ref-amendoza','ref-pvillanueva','ref-mreyes','ref-lgarcia','ref-makatimotors','ref-cebuprime')" },
-  { table: 'reinsurers', label: 'sample reinsurers', where: "id IN ('RE001','RE002','RE003','RE004','RE005','RE006') AND created_by = 'seed'" },
   { table: 'incentive_programs', label: 'sample incentive programmes', where: "program_code IN ('INC-2026-001','INC-2026-002','INC-2026-003','INC-2026-004')" },
   { table: 'master_records', label: 'demo master records', where: "created_by = 'seed' AND type_code IN ('company','bank-account','employee','petty-cash','exchange-rate','commission')" },
   { table: 'master_records', label: 'sample repair shops and suppliers', where: "created_by = 'seed' AND type_code IN ('repair-shop','supplier')" },

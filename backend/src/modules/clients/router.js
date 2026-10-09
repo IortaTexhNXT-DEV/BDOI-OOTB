@@ -2,16 +2,19 @@ import { moduleRouter } from '../../lib/registry.js';
 import { requireAuth, requirePermission } from '../../lib/auth.js';
 import { validate, z } from '../../lib/validate.js';
 import { audit } from '../../lib/audit.js';
-import { ok, paging } from '../../lib/respond.js';
+import { ok, created, paging } from '../../lib/respond.js';
+import { memoryUpload } from '../../lib/uploadLimits.js';
 import { sendEntity, actor } from '../documents/common.js';
 import { ownRecord, withScope, scopeOf } from '../../lib/scope.js';
 import * as svc from './service.js';
+import * as kyc from './kyc.js';
 
 const { router, define } = moduleRouter('Clients', '/clients');
 const customers = moduleRouter('Clients', '/customers');
 const SCREEN = 'Operations > Clients';
 const canRead = [requireAuth, requirePermission('read:clients')];
 const canWrite = [requireAuth, requirePermission('write:clients')];
+const docUpload = memoryUpload({ files: 1 }).single('file');
 
 const clientBody = z.object({
   firstName: z.string().max(100).optional().nullable(), lastName: z.string().max(100).optional().nullable(),
@@ -113,26 +116,72 @@ const onboardExample = { clientType: 'individual', firstName: 'Juan', middleName
   occupation: 'Engineer', sourceOfFunds: 'Salary', expectedLines: ['MOTOR'], expectedPaymentMode: 'bank-transfer', expectedAnnualPremium: 45000 };
 
 define({
-  method: 'POST', path: '/onboard', summary: 'Onboard a client before its first policy (individual or juridical with signatories and beneficial owners); rated and screened at once',
+  method: 'POST', path: '/onboard', summary: 'Onboard a client before its first policy (individual or juridical with signatories and beneficial owners)',
   screen: `${SCREEN} > Onboard client`, middleware: [...canWrite, validate(onboardBody)], request: onboardExample,
-  response: { success: true, data: { client: { ...example, kycStatus: 'complete', riskRating: 'low' }, aml: { assessment: { rating: 'low', score: 0 }, screening: { hits: 0 } } } },
+  response: { success: true, data: { client: { ...example, kycStatus: 'complete' } } },
   handler: async (req, res) => {
-    const r = await svc.onboardClient(req.body, actor(req));
-    const client = svc.toClient(r.client);
-    await audit(req, { entity: 'client', entityId: client.id, action: 'onboard', after: { ...client, riskRating: r.aml.assessment.rating } });
-    res.status(201).json({ success: true, message: r.aml.screening.openHits ? 'Client onboarded; a screening match is queued for the compliance officer' : 'Client onboarded',
-      data: { client, aml: r.aml } });
+    const client = svc.toClient(await svc.onboardClient(req.body, actor(req)));
+    await audit(req, { entity: 'client', entityId: client.id, action: 'onboard', after: client });
+    res.status(201).json({ success: true, message: 'Client onboarded', data: { client } });
   },
 });
 define({
-  method: 'PUT', path: '/:id/kyc', summary: 'Update the identification of a client (onboarding screen); the client is rated again and, when the name changed, screened',
+  method: 'PUT', path: '/:id/kyc', summary: 'Update the identification of a client (onboarding screen); its KYC status follows',
   screen: `${SCREEN} > Onboard client`, middleware: [...canWrite, ownRecord('client'), validate(z.object(kycFields).partial().extend({ clientType: z.enum(['individual', 'corporate']).optional() }))],
-  request: { occupation: 'Business owner', expectedAnnualPremium: 250000 }, response: { success: true, data: { client: example, assessment: { rating: 'normal' } } },
+  request: { occupation: 'Business owner', expectedAnnualPremium: 250000 }, response: { success: true, data: { client: example } },
   handler: async (req, res) => {
     const r = await svc.updateKyc(req.params.id, req.body, actor(req));
     const client = svc.toClient(r.after);
     await audit(req, { entity: 'client', entityId: client.id, action: 'update-kyc', before: svc.toClient(r.before), after: client });
-    ok(res, { client, assessment: r.assessment }, 'Client identification saved');
+    ok(res, { client }, 'Client identification saved');
+  },
+});
+define({
+  method: 'GET', path: '/:id/profile', summary: 'KYC profile of a client: identification still missing, signatories, beneficial owners with their warnings, documents',
+  screen: `${SCREEN} > Onboard client`, middleware: [...canRead, ownRecord('client')],
+  response: { success: true, data: { client: { kycStatus: 'complete' }, missing: [], signatories: [], beneficialOwners: [], ownerWarnings: [], beneficialOwnerThreshold: 25, documents: [] } },
+  handler: async (req, res) => ok(res, await kyc.profile(req.params.id)),
+});
+
+const partyStatus = { signatory: z.enum(['active', 'revoked']), owner: z.enum(['active', 'removed']) };
+for (const [kind, path, body, save, entity, status] of [
+  ['signatory', 'signatories', signatory, kyc.saveSignatory, 'client_signatory', partyStatus.signatory],
+  ['beneficial owner', 'beneficial-owners', owner, kyc.saveOwner, 'client_beneficial_owner', partyStatus.owner],
+]) {
+  const label = `${kind[0].toUpperCase()}${kind.slice(1)}`;
+  define({
+    method: 'POST', path: `/:id/${path}`, summary: `Add a ${kind} of a juridical client`, screen: `${SCREEN} > Onboard client (juridical)`,
+    middleware: [...canWrite, ownRecord('client'), validate(body.extend({ status: status.optional() }))],
+    request: kind === 'signatory' ? { fullName: 'Maria Reyes', position: 'Treasurer', authorityDocument: 'secretary-certificate', authorityDate: '2026-09-01' }
+      : { fullName: 'Jose Tan', ownershipPercent: 40, controlType: 'ownership', nationality: 'Filipino' }, response: { success: true },
+    handler: async (req, res) => {
+      const r = await save(req.params.id, null, req.body, actor(req));
+      await audit(req, { entity, entityId: r.after.id, action: 'create', after: r.after });
+      await kyc.refreshKycStatus(r.clientId);
+      created(res, r.after, `${label} added`);
+    },
+  });
+  define({
+    method: 'PUT', path: `/:id/${path}/:rowId`, summary: `Change or ${kind === 'signatory' ? 'revoke' : 'remove'} a ${kind}`, screen: `${SCREEN} > Onboard client (juridical)`,
+    middleware: [...canWrite, ownRecord('client'), validate(body.extend({ status: status.optional() }).partial())],
+    request: { status: kind === 'signatory' ? 'revoked' : 'removed' }, response: { success: true },
+    handler: async (req, res) => {
+      const r = await save(req.params.id, req.params.rowId, req.body, actor(req));
+      await audit(req, { entity, entityId: req.params.rowId, action: 'update', before: r.before, after: r.after });
+      await kyc.refreshKycStatus(r.clientId);
+      ok(res, r.after, `${label} saved`);
+    },
+  });
+}
+
+define({
+  method: 'POST', path: '/:id/documents', summary: 'Upload a KYC document (multipart: file, docType, relatedType client | signatory | beneficial-owner, relatedId, description, expiryDate)',
+  screen: `${SCREEN} > Onboard client`, middleware: [...canWrite, ownRecord('client'), docUpload],
+  request: { file: '<binary>', docType: 'board-resolution', relatedType: 'signatory', relatedId: 'sig_1' }, response: { success: true, data: { id: 1, docType: 'board-resolution', fileName: 'resolution.pdf' } },
+  handler: async (req, res) => {
+    const d = await kyc.addDocument(req.params.id, req.file, req.body || {}, req.user);
+    await audit(req, { entity: 'client_kyc_document', entityId: d.id, action: 'upload', after: { ...d, url: undefined } });
+    created(res, d, 'Document uploaded');
   },
 });
 
