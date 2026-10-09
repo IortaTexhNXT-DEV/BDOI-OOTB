@@ -5869,6 +5869,19 @@
       "addSlot": "Add slot"
     }
   },
+  "confirmDialog": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "required": "{{label}} is required.",
+    "minLength": "Enter at least {{count}} characters.",
+    "invalidDate": "Enter a valid date.",
+    "failed": "The action could not be completed. Try again."
+  },
+  "detailView": {
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No"
+  },
   "security": {
     "changePassword": "Change password",
     "twoFactor": "Two-step verification",
