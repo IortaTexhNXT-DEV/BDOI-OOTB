@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1213 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1224 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -11488,7 +11488,7 @@
           "response": []
         },
         {
-          "name": "Readiness of the CAS registration pack (taxpayer details, permit numbers, custodian, books printed)",
+          "name": "Readiness of the CAS registration pack: one row per item (code, business name, complete / missing, value, action: company, permit, atp, custodian, contact, document, books)",
           "request": {
             "method": "GET",
             "header": [],
@@ -11503,17 +11503,99 @@
                 "checklist"
               ]
             },
-            "description": "Readiness of the CAS registration pack (taxpayer details, permit numbers, custodian, books printed)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end"
+            "description": "Readiness of the CAS registration pack: one row per item (code, business name, complete / missing, value, action: company, permit, atp, custodian, contact, document, books)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end"
           },
-          "response": []
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bir/cas/checklist",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bir",
+                    "cas",
+                    "checklist"
+                  ]
+                },
+                "description": "Readiness of the CAS registration pack: one row per item (code, business name, complete / missing, value, action: company, permit, atp, custodian, contact, document, books)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"books\": [\n      {\n        \"code\": \"general_journal\",\n        \"title\": \"General Journal\"\n      }\n    ],\n    \"checklist\": [\n      {\n        \"code\": \"permit\",\n        \"item\": \"CAS permit or acknowledgement number and date\",\n        \"done\": false,\n        \"status\": \"missing\",\n        \"value\": null,\n        \"action\": \"permit\"\n      }\n    ]\n  }\n}"
+            }
+          ]
         },
         {
-          "name": "Backup and restore procedure (PDF)",
+          "name": "The CAS documents (system description and controls, backup and restore procedure): approved version and version in progress",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/bir/cas/documents/backup-procedure",
+              "raw": "{{baseUrl}}/bir/cas/documents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "documents"
+              ]
+            },
+            "description": "The CAS documents (system description and controls, backup and restore procedure): approved version and version in progress\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bir/cas/documents",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bir",
+                    "cas",
+                    "documents"
+                  ]
+                },
+                "description": "The CAS documents (system description and controls, backup and restore procedure): approved version and version in progress\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"type\": \"system_description\",\n      \"slug\": \"system-description\",\n      \"title\": \"System Description and Controls\",\n      \"approved\": {\n        \"id\": \"casd_1\",\n        \"version\": 1,\n        \"status\": \"approved\",\n        \"statusLabel\": \"Approved\",\n        \"changeNote\": \"First approved version\",\n        \"approvedByName\": \"Maria Santos\",\n        \"approvedAt\": \"2026-10-01T02:00:00Z\"\n      },\n      \"open\": {\n        \"id\": \"casd_2\",\n        \"version\": 2,\n        \"status\": \"draft\",\n        \"statusLabel\": \"Draft\",\n        \"sections\": [\n          {\n            \"key\": \"s1\",\n            \"heading\": \"Purpose and scope\",\n            \"text\": \"{{software}} is the accounting system of {{taxpayerName}}.\"\n          }\n        ]\n      }\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "PDF of a CAS document: the approved version, or ?version=n (draft, submitted or nothing approved: DRAFT mark; superseded: SUPERSEDED mark)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/documents/:type?version=2",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -11521,20 +11603,33 @@
                 "bir",
                 "cas",
                 "documents",
-                "backup-procedure"
+                ":type"
+              ],
+              "query": [
+                {
+                  "key": "version",
+                  "value": "2"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "type (path parameter)"
+                }
               ]
             },
-            "description": "Backup and restore procedure (PDF)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end"
+            "description": "PDF of a CAS document: the approved version, or ?version=n (draft, submitted or nothing approved: DRAFT mark; superseded: SUPERSEDED mark)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end"
           },
           "response": []
         },
         {
-          "name": "CAS system description and controls (PDF)",
+          "name": "Comparison of two versions of a CAS document: sections added, removed, changed or unchanged, with the lines removed and added",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/bir/cas/documents/system-description",
+              "raw": "{{baseUrl}}/bir/cas/documents/:type/compare?from=1&to=2",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -11542,10 +11637,416 @@
                 "bir",
                 "cas",
                 "documents",
-                "system-description"
+                ":type",
+                "compare"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "1"
+                },
+                {
+                  "key": "to",
+                  "value": "2"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "type (path parameter)"
+                }
               ]
             },
-            "description": "CAS system description and controls (PDF)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end"
+            "description": "Comparison of two versions of a CAS document: sections added, removed, changed or unchanged, with the lines removed and added\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents > Document > Versions\n\nAccess: read:period-end"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bir/cas/documents/:type/compare?from=1&to=2",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bir",
+                    "cas",
+                    "documents",
+                    ":type",
+                    "compare"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "1"
+                    },
+                    {
+                      "key": "to",
+                      "value": "2"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "type",
+                      "value": "",
+                      "description": "type (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Comparison of two versions of a CAS document: sections added, removed, changed or unchanged, with the lines removed and added\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents > Document > Versions\n\nAccess: read:period-end"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"from\": {\n      \"version\": 1,\n      \"status\": \"superseded\"\n    },\n    \"to\": {\n      \"version\": 2,\n      \"status\": \"approved\"\n    },\n    \"summary\": {\n      \"added\": 0,\n      \"removed\": 0,\n      \"changed\": 1\n    },\n    \"sections\": [\n      {\n        \"key\": \"s1\",\n        \"change\": \"changed\",\n        \"heading\": \"Purpose and scope\",\n        \"headingBefore\": null,\n        \"lines\": [\n          {\n            \"type\": \"removed\",\n            \"text\": \"Old line\"\n          },\n          {\n            \"type\": \"added\",\n            \"text\": \"New line\"\n          }\n        ]\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Start a new version (draft) of a CAS document from the approved version, or from the standard text while none is approved; one version in progress at a time",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/documents/:type/draft",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "documents",
+                ":type",
+                "draft"
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "type (path parameter)"
+                }
+              ]
+            },
+            "description": "Start a new version (draft) of a CAS document from the approved version, or from the standard text while none is approved; one version in progress at a time\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents > Document > Edit\n\nAccess: write:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "Save the sections of the draft (heading and plain text; {{field}} placeholders of the live fields only)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/documents/:type/draft",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "documents",
+                ":type",
+                "draft"
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "type (path parameter)"
+                }
+              ]
+            },
+            "description": "Save the sections of the draft (heading and plain text; {{field}} placeholders of the live fields only)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents > Document > Edit\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sections\": [\n    {\n      \"key\": \"s1\",\n      \"heading\": \"Purpose and scope\",\n      \"text\": \"{{software}} is the accounting system of {{taxpayerName}}.\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Approve the submitted version (approve:period-end; a different user than the one who prepared, edited or submitted it); the previous approved version is superseded",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/documents/:type/draft/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "documents",
+                ":type",
+                "draft",
+                "approve"
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "type (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve the submitted version (approve:period-end; a different user than the one who prepared, edited or submitted it); the previous approved version is superseded\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents > Document\n\nAccess: approve:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Checked against the registration file\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Discard the draft (cancelled; the approved version stays in force)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/documents/:type/draft/discard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "documents",
+                ":type",
+                "draft",
+                "discard"
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "type (path parameter)"
+                }
+              ]
+            },
+            "description": "Discard the draft (cancelled; the approved version stays in force)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents > Document\n\nAccess: write:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "Return the submitted version to its preparer as a draft, with remarks (approve:period-end)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/documents/:type/draft/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "documents",
+                ":type",
+                "draft",
+                "reject"
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "type (path parameter)"
+                }
+              ]
+            },
+            "description": "Return the submitted version to its preparer as a draft, with remarks (approve:period-end)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents > Document\n\nAccess: approve:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Name the restore test frequency\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submit the draft for approval with a reason of the Reason Codes master (context cas_document_change) and a change note",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/documents/:type/draft/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "documents",
+                ":type",
+                "draft",
+                "submit"
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "type (path parameter)"
+                }
+              ]
+            },
+            "description": "Submit the draft for approval with a reason of the Reason Codes master (context cas_document_change) and a change note\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents > Document\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"CDC-CUSTODIAN\",\n  \"changeNote\": \"New backup custodian named\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "A CAS document: every version (who and when prepared, submitted, approved; change note), the open and the approved version with their sections, the standard text while none is approved, the live fields with their values and the activity log",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/documents/:type/versions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "documents",
+                ":type",
+                "versions"
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "type (path parameter)"
+                }
+              ]
+            },
+            "description": "A CAS document: every version (who and when prepared, submitted, approved; change note), the open and the approved version with their sections, the standard text while none is approved, the live fields with their values and the activity log\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents > Document\n\nAccess: read:period-end"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bir/cas/documents/:type/versions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bir",
+                    "cas",
+                    "documents",
+                    ":type",
+                    "versions"
+                  ],
+                  "variable": [
+                    {
+                      "key": "type",
+                      "value": "",
+                      "description": "type (path parameter)"
+                    }
+                  ]
+                },
+                "description": "A CAS document: every version (who and when prepared, submitted, approved; change note), the open and the approved version with their sections, the standard text while none is approved, the live fields with their values and the activity log\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents > Document\n\nAccess: read:period-end"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"type\": \"system_description\",\n    \"slug\": \"system-description\",\n    \"title\": \"System Description and Controls\",\n    \"approved\": {\n      \"id\": \"casd_1\",\n      \"version\": 1,\n      \"status\": \"approved\",\n      \"statusLabel\": \"Approved\",\n      \"changeNote\": \"First approved version\",\n      \"approvedByName\": \"Maria Santos\",\n      \"approvedAt\": \"2026-10-01T02:00:00Z\"\n    },\n    \"open\": {\n      \"id\": \"casd_2\",\n      \"version\": 2,\n      \"status\": \"draft\",\n      \"statusLabel\": \"Draft\",\n      \"sections\": [\n        {\n          \"key\": \"s1\",\n          \"heading\": \"Purpose and scope\",\n          \"text\": \"{{software}} is the accounting system of {{taxpayerName}}.\"\n        }\n      ]\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One version of a CAS document with its sections",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/documents/:type/versions/:version",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "documents",
+                ":type",
+                "versions",
+                ":version"
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "type (path parameter)"
+                },
+                {
+                  "key": "version",
+                  "value": "",
+                  "description": "version (path parameter)"
+                }
+              ]
+            },
+            "description": "One version of a CAS document with its sections\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents > Document > Versions\n\nAccess: read:period-end"
           },
           "response": []
         },
@@ -11605,7 +12106,7 @@
           "response": []
         },
         {
-          "name": "Void the latest print of a book (with a reason); its pages are used again",
+          "name": "Void the latest print of a book with a reason of the Reason Codes master (context cas_print_void; the note when the reason asks for one); its pages are used again",
           "request": {
             "method": "POST",
             "header": [
@@ -11634,10 +12135,95 @@
                 }
               ]
             },
-            "description": "Void the latest print of a book (with a reason); its pages are used again\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: write:period-end",
+            "description": "Void the latest print of a book with a reason of the Reason Codes master (context cas_print_void; the note when the reason asks for one); its pages are used again\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: write:period-end",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"Printer jam: pages damaged\"\n}",
+              "raw": "{\n  \"reasonCode\": \"CPV-DAMAGED\",\n  \"note\": \"Printer jam: pages 14 to 16 torn\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "CAS registration values kept on the CAS screen (permit number and date, invoice ATP and date, backup custodian, system contact) and the active users to name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/registration",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "registration"
+              ]
+            },
+            "description": "CAS registration values kept on the CAS screen (permit number and date, invoice ATP and date, backup custodian, system contact) and the active users to name\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bir/cas/registration",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bir",
+                    "cas",
+                    "registration"
+                  ]
+                },
+                "description": "CAS registration values kept on the CAS screen (permit number and date, invoice ATP and date, backup custodian, system contact) and the active users to name\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"permitNumber\": \"CAS-2026-0001\",\n    \"permitDate\": \"2026-02-01\",\n    \"atpNumber\": \"\",\n    \"atpDateIssued\": \"\",\n    \"custodianUserId\": \"usr_1\",\n    \"custodian\": \"Ana Reyes, IT Officer\",\n    \"contactUserId\": \"\",\n    \"contact\": \"\",\n    \"casPermitNumber\": \"\",\n    \"people\": [\n      {\n        \"userId\": \"usr_1\",\n        \"name\": \"Ana Reyes\",\n        \"email\": \"ana@example.ph\",\n        \"position\": \"IT Officer\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Save CAS registration values (only the fields sent; a custodian or contact is an active user, printed with the position given)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/registration",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "registration"
+              ]
+            },
+            "description": "Save CAS registration values (only the fields sent; a custodian or contact is an active user, printed with the position given)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents > Readiness\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"permitNumber\": \"CAS-2026-0001\",\n  \"permitDate\": \"2026-02-01\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

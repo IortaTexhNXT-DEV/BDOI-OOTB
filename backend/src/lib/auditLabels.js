@@ -55,6 +55,7 @@ export const ENTITY_LABELS = {
   generated_report: 'Report', entry_match: 'Entry match', document_numbering: 'Document numbering', direct_bill_client_payment: 'Direct bill payment',
   bank_rec_match: 'Bank reconciliation match', agent_event: 'Agent event', accounting_period: 'Accounting period', account_map: 'Account mapping',
   master_type: 'Master type', document: 'Document', database: 'Database', item: 'Item', task: 'Task',
+  cas_document: 'CAS document', cas_book_print: 'Book print',
 };
 
 /** "master:insurance-company" -> "Insurance company" (or the master type label when given). */

@@ -363,9 +363,12 @@ describe('CAS registration pack (13.11)', () => {
     expect(prints).toHaveLength(2);
     const first = prints.find((x) => x.period === p1);
     expect((await file('get', `/bir/cas/prints/${first.id}/pdf`)).status).toBe(200);
-    expect((await maker('post', `/bir/cas/prints/${first.id}/void`).send({ reason: 'Damaged' })).status).toBe(409);
+    expect((await maker('post', `/bir/cas/prints/${first.id}/void`).send({ reasonCode: 'CPV-MISPRINT' })).status).toBe(409);
     const second = prints.find((x) => x.period === p2);
-    expect((await maker('post', `/bir/cas/prints/${second.id}/void`).send({ reason: 'Damaged pages' })).body.data.status).toBe('voided');
+    expect((await maker('post', `/bir/cas/prints/${second.id}/void`).send({ reason: 'Damaged pages' })).status).toBe(400);
+    expect((await maker('post', `/bir/cas/prints/${second.id}/void`).send({ reasonCode: 'CPV-DAMAGED' })).body.errors[0].path).toBe('note');
+    const voided = (await maker('post', `/bir/cas/prints/${second.id}/void`).send({ reasonCode: 'CPV-DAMAGED', note: 'Pages torn' })).body.data;
+    expect(voided).toMatchObject({ status: 'voided', voidReasonCode: 'CPV-DAMAGED', voidReason: 'Pages damaged or lost: Pages torn' });
     const again = await file('post', '/bir/cas/books/general_journal/print').send({ period: p2 });
     expect(again.headers['x-book-pages'].split('-')[0]).toBe(String(last1 + 1));
     await setSetting('cas.enforce_print_order', true);
@@ -382,6 +385,6 @@ describe('CAS registration pack (13.11)', () => {
     expect((await file('get', `/bir/cas/audit-extract?from=2020-01-01&to=${today}&format=pdf`)).body.subarray(0, 4).toString()).toBe('%PDF');
     const c = (await maker('get', '/bir/cas/checklist')).body.data;
     expect(c.books).toHaveLength(6);
-    expect(c.checklist.find((i) => /printed/.test(i.item)).done).toBe(true);
+    expect(c.checklist.find((i) => i.code === 'books')).toMatchObject({ done: true, status: 'complete' });
   });
 });

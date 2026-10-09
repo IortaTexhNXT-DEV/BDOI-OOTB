@@ -4,10 +4,12 @@
  * acknowledgements, the EIS e-invoicing outbox and the CAS registration pack (loose-leaf books, system description,
  * backup procedure, audit trail extract).
  * Permissions: read:period-end to view and download; write:period-end to record filings, issue and cancel invoices,
- * record payments, print books and operate the EIS outbox (Accounting).
+ * record payments, print books, operate the EIS outbox, keep the CAS registration values and edit and submit the CAS
+ * documents (Accounting); approve:period-end to approve or reject a CAS document version (another user than its maker).
  */
 import { moduleRouter } from '../../lib/registry.js';
 import { requireAuth, requirePermission } from '../../lib/auth.js';
+import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import { validate, z } from '../../lib/validate.js';
 import { pool, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
@@ -21,11 +23,13 @@ import * as dat from './dat.js';
 import * as inv from './invoices.js';
 import * as eis from './eis.js';
 import * as cas from './cas.js';
+import * as casDocs from './casDocuments.js';
 import { returnPdf, returnXlsx } from './output.js';
 
 const { router, define } = moduleRouter('BIR Forms and Invoicing', '/bir');
 const read = [requireAuth, requirePermission('read:period-end')];
 const write = [requireAuth, requirePermission('write:period-end')];
+const approve = [requireAuth, requirePermission('approve:period-end')];
 const tx = (fn) => withTransaction(fn);
 const XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 const sendFile = (res, buf, name, type) => {
@@ -283,8 +287,30 @@ define({
 const bookParam = z.object({ book: z.enum(cas.BOOK_CODES) });
 const periodYm = z.object({ period: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'period must be YYYY-MM') });
 define({
-  method: 'GET', path: '/cas/checklist', summary: 'Readiness of the CAS registration pack (taxpayer details, permit numbers, custodian, books printed)', screen: 'Accounts > Tax > CAS Books and Documents',
-  middleware: read, handler: async (_req, res) => ok(res, { books: Object.entries(cas.BOOKS).map(([code, b]) => ({ code, title: b.title })), checklist: await cas.casChecklist(pool) }),
+  method: 'GET', path: '/cas/checklist', summary: 'Readiness of the CAS registration pack: one row per item (code, business name, complete / missing, value, action: company, permit, atp, custodian, contact, document, books)',
+  screen: 'Accounts > Tax > CAS Books and Documents', middleware: read,
+  response: { success: true, data: { books: [{ code: 'general_journal', title: 'General Journal' }], checklist: [{ code: 'permit', item: 'CAS permit or acknowledgement number and date', done: false, status: 'missing', value: null, action: 'permit' }] } },
+  handler: async (_req, res) => ok(res, { books: Object.entries(cas.BOOKS).map(([code, b]) => ({ code, title: b.title })), checklist: await cas.casChecklist(pool) }),
+});
+const registrationSchema = z.object({
+  permitNumber: z.string().trim().max(100).optional(), permitDate: dateField.or(z.literal('')).optional(), atpNumber: z.string().trim().max(100).optional(), atpDateIssued: dateField.or(z.literal('')).optional(),
+  custodianUserId: z.string().max(60).optional(), custodianPosition: z.string().trim().max(120).optional(), contactUserId: z.string().max(60).optional(), contactPosition: z.string().trim().max(120).optional(),
+}).strict();
+define({
+  method: 'GET', path: '/cas/registration', summary: 'CAS registration values kept on the CAS screen (permit number and date, invoice ATP and date, backup custodian, system contact) and the active users to name',
+  screen: 'Accounts > Tax > CAS Books and Documents', middleware: read,
+  response: { success: true, data: { permitNumber: 'CAS-2026-0001', permitDate: '2026-02-01', atpNumber: '', atpDateIssued: '', custodianUserId: 'usr_1', custodian: 'Ana Reyes, IT Officer', contactUserId: '', contact: '', casPermitNumber: '', people: [{ userId: 'usr_1', name: 'Ana Reyes', email: 'ana@example.ph', position: 'IT Officer' }] } },
+  handler: async (_req, res) => ok(res, await cas.registration(pool)),
+});
+define({
+  method: 'PUT', path: '/cas/registration', summary: 'Save CAS registration values (only the fields sent; a custodian or contact is an active user, printed with the position given)',
+  screen: 'Accounts > Tax > CAS Books and Documents > Readiness', middleware: [...write, validate(registrationSchema)],
+  request: { permitNumber: 'CAS-2026-0001', permitDate: '2026-02-01' },
+  handler: async (req, res) => {
+    const r = await cas.saveRegistration(pool, req.body, req.user);
+    await audit(req, { entity: 'settings', entityId: 'cas', action: 'update', before: r.before, after: r.after });
+    ok(res, await cas.registration(pool), 'Saved');
+  },
 });
 define({
   method: 'GET', path: '/cas/books/:book/preview', summary: 'Entries of a book of accounts for a month (on screen)', screen: 'Accounts > Tax > CAS Books and Documents',
@@ -319,21 +345,120 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/cas/prints/:id/void', summary: 'Void the latest print of a book (with a reason); its pages are used again', screen: 'Accounts > Tax > CAS Books and Documents',
-  middleware: [...write, validate(z.object({ reason: z.string().min(3).max(300) }))], request: { reason: 'Printer jam: pages damaged' },
+  method: 'POST', path: '/cas/prints/:id/void', summary: 'Void the latest print of a book with a reason of the Reason Codes master (context cas_print_void; the note when the reason asks for one); its pages are used again',
+  screen: 'Accounts > Tax > CAS Books and Documents', middleware: [...write, validate(z.object({ reasonCode: z.string().trim().min(1).max(60), note: z.string().trim().max(1000).optional() }))],
+  request: { reasonCode: 'CPV-DAMAGED', note: 'Printer jam: pages 14 to 16 torn' },
   handler: async (req, res) => {
-    const r = await cas.voidPrint(pool, req.params.id, req.body.reason, req.user);
-    await audit(req, { entity: 'cas_book_print', entityId: r.id, action: 'void', after: { reason: req.body.reason } });
+    const r = await cas.voidPrint(pool, req.params.id, req.body, req.user);
+    await audit(req, { entity: 'cas_book_print', entityId: r.id, action: 'void', before: { status: 'printed' }, after: { status: r.status, reasonCode: r.voidReasonCode, reason: r.voidReason } });
     ok(res, r);
   },
 });
+const docParam = z.object({ type: z.enum(casDocs.DOCUMENT_SLUGS) });
+const sectionsSchema = z.object({ sections: z.array(z.object({ key: z.string().max(40).optional(), heading: z.string().max(200), text: z.string().max(20000) })).min(1).max(40) });
+const docExample = { type: 'system_description', slug: 'system-description', title: 'System Description and Controls',
+  approved: { id: 'casd_1', version: 1, status: 'approved', statusLabel: 'Approved', changeNote: 'First approved version', approvedByName: 'Maria Santos', approvedAt: '2026-10-01T02:00:00Z' },
+  open: { id: 'casd_2', version: 2, status: 'draft', statusLabel: 'Draft', sections: [{ key: 's1', heading: 'Purpose and scope', text: '{{software}} is the accounting system of {{taxpayerName}}.' }] } };
+const docLink = (type) => `/accounts/tax/cas?document=${type}`;
+/** Audit entry and approval notifications of a document action. */
+async function docAction(req, action, r, remarks = null) {
+  await audit(req, { entity: 'cas_document', entityId: r.after.id, action, before: casDocs.auditSnapshot(r.before), after: casDocs.auditSnapshot(r.after, remarks) });
+  const d = casDocs.DOCUMENTS[r.after.doc_type];
+  const base = { document: d.title, number: `version ${r.after.version}`, link: docLink(d.slug), entity: 'cas_document', entityId: r.after.id };
+  if (action === 'submit') await notifyApprovers({ ...base, audience: 'approve:period-end', by: req.user.username });
+  if (action === 'approve' || action === 'reject') {
+    await notifyDecision({ ...base, userId: r.before.submitted_by, decidedBy: req.user.id, approved: action === 'approve', by: req.user.username, reason: action === 'reject' ? remarks : null });
+  }
+}
 define({
-  method: 'GET', path: '/cas/documents/system-description', summary: 'CAS system description and controls (PDF)', screen: 'Accounts > Tax > CAS Books and Documents', middleware: read,
-  handler: async (_req, res) => sendPdf(res, await cas.systemDescriptionPdf(pool), 'CAS-system-description.pdf'),
+  method: 'GET', path: '/cas/documents', summary: 'The CAS documents (system description and controls, backup and restore procedure): approved version and version in progress',
+  screen: 'Accounts > Tax > CAS Books and Documents', middleware: read, response: { success: true, data: [docExample] },
+  handler: async (_req, res) => ok(res, await casDocs.listDocuments(pool)),
 });
 define({
-  method: 'GET', path: '/cas/documents/backup-procedure', summary: 'Backup and restore procedure (PDF)', screen: 'Accounts > Tax > CAS Books and Documents', middleware: read,
-  handler: async (_req, res) => sendPdf(res, await cas.backupProcedurePdf(), 'CAS-backup-procedure.pdf'),
+  method: 'GET', path: '/cas/documents/:type', summary: 'PDF of a CAS document: the approved version, or ?version=n (draft, submitted or nothing approved: DRAFT mark; superseded: SUPERSEDED mark)',
+  screen: 'Accounts > Tax > CAS Books and Documents', middleware: [...read, validate(docParam, 'params'), validate(z.object({ version: z.coerce.number().int().min(1).optional() }), 'query')], query: { version: 2 },
+  handler: async (req, res) => {
+    const r = await casDocs.documentPdf(pool, req.params.type, { version: req.query.version, user: req.user });
+    sendPdf(res, r.pdf, r.fileName);
+  },
+});
+define({
+  method: 'GET', path: '/cas/documents/:type/versions', summary: 'A CAS document: every version (who and when prepared, submitted, approved; change note), the open and the approved version with their sections, the standard text while none is approved, the live fields with their values and the activity log',
+  screen: 'Accounts > Tax > CAS Books and Documents > Document', middleware: [...read, validate(docParam, 'params')], response: { success: true, data: docExample },
+  handler: async (req, res) => ok(res, await casDocs.documentDetail(pool, req.params.type, { viewer: req.user })),
+});
+define({
+  method: 'GET', path: '/cas/documents/:type/versions/:version', summary: 'One version of a CAS document with its sections', screen: 'Accounts > Tax > CAS Books and Documents > Document > Versions',
+  middleware: [...read, validate(docParam.extend({ version: z.coerce.number().int().min(1) }), 'params')],
+  handler: async (req, res) => ok(res, await casDocs.getVersion(pool, req.params.type, req.params.version)),
+});
+define({
+  method: 'GET', path: '/cas/documents/:type/compare', summary: 'Comparison of two versions of a CAS document: sections added, removed, changed or unchanged, with the lines removed and added',
+  screen: 'Accounts > Tax > CAS Books and Documents > Document > Versions', middleware: [...read, validate(docParam, 'params'), validate(z.object({ from: z.coerce.number().int().min(1), to: z.coerce.number().int().min(1) }), 'query')],
+  query: { from: 1, to: 2 },
+  response: { success: true, data: { from: { version: 1, status: 'superseded' }, to: { version: 2, status: 'approved' }, summary: { added: 0, removed: 0, changed: 1 },
+    sections: [{ key: 's1', change: 'changed', heading: 'Purpose and scope', headingBefore: null, lines: [{ type: 'removed', text: 'Old line' }, { type: 'added', text: 'New line' }] }] } },
+  handler: async (req, res) => ok(res, await casDocs.compareVersions(pool, req.params.type, req.query.from, req.query.to)),
+});
+define({
+  method: 'POST', path: '/cas/documents/:type/draft', summary: 'Start a new version (draft) of a CAS document from the approved version, or from the standard text while none is approved; one version in progress at a time',
+  screen: 'Accounts > Tax > CAS Books and Documents > Document > Edit', middleware: [...write, validate(docParam, 'params')],
+  handler: async (req, res) => {
+    const r = await tx((db) => casDocs.createDraft(db, req.params.type, req.user));
+    await docAction(req, 'create', r);
+    created(res, await casDocs.documentDetail(pool, req.params.type, { viewer: req.user }));
+  },
+});
+define({
+  method: 'PUT', path: '/cas/documents/:type/draft', summary: 'Save the sections of the draft (heading and plain text; {{field}} placeholders of the live fields only)',
+  screen: 'Accounts > Tax > CAS Books and Documents > Document > Edit', middleware: [...write, validate(docParam, 'params'), validate(sectionsSchema)],
+  request: { sections: [{ key: 's1', heading: 'Purpose and scope', text: '{{software}} is the accounting system of {{taxpayerName}}.' }] },
+  handler: async (req, res) => {
+    const r = await tx((db) => casDocs.saveDraft(db, req.params.type, req.body.sections, req.user));
+    await docAction(req, 'update', r);
+    ok(res, await casDocs.documentDetail(pool, req.params.type, { viewer: req.user }), 'Saved');
+  },
+});
+define({
+  method: 'POST', path: '/cas/documents/:type/draft/submit', summary: 'Submit the draft for approval with a reason of the Reason Codes master (context cas_document_change) and a change note',
+  screen: 'Accounts > Tax > CAS Books and Documents > Document', middleware: [...write, validate(docParam, 'params'),
+    validate(z.object({ reasonCode: z.string().trim().min(1).max(60), note: z.string().trim().max(1000).optional(), changeNote: z.string().trim().min(1).max(2000) }))],
+  request: { reasonCode: 'CDC-CUSTODIAN', changeNote: 'New backup custodian named' },
+  handler: async (req, res) => {
+    const r = await tx((db) => casDocs.submitDraft(db, req.params.type, req.body, req.user));
+    await docAction(req, 'submit', r, r.after.change_note);
+    ok(res, await casDocs.documentDetail(pool, req.params.type, { viewer: req.user }));
+  },
+});
+define({
+  method: 'POST', path: '/cas/documents/:type/draft/approve', summary: 'Approve the submitted version (approve:period-end; a different user than the one who prepared, edited or submitted it); the previous approved version is superseded',
+  screen: 'Accounts > Tax > CAS Books and Documents > Document', middleware: [...approve, validate(docParam, 'params'), validate(z.object({ remarks: z.string().trim().max(1000).optional() }))],
+  request: { remarks: 'Checked against the registration file' },
+  handler: async (req, res) => {
+    const r = await tx((db) => casDocs.approveVersion(db, req.params.type, req.body, req.user));
+    await docAction(req, 'approve', r, req.body.remarks || null);
+    ok(res, await casDocs.documentDetail(pool, req.params.type, { viewer: req.user }));
+  },
+});
+define({
+  method: 'POST', path: '/cas/documents/:type/draft/reject', summary: 'Return the submitted version to its preparer as a draft, with remarks (approve:period-end)',
+  screen: 'Accounts > Tax > CAS Books and Documents > Document', middleware: [...approve, validate(docParam, 'params'), validate(z.object({ remarks: z.string().trim().min(1).max(1000) }))],
+  request: { remarks: 'Name the restore test frequency' },
+  handler: async (req, res) => {
+    const r = await tx((db) => casDocs.rejectVersion(db, req.params.type, req.body, req.user));
+    await docAction(req, 'reject', r, req.body.remarks);
+    ok(res, await casDocs.documentDetail(pool, req.params.type, { viewer: req.user }));
+  },
+});
+define({
+  method: 'POST', path: '/cas/documents/:type/draft/discard', summary: 'Discard the draft (cancelled; the approved version stays in force)',
+  screen: 'Accounts > Tax > CAS Books and Documents > Document', middleware: [...write, validate(docParam, 'params')],
+  handler: async (req, res) => {
+    const r = await tx((db) => casDocs.discardDraft(db, req.params.type));
+    await docAction(req, 'cancel', r);
+    ok(res, await casDocs.documentDetail(pool, req.params.type, { viewer: req.user }));
+  },
 });
 define({
   method: 'GET', path: '/cas/audit-extract', summary: 'Audit trail extract for a date range (Excel or PDF)', screen: 'Accounts > Tax > CAS Books and Documents',

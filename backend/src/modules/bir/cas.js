@@ -5,8 +5,9 @@
  *                     purchase book per period (month), printed as PDF with page numbers that run on through the
  *                     taxable year (cas_book_prints keeps the pages each print used; a reprint keeps its pages and is
  *                     marked REPRINT; only the latest print of a book can be voided, and its pages are then reused)
- *   documents         system description and controls, backup and restore procedure (text built from the settings
- *                     cas.*), audit trail extract (Excel / PDF) for a date range
+ *   documents         system description and controls, backup and restore procedure (controlled documents, see
+ *                     ./casDocuments.js), audit trail extract (Excel / PDF) for a date range
+ *   readiness         what the registration pack still needs, with the CAS registration values kept on this screen
  *
  * Sources: posted (and reversed) journals for the journal, ledger and cash books; the sales invoices for the sales
  * book; payment vouchers to suppliers and journals with input VAT for the purchase book.
@@ -15,12 +16,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { getSetting } from '../../lib/settings.js';
+import { getSetting, setSetting } from '../../lib/settings.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { renderPdf } from '../../lib/pdf/index.js';
 import { writeXlsx } from '../../lib/xlsx.js';
 import { iso } from '../period-end/fiscal.js';
+import { requiredReason } from '../ops-masters/records.js';
 import { alphalistRows, birIdentity, monthPeriod, round2, sum } from './common.js';
+import { listDocuments } from './casDocuments.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(fs.readFileSync(path.resolve(here, '../../../package.json'), 'utf8'));
@@ -126,7 +129,7 @@ const pageCount = (buf) => (buf.toString('latin1').match(/\/Type \/Page\b(?!s)/g
 
 export const printRow = (r) => r && ({ id: r.id, book: r.book_code, bookTitle: BOOKS[r.book_code]?.title, fiscalYear: r.fiscal_year, period: r.period, periodFrom: iso(r.period_from), periodTo: iso(r.period_to),
   firstPage: r.first_page, lastPage: r.last_page, pages: r.pages, entries: r.entries, totalDebit: Number(r.total_debit), totalCredit: Number(r.total_credit), fileHash: r.file_hash,
-  reprints: r.reprints, lastReprintedAt: r.last_reprinted_at, status: r.status, voidReason: r.void_reason, printedBy: r.printed_by, printedAt: r.printed_at });
+  reprints: r.reprints, lastReprintedAt: r.last_reprinted_at, status: r.status, voidReason: r.void_reason, voidReasonCode: r.void_reason_code, printedBy: r.printed_by, printedAt: r.printed_at });
 
 /** Preview (no record, no page numbers) of a book: { rows, totals } for the screen. */
 export async function previewBook(db, book, period) {
@@ -171,13 +174,15 @@ export async function reprintBook(db, id, user) {
   return { print: printRow(r), pdf };
 }
 
-/** Void the latest print of a book (its pages are used again by the next print). */
-export async function voidPrint(db, id, reason, user) {
+/** Void the latest print of a book with a reason of the Reason Codes master (cas_print_void); its pages are used again by the next print. */
+export async function voidPrint(db, id, body, user) {
   const r = (await db.query('SELECT * FROM cas_book_prints WHERE id = $1', [id])).rows[0];
   if (!r || r.status !== 'printed') throw notFound('Printed book not found');
   const later = (await db.query('SELECT 1 FROM cas_book_prints WHERE book_code = $1 AND fiscal_year = $2 AND status = \'printed\' AND period > $3', [r.book_code, r.fiscal_year, r.period])).rows[0];
   if (later) throw conflict('Only the latest print of a book can be voided');
-  const v = (await db.query('UPDATE cas_book_prints SET status = \'voided\', void_reason = $2, voided_by = $3, voided_at = now() WHERE id = $1 RETURNING *', [id, reason, user?.id ?? null])).rows[0];
+  const reason = await requiredReason(db, 'cas_print_void', body);
+  const v = (await db.query(`UPDATE cas_book_prints SET status = 'voided', void_reason = $2, void_reason_code = $3, voided_by = $4, voided_at = now() WHERE id = $1 RETURNING *`,
+    [id, reason.text, reason.code, user?.id ?? null])).rows[0];
   return printRow(v);
 }
 
@@ -194,66 +199,7 @@ export async function bookXlsx(db, book, period) {
     rows: [...pv.rows.map((r) => pv.columns.map((c) => r[c.key] ?? '')), totals], rowStyles: [...pv.rows.map(() => null), 'bold'] }] });
 }
 
-// ---------------------------------------------------------------- documents
-
-const casSettings = async () => ({
-  software: (await getSetting('cas.software_name', 'iNXT BrokerVerse')) || 'iNXT BrokerVerse', booksForm: (await getSetting('cas.books_form', 'loose-leaf')) || 'loose-leaf',
-  permit: (await getSetting('cas.permit_number', '')) || '', backupFrequency: (await getSetting('cas.backup_frequency', 'Daily full backup with continuous transaction log archiving (point-in-time recovery)')) || '',
-  backupRetention: (await getSetting('cas.backup_retention', 'Daily backups kept 35 days; monthly backups kept 10 years (NIRC Sec. 235 retention)')) || '',
-  backupLocation: (await getSetting('cas.backup_location', 'Managed database service of the hosting provider in the Philippines region, with an encrypted off-site copy')) || '', custodian: (await getSetting('cas.backup_custodian', '')) || '', contact: (await getSetting('cas.system_contact', '')) || '',
-});
-
-/** System description and controls (PDF), for the CAS registration / acknowledgement file. */
-export async function systemDescriptionPdf(db) {
-  const id = await birIdentity();
-  const s = await casSettings();
-  const series = (await db.query('SELECT code, name, prefix, pattern, reset_rule FROM document_numbering WHERE active ORDER BY name')).rows;
-  const roles = (await db.query('SELECT code, name FROM roles ORDER BY name')).rows;
-  const accounts = (await db.query('SELECT count(*)::int AS n FROM gl_accounts WHERE status = \'active\'')).rows[0].n;
-  return renderPdf({
-    title: 'Computerized Accounting System: System Description and Controls', number: `${s.software} ${pkg.version}`,
-    meta: [['Taxpayer', id.name], ['TIN', id.tinFormatted], ['Registered address', id.address], ['RDO', id.rdoCode || '-'], ['System', `${s.software} version ${pkg.version}${process.env.GIT_REF ? ` (${process.env.GIT_REF})` : ''}`],
-      ['Form of books', s.booksForm], ['CAS permit / acknowledgement', s.permit || 'to be issued'], ['Contact person', s.contact || '-']],
-    sections: [
-      { heading: '1. Purpose and scope', text: `${s.software} is the insurance broking and accounting system of ${id.name || 'the taxpayer'}. It records the broking operations (quotations, policies, endorsements, claims, renewals), the billing and collection of premium, the remittance of premium to insurers, commission (direct-bill debit notes, broker-billed commission, overriding commission from insurers, commission to agents and referrers) and the general ledger. Every operational event posts a balanced journal through a posting rule; the books of accounts and the BIR reports are produced from these journals.` },
-      { heading: '2. Modules', rows: [['Sales and placement', 'Prospects, quotations, requests for quotation, placement slips'], ['Policy administration', 'Policies, endorsements, renewals, claims'],
-        ['Receivables and receipts', 'Bills, receipts (collection receipts), collections, credit control'], ['Remittance', 'Premium remittance to insurers, direct-bill commission debit notes, insurer statement reconciliation'],
-        ['Commission', 'Commission to agents and referrers, overriding / contingent commission from insurers'], ['General ledger', 'Chart of accounts, posting rules, journal vouchers, period-end close, financial statements'],
-        ['Tax', 'Sales invoices (EOPT), BIR Form 2307, 0619-E, 1601-EQ, 1604-E, 2551Q, VAT summary, SAWT, QAP, SLSP, DAT files, e-invoicing outbox'],
-        ['Administration', 'Users, roles, document numbering, configuration, audit trail, scheduled jobs']], columns: 1 },
-      { heading: '3. Books of accounts', text: `Generated per month as ${s.booksForm} books: General Journal, General Ledger, Cash Receipts Book, Cash Disbursements Book, Sales Book and Purchase Book. Page numbers run on through the taxable year; every print is recorded (book, period, pages, entries, file hash) and a reprint keeps its page numbers and is marked REPRINT. The chart of accounts has ${accounts} active accounts.` },
-      { heading: '4. Controls', rows: [
-        ['Access', `Sign-in with personal user accounts, password policy, optional two-factor authentication, session time-out. Roles: ${roles.map((r) => r.name).join(', ')}. Every API endpoint checks the user's permissions.`],
-        ['Segregation of duties', 'Maker-checker on journal vouchers, payment vouchers (cheque approval), posting rule and account changes, month-end and year-end close, commission and overriding commission computations.'],
-        ['Data integrity', 'Journals cannot be posted unbalanced, on inactive accounts or into closed periods; posted journals are never edited or deleted, only reversed; documents are cancelled with a reason, never deleted.'],
-        ['Numbering', `System-generated, sequential numbers per series: ${series.map((x) => `${x.name} (${x.prefix})`).join(', ')}. The sales invoice series never resets and stays within the registered serial range.`],
-        ['Period control', 'Accounting periods open, soft-closed, closed and locked; month-end checklist and approval; year-end close with closing entries.'],
-        ['Audit trail', 'Every change records the user, date and time, screen or API, and the values before and after; the audit trail cannot be changed from the application and is extracted for any date range.'],
-        ['Backup', `${s.backupFrequency}. Retention: ${s.backupRetention}. Location: ${s.backupLocation}.`]], columns: 1 },
-      { heading: '5. Outputs', text: 'Financial statements (income statement, balance sheet, trial balance), general ledger detail, journal register, receivables and payables ageing, BIR forms and alphalists with their DAT files, sales invoices and payment acknowledgements, official / collection receipts, payment vouchers.' },
-      { heading: '6. Hardware and software environment', text: 'Web application (Node.js API, PostgreSQL database, React front end) hosted on a managed cloud platform; users connect with a current web browser over HTTPS. No data is kept on the users\' computers.' },
-      { signatures: [{ label: 'Prepared by' }, { label: 'Approved by (taxpayer)' }] },
-    ],
-  });
-}
-
-/** Backup and restore procedure (PDF). */
-export async function backupProcedurePdf() {
-  const id = await birIdentity();
-  const s = await casSettings();
-  return renderPdf({
-    title: 'Backup and Restore Procedure', number: s.software,
-    meta: [['Taxpayer', id.name], ['TIN', id.tinFormatted], ['Custodian', s.custodian || '-']],
-    sections: [
-      { heading: '1. What is backed up', text: 'The whole database (every transaction, master, configuration record, audit trail entry and the record of the books printed) and the stored documents (uploaded files and generated documents).' },
-      { heading: '2. Frequency and retention', rows: [['Frequency', s.backupFrequency], ['Retention', s.backupRetention], ['Location', s.backupLocation]], columns: 1 },
-      { heading: '3. Procedure', text: '1. The hosting platform takes the automated backups at the frequency above and archives the transaction log for point-in-time recovery. 2. The custodian checks every week that the latest backup completed. 3. At every month-end close, after the books of the month are printed, a monthly backup is kept for the retention period. 4. Backups are encrypted at rest and in transit; access is limited to the custodian and the system administrator.' },
-      { heading: '4. Restore and test', text: '1. Restore into a separate environment (never over the live database) from the backup or to a point in time. 2. Check the restored trial balance and the last journal numbers against the last printed books. 3. Record the test (date, backup used, result, who performed it). A restore test is performed at least twice a year and after any change of the hosting platform.' },
-      { heading: '5. Books on storage media', text: 'When the books are kept in computerized form, the general journal, general ledger and the subsidiary books are exported per period (PDF and Excel) and kept on storage media with the backups, for submission to the BIR within the period the regulations set.' },
-      { signatures: [{ label: 'Custodian' }, { label: 'Approved by (taxpayer)' }] },
-    ],
-  });
-}
+// ---------------------------------------------------------------- audit trail extract
 
 /** Audit trail extract for a date range: rows for Excel / PDF. */
 export async function auditExtract(db, { from, to }) {
@@ -268,19 +214,77 @@ export async function auditExtract(db, { from, to }) {
 export const AUDIT_COLUMNS = [{ key: 'dateTime', label: 'Date and time (UTC)' }, { key: 'user', label: 'User' }, { key: 'entity', label: 'Record type' }, { key: 'record', label: 'Record' },
   { key: 'action', label: 'Action' }, { key: 'channel', label: 'Channel' }, { key: 'screen', label: 'Screen / API' }, { key: 'ip', label: 'IP address' }];
 
-/** Readiness of the CAS pack: what is set and what the broker still has to fill in. */
+
+// ---------------------------------------------------------------- registration values and readiness
+
+/**
+ * The CAS registration values kept on this screen (settings, closed list): CAS permit number and date, invoice ATP or
+ * acknowledgement number and date, the backup custodian and the system contact (the user and the name printed).
+ */
+export const REGISTRATION = {
+  permitNumber: 'cas.permit_number', permitDate: 'cas.permit_date', atpNumber: 'invoice.atp_number', atpDateIssued: 'invoice.atp_date_issued',
+  custodianUserId: 'cas.backup_custodian_user', custodian: 'cas.backup_custodian', contactUserId: 'cas.system_contact_user', contact: 'cas.system_contact',
+};
+
+/** The registration values and the active users who can be named custodian or contact. */
+export async function registration(db) {
+  const values = {};
+  for (const [field, key] of Object.entries(REGISTRATION)) values[field] = String((await getSetting(key, '')) || '');
+  values.casPermitNumber = String((await getSetting('invoice.cas_permit_number', '')) || '');
+  const people = (await db.query(`SELECT id, COALESCE(display_name, username) AS name, email, designation FROM users WHERE status = 'active'
+    ORDER BY lower(COALESCE(display_name, username)) LIMIT 1000`)).rows.map((u) => ({ userId: u.id, name: u.name, email: u.email || '', position: u.designation || '' }));
+  return { ...values, people };
+}
+
+/**
+ * Save registration values ({ field: value } of REGISTRATION); a custodian or contact is chosen among the active users
+ * and printed as "Name, position" (the contact also with the e-mail). Returns { before, after } of the changed keys.
+ */
+export async function saveRegistration(db, body, user) {
+  const changes = {};
+  for (const field of ['permitNumber', 'permitDate', 'atpNumber', 'atpDateIssued']) {
+    if (body[field] !== undefined) changes[REGISTRATION[field]] = String(body[field] ?? '').trim();
+  }
+  for (const [role, idField, textField] of [['custodian', 'custodianUserId', 'custodian'], ['contact', 'contactUserId', 'contact']]) {
+    if (body[idField] === undefined) continue;
+    if (!body[idField]) {
+      changes[REGISTRATION[idField]] = '';
+      changes[REGISTRATION[textField]] = '';
+      continue;
+    }
+    const u = (await db.query('SELECT id, COALESCE(display_name, username) AS name, email FROM users WHERE id = $1 AND status = \'active\'', [body[idField]])).rows[0];
+    if (!u) throw badRequest('Validation failed', [{ path: idField, message: 'choose an active user' }]);
+    const position = String(body[`${role}Position`] || '').trim();
+    changes[REGISTRATION[idField]] = u.id;
+    changes[REGISTRATION[textField]] = [u.name, position, role === 'contact' ? u.email : null].filter(Boolean).join(', ');
+  }
+  const before = {};
+  for (const key of Object.keys(changes)) before[key] = (await getSetting(key, '')) || '';
+  for (const [key, value] of Object.entries(changes)) await setSetting(key, value, user?.id ?? null);
+  return { before, after: changes };
+}
+
+/**
+ * Readiness of the CAS pack: one row per item with its business name, Complete / Missing, the value when it is set and
+ * the action that completes it (company: Master > Company; permit, atp, custodian, contact: the registration values of
+ * this screen; document: approve the document; books: print a book).
+ */
 export async function casChecklist(db) {
   const id = await birIdentity();
-  const s = await casSettings();
-  const inv = async (k) => (await getSetting(`invoice.${k}`, '')) || '';
+  const r = await registration(db);
   const prints = (await db.query('SELECT count(*)::int AS n FROM cas_book_prints WHERE status = \'printed\'')).rows[0].n;
+  const docs = await listDocuments(db);
+  const doc = (type) => docs.find((d) => d.type === type).approved;
+  const row = (code, item, done, value, action) => ({ code, item, done: !!done, status: done ? 'complete' : 'missing', value: done ? value || null : null, action });
   return [
-    { item: 'Taxpayer name, TIN and registered address (Master > Company)', done: !!(id.name && id.tin && id.address) },
-    { item: 'RDO code (Master > Company)', done: !!id.rdoCode },
-    { item: 'CAS permit / acknowledgement number (cas.permit_number)', done: !!s.permit },
-    { item: 'Invoice ATP or system acknowledgement (invoice.atp_number / invoice.cas_permit_number)', done: !!((await inv('atp_number')) || (await inv('cas_permit_number'))) },
-    { item: 'Backup custodian named (cas.backup_custodian)', done: !!s.custodian },
-    { item: 'System contact person (cas.system_contact)', done: !!s.contact },
-    { item: 'Books of accounts printed at least once', done: prints > 0 },
+    row('company', 'Taxpayer name, TIN and registered address', id.name && id.tin && id.address, id.name, 'company'),
+    row('rdo', 'RDO code', id.rdoCode, id.rdoCode, 'company'),
+    row('permit', 'CAS permit or acknowledgement number and date', r.permitNumber && r.permitDate, r.permitNumber, 'permit'),
+    row('atp', 'Invoice ATP or acknowledgement', r.atpNumber || r.casPermitNumber, r.atpNumber || r.casPermitNumber, 'atp'),
+    row('custodian', 'Backup custodian', r.custodian, r.custodian, 'custodian'),
+    row('contact', 'System contact person', r.contact, r.contact, 'contact'),
+    row('systemDescription', 'System description approved', doc('system_description'), doc('system_description') && `Version ${doc('system_description').version}`, 'document'),
+    row('backupProcedure', 'Backup procedure approved', doc('backup_procedure'), doc('backup_procedure') && `Version ${doc('backup_procedure').version}`, 'document'),
+    row('books', 'Books printed at least once', prints > 0, prints > 0 ? String(prints) : null, 'books'),
   ];
 }
