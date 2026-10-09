@@ -186,6 +186,52 @@ async function assertChannel(db, id) {
   if (ch.status !== 'active') throw badRequest('Validation failed', [{ path: 'channelId', message: 'The selected distribution channel is inactive' }]);
 }
 
+/** Prospect statuses that are no longer worked. */
+const CLOSED_STATUSES = ['Converted', 'Lost', 'converted', 'lost'];
+const lastDigits = (v) => {
+  const d = String(v ?? '').replace(/\D/g, '');
+  return d.length >= 10 ? d.slice(-10) : null;
+};
+
+/**
+ * Possible duplicates of a new prospect (Create Prospect): clients and open prospects with the same e-mail, the same
+ * mobile number (its last ten digits), or the same name (the person's first and last name, or the company name) with
+ * the same date of birth when both have one. With clientId (a prospect for an existing client) only that client's open
+ * prospects are returned. Off with leads.duplicate_check. Each match: { kind: client | lead, id, number, name, ownerName,
+ * lob, productName, matchedOn: [email, mobile, name, birthDate] }; contact details are not returned.
+ */
+export async function possibleDuplicates(q = {}) {
+  if ((await getSetting('leads.duplicate_check', true)) === false) return [];
+  if (q.clientId) {
+    const rows = await many(`${SELECT} WHERE l.client_id = $1 AND l.deleted_at IS NULL AND NOT (l.status = ANY($2)) ORDER BY l.created_at DESC LIMIT 20`,
+      [String(q.clientId), CLOSED_STATUSES]);
+    return rows.map((r) => ({ kind: 'lead', id: r.id, number: r.lead_number, name: r.display_name, ownerName: r.owner_name, lob: r.lob, productName: r.product_name, matchedOn: ['client'] }));
+  }
+  const email = String(q.emailId ?? q.email ?? '').trim().toLowerCase() || null;
+  const mobile = lastDigits(q.contactNumber ?? q.mobileNumber);
+  const name = (String(q.companyName ?? '').trim() || [q.firstName, q.lastName].map((x) => String(x ?? '').trim()).filter(Boolean).join(' ')).toLowerCase() || null;
+  const dob = isoDate(q.DOB) || null;
+  if (!email && !mobile && !name) return [];
+  const cond = (t) => `(($1::text IS NOT NULL AND lower(${t}.email) = $1)
+    OR ($2::text IS NOT NULL AND right(regexp_replace(COALESCE(${t}.phone, ''), '\\D', '', 'g'), 10) = $2)
+    OR ($3::text IS NOT NULL AND (lower(${t}.display_name) = $3 OR lower(${t}.company_name) = $3) AND ($4::date IS NULL OR ${t}.birth_date IS NULL OR ${t}.birth_date = $4)))`;
+  const params = [email, mobile, name, dob];
+  const clients = await many(`SELECT c.id, c.client_code, c.display_name, c.company_name, c.email, c.phone, c.birth_date, u.display_name AS owner_name
+    FROM clients c LEFT JOIN users u ON u.id = c.owner_user_id WHERE c.status <> 'deleted' AND ${cond('c')} ORDER BY c.created_at DESC LIMIT 10`, params);
+  const leads = await many(`${SELECT} WHERE l.deleted_at IS NULL AND l.client_id IS NULL AND NOT (l.status = ANY($5)) AND ${cond('l')} ORDER BY l.created_at DESC LIMIT 10`,
+    [...params, CLOSED_STATUSES]);
+  const matchedOn = (r) => [
+    email && String(r.email || '').toLowerCase() === email && 'email',
+    mobile && lastDigits(r.phone) === mobile && 'mobile',
+    name && [r.display_name, r.company_name].some((x) => String(x || '').toLowerCase() === name) && 'name',
+    dob && r.birth_date && isoDate(r.birth_date) === dob && 'birthDate',
+  ].filter(Boolean);
+  return [
+    ...clients.map((r) => ({ kind: 'client', id: r.id, number: r.client_code, name: r.display_name, ownerName: r.owner_name, matchedOn: matchedOn(r) })),
+    ...leads.map((r) => ({ kind: 'lead', id: r.id, number: r.lead_number, name: r.display_name, ownerName: r.owner_name, lob: r.lob, productName: r.product_name, matchedOn: matchedOn(r) })),
+  ];
+}
+
 /** Soft delete; a lead with a converted policy cannot be removed. */
 export async function deleteLead(id, userId) {
   const lead = await getLead(id);
