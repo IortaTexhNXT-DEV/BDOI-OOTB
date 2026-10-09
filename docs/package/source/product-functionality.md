@@ -272,7 +272,7 @@ Every business event posts a balanced journal through its posting rule. On a co-
 
 - Pipeline 90 days before expiry (`renewals.pipeline_days`); notices at 60, 30 and 15 days (`limits.renewal_notice_days`); lapse 30 days after expiry (`renewals.grace_period_days`).
 - Renewal Policy, Renewal Batch (up to 500 policies), Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management with win-back campaigns, Performance.
-- At-risk score from claims in the term, unpaid premium, expiry within 30 days, premium increase, no contact and first renewal (`renewals.risk_weights`), with recommended actions.
+- At-risk register: score from claims in the term, unpaid premium, expiry within 15 days or the grace period, premium increase, no contact and first renewal (`renewals.risk_weights`), shown as a breakdown (factor, finding, weight, points); recommended actions (`renewals.risk_actions`) become My Work tasks on the renewal, and an escalation notifies the unit head.
 - Renewal issues the new term, marks the old policy Renewed, bills the premium and accrues commission to the original referrer.
 
 ![Renewal Queue](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-renewal-queue.png)

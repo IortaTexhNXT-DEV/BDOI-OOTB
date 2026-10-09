@@ -337,8 +337,7 @@ BrokerVerse records every create, change, approval, report run and sign-in with 
 | Where | What you see | Who |
 |---|---|---|
 | Master > Audit Trail | Every audited action, searchable by record type, record ID, user and dates. | System Administrator |
-| **Audit Trail** tab of a quotation | Every change of the quotation with date, field, old and new value and user. | Users who open the quotation |
-| Claim audit trail (icon on the claims list) | Every status change of the claim with user and time. | Claims |
+| **Audit Trail** tab of a quotation, **History** of a policy, claim, client or master record | Every event of the record with date and time, user and role, source (screen, API, system job) and each field changed (old value and new value); filter by text, user and kind of event; **Export** to Excel or CSV. | Users who open the record |
 | History of a period, reconciliation, close run or posting rule | Each status change with user, time and remarks. | Accounting, Accounting Manager |
 | **Prepared by**, **Submitted by**, **Approved by** on approval screens | The maker and the checker of the record. | Users of the screen |
 | Master > Users and Access > User, **Sign-in history** | Every sign-in attempt of a user with result, method, IP address and browser. | System Administrator |
@@ -796,9 +795,11 @@ Master > System > Insurer Integration connects BrokerVerse to the insurers' syst
 
 ![Master > Audit Trail](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-audit.png)
 
-1. Enter a **Record type** (for example session for sign-ins, policy, receipt, placement), a **Record ID** or a **User**.
-2. Enter **From date** and **To date**.
-3. Select **Search**. The list shows **When**, **User**, **Record type**, **Record ID**, **Action** and **Change** (before and after values).
+1. Choose Master > System Configuration > Audit Trail. Filter by **Date range**, **User**, **Record type** (for example session for sign-ins, policy, receipt, placement), **Record number** and **Action**; the list refreshes as you filter (**Clear filters** resets them).
+2. Each row shows the date and time, the user and role, the record, the event, the fields changed and the source. Expand a row to see each field changed with its old and new value.
+3. **Export** downloads every event matching the filters to Excel or CSV, one row per changed field.
+
+The history of a single record (claim history, policy and client **History** tab, quotation **Audit Trail** tab, master records) uses the same layout as a timeline grouped by day, newest first, with a search box, a user filter, a filter by kind of event (created, status changes and approvals, other changes, cancelled or removed) and **Export**.
 
 Use it for investigations, access reviews and to show that maker and checker were different people.
 
@@ -1511,12 +1512,19 @@ A client is a person or company that holds or has held a policy, or that was onb
 
 ![The client view](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-client-view.png)
 
+The client view shows the client's name as the page title with the client code, the type (Individual or Corporate), the KYC status and the contact details under it; **Identification and due diligence** opens the onboarding screen. The figures show the **Active policies**, the **Premium in force**, the **Open claims**, the **Renewals due** (with the next expiry) and the **Outstanding balance** (with the bills overdue). Each tab shows its number of records, a search box and a table; the eye opens the record and **More actions** holds the other actions.
+
 | Tab | What you see and do |
 |---|---|
-| **Policy** | The client's policies with gross premium, dates, product and payment status; open a policy from **Actions**. |
-| **Claim** | The client's claims with status. |
-| **Renewal** | Renewals due and quoted. |
-| **Endorsement** | The client's endorsements with number, type, policy, status and payment. |
+| **Policies** | Policy, product and insurer, period of cover, gross premium, status and payment. **More actions**: **Report a claim**, **Renew**, **Endorse** (not while the premium payment is Pending or Reviewing). |
+| **Quotations** | The quotations of the client and of the prospect it came from, with product, insurer, premium and status. |
+| **Claims** | Claim and policy, date and cause of loss, reported date, estimate and status; continue the claim or open its history. |
+| **Renewals** | Policy and renewal number, expiry, current and renewal premium and the renewal stage; continue an open renewal. |
+| **Endorsements** | Endorsement and policy, type, effective date, premium change and status. |
+| **Receipts** | Official receipts with date, policy, payment mode, amount and status. |
+| **Documents** | The KYC documents uploaded on the onboarding screen. |
+| **Activity** | Calls, meetings, e-mails and visits logged with the client and the open next step. |
+| **History** | Every change of the client record (see Audit Trail). |
 
 To correct the name, address or contact details of a client with an issued policy, raise a Personal Details Change endorsement, so the change is recorded against the policy and sent to the insurer.
 
@@ -1589,7 +1597,7 @@ A cover note is temporary evidence of cover that the broker gives the client whi
 3. Check **Cover from** (the inception of the placement, else today), the **Cover period (days)** (empty: the default; at most `cover_note.max_validity_days`), the **Insurer binder reference** and any **Special conditions**.
 4. Select **Issue cover note**. The number is CVN-YYYY-NNNNN (Master > Document Numbering, series cover_note).
 
-On the list, **Print** opens the cover note with the company letterhead, the cover, the risk, the wording of `cover_note.wording` and the signature block; **E-mail to the client** sends the PDF (e-mail template `cover_note`); **Cancel** asks for a reason.
+The figures show the active cover notes and those expiring within 7 days; filter by status and search by cover note, insured, quotation or policy. On the list, **Print** opens the cover note with the company letterhead, the cover, the risk, the wording of `cover_note.wording` and the signature block; **E-mail to the client** sends the PDF (e-mail template `cover_note`); **More actions** > **Cancel cover note** asks for a reason.
 
 | Cover note status | Meaning |
 |---|---|
@@ -1660,19 +1668,21 @@ BrokerVerse puts every policy into the renewal pipeline 90 days before expiry (`
 |---|---|
 | Renewal Policy | See expired and expiring policies with their renewal state, and start a renewal (**Renew**). |
 | Renewal Batch | Group many policies and send their notices and renewal quotes together (up to 500 policies, `renewals.batch_max_policies`). |
-| Renewal Queue | Work the policies due for renewal: days to expiry, premium, status, risk, sales person and contact attempts. |
-| Retention Analytics | Renewal rate, premium retention, cycle time and recommended actions. |
-| At-Risk Policies | Policies with a retention risk score and their risk level. |
-| Negotiations | Record contacts with the client, request approval of renewal terms and send communications. |
-| Lapse Management | Lapsed policies, policies in the grace period and win-back campaigns. |
-| Performance | Renewal rate, premium retention and cycle time against the targets. |
+| Renewal Queue | Work the policies due for renewal: expiry, premium, stage, risk level, account executive and contacts so far. |
+| Retention Analytics | Renewal rate, premium retention and cycle time by month, line of business and account executive, and the profile of the renewals still open. |
+| At-Risk Policies | The risk register: open renewals of Medium risk or above with the main drivers of the score, the next action, tasks and escalation. |
+| Negotiations | The renewals being negotiated; record updates and contacts, submit the terms for approval, approve or reject them. |
+| Lapse Management | Lapsed policies, policies in the grace period, the win-back offers made and the win-back campaigns. |
+| Performance | Renewal rate, premium retention and cycle time against the targets, per account executive and line of business. |
+
+Every Renewals screen has the same layout: the page title with the breadcrumb and the page actions (Export downloads the rows shown as CSV), a row of figures (a figure with a frame filters the list when selected), the search box and filters on one line (**Clear filters** resets them), and the list with the row actions at the right: the eye opens the record in a panel on the right, the three dots open **More actions**.
 
 ### Renew a policy
 
 ![Operations > Renewals > Renewal Policy](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-renewal-policy.png)
 
-1. Choose Operations > Renewals > Renewal Policy. Filter by **Expiry from**, **Expiry to** and **Renewal state**, or search. Each row shows the policy number, client, product, insurer, sales person, expiry, days since or to expiry, premium, payment and **Renewal state** (for example Renewed or Lapsed, renewable).
-2. Select **Renew** on the policy (or **Continue renewal** on a renewal already started). A renewed policy shows **Open** with the number of the new term.
+1. Choose Operations > Renewals > Renewal Policy. The figures count the policies by renewal state (Due for renewal, In grace period, Lapsed, renewable, Renewal in progress, Renewed); select one to show only those. Change the **Expiry between** dates or search by policy number, client or client code. Each row shows the policy and client, product and insurer, account executive, expiry (with the days since or to expiry), premium, payment and **Renewal state**.
+2. Select the renew icon on the policy (the arrow on a renewal already started). The eye opens the policy; on a renewed policy the link icon opens the new term. A policy whose renewal window has closed is quoted as new business.
 3. The renewal quotation opens with the covers of the expiring term, re-rated with the current base rates (`renewals.rating_rates`), a claims loading of 10% per claim in the expiring term up to 30%, and a loyalty discount of 2% per completed renewal up to 10%. Check the terms and continue.
 4. Send it for customer approval as for any quotation. Renewal terms that need approval go to the Processing Team.
 5. When the client accepts, issue the renewal. The system issues the new term, marks the old policy **Renewed**, bills the premium (`renewals.create_receivable`) and accrues the commission to the original referrer.
@@ -1681,29 +1691,49 @@ BrokerVerse puts every policy into the renewal pipeline 90 days before expiry (`
 
 ![Operations > Renewals > Renewal Queue](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-renewal-queue.png)
 
-The queue filters by **Policy/Insured Name**, **Status**, **Risk Level**, **Sales person** and **Expiry Date Range**; the cards count **Total Policies**, **Due Soon (30 days)**, **At Risk** and **In Grace Period**. The renewal statuses include Pending, First Notice Sent, Second Notice Sent, Final Notice Sent, Quote Sent, Approved, Renewed and Lapsed. **Attempts** counts the notices sent out of three.
+The queue searches by policy, renewal, insured or product and filters by **Stage**, **Risk level**, **Account executive** and **Expiry between**; the figures count the open renewals, those expiring within 30 days, those of high risk and those in the grace period (each one filters the list), and the premium due for renewal. The stages include Pending, First Notice Sent, Second Notice Sent, Final Notice Sent, Quote Sent, Pending Approval, Approved; a renewal past its expiry shows In Grace Period. Row actions: the eye opens the renewal on the right (policy, premium, claims, contact, notices); the quote icon prepares the renewal quote; **More actions** sends the next notice, records a reminder (channel, note), completes an approved renewal and opens the policy. **Refresh pipeline** adds the policies now due.
 
-The risk score on **At-Risk Policies** adds weights for claims in the term (25), unpaid premium (20), a premium increase above 10% (20), a first renewal (15), expiry within 15 days (10) and no contact within 30 days of expiry (10) (`renewals.risk_weights`, `renewals.risk_thresholds`). The levels start at 30 (Medium), 55 (High) and 75 (Critical).
+![Operations > Renewals > At-Risk Policies](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-renewal-at-risk.png)
+
+**At-Risk Policies** is the risk register of the open renewals of Medium risk or above, highest score first. Each row shows the policy and insured, the risk level and score, the main drivers in plain words (for example "2 claims in the current term", "First renewal with the broker", "Premium up 33.3% on the renewal quote"), the expiry, the premium, the account executive and the next action (the next open My Work task on the renewal, else the next step recorded on its timeline).
+
+The score adds the weight of each factor found on the renewal (`renewals.risk_weights`, thresholds in `renewals.risk_thresholds`), at most 100:
+
+| Factor | Found when | Weight |
+|---|---|---|
+| Claims in the current term | The expiring policy has a claim | 25 |
+| Unpaid premium | A bill of the expiring policy still has a balance | 20 |
+| Premium increase | The renewal quote is more than 10% above the expiring premium | 20 |
+| First renewal | No earlier term of the policy was renewed with the broker | 15 |
+| No contact before expiry | No notice sent and no contact recorded within 30 days of expiry | 10 |
+| Time to expiry | Expiry within 15 days, or the policy is in or past the grace period | 10 |
+
+The levels start at 30 (Medium), 55 (High) and 75 (Critical) (`renewals.risk_bands`).
+
+Select the eye (or the policy number) to open the renewal on the right:
+
+- **Score breakdown**: every factor with what was found, its weight and the points it adds, and the total.
+- **Recommended actions**: the actions configured for the factors found (`renewals.risk_actions`, for example Call the client, Prepare an alternative quote, Review the claims record with the insurer). **Create task** opens a My Work task on the renewal with the action as its title; choose the due date, priority and who does it (yourself or someone in your team). **Escalate** notifies the unit head (the manager of the renewal owner; the renewal approvers when the owner reports to no one) and records the escalation on the renewal timeline.
+- **Communication history**: the notices sent and every contact, note and escalation recorded on the renewal, with date, channel and user.
 
 ### Negotiations
 
 ![Operations > Renewals > Negotiations](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-renewal-negotiations.png)
 
-Select a policy under **Active Negotiations** to see its **Timeline**, **Details** and **Communications**. Then:
+The list shows every renewal being negotiated (a notice sent, a quote prepared or a contact recorded) with the policy and client, stage, expiry, current and proposed premium (with the change), last activity and account executive. The figures count the renewals in negotiation, quote sent, pending approval, approved and expiring within 15 days. Select a row to open it on the right: the renewal terms and the **Timeline** (date, event, channel, details, user). The actions shown depend on the stage:
 
-- **Add note**: record a call, meeting or message. Choose **Update Type**, **Communication Method** (for example Phone), enter the **Description**, **Outcome**, **Next Action** and **Follow-up Date**, and select **Save Update**.
-- **Request approval**: send the renewal terms to the Processing Team for approval.
-- **Send Communication**: write to the client. SMS, phone and letter are recorded only; e-mails are queued in the outbox.
-
-![Add Negotiation Update](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-renewal-note.png)
+- **Add update**: record a call, meeting, counter offer, competitor quote or revised offer: type, channel, description, outcome, next action and follow-up date (the follow-up date creates a My Work task).
+- **Log communication**: record a message already exchanged with the client (channel, subject, message).
+- **Submit for approval** (stage Quote Sent): the requested premium or discount, urgency, special terms and justification go to the Processing Team.
+- **Approve** and **Reject** (stage Pending Approval, users holding approve:renewals): decide on terms submitted by another user.
 
 ### Renewal Batch, Lapse Management and the analytics
 
 **Renewal Batch** groups policies expiring in the next 30 days (`renewals.batch_window_days`). Select **Create Batch**, choose the policies and send the notices or renewal quotes; the Renewal notice queue job works the batch in the background and **Refresh** shows the progress.
 
-**Lapse Management** lists lapsed policies and policies in the grace period with days lapsed, premium lost, reason and win-back status. **Create Campaign** sets up a win-back campaign: **Campaign Name**, **Target Segment**, **Start Date**, **End Date**, **Discount (%)**, **Budget** and the **Campaign Benefits** offered.
+**Lapse Management** lists lapsed policies and policies in the grace period with the days lapsed (or left in the grace period), premium, lapse reason (the full text shows on hover) and the number of win-back offers made. The panel on the right shows the policy and its **Win-back history** as a table: date, channel, offer, client response and who recorded it. Actions follow the state: **Mark as lapsed** (grace period, with a lapse reason code of Master > Insurance Management > Reason Codes and the details), **Record win-back offer** (channel, discount, payment terms, validity, benefits, campaign and the client's response) and **Reinstate** (lapsed, within `renewals.reinstatement_days`). The **Win-back campaigns** tab lists the campaigns with period, target, discount, clients contacted and converted, conversion and premium recovered; **New campaign** sets one up.
 
-**Retention Analytics** and **Performance** show the renewal rate, premium retention and cycle time for the period, product line and sales person chosen, against the targets (renewal rate 85%, premium retention 90%, cycle time 15 days), with recommended actions. **Export Report** downloads the figures.
+**Performance** shows the renewal rate, premium retention and average cycle time of the renewals due in the period chosen against the targets (`renewals.target_renewal_rate` 85%, `renewals.target_premium_retention` 90%, `renewals.target_cycle_days` 15 days) in the **KPI scorecard** (KPI, target, achieved, variance, Met or Below target), and per account executive, per line of business and by month. **Retention Analytics** shows the same figures over a longer period with the **Open renewals profile**: how many open renewals are of high risk, have claims, have premium unpaid, have had no contact yet or are in the grace period, with a link to the screen that works them. **Export** downloads the table of the tab shown.
 
 ![Operations > Renewals > Retention Analytics](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-renewal-analytics.png)
 
@@ -1757,7 +1787,7 @@ The dashboard shows **Total Open Claims**, **Claims Overdue** (past the handling
 
 ![Operations > Claims](/home/user/BDOI-OOTB/docs/package/source/manual-images/c-claims-list.png)
 
-Choose Operations > Claims. Each row shows **Claim Number**, **Client Name**, **Policy Number**, **Reported**, **Product** and **Status**; search by claim number, policy number or client and filter by status. The icons under **Actions** open the claim details, the next step for the claim's status and the claim audit trail.
+Choose Operations > Claims. The figures count the open claims, the settlements to approve, the claims approved and to be paid and the claims settled; select one to show only those. Each row shows the claim and insured, the policy and product, the date and cause of loss, the reported date, the estimate and the status; search by claim number, policy number or client and filter by status. The eye opens the claim; **More actions** continues the claim at the step it is at, opens the client and opens the claim history.
 
 | Status | Meaning |
 |---|---|
@@ -1769,24 +1799,27 @@ Choose Operations > Claims. Each row shows **Claim Number**, **Client Name**, **
 | Rejected | Refused, with the reason. |
 | Closed | File closed. |
 
-Every claim screen shows the claim journey at the top: **Notification**, **Insurer advice**, **Review**, **Adjuster**, **Assessment**, **Settlement**, **Approval**, **Payment**.
+Every claim screen has the same frame: the claim number as the page title with the insured, the policy, the line of business and the status under it, **Close** to leave the claim, the claim journey (**Notification**, **Insurer advice**, **Review**, **Adjuster**, **Assessment**, **Settlement**, **Approval**, **Payment**; the steps passed are ticked), the key facts of the claim (policy, insured, insurer and its claim number, date and cause of loss, estimate, settlement) and the step in a card with its sections. Forms show three fields a row on a wide screen.
+
+The sections follow the line of business of the policy (`claims.lob_fields`): the driver at the time of loss and the vehicle fields of the third party (plate number, vehicle unit, repair shop) appear for motor claims only. The causes of loss offered are those of the line (`claims.loss_causes`): for example Own Damage, Theft or Third Party Liability for motor, Death, Disability or Bodily Injury / Medical for Personal Accident, Death - Natural Causes / Illness for Credit Life.
 
 ## Register a claim
 
 1. Choose Operations > Policy, find the policy and select **More actions**, then **Claim**. You can also select **Claim** on the policy details page. The action is greyed out while the premium payment is Pending or Reviewing.
-2. Check **Insurance Company Name**, **Policy Number**, **Policy Holder Name** and the address, which fill in from the policy.
+2. Under **Policy and insured**, check **Insurance Company Name**, **Policy Number** and **Policy Holder Name**, and the **Insured's address**, which fill in from the policy.
 3. Under **Incident Details**, enter the fields below.
-4. Enter the driver (motor) and **Third Party Details (If Applicable)**.
-5. Select **Next**, attach the documents and send the claim.
+4. Enter the **Driver at the time of loss** (motor) and the **Third party** (if applicable).
+5. Select **Next**. On **Advice to the insurer**, check the subject and message to the insurer, attach the documents and select **Register claim and send**.
+6. On **Review**, check what was reported (**Edit notification** goes back to correct it) and, once the insurer has acknowledged the claim, select **Proceed to adjuster report**: the claim moves to Processing.
 
 ![Claim Request](/home/user/BDOI-OOTB/docs/package/source/manual-images/c-claim-request.png)
 
 | Field | Required | Rules |
 |---|---|---|
-| **Date of Incident** | Yes | Not in the future; inside the policy period (`claims.validate_loss_date`). |
-| **Time of Incident** | No | |
-| **Address of Incident / Loss Location**, **City**, **Province** | Address yes | Where the loss happened. |
-| **Type of Incident / Cause of Loss** | Yes | The causes of the line (`claims.loss_causes`), for example Collision, Theft / carnapping, Flood / typhoon for motor. |
+| **Date of loss** | Yes | Not in the future; inside the policy period (`claims.validate_loss_date`). |
+| **Time of loss** | No | |
+| **Place of loss**, **City**, **Province** | Place yes | Where the loss happened. |
+| **Cause of loss** | Yes | The causes of the line (`claims.loss_causes`). |
 | **Estimated Claim Amount** | No | First estimate, in pesos. |
 | **Insurance Company Claim Number** | No | The insurer's reference, when known. |
 | **Driver's name** (motor) | Yes | **Same as Policy Holder** copies the policy holder. The driver and vehicle sections apply to motor (`claims.lob_fields`). |
@@ -1811,7 +1844,7 @@ The date of loss cannot be in the future, and the reported date cannot be in the
 
 ## Assessment and settlement (maker)
 
-On **Assessment**, check the **Claim summary** (claim and policy numbers, insurer and its claim number, date of loss and reported, cause, adjuster, estimated amount) and choose **Proceed to settlement**, or **Reject claim** with the **Reason for rejection**.
+On **Assessment**, check the key facts of the claim and the **Assessment basis** (date reported, adjuster and adjuster status) and choose **Proceed to settlement**, or **Reject claim** with the **Reason for rejection**.
 
 ![Settlement](/home/user/BDOI-OOTB/docs/package/source/manual-images/c-claim-settlement.png)
 
@@ -1836,7 +1869,11 @@ When the settlement is paid through the broker, the insurer pays the broker and 
 
 ![Claim Details](/home/user/BDOI-OOTB/docs/package/source/manual-images/c-claim-detail.png)
 
-**Claim Details** shows **Claim Information** (numbers, line, type, priority, status, estimate), **Incident Information**, **Driver Information**, **Policy Information** (with the client code, prospect and quotation numbers), **Third Party Information** and **System Information** (created and updated by and when, the claim due date). The claim settlement page lists the documents the system produces on the company letterhead: **Acknowledgment letter**, **Claims Discharge Voucher**, **Claims Data sheet** and **FIR**; select **View** to open each one. The claim audit trail lists every status change with user and time.
+The claim page (eye on the claims list) shows the claim in sections: **Loss** (date, time, cause, place, reported date, priority, estimate, claims handler), **Policy and insured** (policy, product, insured, client code, period of cover, address), **Driver at the time of loss** (motor), **Third party** (or **Third party or witness**), **Adjuster report**, **Settlement details** and, for a co-insured policy, each insurer's share. **Continue** opens the step the claim is at; **History** opens the claim history.
+
+**Settlement and payment** (the claim once approved or settled) shows the settlement recorded and approved, the documents the system produces on the company letterhead (**Acknowledgment letter**, **Claims Discharge Voucher**, **Claims Data sheet** and **FIR**; the download icon opens each one) and, for a settlement paid through the broker, the settlement cash.
+
+The claim history lists every event of the claim with user, time, source and the fields changed (see Audit Trail).
 
 ![Claim audit trail](/home/user/BDOI-OOTB/docs/package/source/manual-images/c-claim-audit.png)
 

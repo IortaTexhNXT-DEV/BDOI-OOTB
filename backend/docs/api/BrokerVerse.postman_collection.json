@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1207 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1209 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -4970,12 +4970,12 @@
       "name": "Audit Trail",
       "item": [
         {
-          "name": "History of one record as business events, newest first (sort=asc for oldest first): who (display name and roles), when (date and time in general.timezone, general.date_format), from where (screen / API / system job), the event and its changed fields as label, old value, new value (formatted; secrets never shown; ID numbers masked without view:pii). :id is the id or the record number",
+          "name": "History of one record as business events, newest first (sort=asc for oldest first): who (display name and roles), when (date and time in general.timezone, general.date_format), from where (screen / API / system job), the event and its changed fields as label, old value, new value (formatted; secrets never shown; ID numbers masked without view:pii). :id is the id or the record number. export=csv | excel downloads the history, one row per changed field",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/audit/records/:entity/:id?sort=desc",
+              "raw": "{{baseUrl}}/audit/records/:entity/:id?sort=desc&export=excel",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4989,6 +4989,10 @@
                 {
                   "key": "sort",
                   "value": "desc"
+                },
+                {
+                  "key": "export",
+                  "value": "excel"
                 }
               ],
               "variable": [
@@ -5004,7 +5008,7 @@
                 }
               ]
             },
-            "description": "History of one record as business events, newest first (sort=asc for oldest first): who (display name and roles), when (date and time in general.timezone, general.date_format), from where (screen / API / system job), the event and its changed fields as label, old value, new value (formatted; secrets never shown; ID numbers masked without view:pii). :id is the id or the record number\n\nFront-end touchpoint: Detail screens > History (policy, quotation, claim, client, endorsement, receipt, master records)\n\nAccess: Any authenticated user"
+            "description": "History of one record as business events, newest first (sort=asc for oldest first): who (display name and roles), when (date and time in general.timezone, general.date_format), from where (screen / API / system job), the event and its changed fields as label, old value, new value (formatted; secrets never shown; ID numbers masked without view:pii). :id is the id or the record number. export=csv | excel downloads the history, one row per changed field\n\nFront-end touchpoint: Detail screens > History (policy, quotation, claim, client, endorsement, receipt, master records)\n\nAccess: Any authenticated user"
           },
           "response": [
             {
@@ -5013,7 +5017,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/audit/records/:entity/:id?sort=desc",
+                  "raw": "{{baseUrl}}/audit/records/:entity/:id?sort=desc&export=excel",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -5027,6 +5031,10 @@
                     {
                       "key": "sort",
                       "value": "desc"
+                    },
+                    {
+                      "key": "export",
+                      "value": "excel"
                     }
                   ],
                   "variable": [
@@ -5042,7 +5050,7 @@
                     }
                   ]
                 },
-                "description": "History of one record as business events, newest first (sort=asc for oldest first): who (display name and roles), when (date and time in general.timezone, general.date_format), from where (screen / API / system job), the event and its changed fields as label, old value, new value (formatted; secrets never shown; ID numbers masked without view:pii). :id is the id or the record number\n\nFront-end touchpoint: Detail screens > History (policy, quotation, claim, client, endorsement, receipt, master records)\n\nAccess: Any authenticated user"
+                "description": "History of one record as business events, newest first (sort=asc for oldest first): who (display name and roles), when (date and time in general.timezone, general.date_format), from where (screen / API / system job), the event and its changed fields as label, old value, new value (formatted; secrets never shown; ID numbers masked without view:pii). :id is the id or the record number. export=csv | excel downloads the history, one row per changed field\n\nFront-end touchpoint: Detail screens > History (policy, quotation, claim, client, endorsement, receipt, master records)\n\nAccess: Any authenticated user"
               },
               "status": "OK",
               "code": 200,
@@ -19946,6 +19954,71 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Figures of the client view: active policies and their premium, open claims, open renewals and the next expiry, unpaid balance and overdue bills, and the number of policies, quotations, claims, renewals, endorsements, receipts and KYC documents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clients/:id/summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients",
+                ":id",
+                "summary"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Figures of the client view: active policies and their premium, open claims, open renewals and the next expiry, unpaid balance and overdue bills, and the number of policies, quotations, claims, renewals, endorsements, receipts and KYC documents\n\nFront-end touchpoint: Operations > Clients > Client view\n\nAccess: read:clients"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/clients/:id/summary",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "clients",
+                    ":id",
+                    "summary"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Figures of the client view: active policies and their premium, open claims, open renewals and the next expiry, unpaid balance and overdue bills, and the number of policies, quotations, claims, renewals, endorsements, receipts and KYC documents\n\nFront-end touchpoint: Operations > Clients > Client view\n\nAccess: read:clients"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"clientId\": \"cl_1\",\n    \"clientCode\": \"CL-2026-00001\",\n    \"activePolicies\": 2,\n    \"activePremium\": 56730,\n    \"openClaims\": 1,\n    \"openRenewals\": 1,\n    \"nextExpiry\": \"2026-10-28\",\n    \"outstanding\": 26350,\n    \"overdueBills\": 0,\n    \"counts\": {\n      \"policies\": 2,\n      \"quotations\": 3,\n      \"claims\": 2,\n      \"renewals\": 1,\n      \"endorsements\": 0,\n      \"receipts\": 4,\n      \"documents\": 2\n    }\n  }\n}"
             }
           ]
         },
@@ -83001,6 +83074,99 @@
           ]
         },
         {
+          "name": "Escalate an at-risk renewal to the unit head (manager of the renewal owner, else renewals.approver_roles): recorded on the timeline and notified",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/renewals/:id/escalate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "renewals",
+                ":id",
+                "escalate"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Escalate an at-risk renewal to the unit head (manager of the renewal owner, else renewals.approver_roles): recorded on the timeline and notified\n\nFront-end touchpoint: Operations > Renewals > At-Risk Policies > Escalate\n\nAccess: write:renewals",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Client is comparing quotes from two other brokers\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/renewals/:id/escalate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "renewals",
+                    ":id",
+                    "escalate"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Escalate an at-risk renewal to the unit head (manager of the renewal owner, else renewals.approver_roles): recorded on the timeline and notified\n\nFront-end touchpoint: Operations > Renewals > At-Risk Policies > Escalate\n\nAccess: write:renewals",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"note\": \"Client is comparing quotes from two other brokers\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"activity\": {\n      \"id\": 12,\n      \"type\": \"Escalation\",\n      \"description\": \"Client is comparing quotes from two other brokers\"\n    },\n    \"escalatedTo\": [\n      {\n        \"id\": \"usr_1\",\n        \"name\": \"Carlo Mendoza\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Lapse a renewal: reason (text), or reasonCode of the Reason Codes master (lapse) with the reason as its note",
           "request": {
             "method": "POST",
@@ -83738,7 +83904,7 @@
           ]
         },
         {
-          "name": "At-risk renewals: risk score, factors, recommended actions",
+          "name": "At-risk register: open renewals of Medium risk or above, highest score first, with the score breakdown (factor, finding, weight, points), recommended actions (renewals.risk_actions), next open task or step and last contact",
           "request": {
             "method": "GET",
             "header": [],
@@ -83752,7 +83918,7 @@
                 "at-risk"
               ]
             },
-            "description": "At-risk renewals: risk score, factors, recommended actions\n\nFront-end touchpoint: Operations > Renewals > At-Risk Policies\n\nAccess: read:renewals"
+            "description": "At-risk register: open renewals of Medium risk or above, highest score first, with the score breakdown (factor, finding, weight, points), recommended actions (renewals.risk_actions), next open task or step and last contact\n\nFront-end touchpoint: Operations > Renewals > At-Risk Policies\n\nAccess: read:renewals"
           },
           "response": [
             {
@@ -83770,7 +83936,7 @@
                     "at-risk"
                   ]
                 },
-                "description": "At-risk renewals: risk score, factors, recommended actions\n\nFront-end touchpoint: Operations > Renewals > At-Risk Policies\n\nAccess: read:renewals"
+                "description": "At-risk register: open renewals of Medium risk or above, highest score first, with the score breakdown (factor, finding, weight, points), recommended actions (renewals.risk_actions), next open task or step and last contact\n\nFront-end touchpoint: Operations > Renewals > At-Risk Policies\n\nAccess: read:renewals"
               },
               "status": "OK",
               "code": 200,
@@ -83782,7 +83948,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"policyNumber\": \"POL-2025-00012\",\n      \"riskScore\": 65,\n      \"riskCategory\": \"High\",\n      \"riskFactors\": [\n        {\n          \"factor\": \"Claims History\",\n          \"score\": 25,\n          \"details\": \"1 claim(s) on the expiring term\"\n        }\n      ],\n      \"recommendedActions\": [\n        \"Review claims experience with the insurer\"\n      ],\n      \"actionPlan\": {\n        \"priority\": \"Urgent\",\n        \"assignedTo\": \"Ana Reyes\",\n        \"deadline\": \"2026-10-30\"\n      }\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"rnw_1\",\n      \"renewalNumber\": \"RN-2026-00001\",\n      \"policyNumber\": \"POL-2025-00012\",\n      \"insuredName\": \"Maria Santos\",\n      \"riskScore\": 60,\n      \"riskCategory\": \"High\",\n      \"riskFactors\": [\n        {\n          \"code\": \"claims\",\n          \"factor\": \"Claims History\",\n          \"score\": 25,\n          \"details\": \"2 claims in the current term\"\n        }\n      ],\n      \"scoreBreakdown\": [\n        {\n          \"code\": \"claims\",\n          \"factor\": \"Claims History\",\n          \"value\": \"2 claims in the current term\",\n          \"weight\": 25,\n          \"points\": 25\n        },\n        {\n          \"code\": \"unpaid\",\n          \"factor\": \"Unpaid Premium\",\n          \"value\": null,\n          \"weight\": 20,\n          \"points\": 0\n        }\n      ],\n      \"recommendedActions\": [\n        \"Review the claims record with the insurer\",\n        \"Prepare an alternative quote\"\n      ],\n      \"nextAction\": {\n        \"kind\": \"task\",\n        \"taskId\": \"tsk_1\",\n        \"title\": \"Call the client\",\n        \"dueDate\": \"2026-10-12\",\n        \"assignee\": \"Ana Reyes\"\n      },\n      \"lastContactDate\": null,\n      \"assignedAgent\": \"Ana Reyes\",\n      \"assignedAgentId\": \"usr_1\"\n    }\n  ]\n}"
             }
           ]
         },
