@@ -429,6 +429,49 @@ export async function toEvents(rows, { viewer = null } = {}) {
   });
 }
 
+/** Keys of a snapshot that carry the remarks given with an action, in the order they are read. */
+const REMARK_KEYS = ['remarks', 'comments', 'comment', 'reason', 'note', 'notes', 'changeNote'];
+const isStatusKey = (key) => /^status(code)?$/.test(norm(leaf(key)));
+
+/** The status of a snapshot as its label (statusCode before status, so a labelled snapshot is read by its code). */
+function snapshotStatus(data, statusLabels) {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return null;
+  const s = data.statusCode ?? data.status;
+  return s === null || s === undefined || s === '' ? null : statusText(s, statusLabels);
+}
+
+/** The remarks given with an action: the first remark key of the after snapshot, else the note of the event. */
+function remarksOf(row, event) {
+  const data = row.after_data && typeof row.after_data === 'object' ? row.after_data : {};
+  for (const k of REMARK_KEYS) if (typeof data[k] === 'string' && data[k].trim()) return data[k].trim();
+  return event.note || null;
+}
+
+/**
+ * Audit rows as the entries of a record's activity log (components/ActivityLog of the front end): the action code and
+ * its headline, the user with display name and roles, the status move as labels, the remarks given with the action
+ * and the other changed fields as { field, label, before, after }. `statusLabels` labels the status codes of the
+ * record type (e.g. remittance.status_labels).
+ */
+export async function activityEntries(rows, { viewer = null, statusLabels = {} } = {}) {
+  const events = await toEvents(rows, { viewer });
+  return events.map((e, i) => {
+    const r = rows[i];
+    const from = snapshotStatus(r.before_data, statusLabels);
+    const to = snapshotStatus(r.after_data, statusLabels);
+    const moved = to !== null && from !== to;
+    const roles = e.user.roles || [];
+    return {
+      id: e.id, at: e.at, day: e.day, date: e.date, time: e.time, atText: e.atText, actionCode: r.action || null, actionLabel: e.title,
+      user: { username: e.user.username, displayName: e.user.displayName, roles, role: roles.join(', ') || null },
+      fromStatus: moved ? from : null, toStatus: moved ? to : null, remarks: remarksOf(r, e),
+      changes: e.changes.filter((c) => !isStatusKey(c.key) && !NOTE_KEYS.has(norm(c.key)) && norm(c.key) !== 'comments')
+        .map((c) => ({ field: c.key, label: c.label, before: c.from, after: c.to })),
+      source: e.source,
+    };
+  });
+}
+
 /**
  * Claim trail rows (claim_field_changes, one per field) grouped into one row per action: the rows of one trail()
  * call share the transaction time, the action and the user.
