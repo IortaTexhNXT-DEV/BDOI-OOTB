@@ -11,7 +11,7 @@ export const BULK_UPLOAD_TEMPLATES = {
     columns: [
       "First Name", "Last Name", "Preferred Name", "Company Name", "Date of Birth", "Gender", "Email", "Contact Number",
       "House / Unit No.", "Street", "Barangay", "City / Municipality", "Province", "Region", "Country", "ZIP Code", "Lead Category", "TIN", "LOB",
-      "Source",
+      "Product", "Source",
     ],
   },
   quotations: {

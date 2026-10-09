@@ -87,6 +87,11 @@ describe("the product picker", () => {
     expect(onChange).toHaveBeenLastCalledWith({ lob: "LIFE", productId: 7, product: expect.objectContaining({ code: "CL-COMP" }) });
   });
 
+  it("says when the screen offers none of the active products", async () => {
+    render(<Harness onChange={jest.fn()} keep={(p) => p.businessType === "corporate-only"} idPrefix="test" />);
+    expect(await screen.findByText("None of the active products is offered here.")).toBeInTheDocument();
+  });
+
   it("offers a single line at once, and loads the products of a business type", async () => {
     placementService.productLines.mockResolvedValue([LINES[0]]);
     const onChange = jest.fn();

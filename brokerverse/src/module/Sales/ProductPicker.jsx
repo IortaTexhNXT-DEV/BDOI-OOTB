@@ -21,10 +21,13 @@ const lineSelection = (line) => {
  * already loads them.
  */
 const ProductPicker = ({ value = null, onChange, lines: given, businessType, keep, idPrefix = "product-picker", required = false, disabled = false,
-  stacked = false, autoFocus = false }) => {
+  stacked = false, autoFocus = false, emptyText }) => {
   const { t } = useTranslation();
   const loaded = useProductLines({ businessType, enabled: given === undefined });
-  const lines = narrowLines(given === undefined ? loaded : given, keep);
+  const source = given === undefined ? loaded : given;
+  const lines = narrowLines(source, keep);
+  // nothing active at all, or nothing this screen offers
+  const empty = emptyText || (source?.length ? t("productPicker.noneOffered") : t("productPicker.none"));
   const [lineCode, setLineCode] = useState(null);
   const valueLine = lineOf(lines, value || {})?.code || null;
 
@@ -68,7 +71,7 @@ const ProductPicker = ({ value = null, onChange, lines: given, businessType, kee
           options={(lines || []).map((l) => ({ label: l.name, value: l.code }))}
           onChange={(e) => chooseLine(e.value)}
           placeholder={lines ? t("productPicker.chooseLine") : t("productPicker.loading")}
-          emptyMessage={t("productPicker.none")}
+          emptyMessage={empty}
           disabled={disabled || !lines}
           showClear={!required && Boolean(lineCode)}
           filter={(lines || []).length > 8}
@@ -95,7 +98,7 @@ const ProductPicker = ({ value = null, onChange, lines: given, businessType, kee
           className="w-full"
         />
       </div>
-      {lines && !lines.length && <small className="product-picker__empty">{t("productPicker.none")}</small>}
+      {lines && !lines.length && <small className="product-picker__empty">{empty}</small>}
     </div>
   );
 };
@@ -113,6 +116,8 @@ ProductPicker.propTypes = {
   /** line above product instead of side by side */
   stacked: PropTypes.bool,
   autoFocus: PropTypes.bool,
+  /** what to say when no line can be offered */
+  emptyText: PropTypes.string,
 };
 
 /**

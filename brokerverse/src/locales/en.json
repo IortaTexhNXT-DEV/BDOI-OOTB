@@ -8578,6 +8578,8 @@
     "loading": "Loading the lines of business...",
     "none": "No line of business has an active product. Products are set up on Master > Product.",
     "noProducts": "The line has no active product.",
+    "noneOffered": "None of the active products is offered here.",
+    "noneNonPackage": "No non-package product is active. Tick Include package products to choose a package product.",
     "continue": "Continue",
     "cancel": "Cancel",
     "skip": "Skip - tag product later",

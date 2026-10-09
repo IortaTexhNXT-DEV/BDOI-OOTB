@@ -129,7 +129,8 @@ const BrokerSlipCreate = () => {
             <CustomerPicker value={customer} onChange={setCustomer} allowNew newLabel={t("salesMarketing.newProspect")} />
           </div>
           <div className="col-12 md:col-6">
-            <ProductPicker value={{ productId }} onChange={(v) => setProductId(v.productId)} keep={offered} idPrefix="rfq" required />
+            <ProductPicker value={{ productId }} onChange={(v) => setProductId(v.productId)} keep={offered} idPrefix="rfq" required
+              emptyText={showPackage ? undefined : t("productPicker.noneNonPackage")} />
             <div className="flex align-items-center gap-2 mt-1">
               <Checkbox inputId="rfq-package" checked={showPackage} onChange={(e) => setShowPackage(e.checked)} />
               <label htmlFor="rfq-package" className="m-0">{t("salesMarketing.includePackage")}</label>
