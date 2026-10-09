@@ -15,6 +15,8 @@ import SvgDot from "../../../assets/icons/SvgDot";
 import SvgAdd from "../../../assets/icons/SvgAdd";
 import accountingService from "../../../services/accountingService";
 import ImportDialog from "../../../components/ImportDialog";
+import FieldError from "../../../components/FieldError";
+import useFieldErrors, { blank } from "../../../hooks/useFieldErrors";
 import "./index.scss";
 
 const COA_UPLOAD = [{ label: "Chart of accounts", templatePath: "/accounting/accounts/template", uploadPath: "/accounting/accounts/upload" }];
@@ -71,20 +73,18 @@ const ChartOfAccounts = ({ level = "main" }) => {
   const parentOptions = (type, code) => allAccounts.filter((a) => !a.parentCode && a.accountType === type && a.code !== code && a.status === "active")
     .map((a) => ({ label: `${a.code} – ${a.name}`, value: a.code }));
 
-  const openNew = () => setEditing({ isNew: true, values: { ...EMPTY, accountType: filters.type || EMPTY.accountType } });
-  const openEdit = (row) => setEditing({ isNew: false, values: { ...EMPTY, ...row, category: row.category || "", description: row.description || "" } });
+  const { errors, check, fromApi, clear } = useFieldErrors();
+  const openNew = () => { clear(); setEditing({ isNew: true, values: { ...EMPTY, accountType: filters.type || EMPTY.accountType } }); };
+  const openEdit = (row) => { clear(); setEditing({ isNew: false, values: { ...EMPTY, ...row, category: row.category || "", description: row.description || "" } }); };
   const setValue = (patch) => setEditing((e) => ({ ...e, values: { ...e.values, ...patch } }));
 
   const save = async () => {
     const v = editing.values;
-    if (!String(v.code).trim() || !String(v.name).trim()) {
-      toast.current?.show({ severity: "warn", summary: "Required", detail: "Enter the account code and name", life: 3000 });
-      return;
-    }
-    if (level === "sub" && !v.parentCode) {
-      toast.current?.show({ severity: "warn", summary: "Required", detail: "A sub account needs its main account", life: 3000 });
-      return;
-    }
+    if (!check({
+      code: blank(v.code) ? "Enter the account code" : null,
+      name: blank(v.name) ? "Enter the account name" : null,
+      parentCode: level === "sub" && !v.parentCode ? "A sub account needs its main account" : null,
+    })) return;
     const payload = { name: v.name.trim(), accountType: v.accountType, fsGroup: v.fsGroup || undefined, parentCode: v.parentCode || undefined, category: v.category || undefined,
       normalBalance: v.normalBalance || undefined, description: v.description || undefined, isOpenItem: !!v.isOpenItem, allowManual: v.allowManual !== false, status: v.status };
     setSaving(true);
@@ -94,6 +94,7 @@ const ChartOfAccounts = ({ level = "main" }) => {
       setEditing(null);
       load();
     } catch (e) {
+      fromApi(e);
       showError(toast, e);
     } finally {
       setSaving(false);
@@ -193,10 +194,12 @@ const ChartOfAccounts = ({ level = "main" }) => {
             <div className="col-12 md:col-4">
               <label>Account code *</label>
               <InputText value={v.code} disabled={!editing.isNew} onChange={(e) => setValue({ code: e.target.value })} className="w-full" />
+              <FieldError error={errors.code} />
             </div>
             <div className="col-12 md:col-8">
               <label>Account name *</label>
               <InputText value={v.name} onChange={(e) => setValue({ name: e.target.value })} className="w-full" />
+              <FieldError error={errors.name} />
             </div>
             <div className="col-12 md:col-4">
               <label>Account type *</label>
@@ -216,6 +219,7 @@ const ChartOfAccounts = ({ level = "main" }) => {
               <label>Main account{level === "sub" ? " *" : ""}</label>
               <Dropdown value={v.parentCode} options={parentOptions(v.accountType, v.code)} onChange={(e) => setValue({ parentCode: e.value })} filter
                 placeholder={level === "sub" ? "Select the main account" : "None (main account)"} showClear={level !== "sub"} disabled={!editing.isNew && !v.parentCode && level !== "sub"} className="w-full" />
+              <FieldError error={errors.parentCode} />
             </div>
             <div className="col-12 md:col-6">
               <label>Category</label>
