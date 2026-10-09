@@ -321,7 +321,7 @@ Maker-checker means that the user who enters a transaction cannot approve it. Br
 | Claim settlement | The user who submits it | Another user holding approve:claims (Claims; TIS Operations Unit Head) | `claims.settlement_maker_checker` |
 | Journal voucher, correction and reversal | Accounting | Another Accounting user or the Accounting Manager | `journal.require_approval`, `finance.maker_checker_enabled` |
 | Payment voucher, cheque, commission payout, petty cash | Accounting | Another Accounting user | `finance.maker_checker_enabled` |
-| Remittance, settlement and adjustment | Accounting | Another user within the Remittance approval or Remittance settlement limit (Accounting up to PHP 1,000,000.00, Accounting Manager without limit) | Authority Matrix |
+| Remittance, settlement and adjustment | Accounting | Another user holding approve:remittance within the Remittance approval or Remittance settlement limit (Accounting up to PHP 1,000,000.00, Accounting Manager without limit; TIS Finance up to PHP 1,000,000.00, TIS General Manager without limit). For TISPH a user without a limit cannot approve or reject, and an absent approver is covered by a dated delegation, not by handing over single approvals | Authority Matrix, `remittance.require_authority_limit`, `remittance.item_delegation_enabled` |
 | Commission debit note (direct bill) | Accounting | Another Accounting user | built in |
 | Incentive calculation batch | Accounting | Another Accounting user | built in |
 | Month-end and year-end close | Accounting | Accounting Manager | `accounting.period_close_requires_approval` |

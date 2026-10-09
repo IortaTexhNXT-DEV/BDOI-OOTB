@@ -1,7 +1,9 @@
 /**
  * Remittance decisions: the reasons of the remittance, exception, insurer reconciliation and insurer billing decisions
  * on the Reason Codes master (seed 89_remittance_reasons.sql), the reason check of the routes (requiredReason) and who
- * may read them; the steps of a remittance in its activity log (lib/auditLabels.js).
+ * may read them; the steps of a remittance in its activity log (lib/auditLabels.js); who decides a remittance approval
+ * (approve:remittance, migration 0400) and within which limit (remittance.require_authority_limit, the Authority Matrix,
+ * dated delegations), and the per-item delegation switch (remittance.item_delegation_enabled).
  */
 import fs from 'node:fs';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
@@ -123,5 +125,123 @@ describe('the steps of a remittance in its activity log', () => {
     expect(log).toHaveLength(STEPS.length + 2);
     expect(log.filter((e) => !e.actionLabel || /-/.test(e.actionLabel) || e.actionLabel === e.actionCode)).toEqual([]);
     expect(log.map((e) => e.actionLabel)).toEqual(expect.arrayContaining(['Remittance created', 'Policy line excluded from the remittance', 'Agency bill created']));
+  });
+});
+
+describe('approve:remittance and the approval limit', () => {
+  let santos;
+  let cruz;
+  let recon;
+  let unlimited;
+  const setting = (settings) => ctx.api('put', '/settings').send({ settings }).then((r) => expect(r.status).toBe(200));
+  /** A remittance of `net` PHP submitted by the administrator; returns its approval. */
+  const submitted = async (policyNo, net) => {
+    const c = await ctx.api('post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo, premium: net + 1000, commission: 1000, tax: 0 }] });
+    expect(c.status).toBe(201);
+    expect((await ctx.api('post', '/remittance/remittances/process').send({ ids: [c.body.data.id] })).status).toBe(200);
+    const a = (await ctx.api('get', '/remittance/approvals')).body.data.find((x) => x.entityId === c.body.data.id);
+    return { ...a, remittanceId: c.body.data.id };
+  };
+  const lastEntry = async (id) => (await q('SELECT history FROM remittance_approvals WHERE id = $1', [id]))[0].history.at(-1);
+
+  beforeAll(async () => {
+    santos = await persona('ra.santos', { roles: ['accounting'] });
+    await q("UPDATE users SET display_name = 'A. Santos' WHERE id = $1", [santos.id]);
+    cruz = await persona('ra.cruz', { permissions: ['read:profile', 'read:remittance', 'approve:remittance'] });
+    recon = await persona('ra.recon', { roles: ['tis-ccd-recon'] });
+    unlimited = await persona('ra.gm', { roles: ['tis-general-manager'] });
+  });
+
+  it('is granted to the System Administrator, Accounting (and so the Accounting Manager), TIS Finance and the TIS General Manager', async () => {
+    const roles = await q(`SELECT r.code FROM role_permissions rp JOIN roles r ON r.id = rp.role_id JOIN permissions p ON p.id = rp.permission_id
+      WHERE p.code = 'approve:remittance' AND r.code NOT LIKE 'ra-%' ORDER BY r.code`);
+    expect(roles.map((r) => r.code)).toEqual(['accounting', 'system-admin', 'tis-finance', 'tis-general-manager']);
+    const settings = Object.fromEntries((await q(`SELECT key, value FROM app_settings WHERE key IN ('remittance.require_authority_limit', 'remittance.item_delegation_enabled',
+      'access.authority_without_limit')`)).map((r) => [r.key, r.value]));
+    // the TISPH values of seed 90; the global rule for a user without a limit is left as it was (D10)
+    expect(settings).toEqual({ 'remittance.require_authority_limit': true, 'remittance.item_delegation_enabled': false, 'access.authority_without_limit': 'allow' });
+    expect(await q(`SELECT transaction_type, role_code, max_amount FROM authority_limits WHERE role_code LIKE 'tis-%' AND status = 'active' ORDER BY 1, 2`)).toEqual([
+      { transaction_type: 'remittance', role_code: 'tis-finance', max_amount: 1000000 }, { transaction_type: 'remittance', role_code: 'tis-general-manager', max_amount: null },
+      { transaction_type: 'remittance_settlement', role_code: 'tis-finance', max_amount: 1000000 }, { transaction_type: 'remittance_settlement', role_code: 'tis-general-manager', max_amount: null }]);
+  });
+
+  it('a preparer without approve:remittance is refused 403 on every decision route; the initiator is refused', async () => {
+    const a = await submitted('EXT-AUTH-1', 17000);
+    for (const path of [`/remittance/approvals/${a.id}/approve`, `/remittance/approvals/${a.id}/reject`, `/remittance/approvals/${a.id}/delegate`,
+      `/remittance/remittances/${a.remittanceId}/approve`, `/remittance/remittances/${a.remittanceId}/reject`]) {
+      expect((await recon('post', path).send({ comments: 'ok', reasonCode: 'RRJ-DUPLICATE' })).status, path).toBe(403);
+    }
+    expect((await recon('get', '/remittance/approvals')).status).toBe(200);
+    const self = await ctx.api('post', `/remittance/approvals/${a.id}/approve`).send({ comments: 'ok' });
+    expect(self.status).toBe(403);
+    expect(self.body.message).toMatch(/Maker-checker/);
+    expect((await q('SELECT status FROM remittance_approvals WHERE id = $1', [a.id]))[0].status).toBe('Pending');
+  });
+
+  it('a user with approve:remittance and no remittance limit cannot approve or reject: NO_AUTHORITY', async () => {
+    const a = await submitted('EXT-AUTH-2', 17000);
+    for (const [action, body] of [['approve', { comments: 'ok' }], ['reject', { reasonCode: 'RRJ-DUPLICATE' }]]) {
+      const r = await cruz('post', `/remittance/approvals/${a.id}/${action}`).send(body);
+      expect(r.status, action).toBe(403);
+      expect(r.body.errors[0].code).toBe('NO_AUTHORITY');
+      expect(r.body.message).toBe('You have no approval limit for Remittance approval. Ask an administrator to set one in the Authority Matrix.');
+    }
+    // with the remittance rule off, access.authority_without_limit (allow) applies again
+    await setting({ 'remittance.require_authority_limit': false });
+    try {
+      const ok = await cruz('post', `/remittance/approvals/${a.id}/approve`).send({ comments: 'Verified' });
+      expect(ok.status).toBe(200);
+      expect(await lastEntry(a.id)).toMatchObject({ action: 'Approved', by: cruz.id, remarks: 'Verified', limitAtDecision: null, limitSource: null });
+    } finally {
+      await setting({ 'remittance.require_authority_limit': true });
+    }
+  });
+
+  it('an amount above the approver\'s limit is refused; within it, the decision keeps the limit and its source', async () => {
+    const big = await submitted('EXT-AUTH-3', 1250000);
+    const above = await santos('post', `/remittance/approvals/${big.id}/approve`).send({ comments: 'ok' });
+    expect(above.status).toBe(403);
+    expect(above.body.message).toMatch(/PHP 1,250,000\.00 is above your approval authority of PHP 1,000,000\.00 \(role accounting\)/);
+    // a rejection is not bound by the amount, and takes a reason of the remittance_reject context
+    expect((await santos('post', `/remittance/approvals/${big.id}/reject`).send({ reasonCode: 'BRJ-DUPLICATE' })).status).toBe(400);
+    expect((await santos('post', `/remittance/approvals/${big.id}/reject`).send({ reasonCode: 'RRJ-OTHER' })).status).toBe(400);
+    const rej = await santos('post', `/remittance/remittances/${big.remittanceId}/reject`).send({ reasonCode: 'RRJ-OTHER', note: 'Rates of September' });
+    expect(rej.status).toBe(200);
+    expect(await lastEntry(big.id)).toMatchObject({ action: 'Rejected', by: santos.id, reasonCode: 'RRJ-OTHER', remarks: 'Other: Rates of September',
+      limitAtDecision: 1000000, limitSource: 'role accounting' });
+
+    const gm = await submitted('EXT-AUTH-4', 1250000);
+    expect((await unlimited('post', `/remittance/approvals/${gm.id}/approve`).send({ comments: 'Verified' })).status).toBe(200);
+    expect(await lastEntry(gm.id)).toMatchObject({ action: 'Approved', by: unlimited.id, limitAtDecision: null, limitSource: 'role tis-general-manager' });
+    const hist = (await ctx.api('get', '/remittance/approvals/history')).body.data.find((h) => h.referenceNo === gm.referenceNo && h.action === 'Approved');
+    expect(hist).toMatchObject({ limitAtDecision: null, limitSource: 'role tis-general-manager' });
+    const audit = await q("SELECT after_data FROM audit_log WHERE entity = 'remittance_approval' AND entity_id = $1 AND action = 'approve'", [String(gm.id)]);
+    expect(audit[0].after_data).toMatchObject({ limitSource: 'role tis-general-manager' });
+  });
+
+  it('a delegate covering A. Santos decides with her limit, and the decision says so', async () => {
+    const r = await ctx.api('post', '/access-control/delegations').send({ delegatorId: santos.id, delegateId: cruz.id, transactionTypes: ['remittance'],
+      dateFrom: '2026-01-01', dateTo: '2099-12-31', reason: 'Annual leave' });
+    expect(r.status).toBe(201);
+    try {
+      const a = await submitted('EXT-AUTH-5', 17000);
+      expect((await cruz('post', `/remittance/approvals/${a.id}/approve`).send({ comments: 'Verified' })).status).toBe(200);
+      expect(await lastEntry(a.id)).toMatchObject({ action: 'Approved', by: cruz.id, limitAtDecision: 1000000, limitSource: 'delegated by A. Santos (role accounting)' });
+    } finally {
+      await ctx.api('post', `/access-control/delegations/${r.body.data.id}/revoke`);
+    }
+  });
+
+  it('an approval is handed to another user one by one only while item delegation is on', async () => {
+    const a = await submitted('EXT-AUTH-6', 17000);
+    const off = await santos('post', `/remittance/approvals/${a.id}/delegate`).send({ delegateTo: 'ra.gm', comments: 'On leave' });
+    expect(off.status).toBe(409);
+    await setting({ 'remittance.item_delegation_enabled': true });
+    try {
+      expect((await santos('post', `/remittance/approvals/${a.id}/delegate`).send({ delegateTo: 'ra.gm', comments: 'On leave' })).status).toBe(200);
+      expect((await q('SELECT delegated_to FROM remittance_approvals WHERE id = $1', [a.id]))[0].delegated_to).toBe(unlimited.id);
+    } finally {
+      await setting({ 'remittance.item_delegation_enabled': false });
+    }
   });
 });
