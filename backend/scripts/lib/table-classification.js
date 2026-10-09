@@ -90,7 +90,7 @@ export const SYSTEM_RESET_ACTIONS = {
   login_history: 'remove',
   refresh_tokens: 'remove', // sign-in sessions: everyone signs in again
   password_resets: 'remove',
-  data_load_batches: 'remove', // Go-Live Data Load history: the loads of a smoke test go with the records they created
+  data_load_batches: 'remove', // go-live data load history: the loads of a smoke test go with the records they created
   data_load_rows: 'remove',
   data_load_comparisons: 'remove', // environment comparisons go with the load history (compare again after the reset)
   documents: 'partial', // uploaded and generated file records of transaction folders (TRANSACTION_FILE_FOLDERS)

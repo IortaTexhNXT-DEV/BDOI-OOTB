@@ -48,8 +48,7 @@ export const ADMIN_ROLE = "system-admin";
 export const ADMIN_ROLES = [ADMIN_ROLE];
 
 export const roleMenuPermissions = {
-  // The administrator sees every menu. Master > Go-Live Data Load (configuration and migration workbooks,
-  // read:data-load / write:data-load) is granted to no other role: it stays System Administrator only.
+  // The administrator sees every menu.
   [ADMIN_ROLE]: { all: true },
   // Sales & Marketing (Account Executive): prospects, leads, clients, quotation requests, renewals follow-up, own production
   sales: {
@@ -191,8 +190,7 @@ Object.assign(roleMenuPermissions, {
     ...roleMenuPermissions.accounting,
     master: [...roleMenuPermissions.accounting.master, "System Configuration > Audit Trail", "System Configuration > Schedules"],
   },
-  // IT AppSupport / Admin: administration and the reference masters; the business screens read only. Go-Live Data Load
-  // stays with the System Administrator.
+  // IT AppSupport / Admin: administration and the reference masters; the business screens read only.
   "tis-it-admin": {
     dashboard: ["Executive Dashboard"],
     "my work": true,

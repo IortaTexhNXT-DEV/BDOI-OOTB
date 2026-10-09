@@ -39,7 +39,7 @@ export const ROLES = [
 /** Role codes of earlier releases (renamed or merged by migration 0140_broker_roles.sql); a fresh seed never creates them. */
 export const RETIRED_ROLES = ['it-admin', 'ba', 'user-access-admin', 'underwriting', 'customer-services', 'finance', 'finance-manager', 'agent'];
 const MODULES = ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'claims', 'renewals', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'incentive', 'products', 'masters', 'users', 'roles', 'settings', 'reports', 'schedules', 'notifications', 'journal-vouchers', 'audit', 'period-end', 'bank-reconciliation',
-  // go-live data workbench (Master > Go-Live Data Load, migration 0243): System Administrator only
+  // go-live data workbench (API /data-load, migration 0243): System Administrator only
   'data-load'];
 // write:receipts (official receipts, cash posting, payment verification) is Accounting's (TISPH: Cash Control's), never
 // the front office's: segregation of duties.

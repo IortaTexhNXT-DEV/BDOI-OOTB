@@ -10,7 +10,7 @@
  * The database must be migrated and seeded (reference data is enough).
  * Default output: ../docs/package/05_Delivery/Upload_Templates.
  *
- * Also writes the two blank go-live workbooks of Master > Go-Live Data Load (GoLive_Configuration_Workbook.xlsx and
+ * Also writes the two blank go-live workbooks of the go-live data load API (GoLive_Configuration_Workbook.xlsx and
  * GoLive_Migration_Workbook.xlsx, src/modules/data-load), so they can be handed out without signing in.
  */
 import fs from 'node:fs';
@@ -134,7 +134,7 @@ export async function buildTemplates(outDir = DEFAULT_OUT) {
     const { fileName, buffer } = await kitTemplate(kit);
     fs.writeFileSync(path.join(outDir, fileName), buffer);
     const sheets = await kitSheets(kit);
-    out.push({ id: `kit:${kit}`, file: fileName, csv: null, title: KITS[kit].title, menu: 'Master > Go-Live Data Load', screen: 'Master > Go-Live Data Load',
+    out.push({ id: `kit:${kit}`, file: fileName, csv: null, title: KITS[kit].title, menu: 'API (go-live scripts)', screen: 'API (go-live scripts)',
       button: true, route: 'POST /api/data-load/batches (multipart field "file", field kit)', headers: sheets.map((x) => x.name), required: [] });
   }
   const keep = new Set(out.flatMap((t) => [t.file, t.csv].filter(Boolean)));

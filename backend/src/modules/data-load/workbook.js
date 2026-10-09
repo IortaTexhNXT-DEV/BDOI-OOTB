@@ -98,7 +98,7 @@ function instructions(kit, sheets, { prefill, cutover, environment, day }) {
   const line = (a, b = '') => rows.push([a, b]);
   head(KITS[kit].title);
   line('Content', prefill ? `Current data of this environment${environment ? ` (${environment})` : ''}, exported ${day || ''}. Load it into the next environment to promote the ${kit}.` : 'Blank template: fill in the object sheets.');
-  line('Upload on', 'Master > Go-Live Data Load (System Administrator). API: POST /api/data-load/batches (multipart field "file", field kit).');
+  line('Upload with', 'API: POST /api/data-load/batches (multipart field "file", field kit), System Administrator; the go-live scripts (npm run rehearsal:golive) use it.');
   line('Cutover date', cutover ? `${cutover} (setting golive.cutover_date)` : 'Not set yet: golive.cutover_date (Settings sheet of the configuration workbook, or Master > Configuration)');
   head('How to fill in');
   line('Headers', 'Row 1 of each sheet holds the column headers. Columns ending with * are required. Keep the headers; the column order does not matter and a column you do not use may be left empty or removed.');

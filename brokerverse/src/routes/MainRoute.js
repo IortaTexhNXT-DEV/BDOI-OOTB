@@ -301,7 +301,6 @@ import SodRules from "../module/AccessControl/SodRules";
 import AccessReviews from "../module/AccessControl/AccessReviews";
 // client onboarding before the first policy (customer due diligence)
 import ClientOnboarding from "../agentModule/quoteModule/clientOnboarding";
-import GoLiveDataLoad from "../module/GoLiveDataLoad";
 import BundleProducts from "../module/PackagedProducts/BundleProducts";
 import InsurerRateTables from "../module/PackagedProducts/InsurerRateTables";
 import LguTaxRates from "../module/PackagedProducts/LguTaxRates";
@@ -1142,7 +1141,6 @@ const Maincomponent = () => {
           {/* client onboarding before the first policy */}
           <Route path="/agent/client-onboarding" element={<ClientOnboarding />} />
           <Route path="/agent/client-onboarding/:id" element={<ClientOnboarding />} />
-          <Route path="/master/go-live-data-load" element={<GoLiveDataLoad />} />
           <Route path="/master/finance/package-bundles" element={<BundleProducts />} />
           <Route path="/master/finance/insurer-rate-tables" element={<InsurerRateTables />} />
           <Route path="/master/finance/premium-taxes" element={<LguTaxRates />} />

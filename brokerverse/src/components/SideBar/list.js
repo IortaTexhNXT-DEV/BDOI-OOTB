@@ -1534,19 +1534,6 @@ export const menuList = [
           },
         ],
       },
-      {
-        // configuration and migration workbooks loaded before go-live
-        name: "Go-Live and Data",
-        section: true,
-        submenu: [
-          {
-            id: 26,
-            name: "Go-Live Data Load",
-            path: "/master/go-live-data-load",
-            includes: ["/master/go-live-data-load"],
-          },
-        ],
-      },
     ],
   },
   {

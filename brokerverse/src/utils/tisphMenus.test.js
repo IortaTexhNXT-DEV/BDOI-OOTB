@@ -46,10 +46,9 @@ describe("TISPH roles (RBAC v4): menus", () => {
     expect(["/accounts/journalvoucher", "/accounts/period-end/close", "/master/configuration/audit-trail"].filter((p) => !isPathAllowed(p, menuList, ["tis-finance"]))).toEqual([]);
   });
 
-  it("the IT administrator reaches users, roles and masters, not the go-live data load; SUPERID (System Administrator included) sees every menu", () => {
+  it("the IT administrator reaches users, roles and masters; SUPERID (System Administrator included) sees every menu", () => {
     expect(["/master/generals/usermanagement/user", "/master/generals/usermanagement/role", "/master/insurance/lead-sources", "/master/insurance/reason-codes",
       "/master/configuration/system-settings"].filter((p) => !isPathAllowed(p, menuList, ["tis-it-admin"]))).toEqual([]);
-    expect(isPathAllowed("/master/go-live-data-load", menuList, ["tis-it-admin"])).toBe(false);
     expect(isPathAllowed("/master/generals/usermanagement/user", menuList, ["tis-general-manager"])).toBe(true);
     expect(isPathAllowed("/master/configuration/system-settings", menuList, ["tis-general-manager"])).toBe(false);
     expect(filterMenuForRoles(menuList, ["tis-superid", "system-admin"])).toEqual(menuList);
@@ -66,6 +65,7 @@ describe("TISPH roles (RBAC v4): menus", () => {
     const system = master.submenu.find((s) => s.name === "System Configuration").submenu.map((i) => i.name);
     expect(system).toEqual(expect.arrayContaining(["System Settings", "E-mail Layout", "Documents and Reports Layout", "Document Signatures"]));
     expect(master.submenu.map((s) => s.name)).not.toContain("Data Privacy");
+    expect(master.submenu.map((s) => s.name)).not.toContain("Go-Live and Data");
     const layouts = ["/master/configuration/email-layout", "/master/configuration/documents-layout", "/master/configuration/document-signatures"];
     expect(layouts.filter((p) => !isPathAllowed(p, menuList, ["tis-it-admin"]))).toEqual([]);
     expect(layouts.filter((p) => isPathAllowed(p, menuList, ["tis-general-manager"]) || isPathAllowed(p, menuList, ["tis-ops-unit-head"]))).toEqual([]);

@@ -152,7 +152,6 @@ export const HELP_ROUTES = [
   ["/accounts/sap-gl-export", "sap-gl-export"],
   // client onboarding (Operations chapter of the user manual)
   ["/agent/client-onboarding", "onboard-a-client-before-the-first-policy"],
-  ["/master/go-live-data-load", "go-live-data-load"],
   ["/product-configurator", "module-reference-product-configurator"],
   // distribution, programmes and products
   ["/sales/lead-assignment", "lead-assignment"],

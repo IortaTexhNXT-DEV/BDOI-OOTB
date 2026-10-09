@@ -1,5 +1,5 @@
 /**
- * Environment comparison (Master > Go-Live Data Load > Compare environments): the configuration workbook exported
+ * Environment comparison (POST /data-load/comparisons, npm run compare:environments): the configuration workbook exported
  * from another environment ("Current data") compared with this environment, or two exports compared with each other.
  * Comparing never loads anything and writes no business data: this environment is only read (the same export as the
  * "Current data" download) and the result is kept in data_load_comparisons. The engine is compare.js.
