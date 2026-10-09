@@ -172,7 +172,7 @@ export const PURGE_SYSTEM_TABLES = ['notifications', 'email_outbox', 'generated_
   'integration_outbox', 'integration_attempts', 'integration_inbox'];
 export const PURGE_DEMO_CONFIG_TABLES = ['petty_cash_funds', 'package_bundles', 'package_bundle_sections', 'insurer_rate_tables',
   'user_delegations', 'remittance_delegations',
-  // demo COC series, payee bank accounts and insurer API mapping of seeds/sample/75_integrations.sql
+  // demo COC series, payee bank accounts and insurer API mapping of seeds/sample/98_integrations.sql
   'coc_series', 'payee_bank_accounts', 'insurer_api_mappings'];
 
 /** Every classified table. */

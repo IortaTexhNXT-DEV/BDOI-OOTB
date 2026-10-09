@@ -1,6 +1,6 @@
 -- Master registry (definitions of every master screen) and reference master records (lines of business, covers,
--- taxation, transaction codes, vehicle master, remittance / report templates...). Demo companies,
--- employees, bank accounts, petty cash funds, exchange rates and commission rates are in sample/51_masters.sql.
+-- taxation, transaction codes, vehicle master, remittance / report templates...). Demo employees, bank accounts,
+-- petty cash funds, exchange rates and commission rates are in sample/88_masters.sql.
 -- Generated from the front-end form definitions; administrators change them later through /api/masters/:type/definition.
 -- Idempotent.
 INSERT INTO master_types(code, label, category, screen, storage, table_name, code_field, label_field, fields, unique_keys, allow_extra, sort_order, is_system, created_by)
