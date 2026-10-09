@@ -5049,11 +5049,8 @@
     "failedToLoadQuotation": "Failed to load quotation details",
     "errorLoadingQuotation": "An error occurred while loading quotation details",
     "unexpectedErrorConverting": "An unexpected error occurred while converting to policy",
-    "motor": "Motor",
     "fireAndAlliedPerils": "Fire and Allied Perils",
-    "employeeBenefit": "Employee Benefit",
     "travel": "Travel",
-    "property": "Property",
     "afterSameDay": "same day",
     "afterOneDay": "1 day",
     "afterDays": "{{count}} days",
@@ -5064,9 +5061,6 @@
   "quotationPage": {
     "title": "Quotation",
     "home": "Home",
-    "motorQuote": "Motor Quote",
-    "fireAndAlliedPerils": "Fire and Allied Perils",
-    "industrialAllRisks": "Industrial All Risks",
     "createQuote": "Create Quote",
     "bulkUpload": "Bulk Upload"
   },
@@ -8655,7 +8649,6 @@
     "useClient": "Use this client",
     "linkedTo": "Prospect for {{name}} ({{code}})",
     "productQuestion": "Which product is the prospect for?",
-    "packageProducts": "Package products (Quick Quote)",
     "cancel": "Cancel",
     "back": "Back",
     "continue": "Continue"

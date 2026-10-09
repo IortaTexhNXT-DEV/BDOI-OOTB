@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import BulkUploadModal from "./BulkUploadModal";
 import leadService from "../../../services/leadService";
 import CreateProspectDialog from "./CreateProspectDialog";
+import { RFQ_PATH, entryOf, rfqState, useSalesProducts } from "../../../module/Sales/salesProducts";
 
 const LeadListing = () => {
   const { t } = useTranslation();
@@ -24,6 +25,7 @@ const LeadListing = () => {
   const [showReportModal, setShowReportModal] = useState(false);
   const toast = useRef(null);
   const navigate = useNavigate();
+  const products = useSalesProducts();
 
   const items = [
     { label: t("leads.title"), command: () => navigate("/agent/leadlisting") },
@@ -33,34 +35,17 @@ const LeadListing = () => {
 
   // an existing customer picked in the Create prospect dialog travels to the prospect form
   const withClient = (client) => (client ? { state: { existingClient: client } } : undefined);
-  const handleClickMotor = (client) => {
-    navigate("/agent/createlead", withClient(client));
+  // one choice per active product of the Product master, opening the screen the product is quoted on
+  const forms = {
+    motor: (client) => navigate("/agent/createlead", withClient(client)),
+    fire: (client) => navigate("/agent/createlead/fire-allied-perils", withClient(client)),
+    iar: (client) => navigate("/agent/createlead/iar", withClient(client)),
+    eb: (client) => navigate("/agent/createlead/employee-benefit", withClient(client)),
   };
-
-  const handleClickFireAndAlliedPerils = (client) => {
-    navigate("/agent/createlead/fire-allied-perils", withClient(client));
-  };
-
-  const handleClickIar = (client) => {
-    navigate("/agent/createlead/iar", withClient(client));
-  };
-
-  const handleClickEmployeeBenefit = (client) => {
-    navigate("/agent/createlead/employee-benefit", withClient(client));
-  };
-
-  // travel and householder are package products: Quick Quote lists them with the way to quote each
-  const handleClickPackageProduct = () => {
-    navigate("/sales/quick-quote");
-  };
-
-  const prospectProducts = [
-    { value: "Motor", label: t("dashboard.Motor"), open: handleClickMotor },
-    { value: "Fire", label: t("dashboard.Fire and Allied Perils", "Fire and Allied Perils"), open: handleClickFireAndAlliedPerils },
-    { value: "IAR", label: t("dashboard.Industrial All Risks", "Industrial All Risks"), open: handleClickIar },
-    { value: "EB", label: t("dashboard.Employee Benefit"), open: handleClickEmployeeBenefit },
-    { value: "Package", label: t("prospectChooser.packageProducts"), open: () => handleClickPackageProduct() },
-  ];
+  const prospectProducts = (products || []).map((p) => {
+    const form = forms[entryOf(p)];
+    return { value: p.code, label: p.name, open: (client) => (form ? form(client) : navigate(RFQ_PATH, { state: rfqState(p, { client, newProspect: !client }) })) };
+  });
 
   const handleBulkUploadSuccess = () => {
     // Refresh the leads table by updating key

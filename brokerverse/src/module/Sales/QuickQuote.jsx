@@ -1,53 +1,34 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
-import placementService from "../../services/placementService";
-import { notifyError } from "../../utility/dialogs";
 import { PageHeader } from "../Placement/shared";
+import { RFQ_PATH, entryOf, rfqState, useSalesProducts } from "./salesProducts";
 import "../Placement/index.scss";
 import "./index.scss";
 
 /**
- * Quote wizards built into the front end, by line of business. The motor wizard starts with the prospect's details
- * and prices the vehicle from the motor tariff (own damage, CTPL, Auto Passenger PA).
- */
-const WIZARDS = { MOTOR: "/agent/createlead" };
-
-/**
- * Sales & Marketing > Quick Quote: the package products (Product master business type "package") to quote on the
- * spot. A product with a quote wizard opens it; any other package product is quoted through a Request for Quotation.
+ * Sales & Marketing > Quick Quote: the active package products (Product master business type "package") to quote on
+ * the spot. A motor product opens the motor quote wizard, which starts with the prospect's details and prices the
+ * vehicle from the motor tariff (own damage, CTPL, Auto Passenger PA); any other package product is quoted through a
+ * Request for Quotation.
  */
 const QuickQuote = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [products, setProducts] = useState(null);
-
-  useEffect(() => {
-    let alive = true;
-    placementService
-      .options({ businessType: "package" })
-      .then((o) => alive && setProducts(o.products || []))
-      .catch((e) => {
-        notifyError(e.message);
-        if (alive) setProducts([]);
-      });
-    return () => {
-      alive = false;
-    };
-  }, []);
+  const products = useSalesProducts({ businessType: "package" });
+  const hasWizard = (p) => entryOf(p) === "motor";
 
   const start = (p) => {
-    const wizard = WIZARDS[p.lob];
-    if (wizard) navigate(wizard);
-    else navigate("/placement/broker-slips/new", { state: { prefill: { productId: p.id, productType: p.name } } });
+    if (hasWizard(p)) navigate("/agent/createlead");
+    else navigate(RFQ_PATH, { state: rfqState(p) });
   };
 
   return (
     <div className="placement-page quick-quote">
       <PageHeader title={t("salesMarketing.quickQuote.title")}>
-        <Button label={t("salesMarketing.quickQuote.nonPackage")} icon="pi pi-send" outlined onClick={() => navigate("/placement/broker-slips/new")} />
+        <Button label={t("salesMarketing.quickQuote.nonPackage")} icon="pi pi-send" outlined onClick={() => navigate(RFQ_PATH)} />
       </PageHeader>
       {products && !products.length && <div className="placement-card muted">{t("salesMarketing.quickQuote.none")}</div>}
       <div className="grid">
@@ -58,11 +39,11 @@ const QuickQuote = () => {
                 <h3>{p.name}</h3>
                 <Tag value={t(`productClassification.segments.${p.customerSegment || "both"}`)} severity="info" />
               </div>
-              <p className="muted">{WIZARDS[p.lob] ? t("salesMarketing.quickQuote.wizard") : t("salesMarketing.quickQuote.noWizard")}</p>
+              <p className="muted">{hasWizard(p) ? t("salesMarketing.quickQuote.wizard") : t("salesMarketing.quickQuote.noWizard")}</p>
               <Button
-                label={WIZARDS[p.lob] ? t("salesMarketing.quickQuote.start") : t("salesMarketing.quickQuote.request")}
-                icon={WIZARDS[p.lob] ? "pi pi-bolt" : "pi pi-send"}
-                outlined={!WIZARDS[p.lob]}
+                label={hasWizard(p) ? t("salesMarketing.quickQuote.start") : t("salesMarketing.quickQuote.request")}
+                icon={hasWizard(p) ? "pi pi-bolt" : "pi pi-send"}
+                outlined={!hasWizard(p)}
                 onClick={() => start(p)}
               />
             </div>

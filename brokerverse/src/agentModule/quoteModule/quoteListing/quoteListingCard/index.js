@@ -31,13 +31,13 @@ import {
 } from "../../../../utils/statusHelpers";
 import StatusBadge from "../../../../components/StatusBadge";
 import SvgHome from "../../../../assets/agentIcon/SvgHome";
-import SvgTravel from "../../../../assets/agentIcon/SvgTravel";
 import EmployeeBenefitIcon from "../../../EmployeeFlow/EmployeeBenefitIcon";
 import SvgMotor from "../../../../assets/agentIcon/SvgMotor";
 import SvgFire from "../../../../assets/agentIcon/SvgFire";
 import "./index.scss";
 import { formatDate as formatConfiguredDate } from "../../../../utility/dateFormat";
 import { confirmAction, notifyError, notifySuccess } from "../../../../utility/dialogs";
+import { RFQ_PATH, entryOf, rfqState, useSalesProducts } from "../../../../module/Sales/salesProducts";
 const QuoteListingCard = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -519,161 +519,37 @@ const QuoteListingCard = () => {
     }
   };
 
-  const dropdownOptionsQuote = [
-    {
-      label: (
+  // one choice per active product of the Product master, quoted for this prospect: motor in the quote wizard, Fire and
+  // IAR in their forms, any other product through a Request for Quotation to the insurers
+  const products = useSalesProducts();
+  const icons = { motor: <SvgMotor />, fire: <SvgFire />, iar: <SvgHome />, eb: <EmployeeBenefitIcon /> };
+  const addQuote = (p) => {
+    const entry = entryOf(p);
+    if (entry === "motor") handleclick();
+    else if (entry === "fire") handleClickFireAndAlliedPerils();
+    else if (entry === "iar") handleClickIar();
+    else if (entry === "eb") navigate("/agent/createlead/employee-benefit");
+    else navigate(RFQ_PATH, { state: rfqState(p, { lead: leadRefId ? { ...currentLeadDetails, leadId: leadRefId } : null }) });
+  };
+  const dropdownOptionsQuote = (products || []).map((p) => ({
+    value: p.id,
+    label: (
+      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div>{icons[entryOf(p)] || <i className="pi pi-send" />}</div>
         <div
-          style={{ display: "flex", alignItems: "center", gap: "10px" }}
-          onClick={() => {
-            handleclick();
+          style={{
+            fontFamily: "Nunito, Arial, sans-serif",
+            fontWeight: 400,
+            fontSize: "16px",
+            color: "#111927",
+            width: "100%",
           }}
         >
-          <div>
-            <SvgMotor />
-          </div>
-          <div
-            style={{
-              fontFamily: "Nunito, Arial, sans-serif",
-              fontWeight: 400,
-              fontSize: "16px",
-              color: "#111927",
-              width: "100%",
-            }}
-          >
-            {t("quoteListing.motor")}
-          </div>
+          {p.name}
         </div>
-      ),
-      value: "Motor",
-    },
-    {
-      label: (
-        <div
-          style={{ display: "flex", alignItems: "center", gap: "10px" }}
-          onClick={() => {
-            handleClickFireAndAlliedPerils();
-          }}
-        >
-          <div>
-            <SvgFire />
-          </div>
-          <div
-            style={{
-              fontFamily: "Nunito, Arial, sans-serif",
-              fontWeight: 400,
-              fontSize: "16px",
-              color: "#111927",
-              width: "100%",
-            }}
-          >
-            {t("quoteListing.fireAndAlliedPerils")}
-          </div>
-        </div>
-      ),
-      value: "FireAndAlliedPerils",
-    },
-    {
-      label: (
-        <div
-          style={{ display: "flex", alignItems: "center", gap: "10px" }}
-          onClick={() => {
-            handleClickIar();
-          }}
-        >
-          <div>
-            <SvgHome />
-          </div>
-          <div
-            style={{
-              fontFamily: "Nunito, Arial, sans-serif",
-              fontWeight: 400,
-              fontSize: "16px",
-              color: "#111927",
-              width: "100%",
-            }}
-          >
-            {t("dashboard.Industrial All Risks", "Industrial All Risks")}
-          </div>
-        </div>
-      ),
-      value: "IndustrialAllRisks",
-    },
-    {
-      label: (
-        <div
-          style={{ display: "flex", alignItems: "center", gap: "10px" }}
-          onClick={() => {
-          }}
-        >
-          <div>
-            <EmployeeBenefitIcon />
-          </div>
-          <div
-            style={{
-              fontFamily: "Nunito, Arial, sans-serif",
-              fontWeight: 400,
-              fontSize: "16px",
-              color: "#111927",
-              width: "100%",
-            }}
-          >
-            {t("quoteListing.employeeBenefit")}
-          </div>
-        </div>
-      ),
-      value: "EmployeeBenefit",
-    },
-    {
-      label: (
-        <div
-          style={{ display: "flex", alignItems: "center", gap: "10px" }}
-          onClick={() => {
-          }}
-        >
-          <div>
-            <SvgTravel />
-          </div>
-          <div
-            style={{
-              fontFamily: "Nunito, Arial, sans-serif",
-              fontWeight: 400,
-              fontSize: "16px",
-              color: "#111927",
-              width: "100%",
-            }}
-          >
-            Travel
-          </div>
-        </div>
-      ),
-      value: "Travel",
-    },
-    {
-      label: (
-        <div
-          style={{ display: "flex", alignItems: "center", gap: "10px" }}
-          onClick={() => {
-          }}
-        >
-          <div>
-            <SvgHome />
-          </div>
-          <div
-            style={{
-              fontFamily: "Nunito, Arial, sans-serif",
-              fontWeight: 400,
-              fontSize: "16px",
-              color: "#111927",
-              width: "100%",
-            }}
-          >
-            {t("quoteListing.property")}
-          </div>
-        </div>
-      ),
-      value: "Property",
-    },
-  ];
+      </div>
+    ),
+  }));
 
   return (
     <div className="quote__listing__card__container mt-4">
@@ -700,14 +576,8 @@ const QuoteListingCard = () => {
                 value={null}
                 options={dropdownOptionsQuote}
                 onChange={(e) => {
-                  // Handle selection if needed
-                  if (e.value === "Motor") {
-                    handleclick();
-                  } else if (e.value === "FireAndAlliedPerils") {
-                    handleClickFireAndAlliedPerils();
-                  } else if (e.value === "IndustrialAllRisks") {
-                    handleClickIar();
-                  }
+                  const product = (products || []).find((p) => p.id === e.value);
+                  if (product) addQuote(product);
                 }}
                 placeholder={t("quoteListing.addQuote")}
                 dropdownIcon={<SvgAdd />}

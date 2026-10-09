@@ -14,10 +14,10 @@ import service from "../../services/distributionService";
 import { hasPermission } from "../../utils/canOpen";
 import { confirmAction, promptText } from "../../utility/dialogs";
 import { Field, PageHeader, StatusTag, dateTime, showError, showSuccess } from "./common";
+import { useSalesProducts } from "../Sales/salesProducts";
 
 const EMPTY_RULE = { name: "", priority: 100, method: "round_robin", assignees: [], status: "active", description: "",
   conditions: { branchCode: "", lob: "", source: "", leadCategory: "", channelId: "", province: "", city: "" } };
-const LOBS = ["MOTOR", "FIRE", "IAR", "MARINE", "ACCIDENT", "CASUALTY", "ENGINEERING", "EB"];
 
 /**
  * Operations > Sales & Marketing > Lead Assignment: the team view by reporting line (every account executive and
@@ -43,7 +43,10 @@ const LeadAssignment = () => {
   const [history, setHistory] = useState(null);
 
   const assigneeOptions = useMemo(() => assignees.map((a) => ({ value: a.id, label: `${a.name} (${a.branchCode || "-"}, ${a.open} ${t("distribution.la.open", "open")})` })), [assignees, t]);
-  const lobOptions = LOBS.map((v) => ({ value: v, label: v }));
+  // lines of the active products (Product master); a rule keeps the line it was saved with
+  const products = useSalesProducts({ enabled: manage });
+  const lobOptions = useMemo(() => [...new Set((products || []).map((p) => p.lob).filter(Boolean))].sort().map((v) => ({ value: v, label: v })), [products]);
+  const ruleLobOptions = (lob) => (lob && !lobOptions.some((o) => o.value === lob) ? [...lobOptions, { value: lob, label: lob }] : lobOptions);
   const methodOptions = ["round_robin", "load", "fixed"].map((v) => ({ value: v, label: t(`distribution.la.method.${v}`, v) }));
 
   const loadTeam = useCallback(async () => {
@@ -238,7 +241,7 @@ const LeadAssignment = () => {
               <MultiSelect value={rule.assignees} options={assigneeOptions} filter display="chip" onChange={(e) => setRule({ ...rule, assignees: e.value })} />
             </Field>
             <Field label={t("distribution.la.cond.lob", "Line of business")}>
-              <Dropdown value={rule.conditions.lob} options={lobOptions} showClear onChange={(e) => setRule({ ...rule, conditions: { ...rule.conditions, lob: e.value || "" } })} />
+              <Dropdown value={rule.conditions.lob} options={ruleLobOptions(rule.conditions.lob)} showClear onChange={(e) => setRule({ ...rule, conditions: { ...rule.conditions, lob: e.value || "" } })} />
             </Field>
             <Field label={t("distribution.la.cond.channelId", "Distribution channel")}>
               <Dropdown value={rule.conditions.channelId} options={channels.map((c) => ({ value: c.id, label: c.label }))} filter showClear

@@ -7,12 +7,12 @@ import SvgDot from "../../../assets/agentIcon/SvgDots";
 import ClientListingCard from "./clientListingCard";
 import { Dropdown } from "primereact/dropdown";
 import SvgMotor from "../../../assets/agentIcon/SvgMotor";
-import SvgTravel from "../../../assets/agentIcon/SvgTravel";
 import SvgHome from "../../../assets/agentIcon/SvgHome";
 import SvgFire from "../../../assets/agentIcon/SvgFire";
 import { useNavigate } from "react-router-dom";
 import { canOpen, hasPermission } from "../../../utils/canOpen";
 import { Button } from "primereact/button";
+import { RFQ_PATH, entryOf, rfqState, useSalesProducts } from "../../../module/Sales/salesProducts";
 
 const ClientListing = () => {
   const { t } = useTranslation();
@@ -26,10 +26,20 @@ const ClientListing = () => {
   // only roles that may open Leads/Prospects are offered "Create Lead" (claims users view clients only)
   const canCreateLead = canOpen("/agent/createlead");
 
-  const dropdownOptions = [
-    {
-      label: <div style={{ display: "flex",alignItems:"center",gap:"10px" }} onClick={()=>{handleClickMotor()}}>
-        <div><SvgMotor /></div>
+  // "Create Lead": one choice per active product of the Product master, opening the screen the product is quoted on
+  const products = useSalesProducts({ enabled: canCreateLead });
+  const forms = { motor: "/agent/createlead", fire: "/agent/createlead/fire-allied-perils", iar: "/agent/createlead/iar", eb: "/agent/createlead/employee-benefit" };
+  const icons = { motor: <SvgMotor />, fire: <SvgFire />, iar: <SvgHome /> };
+  const createLead = (p) => {
+    const form = forms[entryOf(p)];
+    if (form) navigate(form);
+    else navigate(RFQ_PATH, { state: rfqState(p, { newProspect: true }) });
+  };
+  const dropdownOptions = (products || []).map((p) => ({
+    value: p.id,
+    label: (
+      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div>{icons[entryOf(p)] || <i className="pi pi-send" />}</div>
         <div
           style={{
             fontFamily: "Nunito, Arial, sans-serif",
@@ -39,72 +49,11 @@ const ClientListing = () => {
             width: "100%",
           }}
         >
-          {t("dashboard.Motor")}
+          {p.name}
         </div>
-      </div>,
-      value: 'Motor'
-    },
-    {
-      label: <div style={{ display: "flex",alignItems:"center",gap:"10px" }} onClick={()=>{handleClickFireAndAlliedPerils()}}>
-        <div><SvgFire /></div>
-        <div
-          style={{
-            fontFamily: "Nunito, Arial, sans-serif",
-            fontWeight: 400,
-            fontSize: "16px",
-            color: "#111927",
-            width: "100%",
-          }}
-        >
-          {t("dashboard.Fire and Allied Perils")}
-        </div>
-      </div>,
-      value: 'FireAndAlliedPerils'
-    },
-    {
-      label: <div style={{ display: "flex",alignItems:"center",gap:"10px" }}>
-        <div><SvgTravel /></div>
-        <div
-          style={{
-            fontFamily: "Nunito, Arial, sans-serif",
-            fontWeight: 400,
-            fontSize: "16px",
-            color: "#111927",
-            width: "100%",
-          }}
-        >
-          {t("dashboard.Travel")}
-        </div>
-      </div>,
-      value: 'Travel'
-    },
-    {
-      label: <div style={{ display: "flex",alignItems:"center",gap:"10px" }}>
-        <div><SvgHome /></div>
-        <div
-          style={{
-            fontFamily: "Nunito, Arial, sans-serif",
-            fontWeight: 400,
-            fontSize: "16px",
-            color: "#111927",
-            width: "100%",
-          }}
-        >
-          {t("dashboard.Property")}
-        </div>
-      </div>, value: 'Property'
-    },
-  ];
-
-
-  const handleClickMotor = () =>{
-    navigate("/agent/createlead")
-  }
-
-  const handleClickFireAndAlliedPerils = () => {
-    navigate("/agent/createlead/fire-allied-perils");
-  }
-
+      </div>
+    ),
+  }));
 
   return (
     <div className="clientlisting__overal__container">
@@ -124,12 +73,9 @@ const ClientListing = () => {
               value={selectedOption}
               options={dropdownOptions}
               onChange={(e) => {
-                setSelectedOption(e.value);
-                if (e.value === "Motor") {
-                  handleClickMotor();
-                } else if (e.value === "FireAndAlliedPerils") {
-                  handleClickFireAndAlliedPerils();
-                }
+                setSelectedOption(null);
+                const product = (products || []).find((p) => p.id === e.value);
+                if (product) createLead(product);
               }}
               placeholder={t("clients.createLead")}
               dropdownIcon={<SvgAdd />}
