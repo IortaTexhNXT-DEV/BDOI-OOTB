@@ -23,6 +23,7 @@ import useMasterOptions from "../../../agentModule/component/useMasterOptions";
 import SvgDot from "../../../assets/icons/SvgDot";
 import FieldError from "../../../components/FieldError";
 import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
+import { downloadCsv } from "../../../utility/csvExport";
 import { requiredErrors, hasErrors, errorSummary } from "../../../utility/requiredFields";
 import "./index.scss";
 import { formatPercent, progressValue } from "../../../utility/numberFormat";
@@ -219,6 +220,22 @@ const LapseManagement = () => {
 
     setFilteredPolicies(filtered);
     calculateDashboard(filtered);
+  };
+
+  const handleExport = () => {
+    downloadCsv(`lapse-management-${toIsoDate(new Date())}.csv`, filteredPolicies, [
+      { header: t("renewal.policyNumber"), field: "policyNumber" },
+      { header: t("renewal.insuredName"), field: "insuredName" },
+      { header: t("renewal.product"), field: "product" },
+      { header: t("renewal.status"), field: (p) => p.status || (p.lapseDate ? "Lapsed" : "Active") },
+      { header: t("renewal.lapsed"), field: (p) => formatAppDate(p.lapseDate) },
+      { header: t("renewal.daysLapsed"), field: "daysLapsed" },
+      { header: t("renewal.premiumLost"), field: "premiumLost" },
+      { header: t("renewal.reason"), field: "lapseReason" },
+      { header: t("renewal.winBack"), field: "winBackStatus" },
+      { header: t("renewal.attempts"), field: (p) => p.winBackAttempts?.length || 0 },
+    ]);
+    toast.current.show({ severity: "success", summary: t("renewal.exportStarted"), detail: t("renewal.rowsExported", { count: filteredPolicies.length }), life: 3000 });
   };
 
   const handleClear = () => {
@@ -642,15 +659,9 @@ const LapseManagement = () => {
                       <Button
                         icon="pi pi-file-excel"
                         className="p-button-text"
-                        onClick={() => {
-                          toast.current.show({
-                            severity: 'success',
-                            summary: t("renewal.exportStarted"),
-                            detail: t("renewal.lapseDataExportedToExcel"),
-                            life: 3000
-                          });
-                        }}
-                        tooltip="Export to Excel" aria-label="Export to Excel"
+                        onClick={handleExport}
+                        disabled={!filteredPolicies.length}
+                        tooltip={t("renewal.exportToCsv")} aria-label={t("renewal.exportToCsv")}
                       />
                     </div>
                   </div>

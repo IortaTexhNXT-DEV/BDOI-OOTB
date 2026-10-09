@@ -233,9 +233,11 @@ export default function BatchTable() {
     }
   };
 
+  // a list row carries the counters only; the policies of the batch are loaded with its details
   const handleViewBatchDetails = (batch) => {
-    setSelectedBatch(batch);
+    setSelectedBatch({ ...batch, policies: batch.policies || [] });
     setShowBatchDetailsModal(true);
+    fetchBatchDetails(batch.batchId);
   };
 
   const formatDate = (dateString) => {

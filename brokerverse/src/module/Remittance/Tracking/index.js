@@ -458,7 +458,7 @@ const RemittanceTracking = () => {
                   icon="pi pi-file-excel"
                   className="p-button-text"
                   onClick={handleExport}
-                  tooltip="Export to Excel" aria-label="Export to Excel"
+                  tooltip="Export to CSV" aria-label="Export to CSV"
                 />
               </div>
             </div>

@@ -13,6 +13,7 @@ import { Toast } from "primereact/toast";
 import salesActivityService from "../../services/salesActivityService";
 import { CHANNEL_ICON } from "../../components/SalesActivities/ActivityPanel";
 import { PageHeader, dateTime, date, isoOf, numericColumn, showError } from "../OpsAccounting/common";
+import { calendarDateFormat } from "../../utility/dateFormat";
 
 const monthStart = () => {
   const d = new Date();
@@ -64,8 +65,8 @@ const SalesActivities = () => {
     <div className="pe-page">
       <Toast ref={toast} />
       <PageHeader title={t("salesActivities.screen")} group={t("salesActivities.group")} section={t("salesActivities.section")} subtitle={t("salesActivities.intro")}>
-        <Calendar value={from} onChange={(e) => e.value && setFrom(e.value)} showIcon dateFormat="yy-mm-dd" aria-label={t("salesActivities.from")} />
-        <Calendar value={to} onChange={(e) => e.value && setTo(e.value)} showIcon dateFormat="yy-mm-dd" aria-label={t("salesActivities.to")} />
+        <Calendar value={from} onChange={(e) => e.value && setFrom(e.value)} showIcon dateFormat={calendarDateFormat()} aria-label={t("salesActivities.from")} />
+        <Calendar value={to} onChange={(e) => e.value && setTo(e.value)} showIcon dateFormat={calendarDateFormat()} aria-label={t("salesActivities.to")} />
         <Button icon="pi pi-download" outlined label={t("salesActivities.export")}
           onClick={() => (tab === 0 ? salesActivityService.downloadList(params) : salesActivityService.downloadReport(period)).catch((e) => showError(toast, e))} />
       </PageHeader>

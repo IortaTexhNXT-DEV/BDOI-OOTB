@@ -16,7 +16,8 @@ import { Avatar } from "primereact/avatar";
 import { Calendar } from "primereact/calendar";
 import renewalsWorkspaceService, { periodRange, productLabel } from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
-import { calendarDateFormat } from "../../../utility/dateFormat";
+import { calendarDateFormat, toIsoDate } from "../../../utility/dateFormat";
+import { downloadCsv } from "../../../utility/csvExport";
 import "./index.scss";
 import { currencySymbol } from "../../../utility/currencyConverter";
 import { formatPercent, formatWithUnit, progressValue } from "../../../utility/numberFormat";
@@ -344,6 +345,17 @@ const PerformanceTracking = () => {
   const achievementOf = (kpi) => (kpi.inverse
     ? Math.max(0, 100 - ((kpi.achieved - kpi.target) / kpi.target) * 100)
     : (kpi.achieved / kpi.target) * 100);
+  const handleExport = () => {
+    downloadCsv(`renewal-performance-${toIsoDate(new Date())}.csv`, kpiData, [
+      { header: t("renewal.kpiCategory"), field: "category" },
+      { header: t("renewal.target"), field: "target" },
+      { header: t("renewal.achieved"), field: "achieved" },
+      { header: t("renewal.unit"), field: "unit" },
+      { header: t("renewal.achievement"), field: (kpi) => `${achievementOf(kpi).toFixed(1)}%` },
+    ]);
+    toast.current.show({ severity: "success", summary: t("renewal.exportStarted"), detail: t("renewal.rowsExported", { count: kpiData.length }), life: 3000 });
+  };
+
   // The KPI furthest from its target (none when every KPI is met)
   const improvementArea = kpiData
     .filter((kpi) => achievementOf(kpi) < 100)
@@ -471,14 +483,8 @@ const PerformanceTracking = () => {
                   label="Export Report"
                   icon="pi pi-file-excel"
                   className="p-button-secondary"
-                  onClick={() => {
-                    toast.current.show({
-                      severity: 'success',
-                      summary: t("renewal.exportStarted"),
-                      detail: t("renewal.performanceReportExportedToExcel"),
-                      life: 3000
-                    });
-                  }}
+                  onClick={handleExport}
+                  disabled={!kpiData.length}
                 />
               </div>
             </div>

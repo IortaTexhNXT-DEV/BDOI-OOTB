@@ -11,6 +11,7 @@ import { Toast } from "primereact/toast";
 import service from "../../services/integrationsService";
 import { useServerList } from "../../hooks/useServerList";
 import { PageHeader, date, dateTime, isoDay, money, showError, showSuccess } from "./common";
+import { calendarDateFormat } from "../../utility/dateFormat";
 
 const STATUSES = ["done", "empty", "failed", "running"];
 const SEVERITY = { done: "success", empty: "secondary", failed: "danger", running: "info" };
@@ -50,7 +51,7 @@ const SapGlExport = () => {
     <div className="pe-page">
       <Toast ref={toast} />
       <PageHeader home={t("sidebar.Accounts")} section={t("sidebar.Accounts")} title={t("sapGl.title")} subtitle={t("sapGl.intro")}>
-        <Calendar value={day} onChange={(e) => setDay(e.value)} dateFormat="yy-mm-dd" maxDate={new Date()} aria-label={t("sapGl.exportDate")} />
+        <Calendar value={day} onChange={(e) => setDay(e.value)} dateFormat={calendarDateFormat()} maxDate={new Date()} aria-label={t("sapGl.exportDate")} />
         <Button icon="pi pi-play" label={t("sapGl.runNow")} loading={busy} disabled={!day} onClick={run} />
       </PageHeader>
       {settings && (

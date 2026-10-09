@@ -220,7 +220,7 @@ const Statement = () => {
             icon="pi pi-download"
             className="p-button-outlined"
             onClick={handleExportStatement}
-            tooltip="Export to PDF" aria-label="Export to PDF"
+            tooltip="Export to CSV" aria-label="Export to CSV"
           />
         </div>
         <BreadCrumb
