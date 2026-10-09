@@ -15,6 +15,7 @@ import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { round2, num, isoDate, today } from '../accounting/lib/http.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { oldBillNumber } from '../receipts/opening.js';
+import { syncPolicyPaymentStatus } from '../receipts/receivables.js';
 
 export const DEFAULT_MODES = ['bank-transfer', 'check', 'online', 'cash'];
 const MODE_LABELS = { 'bank-transfer': 'Bank transfer', check: 'Cheque', online: 'Online payment', cash: 'Cash', card: 'Card', gcash: 'GCash' };
@@ -66,18 +67,6 @@ export async function paymentSummary(db, policy, user) {
     billingMode: policy.billing_mode || 'broker', directBill: direct ? await directBillSummary(db, policy.id) : null };
 }
 
-async function setPolicyPaymentStatus(db, policyId, userId) {
-  const r = (await db.query(`SELECT count(*)::int AS n, COALESCE(sum(amount),0) AS amt, COALESCE(sum(balance),0) AS bal FROM receivables WHERE policy_id = $1 AND status <> 'written-off'`, [policyId])).rows[0];
-  const pending = Number((await db.query('SELECT count(*)::int AS n FROM policy_payments WHERE policy_id = $1 AND status = \'submitted\'', [policyId])).rows[0].n);
-  let status = 'Pending';
-  if (r.n > 0 && Number(r.bal) <= 0) status = 'Completed';
-  else if (pending > 0) status = 'Reviewing';
-  else if (r.n > 0 && Number(r.bal) < Number(r.amt)) status = 'Partial';
-  const allowed = (await getSetting('policies.payment_statuses', ['Pending', 'Reviewing', 'Partial', 'Completed', 'Refunded'])) || [];
-  if (!allowed.includes(status)) return;
-  await db.query(`UPDATE policies SET payment_status = $2, paid_at = CASE WHEN $2 = 'Completed' THEN COALESCE(paid_at, now()) ELSE paid_at END, updated_by = $3, updated_at = now()
-    WHERE id = $1`, [policyId, status, userId]);
-}
 
 async function confirm(db, capture, user) {
   const { createReceipt } = await import('../receipts/service.js');
@@ -97,7 +86,7 @@ export async function capturePayment(db, policy, body, user) {
   if (policy.billing_mode === 'direct') throw conflict(`Policy ${policy.policy_number} is direct billed: the client pays the premium to the insurer, not to the broker`);
   if (body.option === 'pay-later') {
     await db.query('UPDATE policies SET payment_method = $2, updated_by = $3, updated_at = now() WHERE id = $1', [policy.id, 'Pay later', user.id]);
-    await setPolicyPaymentStatus(db, policy.id, user.id);
+    await syncPolicyPaymentStatus(db, policy.id, user.id);
     return { option: 'pay-later', capture: null, receipt: null, posted: false };
   }
   const { modes } = await paymentSettings();
@@ -124,7 +113,7 @@ export async function capturePayment(db, policy, body, user) {
   await db.query('UPDATE policies SET payment_method = $2, updated_at = now() WHERE id = $1', [policy.id, modeDef.label]);
   let receipt = null;
   if (canPostReceipts(user)) receipt = await confirm(db, c, user);
-  await setPolicyPaymentStatus(db, policy.id, user.id);
+  await syncPolicyPaymentStatus(db, policy.id, user.id);
   const row = (await db.query(`${CAPTURE_SQL} WHERE pp.id = $1`, [c.id])).rows[0];
   return { option: 'payment', capture: captureRow(row), receipt, posted: Boolean(receipt) };
 }
@@ -140,14 +129,14 @@ async function lockCapture(db, policyId, id) {
 export async function confirmCapture(db, policy, id, user) {
   const c = await lockCapture(db, policy.id, id);
   const receipt = await confirm(db, c, user);
-  await setPolicyPaymentStatus(db, policy.id, user.id);
+  await syncPolicyPaymentStatus(db, policy.id, user.id);
   return { capture: captureRow((await db.query(`${CAPTURE_SQL} WHERE pp.id = $1`, [id])).rows[0]), receipt };
 }
 
 export async function rejectCapture(db, policy, id, reason, user) {
   const c = await lockCapture(db, policy.id, id);
   await db.query(`UPDATE policy_payments SET status = 'rejected', rejected_by = $2, rejected_at = now(), reject_reason = $3, updated_at = now() WHERE id = $1`, [c.id, user.id, reason]);
-  await setPolicyPaymentStatus(db, policy.id, user.id);
+  await syncPolicyPaymentStatus(db, policy.id, user.id);
   return { capture: captureRow((await db.query(`${CAPTURE_SQL} WHERE pp.id = $1`, [id])).rows[0]) };
 }
 

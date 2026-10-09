@@ -241,7 +241,25 @@ async function applyToReceivable(db, rcv, amount, ctx) {
   // collected_on: the date the money was received (the journal's date), not the time it was keyed in
   await db.query(`INSERT INTO receipt_applications(receipt_id, receipt_line_id, receivable_id, amount, journal_id, payment_mode, reference_no, applied_by, collected_on)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`, [ctx.receipt?.id || null, ctx.lineId || null, rcv.id, amount, jv.id, ctx.paymentMode || null, ctx.referenceNo || null, ctx.user?.id ?? null, jv.jv_date || null]);
+  await syncPolicyPaymentStatus(db, policy.id, ctx.user?.id ?? null);
   return upd;
+}
+
+/**
+ * Payment status of a policy from its bills (Completed once nothing is left to pay, Partial, Pending) and the payments
+ * captured and waiting for finance (Reviewing). Follows every receipt applied or reversed, from any screen.
+ */
+export async function syncPolicyPaymentStatus(db, policyId, userId = null) {
+  const r = (await db.query(`SELECT count(*)::int AS n, COALESCE(sum(amount),0) AS amt, COALESCE(sum(balance),0) AS bal FROM receivables WHERE policy_id = $1 AND status <> 'written-off'`, [policyId])).rows[0];
+  const pending = Number((await db.query('SELECT count(*)::int AS n FROM policy_payments WHERE policy_id = $1 AND status = \'submitted\'', [policyId])).rows[0].n);
+  let status = 'Pending';
+  if (r.n > 0 && Number(r.bal) <= 0) status = 'Completed';
+  else if (pending > 0) status = 'Reviewing';
+  else if (r.n > 0 && Number(r.bal) < Number(r.amt)) status = 'Partial';
+  const allowed = (await getSetting('policies.payment_statuses', ['Pending', 'Reviewing', 'Partial', 'Completed', 'Refunded'])) || [];
+  if (!allowed.includes(status)) return;
+  await db.query(`UPDATE policies SET payment_status = $2, paid_at = CASE WHEN $2 = 'Completed' THEN COALESCE(paid_at, now()) ELSE paid_at END, updated_by = $3, updated_at = now()
+    WHERE id = $1`, [policyId, status, userId]);
 }
 
 /** Commission eligibility: once nothing is open on the policy, the premium counts as collected. */
@@ -411,10 +429,11 @@ export async function reverseReceiptApplications(db, receipt, user) {
   const apps = (await db.query('SELECT * FROM receipt_applications WHERE receipt_id = $1 AND status = \'applied\' FOR UPDATE', [receipt.id])).rows;
   for (const a of apps) {
     if (a.journal_id) await reverseJournal(db, a.journal_id, user, { description: `Cancellation of receipt ${receipt.receipt_number}` });
-    await db.query(`UPDATE receivables SET balance = balance + $2, updated_at = now(),
-      status = CASE WHEN balance + $2 >= amount THEN 'open' ELSE 'partial' END WHERE id = $1`, [a.receivable_id, a.amount]);
+    const rcv = (await db.query(`UPDATE receivables SET balance = balance + $2, updated_at = now(),
+      status = CASE WHEN balance + $2 >= amount THEN 'open' ELSE 'partial' END WHERE id = $1 RETURNING policy_id`, [a.receivable_id, a.amount])).rows[0];
     await db.query('UPDATE collection_items SET closed_at = NULL, updated_at = now() WHERE receivable_id = $1', [a.receivable_id]);
     await db.query('UPDATE receipt_applications SET status = \'reversed\', reversed_at = now() WHERE id = $1', [a.id]);
+    if (rcv?.policy_id) await syncPolicyPaymentStatus(db, rcv.policy_id, user?.id ?? null);
   }
   return apps.length;
 }

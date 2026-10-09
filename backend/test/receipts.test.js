@@ -67,16 +67,21 @@ describe('receipts', () => {
     expect(p1.body.data.receiptStatus).toBe('Converted');
     let r = (await query('SELECT balance, status FROM receivables WHERE id = $1', [rcv.id])).rows[0];
     expect(r.status).toBe('partial');
+    // the policy's payment status follows a receipt from Accounts > Receipts as it does a payment captured on the policy
+    const payment = async () => (await query('SELECT payment_status FROM policies WHERE id = $1', [policy.id])).rows[0].payment_status;
+    expect(await payment()).toBe('Partial');
     expect((await ctx.as('maker')('post', '/receipts').send({ receivableId: rcv.id, amount: gross })).status).toBe(400);
     const p2 = await ctx.as('maker')('post', '/receipts').send({ receivableId: rcv.id, amount: Number(r.balance), paymentMode: 'check' });
     expect(p2.status).toBe(201);
     r = (await query('SELECT balance, status FROM receivables WHERE id = $1', [rcv.id])).rows[0];
     expect(r.status).toBe('paid');
+    expect(await payment()).toBe('Completed');
     expect(await ledgerIntegrity()).toEqual({ unbalanced: 0, diff: 0 });
 
     const cancel = await ctx.as('maker')('post', `/receipts/${p2.body.data.receiptId}/cancel`).send({ reason: 'Cheque bounced' });
     expect(cancel.status).toBe(200);
     expect(cancel.body.data.receiptStatus).toBe('Cancelled');
+    expect(await payment()).toBe('Partial');
     r = (await query('SELECT balance, status FROM receivables WHERE id = $1', [rcv.id])).rows[0];
     expect(r.status).toBe('partial');
     expect(await ledgerIntegrity()).toEqual({ unbalanced: 0, diff: 0 });
