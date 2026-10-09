@@ -67,6 +67,7 @@ A sample row that the purge script must remove needs a key listed in `scripts/pu
 | `83_tisph_lists.sql` | reference | the 14 lead sources of Pre-BSM M07 and the 32 reason codes of M24 that have no master of their own (decline, repudiation, lapse, refund, adjustment, non-materialise) |
 | `84_lead_reassignment_reasons.sql` | reference | the context reassignment on the Reason Code master and its reasons (account executive left or on leave, territory or branch change, workload balancing, customer request, not worked in time, needs a specialist, other): the reason of a prospect reassigned or sent to the reassignment queue |
 | `88_accounting_reasons.sql` | reference | the contexts of the accounting decisions on the Reason Code master (period close, period reopening, year-end reversal, void of a printed CAS book, change of a CAS document, incentive batch rejection) and their reasons, each with an Other that needs a note |
+| `89_remittance_reasons.sql` | reference | the contexts of the remittance decisions on the Reason Code master (remittance rejection, withdrawal, cancellation, approval revocation, off-cycle remittance, line exclusion; exception escalation, resolution and reopening; insurer statement match with a difference and match undone; insurer confirmation difference; possible duplicate payment; insurer billing rejection and cancellation) and their reasons, each Other needing a note; the reasons of an exception resolution come with the exception types |
 
 ### Sample files (TISPH sample business)
 

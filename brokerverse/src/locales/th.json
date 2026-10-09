@@ -5394,7 +5394,22 @@
       "year_end_reverse": "การกลับรายการปิดบัญชีสิ้นปี",
       "cas_print_void": "การยกเลิกการพิมพ์สมุดบัญชี CAS",
       "cas_document_change": "การแก้ไขเอกสาร CAS",
-      "incentive_batch_reject": "การปฏิเสธชุดคำนวณค่าตอบแทนจูงใจ"
+      "incentive_batch_reject": "การปฏิเสธชุดคำนวณค่าตอบแทนจูงใจ",
+      "remittance_reject": "การปฏิเสธการนำส่งเบี้ยประกัน",
+      "remittance_withdraw": "การถอนการนำส่งเบี้ยประกัน",
+      "remittance_cancel": "การยกเลิกการนำส่งเบี้ยประกัน",
+      "remittance_revoke": "การเพิกถอนการอนุมัติการนำส่งเบี้ยประกัน",
+      "remittance_off_cycle": "การนำส่งเบี้ยประกันนอกรอบ",
+      "remittance_line_exclude": "การตัดรายการออกจากการนำส่งเบี้ยประกัน",
+      "exception_escalate": "การส่งต่อรายการผิดปกติ",
+      "exception_resolve": "การแก้ไขรายการผิดปกติ",
+      "exception_reopen": "การเปิดรายการผิดปกติใหม่",
+      "reconciliation_difference": "การจับคู่ใบแจ้งยอดบริษัทประกันที่มีผลต่าง",
+      "reconciliation_unmatch": "การยกเลิกการจับคู่ใบแจ้งยอดบริษัทประกัน",
+      "confirmation_difference": "ผลต่างจากการยืนยันของบริษัทประกัน",
+      "payment_duplicate_override": "การชำระเงินที่อาจซ้ำ",
+      "billing_reject": "การปฏิเสธใบแจ้งหนี้ถึงบริษัทประกัน",
+      "billing_cancel": "การยกเลิกใบแจ้งหนี้ถึงบริษัทประกัน"
     }
   },
   "opsAcc": {

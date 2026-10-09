@@ -12,7 +12,8 @@
  *   reason-code                                  Master > Insurance Management (write:masters only; read with the read
  *                                                permission of a module that records a coded reason: quotations,
  *                                                claims, renewals, period-end (period close, year-end, CAS books),
- *                                                incentive (batch rejection))
+ *                                                incentive (batch rejection), remittance (remittance decisions,
+ *                                                exceptions, insurer reconciliation and billing))
  * Reading needs the read permission of an owning module (or read:masters).
  */
 import { moduleRouter } from '../../lib/registry.js';
@@ -31,7 +32,7 @@ export const OWNERS = {
   'claim-document-requirement': { module: 'claims' }, 'repair-shop': { module: 'claims' }, supplier: { module: 'payables' }, 'asset-class': { module: 'fixed-assets' },
   'cost-centre': { module: 'journal-vouchers' },
   'sales-activity-type': { module: 'sales-activities', write: false }, 'sales-activity-outcome': { module: 'sales-activities', write: false },
-  'lead-source': { module: 'leads', write: false }, 'reason-code': { module: ['quotations', 'claims', 'renewals', 'period-end', 'incentive'], write: false },
+  'lead-source': { module: 'leads', write: false }, 'reason-code': { module: ['quotations', 'claims', 'renewals', 'period-end', 'incentive', 'remittance'], write: false },
 };
 const SCREEN = 'Master > Insurance Management / Accounts > Payables / Master > Finance (operational masters)';
 

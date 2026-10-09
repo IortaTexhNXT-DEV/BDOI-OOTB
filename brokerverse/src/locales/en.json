@@ -6598,7 +6598,22 @@
       "year_end_reverse": "Year-end close reversal",
       "cas_print_void": "CAS book print void",
       "cas_document_change": "CAS document change",
-      "incentive_batch_reject": "Incentive batch rejection"
+      "incentive_batch_reject": "Incentive batch rejection",
+      "remittance_reject": "Remittance rejection",
+      "remittance_withdraw": "Remittance withdrawal",
+      "remittance_cancel": "Remittance cancellation",
+      "remittance_revoke": "Remittance approval revocation",
+      "remittance_off_cycle": "Off-cycle remittance",
+      "remittance_line_exclude": "Remittance line exclusion",
+      "exception_escalate": "Exception escalation",
+      "exception_resolve": "Exception resolution",
+      "exception_reopen": "Exception reopening",
+      "reconciliation_difference": "Insurer statement match with difference",
+      "reconciliation_unmatch": "Insurer statement match undone",
+      "confirmation_difference": "Insurer confirmation difference",
+      "payment_duplicate_override": "Possible duplicate payment",
+      "billing_reject": "Insurer billing rejection",
+      "billing_cancel": "Insurer billing cancellation"
     }
   },
   "birTax": {
