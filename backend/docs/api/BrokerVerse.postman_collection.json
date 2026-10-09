@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1211 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1214 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -56479,7 +56479,7 @@
           ]
         },
         {
-          "name": "Start the year-end close of a fiscal year (the year becomes \"closing\")",
+          "name": "Start the year-end close of a fiscal year (the year becomes \"closing\"); the pre-checks run at once (status checked when they all pass)",
           "request": {
             "method": "POST",
             "header": [
@@ -56498,7 +56498,7 @@
                 "year-end"
               ]
             },
-            "description": "Start the year-end close of a fiscal year (the year becomes \"closing\")\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+            "description": "Start the year-end close of a fiscal year (the year becomes \"closing\"); the pre-checks run at once (status checked when they all pass)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"fiscalYear\": \"FY2025\"\n}",
@@ -56530,7 +56530,7 @@
                     "year-end"
                   ]
                 },
-                "description": "Start the year-end close of a fiscal year (the year becomes \"closing\")\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+                "description": "Start the year-end close of a fiscal year (the year becomes \"closing\"); the pre-checks run at once (status checked when they all pass)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"fiscalYear\": \"FY2025\"\n}",
@@ -56716,7 +56716,7 @@
           ]
         },
         {
-          "name": "Run the year-end pre-checks",
+          "name": "Run the year-end pre-checks again and keep the result on the run",
           "request": {
             "method": "POST",
             "header": [
@@ -56744,7 +56744,7 @@
                 }
               ]
             },
-            "description": "Run the year-end pre-checks\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+            "description": "Run the year-end pre-checks again and keep the result on the run\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
             "body": {
               "mode": "raw",
               "raw": "{}",
@@ -56785,7 +56785,7 @@
                     }
                   ]
                 },
-                "description": "Run the year-end pre-checks\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+                "description": "Run the year-end pre-checks again and keep the result on the run\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
                 "body": {
                   "mode": "raw",
                   "raw": "{}",
@@ -56811,7 +56811,7 @@
           ]
         },
         {
-          "name": "Close the fiscal year: closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year (approve:period-end)",
+          "name": "Close the fiscal year (approve:period-end; maker-checker: not the user who started the run): closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year",
           "request": {
             "method": "POST",
             "header": [
@@ -56839,10 +56839,10 @@
                 }
               ]
             },
-            "description": "Close the fiscal year: closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year (approve:period-end)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
+            "description": "Close the fiscal year (approve:period-end; maker-checker: not the user who started the run): closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
             "body": {
               "mode": "raw",
-              "raw": "{}",
+              "raw": "{\n  \"remarks\": \"Audit adjustments reviewed\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -56880,10 +56880,10 @@
                     }
                   ]
                 },
-                "description": "Close the fiscal year: closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year (approve:period-end)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
+                "description": "Close the fiscal year (approve:period-end; maker-checker: not the user who started the run): closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
                 "body": {
                   "mode": "raw",
-                  "raw": "{}",
+                  "raw": "{\n  \"remarks\": \"Audit adjustments reviewed\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -56906,7 +56906,7 @@
           ]
         },
         {
-          "name": "Reverse a year-end close until the first period of the next year is closed (approve:period-end; reason required)",
+          "name": "Approve the requested reversal and reverse the close (approve:period-end; maker-checker: not the requester): closing entries reversed, opening balances removed, periods unlocked",
           "request": {
             "method": "POST",
             "header": [
@@ -56934,10 +56934,10 @@
                 }
               ]
             },
-            "description": "Reverse a year-end close until the first period of the next year is closed (approve:period-end; reason required)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
+            "description": "Approve the requested reversal and reverse the close (approve:period-end; maker-checker: not the requester): closing entries reversed, opening balances removed, periods unlocked\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
             "body": {
               "mode": "raw",
-              "raw": "{}",
+              "raw": "{\n  \"remarks\": \"Reversal agreed with the external auditor\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -56975,7 +56975,199 @@
                     }
                   ]
                 },
-                "description": "Reverse a year-end close until the first period of the next year is closed (approve:period-end; reason required)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
+                "description": "Approve the requested reversal and reverse the close (approve:period-end; maker-checker: not the requester): closing entries reversed, opening balances removed, periods unlocked\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"remarks\": \"Reversal agreed with the external auditor\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"yec_1\",\n    \"runNumber\": \"YEC-2026-00001\",\n    \"fiscalYear\": \"FY2025\",\n    \"status\": \"closed\",\n    \"netIncome\": 1250000,\n    \"nextFiscalYear\": \"FY2026\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Request the reversal of a closed year with a reason (Reason Codes master, context year_end_reverse); possible until the first period of the next year is closed",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/year-end/:id/reverse-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "year-end",
+                ":id",
+                "reverse-request"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Request the reversal of a closed year with a reason (Reason Codes master, context year_end_reverse); possible until the first period of the next year is closed\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"YER-AUDITADJ\",\n  \"note\": \"Adjustments of the external auditor\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/year-end/:id/reverse-request",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "year-end",
+                    ":id",
+                    "reverse-request"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Request the reversal of a closed year with a reason (Reason Codes master, context year_end_reverse); possible until the first period of the next year is closed\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"YER-AUDITADJ\",\n  \"note\": \"Adjustments of the external auditor\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"yec_1\",\n    \"runNumber\": \"YEC-2026-00001\",\n    \"fiscalYear\": \"FY2025\",\n    \"status\": \"closed\",\n    \"netIncome\": 1250000,\n    \"nextFiscalYear\": \"FY2026\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Withdraw a reversal request (the requester, or a user with approve:period-end)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/year-end/:id/reverse-request/withdraw",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "year-end",
+                ":id",
+                "reverse-request",
+                "withdraw"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Withdraw a reversal request (the requester, or a user with approve:period-end)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end, approve:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/year-end/:id/reverse-request/withdraw",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "year-end",
+                    ":id",
+                    "reverse-request",
+                    "withdraw"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Withdraw a reversal request (the requester, or a user with approve:period-end)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end, approve:period-end",
                 "body": {
                   "mode": "raw",
                   "raw": "{}",
@@ -56997,6 +57189,69 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"yec_1\",\n    \"runNumber\": \"YEC-2026-00001\",\n    \"fiscalYear\": \"FY2025\",\n    \"status\": \"closed\",\n    \"netIncome\": 1250000,\n    \"nextFiscalYear\": \"FY2026\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "The Year-End Close screen of a fiscal year (default: the year being closed, else the oldest open year): run, the five steps with their checks, adjustment journals, closing entries and opening balances (previewed until the close), history of the runs and the actions the user may take with the reason when not",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/year-end/overview?fiscalYear=FY2026",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "year-end",
+                "overview"
+              ],
+              "query": [
+                {
+                  "key": "fiscalYear",
+                  "value": "FY2026"
+                }
+              ]
+            },
+            "description": "The Year-End Close screen of a fiscal year (default: the year being closed, else the oldest open year): run, the five steps with their checks, adjustment journals, closing entries and opening balances (previewed until the close), history of the runs and the actions the user may take with the reason when not\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: read:period-end, read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/year-end/overview?fiscalYear=FY2026",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "year-end",
+                    "overview"
+                  ],
+                  "query": [
+                    {
+                      "key": "fiscalYear",
+                      "value": "FY2026"
+                    }
+                  ]
+                },
+                "description": "The Year-End Close screen of a fiscal year (default: the year being closed, else the oldest open year): run, the five steps with their checks, adjustment journals, closing entries and opening balances (previewed until the close), history of the runs and the actions the user may take with the reason when not\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: read:period-end, read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"fiscalYear\": {\n      \"code\": \"FY2026\",\n      \"status\": \"closing\",\n      \"adjustmentPeriod\": \"2026-13\"\n    },\n    \"run\": {\n      \"id\": \"yec_1\",\n      \"runNumber\": \"YEC-2026-00001\",\n      \"fiscalYear\": \"FY2025\",\n      \"status\": \"checked\",\n      \"netIncome\": 1250000,\n      \"nextFiscalYear\": \"FY2026\",\n      \"preparedByName\": \"Ana Santos\"\n    },\n    \"steps\": [\n      {\n        \"key\": \"prerequisites\",\n        \"status\": \"passed\"\n      },\n      {\n        \"key\": \"adjustments\",\n        \"status\": \"passed\"\n      },\n      {\n        \"key\": \"closing\",\n        \"status\": \"pending\"\n      },\n      {\n        \"key\": \"approval\",\n        \"status\": \"pending-approval\"\n      },\n      {\n        \"key\": \"opening\",\n        \"status\": \"pending\"\n      }\n    ],\n    \"currentStep\": \"approval\",\n    \"checks\": [\n      {\n        \"code\": \"periods_closed\",\n        \"step\": \"prerequisites\",\n        \"status\": \"passed\",\n        \"data\": {\n          \"total\": 12,\n          \"closed\": 12\n        }\n      }\n    ],\n    \"closing\": {\n      \"source\": \"preview\",\n      \"netIncome\": 1250000,\n      \"lines\": [\n        {\n          \"accountCode\": \"3201001\",\n          \"accountType\": \"income\",\n          \"balance\": -1800000,\n          \"debit\": 1800000,\n          \"credit\": 0\n        }\n      ]\n    },\n    \"opening\": {\n      \"source\": \"preview\",\n      \"fiscalYear\": \"FY2027\",\n      \"totalDebit\": 2102400,\n      \"totalCredit\": 2102400,\n      \"lines\": []\n    },\n    \"actions\": {\n      \"close\": {\n        \"allowed\": false,\n        \"reason\": \"maker-checker\"\n      }\n    }\n  }\n}"
             }
           ]
         }

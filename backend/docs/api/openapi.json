@@ -92594,7 +92594,7 @@
       },
       "post": {
         "operationId": "postPeriodEndYearEnd",
-        "summary": "Start the year-end close of a fiscal year (the year becomes \"closing\")",
+        "summary": "Start the year-end close of a fiscal year (the year becomes \"closing\"); the pre-checks run at once (status checked when they all pass)",
         "tags": [
           "Period End"
         ],
@@ -92868,7 +92868,7 @@
     "/period-end/year-end/{id}/check": {
       "post": {
         "operationId": "postPeriodEndYearEndIdCheck",
-        "summary": "Run the year-end pre-checks",
+        "summary": "Run the year-end pre-checks again and keep the result on the run",
         "tags": [
           "Period End"
         ],
@@ -92964,7 +92964,7 @@
     "/period-end/year-end/{id}/close": {
       "post": {
         "operationId": "postPeriodEndYearEndIdClose",
-        "summary": "Close the fiscal year: closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year (approve:period-end)",
+        "summary": "Close the fiscal year (approve:period-end; maker-checker: not the user who started the run): closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year",
         "tags": [
           "Period End"
         ],
@@ -93041,6 +93041,317 @@
         },
         "x-screen": "Accounts > Period End > Year-End Close",
         "x-permissions": [
+          "approve:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "remarks": "Audit adjustments reviewed"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/period-end/year-end/{id}/reverse": {
+      "post": {
+        "operationId": "postPeriodEndYearEndIdReverse",
+        "summary": "Approve the requested reversal and reverse the close (approve:period-end; maker-checker: not the requester): closing entries reversed, opening balances removed, periods unlocked",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "runNumber": {
+                          "type": "string"
+                        },
+                        "fiscalYear": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "netIncome": {
+                          "type": "integer"
+                        },
+                        "nextFiscalYear": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "yec_1",
+                    "runNumber": "YEC-2026-00001",
+                    "fiscalYear": "FY2025",
+                    "status": "closed",
+                    "netIncome": 1250000,
+                    "nextFiscalYear": "FY2026"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Year-End Close",
+        "x-permissions": [
+          "approve:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "remarks": "Reversal agreed with the external auditor"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/period-end/year-end/{id}/reverse-request": {
+      "post": {
+        "operationId": "postPeriodEndYearEndIdReverseRequest",
+        "summary": "Request the reversal of a closed year with a reason (Reason Codes master, context year_end_reverse); possible until the first period of the next year is closed",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "runNumber": {
+                          "type": "string"
+                        },
+                        "fiscalYear": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "netIncome": {
+                          "type": "integer"
+                        },
+                        "nextFiscalYear": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "yec_1",
+                    "runNumber": "YEC-2026-00001",
+                    "fiscalYear": "FY2025",
+                    "status": "closed",
+                    "netIncome": 1250000,
+                    "nextFiscalYear": "FY2026"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Year-End Close",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reasonCode": "YER-AUDITADJ",
+                "note": "Adjustments of the external auditor"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/period-end/year-end/{id}/reverse-request/withdraw": {
+      "post": {
+        "operationId": "postPeriodEndYearEndIdReverseRequestWithdraw",
+        "summary": "Withdraw a reversal request (the requester, or a user with approve:period-end)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end, approve:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "runNumber": {
+                          "type": "string"
+                        },
+                        "fiscalYear": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "netIncome": {
+                          "type": "integer"
+                        },
+                        "nextFiscalYear": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "yec_1",
+                    "runNumber": "YEC-2026-00001",
+                    "fiscalYear": "FY2025",
+                    "status": "closed",
+                    "netIncome": 1250000,
+                    "nextFiscalYear": "FY2026"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Year-End Close",
+        "x-permissions": [
+          "write:period-end",
           "approve:period-end"
         ],
         "requestBody": {
@@ -93057,22 +93368,23 @@
         }
       }
     },
-    "/period-end/year-end/{id}/reverse": {
-      "post": {
-        "operationId": "postPeriodEndYearEndIdReverse",
-        "summary": "Reverse a year-end close until the first period of the next year is closed (approve:period-end; reason required)",
+    "/period-end/year-end/overview": {
+      "get": {
+        "operationId": "getPeriodEndYearEndOverview",
+        "summary": "The Year-End Close screen of a fiscal year (default: the year being closed, else the oldest open year): run, the five steps with their checks, adjustment journals, closing entries and opening balances (previewed until the close), history of the runs and the actions the user may take with the reason when not",
         "tags": [
           "Period End"
         ],
-        "description": "Front-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
+        "description": "Front-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: read:period-end, read:journal-vouchers",
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
+            "name": "fiscalYear",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "string"
-            }
+            },
+            "example": "FY2026"
           }
         ],
         "responses": {
@@ -93089,23 +93401,161 @@
                     "data": {
                       "type": "object",
                       "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "runNumber": {
-                          "type": "string"
-                        },
                         "fiscalYear": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "adjustmentPeriod": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "run": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "runNumber": {
+                              "type": "string"
+                            },
+                            "fiscalYear": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "netIncome": {
+                              "type": "integer"
+                            },
+                            "nextFiscalYear": {
+                              "type": "string"
+                            },
+                            "preparedByName": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "steps": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "currentStep": {
                           "type": "string"
                         },
-                        "status": {
-                          "type": "string"
+                        "checks": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "step": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "data": {
+                                "type": "object",
+                                "properties": {
+                                  "total": {
+                                    "type": "integer"
+                                  },
+                                  "closed": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            }
+                          }
                         },
-                        "netIncome": {
-                          "type": "integer"
+                        "closing": {
+                          "type": "object",
+                          "properties": {
+                            "source": {
+                              "type": "string"
+                            },
+                            "netIncome": {
+                              "type": "integer"
+                            },
+                            "lines": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "accountCode": {
+                                    "type": "string"
+                                  },
+                                  "accountType": {
+                                    "type": "string"
+                                  },
+                                  "balance": {
+                                    "type": "integer"
+                                  },
+                                  "debit": {
+                                    "type": "integer"
+                                  },
+                                  "credit": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            }
+                          }
                         },
-                        "nextFiscalYear": {
-                          "type": "string"
+                        "opening": {
+                          "type": "object",
+                          "properties": {
+                            "source": {
+                              "type": "string"
+                            },
+                            "fiscalYear": {
+                              "type": "string"
+                            },
+                            "totalDebit": {
+                              "type": "integer"
+                            },
+                            "totalCredit": {
+                              "type": "integer"
+                            },
+                            "lines": {
+                              "type": "array",
+                              "items": {}
+                            }
+                          }
+                        },
+                        "actions": {
+                          "type": "object",
+                          "properties": {
+                            "close": {
+                              "type": "object",
+                              "properties": {
+                                "allowed": {
+                                  "type": "boolean"
+                                },
+                                "reason": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -93114,12 +93564,80 @@
                 "example": {
                   "success": true,
                   "data": {
-                    "id": "yec_1",
-                    "runNumber": "YEC-2026-00001",
-                    "fiscalYear": "FY2025",
-                    "status": "closed",
-                    "netIncome": 1250000,
-                    "nextFiscalYear": "FY2026"
+                    "fiscalYear": {
+                      "code": "FY2026",
+                      "status": "closing",
+                      "adjustmentPeriod": "2026-13"
+                    },
+                    "run": {
+                      "id": "yec_1",
+                      "runNumber": "YEC-2026-00001",
+                      "fiscalYear": "FY2025",
+                      "status": "checked",
+                      "netIncome": 1250000,
+                      "nextFiscalYear": "FY2026",
+                      "preparedByName": "Ana Santos"
+                    },
+                    "steps": [
+                      {
+                        "key": "prerequisites",
+                        "status": "passed"
+                      },
+                      {
+                        "key": "adjustments",
+                        "status": "passed"
+                      },
+                      {
+                        "key": "closing",
+                        "status": "pending"
+                      },
+                      {
+                        "key": "approval",
+                        "status": "pending-approval"
+                      },
+                      {
+                        "key": "opening",
+                        "status": "pending"
+                      }
+                    ],
+                    "currentStep": "approval",
+                    "checks": [
+                      {
+                        "code": "periods_closed",
+                        "step": "prerequisites",
+                        "status": "passed",
+                        "data": {
+                          "total": 12,
+                          "closed": 12
+                        }
+                      }
+                    ],
+                    "closing": {
+                      "source": "preview",
+                      "netIncome": 1250000,
+                      "lines": [
+                        {
+                          "accountCode": "3201001",
+                          "accountType": "income",
+                          "balance": -1800000,
+                          "debit": 1800000,
+                          "credit": 0
+                        }
+                      ]
+                    },
+                    "opening": {
+                      "source": "preview",
+                      "fiscalYear": "FY2027",
+                      "totalDebit": 2102400,
+                      "totalCredit": 2102400,
+                      "lines": []
+                    },
+                    "actions": {
+                      "close": {
+                        "allowed": false,
+                        "reason": "maker-checker"
+                      }
+                    }
                   }
                 }
               }
@@ -93137,20 +93655,9 @@
         },
         "x-screen": "Accounts > Period End > Year-End Close",
         "x-permissions": [
-          "approve:period-end"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {}
-              },
-              "example": {}
-            }
-          }
-        }
+          "read:period-end",
+          "read:journal-vouchers"
+        ]
       }
     },
     "/petty-cash/disbursements": {

@@ -2406,7 +2406,15 @@ Select **New template** and enter **Name**, **Kind** (Recurring or accrual), **F
 
 ### Year-end close (preparer)
 
-The year-end close needs all twelve periods closed. Choose the fiscal year and select **Start year-end close**; run the pre-checks; post audit adjustments with **Adjustment journal** (dated the year end, posted in period 13, approved by a second user). The Accounting Manager closes the year.
+Accounts > Period End > Year-End Close leads through five steps, one card per step; the stepper above the card shows the status of each step. Choose the fiscal year and select **Start year-end close**: the prerequisites are checked at once.
+
+1. **Prerequisites**: the twelve periods of the year closed (soft-closed months are accepted when `accounting.year_end_accepts_soft_closed` is on), no unposted journal dated in the year, the suspense account nil, the trial balance balanced at the year end, the current year P/L and retained earnings accounts set up, and the previous fiscal year closed. A failed check links to the screen where it is resolved; **Run checks again** records the result on the run.
+2. **Year-end adjustments**: adjustment period 13 open and every adjustment journal in it posted. **Add adjustment** records a journal dated the year end in period 13; a second user approves and posts it from Journal Voucher.
+3. **Closing entries**: every income and expense account closed to current year P/L, then current year P/L to retained earnings. Until the year is closed the card shows a preview; afterwards, the posted journals.
+4. **Close the year**: the Accounting Manager selects **Close fiscal year**, with an optional remark. The user who started the year-end close cannot close the year; the button shows the reason. The close posts the closing entries in period 13, writes the opening balances of the next year, locks the periods of the year and creates the next fiscal year.
+5. **Opening balances**: the balance-sheet balances carried into the next fiscal year, previewed until the close, with their totals.
+
+A closed year is reopened with **Request reversal** and a reason from the Reason Codes master (Year-end close reversal); another Accounting Manager approves it with **Reverse close**, or the request is withdrawn. A reversal is possible until the first period of the next year is closed. The activity at the foot of the page lists every action with the user, the role, the date and time and the status change.
 
 ## Accounts payable
 
