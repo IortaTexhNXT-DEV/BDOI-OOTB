@@ -4,15 +4,16 @@ import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
-import { PageHeader as PeHeader, date, money, showError, showSuccess } from "../PeriodEnd/common";
+import SharedPageHeader from "../../components/PageHeader";
+import { date, money, showError, showSuccess } from "../PeriodEnd/common";
 import "../PeriodEnd/index.scss";
 
 export { date, money, showError, showSuccess };
 
-/** Page header with the Accounts > Tax breadcrumb (or the given section). */
+/** Page header with the Accounts > Tax breadcrumb (or the given section); `subtitle` is the help behind the info icon. */
 export const PageHeader = ({ section, ...props }) => {
   const { t } = useTranslation();
-  return <PeHeader section={section || t("periodEnd.tax")} {...props} />;
+  return <SharedPageHeader home={t("periodEnd.accounts")} {...props} section={section || t("periodEnd.tax")} />;
 };
 
 const SEVERITY = {

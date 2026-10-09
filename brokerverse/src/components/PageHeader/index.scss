@@ -1,0 +1,81 @@
+@import "../../theme/bdoi/tokens";
+
+.bv-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-bottom: 16px;
+
+  .bv-page-header__main {
+    flex: 1 1 20rem;
+    min-width: 0;
+  }
+
+  .bv-page-header__title-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .bv-page-header__title {
+    margin: 0;
+    font-family: $font-heading;
+    font-size: 24px;
+    line-height: 32px;
+    font-weight: 700;
+    color: $color-heading;
+    overflow-wrap: anywhere;
+  }
+
+  .bv-page-header__back.p-button,
+  .bv-help-tip.p-button {
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    color: $color-text-muted;
+  }
+
+  .bv-help-tip.p-button .p-button-icon {
+    font-size: 0.95rem;
+  }
+
+  .bv-help-tip.p-button:focus-visible {
+    box-shadow: $focus-ring;
+  }
+
+  .bv-page-header__main .bv-page-header__crumbs.p-breadcrumb {
+    margin: 4px 0 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  .bv-page-header__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  @media (max-width: 640px) {
+    .bv-page-header__actions {
+      flex-basis: 100%;
+      justify-content: flex-start;
+      margin-left: 0;
+    }
+  }
+}
+
+.bv-help-tip__tooltip.p-tooltip {
+  max-width: 22rem;
+
+  .p-tooltip-text {
+    font-size: 13px;
+    line-height: 1.45;
+  }
+}
