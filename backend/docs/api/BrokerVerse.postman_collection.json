@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1211 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1213 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -29992,6 +29992,55 @@
               ],
               "cookie": [],
               "body": "application/pdf"
+            }
+          ]
+        },
+        {
+          "name": "Letterhead and document colours for a page printed from the browser (the same as on the server documents): company name, address lines, TIN, licence, contact, the print logo as a data URL and the documents section of the theme",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/document-templates/letterhead",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "document-templates",
+                "letterhead"
+              ]
+            },
+            "description": "Letterhead and document colours for a page printed from the browser (the same as on the server documents): company name, address lines, TIN, licence, contact, the print logo as a data URL and the documents section of the theme\n\nFront-end touchpoint: Printable views (Print on screens that print a page of their own)\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/document-templates/letterhead",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "document-templates",
+                    "letterhead"
+                  ]
+                },
+                "description": "Letterhead and document colours for a page printed from the browser (the same as on the server documents): company name, address lines, TIN, licence, contact, the print logo as a data URL and the documents section of the theme\n\nFront-end touchpoint: Printable views (Print on screens that print a page of their own)\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"name\": \"Toyota Insurance Services Philippines, Inc.\",\n    \"addressLines\": [\n      \"31F Net Park, 5th Avenue\",\n      \"Taguig City, Metro Manila 1634, Philippines\"\n    ],\n    \"tin\": \"000-000-000-000\",\n    \"licence\": \"IC-B-1234\",\n    \"phone\": \"+63 2 8888 0000\",\n    \"email\": \"tisph@example.ph\",\n    \"website\": \"\",\n    \"logo\": \"data:image/png;base64,...\",\n    \"documents\": {\n      \"accent\": \"#eb0a1e\",\n      \"headingColor\": \"#eb0a1e\",\n      \"headingBg\": \"#f7f7f7\",\n      \"tableHeaderBg\": \"#eb0a1e\",\n      \"tableHeaderText\": \"#ffffff\",\n      \"footerText\": \"Authorized by the Insurance Commission ...\",\n      \"showLogo\": true,\n      \"logoHeight\": 46\n    },\n    \"generatedBy\": \"Rosa Finance\",\n    \"generatedAt\": \"10/10/2026 09:03\"\n  }\n}"
             }
           ]
         },
@@ -64052,7 +64101,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"action\": \"create-version\",\n      \"username\": \"BrokerVerse\",\n      \"at\": \"2026-09-29T08:00:00Z\",\n      \"version\": 2\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"action\": \"create-version\",\n      \"actionLabel\": \"Create version\",\n      \"username\": \"BrokerVerse\",\n      \"displayName\": \"BrokerVerse Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"at\": \"2026-09-29T08:00:00Z\",\n      \"version\": 2\n    }\n  ]\n}"
             }
           ]
         },
@@ -65962,7 +66011,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -66439,7 +66488,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -66867,7 +66916,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -67393,7 +67442,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -68016,7 +68065,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -68498,7 +68547,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Draft\",\n          \"to\": \"Active\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Draft\",\n          \"to\": \"Active\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -69564,7 +69613,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -69992,7 +70041,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -70383,7 +70432,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Draft\",\n          \"to\": \"Active\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Draft\",\n          \"to\": \"Active\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -71161,7 +71210,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -71589,7 +71638,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -72147,7 +72196,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         }
@@ -80083,7 +80132,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"referenceNo\": \"REM-2026-00001\",\n      \"actionType\": \"approve\",\n      \"previousValue\": \"Pending Approval\",\n      \"newValue\": \"Approved\",\n      \"changedBy\": \"finance.head\",\n      \"changeDate\": \"2026-09-26 15:45\"\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"referenceNo\": \"REM-2026-00001\",\n      \"actionType\": \"approve\",\n      \"actionLabel\": \"Approved\",\n      \"previousValue\": \"Pending Approval\",\n      \"newValue\": \"Approved\",\n      \"changedBy\": \"finance.head\",\n      \"changedByName\": \"Fe Head\",\n      \"changedByRoles\": [\n        \"Finance Manager\"\n      ],\n      \"changeDate\": \"2026-09-26 15:45\",\n      \"changedAt\": \"2026-09-26T15:45:00.000Z\"\n    }\n  ]\n}"
             }
           ]
         },
@@ -81107,7 +81156,7 @@
           ]
         },
         {
-          "name": "Remittance details: insurer, policies, documents, activity log",
+          "name": "Remittance details: insurer, policies, documents, activity log (oldest first: the remittance's audit rows, its approval decisions and the settlement that settled it; each entry with action label, user display name and roles, status from / to, remarks and changed fields)",
           "request": {
             "method": "GET",
             "header": [],
@@ -81129,7 +81178,7 @@
                 }
               ]
             },
-            "description": "Remittance details: insurer, policies, documents, activity log\n\nFront-end touchpoint: Accounts > Remittance > Tracking > View\n\nAccess: read:remittance, write:remittance"
+            "description": "Remittance details: insurer, policies, documents, activity log (oldest first: the remittance's audit rows, its approval decisions and the settlement that settled it; each entry with action label, user display name and roles, status from / to, remarks and changed fields)\n\nFront-end touchpoint: Accounts > Remittance > Tracking > View\n\nAccess: read:remittance, write:remittance"
           },
           "response": [
             {
@@ -81155,7 +81204,7 @@
                     }
                   ]
                 },
-                "description": "Remittance details: insurer, policies, documents, activity log\n\nFront-end touchpoint: Accounts > Remittance > Tracking > View\n\nAccess: read:remittance, write:remittance"
+                "description": "Remittance details: insurer, policies, documents, activity log (oldest first: the remittance's audit rows, its approval decisions and the settlement that settled it; each entry with action label, user display name and roles, status from / to, remarks and changed fields)\n\nFront-end touchpoint: Accounts > Remittance > Tracking > View\n\nAccess: read:remittance, write:remittance"
               },
               "status": "OK",
               "code": 200,
@@ -81167,7 +81216,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rm_1\",\n    \"remittanceNo\": \"REM-2026-00001\",\n    \"remittanceDate\": \"2026-09-15\",\n    \"insurerCode\": \"MALAYAN\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"policyCount\": 3,\n    \"grossAmount\": 45000,\n    \"commission\": 6750,\n    \"tax\": 0,\n    \"netAmount\": 38250,\n    \"status\": \"Pending Approval\",\n    \"statusCode\": \"for-approval\",\n    \"insurerDetails\": {\n      \"code\": \"MALAYAN\",\n      \"name\": \"Malayan Insurance Co., Inc.\"\n    },\n    \"policies\": [\n      {\n        \"policyNo\": \"POL-2026-00001\",\n        \"premium\": 15000,\n        \"commission\": 2250\n      }\n    ],\n    \"activityLog\": []\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rm_1\",\n    \"remittanceNo\": \"REM-2026-00001\",\n    \"remittanceDate\": \"2026-09-15\",\n    \"insurerCode\": \"MALAYAN\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"policyCount\": 3,\n    \"grossAmount\": 45000,\n    \"commission\": 6750,\n    \"tax\": 0,\n    \"netAmount\": 38250,\n    \"status\": \"Pending Approval\",\n    \"statusCode\": \"for-approval\",\n    \"insurerDetails\": {\n      \"code\": \"MALAYAN\",\n      \"name\": \"Malayan Insurance Co., Inc.\"\n    },\n    \"policies\": [\n      {\n        \"policyNo\": \"POL-2026-00001\",\n        \"premium\": 15000,\n        \"commission\": 2250\n      }\n    ],\n    \"activityLog\": [\n      {\n        \"action\": \"submit\",\n        \"by\": \"r.finance\",\n        \"at\": \"2026-10-10T01:03:00.000Z\",\n        \"notes\": null,\n        \"id\": \"812\",\n        \"date\": \"10/10/2026\",\n        \"time\": \"09:03\",\n        \"atText\": \"10/10/2026 09:03\",\n        \"actionCode\": \"submit\",\n        \"actionLabel\": \"Remittance submitted\",\n        \"user\": {\n          \"username\": \"r.finance\",\n          \"displayName\": \"Rosa Finance\",\n          \"roles\": [\n            \"Finance Officer\"\n          ],\n          \"role\": \"Finance Officer\"\n        },\n        \"fromStatus\": \"Draft\",\n        \"toStatus\": \"Pending Approval\",\n        \"remarks\": null,\n        \"changes\": [\n          {\n            \"field\": \"batchId\",\n            \"label\": \"Batch ID\",\n            \"before\": null,\n            \"after\": \"BLK-2026-00001\"\n          }\n        ],\n        \"source\": {\n          \"channel\": \"screen\",\n          \"label\": \"Screen\",\n          \"name\": \"Accounts > Remittance > Tracking\"\n        }\n      }\n    ]\n  }\n}"
             }
           ]
         },
@@ -81263,6 +81312,85 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"status\": \"Approved\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Printable remittance advice (agency bill for an agency bill): broker letterhead, the policies, the amount due and the signatures (PDF; download=1 for an attachment)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/remittances/:id/pdf?download=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "remittances",
+                ":id",
+                "pdf"
+              ],
+              "query": [
+                {
+                  "key": "download",
+                  "value": "1"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Printable remittance advice (agency bill for an agency bill): broker letterhead, the policies, the amount due and the signatures (PDF; download=1 for an attachment)\n\nFront-end touchpoint: Accounts > Remittance > Tracking > Print\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/remittances/:id/pdf?download=1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "remittances",
+                    ":id",
+                    "pdf"
+                  ],
+                  "query": [
+                    {
+                      "key": "download",
+                      "value": "1"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Printable remittance advice (agency bill for an agency bill): broker letterhead, the policies, the amount due and the signatures (PDF; download=1 for an attachment)\n\nFront-end touchpoint: Accounts > Remittance > Tracking > Print\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "application/pdf"
             }
           ]
         },

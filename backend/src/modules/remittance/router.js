@@ -12,7 +12,7 @@ import * as clientPayments from './clientPayments.js';
 import { pool, withTransaction } from '../../db/pool.js';
 import { businessTimeZone } from '../../lib/dates.js';
 import { buildPdf, sendPdf } from '../documents/pdf.js';
-import { commissionDebitNoteDoc } from '../documents/templates.js';
+import { commissionDebitNoteDoc, remittanceAdviceDoc } from '../documents/templates.js';
 
 /** Remittance (Accounts > Remittance, 16 screens) and the Remittance Master overview. */
 const { router, define } = moduleRouter('Remittance', '/remittance');
@@ -57,6 +57,14 @@ define({
   screen: S('Tracking > View'), middleware: read,
   response: { success: true, data: { ...rem, insurerDetails: { code: 'MALAYAN', name: 'Malayan Insurance Co., Inc.' }, policies: [{ policyNo: 'POL-2026-00001', premium: 15000, commission: 2250 }], activityLog: [activity] } },
   handler: async (req, res) => ok(res, await svc.remittanceDetails(req.params.id, { viewer: req.user })),
+});
+define({
+  method: 'GET', path: '/remittances/:id/pdf', summary: 'Printable remittance advice (agency bill for an agency bill): broker letterhead, the policies, the amount due and the signatures (PDF; download=1 for an attachment)',
+  screen: S('Tracking > Print'), middleware: read, query: { download: 1 }, response: 'application/pdf',
+  handler: async (req, res) => {
+    const r = await svc.remittanceDetails(req.params.id, { viewer: req.user });
+    sendPdf(res, buildPdf(await remittanceAdviceDoc(r, r.policies)), `remittance-${r.remittanceNo}.pdf`, req.query.download ? 'attachment' : 'inline');
+  },
 });
 define({
   method: 'POST', path: '/remittances', summary: 'Create a draft remittance from policy lines', screen: S('Tracking'), middleware: write,
