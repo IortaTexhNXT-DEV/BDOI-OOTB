@@ -320,7 +320,6 @@ import IcAnnualStatement from "../module/Compliance/IcAnnualStatement";
 import IcProductionReport from "../module/Compliance/IcProductionReport";
 import BreachRegister from "../module/Compliance/BreachRegister";
 import GoLiveDataLoad from "../module/GoLiveDataLoad";
-import CompareInsurers from "../module/PackagedProducts/CompareInsurers";
 import BundleProducts from "../module/PackagedProducts/BundleProducts";
 import InsurerRateTables from "../module/PackagedProducts/InsurerRateTables";
 import LguTaxRates from "../module/PackagedProducts/LguTaxRates";
@@ -1189,7 +1188,6 @@ const Maincomponent = () => {
           <Route path="/compliance/ic-production-report" element={<IcProductionReport />} />
           <Route path="/compliance/breaches" element={<BreachRegister />} />
           <Route path="/master/go-live-data-load" element={<GoLiveDataLoad />} />
-          <Route path="/sales/compare-insurers" element={<CompareInsurers />} />
           <Route path="/master/finance/package-bundles" element={<BundleProducts />} />
           <Route path="/master/finance/insurer-rate-tables" element={<InsurerRateTables />} />
           <Route path="/master/finance/premium-taxes" element={<LguTaxRates />} />

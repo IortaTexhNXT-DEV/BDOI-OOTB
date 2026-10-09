@@ -1,12 +1,13 @@
 /**
  * Insurer rate tables (Master > Packaged Products > Insurer Rate Tables): per insurer and product the rate basis, rate,
- * minimum premium, deductible, key benefits, commission rate and effective dates. The quick quote comparison prices
- * every insurer from its row; package sections use the row of the section's insurer when there is one.
+ * minimum premium, deductible, key benefits, commission rate and effective dates. Package sections use the row of the
+ * section's insurer when there is one.
  * Rule: no two active rows of the same insurer and product with overlapping dates.
  */
 import { many, query, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { round2 } from '../../lib/money.js';
+import { resolveCommissionRate } from '../commission-rates/resolve.js';
 
 export const RATE_BASES = ['percent', 'per_mille', 'flat'];
 
@@ -61,13 +62,11 @@ export async function rateTableFor(db, insurerId, productId, date) {
   return r ? toRateTable(r) : null;
 }
 
-/** Every row in force for a product on a date, one per insurer (active insurers only). */
-export async function rateTablesInForce(db, productId, date) {
-  const rows = (await (db || { query }).query(`${SELECT} WHERE r.active AND ic.status = 'active' AND r.product_id = $1
-    AND r.effective_from <= $2::date AND (r.effective_to IS NULL OR r.effective_to >= $2::date) ORDER BY r.insurance_company_id, r.effective_from DESC, r.id DESC`,
-  [Number(productId), date])).rows;
-  const seen = new Set();
-  return rows.filter((r) => (seen.has(r.insurance_company_id) ? false : seen.add(r.insurance_company_id))).map(toRateTable);
+/** Commission rate of an insurer on a product: the rate table's, else the Commission Rate Matrix (with its fallbacks). */
+export async function commissionRateFor({ rateTable = null, insurerId, productId, lob, date, renewal = false }, db = null) {
+  if (rateTable && rateTable.commissionRate !== null && rateTable.commissionRate !== undefined) return { rate: rateTable.commissionRate, source: 'rate-table' };
+  const r = await resolveCommissionRate({ insurerId, productId, lob: lob ? String(lob).toLowerCase() : null, policyType: renewal ? 'renewal' : 'new', date, db });
+  return { rate: r.rate, source: r.source };
 }
 
 const columnsOf = (b, base = {}) => ({

@@ -9,18 +9,15 @@ import * as rt from './rateTables.js';
 import * as bundles from './bundles.js';
 import * as quotes from './bundleQuotes.js';
 import * as issue from './issue.js';
-import { clientView, compareInsurers, comparisonPdf, quotationFromComparison } from './compare.js';
 
 /**
  * Packaged products (high-velocity retail and SME): bundle products and insurer rate tables (Master > Packaged
- * Products), the quick quote comparison (Sales & Marketing > Quick Quote > Compare Insurers) and package quotations and
- * policies (Sales & Marketing > Package Bundles). Masters are maintained by the Processing Team (write:products);
- * quoting follows the quotation permissions and issuing needs write:policies.
+ * Products) and package quotations and policies (Sales & Marketing > Package Bundles). Masters are maintained by the
+ * Processing Team (write:products); quoting follows the quotation permissions and issuing needs write:policies.
  */
 const { router, define } = moduleRouter('Packaged Products', '/packages');
 const MASTER_BUNDLES = 'Master > Packaged Products > Bundle Products';
 const MASTER_RATES = 'Master > Packaged Products > Insurer Rate Tables';
-const COMPARE = 'Operations > Sales & Marketing > Compare Insurers';
 const BUNDLES = 'Operations > Sales & Marketing > Package Bundles';
 const readMasters = [requireAuth, requirePermission('read:quotations', 'read:products', 'read:masters', 'read:policies')];
 const writeMasters = [requireAuth, requirePermission('write:products')];
@@ -135,50 +132,6 @@ define({
     const before = await bundles.deleteBundle(req.params.id, req.user);
     await audit(req, { entity: 'package_bundle', entityId: before.id, action: before.deactivated ? 'deactivate' : 'delete', before });
     ok(res, before, before.deactivated ? 'Bundle deactivated (already quoted)' : 'Bundle deleted');
-  },
-});
-
-// ------------------------------------------------------------------ comparison
-const compareBody = z.object({
-  productId: z.union([id, z.string().trim().min(1).max(40)]), sumInsured: z.coerce.number().positive().max(1e13), lguCode: z.string().trim().max(20).nullable().optional(),
-  city: z.string().trim().max(120).nullable().optional(), date: date.nullable().optional(), insurerIds: z.array(id).max(50).optional(),
-}).strict();
-const compareExample = { product: { id: 11, code: 'HOME', name: 'Householder Insurance', line: 'fire', lob: 'FIRE', taxRegime: 'vat' }, sumInsured: 1000000, date: '2026-09-30',
-  lgu: { code: 'MKT', name: 'Makati', rate: 0.2 }, currency: 'PHP', cheapestId: 2,
-  columns: [{ insuranceCompanyId: 2, insurerName: 'Malayan Insurance Co., Inc.', rateTableId: 1, rateBasis: 'percent', rate: 0.25, premium: 2500, vat: 300, premiumTax: 0, dst: 312.5,
-    fst: 50, lgt: 5, otherCharges: 0, taxes: 667.5, totalCharges: 667.5, total: 3167.5, deductible: 'PHP 2,500 each and every loss', keyBenefits: ['Fire and lightning'],
-    commissionRate: 0.2, commissionAmount: 500 }] };
-
-define({
-  method: 'POST', path: '/compare', summary: 'Instant comparison of a package product across insurers (rate tables in force): premium, taxes, total, deductible, benefits; commission for staff (clientView=true hides it)',
-  screen: COMPARE, middleware: [...canQuote, validate(compareBody.extend({ clientView: z.boolean().optional() }))], request: { productId: 11, sumInsured: 1000000, lguCode: 'MKT' },
-  response: { success: true, data: compareExample },
-  handler: async (req, res) => {
-    const { clientView: asClient, ...b } = req.body;
-    const result = await compareInsurers(b);
-    ok(res, asClient ? clientView(result) : result);
-  },
-});
-define({
-  method: 'POST', path: '/compare/pdf', summary: 'Printable comparison for the client on the company letterhead (commission never printed); selected limits the insurers shown',
-  screen: `${COMPARE} > Print`, middleware: [...canQuote, validate(compareBody.extend({ preparedFor: z.string().trim().max(200).nullable().optional(), selected: z.array(id).max(10).optional() }))],
-  request: { productId: 11, sumInsured: 1000000, lguCode: 'MKT', preparedFor: 'Maria Santos' }, response: '(application/pdf)',
-  handler: async (req, res) => {
-    const { preparedFor, selected, ...b } = req.body;
-    const pdf = await comparisonPdf(await compareInsurers(b), { preparedFor, selected });
-    sendPdf(res, pdf, 'insurer-comparison.pdf', 'inline');
-  },
-});
-define({
-  method: 'POST', path: '/compare/quotation', summary: 'Proceed with one insurer of the comparison: a quotation for the prospect or client priced from its rate table with the tax and charge engine',
-  screen: `${COMPARE} > Proceed`, middleware: [...writeQuote, validate(compareBody.extend({ insuranceCompanyId: id, leadRefId: z.string().max(60).optional(), clientId: z.string().max(60).optional(),
-    remarks: z.string().max(1000).optional(), insurersCompared: z.coerce.number().int().min(0).max(100).optional() }))],
-  request: { productId: 11, sumInsured: 1000000, lguCode: 'MKT', insuranceCompanyId: 2, leadRefId: 'ld_0123456789abcdef' },
-  response: { success: true, data: { quotationId: 'qt_0123456789abcdef', quotationNumber: 'QT-2026-00042', premiumTotal: 3167.5 } },
-  handler: async (req, res) => {
-    const q = await quotationFromComparison(req.body, req.user);
-    await audit(req, { entity: 'quotation', entityId: q.id, action: 'create', after: { source: 'comparison', ...req.body } });
-    created(res, { quotationId: q.id, quotationNumber: q.quote_number, premiumTotal: Number(q.premium_total) }, 'Quotation created');
   },
 });
 

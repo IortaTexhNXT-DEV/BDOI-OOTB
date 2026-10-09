@@ -112,14 +112,6 @@ export const menuList = [
             permissions: ["write:quotations"],
           },
           {
-            // package products: premiums of several insurers side by side from their rate tables
-            id: 35,
-            name: "Compare Insurers",
-            path: "/sales/compare-insurers",
-            includes: ["/sales/compare-insurers"],
-            permissions: ["write:quotations"],
-          },
-          {
             // the broker slip is the request for quotation sent to several insurers
             id: 32,
             name: "Request for Quotation",

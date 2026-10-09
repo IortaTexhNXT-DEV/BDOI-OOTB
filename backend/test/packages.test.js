@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, withProducts } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { premiumOnRate } from '../src/modules/packages/rateTables.js';
 import { insurerTotals } from '../src/modules/packages/issue.js';
@@ -21,6 +21,7 @@ async function persona(username, roles) {
 
 beforeAll(async () => {
   ctx = await setup();
+  await withProducts();
   sales = await persona('pk.sales', ['sales']);
   processing = await persona('pk.processing', ['processing']);
   claims = await persona('pk.claims', ['claims']);
@@ -47,7 +48,7 @@ describe('rate formulas and insurer grouping', () => {
   });
 });
 
-describe('insurer rate tables and comparison', () => {
+describe('insurer rate tables', () => {
   let homeId;
   it('lets the Processing Team maintain rate tables; Sales reads them', async () => {
     homeId = await idOf('products', 'HOME');
@@ -65,37 +66,10 @@ describe('insurer rate tables and comparison', () => {
     expect((await processing('delete', `/packages/rate-tables/${add.body.data.id}`)).body.data.deactivated).toBe(false);
   });
 
-  it('compares the insurers of a product side by side, cheapest total first', async () => {
-    const r = await sales('post', '/packages/compare').send({ productId: homeId, sumInsured: 1000000, lguCode: 'MKT' });
-    expect(r.status).toBe(200);
-    const cols = r.body.data.columns;
-    expect(cols.map((c) => c.insurerCode)).toEqual(['MAPFRE', 'STANDARD', 'MALAYAN', 'PIONEER']);
-    expect(cols[0]).toMatchObject({ premium: 2000, vat: 240, dst: 250, fst: 40, lgt: 4, total: 2534, commissionRate: 0.15, commissionAmount: 300 });
-    expect(cols[2]).toMatchObject({ premium: 2500, vat: 300, dst: 312.5, fst: 50, lgt: 5, total: 3167.5, deductible: 'PHP 2,500 each and every loss' });
-    expect(cols[2].keyBenefits.length).toBe(5);
-    const client = await sales('post', '/packages/compare').send({ productId: 'HOME', sumInsured: 1000000, clientView: true });
-    expect(client.body.data.columns[0].commissionRate).toBeUndefined();
-    expect(client.body.data.columns[0].lgt).toBe(15); // LGT rule rate without a location: 0.75% since migration 0236 (was 0.2%: 4)
-    expect((await sales('post', '/packages/compare').send({ productId: homeId, sumInsured: 0 })).status).toBe(400);
-    expect((await sales('post', '/packages/compare').send({ productId: homeId, sumInsured: 1000, lguCode: 'NOPE' })).status).toBe(400);
-    expect((await claims('post', '/packages/compare').send({ productId: homeId, sumInsured: 1000 })).status).toBe(403);
-  });
-
-  it('prints the comparison for the client and proceeds to a quotation priced with the engine', async () => {
-    const pdf = await sales('post', '/packages/compare/pdf').send({ productId: homeId, sumInsured: 1000000, lguCode: 'MKT', preparedFor: 'Maria Santos' });
-    expect(pdf.status).toBe(200);
-    expect(pdf.headers['content-type']).toBe('application/pdf');
-    expect(pdf.body.subarray(0, 5).toString()).toBe('%PDF-');
-    expect(pdf.body.toString('latin1')).not.toMatch(/Commission/i);
-    const lead = await sales('post', '/leads').send({ firstName: 'Nina', lastName: 'Villareal', emailId: 'nina.villareal@example.ph', contactNumber: '09170000021', leadCategory: 'Retail' });
-    const quote = await sales('post', '/packages/compare/quotation').send({ productId: homeId, sumInsured: 1000000, lguCode: 'MKT', insuranceCompanyId: await idOf('insurance_companies', 'MALAYAN'),
-      leadRefId: lead.body.leadId, insurersCompared: 4 });
-    expect(quote.status).toBe(201);
-    expect(quote.body.data).toMatchObject({ premiumTotal: 3167.5 });
-    const row = await q1('SELECT product_id, premium_base, vat, dst, fst, lgt, commission_rate, doc FROM quotes WHERE id = $1', [quote.body.data.quotationId]);
-    expect(row).toMatchObject({ product_id: homeId, premium_base: 2500, vat: 300, dst: 312.5, fst: 50, lgt: 5 });
-    expect(Number(row.commission_rate)).toBe(0.2);
-    expect(row.doc.chargeEngine).toBe(true);
+  it('serves no insurer comparison: insurers are compared on the Request for Quotation', async () => {
+    for (const path of ['/packages/compare', '/packages/compare/pdf', '/packages/compare/quotation']) {
+      expect((await sales('post', path).send({ productId: homeId, sumInsured: 1000000 })).status).toBe(404);
+    }
   });
 });
 

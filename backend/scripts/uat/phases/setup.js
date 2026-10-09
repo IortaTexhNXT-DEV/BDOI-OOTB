@@ -91,7 +91,7 @@ async function ensureInsurers(ctx) {
 
 /**
  * The scenario's insurers on the insurer market of every active product template (Product Configurator > Market
- * Mapping): a Request for Quotation approaches, and Compare Insurers compares, only insurers on the product's market.
+ * Mapping): a Request for Quotation approaches only insurers on the product's market.
  */
 async function ensureMarket(ctx) {
   const s = ctx.as.sysadmin;

@@ -1,13 +1,12 @@
 # Packaged products
 
-High-velocity retail and SME business: multi-line bundles sold as one package, the quick quote comparison across
-insurers and package policies. Routes are under `/packages`.
+High-velocity retail and SME business: multi-line bundles sold as one package, and package policies. Routes are under
+`/packages`. Insurers are compared through the Request for Quotation (broker slip) and the Comparison Reports.
 
 | Screen | Routes | Permission |
 |---|---|---|
 | Master > Packaged Products > Insurer Rate Tables | `/packages/rate-tables` | read: `read:quotations` / `read:products` / `read:masters` / `read:policies`; write: `write:products` (Processing Team) |
 | Master > Packaged Products > Bundle Products | `/packages/bundles` | same as rate tables |
-| Sales & Marketing > Compare Insurers (from Quick Quote) | `/packages/compare`, `/compare/pdf`, `/compare/quotation` | `read:quotations`; proceed: `write:quotations` |
 | Sales & Marketing > Package Bundles | `/packages/quotes`, `/packages/policies` | quotations: `read:` / `write:quotations`; issue: `write:policies`; endorse: `write:endorsements` or `write:policies`; renew: `write:renewals` or `write:quotations` |
 
 Scoped users (`security.scoped_roles`) only see their own package quotations and policies.
@@ -16,8 +15,7 @@ Scoped users (`security.scoped_roles`) only see their own package quotations and
 
 | File | What it does |
 |---|---|
-| `rateTables.js` | Insurer rate tables (insurer, product, rate basis percent / per mille / flat, rate, minimum premium, deductible, key benefits, commission rate, effective dates; no overlapping active rows) and `premiumOnRate()`. |
-| `compare.js` | The comparison matrix (every insurer with a rate table in force), the client view without commission, the PDF on the letterhead and "proceed" into a quotation priced with the tax engine. |
+| `rateTables.js` | Insurer rate tables (insurer, product, rate basis percent / per mille / flat, rate, minimum premium, deductible, key benefits, commission rate, effective dates; no overlapping active rows), `premiumOnRate()` and `commissionRateFor()`. |
 | `bundles.js` | Bundle products and their sections (product, default sum insured, rate, minimum premium, property flag, optional, allowed insurers, benefits). |
 | `bundleQuotes.js` | `priceBundle()` and package quotations (`PQ-` numbers, series `package_quote`). |
 | `issue.js` | Issuance under one policy number (`PKG-`, series `package_policy`), the booking split per insurer, section endorsements, renewal of the whole package, quotation and schedule PDFs. |
@@ -62,5 +60,6 @@ Scoped users (`security.scoped_roles`) only see their own package quotations and
 
 ## Settings
 
-`packages.quote_validity_days`, `packages.endorsement_prorata`, `packages.comparison_disclaimer`,
+`packages.quote_validity_days`, `packages.endorsement_prorata`, `packages.comparison_disclaimer` (note on the bundle
+quotation and schedule),
 `packages.flat_charges_on_first_section`.
