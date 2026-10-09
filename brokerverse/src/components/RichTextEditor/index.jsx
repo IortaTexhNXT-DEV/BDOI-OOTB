@@ -9,9 +9,9 @@ import "./index.scss";
 export const htmlIsEmpty = (html) => !String(html || "").replace(/<(?!img)[^>]*>/gi, "").replace(/&nbsp;/g, " ").trim() && !/<img/i.test(String(html || ""));
 
 const TOOLS = [
-  { command: "bold", icon: "pi pi-bold", key: "bold", label: "Bold" },
-  { command: "italic", icon: "pi pi-italic", key: "italic", label: "Italic" },
-  { command: "underline", icon: "pi pi-underline", key: "underline", label: "Underline" },
+  { command: "bold", letter: "B", key: "bold", label: "Bold" },
+  { command: "italic", letter: "I", key: "italic", label: "Italic" },
+  { command: "underline", letter: "U", key: "underline", label: "Underline" },
   { command: "insertUnorderedList", icon: "pi pi-list", key: "bullets", label: "Bulleted list" },
   { command: "insertOrderedList", icon: "pi pi-sort-numeric-down", key: "numbers", label: "Numbered list" },
   { command: "removeFormat", icon: "pi pi-eraser", key: "clear", label: "Clear formatting" },
@@ -102,7 +102,8 @@ const RichTextEditor = ({ value, onChange, placeholders = [], invalid = false, i
     <div className={`bv-rte${invalid ? " bv-rte--invalid" : ""}`}>
       <div className="bv-rte__toolbar" role="toolbar" aria-label={t("editor.toolbar", "Formatting")}>
         {TOOLS.map((tool) => (
-          <Button key={tool.key} type="button" icon={tool.icon} text size="small" disabled={html} onMouseDown={keep} onClick={() => exec(tool.command)}
+          <Button key={tool.key} type="button" icon={tool.icon} label={tool.letter} className={tool.letter ? `bv-rte__letter bv-rte__letter--${tool.key}` : undefined} text size="small"
+            disabled={html} onMouseDown={keep} onClick={() => exec(tool.command)}
             tooltip={t(`editor.${tool.key}`, tool.label)} tooltipOptions={{ position: "top" }} aria-label={t(`editor.${tool.key}`, tool.label)} />
         ))}
         <Button type="button" icon="pi pi-link" text size="small" disabled={html} onMouseDown={keep} onClick={addLink}
@@ -114,7 +115,7 @@ const RichTextEditor = ({ value, onChange, placeholders = [], invalid = false, i
           <span className="bv-rte__placeholders">
             <span className="bv-rte__insert">{t("editor.insert", "Insert")}</span>
             {placeholders.map((p) => (
-              <Button key={p.name} type="button" label={p.label} outlined size="small" onMouseDown={keep} onClick={() => insert(p)} />
+              <Button key={p.name} type="button" label={p.label} icon="pi pi-plus" className="bv-rte__chip" outlined size="small" onMouseDown={keep} onClick={() => insert(p)} />
             ))}
           </span>
         ) : null}

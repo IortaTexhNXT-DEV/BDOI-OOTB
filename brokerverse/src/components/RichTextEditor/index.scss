@@ -25,6 +25,27 @@
     padding: 0;
   }
 
+  .p-button.bv-rte__letter {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    justify-content: center;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1rem;
+  }
+
+  .bv-rte__letter--bold .p-button-label {
+    font-weight: 700;
+  }
+
+  .bv-rte__letter--italic .p-button-label {
+    font-style: italic;
+  }
+
+  .bv-rte__letter--underline .p-button-label {
+    text-decoration: underline;
+  }
+
   .bv-rte__on {
     background: var(--surface-hover, #e9ecef);
   }
@@ -37,9 +58,14 @@
   gap: 0.25rem;
   margin-left: auto;
 
-  .p-button {
+  .p-button.bv-rte__chip {
     padding: 0.2rem 0.5rem;
     font-size: 0.8rem;
+    border-radius: 999px;
+
+    .p-button-icon {
+      font-size: 0.7rem;
+    }
   }
 }
 
