@@ -181,7 +181,8 @@ export async function riskFacts(v = {}) {
     if (byClass[vehicleType]) f.vehicleUse = byClass[vehicleType];
     else if (yes(get('TNVS'))) f.vehicleUse = 'TNVS';
   }
-  const si = num(v.totalSumInsured) || num(v.sumInsured) || num(rd.sumInsured) || num(v.lossAndDamageCoverage);
+  // a motor quotation's sum insured is the vehicle's (own damage), not the total with the liability limits
+  const si = num(v.lossAndDamageCoverage) || num(v.totalSumInsured) || num(v.sumInsured) || num(rd.sumInsured);
   if (si > 0) f.sumInsured = round2(si);
   for (const k of ['fairMarketValue', 'driverAge', 'claimsLast3Years', 'ncbYears', 'fleetSize']) if (present(get(k))) f[k] = num(get(k));
   // the driver's date of birth gives the driver age (full years on the quotation date)
