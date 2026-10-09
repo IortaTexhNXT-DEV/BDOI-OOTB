@@ -1,7 +1,7 @@
 /**
  * E-signatures: capture (drawn or uploaded) for authorised signatories (Master > Signatories, write:masters) and for a
  * user's own signature (My Profile), versions, revocation, the protected image, and the document signature mapping
- * (Master > System Settings > Theme and Branding > Document signatures).
+ * (Master > System Configuration > Document Signatures).
  */
 import { moduleRouter } from '../../lib/registry.js';
 import { audit } from '../../lib/audit.js';
@@ -66,7 +66,7 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/slots', summary: 'Document signature mapping: document types, slot sources and conditions, and the slots', screen: 'Master > System Settings > Theme and Branding > Document signatures',
+  method: 'GET', path: '/slots', summary: 'Document signature mapping: document types, slot sources and conditions, and the slots', screen: 'Master > System Configuration > Document Signatures',
   middleware: canRead('settings'),
   response: { success: true, data: { documentTypes: [{ key: 'policy-schedule', label: 'Policy schedule' }], sources: [{ key: 'default-signatory', label: 'The default signatory' }], conditions: [{ key: 'issued', label: 'Once the document is issued' }],
     slots: [{ id: 1, documentType: 'policy-schedule', slot: 'authorized', label: 'For {{companyName}}', source: 'default-signatory', condition: 'issued', active: true }] } },
@@ -79,7 +79,7 @@ define({
 });
 define({
   method: 'PUT', path: '/slots', summary: 'Save the signature mapping of the document types sent ({ slots: [{ documentType, slot, label, source, signatoryId?, condition, active }] })',
-  screen: 'Master > System Settings > Theme and Branding > Document signatures', middleware: canWrite('settings'),
+  screen: 'Master > System Configuration > Document Signatures', middleware: canWrite('settings'),
   request: { slots: [{ documentType: 'payment-voucher', slot: 'approved-by', label: 'Approved by', source: 'approving-user', condition: 'approved', active: true }] },
   response: { success: true, data: [] },
   handler: async (req, res) => {

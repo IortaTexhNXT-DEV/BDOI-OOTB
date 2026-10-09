@@ -84,7 +84,7 @@ export async function buildAttachments(list) {
 
 /**
  * The nodemailer message of an outbox row (attachments generated now). The body is wrapped in the broker's e-mail
- * layout (Theme and Branding > E-mail: header band with the logo, footer line) at send time; the inline logo follows
+ * layout (Master > System Configuration > E-mail Layout: header band with the logo, footer line) at send time; the inline logo follows
  * the document attachments.
  */
 export async function buildMessage(m) {

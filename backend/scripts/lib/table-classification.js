@@ -48,8 +48,8 @@ export const TRANSACTION_TABLES = [
   'package_endorsements', 'package_sections', 'package_quotes', 'payment_events', 'payment_links',
   // access reviews held, calendar events of users
   'access_review_items', 'access_reviews', 'agent_events',
-  // data privacy: consents and data subject requests belong to the clients and leads that go
-  'data_subject_requests', 'privacy_consents',
+  // consents (marketing and messaging) belong to the clients and leads that go
+  'privacy_consents',
   // the work diary of Operations > My Work (tasks and follow-ups on the records that go)
   'work_tasks',
   // integrations: CTPL authentication of each cover, bank payment batches and their lines
@@ -90,7 +90,7 @@ export const SYSTEM_RESET_ACTIONS = {
   login_history: 'remove',
   refresh_tokens: 'remove', // sign-in sessions: everyone signs in again
   password_resets: 'remove',
-  data_load_batches: 'remove', // Go-Live Data Load history: the loads of a smoke test go with the records they created
+  data_load_batches: 'remove', // go-live data load history: the loads of a smoke test go with the records they created
   data_load_rows: 'remove',
   data_load_comparisons: 'remove', // environment comparisons go with the load history (compare again after the reset)
   documents: 'partial', // uploaded and generated file records of transaction folders (TRANSACTION_FILE_FOLDERS)

@@ -15,9 +15,7 @@ import SvgEyeIcon from "../../../../../assets/icons/SvgEyeIcon";
 import SvgEditIcon from "../../../../../assets/icons/SvgEditIcon";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getPatchRoleEditMiddleware,
   getSearchRoleMiddleware,
-  getViewRoleEditMiddleware,
   getRoleListMiddleware,
 } from "../store/roleMiddleware";
 import MasterStatusToggle from "../../../common/MasterStatusToggle";
@@ -51,14 +49,13 @@ const RoleMaster = () => {
   const handleNavigate = () => {
     navigate("/master/generals/usermanagement/role/add/1");
   };
+  // the view and edit screens load the record of the address
   const handleView = (rowData) => {
-    dispatch(getViewRoleEditMiddleware(rowData));
-    navigate("/master/generals/usermanagement/role/view/2");
+    navigate(`/master/generals/usermanagement/role/view/${rowData.id}`);
   };
 
   const handlEdit = (rowData) => {
-    dispatch(getPatchRoleEditMiddleware(rowData));
-    navigate("/master/generals/usermanagement/role/edit/3");
+    navigate(`/master/generals/usermanagement/role/edit/${rowData.id}`);
   };
 
   useEffect(() => {

@@ -26,8 +26,8 @@ export async function header(title, number, opts = {}) {
 }
 
 /**
- * Signature part of a document (modules/e-signatures: Master > System Settings > Theme and Branding > Document
- * signatures): { watermark, section }. `ctx` { status, date, signatory, issuedBy, approvedBy, names }; `blocks` the
+ * Signature part of a document (modules/e-signatures: Master > System Configuration > Document Signatures):
+ * { watermark, section }. `ctx` { status, date, signatory, issuedBy, approvedBy, names }; `blocks` the
  * document's own signature lines in print order ({ slot } for a mapped one, { label } for a blank line).
  */
 export async function signatures(h, documentType, ctx, opts = {}) {

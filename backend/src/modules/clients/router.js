@@ -14,6 +14,8 @@ const customers = moduleRouter('Clients', '/customers');
 const SCREEN = 'Operations > Clients';
 const canRead = [requireAuth, requirePermission('read:clients')];
 const canWrite = [requireAuth, requirePermission('write:clients')];
+// the customer codes of the bulk print of Receipts and Disbursement: Cash Control receipts without the client register
+const canListCodes = [requireAuth, requirePermission('read:clients', 'read:receipts', 'read:disbursements')];
 const docUpload = memoryUpload({ files: 1 }).single('file');
 
 const clientBody = z.object({
@@ -186,7 +188,7 @@ define({
 });
 
 customers.define({
-  method: 'GET', path: '/codes', summary: 'Customer codes for dropdowns', screen: 'Accounts > Disbursement / Receipts', middleware: canRead,
+  method: 'GET', path: '/codes', summary: 'Customer codes for dropdowns (read:clients, read:receipts or read:disbursements)', screen: 'Accounts > Disbursement / Receipts', middleware: canListCodes,
   response: { success: true, data: [{ clientId: 'cl_1', customerCode: 'CL-2026-00001', name: 'Juan Dela Cruz' }] },
   handler: async (req, res) => ok(res, await svc.customerCodes(await scopeOf(req))),
 });

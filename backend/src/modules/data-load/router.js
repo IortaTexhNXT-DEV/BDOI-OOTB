@@ -12,14 +12,15 @@ import * as svc from './service.js';
 import * as cmp from './comparisons.js';
 
 /**
- * Go-Live Data Workbench (Master > Go-Live Data Load): the configuration and migration workbooks. Download a blank
+ * Go-Live Data Workbench: the configuration and migration workbooks, through the API only (there is no screen; the
+ * go-live scripts, npm run rehearsal:golive and npm run compare:environments, call it). Download a blank
  * template or the current data of this environment, upload (validated as a dry run, nothing saved), download the rows
  * in error, load, history and the reconciliation of a migration load; the environment comparison (an export of another
  * environment compared with this one, or two exports with each other: never loads). System Administrator only
  * (read:data-load / write:data-load, migrations 0244 and 0247).
  */
 const { router, define } = moduleRouter('Go-Live Data Workbench', '/data-load');
-const SCREEN = 'Master > Go-Live Data Load';
+const SCREEN = 'API (go-live scripts)';
 const canRead = [requireAuth, requirePermission('read:data-load', 'write:data-load')];
 const canWrite = [requireAuth, requirePermission('write:data-load')];
 const XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -177,7 +178,7 @@ define({
       newUsers: r.temporaryPasswords.map((u) => u.username) } });
     const counts = Object.values(r.batch.loadedCounts || {}).reduce((a, c) => ({ created: a.created + (c.created || 0), updated: a.updated + (c.updated || 0) }), { created: 0, updated: 0 });
     await notify({ userId: req.user.id, type: 'info', title: `Go-live ${r.batch.kit} workbook loaded`,
-      message: `Batch ${r.batch.id} (${r.batch.fileName || r.batch.kit}): ${counts.created} created, ${counts.updated} updated`, link: '/master/go-live-data-load', entity: 'data_load_batch', entityId: r.batch.id });
+      message: `Batch ${r.batch.id} (${r.batch.fileName || r.batch.kit}): ${counts.created} created, ${counts.updated} updated`, entity: 'data_load_batch', entityId: r.batch.id });
     // temporary passwords are in the body once; never cached
     res.set('Cache-Control', 'no-store');
     ok(res, r, `Loaded: ${counts.created} created, ${counts.updated} updated`);

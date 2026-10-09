@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
  * Environment comparison for release pipelines: proves that the configuration and masters of two running environments
- * are mirrored (Dev -> SIT -> UAT -> Pre-Prod -> Production), the same comparison as Master > Go-Live Data Load >
- * Compare environments, run outside both of them.
+ * are mirrored (Dev -> SIT -> UAT -> Pre-Prod -> Production), the same comparison as POST /api/data-load/comparisons,
+ * run outside both of them.
  *
  * Downloads the configuration workbook with the current data (GET /api/data-load/kits/configuration/template?prefill=true)
  * from SOURCE and TARGET, compares them on the natural keys of the workbench (GET /api/data-load/kits) and writes the

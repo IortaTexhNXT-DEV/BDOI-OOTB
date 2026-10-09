@@ -3,8 +3,11 @@
  * screen's permission and validation); the generic configuration endpoints (PUT /settings, PUT
  * /system-settings/configuration) refuse a change to them and Master > Configuration shows them read-only with a link.
  *
- *   Master > System Settings       look of the application: logo on screen, favicon, colours, display currency,
- *                                  language and application name
+ *   Master > System Settings       display currency and language
+ *   Brand pack / layout screens    look of the application (application name, logo on screen, favicon, colours):
+ *                                  the brand pack of the deployment (BRAND_PACK); the e-mail and document sections of
+ *                                  the theme: Master > System Configuration > E-mail Layout / Documents and Reports
+ *                                  Layout
  *   Master > Company               the legal identity: company name, TIN, registered address and the print logo are
  *                                  fields of the primary company; these settings are only the fallback used when no
  *                                  company exists (lib/letterhead.js, period-end/tax.js)
@@ -17,7 +20,13 @@ export const SETTING_OWNERS = [
   {
     screen: 'Master > System Settings',
     path: '/master/configuration/system-settings',
-    keys: ['currency.default', 'general.default_language', 'general.system_name'],
+    keys: ['currency.default', 'general.default_language'],
+    prefixes: [],
+  },
+  {
+    screen: 'the brand pack (BRAND_PACK) and Master > System Configuration > E-mail Layout / Documents and Reports Layout',
+    path: '/master/configuration/documents-layout',
+    keys: ['general.system_name'],
     prefixes: ['branding.'],
   },
   {

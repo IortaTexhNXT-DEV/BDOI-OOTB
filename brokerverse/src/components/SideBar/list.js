@@ -1460,7 +1460,28 @@ export const menuList = [
             id: 0,
             name: "System Settings",
             path: "/master/configuration/system-settings",
-            includes: ["/master/configuration/system-settings", "/master/configuration/theme-branding"],
+            includes: ["/master/configuration/system-settings"],
+          },
+          {
+            // the layout of every e-mail the system sends
+            id: 25,
+            name: "E-mail Layout",
+            path: "/master/configuration/email-layout",
+            includes: ["/master/configuration/email-layout"],
+          },
+          {
+            // print colours, logo, footer lines and Excel header of the documents and report files
+            id: 26,
+            name: "Documents and Reports Layout",
+            path: "/master/configuration/documents-layout",
+            includes: ["/master/configuration/documents-layout"],
+          },
+          {
+            // which signature prints on which document
+            id: 27,
+            name: "Document Signatures",
+            path: "/master/configuration/document-signatures",
+            includes: ["/master/configuration/document-signatures"],
           },
           {
             id: 20,
@@ -1510,38 +1531,6 @@ export const menuList = [
             name: "Insurer Integration",
             path: "/master/configuration/insurer-integration",
             includes: ["/master/configuration/insurer-integration"],
-          },
-        ],
-      },
-      {
-        id: 25,
-        name: "Data Privacy",
-        section: true,
-        submenu: [
-          {
-            id: 1,
-            name: "Data Subject Requests",
-            path: "/master/data-privacy/requests",
-            includes: ["/master/data-privacy/requests"],
-          },
-          {
-            id: 2,
-            name: "Consent Register",
-            path: "/master/data-privacy/consents",
-            includes: ["/master/data-privacy/consents"],
-          },
-        ],
-      },
-      {
-        // configuration and migration workbooks loaded before go-live
-        name: "Go-Live and Data",
-        section: true,
-        submenu: [
-          {
-            id: 26,
-            name: "Go-Live Data Load",
-            path: "/master/go-live-data-load",
-            includes: ["/master/go-live-data-load"],
           },
         ],
       },

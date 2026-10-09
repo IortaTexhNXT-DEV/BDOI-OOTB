@@ -6,7 +6,6 @@ import { configureStore } from "@reduxjs/toolkit";
 import { applyBranding, contrastRatio, loadFontStylesheet, mix, themeToCssVars } from "./themeEngine";
 import { BrandingProvider, useBranding, fetchBranding } from "./BrandingProvider";
 import LoginArt, { loginPanelProps } from "./LoginArt";
-import ThemePreview from "../../module/ThemeBranding/ThemePreview";
 const postcssBrandVars = require("../../../scripts/postcss-brand-vars");
 
 const TIS = {
@@ -110,7 +109,7 @@ describe("branding provider", () => {
   });
 });
 
-describe("sign-in picture and live preview", () => {
+describe("sign-in picture", () => {
   it("shows a library picture over the gradient, an uploaded picture at its focal point, or colour only", () => {
     expect(loginPanelProps({ login: { panel: "library", libraryUrl: "/brand/library/motor.svg" } }).src).toBe("/brand/library/motor.svg");
     const img = loginPanelProps({ login: { panel: "image", panelImageUrl: "/api/branding/assets/login-panel?v=1", focalX: 20, focalY: 80 } });
@@ -119,16 +118,5 @@ describe("sign-in picture and live preview", () => {
     render(<LoginArt theme={TIS} />);
     expect(screen.getByTestId("login-art-image").getAttribute("src")).toBe("/brand/library/motor.svg");
     expect(screen.getByTestId("login-art-overlay").style.background).toBe("rgba(0, 0, 0, 0.2)");
-  });
-
-  it("previews the draft theme on its own box: header, side bar, table, buttons, document header and sign-in page", () => {
-    render(<ThemePreview theme={TIS} fontStack="Arial" logoUrl="/logo.png" systemName="TIS" companyName="Toyota Insurance Services" t={(k, d) => d} />);
-    const box = screen.getByTestId("theme-preview");
-    expect(box.style.getPropertyValue("--bv-header-bg")).toBe("#ffffff");
-    expect(box.style.getPropertyValue("--bv-table-header-bg")).toBe("#eeeeee");
-    expect(document.documentElement.style.getPropertyValue("--bv-header-bg")).toBe("");
-    expect(screen.getByText("Policy Schedule")).toBeTruthy();
-    expect(screen.getByText("Licence No. 0000")).toBeTruthy();
-    expect(screen.getByText("Welcome")).toBeTruthy();
   });
 });

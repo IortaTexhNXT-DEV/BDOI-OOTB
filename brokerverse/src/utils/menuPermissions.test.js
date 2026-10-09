@@ -177,7 +177,7 @@ describe("menu structure", () => {
     for (const p of ["/master/finance/taxation", "/master/finance/posting-rules"]) {
       expect(isPathAllowed(p, menuList, ["accounting"])).toBe(true);
     }
-    expect(isPathAllowed("/master/data-privacy/requests", menuList, ["operations"])).toBe(true);
+    expect(isPathAllowed("/master/insurance/channels", menuList, ["operations"])).toBe(true);
     expect(isPathAllowed("/master/generals/usermanagement/user", menuList, ["operations"])).toBe(false);
   });
 });

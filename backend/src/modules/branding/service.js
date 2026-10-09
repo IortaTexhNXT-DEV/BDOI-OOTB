@@ -90,7 +90,7 @@ export async function currentTheme() {
 const isLocalImageRef = (v) => !v || /^\/[A-Za-z0-9._\-/]+$/.test(v) || v.startsWith(`${config.publicBaseUrl}/api/branding/assets/`) || /\/api\/s3\/object\/[A-Za-z0-9._\-/]+$/.test(v.split('?')[0]);
 
 /**
- * Validate a theme sent by the Theme and Branding screen or a brand pack. Unknown values are refused (not ignored):
+ * Validate a theme sent by the layout screens or a brand pack. Unknown values are refused (not ignored):
  * colours must be hex, the font must be one of FONTS, numbers within their range, texts within their length, images
  * uploaded (never another web site); text on the buttons, the header and the table header must reach WCAG AA.
  * Returns { theme (resolved), errors, warnings, checks }.
@@ -278,7 +278,7 @@ export async function documentBranding(letterhead = null, theme = null) {
 const escHtml = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 /**
- * Wrap an e-mail body in the broker's layout (Theme and Branding > E-mail): a header band with the logo (attached
+ * Wrap an e-mail body in the broker's layout (Master > System Configuration > E-mail Layout): a header band with the logo (attached
  * inline, cid:brand-logo) or the company name, the body, and the footer line. Applied when the message is sent, so a
  * queued message carries the branding in force. Returns { html, attachments } (nodemailer attachments).
  * `logoAs: 'data'` embeds the logo as a data URI instead (the preview on screen).

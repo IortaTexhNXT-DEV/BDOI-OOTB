@@ -119,6 +119,16 @@ describe('look-ups without read:users', () => {
       expect(r.body.data.find((o) => o.value === ids['pw.finance'])).toBeUndefined();
     }
   });
+  it('GET /reports/filters/clients serves the report Client filter to every report reader, within the record scope', async () => {
+    await makeUser('pw.ccd', ['tis-ccd-bp']);
+    expect((await as('pw.ccd', 'get', '/clients')).status).toBe(403);
+    const r = await as('pw.ccd', 'get', '/reports/filters/clients');
+    expect(r.status).toBe(200);
+    expect(r.body.data).toEqual(expect.arrayContaining([{ label: 'Walker Uno', value: 'cl_pw1', code: 'CL-PW-1' }, { label: 'Walker Dos', value: 'cl_pw2', code: 'CL-PW-2' }]));
+    const own = (await as('pw.agent', 'get', '/reports/filters/clients')).body.data.map((o) => o.value);
+    expect(own).toContain('cl_pw1');
+    expect(own).not.toContain('cl_pw2');
+  });
   it('GET /remittance/approvals/approvers lists the other users who may approve remittances', async () => {
     const r = await as('pw.finance', 'get', '/remittance/approvals/approvers');
     expect(r.status).toBe(200);

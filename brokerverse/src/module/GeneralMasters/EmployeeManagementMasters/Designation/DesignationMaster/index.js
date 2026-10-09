@@ -16,8 +16,6 @@ import SvgEditIcon from "../../../../../assets/icons/SvgEditIcon";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import {
-  getDesignationPatchData,
-  getDesignationViewData,
   getSearchDesignationMiddleware,
   getDesignationListByIdMiddleware,
 } from "../store/designationMiddleware";
@@ -40,14 +38,13 @@ const DesignationMaster = () => {
   const handleNavigate = () => {
     navigate("/master/generals/employeemanagement/designation/add/1");
   };
+  // the view and edit screens load the record of the address
   const handleView = (rowData) => {
-    dispatch(getDesignationViewData(rowData));
-    navigate("/master/generals/employeemanagement/designation/view/2");
+    navigate(`/master/generals/employeemanagement/designation/view/${rowData.id}`);
   };
 
   const handlEdit = (rowData) => {
-    dispatch(getDesignationPatchData(rowData));
-    navigate("/master/generals/employeemanagement/designation/edit/3");
+    navigate(`/master/generals/employeemanagement/designation/edit/${rowData.id}`);
   };
   const items = [
     { label: t("generalMasters.employeeManagement") },

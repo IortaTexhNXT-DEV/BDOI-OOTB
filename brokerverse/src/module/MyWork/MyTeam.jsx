@@ -17,7 +17,7 @@ import { SKELETON_ROWS, cell } from "./parts";
 
 const initials = (name) => String(name || "?").split(/[\s.]+/).filter(Boolean).slice(0, 2).map((p) => p[0].toUpperCase()).join("");
 
-/** Reassign an item (claim handler, data subject request, task) to the manager or someone in the team. */
+/** Reassign an item (claim handler, task) to the manager or someone in the team. */
 const ReassignDialog = ({ item, onHide, onDone }) => {
   const { t } = useTranslation();
   const [people, setPeople] = useState([]);

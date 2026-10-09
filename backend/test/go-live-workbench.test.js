@@ -1,5 +1,5 @@
 /**
- * Go-Live Data Workbench (Master > Go-Live Data Load): the configuration and migration kits. Template download per
+ * Go-Live Data Workbench (API /data-load): the configuration and migration kits. Template download per
  * kit, validation as a dry run (one rolled-back transaction, cross-sheet references), errors and the errors workbook
  * re-uploaded after the fix, load and re-load without duplicates, migration flags without journals, bills or
  * commission, the cutover date and go-live lock guards, the numbering collision check, the permission and the

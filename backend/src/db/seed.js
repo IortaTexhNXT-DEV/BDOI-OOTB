@@ -39,7 +39,7 @@ export const ROLES = [
 /** Role codes of earlier releases (renamed or merged by migration 0140_broker_roles.sql); a fresh seed never creates them. */
 export const RETIRED_ROLES = ['it-admin', 'ba', 'user-access-admin', 'underwriting', 'customer-services', 'finance', 'finance-manager', 'agent'];
 const MODULES = ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'claims', 'renewals', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'incentive', 'products', 'masters', 'users', 'roles', 'settings', 'reports', 'schedules', 'notifications', 'journal-vouchers', 'audit', 'period-end', 'bank-reconciliation',
-  // go-live data workbench (Master > Go-Live Data Load, migration 0243): System Administrator only
+  // go-live data workbench (API /data-load, migration 0243): System Administrator only
   'data-load'];
 // write:receipts (official receipts, cash posting, payment verification) is Accounting's (TISPH: Cash Control's), never
 // the front office's: segregation of duties.
@@ -52,8 +52,6 @@ const ROLE_PERMS = {
     'pii:view'],
   processing: ['profile', 'leads:read', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'products', 'reports', 'notifications', 'masters:read', 'claims:read'],
   operations: ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'claims:read', 'reports', 'notifications', 'masters:read', 'products:read',
-    // data privacy: data subject requests, consent register, personal data export and anonymisation (permissions of migration 0221)
-    'privacy:read', 'privacy:write',
     // full personal identifiers (migration 0276)
     'pii:view'],
   claims: ['profile', 'clients:read', 'policies:read', 'claims', 'reports', 'notifications', 'masters:read'],
@@ -100,8 +98,8 @@ const TIS_FRONT_READS = ['products:read', 'channels:read', 'motor-programmes:rea
   'integrations:read', 'schedules:read'];
 const TIS_MAKER = ['quotations', 'policies', 'endorsements', 'renewals', 'fleet', 'marine', 'pii:view'];
 const TIS_FRONT_APPROVALS = ['quotations:approve', 'policies:approve', 'renewals:approve'];
-const TIS_SALES = [...TIS_COMMON, ...TIS_FRONT_READS, ...TIS_MAKER, 'leads', 'clients', 'sales-activities', 'privacy', 'claims:read'];
-const TIS_OPS = [...TIS_COMMON, ...TIS_FRONT_READS, ...TIS_MAKER, 'claims', 'leads:read', 'clients:read', 'sales-activities:read', 'lead-assignment:read', 'privacy:read'];
+const TIS_SALES = [...TIS_COMMON, ...TIS_FRONT_READS, ...TIS_MAKER, 'leads', 'clients', 'sales-activities', 'claims:read'];
+const TIS_OPS = [...TIS_COMMON, ...TIS_FRONT_READS, ...TIS_MAKER, 'claims', 'leads:read', 'clients:read', 'sales-activities:read', 'lead-assignment:read'];
 const TIS_CCD = [...TIS_COMMON, 'receipts'];
 const TIS_ACCOUNTING_READS = ['disbursements:read', 'journal-vouchers:read', 'payables:read', 'fixed-assets:read'];
 const TIS_BUSINESS_READS = ['leads:read', 'clients:read', 'quotations:read', 'policies:read', 'endorsements:read', 'renewals:read', 'claims:read'];
@@ -125,7 +123,7 @@ Object.assign(ROLE_PERMS, {
     ...TIS_ACCOUNTING_READS, 'masters', 'channels', 'products', 'motor-programmes', 'premium-charges:write', 'users', 'roles', 'access-control', 'access-control:approve', 'settings',
     'integrations', 'schedules', 'audit:read'],
   'tis-general-manager': [...TIS_COMMON, ...TIS_FRONT_READS, ...TIS_MAKER, ...TIS_FRONT_APPROVALS, 'leads', 'clients', 'claims', 'claims:approve', 'sales-activities',
-    'lead-assignment', 'campaigns', 'privacy:read', ...TIS_ACCOUNTING_READS, 'payables:approve', 'bank-reconciliation:read', 'period-end:read', 'audit:read', 'users:read',
+    'lead-assignment', 'campaigns', ...TIS_ACCOUNTING_READS, 'payables:approve', 'bank-reconciliation:read', 'period-end:read', 'audit:read', 'users:read',
     'roles:read', 'access-control:read'],
 });
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */

@@ -1,0 +1,160 @@
+// Layout screens of Master > System Configuration: E-mail Layout, Documents and Reports Layout, Document Signatures.
+
+.bv-dl {
+  .bv-dl__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .bv-dl__lead,
+  .bv-dl__hint {
+    color: #656565;
+    font-size: 13px;
+    line-height: 19px;
+    max-width: 760px;
+    margin: 0 0 12px;
+  }
+
+  .bv-dl__actions,
+  .bv-dl__buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .bv-dl__msg {
+    width: 100%;
+    margin-bottom: 12px;
+    justify-content: flex-start;
+  }
+
+  .bv-dl__card {
+    background: #ffffff;
+    border: 1px solid #e4e4e4;
+    border-radius: 12px;
+    padding: 16px;
+    max-width: 1100px;
+  }
+
+  .bv-dl__section {
+    padding: 12px 0 16px;
+    border-bottom: 1px solid #eeeeee;
+
+    &:first-child {
+      padding-top: 0;
+    }
+
+    &:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    h3 {
+      font-size: 15px;
+      margin: 0 0 8px;
+    }
+  }
+
+  .bv-dl__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px 16px;
+    margin-bottom: 8px;
+  }
+
+  .bv-dl__field,
+  .bv-dl__color {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 8px;
+
+    > label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #4b4b4b;
+    }
+
+    .p-dropdown,
+    .p-inputtext,
+    .p-inputnumber {
+      width: 100%;
+    }
+  }
+
+  .bv-dl__switch {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .bv-dl__color-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .p-colorpicker-preview {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+    }
+
+    .p-inputtext {
+      width: 96px;
+      flex: 0 0 auto;
+      font-family: monospace;
+    }
+  }
+
+  .bv-dl__email {
+    width: 100%;
+    height: 360px;
+    border: 1px solid #e4e4e4;
+    border-radius: 8px;
+    margin-top: 12px;
+  }
+
+  .bv-dl__slots-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .bv-dl__slot {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 16px;
+    padding: 12px;
+    border: 1px solid #e4e4e4;
+    border-radius: 10px;
+    background: #fafafa;
+
+    .bv-dl__field {
+      margin-bottom: 4px;
+    }
+
+    @media (max-width: 640px) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .bv-dl__slot-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .bv-dl__switch {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 13px;
+    }
+  }
+}

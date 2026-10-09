@@ -1,9 +1,9 @@
 # Toyota Insurance Services: brand pack
 
 Client brand pack for the **Toyota Insurance Services (Philippines)** engagement. It is an optional pack bundled with
-the product that a System Administrator enables in one environment from Master > System Settings > Theme and Branding
-> Brand packs > Bundled packs; it is not the BrokerVerse default, nothing enables it automatically, and it is not part
-of the generic out-of-the-box seed that every broker receives.
+the product that a TISPH deployment enables with `BRAND_PACK=toyota-insurance-services` (or a System Administrator
+through the bundled pack API); it is not the BrokerVerse default, nothing enables it without one of these, and it is
+not part of the generic out-of-the-box seed that every broker receives.
 
 ## Trademark and contract
 
@@ -31,7 +31,7 @@ two copies must stay identical (a test compares them).
 Following the client's web site style (shared by the product owner as screenshots; the site is not reachable from the
 build environment): white header and side bar, near-black text and controls, light grey backgrounds, a clean
 sans-serif, and Toyota red only as a small accent. No photographs of the client's web site are included (their
-copyright): the broker uploads its own sign-in picture in Theme and Branding if it wants one.
+copyright): the broker supplies its own sign-in picture (branding image upload of the API) if it wants one.
 
 | Role | Colour | Note |
 | --- | --- | --- |
@@ -55,16 +55,19 @@ the application name to "Toyota Insurance Services" (untick "Also set the applic
 
 1. Confirm the environment belongs to the Toyota Insurance Services engagement (see above) and keep the contract
    reference with the engagement records.
-2. Sign in as a System Administrator: Master > System Settings > Theme and Branding > Brand packs > Bundled packs.
-3. On the Toyota Insurance Services card, check the preview (Sample document, Sample e-mail), then select Enable. The
-   dialog names the owner of the marks and checks the pack; tick "This environment belongs to the client engagement wh
-   se contract with iorta TechNXT covers these marks" (the button stays disabled until then). "Also use the logo on printed documents" sets the logo as the print
-   logo of the primary company (Master > Company); "Also set the application name of the pack" sets the name.
-4. Every signed-in user gets the new look on their next navigation; documents and reports printed from now on use it.
-   The card shows "Enabled on <date> by <user>"; the enablement and the acknowledgement are in the audit trail.
-5. Back to default on the card returns the environment to the iorta TechNXT default (theme, logo, favicon, and the
-   application name and print logo as they were before the pack).
+2. Set `BRAND_PACK=toyota-insurance-services` on the API of the environment (deploy/REFERENCE.md, "Brand pack of the
+   deployment"): at its first start the API enables the pack with the acknowledgement of the deployment, sets the logo
+   as the print logo of the primary company (Master > Company) and the application name. Without the variable, a
+   System Administrator enables it through the API: `POST /api/branding/packs/bundled/toyota-insurance-services/check`,
+   then `.../enable` with `acknowledgedPermission: true` (the call is refused without it).
+3. Every signed-in user gets the new look on their next navigation; documents and reports printed from now on use it.
+   `GET /api/branding/packs/bundled` shows the enablement with who and when; it and the acknowledgement are in the
+   audit trail.
+4. Back to default (`POST /api/branding/packs/reset-default`) returns the environment to the iorta TechNXT default
+   (theme, logo, favicon, and the application name and print logo as they were before the pack).
 
-The zip remains importable (Theme and Branding > Brand packs > Import) for an environment that does not list bundled
-packs. To promote the branding to another environment, enable the pack there the same way, or export the brand pack
-from UAT and import that file in Production. See `docs/onboarding/BRANDING_AND_SIGNATURES.md`.
+The e-mail layout, the documents and reports layout and the signature mapping are then adjusted on Master > System
+Configuration (E-mail Layout, Documents and Reports Layout, Document Signatures). The zip remains importable
+(`POST /api/branding/brand-pack`) for an environment that does not list bundled packs. To promote the branding to
+another environment, enable the pack there the same way, or export the brand pack from UAT and import that file in
+Production. See `docs/onboarding/BRANDING_AND_SIGNATURES.md`.

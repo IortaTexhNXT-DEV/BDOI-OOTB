@@ -26,6 +26,17 @@ describe('cost centres', () => {
     expect(cc).toMatchObject({ name: 'Toyota Insurance Services', data: { isDefault: true, companyCode: 'TISPH' } });
   });
 
+  it('Master > Finance > Cost Centres lists and maintains the master for Accounting; the front office cannot change it', async () => {
+    const list = await ctx.as('maker')('get', '/ops-masters/cost-centre?status=all');
+    expect(list.status, JSON.stringify(list.body)).toBe(200);
+    expect(list.body.type.fields.map((f) => f.name)).toEqual(expect.arrayContaining(['code', 'name', 'companyCode', 'isDefault']));
+    expect(list.body.data.find((x) => x.code === '900901')).toMatchObject({ name: 'Toyota Insurance Services' });
+    const add = await ctx.as('maker')('post', '/ops-masters/cost-centre').send({ code: '900903', name: 'Toyota Insurance Services - Operations', companyCode: 'TISPH' });
+    expect(add.status, JSON.stringify(add.body)).toBe(201);
+    expect((await ctx.as('maker')('put', `/ops-masters/cost-centre/${add.body.data.id}`).send({ responsiblePerson: 'Finance Head' })).status).toBe(200);
+    expect((await ctx.as('sales')('post', '/ops-masters/cost-centre').send({ code: '900904', name: 'No' })).status).toBe(403);
+  });
+
   it('stamps the default cost centre on system journals', async () => {
     const m = await makePolicy({ net: 8000 });
     expect((await ctx.as('maker')('post', '/receipts').send({ policyId: m.policy.id, amount: m.gross })).status).toBe(201);

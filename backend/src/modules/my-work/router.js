@@ -1,17 +1,17 @@
 /**
  * Operations > My Work (/my-work): the open items waiting on the signed-in user, their team and everyone (summary,
- * paged list, per-member breakdown, agenda), reassignment where the owning module supports it (claims handler, data
- * subject request assignee, tasks), the work diary (tasks) and the Home figures (figures.js: role preset, role, branch and
- * the role's figures). Every signed-in user has a My Work; each category is shown only with the permission to read its
- * records (sources.js), so no permission of its own is needed.
+ * paged list, per-member breakdown, agenda), reassignment where the owning module supports it (claims handler, tasks),
+ * the work diary (tasks) and the Home figures (figures.js: role preset, role, branch and the role's figures). Every
+ * signed-in user has a My Work; each category is shown only with the permission to read its records (sources.js), so
+ * no permission of its own is needed.
  */
 import { moduleRouter } from '../../lib/registry.js';
 import { hasPermission } from '../../lib/auth.js';
 import { validate, z } from '../../lib/validate.js';
-import { pool, withTransaction } from '../../db/pool.js';
+import { pool } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created, paging, pageMeta } from '../../lib/respond.js';
-import { badRequest, forbidden, notFound } from '../../lib/errors.js';
+import { forbidden, notFound } from '../../lib/errors.js';
 import { assertVisible, scopeOf } from '../../lib/scope.js';
 import { notify } from '../notifications/service.js';
 import * as svc from './service.js';
@@ -87,9 +87,9 @@ define({
 });
 
 define({
-  method: 'POST', path: '/items/reassign', summary: 'Reassign an open item to yourself or someone in your team where its module supports it: claim handler (write:claims), data subject request (write:privacy), task',
+  method: 'POST', path: '/items/reassign', summary: 'Reassign an open item to yourself or someone in your team where its module supports it: claim handler (write:claims), task',
   screen: `${S} > My Team`,
-  middleware: [validate(z.object({ category: z.enum(['claims', 'approvals', 'tasks']), id: z.string().min(1).max(80), assignTo: z.string().min(1).max(60), note: z.string().max(500).optional() }))],
+  middleware: [validate(z.object({ category: z.enum(['claims', 'tasks']), id: z.string().min(1).max(80), assignTo: z.string().min(1).max(60), note: z.string().max(500).optional() }))],
   request: { category: 'claims', id: 'clm_1', assignTo: 'usr_3' }, response: { success: true, message: 'Reassigned', data: { category: 'claims', id: 'clm_1', ownerId: 'usr_3', ownerName: 'Joy Macaraeg' } },
   handler: async (req, res) => {
     const { category, id, assignTo } = req.body;
@@ -101,34 +101,19 @@ define({
       await audit(req, { entity: 'task', entityId: id, action: 'reassign', before: { assignedTo: r.before.assignedTo }, after: { assignedTo: assignTo } });
       return ok(res, { category, id, ownerId: assignTo, ownerName: target.displayName }, 'Reassigned');
     }
-    if (category === 'claims') {
-      if (!hasPermission(req.user, 'write:claims')) throw forbidden('Requires permission: write:claims');
-      await assertVisible(req, 'claim', id);
-      const claim = (await pool.query('SELECT id, claim_number, handler_user_id, status FROM claims WHERE id = $1 OR claim_number = $1', [id])).rows[0];
-      if (!claim) throw notFound('Claim not found');
-      if (claim.handler_user_id && !(await manages(req.user, claim.handler_user_id))) throw forbidden('The claim is handled by someone who does not report to you');
-      const claims = await import('../claims/service.js');
-      const r = await claims.updateClaim(claim.id, { handlerUserId: assignTo }, req.user, []);
-      await audit(req, { entity: 'claim', entityId: claim.id, action: 'reassign', before: { handlerUserId: claim.handler_user_id }, after: { handlerUserId: assignTo } });
-      if (assignTo !== req.user.id) {
-        await notify({ userId: assignTo, type: 'info', title: `Claim ${claim.claim_number} assigned to you`, message: `${req.user.username} made you the handler of claim ${claim.claim_number}`,
-          link: `/agent/claimdetail/${claim.id}`, entity: 'claim', entityId: claim.id });
-      }
-      return ok(res, { category, id: r.after?.id || claim.id, ownerId: assignTo, ownerName: target.displayName }, 'Reassigned');
-    }
-    // approvals: only the data subject requests have an assignee (the other approvals are queues of a permission)
-    if (!hasPermission(req.user, 'write:privacy')) throw forbidden('Requires permission: write:privacy');
-    const privacy = await import('../privacy/service.js');
-    const dsr = (await pool.query('SELECT id, request_number, assigned_to FROM data_subject_requests WHERE id = $1 OR request_number = $1', [id])).rows[0];
-    if (!dsr) throw badRequest('Only data subject requests can be reassigned among the approvals; open the record for the others');
-    if (dsr.assigned_to && !(await manages(req.user, dsr.assigned_to))) throw forbidden('The request is assigned to someone who does not report to you');
-    const { before, after } = await withTransaction((db) => privacy.updateRequest(db, dsr.id, { assignedTo: assignTo }, req.user.id));
-    await audit(req, { entity: 'data_subject_request', entityId: dsr.id, action: 'reassign', before: { assignedTo: before.assigned_to }, after: { assignedTo: after.assigned_to } });
+    if (!hasPermission(req.user, 'write:claims')) throw forbidden('Requires permission: write:claims');
+    await assertVisible(req, 'claim', id);
+    const claim = (await pool.query('SELECT id, claim_number, handler_user_id, status FROM claims WHERE id = $1 OR claim_number = $1', [id])).rows[0];
+    if (!claim) throw notFound('Claim not found');
+    if (claim.handler_user_id && !(await manages(req.user, claim.handler_user_id))) throw forbidden('The claim is handled by someone who does not report to you');
+    const claims = await import('../claims/service.js');
+    const r = await claims.updateClaim(claim.id, { handlerUserId: assignTo }, req.user, []);
+    await audit(req, { entity: 'claim', entityId: claim.id, action: 'reassign', before: { handlerUserId: claim.handler_user_id }, after: { handlerUserId: assignTo } });
     if (assignTo !== req.user.id) {
-      await notify({ userId: assignTo, type: 'info', title: `Data subject request ${dsr.request_number} assigned to you`, message: `Assigned by ${req.user.username}`,
-        link: '/master/data-privacy/requests', entity: 'data_subject_request', entityId: dsr.id });
+      await notify({ userId: assignTo, type: 'info', title: `Claim ${claim.claim_number} assigned to you`, message: `${req.user.username} made you the handler of claim ${claim.claim_number}`,
+        link: `/agent/claimdetail/${claim.id}`, entity: 'claim', entityId: claim.id });
     }
-    return ok(res, { category, id: dsr.id, ownerId: assignTo, ownerName: target.displayName }, 'Reassigned');
+    return ok(res, { category, id: r.after?.id || claim.id, ownerId: assignTo, ownerName: target.displayName }, 'Reassigned');
   },
 });
 

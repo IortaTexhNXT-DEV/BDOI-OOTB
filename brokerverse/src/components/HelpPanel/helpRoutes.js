@@ -135,7 +135,9 @@ export const HELP_ROUTES = [
   ["/master/finance/commission-rate-matrix", "commission-rate-matrix"],
   ["/master/incentive", "incentive-programmes"],
   ["/master/configuration/system-settings", "configuration-screens"],
-  ["/master/configuration/theme-branding", "theme-and-branding"],
+  ["/master/configuration/email-layout", "e-mail-layout"],
+  ["/master/configuration/documents-layout", "documents-and-reports-layout"],
+  ["/master/configuration/document-signatures", "document-signatures"],
   ["/master/configuration/settings", "configuration"],
   ["/master/configuration/document-numbering", "document-numbering"],
   ["/master/configuration/schedules", "system-administrator-schedules"],
@@ -148,10 +150,8 @@ export const HELP_ROUTES = [
   ["/master/finance/bank-file-layouts", "bank-file-layouts-and-payee-bank-accounts"],
   ["/accounts/bank-payment-files", "bank-payment-files"],
   ["/accounts/sap-gl-export", "sap-gl-export"],
-  ["/master/data-privacy", "data-privacy"],
   // client onboarding (Operations chapter of the user manual)
   ["/agent/client-onboarding", "onboard-a-client-before-the-first-policy"],
-  ["/master/go-live-data-load", "go-live-data-load"],
   ["/product-configurator", "module-reference-product-configurator"],
   // distribution, programmes and products
   ["/sales/lead-assignment", "lead-assignment"],

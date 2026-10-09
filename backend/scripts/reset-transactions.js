@@ -11,7 +11,7 @@
  *   - every transaction table (leads, clients, quotations, policies, endorsements, receivables, receipts, payments,
  *     collections, disbursements, petty cash movements, commissions, remittances, incentive results, claims, renewals,
  *     journals, accounting periods and fiscal years, period-end closes, bank and insurer reconciliations, credit control,
- *     package sales, payment links, access reviews, privacy records);
+ *     package sales, payment links, access reviews, consent records);
  *   - notifications, the e-mail outbox, generated report records, job run history and queue, sign-in history,
  *     sign-in sessions and password reset codes;
  *   - the document records of transaction storage folders (with --purge-files also the files of those folders);

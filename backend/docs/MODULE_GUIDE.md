@@ -28,7 +28,7 @@ minimal, clearly-correct front-end fix.
   `requirePermission('read:<module>')`; the System Administrator (`system-admin`, `ADMIN_ROLE` in `src/lib/auth.js`)
   always passes. Permission codes are `read:` / `write:` + one of the modules in `MODULES` in `src/db/seed.js`, plus
   `approve:period-end`, `approve:bank-reconciliation`, `approve:insurer-reconciliation`, `approve:credit-control`,
-  `write:posting-rules`, `approve:posting-rules`, `read:privacy` and `write:privacy`, and the approvals of the front office
+  `write:posting-rules`, `approve:posting-rules` and `view:pii` (full personal identifiers), and the approvals of the front office
   (migration 0348): `approve:quotations` (quotation approval), `approve:policies` (check of a placement against the slip),
   `approve:renewals` (renewal terms) and `approve:claims` (claim decisions). An approval route requires the approval
   permission besides the write permission, and the service keeps its maker-checker rule. Which role holds which

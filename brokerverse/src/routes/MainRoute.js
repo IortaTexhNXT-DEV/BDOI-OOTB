@@ -70,7 +70,9 @@ import AddAccountDetail from "../module/FinanceMastersModule/BankMaster/AccountD
 import ViewAccountDetail from "../module/FinanceMastersModule/BankMaster/AccountDataView/ViewAccountData";
 import EditAccountDetail from "../module/FinanceMastersModule/BankMaster/AccountDataView/EditAccountData";
 import SystemSettingsPage from "../module/SystemSettings";
-import ThemeBrandingPage from "../module/ThemeBranding";
+import EmailLayoutPage from "../module/DocumentLayouts/EmailLayout";
+import DocumentsLayoutPage from "../module/DocumentLayouts/DocumentsLayout";
+import DocumentSignaturesPage from "../module/DocumentLayouts/DocumentSignatures";
 import ConfigurationPage from "../module/Administration/Configuration";
 import SchedulesPage from "../module/Administration/Schedules";
 import DocumentNumberingPage from "../module/Administration/DocumentNumbering";
@@ -297,11 +299,8 @@ import AuthorityMatrix from "../module/AccessControl/AuthorityMatrix";
 import Delegations from "../module/AccessControl/Delegations";
 import SodRules from "../module/AccessControl/SodRules";
 import AccessReviews from "../module/AccessControl/AccessReviews";
-import DataSubjectRequests from "../module/DataPrivacy/DataSubjectRequests";
-import ConsentRegister from "../module/DataPrivacy/ConsentRegister";
 // client onboarding before the first policy (customer due diligence)
 import ClientOnboarding from "../agentModule/quoteModule/clientOnboarding";
-import GoLiveDataLoad from "../module/GoLiveDataLoad";
 import BundleProducts from "../module/PackagedProducts/BundleProducts";
 import InsurerRateTables from "../module/PackagedProducts/InsurerRateTables";
 import LguTaxRates from "../module/PackagedProducts/LguTaxRates";
@@ -911,7 +910,9 @@ const Maincomponent = () => {
             path="master/configuration/system-settings"
             element={<SystemSettingsPage />}
           />
-          <Route path="master/configuration/theme-branding" element={<ThemeBrandingPage />} />
+          <Route path="master/configuration/email-layout" element={<EmailLayoutPage />} />
+          <Route path="master/configuration/documents-layout" element={<DocumentsLayoutPage />} />
+          <Route path="master/configuration/document-signatures" element={<DocumentSignaturesPage />} />
           <Route path="master/configuration/settings" element={<ConfigurationPage />} />
           <Route path="master/configuration/schedules" element={<SchedulesPage />} />
           <Route path="master/configuration/document-numbering" element={<DocumentNumberingPage />} />
@@ -1137,12 +1138,9 @@ const Maincomponent = () => {
           <Route path="/master/generals/usermanagement/delegations" element={<Delegations />} />
           <Route path="/master/generals/usermanagement/segregation-of-duties" element={<SodRules />} />
           <Route path="/master/generals/usermanagement/access-reviews" element={<AccessReviews />} />
-          <Route path="/master/data-privacy/requests" element={<DataSubjectRequests />} />
-          <Route path="/master/data-privacy/consents" element={<ConsentRegister />} />
           {/* client onboarding before the first policy */}
           <Route path="/agent/client-onboarding" element={<ClientOnboarding />} />
           <Route path="/agent/client-onboarding/:id" element={<ClientOnboarding />} />
-          <Route path="/master/go-live-data-load" element={<GoLiveDataLoad />} />
           <Route path="/master/finance/package-bundles" element={<BundleProducts />} />
           <Route path="/master/finance/insurer-rate-tables" element={<InsurerRateTables />} />
           <Route path="/master/finance/premium-taxes" element={<LguTaxRates />} />

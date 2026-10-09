@@ -84,6 +84,13 @@ describe('clients', () => {
   it('serves customer codes and enforces permissions', async () => {
     const codes = await finance('get', '/customers/codes');
     expect(codes.body.data.length).toBeGreaterThanOrEqual(10);
+    // Cash Control picks the customer codes of a bulk print without reading the client register
+    const ccd = await persona('c.ccd', ['tis-ccd-pdu']);
+    expect((await ccd('get', '/clients')).status).toBe(403);
+    const ccdCodes = await ccd('get', '/customers/codes');
+    expect(ccdCodes.status).toBe(200);
+    expect(ccdCodes.body.data.length).toBe(codes.body.data.length);
+    expect((await sales('get', '/customers/codes')).status).toBe(200);
     expect((await finance('post', '/clients').send({ firstName: 'x' })).status).toBe(403);
     // Agents see Clients in their menu: read allowed, create refused.
     expect((await agent('get', '/clients')).status).toBe(200);

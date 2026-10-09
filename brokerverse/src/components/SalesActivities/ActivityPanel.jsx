@@ -19,7 +19,8 @@ const TASK_SEVERITY = { open: "warning", done: "success", cancelled: "secondary"
 /**
  * Activities of a prospect (lead), a quotation (quote) or a client: the timeline of the calls, meetings, e-mails and
  * visits logged on it (newest first; a prospect and a client also show those of their quotations), the open next
- * step, and Log activity (write:sales-activities). The next step becomes a follow-up task in My Work.
+ * step, and Log activity (write:sales-activities). The next step becomes a follow-up task in My Work. Nothing is shown
+ * to a role without read:sales-activities (the record screens are also opened by roles that only read them).
  */
 const ActivityPanel = ({ entity, recordId, onLogged }) => {
   const { t } = useTranslation();
@@ -32,9 +33,10 @@ const ActivityPanel = ({ entity, recordId, onLogged }) => {
   const [cancelling, setCancelling] = useState(null);
   const [reason, setReason] = useState("");
   const canWrite = hasPermission("write:sales-activities");
+  const canRead = canWrite || hasPermission("read:sales-activities");
 
   const load = useCallback(async () => {
-    if (!entity || !recordId) return;
+    if (!canRead || !entity || !recordId) return;
     setLoading(true);
     try {
       setData(await salesActivityService.timeline(entity, recordId));
@@ -44,9 +46,11 @@ const ActivityPanel = ({ entity, recordId, onLogged }) => {
     } finally {
       setLoading(false);
     }
-  }, [entity, recordId]);
+  }, [canRead, entity, recordId]);
   useEffect(() => { load(); }, [load]);
-  useEffect(() => { salesActivityService.options().then(setOptions).catch(() => setOptions({ types: [], outcomes: [] })); }, []);
+  useEffect(() => {
+    if (canRead) salesActivityService.options().then(setOptions).catch(() => setOptions({ types: [], outcomes: [] }));
+  }, [canRead]);
 
   const notify = (severity, detail) => toast.current?.show({ severity, summary: severity === "error" ? t("salesActivities.error") : t("salesActivities.done"), detail, life: 5000 });
   const save = async (payload) => {
@@ -77,6 +81,7 @@ const ActivityPanel = ({ entity, recordId, onLogged }) => {
     }
   };
 
+  if (!canRead) return null;
   const activities = data?.activities || [];
   return (
     <div className="bv-activities">

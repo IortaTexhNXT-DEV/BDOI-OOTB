@@ -46,10 +46,9 @@ describe("TISPH roles (RBAC v4): menus", () => {
     expect(["/accounts/journalvoucher", "/accounts/period-end/close", "/master/configuration/audit-trail"].filter((p) => !isPathAllowed(p, menuList, ["tis-finance"]))).toEqual([]);
   });
 
-  it("the IT administrator reaches users, roles and masters, not the go-live data load; SUPERID (System Administrator included) sees every menu", () => {
+  it("the IT administrator reaches users, roles and masters; SUPERID (System Administrator included) sees every menu", () => {
     expect(["/master/generals/usermanagement/user", "/master/generals/usermanagement/role", "/master/insurance/lead-sources", "/master/insurance/reason-codes",
       "/master/configuration/system-settings"].filter((p) => !isPathAllowed(p, menuList, ["tis-it-admin"]))).toEqual([]);
-    expect(isPathAllowed("/master/go-live-data-load", menuList, ["tis-it-admin"])).toBe(false);
     expect(isPathAllowed("/master/generals/usermanagement/user", menuList, ["tis-general-manager"])).toBe(true);
     expect(isPathAllowed("/master/configuration/system-settings", menuList, ["tis-general-manager"])).toBe(false);
     expect(filterMenuForRoles(menuList, ["tis-superid", "system-admin"])).toEqual(menuList);
@@ -59,5 +58,27 @@ describe("TISPH roles (RBAC v4): menus", () => {
     expect(isPathAllowed("/master/insurance/lead-sources", menuList, ["tis-sales-officer"])).toBe(false);
     expect(helpSectionFor("/master/insurance/lead-sources").id).toBe("lead-sources-and-reason-codes");
     expect(helpSectionFor("/master/insurance/reason-codes").id).toBe("lead-sources-and-reason-codes");
+  });
+
+  it("shows a persona only the screens its permissions open: no campaigns for Operations, no maker or unread screens for IT", () => {
+    const ops = ["tis-ops-associate", "tis-ops-officer", "tis-ops-unit-head"];
+    expect(ops.filter((role) => isPathAllowed("/sales/campaigns", menuList, [role]))).toEqual([]);
+    expect(ops.filter((role) => !isPathAllowed("/sales/activities", menuList, [role]) || !isPathAllowed("/operations/fleet-schedules", menuList, [role]))).toEqual([]);
+    expect(isPathAllowed("/sales/campaigns", menuList, ["tis-sales-officer"])).toBe(true);
+    expect(["/sales/quick-quote", "/sales/campaigns", "/sales/activities", "/operations/fleet-schedules", "/operations/open-covers"]
+      .filter((p) => isPathAllowed(p, menuList, ["tis-it-admin"]))).toEqual([]);
+    expect(["/agent/leadlisting", "/agent/Quotation", "/agent/clientlisting", "/agent/policy", "/agent/claim"].filter((p) => !isPathAllowed(p, menuList, ["tis-it-admin"]))).toEqual([]);
+  });
+
+  it("System Configuration offers the e-mail and document layouts and the signatures, without the theme editor or Data Privacy", () => {
+    const master = menuList.find((m) => m.name === "Master");
+    const system = master.submenu.find((s) => s.name === "System Configuration").submenu.map((i) => i.name);
+    expect(system).toEqual(expect.arrayContaining(["System Settings", "E-mail Layout", "Documents and Reports Layout", "Document Signatures"]));
+    expect(master.submenu.map((s) => s.name)).not.toContain("Data Privacy");
+    expect(master.submenu.map((s) => s.name)).not.toContain("Go-Live and Data");
+    const layouts = ["/master/configuration/email-layout", "/master/configuration/documents-layout", "/master/configuration/document-signatures"];
+    expect(layouts.filter((p) => !isPathAllowed(p, menuList, ["tis-it-admin"]))).toEqual([]);
+    expect(layouts.filter((p) => isPathAllowed(p, menuList, ["tis-general-manager"]) || isPathAllowed(p, menuList, ["tis-ops-unit-head"]))).toEqual([]);
+    expect(layouts.map((p) => helpSectionFor(p).matched)).toEqual([true, true, true]);
   });
 });

@@ -48,8 +48,7 @@ export const ADMIN_ROLE = "system-admin";
 export const ADMIN_ROLES = [ADMIN_ROLE];
 
 export const roleMenuPermissions = {
-  // The administrator sees every menu. Master > Go-Live Data Load (configuration and migration workbooks,
-  // read:data-load / write:data-load) is granted to no other role: it stays System Administrator only.
+  // The administrator sees every menu.
   [ADMIN_ROLE]: { all: true },
   // Sales & Marketing (Account Executive): prospects, leads, clients, quotation requests, renewals follow-up, own production
   sales: {
@@ -88,8 +87,8 @@ export const roleMenuPermissions = {
     "my work": true,
     operations: OPERATIONS_ALL,
     reports: ["All Reports", "Operational Reports", "Report Builder"],
-    // data subject requests and the consent register (read:privacy / write:privacy); distribution channels (read:channels)
-    master: ["Data Privacy", "Insurance Management > Distribution Channels"],
+    // distribution channels (read:channels)
+    master: ["Insurance Management > Distribution Channels"],
   },
   claims: {
     dashboard: ["Claims Dashboard"],
@@ -150,7 +149,7 @@ export const roleMenuPermissions = {
       "Finance > Bank File Layouts",
       // asset classes of the fixed asset register (write:fixed-assets)
       "Finance > Asset Classes",
-      // cost centres of the journal lines (write:masters)
+      // cost centres of the journal lines (write:journal-vouchers)
       "Finance > Cost Centres"],
     commission: ["Commission Dashboard", "Agents/Referrer Accounts",
       // overriding, profit and contingent commission from insurers (read:commission / write:commission)
@@ -166,14 +165,20 @@ export const roleMenuPermissions = {
 const TIS_CASH_REPORTS = ["All Reports", "Financial Reports > SOA/Premium Receivable", "Financial Reports > Collection Report"];
 const TIS_CCD = (accounts) => ({ "my work": true, operations: ["Payments"], accounts, reports: TIS_CASH_REPORTS });
 const TIS_SALES = { ...roleMenuPermissions.sales, accounts: ["Receipts", "Collections"] };
+// Sales & Marketing item by item, for the personas that lack the permission of some of its screens
+const SALES_MARKETING = ["Prospects", "Quick Quote", "Request for Quotation", "Quotations", "Placement Slips", "Lead Assignment", "Dealer Programmes",
+  "Comparison Reports", "Campaigns", "Sales Activities"];
+const salesMarketingWithout = (...left) => SALES_MARKETING.filter((item) => !left.includes(item)).map((item) => `Sales & Marketing > ${item}`);
+const operationsWithout = (...left) => OPERATIONS_ALL.filter((item) => item !== "Sales & Marketing" && !left.includes(item));
 const TIS_OPERATIONS = {
   dashboard: ["Executive Dashboard", "Processing Dashboard", "Claims Dashboard"],
   "product configurator": ["Dashboard", "Product Templates"],
   "my work": true,
-  operations: [...OPERATIONS_ALL, "Claim Documents", "Motor Claim Repairs"],
+  // campaigns are Sales' (read:campaigns)
+  operations: [...operationsWithout(), ...salesMarketingWithout("Campaigns"), "Claim Documents", "Motor Claim Repairs"],
   accounts: ["Receipts", "Collections"],
   reports: ["All Reports", "Operational Reports", "Report Builder"],
-  master: ["Data Privacy", "Insurance Management > Distribution Channels", "Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops"],
+  master: ["Insurance Management > Distribution Channels", "Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops"],
 };
 Object.assign(roleMenuPermissions, {
   "tis-sales-associate": TIS_SALES,
@@ -191,12 +196,13 @@ Object.assign(roleMenuPermissions, {
     ...roleMenuPermissions.accounting,
     master: [...roleMenuPermissions.accounting.master, "System Configuration > Audit Trail", "System Configuration > Schedules"],
   },
-  // IT AppSupport / Admin: administration and the reference masters; the business screens read only. Go-Live Data Load
-  // stays with the System Administrator.
+  // IT AppSupport / Admin: administration and the reference masters; the business screens read only.
   "tis-it-admin": {
     dashboard: ["Executive Dashboard"],
     "my work": true,
-    operations: OPERATIONS_ALL,
+    // reads the business registers; not the quick quote (write:quotations), campaigns, sales activities, fleet schedules
+    // and open covers (read:campaigns, read:sales-activities, read:fleet, read:marine)
+    operations: [...operationsWithout("Fleet Schedules", "Marine Open Covers"), ...salesMarketingWithout("Quick Quote", "Campaigns", "Sales Activities")],
     accounts: ["Receipts", "Collections", "Post-Dated Cheques", "Disbursement", "Journal Voucher", "Payables", "Fixed Assets", "Remittance"],
     commission: ["Commission Dashboard"],
     reports: ["All Reports", "Operational Reports", "Financial Reports"],

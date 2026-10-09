@@ -171,5 +171,5 @@ export const PRESETS = {
   }),
 };
 
-/** Preset list for the Theme and Branding screen. */
+/** Preset list of the theme endpoint (GET /branding/theme). */
 export const presetList = () => Object.values(PRESETS).map((p) => ({ key: p.preset, name: p.name, theme: p }));

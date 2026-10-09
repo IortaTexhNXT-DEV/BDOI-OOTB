@@ -11,12 +11,12 @@ export const AREAS = [
     id: "company",
     title: "Company & Branding",
     icon: "pi pi-building",
-    summary: "Time zone, date format, the look of printed documents and the support contacts shown in Help. The application name, logo and colours are set in System Settings; the company's legal identity in the Company master.",
+    summary: "Time zone, date format, the look of printed documents and the support contacts shown in Help. The application name, logo and colours come from the brand pack of the deployment; the company's legal identity is in the Company master.",
     groups: ["general", "branding", "currency", "documents", "system", "golive", "support"],
     links: [
-      { label: "System Settings (application name, logo, colours, language, currency)", path: "/master/configuration/system-settings" },
-      { label: "Theme and Branding (theme, sign-in page, documents, e-mail, signatures, brand packs)", path: "/master/configuration/theme-branding" },
-      { label: "Go-Live Data Load (configuration and migration workbooks)", path: "/master/go-live-data-load" },
+      { label: "System Settings (display currency, language)", path: "/master/configuration/system-settings" },
+      { label: "Documents and Reports Layout", path: "/master/configuration/documents-layout" },
+      { label: "E-mail Layout", path: "/master/configuration/email-layout" },
       { label: "Company master (legal name, TIN, registered address, print logo)", path: "/master/generals/organization/companymaster" },
       { label: "Branch master", path: "/master/generals/organization/branchmaster" },
     ],
@@ -122,12 +122,9 @@ export const AREAS = [
     id: "maintenance",
     title: "Data Retention, Privacy & Uploads",
     icon: "pi pi-database",
-    summary: "How long logs and messages are kept, the data privacy notice version, request due days and record retention, the size limits of uploaded files and the go-live lock.",
+    summary: "How long logs and messages are kept, the masking of personal identifiers and the privacy notice version, the size limits of uploaded files and the go-live lock.",
     groups: ["housekeeping", "privacy", "uploads", "golive"],
-    links: [
-      { label: "Audit trail", path: "/master/configuration/audit-trail" },
-      { label: "Data subject requests", path: "/master/data-privacy/requests" },
-    ],
+    links: [{ label: "Audit trail", path: "/master/configuration/audit-trail" }],
   },
 ];
 

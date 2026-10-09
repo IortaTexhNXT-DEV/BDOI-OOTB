@@ -4,6 +4,7 @@ import { validate, z } from '../../lib/validate.js';
 import { ok, created, paging, pageMeta } from '../../lib/respond.js';
 import { audit } from '../../lib/audit.js';
 import { forbidden } from '../../lib/errors.js';
+import { scopeOf } from '../../lib/scope.js';
 import * as svc from './service.js';
 
 const { router, define } = moduleRouter('Reports', '/reports');
@@ -126,6 +127,12 @@ define({
   screen: 'Reports > * (Agent filter)', middleware: canRead, permissions: ['read:reports'],
   response: { success: true, data: [{ label: 'Maria Santos', value: 'usr_1', code: 'AE001' }] },
   handler: async (_req, res) => ok(res, await svc.agentFilterOptions()),
+});
+define({
+  method: 'GET', path: '/filters/clients', summary: 'Clients a report Client filter can use (not anonymised, within the reader\'s record scope, first 500 by name), as { label, value, code }',
+  screen: 'Reports > * (Client filter)', middleware: canRead, permissions: ['read:reports'],
+  response: { success: true, data: [{ label: 'Angela Ramos', value: 'cl_1', code: 'CL-2026-00001' }] },
+  handler: async (req, res) => ok(res, await svc.clientFilterOptions(await scopeOf(req))),
 });
 
 /* ----- catalogue, run and generate ----- */

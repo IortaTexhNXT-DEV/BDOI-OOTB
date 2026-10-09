@@ -1,5 +1,5 @@
 /**
- * Environment comparison of the Go-Live Data Workbench (Master > Go-Live Data Load > Compare environments): the
+ * Environment comparison of the Go-Live Data Workbench (POST /data-load/comparisons): the
  * configuration workbook exported from another environment compared with this one, or two exports with each other,
  * never loaded. Identical environment (Mirrored), exact field difference, rows only in the file / only here,
  * environment-specific fields set apart (numbering counters with the toggle), file A vs file B without reading or

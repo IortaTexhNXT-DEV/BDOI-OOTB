@@ -10,7 +10,7 @@
  * The database must be migrated and seeded (reference data is enough).
  * Default output: ../docs/package/05_Delivery/Upload_Templates.
  *
- * Also writes the two blank go-live workbooks of Master > Go-Live Data Load (GoLive_Configuration_Workbook.xlsx and
+ * Also writes the two blank go-live workbooks of the go-live data load API (GoLive_Configuration_Workbook.xlsx and
  * GoLive_Migration_Workbook.xlsx, src/modules/data-load), so they can be handed out without signing in.
  */
 import fs from 'node:fs';
@@ -62,7 +62,7 @@ export const FILE_ROUTES = [
   { module: 'system-settings', method: 'POST', path: '/logo-presets', noTemplate: 'Logo image (single file)' },
   { module: 'system-settings', method: 'POST', path: '/upload/:field', noTemplate: 'Logo or favicon image (single file)' },
   { module: 'branding', method: 'POST', path: '/upload/:asset', noTemplate: 'Logo, favicon or sign-in picture (single image)' },
-  { module: 'branding', method: 'POST', path: '/brand-pack', noTemplate: 'Brand pack exported by Theme and Branding (.zip or .json)' },
+  { module: 'branding', method: 'POST', path: '/brand-pack', noTemplate: 'Brand pack exported by GET /api/branding/brand-pack (.zip or .json)' },
   { module: 'e-signatures', method: 'POST', path: '/', noTemplate: 'Signature image (single PNG / JPEG, or drawn on screen)' },
   { module: 'uploads', method: 'POST', path: '/upload', noTemplate: 'Attachments: policy documents, IDs, vehicle photos, payment proofs, quotation responses, insurer offers, product documents, company logo' },
   { module: 'uploads', method: 'POST', path: '/upload-multiple', noTemplate: 'Several attachments at once (claim documents)' },
@@ -134,7 +134,7 @@ export async function buildTemplates(outDir = DEFAULT_OUT) {
     const { fileName, buffer } = await kitTemplate(kit);
     fs.writeFileSync(path.join(outDir, fileName), buffer);
     const sheets = await kitSheets(kit);
-    out.push({ id: `kit:${kit}`, file: fileName, csv: null, title: KITS[kit].title, menu: 'Master > Go-Live Data Load', screen: 'Master > Go-Live Data Load',
+    out.push({ id: `kit:${kit}`, file: fileName, csv: null, title: KITS[kit].title, menu: 'API (go-live scripts)', screen: 'API (go-live scripts)',
       button: true, route: 'POST /api/data-load/batches (multipart field "file", field kit)', headers: sheets.map((x) => x.name), required: [] });
   }
   const keep = new Set(out.flatMap((t) => [t.file, t.csv].filter(Boolean)));
