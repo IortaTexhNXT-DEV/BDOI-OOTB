@@ -259,6 +259,29 @@ describe('claim document checklist', () => {
     expect(names).not.toContain('Notice of Default');
     expect(r.body.data.summary.complete).toBe(false);
   });
+  it('lists only the documents of the cause of loss: a collision claim has no theft or death documents', async () => {
+    const id = (await one(`INSERT INTO claims(claim_number, policy_id, client_id, status, loss_date, lob, claim_type, loss_type) VALUES ('CLM-T-DOC2', $1, $2, 'registered', current_date - 2, 'MOTOR', 'Motor', 'Own Damage - Collision / Accident') RETURNING id`,
+      [m.policy.id, m.client.id])).id;
+    const names = (await ctx.as('claims')('get', `/claim-documents/claims/${id}`)).body.data.items.map((i) => i.documentName);
+    expect(names).toEqual(expect.arrayContaining(['Claim Form', 'Photos of all vehicles involved', 'Police Report']));
+    expect(names).not.toContain('Affidavit of Theft');
+    expect(names).not.toContain('Third-party OR/CR');
+    expect(names).not.toContain('Death Certificate');
+    const tp = (await one(`INSERT INTO claims(claim_number, policy_id, client_id, status, loss_date, lob, claim_type, loss_type) VALUES ('CLM-T-DOC3', $1, $2, 'registered', current_date - 2, 'MOTOR', 'Motor', 'Third Party Property Damage - Collision / Accident') RETURNING id`,
+      [m.policy.id, m.client.id])).id;
+    expect((await ctx.as('claims')('get', `/claim-documents/claims/${tp}`)).body.data.items.map((i) => i.documentName)).toEqual(expect.arrayContaining(['Third-party OR/CR', 'Photos of all vehicles involved']));
+    await query("UPDATE claims SET status = 'closed' WHERE id = ANY($1)", [[id, tp]]);
+  });
+  it('queues the claims awaiting documents with what is in and what is missing', async () => {
+    const q = (await ctx.as('claims')('get', '/claim-documents/awaiting')).body.data;
+    const row = q.rows.find((x) => x.claimId === claimId);
+    expect(row).toMatchObject({ claimNumber: 'CLM-T-DOC1', complete: false, lossCause: null });
+    expect(row.missing).toBeGreaterThan(0);
+    expect(row.received + row.missing).toBe(row.required);
+    expect(q.summary.missing).toBeGreaterThanOrEqual(1);
+    expect((await ctx.as('claims')('get', '/claim-documents/awaiting?stage=ready')).body.data.rows.map((x) => x.claimId)).not.toContain(claimId);
+    expect((await ctx.as('claims')('get', '/claim-documents/awaiting?stage=bad')).status).toBe(400);
+  });
   it('refuses the submission to the insurer while a required document is missing', async () => {
     const r = await ctx.as('claims')('post', `/claim-documents/claims/${claimId}/submit-to-insurer`).send({});
     expect(r.status).toBe(409);
@@ -286,6 +309,8 @@ describe('claim document checklist', () => {
     const s = await ctx.as('claims')('post', `/claim-documents/claims/${claimId}/submit-to-insurer`).send({ reference: 'E-mail to insurer' });
     expect(s.status).toBe(200);
     expect(s.body.data.submittedToInsurerAt).toBeTruthy();
+    expect((await ctx.as('claims')('get', `/claims/${claimId}`)).body.data.submittedToInsurerAt).toBeTruthy();
+    expect((await ctx.as('claims')('get', '/claim-documents/awaiting?stage=all')).body.data.rows.map((x) => x.claimId)).not.toContain(claimId);
     expect((await ctx.as('sales')('post', `/claim-documents/claims/${claimId}/remind`).send({})).status).toBe(403);
   });
 });

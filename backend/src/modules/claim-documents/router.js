@@ -1,5 +1,6 @@
 /**
- * Claim document checklist (Operations > Claim Documents): the documents of a claim from the checklist master,
+ * Claim document checklist (the Documents step of a claim) and the work queue Operations > Claims Awaiting Documents:
+ * the documents of a claim from the checklist master,
  * received / waived status, upload, missing-document reminders to the claimant and the submission of the claim file to
  * the insurer (refused while a required document is missing, claims.require_documents_before_submission).
  * read:claims to view, write:claims to change.
@@ -11,7 +12,7 @@ import { pool, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created } from '../../lib/respond.js';
 import { badRequest } from '../../lib/errors.js';
-import { ownRecord } from '../../lib/scope.js';
+import { ownRecord, scopeOf } from '../../lib/scope.js';
 import { memoryUpload } from '../../lib/uploadLimits.js';
 import { checkUploadedFiles } from '../uploads/fileTypes.js';
 import { storeUpload } from '../claims/util.js';
@@ -20,12 +21,20 @@ import * as svc from './service.js';
 const { router, define } = moduleRouter('Claim Documents', '/claim-documents');
 const read = [requireAuth, requirePermission('read:claims')];
 const write = [requireAuth, requirePermission('write:claims')];
-const S = 'Operations > Claim Documents';
+const S = 'Operations > Claims > claim > Documents';
 const multerSingle = memoryUpload({ files: 1 }).single('file');
 const singleFile = (req, res, next) => multerSingle(req, res, (e) => next(e ? badRequest(e.message) : undefined));
 const example = { claimNumber: 'CLM-2026-00001', policyNumber: 'POL-2026-00001', claimType: 'Own Damage', summary: { total: 8, required: 7, received: 5, missingRequired: 2, complete: false },
   items: [{ id: 1, documentName: 'Police report or affidavit of the driver', required: true, status: 'pending' }], reminders: [] };
 
+define({
+  method: 'GET', path: '/awaiting', summary: 'Work queue: open claims whose claim file has not gone to the insurer, with the required documents received and missing and the last reminder (stage missing | ready | all)',
+  screen: 'Operations > Claims Awaiting Documents', middleware: [...read, validate(z.object({ stage: z.enum(['missing', 'ready', 'all']).optional(), search: z.string().max(100).optional() }), 'query')], query: { stage: 'missing' },
+  response: { success: true, data: { summary: { missing: 3, ready: 1, documentsMissing: 11, notReminded: 1 },
+    rows: [{ claimId: 'clm_1', claimNumber: 'CLM-2026-00001', policyNumber: 'POL-2026-00001', claimant: 'Maria Santos', lob: 'MOTOR', lossCause: 'Theft', status: 'registered',
+      reportedDate: '2026-10-01', daysOpen: 8, required: 18, received: 15, missing: 3, lastReminderAt: null, complete: false }] } },
+  handler: async (req, res) => ok(res, await withTransaction(async (db) => svc.awaiting(db, { stage: req.query.stage, search: req.query.search, scope: await scopeOf(req) }))),
+});
 define({
   method: 'GET', path: '/claims/:id', summary: 'Document checklist of a claim (from the checklist master by line of business and claim type), what is missing and the reminders sent',
   screen: S, middleware: [...read, ownRecord('claim')], response: { success: true, data: example },

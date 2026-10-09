@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1209 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1210 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -16571,6 +16571,67 @@
       "name": "Claim Documents",
       "item": [
         {
+          "name": "Work queue: open claims whose claim file has not gone to the insurer, with the required documents received and missing and the last reminder (stage missing | ready | all)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/claim-documents/awaiting?stage=missing",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claim-documents",
+                "awaiting"
+              ],
+              "query": [
+                {
+                  "key": "stage",
+                  "value": "missing"
+                }
+              ]
+            },
+            "description": "Work queue: open claims whose claim file has not gone to the insurer, with the required documents received and missing and the last reminder (stage missing | ready | all)\n\nFront-end touchpoint: Operations > Claims Awaiting Documents\n\nAccess: read:claims"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/claim-documents/awaiting?stage=missing",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claim-documents",
+                    "awaiting"
+                  ],
+                  "query": [
+                    {
+                      "key": "stage",
+                      "value": "missing"
+                    }
+                  ]
+                },
+                "description": "Work queue: open claims whose claim file has not gone to the insurer, with the required documents received and missing and the last reminder (stage missing | ready | all)\n\nFront-end touchpoint: Operations > Claims Awaiting Documents\n\nAccess: read:claims"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"summary\": {\n      \"missing\": 3,\n      \"ready\": 1,\n      \"documentsMissing\": 11,\n      \"notReminded\": 1\n    },\n    \"rows\": [\n      {\n        \"claimId\": \"clm_1\",\n        \"claimNumber\": \"CLM-2026-00001\",\n        \"policyNumber\": \"POL-2026-00001\",\n        \"claimant\": \"Maria Santos\",\n        \"lob\": \"MOTOR\",\n        \"lossCause\": \"Theft\",\n        \"status\": \"registered\",\n        \"reportedDate\": \"2026-10-01\",\n        \"daysOpen\": 8,\n        \"required\": 18,\n        \"received\": 15,\n        \"missing\": 3,\n        \"lastReminderAt\": null,\n        \"complete\": false\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Document checklist of a claim (from the checklist master by line of business and claim type), what is missing and the reminders sent",
           "request": {
             "method": "GET",
@@ -16593,7 +16654,7 @@
                 }
               ]
             },
-            "description": "Document checklist of a claim (from the checklist master by line of business and claim type), what is missing and the reminders sent\n\nFront-end touchpoint: Operations > Claim Documents\n\nAccess: read:claims"
+            "description": "Document checklist of a claim (from the checklist master by line of business and claim type), what is missing and the reminders sent\n\nFront-end touchpoint: Operations > Claims > claim > Documents\n\nAccess: read:claims"
           },
           "response": [
             {
@@ -16619,7 +16680,7 @@
                     }
                   ]
                 },
-                "description": "Document checklist of a claim (from the checklist master by line of business and claim type), what is missing and the reminders sent\n\nFront-end touchpoint: Operations > Claim Documents\n\nAccess: read:claims"
+                "description": "Document checklist of a claim (from the checklist master by line of business and claim type), what is missing and the reminders sent\n\nFront-end touchpoint: Operations > Claims > claim > Documents\n\nAccess: read:claims"
               },
               "status": "OK",
               "code": 200,
@@ -16664,7 +16725,7 @@
                 }
               ]
             },
-            "description": "Add a document the master does not list to the claim checklist\n\nFront-end touchpoint: Operations > Claim Documents\n\nAccess: write:claims",
+            "description": "Add a document the master does not list to the claim checklist\n\nFront-end touchpoint: Operations > Claims > claim > Documents\n\nAccess: write:claims",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"documentName\": \"Medical certificate\",\n  \"required\": true\n}",
@@ -16705,7 +16766,7 @@
                     }
                   ]
                 },
-                "description": "Add a document the master does not list to the claim checklist\n\nFront-end touchpoint: Operations > Claim Documents\n\nAccess: write:claims",
+                "description": "Add a document the master does not list to the claim checklist\n\nFront-end touchpoint: Operations > Claims > claim > Documents\n\nAccess: write:claims",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"documentName\": \"Medical certificate\",\n  \"required\": true\n}",
@@ -16765,7 +16826,7 @@
                 }
               ]
             },
-            "description": "Mark a document received (receivedOn), waived (waiveReason) or pending again, or change whether it is required\n\nFront-end touchpoint: Operations > Claim Documents\n\nAccess: write:claims",
+            "description": "Mark a document received (receivedOn), waived (waiveReason) or pending again, or change whether it is required\n\nFront-end touchpoint: Operations > Claims > claim > Documents\n\nAccess: write:claims",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"status\": \"received\",\n  \"receivedOn\": \"2026-10-04\"\n}",
@@ -16812,7 +16873,7 @@
                     }
                   ]
                 },
-                "description": "Mark a document received (receivedOn), waived (waiveReason) or pending again, or change whether it is required\n\nFront-end touchpoint: Operations > Claim Documents\n\nAccess: write:claims",
+                "description": "Mark a document received (receivedOn), waived (waiveReason) or pending again, or change whether it is required\n\nFront-end touchpoint: Operations > Claims > claim > Documents\n\nAccess: write:claims",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"status\": \"received\",\n  \"receivedOn\": \"2026-10-04\"\n}",
@@ -16873,7 +16934,7 @@
                 }
               ]
             },
-            "description": "Upload the copy of a checklist document (multipart file); the item is marked received\n\nFront-end touchpoint: Operations > Claim Documents\n\nAccess: write:claims",
+            "description": "Upload the copy of a checklist document (multipart file); the item is marked received\n\nFront-end touchpoint: Operations > Claims > claim > Documents\n\nAccess: write:claims",
             "body": {
               "mode": "raw",
               "raw": "\"multipart/form-data file\"",
@@ -16921,7 +16982,7 @@
                     }
                   ]
                 },
-                "description": "Upload the copy of a checklist document (multipart file); the item is marked received\n\nFront-end touchpoint: Operations > Claim Documents\n\nAccess: write:claims",
+                "description": "Upload the copy of a checklist document (multipart file); the item is marked received\n\nFront-end touchpoint: Operations > Claims > claim > Documents\n\nAccess: write:claims",
                 "body": {
                   "mode": "raw",
                   "raw": "\"multipart/form-data file\"",
@@ -16975,7 +17036,7 @@
                 }
               ]
             },
-            "description": "E-mail the claimant the documents still missing (template claim_missing_documents; to defaults to the client e-mail)\n\nFront-end touchpoint: Operations > Claim Documents > Remind\n\nAccess: write:claims",
+            "description": "E-mail the claimant the documents still missing (template claim_missing_documents; to defaults to the client e-mail)\n\nFront-end touchpoint: Operations > Claims > claim > Documents > Remind\n\nAccess: write:claims",
             "body": {
               "mode": "raw",
               "raw": "{}",
@@ -17016,7 +17077,7 @@
                     }
                   ]
                 },
-                "description": "E-mail the claimant the documents still missing (template claim_missing_documents; to defaults to the client e-mail)\n\nFront-end touchpoint: Operations > Claim Documents > Remind\n\nAccess: write:claims",
+                "description": "E-mail the claimant the documents still missing (template claim_missing_documents; to defaults to the client e-mail)\n\nFront-end touchpoint: Operations > Claims > claim > Documents > Remind\n\nAccess: write:claims",
                 "body": {
                   "mode": "raw",
                   "raw": "{}",
@@ -17070,7 +17131,7 @@
                 }
               ]
             },
-            "description": "Record the submission of the claim file to the insurer; refused while a required document is missing (claims.require_documents_before_submission)\n\nFront-end touchpoint: Operations > Claim Documents > Submit to insurer\n\nAccess: write:claims",
+            "description": "Record the submission of the claim file to the insurer; refused while a required document is missing (claims.require_documents_before_submission)\n\nFront-end touchpoint: Operations > Claims > claim > Documents > Submit to insurer\n\nAccess: write:claims",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"reference\": \"E-mail to Malayan claims 04-Oct\"\n}",
@@ -17111,7 +17172,7 @@
                     }
                   ]
                 },
-                "description": "Record the submission of the claim file to the insurer; refused while a required document is missing (claims.require_documents_before_submission)\n\nFront-end touchpoint: Operations > Claim Documents > Submit to insurer\n\nAccess: write:claims",
+                "description": "Record the submission of the claim file to the insurer; refused while a required document is missing (claims.require_documents_before_submission)\n\nFront-end touchpoint: Operations > Claims > claim > Documents > Submit to insurer\n\nAccess: write:claims",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"reference\": \"E-mail to Malayan claims 04-Oct\"\n}",

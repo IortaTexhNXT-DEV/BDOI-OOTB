@@ -27426,6 +27426,156 @@
         ]
       }
     },
+    "/claim-documents/awaiting": {
+      "get": {
+        "operationId": "getClaimDocumentsAwaiting",
+        "summary": "Work queue: open claims whose claim file has not gone to the insurer, with the required documents received and missing and the last reminder (stage missing | ready | all)",
+        "tags": [
+          "Claim Documents"
+        ],
+        "description": "Front-end touchpoint: Operations > Claims Awaiting Documents\n\nAccess: read:claims",
+        "parameters": [
+          {
+            "name": "stage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "missing"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "missing": {
+                              "type": "integer"
+                            },
+                            "ready": {
+                              "type": "integer"
+                            },
+                            "documentsMissing": {
+                              "type": "integer"
+                            },
+                            "notReminded": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "claimId": {
+                                "type": "string"
+                              },
+                              "claimNumber": {
+                                "type": "string"
+                              },
+                              "policyNumber": {
+                                "type": "string"
+                              },
+                              "claimant": {
+                                "type": "string"
+                              },
+                              "lob": {
+                                "type": "string"
+                              },
+                              "lossCause": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "reportedDate": {
+                                "type": "string"
+                              },
+                              "daysOpen": {
+                                "type": "integer"
+                              },
+                              "required": {
+                                "type": "integer"
+                              },
+                              "received": {
+                                "type": "integer"
+                              },
+                              "missing": {
+                                "type": "integer"
+                              },
+                              "lastReminderAt": {},
+                              "complete": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "summary": {
+                      "missing": 3,
+                      "ready": 1,
+                      "documentsMissing": 11,
+                      "notReminded": 1
+                    },
+                    "rows": [
+                      {
+                        "claimId": "clm_1",
+                        "claimNumber": "CLM-2026-00001",
+                        "policyNumber": "POL-2026-00001",
+                        "claimant": "Maria Santos",
+                        "lob": "MOTOR",
+                        "lossCause": "Theft",
+                        "status": "registered",
+                        "reportedDate": "2026-10-01",
+                        "daysOpen": 8,
+                        "required": 18,
+                        "received": 15,
+                        "missing": 3,
+                        "lastReminderAt": null,
+                        "complete": false
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Claims Awaiting Documents",
+        "x-permissions": [
+          "read:claims"
+        ]
+      }
+    },
     "/claim-documents/claims/{id}": {
       "get": {
         "operationId": "getClaimDocumentsClaimsId",
@@ -27433,7 +27583,7 @@
         "tags": [
           "Claim Documents"
         ],
-        "description": "Front-end touchpoint: Operations > Claim Documents\n\nAccess: read:claims",
+        "description": "Front-end touchpoint: Operations > Claims > claim > Documents\n\nAccess: read:claims",
         "parameters": [
           {
             "name": "id",
@@ -27552,7 +27702,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Operations > Claim Documents",
+        "x-screen": "Operations > Claims > claim > Documents",
         "x-permissions": [
           "read:claims"
         ]
@@ -27565,7 +27715,7 @@
         "tags": [
           "Claim Documents"
         ],
-        "description": "Front-end touchpoint: Operations > Claim Documents\n\nAccess: write:claims",
+        "description": "Front-end touchpoint: Operations > Claims > claim > Documents\n\nAccess: write:claims",
         "parameters": [
           {
             "name": "id",
@@ -27628,7 +27778,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Operations > Claim Documents",
+        "x-screen": "Operations > Claims > claim > Documents",
         "x-permissions": [
           "write:claims"
         ],
@@ -27663,7 +27813,7 @@
         "tags": [
           "Claim Documents"
         ],
-        "description": "Front-end touchpoint: Operations > Claim Documents\n\nAccess: write:claims",
+        "description": "Front-end touchpoint: Operations > Claims > claim > Documents\n\nAccess: write:claims",
         "parameters": [
           {
             "name": "id",
@@ -27730,7 +27880,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Operations > Claim Documents",
+        "x-screen": "Operations > Claims > claim > Documents",
         "x-permissions": [
           "write:claims"
         ],
@@ -27765,7 +27915,7 @@
         "tags": [
           "Claim Documents"
         ],
-        "description": "Front-end touchpoint: Operations > Claim Documents\n\nAccess: write:claims",
+        "description": "Front-end touchpoint: Operations > Claims > claim > Documents\n\nAccess: write:claims",
         "parameters": [
           {
             "name": "id",
@@ -27832,7 +27982,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Operations > Claim Documents",
+        "x-screen": "Operations > Claims > claim > Documents",
         "x-permissions": [
           "write:claims"
         ],
@@ -27856,7 +28006,7 @@
         "tags": [
           "Claim Documents"
         ],
-        "description": "Front-end touchpoint: Operations > Claim Documents > Remind\n\nAccess: write:claims",
+        "description": "Front-end touchpoint: Operations > Claims > claim > Documents > Remind\n\nAccess: write:claims",
         "parameters": [
           {
             "name": "id",
@@ -27920,7 +28070,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Operations > Claim Documents > Remind",
+        "x-screen": "Operations > Claims > claim > Documents > Remind",
         "x-permissions": [
           "write:claims"
         ],
@@ -27945,7 +28095,7 @@
         "tags": [
           "Claim Documents"
         ],
-        "description": "Front-end touchpoint: Operations > Claim Documents > Submit to insurer\n\nAccess: write:claims",
+        "description": "Front-end touchpoint: Operations > Claims > claim > Documents > Submit to insurer\n\nAccess: write:claims",
         "parameters": [
           {
             "name": "id",
@@ -28068,7 +28218,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Operations > Claim Documents > Submit to insurer",
+        "x-screen": "Operations > Claims > claim > Documents > Submit to insurer",
         "x-permissions": [
           "write:claims"
         ],
