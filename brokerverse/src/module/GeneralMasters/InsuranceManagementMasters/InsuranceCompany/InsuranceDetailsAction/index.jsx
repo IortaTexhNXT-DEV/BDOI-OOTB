@@ -557,8 +557,9 @@ const InsuranceDetailsAction = ({ action }) => {
                 className="input__label__corrections"
                 placeholder={t("numberingMasters.creditTerms.useDefault")}
                 label={t(label)}
+                length={4}
                 value={(action === "add" || action === "edit" ? formik.values[key] : getInsuranceView?.[key]) ?? ""}
-                onChange={(e) => formik.setFieldValue(key, e.target.value)}
+                onChange={(e) => formik.setFieldValue(key, e.target.value.replace(/\D/g, ""))}
               />
               {formik.errors[key] && (
                 <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors[key]}</div>
