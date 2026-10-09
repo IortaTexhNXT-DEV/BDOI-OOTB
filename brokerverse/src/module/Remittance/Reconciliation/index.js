@@ -107,7 +107,8 @@ const ReconciliationProcess = () => {
       showSuccess(toast, typeof detail === "function" ? detail(result) : detail, summary);
       await loadReconciliation();
     } catch (error) {
-      showError(toast, error, summary);
+      // the summary names the action as done ("Import Complete"); a failure keeps the error heading
+      showError(toast, error);
     } finally {
       setLoading(false);
     }

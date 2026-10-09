@@ -52,7 +52,10 @@ define({
     let created = 0;
     for (const [i, row] of rows.entries()) {
       try {
-        const r = await withTransaction((db) => svc.importPolicy(db, svc.policyFromRow(row), actor(req), { migration }));
+        const p = svc.policyFromRow(row);
+        const missing = migration ? svc.goLiveMissing(p) : [];
+        if (missing.length) throw badRequest(`An existing policy (go-live) needs ${missing.join(', ')}`);
+        const r = await withTransaction((db) => svc.importPolicy(db, p, actor(req), { migration }));
         await audit(req, { entity: 'policy', entityId: r.policyId, action: migration ? 'go-live-migration' : 'bulk-create', after: { policyId: r.policyId, billNumber: r.receivable?.bill_number ?? null } });
         created += 1;
       } catch (e) { errors.push({ row: i + 2, message: columnMessage(e.details?.length ? e.details.map((d) => d.message).join('; ') : e.message, svc.POLICY_UPLOAD_COLUMNS) }); }

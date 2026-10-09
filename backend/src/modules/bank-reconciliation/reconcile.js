@@ -11,6 +11,8 @@
  * date. Balance per books: GL balance of the cash account (pe_balance_before, which honours year-end opening balances).
  */
 import { getSetting } from '../../lib/settings.js';
+import { printFormat } from '../../lib/pdf/index.js';
+import { formatDateTime } from '../../lib/pdf/format.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { hasPermission } from '../../lib/auth.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
@@ -236,7 +238,8 @@ export async function statementPdfSpec(rec, company) {
   const detail = [['Deposits in transit', s.items?.depositsInTransit, 'book'], ['Outstanding cheques', s.items?.outstandingCheques, 'book'], ['Bank credits not yet booked', s.items?.unbookedCredits, 'bank'],
     ['Bank charges not yet booked', s.items?.unbookedDebits, 'bank'], ['Bank errors', s.items?.bankErrors, 'bank'], ['Book errors', s.items?.bookErrors, 'bank']];
   for (const [heading, list, kind] of detail) if (list?.length) sections.push({ heading: `${heading} (${list.length})`, table: itemTable(list, kind) });
-  const at = (v) => (v ? new Date(v).toISOString().slice(0, 16).replace('T', ' ') : '-');
+  const fmt = await printFormat();
+  const at = (v) => (v ? formatDateTime(v, fmt) : '-');
   sections.push({ heading: 'Sign-off', rows: [['Prepared by', txt(rec.preparedByName || '-')], ['Prepared at', at(rec.preparedAt)], ['Approved by', txt(rec.approvedByName || '-')], ['Approved at', at(rec.approvedAt)]] });
   return {
     title: 'Bank Reconciliation Statement',
@@ -245,7 +248,8 @@ export async function statementPdfSpec(rec, company) {
       ['GL account', txt(`${s.glAccountCode} ${s.glAccountName || ''}`.trim())], ['Period', rec.period], ['As of', s.asOf],
       ['Bank statement', txt(s.statement ? `${s.statement.statementNumber}${s.statement.statementRef ? ` (${s.statement.statementRef})` : ''}` : '-')]],
     sections,
-    footer: txt(`${company.system || company.name || ''} - generated ${new Date().toISOString().replace('T', ' ').slice(0, 16)} UTC`),
+    // the generated date and user are printed by the layout in the business time zone
+    footer: txt(company.system || company.name || ''),
   };
 }
 

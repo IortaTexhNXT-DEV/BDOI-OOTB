@@ -10,6 +10,7 @@ import request from 'supertest';
 import { setupFinance, makePolicy, ledgerIntegrity } from './accounting.fixtures.js';
 import { pool, query } from '../src/db/pool.js';
 import { parseRows } from '../src/modules/insurer-reconciliation/statements.js';
+import { readWorkbook } from '../src/modules/documents/xlsx.js';
 import { compare, normPolicy } from '../src/modules/insurer-reconciliation/matching.js';
 
 let ctx;
@@ -115,14 +116,19 @@ describe('insurer statement reconciliation', () => {
   });
 
   it('exports the differences report as Excel, CSV and PDF', async () => {
-    const x = await ctx.as('maker')('get', `/insurer-reconciliation/statements/${s.id}/report`);
+    const binary = (res, cb) => { const chunks = []; res.on('data', (d) => chunks.push(d)); res.on('end', () => cb(null, Buffer.concat(chunks))); };
+    const x = await ctx.as('maker')('get', `/insurer-reconciliation/statements/${s.id}/report`).buffer(true).parse(binary);
     expect(x.status).toBe(200);
     expect(x.headers['content-type']).toContain('spreadsheetml');
     const c2 = await ctx.as('maker')('get', `/insurer-reconciliation/statements/${s.id}/report?format=csv`);
     expect(c2.text).toContain(b.policy.policy_number);
     expect(c2.text).toContain('Missing on the insurer statement');
-    const p = await ctx.as('maker')('get', `/insurer-reconciliation/statements/${s.id}/report?format=pdf`);
+    const p = await ctx.as('maker')('get', `/insurer-reconciliation/statements/${s.id}/report?format=pdf`).buffer(true).parse(binary);
     expect(p.headers['content-type']).toContain('application/pdf');
+    // generated in the business time zone by the layout, not a UTC stamp in the footer
+    expect(p.body.toString('latin1')).not.toContain('UTC');
+    const wb = readWorkbook(x.body);
+    expect(wb[1].rows.find((r) => r[0] === 'Period')[1]).toMatch(/^\d{2}\/\d{2}\/\d{4} to \d{2}\/\d{2}\/\d{4}$/);
     const list = await ctx.as('maker')('get', '/insurer-reconciliation/statements?status=approved');
     expect(list.body.data.map((z) => z.id)).toContain(s.id);
   });

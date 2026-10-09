@@ -397,6 +397,9 @@ export const POLICY_UPLOAD_COLUMNS = [
   { key: 'paymentStatus', header: 'Payment Status', format: 'Pending when empty', allowed: ['Pending', 'Reviewing', 'Partial', 'Completed', 'Refunded'], example: 'Pending' },
 ];
 
+/** Columns an existing policy (go-live upload) must have: it keeps its number, insurer and term. */
+export const goLiveMissing = (p) => POLICY_UPLOAD_COLUMNS.filter((c) => c.required === 'Existing policies (go-live)' && !p[c.key]).map((c) => c.header);
+
 /** Map an uploaded policy row to the issuance inputs. */
 export function policyFromRow(row) {
   const v = mapColumns(row, POLICY_UPLOAD_COLUMNS);
@@ -411,9 +414,6 @@ export function policyFromRow(row) {
 export async function importPolicy(db, p, userId, { migration = false } = {}) {
   if (!p.grossPremium) throw badRequest('grossPremium is required');
   if (!p.firstName && !p.companyName && !p.insuredName) throw badRequest('insuredName (or firstName / companyName) is required');
-  // an in-force policy of the old system keeps its number, insurer and term
-  const missing = migration ? POLICY_UPLOAD_COLUMNS.filter((c) => c.required === 'Existing policies (go-live)' && !p[c.key]).map((c) => c.header) : [];
-  if (missing.length) throw badRequest(`An existing policy (go-live) needs ${missing.join(', ')}`);
   const icId = await insurerId(db, p.insuranceCompanyName);
   if (p.insuranceCompanyName && !icId) throw badRequest(`Insurance Company "${p.insuranceCompanyName}" is not in the Insurance Company master`);
   const [first, ...rest] = (p.insuredName || '').split(' ');

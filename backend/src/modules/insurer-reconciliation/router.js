@@ -18,6 +18,8 @@ import { writeXlsx } from '../../lib/xlsx.js';
 import { toCsv, uploadFile } from '../documents/tabular.js';
 import { insurerStatementUpload, sendWorkbook } from '../documents/uploadTemplates.js';
 import { printContext, renderPdf, sendPdf } from '../documents/pdf.js';
+import { printFormat } from '../../lib/pdf/index.js';
+import { formatDatesIn } from '../../lib/pdf/format.js';
 import { excelBrand } from '../reports/service.js';
 import * as st from './statements.js';
 import * as mt from './matching.js';
@@ -207,7 +209,7 @@ define({
     const format = String(req.query.format || 'xlsx').toLowerCase();
     if (format === 'pdf') {
       const company = { name: await companyName(), system: (await getSetting('general.system_name')) ?? '' };
-      sendPdf(res, await renderPdf(rc.reportPdfSpec(s, company)), `${base}.pdf`, req.query.download ? 'attachment' : 'inline');
+      sendPdf(res, await renderPdf(rc.reportPdfSpec(s, company, await printFormat())), `${base}.pdf`, req.query.download ? 'attachment' : 'inline');
       return;
     }
     const rows = rc.reportRows(s);
@@ -219,10 +221,11 @@ define({
     }
     const money = new Set([6, 7, 8, 9, 10, 11, 12, 13, 14]);
     const sum = s.summary;
-    const buf = writeXlsx({ title: `Insurer statement reconciliation ${s.statementNumber}`, brand: excelBrand(await printContext()), sheets: [
-      { name: 'Reconciliation', columns: rc.REPORT_HEADER.map((h, i) => ({ header: h, type: money.has(i) ? 'money' : 'text', width: i === 16 ? 60 : 16 })), rows },
+    const ctx = await printContext();
+    const buf = writeXlsx({ title: `Insurer statement reconciliation ${s.statementNumber}`, brand: excelBrand(ctx), dateFormat: ctx.format.dateFormat, sheets: [
+      { name: 'Reconciliation', columns: rc.REPORT_HEADER.map((h, i) => ({ header: h, type: money.has(i) ? 'money' : i === 3 ? 'date' : 'text', width: i === 16 ? 60 : 16 })), rows },
       { name: 'Summary', columns: [{ header: 'Item', width: 40 }, { header: 'Value', width: 20, type: 'auto' }], rows: [
-        ['Insurer', s.insurerName], ['Statement', `${s.statementTypeLabel} ${s.statementRef || ''}`.trim()], ['Period', `${s.periodFrom} to ${s.periodTo}`], ['Status', s.status],
+        ['Insurer', s.insurerName], ['Statement', `${s.statementTypeLabel} ${s.statementRef || ''}`.trim()], ['Period', formatDatesIn(`${s.periodFrom} to ${s.periodTo}`, ctx.format)], ['Status', s.status],
         ['Lines', sum.lines], ['Matched', sum.matched], ['Amount differences', sum.differences], ['Not found at the broker', sum.missingInBroker],
         ['Missing on the insurer statement', sum.missingInInsurer], ['Unresolved', sum.unresolved], ['Premium adjustments', sum.adjustments.premium], ['Commission adjustments', sum.adjustments.commission]] },
     ] });
