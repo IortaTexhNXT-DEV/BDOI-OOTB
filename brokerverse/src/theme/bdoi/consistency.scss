@@ -184,6 +184,12 @@ small.p-error,
   padding-bottom: 9px;
 }
 
+.p-calendar.p-calendar-w-btn .p-datepicker-trigger {
+  min-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 // a checkbox or radio button and its label on one line, the box centred on the text
 .p-checkbox,
 .p-radiobutton {
