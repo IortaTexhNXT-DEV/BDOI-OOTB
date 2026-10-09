@@ -21,9 +21,10 @@ const App = () => {
   });
 
   const dispatch = useDispatch();
-  // The application name (general.system_name, Master > System Settings) in the browser tab
+  // The application name (general.system_name, the brand pack of the deployment) in the browser tab, once loaded:
+  // until then the tab keeps the title public/branding-boot.js set
   const appTitle = useSelector(
-    (state) => state.systemSettingsReducer?.systemName || "BrokerVerse"
+    (state) => (state.systemSettingsReducer?.loaded ? state.systemSettingsReducer.systemName : "")
   );
 
   const { hasToken, userData } = authState;
@@ -52,6 +53,7 @@ const App = () => {
   }, [authState.hasToken, authState.userData]);
 
   useEffect(() => {
+    if (!appTitle) return;
     applyAppTitle(appTitle, { authenticated: hasToken, userName });
 
     const metaDescription = document.querySelector('meta[name="description"]');

@@ -135,8 +135,8 @@ export function loadFontStylesheet(url, doc = document) {
 
 /**
  * Apply a branding payload (GET /api/branding: { theme, fontStack, fontUrl, faviconUrl }) to the document: CSS custom
- * properties and data attributes (density, header and side bar style) on <html>, the font stylesheet and the favicon.
- * Returns the variables set.
+ * properties and data attributes (density, header and side bar style) on <html>, the font stylesheet, the favicon and
+ * the browser colour of mobile devices (header background). Returns the variables set.
  */
 export function applyBranding(branding, root = typeof document !== "undefined" ? document.documentElement : null) {
   if (!root || !branding) return {};
@@ -166,7 +166,9 @@ export function applyBranding(branding, root = typeof document !== "undefined" ?
     }
     if (link.getAttribute("href") !== branding.faviconUrl) link.href = branding.faviconUrl;
   }
-  return vars;
+  const themeColor = doc.querySelector("meta[name='theme-color']");
+  if (themeColor) themeColor.setAttribute("content", vars["--bv-header-bg"]);
+  return brand ? { ...vars, ...alt } : vars;
 }
 
 /** Inline style object with a theme's variables, for previews (applied to one element, not the page). */

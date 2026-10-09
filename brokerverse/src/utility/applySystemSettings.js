@@ -22,32 +22,19 @@ export function applyThemeColors(primaryColor, secondaryColor) {
 }
 
 /**
- * Update favicon link in document head.
+ * The browser tab title from the application name (general.system_name): "<name> - Login" before sign-in,
+ * "<name> - Dashboard | <user>" after.
  */
-export function applyFavicon(faviconUrl) {
-  const href = faviconUrl || DEFAULT_SYSTEM_SETTINGS.faviconUrl;
-  let link = document.querySelector("link[rel='icon']");
-  if (!link) {
-    link = document.createElement("link");
-    link.rel = "icon";
-    document.head.appendChild(link);
-  }
-  link.href = href;
+export function appTitle(name, { authenticated, userName } = {}) {
+  const shown = name || DEFAULT_SYSTEM_SETTINGS.systemName;
+  // non-production environments put their name first in the browser tab, e.g. "[UAT] Toyota Insurance Services - Login"
+  const base = runtimeConfig.showEnvironmentBanner ? `[${runtimeConfig.environmentName}] ${shown}` : shown;
+  return authenticated ? `${base} - Dashboard | ${userName || "User"}` : `${base} - Login`;
 }
 
-/**
- * Set document title from the application name (login / generic pages).
- * Authenticated pages may append more in App.js.
- */
-export function applyAppTitle(appTitle, { authenticated, userName } = {}) {
-  const name = appTitle || DEFAULT_SYSTEM_SETTINGS.systemName;
-  // non-production environments put their name first in the browser tab, e.g. "[UAT] BrokerVerse - Login"
-  const base = runtimeConfig.showEnvironmentBanner ? `[${runtimeConfig.environmentName}] ${name}` : name;
-  if (authenticated) {
-    document.title = `${base} - Dashboard | ${userName || "User"}`;
-  } else {
-    document.title = `${base} - Login`;
-  }
+/** Set the browser tab title (appTitle). The favicon comes with the branding (src/theme/runtime/themeEngine.js). */
+export function applyAppTitle(name, options = {}) {
+  document.title = appTitle(name, options);
 }
 
 /**
@@ -73,7 +60,6 @@ export function applySystemSettings(settings = {}, options = {}) {
   setPhoneConfig(merged);
   setQuoteOptions(merged);
   applyThemeColors(merged.primaryColor, merged.secondaryColor);
-  applyFavicon(merged.faviconUrl);
   applyAppTitle(merged.systemName, options);
   applyDefaultLanguage(merged.defaultLanguage);
   return merged;

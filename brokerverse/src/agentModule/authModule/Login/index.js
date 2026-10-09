@@ -56,7 +56,7 @@ const Login = () => {
   const currentLanguage =
     languageOptions.find((o) => i18n.language && i18n.language.startsWith(o.value))?.value || languageOptions[0]?.value || "en";
   // Branding (Theme and Branding, GET /api/branding) first, then the System Settings values
-  const { branding } = useBranding();
+  const { branding, ready: brandingReady } = useBranding();
   const login = branding?.theme?.login || {};
   const storedSystemName = useSelector(
     (state) => state.systemSettingsReducer?.systemName || DEFAULT_SYSTEM_SETTINGS.systemName
@@ -370,6 +370,9 @@ const Login = () => {
   const subtitle =
     step === "signin" ? (passwordVisible ? t("login.subtitle") : t("login.subtitleMicrosoft")) : headings[step][1];
   const tagline = step === "signin" ? login.tagline : "";
+
+  // the page waits for the branding of the environment instead of painting the default logo and colours first
+  if (!brandingReady) return <div className="agent__container__login bv-auth" aria-busy="true" />;
 
   return (
     <div className="agent__container__login bv-auth">
