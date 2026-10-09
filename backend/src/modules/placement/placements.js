@@ -434,7 +434,7 @@ const slipDeductible = (row) => {
 /**
  * Compare the e-policy with the slip (placement.check_fields): amounts within the tolerance (the larger of
  * placement.check_tolerance_amount and placement.check_tolerance_pct of the slip amount), the period, the insured, the
- * vehicle identifiers and the deductible exactly. Items: { key, label, slip, epolicy, difference, status } with status
+ * vehicle identifiers (motor and CTPL placements only) and the deductible exactly. Items: { key, label, slip, epolicy, difference, status } with status
  * match | mismatch | captured (a value the slip did not have, e.g. a plate number the quote gave as TBA) | carried (taken
  * from the slip) | not-given (an optional amount the e-policy does not state).
  */
@@ -465,7 +465,7 @@ export async function compareWithSlip(row) {
     text('expiryDate', 'Expiry date', isoDate(row.expiry_date), isoDate(ep.expiryDate));
   }
   if (fields.includes('insuredName')) text('insuredName', 'Insured', row.insured_name, ep.participantName);
-  if (fields.includes('vehicle')) {
+  if (fields.includes('vehicle') && row.lob === 'MOTOR') {
     const slip = await slipVehicle(row);
     for (const [k, label] of Object.entries(VEHICLE_ITEMS)) if (slip[k] || !unknown(ep.vehicle?.[k])) text(k, label, slip[k], unknown(ep.vehicle?.[k]) ? null : ep.vehicle[k]);
   }
@@ -480,18 +480,21 @@ const differenceText = (cmp) => cmp.items.filter((i) => i.status === 'mismatch')
 /**
  * e-Policy received: the issued policy the insurer returned is uploaded (documentKey, from POST /s3/upload) and its
  * figures keyed (TIS-BRD-ISSUE-02): insurer and BrokerVerse policy numbers, participant name, sum insured, premium,
- * commission, issue / issuance / effective / production dates, vehicle identifiers (registration mandatory for motor
- * even where the quotation said TBA) and an optional vehicle photo. The system compares it with the slip at once.
+ * commission, issue / issuance / effective / production dates and, for a motor or CTPL placement only, the vehicle
+ * identifiers (registration mandatory even where the quotation said TBA) and an optional vehicle photo; another line
+ * keeps neither. The system compares it with the slip at once.
  */
 export async function recordEpolicy(id, body, user) {
   const p = await getPlacementRow(id);
   if (!WITH_INSURER.includes(p.status)) throw conflict(`An e-policy is recorded against a placement slip sent to the insurer (placement status: ${LABELS[p.status] || p.status})`);
   const document = await findDocument(body.documentKey);
   if (!document) throw badRequest('The e-policy file was not found; upload it again', [{ path: 'documentKey', message: 'Unknown file' }]);
-  if (body.vehiclePhotoKey && !(await findDocument(body.vehiclePhotoKey))) throw badRequest('The vehicle photo was not found; upload it again', [{ path: 'vehiclePhotoKey', message: 'Unknown file' }]);
-  const slip = await slipVehicle(p);
-  const vehicle = Object.fromEntries(Object.keys(VEHICLE_ITEMS).map((k) => [k, unknown(body.vehicle?.[k]) ? slip[k] : String(body.vehicle[k]).trim()]));
-  if (p.lob === 'MOTOR' && !vehicle.plateNumber && !vehicle.mvFileNumber) {
+  const motor = p.lob === 'MOTOR';
+  const photoKey = motor ? body.vehiclePhotoKey || null : null;
+  if (photoKey && !(await findDocument(photoKey))) throw badRequest('The vehicle photo was not found; upload it again', [{ path: 'vehiclePhotoKey', message: 'Unknown file' }]);
+  const slip = motor ? await slipVehicle(p) : {};
+  const vehicle = motor ? Object.fromEntries(Object.keys(VEHICLE_ITEMS).map((k) => [k, unknown(body.vehicle?.[k]) ? slip[k] : String(body.vehicle[k]).trim()])) : null;
+  if (motor && !vehicle.plateNumber && !vehicle.mvFileNumber) {
     throw badRequest('The plate number or MV file number is required on the policy, even where the quotation gave it as TBA', [{ path: 'vehicle.plateNumber', message: 'Registration details are required' }]);
   }
   if (body.brokerPolicyNumber && await one('SELECT 1 FROM policies WHERE policy_number = $1', [body.brokerPolicyNumber])) throw conflict(`Policy number ${body.brokerPolicyNumber} already exists`);
@@ -500,8 +503,7 @@ export async function recordEpolicy(id, body, user) {
     sumInsured: num(body.sumInsured), netPremium: num(body.netPremium), grossPremium: given(body.grossPremium) ? num(body.grossPremium) : null,
     commissionAmount: given(body.commissionAmount) ? num(body.commissionAmount) : null, issueDate: isoDate(body.issueDate), issuanceDate: isoDate(body.issuanceDate) || await today(),
     effectiveDate: isoDate(body.effectiveDate), expiryDate: isoDate(body.expiryDate) || isoDate(p.expiry_date), productionDate: isoDate(body.productionDate) || null,
-    deductible: body.deductible || null, vehicle: p.lob === 'MOTOR' || Object.values(vehicle).some(Boolean) ? vehicle : null,
-    vehiclePhotoKey: body.vehiclePhotoKey || null, vehiclePhotoName: body.vehiclePhotoName || null, remarks: body.remarks || null,
+    deductible: body.deductible || null, vehicle, vehiclePhotoKey: photoKey, vehiclePhotoName: photoKey ? body.vehiclePhotoName || null : null, remarks: body.remarks || null,
   };
   if (epolicy.expiryDate <= epolicy.effectiveDate) throw badRequest('expiryDate must be after effectiveDate');
   const cmp = await compareWithSlip({ ...p, epolicy });
@@ -517,7 +519,7 @@ export async function recordEpolicy(id, body, user) {
       const ref = refs.get(Number(x.insuranceCompanyId)) || (x.isLead ? epolicy.insurerPolicyNumber : x.insurerReference);
       await db.query("UPDATE risk_participants SET status = 'confirmed', insurer_reference = $2, confirmed_at = now(), confirmed_by = $3, updated_at = now() WHERE id = $1", [x.participantId, ref || null, user.id]);
     }
-    await db.query("UPDATE documents SET entity = 'placement', entity_id = $2 WHERE storage_key = ANY($1) AND entity IS NULL", [[document.storage_key, body.vehiclePhotoKey ? safeKey(body.vehiclePhotoKey) : null].filter(Boolean), p.id]);
+    await db.query("UPDATE documents SET entity = 'placement', entity_id = $2 WHERE storage_key = ANY($1) AND entity IS NULL", [[document.storage_key, photoKey ? safeKey(photoKey) : null].filter(Boolean), p.id]);
   });
   return placementById(p.id);
 }
