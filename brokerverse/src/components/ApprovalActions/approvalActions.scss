@@ -1,0 +1,25 @@
+// Approve / Reject with the maker-checker reason (components/ApprovalActions). Theme CSS variables only.
+
+.bv-approval-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  font-family: var(--font-body);
+}
+
+.bv-approval-actions__reason {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-right: auto;
+  max-width: 28rem;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+
+  .pi {
+    font-size: 12px;
+  }
+}

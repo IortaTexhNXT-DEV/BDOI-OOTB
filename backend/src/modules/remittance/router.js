@@ -13,7 +13,7 @@ import * as clientPayments from './clientPayments.js';
 import { pool, withTransaction } from '../../db/pool.js';
 import { businessTimeZone } from '../../lib/dates.js';
 import { buildPdf, sendPdf } from '../documents/pdf.js';
-import { commissionDebitNoteDoc } from '../documents/templates.js';
+import { commissionDebitNoteDoc, remittanceAdviceDoc } from '../documents/templates.js';
 
 /** Remittance (Accounts > Remittance, 16 screens) and the Remittance Master overview. */
 const { router, define } = moduleRouter('Remittance', '/remittance');
@@ -46,10 +46,26 @@ define({
     sendList(res, rows, total, pg, { summary });
   },
 });
+const activity = {
+  action: 'submit', by: 'r.finance', at: '2026-10-10T01:03:00.000Z', notes: null, id: '812', day: '2026-10-10', date: '10/10/2026', time: '09:03', atText: '10/10/2026 09:03',
+  actionCode: 'submit', actionLabel: 'Remittance submitted', user: { username: 'r.finance', displayName: 'Rosa Finance', roles: ['Finance Officer'], role: 'Finance Officer' },
+  fromStatus: 'Draft', toStatus: 'Pending Approval', remarks: null, changes: [{ field: 'batchId', label: 'Batch ID', before: null, after: 'BLK-2026-00001' }],
+  source: { channel: 'screen', label: 'Screen', name: 'Accounts > Remittance > Tracking' },
+};
 define({
-  method: 'GET', path: '/remittances/:id', summary: 'Remittance details: insurer, policies, documents, activity log', screen: S('Tracking > View'), middleware: read,
-  response: { success: true, data: { ...rem, insurerDetails: { code: 'MALAYAN', name: 'Malayan Insurance Co., Inc.' }, policies: [{ policyNo: 'POL-2026-00001', premium: 15000, commission: 2250 }], activityLog: [] } },
-  handler: async (req, res) => ok(res, await svc.remittanceDetails(req.params.id)),
+  method: 'GET', path: '/remittances/:id',
+  summary: 'Remittance details: insurer, policies, documents, activity log (oldest first: the remittance\'s audit rows, its approval decisions and the settlement that settled it; each entry with action label, user display name and roles, status from / to, remarks and changed fields)',
+  screen: S('Tracking > View'), middleware: read,
+  response: { success: true, data: { ...rem, insurerDetails: { code: 'MALAYAN', name: 'Malayan Insurance Co., Inc.' }, policies: [{ policyNo: 'POL-2026-00001', premium: 15000, commission: 2250 }], activityLog: [activity] } },
+  handler: async (req, res) => ok(res, await svc.remittanceDetails(req.params.id, { viewer: req.user })),
+});
+define({
+  method: 'GET', path: '/remittances/:id/pdf', summary: 'Printable remittance advice (agency bill for an agency bill): broker letterhead, the policies, the amount due and the signatures (PDF; download=1 for an attachment)',
+  screen: S('Tracking > Print'), middleware: read, query: { download: 1 }, response: 'application/pdf',
+  handler: async (req, res) => {
+    const r = await svc.remittanceDetails(req.params.id, { viewer: req.user });
+    sendPdf(res, buildPdf(await remittanceAdviceDoc(r, r.policies)), `remittance-${r.remittanceNo}.pdf`, req.query.download ? 'attachment' : 'inline');
+  },
 });
 define({
   method: 'POST', path: '/remittances', summary: 'Create a draft remittance from policy lines', screen: S('Tracking'), middleware: write,
@@ -651,7 +667,8 @@ define({
 });
 define({
   method: 'GET', path: '/history/audit', summary: 'Audit trail of remittance records (filter referenceNo)', screen: S('History > Audit Trail'), middleware: read, query: { referenceNo: 'REM-2026-00001' },
-  response: { success: true, data: [{ referenceNo: 'REM-2026-00001', actionType: 'approve', previousValue: 'Pending Approval', newValue: 'Approved', changedBy: 'finance.head', changeDate: '2026-09-26 15:45' }] },
+  response: { success: true, data: [{ referenceNo: 'REM-2026-00001', actionType: 'approve', actionLabel: 'Approved', previousValue: 'Pending Approval', newValue: 'Approved', changedBy: 'finance.head',
+    changedByName: 'Fe Head', changedByRoles: ['Finance Manager'], changeDate: '2026-09-26 15:45', changedAt: '2026-09-26T15:45:00.000Z' }] },
   handler: async (req, res) => ok(res, await items.auditTrail(req.query)),
 });
 define({

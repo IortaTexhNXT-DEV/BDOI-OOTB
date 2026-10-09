@@ -1,0 +1,280 @@
+// Activity log timeline (components/ActivityLog): a thin rail with small markers, one entry per action, the changed
+// fields in a quiet table. Theme CSS variables only.
+
+.bv-activity {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+.bv-activity__state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 4px;
+  color: var(--color-text-muted);
+
+  &--error {
+    color: var(--color-danger);
+  }
+}
+
+.bv-activity__skeleton {
+  display: flex;
+  gap: 14px;
+  padding: 10px 0;
+}
+
+.bv-activity__skeleton-lines {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bv-activity__day + .bv-activity__day {
+  margin-top: 8px;
+}
+
+.bv-activity__day-label {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 2px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-heading);
+}
+
+.bv-activity__relative {
+  color: var(--bv-primary);
+}
+
+.bv-activity__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bv-activity__entry {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  padding: 12px 0 12px 2px;
+
+  // the rail joining the markers of one day
+  &::before {
+    content: "";
+    position: absolute;
+    left: 7px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--color-border);
+  }
+
+  &:first-child::before {
+    top: 18px;
+  }
+
+  &:last-child::before {
+    bottom: calc(100% - 18px);
+  }
+
+  &:only-child::before {
+    display: none;
+  }
+}
+
+.bv-activity__marker {
+  position: relative;
+  flex: 0 0 12px;
+  width: 12px;
+  height: 12px;
+  margin-top: 4px;
+  border: 2px solid var(--color-placeholder);
+  border-radius: 50%;
+  background: var(--color-surface);
+}
+
+.bv-activity__entry--positive .bv-activity__marker {
+  border-color: var(--color-success);
+}
+
+.bv-activity__entry--negative .bv-activity__marker {
+  border-color: var(--color-danger);
+}
+
+.bv-activity__entry--status .bv-activity__marker {
+  border-color: var(--bv-primary);
+}
+
+.bv-activity__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.bv-activity__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bv-activity__action {
+  font-weight: 700;
+  color: var(--color-heading);
+}
+
+.bv-activity__time {
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+.bv-activity__who {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 0;
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.bv-activity__name {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.bv-activity__role::before,
+.bv-activity__source::before {
+  content: "·";
+  margin: 0 6px;
+  color: var(--color-placeholder);
+}
+
+.bv-activity__source {
+  overflow-wrap: anywhere;
+}
+
+.bv-activity__status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.bv-activity__arrow {
+  font-size: 10px;
+  color: var(--color-placeholder);
+}
+
+.bv-activity__remarks {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-left: 2px solid var(--color-border);
+  background: var(--color-surface-muted);
+  border-radius: 0 var(--bv-radius-sm) var(--bv-radius-sm) 0;
+
+  p {
+    margin: 0;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+    color: var(--color-heading);
+  }
+}
+
+.bv-activity__remarks-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.bv-activity__changes {
+  margin-top: 8px;
+}
+
+.bv-activity__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--bv-link, var(--bv-primary));
+  cursor: pointer;
+
+  .pi {
+    font-size: 10px;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--bv-focus-color);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+.bv-activity__table {
+  width: 100%;
+  margin-top: 6px;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th,
+  td {
+    padding: 5px 8px;
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+    vertical-align: baseline;
+    overflow-wrap: anywhere;
+  }
+
+  thead th {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    background: var(--color-surface-muted);
+  }
+
+  tbody th {
+    width: 32%;
+    font-weight: 600;
+    color: var(--color-text-muted);
+  }
+
+  td {
+    width: 34%;
+    color: var(--color-heading);
+  }
+}
+
+.bv-activity__value--muted {
+  color: var(--color-placeholder);
+}
+
+@media (max-width: 640px) {
+  .bv-activity__head {
+    flex-direction: column;
+    gap: 0;
+  }
+}
+
+@media print {
+  .bv-activity__table[hidden] {
+    display: table;
+  }
+
+  .bv-activity__toggle .pi {
+    display: none;
+  }
+}
