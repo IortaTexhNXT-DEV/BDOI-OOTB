@@ -12,10 +12,8 @@ import { useTranslation } from "react-i18next";
 import documentTemplateService from "../../../services/documentTemplateService";
 import emailService from "../../../services/emailService";
 import EmailDocumentDialog from "../../../components/EmailDocumentDialog";
-import {
-  showSuccessMessage,
-  showErrorMessage,
-} from "../../../utility/toastUtils";
+import { printPdf } from "../../../components/Print";
+import { showErrorMessage } from "../../../utility/toastUtils";
 
 function PolicyReceipts() {
   const { t } = useTranslation();
@@ -58,94 +56,33 @@ function PolicyReceipts() {
     textalign: "center",
   };
 
-  const handlePrintAll = async () => {
-    if (!currentReceiptId) {
-      showErrorMessage(t("accounts.addReceiptEdit.receiptIdMissing"));
-      return;
-    }
-
-    try {
-      setPrintLoading(true);
-      showSuccessMessage(
-        t("accounts.addReceiptEdit.generatingPdf"),
-        t("common.success")
-      );
-
-      const result = await documentTemplateService.getReceiptPdf(
-        currentReceiptId,
-        {
-          fileName: `receipt-${receiptNumber || currentReceiptId}.pdf`,
-        }
-      );
-
-      if (!result.success) {
-        throw new Error(
-          result.error || t("accounts.addReceiptEdit.failedToPrintReceipt")
-        );
-      }
-
-      showSuccessMessage(
-        t("accounts.addReceiptEdit.pdfDownloadedSuccess"),
-        t("common.success")
-      );
-    } catch (error) {
-      showErrorMessage(
-        error?.message || t("accounts.addReceiptEdit.failedToPrintReceipt"),
-        t("common.error")
-      );
-    } finally {
-      setPrintLoading(false);
-    }
+  // prints the official receipt (the whole receipt or the lines chosen) from the server PDF
+  const printReceipt = (lineIds, fileName) => {
+    setPrintLoading(true);
+    printPdf(documentTemplateService.receiptPdfPath(currentReceiptId, { lineIds }), { fileName })
+      .catch((error) => showErrorMessage(error?.message || t("accounts.addReceiptEdit.failedToPrintReceipt"), t("common.error")))
+      .finally(() => setPrintLoading(false));
   };
 
-  const handlePrintSelected = async () => {
+  const handlePrintAll = () => {
     if (!currentReceiptId) {
       showErrorMessage(t("accounts.addReceiptEdit.receiptIdMissing"));
       return;
     }
+    printReceipt([], `receipt-${receiptNumber || currentReceiptId}.pdf`);
+  };
 
+  const handlePrintSelected = () => {
+    if (!currentReceiptId) {
+      showErrorMessage(t("accounts.addReceiptEdit.receiptIdMissing"));
+      return;
+    }
     if (!selectedRows || selectedRows.length === 0) {
       showErrorMessage(t("accounts.addReceiptEdit.selectOneToPrint"));
       return;
     }
-
-    try {
-      setPrintLoading(true);
-      showSuccessMessage(
-        t("accounts.addReceiptEdit.generatingPdf"),
-        t("common.success")
-      );
-
-      const lineIds = selectedRows
-        .map((row) => row.receiptListId || row.id)
-        .filter(Boolean);
-
-      const result = await documentTemplateService.getReceiptPdf(
-        currentReceiptId,
-        {
-          lineIds,
-          fileName: `receipt-${receiptNumber || currentReceiptId}-selected.pdf`,
-        }
-      );
-
-      if (!result.success) {
-        throw new Error(
-          result.error || t("accounts.addReceiptEdit.failedToPrintReceipt")
-        );
-      }
-
-      showSuccessMessage(
-        t("accounts.addReceiptEdit.pdfDownloadedSuccess"),
-        t("common.success")
-      );
-    } catch (error) {
-      showErrorMessage(
-        error?.message || t("accounts.addReceiptEdit.failedToPrintReceipt"),
-        t("common.error")
-      );
-    } finally {
-      setPrintLoading(false);
-    }
+    const lineIds = selectedRows.map((row) => row.receiptListId || row.id).filter(Boolean);
+    printReceipt(lineIds, `receipt-${receiptNumber || currentReceiptId}-selected.pdf`);
   };
 
   return (

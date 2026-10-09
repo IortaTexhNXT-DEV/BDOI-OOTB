@@ -38,6 +38,8 @@ const openPdf = async (response) => {
 const brandingService = {
   /** Printable journal voucher (Accounts > Journal Voucher > Details > Print). */
   printJournalVoucher: async (id) => openPdf(await fetch(`${BASE_URL}/journal-vouchers/${encodeURIComponent(id)}/pdf`, { headers: headers() })),
+  /** Letterhead and document colours of pages printed from the browser (components/Print). */
+  letterhead: async () => json(await fetch(`${BASE_URL}/document-templates/letterhead`, { headers: headers() }), "Failed to load the letterhead"),
   /** Printable endorsement (Endorsement > Detailed view > Print). */
   printEndorsement: async (id) => openPdf(await fetch(`${BASE_URL}/endorsements/${encodeURIComponent(id)}/pdf`, { headers: headers() })),
   getEditor: async () => json(await fetch(`${BASE_URL}/branding/theme`, { headers: headers() }), "Failed to load the theme"),
