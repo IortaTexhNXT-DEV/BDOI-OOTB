@@ -83,7 +83,11 @@ tariff of the product configurator, the lead sources, the sales activity types, 
 and the accounts of the TISPH chart. Premiums are priced as the engines price them (premium tax and charge rules,
 motor tariff, Commission Rate Matrix / insurer / default commission rate; helpers in `sample/84_sales.sql`), and every
 sample journal balances on the accounts the configuration names. A database seeded with the sample of an earlier
-release is converted by migration `0365_tisph_sample_data.sql` (earlier sample rows removed, those users worked on kept).
+release is converted by migration `0365_tisph_sample_data.sql` (earlier sample rows removed, those users worked on kept);
+migration `0369_tisph_sample_data_kept_policies.sql` gives the earlier sample policies kept that way the premium
+breakdown the sample files read (the whole premium as net premium, no premium taxes, as the earlier sample booked
+them). A sample file that reads a row it did not create (a term kept under the same fixed id) treats a missing amount
+as nil.
 
 | File | Contents |
 |---|---|

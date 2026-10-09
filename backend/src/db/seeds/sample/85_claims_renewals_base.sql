@@ -113,14 +113,16 @@ UPDATE policies SET renewed_to = 'pol_crs_24' WHERE id = 'pol_crs_23' AND renewe
 UPDATE policies SET renewed_from = 'pol_crs_23' WHERE id = 'pol_crs_24' AND renewed_from IS NULL;
 
 -- Premium bills: paid for most terms, unpaid on two (claims acceptance control demo, payment status in batches), half
--- paid on the fleet account that pays by post-dated cheques; billed on the inception date, due 30 days later
+-- paid on the fleet account that pays by post-dated cheques; billed on the inception date, due 30 days later. A term
+-- already billed (one of an earlier sample kept on a database in use, or billed by a user) is not billed again, and a
+-- tax missing from a term the seed did not create counts as nil.
 INSERT INTO receivables(id, bill_number, policy_id, client_id, amount, balance, due_date, status, source, currency, net_premium, vat, dst, lgt, other_charges, created_at)
 SELECT 'rcv_crs_' || substr(p.id, 9), 'INV-' || substr(p.policy_number, 5), p.id, p.client_id, p.premium_total,
        CASE WHEN p.id IN ('pol_crs_03', 'pol_crs_16') THEN p.premium_total WHEN p.id = 'pol_crs_02' THEN p.premium_total - round(p.premium_total / 2, 2) ELSE 0 END, p.inception_date + 30,
        CASE WHEN p.id IN ('pol_crs_03', 'pol_crs_16') THEN 'open' WHEN p.id = 'pol_crs_02' THEN 'partial' ELSE 'paid' END, CASE WHEN p.renewed_from IS NOT NULL THEN 'renewal' ELSE 'policy' END, p.currency,
-       p.net_premium, (p.details->>'valueAddedTax')::numeric, (p.details->>'documentaryStampTax')::numeric, (p.details->>'localGovernmentTax')::numeric,
-       (p.details->>'otherCharges')::numeric, p.inception_date::timestamptz
-FROM policies p WHERE p.id LIKE 'pol_crs_%'
+       p.net_premium, COALESCE((p.details->>'valueAddedTax')::numeric, 0), COALESCE((p.details->>'documentaryStampTax')::numeric, 0),
+       COALESCE((p.details->>'localGovernmentTax')::numeric, 0), COALESCE((p.details->>'otherCharges')::numeric, 0), p.inception_date::timestamptz
+FROM policies p WHERE p.id LIKE 'pol_crs_%' AND NOT EXISTS (SELECT 1 FROM receivables r WHERE r.policy_id = p.id)
 ON CONFLICT (id) DO NOTHING;
 UPDATE policies p SET bill_number = r.bill_number, payment_status = CASE r.status WHEN 'paid' THEN 'Completed' WHEN 'partial' THEN 'Partial' ELSE 'Pending' END
 FROM receivables r WHERE r.policy_id = p.id AND p.id LIKE 'pol_crs_%' AND p.bill_number IS NULL;

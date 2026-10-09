@@ -49,6 +49,8 @@ A database seeded with the sample data of an earlier release (fictional insurers
 policies) is converted by migration `0365_tisph_sample_data.sql` on the next start: it removes the earlier sample
 business, keeps any record a user worked on (and the sample clients and prospects those records use) and records
 the conversion in the audit trail; the seed then adds the TISPH sample business. Non-sample data is never touched.
+The earlier sample policies kept that way get the premium breakdown the sample seed reads from migration
+`0369_tisph_sample_data_kept_policies.sql` (also recorded in the audit trail).
 
 Demo data never stops the start: a sample file that fails on a database in use is rolled back and left out, and the
 log shows `WARNING: sample data file sample/<file> was rolled back and left out: <database error>`; the seed ends
