@@ -1692,6 +1692,14 @@ const PolicyDetailView = () => {
             )}
           </div>
         </div>
+        {rawPolicyData?.renewedTo && (
+          <NextStep title={t("policyDetail.renewedTitle")} text={t("policyDetail.renewedText")}
+            actions={[{ key: "renewal", label: t("policyDetail.openRenewalTerm"), to: `/agent/policydetail/${rawPolicyData.renewedTo}` }]} />
+        )}
+        {rawPolicyData?.renewedFrom && (
+          <NextStep title={t("policyDetail.renewalOfTitle")} text={t("policyDetail.renewalOfText")}
+            actions={[{ key: "expiring", label: t("policyDetail.openExpiringTerm"), to: `/agent/policydetail/${rawPolicyData.renewedFrom}` }]} />
+        )}
         {paymentStatusIsPending && hasPermission("write:receipts") && (
           <NextStep title={t("policyDetail.nextStepCollect")} text={t("policyDetail.nextStepCollectText", { bill: rawPolicyData?.billNumber || "" })}
             actions={[{ key: "receipt", label: t("policyDetail.recordReceipt"),

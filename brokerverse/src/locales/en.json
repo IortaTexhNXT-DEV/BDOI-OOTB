@@ -3572,7 +3572,13 @@
     "directBillDescription": "The client pays the premium directly to the insurer. No premium payment is collected by the broker; the broker bills the insurer for its commission.",
     "nextStepCollect": "Next step: collect the premium",
     "nextStepCollectText": "The policy is booked and its bill {{bill}} is open. Record the receipt when the client pays.",
-    "recordReceipt": "Record receipt"
+    "recordReceipt": "Record receipt",
+    "renewedTitle": "Renewed",
+    "renewedText": "This policy was renewed; the next term is a policy of its own.",
+    "openRenewalTerm": "Open the renewal term",
+    "renewalOfTitle": "Renewal term",
+    "renewalOfText": "This policy renews an expiring term of the same client.",
+    "openExpiringTerm": "Open the expiring term"
   },
   "uploadPolicy": {
     "title": "Prospects",
