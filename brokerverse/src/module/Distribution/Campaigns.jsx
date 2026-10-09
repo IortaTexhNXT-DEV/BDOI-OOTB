@@ -15,8 +15,8 @@ import service from "../../services/distributionService";
 import { hasPermission } from "../../utils/canOpen";
 import { confirmAction } from "../../utility/dialogs";
 import { Field, PageHeader, StatusTag, dateTime, showError, showSuccess } from "./common";
+import { lobChoices, useProductLines } from "../Sales/salesProducts";
 
-const LOBS = ["MOTOR", "FIRE", "IAR", "MARINE", "ACCIDENT", "CASUALTY", "ENGINEERING", "EB"];
 const EMPTY_SEGMENT = { name: "", description: "", status: "active", criteria: { partyType: "both", lob: "", province: "", city: "", channelId: "", clientType: "", leadStatus: "", expiringWithinDays: null } };
 const EMPTY_TEMPLATE = { code: "", name: "", subject: "", status: "active",
   bodyHtml: "<p>Dear {{firstName}},</p>\n<p></p>\n<p>{{companyName}}</p>\n<p style=\"font-size:12px\">To stop receiving offers by e-mail, <a href=\"{{optOutLink}}\">unsubscribe here</a>.</p>" };
@@ -47,6 +47,12 @@ const Campaigns = () => {
   const [templatePreview, setTemplatePreview] = useState(null);
   const [schedule, setSchedule] = useState(null); // { id, at }
   const [results, setResults] = useState(null);
+  // the active lines that have active products (the product pickers' lines); a segment keeps the line it was saved with
+  const lines = useProductLines({ enabled: Boolean(segment) });
+  const segmentLobOptions = (lob) => {
+    const options = lobChoices(lines);
+    return lob && !options.some((o) => o.value === lob) ? [...options, { value: lob, label: lob }] : options;
+  };
 
   const load = useCallback(async () => {
     try {
@@ -228,7 +234,7 @@ const Campaigns = () => {
               <Field label={t("distribution.common.status", "Status")}><Dropdown value={segment.status} options={activeOptions} onChange={(e) => setSegment({ ...segment, status: e.value })} /></Field>
               <Field label={t("distribution.common.description", "Description")} full><InputText value={segment.description || ""} onChange={(e) => setSegment({ ...segment, description: e.target.value })} /></Field>
               <Field label={t("distribution.cp.partyType", "Who")}><Dropdown value={segment.criteria.partyType} options={partyOptions} onChange={(e) => setCriteria("partyType", e.value)} /></Field>
-              <Field label={t("distribution.cp.lob", "Line of business")}><Dropdown value={segment.criteria.lob} options={LOBS.map((v) => ({ value: v, label: v }))} showClear onChange={(e) => setCriteria("lob", e.value || "")} /></Field>
+              <Field label={t("distribution.cp.lob", "Line of business")}><Dropdown value={segment.criteria.lob} options={segmentLobOptions(segment.criteria.lob)} showClear onChange={(e) => setCriteria("lob", e.value || "")} /></Field>
               <Field label={t("distribution.cp.province", "Province")}><InputText value={segment.criteria.province} onChange={(e) => setCriteria("province", e.target.value)} /></Field>
               <Field label={t("distribution.cp.city", "City / municipality")}><InputText value={segment.criteria.city} onChange={(e) => setCriteria("city", e.target.value)} /></Field>
               <Field label={t("distribution.cp.channel", "Distribution channel")}>

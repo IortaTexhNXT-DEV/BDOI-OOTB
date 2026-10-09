@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -13,7 +13,8 @@ import { isFireLob, isIarLob } from '../../endorsementModule/constants/endorseme
 import { formatDate as formatConfiguredDate } from '../../../utility/dateFormat';
 import PartyPrivacyPanel from '../../../module/DataPrivacy/PartyPrivacyPanel';
 import ActivityPanel from '../../../components/SalesActivities/ActivityPanel';
-import { RFQ_PATH, rfqState } from '../../../module/Sales/salesProducts';
+import { RFQ_PATH, isUntagged, rfqState } from '../../../module/Sales/salesProducts';
+import TagProductDialog from '../leadListing/TagProductDialog';
 import './index.scss';
 
 const LeadDetail = () => {
@@ -22,6 +23,8 @@ const LeadDetail = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const toast = React.useRef(null);
+  // 'tag': Tag product; 'quote': the product asked for before the first quotation of a prospect without one
+  const [tagging, setTagging] = useState(null);
 
   const { currentLeadDetails, loading, error } = useSelector(({ leadReducers }) => ({
     currentLeadDetails: leadReducers?.currentLeadDetails || {},
@@ -81,11 +84,17 @@ const LeadDetail = () => {
 
   /**
    * Same entry point as straight after creating the lead: the quote screen of the lead's line of business (the motor
-   * quote wizard, the Fire or IAR form), else a Request for Quotation to the insurers.
+   * quote wizard, the Fire or IAR form), else a Request for Quotation to the insurers. A prospect whose product is not
+   * yet tagged is asked for it first.
    */
   const handleCreateQuote = () => {
-    const id = currentLeadDetails.leadId || leadId;
-    const lob = currentLeadDetails.lob;
+    if (isUntagged(currentLeadDetails)) setTagging('quote');
+    else startQuote(currentLeadDetails);
+  };
+
+  const startQuote = (lead) => {
+    const id = lead.leadId || leadId;
+    const lob = lead.lob;
     if (lob && isIarLob(lob)) {
       navigate('/agent/createlead/iar', { state: { leadRefId: id, leadId: id, isEdit: true } });
       return;
@@ -95,11 +104,18 @@ const LeadDetail = () => {
       return;
     }
     if (lob && String(lob).toUpperCase() !== 'MOTOR') {
-      const product = currentLeadDetails.productType ? { name: currentLeadDetails.productType } : null;
-      navigate(RFQ_PATH, { state: rfqState(product, { lead: { ...currentLeadDetails, leadId: id } }) });
+      const product = lead.productType ? { id: lead.productId ?? undefined, name: lead.productType } : null;
+      navigate(RFQ_PATH, { state: rfqState(product, { lead: { ...lead, leadId: id } }) });
       return;
     }
-    navigate(`/agent/createquote/policydetails/createquote/${id}`, { state: { lead: currentLeadDetails } });
+    navigate(`/agent/createquote/policydetails/createquote/${id}`, { state: { lead } });
+  };
+
+  const handleTagged = (lead) => {
+    const next = tagging;
+    setTagging(null);
+    dispatch(getLeadByIdMiddleware(leadId));
+    if (next === 'quote') startQuote(lead);
   };
 
   if (loading) {
@@ -143,6 +159,7 @@ const LeadDetail = () => {
     <div className="lead-detail-container">
       <Toast ref={toast} />
       <ConfirmDialog />
+      <TagProductDialog lead={currentLeadDetails} visible={Boolean(tagging)} forQuote={tagging === 'quote'} onHide={() => setTagging(null)} onTagged={handleTagged} />
       
       <div className="header">
         <h2>{t('leadDetail.title')}</h2>
@@ -152,6 +169,13 @@ const LeadDetail = () => {
             icon="pi pi-file-edit"
             className="mr-2"
             onClick={handleCreateQuote}
+            disabled={!currentLeadDetails.leadId && !leadId}
+          />
+          <Button
+            label={currentLeadDetails.lob ? t('productPicker.changeProduct') : t('productPicker.tagProduct')}
+            icon="pi pi-tag"
+            className="p-button-outlined mr-2"
+            onClick={() => setTagging('tag')}
             disabled={!currentLeadDetails.leadId && !leadId}
           />
           <Button
@@ -175,6 +199,8 @@ const LeadDetail = () => {
         </div>
       </div>
 
+      {isUntagged(currentLeadDetails) && <Message severity="warn" className="w-full justify-content-start mb-3" text={t('productPicker.untaggedNote')} />}
+
       <div className="grid">
         <div className="col-12 md:col-6">
           <Card className="detail-card">
@@ -186,6 +212,14 @@ const LeadDetail = () => {
             <div className="detail-row">
               <span className="label">{t('leadDetail.category')}</span>
               <span className="value">{currentLeadDetails.leadCategory || t('policyDetail.nA')}</span>
+            </div>
+            <div className="detail-row">
+              <span className="label">{t('productPicker.lineAndProduct')}</span>
+              <span className="value">
+                {currentLeadDetails.lob
+                  ? [currentLeadDetails.lob, currentLeadDetails.productName || currentLeadDetails.productType].filter(Boolean).join(' - ')
+                  : t('productPicker.untagged')}
+              </span>
             </div>
             <div className="detail-row">
               <span className="label">{t('leadDetail.firstName')}</span>

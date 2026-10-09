@@ -4,6 +4,7 @@ import { Card } from "primereact/card";
 import { RadioButton } from "primereact/radiobutton";
 import InputTextField from "../../../component/inputText";
 import { Button } from "primereact/button";
+import { Message } from "primereact/message";
 import DatepickerField from "../../../component/datePicker";
 import CustomToast from "../../../../components/Toast";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -66,6 +67,10 @@ const LeadCreationCard = ({ flow, action }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
+  // Create Prospect > Skip - tag product later: no product; a product chosen there tags the prospect; else motor
+  const untagged = action === "post" && Boolean(location.state?.untagged);
+  const productTag = untagged ? { lob: null }
+    : location.state?.product ? { lob: location.state.product.lob, productId: location.state.product.productId } : { lob: "MOTOR" };
 
   // Fetch lead data when in edit mode
   useEffect(() => {
@@ -133,6 +138,7 @@ const LeadCreationCard = ({ flow, action }) => {
     if (action === "post") {
       const valueWithId = {
         ...values,
+        ...productTag,
         id: leadtabledata?.length + 1,
       };
 
@@ -145,7 +151,10 @@ const LeadCreationCard = ({ flow, action }) => {
 
           toastRef.current.showToast();
           setTimeout(() => {
-            if (createdLeadId) {
+            // a prospect without a product opens on its details, where its product is tagged later
+            if (createdLeadId && untagged) {
+              navigate(`/agent/leaddetail/${createdLeadId}`);
+            } else if (createdLeadId) {
               navigate(
                 `/agent/createquote/policydetails/createquote/${createdLeadId}`,
                 {
@@ -389,6 +398,7 @@ const LeadCreationCard = ({ flow, action }) => {
             : t("leadCreation.editLead")
         }
       >
+        {untagged && <Message severity="info" className="w-full justify-content-start mt-2" text={t("productPicker.skipHint")} />}
         {action === "post" ? (
           <div>
             <div className="subheadinglabel_txt mt-3">{t("leadCreation.selectCategory")}</div>

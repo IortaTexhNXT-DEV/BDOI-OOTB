@@ -14,7 +14,7 @@ import service from "../../services/distributionService";
 import { hasPermission } from "../../utils/canOpen";
 import { confirmAction, promptText } from "../../utility/dialogs";
 import { Field, PageHeader, StatusTag, dateTime, showError, showSuccess } from "./common";
-import { useSalesProducts } from "../Sales/salesProducts";
+import { lobChoices, useProductLines } from "../Sales/salesProducts";
 
 const EMPTY_RULE = { name: "", priority: 100, method: "round_robin", assignees: [], status: "active", description: "",
   conditions: { branchCode: "", lob: "", source: "", leadCategory: "", channelId: "", province: "", city: "" } };
@@ -43,9 +43,10 @@ const LeadAssignment = () => {
   const [history, setHistory] = useState(null);
 
   const assigneeOptions = useMemo(() => assignees.map((a) => ({ value: a.id, label: `${a.name} (${a.branchCode || "-"}, ${a.open} ${t("distribution.la.open", "open")})` })), [assignees, t]);
-  // lines of the active products (Product master); a rule keeps the line it was saved with
-  const products = useSalesProducts({ enabled: manage });
-  const lobOptions = useMemo(() => [...new Set((products || []).map((p) => p.lob).filter(Boolean))].sort().map((v) => ({ value: v, label: v })), [products]);
+  // the active lines that have active products (the product pickers' lines); a rule keeps the line it was saved with.
+  // A rule with a line does not match a prospect whose product is not yet tagged.
+  const lines = useProductLines({ enabled: manage });
+  const lobOptions = useMemo(() => lobChoices(lines), [lines]);
   const ruleLobOptions = (lob) => (lob && !lobOptions.some((o) => o.value === lob) ? [...lobOptions, { value: lob, label: lob }] : lobOptions);
   const methodOptions = ["round_robin", "load", "fixed"].map((v) => ({ value: v, label: t(`distribution.la.method.${v}`, v) }));
 

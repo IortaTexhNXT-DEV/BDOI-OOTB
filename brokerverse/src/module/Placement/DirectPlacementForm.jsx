@@ -16,6 +16,7 @@ import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import { calendarDateFormat } from "../../utility/dateFormat";
 import { CustomerPicker, PageHeader, ParticipantEditor, RiskDetailsEditor, customerFields, customerName, participantProblem, usePlacementOptions } from "./shared";
 import { isoDate } from "./dates";
+import ProductPicker from "../Sales/ProductPicker";
 import "./index.scss";
 
 /**
@@ -106,9 +107,8 @@ const DirectPlacementForm = () => {
             <label>{t("placement.fields.customer")} *</label>
             <CustomerPicker value={customer} onChange={setCustomer} allowNew />
           </div>
-          <div className="col-12 md:col-6 lg:col-3">
-            <label>{t("placement.fields.product")} *</label>
-            <Dropdown value={productId} options={options.products.map((p) => ({ label: `${p.name} (${p.lob})`, value: p.id }))} onChange={(e) => setProductId(e.value)} filter className="w-full" placeholder={t("placement.fields.chooseProduct")} />
+          <div className="col-12 lg:col-6">
+            <ProductPicker value={{ productId }} onChange={(v) => setProductId(v.productId)} idPrefix="direct-placement" required />
           </div>
           <div className="col-12 md:col-6 lg:col-3">
             <label>{t("placement.fields.insured")}</label>

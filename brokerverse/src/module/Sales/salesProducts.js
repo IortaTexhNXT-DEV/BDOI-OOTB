@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import placementService from "../../services/placementService";
+import systemSettingsService from "../../services/systemSettingsService";
 import { notifyError } from "../../utility/dialogs";
 
 /** The new Request for Quotation (broker slip). */
@@ -42,6 +43,81 @@ export const useSalesProducts = ({ businessType, enabled = true } = {}) => {
     };
   }, [businessType, enabled]);
   return products;
+};
+
+/**
+ * Products grouped by line of business for the product pickers (null while loading): the active lines of the Line of
+ * Business master that have active products, Motor first, each with its active products ({ id, code, name, line, lob,
+ * businessType, customerSegment }). businessType "package" or "non_package" narrows the products.
+ */
+export const useProductLines = ({ businessType, enabled = true } = {}) => {
+  const [lines, setLines] = useState(null);
+  useEffect(() => {
+    if (!enabled) return undefined;
+    let alive = true;
+    placementService
+      .productLines(businessType ? { businessType } : {})
+      .then((l) => alive && setLines(l))
+      .catch((e) => {
+        notifyError(e.message);
+        if (alive) setLines([]);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [businessType, enabled]);
+  return lines;
+};
+
+/** The product of the lines with this id (null when none). */
+export const productOf = (lines, id) =>
+  id === null || id === undefined ? null : (lines || []).flatMap((l) => l.products).find((p) => String(p.id) === String(id)) || null;
+
+/**
+ * The line a { lob, productId } value belongs to: the line of its product, else the line whose code is the lob, else
+ * the line with a product quoted under that lob (IAR is a product of the fire line).
+ */
+export const lineOf = (lines, { lob, productId } = {}) => {
+  const all = lines || [];
+  const byProduct = all.find((l) => l.products.some((p) => productId !== null && productId !== undefined && String(p.id) === String(productId)));
+  if (byProduct || !lob) return byProduct || null;
+  const code = String(lob).toUpperCase();
+  return all.find((l) => l.code === code) || all.find((l) => l.products.some((p) => p.lob === code)) || null;
+};
+
+/** Lines narrowed to the products a screen offers (lines left without a product are dropped). */
+export const narrowLines = (lines, keep) =>
+  !lines || !keep ? lines : lines.map((l) => ({ ...l, products: l.products.filter(keep) })).filter((l) => l.products.length);
+
+/**
+ * Line of business choices of the screens that match prospects by line (lead assignment rules, campaign segments):
+ * each line, then the quoting line of a product that differs from its line (Industrial All Risks: IAR).
+ */
+export const lobChoices = (lines) => {
+  const out = (lines || []).map((l) => ({ value: l.code, label: l.name }));
+  for (const l of lines || []) {
+    for (const p of l.products) if (p.lob && !out.some((o) => o.value === p.lob)) out.push({ value: p.lob, label: `${l.name} - ${p.name}` });
+  }
+  return out;
+};
+
+/** Whether a prospect still waits for its product (Create Prospect > Skip - tag product later). */
+export const isUntagged = (lead) => Boolean(lead?.leadId || lead?.id) && !lead.lob;
+
+/** leads.product_required (System Settings, group leads): a new prospect must name its product (no Skip). */
+export const useProductRequired = () => {
+  const [required, setRequired] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    systemSettingsService
+      .getConfiguration("leads")
+      .then((rows) => alive && setRequired((rows || []).some((r) => r.key === "leads.product_required" && String(r.value) === "true")))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+  return required;
 };
 
 const leadName = (lead) => lead?.companyName || [lead?.firstName, lead?.lastName].filter(Boolean).join(" ") || lead?.fullName || "";

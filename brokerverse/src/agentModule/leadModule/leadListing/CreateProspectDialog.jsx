@@ -8,16 +8,22 @@ import { RadioButton } from "primereact/radiobutton";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import clientService from "../../../services/clientService";
+import ProductPicker from "../../../module/Sales/ProductPicker";
+import { productOf, useProductLines } from "../../../module/Sales/salesProducts";
 
 const MIN_SEARCH = 3;
 
 /**
  * Create prospect: first whether the customer is new or already a client. For an existing customer the user finds the
  * client by name, mobile number or e-mail, and the prospect is created linked to that client (its details pre-filled,
- * no second client when the quotation converts). Then the product line, which opens the matching prospect form.
+ * no second client when the quotation converts). Then the line of business and the product, which opens the matching
+ * prospect form, or Skip - tag product later (unless leads.product_required), which opens the prospect form without a
+ * product.
  */
-const CreateProspectDialog = ({ visible, onHide, products }) => {
+const CreateProspectDialog = ({ visible, onHide, onProduct, onSkip, productRequired = false }) => {
   const { t } = useTranslation();
+  const lines = useProductLines({ enabled: visible });
+  const [choice, setChoice] = useState({ lob: null, productId: null });
   const [kind, setKind] = useState("new");
   const [step, setStep] = useState("kind");
   const [term, setTerm] = useState("");
@@ -34,6 +40,7 @@ const CreateProspectDialog = ({ visible, onHide, products }) => {
       setResults([]);
       setClient(null);
       setSearchError("");
+      setChoice({ lob: null, productId: null });
     }
   }, [visible]);
 
@@ -60,12 +67,19 @@ const CreateProspectDialog = ({ visible, onHide, products }) => {
 
   const next = () => setStep(kind === "existing" ? "search" : "product");
   const back = () => setStep(step === "product" && kind === "existing" ? "search" : "kind");
+  const product = productOf(lines, choice.productId);
 
   const footer = (
     <div className="flex justify-content-between w-full">
       <Button type="button" label={step === "kind" ? t("prospectChooser.cancel") : t("prospectChooser.back")} text onClick={step === "kind" ? onHide : back} />
       {step === "kind" && <Button type="button" label={t("prospectChooser.continue")} onClick={next} />}
       {step === "search" && <Button type="button" label={t("prospectChooser.useClient")} onClick={() => setStep("product")} disabled={!client} />}
+      {step === "product" && (
+        <div className="flex gap-2">
+          {!productRequired && <Button type="button" label={t("productPicker.skip")} icon="pi pi-clock" outlined onClick={() => onSkip(client)} />}
+          <Button type="button" label={t("prospectChooser.continue")} icon="pi pi-check" onClick={() => onProduct(product, client)} disabled={!product} />
+        </div>
+      )}
     </div>
   );
 
@@ -120,14 +134,9 @@ const CreateProspectDialog = ({ visible, onHide, products }) => {
               {t("prospectChooser.linkedTo", { name: client.displayName, code: client.generatedClientId })}
             </p>
           )}
-          <p className="m-0 text-color-secondary">{t("prospectChooser.productQuestion")}</p>
-          <div className="grid mt-1">
-            {products.map((p) => (
-              <div className="col-12 md:col-6" key={p.value}>
-                <Button type="button" outlined className="w-full justify-content-start" label={p.label} onClick={() => p.open(client)} />
-              </div>
-            ))}
-          </div>
+          <p className="m-0 mb-2 text-color-secondary">{t("prospectChooser.productQuestion")}</p>
+          <ProductPicker value={choice} onChange={setChoice} lines={lines} idPrefix="create-prospect" required={productRequired} autoFocus />
+          {!productRequired && <small className="text-color-secondary mt-2">{t("productPicker.skipHint")}</small>}
         </div>
       )}
     </Dialog>
@@ -137,8 +146,12 @@ const CreateProspectDialog = ({ visible, onHide, products }) => {
 CreateProspectDialog.propTypes = {
   visible: PropTypes.bool,
   onHide: PropTypes.func.isRequired,
-  /** [{ value, label, open(client|null) }] */
-  products: PropTypes.arrayOf(PropTypes.shape({ value: PropTypes.string, label: PropTypes.string, open: PropTypes.func })).isRequired,
+  /** (product, client|null): the product chosen opens its prospect form */
+  onProduct: PropTypes.func.isRequired,
+  /** (client|null): the prospect form without a product */
+  onSkip: PropTypes.func.isRequired,
+  /** leads.product_required: no Skip */
+  productRequired: PropTypes.bool,
 };
 
 export default CreateProspectDialog;

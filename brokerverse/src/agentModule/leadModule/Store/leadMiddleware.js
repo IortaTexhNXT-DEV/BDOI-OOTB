@@ -71,6 +71,9 @@ export const postCreateleadMiddleware = createAsyncThunk(
         // where the prospect came from (Lead Source master)
         ...(payload?.Source ? { source: payload.Source } : {}),
         ...(payload?.clientId ? { clientId: payload.clientId } : {}),
+        // line of business and product (lob null: the product is tagged later)
+        ...(payload?.lob !== undefined ? { lob: payload.lob } : {}),
+        ...(payload?.productId ? { productId: payload.productId } : {}),
         createdBy: (() => {
           try {
             const userData = JSON.parse(localStorage.getItem('user') || '{}');

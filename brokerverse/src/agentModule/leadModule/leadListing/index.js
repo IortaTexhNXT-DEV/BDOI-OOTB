@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 import BulkUploadModal from "./BulkUploadModal";
 import leadService from "../../../services/leadService";
 import CreateProspectDialog from "./CreateProspectDialog";
-import { RFQ_PATH, entryOf, rfqState, useSalesProducts } from "../../../module/Sales/salesProducts";
+import { RFQ_PATH, entryOf, rfqState, useProductRequired } from "../../../module/Sales/salesProducts";
 
 const LeadListing = () => {
   const { t } = useTranslation();
@@ -25,7 +25,7 @@ const LeadListing = () => {
   const [showReportModal, setShowReportModal] = useState(false);
   const toast = useRef(null);
   const navigate = useNavigate();
-  const products = useSalesProducts();
+  const productRequired = useProductRequired();
 
   const items = [
     { label: t("leads.title"), command: () => navigate("/agent/leadlisting") },
@@ -35,17 +35,20 @@ const LeadListing = () => {
 
   // an existing customer picked in the Create prospect dialog travels to the prospect form
   const withClient = (client) => (client ? { state: { existingClient: client } } : undefined);
-  // one choice per active product of the Product master, opening the screen the product is quoted on
+  // the product chosen opens the screen it is quoted on; the motor form is tagged with the product
   const forms = {
-    motor: (client) => navigate("/agent/createlead", withClient(client)),
+    motor: (client, p) => navigate("/agent/createlead", { state: { ...(client ? { existingClient: client } : {}), product: { lob: p.lob, productId: p.id } } }),
     fire: (client) => navigate("/agent/createlead/fire-allied-perils", withClient(client)),
     iar: (client) => navigate("/agent/createlead/iar", withClient(client)),
     eb: (client) => navigate("/agent/createlead/employee-benefit", withClient(client)),
   };
-  const prospectProducts = (products || []).map((p) => {
+  const openProduct = (p, client) => {
     const form = forms[entryOf(p)];
-    return { value: p.code, label: p.name, open: (client) => (form ? form(client) : navigate(RFQ_PATH, { state: rfqState(p, { client, newProspect: !client }) })) };
-  });
+    if (form) form(client, p);
+    else navigate(RFQ_PATH, { state: rfqState(p, { client, newProspect: !client }) });
+  };
+  // Skip - tag product later: the prospect form without a product
+  const skipProduct = (client) => navigate("/agent/createlead", { state: { ...(client ? { existingClient: client } : {}), untagged: true } });
 
   const handleBulkUploadSuccess = () => {
     // Refresh the leads table by updating key
@@ -165,7 +168,7 @@ const LeadListing = () => {
       </div>
       <LeadStatsCards />
       <ProspectTable key={refreshKey} />
-      <CreateProspectDialog visible={showCreate} onHide={() => setShowCreate(false)} products={prospectProducts} />
+      <CreateProspectDialog visible={showCreate} onHide={() => setShowCreate(false)} onProduct={openProduct} onSkip={skipProduct} productRequired={productRequired} />
       <BulkUploadModal
         visible={showBulkUpload}
         onHide={() => setShowBulkUpload(false)}

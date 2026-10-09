@@ -49,6 +49,8 @@ export const OPEN_STATUSES = ["draft", "sent", "acknowledged", "epolicy_received
 const placementService = {
   // reference data and configuration
   options: async (params) => (await request("GET", `/placements/options${queryString(params)}`)).data,
+  // active lines of business with their active products (the product pickers)
+  productLines: async (params) => (await request("GET", `/placements/product-lines${queryString(params)}`)).data.lines || [],
   journey: async (params) => (await request("GET", `/placements/journey${queryString(params)}`)).data,
   searchClients: async (search) => {
     const data = (await request("GET", `/clients${queryString({ search, pageSize: 20 })}`)).data;

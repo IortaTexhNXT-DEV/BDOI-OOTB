@@ -178,6 +178,30 @@ class LeadService {
   }
 
   /**
+   * Tag or change the line of business and product of a lead
+   * @param {string} leadId - Lead ID
+   * @param {{ lob: string, productId: number }} tag - Line of business code and product id
+   * @returns {Promise<Object>} API response with the updated lead
+   */
+  async tagProduct(leadId, { lob, productId }) {
+    try {
+      const response = await fetch(`${this.baseURL}/leads/${encodeURIComponent(leadId)}/product`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", ...authService.getAuthHeader() },
+        body: JSON.stringify({ lob, productId }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const detail = Array.isArray(data.errors) ? data.errors.map((e) => e.message).filter(Boolean).join(", ") : "";
+        throw new Error(detail || data.message || "Failed to tag the product");
+      }
+      return { success: true, data };
+    } catch (error) {
+      return { success: false, error: error.message || "Failed to tag the product" };
+    }
+  }
+
+  /**
    * Get lead by ID
    * @param {string} leadId - Lead ID
    * @returns {Promise<Object>} API response

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -20,6 +20,10 @@ import { useListState, useServerList } from "../../../hooks/useServerList";
 import { statusLabel, statusSeverity } from "../../../utils/statusSeverity";
 import logger from "../../../utility/logger";
 import { useSalesProducts } from "../../../module/Sales/salesProducts";
+import TagProductDialog from "./TagProductDialog";
+
+/** lob filter (and tab) of the prospects whose product is not yet tagged. */
+const UNTAGGED = "none";
 
 /** Names of the lines that are not Line of Business master codes (IAR is a fire line) or read before the master loads. */
 const LOB_LABELS = {
@@ -37,8 +41,9 @@ const LEAD_STATUS_KEYS = {
 const INITIAL = { tab: 0, search: "", leadCategory: "", country: "", province: "", city: "", showFilters: false };
 
 /**
- * Sales > Prospects list: one table per line of business of the active products (Product master), Motor first, paged,
- * searched and filtered by the server.
+ * Sales > Prospects list: one table per line of business of the active products (Product master), Motor first, and the
+ * prospects whose product is not yet tagged, paged, searched and filtered by the server. Tag product sets the line of
+ * business and product of a prospect, or changes them.
  * The search, filters, tab and page are kept while the user opens a prospect and comes back.
  */
 const ProspectTable = () => {
@@ -51,11 +56,12 @@ const ProspectTable = () => {
   const lobMaster = useMasterOptions("line-of-business");
   const lobs = useMemo(() => {
     const lines = [...new Set((products || []).map((p) => p.lob).filter(Boolean))];
-    return lines.length ? ["MOTOR", ...lines.filter((l) => l !== "MOTOR").sort()] : ["MOTOR"];
+    return [...(lines.length ? ["MOTOR", ...lines.filter((l) => l !== "MOTOR").sort()] : ["MOTOR"]), UNTAGGED];
   }, [products]);
   const lob = lobs[state.tab] || "MOTOR";
-  const lobName = (code) => lobMaster.find((o) => o.code === code)?.label
-    || t(LOB_LABELS[code]?.labelKey || "", { defaultValue: LOB_LABELS[code]?.fallback || code || "-" });
+  const lobName = (code) => (code === UNTAGGED ? t("productPicker.untagged") : lobMaster.find((o) => o.code === code)?.label
+    || t(LOB_LABELS[code]?.labelKey || "", { defaultValue: LOB_LABELS[code]?.fallback || code || "-" }));
+  const [tagging, setTagging] = useState(null);
 
   const fetchPage = useCallback(async ({ page, pageSize }) => {
     const res = await leadService.getAllLeads({
@@ -119,11 +125,13 @@ const ProspectTable = () => {
   const actions = (r) => (
     <div className="flex gap-1 justify-content-end">
       <Button icon="pi pi-eye" text rounded size="small" aria-label={t("leads.view")} tooltip={t("leads.view")} tooltipOptions={{ position: "top" }} onClick={(e) => { e.stopPropagation(); openLead(r, false); }} />
+      <Button icon="pi pi-tag" text rounded size="small" aria-label={r.lob ? t("productPicker.changeProduct") : t("productPicker.tagProduct")}
+        tooltip={r.lob ? t("productPicker.changeProduct") : t("productPicker.tagProduct")} tooltipOptions={{ position: "top" }} onClick={(e) => { e.stopPropagation(); setTagging(r); }} />
       <Button icon="pi pi-pencil" text rounded size="small" aria-label={t("leads.edit")} tooltip={t("leads.edit")} tooltipOptions={{ position: "top" }} onClick={(e) => { e.stopPropagation(); openLead(r, true); }} />
       <Button icon="pi pi-trash" text rounded size="small" severity="danger" aria-label={t("leads.delete")} tooltip={t("leads.delete")} tooltipOptions={{ position: "top" }} onClick={(e) => { e.stopPropagation(); removeLead(r); }} />
     </div>
   );
-  const lobLabel = (r) => r.productType || lobName(r.lob);
+  const lobLabel = (r) => (r.lob ? r.productType || lobName(r.lob) : <Tag value={t("productPicker.untagged")} severity="warning" />);
 
   const table = (
     <DataTable {...list.tableProps} scrollable dataKey="leadId" size="small" stripedRows className="prospect-table" emptyMessage={list.error ? t("listCommon.loadFailed", { message: list.error }) : t("leads.noLeadsFound")}
@@ -168,6 +176,7 @@ const ProspectTable = () => {
         )}
         {table}
       </div>
+      <TagProductDialog lead={tagging} visible={Boolean(tagging)} onHide={() => setTagging(null)} onTagged={() => { setTagging(null); list.reload(); }} />
     </div>
   );
 };

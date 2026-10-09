@@ -17,6 +17,7 @@ import { isoDate } from "./dates";
 import useMasterOptions from "../GeneralMasters/common/useMasterOptions";
 import useQuoteSetup from "../../agentModule/quoteModule/utils/useQuoteSetup";
 import RiskFactsFields from "../../agentModule/quoteModule/policyDetails/policyDetailsCard/RiskFactsFields";
+import ProductPicker from "../Sales/ProductPicker";
 import "./index.scss";
 
 const blankCover = () => ({ cover: "", sumInsured: null, deductible: "" });
@@ -82,7 +83,7 @@ const BrokerSlipCreate = () => {
     return current && !list.some((o) => o.value === current) ? [...list, { label: current, value: current }] : list;
   };
   // non-package products are placed through requests for quotation; package ones are offered on request
-  const productChoices = options.products.filter((p) => showPackage || p.businessType !== "package" || p.id === productId);
+  const offered = (p) => showPackage || p.businessType !== "package" || p.id === productId;
   const motor = product?.lob === "MOTOR";
   // the risk details the acceptance rules and rating factors of the product's template test (number of members...)
   const ruleSetup = useQuoteSetup(product ? { productId: product.id, lob: product.lob } : { lob: "NONE" });
@@ -127,9 +128,8 @@ const BrokerSlipCreate = () => {
             <label>{t("placement.fields.customer")} *</label>
             <CustomerPicker value={customer} onChange={setCustomer} allowNew newLabel={t("salesMarketing.newProspect")} />
           </div>
-          <div className="col-12 md:col-3">
-            <label>{t("placement.fields.product")} *</label>
-            <Dropdown value={productId} options={productChoices.map((p) => ({ label: `${p.name} (${p.lob})`, value: p.id }))} onChange={(e) => setProductId(e.value)} filter className="w-full" placeholder={t("placement.fields.chooseProduct")} />
+          <div className="col-12 md:col-6">
+            <ProductPicker value={{ productId }} onChange={(v) => setProductId(v.productId)} keep={offered} idPrefix="rfq" required />
             <div className="flex align-items-center gap-2 mt-1">
               <Checkbox inputId="rfq-package" checked={showPackage} onChange={(e) => setShowPackage(e.checked)} />
               <label htmlFor="rfq-package" className="m-0">{t("salesMarketing.includePackage")}</label>

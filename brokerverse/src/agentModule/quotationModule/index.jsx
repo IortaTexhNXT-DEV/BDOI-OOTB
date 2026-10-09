@@ -4,21 +4,18 @@ import QuotationTable from "./quotationTable";
 import "../quotationModule/index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
-import { Dropdown } from "primereact/dropdown";
 import SvgDot from "../../assets/agentIcon/SvgDots";
-import SvgMotor from "../../assets/agentIcon/SvgMotor";
-import SvgFire from "../../assets/agentIcon/SvgFire";
-import SvgHome from "../../assets/agentIcon/SvgHome";
 import BulkUploadModal from "./BulkUploadModal";
 import { useNavigate } from "react-router-dom";
 import QuoteStatsCards from "../quoteModule/quoteListing/QuoteStatsCards";
-import { RFQ_PATH, entryOf, rfqState, useSalesProducts } from "../../module/Sales/salesProducts";
+import { RFQ_PATH, entryOf, rfqState } from "../../module/Sales/salesProducts";
+import { ProductPickerDialog } from "../../module/Sales/ProductPicker";
 
 const ClientListingCard = () => {
   const { t } = useTranslation();
   const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [selectedOption, setSelectedOption] = useState(null);
+  const [choosingProduct, setChoosingProduct] = useState(false);
   const navigate = useNavigate();
 
   const items = [{ label: t("quotationPage.title") }];
@@ -29,37 +26,16 @@ const ClientListingCard = () => {
     setRefreshKey((prev) => prev + 1);
   };
 
-  // one choice per active product of the Product master: motor and fire quotes start from a prospect, IAR and employee
+  // the product to quote (line of business, then product): motor and fire quotes start from a prospect, IAR and employee
   // benefits from their own forms, any other product from a Request for Quotation to the insurers
-  const products = useSalesProducts();
-  const icons = { motor: <SvgMotor />, fire: <SvgFire />, iar: <SvgHome /> };
   const start = (p) => {
+    setChoosingProduct(false);
     const entry = entryOf(p);
     if (entry === "motor" || entry === "fire") navigate("/agent/leadlisting");
     else if (entry === "iar") navigate("/agent/createlead/iar");
     else if (entry === "eb") navigate("/agent/createlead/employee-benefit");
     else navigate(RFQ_PATH, { state: rfqState(p) });
   };
-
-  const dropdownOptions = (products || []).map((p) => ({
-    value: p.id,
-    label: (
-      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-        <div>{icons[entryOf(p)] || <i className="pi pi-send" />}</div>
-        <div
-          style={{
-            fontFamily: "Nunito, Arial, sans-serif",
-            fontWeight: 400,
-            fontSize: "16px",
-            color: "#111927",
-            width: "100%",
-          }}
-        >
-          {p.name}
-        </div>
-      </div>
-    ),
-  }));
 
   return (
     <div className="claim__table__container__quotation mt-4">
@@ -92,22 +68,9 @@ const ClientListingCard = () => {
               onClick={() => setShowBulkUpload(true)}
               style={{ borderRadius: "8px" }}
             />
-            <Dropdown
-              value={selectedOption}
-              options={dropdownOptions}
-              placeholder={t("quotationPage.createQuote")}
-              className="dropdown__createlead"
-              style={{
-                minWidth: "150px",
-                border: "1px solid #E5E7EB",
-                borderRadius: "8px",
-              }}
-              onChange={(e) => {
-                const product = (products || []).find((p) => p.id === e.value);
-                if (product) start(product);
-                setSelectedOption(null);
-              }}
-            />
+            <Button label={t("quotationPage.createQuote")} icon="pi pi-plus" onClick={() => setChoosingProduct(true)} style={{ borderRadius: "8px" }} />
+            <ProductPickerDialog visible={choosingProduct} onHide={() => setChoosingProduct(false)} onSelect={start}
+              header={t("quotationPage.createQuote")} hint={t("productPicker.createQuoteHint")} />
           </div>
         </div>
         <div

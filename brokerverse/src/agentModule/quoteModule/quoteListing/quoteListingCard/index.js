@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 import SvgLeftArrow from "../../../../assets/agentIcon/SvgLeftArrow";
-import SvgAdd from "../../../../assets/agentIcon/SvgAdd";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { DataTable } from "primereact/datatable";
@@ -30,14 +29,13 @@ import {
   canEditQuotation,
 } from "../../../../utils/statusHelpers";
 import StatusBadge from "../../../../components/StatusBadge";
-import SvgHome from "../../../../assets/agentIcon/SvgHome";
-import EmployeeBenefitIcon from "../../../EmployeeFlow/EmployeeBenefitIcon";
-import SvgMotor from "../../../../assets/agentIcon/SvgMotor";
-import SvgFire from "../../../../assets/agentIcon/SvgFire";
 import "./index.scss";
 import { formatDate as formatConfiguredDate } from "../../../../utility/dateFormat";
 import { confirmAction, notifyError, notifySuccess } from "../../../../utility/dialogs";
-import { RFQ_PATH, entryOf, rfqState, useSalesProducts } from "../../../../module/Sales/salesProducts";
+import { RFQ_PATH, entryOf, isUntagged, rfqState } from "../../../../module/Sales/salesProducts";
+import { ProductPickerDialog } from "../../../../module/Sales/ProductPicker";
+import leadService from "../../../../services/leadService";
+import { getLeadByIdMiddleware } from "../../../leadModule/Store/leadMiddleware";
 const QuoteListingCard = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -519,10 +517,10 @@ const QuoteListingCard = () => {
     }
   };
 
-  // one choice per active product of the Product master, quoted for this prospect: motor in the quote wizard, Fire and
-  // IAR in their forms, any other product through a Request for Quotation to the insurers
-  const products = useSalesProducts();
-  const icons = { motor: <SvgMotor />, fire: <SvgFire />, iar: <SvgHome />, eb: <EmployeeBenefitIcon /> };
+  // the product to quote for this prospect (line of business, then product): motor in the quote wizard, Fire and IAR in
+  // their forms, any other product through a Request for Quotation to the insurers
+  const [choosingProduct, setChoosingProduct] = useState(false);
+  const [tagging, setTagging] = useState(false);
   const addQuote = (p) => {
     const entry = entryOf(p);
     if (entry === "motor") handleclick();
@@ -531,25 +529,21 @@ const QuoteListingCard = () => {
     else if (entry === "eb") navigate("/agent/createlead/employee-benefit");
     else navigate(RFQ_PATH, { state: rfqState(p, { lead: leadRefId ? { ...currentLeadDetails, leadId: leadRefId } : null }) });
   };
-  const dropdownOptionsQuote = (products || []).map((p) => ({
-    value: p.id,
-    label: (
-      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-        <div>{icons[entryOf(p)] || <i className="pi pi-send" />}</div>
-        <div
-          style={{
-            fontFamily: "Nunito, Arial, sans-serif",
-            fontWeight: 400,
-            fontSize: "16px",
-            color: "#111927",
-            width: "100%",
-          }}
-        >
-          {p.name}
-        </div>
-      </div>
-    ),
-  }));
+  // a prospect whose product is not yet tagged is tagged with the product of its first quotation
+  const quoteProduct = async (p, lob) => {
+    if (leadRefId && isUntagged(currentLeadDetails)) {
+      setTagging(true);
+      const r = await leadService.tagProduct(leadRefId, { lob, productId: p.id });
+      setTagging(false);
+      if (!r.success) {
+        notifyError(r.error);
+        return;
+      }
+      dispatch(getLeadByIdMiddleware(leadRefId));
+    }
+    setChoosingProduct(false);
+    addQuote(p);
+  };
 
   return (
     <div className="quote__listing__card__container mt-4">
@@ -572,15 +566,15 @@ const QuoteListingCard = () => {
           </div>
           <div class="col-12 md:col-6 lg:col-6">
             <div class="btn__container__quote__listing col-12 md:col-6 lg:col-6">
-              <Dropdown
-                value={null}
-                options={dropdownOptionsQuote}
-                onChange={(e) => {
-                  const product = (products || []).find((p) => p.id === e.value);
-                  if (product) addQuote(product);
-                }}
-                placeholder={t("quoteListing.addQuote")}
-                dropdownIcon={<SvgAdd />}
+              <Button label={t("quoteListing.addQuote")} icon="pi pi-plus" onClick={() => setChoosingProduct(true)} />
+              <ProductPickerDialog
+                visible={choosingProduct}
+                onHide={() => setChoosingProduct(false)}
+                onSelect={quoteProduct}
+                busy={tagging}
+                header={t("quoteListing.addQuote")}
+                hint={isUntagged(currentLeadDetails) ? t("productPicker.quoteHint", { name: [currentLeadDetails.firstName, currentLeadDetails.lastName].filter(Boolean).join(" ") || currentLeadDetails.companyName }) : t("productPicker.addQuoteHint")}
+                value={currentLeadDetails?.lob ? { lob: currentLeadDetails.lob, productId: currentLeadDetails.productId ?? null } : null}
               />
             </div>
           </div>
