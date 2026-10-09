@@ -64,9 +64,33 @@ export async function getLead(id, db = null) {
   return r;
 }
 
+/** Source of the leads of a bulk upload that name none. */
+export const UPLOAD_SOURCE = 'bulk-upload';
+/** Sources the system sets itself (uploads, dealer programme sales): not checked against the Lead Source master. */
+const SYSTEM_SOURCES = new Set([UPLOAD_SOURCE, 'dealer-programme']);
+
+/**
+ * The Source of a prospect from the Lead Source master (Master > Insurance Management > Lead Sources), matched by code
+ * or name and stored as the master's name. A value the master does not know is kept as typed, or refused when
+ * leads.source_list_only is on. Empty: null.
+ */
+export async function leadSource(db, value) {
+  const v = String(value ?? '').trim();
+  if (!v) return null;
+  if (SYSTEM_SOURCES.has(v)) return v;
+  const known = (await db.query(`SELECT name FROM master_records WHERE type_code = 'lead-source' AND status = 'active' AND (lower(code) = lower($1) OR lower(name) = lower($1))
+    ORDER BY (lower(code) = lower($1)) DESC LIMIT 1`, [v])).rows[0];
+  if (known) return known.name;
+  if (await getSetting('leads.source_list_only', false)) {
+    throw badRequest('Validation failed', [{ path: 'source', message: `Source ${v} is not a lead source of Master > Insurance Management > Lead Sources` }]);
+  }
+  return v;
+}
+
 export async function createLead(body, userId, db = null) {
   const { cols, extra } = columnsFrom(body);
   if (!cols.first_name && !cols.company_name) throw badRequest('firstName or companyName is required');
+  if (cols.source !== undefined) cols.source = await leadSource(db || { query }, cols.source);
   await assertBirthDate(cols.birth_date);
   await fillRegion(cols, undefined, db);
   const run = async (c) => {
@@ -96,6 +120,7 @@ export async function createLead(body, userId, db = null) {
 export async function updateLead(id, body, userId) {
   const before = await getLead(id);
   const { cols, extra } = columnsFrom(body);
+  if (cols.source !== undefined && cols.source !== before.source) cols.source = await leadSource({ query }, cols.source);
   if (cols.channel_id) await assertChannel({ query }, cols.channel_id);
   await assertBirthDate(cols.birth_date);
   await fillRegion(cols);
@@ -218,11 +243,11 @@ export const LEAD_UPLOAD_COLUMNS = [
   { key: 'leadCategory', header: 'Lead Category', aliases: ['category'], format: 'Text', allowed: ['Retail', 'Corporate'], example: 'Retail' },
   { key: 'taxInformationNumber', header: 'TIN', aliases: ['taxInformationNumber', 'tax number'], format: 'Tax identification number', example: '123-456-789-000' },
   { key: 'lob', header: 'LOB', aliases: ['line of business', 'product'], format: 'Line of business', allowed: ['MOTOR', 'FIRE', 'IAR'], example: 'MOTOR' },
-  { key: 'source', header: 'Source', format: 'Text; bulk-upload when empty', example: 'Referral' },
+  { key: 'source', header: 'Source', aliases: ['lead source'], format: 'Lead source of Master > Insurance Management > Lead Sources (code or name); bulk-upload when empty', example: 'Referral' },
 ];
 
 /** Uploaded row -> lead body. */
 export const leadFromRow = (row) => {
   const v = mapColumns(row, LEAD_UPLOAD_COLUMNS);
-  return { ...v, source: v.source || 'bulk-upload' };
+  return { ...v, source: v.source || UPLOAD_SOURCE };
 };

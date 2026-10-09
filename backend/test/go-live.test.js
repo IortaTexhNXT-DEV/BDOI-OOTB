@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { migrate } from '../src/db/migrate.js';
-import { seed, seedFiles, seedSampleData } from '../src/db/seed.js';
+import { ROLES, seed, seedFiles, seedSampleData } from '../src/db/seed.js';
 import { pool, query } from '../src/db/pool.js';
 import { createApp } from '../src/app.js';
 import { setReady } from '../src/lib/health.js';
@@ -115,7 +115,7 @@ describe('production start on a fresh database', () => {
     expect(await count('report_definitions')).toBeGreaterThan(10);
     expect(await count('app_settings')).toBeGreaterThan(100);
     expect(await count('app_settings', "key = 'numbering.policy.prefix'")).toBe(1);
-    expect(await count('roles')).toBe(7); // system-admin and the six broker roles
+    expect(await count('roles')).toBe(ROLES.length); // system-admin, the six broker roles and the TISPH roles
     expect(await count('scheduled_jobs')).toBeGreaterThan(0);
     expect(await count('gl_accounts')).toBeGreaterThan(50);
     expect(await count('product_templates')).toBeGreaterThan(0);

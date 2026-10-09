@@ -124,6 +124,12 @@
    "chapter": "Getting started"
   },
   {
+   "id": "tisph-roles",
+   "title": "TISPH roles",
+   "level": 3,
+   "chapter": "Getting started"
+  },
+  {
    "id": "working-with-lists",
    "title": "Working with lists",
    "level": 2,
@@ -282,6 +288,12 @@
   {
    "id": "operational-masters",
    "title": "Operational masters",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "lead-sources-and-reason-codes",
+   "title": "Lead sources and reason codes",
    "level": 3,
    "chapter": "System Administrator"
   },

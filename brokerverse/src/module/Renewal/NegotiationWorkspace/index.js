@@ -26,6 +26,7 @@ import FieldError from "../../../components/FieldError";
 import SvgDot from "../../../assets/icons/SvgDot";
 import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
 import { requiredErrors, hasErrors, errorSummary } from "../../../utility/requiredFields";
+import { hasPermission } from "../../../utils/canOpen";
 import "./index.scss";
 
 const NegotiationWorkspace = () => {
@@ -612,7 +613,7 @@ const NegotiationWorkspace = () => {
                   onClick={handleSendCommunication}
                   disabled={!selectedNegotiation}
                 />
-                {pendingApproval && (
+                {pendingApproval && hasPermission("approve:renewals") && (
                   <>
                     <Button
                       label={t("renewal.approve", "Approve")}

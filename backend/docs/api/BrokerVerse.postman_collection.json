@@ -17728,7 +17728,7 @@
                 }
               ]
             },
-            "description": "Checker decision on a pending settlement (decision approve | return); the approver must differ from the requester\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: role:claims, write:claims",
+            "description": "Checker decision on a pending settlement (decision approve | return); the approver must differ from the requester\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: write:claims, approve:claims",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"decision\": \"approve\",\n  \"approvedAmount\": 75000,\n  \"note\": \"Within authority\"\n}",
@@ -17768,7 +17768,7 @@
                     }
                   ]
                 },
-                "description": "Checker decision on a pending settlement (decision approve | return); the approver must differ from the requester\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: role:claims, write:claims",
+                "description": "Checker decision on a pending settlement (decision approve | return); the approver must differ from the requester\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: write:claims, approve:claims",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"decision\": \"approve\",\n  \"approvedAmount\": 75000,\n  \"note\": \"Within authority\"\n}",
@@ -17898,7 +17898,7 @@
                 }
               ]
             },
-            "description": "Close a settled or rejected claim\n\nFront-end touchpoint: Operations > Claims\n\nAccess: role:claims, write:claims",
+            "description": "Close a settled or rejected claim\n\nFront-end touchpoint: Operations > Claims\n\nAccess: write:claims, approve:claims",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"note\": \"File closed\"\n}",
@@ -17938,7 +17938,7 @@
                     }
                   ]
                 },
-                "description": "Close a settled or rejected claim\n\nFront-end touchpoint: Operations > Claims\n\nAccess: role:claims, write:claims",
+                "description": "Close a settled or rejected claim\n\nFront-end touchpoint: Operations > Claims\n\nAccess: write:claims, approve:claims",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"note\": \"File closed\"\n}",
@@ -18090,7 +18090,7 @@
           ]
         },
         {
-          "name": "Reject a claim",
+          "name": "Reject (repudiate) a claim: reason as text, or reasonCode of the Reason Codes master (repudiation) with the reason as its note",
           "request": {
             "method": "PUT",
             "header": [
@@ -18117,10 +18117,10 @@
                 }
               ]
             },
-            "description": "Reject a claim\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: role:claims, write:claims",
+            "description": "Reject (repudiate) a claim: reason as text, or reasonCode of the Reason Codes master (repudiation) with the reason as its note\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: write:claims, approve:claims",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"Loss not covered\"\n}",
+              "raw": "{\n  \"reasonCode\": \"REP-NOTCOVERED\",\n  \"reason\": \"Flood damage excluded from the motor policy\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -18157,10 +18157,10 @@
                     }
                   ]
                 },
-                "description": "Reject a claim\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: role:claims, write:claims",
+                "description": "Reject (repudiate) a claim: reason as text, or reasonCode of the Reason Codes master (repudiation) with the reason as its note\n\nFront-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: write:claims, approve:claims",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"reason\": \"Loss not covered\"\n}",
+                  "raw": "{\n  \"reasonCode\": \"REP-NOTCOVERED\",\n  \"reason\": \"Flood damage excluded from the motor policy\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -18382,7 +18382,7 @@
                 }
               ]
             },
-            "description": "Submit the settlement (multipart; goes to Pending Approval when maker-checker is on) or mark an approved claim settled\n\nFront-end touchpoint: Operations > Claims > Settlement details\n\nAccess: role:claims, write:claims",
+            "description": "Submit the settlement (multipart; goes to Pending Approval when maker-checker is on) or mark an approved claim settled\n\nFront-end touchpoint: Operations > Claims > Settlement details\n\nAccess: write:claims, approve:claims",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"settlementType\": \"Cash\",\n  \"settlementAmount\": 75000,\n  \"settlementIssueDate\": \"2026-09-25\",\n  \"settlementDate\": \"2026-09-28\",\n  \"settlementDocument\": \"(file)\"\n}",
@@ -18422,7 +18422,7 @@
                     }
                   ]
                 },
-                "description": "Submit the settlement (multipart; goes to Pending Approval when maker-checker is on) or mark an approved claim settled\n\nFront-end touchpoint: Operations > Claims > Settlement details\n\nAccess: role:claims, write:claims",
+                "description": "Submit the settlement (multipart; goes to Pending Approval when maker-checker is on) or mark an approved claim settled\n\nFront-end touchpoint: Operations > Claims > Settlement details\n\nAccess: write:claims, approve:claims",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"settlementType\": \"Cash\",\n  \"settlementAmount\": 75000,\n  \"settlementIssueDate\": \"2026-09-25\",\n  \"settlementDate\": \"2026-09-28\",\n  \"settlementDocument\": \"(file)\"\n}",
@@ -18475,7 +18475,7 @@
                 }
               ]
             },
-            "description": "Move a claim to review / closed / rejected (claimStatus accepts a code or label, e.g. Processing)\n\nFront-end touchpoint: Operations > Claims > Request approval\n\nAccess: role:claims, write:claims",
+            "description": "Move a claim to review / closed / rejected (claimStatus accepts a code or label, e.g. Processing)\n\nFront-end touchpoint: Operations > Claims > Request approval\n\nAccess: write:claims, approve:claims",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"claimStatus\": \"Processing\",\n  \"note\": \"Documents complete\"\n}",
@@ -18515,7 +18515,7 @@
                     }
                   ]
                 },
-                "description": "Move a claim to review / closed / rejected (claimStatus accepts a code or label, e.g. Processing)\n\nFront-end touchpoint: Operations > Claims > Request approval\n\nAccess: role:claims, write:claims",
+                "description": "Move a claim to review / closed / rejected (claimStatus accepts a code or label, e.g. Processing)\n\nFront-end touchpoint: Operations > Claims > Request approval\n\nAccess: write:claims, approve:claims",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"claimStatus\": \"Processing\",\n  \"note\": \"Documents complete\"\n}",
@@ -60172,7 +60172,7 @@
           ]
         },
         {
-          "name": "Decide the check against the slip (never the user who recorded the e-policy): confirm (matches -> Checked), accept (differences accepted with a reason by an approver with write:policies -> Checked) or return (back to the insurer with the differences -> Acknowledged)",
+          "name": "Decide the check against the slip (approve:policies; never the user who recorded the e-policy): confirm (matches -> Checked), accept (differences accepted with a reason by an approver with write:policies -> Checked) or return (back to the insurer with the differences -> Acknowledged)",
           "request": {
             "method": "POST",
             "header": [
@@ -60199,7 +60199,7 @@
                 }
               ]
             },
-            "description": "Decide the check against the slip (never the user who recorded the e-policy): confirm (matches -> Checked), accept (differences accepted with a reason by an approver with write:policies -> Checked) or return (back to the insurer with the differences -> Acknowledged)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Confirm check / Return to insurer\n\nAccess: write:quotations",
+            "description": "Decide the check against the slip (approve:policies; never the user who recorded the e-policy): confirm (matches -> Checked), accept (differences accepted with a reason by an approver with write:policies -> Checked) or return (back to the insurer with the differences -> Acknowledged)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Confirm check / Return to insurer\n\nAccess: write:quotations, approve:policies",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"decision\": \"return\",\n  \"reason\": \"Premium on the e-policy is PHP 150.00 above the agreed premium\"\n}",
@@ -60239,7 +60239,7 @@
                     }
                   ]
                 },
-                "description": "Decide the check against the slip (never the user who recorded the e-policy): confirm (matches -> Checked), accept (differences accepted with a reason by an approver with write:policies -> Checked) or return (back to the insurer with the differences -> Acknowledged)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Confirm check / Return to insurer\n\nAccess: write:quotations",
+                "description": "Decide the check against the slip (approve:policies; never the user who recorded the e-policy): confirm (matches -> Checked), accept (differences accepted with a reason by an approver with write:policies -> Checked) or return (back to the insurer with the differences -> Acknowledged)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Confirm check / Return to insurer\n\nAccess: write:quotations, approve:policies",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"decision\": \"return\",\n  \"reason\": \"Premium on the e-policy is PHP 150.00 above the agreed premium\"\n}",
@@ -75097,7 +75097,7 @@
           ]
         },
         {
-          "name": "Change quotation status along quotations.transitions (Approved is maker-checker: approver differs from creator)",
+          "name": "Change quotation status along quotations.transitions (Approved needs approve:quotations and is maker-checker: approver differs from creator; Rejected / Dropped take a decline or non-materialise reasonCode of the Reason Codes master)",
           "request": {
             "method": "PUT",
             "header": [
@@ -75124,7 +75124,7 @@
                 }
               ]
             },
-            "description": "Change quotation status along quotations.transitions (Approved is maker-checker: approver differs from creator)\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail (status)\n\nAccess: write:quotations",
+            "description": "Change quotation status along quotations.transitions (Approved needs approve:quotations and is maker-checker: approver differs from creator; Rejected / Dropped take a decline or non-materialise reasonCode of the Reason Codes master)\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail (status)\n\nAccess: write:quotations",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"status\": \"Approved\",\n  \"updatedBy\": \"agent\"\n}",
@@ -75164,7 +75164,7 @@
                     }
                   ]
                 },
-                "description": "Change quotation status along quotations.transitions (Approved is maker-checker: approver differs from creator)\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail (status)\n\nAccess: write:quotations",
+                "description": "Change quotation status along quotations.transitions (Approved needs approve:quotations and is maker-checker: approver differs from creator; Rejected / Dropped take a decline or non-materialise reasonCode of the Reason Codes master)\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail (status)\n\nAccess: write:quotations",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"status\": \"Approved\",\n  \"updatedBy\": \"agent\"\n}",
@@ -75190,7 +75190,7 @@
           ]
         },
         {
-          "name": "Change quotation status along quotations.transitions (Approved is maker-checker: approver differs from creator)",
+          "name": "Change quotation status along quotations.transitions (Approved needs approve:quotations and is maker-checker: approver differs from creator; Rejected / Dropped take a decline or non-materialise reasonCode of the Reason Codes master)",
           "request": {
             "method": "PATCH",
             "header": [
@@ -75217,7 +75217,7 @@
                 }
               ]
             },
-            "description": "Change quotation status along quotations.transitions (Approved is maker-checker: approver differs from creator)\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail (status)\n\nAccess: write:quotations",
+            "description": "Change quotation status along quotations.transitions (Approved needs approve:quotations and is maker-checker: approver differs from creator; Rejected / Dropped take a decline or non-materialise reasonCode of the Reason Codes master)\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail (status)\n\nAccess: write:quotations",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"status\": \"Approved\",\n  \"updatedBy\": \"agent\"\n}",
@@ -75257,7 +75257,7 @@
                     }
                   ]
                 },
-                "description": "Change quotation status along quotations.transitions (Approved is maker-checker: approver differs from creator)\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail (status)\n\nAccess: write:quotations",
+                "description": "Change quotation status along quotations.transitions (Approved needs approve:quotations and is maker-checker: approver differs from creator; Rejected / Dropped take a decline or non-materialise reasonCode of the Reason Codes master)\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail (status)\n\nAccess: write:quotations",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"status\": \"Approved\",\n  \"updatedBy\": \"agent\"\n}",
@@ -83782,7 +83782,7 @@
           ]
         },
         {
-          "name": "Checker decision on renewal terms (decision approve | reject); approver must differ from the submitter",
+          "name": "Checker decision on renewal terms (decision approve | reject; approve:renewals); approver must differ from the submitter",
           "request": {
             "method": "POST",
             "header": [
@@ -83809,7 +83809,7 @@
                 }
               ]
             },
-            "description": "Checker decision on renewal terms (decision approve | reject); approver must differ from the submitter\n\nFront-end touchpoint: Operations > Renewals > Negotiations (approval)\n\nAccess: write:renewals",
+            "description": "Checker decision on renewal terms (decision approve | reject; approve:renewals); approver must differ from the submitter\n\nFront-end touchpoint: Operations > Renewals > Negotiations (approval)\n\nAccess: write:renewals, approve:renewals",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"decision\": \"approve\",\n  \"note\": \"Within authority\"\n}",
@@ -83849,7 +83849,7 @@
                     }
                   ]
                 },
-                "description": "Checker decision on renewal terms (decision approve | reject); approver must differ from the submitter\n\nFront-end touchpoint: Operations > Renewals > Negotiations (approval)\n\nAccess: write:renewals",
+                "description": "Checker decision on renewal terms (decision approve | reject; approve:renewals); approver must differ from the submitter\n\nFront-end touchpoint: Operations > Renewals > Negotiations (approval)\n\nAccess: write:renewals, approve:renewals",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"decision\": \"approve\",\n  \"note\": \"Within authority\"\n}",
@@ -83968,7 +83968,7 @@
           ]
         },
         {
-          "name": "Lapse a renewal (reason required)",
+          "name": "Lapse a renewal: reason (text), or reasonCode of the Reason Codes master (lapse) with the reason as its note",
           "request": {
             "method": "POST",
             "header": [
@@ -83995,10 +83995,10 @@
                 }
               ]
             },
-            "description": "Lapse a renewal (reason required)\n\nFront-end touchpoint: Operations > Renewals > Lapse Management\n\nAccess: write:renewals",
+            "description": "Lapse a renewal: reason (text), or reasonCode of the Reason Codes master (lapse) with the reason as its note\n\nFront-end touchpoint: Operations > Renewals > Lapse Management\n\nAccess: write:renewals",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"Client moved to another broker\"\n}",
+              "raw": "{\n  \"reasonCode\": \"LAP-NONRENEW\",\n  \"reason\": \"Client moved to another broker\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -84035,10 +84035,10 @@
                     }
                   ]
                 },
-                "description": "Lapse a renewal (reason required)\n\nFront-end touchpoint: Operations > Renewals > Lapse Management\n\nAccess: write:renewals",
+                "description": "Lapse a renewal: reason (text), or reasonCode of the Reason Codes master (lapse) with the reason as its note\n\nFront-end touchpoint: Operations > Renewals > Lapse Management\n\nAccess: write:renewals",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"reason\": \"Client moved to another broker\"\n}",
+                  "raw": "{\n  \"reasonCode\": \"LAP-NONRENEW\",\n  \"reason\": \"Client moved to another broker\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -84989,7 +84989,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"policyNumber\": \"POL-2025-00007\",\n      \"insuredName\": \"Tech Solutions Ltd\",\n      \"lapseDate\": \"2026-09-01\",\n      \"daysLapsed\": 27,\n      \"premiumLost\": 85000,\n      \"lapseReason\": \"Premium too high\",\n      \"reinstatementEligible\": true,\n      \"winBackAttempts\": []\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"policyNumber\": \"POL-2025-00007\",\n      \"insuredName\": \"Tech Solutions Ltd\",\n      \"lapseDate\": \"2026-09-01\",\n      \"daysLapsed\": 27,\n      \"premiumLost\": 85000,\n      \"lapseReason\": \"Customer No Longer Needs Coverage: sold the vehicle\",\n      \"lapseReasonCode\": \"LAP-COV\",\n      \"reinstatementEligible\": true,\n      \"winBackAttempts\": []\n    }\n  ]\n}"
             }
           ]
         },

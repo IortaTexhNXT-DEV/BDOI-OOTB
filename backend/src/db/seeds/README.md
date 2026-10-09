@@ -17,6 +17,15 @@ Manager (includes Accounting, adds the period-end approval). A database of an ea
 user-access-admin merged into system-admin; the agent login role withdrawn, its users moved to sales); the seed never
 creates the old codes.
 
+TISPH roles (RBAC v4 sheet of the Pre-BSM workbook, `ROLES` and `ROLE_PERMS` in `seed.js`, migration
+`0348_tisph_roles.sql` for a database in use): `tis-sales-associate`, `tis-sales-officer`, `tis-sales-unit-head`,
+`tis-ops-associate`, `tis-ops-officer`, `tis-ops-unit-head`, `tis-ccd-pdu`, `tis-ccd-pdc` (CCD-PDC in the screen matrix,
+CCD-ADA in the department table), `tis-ccd-bp`, `tis-ccd-recon`, `tis-finance`, `tis-it-admin`, `tis-general-manager`
+and `tis-superid` (user acceptance testing: includes `system-admin`; set it Inactive before go-live). Sales and
+Operations both make; `approve:quotations`, `approve:policies`, `approve:renewals` and `approve:claims` are the
+approvals, held by the Officers and Unit Heads of Sales, the Unit Head of Operations and the General Manager (and by
+the broker roles that approved before).
+
 `SEED_SAMPLE_DATA`: `true` / `false` (also `1` / `0`, `yes` / `no`, `on` / `off`). Unset: on in development and test,
 off with `NODE_ENV=production`. To remove sample data from a database that was seeded with it, use
 `npm run purge:sample` (`scripts/purge-sample-data.js`, see `deploy/REFERENCE.md`).
@@ -63,8 +72,11 @@ A sample row that the purge script must remove needs a key listed in `scripts/pu
 | `sample/75_integrations.sql` | sample | demo COC series (Malayan, Pioneer), insurer payee bank accounts and an insurer API mapping for Malayan |
 | `72_bir_forms.sql` | reference | BIR forms and invoicing: label of the VAT-registered setting that also drives the sales invoice and the 2551Q working paper |
 | `sample/72_override_commission.sql` | sample | two fictional overriding commission agreements (Mercantile production override, Pioneer profit commission on loss ratio) |
+| `77_lead_sources_reason_codes.sql` | reference | the Lead Source and Reason Code master screens (Master > Insurance Management); their values are the broker's |
 | `80_tisph_configuration.sql` | reference | TISPH configuration from the Pre-BSM workbook: the TISPH company as letterhead company (with the document logo of a brand pack already in force on the earlier letterhead company), fiscal year from April (a January fiscal calendar is rebuilt while nothing has been closed in it, otherwise left with a warning), Head Office address, departments, insurer panel (AXA's registered name, Stronghold active), policy types of the Group PA, Credit Life Voluntary and Parcel sub-classes, causes of loss and claim document checklist of the Phase 1 lines (the reference Motor and all-lines checklist retired), cancellation reasons, payment modes |
 | `81_tisph_finance.sql` | reference | TISPH finance configuration from the Finance & General Accounting workbook: the 319 accounts of the TISPH chart (FGA.01) with their Main Account mirror, the account roles, cash and payee accounts and tax code accounts that have one TISPH account, the TISPH VAT codes and withholding tax codes (FGA.06, one per ATC; WC140 at 15% by TISPH decision, WI140 keeps its rate), the placeholder account 210245 Accounts Payable - Insurance Company (FGA.09; missing from FGA.01) for the premium payable to insurers and its premium tax roles, and the cost centre 900901 Toyota Insurance Services as the default (FGA.04) |
+| `82_tisph_roles.sql` | reference | the TISPH roles in the report catalogue (each with the reports of the broker role closest to it; Cash Control with the cash and bank reports) and in the role-list settings (quotation and renewal approvers, incentive eligibility, payment error notices); the segregation-of-duties rule CCD-BP / CCD-Recon (warn) |
+| `83_tisph_lists.sql` | reference | the 14 lead sources of Pre-BSM M07 and the 32 reason codes of M24 that have no master of their own (decline, repudiation, lapse, refund, adjustment, non-materialise) |
 
 The TISPH files replace a reference value only while it is still the reference value and nobody has changed it, so
 they apply to a new database and, at the next start, to a database already in use, without undoing administrator changes.

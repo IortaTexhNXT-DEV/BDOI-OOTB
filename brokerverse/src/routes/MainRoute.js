@@ -227,7 +227,7 @@ import MotorClaimRepairs from "../module/OpsAccounting/MotorClaimRepairs";
 import SupplierInvoices from "../module/OpsAccounting/SupplierInvoices";
 import { ApAgeing, SupplierPayments } from "../module/OpsAccounting/SupplierPayments";
 import { AssetRegister, DepreciationRun } from "../module/OpsAccounting/FixedAssets";
-import { AssetClasses, CancellationReasons, ClaimDocumentChecklist, CostCentres, RepairShops, ShortPeriodRates, Suppliers } from "../module/OpsAccounting/Masters";
+import { AssetClasses, CancellationReasons, ClaimDocumentChecklist, CostCentres, LeadSources, ReasonCodes, RepairShops, ShortPeriodRates, Suppliers } from "../module/OpsAccounting/Masters";
 // sales activities, asset disposal and the BIR 2307 of suppliers
 import SalesActivities from "../module/SalesActivities/SalesActivities";
 import { AssetDisposals } from "../module/OpsAccounting/AssetDisposals";
@@ -1715,6 +1715,8 @@ const Maincomponent = () => {
           <Route path="/master/insurance/cancellation-reasons" element={<CancellationReasons />} />
           <Route path="/master/insurance/claim-document-checklist" element={<ClaimDocumentChecklist />} />
           <Route path="/master/insurance/repair-shops" element={<RepairShops />} />
+          <Route path="/master/insurance/lead-sources" element={<LeadSources />} />
+          <Route path="/master/insurance/reason-codes" element={<ReasonCodes />} />
           <Route path="/master/finance/asset-classes" element={<AssetClasses />} />
           <Route path="/master/finance/cost-centres" element={<CostCentres />} />
 

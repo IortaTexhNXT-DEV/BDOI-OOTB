@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import { config } from '../../config.js';
+import { hasPermission } from '../../lib/auth.js';
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { notFound, badRequest, forbidden, conflict } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
@@ -26,6 +27,7 @@ import { journeyFor, assertStep, resolveLob } from '../placement/journey.js';
 import { companyName } from '../../lib/letterhead.js';
 import { assertNotDeclined, assertFactsCaptured, referralFor, assertReferralCleared, assertMayDecide } from '../product-configurator/underwriting.js';
 import { assertAuthority } from '../access-control/service.js';
+import { decisionReason } from '../ops-masters/records.js';
 
 export async function getQuoteRow(id, db = null) {
   const r = await (db || { query }).query(`${QUOTE_SELECT} WHERE (q.id = $1 OR q.quote_number = $1) AND q.deleted_at IS NULL`, [id]);
@@ -144,8 +146,12 @@ export async function deleteQuote(id, userId) {
   return q;
 }
 
-/** Status change following quotations.transitions (API labels). Approval is maker-checker when enabled. */
-export async function changeStatus(id, label, user) {
+/**
+ * Status change following quotations.transitions (API labels). Approval needs approve:quotations and is maker-checker
+ * when enabled. A Rejected or Dropped quotation may carry a reason code of the reason-code master (decline or
+ * non-materialise), checked here; the reason itself is recorded in the audit trail.
+ */
+export async function changeStatus(id, label, user, { reasonCode = null, reason = null } = {}) {
   const q = await getQuoteRow(id);
   const target = quoteStatusIn(label);
   if (!target) throw badRequest(`Unknown quotation status ${label}`);
@@ -154,6 +160,8 @@ export async function changeStatus(id, label, user) {
   const transitions = await getSetting('quotations.transitions', {});
   if (!(transitions[from] || []).includes(to)) throw badRequest(`Cannot change a ${from} quotation to ${to}`);
   if (to === 'Approved') assertReferralCleared(q, 'approval');
+  if (to === 'Approved' && !hasPermission(user, 'approve:quotations')) throw forbidden('Requires permission: approve:quotations');
+  const why = ['Rejected', 'Dropped'].includes(to) ? await decisionReason({ query }, ['decline', 'non-materialise'], { reasonCode, reason }) : { code: null, text: reason };
   if (to === 'Approved' && await getSetting('workflow.quote_maker_checker', true) && q.created_by === user.id) {
     throw forbidden('Maker-checker: the approver must be different from the user who created the quotation');
   }
@@ -165,7 +173,7 @@ export async function changeStatus(id, label, user) {
     await notifyDecision({ userId: owner, decidedBy: user.id, document: 'Quotation', number: q.quote_number, approved: true, by: user.username,
       message: `Quotation ${q.quote_number} was approved by ${user.username} and can be converted to a policy`, link: `/agent/quotedetailview/${q.id}`, entity: 'quotation', entityId: q.id });
   }
-  return { before: q, after: await getQuoteRow(q.id), placement };
+  return { before: q, after: await getQuoteRow(q.id), placement, reason: why };
 }
 
 /** The placement slip raised automatically when the client accepts (placement/placements.js#autoRaisePlacement). */

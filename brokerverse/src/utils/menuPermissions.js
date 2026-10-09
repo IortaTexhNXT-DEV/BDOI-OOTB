@@ -160,6 +160,65 @@ export const roleMenuPermissions = {
   },
 };
 
+// TISPH personas (Pre-BSM RBAC v4, backend migration 0348): each starts from the menus of the broker role closest to
+// it, and the server's permissions decide what it may change (an Associate sees the approval screens but cannot
+// approve). SUPERID includes the System Administrator, so the server returns system-admin among its roles: every menu.
+const TIS_CASH_REPORTS = ["All Reports", "Financial Reports > SOA/Premium Receivable", "Financial Reports > Collection Report"];
+const TIS_CCD = (accounts) => ({ "my work": true, operations: ["Payments"], accounts, reports: TIS_CASH_REPORTS });
+const TIS_SALES = { ...roleMenuPermissions.sales, accounts: ["Receipts", "Collections"] };
+const TIS_OPERATIONS = {
+  dashboard: ["Executive Dashboard", "Processing Dashboard", "Claims Dashboard"],
+  "product configurator": ["Dashboard", "Product Templates"],
+  "my work": true,
+  operations: [...OPERATIONS_ALL, "Claim Documents", "Motor Claim Repairs"],
+  accounts: ["Receipts", "Collections"],
+  reports: ["All Reports", "Operational Reports", "Report Builder"],
+  master: ["Data Privacy", "Insurance Management > Distribution Channels", "Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops"],
+};
+Object.assign(roleMenuPermissions, {
+  "tis-sales-associate": TIS_SALES,
+  "tis-sales-officer": TIS_SALES,
+  "tis-sales-unit-head": { ...TIS_SALES, accounts: [...TIS_SALES.accounts, "Disbursement", "Payables", "Incentive"] },
+  "tis-ops-associate": TIS_OPERATIONS,
+  "tis-ops-officer": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, "Journal Voucher", "Fixed Assets"] },
+  "tis-ops-unit-head": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, "Journal Voucher", "Fixed Assets", "Disbursement", "Payables"] },
+  "tis-ccd-pdu": TIS_CCD(["Post-Dated Cheques", "Receipts"]),
+  "tis-ccd-pdc": TIS_CCD(["Post-Dated Cheques", "Receipts", "Collections", "Bank Reconciliation", "Insurer Reconciliation"]),
+  "tis-ccd-bp": TIS_CCD(["Receipts", "Collections", "Post-Dated Cheques", "Bank Reconciliation", "Insurer Reconciliation"]),
+  "tis-ccd-recon": TIS_CCD(["Receipts", "Collections", "Post-Dated Cheques", "Bank Reconciliation", "Insurer Reconciliation", "Open Entry Matching", "Open Entry Unmatching", "Disbursement"]),
+  // Finance & General Accounting: the Accounting menus, plus the audit trail and the schedules (interface monitor)
+  "tis-finance": {
+    ...roleMenuPermissions.accounting,
+    master: [...roleMenuPermissions.accounting.master, "System Configuration > Audit Trail", "System Configuration > Schedules"],
+  },
+  // IT AppSupport / Admin: administration and the reference masters; the business screens read only. Go-Live Data Load
+  // stays with the System Administrator.
+  "tis-it-admin": {
+    dashboard: ["Executive Dashboard"],
+    "my work": true,
+    operations: OPERATIONS_ALL,
+    accounts: ["Receipts", "Collections", "Post-Dated Cheques", "Disbursement", "Journal Voucher", "Payables", "Fixed Assets", "Remittance"],
+    commission: ["Commission Dashboard"],
+    reports: ["All Reports", "Operational Reports", "Financial Reports"],
+    master: ["Organization", "Insurance Management", "Location", "Employee Management", "User Management", "System Configuration", "Finance > Currency",
+      "Finance > Exchange Rate", "Finance > Bank", "Finance > Transaction Code", "Finance > Premium Taxes & LGU Rates", "Finance > Insurer Rate Tables",
+      "Finance > Commission Rate Matrix", "Finance > Package Bundles"],
+    "product configurator": roleMenuPermissions.processing["product configurator"],
+  },
+  // TIS General Manager: the front office with its approvals; accounting, commission and administration read only
+  "tis-general-manager": {
+    dashboard: ["Executive Dashboard", "Sales Dashboard", "Processing Dashboard", "Claims Dashboard"],
+    "product configurator": ["Dashboard", "Product Templates"],
+    "my work": true,
+    operations: [...OPERATIONS_ALL, "Claim Documents", "Motor Claim Repairs"],
+    accounts: roleMenuPermissions.accounting.accounts,
+    commission: roleMenuPermissions.accounting.commission,
+    reports: ["All Reports", "Operational Reports", "Financial Reports"],
+    master: ["User Management > User", "User Management > Role", "User Management > User Access Matrix", "User Management > Role Permissions",
+      "User Management > Authority Matrix", "User Management > Segregation of Duties", "System Configuration > Audit Trail", "Insurance Management > Distribution Channels"],
+  },
+});
+
 /** Roles of the signed-in user, from the login response stored by authService. */
 export const getUserRoles = () => {
   try {

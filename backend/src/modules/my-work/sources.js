@@ -304,8 +304,8 @@ async function approvals(ctx) {
       status: 'ic.status', link: "'/incentive/approvals'", amount: 'ic.total_amount', created_at: 'ic.created_at' })}
       FROM incentive_calculations ic WHERE ic.status = 'Pending Approval' AND ${notMine(ctx, 'ic.submitted_by')}`);
   }
-  // claim settlements: decided by the Claims role (claims/service.js), never by the officer who requested them
-  if (ctx.can('write:claims') && (ctx.roles.includes('claims') || isAdmin(ctx.user))) {
+  // claim settlements: decided by the holders of approve:claims (claims/service.js), never by the officer who requested them
+  if (ctx.can('write:claims') && ctx.can('approve:claims')) {
     out.push(`SELECT ${select({ ...base, kind: "'Claim settlement'", id: 'cs.id', ref: 'cs.claim_number', title: "COALESCE(p.policy_number, 'Claim')", client_name: CLIENT('c'),
       due_date: due('cs.updated_at'), status: 'cs.status', priority: prio('cs.priority'), link: "'/agent/claimrequest/settlementapproval/' || cs.id",
       amount: "COALESCE(NULLIF(cs.settlement->>'settlementAmount', '')::numeric, cs.approved_amount, cs.estimate_amount)", created_at: 'cs.created_at' })}
@@ -314,15 +314,15 @@ async function approvals(ctx) {
   }
   // renewal premiums: decided by the roles of renewals.approver_roles (renewals/service.js)
   const renewalApprovers = (await getSetting('renewals.approver_roles', ['processing'])) || [];
-  if (ctx.can('write:renewals') && (isAdmin(ctx.user) || ctx.roles.some((r) => renewalApprovers.includes(r)))) {
+  if (ctx.can('approve:renewals') && (isAdmin(ctx.user) || ctx.roles.some((r) => renewalApprovers.includes(r)))) {
     out.push(`SELECT ${select({ ...base, kind: "'Renewal premium'", id: 'ra.id', ref: 'ra.renewal_number', title: 'p.policy_number', client_name: CLIENT('c'),
       due_date: `LEAST(COALESCE(ra.due_date, p.expiry_date), ${due('COALESCE(ra.submitted_at, ra.updated_at)')})`, status: 'ra.status', priority: prio('ra.priority'),
       link: "'/renewal/negotiations'", amount: 'ra.premium_new', created_at: 'ra.created_at' })}
       FROM renewals ra JOIN policies p ON p.id = ra.policy_id LEFT JOIN clients c ON c.id = COALESCE(ra.client_id, p.client_id)
       WHERE ra.status = 'pending-approval' AND ${notMine(ctx, 'ra.submitted_by')} AND ${rec(ctx, 'renewal', 'ra')}`);
   }
-  // premium payments captured on a policy wait for Accounting's verification (policies/router.js)
-  if (ctx.can('write:receipts') && (ctx.roles.includes('accounting') || isAdmin(ctx.user)) && await has('policy_payments')) {
+  // premium payments captured on a policy wait for the verification of a receipting user (write:receipts, policies/router.js)
+  if (ctx.can('write:receipts') && await has('policy_payments')) {
     out.push(`SELECT ${select({ ...base, kind: "'Premium payment to verify'", id: 'pp.id', ref: "COALESCE(pp.reference_no, p.policy_number)", title: 'p.policy_number', client_name: CLIENT('c'),
       due_date: due('pp.created_at'), status: 'pp.status', next_action: "'Verify the payment and issue the receipt'", link: "'/agent/policy/paymentoptions/' || pp.policy_id",
       amount: 'pp.amount', created_at: 'pp.created_at' })}

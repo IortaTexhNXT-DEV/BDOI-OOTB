@@ -4927,7 +4927,7 @@
     }
   }
 }"
-253,Claims,PUT,/api/claims/approve-settlement/:id,Checker decision on a pending settlement (decision approve | return); the approver must differ from the requester,Operations > Claims > Settlement approval,Bearer JWT,"role:claims, write:claims","{
+253,Claims,PUT,/api/claims/approve-settlement/:id,Checker decision on a pending settlement (decision approve | return); the approver must differ from the requester,Operations > Claims > Settlement approval,Bearer JWT,"write:claims, approve:claims","{
   ""decision"": ""approve"",
   ""approvedAmount"": 75000,
   ""note"": ""Within authority""
@@ -4968,7 +4968,7 @@
   ""total"": 1,
   ""sort"": ""desc""
 }"
-255,Claims,PUT,/api/claims/close/:id,Close a settled or rejected claim,Operations > Claims,Bearer JWT,"role:claims, write:claims","{
+255,Claims,PUT,/api/claims/close/:id,Close a settled or rejected claim,Operations > Claims,Bearer JWT,"write:claims, approve:claims","{
   ""note"": ""File closed""
 }","{
   ""success"": true,
@@ -5029,8 +5029,9 @@
   }
 }"
 257,Claims,GET,/api/claims/getdocuments/:id,"Download a claim document (uploaded file, or generated PDF: Claims Acknowledgement Letter, Claims Discharge Voucher, Claims Data Sheet)",Operations > Claims > Claim detailed view,Bearer JWT,read:claims,Query: ?documentName=Claims%20Acknowledgement%20Letter,application/pdf
-258,Claims,PUT,/api/claims/rejectclaim/:id,Reject a claim,Operations > Claims > Settlement approval,Bearer JWT,"role:claims, write:claims","{
-  ""reason"": ""Loss not covered""
+258,Claims,PUT,/api/claims/rejectclaim/:id,"Reject (repudiate) a claim: reason as text, or reasonCode of the Reason Codes master (repudiation) with the reason as its note",Operations > Claims > Settlement approval,Bearer JWT,"write:claims, approve:claims","{
+  ""reasonCode"": ""REP-NOTCOVERED"",
+  ""reason"": ""Flood damage excluded from the motor policy""
 }","{
   ""success"": true,
   ""message"": ""Claim rejected"",
@@ -5100,7 +5101,7 @@
   }
 }"
 260,Claims,GET,/api/claims/reports/criteria,Claims report by criteria (All | Open | Settled | Rejected | Aging) as an .xlsx download (reportType=json for JSON),Reports > Operational Reports > Claims,Bearer JWT,"read:claims, read:reports",Query: ?startDate=2026-01-01&endDate=2026-09-28&criteria=Open&reportType=excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet (claims-report-Open-2026-01-01-to-2026-09-28.xlsx)
-261,Claims,PUT,/api/claims/settle/:id,Submit the settlement (multipart; goes to Pending Approval when maker-checker is on) or mark an approved claim settled,Operations > Claims > Settlement details,Bearer JWT,"role:claims, write:claims","{
+261,Claims,PUT,/api/claims/settle/:id,Submit the settlement (multipart; goes to Pending Approval when maker-checker is on) or mark an approved claim settled,Operations > Claims > Settlement details,Bearer JWT,"write:claims, approve:claims","{
   ""settlementType"": ""Cash"",
   ""settlementAmount"": 75000,
   ""settlementIssueDate"": ""2026-09-25"",
@@ -5127,7 +5128,7 @@
     }
   }
 }"
-262,Claims,PUT,/api/claims/updatestatus/:id,"Move a claim to review / closed / rejected (claimStatus accepts a code or label, e.g. Processing)",Operations > Claims > Request approval,Bearer JWT,"role:claims, write:claims","{
+262,Claims,PUT,/api/claims/updatestatus/:id,"Move a claim to review / closed / rejected (claimStatus accepts a code or label, e.g. Processing)",Operations > Claims > Request approval,Bearer JWT,"write:claims, approve:claims","{
   ""claimStatus"": ""Processing"",
   ""note"": ""Documents complete""
 }","{
@@ -16461,7 +16462,7 @@
     ]
   }
 }"
-812,Placement Slips,POST,/api/placements/:id/check,"Decide the check against the slip (never the user who recorded the e-policy): confirm (matches -> Checked), accept (differences accepted with a reason by an approver with write:policies -> Checked) or return (back to the insurer with the differences -> Acknowledged)",Operations > Sales & Marketing > Placement Slips > Detail > Confirm check / Return to insurer,Bearer JWT,write:quotations,"{
+812,Placement Slips,POST,/api/placements/:id/check,"Decide the check against the slip (approve:policies; never the user who recorded the e-policy): confirm (matches -> Checked), accept (differences accepted with a reason by an approver with write:policies -> Checked) or return (back to the insurer with the differences -> Acknowledged)",Operations > Sales & Marketing > Placement Slips > Detail > Confirm check / Return to insurer,Bearer JWT,"write:quotations, approve:policies","{
   ""decision"": ""return"",
   ""reason"": ""Premium on the e-policy is PHP 150.00 above the agreed premium""
 }","{
@@ -20072,7 +20073,7 @@
     ""to"": ""juan@example.com""
   }
 }"
-1011,Quotations,PUT,/api/quotations/:id/status,Change quotation status along quotations.transitions (Approved is maker-checker: approver differs from creator),Operations > Sales & Marketing > Quotations > Quote detail (status),Bearer JWT,write:quotations,"{
+1011,Quotations,PUT,/api/quotations/:id/status,Change quotation status along quotations.transitions (Approved needs approve:quotations and is maker-checker: approver differs from creator; Rejected / Dropped take a decline or non-materialise reasonCode of the Reason Codes master),Operations > Sales & Marketing > Quotations > Quote detail (status),Bearer JWT,write:quotations,"{
   ""status"": ""Approved"",
   ""updatedBy"": ""agent""
 }","{
@@ -20093,7 +20094,7 @@
   },
   ""success"": true
 }"
-1012,Quotations,PATCH,/api/quotations/:id/status,Change quotation status along quotations.transitions (Approved is maker-checker: approver differs from creator),Operations > Sales & Marketing > Quotations > Quote detail (status),Bearer JWT,write:quotations,"{
+1012,Quotations,PATCH,/api/quotations/:id/status,Change quotation status along quotations.transitions (Approved needs approve:quotations and is maker-checker: approver differs from creator; Rejected / Dropped take a decline or non-materialise reasonCode of the Reason Codes master),Operations > Sales & Marketing > Quotations > Quote detail (status),Bearer JWT,write:quotations,"{
   ""status"": ""Approved"",
   ""updatedBy"": ""agent""
 }","{
@@ -22289,7 +22290,7 @@
     ""description"": ""Client asked for a 5% discount""
   }
 }"
-1125,Renewals workspace,POST,/api/renewals/:id/approve,Checker decision on renewal terms (decision approve | reject); approver must differ from the submitter,Operations > Renewals > Negotiations (approval),Bearer JWT,write:renewals,"{
+1125,Renewals workspace,POST,/api/renewals/:id/approve,Checker decision on renewal terms (decision approve | reject; approve:renewals); approver must differ from the submitter,Operations > Renewals > Negotiations (approval),Bearer JWT,"write:renewals, approve:renewals","{
   ""decision"": ""approve"",
   ""note"": ""Within authority""
 }","{
@@ -22360,7 +22361,8 @@
     }
   }
 }"
-1127,Renewals workspace,POST,/api/renewals/:id/lapse,Lapse a renewal (reason required),Operations > Renewals > Lapse Management,Bearer JWT,write:renewals,"{
+1127,Renewals workspace,POST,/api/renewals/:id/lapse,"Lapse a renewal: reason (text), or reasonCode of the Reason Codes master (lapse) with the reason as its note",Operations > Renewals > Lapse Management,Bearer JWT,write:renewals,"{
+  ""reasonCode"": ""LAP-NONRENEW"",
   ""reason"": ""Client moved to another broker""
 }","{
   ""success"": true,
@@ -22652,7 +22654,8 @@
       ""lapseDate"": ""2026-09-01"",
       ""daysLapsed"": 27,
       ""premiumLost"": 85000,
-      ""lapseReason"": ""Premium too high"",
+      ""lapseReason"": ""Customer No Longer Needs Coverage: sold the vehicle"",
+      ""lapseReasonCode"": ""LAP-COV"",
       ""reinstatementEligible"": true,
       ""winBackAttempts"": []
     }

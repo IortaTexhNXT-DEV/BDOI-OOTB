@@ -68,6 +68,8 @@ export const postCreateleadMiddleware = createAsyncThunk(
         leadCategory: payload?.category || "Retail", // Map to the selected category
         companyName: payload?.CompanyName || null,
         taxInformationNumber: payload?.TaxNumber || null,
+        // where the prospect came from (Lead Source master)
+        ...(payload?.Source ? { source: payload.Source } : {}),
         ...(payload?.clientId ? { clientId: payload.clientId } : {}),
         createdBy: (() => {
           try {
@@ -134,6 +136,7 @@ export const patchLeadEditMiddleWare = createAsyncThunk(
         leadCategory: payload?.category || "Retail",
         companyName: payload?.CompanyName || null,
         taxInformationNumber: payload?.TaxNumber || null,
+        ...(payload?.Source !== undefined ? { source: payload.Source || null } : {}),
         updatedBy: (() => {
           try {
             const userData = JSON.parse(localStorage.getItem('user') || '{}');

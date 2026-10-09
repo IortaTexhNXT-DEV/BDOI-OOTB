@@ -28,8 +28,18 @@ minimal, clearly-correct front-end fix.
   `requirePermission('read:<module>')`; the System Administrator (`system-admin`, `ADMIN_ROLE` in `src/lib/auth.js`)
   always passes. Permission codes are `read:` / `write:` + one of the modules in `MODULES` in `src/db/seed.js`, plus
   `approve:period-end`, `approve:bank-reconciliation`, `approve:insurer-reconciliation`, `approve:credit-control`,
-  `write:posting-rules`, `approve:posting-rules`, `read:privacy` and `write:privacy`. Which role holds which permission is `ROLE_PERMS` in the
-  same file.
+  `write:posting-rules`, `approve:posting-rules`, `read:privacy` and `write:privacy`, and the approvals of the front office
+  (migration 0348): `approve:quotations` (quotation approval), `approve:policies` (check of a placement against the slip),
+  `approve:renewals` (renewal terms) and `approve:claims` (claim decisions). An approval route requires the approval
+  permission besides the write permission, and the service keeps its maker-checker rule. Which role holds which
+  permission is `ROLE_PERMS` in the same file (the broker roles and the TISPH roles `tis-*` of the RBAC v4 sheet); a
+  role added there for databases in use also needs a migration, as `0348_tisph_roles.sql` does. Roles that include
+  the System Administrator role through `roles.inherits` (SUPERID) are protected like it: `adminEquivalentRoles()` in
+  `src/lib/auth.js`.
+- Coded reasons: a decision that records a reason (claim repudiation, renewal lapse, quotation declined or dropped)
+  takes an optional `reasonCode` of the reason-code master besides the free-text reason; resolve it with
+  `decisionReason(db, contexts, { reasonCode, reason })` from `src/modules/ops-masters/records.js`, which checks the
+  context and the "requires note" flag and returns the code and the text to store.
 - Record scoping: users whose roles are all in `security.scoped_roles` only see their own book. Use
   `src/lib/scope.js`: pass `await withScope(req)` to list / stats services and add `scopeSql(q[SCOPE], '<entity>', alias, params)`
   to the WHERE clause; guard detail, update and workflow routes with `ownRecord('<entity>')` (answers 404, not 403).

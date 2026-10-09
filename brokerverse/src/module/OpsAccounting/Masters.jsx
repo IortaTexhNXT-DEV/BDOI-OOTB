@@ -20,6 +20,10 @@ export const Suppliers = page("supplier", "suppliers", "opsAcc.accounts", ["code
 // sales activities (Master > Organization): the activity types and outcomes account executives choose when they log
 export const SalesActivityTypes = page("sales-activity-type", "salesActivityTypes", "opsAcc.master", ["code", "name", "channel", "followUpDays", "sortOrder"]);
 export const SalesActivityOutcomes = page("sales-activity-outcome", "salesActivityOutcomes", "opsAcc.master", ["code", "name", "result", "sortOrder"]);
+// lead sources and reason codes (Master > Insurance Management): the Source of a prospect; coded reasons of a declined
+// or dropped quotation, a claim repudiation and a renewal lapse
+export const LeadSources = page("lead-source", "leadSources", "opsAcc.master", ["code", "name", "channelType", "branchCode", "sortOrder"]);
+export const ReasonCodes = page("reason-code", "reasonCodes", "opsAcc.master", ["code", "name", "context", "requiresNote", "sortOrder"]);
 export const AssetClasses = page("asset-class", "assetClasses", "opsAcc.master", ["code", "name", "usefulLifeMonths", "assetAccount", "accumulatedAccount", "expenseAccount"]);
 // cost centres stamped on journal lines (FGA.04); the one marked Default goes on lines that name none
 export const CostCentres = page("cost-centre", "costCentres", "opsAcc.master", ["code", "name", "companyCode", "department", "responsiblePerson", "isDefault"]);

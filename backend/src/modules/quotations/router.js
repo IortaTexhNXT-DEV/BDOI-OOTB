@@ -29,7 +29,7 @@ const quoteBody = z.object({
   leadRefId: z.string().min(1).optional(), clientId: z.string().optional(), productType: z.string().max(100).optional(),
   insurancePolicyType: z.string().max(100).optional().nullable(), discount: z.union([z.string(), z.number()]).optional().nullable(),
 }).passthrough();
-const statusBody = z.object({ status: z.string().min(1), updatedBy: z.string().optional(), reason: z.string().optional() });
+const statusBody = z.object({ status: z.string().min(1), updatedBy: z.string().optional(), reason: z.string().max(2000).optional(), reasonCode: z.string().max(40).optional().nullable() });
 const example = { quotationId: 'qt_1', quotationNumber: 'QT-2026-00001', quotationStatus: 'Draft', leadRefId: 'ld_1', productType: 'Motor', netPremium: 18500, valueAddedTax: 2220, documentaryStampTax: 2312.5, localGovernmentTax: 138.75, grossPremium: 23171.25, totalSumInsured: 1200000, lead: { firstName: 'Juan', lastName: 'Dela Cruz' } };
 const out = (r) => toQuote(r);
 /** Audit entry of a placement slip raised automatically when the client accepted the quotation. */
@@ -154,15 +154,16 @@ define({
   },
 });
 const statusHandler = async (req, res) => {
-  const { before, after, placement } = await svc.changeStatus(req.params.id, req.body.status, req.user);
-  await audit(req, { entity: 'quotation', entityId: after.id, action: 'status', before: { quotationStatus: out(before).quotationStatus }, after: { quotationStatus: out(after).quotationStatus, reason: req.body.reason } });
+  const { before, after, placement, reason } = await svc.changeStatus(req.params.id, req.body.status, req.user, { reasonCode: req.body.reasonCode, reason: req.body.reason });
+  await audit(req, { entity: 'quotation', entityId: after.id, action: 'status', before: { quotationStatus: out(before).quotationStatus },
+    after: { quotationStatus: out(after).quotationStatus, reason: reason.text ?? undefined, reasonCode: reason.code ?? undefined } });
   if (placement) await auditRaised(req, placement);
   sendEntity(res, out(after), { message: `Status changed to ${out(after).quotationStatus}${placement ? `; placement slip ${placement.placementNumber} raised` : ''}`,
     extra: placement ? { placementId: placement.id, placementNumber: placement.placementNumber } : {} });
 };
 for (const method of ['PUT', 'PATCH']) {
   define({
-    method, path: '/:id/status', summary: 'Change quotation status along quotations.transitions (Approved is maker-checker: approver differs from creator)', screen: `${SCREEN} > Quote detail (status)`,
+    method, path: '/:id/status', summary: 'Change quotation status along quotations.transitions (Approved needs approve:quotations and is maker-checker: approver differs from creator; Rejected / Dropped take a decline or non-materialise reasonCode of the Reason Codes master)', screen: `${SCREEN} > Quote detail (status)`,
     middleware: [...canWrite, ownRecord('quote'), validate(statusBody)], request: { status: 'Approved', updatedBy: 'agent' }, response: { ...example, quotationStatus: 'Approved', success: true }, handler: statusHandler,
   });
 }

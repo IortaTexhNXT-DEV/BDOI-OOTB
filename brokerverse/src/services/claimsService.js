@@ -198,7 +198,7 @@ class ClaimsService {
     }
   }
 
-  async rejectClaim(claimId, reason) {
+  async rejectClaim(claimId, reason, reasonCode = null) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -211,7 +211,7 @@ class ClaimsService {
             "Content-Type": "application/json",
             ...authService.getAuthHeader(),
           },
-          body: JSON.stringify(reason ? { reason } : {}),
+          body: JSON.stringify({ ...(reason ? { reason } : {}), ...(reasonCode ? { reasonCode } : {}) }),
           signal: controller.signal,
         }
       );

@@ -7,7 +7,7 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
 import { many, one, query } from '../../db/pool.js';
-import { isAdmin, ADMIN_ROLES, revokeSessions } from '../../lib/auth.js';
+import { isAdmin, ADMIN_ROLES, adminEquivalentRoles, revokeSessions } from '../../lib/auth.js';
 import { setSetting } from '../../lib/settings.js';
 import { settingOwner } from '../../lib/settingOwners.js';
 import { passwordPolicy, recordHistory } from '../../lib/password.js';
@@ -40,6 +40,8 @@ const MASTER_SHEETS = {
   // operations and accounting masters (seed 73_ops_accounting.sql)
   supplier: 'Suppliers', 'asset-class': 'Asset Classes', 'short-period-rate': 'Short-Period Rates', 'cancellation-reason': 'Cancellation Reasons',
   'claim-document-requirement': 'Claim Document Checklist', 'repair-shop': 'Repair Shops',
+  // lead sources and reason codes (seed 77_lead_sources_reason_codes.sql)
+  'lead-source': 'Lead Sources', 'reason-code': 'Reason Codes',
 };
 
 /** Earlier names of a sheet, still read from an uploaded workbook (the Province master was called State). */
@@ -212,6 +214,7 @@ const usersSheet = () => ({
     const unknown = codes.filter((c) => !roles.some((r) => r.code === c));
     if (unknown.length) fail('roles', `Unknown role(s): ${unknown.join(', ')}`);
     if (!isAdmin(ctx.user) && codes.some((c) => ADMIN_ROLES.includes(c))) fail('roles', 'Only a System Administrator can grant the System Administrator role');
+    if (!isAdmin(ctx.user) && (await adminEquivalentRoles()).some((c) => codes.includes(c))) fail('roles', 'Only a System Administrator can grant a role that includes the System Administrator role');
     if (v.branchCode && !(await one('SELECT 1 FROM branches WHERE lower(code) = lower($1) AND status <> \'deleted\'', [v.branchCode]))) fail('branchCode', `Branch ${v.branchCode} is not in the Branch master`);
     let designation = v.designation || undefined;
     if (designation) {
@@ -685,6 +688,7 @@ export async function configurationSheets() {
     await m('insurance-company'), await m('line-of-business'), await m('product'), await m('policy-type'), await m('cover'),
     await m('vehicle-brand'), await m('vehicle-model'), await m('vehicle-variant'), await m('vehicle'),
     await m('supplier'), await m('asset-class'), await m('short-period-rate'), await m('cancellation-reason'), await m('claim-document-requirement'), await m('repair-shop'),
+    await m('lead-source'), await m('reason-code'),
     commissionSheet(), chargesSheet(), lguSheet(), authoritySheet(), numberingSheet(),
     // integrations: bank accounts of the payees paid by bank file, COC number series of the insurers
     payeeAccountsSheet(), cocSeriesSheet(),

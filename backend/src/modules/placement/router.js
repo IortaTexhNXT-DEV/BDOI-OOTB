@@ -25,6 +25,8 @@ import { getSetting } from '../../lib/settings.js';
 const canRead = [requireAuth, requirePermission('read:quotations')];
 const canWrite = [requireAuth, requirePermission('write:quotations')];
 const canIssue = [requireAuth, requirePermission('write:quotations'), requirePermission('write:policies')];
+// the check against the slip is the checker's step of the placement: approve:policies (migration 0348)
+const canCheck = [requireAuth, requirePermission('write:quotations'), requirePermission('approve:policies')];
 
 const money = z.union([z.number(), z.string()]).optional().nullable();
 const participantBody = z.object({
@@ -316,8 +318,8 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/:id/check', summary: 'Decide the check against the slip (never the user who recorded the e-policy): confirm (matches -> Checked), accept (differences accepted with a reason by an approver with write:policies -> Checked) or return (back to the insurer with the differences -> Acknowledged)',
-  screen: `${PS} > Detail > Confirm check / Return to insurer`, middleware: [...canWrite, ownRecord('placement'), validate(z.object({ decision: z.enum(['confirm', 'accept', 'return']), reason: z.string().max(2000).optional().nullable() }))],
+  method: 'POST', path: '/:id/check', summary: 'Decide the check against the slip (approve:policies; never the user who recorded the e-policy): confirm (matches -> Checked), accept (differences accepted with a reason by an approver with write:policies -> Checked) or return (back to the insurer with the differences -> Acknowledged)',
+  screen: `${PS} > Detail > Confirm check / Return to insurer`, middleware: [...canCheck, ownRecord('placement'), validate(z.object({ decision: z.enum(['confirm', 'accept', 'return']), reason: z.string().max(2000).optional().nullable() }))],
   request: { decision: 'return', reason: 'Premium on the e-policy is PHP 150.00 above the agreed premium' },
   response: { success: true, data: { ...placementExample, status: 'acknowledged' }, comparison: checkExample, mail: { to: 'uw@malayan.example', emailId: 812 } },
   handler: async (req, res) => {
