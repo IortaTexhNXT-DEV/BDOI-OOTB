@@ -11,10 +11,9 @@ export const AREAS = [
     id: "company",
     title: "Company & Branding",
     icon: "pi pi-building",
-    summary: "Time zone, date format, the look of printed documents and the support contacts shown in Help. The application name, logo and colours come from the brand pack of the deployment; the company's legal identity is in the Company master.",
+    summary: "Time zone, date format, display currency, default language, the look of printed documents and the support contacts shown in Help. The application name, logo and colours come from the brand pack of the deployment; the company's legal identity is in the Company master.",
     groups: ["general", "branding", "currency", "documents", "system", "golive", "support"],
     links: [
-      { label: "System Settings (display currency, language)", path: "/master/configuration/system-settings" },
       { label: "Documents and Reports Layout", path: "/master/configuration/documents-layout" },
       { label: "E-mail Layout", path: "/master/configuration/email-layout" },
       { label: "Company master (legal name, TIN, registered address, print logo)", path: "/master/generals/organization/companymaster" },
@@ -173,7 +172,7 @@ export const CHOICES = {
 
 /**
  * Settings kept on their own screens: shown read-only with a link "Managed in <screen>". The API names the owner of
- * most of them (GET /settings managedBy, back end lib/settingOwners.js: System Settings, Company master, Premium
+ * most of them (GET /settings managedBy, back end lib/settingOwners.js: the brand pack, Company master, Premium
  * Taxes & LGU Rates) and refuses a change sent from here; the GL account settings below are changed with a second
  * person's approval on Account determination.
  */
@@ -185,7 +184,7 @@ export const MANAGED_ELSEWHERE = [
 ];
 /** The screen a setting is managed in ({ label, path }), from the API's managedBy or the list above; null when edited here. */
 export const managedElsewhere = (key, managedBy = null) => {
-  if (managedBy?.path) return { label: managedBy.screen === "Master > System Settings" ? "System Settings" : managedBy.screen, path: managedBy.path };
+  if (managedBy?.path) return { label: managedBy.screen, path: managedBy.path };
   return MANAGED_ELSEWHERE.find((m) => m.test(key)) || null;
 };
 

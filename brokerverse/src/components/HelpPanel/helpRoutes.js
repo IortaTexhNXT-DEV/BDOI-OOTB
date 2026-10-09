@@ -134,7 +134,6 @@ export const HELP_ROUTES = [
   ["/master/finance/configuration-approvals", "posting-configuration-configuration-approvals-posting-rules-account-determination"],
   ["/master/finance/commission-rate-matrix", "commission-rate-matrix"],
   ["/master/incentive", "incentive-programmes"],
-  ["/master/configuration/system-settings", "configuration-screens"],
   ["/master/configuration/email-layout", "e-mail-layout"],
   ["/master/configuration/documents-layout", "documents-and-reports-layout"],
   ["/master/configuration/document-signatures", "document-signatures"],

@@ -5772,17 +5772,6 @@
     "totalSumInsured": "Total Sum Insured",
     "totalSumInsuredAll": "Total sum insured (all sections)"
   },
-  "systemSettings": {
-    "masters": "Master",
-    "baseCurrencyHint": "Accounts are kept in the base currency {{base}} (Master > Finance > Currency); the display currency only changes how amounts are labelled.",
-    "title": "System Settings",
-    "localization": "Localization",
-    "displayCurrency": "Display Currency",
-    "selectCurrency": "Select currency",
-    "defaultLanguage": "Default Language",
-    "saved": "System settings saved",
-    "saveFailed": "Failed to save settings"
-  },
   "documentLayouts": {
     "master": "Master",
     "cannotSave": "Cannot save",

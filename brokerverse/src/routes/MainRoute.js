@@ -69,7 +69,6 @@ import Accountdataview from "../module/FinanceMastersModule/BankMaster/AccountDa
 import AddAccountDetail from "../module/FinanceMastersModule/BankMaster/AccountDataView/AddAccountDetail/index";
 import ViewAccountDetail from "../module/FinanceMastersModule/BankMaster/AccountDataView/ViewAccountData";
 import EditAccountDetail from "../module/FinanceMastersModule/BankMaster/AccountDataView/EditAccountData";
-import SystemSettingsPage from "../module/SystemSettings";
 import EmailLayoutPage from "../module/DocumentLayouts/EmailLayout";
 import DocumentsLayoutPage from "../module/DocumentLayouts/DocumentsLayout";
 import DocumentSignaturesPage from "../module/DocumentLayouts/DocumentSignatures";
@@ -906,10 +905,6 @@ const Maincomponent = () => {
 
 
           <Route />
-          <Route
-            path="master/configuration/system-settings"
-            element={<SystemSettingsPage />}
-          />
           <Route path="master/configuration/email-layout" element={<EmailLayoutPage />} />
           <Route path="master/configuration/documents-layout" element={<DocumentsLayoutPage />} />
           <Route path="master/configuration/document-signatures" element={<DocumentSignaturesPage />} />

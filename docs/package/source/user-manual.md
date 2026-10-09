@@ -1,10 +1,10 @@
 ---
 title: User Manual
 subtitle: BrokerVerse OOTB, by persona
-version: 1.2.5
+version: 1.2.6
 date: 09 October 2026
 prepared: iorta TechNXT
-change: Version 1.2.5 (09 October 2026): Theme and Branding withdrawn, the brand of the TISPH build comes from its brand pack; E-mail Layout, Documents and Reports Layout and Document Signatures are entries of Master > System; System Settings keeps the display currency and the language; Data Privacy (data subject requests, consent register, privacy panels) and the Go-Live Data Load screen withdrawn, the go-live workbooks are loaded through the API. Version 1.2.4 (09 October 2026): Reinsurance and the Compliance menu withdrawn (AML/CFT programme, Insurance Commission registers, complaints and breach registers, the Compliance Officer role); client onboarding keeps the identification, signatories, beneficial owners and KYC documents. Version 1.2.3 (04 October 2026): Home is the role-aware landing page built on My Work (presets per role, role figures, the new My Work categories of the compliance officer, accounting manager and system administrator); the Home dashboard and Open Items sections withdrawn. Version 1.2.2: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.2.1: release figures aligned (eight roles on the Role screen). Version 1.2 (release 1.1): Theme and Branding, the menus of every persona as delivered, My Work, the Compliance Officer with the Insurance Commission registers, the complaints register and the breach register, the operational masters, Help panel sections for every screen, screenshots recaptured
+change: Version 1.2.6 (09 October 2026): System Settings withdrawn: the display currency and the default language are set on Master > Configuration (area Company & Branding); the brand pack of the environment is applied again whenever the API starts and the screens differ from it, and the side bar shows only the logo when it carries the name. Version 1.2.5 (09 October 2026): Theme and Branding withdrawn, the brand of the TISPH build comes from its brand pack; E-mail Layout, Documents and Reports Layout and Document Signatures are entries of Master > System; System Settings keeps the display currency and the language; Data Privacy (data subject requests, consent register, privacy panels) and the Go-Live Data Load screen withdrawn, the go-live workbooks are loaded through the API. Version 1.2.4 (09 October 2026): Reinsurance and the Compliance menu withdrawn (AML/CFT programme, Insurance Commission registers, complaints and breach registers, the Compliance Officer role); client onboarding keeps the identification, signatories, beneficial owners and KYC documents. Version 1.2.3 (04 October 2026): Home is the role-aware landing page built on My Work (presets per role, role figures, the new My Work categories of the compliance officer, accounting manager and system administrator); the Home dashboard and Open Items sections withdrawn. Version 1.2.2: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.2.1: release figures aligned (eight roles on the Role screen). Version 1.2 (release 1.1): Theme and Branding, the menus of every persona as delivered, My Work, the Compliance Officer with the Insurance Commission registers, the complaints register and the breach register, the operational masters, Help panel sections for every screen, screenshots recaptured
 reviewed:
 approved:
 acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal Revenue; LTO=Land Transportation Office; RFQ=Request for quotation; CTPL=Compulsory third party liability; DST=Documentary stamp tax; LGT=Local government tax; LGU=Local government unit; FST=Fire service tax; VAT=Value-added tax; EWT=Expanded withholding tax; CWT=Creditable withholding tax; ATC=Alphanumeric tax code; OR=Official receipt; SOA=Statement of account; PV=Payment voucher; JV=Journal voucher; GL=General ledger; DN=Debit note; KYC=Know your customer; TIN=Taxpayer identification number; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; IAR=Industrial all risks; PA=Personal accident; APPA=Auto passenger personal accident; SoD=Segregation of duties; PEP=Politically exposed person; NPC=National Privacy Commission; COC=Certificate of cover; PDC=Post-dated cheque; LOA=Letter of authority; EIS=Electronic Invoicing System; CAS=Computerized accounting system; WCAG=Web Content Accessibility Guidelines
@@ -428,7 +428,7 @@ Every menu: Dashboard, Operations, Accounts, Commission, Reports, Master and Pro
 
 | Menu | Items |
 |---|---|
-| Master > System | System Settings, E-mail Layout, Documents and Reports Layout, Document Signatures, Configuration, Document Numbering, Schedules, Audit Trail, E-mail Outbox, Integrations, Message Templates, Insurer Integration |
+| Master > System | E-mail Layout, Documents and Reports Layout, Document Signatures, Configuration, Document Numbering, Schedules, Audit Trail, E-mail Outbox, Integrations, Message Templates, Insurer Integration |
 | Master | Organization (Company, Branch, Sales Activity Types, Sales Activity Outcomes); Insurance (Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Claim Document Checklist, Repair Shops, Distribution Channels); Location (Country, Province, City / Municipality); Employees (Hierarchy, Designation); Users and Access (User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews) |
 | Master > Finance | Account Determination, Posting Rules, Configuration Approvals, Accounting Flow, Package Bundles, Insurer Rate Tables, Premium Taxes & LGU Rates, Payment Gateways, Commission Rate Matrix, Transaction Code, Currency, Exchange Rate, Bank, Account Category, Main Account, Sub Account, Taxation, Close Checklist, Asset Classes, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats, Bank File Layouts, Remittance Master, Incentive Programs |
 
@@ -627,9 +627,7 @@ The group **Go-live** (area Company & Branding) holds the cutover date `golive.c
 
 > Change tax rates, GL accounts and maker-checker switches only with the agreement of the Accounting Manager. Settings that control postings are protected: the system refuses a change that must go through Configuration Approvals.
 
-**System Settings** (Master > System > System Settings) holds the localisation: **Display Currency** (amounts are labelled in it; the accounts stay in the base currency of the Currency master) and **Default Language**. **Save** applies them to every user. The application name, the logo, the favicon and the colours of the screens and the sign-in page come from the brand pack of the environment (the Toyota Insurance Services pack in the TISPH environments), set when the environment is deployed; they are not changed on a screen. Printed documents use the logo of the letterhead company in Master > Organization > Company.
-
-![Master > System Settings](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-system-settings.png)
+The localisation is in the area Company & Branding: **Display currency** (`currency.default`: amounts are labelled in it; the accounts stay in the base currency of the Currency master, and only an active currency of that master is accepted) and **Default language** (`general.default_language`). Saving applies them to every user. The application name, the logo, the favicon and the colours of the screens and the sign-in page come from the brand pack of the environment (the Toyota Insurance Services pack in the TISPH environments), set when the environment is deployed and applied again whenever the system starts and finds them changed; they are not changed on a screen. Printed documents use the logo of the letterhead company in Master > Organization > Company.
 
 ## E-mail Layout
 
@@ -835,7 +833,7 @@ The blank workbooks are delivered with the upload templates as GoLive_Configurat
 
 Each workbook has an **Instructions** sheet (load order, rules, every column), a **Lists** sheet with the allowed values, and one sheet per object in load order. Row 1 holds the headers; a required column ends with *. Row 2 is a sample row: a row whose first cell starts with SAMPLE is never loaded. Enter data from row 3. Dates are written YYYY-MM-DD.
 
-Some set-up is not in the workbooks and is entered on its own screen: roles and permissions, segregation of duties, delegations, access reviews, the approval of authority limits, tax codes, account determination and posting rules, statement formats, the close checklist, product templates and the motor tariff, package bundles, payment gateways, System Settings, schedules, fiscal years and periods, remittance masters, incentive programmes, referrer accounts and petty cash funds. The Instructions sheet lists them.
+Some set-up is not in the workbooks and is entered on its own screen: roles and permissions, segregation of duties, delegations, access reviews, the approval of authority limits, tax codes, account determination and posting rules, statement formats, the close checklist, product templates and the motor tariff, package bundles, payment gateways, schedules, fiscal years and periods, remittance masters, incentive programmes, referrer accounts and petty cash funds. The Instructions sheet lists them.
 
 ## Migration rules and reconciliation
 
@@ -934,7 +932,7 @@ Every way of starting a new prospect goes through this panel: **Create Prospect*
 
 The system gives the prospect its number (LD-YYYY-NNNNN) with status New and, for a motor prospect, opens **Create Quote** for it. Fire and Allied Perils and Industrial All Risks prospects also ask for the risk location and the sums insured. A prospect created with **Skip - tag product later** opens on its **Prospect Details**, with the note that its product is not yet tagged, and is listed on the tab **Product not yet tagged**.
 
-> **Note:** When the setting `leads.product_required` is on (System Settings, group leads), **Skip - tag product later** is not offered and every new prospect must name its line of business and product.
+> **Note:** When the setting `leads.product_required` is on (Master > Configuration, group leads), **Skip - tag product later** is not offered and every new prospect must name its line of business and product.
 
 ### Tag the product later
 
@@ -2815,7 +2813,7 @@ This chapter lists every menu screen in menu order with its purpose, its main fi
 
 | Screen | Purpose | Main content and rules | Roles |
 |---|---|---|---|
-| Executive Dashboard | Business performance against target. | Period (This Month, This Quarter, This Year); Total Revenue, Active Policies, New Business, Claims Rate, Retention Rate, Premium Receivable (Clients), Commission Receivable (Insurers, Direct Bill), each change against the same number of days of the previous period; migrated policies are not premium written; trends, revenue by product line, regional performance, top products, top sales performance; **Export Report** (Production Register); **Settings** (roles that may open System Settings) opens Master > System Settings. Targets from `dashboard.targets`. | All but Claims |
+| Executive Dashboard | Business performance against target. | Period (This Month, This Quarter, This Year); Total Revenue, Active Policies, New Business, Claims Rate, Retention Rate, Premium Receivable (Clients), Commission Receivable (Insurers, Direct Bill), each change against the same number of days of the previous period; migrated policies are not premium written; trends, revenue by product line, regional performance, top products, top sales performance; **Export Report** (Production Register); **Settings** (roles that may open Configuration) opens Master > Configuration. Targets from `dashboard.targets`. | All but Claims |
 | Claims Dashboard | Claims workload. | Total Open Claims, Claims Overdue (`claims.sla_days`), Today's Claims, recent claims; **Export Report**. | Claims, System Administrator |
 | Processing Dashboard | Processing Workbench. | Submissions, cycle time, open alerts, workload, submissions list, open tasks; **New Submission**. | Processing Team, System Administrator |
 | Sales Dashboard | Sales team performance. | Sales person, period; prospects, quotations, conversion, policies issued, premium, open pipeline; trend and pipelines. | Sales & Marketing, System Administrator |
@@ -2958,7 +2956,6 @@ See the chapter Reports, dashboards, schedules and notifications.
 
 | Screen | Purpose |
 |---|---|
-| System Settings | Display currency and default language. |
 | E-mail Layout | The layout of every e-mail: header colours, logo, footer line; sample e-mail. |
 | Documents and Reports Layout | Print colours, logo, footer lines and Excel header of every document and report file, with the WCAG AA contrast check; sample document. |
 | Document Signatures | Which signature prints on which document: slots, signed by, prints when. |

@@ -4784,16 +4784,6 @@
     "committed": "ยืนยันแล้ว",
     "escalated": "ยกระดับ"
   },
-  "systemSettings": {
-    "masters": "มาสเตอร์",
-    "title": "การตั้งค่าระบบ",
-    "localization": "ภาษาและสกุลเงิน",
-    "displayCurrency": "สกุลเงินที่แสดง",
-    "selectCurrency": "เลือกสกุลเงิน",
-    "defaultLanguage": "ภาษาเริ่มต้น",
-    "saved": "บันทึกการตั้งค่าระบบแล้ว",
-    "saveFailed": "บันทึกการตั้งค่าไม่สำเร็จ"
-  },
   "documentLayouts": {
     "master": "มาสเตอร์",
     "cannotSave": "บันทึกไม่ได้",
