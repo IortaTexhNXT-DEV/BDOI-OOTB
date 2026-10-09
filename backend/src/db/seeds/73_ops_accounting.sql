@@ -17,6 +17,7 @@ INSERT INTO app_settings(key, value, "group", label, type) VALUES
  ('endorsements.short_period_for_insured', 'true', 'endorsements', 'Cancellations: apply the short-period scale when the insured cancels (insurer-initiated stays pro-rata)', 'boolean'),
  ('endorsements.default_cancellation_reason', '"INSURED_REQUEST"', 'endorsements', 'Cancellations: reason used when none is given (Cancellation Reason master code)', 'string'),
  ('endorsements.cancellation_returned_taxes', '{"vat":true,"dst":false,"lgt":true,"fst":false,"other":false}', 'endorsements', 'Cancellations: premium taxes returned with the return premium (documentary stamp tax is not refundable)', 'json'),
+ ('endorsements.return_approval', 'true', 'endorsements', 'Cancellations and return premiums: booked by a user other than the one who raised them, holding approve:policies and within the Authority Matrix limit for return premiums', 'boolean'),
  ('pdc.due_window_days', '3', 'receipts', 'Post-dated cheques: show cheques due within this many days on the deposit due list and remind Accounting', 'number'),
  ('pdc.default_deposit_account', '""', 'receipts', 'Post-dated cheques: bank account (Bank Account master code) cheques are deposited to by default', 'string'),
  ('pdc.notify_client_on_bounce', 'true', 'receipts', 'Post-dated cheques: e-mail the client when a cheque bounces', 'boolean'),

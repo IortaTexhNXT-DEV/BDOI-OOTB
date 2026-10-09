@@ -1,9 +1,11 @@
 import { many, one, query, withTransaction } from '../../db/pool.js';
-import { notFound, badRequest } from '../../lib/errors.js';
+import { notFound, badRequest, forbidden } from '../../lib/errors.js';
+import { hasPermission } from '../../lib/auth.js';
 import { getSetting } from '../../lib/settings.js';
 import { formatMoney } from '../../lib/money.js';
-import { queueEmail } from '../../lib/mailer.js';
+import { documentAttachment, queueEmail } from '../../lib/mailer.js';
 import { notify } from '../notifications/service.js';
+import { notifyApprovers } from '../notifications/approvals.js';
 import { num, round2, renderTemplate, emailTemplate } from '../documents/common.js';
 import { endorsementStatusOut, endorsementStatusIn } from '../documents/statuses.js';
 import { getPolicyRow, createReceivable } from '../policies/service.js';
@@ -214,7 +216,42 @@ export async function listEndorsements(q, pg) {
 
 export const endorsementsOfPolicy = async (policyId) => many(`${SELECT} WHERE e.policy_id = $1 ORDER BY e.created_at DESC`, [policyId]);
 
-/** Draft -> PendingCustomer (or InitiateCancel for cancellations): e-mail the client the endorsement summary. */
+/**
+ * Maker-checker of money going back (endorsements.return_approval) when a user completes an endorsement on screen: a
+ * cancellation or a return premium is booked by a user other than the one who raised it, holding approve:policies,
+ * within their Authority Matrix limit for return premiums (transaction type return_premium). Flows that raise and
+ * complete their own endorsement under their own approval (fleet schedules) do not pass an approver.
+ */
+async function assertReturnApproval(e, approver) {
+  if (!(Number(e.premium_delta) < 0 || e.is_cancel) || (await getSetting('endorsements.return_approval', true)) === false) return;
+  const what = e.is_cancel ? 'A cancellation' : 'A return premium';
+  if (e.created_by && e.created_by === approver.id) throw forbidden(`${what} is booked by a user other than the one who raised it (maker-checker): ask an approver to complete ${e.endorsement_number}`);
+  if (!hasPermission(approver, 'approve:policies')) throw forbidden(`${what} is booked by a user holding approve:policies`);
+  const { assertAuthority } = await import('../access-control/service.js');
+  await withTransaction((db) => assertAuthority(db, approver, 'return_premium', Math.abs(Number(e.premium_delta))));
+}
+
+/**
+ * The endorsement request to the policy's insurer (its contact e-mail), with the endorsement PDF attached: the insurer
+ * confirms it by issuing its own endorsement, recorded when the endorsement is completed. null when the insurer has
+ * no contact e-mail.
+ */
+async function emailInsurer(e, cancel) {
+  const ins = await one('SELECT ic.name, ic.contact_email FROM policies p JOIN insurance_companies ic ON ic.id = p.insurance_company_id WHERE p.id = $1', [e.policy_id]);
+  if (!ins?.contact_email) return null;
+  const t = await emailTemplate('endorsement_insurer');
+  const v = { insurerName: ins.name, endorsementNumber: e.endorsement_number, policyNumber: e.policy_number, insuredName: e.insured_name || e.client_name || '',
+    effectiveDate: isoDate(e.effective_date) || '', premiumDelta: Number(e.premium_delta).toFixed(2), currency: await getSetting('currency.default', 'PHP'),
+    companyName: await companyName(), action: cancel ? 'cancellation' : 'endorsement' };
+  await queueEmail({ to: ins.contact_email, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: 'endorsement_insurer',
+    entity: 'endorsement', entityId: e.id, attachments: [documentAttachment('endorsement', { endorsementId: e.id }, `endorsement-${e.endorsement_number}.pdf`)] });
+  return ins.contact_email;
+}
+
+/**
+ * Draft -> PendingCustomer (or InitiateCancel for cancellations): e-mail the client the endorsement summary and the
+ * insurer the endorsement request ("Send to Insurance Company").
+ */
 export async function sendToCustomer(id, userId, cancel) {
   const e = await getEndorsementRow(id);
   if (!['draft', 'submitted', 'cancel-initiated'].includes(e.status)) throw badRequest(`A ${endorsementStatusOut(e.status)} endorsement cannot be sent`);
@@ -227,8 +264,15 @@ export async function sendToCustomer(id, userId, cancel) {
       action: cancel ? 'cancellation' : 'endorsement' };
     await queueEmail({ to: client.email, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: 'endorsement_customer', entity: 'endorsement', entityId: e.id });
   }
+  const insurerEmail = await emailInsurer(e, cancel);
   await query('UPDATE endorsements SET status = $2, sent_at = now(), sent_by = $3, updated_by = $3, updated_at = now() WHERE id = $1', [e.id, target, userId]);
-  return { before: e, after: await getEndorsementRow(e.id), emailedTo: client?.email || null };
+  // money going back is completed by another user (endorsements.return_approval): the approvers are told it is coming
+  if ((Number(e.premium_delta) < 0 || e.is_cancel) && (await getSetting('endorsements.return_approval', true)) !== false) {
+    const by = (await one('SELECT display_name FROM users WHERE id = $1', [userId]))?.display_name || 'A user';
+    await notifyApprovers({ audience: 'approve:policies', document: e.is_cancel ? 'Cancellation' : 'Return premium', number: e.endorsement_number, by,
+      detail: `${e.policy_number}, ${Number(e.premium_delta).toFixed(2)}`, link: `/agent/uploadendorsement/${e.id}`, entity: 'endorsement', entityId: e.id });
+  }
+  return { before: e, after: await getEndorsementRow(e.id), emailedTo: client?.email || null, insurerEmailedTo: insurerEmail };
 }
 
 /** PascalCase form keys (PlateNumber) -> policy document keys (plateNumber). */
@@ -273,9 +317,10 @@ async function applyToPolicy(db, e, completion, userId) {
   return p;
 }
 
-export async function completeEndorsement(body, userId) {
+export async function completeEndorsement(body, userId, { approver = null } = {}) {
   const e0 = await getEndorsementRow(body.endorsementId);
   if (['completed', 'cancelled', 'rejected'].includes(e0.status)) throw badRequest(`Endorsement is already ${endorsementStatusOut(e0.status)}`);
+  if (approver) await assertReturnApproval(e0, approver);
   const completion = {
     policyNumber: body.policyNumber || e0.policy_number, insurerEndorsementNumber: body.endorsementNumber || null,
     productionDate: isoDate(body.productionDate), inceptionDate: isoDate(body.inceptionDate), issuedDate: isoDate(body.issuedDate), expiryDate: isoDate(body.expiryDate), notes: body.notes || '',

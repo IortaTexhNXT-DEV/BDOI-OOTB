@@ -9,6 +9,7 @@
  *   placement-slip         { placementId, insurerId }  placement slip (firm order) showing that insurer's share
  *   bank-endorsement-letter { saleId }       letter to the financing bank of a dealer sale (motor programmes)
  *   comparison-report      { reportId }      client comparison and recommendation report
+ *   endorsement            { endorsementId } endorsement or cancellation request to the insurer
  */
 import { pool } from '../../db/pool.js';
 import { notFound } from '../../lib/errors.js';
@@ -51,6 +52,13 @@ const GENERATORS = {
     const { bankLetterSpec } = await import('../motor-programmes/letters.js');
     const spec = await bankLetterSpec(saleId);
     return { fileName: `bank-letter-${spec.number || saleId}.pdf`, content: buildPdf(spec) };
+  },
+  'endorsement': async ({ endorsementId }) => {
+    const { getEndorsementRow, toEndorsement } = await import('../endorsements/service.js');
+    const { endorsementDoc } = await import('./templates.js');
+    const row = await getEndorsementRow(endorsementId);
+    const e = toEndorsement(row);
+    return { fileName: `endorsement-${e.endorsementNumber}.pdf`, content: buildPdf(await endorsementDoc(e, row)) };
   },
   'comparison-report': async ({ reportId }) => {
     const { comparisonReportSpec } = await import('../comparison-reports/service.js');

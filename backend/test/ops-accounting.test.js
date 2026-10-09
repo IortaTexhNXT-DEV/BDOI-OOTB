@@ -117,7 +117,7 @@ describe('cancellation return premium', () => {
     expect(e.status).toBe(201);
     expect(e.body.premiumDelta).toBe(-quote.grossReturn);
     expect(e.body).toMatchObject({ cancellationMethod: 'pro-rata', cancellationReason: 'INSURER_DECISION' });
-    const c = await ctx.api('post', '/endorsements/complete-endorsement').send({ endorsementId: e.body.endorsementId });
+    const c = await ctx.as('sales')('post', '/endorsements/complete-endorsement').send({ endorsementId: e.body.endorsementId });
     expect(c.status).toBe(200);
     expect((await one('SELECT status FROM policies WHERE id = $1', [m.policy.id])).status).toBe('cancelled');
     const after = await one('SELECT balance FROM receivables WHERE id = $1', [rcv.id]);
@@ -135,7 +135,7 @@ describe('cancellation return premium', () => {
       partialPercent: 40, cancellationReason: 'INSURED_REQUEST', effectiveDate: asOf });
     expect(e.status).toBe(201);
     expect(e.body.returnCalculation.returnNetPremium).toBe(3200);
-    const c = await ctx.api('post', '/endorsements/complete-endorsement').send({ endorsementId: e.body.endorsementId });
+    const c = await ctx.as('sales')('post', '/endorsements/complete-endorsement').send({ endorsementId: e.body.endorsementId });
     expect(c.body.status).toBe('Completed');
     expect((await one('SELECT status FROM policies WHERE id = $1', [m.policy.id])).status).toBe('active');
   });
@@ -153,7 +153,7 @@ describe('cancellation return premium', () => {
       cancellationReason: 'NON_PAYMENT', effectiveDate: asOf });
     expect(e.status).toBe(201);
     expect(e.body.premiumDelta).toBe(-expected);
-    const c = await ctx.api('post', '/endorsements/complete-endorsement').send({ endorsementId: e.body.endorsementId });
+    const c = await ctx.as('sales')('post', '/endorsements/complete-endorsement').send({ endorsementId: e.body.endorsementId });
     expect(c.status).toBe(200);
     expect((await one('SELECT status FROM policies WHERE id = $1', [m.policy.id])).status).toBe('cancelled');
     expect(Number((await one('SELECT balance FROM receivables WHERE id = $1', [rcv.id])).balance)).toBe(r2(610.4 - expected));
