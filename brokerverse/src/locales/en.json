@@ -10109,7 +10109,8 @@
       "yes": "Yes",
       "search": "Search",
       "delete": "Delete",
-      "back": "Back"
+      "back": "Back",
+      "required": "Required"
     },
     "cr": {
       "clientReport": "Client comparison report",
@@ -10162,7 +10163,7 @@
       "annualPremium": "Annual premium",
       "start": "Start",
       "findClient": "Find the client",
-      "toHelp": "One year when empty",
+      "toHelp": "One year after the start, unless you change it",
       "removeVehicle": "Remove item {{item}} from the draft schedule?",
       "deleteFrom": "Delete item {{item}} by endorsement: effective date (YYYY-MM-DD)",
       "deleteReason": "Reason (vehicle sold, total loss ...)",
@@ -10201,7 +10202,11 @@
         "vehicleType": "Vehicle class (CTPL tariff)",
         "usage": "Usage",
         "mortgagee": "Mortgagee"
-      }
+      },
+      "clientRequired": "Choose the client",
+      "fromRequired": "Enter the start of the period",
+      "toAfterFrom": "The period must end after it starts",
+      "insurerHelp": "Can be chosen later, before the policy is issued"
     },
     "mp": {
       "freeYear": "First year free, paid by the {{payer}}",

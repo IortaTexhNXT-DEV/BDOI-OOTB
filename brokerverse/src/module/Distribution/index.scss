@@ -34,6 +34,19 @@
   grid-column: 1 / -1;
 }
 
+.dist-required {
+  color: var(--color-danger, #b42318);
+}
+
+.dist-field--invalid {
+  .p-inputtext,
+  .p-dropdown,
+  .p-autocomplete-input,
+  .p-calendar .p-inputtext {
+    border-color: var(--color-danger, #b42318);
+  }
+}
+
 .dist-toolbar {
   display: flex;
   gap: 0.75rem;
@@ -70,9 +83,14 @@
   overflow: auto;
 }
 
+.dist-mail-subject {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
+
 .dist-mail-preview {
   width: 100%;
-  min-height: 24rem;
+  min-height: 32rem;
   border: 1px solid #e5e9f0;
   border-radius: 8px;
   background: #fff;
