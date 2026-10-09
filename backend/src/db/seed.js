@@ -148,9 +148,18 @@ export async function seed({ log = console.log, sampleData } = {}) {
   // reference files it builds on), each idempotent. Sample / demo files (seeds/sample) run only when sample data is on.
   const withSample = sampleData ?? seedSampleData();
   if (withSample && process.env.NODE_ENV === 'production') log('WARNING: SEED_SAMPLE_DATA is on in production: demo leads, clients, policies and transactions are being seeded');
-  for (const f of seedFiles({ sample: withSample })) {
-    await query(fs.readFileSync(f.path, 'utf8'));
-    log(`seeded ${f.name}`);
+  // A seed file reports what it left undone with RAISE WARNING; the warning goes to the start-up log.
+  const client = await pool.connect();
+  const notice = (n) => log(`${n.severity === 'WARNING' ? 'WARNING: ' : ''}${n.message}`);
+  client.on('notice', notice);
+  try {
+    for (const f of seedFiles({ sample: withSample })) {
+      await client.query(fs.readFileSync(f.path, 'utf8'));
+      log(`seeded ${f.name}`);
+    }
+  } finally {
+    client.off('notice', notice);
+    client.release();
   }
   log(withSample ? 'seed complete (reference + sample data)' : 'seed complete (reference data only; SEED_SAMPLE_DATA is off)');
   return { sampleData: withSample };

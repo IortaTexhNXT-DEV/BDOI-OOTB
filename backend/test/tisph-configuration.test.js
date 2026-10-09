@@ -2,15 +2,18 @@
  * TISPH configuration (seeds 80_tisph_configuration.sql and 81_tisph_finance.sql): a new database carries the company,
  * fiscal year, departments, insurer panel, policy types, claim checklist and causes of loss, cancellation reasons and
  * payment modes of the Pre-BSM workbook, and the chart of accounts, account determination and tax codes of the Finance
- * & General Accounting workbook. Seeding again changes nothing and keeps administrator changes.
+ * & General Accounting workbook. Seeding again changes nothing and keeps administrator changes. On a database already
+ * in use, the document logo of a brand pack in force moves to TISPH and a January fiscal calendar is rebuilt on April
+ * while nothing has been closed in it.
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { setup } from './helpers.js';
-import { pool } from '../src/db/pool.js';
+import { pool, withTransaction } from '../src/db/pool.js';
 import { seed } from '../src/db/seed.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
-import { clearLetterheadCache, getLetterhead } from '../src/lib/letterhead.js';
-import { fiscalStartFor } from '../src/modules/period-end/fiscal.js';
+import { clearLetterheadCache, getLetterhead, resolveLogo } from '../src/lib/letterhead.js';
+import { ensureCalendar, fiscalStartFor } from '../src/modules/period-end/fiscal.js';
+import { enableDeploymentPack } from '../src/modules/branding/bundled.js';
 
 let ctx;
 const q = (sql, params) => pool.query(sql, params).then((r) => r.rows);
@@ -115,5 +118,68 @@ describe('TISPH configuration of a new database', () => {
     expect(await count()).toBe(before);
     expect((await q("SELECT name FROM insurance_companies WHERE code = 'AXA'"))[0].name).toBe('AXA Philippines');
     expect(await setting('accounting.account.cash_in_bank')).toBe('1102001');
+  });
+});
+
+describe('TISPH configuration of a database already in use', () => {
+  const company = async (code) => (await q("SELECT id, data FROM master_records WHERE type_code = 'company' AND code = $1", [code]))[0];
+  const startMonths = async () => (await q('SELECT DISTINCT extract(month FROM start_date)::int AS m FROM fiscal_years')).map((r) => r.m);
+  const januaryCalendar = async () => {
+    await q("UPDATE app_settings SET value = '1', updated_by = NULL WHERE key = 'accounting.fiscal_year_start_month'");
+    await q('UPDATE accounting_periods SET fiscal_year = NULL');
+    await q('DELETE FROM accounting_periods WHERE is_adjustment');
+    await q('DELETE FROM fiscal_years');
+    clearSettingsCache();
+    await withTransaction((db) => ensureCalendar(db));
+    expect(await startMonths()).toEqual([1]);
+  };
+
+  it('moves the document logo of the brand pack enabled on the earlier letterhead company to TISPH', async () => {
+    // as before the TISPH seeds: the out-of-the-box company is the letterhead and BRAND_PACK puts its logo on it
+    await q("UPDATE master_records SET data = data || jsonb_build_object('IsPrimary', code = 'ITX') WHERE type_code = 'company' AND code IN ('ITX', 'TISPH')");
+    const ownLogo = (await company('ITX')).data.Logo;
+    expect(await enableDeploymentPack('toyota-insurance-services')).toMatchObject({ status: 'enabled' });
+    const packLogo = (await company('ITX')).data.Logo;
+    expect(packLogo).not.toBe(ownLogo);
+
+    await seed({ log: () => {} });
+    const tisph = await company('TISPH');
+    expect(tisph.data).toMatchObject({ IsPrimary: true, Logo: packLogo });
+    expect((await company('ITX')).data).toMatchObject({ IsPrimary: false, Logo: ownLogo });
+    expect((await q("SELECT previous->>'companyId' AS id FROM brand_pack_enablements WHERE status = 'enabled'"))[0].id).toBe(String(tisph.id));
+    clearLetterheadCache();
+    const lh = await getLetterhead({ fresh: true });
+    expect(lh.code).toBe('TISPH');
+    expect(lh.logo.buffer.equals((await resolveLogo(packLogo)).buffer)).toBe(true);
+
+    // Back to default takes the pack logo off TISPH, the company it is now on
+    expect((await ctx.api('post', '/branding/packs/reset-default').send({})).status).toBe(200);
+    expect((await company('TISPH')).data.Logo).toBeUndefined();
+    expect((await company('ITX')).data.Logo).toBe(ownLogo);
+  });
+
+  it('rebuilds a January fiscal calendar on April while no period has been closed; a soft close stays', async () => {
+    await januaryCalendar();
+    await q("UPDATE accounting_periods SET status = 'soft_closed' WHERE period = '2026-01'");
+    await seed({ log: () => {} });
+    clearSettingsCache();
+    expect(await setting('accounting.fiscal_year_start_month')).toBe(4);
+    expect(await q('SELECT code FROM fiscal_years')).toEqual([]);
+    await withTransaction((db) => ensureCalendar(db));
+    expect(await startMonths()).toEqual([4]);
+    expect((await q("SELECT fiscal_year, period_no, status FROM accounting_periods WHERE period = '2026-01'"))[0]).toEqual({ fiscal_year: 'FY2026', period_no: 10, status: 'soft_closed' });
+    expect(await q("SELECT period FROM accounting_periods WHERE is_adjustment AND period = '2025-13'")).toEqual([]);
+  });
+
+  it('leaves a January fiscal calendar with a closed period as it is and logs a warning', async () => {
+    await januaryCalendar();
+    await q("UPDATE accounting_periods SET status = 'closed' WHERE period = '2026-02'");
+    const messages = [];
+    await seed({ log: (m) => messages.push(m) });
+    clearSettingsCache();
+    expect(messages.filter((m) => m.startsWith('WARNING: TISPH fiscal year April to March not applied'))).toEqual([
+      'WARNING: TISPH fiscal year April to March not applied: the fiscal calendar starts in January and a period is closed or locked (accounting.fiscal_year_start_month stays 1)']);
+    expect(await setting('accounting.fiscal_year_start_month')).toBe(1);
+    expect(await startMonths()).toEqual([1]);
   });
 });

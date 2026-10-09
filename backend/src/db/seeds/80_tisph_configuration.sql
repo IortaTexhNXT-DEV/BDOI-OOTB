@@ -18,23 +18,72 @@ SELECT 'company', 'TISPH', 'Toyota Insurance Services Philippines Corporation',
        'active', 'system'
 WHERE NOT EXISTS (SELECT 1 FROM master_records WHERE type_code = 'company' AND lower(code) = 'tisph');
 
--- TISPH becomes the letterhead company in place of the out-of-the-box company, unless an administrator has chosen one.
+-- TISPH becomes the letterhead company in place of the out-of-the-box company, unless an administrator has chosen one
+-- (a change made by enabling a brand pack does not count: the pack only put its document logo on it).
 UPDATE master_records m SET data = m.data || jsonb_build_object('IsPrimary', m.code = 'TISPH'), updated_at = now()
  WHERE m.type_code = 'company' AND m.code IN ('ITX', 'TISPH')
-   AND EXISTS (SELECT 1 FROM master_records i WHERE i.type_code = 'company' AND i.code = 'ITX' AND i.status = 'active' AND i.updated_by IS NULL
-                 AND lower(COALESCE(i.data->>'IsPrimary', 'false')) IN ('true', 'yes', '1'))
+   AND EXISTS (SELECT 1 FROM master_records i WHERE i.type_code = 'company' AND i.code = 'ITX' AND i.status = 'active'
+                 AND lower(COALESCE(i.data->>'IsPrimary', 'false')) IN ('true', 'yes', '1')
+                 AND (i.updated_by IS NULL OR EXISTS (SELECT 1 FROM brand_pack_enablements e WHERE e.status = 'enabled'
+                        AND e.previous->>'companyId' = i.id::text AND e.enabled_by_user_id = i.updated_by)))
    AND EXISTS (SELECT 1 FROM master_records t WHERE t.type_code = 'company' AND t.code = 'TISPH' AND t.status = 'active' AND t.updated_by IS NULL);
+
+-- A brand pack in force put its document logo on the company that was the letterhead before (BRAND_PACK is enabled
+-- once per environment, so it is not applied again): the logo moves to TISPH, the earlier company gets its own logo
+-- back, and the enablement now records TISPH, so Back to default removes the pack logo from TISPH.
+WITH moved AS (
+  SELECT e.id AS enablement_id, e.previous->>'documentLogo' AS previous_logo, p.id AS previous_id, p.data->>'Logo' AS logo, t.id AS tisph_id
+    FROM brand_pack_enablements e
+    JOIN master_records p ON p.type_code = 'company' AND e.previous->>'companyId' = p.id::text
+    JOIN master_records t ON t.type_code = 'company' AND t.code = 'TISPH' AND t.status = 'active'
+   WHERE e.status = 'enabled' AND e.applied ? 'documentLogo' AND p.id <> t.id
+     AND lower(COALESCE(t.data->>'IsPrimary', 'false')) IN ('true', 'yes', '1') AND COALESCE(t.data->>'Logo', '') = ''
+     AND COALESCE(p.data->>'Logo', '') <> '' AND p.data->>'Logo' IS DISTINCT FROM e.previous->>'documentLogo'
+), to_tisph AS (
+  UPDATE master_records m SET data = m.data || jsonb_build_object('Logo', moved.logo), updated_at = now() FROM moved WHERE m.id = moved.tisph_id RETURNING m.id
+), back AS (
+  UPDATE master_records m SET data = CASE WHEN moved.previous_logo IS NULL THEN m.data - 'Logo' ELSE m.data || jsonb_build_object('Logo', moved.previous_logo) END,
+         updated_at = now()
+    FROM moved WHERE m.id = moved.previous_id RETURNING m.id
+)
+UPDATE brand_pack_enablements e SET previous = e.previous || jsonb_build_object('companyId', moved.tisph_id, 'documentLogo', NULL)
+  FROM moved WHERE e.id = moved.enablement_id;
 
 UPDATE app_settings SET value = to_jsonb(c.name), updated_at = now()
   FROM master_records c
  WHERE app_settings.key = 'general.company_name' AND app_settings.value = '"iorta TechNXT Corp."' AND app_settings.updated_by IS NULL
    AND c.type_code = 'company' AND c.code = 'TISPH' AND c.status = 'active' AND lower(COALESCE(c.data->>'IsPrimary', 'false')) = 'true';
 
--- Financial year April to March (M01 row 7, M32, BRD). Only while the fiscal calendar has not been generated: a calendar
--- already built on the January start is rebuilt by Finance, not here.
-UPDATE app_settings SET value = '4', updated_at = now()
- WHERE key = 'accounting.fiscal_year_start_month' AND value = '1' AND updated_by IS NULL
-   AND NOT EXISTS (SELECT 1 FROM fiscal_years);
+-- Financial year April to March (M01 row 7, M32, BRD). A fiscal calendar already generated on the January start is
+-- rebuilt while nothing has been closed in it: its fiscal years and adjustment periods are dropped and generated again
+-- on the April start when next needed; the monthly periods keep their codes and status (a soft close stays). Once a
+-- period or a year has been closed, closing entries or opening balances exist, the calendar is left as it is with a
+-- warning in the start-up log, for Finance to decide.
+DO $$
+DECLARE blocker text;
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM app_settings WHERE key = 'accounting.fiscal_year_start_month' AND value = '1' AND updated_by IS NULL) THEN
+    RETURN;
+  END IF;
+  SELECT CASE
+           WHEN EXISTS (SELECT 1 FROM accounting_periods WHERE status IN ('closed', 'locked')) THEN 'a period is closed or locked'
+           WHEN EXISTS (SELECT 1 FROM period_status_history WHERE to_status IN ('closed', 'locked')) THEN 'a period has been closed before'
+           WHEN EXISTS (SELECT 1 FROM fiscal_years WHERE status <> 'open') THEN 'a fiscal year is being closed or is closed'
+           WHEN EXISTS (SELECT 1 FROM year_end_runs) THEN 'a year-end close has been run'
+           WHEN EXISTS (SELECT 1 FROM journal_vouchers WHERE period ~ '-13$') THEN 'closing entries exist'
+           WHEN EXISTS (SELECT 1 FROM opening_balances) THEN 'opening balances are loaded'
+         END INTO blocker;
+  IF blocker IS NOT NULL THEN
+    RAISE WARNING 'TISPH fiscal year April to March not applied: the fiscal calendar starts in January and % (accounting.fiscal_year_start_month stays 1)', blocker;
+    RETURN;
+  END IF;
+  UPDATE accounting_periods SET fiscal_year = NULL, updated_at = now() WHERE fiscal_year IS NOT NULL;
+  DELETE FROM accounting_periods WHERE is_adjustment;
+  DELETE FROM fiscal_years;
+  UPDATE period_close_runs SET fiscal_year = 'FY' || (left(period, 4)::int + CASE WHEN right(period, 2)::int >= 4 THEN 1 ELSE 0 END), updated_at = now()
+   WHERE period ~ '^\d{4}-\d{2}$';
+  UPDATE app_settings SET value = '4', updated_at = now() WHERE key = 'accounting.fiscal_year_start_month';
+END $$;
 
 -- ---------------------------------------------------------------- M02 Offices & Branches: Head Office
 -- One office (M01 row 12). BR02 is a placeholder row. Region and "Issuing Office" have no field on the Branch master.

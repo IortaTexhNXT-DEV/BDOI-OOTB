@@ -5,7 +5,7 @@ rows are inserted by natural key or fixed id, and existing rows and administrato
 
 1. In code: roles, permissions and role grants, the administrator `BrokerVerse` (password from `ADMIN_PASSWORD`).
 2. `settings.json` (configuration keys) and `jobs.json` (scheduled jobs).
-3. The SQL files, in file-name order: `seeds/*.sql` (**reference**) always, and `seeds/sample/*.sql` (**sample**)
+3. The SQL files, in file-name order (a file reports what it leaves undone with `RAISE WARNING`, written to the log): `seeds/*.sql` (**reference**) always, and `seeds/sample/*.sql` (**sample**)
    only when `SEED_SAMPLE_DATA` is on. Reference and sample files are interleaved by file name (a reference file
    runs before the sample file with the same name), so a sample file always runs after the reference data it reads.
 
@@ -63,7 +63,7 @@ A sample row that the purge script must remove needs a key listed in `scripts/pu
 | `sample/75_integrations.sql` | sample | demo COC series (Malayan, Pioneer), insurer payee bank accounts and an insurer API mapping for Malayan |
 | `72_bir_forms.sql` | reference | BIR forms and invoicing: label of the VAT-registered setting that also drives the sales invoice and the 2551Q working paper |
 | `sample/72_override_commission.sql` | sample | two fictional overriding commission agreements (Mercantile production override, Pioneer profit commission on loss ratio) |
-| `80_tisph_configuration.sql` | reference | TISPH configuration from the Pre-BSM workbook: the TISPH company as letterhead company, fiscal year from April (while no fiscal calendar exists), Head Office address, departments, insurer panel (AXA's registered name, Stronghold active), policy types of the Group PA, Credit Life Voluntary and Parcel sub-classes, causes of loss and claim document checklist of the Phase 1 lines (the reference Motor and all-lines checklist retired), cancellation reasons, payment modes |
+| `80_tisph_configuration.sql` | reference | TISPH configuration from the Pre-BSM workbook: the TISPH company as letterhead company (with the document logo of a brand pack already in force on the earlier letterhead company), fiscal year from April (a January fiscal calendar is rebuilt while nothing has been closed in it, otherwise left with a warning), Head Office address, departments, insurer panel (AXA's registered name, Stronghold active), policy types of the Group PA, Credit Life Voluntary and Parcel sub-classes, causes of loss and claim document checklist of the Phase 1 lines (the reference Motor and all-lines checklist retired), cancellation reasons, payment modes |
 | `81_tisph_finance.sql` | reference | TISPH finance configuration from the Finance & General Accounting workbook: the 319 accounts of the TISPH chart (FGA.01) with their Main Account mirror, the account roles, cash and payee accounts and tax code accounts that have one TISPH account, the TISPH VAT codes and withholding tax codes (FGA.06, one per ATC; WC140 and WI140 keep their rates) |
 
 The TISPH files replace a reference value only while it is still the reference value and nobody has changed it, so
