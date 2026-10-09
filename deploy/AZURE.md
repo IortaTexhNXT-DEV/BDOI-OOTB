@@ -280,8 +280,23 @@ With `sftp_enabled = true` each environment gets an Azure Storage account with S
    port 22. Passwords are disabled.
 
 The API's managed identity has **Storage Blob Data Contributor** on the account and reaches it through a private
-endpoint. The SAP and bank file jobs (CR-12) write and read these containers; until they are built, files can be
-moved with Azure Storage Explorer or `az storage blob upload --auth-mode login`.
+endpoint.
+
+**SAP GL files (INTG-04 item 1).** The job `sap-gl-export` (Master > Schedules, 11:59 PM Manila) and Accounts > SAP GL
+Export write the day's header and line files (`ARHDTISPH<date>.txt`, `ARLITISPH<date>.txt`; layout in the setting
+`sap_gl.layout`, see `backend/src/modules/sap-gl/README.md`) to `SAP_GL_EXPORT_DIR` when the API has that variable,
+else to the folder `sap_gl.folder` (default `sap-outbound`) of `UPLOAD_DIR`, that is `/app/uploads/sap-outbound` on the
+documents share. Container Apps mount Azure Files shares, not Blob containers, so the files reach the SFTP container
+`sap-outbound` in one of two ways, to be chosen with TISPH IT:
+
+- a copy after the cut-off, for example an Azure Container Apps job or Automation runbook running
+  `azcopy sync "https://<documents account>.file.core.windows.net/uploads/sap-outbound" "https://<sftp account>.blob.core.windows.net/sap-outbound"`
+  with the managed identity, a few minutes after 11:59 PM;
+- or an Azure Files share that SAP collects from, mounted in the API container and named in `SAP_GL_EXPORT_DIR`.
+
+Every run also keeps its files in the database: Accounts > SAP GL Export downloads them as written, and **Run now**
+re-generates a day (the files are written again under the same names). The bank files can be moved with Azure Storage
+Explorer or `az storage blob upload --auth-mode login`.
 
 ## 12. Backups, restore and disaster recovery (RPO 1 hour, RTO 4 hours)
 

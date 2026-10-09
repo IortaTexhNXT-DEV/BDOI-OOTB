@@ -545,9 +545,10 @@ All masters work alike: a list with search, **Add** (the form opens on its own p
 | Claim Document Checklist | Master > Insurance | Claims, System Administrator |
 | Repair Shops | Master > Insurance | Claims, System Administrator |
 | Asset Classes | Master > Finance | Accounting, System Administrator |
+| Cost Centres | Master > Finance | Accounting, System Administrator |
 | Suppliers | Accounts > Payables > Suppliers | Accounting, System Administrator |
 
-Each screen lists the records with **Add**, the edit icon and activate / deactivate. The six masters are also in the go-live configuration workbook and have upload templates. **Sales Activity Types** and **Sales Activity Outcomes** (Master > Organization) work the same way and are described under Sales activities in the Sales & Marketing chapter; **Distribution Channels** (Master > Insurance) in the chapter Distribution, programmes and products.
+Each screen lists the records with **Add**, the edit icon and activate / deactivate. The seven masters are also in the go-live configuration workbook and have upload templates. **Sales Activity Types** and **Sales Activity Outcomes** (Master > Organization) work the same way and are described under Sales activities in the Sales & Marketing chapter; **Distribution Channels** (Master > Insurance) in the chapter Distribution, programmes and products.
 
 ![Master > Insurance > Short-Period Rates, one of the operational masters](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-ops-masters.png)
 
@@ -2103,6 +2104,16 @@ Insurer remittances, referrer commission payouts, refunds and supplier payments 
 
 The batch is **Completed** when every payment has a result. A batch with no paid payment can be cancelled; its vouchers become free again. Every step is in the audit trail, and the file and status file are in Master > System > Integrations (outbox and inbox).
 
+
+## SAP GL export
+
+Every day at the 11:59 PM cut-off the GL entries posted since the previous cut-off are written as two text files for the SAP GL upload: the header file ARHDTISPH followed by the date (one SAP document per posting date) and the line file ARLITISPH followed by the date (one line per journal line with the posting key 40 debit or 50 credit, the GL account, the amount, the text, the cost centre, the value date, the client or insurer code and the journal and document numbers). The job **SAP GL text files** of Master > Schedules writes them to the folder SAP collects from.
+
+1. Choose Accounts > SAP GL Export. The list shows each run: the day, the run number, the window of posting times, the status (Written, Nothing posted, Failed), the journals and lines, the totals, who started it and the warnings (accounts outside the SAP chart, lines without a cost centre).
+2. To write the files of a day again, or before the cut-off, choose the day and select **Run now / re-generate**. The run takes the entries posted between the previous day's cut-off and the day's cut-off and writes the files again under the same names.
+3. Select a file name to download the file as it was written.
+
+An entry approved after the cut-off goes into the next day's file. The folder, the cut-off and the record layout (field list, delimiter or fixed widths, file names) are settings of Master > Configuration, group integrations (`sap_gl.folder`, `sap_gl.cut_off`, `sap_gl.layout`), so the layout can be corrected without a new release.
 ## Bank file layouts and payee bank accounts
 
 ![Master > Finance > Bank File Layouts](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-bank-file-layouts.png)
@@ -2152,6 +2163,10 @@ The cards show **Unbilled commission**, **Billed, outstanding**, **Overdue** and
 A second Accounting user approves it on the tab **2. Debit Notes**, which lists each debit note (DN-YYYY-NNNNN) with date, insurer, policies, commission, VAT, total due, collected, balance, due date and status (Draft, Pending Approval, Open, Partially Collected, Collected). The approved debit note is printed on the company letterhead and e-mailed to the insurer. When the insurer pays, open the debit note, enter the cash received, the tax withheld (EWT), the payment mode and the reference, and post the collection. Partial payments are allowed. The collection posts Dr Cash in Bank and Creditable Withholding Tax (BIR Form 2307) / Cr Commission Receivable.
 
 ![Direct Bill Processing: Debit Notes](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-rem-directbill-dn.png)
+
+### Gross remittance: commission billing statements
+
+For an insurer and product whose remittance basis is gross (setting `remittance.basis_rules`; the default basis, net, keeps the commission out of the premium remitted), the client pays the premium to the broker, the whole premium is remitted to the insurer and the commission is billed to the insurer separately. The premium bill then credits the whole premium to Accounts Payable - Insurance Company and the insurer's payment voucher pays the whole premium collected. Each bill's commission waits on the tab **1. Raise Debit Note** with **Commission of** set to **Gross remittance (billing statement)**: raise and submit it as for a debit note. The document is a **Billing Statement** (CBS-YYYY-NNNNN). Its approval by a second user posts Dr Receivable from Insurance Company / Cr Commission Income / Cr Output VAT; cancelling an approved statement without collections reverses that entry. The insurer's payment is recorded as for a debit note, with the creditable withholding tax. A return premium credits its commission on the next statement.
 
 The tab **3. Billing Mode** changes an issued policy between **Direct bill** and **Broker billed**: enter the **Policy number**, choose the **Billing mode**, give the **Reason** and select **Change billing mode**. Direct bill cancels the premium bill and books the commission due from the insurer. The change is refused once premium was collected or remitted, or once the commission is on a debit note.
 
@@ -2218,7 +2233,19 @@ Production is the premium of the insurer's policies issued in the period (issued
 
 ![Add Journal Voucher](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-jv-add.png)
 
-An unbalanced voucher is refused with the difference. A voucher dated in a soft-closed period can be posted only by the Accounting Manager, and one dated in a closed period is refused. The approvers are notified; the checker approves (the journal is posted and appears in the Journal register and the trial balance) or rejects it with a reason. The list (**Journal Voucher history**) shows **Transaction Code**, **Transaction Number**, **Date**, **Description**, **Status** and **View**.
+An unbalanced voucher is refused with the difference. A voucher dated in a soft-closed period can be posted only by the Accounting Manager, and one dated in a closed period is refused. The approvers are notified; the checker approves (the journal is posted and appears in the Journal register and the trial balance) or rejects it with a reason. The list (**Journal Voucher history**) shows **Transaction Code**, **Transaction Number**, **Date**, **Description**, **Status** and **View**. Tick **System journals parked for approval** to list the journals of the system that wait for approval (see Accounting Flow).
+
+Each line has a **Cost Centre** (Master > Finance > Cost Centres). Leave it empty for the default cost centre, 900901 Toyota Insurance Services for TISPH; every journal of the system takes the default. The cost centre shows on the voucher, in Accounting Query and its export, in the General Ledger Detail report and in the SAP GL file.
+
+### Upload journal vouchers
+
+Accruals, prepayments, bank reconciliation adjustments, income tax accruals and the entries of the non-insurance processes can be uploaded from a spreadsheet.
+
+1. Choose Accounts > Journal Voucher and select **Upload**.
+2. Select **Download template**. The workbook has a **Data** sheet (one row per journal line: **Voucher Ref**, **Voucher Date**, **Transaction Code**, **Description**, **Account Code**, **Debit** or **Credit**, **Line Text**, **Cost Center**, **Branch Code**, **Department Code**, **Currency**), a **Columns** sheet with the format of each column and an **Instructions** sheet. The rows with the same Voucher Ref make one voucher.
+3. Fill in the Data sheet (delete the sample rows), select **Choose file** and **Upload**.
+
+The whole file is checked first: one date and transaction code per voucher, Debit or Credit on each row, debits equal to credits, accounts that exist and accept manual entries, valid cost centres and an open period. When a row is wrong nothing is saved and every row to fix is listed with its row number and voucher reference; correct the file and upload it again. The vouchers created are listed with their numbers; each waits for the approval of another user, like a voucher entered on the screen.
 
 **Correction JV** reverses a posted voucher and posts the corrected lines after approval: choose the **Transaction Code** and **Transaction Number** of the voucher, the **Corrections JV Transaction Code** and the **Correction Description**, select **Next** and enter the corrected lines. **Reversal JV** posts the opposite entries of a posted voucher after approval.
 
@@ -2624,7 +2651,9 @@ Posting rule versions, their activation and account determination changes wait o
 
 ![Master > Finance > Account Determination](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-acct-det.png)
 
-**Accounting Flow** shows, for each operational event, what it posts, read from the posting rules in force: the screen or action that triggers it, the approval before it posts, and the accounts it debits and credits. **Open the rule** opens the posting rule.
+**Accounting Flow** shows, for each operational event, what it posts, read from the posting rules in force: the screen or action that triggers it, the approval before it posts, whether its journal is **Parked for approval** or **Posted at once**, and the accounts it debits and credits. **Open the rule** opens the posting rule.
+
+The events whose journals are parked are listed in the setting `accounting.parked_events` (Master > Configuration, group accounting). A parked journal waits on Accounts > Journal Voucher (tick **System journals parked for approval**) and in My Work > Approvals until a user other than the one whose action created it approves it, which posts it. It cannot be rejected on its own: cancel its source document (the collection, the invoice, the payment), which cancels the journal. TISPH parks the collection of commission from an insurer, the service invoice and its payment, and the payment of supplier invoices. Premium bookings, collections applied to bills, direct-bill commission, refunds due from insurers and write-offs always post at once, because the bill, the remittance or the matching that comes next reads them; the setting refuses them.
 
 > Change posting rules only after a simulation. A wrong rule posts wrong journals from its effective date.
 

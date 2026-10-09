@@ -1042,6 +1042,12 @@
    "chapter": "Accounting"
   },
   {
+   "id": "sap-gl-export",
+   "title": "SAP GL export",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
    "id": "bank-file-layouts-and-payee-bank-accounts",
    "title": "Bank file layouts and payee bank accounts",
    "level": 2,
@@ -1060,6 +1066,12 @@
    "chapter": "Accounting"
   },
   {
+   "id": "gross-remittance-commission-billing-statements",
+   "title": "Gross remittance: commission billing statements",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
    "id": "commission-to-agents-and-referrers",
    "title": "Commission to agents and referrers",
    "level": 2,
@@ -1075,6 +1087,12 @@
    "id": "journal-vouchers",
    "title": "Journal vouchers",
    "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "upload-journal-vouchers",
+   "title": "Upload journal vouchers",
+   "level": 3,
    "chapter": "Accounting"
   },
   {

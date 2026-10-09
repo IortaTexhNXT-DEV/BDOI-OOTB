@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1211 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1218 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -3104,7 +3104,7 @@
           ]
         },
         {
-          "name": "Search accounting entries (policyId, clientId, clientName, entryType, referenceType, status, glCode, startDate, endDate; paging)",
+          "name": "Search accounting entries (policyId, clientId, clientName, entryType, referenceType, status, glCode, costCentre, startDate, endDate; paging)",
           "request": {
             "method": "GET",
             "header": [],
@@ -3137,7 +3137,7 @@
                 }
               ]
             },
-            "description": "Search accounting entries (policyId, clientId, clientName, entryType, referenceType, status, glCode, startDate, endDate; paging)\n\nFront-end touchpoint: Accounts > Accounting Query\n\nAccess: read:journal-vouchers, read:receipts, read:disbursements"
+            "description": "Search accounting entries (policyId, clientId, clientName, entryType, referenceType, status, glCode, costCentre, startDate, endDate; paging)\n\nFront-end touchpoint: Accounts > Accounting Query\n\nAccess: read:journal-vouchers, read:receipts, read:disbursements"
           },
           "response": [
             {
@@ -3174,7 +3174,7 @@
                     }
                   ]
                 },
-                "description": "Search accounting entries (policyId, clientId, clientName, entryType, referenceType, status, glCode, startDate, endDate; paging)\n\nFront-end touchpoint: Accounts > Accounting Query\n\nAccess: read:journal-vouchers, read:receipts, read:disbursements"
+                "description": "Search accounting entries (policyId, clientId, clientName, entryType, referenceType, status, glCode, costCentre, startDate, endDate; paging)\n\nFront-end touchpoint: Accounts > Accounting Query\n\nAccess: read:journal-vouchers, read:receipts, read:disbursements"
               },
               "status": "OK",
               "code": 200,
@@ -42630,12 +42630,12 @@
           ]
         },
         {
-          "name": "Journal voucher register (manual, correction and reversal JVs; all=true for system journals too)",
+          "name": "Journal voucher register (manual, correction and reversal JVs; all=true for system journals too; parked=true for the system journals parked for approval)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/journal-vouchers/history?page=1&pageSize=20&transactionCode=JV01&transactionNumber=JV-2026&status=posted",
+              "raw": "{{baseUrl}}/journal-vouchers/history?page=1&pageSize=20&transactionCode=JV01&transactionNumber=JV-2026&status=posted&parked=false",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -42663,10 +42663,14 @@
                 {
                   "key": "status",
                   "value": "posted"
+                },
+                {
+                  "key": "parked",
+                  "value": "false"
                 }
               ]
             },
-            "description": "Journal voucher register (manual, correction and reversal JVs; all=true for system journals too)\n\nFront-end touchpoint: Accounts > Journal Voucher\n\nAccess: read:journal-vouchers"
+            "description": "Journal voucher register (manual, correction and reversal JVs; all=true for system journals too; parked=true for the system journals parked for approval)\n\nFront-end touchpoint: Accounts > Journal Voucher\n\nAccess: read:journal-vouchers"
           },
           "response": [
             {
@@ -42675,7 +42679,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/journal-vouchers/history?page=1&pageSize=20&transactionCode=JV01&transactionNumber=JV-2026&status=posted",
+                  "raw": "{{baseUrl}}/journal-vouchers/history?page=1&pageSize=20&transactionCode=JV01&transactionNumber=JV-2026&status=posted&parked=false",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -42703,10 +42707,14 @@
                     {
                       "key": "status",
                       "value": "posted"
+                    },
+                    {
+                      "key": "parked",
+                      "value": "false"
                     }
                   ]
                 },
-                "description": "Journal voucher register (manual, correction and reversal JVs; all=true for system journals too)\n\nFront-end touchpoint: Accounts > Journal Voucher\n\nAccess: read:journal-vouchers"
+                "description": "Journal voucher register (manual, correction and reversal JVs; all=true for system journals too; parked=true for the system journals parked for approval)\n\nFront-end touchpoint: Accounts > Journal Voucher\n\nAccess: read:journal-vouchers"
               },
               "status": "OK",
               "code": 200,
@@ -42796,6 +42804,134 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"jv_1\",\n    \"transactionCode\": \"JV01\",\n    \"transactionNumber\": \"JV-2026-00001\",\n    \"transactionDescription\": \"Accrual of audit fees\",\n    \"date\": \"2026-09-28\",\n    \"totalDebit\": 25000,\n    \"totalCredit\": 25000,\n    \"status\": \"for-approval\",\n    \"kind\": \"reversal\",\n    \"reversalOf\": \"jv_1\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Upload journal vouchers from CSV / XLSX (multipart \"file\"): rows grouped by Voucher Ref, the whole file checked first (balanced, accounts active and open to manual entries, cost centres, period open); each voucher is parked for approval by a different user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/journal-vouchers/upload",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "journal-vouchers",
+                "upload"
+              ]
+            },
+            "description": "Upload journal vouchers from CSV / XLSX (multipart \"file\"): rows grouped by Voucher Ref, the whole file checked first (balanced, accounts active and open to manual entries, cost centres, period open); each voucher is parked for approval by a different user\n\nFront-end touchpoint: Accounts > Journal Voucher > Upload\n\nAccess: write:journal-vouchers",
+            "body": {
+              "mode": "raw",
+              "raw": "\"multipart/form-data file\"",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/journal-vouchers/upload",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "journal-vouchers",
+                    "upload"
+                  ]
+                },
+                "description": "Upload journal vouchers from CSV / XLSX (multipart \"file\"): rows grouped by Voucher Ref, the whole file checked first (balanced, accounts active and open to manual entries, cost centres, period open); each voucher is parked for approval by a different user\n\nFront-end touchpoint: Accounts > Journal Voucher > Upload\n\nAccess: write:journal-vouchers",
+                "body": {
+                  "mode": "raw",
+                  "raw": "\"multipart/form-data file\"",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"2 journal vouchers uploaded for approval\",\n  \"data\": {\n    \"total\": 4,\n    \"vouchers\": [\n      {\n        \"voucherRef\": \"ACCR-2026-10-01\",\n        \"id\": \"jv_1\",\n        \"transactionCode\": \"JV01\",\n        \"transactionNumber\": \"JV-2026-00001\",\n        \"transactionDescription\": \"Accrual of audit fees\",\n        \"date\": \"2026-09-28\",\n        \"totalDebit\": 25000,\n        \"totalCredit\": 25000,\n        \"status\": \"for-approval\",\n        \"kind\": \"standard\",\n        \"lineCount\": 2\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Journal voucher upload template (XLSX: Data, Columns and Instructions sheets)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/journal-vouchers/upload/template",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "journal-vouchers",
+                "upload",
+                "template"
+              ]
+            },
+            "description": "Journal voucher upload template (XLSX: Data, Columns and Instructions sheets)\n\nFront-end touchpoint: Accounts > Journal Voucher > Upload > Download template\n\nAccess: read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/journal-vouchers/upload/template",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "journal-vouchers",
+                    "upload",
+                    "template"
+                  ]
+                },
+                "description": "Journal voucher upload template (XLSX: Data, Columns and Instructions sheets)\n\nFront-end touchpoint: Accounts > Journal Voucher > Upload > Download template\n\nAccess: read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
             }
           ]
         }
@@ -65150,7 +65286,7 @@
           ]
         },
         {
-          "name": "Accounting flow: for every business event, the screen that triggers it, the approval before posting and the debit / credit lines of the rule in force (GL accounts resolved today)",
+          "name": "Accounting flow: for every business event, the screen that triggers it, the approval before posting, whether its journal is parked for approval or posted at once (accounting.parked_events) and the debit / credit lines of the rule in force (GL accounts resolved today)",
           "request": {
             "method": "GET",
             "header": [],
@@ -65164,7 +65300,7 @@
                 "flow"
               ]
             },
-            "description": "Accounting flow: for every business event, the screen that triggers it, the approval before posting and the debit / credit lines of the rule in force (GL accounts resolved today)\n\nFront-end touchpoint: Master > Finance > Accounting Flow\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+            "description": "Accounting flow: for every business event, the screen that triggers it, the approval before posting, whether its journal is parked for approval or posted at once (accounting.parked_events) and the debit / credit lines of the rule in force (GL accounts resolved today)\n\nFront-end touchpoint: Master > Finance > Accounting Flow\n\nAccess: read:journal-vouchers, read:masters, read:settings"
           },
           "response": [
             {
@@ -65182,7 +65318,7 @@
                     "flow"
                   ]
                 },
-                "description": "Accounting flow: for every business event, the screen that triggers it, the approval before posting and the debit / credit lines of the rule in force (GL accounts resolved today)\n\nFront-end touchpoint: Master > Finance > Accounting Flow\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+                "description": "Accounting flow: for every business event, the screen that triggers it, the approval before posting, whether its journal is parked for approval or posted at once (accounting.parked_events) and the debit / credit lines of the rule in force (GL accounts resolved today)\n\nFront-end touchpoint: Master > Finance > Accounting Flow\n\nAccess: read:journal-vouchers, read:masters, read:settings"
               },
               "status": "OK",
               "code": 200,
@@ -65194,7 +65330,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-09-30\",\n    \"events\": [\n      {\n        \"eventCode\": \"receipt.apply\",\n        \"label\": \"Premium collection applied\",\n        \"trigger\": \"Accounts > Receipts\",\n        \"approval\": \"Finance only\",\n        \"version\": 1,\n        \"debits\": [\n          {\n            \"side\": \"Dr\",\n            \"amountKey\": \"amount\",\n            \"account\": {\n              \"kind\": \"resolver\",\n              \"label\": \"Bank account of the receipt\",\n              \"glCode\": null\n            }\n          }\n        ],\n        \"credits\": [\n          {\n            \"side\": \"Cr\",\n            \"amountKey\": \"amount\",\n            \"account\": {\n              \"kind\": \"role\",\n              \"label\": \"Premiums receivable\",\n              \"glCode\": \"1202001\",\n              \"glName\": \"Premiums Receivable\"\n            }\n          }\n        ]\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-09-30\",\n    \"events\": [\n      {\n        \"eventCode\": \"receipt.apply\",\n        \"label\": \"Premium collection applied\",\n        \"trigger\": \"Accounts > Receipts\",\n        \"approval\": \"Finance only\",\n        \"posting\": \"posted\",\n        \"alwaysPosted\": \"Posts with its sub-ledger: the bill, collection, commission or refund it records is used at once by the next steps\",\n        \"version\": 1,\n        \"debits\": [\n          {\n            \"side\": \"Dr\",\n            \"amountKey\": \"amount\",\n            \"account\": {\n              \"kind\": \"resolver\",\n              \"label\": \"Bank account of the receipt\",\n              \"glCode\": null\n            }\n          }\n        ],\n        \"credits\": [\n          {\n            \"side\": \"Cr\",\n            \"amountKey\": \"amount\",\n            \"account\": {\n              \"kind\": \"role\",\n              \"label\": \"Premiums receivable\",\n              \"glCode\": \"1202001\",\n              \"glName\": \"Premiums Receivable\"\n            }\n          }\n        ]\n      }\n    ]\n  }\n}"
             }
           ]
         },
@@ -87504,6 +87640,366 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"record\": {\n      \"entity\": \"lead\",\n      \"id\": \"lead_1\",\n      \"number\": \"LD-2026-00012\",\n      \"name\": \"Rico Villanueva\"\n    },\n    \"activities\": [\n      {\n        \"id\": \"sac_1\",\n        \"entity\": \"lead\",\n        \"entityId\": \"lead_1\",\n        \"recordNumber\": \"LD-2026-00012\",\n        \"partyName\": \"Rico Villanueva\",\n        \"activityType\": \"CALL\",\n        \"activityTypeName\": \"Phone call\",\n        \"channel\": \"call\",\n        \"subject\": \"Introductory call\",\n        \"activityAt\": \"2026-10-02T02:30:00Z\",\n        \"durationMinutes\": 15,\n        \"contactPerson\": \"Rico Villanueva\",\n        \"outcome\": \"INTERESTED\",\n        \"outcomeName\": \"Interested, wants a quotation\",\n        \"nextStep\": \"Send the motor quotation\",\n        \"nextStepDate\": \"2026-10-06\",\n        \"taskId\": \"tsk_1\",\n        \"taskStatus\": \"open\",\n        \"accountExecutive\": \"usr_1\",\n        \"accountExecutiveName\": \"Maria Rivera\",\n        \"status\": \"logged\"\n      }\n    ],\n    \"nextStep\": {\n      \"activityId\": \"sac_1\",\n      \"nextStep\": \"Send the motor quotation\",\n      \"dueDate\": \"2026-10-06\",\n      \"taskId\": \"tsk_1\"\n    }\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SAP GL Export",
+      "item": [
+        {
+          "name": "Runs of the SAP GL file, newest first (from / to on the export date, status)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sap-gl/runs?from=2026-10-01&to=2026-10-31&page=1&pageSize=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sap-gl",
+                "runs"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-10-31"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Runs of the SAP GL file, newest first (from / to on the export date, status)\n\nFront-end touchpoint: Accounts > SAP GL Export\n\nAccess: read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/sap-gl/runs?from=2026-10-01&to=2026-10-31&page=1&pageSize=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "sap-gl",
+                    "runs"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-10-01"
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-10-31"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Runs of the SAP GL file, newest first (from / to on the export date, status)\n\nFront-end touchpoint: Accounts > SAP GL Export\n\nAccess: read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 12,\n      \"exportDate\": \"2026-10-08\",\n      \"runNo\": 1,\n      \"windowFrom\": \"2026-10-07T15:59:00Z\",\n      \"windowTo\": \"2026-10-08T15:59:00Z\",\n      \"trigger\": \"schedule\",\n      \"status\": \"done\",\n      \"folder\": \"sap-outbound\",\n      \"journalCount\": 42,\n      \"lineCount\": 131,\n      \"documentCount\": 1,\n      \"totalDebit\": 1250400.5,\n      \"totalCredit\": 1250400.5,\n      \"warnings\": [],\n      \"files\": [\n        {\n          \"kind\": \"header\",\n          \"fileName\": \"ARHDTISPH20261008.txt\",\n          \"records\": 1,\n          \"bytes\": 120\n        },\n        {\n          \"kind\": \"line\",\n          \"fileName\": \"ARLITISPH20261008.txt\",\n          \"records\": 131,\n          \"bytes\": 23800\n        }\n      ]\n    }\n  ],\n  \"pagination\": {\n    \"currentPage\": 1,\n    \"pageSize\": 20,\n    \"totalRecords\": 1,\n    \"totalPages\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Run now / re-generate the files of a day (default today): the entries posted after the previous day's cut-off up to the day's cut-off; the folder's files of that day are written again",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sap-gl/runs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sap-gl",
+                "runs"
+              ]
+            },
+            "description": "Run now / re-generate the files of a day (default today): the entries posted after the previous day's cut-off up to the day's cut-off; the folder's files of that day are written again\n\nFront-end touchpoint: Accounts > SAP GL Export > Run now\n\nAccess: write:journal-vouchers",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-10-08\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/sap-gl/runs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "sap-gl",
+                    "runs"
+                  ]
+                },
+                "description": "Run now / re-generate the files of a day (default today): the entries posted after the previous day's cut-off up to the day's cut-off; the folder's files of that day are written again\n\nFront-end touchpoint: Accounts > SAP GL Export > Run now\n\nAccess: write:journal-vouchers",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"date\": \"2026-10-08\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 12,\n    \"exportDate\": \"2026-10-08\",\n    \"runNo\": 1,\n    \"windowFrom\": \"2026-10-07T15:59:00Z\",\n    \"windowTo\": \"2026-10-08T15:59:00Z\",\n    \"trigger\": \"schedule\",\n    \"status\": \"done\",\n    \"folder\": \"sap-outbound\",\n    \"journalCount\": 42,\n    \"lineCount\": 131,\n    \"documentCount\": 1,\n    \"totalDebit\": 1250400.5,\n    \"totalCredit\": 1250400.5,\n    \"warnings\": [],\n    \"files\": [\n      {\n        \"kind\": \"header\",\n        \"fileName\": \"ARHDTISPH20261008.txt\",\n        \"records\": 1,\n        \"bytes\": 120\n      },\n      {\n        \"kind\": \"line\",\n        \"fileName\": \"ARLITISPH20261008.txt\",\n        \"records\": 131,\n        \"bytes\": 23800\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One run with its files",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sap-gl/runs/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sap-gl",
+                "runs",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One run with its files\n\nFront-end touchpoint: Accounts > SAP GL Export\n\nAccess: read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/sap-gl/runs/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "sap-gl",
+                    "runs",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One run with its files\n\nFront-end touchpoint: Accounts > SAP GL Export\n\nAccess: read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 12,\n    \"exportDate\": \"2026-10-08\",\n    \"runNo\": 1,\n    \"windowFrom\": \"2026-10-07T15:59:00Z\",\n    \"windowTo\": \"2026-10-08T15:59:00Z\",\n    \"trigger\": \"schedule\",\n    \"status\": \"done\",\n    \"folder\": \"sap-outbound\",\n    \"journalCount\": 42,\n    \"lineCount\": 131,\n    \"documentCount\": 1,\n    \"totalDebit\": 1250400.5,\n    \"totalCredit\": 1250400.5,\n    \"warnings\": [],\n    \"files\": [\n      {\n        \"kind\": \"header\",\n        \"fileName\": \"ARHDTISPH20261008.txt\",\n        \"records\": 1,\n        \"bytes\": 120\n      },\n      {\n        \"kind\": \"line\",\n        \"fileName\": \"ARLITISPH20261008.txt\",\n        \"records\": 131,\n        \"bytes\": 23800\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Download the header or line file of a run (kind header | line) as written",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sap-gl/runs/:id/files/:kind",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sap-gl",
+                "runs",
+                ":id",
+                "files",
+                ":kind"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "kind",
+                  "value": "",
+                  "description": "kind (path parameter)"
+                }
+              ]
+            },
+            "description": "Download the header or line file of a run (kind header | line) as written\n\nFront-end touchpoint: Accounts > SAP GL Export > Download\n\nAccess: read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/sap-gl/runs/:id/files/:kind",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "sap-gl",
+                    "runs",
+                    ":id",
+                    "files",
+                    ":kind"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "kind",
+                      "value": "",
+                      "description": "kind (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Download the header or line file of a run (kind header | line) as written\n\nFront-end touchpoint: Accounts > SAP GL Export > Download\n\nAccess: read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(text/plain attachment)"
+            }
+          ]
+        },
+        {
+          "name": "Folder, cut-off and record layout of the SAP GL file (changed on Master > Configuration, group integrations)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sap-gl/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sap-gl",
+                "settings"
+              ]
+            },
+            "description": "Folder, cut-off and record layout of the SAP GL file (changed on Master > Configuration, group integrations)\n\nFront-end touchpoint: Accounts > SAP GL Export\n\nAccess: read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/sap-gl/settings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "sap-gl",
+                    "settings"
+                  ]
+                },
+                "description": "Folder, cut-off and record layout of the SAP GL file (changed on Master > Configuration, group integrations)\n\nFront-end touchpoint: Accounts > SAP GL Export\n\nAccess: read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"folder\": \"sap-outbound\",\n    \"exportDir\": null,\n    \"cutOff\": \"23:59\",\n    \"accountPattern\": \"^[0-9]{6}$\",\n    \"layout\": {\n      \"format\": \"delimited\"\n    }\n  }\n}"
             }
           ]
         }

@@ -74,6 +74,7 @@ with the API collection exported by `npm run export:api`). The table is written 
 | Holiday master upload | No Upload button: Master > Configuration (reference list, API /api/masters/holiday; no screen of its own) | `POST /api/masters/holiday/upload` | `Holiday_Upload_Template.xlsx` |
 | Supplier master upload | No Upload button: Accounts > Payables > Suppliers | `POST /api/masters/supplier/upload` | `Supplier_Upload_Template.xlsx` |
 | Asset Class master upload | No Upload button: Master > Finance > Asset Classes | `POST /api/masters/asset-class/upload` | `Asset_Class_Upload_Template.xlsx` |
+| Cost Centre master upload | No Upload button: Master > Finance > Cost Centres | `POST /api/masters/cost-centre/upload` | `Cost_Centre_Upload_Template.xlsx` |
 | Short-Period Rate master upload | No Upload button: Master > Insurance Management > Short-Period Rates | `POST /api/masters/short-period-rate/upload` | `Short_Period_Rate_Upload_Template.xlsx` |
 | Cancellation Reason master upload | No Upload button: Master > Insurance Management > Cancellation Reasons | `POST /api/masters/cancellation-reason/upload` | `Cancellation_Reason_Upload_Template.xlsx` |
 | Claim Document Checklist master upload | No Upload button: Master > Insurance Management > Claim Document Checklist | `POST /api/masters/claim-document-requirement/upload` | `Claim_Document_Checklist_Upload_Template.xlsx` |
@@ -85,6 +86,7 @@ with the API collection exported by `npm run export:api`). The table is written 
 | Policies upload | Operations > Policy > Bulk Upload | `POST /api/policies/bulk-upload` | `Policies_Upload_Template.xlsx` |
 | Official receipts upload | Accounts > Receipts > Bulk upload | `POST /api/receipts/bulk-upload` | `Receipts_Upload_Template.xlsx` |
 | Payment vouchers upload | Accounts > Disbursement > Bulk upload | `POST /api/disbursements/bulk-upload` | `Disbursements_Upload_Template.xlsx` |
+| Journal vouchers upload (manual adjusting entries) | Accounts > Journal Voucher > Upload | `POST /api/journal-vouchers/upload` | `Journal_Vouchers_Upload_Template.xlsx` |
 | GL opening balances (go-live trial balance) | Accounts > Period End > Period Management > Import opening balances | `POST /api/period-end/opening-balances/import` | `Opening_Balances_Upload_Template.xlsx` |
 | Open premium receivables (go-live open items) | Accounts > Collections > Import open items | `POST /api/receipts/opening-items/import` | `Open_Items_Upload_Template.xlsx` |
 | Remittance reconciliation: bank transactions | Accounts > Remittance > Reconciliation > Import | The screen reads the CSV in the browser and sends POST /api/remittance/reconciliation/bank-transactions | `Remittance_Bank_Transactions_Template.xlsx`, `Remittance_Bank_Transactions_Template.csv` |

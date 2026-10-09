@@ -86,6 +86,7 @@ there, and setting the variable is the acknowledgement the screen otherwise asks
 | Variable | Default | Meaning |
 |---|---|---|
 | `SCHEDULER_ENABLED` | `true` | Run the cron scheduler (Master > Schedules jobs) on this instance. `false` on instances that must not run jobs; "Run now" still works there. |
+| `SAP_GL_EXPORT_DIR` | empty | Folder the daily SAP GL text files are written to (job `sap-gl-export`, Accounts > SAP GL Export) when it is not the folder `sap_gl.folder` of `UPLOAD_DIR`, e.g. a share SAP collects from (AZURE.md section 11). |
 
 Several instances may run the scheduler: every job run takes a PostgreSQL advisory lock keyed on the job code
 (`pg_try_advisory_lock`), so a job never runs twice at the same time, and a scheduled run is skipped when another

@@ -258,6 +258,9 @@
       "name": "Sales Activities"
     },
     {
+      "name": "SAP GL Export"
+    },
+    {
       "name": "Schedules"
     },
     {
@@ -4624,7 +4627,7 @@
     "/accounting/entries/search": {
       "get": {
         "operationId": "getAccountingEntriesSearch",
-        "summary": "Search accounting entries (policyId, clientId, clientName, entryType, referenceType, status, glCode, startDate, endDate; paging)",
+        "summary": "Search accounting entries (policyId, clientId, clientName, entryType, referenceType, status, glCode, costCentre, startDate, endDate; paging)",
         "tags": [
           "Accounting"
         ],
@@ -69506,7 +69509,7 @@
     "/journal-vouchers/history": {
       "get": {
         "operationId": "getJournalVouchersHistory",
-        "summary": "Journal voucher register (manual, correction and reversal JVs; all=true for system journals too)",
+        "summary": "Journal voucher register (manual, correction and reversal JVs; all=true for system journals too; parked=true for the system journals parked for approval)",
         "tags": [
           "Journal Vouchers"
         ],
@@ -69556,6 +69559,15 @@
               "type": "string"
             },
             "example": "posted"
+          },
+          {
+            "name": "parked",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": false
           }
         ],
         "responses": {
@@ -69779,6 +69791,166 @@
             }
           }
         }
+      }
+    },
+    "/journal-vouchers/upload": {
+      "post": {
+        "operationId": "postJournalVouchersUpload",
+        "summary": "Upload journal vouchers from CSV / XLSX (multipart \"file\"): rows grouped by Voucher Ref, the whole file checked first (balanced, accounts active and open to manual entries, cost centres, period open); each voucher is parked for approval by a different user",
+        "tags": [
+          "Journal Vouchers"
+        ],
+        "description": "Front-end touchpoint: Accounts > Journal Voucher > Upload\n\nAccess: write:journal-vouchers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer"
+                        },
+                        "vouchers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "voucherRef": {
+                                "type": "string"
+                              },
+                              "id": {
+                                "type": "string"
+                              },
+                              "transactionCode": {
+                                "type": "string"
+                              },
+                              "transactionNumber": {
+                                "type": "string"
+                              },
+                              "transactionDescription": {
+                                "type": "string"
+                              },
+                              "date": {
+                                "type": "string"
+                              },
+                              "totalDebit": {
+                                "type": "integer"
+                              },
+                              "totalCredit": {
+                                "type": "integer"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "lineCount": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "2 journal vouchers uploaded for approval",
+                  "data": {
+                    "total": 4,
+                    "vouchers": [
+                      {
+                        "voucherRef": "ACCR-2026-10-01",
+                        "id": "jv_1",
+                        "transactionCode": "JV01",
+                        "transactionNumber": "JV-2026-00001",
+                        "transactionDescription": "Accrual of audit fees",
+                        "date": "2026-09-28",
+                        "totalDebit": 25000,
+                        "totalCredit": 25000,
+                        "status": "for-approval",
+                        "kind": "standard",
+                        "lineCount": 2
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Journal Voucher > Upload",
+        "x-permissions": [
+          "write:journal-vouchers"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              },
+              "example": "multipart/form-data file"
+            }
+          }
+        }
+      }
+    },
+    "/journal-vouchers/upload/template": {
+      "get": {
+        "operationId": "getJournalVouchersUploadTemplate",
+        "summary": "Journal voucher upload template (XLSX: Data, Columns and Instructions sheets)",
+        "tags": [
+          "Journal Vouchers"
+        ],
+        "description": "Front-end touchpoint: Accounts > Journal Voucher > Upload > Download template\n\nAccess: read:journal-vouchers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Journal Voucher > Upload > Download template",
+        "x-permissions": [
+          "read:journal-vouchers"
+        ]
       }
     },
     "/lead-assignment/assignees": {
@@ -106643,7 +106815,7 @@
     "/posting-rules/flow": {
       "get": {
         "operationId": "getPostingRulesFlow",
-        "summary": "Accounting flow: for every business event, the screen that triggers it, the approval before posting and the debit / credit lines of the rule in force (GL accounts resolved today)",
+        "summary": "Accounting flow: for every business event, the screen that triggers it, the approval before posting, whether its journal is parked for approval or posted at once (accounting.parked_events) and the debit / credit lines of the rule in force (GL accounts resolved today)",
         "tags": [
           "Posting Rules"
         ],
@@ -106681,6 +106853,12 @@
                                 "type": "string"
                               },
                               "approval": {
+                                "type": "string"
+                              },
+                              "posting": {
+                                "type": "string"
+                              },
+                              "alwaysPosted": {
                                 "type": "string"
                               },
                               "version": {
@@ -106760,6 +106938,8 @@
                         "label": "Premium collection applied",
                         "trigger": "Accounts > Receipts",
                         "approval": "Finance only",
+                        "posting": "posted",
+                        "alwaysPosted": "Posts with its sub-ledger: the bill, collection, commission or refund it records is used at once by the next steps",
                         "version": 1,
                         "debits": [
                           {
@@ -141043,6 +141223,649 @@
         "x-permissions": [
           "read:sales-activities",
           "write:sales-activities"
+        ]
+      }
+    },
+    "/sap-gl/runs": {
+      "get": {
+        "operationId": "getSapGlRuns",
+        "summary": "Runs of the SAP GL file, newest first (from / to on the export date, status)",
+        "tags": [
+          "SAP GL Export"
+        ],
+        "description": "Front-end touchpoint: Accounts > SAP GL Export\n\nAccess: read:journal-vouchers",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10-01"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10-31"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 20
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "exportDate": {
+                            "type": "string"
+                          },
+                          "runNo": {
+                            "type": "integer"
+                          },
+                          "windowFrom": {
+                            "type": "string"
+                          },
+                          "windowTo": {
+                            "type": "string"
+                          },
+                          "trigger": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "folder": {
+                            "type": "string"
+                          },
+                          "journalCount": {
+                            "type": "integer"
+                          },
+                          "lineCount": {
+                            "type": "integer"
+                          },
+                          "documentCount": {
+                            "type": "integer"
+                          },
+                          "totalDebit": {
+                            "type": "number"
+                          },
+                          "totalCredit": {
+                            "type": "number"
+                          },
+                          "warnings": {
+                            "type": "array",
+                            "items": {}
+                          },
+                          "files": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "kind": {
+                                  "type": "string"
+                                },
+                                "fileName": {
+                                  "type": "string"
+                                },
+                                "records": {
+                                  "type": "integer"
+                                },
+                                "bytes": {
+                                  "type": "integer"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "currentPage": {
+                          "type": "integer"
+                        },
+                        "pageSize": {
+                          "type": "integer"
+                        },
+                        "totalRecords": {
+                          "type": "integer"
+                        },
+                        "totalPages": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 12,
+                      "exportDate": "2026-10-08",
+                      "runNo": 1,
+                      "windowFrom": "2026-10-07T15:59:00Z",
+                      "windowTo": "2026-10-08T15:59:00Z",
+                      "trigger": "schedule",
+                      "status": "done",
+                      "folder": "sap-outbound",
+                      "journalCount": 42,
+                      "lineCount": 131,
+                      "documentCount": 1,
+                      "totalDebit": 1250400.5,
+                      "totalCredit": 1250400.5,
+                      "warnings": [],
+                      "files": [
+                        {
+                          "kind": "header",
+                          "fileName": "ARHDTISPH20261008.txt",
+                          "records": 1,
+                          "bytes": 120
+                        },
+                        {
+                          "kind": "line",
+                          "fileName": "ARLITISPH20261008.txt",
+                          "records": 131,
+                          "bytes": 23800
+                        }
+                      ]
+                    }
+                  ],
+                  "pagination": {
+                    "currentPage": 1,
+                    "pageSize": 20,
+                    "totalRecords": 1,
+                    "totalPages": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > SAP GL Export",
+        "x-permissions": [
+          "read:journal-vouchers"
+        ]
+      },
+      "post": {
+        "operationId": "postSapGlRuns",
+        "summary": "Run now / re-generate the files of a day (default today): the entries posted after the previous day's cut-off up to the day's cut-off; the folder's files of that day are written again",
+        "tags": [
+          "SAP GL Export"
+        ],
+        "description": "Front-end touchpoint: Accounts > SAP GL Export > Run now\n\nAccess: write:journal-vouchers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "exportDate": {
+                          "type": "string"
+                        },
+                        "runNo": {
+                          "type": "integer"
+                        },
+                        "windowFrom": {
+                          "type": "string"
+                        },
+                        "windowTo": {
+                          "type": "string"
+                        },
+                        "trigger": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "folder": {
+                          "type": "string"
+                        },
+                        "journalCount": {
+                          "type": "integer"
+                        },
+                        "lineCount": {
+                          "type": "integer"
+                        },
+                        "documentCount": {
+                          "type": "integer"
+                        },
+                        "totalDebit": {
+                          "type": "number"
+                        },
+                        "totalCredit": {
+                          "type": "number"
+                        },
+                        "warnings": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "files": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string"
+                              },
+                              "fileName": {
+                                "type": "string"
+                              },
+                              "records": {
+                                "type": "integer"
+                              },
+                              "bytes": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 12,
+                    "exportDate": "2026-10-08",
+                    "runNo": 1,
+                    "windowFrom": "2026-10-07T15:59:00Z",
+                    "windowTo": "2026-10-08T15:59:00Z",
+                    "trigger": "schedule",
+                    "status": "done",
+                    "folder": "sap-outbound",
+                    "journalCount": 42,
+                    "lineCount": 131,
+                    "documentCount": 1,
+                    "totalDebit": 1250400.5,
+                    "totalCredit": 1250400.5,
+                    "warnings": [],
+                    "files": [
+                      {
+                        "kind": "header",
+                        "fileName": "ARHDTISPH20261008.txt",
+                        "records": 1,
+                        "bytes": 120
+                      },
+                      {
+                        "kind": "line",
+                        "fileName": "ARLITISPH20261008.txt",
+                        "records": 131,
+                        "bytes": 23800
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > SAP GL Export > Run now",
+        "x-permissions": [
+          "write:journal-vouchers"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "date": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "date": "2026-10-08"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sap-gl/runs/{id}": {
+      "get": {
+        "operationId": "getSapGlRunsId",
+        "summary": "One run with its files",
+        "tags": [
+          "SAP GL Export"
+        ],
+        "description": "Front-end touchpoint: Accounts > SAP GL Export\n\nAccess: read:journal-vouchers",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "exportDate": {
+                          "type": "string"
+                        },
+                        "runNo": {
+                          "type": "integer"
+                        },
+                        "windowFrom": {
+                          "type": "string"
+                        },
+                        "windowTo": {
+                          "type": "string"
+                        },
+                        "trigger": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "folder": {
+                          "type": "string"
+                        },
+                        "journalCount": {
+                          "type": "integer"
+                        },
+                        "lineCount": {
+                          "type": "integer"
+                        },
+                        "documentCount": {
+                          "type": "integer"
+                        },
+                        "totalDebit": {
+                          "type": "number"
+                        },
+                        "totalCredit": {
+                          "type": "number"
+                        },
+                        "warnings": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "files": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string"
+                              },
+                              "fileName": {
+                                "type": "string"
+                              },
+                              "records": {
+                                "type": "integer"
+                              },
+                              "bytes": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 12,
+                    "exportDate": "2026-10-08",
+                    "runNo": 1,
+                    "windowFrom": "2026-10-07T15:59:00Z",
+                    "windowTo": "2026-10-08T15:59:00Z",
+                    "trigger": "schedule",
+                    "status": "done",
+                    "folder": "sap-outbound",
+                    "journalCount": 42,
+                    "lineCount": 131,
+                    "documentCount": 1,
+                    "totalDebit": 1250400.5,
+                    "totalCredit": 1250400.5,
+                    "warnings": [],
+                    "files": [
+                      {
+                        "kind": "header",
+                        "fileName": "ARHDTISPH20261008.txt",
+                        "records": 1,
+                        "bytes": 120
+                      },
+                      {
+                        "kind": "line",
+                        "fileName": "ARLITISPH20261008.txt",
+                        "records": 131,
+                        "bytes": 23800
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > SAP GL Export",
+        "x-permissions": [
+          "read:journal-vouchers"
+        ]
+      }
+    },
+    "/sap-gl/runs/{id}/files/{kind}": {
+      "get": {
+        "operationId": "getSapGlRunsIdFilesKind",
+        "summary": "Download the header or line file of a run (kind header | line) as written",
+        "tags": [
+          "SAP GL Export"
+        ],
+        "description": "Front-end touchpoint: Accounts > SAP GL Export > Download\n\nAccess: read:journal-vouchers",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "(text/plain attachment)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > SAP GL Export > Download",
+        "x-permissions": [
+          "read:journal-vouchers"
+        ]
+      }
+    },
+    "/sap-gl/settings": {
+      "get": {
+        "operationId": "getSapGlSettings",
+        "summary": "Folder, cut-off and record layout of the SAP GL file (changed on Master > Configuration, group integrations)",
+        "tags": [
+          "SAP GL Export"
+        ],
+        "description": "Front-end touchpoint: Accounts > SAP GL Export\n\nAccess: read:journal-vouchers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "folder": {
+                          "type": "string"
+                        },
+                        "exportDir": {},
+                        "cutOff": {
+                          "type": "string"
+                        },
+                        "accountPattern": {
+                          "type": "string"
+                        },
+                        "layout": {
+                          "type": "object",
+                          "properties": {
+                            "format": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "folder": "sap-outbound",
+                    "exportDir": null,
+                    "cutOff": "23:59",
+                    "accountPattern": "^[0-9]{6}$",
+                    "layout": {
+                      "format": "delimited"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > SAP GL Export",
+        "x-permissions": [
+          "read:journal-vouchers"
         ]
       }
     },
