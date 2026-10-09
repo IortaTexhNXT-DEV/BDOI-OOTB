@@ -84,7 +84,7 @@ export async function bookRows(db, book, from, to) {
     });
   }
   if (book === 'purchases') {
-    const inputVat = String((await getSetting('accounting.account.input_vat', '1301001')) || '1301001');
+    const inputVat = String((await getSetting('accounting.account.input_vat', '135000')) || '135000');
     const wht = String((await getSetting('accounting.account.wht_payable', '2204001')) || '2204001');
     return (await db.query(`SELECT j.jv_date, j.jv_number, COALESCE(d.voucher_number, j.transaction_code, '') AS reference, COALESCE(d.payee_name, j.description, '') AS supplier,
         COALESCE(cr.tin, ic.tin, '') AS tin,
