@@ -42,6 +42,7 @@ export const DOCUMENT_TYPES = {
   'acknowledgement-receipt': { label: 'Acknowledgement receipt', draft: [], cancelled: ['rejected'] },
   'payment-voucher': { label: 'Payment voucher', draft: ['draft', 'pending', 'for-approval', 'rejected', 'returned'], approved: ['approved', 'printed', 'released', 'paid', 'cleared'], cancelled: ['cancelled', 'void'] },
   'debit-note': { label: 'Commission debit note', draft: ['draft', 'for-approval', 'rejected'], cancelled: ['cancelled'] },
+  'remittance-advice': { label: 'Remittance advice / agency bill', draft: ['draft', 'for-approval', 'rejected'], approved: ['approved', 'settled'], cancelled: ['cancelled'] },
   'billing-statement': { label: 'Billing statement / invoice', draft: [] },
   'statement-of-account': { label: 'Statement of account', draft: [] },
   'journal-voucher': { label: 'Journal voucher', draft: ['draft', 'pending', 'for-approval', 'rejected'], approved: ['posted', 'approved'], cancelled: ['reversed', 'cancelled', 'void'] },

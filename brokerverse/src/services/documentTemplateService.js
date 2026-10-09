@@ -68,6 +68,17 @@ class DocumentTemplateService {
   }
 
   /**
+   * API path of the official receipt PDF (full receipt or selected line items), for components/Print printPdf.
+   * @param {string} receiptId - Receipt ID
+   * @param {Object} options - { lineIds?: string[] }
+   * @returns {string}
+   */
+  receiptPdfPath(receiptId, { lineIds = [] } = {}) {
+    const query = lineIds.length ? `?${new URLSearchParams({ lineIds: lineIds.join(",") })}` : "";
+    return `/document-templates/receipt/${encodeURIComponent(receiptId)}${query}`;
+  }
+
+  /**
    * Download receipt PDF (full receipt or selected line items).
    * @param {string} receiptId - Receipt ID
    * @param {Object} options - { lineIds?: string[], fileName?: string }
