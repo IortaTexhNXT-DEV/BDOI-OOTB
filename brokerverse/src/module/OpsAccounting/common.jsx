@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Tag } from "primereact/tag";
 import SvgDot from "../../assets/icons/SvgDot";
+import InfoTip from "../../components/InfoTip";
 import { statusSeverity } from "../../utils/statusSeverity";
 import { date, dateTime, money, showError, showSuccess } from "../PeriodEnd/common";
 import "../PeriodEnd/index.scss";
@@ -16,16 +17,15 @@ export const OpsTag = ({ status }) => {
   return <Tag className="pe-tag" value={t(`opsAcc.status.${status}`, { defaultValue: String(status).replace(/[_-]/g, " ") })} severity={statusSeverity(status)} />;
 };
 
-/** Page title with the breadcrumb (menu group > section > page) and the page actions. */
+/** Page title with the breadcrumb (menu group > section > page) and the page actions; the explanation is the tooltip of the title's info icon. */
 export const PageHeader = ({ title, group, section, subtitle, children }) => {
   const { t } = useTranslation();
   const model = [section, title].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).map((label) => ({ label }));
   return (
     <div className="pe-header">
       <div>
-        <h1 className="pe-title">{title}</h1>
+        <h1 className="pe-title">{title}<InfoTip text={subtitle} /></h1>
         <BreadCrumb home={{ label: group || t("opsAcc.accounts") }} model={model} separatorIcon={<SvgDot color={"#000"} />} className="pe-breadcrumb" />
-        {subtitle && <p className="pe-subtitle">{subtitle}</p>}
       </div>
       <div className="pe-header-actions">{children}</div>
     </div>

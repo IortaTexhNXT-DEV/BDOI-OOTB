@@ -65,7 +65,7 @@ const opsAccountingService = {
   printCoverNote: (cnId) => openFile(`/cover-notes/${id(cnId)}/pdf`),
   // cancellation
   cancellationReasons: () => request("/cancellations/reasons"),
-  shortPeriodScale: () => request("/cancellations/short-period-scale"),
+  searchPolicies: (search) => request(`/policies${qs({ search, status: "active", pageSize: 10 })}`),
   cancellationQuote: (payload) => post("/cancellations/quote", payload),
   createCancellation: async (payload) => {
     const body = await raw("/endorsements/create-endorsement", { method: "POST", body: JSON.stringify(payload) });

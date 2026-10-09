@@ -1,0 +1,15 @@
+@import "../../theme/bdoi/tokens";
+
+.bv-info-tip {
+  margin-left: 8px;
+  font-size: 16px;
+  vertical-align: middle;
+  color: $color-text-muted;
+  cursor: help;
+
+  &:hover,
+  &:focus {
+    color: $brand-blue;
+    outline: none;
+  }
+}
