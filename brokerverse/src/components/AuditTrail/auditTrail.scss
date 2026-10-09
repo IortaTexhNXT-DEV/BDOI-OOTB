@@ -20,7 +20,37 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 4px;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    margin-bottom: 8px;
+  }
+}
+
+// filter bar of a record's history: search, person, kind of event; the count and Export on the right
+.bv-audit-filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  &__search {
+    flex: 1 1 16rem;
+    max-width: 22rem;
+
+    .p-inputtext {
+      width: 100%;
+    }
+  }
+
+  .p-dropdown {
+    min-width: 11rem;
+  }
+
+  &__end {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
   }
 }
 

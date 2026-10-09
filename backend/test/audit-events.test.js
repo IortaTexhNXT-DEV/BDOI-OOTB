@@ -151,6 +151,15 @@ describe('audit trail API', () => {
     // by record number too
     const code = (await api('get', `/clients/${clientId}`)).body.generatedClientId;
     expect((await api('get', `/audit/records/client/${code}`)).body.data.length).toBe(r.body.data.length);
+    // the history of the record downloads as a sheet, one row per changed field
+    const csv = await api('get', `/audit/records/client/${clientId}?export=csv`);
+    expect(csv.status).toBe(200);
+    expect(csv.headers['content-type']).toMatch(/text\/csv/);
+    expect(csv.headers['content-disposition']).toMatch(/history-client-/);
+    expect(csv.text).toMatch(/Date,Time,User,Role,Record type,Record,Event,Field,Old value,New value/);
+    expect(csv.text).toMatch(/Last name,Chua,Chua-Tan/);
+    const xlsx = await api('get', `/audit/records/client/${clientId}?export=excel`);
+    expect(xlsx.headers['content-type']).toContain('spreadsheetml');
   });
 
   it('pages the audit log as events with filters and downloads it', async () => {

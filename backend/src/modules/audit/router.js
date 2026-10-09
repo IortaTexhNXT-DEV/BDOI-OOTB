@@ -4,6 +4,8 @@ import { forbidden } from '../../lib/errors.js';
 import { assertVisible } from '../../lib/scope.js';
 import { ok } from '../../lib/respond.js';
 import { today } from '../../lib/dates.js';
+import { EXPORT_COLUMNS, exportRows } from '../../lib/auditEvents.js';
+import { sendSheet } from '../claims/docs.js';
 import * as svc from './service.js';
 
 /**
@@ -31,9 +33,9 @@ const event = {
 
 define({
   method: 'GET', path: '/records/:entity/:id',
-  summary: 'History of one record as business events, newest first (sort=asc for oldest first): who (display name and roles), when (date and time in general.timezone, general.date_format), from where (screen / API / system job), the event and its changed fields as label, old value, new value (formatted; secrets never shown; ID numbers masked without view:pii). :id is the id or the record number',
+  summary: 'History of one record as business events, newest first (sort=asc for oldest first): who (display name and roles), when (date and time in general.timezone, general.date_format), from where (screen / API / system job), the event and its changed fields as label, old value, new value (formatted; secrets never shown; ID numbers masked without view:pii). :id is the id or the record number. export=csv | excel downloads the history, one row per changed field',
   screen: 'Detail screens > History (policy, quotation, claim, client, endorsement, receipt, master records)',
-  query: { sort: 'desc' }, response: { success: true, data: [event], total: 1, today: '2026-10-04' },
+  query: { sort: 'desc', export: 'excel' }, response: { success: true, data: [event], total: 1, today: '2026-10-04' },
   handler: async (req, res) => {
     const entity = String(req.params.entity);
     const module = entity.startsWith('master:') ? 'masters' : MODULE_OF[entity];
@@ -42,7 +44,13 @@ define({
     const scopeKey = svc.SCOPE_ENTITY[entity === 'quote' ? 'quotation' : entity];
     if (scopeKey) await assertVisible(req, scopeKey, req.params.id);
     const events = await svc.recordHistory(entity, req.params.id, { viewer: req.user, sort: req.query.sort });
-    ok(res, events, 'OK', { total: events.length, today: await today() });
+    const format = String(req.query.export || '').toLowerCase();
+    if (format === 'csv' || format === 'excel' || format === 'xlsx') {
+      const name = String(events[0]?.reference || req.params.id).replace(/[^A-Za-z0-9._-]+/g, '-');
+      return sendSheet(res, { fileName: `history-${entity.replace(/[^a-z0-9-]+/gi, '-')}-${name}`, format: format === 'csv' ? 'csv' : 'excel',
+        sheets: [{ name: 'History', columns: EXPORT_COLUMNS, rows: exportRows(events) }] });
+    }
+    return ok(res, events, 'OK', { total: events.length, today: await today() });
   },
 });
 

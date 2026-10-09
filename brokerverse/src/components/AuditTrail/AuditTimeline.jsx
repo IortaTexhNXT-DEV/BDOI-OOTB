@@ -1,7 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
+import { Dropdown } from "primereact/dropdown";
+import { InputText } from "primereact/inputtext";
+import { Menu } from "primereact/menu";
 import { Skeleton } from "primereact/skeleton";
 import auditService from "../../services/auditService";
 import AuditChanges from "./AuditChanges";
@@ -14,15 +17,30 @@ const addDays = (iso, n) => {
   return d.toISOString().slice(0, 10);
 };
 
+/** Kinds of event a history can be narrowed to (the colour family of their marker, AuditEventParts.eventTone). */
+const KINDS = ["positive", "status", "neutral", "negative"];
+
+/** Text an event is searched on: its headline, note, who, source and the fields it changed with their values. */
+const searchText = (e) => [e.title, e.note, e.user?.displayName, e.source?.name, e.source?.label,
+  ...(e.changes || []).flatMap((c) => [c.label, c.from, c.to])].filter((v) => v !== null && v !== undefined).join(" ").toLowerCase();
+
 /**
  * History of one record as a vertical timeline, newest first and grouped by day: each entry is one business event
- * (what happened, when, who with their role, from which screen / API / job) with the fields it changed beneath it.
- * Dates and times come from the server in the configured format and time zone.
+ * (what happened, when, who with their role, from which screen / API / job) with the fields it changed beneath it
+ * (old value -> new value). A filter bar narrows it by text, person and kind of event; Export downloads the whole
+ * history (Excel or CSV, one row per changed field). Dates and times come from the server in the configured format and
+ * time zone.
  */
 const AuditTimeline = ({ entity, recordId, emptyText, limit }) => {
   const { t } = useTranslation();
   const [state, setState] = useState({ loading: true, error: null, events: [], today: null });
   const [showAll, setShowAll] = useState(false);
+  const [query, setQuery] = useState("");
+  const [person, setPerson] = useState("");
+  const [kind, setKind] = useState("");
+  const [exporting, setExporting] = useState(null);
+  const [exportError, setExportError] = useState("");
+  const exportMenu = useRef(null);
 
   const load = useCallback(async () => {
     if (!entity || !recordId) return;
@@ -37,7 +55,26 @@ const AuditTimeline = ({ entity, recordId, emptyText, limit }) => {
 
   useEffect(() => { load(); }, [load]);
 
-  const visible = limit && !showAll ? state.events.slice(0, limit) : state.events;
+  const people = useMemo(() => [...new Map(state.events.map((e) => [e.user?.username || e.user?.displayName || "", e.user?.displayName || t("auditTrail.system", "System")])).entries()],
+    [state.events, t]);
+  const filtering = !!(query.trim() || person || kind);
+  const matching = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return state.events.filter((e) => (!person || (e.user?.username || e.user?.displayName || "") === person) && (!kind || eventTone(e) === kind)
+      && (!q || searchText(e).includes(q)));
+  }, [state.events, query, person, kind]);
+  const visible = limit && !showAll && !filtering ? matching.slice(0, limit) : matching;
+  const download = async (format) => {
+    setExporting(format);
+    setExportError("");
+    try {
+      await auditService.downloadRecordHistory(entity, recordId, format);
+    } catch (e) {
+      setExportError(e.message || String(e));
+    } finally {
+      setExporting(null);
+    }
+  };
   const days = useMemo(() => {
     const out = [];
     for (const e of visible) {
@@ -74,12 +111,44 @@ const AuditTimeline = ({ entity, recordId, emptyText, limit }) => {
   return (
     <div className="bv-audit-timeline">
       <div className="bv-audit-timeline__bar">
-        <span className="bv-audit-count">
-          {state.error ? state.error : t("auditTrail.eventCount", { count: state.events.length, defaultValue: state.events.length === 1 ? "1 event" : `${state.events.length} events` })}
-        </span>
-        <Button icon="pi pi-refresh" text rounded size="small" className="bv-audit-icon-btn" onClick={load} loading={state.loading}
-          aria-label={t("auditTrail.refresh", { defaultValue: "Refresh" })} tooltip={t("auditTrail.refresh", { defaultValue: "Refresh" })} tooltipOptions={{ position: "top" }} />
+        <div className="bv-audit-filters">
+          <span className="p-input-icon-left bv-audit-filters__search">
+            <i className="pi pi-search" />
+            <InputText value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("auditTrail.searchHint", { defaultValue: "Search events, fields and values" })}
+              aria-label={t("auditTrail.searchHint", { defaultValue: "Search events, fields and values" })} />
+          </span>
+          <Dropdown value={person} onChange={(e) => setPerson(e.value || "")} aria-label={t("auditTrail.user", { defaultValue: "User" })}
+            options={[{ label: t("auditTrail.allUsers", { defaultValue: "All users" }), value: "" }, ...people.map(([value, label]) => ({ value, label }))]} />
+          <Dropdown value={kind} onChange={(e) => setKind(e.value || "")} aria-label={t("auditTrail.kind", { defaultValue: "Kind of event" })}
+            options={[{ label: t("auditTrail.allKinds", { defaultValue: "All events" }), value: "" }, ...KINDS.map((k) => ({ value: k, label: t(`auditTrail.kinds.${k}`) }))]} />
+          {filtering ? (
+            <Button type="button" text size="small" icon="pi pi-filter-slash" label={t("auditTrail.clearFilters", { defaultValue: "Clear filters" })}
+              onClick={() => { setQuery(""); setPerson(""); setKind(""); }} />
+          ) : null}
+        </div>
+        <div className="bv-audit-filters__end">
+          <span className="bv-audit-count">
+            {state.error ? state.error : filtering
+              ? t("auditTrail.eventsShown", { shown: matching.length, count: state.events.length, defaultValue: `${matching.length} of ${state.events.length} events` })
+              : t("auditTrail.eventCount", { count: state.events.length, defaultValue: state.events.length === 1 ? "1 event" : `${state.events.length} events` })}
+          </span>
+          <Menu popup ref={exportMenu} model={[
+            { label: t("auditTrail.excel", { defaultValue: "Excel" }), icon: "pi pi-file-excel", command: () => download("excel") },
+            { label: t("auditTrail.csv", { defaultValue: "CSV" }), icon: "pi pi-file", command: () => download("csv") },
+          ]} />
+          <Button type="button" icon="pi pi-download" outlined size="small" label={t("auditTrail.export", { defaultValue: "Export" })} loading={!!exporting}
+            disabled={!state.events.length || !recordId} onClick={(e) => exportMenu.current.toggle(e)} aria-haspopup />
+          <Button icon="pi pi-refresh" text rounded size="small" className="bv-audit-icon-btn" onClick={load} loading={state.loading}
+            aria-label={t("auditTrail.refresh", { defaultValue: "Refresh" })} tooltip={t("auditTrail.refresh", { defaultValue: "Refresh" })} tooltipOptions={{ position: "top" }} />
+        </div>
       </div>
+      {exportError ? <small className="p-error block mb-2">{exportError}</small> : null}
+      {!state.error && state.events.length > 0 && !matching.length ? (
+        <div className="bv-audit-empty">
+          <i className="pi pi-filter" aria-hidden="true" />
+          <span>{t("auditTrail.noMatch", { defaultValue: "No event matches the filters." })}</span>
+        </div>
+      ) : null}
       {!state.error && !state.events.length ? (
         <div className="bv-audit-empty">
           <i className="pi pi-history" aria-hidden="true" />
@@ -110,7 +179,7 @@ const AuditTimeline = ({ entity, recordId, emptyText, limit }) => {
           </ol>
         </section>
       ))}
-      {limit && state.events.length > limit ? (
+      {limit && !filtering && state.events.length > limit ? (
         <Button text size="small" className="bv-audit-showall" onClick={() => setShowAll(!showAll)}
           label={showAll ? t("auditTrail.showRecent", { defaultValue: "Show recent events only" }) : t("auditTrail.showAllEvents", { count: state.events.length, defaultValue: `Show all ${state.events.length} events` })} />
       ) : null}

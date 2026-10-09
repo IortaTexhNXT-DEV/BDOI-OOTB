@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
-import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
-import { Tag } from "primereact/tag";
 import claimsService from "../../../services/claimsService";
 import { AuditTimeline } from "../../../components/AuditTrail";
-import { statusSeverity } from "../../../utils/statusSeverity";
+import { KeyFacts, PageHeader, SectionCard, StatusChip } from "../../../components/RecordPage";
+import { claimFacts } from "../../claimsModule/shared/ClaimJourneyLayout";
 import logger from "../../../utility/logger";
-import "./index.scss";
 
 /**
- * Claims > Audit trail of one claim: every business event of the claim (registration, adjuster report, settlement,
- * status changes) as a timeline, newest first, with who did it, from where, and the fields it changed.
+ * Claims > History of one claim: every business event of the claim (registration, adjuster report, settlement, status
+ * changes) as a timeline, newest first, with who did it, from where and the fields it changed; filters and export.
  */
 const ClaimAuditTrail = () => {
   const { t } = useTranslation();
@@ -28,47 +26,31 @@ const ClaimAuditTrail = () => {
     return () => { live = false; };
   }, [claimId]);
 
-  const status = claim?.claimStatus || claim?.status;
-  const facts = [
-    [t("claimAuditTrail.policyNumber", { defaultValue: "Policy number" }), claim?.policyNumber],
-    [t("claimAuditTrail.insured", { defaultValue: "Insured" }), claim?.policyHolderName || claim?.clientName],
-    [t("claimAuditTrail.insurer", { defaultValue: "Insurer" }), claim?.insuranceCompanyName],
-    [t("claimAuditTrail.insurerClaimNumber", { defaultValue: "Insurer claim number" }), claim?.insuranceCompanyClaimNumber],
-  ];
-
+  const number = claim?.claimNumber || claimId;
   return (
-    <div className="claim-audit">
-      <BreadCrumb className="claim-audit__crumbs"
-        model={[{ label: t("claimAuditTrail.claims", { defaultValue: "Claims" }), command: () => navigate("/agent/claim"), className: "bv-crumb-link" },
-          { label: t("claimAuditTrail.title", { defaultValue: "Audit trail" }) }]}
-        home={{ label: t("claimAuditTrail.operations", { defaultValue: "Operations" }) }} />
-      <div className="claim-audit__header">
-        <div>
-          <h2 className="claim-audit__title">
-            {t("claimAuditTrail.heading", { defaultValue: "Claim audit trail" })}
-          </h2>
-          <div className="claim-audit__subtitle">
-            <span className="claim-audit__number">{claim?.claimNumber || claimId}</span>
-            {status ? <Tag value={status} severity={statusSeverity(claim?.lifecycleStatus || status)} /> : null}
-          </div>
-        </div>
-        <div className="claim-audit__actions">
-          <Button icon="pi pi-eye" outlined size="small" label={t("claimAuditTrail.viewClaim", { defaultValue: "View claim" })}
-            onClick={() => navigate(`/agent/claimdetail/${claim?.id || claimId}`)} />
-          <Button icon="pi pi-arrow-left" text size="small" label={t("claimAuditTrail.back", { defaultValue: "Back" })} onClick={() => navigate("/agent/claim")} />
-        </div>
-      </div>
-      <dl className="claim-audit__facts">
-        {facts.map(([label, value]) => (
-          <div key={label}>
-            <dt>{label}</dt>
-            <dd>{value || "—"}</dd>
-          </div>
-        ))}
-      </dl>
-      <div className="claim-audit__card">
+    <div className="bv-ops-page claim-audit">
+      <PageHeader
+        title={t("claimAuditTrail.heading", { defaultValue: "Claim history" })}
+        crumbs={[{ label: t("claimAuditTrail.operations", { defaultValue: "Operations" }) },
+          { label: t("claimAuditTrail.claims", { defaultValue: "Claims" }), onClick: () => navigate("/agent/claim") },
+          { label: number, onClick: () => navigate(`/agent/claimdetail/${claim?.id || claimId}`) },
+          { label: t("claimAuditTrail.title", { defaultValue: "History" }) }]}
+        meta={(
+          <>
+            <span className="bv-page-header__code">{number}</span>
+            {claim?.claimStatus ? <StatusChip status={claim.lifecycleStatus || claim.claimStatus} label={claim.claimStatus} /> : null}
+          </>
+        )}
+        actions={(
+          <>
+            <Button icon="pi pi-arrow-left" outlined label={t("claimAuditTrail.back", { defaultValue: "All claims" })} onClick={() => navigate("/agent/claim")} />
+            <Button icon="pi pi-eye" label={t("claimAuditTrail.viewClaim", { defaultValue: "View claim" })} onClick={() => navigate(`/agent/claimdetail/${claim?.id || claimId}`)} />
+          </>
+        )} />
+      {claim ? <KeyFacts items={claimFacts(claim, t)} /> : null}
+      <SectionCard>
         <AuditTimeline entity="claim" recordId={claimId} />
-      </div>
+      </SectionCard>
     </div>
   );
 };
