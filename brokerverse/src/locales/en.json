@@ -793,7 +793,12 @@
     "paymentLines": "Payment lines",
     "reference": "Reference",
     "description": "Description",
-    "noChequeIssued": "No cheque has been issued on this voucher"
+    "noChequeIssued": "No cheque has been issued on this voucher",
+    "nextStepIssue": "Next step: issue the cheque or transfer",
+    "nextStepIssueText": "Select the payment lines and the bank account of the payment; the voucher is then approved by another user.",
+    "issuePayment": "Issue payment",
+    "nextStepApprove": "Next step: approval by another user",
+    "nextStepApproveText": "Select the cheque below and approve it; the user who created or issued the voucher cannot approve it."
   },
   "renewal": {
     "renewals": "Renewals",

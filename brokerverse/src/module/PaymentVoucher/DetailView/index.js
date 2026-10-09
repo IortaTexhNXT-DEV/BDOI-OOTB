@@ -20,6 +20,7 @@ import disbursementService from "../../../services/disbursementService";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Tag } from "primereact/tag";
+import NextStep from "../../../components/NextStep";
 
 function Detailview() {
   const { t } = useTranslation();
@@ -406,6 +407,14 @@ function Detailview() {
         className="breadcrumbs_container"
         separatorIcon={<SvgDot color={"#000"} />}
       />
+      {/* a voucher without a cheque or transfer cannot be approved: say where it is issued */}
+      {!loading && String(disbursementDetails?.status || "").toLowerCase() === "draft" && processedChequeBookData.length === 0 && (
+        <NextStep title={t("paymentVoucher.nextStepIssue")} text={t("paymentVoucher.nextStepIssueText")}
+          actions={[{ key: "issue", label: t("paymentVoucher.issuePayment"), to: `/accounts/paymentvoucher/invoicelist/${id}` }]} />
+      )}
+      {!loading && processedChequeBookData.some((r) => r.status === "Pending") && (
+        <NextStep title={t("paymentVoucher.nextStepApprove")} text={t("paymentVoucher.nextStepApproveText")} />
+      )}
 
       <Card className="cardstyle_container">
         <div className="grid">
