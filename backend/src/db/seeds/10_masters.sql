@@ -15,16 +15,20 @@ INSERT INTO insurance_companies(code, name, short_name, commission_rate, contact
  ('PIONEER','Pioneer Insurance & Surety Corp.','Pioneer',0.175,'uw@pioneer.example','active'),
  ('FPG','FPG Insurance Co., Inc.','FPG',0.15,'uw@fpg.example','active'),
  ('STANDARD','Standard Insurance Co., Inc.','Standard',0.16,'uw@standard.example','active'),
- ('MERCANTILE','Mercantile Insurance Co., Inc.','Mercantile',0.14,'uw@mercantile.example','active')
+ ('MERCANTILE','Mercantile Insurance Co., Inc.','Mercantile',0.14,'uw@mercantile.example','active'),
+ ('MAAGAP','Maagap Insurance, Inc.','Maagap',NULL,NULL,'active'),
+ ('AXA','AXA Philippines','AXA',NULL,NULL,'active')
 ON CONFLICT (code) DO NOTHING;
-INSERT INTO products(code, name, line) VALUES
- ('MOTOR','Motor Vehicle Insurance','motor'),('CTPL','Compulsory Third Party Liability','motor'),
- ('FIRE','Fire and Allied Perils','fire'),('MARINE','Marine Cargo','marine'),
- ('PA','Personal Accident','accident'),('CGL','Comprehensive General Liability','casualty'),
- ('EB','Group Employee Benefits','eb'),('BOND','Surety Bond','casualty')
+-- TISPH catalogue (migration 0341): the products outside it are created inactive, switched on in Master > Product.
+INSERT INTO products(code, name, line, status) VALUES
+ ('MOTOR','Motor Vehicle Insurance','motor','active'),('CTPL','Compulsory Third Party Liability','motor','active'),
+ ('FIRE','Fire and Allied Perils','fire','inactive'),('MARINE','Marine Cargo','marine','inactive'),
+ ('PA','Personal Accident','accident','active'),('CGL','Comprehensive General Liability','casualty','inactive'),
+ ('EB','Group Employee Benefits','eb','inactive'),('BOND','Surety Bond','casualty','inactive')
 ON CONFLICT (code) DO NOTHING;
-INSERT INTO policy_types(product_id, code, name)
-SELECT p.id, v.code, v.name FROM (VALUES
+-- Group PA is the GPA product (64_product_classification.sql); Own Damage / Theft is not sold by TISPH.
+INSERT INTO policy_types(product_id, code, name, status)
+SELECT p.id, v.code, v.name, CASE WHEN p.status = 'active' AND v.code NOT IN ('ODTH','PA-GRP') THEN 'active' ELSE 'inactive' END FROM (VALUES
  ('MOTOR','COMP','Comprehensive'),('MOTOR','TPL','Third Party Liability'),('MOTOR','ODTH','Own Damage / Theft'),
  ('CTPL','CTPL','CTPL'),('FIRE','FIRE-RES','Residential'),('FIRE','FIRE-COM','Commercial'),
  ('MARINE','MC-IMP','Import'),('MARINE','MC-DOM','Domestic'),('PA','PA-IND','Individual'),('PA','PA-GRP','Group'),

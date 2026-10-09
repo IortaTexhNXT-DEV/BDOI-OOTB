@@ -1,10 +1,10 @@
 -- SAMPLE / DEMO DATA: runs only when SEED_SAMPLE_DATA is true. Packaged products (illustrative rates, verify with the
 -- insurers before use): insurer rate tables for the householder, personal accident and burglary products, and two
 -- bundles, "SME Shield" (Fire + CGL + Burglary) and "Home Protect" (Householder fire + PA + optional Burglary).
--- Idempotent by code and by insurer / product / effective date.
+-- Idempotent by code and by insurer / product / effective date. Rate tables of inactive products are inactive.
 
-INSERT INTO insurer_rate_tables(insurance_company_id, product_id, rate_basis, rate, minimum_premium, deductible, deductible_amount, key_benefits, commission_rate, effective_from, remarks, created_by)
-SELECT ic.id, p.id, v.basis, v.rate, v.minimum, v.deductible, v.ded_amount, v.benefits::jsonb, v.commission, DATE '2026-01-01', 'Sample rate', 'seed'
+INSERT INTO insurer_rate_tables(insurance_company_id, product_id, rate_basis, rate, minimum_premium, deductible, deductible_amount, key_benefits, commission_rate, effective_from, active, remarks, created_by)
+SELECT ic.id, p.id, v.basis, v.rate, v.minimum, v.deductible, v.ded_amount, v.benefits::jsonb, v.commission, DATE '2026-01-01', p.status = 'active', 'Sample rate', 'seed'
 FROM (VALUES
  ('MALAYAN', 'HOME', 'percent', 0.25, 1500, 'PHP 2,500 each and every loss', 2500, '["Fire and lightning","Typhoon, flood and windstorm","Earthquake fire and shock","Riot, strike and malicious damage","Temporary living expenses up to PHP 30,000"]', 0.20),
  ('STANDARD', 'HOME', 'percent', 0.22, 1800, 'PHP 5,000 each and every loss', 5000, '["Fire and lightning","Typhoon and flood","Burst pipes and water damage"]', 0.18),
@@ -19,9 +19,10 @@ FROM (VALUES
 JOIN insurance_companies ic ON ic.code = v.insurer JOIN products p ON p.code = v.product
 WHERE NOT EXISTS (SELECT 1 FROM insurer_rate_tables x WHERE x.insurance_company_id = ic.id AND x.product_id = p.id AND x.effective_from = DATE '2026-01-01');
 
-INSERT INTO package_bundles(code, name, description, customer_segment, discount_percent, term_months, auto_issue, created_by) VALUES
- ('SME-SHIELD', 'SME Shield', 'Property, liability and burglary cover for small shops, offices and restaurants', 'sme', 10, 12, true, 'seed'),
- ('HOME-PROTECT', 'Home Protect', 'Householder fire, personal accident of the head of the family and optional burglary', 'retail', 5, 12, true, 'seed')
+-- Both bundles carry products outside the TISPH catalogue (migration 0341): they are created inactive.
+INSERT INTO package_bundles(code, name, description, customer_segment, discount_percent, term_months, auto_issue, status, created_by) VALUES
+ ('SME-SHIELD', 'SME Shield', 'Property, liability and burglary cover for small shops, offices and restaurants', 'sme', 10, 12, true, 'inactive', 'seed'),
+ ('HOME-PROTECT', 'Home Protect', 'Householder fire, personal accident of the head of the family and optional burglary', 'retail', 5, 12, true, 'inactive', 'seed')
 ON CONFLICT (code) DO NOTHING;
 
 INSERT INTO package_bundle_sections(bundle_id, section_no, name, product_id, default_sum_insured, rate_percent, minimum_premium, property, optional, insurer_ids, benefits)

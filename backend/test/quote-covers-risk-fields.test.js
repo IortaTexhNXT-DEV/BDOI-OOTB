@@ -7,7 +7,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, withProducts } from './helpers.js';
 import { pool, query } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { today } from '../src/lib/dates.js';
@@ -27,6 +27,7 @@ const riskFields = (dob, extra = {}) => ({ vehicleUse: 'Private', driverDateOfBi
 
 beforeAll(async () => {
   ctx = await setup();
+  await withProducts();
   await ctx.api('post', '/users').send({ username: 'qc.sales', password: 'Welcome@123', displayName: 'qc.sales', email: 'qc.sales@example.ph', roles: ['sales'] });
   const token = await loginAs(ctx.app, 'qc.sales', 'Welcome@123');
   sales = (m, p) => request(ctx.app)[m](`/api${p}`).set('Authorization', `Bearer ${token}`);

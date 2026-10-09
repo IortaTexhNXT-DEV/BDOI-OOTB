@@ -1,12 +1,13 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, withProducts } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 
 let ctx;
 let salesToken;
 beforeAll(async () => {
   ctx = await setup();
+  await withProducts();
   await ctx.api('post', '/users').send({ username: 'p.sales', password: 'Welcome@123', displayName: 'P Sales', roles: ['sales'] });
   salesToken = await loginAs(ctx.app, 'p.sales', 'Welcome@123');
 });

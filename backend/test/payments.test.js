@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, withProducts } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { PROVIDERS, dragonpayPostbackDigest, dragonpayRequestDigest } from '../src/modules/payment-gateway/providers.js';
 import { createLink } from '../src/modules/payment-gateway/service.js';
@@ -82,6 +82,7 @@ describe('payment links end to end', () => {
   let salesUser;
   beforeAll(async () => {
     ctx = await setup();
+    await withProducts();
     admin = ctx.api;
     sales = await persona('pay.sales', ['sales']);
     accounting = await persona('pay.accounting', ['accounting']);

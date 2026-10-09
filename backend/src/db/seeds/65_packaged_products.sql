@@ -10,7 +10,7 @@ ON CONFLICT DO NOTHING;
 UPDATE master_types SET fields = fields || $j$[{"name":"premiumTaxRegime","label":"Premium Tax Regime","type":"select","required":false,"options":["vat","premium_tax","exempt"],"column":"premium_tax_regime"}]$j$::jsonb
 WHERE code = 'product' AND NOT fields @> '[{"name":"premiumTaxRegime"}]'::jsonb;
 
--- Burglary, sold as a section of the SME and home packages.
-INSERT INTO products(code, name, line, description, business_type, customer_segment) VALUES
- ('BURGLARY', 'Burglary and Robbery', 'casualty', 'Loss of contents by burglary, robbery or theft with visible forced entry', 'package', 'both')
+-- Burglary, sold as a section of the SME and home packages; outside the TISPH catalogue (migration 0341).
+INSERT INTO products(code, name, line, description, business_type, customer_segment, status) VALUES
+ ('BURGLARY', 'Burglary and Robbery', 'casualty', 'Loss of contents by burglary, robbery or theft with visible forced entry', 'package', 'both', 'inactive')
 ON CONFLICT (code) DO NOTHING;
