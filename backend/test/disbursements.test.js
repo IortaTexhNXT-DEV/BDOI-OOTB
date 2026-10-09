@@ -51,7 +51,7 @@ describe('disbursements / payment vouchers', () => {
     expect(ap.status).toBe(200);
     expect(ap.body.data.journalId).toBeTruthy();
     const lines = (await query('SELECT account_code, debit, credit FROM journal_lines WHERE jv_id = $1 ORDER BY line_no', [ap.body.data.journalId])).rows;
-    expect(lines.map((l) => l.account_code)).toEqual(['2205001', '1102001']);
+    expect(lines.map((l) => l.account_code)).toEqual(['210230', '1102001']);
     const pr = await ctx.as('checker')('put', `/disbursements/checkbook/${id}`).send({ status: 'Printed' });
     expect(pr.body.data.status).toBe('Printed');
     const v = await ctx.as('maker')('get', `/disbursements/${d.disbursementId}`);

@@ -122,7 +122,7 @@ describe('former hard-coded texts and limits come from settings', () => {
     await request(app).post('/api/auth/forgot-password').send({ username: 'BrokerVerse' }).expect(200);
     // {{companyName}} is the letterhead company (primary company of the Company master)
     const company = await companyName();
-    expect(company).toBe('iorta TechNXT Corp.');
+    expect(company).toBe('Toyota Insurance Services Philippines Corporation');
     expect((await last()).subject).toBe(`Your ${company} password reset code`);
     expect((await last()).body_html).toContain('It expires in 15 minutes.');
     expect(Math.round((await lifetime()) / 60)).toBe(15);

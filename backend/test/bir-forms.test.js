@@ -200,7 +200,7 @@ describe('sales invoices under the EOPT Act (13.10)', () => {
     expect(inv).toMatchObject({ vatableSales: 10000, vatExemptSales: 500, zeroRatedSales: 0, vatAmount: 1200, totalSales: 10500, totalAmount: 11700, status: 'issued', balance: 11700 });
     expect(inv.seller).toMatchObject({ registeredName: expect.any(String), tin: expect.stringMatching(/^\d{9}$/), branchCode: expect.stringMatching(/^\d{5}$/), vatRegistered: true });
     expect(await bal('1205003', inv.journalId)).toBe(11700);
-    expect(await bal('2204003', inv.journalId)).toBe(-1200);
+    expect(await bal('235000', inv.journalId)).toBe(-1200);
     const b = (await maker('post', '/bir/invoices').send(manual())).body.data;
     expect(Number(b.invoiceNumber.slice(3))).toBe(Number(inv.invoiceNumber.slice(3)) + 1);
 

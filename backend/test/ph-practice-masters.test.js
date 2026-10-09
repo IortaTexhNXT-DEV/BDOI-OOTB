@@ -12,8 +12,10 @@ import { one, pool, query } from '../src/db/pool.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const SEED = path.join(here, '..', 'src', 'db', 'seeds', '69_ph_practice_masters.sql');
-const TYPES = { salutation: 10, 'civil-status': 6, gender: 2, nationality: 17, 'government-id-type': 12, 'customer-type': 10, 'payment-mode': 10, holiday: 42 };
-const STARTER_INSURERS = ['FPG', 'MALAYAN', 'MAPFRE', 'MERCANTILE', 'PIONEER', 'STANDARD'];
+const TYPES = { salutation: 10, 'civil-status': 6, gender: 2, nationality: 17, 'government-id-type': 12, 'customer-type': 10, 'payment-mode': 17, holiday: 42 };
+// payment modes: the 10 of seed 69 and the 7 TISPH modes (seed 80_tisph_configuration.sql); Stronghold is on the TISPH panel
+const TISPH_PAYMENT_MODES = ['EFT', 'CARD', 'CHCK', 'E-WALLET', 'OTC', 'MC', 'ADA'];
+const STARTER_INSURERS = ['FPG', 'MALAYAN', 'MAPFRE', 'MERCANTILE', 'PIONEER', 'STANDARD', 'STRONGHOLD'];
 
 let ctx;
 beforeAll(async () => { ctx = await setup(); });
@@ -95,7 +97,7 @@ describe('Philippine practice masters (seed 69)', () => {
 
   it('payment modes used in the Philippines', async () => {
     const rows = await records('payment-mode');
-    expect(rows.map((r) => r.code)).toEqual(['CASH', 'CHECK', 'PDC', 'DEPOSIT', 'INSTAPAY', 'PESONET', 'GCASH', 'MAYA', 'CREDIT_CARD', 'DEBIT_CARD']);
+    expect(rows.map((r) => r.code)).toEqual(['CASH', 'CHECK', 'PDC', 'DEPOSIT', 'INSTAPAY', 'PESONET', 'GCASH', 'MAYA', 'CREDIT_CARD', 'DEBIT_CARD', ...TISPH_PAYMENT_MODES]);
     expect(byCode(rows).PDC.name).toBe('Post-dated Check');
   });
 
@@ -130,7 +132,7 @@ describe('Philippine practice masters (seed 69)', () => {
     expect(new Set(rows.map((b) => b.swift_code)).size).toBe(17);
   });
 
-  it('the 51 non-life insurers licensed by the Insurance Commission: 45 inactive to activate, the 6 starters active', async () => {
+  it('the 51 non-life insurers licensed by the Insurance Commission: 44 inactive to activate, the 6 starters and Stronghold active', async () => {
     const rows = (await query("SELECT code, name, short_name, status, attrs FROM insurance_companies WHERE attrs ? 'icLineOfBusiness' ORDER BY code")).rows;
     expect(rows).toHaveLength(51);
     for (const r of rows) {
@@ -141,7 +143,7 @@ describe('Philippine practice masters (seed 69)', () => {
     expect(rows.filter((r) => r.attrs.icLineOfBusiness === 'Composite').map((r) => r.code)).toEqual(['PARAMOUNT']);
     const active = rows.filter((r) => r.status === 'active').map((r) => r.code).sort();
     expect(active).toEqual(STARTER_INSURERS);
-    expect(rows.filter((r) => r.status === 'inactive')).toHaveLength(45);
+    expect(rows.filter((r) => r.status === 'inactive')).toHaveLength(44);
     const ins = byCode(rows);
     expect(ins.AIG).toMatchObject({ name: 'AIG Philippines Insurance, Inc.', short_name: 'AIG', status: 'inactive' });
     expect(ins.BPIMS.name).toBe('BPI/MS Insurance Corporation');

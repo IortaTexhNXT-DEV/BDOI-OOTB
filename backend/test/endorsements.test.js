@@ -234,7 +234,7 @@ describe('coverage change endorsements (premium delta)', () => {
     expect(Number(item.gross_premium)).toBeCloseTo(delta, 2);
     expect(Number(item.amount)).toBeCloseTo(Number(item.commission) + Number(item.vat), 2);
     const lines = await q('SELECT account_code FROM journal_lines WHERE jv_id = $1 ORDER BY line_no', [item.booking_jv_id]);
-    expect(lines.map((l) => l.account_code)).toEqual(['1203001', '3201001', '2204003']);
+    expect(lines.map((l) => l.account_code)).toEqual(['110400', '3201001', '235000']);
     expect((await q('SELECT billing_mode FROM endorsements WHERE id = $1', [e.body.endorsementId]))[0].billing_mode).toBe('direct');
   });
 });

@@ -203,7 +203,7 @@ describe('matching', () => {
     expect(r.body.data).toMatchObject({ bankTotal: 1500, bookTotal: 1500, difference: 0 });
     expect(r.body.data.items.filter((i) => i.side === 'book')).toHaveLength(2);
     const fee = (await query('SELECT l.account_code, l.debit FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id WHERE j.source = \'bank-reconciliation\' AND l.debit = 10')).rows;
-    expect(fee).toEqual([{ account_code: '4401004', debit: 10 }]);
+    expect(fee).toEqual([{ account_code: '650010', debit: 10 }]);
   });
 });
 
@@ -217,7 +217,7 @@ describe('adjustments', () => {
     expect(r.body.data.status).toBe('posted');
     expect(r.body.data.matchId).toBeTruthy();
     const lines = (await query('SELECT l.account_code, l.debit, l.credit, j.source, j.jv_date FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id WHERE j.id = $1 ORDER BY l.line_no', [r.body.data.journal.id])).rows;
-    expect(lines.map((l) => [l.account_code, Number(l.debit), Number(l.credit)])).toEqual([['4401004', 150, 0], [GL, 0, 150]]);
+    expect(lines.map((l) => [l.account_code, Number(l.debit), Number(l.credit)])).toEqual([['650010', 150, 0], [GL, 0, 150]]);
     expect(lines[0].source).toBe('bank-reconciliation');
     expect(lines[0].jv_date).toBe('2026-06-30');
     expect((await maker('post', `/bank-reconciliation/bank-lines/${charge.id}/adjustment`).send({ typeCode: 'BCHG' })).status).toBe(409);

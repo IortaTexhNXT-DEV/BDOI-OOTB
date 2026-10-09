@@ -53,7 +53,7 @@ describe('direct-bill policy issue', () => {
     expect(item.status).toBe('unbilled');
     const jv = (await query('SELECT * FROM journal_vouchers WHERE id = $1', [item.booking_jv_id])).rows[0];
     expect(jv).toMatchObject({ entry_type: 'DIRECT_BILLED', status: 'posted', policy_id: d.policyId });
-    expect(await lines(jv.id)).toEqual([{ a: '1203001', d: 16800, c: 0 }, { a: '3201001', d: 0, c: 15000 }, { a: '2204003', d: 0, c: 1800 }]);
+    expect(await lines(jv.id)).toEqual([{ a: '110400', d: 16800, c: 0 }, { a: '3201001', d: 0, c: 15000 }, { a: '235000', d: 0, c: 1800 }]);
     // nothing on premium receivable (1202001) or premium payable to the insurer (2201001) for this policy
     const premium = (await query(`SELECT count(*)::int AS n FROM journal_lines WHERE policy_id = $1 AND account_code IN ('1202001', '2201001')`, [d.policyId])).rows[0].n;
     expect(premium).toBe(0);
@@ -99,7 +99,7 @@ describe('direct-bill policy issue', () => {
     const nv = await issue({ net: 10000, gross: 12525 });
     const i2 = (await query('SELECT * FROM direct_bill_items WHERE policy_id = $1', [nv.policyId])).rows[0];
     expect([Number(i2.commission), Number(i2.vat), Number(i2.amount)]).toEqual([1500, 0, 1500]);
-    expect((await lines(i2.booking_jv_id)).map((l) => l.a)).toEqual(['1203001', '3201001']);
+    expect((await lines(i2.booking_jv_id)).map((l) => l.a)).toEqual(['110400', '3201001']);
     await setting('direct_bill.broker_vat_registered', true);
     // these two stay out of the debit-note tests below
     await query('UPDATE direct_bill_items SET status = \'cancelled\' WHERE policy_id = ANY($1)', [[inc.policyId, nv.policyId]]);
@@ -109,7 +109,7 @@ describe('direct-bill policy issue', () => {
     const x = await issue({ net: 20000, gross: 25050, insurer: 'PIONEER' });
     const it = await withTransaction((db) => bookDirectBill(db, { policy: { id: x.policyId }, amount: -2505, breakdown: { netPremium: -2000, commissionAmount: -300 }, source: 'endorsement', reference: 'END-TEST-1', user: { id: ctx.userIds.maker } }));
     expect([Number(it.commission), Number(it.vat), Number(it.amount)]).toEqual([-300, -36, -336]);
-    expect(await lines(it.booking_jv_id)).toEqual([{ a: '3201001', d: 300, c: 0 }, { a: '2204003', d: 36, c: 0 }, { a: '1203001', d: 0, c: 336 }]);
+    expect(await lines(it.booking_jv_id)).toEqual([{ a: '3201001', d: 300, c: 0 }, { a: '235000', d: 36, c: 0 }, { a: '110400', d: 0, c: 336 }]);
     await query('UPDATE direct_bill_items SET status = \'cancelled\' WHERE policy_id = $1', [x.policyId]);
   });
 });
@@ -176,7 +176,7 @@ describe('commission debit note', () => {
     expect(c1.status).toBe(201);
     expect(c1.body.data).toMatchObject({ statusCode: 'partial', status: 'Partially Collected', collectedCash: 7650, collectedEwt: 750, balance: 8400 });
     expect(c1.body.data.collection.collectionNumber).toMatch(/^DNC-\d{4}-\d{5}$/);
-    expect(await lines(c1.body.data.collection.journalId)).toEqual([{ a: '1102001', d: 7650, c: 0 }, { a: '1302001', d: 750, c: 0 }, { a: '1203001', d: 0, c: 8400 }]);
+    expect(await lines(c1.body.data.collection.journalId)).toEqual([{ a: '106010', d: 7650, c: 0 }, { a: '1302001', d: 750, c: 0 }, { a: '110400', d: 0, c: 8400 }]);
     // cannot collect more than the balance
     expect((await ctx.as('maker')('post', `/remittance/direct-bill/${dn.id}/collections`).send({ cashAmount: 9000, ewtAmount: 0 })).status).toBe(400);
     // the Account Executive's commission waits for the insurer's payment
@@ -189,7 +189,7 @@ describe('commission debit note', () => {
     expect((await query('SELECT status FROM commissions WHERE policy_id = $1', [d.policyId])).rows[0].status).toBe('Eligible');
     // commission receivable of the policy is cleared: 16,800 booked, 8,400 + 8,400 collected
     const bal = (await query(`SELECT COALESCE(sum(l.debit - l.credit), 0)::float AS b FROM journal_lines l JOIN journal_vouchers j ON j.id = l.jv_id
-      WHERE l.account_code = '1203001' AND (j.policy_id = $1 OR (j.reference_type = 'CommissionDebitNote' AND j.reference_id = $2))`, [d.policyId, dn.id])).rows[0].b;
+      WHERE l.account_code = '110400' AND (j.policy_id = $1 OR (j.reference_type = 'CommissionDebitNote' AND j.reference_id = $2))`, [d.policyId, dn.id])).rows[0].b;
     expect(bal).toBe(0);
     expect((await ctx.as('maker')('post', `/remittance/direct-bill/${dn.id}/collections`).send({ cashAmount: 1 })).status).toBe(409);
     expect(await ledgerIntegrity()).toEqual({ unbalanced: 0, diff: 0 });
@@ -211,8 +211,8 @@ describe('commission debit note', () => {
     expect(row).toMatchObject({ insurer: 'FPG Insurance Co., Inc.', debitNoteNo: dn.dnNumber, totalDue: 16800, balance: 8400, status: 'Partially collected' });
     const tb = await ctx.as('maker')('get', '/accounting/trial-balance');
     expect(tb.body.data.totals.balanced).toBe(true);
-    const acct = tb.body.data.rows.find((x) => x.accountCode === '1203001');
-    expect(acct).toMatchObject({ accountType: 'asset', fsGroup: 'Current Assets', accountName: 'Commission Receivable – Insurers (Direct Bill)' });
+    const acct = tb.body.data.rows.find((x) => x.accountCode === '110400');
+    expect(acct).toMatchObject({ accountType: 'asset', fsGroup: 'Current Assets', accountName: 'Receivable from Insurance Company' });
     expect(tb.body.data.rows.find((x) => x.accountCode === '1302001').debit).toBeGreaterThanOrEqual(750);
     const prod = await ctx.api('post', '/reports/production-register/run').send({ ReportCriteria: 'Billing Mode', FromDate: '2020-01-01', ToDate: '2030-12-31', perPage: 500 });
     expect(prod.body.data.rows.find((x) => x.policyNumber === d.policy.policy_number).billingMode).toBe('Direct bill');

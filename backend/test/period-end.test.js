@@ -6,6 +6,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { setupFinance } from './accounting.fixtures.js';
+import { withCalendarFiscalYear } from './helpers.js';
 import { pool, query, withTransaction } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { createJournal, cancelJournal } from '../src/modules/accounting/lib/ledger.js';
@@ -17,6 +18,7 @@ let admin;
 let maker;
 beforeAll(async () => {
   ctx = await setupFinance();
+  await withCalendarFiscalYear();
   admin = ctx.api;
   maker = ctx.as('maker');
 });
@@ -285,7 +287,7 @@ describe('year-end close', () => {
     const tbBefore = (await admin('get', '/accounting/trial-balance?asOf=2025-12-31')).body.data;
     netIncome = Number(is.summary.netIncome);
     expect(netIncome).toBeCloseTo(tbBefore.totals.netIncome, 2);
-    const reBefore = await bal('5101001', '2025-12-31');
+    const reBefore = await bal('340000', '2025-12-31');
     expect((await maker('post', `/period-end/year-end/${ye.id}/close`).send({})).status).toBe(403);
     const closed = await admin('post', `/period-end/year-end/${ye.id}/close`).send({});
     expect(closed.status, JSON.stringify(closed.body)).toBe(200);
@@ -299,8 +301,8 @@ describe('year-end close', () => {
       JOIN gl_accounts a ON a.code = l.account_code WHERE a.account_type IN ('income','expense') AND j.status IN ('posted','reversed') AND j.jv_date <= '2025-12-31'
       GROUP BY l.account_code HAVING sum(l.debit - l.credit) <> 0`)).rows;
     expect(pl).toEqual([]);
-    expect(await bal('5102001', '2025-12-31')).toBe(0);
-    expect(await bal('5101001', '2025-12-31') - reBefore).toBeCloseTo(-netIncome, 2);
+    expect(await bal('340020', '2025-12-31')).toBe(0);
+    expect(await bal('340000', '2025-12-31') - reBefore).toBeCloseTo(-netIncome, 2);
     const tb = (await admin('get', '/accounting/trial-balance?asOf=2025-12-31')).body.data;
     expect(tb.totals.balanced).toBe(true);
     expect(tb.totals.netIncome).toBe(0);
@@ -316,8 +318,8 @@ describe('year-end close', () => {
     const ocm = await report('trial-balance-ocm', { FromDate: '2026-01-01', ToDate: '2026-09-30' });
     expect(ocm.summary.openingBalanced).toBe(true);
     expect(ocm.summary.balanced).toBe(true);
-    const re = ocm.rows.find((r) => r.accountCode === '5101001');
-    expect(Number(re.openingCredit) - Number(re.openingDebit)).toBeCloseTo(-(await bal('5101001', '2025-12-31')), 2);
+    const re = ocm.rows.find((r) => r.accountCode === '340000');
+    expect(Number(re.openingCredit) - Number(re.openingDebit)).toBeCloseTo(-(await bal('340000', '2025-12-31')), 2);
     const bs = await report('balance-sheet', { FromDate: '2026-01-01', ToDate: '2026-09-30' });
     expect(Number(bs.summary.difference)).toBe(0);
     expect(Number(bs.summary.priorTotalAssets)).toBeCloseTo(Number(bs.summary.priorTotalLiabilitiesAndEquity), 2);
@@ -365,7 +367,7 @@ describe('BIR tax', () => {
   it('tax codes master holds the PH codes with ATCs and is editable', async () => {
     const list = (await maker('get', '/period-end/tax-codes')).body.data;
     for (const atc of ['WC158', 'WI158', 'WC160', 'WI160', 'WI515']) expect(list.find((t) => t.atc === atc), atc).toBeTruthy();
-    expect(list.find((t) => t.code === 'VAT12-OUT')).toMatchObject({ taxType: 'VAT', rate: 12, glAccount: '2204003', editable: true });
+    expect(list.find((t) => t.code === 'VAT12-OUT')).toMatchObject({ taxType: 'VAT', rate: 12, glAccount: '235000', editable: true });
     const upd = await maker('put', '/period-end/tax-codes/WC160').send({ rate: 2, remarks: 'RR 11-2018' });
     expect(upd.body.data.remarks).toBe('RR 11-2018');
     expect((await maker('post', '/period-end/tax-codes').send({ code: 'WC999', description: 'Test code', taxType: 'EWT', rate: 3, atc: 'WC158' })).status).toBe(409);

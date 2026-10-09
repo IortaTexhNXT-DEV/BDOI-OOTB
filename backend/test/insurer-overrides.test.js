@@ -89,7 +89,7 @@ describe('agreements, computation, approval and settlement', () => {
     const ap = await checker('post', `/insurer-overrides/computations/${comp.id}/approve`).send({});
     expect(ap.status, JSON.stringify(ap.body)).toBe(200);
     expect(ap.body.data).toMatchObject({ status: 'approved', balance: comp.receivable });
-    expect(await lines(ap.body.data.journalId)).toEqual([['1203006', comp.receivable, 0], ['3201002', 0, comp.commission], ['2204003', 0, comp.vat]]);
+    expect(await lines(ap.body.data.journalId)).toEqual([['1203006', comp.receivable, 0], ['3201002', 0, comp.commission], ['235000', 0, comp.vat]]);
     expect((await maker('post', `/insurer-overrides/agreements/${agreement.id}/compute`).send({ year, periodLabel: String(year) })).status).toBe(409);
 
     // the sales invoice of the commission (EOPT): no second posting
@@ -106,12 +106,12 @@ describe('agreements, computation, approval and settlement', () => {
     expect(s1.status, JSON.stringify(s1.body)).toBe(200);
     expect(s1.body.data.computation).toMatchObject({ status: 'partially_settled' });
     expect(s1.body.data.statementMatches).toBe(true);
-    expect(await lines(s1.body.data.settlement.journalId)).toEqual([['1102001', Math.round((half - ewt) * 100) / 100, 0], ['1302001', ewt, 0], ['1203006', 0, half]]);
+    expect(await lines(s1.body.data.settlement.journalId)).toEqual([['106010', Math.round((half - ewt) * 100) / 100, 0], ['1302001', ewt, 0], ['1203006', 0, half]]);
     const rest = Math.round((comp.receivable - half) * 100) / 100;
     const s2 = await maker('post', `/insurer-overrides/computations/${comp.id}/settlements`).send({ statementReference: 'SOA-STD-2', cashReceived: rest - 10, differenceTreatment: 'adjust_income' });
     expect(s2.body.data.computation).toMatchObject({ status: 'settled', balance: 0 });
     expect(s2.body.data.settlement.difference).toBe(-10);
-    expect(await lines(s2.body.data.settlement.journalId)).toEqual([['1102001', Math.round((rest - 10) * 100) / 100, 0], ['1203006', 0, rest], ['3201002', 10, 0]]);
+    expect(await lines(s2.body.data.settlement.journalId)).toEqual([['106010', Math.round((rest - 10) * 100) / 100, 0], ['1203006', 0, rest], ['3201002', 10, 0]]);
     const full = (await maker('get', `/insurer-overrides/computations/${comp.id}`)).body.data;
     expect(full.settlements).toHaveLength(2);
     expect((await maker('post', `/insurer-overrides/computations/${comp.id}/settlements`).send({ statementReference: 'SOA-X', cashReceived: 1 })).status).toBe(409);

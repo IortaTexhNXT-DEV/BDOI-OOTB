@@ -67,7 +67,8 @@ describe('chart of accounts', () => {
     for (const a of all) {
       expect(a.fs_group, a.code).toBeTruthy();
       expect(groupType.get(a.fs_group), `${a.code} ${a.fs_group}`).toBe(a.account_type);
-      expect(String(a.code)[0], a.code).toBe({ asset: '1', liability: '2', income: '3', expense: '4', equity: '5' }[a.account_type]);
+      // the starter chart numbers by type; the TISPH chart (6-digit SAP codes, seed 81_tisph_finance.sql) by its own ranges
+      if (a.code.length === 7) expect(String(a.code)[0], a.code).toBe({ asset: '1', liability: '2', income: '3', expense: '4', equity: '5' }[a.account_type]);
     }
     // contra accounts carry a credit balance, the income summary is not for manual vouchers
     expect(byCode.get('1402001').normal_balance).toBe('credit');
@@ -146,7 +147,7 @@ describe('chart of accounts', () => {
     expect((await ctx.api('get', '/masters/sub-account/options?limit=1000')).body.data.map((o) => o.code)).toContain('4409101001');
     expect((await ctx.api('get', '/accounting/accounts?level=sub&search=4409101')).body.data.map((a) => a.code)).toEqual(['4409101001']);
     // a system account cannot be deactivated
-    const off = await ctx.api('put', '/accounting/accounts/2204003').send({ status: 'inactive' });
+    const off = await ctx.api('put', '/accounting/accounts/235000').send({ status: 'inactive' });
     expect(off.status).toBe(409);
     expect(off.body.message).toMatch(/output_vat/);
   });

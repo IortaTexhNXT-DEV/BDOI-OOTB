@@ -402,6 +402,8 @@ describe('e-signatures', () => {
 describe('brand packs', () => {
   it('exports and imports a brand pack (zip and JSON), dry run first', async () => {
     await ctx.api('put', '/branding/theme').send({ theme: { ...PRESETS['corporate-grey'], name: 'Grey Broker' } });
+    // the TISPH letterhead company has no logo of its own yet: it gets one so that the pack carries a document logo
+    await query(`UPDATE master_records SET data = data || '{"Logo": "/bdoi/iorta-technxt.png"}'::jsonb WHERE type_code = 'company' AND code = 'TISPH'`);
     const zip = await binary(ctx.api('get', '/branding/brand-pack?format=zip'));
     expect(zip.status).toBe(200);
     expect(zip.headers['content-type']).toContain('application/zip');

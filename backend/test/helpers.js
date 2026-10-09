@@ -52,6 +52,17 @@ export async function withoutCommissionTaxes() {
   clearSettingsCache();
 }
 /**
+ * Fiscal year on the calendar year (accounting.fiscal_year_start_month = 1) for suites whose dates and fiscal year codes
+ * assume it. TISPH's April start (seed 80_tisph_configuration.sql) is covered by test/period-end-calendar.test.js and
+ * test/tisph-configuration.test.js.
+ */
+export async function withCalendarFiscalYear() {
+  const { query } = await import('../src/db/pool.js');
+  const { clearSettingsCache } = await import('../src/lib/settings.js');
+  await query('UPDATE app_settings SET value = \'1\' WHERE key = \'accounting.fiscal_year_start_month\'');
+  clearSettingsCache();
+}
+/**
  * Apply posting rule and account determination changes at once (no second approver, migration 0174), for suites that
  * test the effect of a change. test/configuration-controls.test.js covers the approval.
  */

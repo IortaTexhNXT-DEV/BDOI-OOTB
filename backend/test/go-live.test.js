@@ -108,9 +108,9 @@ describe('production start on a fresh database', () => {
     expect(await count('users', `username = ANY('{${SAMPLE_USERS.join(',')}}')`)).toBe(0);
     expect(await count('insurance_companies', "code IN ('SECUREGUARD','APEX')")).toBe(0);
     expect(await count('master_records', "type_code IN ('employee','bank-account')")).toBe(0);
-    // the only company is the OOTB letterhead company (reference data)
-    expect(await count('master_records', "type_code = 'company'")).toBe(1);
-    expect(await count('master_records', "type_code = 'company' AND code = 'ITX' AND data->>'IsPrimary' = 'true'")).toBe(1);
+    // the companies are the OOTB company and TISPH, the letterhead company (reference data)
+    expect(await count('master_records', "type_code = 'company'")).toBe(2);
+    expect(await count('master_records', "type_code = 'company' AND code = 'TISPH' AND data->>'IsPrimary' = 'true'")).toBe(1);
     // reference data
     expect(await count('report_definitions')).toBeGreaterThan(10);
     expect(await count('app_settings')).toBeGreaterThan(100);

@@ -251,10 +251,12 @@ describe('claim document checklist', () => {
     const r = await ctx.as('claims')('get', `/claim-documents/claims/${claimId}`);
     expect(r.status).toBe(200);
     const names = r.body.data.items.map((i) => i.documentName);
-    expect(names).toContain('Duly accomplished claim form');
-    expect(names).toContain('PNP-HPG alarm sheet and certificate of non-recovery');
+    // TISPH checklist (Pre-BSM M14): the Motor documents and those of every line, not those of other lines
+    expect(names).toContain('Claim Form');
+    expect(names).toContain('Affidavit of Theft');
+    expect(names).toContain('Police Report');
     expect(names).not.toContain('Fire investigation report of the Bureau of Fire Protection');
-    expect(names).not.toContain('Third party\'s claim letter and estimate');
+    expect(names).not.toContain('Notice of Default');
     expect(r.body.data.summary.complete).toBe(false);
   });
   it('refuses the submission to the insurer while a required document is missing', async () => {
@@ -268,7 +270,7 @@ describe('claim document checklist', () => {
     expect(r.body.data.to).toBe(m.client.email);
     const mail = await one('SELECT subject, body_html FROM email_outbox WHERE id = $1', [r.body.data.emailId]);
     expect(mail.subject).toMatch(/CLM-T-DOC1/);
-    expect(mail.body_html).toMatch(/<li>PNP-HPG alarm sheet/);
+    expect(mail.body_html).toMatch(/<li>Affidavit of Theft/);
     await query('UPDATE claim_document_reminders SET created_at = now() - interval \'5 days\' WHERE claim_id = $1', [claimId]);
     expect((await claimDocumentReminders()).reminders).toBeGreaterThanOrEqual(1);
     expect((await one('SELECT count(*)::int AS n FROM claim_document_reminders WHERE claim_id = $1 AND automatic', [claimId])).n).toBe(1);
@@ -375,7 +377,7 @@ describe('accounts payable', () => {
     expect(a.status).toBe(200);
     expect(a.body.data.status).toBe('approved');
     const lines = await jvLines(a.body.data.journalId);
-    expect(lines).toEqual(expect.arrayContaining([{ a: '4401008', d: 6000, c: 0 }, { a: '4401007', d: 4000, c: 0 }, { a: '1301001', d: 1200, c: 0 },
+    expect(lines).toEqual(expect.arrayContaining([{ a: '4401008', d: 6000, c: 0 }, { a: '4401007', d: 4000, c: 0 }, { a: '135000', d: 1200, c: 0 },
       { a: '2204001', d: 0, c: 100 }, { a: '2206001', d: 0, c: 11100 }]));
     pdfOk(await pdfGet(ctx.as('maker'), `/payables/invoices/${inv.id}/pdf`));
   });

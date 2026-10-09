@@ -237,11 +237,11 @@ describe('letterhead and the primary company', () => {
   beforeAll(async () => { ctx = await setup(); });
   afterAll(async () => { await pool.end(); });
 
-  it('reads the primary company of the Company master (iorta TechNXT Corp. out of the box) with its logo', async () => {
+  it('reads the primary company of the Company master (TISPH) with the default logo', async () => {
     clearLetterheadCache();
     const lh = await getLetterhead({ fresh: true });
-    expect(lh).toMatchObject({ code: 'ITX', name: 'iorta TechNXT Corp.', tin: '00-010-0234-8393', licence: '', phone: '', email: 'connect@iortatechnxt.com' });
-    expect(lh.addressLines).toEqual(['UB, 111 Paseo De Roxas Building', 'Legazpi Village, San Lorenzo', 'Makati, Metro Manila, Philippines']);
+    expect(lh).toMatchObject({ code: 'TISPH', name: 'Toyota Insurance Services Philippines Corporation', tin: '685-442-861-00000', licence: '', phone: '', email: '' });
+    expect(lh.addressLines).toEqual(['27F GT TOWER INTERNATIONAL', 'AYALA AVE. COR H V DELA COSTA ST.', 'SALCEDO VILLAGE', 'Makati City, Metro Manila, Philippines']);
     expect(lh.logo?.type).toBe('png');
     expect(companyAddressLines({ AddressLine1: 'A', City: 'Makati', State: 'Metro Manila', PinCode: '1226', Country: 'Philippines' })).toEqual(['A', 'Makati, Metro Manila 1226, Philippines']);
   });
@@ -249,9 +249,9 @@ describe('letterhead and the primary company', () => {
     const body = { CompanyCode: 'TPC', CompanyName: 'Test Primary Brokers Corp.', City: 'Pasig', State: 'Metro Manila', Country: 'Philippines', TIN: '123-456-789-000', IsPrimary: true };
     const dup = await ctx.api('post', '/masters/company').send(body);
     expect(dup.status).toBe(400);
-    expect(dup.body.errors[0].message).toMatch(/Only one company can be the letterhead \(primary\) company: iorta TechNXT Corp\. is already primary/);
-    const itx = (await query("SELECT id FROM master_records WHERE type_code = 'company' AND code = 'ITX'")).rows[0].id;
-    expect((await ctx.api('put', `/masters/company/${itx}`).send({ IsPrimary: false })).status).toBe(200);
+    expect(dup.body.errors[0].message).toMatch(/Only one company can be the letterhead \(primary\) company: Toyota Insurance Services Philippines Corporation is already primary/);
+    const tisph = (await query("SELECT id FROM master_records WHERE type_code = 'company' AND code = 'TISPH'")).rows[0].id;
+    expect((await ctx.api('put', `/masters/company/${tisph}`).send({ IsPrimary: false })).status).toBe(200);
     const c = await ctx.api('post', '/masters/company').send(body);
     expect(c.status).toBe(201);
     const lh = await getLetterhead();
@@ -259,7 +259,7 @@ describe('letterhead and the primary company', () => {
     expect(lh.logo?.type).toBe('png'); // no logo of its own: documents.default_logo_path
     expect((await query("SELECT value FROM app_settings WHERE key = 'general.company_name'")).rows[0].value).toBe('Test Primary Brokers Corp.');
     // a second primary through an update is refused as well
-    expect((await ctx.api('put', `/masters/company/${itx}`).send({ IsPrimary: true })).status).toBe(400);
+    expect((await ctx.api('put', `/masters/company/${tisph}`).send({ IsPrimary: true })).status).toBe(400);
     // a quotation PDF prints the new letterhead
     const q = (await query('SELECT id FROM quotes ORDER BY created_at DESC LIMIT 1')).rows[0];
     if (q) {
@@ -272,7 +272,7 @@ describe('letterhead and the primary company', () => {
     const fallback = await getLetterhead();
     expect(fallback.name).not.toBe('Test Primary Brokers Corp.');
     expect(fallback.name).toBeTruthy();
-    expect((await ctx.api('put', `/masters/company/${itx}`).send({ IsPrimary: true })).status).toBe(200);
-    expect((await getLetterhead()).name).toBe('iorta TechNXT Corp.');
+    expect((await ctx.api('put', `/masters/company/${tisph}`).send({ IsPrimary: true })).status).toBe(200);
+    expect((await getLetterhead()).name).toBe('Toyota Insurance Services Philippines Corporation');
   });
 });

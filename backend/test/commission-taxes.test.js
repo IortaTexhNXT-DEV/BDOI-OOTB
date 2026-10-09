@@ -26,7 +26,7 @@ describe('commission taxes on broker-billed business', () => {
     expect(Number(rcv.commission_vat)).toBe(180);
     expect(Number(rcv.commission_ewt)).toBe(150);
     expect(await linesOf(rcv.booking_jv_id)).toEqual([
-      ['1202001', 12525, 0], ['2201001', 0, r2(12525 - 1500 - 180 + 150)], ['3201001', 0, 1500], ['2204003', 0, 180], ['1302001', 150, 0]]);
+      ['1202001', 12525, 0], ['2201001', 0, r2(12525 - 1500 - 180 + 150)], ['3201001', 0, 1500], ['235000', 0, 180], ['1302001', 150, 0]]);
     const rule = (await query('SELECT p.version FROM journal_vouchers j JOIN posting_rules p ON p.id = j.posting_rule_id WHERE j.id = $1', [rcv.booking_jv_id])).rows[0];
     expect(rule.version).toBe(2);
     expect(await ledgerIntegrity()).toEqual({ unbalanced: 0, diff: 0 });
@@ -58,7 +58,7 @@ describe('commission taxes on broker-billed business', () => {
     await ctx.as('maker')('post', '/receipts').send({ policyId: m.policy.id, amount: m.gross });
     const out = await withTransaction(async (db) => returnPremium(db, { policy: await findPolicy(db, m.policy.id), amount: 1252.5, reference: 'END-CT-1' }));
     const lines = await linesOf(out.journalId);
-    expect(lines).toEqual(expect.arrayContaining([['3201001', 150, 0], ['2204003', 18, 0], ['1302001', 0, 15], ['2201001', r2(1252.5 - 150 - 18 + 15), 0]]));
+    expect(lines).toEqual(expect.arrayContaining([['3201001', 150, 0], ['235000', 18, 0], ['1302001', 0, 15], ['2201001', r2(1252.5 - 150 - 18 + 15), 0]]));
 
     await setSetting('accounting.broker_billed_commission_vat', false);
     await setSetting('accounting.broker_billed_commission_ewt', false);
@@ -68,7 +68,7 @@ describe('commission taxes on broker-billed business', () => {
     await setSetting('accounting.broker_billed_commission_ewt', true);
     const back = await withTransaction(async (db) => returnPremium(db, { policy: await findPolicy(db, old.policy.id), amount: 1252.5, reference: 'END-CT-2' }));
     const codes = (await linesOf(back.journalId)).map((l) => l[0]);
-    expect(codes).not.toContain('2204003');
+    expect(codes).not.toContain('235000');
     expect(codes).not.toContain('1302001');
     expect(await ledgerIntegrity()).toEqual({ unbalanced: 0, diff: 0 });
   });
@@ -87,7 +87,7 @@ describe('commission taxes on broker-billed business', () => {
     const sim = await ctx.as('maker')('post', '/posting-rules/simulate').send({ eventCode: 'policy.issue.broker_billed' });
     expect(sim.status).toBe(200);
     expect(sim.body.data.balanced).toBe(true);
-    expect(sim.body.data.lines.map((l) => [l.accountCode, l.debit, l.credit])).toEqual(expect.arrayContaining([['2204003', 0, 180], ['1302001', 150, 0]]));
+    expect(sim.body.data.lines.map((l) => [l.accountCode, l.debit, l.credit])).toEqual(expect.arrayContaining([['235000', 0, 180], ['1302001', 150, 0]]));
     await query('UPDATE tax_codes SET gl_account = \'1301001\' WHERE code = \'WC139\'');
     const moved = await ctx.as('maker')('post', '/posting-rules/simulate').send({ eventCode: 'policy.issue.broker_billed' });
     expect(moved.body.data.lines.find((l) => l.debit === 150).accountCode).toBe('1301001');
@@ -98,7 +98,7 @@ describe('commission taxes on broker-billed business', () => {
   it('the set-up screen reads and changes the switches and tax codes', async () => {
     const g = await ctx.as('maker')('get', '/account-determination/commission-taxes');
     expect(g.status).toBe(200);
-    expect(g.body.data.vat).toMatchObject({ enabled: true, code: 'VAT12-OUT', ratePercent: 12, glAccount: '2204003' });
+    expect(g.body.data.vat).toMatchObject({ enabled: true, code: 'VAT12-OUT', ratePercent: 12, glAccount: '235000' });
     expect(g.body.data.ewt).toMatchObject({ enabled: true, code: 'WC139', ratePercent: 10, atc: 'WC139' });
     expect((await ctx.as('maker')('put', '/account-determination/commission-taxes').send({ ewtCode: 'WC140' })).status).toBe(403);
     expect((await ctx.api('put', '/account-determination/commission-taxes').send({ vatCode: 'WC139' })).status).toBe(400);

@@ -45,7 +45,7 @@ describe('posting rules reproduce the journals posted before they existed', () =
     expect(simple(await linesOf(rcv.booking_jv_id))).toEqual([
       ['1202001', 12525, 0, `Premium receivable ${rcv.bill_number}`], ['2201001', 0, 11025, `Premium due to ${insurer}`], ['3201001', 0, 1500, 'Brokerage commission']]);
     const app = (await query('SELECT journal_id FROM receipt_applications WHERE receivable_id = $1', [rcv.id])).rows[0];
-    expect(simple(await linesOf(app.journal_id))).toEqual([['1101001', 5000, 0, 'REF-1'], ['1202001', 0, 5000, `Settles ${rcv.bill_number}`]]);
+    expect(simple(await linesOf(app.journal_id))).toEqual([['100000', 5000, 0, 'REF-1'], ['1202001', 0, 5000, `Settles ${rcv.bill_number}`]]);
     const jv = (await query('SELECT j.*, p.event_code FROM journal_vouchers j JOIN posting_rules p ON p.id = j.posting_rule_id WHERE j.id = $1', [rcv.booking_jv_id])).rows[0];
     expect(jv).toMatchObject({ event_code: 'policy.issue.broker_billed', entry_type: 'NEW_BUSINESS', source: 'booking', description: `Premium billed – ${m.policy.policy_number} (${rcv.bill_number})` });
     await setSetting('accounting.split_premium_taxes', true);
@@ -54,24 +54,24 @@ describe('posting rules reproduce the journals posted before they existed', () =
   it('every other migrated event builds the legacy lines', async () => {
     const cases = [
       ['directbill.commission', { amounts: { amount: 1680, commission: 1500, vat: 180 }, vars: { insurer: 'FPG' } },
-        [['1203001', 1680, 0, 'Commission due from FPG'], ['3201001', 0, 1500, 'Brokerage commission (direct bill)'], ['2204003', 0, 180, 'Output VAT on commission']]],
+        [['110400', 1680, 0, 'Commission due from FPG'], ['3201001', 0, 1500, 'Brokerage commission (direct bill)'], ['235000', 0, 180, 'Output VAT on commission']]],
       ['directbill.commission_return', { amounts: { amount: 1680, commission: 1500, vat: 180 }, vars: { insurer: 'FPG' } },
-        [['3201001', 1500, 0, 'Brokerage commission (direct bill)'], ['2204003', 180, 0, 'Output VAT on commission'], ['1203001', 0, 1680, 'Commission due from FPG']]],
+        [['3201001', 1500, 0, 'Brokerage commission (direct bill)'], ['235000', 180, 0, 'Output VAT on commission'], ['110400', 0, 1680, 'Commission due from FPG']]],
       ['directbill.collection', { accounts: { bank: '1102002' }, amounts: { cash: 1530, ewt: 150, applied: 1680 }, vars: { insurer: 'FPG', memoRef: 'OR-9', form2307Suffix: ' (BIR 2307 F-1)', dnNumber: 'DN-1' } },
-        [['1102002', 1530, 0, 'OR-9'], ['1302001', 150, 0, 'EWT withheld by FPG (BIR 2307 F-1)'], ['1203001', 0, 1680, 'Settles DN-1']]],
+        [['1102002', 1530, 0, 'OR-9'], ['1302001', 150, 0, 'EWT withheld by FPG (BIR 2307 F-1)'], ['110400', 0, 1680, 'Settles DN-1']]],
       ['commission.approve', { amounts: { amount: 800 }, vars: { referrerName: 'Juan' } }, [['4401010', 800, 0, 'Comsub expense'], ['2203001', 0, 800, 'Payable to Juan']]],
       ['commission.payout', { amounts: { gross: 800, net: 760, wht: 40 }, vars: { payeeName: 'Juan' } },
-        [['2203001', 800, 0, 'Comsub payable settled'], ['1102001', 0, 760, 'Paid to Juan'], ['2204001', 0, 40, 'Withholding tax on commission']]],
+        [['2203001', 800, 0, 'Comsub payable settled'], ['106010', 0, 760, 'Paid to Juan'], ['2204001', 0, 40, 'Withholding tax on commission']]],
       ['commission.clawback', { amounts: { amount: 800 } }, [['1204001', 800, 0, 'Clawback receivable from referrer'], ['4401010', 0, 800, 'Comsub clawback']]],
       ['disbursement.payment', { payeeType: 'Customer', paymentMode: 'check', amounts: { amount: 500, payable: 500 }, vars: { payeeType: 'Customer', instrumentNo: '000123' } },
-        [['2205001', 500, 0, 'Payable settled (Customer)'], ['1102001', 0, 500, 'Cheque 000123']]],
+        [['210230', 500, 0, 'Payable settled (Customer)'], ['106010', 0, 500, 'Cheque 000123']]],
       ['disbursement.payment', { payeeType: 'Insurer', paymentMode: 'check', amounts: { amount: 900, payable: 900 }, vars: { payeeType: 'Insurer', instrumentNo: '' } },
-        [['2201001', 900, 0, 'Payable settled (Insurer)'], ['1102001', 0, 900, 'Cheque']]],
-      ['pettycash.fund', { accounts: { fund: '1103001' }, amounts: { amount: 10000 }, vars: { fundCode: 'PCF-1' } }, [['1103001', 10000, 0, 'Fund PCF-1'], ['1102001', 0, 10000, 'Cheque to PCF-1 custodian']]],
-      ['pettycash.disbursement', { accounts: { expense: '4401007', vat: '1301001', wht: '2204001', fund: '1103001' }, amounts: { net_of_vat: 1785.71, vat: 214.29, net: 1980, wht: 20 }, vars: { remarks: 'Courier', fundCode: 'PCF-1' } },
-        [['4401007', 1785.71, 0, 'Courier'], ['1301001', 214.29, 0, 'Input VAT'], ['1103001', 0, 1980, 'Paid from PCF-1'], ['2204001', 0, 20, 'Expanded withholding tax']]],
+        [['2201001', 900, 0, 'Payable settled (Insurer)'], ['106010', 0, 900, 'Cheque']]],
+      ['pettycash.fund', { accounts: { fund: '1103001' }, amounts: { amount: 10000 }, vars: { fundCode: 'PCF-1' } }, [['1103001', 10000, 0, 'Fund PCF-1'], ['106010', 0, 10000, 'Cheque to PCF-1 custodian']]],
+      ['pettycash.disbursement', { accounts: { expense: '4401007', vat: '135000', wht: '2204001', fund: '1103001' }, amounts: { net_of_vat: 1785.71, vat: 214.29, net: 1980, wht: 20 }, vars: { remarks: 'Courier', fundCode: 'PCF-1' } },
+        [['4401007', 1785.71, 0, 'Courier'], ['135000', 214.29, 0, 'Input VAT'], ['1103001', 0, 1980, 'Paid from PCF-1'], ['2204001', 0, 20, 'Expanded withholding tax']]],
       ['pettycash.receipt', { accounts: { fund: '1103001', credit: '1205001' }, amounts: { amount: 200 }, vars: { remarks: null } }, [['1103001', 200, 0, null], ['1205001', 0, 200, null]]],
-      ['pettycash.replenishment', { accounts: { fund: '1103001' }, amounts: { amount: 5000 }, vars: { fundCode: 'PCF-1' } }, [['1103001', 5000, 0, 'Replenishment'], ['1102001', 0, 5000, 'Cheque for PCF-1']]],
+      ['pettycash.replenishment', { accounts: { fund: '1103001' }, amounts: { amount: 5000 }, vars: { fundCode: 'PCF-1' } }, [['1103001', 5000, 0, 'Replenishment'], ['106010', 0, 5000, 'Cheque for PCF-1']]],
     ];
     for (const [event, context, expected] of cases) {
       const { lines } = await buildJournal(pool, event, { branchCode: null, ...context });
@@ -227,7 +227,7 @@ describe('return premium, cancellation and write-off', () => {
     const tax = (x) => r2(10000 * (x / 12525));
     expect(simple(lines).map((l) => l.slice(0, 3))).toEqual([
       ['2201001', r2(10000 - commission - tax(1200) - tax(1250) - tax(75)), 0], ['2201002', tax(1200), 0], ['2201003', tax(1250), 0], ['2201004', tax(75), 0],
-      ['3201001', commission, 0], ['1202001', 0, 7525], ['2205001', 0, 2475]]);
+      ['3201001', commission, 0], ['1202001', 0, 7525], ['210230', 0, 2475]]);
     const refund = (await query('SELECT * FROM invoice_lists WHERE policy_id = $1 AND payee_type = \'Customer\'', [m.policy.id])).rows[0];
     expect(Number(refund.total_amount)).toBe(2475);
     expect((await query('SELECT entry_type FROM journal_vouchers WHERE id = $1', [out.journalId])).rows[0].entry_type).toBe('ENDORSEMENT_NEGATIVE');

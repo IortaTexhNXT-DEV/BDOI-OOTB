@@ -123,7 +123,7 @@ describe('fixed asset disposal', () => {
     sold = r.body.data;
     expect(sold).toMatchObject({ disposalNumber: expect.stringMatching(/^FAD-/), status: 'posted', gainLoss: -10000, outputVat: 6000, grossProceeds: 56000, salesInvoiceNumber: expect.any(String) });
     expect(await jvLines(sold.journalId)).toEqual([{ a: '1402003', d: 60000, c: 0 }, { a: '1102001', d: 56000, c: 0 }, { a: '4501004', d: 10000, c: 0 },
-      { a: '1401003', d: 0, c: 120000 }, { a: '2204003', d: 0, c: 6000 }]);
+      { a: '1401003', d: 0, c: 120000 }, { a: '235000', d: 0, c: 6000 }]);
     const inv = (await maker('get', `/bir/invoices/${sold.salesInvoiceId}`)).body.data;
     expect(inv).toMatchObject({ sourceType: 'asset_disposal', sourceReference: sold.disposalNumber, buyerName: 'Juan dela Cruz Trading Inc.', vatableSales: 50000, vatAmount: 6000,
       totalAmount: 56000, balance: 0 });
@@ -142,7 +142,7 @@ describe('fixed asset disposal', () => {
     expect(r.status, JSON.stringify(r.body)).toBe(201);
     expect(r.body.data).toMatchObject({ gainLoss: 2000, amountDue: 2240 });
     expect(await jvLines(r.body.data.journalId)).toEqual([{ a: '1402003', d: 10000, c: 0 }, { a: '1205003', d: 2240, c: 0 }, { a: '1401003', d: 0, c: 10000 },
-      { a: '2204003', d: 0, c: 240 }, { a: '3301004', d: 0, c: 2000 }]);
+      { a: '235000', d: 0, c: 240 }, { a: '3301004', d: 0, c: 2000 }]);
     const pay = await maker('post', `/bir/invoices/${r.body.data.salesInvoiceId}/payments`).send({ amount: 2240, paymentDate: asOf, paymentMode: 'bank-transfer', bankAccount: 'ACC-BDO-001' });
     expect(pay.status, JSON.stringify(pay.body)).toBe(201);
     expect((await maker('get', `/fixed-assets/disposals/${r.body.data.id}`)).body.data.amountDue).toBe(0);
