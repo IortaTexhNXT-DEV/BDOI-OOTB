@@ -63,6 +63,13 @@ minimal, clearly-correct front-end fix.
 - Shared helpers: dates in `src/lib/dates.js` (`today`, `isoDate`, `addDays`, `businessDate`), amounts in
   `src/lib/money.js` (`round2`, `toNumber`, `formatMoney`), CSV in `src/lib/csv.js`, XLSX in `src/lib/xlsx.js`,
   maker-checker in `src/lib/makerChecker.js`. Do not write local copies.
+- Spreadsheet downloads: `sendTable` (`src/modules/documents/tabular.js`) or `writeXlsx` with `dateFormat` from
+  `general.date_format`; date cells are real dates shown in that format, never yyyy-mm-dd text. Printed documents show
+  dates through `formatDate` / `formatDatesIn` (`src/lib/pdf/format.js`).
+- Uploads: the template comes from the importer's own column list (`src/modules/documents/uploadTemplates.js`,
+  `sendTemplate` / `sendWorkbook`: Data, Columns and Instructions sheets) on a `GET .../template` route next to the upload;
+  a row-by-row upload answers `uploadResult()` ("Processed n rows: c created, f failed" and the failed rows) and names
+  the columns in its messages (`columnMessage`, `issueText`).
 - Money is `numeric(14,2)`; the pool returns numbers. Dates are `date`, returned as `YYYY-MM-DD`.
 - Deletes are soft (status) unless the record is a draft.
 - No `console.log` (eslint refuses it outside scripts); use `req.log` in handlers and `logger` from

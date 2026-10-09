@@ -13,7 +13,7 @@ import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
 import { Paginator } from "primereact/paginator";
 import accountingService from "../../../services/accountingService";
-import { calendarDateFormat, formatDate } from "../../../utility/dateFormat";
+import { calendarDateFormat, formatDate, toIsoDate } from "../../../utility/dateFormat";
 import "./index.scss";
 import logger from "../../../utility/logger";
 import { FieldsSkeleton } from "../../../components/Skeletons";
@@ -159,10 +159,10 @@ const AllClientsAccountingView = () => {
       const filters = {
         entryType: entryType || undefined,
         startDate: startDate
-          ? new Date(startDate).toISOString().split("T")[0]
+          ? toIsoDate(startDate)
           : undefined,
         endDate: endDate
-          ? new Date(endDate).toISOString().split("T")[0]
+          ? toIsoDate(endDate)
           : undefined,
         page: pagination.page,
         pageSize: pagination.pageSize,
@@ -267,7 +267,7 @@ const AllClientsAccountingView = () => {
           [
             t.clientNumber || "",
             `"${(t.clientName || "").replace(/"/g, '""')}"`,
-            t.documentDate ? new Date(t.documentDate).toISOString().split("T")[0] : "",
+            t.documentDate ? formatDate(t.documentDate) : "",
             t.transactionCode || "",
             `"${(t.description || "").replace(/"/g, '""')}"`,
             t.accountCode || "",
@@ -289,7 +289,7 @@ const AllClientsAccountingView = () => {
       link.setAttribute("href", url);
       link.setAttribute(
         "download",
-        `all-clients-accounting-${new Date().toISOString().split("T")[0]}.csv`
+        `all-clients-accounting-${toIsoDate(new Date())}.csv`
       );
       link.style.visibility = "hidden";
       document.body.appendChild(link);

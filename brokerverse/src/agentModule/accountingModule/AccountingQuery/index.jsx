@@ -13,7 +13,7 @@ import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
 import { ConfirmDialog } from "primereact/confirmdialog";
 import accountingService from "../../../services/accountingService";
-import { calendarDateFormat, formatDate } from "../../../utility/dateFormat";
+import { calendarDateFormat, formatDate, toIsoDate } from "../../../utility/dateFormat";
 import "./index.scss";
 import logger from "../../../utility/logger";
 
@@ -193,10 +193,10 @@ const AccountingQuery = () => {
         status: status || undefined,
         glCode: glCode?.trim() || undefined,
         startDate: startDate
-          ? new Date(startDate).toISOString().split("T")[0]
+          ? toIsoDate(startDate)
           : undefined,
         endDate: endDate
-          ? new Date(endDate).toISOString().split("T")[0]
+          ? toIsoDate(endDate)
           : undefined,
         page,
         pageSize: pageSize || pagination.pageSize,
@@ -264,10 +264,10 @@ const AccountingQuery = () => {
         status: status || undefined,
         glCode: glCode?.trim() || undefined,
         startDate: startDate
-          ? new Date(startDate).toISOString().split("T")[0]
+          ? toIsoDate(startDate)
           : undefined,
         endDate: endDate
-          ? new Date(endDate).toISOString().split("T")[0]
+          ? toIsoDate(endDate)
           : undefined,
       };
 

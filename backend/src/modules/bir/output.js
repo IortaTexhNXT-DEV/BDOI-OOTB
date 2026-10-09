@@ -5,6 +5,7 @@
  */
 import { renderPdf } from '../../lib/pdf/index.js';
 import { writeXlsx } from '../../lib/xlsx.js';
+import { DEFAULT_FORMAT, formatDatesIn } from '../../lib/pdf/format.js';
 
 const cell = (v, type) => {
   if (v === null || v === undefined || v === '') return '';
@@ -58,11 +59,11 @@ export function returnPdf(r) {
   });
 }
 
-/** Excel of a return: the form, each schedule on its own sheet, the reconciliation. */
-export function returnXlsx(r) {
+/** Excel of a return: the form, each schedule on its own sheet, the reconciliation (dates in fmt.dateFormat). */
+export function returnXlsx(r, fmt = DEFAULT_FORMAT) {
   const sheets = [
     { name: r.form, columns: [{ header: 'Item', width: 8 }, { header: 'Particulars', width: 70 }, { header: 'Tax base', type: 'money', width: 16 }, { header: 'Rate (%)', type: 'number', width: 10 }, { header: 'Amount', type: 'money', width: 16 }],
-      rows: [...r.header.map(([k, v]) => ['', `${k}: ${v || '-'}`, '', '', '']), ...r.items.map((i) => [i.no, i.label, i.taxBase ?? '', i.rate ?? '', Number(i.amount) || 0])], autoFilter: false },
+      rows: [...r.header.map(([k, v]) => ['', `${k}: ${v ? formatDatesIn(v, fmt) : '-'}`, '', '', '']), ...r.items.map((i) => [i.no, i.label, i.taxBase ?? '', i.rate ?? '', Number(i.amount) || 0])], autoFilter: false },
     ...r.schedules.map((s) => scheduleSheet(s)),
   ];
   if (r.reconciliation?.checks?.length) {
@@ -71,7 +72,7 @@ export function returnXlsx(r) {
     rows: [...r.reconciliation.checks.map((c) => [c.label, c.returnAmount, c.otherAmount, c.difference, c.reconciled ? 'Reconciled' : 'Difference to explain']),
       ...(r.reconciliation.perAtc || []).map((a) => [`ATC ${a.atc || '(none)'}: return against QAP`, a.returnAmount, a.qapAmount, a.difference, a.difference === 0 ? 'Reconciled' : 'Difference to explain'])] });
   }
-  return writeXlsx({ title: `BIR Form ${r.form} ${r.period.label}`, sheets });
+  return writeXlsx({ title: `BIR Form ${r.form} ${r.period.label}`, sheets, dateFormat: fmt.dateFormat });
 }
 
 /** One schedule as a worksheet with a totals row. */

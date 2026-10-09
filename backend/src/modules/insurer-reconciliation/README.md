@@ -25,7 +25,8 @@ approver must not be the preparer or the submitter.
 
 1. Import the statement file with the insurer's format (else the generic one): insurer, type (premium or commission),
    period, the insurer's statement reference and the amount tolerance. A row that cannot be read stops the import; the
-   same file cannot be imported twice for an insurer.
+   same file cannot be imported twice for an insurer. The import dialog offers the upload template of the GENERIC format
+   (`GET /insurer-reconciliation/statements/template`).
 2. Automatic matching: by policy number (ignoring case, spaces and dashes) to a remittance line (premium statement) or
    commission debit note line (commission statement), then any other record of the policy; the closest gross premium
    wins. A line whose policy number is unknown is matched on gross premium within the tolerance and the insured name

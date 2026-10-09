@@ -27,10 +27,13 @@ import {
   filterPaymentVoucherMiddleware,
 } from "./store/paymentVocherMiddleware";
 import clientService from "../../services/clientService";
-import BulkUploadModal from "./BulkUploadModal";
+import ImportDialog from "../../components/ImportDialog";
 import { PAGE_SIZE, PAGE_SIZES } from "../../hooks/useServerList";
-import { calendarDateFormat, formatDate as formatAppDate } from "../../utility/dateFormat";
+import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../utility/dateFormat";
 import logger from "../../utility/logger";
+
+/** Bulk upload: template and importer of the API (Data, Columns and Instructions sheets; failed rows listed). */
+const UPLOAD_TARGETS = [{ label: "Payment vouchers", templatePath: "/disbursements/bulk-upload/template", uploadPath: "/disbursements/bulk-upload" }];
 
 const Index = () => {
   const { t } = useTranslation();
@@ -142,8 +145,8 @@ const Index = () => {
     const filters = {
       customerCodeFrom: customerCodeString,
       customerCodeTo: customerCodeToString,
-      createdAtFrom: dateFrom.toISOString().split("T")[0], // Format as YYYY-MM-DD
-      createdAtTo: dateTo.toISOString().split("T")[0], // Format as YYYY-MM-DD
+      createdAtFrom: toIsoDate(dateFrom),
+      createdAtTo: toIsoDate(dateTo),
     };
 
     try {
@@ -849,10 +852,12 @@ const Index = () => {
         </Dialog>
       </div>
 
-      <BulkUploadModal
+      <ImportDialog
         visible={visibleBulkUploadPopup}
         onHide={() => setVisibleBulkUploadPopup(false)}
-        onUploadSuccess={handleBulkUploadSuccess}
+        title={"Bulk upload disbursements"}
+        targets={UPLOAD_TARGETS}
+        onDone={handleBulkUploadSuccess}
       />
 
       <Toast ref={toast} />

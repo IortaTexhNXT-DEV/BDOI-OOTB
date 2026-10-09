@@ -18,18 +18,21 @@ import SvgDot from "../../../assets/icons/SvgDot";
 import "./index.scss";
 import { progressValue, roundTo } from "../../../utility/numberFormat";
 import { confirmAction, promptText } from "../../../utility/dialogs";
+import importService from "../../../services/importService";
 
 const emptyRecon = { bankTransactions: [], systemTransactions: [], exceptions: [], summary: { total: 0, matched: 0, unmatched: 0, partial: 0, successRate: 0 } };
 
 /** Parses a bank statement CSV (header row with transDate/date, reference, amount, description). */
 const parseBankCsv = (text) => {
-  const [head, ...lines] = text.split(/\r?\n/).filter((l) => l.trim());
+  // a CSV saved by Excel as UTF-8 starts with a byte order mark
+  const [head, ...lines] = text.replace(/^\ufeff/, "").split(/\r?\n/).filter((l) => l.trim());
   const cols = (head || "").split(",").map((c) => c.trim().toLowerCase());
   const at = (names) => cols.findIndex((c) => names.includes(c));
   const idx = { transDate: at(["transdate", "date", "transaction date"]), reference: at(["reference", "ref"]), amount: at(["amount"]), description: at(["description", "narration"]) };
   return lines.map((line) => {
     const cells = line.split(",").map((c) => c.trim());
-    return { transDate: cells[idx.transDate], reference: cells[idx.reference], amount: Number(cells[idx.amount]), description: idx.description >= 0 ? cells[idx.description] : "" };
+    // the amount is sent as written: the server refuses the file when a line has none
+    return { transDate: cells[idx.transDate], reference: cells[idx.reference], amount: cells[idx.amount], description: idx.description >= 0 ? cells[idx.description] : "" };
   });
 };
 
@@ -104,7 +107,8 @@ const ReconciliationProcess = () => {
       showSuccess(toast, typeof detail === "function" ? detail(result) : detail, summary);
       await loadReconciliation();
     } catch (error) {
-      showError(toast, error, summary);
+      // the summary names the action as done ("Import Complete"); a failure keeps the error heading
+      showError(toast, error);
     } finally {
       setLoading(false);
     }
@@ -253,6 +257,8 @@ const ReconciliationProcess = () => {
               <div className="panel-header">
                 <h4>Bank Transactions</h4>
                 <div className="panel-actions">
+                  <Button icon="pi pi-download" className="p-button-sm" outlined label={t("remittance.downloadTemplate")}
+                    onClick={() => importService.downloadTemplate("/remittance/reconciliation/bank-transactions/template", "Remittance_Bank_Transactions_Template.csv").catch((e) => showError(toast, e))} />
                   <Button icon="pi pi-upload" className="p-button-sm" label="Import" onClick={() => fileInput.current?.click()} />
                   <Button icon="pi pi-refresh" className="p-button-sm" outlined onClick={loadReconciliation} aria-label="Refresh" tooltip="Refresh" tooltipOptions={{ position: "top" }} />
                 </div>

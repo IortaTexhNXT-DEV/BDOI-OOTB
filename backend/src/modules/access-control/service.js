@@ -11,6 +11,7 @@
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { today } from '../../lib/dates.js';
+import { DEFAULT_FORMAT, formatDate, formatDateTime } from '../../lib/pdf/format.js';
 
 const money = (v) => (v === null || v === undefined ? null : Math.round(Number(v) * 100) / 100);
 
@@ -286,8 +287,9 @@ export async function userMatrix(db, { status = null } = {}) {
 
 export const USER_MATRIX_HEADER = ['Username', 'Name', 'Employee code', 'Branch', 'Department', 'Designation', 'Reporting to', 'Status', 'Roles',
   'Last sign-in', 'Days since sign-in', 'Two-factor', 'Password age (days)', 'Segregation of duties'];
-export const userMatrixRows = (m) => m.rows.map((u) => [u.username, u.displayName, u.employeeCode || '', u.branch || '', u.department || '', u.designation || '',
-  u.reportingTo || '', u.status, u.roles.join(', '), u.lastLoginAt ? new Date(u.lastLoginAt).toISOString().slice(0, 16).replace('T', ' ') : 'never',
+/** Rows of the user access matrix export (sign-in times in the business time zone and date format of fmt). */
+export const userMatrixRows = (m, fmt = DEFAULT_FORMAT) => m.rows.map((u) => [u.username, u.displayName, u.employeeCode || '', u.branch || '', u.department || '', u.designation || '',
+  u.reportingTo || '', u.status, u.roles.join(', '), u.lastLoginAt ? formatDateTime(u.lastLoginAt, fmt) : 'never',
   u.daysSinceLogin, u.twoFactor ? 'on' : 'off', u.passwordAgeDays, u.sodConflicts.map((c) => `${c.name} (${c.action})`).join('; ')]);
 
 /** Permissions down, roles across (what each role may do), grouped by module. */
@@ -354,8 +356,8 @@ export async function closeReview(db, id, user) {
 }
 
 export const REVIEW_HEADER = ['Username', 'Name', 'Branch', 'Roles', 'Last sign-in', 'Decision', 'Remarks', 'Decided by', 'Decided at'];
-export const reviewRows = (r) => r.items.map((i) => [i.username, i.displayName, i.branch || '', i.roles.join(', '),
-  i.lastLoginAt ? new Date(i.lastLoginAt).toISOString().slice(0, 10) : 'never', i.decision, i.remarks || '', i.decidedBy || '', i.decidedAt ? new Date(i.decidedAt).toISOString().slice(0, 16).replace('T', ' ') : '']);
+export const reviewRows = (r, fmt = DEFAULT_FORMAT) => r.items.map((i) => [i.username, i.displayName, i.branch || '', i.roles.join(', '),
+  i.lastLoginAt ? formatDate(i.lastLoginAt, fmt) : 'never', i.decision, i.remarks || '', i.decidedBy || '', i.decidedAt ? formatDateTime(i.decidedAt, fmt) : '']);
 
 // ---------------------------------------------------------------- sessions and dormant accounts
 

@@ -12,6 +12,7 @@ import { Toast } from "primereact/toast";
 import service from "../../services/integrationsService";
 import { useServerList } from "../../hooks/useServerList";
 import { IntTag, PageHeader, date, dateTime, isoDay, money, showError, showSuccess } from "./common";
+import { calendarDateFormat } from "../../utility/dateFormat";
 
 const STATUSES = ["draft", "for-approval", "approved", "file-generated", "sent", "completed", "cancelled"];
 const CHANNELS = ["bulk_credit", "instapay", "pesonet"];
@@ -60,7 +61,7 @@ const NewBatch = ({ visible, onHide, onCreated, toast }) => {
           <Dropdown value={form.bankAccountCode} options={accounts.map((a) => ({ label: `${a.name} (${a.bankCode} ${a.accountNumber})`, value: a.code }))} onChange={(e) => setForm({ ...form, bankAccountCode: e.value })} className="w-full" /></div>
         <div className="col-6 md:col-2"><label>{t("integrations.channel")}</label>
           <Dropdown value={form.channel} options={(layout?.channels || CHANNELS).map((c) => ({ label: t(`integrations.channelTypes.${c}`), value: c }))} onChange={(e) => setForm({ ...form, channel: e.value })} className="w-full" /></div>
-        <div className="col-6 md:col-2"><label>{t("integrations.valueDate")}</label><Calendar value={form.valueDate} onChange={(e) => setForm({ ...form, valueDate: e.value })} dateFormat="yy-mm-dd" className="w-full" /></div>
+        <div className="col-6 md:col-2"><label>{t("integrations.valueDate")}</label><Calendar value={form.valueDate} onChange={(e) => setForm({ ...form, valueDate: e.value })} dateFormat={calendarDateFormat()} className="w-full" /></div>
         {layout?.isExample && <div className="col-12"><Message severity="warn" className="w-full" text={t("integrations.exampleLayout")} /></div>}
         <div className="col-12">
           <DataTable value={vouchers} loading={loading} dataKey="disbursementId" size="small" stripedRows selectionMode="checkbox" selection={selected}

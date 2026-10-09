@@ -378,7 +378,7 @@ export async function issuePolicy(db, src, body, userId) {
 
 /** Columns of the policy bulk upload (Policies > Bulk Upload); the upload template is built from this list. */
 export const POLICY_UPLOAD_COLUMNS = [
-  { key: 'policyNumber', header: 'Policy Number', aliases: ['policy no'], format: 'Insurer policy number; a new BrokerVerse number is given when empty', example: 'PC-MLY-2026-000101' },
+  { key: 'policyNumber', header: 'Policy Number', aliases: ['policy no'], required: 'Existing policies (go-live)', format: 'Insurer policy number; for new business a BrokerVerse number is given when empty', example: 'PC-MLY-2026-000101' },
   { key: 'insuredName', header: 'Insured Name', aliases: ['client name', 'name'], required: 'Insured Name, First Name or Company Name', format: 'Full name of the insured', example: 'Maria Santos' },
   { key: 'firstName', header: 'First Name', format: 'Text', example: 'Maria' },
   { key: 'lastName', header: 'Last Name', format: 'Text', example: 'Santos' },
@@ -386,9 +386,9 @@ export const POLICY_UPLOAD_COLUMNS = [
   { key: 'emailId', header: 'Email', aliases: ['email'], format: 'E-mail address', example: 'maria.santos@example.ph' },
   { key: 'contactNumber', header: 'Contact Number', aliases: ['mobile', 'phone'], format: 'Mobile or landline number', example: '09171234567' },
   { key: 'productType', header: 'Product Type', aliases: ['product', 'lob'], format: 'Product or line of business; Motor when empty', allowed: ['Motor', 'Fire', 'IAR'], example: 'Motor' },
-  { key: 'insuranceCompanyName', header: 'Insurance Company', aliases: ['insuranceCompanyName', 'insurer'], format: 'Insurer name or code as in the Insurance Company master', example: 'Malayan Insurance Co., Inc.' },
-  { key: 'inception', header: 'Inception Date', aliases: ['effective date', 'start date'], format: 'Date YYYY-MM-DD; today when empty', example: '2026-10-01' },
-  { key: 'expiry', header: 'Expiry Date', aliases: ['end date'], format: 'Date YYYY-MM-DD; inception plus the default term when empty', example: '2027-10-01' },
+  { key: 'insuranceCompanyName', header: 'Insurance Company', aliases: ['insuranceCompanyName', 'insurer'], required: 'Existing policies (go-live)', format: 'Insurer name or code as in the Insurance Company master', example: 'Malayan Insurance Co., Inc.' },
+  { key: 'inception', header: 'Inception Date', aliases: ['effective date', 'start date'], required: 'Existing policies (go-live)', format: 'Date YYYY-MM-DD; for new business today when empty', example: '2026-10-01' },
+  { key: 'expiry', header: 'Expiry Date', aliases: ['end date'], required: 'Existing policies (go-live)', format: 'Date YYYY-MM-DD; for new business inception plus the default term when empty', example: '2027-10-01' },
   { key: 'issuedDate', header: 'Issue Date', aliases: ['issued date'], format: 'Date YYYY-MM-DD; today when empty', example: '2026-09-28' },
   { key: 'sumInsured', header: 'Sum Insured', aliases: ['totalSumInsured'], format: 'Amount in PHP, no currency sign', example: '1250000' },
   { key: 'netPremium', header: 'Net Premium', format: 'Amount in PHP; the gross premium when empty', example: '28750' },
@@ -396,6 +396,9 @@ export const POLICY_UPLOAD_COLUMNS = [
   { key: 'plateNumber', header: 'Plate Number', aliases: ['plate no'], format: 'Motor only', example: 'NCA 4521' },
   { key: 'paymentStatus', header: 'Payment Status', format: 'Pending when empty', allowed: ['Pending', 'Reviewing', 'Partial', 'Completed', 'Refunded'], example: 'Pending' },
 ];
+
+/** Columns an existing policy (go-live upload) must have: it keeps its number, insurer and term. */
+export const goLiveMissing = (p) => POLICY_UPLOAD_COLUMNS.filter((c) => c.required === 'Existing policies (go-live)' && !p[c.key]).map((c) => c.header);
 
 /** Map an uploaded policy row to the issuance inputs. */
 export function policyFromRow(row) {
@@ -411,6 +414,8 @@ export function policyFromRow(row) {
 export async function importPolicy(db, p, userId, { migration = false } = {}) {
   if (!p.grossPremium) throw badRequest('grossPremium is required');
   if (!p.firstName && !p.companyName && !p.insuredName) throw badRequest('insuredName (or firstName / companyName) is required');
+  const icId = await insurerId(db, p.insuranceCompanyName);
+  if (p.insuranceCompanyName && !icId) throw badRequest(`Insurance Company "${p.insuranceCompanyName}" is not in the Insurance Company master`);
   const [first, ...rest] = (p.insuredName || '').split(' ');
   const firstName = p.firstName || (p.companyName ? null : first);
   const lastName = p.lastName || (p.companyName ? null : rest.join(' ') || null);
@@ -419,7 +424,6 @@ export async function importPolicy(db, p, userId, { migration = false } = {}) {
       client_type, lead_category) VALUES ($1,$2,$3,$4,$5,$6,$7,'bulk-upload',$8,$8,$9,$10) RETURNING id`,
   [code, firstName, lastName, p.companyName || null, p.insuredName || [firstName, lastName].filter(Boolean).join(' ') || p.companyName, p.emailId || null,
     p.contactNumber || null, userId, p.companyName ? 'corporate' : 'individual', p.companyName ? 'Corporate' : 'Retail']);
-  const icId = await insurerId(db, p.insuranceCompanyName);
   const rate = icId ? Number((await db.query('SELECT commission_rate FROM insurance_companies WHERE id = $1', [icId])).rows[0]?.commission_rate || 0)
     : Number(await getSetting('commission.default_rate', 0.15));
   return issuePolicy(db, {

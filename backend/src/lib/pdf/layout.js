@@ -14,7 +14,7 @@
 import { PAGE_SIZES } from './writer.js';
 import { loadImage } from './image.js';
 import { textWidth, wrapText } from './fonts.js';
-import { DEFAULT_FORMAT } from './format.js';
+import { DEFAULT_FORMAT, formatDatesIn } from './format.js';
 import { allocateWidths, prepareTable, CELL_PAD } from './table.js';
 
 const COLORS = { text: '#1a1a1a', muted: '#5f6b76', rule: '#b8c2cc', zebra: '#f3f6f9', total: '#e3e9f0', headingBg: '#e9eff5' };
@@ -198,7 +198,7 @@ export class DocRenderer {
     const valueW = cellW - labelW;
     for (let i = 0; i < list.length; i += columns) {
       const cells = list.slice(i, i + columns).map((r) => {
-        const v = r[1] === null || r[1] === undefined || r[1] === '' ? '-' : String(r[1]);
+        const v = r[1] === null || r[1] === undefined || r[1] === '' ? '-' : formatDatesIn(r[1], this.fmt);
         return { label: wrapText(r[0], 7.5, labelW - 8, { bold: true }), value: wrapText(v, 9, valueW - 2, { bold: !!r[2]?.bold }), bold: !!r[2]?.bold };
       });
       const lines = Math.max(...cells.map((c) => Math.max(c.label.length, c.value.length)));

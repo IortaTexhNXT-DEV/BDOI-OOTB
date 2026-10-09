@@ -87,7 +87,7 @@ export function staticUploads() {
         { firstName: 'Maria', lastName: 'Santos', DOB: '1988-04-12', gender: 'Female', emailId: 'maria.santos@example.ph', contactNumber: '09171234567', houseNo: '12 Mabini St.', barangay: 'San Antonio',
           city: 'Pasig City', province: 'Metro Manila', country: 'Philippines', zipCode: '1600', leadCategory: 'Retail', taxInformationNumber: '123-456-789-000', lob: 'MOTOR', source: 'Referral' },
         { companyName: 'Luzon Agri Ventures Corp.', emailId: 'admin@luzonagri.example.ph', contactNumber: '+63 45 961 2233', houseNo: 'Km 78 MacArthur Highway', barangay: 'Dolores',
-          city: 'San Fernando', province: 'Pampanga', country: 'Philippines', zipCode: '2000', leadCategory: 'Corporate', taxInformationNumber: '009-876-543-000', lob: 'FIRE', source: 'Walk-in' },
+          city: 'San Fernando', province: 'Pampanga', country: 'Philippines', zipCode: '2000', leadCategory: 'Corporate', taxInformationNumber: '009-876-543-000', lob: 'MOTOR', product: 'Motor Vehicle Insurance', source: 'Walk-in' },
       ],
       notes: ['A lead needs a First Name (individual) or a Company Name (corporate).'],
     },
@@ -351,11 +351,16 @@ export function remittanceUpload(maps, configCode) {
 
 // ---------- download from the screens ----------
 
+/** Send the workbook of an upload definition as an attachment. */
+export function sendWorkbook(res, def) {
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', `attachment; filename="${def.file}"`);
+  res.send(templateWorkbook(def));
+}
+
 /** Send the workbook of a static upload definition (by id) as an attachment. */
 export function sendTemplate(res, id) {
   const def = staticUploads().find((d) => d.id === id);
   if (!def) throw new Error(`Unknown template ${id}`);
-  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-  res.setHeader('Content-Disposition', `attachment; filename="${def.file}"`);
-  res.send(templateWorkbook(def));
+  sendWorkbook(res, def);
 }

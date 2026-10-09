@@ -11,7 +11,7 @@ import { isoDate, pageParams, sendList, sendNoData } from '../accounting/lib/htt
 import { storeFile } from '../accounting/lib/files.js';
 import { receiptsPdf } from '../documents/finance.js';
 import { camel, excelDate, readSheet } from '../accounting/lib/sheet.js';
-import { mapColumns } from '../documents/tabular.js';
+import { columnMessage, issueText, mapColumns, uploadResult } from '../documents/tabular.js';
 import { ownRecord, withScope, scopeOf, scopeSql, canSee } from '../../lib/scope.js';
 import * as svc from './service.js';
 import * as billing from './billing.js';
@@ -92,9 +92,13 @@ define({
   },
 });
 define({
+  method: 'GET', path: '/bulk-upload/template', summary: 'Official receipts upload template (XLSX: Data, Columns and Instructions sheets)', screen: `${SCREEN} > Bulk upload > Download template`,
+  middleware: read, response: '(xlsx file)', handler: async (_req, res) => sendTemplate(res, 'receipts'),
+});
+define({
   method: 'POST', path: '/bulk-upload', summary: 'Bulk official receipts from an .xlsx / .csv file (multipart "file"); each row pays a policy', screen: `${SCREEN} > Bulk upload`, middleware: [...write, upload.single('file')],
   request: { file: '(xlsx) columns: policyNumber, amount, receiptDate, paymentMode, referenceNo, customerCode, remarks' },
-  response: { success: true, data: { message: '2 of 2 rows imported', total: 2, created: 2, failed: 0, errors: [] } },
+  response: { success: true, data: { message: 'Processed 2 rows: 2 created, 0 failed', total: 2, created: 2, failed: 0, errors: [] } },
   handler: async (req, res) => {
     if (!req.file) throw badRequest('Attach the file in the "file" field');
     const rows = readSheet(req.file.buffer, req.file.originalname);
@@ -110,11 +114,12 @@ define({
         const rc = await withTransaction((db) => svc.createReceipt(db, body, req.user, { source: 'bulk-upload' }));
         ids.push(rc.receiptId);
       } catch (e) {
-        errors.push({ row: i + 2, error: e.issues ? e.issues.map((x) => `${x.path.join('.')}: ${x.message}`).join('; ') : e.message });
+        errors.push({ row: i + 2, message: e.issues ? issueText(e.issues, svc.RECEIPT_UPLOAD_COLUMNS) : columnMessage(e.message, svc.RECEIPT_UPLOAD_COLUMNS) });
       }
     }
     await audit(req, { entity: 'receipt', entityId: null, action: 'bulk-upload', after: { file: req.file.originalname, created: ids.length, failed: errors.length } });
-    ok(res, { message: `${ids.length} of ${rows.length} rows imported`, total: rows.length, created: ids.length, failed: errors.length, errors, ids }, `${ids.length} receipts imported`);
+    const data = uploadResult(rows.length, ids.length, errors, { ids });
+    ok(res, data, data.message);
   },
 });
 define({

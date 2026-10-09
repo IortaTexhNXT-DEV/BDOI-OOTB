@@ -15,9 +15,10 @@ import { Tag } from "primereact/tag";
 import { ProgressBar } from "primereact/progressbar";
 import renewalsWorkspaceService, { periodRange, productLabel } from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
-import { calendarDateFormat } from "../../../utility/dateFormat";
+import { calendarDateFormat, toIsoDate } from "../../../utility/dateFormat";
 import { useChartTheme } from "../../../theme/chartTheme";
 import { mix } from "../../../theme/runtime/themeEngine";
+import { downloadCsv } from "../../../utility/csvExport";
 import "./index.scss";
 import { currencySymbol } from "../../../utility/currencyConverter";
 import { formatPercent, formatWithUnit, progressValue } from "../../../utility/numberFormat";
@@ -306,6 +307,18 @@ const RetentionAnalytics = () => {
     );
   };
 
+  const handleExport = () => {
+    downloadCsv(`retention-analytics-${toIsoDate(new Date())}.csv`, shownAgents, [
+      { header: t("renewal.rank"), field: "ranking" },
+      { header: t("renewal.salesPerson"), field: "agentName" },
+      { header: t("renewal.renewalRatePercent"), field: "renewalRate" },
+      { header: t("renewal.policiesRenewed"), field: "policiesRenewed" },
+      { header: t("renewal.premium"), field: "premiumRetained" },
+      { header: t("renewal.cycleTime"), field: "avgCycleTime" },
+    ]);
+    toast.current.show({ severity: "success", summary: t("renewal.exportStarted"), detail: t("renewal.rowsExported", { count: shownAgents.length }), life: 3000 });
+  };
+
   const premiumTemplate = (rowData) => {
     return formatCurrency(rowData.premiumRetained);
   };
@@ -386,14 +399,8 @@ const RetentionAnalytics = () => {
                   label="Export Report"
                   icon="pi pi-file-excel"
                   className="p-button-secondary"
-                  onClick={() => {
-                    toast.current.show({
-                      severity: 'success',
-                      summary: 'Export Started',
-                      detail: 'Analytics report exported to Excel',
-                      life: 3000
-                    });
-                  }}
+                  onClick={handleExport}
+                  disabled={!shownAgents.length}
                 />
               </div>
             </div>

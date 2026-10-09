@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1211 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1220 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -10544,6 +10544,57 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"lineCount\": 12,\n    \"totalDebits\": 10000,\n    \"totalCredits\": 22500,\n    \"balanced\": true,\n    \"duplicates\": 0,\n    \"lines\": [\n      {\n        \"date\": \"2026-09-02\",\n        \"description\": \"DEPOSIT\",\n        \"credit\": 5000,\n        \"duplicate\": false,\n        \"suggestedType\": null\n      }\n    ],\n    \"errors\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Bank statement upload template of the GENERIC statement format (XLSX: Data, Columns and Instructions sheets)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-reconciliation/statements/template",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-reconciliation",
+                "statements",
+                "template"
+              ]
+            },
+            "description": "Bank statement upload template of the GENERIC statement format (XLSX: Data, Columns and Instructions sheets)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Reconciliation Workspace > Import statement > Download template\n\nAccess: read:bank-reconciliation"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-reconciliation/statements/template",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-reconciliation",
+                    "statements",
+                    "template"
+                  ]
+                },
+                "description": "Bank statement upload template of the GENERIC statement format (XLSX: Data, Columns and Instructions sheets)\n\nFront-end touchpoint: Accounts > Bank Reconciliation > Reconciliation Workspace > Import statement > Download template\n\nAccess: read:bank-reconciliation"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
             }
           ]
         },
@@ -28501,7 +28552,58 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"2 of 2 rows imported\",\n    \"total\": 2,\n    \"created\": 2,\n    \"failed\": 0,\n    \"errors\": []\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Processed 2 rows: 2 created, 0 failed\",\n    \"total\": 2,\n    \"created\": 2,\n    \"failed\": 0,\n    \"errors\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Payment vouchers upload template (XLSX: Data, Columns and Instructions sheets)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/disbursements/bulk-upload/template",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "disbursements",
+                "bulk-upload",
+                "template"
+              ]
+            },
+            "description": "Payment vouchers upload template (XLSX: Data, Columns and Instructions sheets)\n\nFront-end touchpoint: Accounts > Disbursement (Payment Voucher) > Bulk upload > Download template\n\nAccess: read:disbursements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/disbursements/bulk-upload/template",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "disbursements",
+                    "bulk-upload",
+                    "template"
+                  ]
+                },
+                "description": "Payment vouchers upload template (XLSX: Data, Columns and Instructions sheets)\n\nFront-end touchpoint: Accounts > Disbursement (Payment Voucher) > Bulk upload > Download template\n\nAccess: read:disbursements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
             }
           ]
         },
@@ -40183,6 +40285,57 @@
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"format\": \"GENERIC\",\n    \"lines\": [\n      {\n        \"lineNo\": 1,\n        \"policyNo\": \"POL-2026-00001\",\n        \"grossPremium\": 12525,\n        \"commission\": 1500\n      }\n    ],\n    \"errors\": [],\n    \"totals\": {\n      \"count\": 1\n    }\n  }\n}"
             }
           ]
+        },
+        {
+          "name": "Insurer statement upload template of the GENERIC insurer statement format (XLSX: Data, Columns and Instructions sheets)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-reconciliation/statements/template",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-reconciliation",
+                "statements",
+                "template"
+              ]
+            },
+            "description": "Insurer statement upload template of the GENERIC insurer statement format (XLSX: Data, Columns and Instructions sheets)\n\nFront-end touchpoint: Accounts > Insurer Reconciliation > Insurer Statements > Import statement > Download template\n\nAccess: read:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-reconciliation/statements/template",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-reconciliation",
+                    "statements",
+                    "template"
+                  ]
+                },
+                "description": "Insurer statement upload template of the GENERIC insurer statement format (XLSX: Data, Columns and Instructions sheets)\n\nFront-end touchpoint: Accounts > Insurer Reconciliation > Insurer Statements > Import statement > Download template\n\nAccess: read:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
+            }
+          ]
         }
       ]
     },
@@ -43451,6 +43604,57 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Processed 3 rows: 3 created, 0 failed\",\n    \"total\": 3,\n    \"created\": 3,\n    \"failed\": 0,\n    \"errors\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Leads upload template (XLSX: Data, Columns and Instructions sheets)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leads/bulk-upload/template",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leads",
+                "bulk-upload",
+                "template"
+              ]
+            },
+            "description": "Leads upload template (XLSX: Data, Columns and Instructions sheets)\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Bulk Upload > Download template\n\nAccess: read:leads"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/leads/bulk-upload/template",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "leads",
+                    "bulk-upload",
+                    "template"
+                  ]
+                },
+                "description": "Leads upload template (XLSX: Data, Columns and Instructions sheets)\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Bulk Upload > Download template\n\nAccess: read:leads"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
             }
           ]
         },
@@ -61104,6 +61308,57 @@
           ]
         },
         {
+          "name": "Policies upload template (XLSX: Data, Columns and Instructions sheets)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/policies/bulk-upload/template",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "policies",
+                "bulk-upload",
+                "template"
+              ]
+            },
+            "description": "Policies upload template (XLSX: Data, Columns and Instructions sheets)\n\nFront-end touchpoint: Operations > Policy > Bulk Upload > Download template\n\nAccess: read:policies"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/policies/bulk-upload/template",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "policies",
+                    "bulk-upload",
+                    "template"
+                  ]
+                },
+                "description": "Policies upload template (XLSX: Data, Columns and Instructions sheets)\n\nFront-end touchpoint: Operations > Policy > Bulk Upload > Download template\n\nAccess: read:policies"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
+            }
+          ]
+        },
+        {
           "name": "Premium payments captured on policies, for finance verification (status submitted | confirmed | rejected | all)",
           "request": {
             "method": "GET",
@@ -75190,6 +75445,57 @@
           ]
         },
         {
+          "name": "Quotations upload template (XLSX: Data, Columns and Instructions sheets)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/quotations/bulk-upload/template",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "quotations",
+                "bulk-upload",
+                "template"
+              ]
+            },
+            "description": "Quotations upload template (XLSX: Data, Columns and Instructions sheets)\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Bulk Upload > Download template\n\nAccess: read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/quotations/bulk-upload/template",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "quotations",
+                    "bulk-upload",
+                    "template"
+                  ]
+                },
+                "description": "Quotations upload template (XLSX: Data, Columns and Instructions sheets)\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Bulk Upload > Download template\n\nAccess: read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
+            }
+          ]
+        },
+        {
           "name": "Quotations in one status",
           "request": {
             "method": "GET",
@@ -76207,7 +76513,58 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"2 of 2 rows imported\",\n    \"total\": 2,\n    \"created\": 2,\n    \"failed\": 0,\n    \"errors\": []\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Processed 2 rows: 2 created, 0 failed\",\n    \"total\": 2,\n    \"created\": 2,\n    \"failed\": 0,\n    \"errors\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Official receipts upload template (XLSX: Data, Columns and Instructions sheets)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/receipts/bulk-upload/template",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipts",
+                "bulk-upload",
+                "template"
+              ]
+            },
+            "description": "Official receipts upload template (XLSX: Data, Columns and Instructions sheets)\n\nFront-end touchpoint: Accounts > Receipts > Bulk upload > Download template\n\nAccess: read:receipts"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/receipts/bulk-upload/template",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "receipts",
+                    "bulk-upload",
+                    "template"
+                  ]
+                },
+                "description": "Official receipts upload template (XLSX: Data, Columns and Instructions sheets)\n\nFront-end touchpoint: Accounts > Receipts > Bulk upload > Download template\n\nAccess: read:receipts"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
             }
           ]
         },
@@ -77938,6 +78295,69 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"upload\": {\n      \"status\": \"Processed\"\n    },\n    \"remittances\": [\n      {\n        \"id\": \"rm_1\",\n        \"remittanceNo\": \"REM-2026-00001\",\n        \"remittanceDate\": \"2026-09-15\",\n        \"insurerCode\": \"MALAYAN\",\n        \"insurerName\": \"Malayan Insurance Co., Inc.\",\n        \"policyCount\": 3,\n        \"grossAmount\": 45000,\n        \"commission\": 6750,\n        \"tax\": 0,\n        \"netAmount\": 38250,\n        \"status\": \"Pending Approval\",\n        \"statusCode\": \"for-approval\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Remittance bulk upload template of a bulk-processing configuration (configCode; default: the first active one): the columns of its field mappings (XLSX: Data, Columns and Instructions sheets)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/bulk/template?configCode=ARM-001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "bulk",
+                "template"
+              ],
+              "query": [
+                {
+                  "key": "configCode",
+                  "value": "ARM-001"
+                }
+              ]
+            },
+            "description": "Remittance bulk upload template of a bulk-processing configuration (configCode; default: the first active one): the columns of its field mappings (XLSX: Data, Columns and Instructions sheets)\n\nFront-end touchpoint: Accounts > Remittance > Bulk Processing > Upload File > Download template\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/bulk/template?configCode=ARM-001",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "bulk",
+                    "template"
+                  ],
+                  "query": [
+                    {
+                      "key": "configCode",
+                      "value": "ARM-001"
+                    }
+                  ]
+                },
+                "description": "Remittance bulk upload template of a bulk-processing configuration (configCode; default: the first active one): the columns of its field mappings (XLSX: Data, Columns and Instructions sheets)\n\nFront-end touchpoint: Accounts > Remittance > Bulk Processing > Upload File > Download template\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
             }
           ]
         },
@@ -80759,6 +81179,59 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"rmi_7\",\n      \"status\": \"unmatched\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Bank transactions import template (CSV: TransDate, Reference, Amount, Description)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/reconciliation/bank-transactions/template",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "reconciliation",
+                "bank-transactions",
+                "template"
+              ]
+            },
+            "description": "Bank transactions import template (CSV: TransDate, Reference, Amount, Description)\n\nFront-end touchpoint: Accounts > Remittance > Reconciliation > Import > Template\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/reconciliation/bank-transactions/template",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "reconciliation",
+                    "bank-transactions",
+                    "template"
+                  ]
+                },
+                "description": "Bank transactions import template (CSV: TransDate, Reference, Amount, Description)\n\nFront-end touchpoint: Accounts > Remittance > Reconciliation > Import > Template\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(csv file)"
             }
           ]
         },

@@ -84,7 +84,8 @@ describe('disbursements / payment vouchers', () => {
     const up = await ctx.as('maker')('post', '/disbursements/bulk-upload').attach('file', Buffer.from(csv), 'vouchers.csv');
     expect(up.status).toBe(200);
     expect(up.body.data.created).toBe(1);
-    expect(up.body.data.errors[0].row).toBe(3);
+    expect(up.body.data.message).toBe('Processed 2 rows: 1 created, 1 failed');
+    expect(up.body.data.errors[0]).toMatchObject({ row: 3, message: expect.stringMatching(/Payee Type/) });
     const created = await ctx.as('maker')('get', `/disbursements/${up.body.data.ids[0]}`);
     expect(created.body.data.amount).toBe(1250);
   });

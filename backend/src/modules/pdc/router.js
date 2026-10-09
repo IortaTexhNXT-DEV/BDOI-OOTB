@@ -30,7 +30,7 @@ define({
   handler: async (req, res) => {
     const r = await svc.listPdcs(pool, req.query);
     if (['xlsx', 'csv'].includes(req.query.format)) {
-      sendTable(res, { header: HEADER.map((h) => h.label), rows: r.rows.map((x) => HEADER.map((h) => x[h.key] ?? '')), fileBase: `post-dated-cheques-${r.asOf}`, format: req.query.format, sheetName: 'Post-dated cheques' });
+      await sendTable(res, { header: HEADER.map((h) => h.label), rows: r.rows.map((x) => HEADER.map((h) => x[h.key] ?? '')), fileBase: `post-dated-cheques-${r.asOf}`, format: req.query.format, sheetName: 'Post-dated cheques' });
       return;
     }
     ok(res, r);

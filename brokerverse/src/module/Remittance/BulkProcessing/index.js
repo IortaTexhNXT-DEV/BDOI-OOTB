@@ -11,6 +11,7 @@ import { BreadCrumb } from "primereact/breadcrumb";
 import { Tag } from "primereact/tag";
 import remittanceService, { masterService } from "../../../services/remittanceService";
 import { downloadCsv, formatDateTime, showError, statusSeverity } from "../shared";
+import importService from "../../../services/importService";
 import SvgDot from "../../../assets/icons/SvgDot";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
@@ -112,6 +113,8 @@ const BulkProcessing = () => {
       <Card>
         {activeIndex === 0 && (
           <div className="upload-section">
+            <Button label={t("remittance.downloadTemplate")} icon="pi pi-download" outlined size="small" className="mb-3"
+              onClick={() => importService.downloadTemplate(`/remittance/bulk/template${selectedConfig?.code ? `?configCode=${encodeURIComponent(selectedConfig.code)}` : ""}`).catch((e) => showError(toast, e))} />
             <FileUpload
               name="bulkFile"
               customUpload

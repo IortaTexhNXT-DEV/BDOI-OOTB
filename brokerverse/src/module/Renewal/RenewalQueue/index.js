@@ -19,7 +19,8 @@ import { ProgressBar } from "primereact/progressbar";
 import { Avatar } from "primereact/avatar";
 import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
-import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
+import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
+import { downloadCsv } from "../../../utility/csvExport";
 import "./index.scss";
 import { formatPercent, progressValue } from "../../../utility/numberFormat";
 
@@ -214,6 +215,23 @@ const RenewalQueue = () => {
 
     setFilteredPolicies(filtered);
     calculateDashboard(filtered);
+  };
+
+  const handleExport = () => {
+    downloadCsv(`renewal-queue-${toIsoDate(new Date())}.csv`, filteredPolicies, [
+      { header: t("renewal.policyNumber"), field: "policyNumber" },
+      { header: t("renewal.insuredName"), field: "insuredName" },
+      { header: t("renewal.product"), field: "product" },
+      { header: t("renewal.insurer"), field: "insurer" },
+      { header: t("renewal.expiry"), field: (p) => formatAppDate(p.expiryDate) },
+      { header: t("renewal.daysToExpiry"), field: "daysToExpiry" },
+      { header: t("renewal.premium"), field: (p) => p.renewalPremium ?? p.currentPremium },
+      { header: t("renewal.status"), field: "status" },
+      { header: t("renewal.risk"), field: "retentionRisk" },
+      { header: t("renewal.agent"), field: "assignedAgent" },
+      { header: t("renewal.attempts"), field: "renewalAttempts" },
+    ]);
+    toast.current.show({ severity: "success", summary: t("renewal.exportStarted"), detail: t("renewal.rowsExported", { count: filteredPolicies.length }), life: 3000 });
   };
 
   const handleClear = () => {
@@ -545,15 +563,9 @@ const RenewalQueue = () => {
                 <Button
                   icon="pi pi-file-excel"
                   className="p-button-text"
-                  onClick={() => {
-                    toast.current.show({
-                      severity: 'success',
-                      summary: t("renewal.exportStarted"),
-                      detail: t("renewal.renewalQueueExportedToExcel"),
-                      life: 3000
-                    });
-                  }}
-                  tooltip={t("renewal.exportToExcel")} aria-label={t("renewal.exportToExcel")}
+                  onClick={handleExport}
+                  disabled={!filteredPolicies.length}
+                  tooltip={t("renewal.exportToCsv")} aria-label={t("renewal.exportToCsv")}
                 />
               </div>
             </div>

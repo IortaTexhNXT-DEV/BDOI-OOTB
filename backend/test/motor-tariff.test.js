@@ -45,6 +45,9 @@ describe('Motor tariff (CTPL fixed premium, Auto Passenger PA per seat)', () => 
     const r = await price(motor({ includeCTPL: true }));
     expect(r.status).toBe(400);
     expect(r.body.message).toMatch(/vehicle type/i);
+    const unknown = await price(motor({ includeCTPL: true, ...vehicle('Private Car') }));
+    expect(unknown.status).toBe(400);
+    expect(unknown.body.message).toMatch(/Vehicle type "Private Car" is not an Insurance Commission vehicle class of the motor tariff \(private_cars, /);
   });
 
   it('prices Auto Passenger PA as limit per person x seats x rate and counts the cover in the sum insured', async () => {

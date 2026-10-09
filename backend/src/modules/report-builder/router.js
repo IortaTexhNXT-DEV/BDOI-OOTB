@@ -51,7 +51,7 @@ define({
     await audit(req, { entity: 'report_builder', entityId: req.body.dataset, action: 'export', after: { name: req.body.name || null, rows: out.rows.length, definition: req.body } });
     const rows = out.rows.map((r) => out.columns.map((c) => r[c.key]));
     if (Object.keys(out.totals).length) rows.push(out.columns.map((c, i) => (c.key in out.totals ? out.totals[c.key] : i === 0 ? 'Total' : '')));
-    sendTable(res, { header: out.columns.map((c) => c.label), rows, fileBase: fileName(req.body.name || req.body.dataset), format: req.query.format === 'csv' ? 'csv' : 'xlsx', sheetName: 'Report' });
+    await sendTable(res, { header: out.columns.map((c) => c.label), rows, fileBase: fileName(req.body.name || req.body.dataset), format: req.query.format === 'csv' ? 'csv' : 'xlsx', sheetName: 'Report' });
   },
 });
 define({
@@ -105,7 +105,7 @@ define({
     await audit(req, { entity: 'report_builder_report', entityId: r.id, action: 'export', after: { rows: out.rows.length } });
     const rows = out.rows.map((x) => out.columns.map((c) => x[c.key]));
     if (Object.keys(out.totals).length) rows.push(out.columns.map((c, i) => (c.key in out.totals ? out.totals[c.key] : i === 0 ? 'Total' : '')));
-    sendTable(res, { header: out.columns.map((c) => c.label), rows, fileBase: fileName(r.name), format: req.query.format === 'csv' ? 'csv' : 'xlsx', sheetName: 'Report' });
+    await sendTable(res, { header: out.columns.map((c) => c.label), rows, fileBase: fileName(r.name), format: req.query.format === 'csv' ? 'csv' : 'xlsx', sheetName: 'Report' });
   },
 });
 define({

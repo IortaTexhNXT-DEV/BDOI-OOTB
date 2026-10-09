@@ -5,7 +5,8 @@ import { audit } from '../../lib/audit.js';
 import { paging } from '../../lib/respond.js';
 import { withTransaction } from '../../db/pool.js';
 import { sendEntity, actor } from '../documents/common.js';
-import { uploadFile, parseUploadedRows, sendTable } from '../documents/tabular.js';
+import { uploadFile, parseUploadedRows, sendTable, columnMessage, uploadResult } from '../documents/tabular.js';
+import { sendTemplate } from '../documents/uploadTemplates.js';
 import { ownRecord, withScope, scopeOf } from '../../lib/scope.js';
 import * as svc from './service.js';
 import { today } from '../../lib/dates.js';
@@ -63,8 +64,12 @@ define({
     const category = req.query.category || 'All';
     const { header, rows } = await svc.leadReport(category, await scopeOf(req));
     await audit(req, { entity: 'lead', entityId: null, action: 'report', after: { category, rows: rows.length } });
-    sendTable(res, { header, rows, fileBase: `lead-report-${String(category).replace(/[^a-zA-Z0-9]/g, '')}-${await today()}`, format: req.query.format === 'csv' ? 'csv' : 'xlsx', sheetName: 'Leads' });
+    await sendTable(res, { header, rows, fileBase: `lead-report-${String(category).replace(/[^a-zA-Z0-9]/g, '')}-${await today()}`, format: req.query.format === 'csv' ? 'csv' : 'xlsx', sheetName: 'Leads' });
   },
+});
+define({
+  method: 'GET', path: '/bulk-upload/template', summary: 'Leads upload template (XLSX: Data, Columns and Instructions sheets)', screen: `${SCREEN} > Bulk Upload > Download template`,
+  middleware: canRead, response: '(xlsx file)', handler: async (_req, res) => sendTemplate(res, 'leads'),
 });
 define({
   method: 'POST', path: '/bulk-upload', summary: 'Bulk upload leads from CSV or XLSX (multipart field "file"; header row with First Name, Last Name, Email, Contact Number ...; LOB and Product optional: empty, the product is tagged later)',
@@ -77,14 +82,14 @@ define({
     for (const [i, row] of rows.entries()) {
       const body = svc.leadFromRow(row);
       const parsed = createBody.safeParse(body);
-      if (!parsed.success) { errors.push({ row: i + 2, message: parsed.error.issues.map((x) => x.message).join('; ') }); continue; }
+      if (!parsed.success) { errors.push({ row: i + 2, message: columnMessage(parsed.error.issues.map((x) => x.message).join('; '), svc.LEAD_UPLOAD_COLUMNS) }); continue; }
       try {
         const lead = await withTransaction((c) => svc.createLead(parsed.data, actor(req), c));
         await audit(req, { entity: 'lead', entityId: lead.id, action: 'bulk-create', after: svc.toLead(lead) });
         created += 1;
-      } catch (e) { errors.push({ row: i + 2, message: e.details?.length ? e.details.map((d) => d.message).join('; ') : e.message }); }
+      } catch (e) { errors.push({ row: i + 2, message: columnMessage(e.details?.length ? e.details.map((d) => d.message).join('; ') : e.message, svc.LEAD_UPLOAD_COLUMNS) }); }
     }
-    const data = { message: `Processed ${rows.length} rows: ${created} created, ${errors.length} failed`, total: rows.length, created, failed: errors.length, errors };
+    const data = uploadResult(rows.length, created, errors);
     res.json({ success: true, message: data.message, data });
   },
 });

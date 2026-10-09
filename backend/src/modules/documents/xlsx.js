@@ -118,7 +118,7 @@ export function readWorkbook(buf) {
   return sheets;
 }
 
-/** Build a one-sheet XLSX from a header row and data rows (numbers stay numeric). */
-export function writeXlsx(header, rows, sheetName = 'Report') {
-  return writeWorkbook({ sheets: [{ name: sheetName, columns: header.map((h) => ({ header: String(h ?? ''), type: 'auto' })), rows }] });
+/** Build a one-sheet XLSX from a header row and data rows (numbers stay numeric, yyyy-mm-dd values are dates in dateFormat). */
+export function writeXlsx(header, rows, sheetName = 'Report', { dateFormat } = {}) {
+  return writeWorkbook({ sheets: [{ name: sheetName, columns: header.map((h) => ({ header: String(h ?? ''), type: 'auto' })), rows }], dateFormat });
 }
