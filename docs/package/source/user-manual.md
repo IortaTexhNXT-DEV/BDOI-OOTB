@@ -2241,7 +2241,7 @@ Bank charges, interest, final tax on interest and direct credits appear on the s
 
 ### Prepare the reconciliation
 
-1. Select **New reconciliation** on Reconciliations (or start it from the workspace), choose the **Bank account** and **Period** and select **Start**. The reconciliation (BRC-YYYY-NNNNN) opens as Draft with live figures.
+1. Select **New reconciliation** on Reconciliations (or start it from the workspace), choose the **Bank account** and **Period** (proposed: the month after the account's last reconciliation; a period already reconciled is flagged with its number) and select **Start**. The reconciliation (BRC-YYYY-NNNNN) opens as Draft with live figures.
 2. Check the **Bank Reconciliation Statement**: balance per bank statement, deposits in transit, outstanding cheques and bank errors give the adjusted bank balance; balance per books, bank credits and charges not yet booked and book errors give the adjusted book balance. The **Difference** must be PHP 0.00.
 3. Prepare it. The figures are frozen and the reconciliation waits for the Accounting Manager's approval.
 
@@ -2414,7 +2414,7 @@ Suppliers are kept on Accounts > Payables > Suppliers: TIN, address, VAT registr
 1. Accounts > Payables > Supplier Invoices > **New supplier invoice**: supplier, the supplier's invoice number and date, description, and one line per expense account (or an **Asset class** for an asset bought). Input VAT is computed on the vatable lines of a VAT-registered supplier at the rate of `payables.input_vat_code`; the EWT at the rate of the supplier's EWT tax code on the amount net of VAT. The due date follows the payment terms. The same supplier invoice number cannot be recorded twice.
 2. **Save and submit** sends it for approval; the Accounting Manager (another user) approves it, which posts the journal (posting rule ap.invoice: Dr expense or asset, Dr input VAT / Cr EWT payable, Cr Accounts Payable - Suppliers), or rejects it with a reason. Without `payables.maker_checker` the invoice posts when it is submitted. An asset line is registered in the fixed asset register on approval.
 3. **Print** gives the AP voucher with the journal. **Cancel** an invoice without payments; an approved one is reversed.
-4. Accounts > Payables > Supplier Payments > **New supplier payment**: the supplier, the invoices to pay (all open invoices are ticked), mode, bank account, cheque number. Posting rule ap.payment: Dr Accounts Payable - Suppliers / Cr bank. **Print** gives the payment voucher; **Cancel** reverses the payment and opens the invoices again.
+4. Accounts > Payables > Supplier Payments > **New supplier payment**: the supplier, the invoices to pay (all open invoices are ticked), mode, the bank account the payment is made from (required; proposed only when there is one), cheque number. Posting rule ap.payment: Dr Accounts Payable - Suppliers / Cr bank. **Print** gives the payment voucher; **Cancel** reverses the payment and opens the invoices again.
 5. Accounts > Payables > AP Ageing shows the open balances by supplier and by invoice, aged on the due dates (buckets of `limits.receivable_ageing_buckets`); **Export to Excel**.
 
 ### BIR Form 2307 for suppliers
@@ -2433,7 +2433,7 @@ The same generator issues the certificates of the commission payees on Accounts 
 
 ![Accounts > Fixed Assets > Asset Register](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-fixed-assets.png)
 
-Accounts > Fixed Assets > Asset Register lists the assets with their cost, accumulated depreciation and book value. **Register asset** for an asset not bought through a supplier invoice: name, asset class (Master > Finance > Asset Classes gives the useful life and the asset, accumulated depreciation and depreciation expense accounts), dates, cost, salvage value, location, custodian and serial number. For an asset carried at go-live enter the accumulated depreciation at go-live and the first period to depreciate here. Select an asset to see its straight-line schedule: each month's depreciation, accumulated depreciation and book value, and whether the month is posted.
+Accounts > Fixed Assets > Asset Register lists the assets with their cost, accumulated depreciation and book value. **Register asset** for an asset not bought through a supplier invoice: name, asset class (Master > Finance > Asset Classes gives the useful life and the asset, accumulated depreciation and depreciation expense accounts), dates, cost, salvage value, location, custodian and serial number. For an asset carried at go-live enter the accumulated depreciation at go-live and pick the first month to depreciate here. Select an asset to see its straight-line schedule: each month's depreciation, accumulated depreciation and book value, and whether the month is posted.
 
 Depreciation is straight-line from the in-service month (`fixed_assets.first_month`); the last month takes the rounding so the asset ends at its salvage value. Accounts > Fixed Assets > Depreciation Run shows what a period's depreciation is and **Post depreciation** posts one journal per asset class dated the end of the period (posting rule fa.depreciation: Dr depreciation expense / Cr accumulated depreciation). An asset is never depreciated twice for a period. The month-end close runs the same step (**(e) Depreciation**, `fixed_assets.depreciation_in_month_end`).
 
