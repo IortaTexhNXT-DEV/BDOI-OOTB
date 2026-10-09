@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1211 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1219 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -558,6 +558,302 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"roles\": [],\n    \"rows\": [\n      {\n        \"code\": \"journal_voucher\",\n        \"cells\": {\n          \"accounting\": {\n            \"maxAmount\": 500000,\n            \"set\": true,\n            \"pending\": null\n          }\n        }\n      }\n    ],\n    \"userLimits\": [],\n    \"withoutLimit\": \"allow\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Changes of access (role access) with their summary in business words and what the signed-in user may do (?status=pending|approved|rejected|withdrawn|all&kind&target)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/changes?status=pending&kind=role-access",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "changes"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                },
+                {
+                  "key": "kind",
+                  "value": "role-access"
+                }
+              ]
+            },
+            "description": "Changes of access (role access) with their summary in business words and what the signed-in user may do (?status=pending|approved|rejected|withdrawn|all&kind&target)\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/changes?status=pending&kind=role-access",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "changes"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "pending"
+                    },
+                    {
+                      "key": "kind",
+                      "value": "role-access"
+                    }
+                  ]
+                },
+                "description": "Changes of access (role access) with their summary in business words and what the signed-in user may do (?status=pending|approved|rejected|withdrawn|all&kind&target)\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 12,\n      \"ref\": \"CFG-12\",\n      \"kind\": \"role-access\",\n      \"kindLabel\": \"Role access\",\n      \"target\": \"tis-finance\",\n      \"targetLabel\": \"TIS Finance & General Accounting\",\n      \"summary\": [\n        \"Added: Accounts › Bank reconciliation › Approve\"\n      ],\n      \"status\": \"pending\",\n      \"requestedBy\": \"IT administrator\",\n      \"requestedAt\": \"2026-10-09T02:15:00Z\",\n      \"canDecide\": true,\n      \"canWithdraw\": true,\n      \"link\": \"/master/generals/usermanagement/role-permissions?view=pending&change=12\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "One change of access",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/changes/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "changes",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One change of access\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/changes/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "changes",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One change of access\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 12,\n    \"ref\": \"CFG-12\",\n    \"kind\": \"role-access\",\n    \"kindLabel\": \"Role access\",\n    \"target\": \"tis-finance\",\n    \"targetLabel\": \"TIS Finance & General Accounting\",\n    \"summary\": [\n      \"Added: Accounts › Bank reconciliation › Approve\"\n    ],\n    \"status\": \"pending\",\n    \"requestedBy\": \"IT administrator\",\n    \"requestedAt\": \"2026-10-09T02:15:00Z\",\n    \"canDecide\": true,\n    \"canWithdraw\": true,\n    \"link\": \"/master/generals/usermanagement/role-permissions?view=pending&change=12\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve (applies it) or reject (remarks required) a change of access; never by the requester",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/changes/:id/decision",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "changes",
+                ":id",
+                "decision"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve (applies it) or reject (remarks required) a change of access; never by the requester\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: approve:access-control",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"approve\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/changes/:id/decision",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "changes",
+                    ":id",
+                    "decision"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve (applies it) or reject (remarks required) a change of access; never by the requester\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: approve:access-control",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"decision\": \"approve\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 12,\n    \"ref\": \"CFG-12\",\n    \"kind\": \"role-access\",\n    \"kindLabel\": \"Role access\",\n    \"target\": \"tis-finance\",\n    \"targetLabel\": \"TIS Finance & General Accounting\",\n    \"summary\": [\n      \"Added: Accounts › Bank reconciliation › Approve\"\n    ],\n    \"status\": \"approved\",\n    \"requestedBy\": \"IT administrator\",\n    \"requestedAt\": \"2026-10-09T02:15:00Z\",\n    \"canDecide\": true,\n    \"canWithdraw\": true,\n    \"link\": \"/master/generals/usermanagement/role-permissions?view=pending&change=12\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Withdraw a change of access waiting for approval (the requester or an approver)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/changes/:id/withdraw",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "changes",
+                ":id",
+                "withdraw"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Withdraw a change of access waiting for approval (the requester or an approver)\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: write:roles, write:access-control, approve:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/changes/:id/withdraw",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "changes",
+                    ":id",
+                    "withdraw"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Withdraw a change of access waiting for approval (the requester or an approver)\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: write:roles, write:access-control, approve:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 12,\n    \"ref\": \"CFG-12\",\n    \"kind\": \"role-access\",\n    \"kindLabel\": \"Role access\",\n    \"target\": \"tis-finance\",\n    \"targetLabel\": \"TIS Finance & General Accounting\",\n    \"summary\": [\n      \"Added: Accounts › Bank reconciliation › Approve\"\n    ],\n    \"status\": \"withdrawn\",\n    \"requestedBy\": \"IT administrator\",\n    \"requestedAt\": \"2026-10-09T02:15:00Z\",\n    \"canDecide\": true,\n    \"canWithdraw\": true,\n    \"link\": \"/master/generals/usermanagement/role-permissions?view=pending&change=12\"\n  }\n}"
             }
           ]
         },
@@ -1120,6 +1416,263 @@
           ]
         },
         {
+          "name": "Role permissions in business words: the access catalogue (areas, modules, levels), the departments, and each role with its own and included access, users and change waiting for approval",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/role-access",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "role-access"
+              ]
+            },
+            "description": "Role permissions in business words: the access catalogue (areas, modules, levels), the departments, and each role with its own and included access, users and change waiting for approval\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/role-access",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "role-access"
+                  ]
+                },
+                "description": "Role permissions in business words: the access catalogue (areas, modules, levels), the departments, and each role with its own and included access, users and change waiting for approval\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"approval\": true,\n    \"catalogue\": {\n      \"areas\": [\n        {\n          \"code\": \"accounts\",\n          \"name\": \"Accounts\",\n          \"order\": 3\n        }\n      ],\n      \"modules\": [\n        {\n          \"code\": \"receipts\",\n          \"area\": \"accounts\",\n          \"name\": \"Receipts\",\n          \"screens\": [\n            \"Receipts\",\n            \"Post-Dated Cheques\"\n          ],\n          \"levels\": [\n            \"view\",\n            \"edit\"\n          ]\n        }\n      ],\n      \"permissions\": [\n        {\n          \"code\": \"read:receipts\",\n          \"area\": \"accounts\",\n          \"module\": \"receipts\",\n          \"level\": \"view\",\n          \"meaning\": \"See receipts and post-dated cheques\",\n          \"checked\": true,\n          \"baseline\": false\n        }\n      ]\n    },\n    \"departments\": [\n      {\n        \"name\": \"Cash Control\",\n        \"order\": 3\n      }\n    ],\n    \"roles\": [\n      {\n        \"code\": \"tis-ccd-bp\",\n        \"name\": \"CCD-BP / QRPh (Receipting)\",\n        \"department\": \"Cash Control\",\n        \"platform\": false,\n        \"fullAccess\": false,\n        \"status\": \"active\",\n        \"inherits\": [],\n        \"includedBy\": [],\n        \"users\": {\n          \"active\": 2,\n          \"inactive\": 0\n        },\n        \"own\": [\n          \"read:receipts\",\n          \"write:receipts\"\n        ],\n        \"included\": {},\n        \"pending\": null,\n        \"editBlocked\": null\n      }\n    ],\n    \"pendingCount\": 0,\n    \"abilities\": {\n      \"edit\": true,\n      \"approve\": true\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change the access of a role (reason required); it applies once another administrator approves it (or at once with access.change_approval off)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/role-access/:role/changes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "role-access",
+                ":role",
+                "changes"
+              ],
+              "variable": [
+                {
+                  "key": "role",
+                  "value": "",
+                  "description": "role (path parameter)"
+                }
+              ]
+            },
+            "description": "Change the access of a role (reason required); it applies once another administrator approves it (or at once with access.change_approval off)\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: write:roles",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"grant\": [\n    \"approve:bank-reconciliation\"\n  ],\n  \"revoke\": [\n    \"write:fixed-assets\"\n  ],\n  \"reasonCode\": \"ACC-REDESIGN\",\n  \"note\": \"Bank reconciliation approval moves to Finance\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/role-access/:role/changes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "role-access",
+                    ":role",
+                    "changes"
+                  ],
+                  "variable": [
+                    {
+                      "key": "role",
+                      "value": "",
+                      "description": "role (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change the access of a role (reason required); it applies once another administrator approves it (or at once with access.change_approval off)\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: write:roles",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"grant\": [\n    \"approve:bank-reconciliation\"\n  ],\n  \"revoke\": [\n    \"write:fixed-assets\"\n  ],\n  \"reasonCode\": \"ACC-REDESIGN\",\n  \"note\": \"Bank reconciliation approval moves to Finance\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"change\": {\n      \"id\": 12,\n      \"ref\": \"CFG-12\",\n      \"kind\": \"role-access\",\n      \"kindLabel\": \"Role access\",\n      \"target\": \"tis-finance\",\n      \"targetLabel\": \"TIS Finance & General Accounting\",\n      \"summary\": [\n        \"Added: Accounts › Bank reconciliation › Approve\"\n      ],\n      \"status\": \"pending\",\n      \"requestedBy\": \"IT administrator\",\n      \"requestedAt\": \"2026-10-09T02:15:00Z\",\n      \"canDecide\": true,\n      \"canWithdraw\": true,\n      \"link\": \"/master/generals/usermanagement/role-permissions?view=pending&change=12\"\n    },\n    \"applied\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "What a change of a role's access would do (dry run): the change without no-ops, segregation-of-duties warnings for the role and its users, who is affected",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/role-access/check",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "role-access",
+                "check"
+              ]
+            },
+            "description": "What a change of a role's access would do (dry run): the change without no-ops, segregation-of-duties warnings for the role and its users, who is affected\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: write:roles",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"tis-finance\",\n  \"grant\": [\n    \"approve:bank-reconciliation\"\n  ],\n  \"revoke\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/access-control/role-access/check",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "access-control",
+                    "role-access",
+                    "check"
+                  ]
+                },
+                "description": "What a change of a role's access would do (dry run): the change without no-ops, segregation-of-duties warnings for the role and its users, who is affected\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: write:roles",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"role\": \"tis-finance\",\n  \"grant\": [\n    \"approve:bank-reconciliation\"\n  ],\n  \"revoke\": []\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"grant\": [\n      \"approve:bank-reconciliation\"\n    ],\n    \"revoke\": [],\n    \"added\": [\n      \"Accounts › Bank reconciliation › Approve\"\n    ],\n    \"removed\": [],\n    \"warnings\": [],\n    \"blocked\": false,\n    \"affected\": {\n      \"users\": 6,\n      \"throughUsers\": 0,\n      \"throughRoles\": []\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Role permissions for audit (?roles=a,b&base=1&format=xlsx|csv): access by role x module x level, the matrix, the changes waiting for approval and the permission codes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/access-control/role-access/export?roles=tis-sales-associate,tis-sales-officer&base=0&format=xlsx",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "access-control",
+                "role-access",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "roles",
+                  "value": "tis-sales-associate,tis-sales-officer"
+                },
+                {
+                  "key": "base",
+                  "value": "0"
+                },
+                {
+                  "key": "format",
+                  "value": "xlsx"
+                }
+              ]
+            },
+            "description": "Role permissions for audit (?roles=a,b&base=1&format=xlsx|csv): access by role x module x level, the matrix, the changes waiting for approval and the permission codes\n\nFront-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control"
+          },
+          "response": []
+        },
+        {
           "name": "Permissions down, roles across: what each role may do (inherited roles listed per role)",
           "request": {
             "method": "GET",
@@ -1246,7 +1799,7 @@
           ]
         },
         {
-          "name": "Segregation-of-duties rules: pairs of roles one person may not hold together",
+          "name": "Segregation-of-duties rules: pairs of roles one person may not hold together, and access a role or a person should not combine",
           "request": {
             "method": "GET",
             "header": [],
@@ -1260,7 +1813,7 @@
                 "sod-rules"
               ]
             },
-            "description": "Segregation-of-duties rules: pairs of roles one person may not hold together\n\nFront-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: read:access-control"
+            "description": "Segregation-of-duties rules: pairs of roles one person may not hold together, and access a role or a person should not combine\n\nFront-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: read:access-control"
           },
           "response": [
             {
@@ -1278,7 +1831,7 @@
                     "sod-rules"
                   ]
                 },
-                "description": "Segregation-of-duties rules: pairs of roles one person may not hold together\n\nFront-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: read:access-control"
+                "description": "Segregation-of-duties rules: pairs of roles one person may not hold together, and access a role or a person should not combine\n\nFront-end touchpoint: Master > User Management > Segregation of Duties\n\nAccess: read:access-control"
               },
               "status": "OK",
               "code": 200,
@@ -1290,7 +1843,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"code\": \"SOD-PROC-ACCT\",\n      \"roleA\": \"processing\",\n      \"roleB\": \"accounting\",\n      \"action\": \"block\"\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"code\": \"SOD-PROC-ACCT\",\n      \"kind\": \"roles\",\n      \"roleA\": \"processing\",\n      \"roleB\": \"accounting\",\n      \"accessA\": [],\n      \"accessB\": [],\n      \"action\": \"block\"\n    },\n    {\n      \"id\": 7,\n      \"code\": \"SOD-ACC-CLAIM-PAY\",\n      \"kind\": \"access\",\n      \"roleA\": null,\n      \"roleB\": null,\n      \"accessA\": [\n        \"write:claims\"\n      ],\n      \"accessB\": [\n        \"write:disbursements\"\n      ],\n      \"accessANames\": [\n        \"Operations › Claims › Create and edit\"\n      ],\n      \"accessBNames\": [\n        \"Accounts › Disbursements and petty cash › Create and edit\"\n      ],\n      \"action\": \"warn\"\n    }\n  ]\n}"
             }
           ]
         },
@@ -88958,7 +89511,7 @@
           ]
         },
         {
-          "name": "Update a role and its permissions",
+          "name": "Update a role and its permissions (with access.change_approval, a new permission list waits for approval as a change of the role's access)",
           "request": {
             "method": "PUT",
             "header": [
@@ -88984,7 +89537,7 @@
                 }
               ]
             },
-            "description": "Update a role and its permissions\n\nFront-end touchpoint: Master > User Management > Role > Edit\n\nAccess: write:roles",
+            "description": "Update a role and its permissions (with access.change_approval, a new permission list waits for approval as a change of the role's access)\n\nFront-end touchpoint: Master > User Management > Role > Edit\n\nAccess: write:roles",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Branch Manager\",\n  \"permissions\": [\n    \"read:leads\"\n  ]\n}",
@@ -89023,7 +89576,7 @@
                     }
                   ]
                 },
-                "description": "Update a role and its permissions\n\nFront-end touchpoint: Master > User Management > Role > Edit\n\nAccess: write:roles",
+                "description": "Update a role and its permissions (with access.change_approval, a new permission list waits for approval as a change of the role's access)\n\nFront-end touchpoint: Master > User Management > Role > Edit\n\nAccess: write:roles",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"name\": \"Branch Manager\",\n  \"permissions\": [\n    \"read:leads\"\n  ]\n}",

@@ -35,7 +35,11 @@ minimal, clearly-correct front-end fix.
   permission is `ROLE_PERMS` in the same file (the broker roles and the TISPH roles `tis-*` of the RBAC v4 sheet); a
   role added there for databases in use also needs a migration, as `0348_tisph_roles.sql` does. Roles that include
   the System Administrator role through `roles.inherits` (SUPERID) are protected like it: `adminEquivalentRoles()` in
-  `src/lib/auth.js`.
+  `src/lib/auth.js`. A new permission code also needs its entry in `src/modules/access-control/catalogue.js` (area,
+  module, level and what it allows in business words): Role Permissions shows it from there, and
+  `test/role-permissions.test.js` fails while a code of the database has none. On a database in use, the access of a
+  role is changed on Role Permissions as a change another administrator approves (`access.change_approval`); a
+  migration that grants a permission for a release grants it directly, as `0348_tisph_roles.sql` does.
 - Coded reasons: a decision that records a reason (claim repudiation, renewal lapse, quotation declined or dropped)
   takes an optional `reasonCode` of the reason-code master besides the free-text reason; resolve it with
   `decisionReason(db, contexts, { reasonCode, reason })` from `src/modules/ops-masters/records.js`, which checks the
@@ -43,7 +47,8 @@ minimal, clearly-correct front-end fix.
   without a reason (period close and reopening, year-end reversal, void of a printed CAS book, change of a CAS
   document, incentive batch rejection: the contexts of seed `88_accounting_reasons.sql`) takes `{ reasonCode, note }`
   and resolves it with `requiredReason(db, context, { reasonCode, note })` from the same file (the code is required;
-  returns `{ code, name, note, text }`); store the code beside the reason text (migration 0380 adds the columns).
+  returns `{ code, name, note, text }`); store the code beside the reason text (migration 0380 adds the columns). A
+  change of access takes its reason from the context `access_change` (seed `91_role_access.sql`).
 - Record scoping: users whose roles are all in `security.scoped_roles` only see their own book. Use
   `src/lib/scope.js`: pass `await withScope(req)` to list / stats services and add `scopeSql(q[SCOPE], '<entity>', alias, params)`
   to the WHERE clause; guard detail, update and workflow routes with `ownRecord('<entity>')` (answers 404, not 403).

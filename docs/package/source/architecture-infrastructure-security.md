@@ -528,7 +528,7 @@ With package B, Sales, Operations and Accounting hold `view:pii` and see full TI
 | Delegation of authority | Time-bound delegation of approval authority (leave, travel), revocable (Master > User Management > Delegations) |
 | Segregation of duties | Rules on pairs of roles, checked when roles are assigned (`access.sod_enforced`). Seeded: placement and payment, placement and payment approval, claims and payment (block); sales and collection, sales and claims (warn) |
 | Access reviews | Recertification campaigns over every active user; "revoke" deactivates the account and signs it out (Master > User Management > Access Reviews) |
-| Access reports | User Access Matrix and Role Permissions, downloadable as XLSX or CSV |
+| Access reports | User Access Matrix and Role Permissions (access by role, module and level, the changes waiting for approval, the permission codes), downloadable as XLSX or CSV |
 | Period control | Postings refused in closed or locked periods; soft-closed periods only with `approve:period-end` |
 
 ## Application security controls (OWASP Top 10, 2021)

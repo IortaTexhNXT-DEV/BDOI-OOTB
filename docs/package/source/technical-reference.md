@@ -373,7 +373,7 @@ A route therefore cannot be left open by forgetting `requireAuth`, and the API c
 ## Permissions and roles
 
 - **Permission codes.** `read:<area>`, `write:<area>` and `approve:<area>` (98 codes with packages B and G), plus `view:pii` (package B: full personal identifiers). An endpoint names its permission with `requirePermission('write:receipts')`, or an administrator role with `roles: [ADMIN_ROLE]`. A missing permission answers 403 naming it.
-- **Roles.** Eight roles are seeded. The System Administrator holds every permission. The grants of the other roles are in `ROLE_PERMS` of `backend/src/db/seed.js` and in the migration that added a permission; roles may inherit other roles (`ROLE_INHERITS`: Accounting Manager inherits Accounting; `user_effective_roles()` in the database). Administrators change grants on Master > User Management > Role Permissions.
+- **Roles.** Eight roles are seeded. The System Administrator holds every permission. The grants of the other roles are in `ROLE_PERMS` of `backend/src/db/seed.js` and in the migration that added a permission; roles may inherit other roles (`ROLE_INHERITS`: Accounting Manager inherits Accounting; `user_effective_roles()` in the database). Administrators change grants on Master > User Management > Role Permissions: a change of a role's access is a request that another user holding `approve:access-control` approves (`access.change_approval`, `backend/src/modules/access-control/README.md`); every permission code has its business name in `backend/src/modules/access-control/catalogue.js`.
 
 | Role (code) | Permissions | Typical grants |
 |---|---|---|
@@ -1095,7 +1095,7 @@ Database records that support the logs: `audit_log` (changes, with source), `log
 | "Invalid username or password", then "Account locked" | Wrong passwords reached `limits.max_login_attempts` | `login_history`; unlock on Master > User Management |
 | 429 "Too many requests" | Sign-in or API rate limit | `security.login_rate_limit`, `security.api_rate_limit`; wait for `Retry-After` |
 | "Session ended; sign in again" | Token version raised (password reset, role change, deactivation) | `users.token_version`; expected behaviour |
-| 403 "Requires permission: write:..." | Role lacks the permission | Master > User Management > Role Permissions |
+| 403 "Requires permission: write:..." | Role lacks the permission | Master > User Management > Role Permissions (Show technical names gives the codes); the change applies once approved |
 | Screen missing from the menu | Role not granted the menu entry | `roleMenuPermissions` in `utils/menuPermissions.js` |
 | "Accounting period ... is closed / soft-closed / locked" | Posting date in a closed period | Accounts > Period End > Period Management |
 | "No active posting rule for event ..." or "GL account setting ... is not configured" | Posting configuration incomplete | Master > Finance > Posting Rules and Account Determination |

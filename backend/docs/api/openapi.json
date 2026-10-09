@@ -781,6 +781,509 @@
         ]
       }
     },
+    "/access-control/changes": {
+      "get": {
+        "operationId": "getAccessControlChanges",
+        "summary": "Changes of access (role access) with their summary in business words and what the signed-in user may do (?status=pending|approved|rejected|withdrawn|all&kind&target)",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "pending"
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "role-access"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "ref": {
+                            "type": "string"
+                          },
+                          "kind": {
+                            "type": "string"
+                          },
+                          "kindLabel": {
+                            "type": "string"
+                          },
+                          "target": {
+                            "type": "string"
+                          },
+                          "targetLabel": {
+                            "type": "string"
+                          },
+                          "summary": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "requestedBy": {
+                            "type": "string"
+                          },
+                          "requestedAt": {
+                            "type": "string"
+                          },
+                          "canDecide": {
+                            "type": "boolean"
+                          },
+                          "canWithdraw": {
+                            "type": "boolean"
+                          },
+                          "link": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 12,
+                      "ref": "CFG-12",
+                      "kind": "role-access",
+                      "kindLabel": "Role access",
+                      "target": "tis-finance",
+                      "targetLabel": "TIS Finance & General Accounting",
+                      "summary": [
+                        "Added: Accounts › Bank reconciliation › Approve"
+                      ],
+                      "status": "pending",
+                      "requestedBy": "IT administrator",
+                      "requestedAt": "2026-10-09T02:15:00Z",
+                      "canDecide": true,
+                      "canWithdraw": true,
+                      "link": "/master/generals/usermanagement/role-permissions?view=pending&change=12"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Role Permissions",
+        "x-permissions": [
+          "read:access-control"
+        ]
+      }
+    },
+    "/access-control/changes/{id}": {
+      "get": {
+        "operationId": "getAccessControlChangesId",
+        "summary": "One change of access",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "ref": {
+                          "type": "string"
+                        },
+                        "kind": {
+                          "type": "string"
+                        },
+                        "kindLabel": {
+                          "type": "string"
+                        },
+                        "target": {
+                          "type": "string"
+                        },
+                        "targetLabel": {
+                          "type": "string"
+                        },
+                        "summary": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "requestedAt": {
+                          "type": "string"
+                        },
+                        "canDecide": {
+                          "type": "boolean"
+                        },
+                        "canWithdraw": {
+                          "type": "boolean"
+                        },
+                        "link": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 12,
+                    "ref": "CFG-12",
+                    "kind": "role-access",
+                    "kindLabel": "Role access",
+                    "target": "tis-finance",
+                    "targetLabel": "TIS Finance & General Accounting",
+                    "summary": [
+                      "Added: Accounts › Bank reconciliation › Approve"
+                    ],
+                    "status": "pending",
+                    "requestedBy": "IT administrator",
+                    "requestedAt": "2026-10-09T02:15:00Z",
+                    "canDecide": true,
+                    "canWithdraw": true,
+                    "link": "/master/generals/usermanagement/role-permissions?view=pending&change=12"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Role Permissions",
+        "x-permissions": [
+          "read:access-control"
+        ]
+      }
+    },
+    "/access-control/changes/{id}/decision": {
+      "post": {
+        "operationId": "postAccessControlChangesIdDecision",
+        "summary": "Approve (applies it) or reject (remarks required) a change of access; never by the requester",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Role Permissions\n\nAccess: approve:access-control",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "ref": {
+                          "type": "string"
+                        },
+                        "kind": {
+                          "type": "string"
+                        },
+                        "kindLabel": {
+                          "type": "string"
+                        },
+                        "target": {
+                          "type": "string"
+                        },
+                        "targetLabel": {
+                          "type": "string"
+                        },
+                        "summary": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "requestedAt": {
+                          "type": "string"
+                        },
+                        "canDecide": {
+                          "type": "boolean"
+                        },
+                        "canWithdraw": {
+                          "type": "boolean"
+                        },
+                        "link": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 12,
+                    "ref": "CFG-12",
+                    "kind": "role-access",
+                    "kindLabel": "Role access",
+                    "target": "tis-finance",
+                    "targetLabel": "TIS Finance & General Accounting",
+                    "summary": [
+                      "Added: Accounts › Bank reconciliation › Approve"
+                    ],
+                    "status": "approved",
+                    "requestedBy": "IT administrator",
+                    "requestedAt": "2026-10-09T02:15:00Z",
+                    "canDecide": true,
+                    "canWithdraw": true,
+                    "link": "/master/generals/usermanagement/role-permissions?view=pending&change=12"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Role Permissions",
+        "x-permissions": [
+          "approve:access-control"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "decision": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "decision": "approve"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/access-control/changes/{id}/withdraw": {
+      "post": {
+        "operationId": "postAccessControlChangesIdWithdraw",
+        "summary": "Withdraw a change of access waiting for approval (the requester or an approver)",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Role Permissions\n\nAccess: write:roles, write:access-control, approve:access-control",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "ref": {
+                          "type": "string"
+                        },
+                        "kind": {
+                          "type": "string"
+                        },
+                        "kindLabel": {
+                          "type": "string"
+                        },
+                        "target": {
+                          "type": "string"
+                        },
+                        "targetLabel": {
+                          "type": "string"
+                        },
+                        "summary": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "requestedAt": {
+                          "type": "string"
+                        },
+                        "canDecide": {
+                          "type": "boolean"
+                        },
+                        "canWithdraw": {
+                          "type": "boolean"
+                        },
+                        "link": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 12,
+                    "ref": "CFG-12",
+                    "kind": "role-access",
+                    "kindLabel": "Role access",
+                    "target": "tis-finance",
+                    "targetLabel": "TIS Finance & General Accounting",
+                    "summary": [
+                      "Added: Accounts › Bank reconciliation › Approve"
+                    ],
+                    "status": "withdrawn",
+                    "requestedBy": "IT administrator",
+                    "requestedAt": "2026-10-09T02:15:00Z",
+                    "canDecide": true,
+                    "canWithdraw": true,
+                    "link": "/master/generals/usermanagement/role-permissions?view=pending&change=12"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Role Permissions",
+        "x-permissions": [
+          "write:roles",
+          "write:access-control",
+          "approve:access-control"
+        ]
+      }
+    },
     "/access-control/delegations": {
       "get": {
         "operationId": "getAccessControlDelegations",
@@ -1434,6 +1937,660 @@
         }
       }
     },
+    "/access-control/role-access": {
+      "get": {
+        "operationId": "getAccessControlRoleAccess",
+        "summary": "Role permissions in business words: the access catalogue (areas, modules, levels), the departments, and each role with its own and included access, users and change waiting for approval",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "approval": {
+                          "type": "boolean"
+                        },
+                        "catalogue": {
+                          "type": "object",
+                          "properties": {
+                            "areas": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "code": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "order": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            },
+                            "modules": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "code": {
+                                    "type": "string"
+                                  },
+                                  "area": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "screens": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "levels": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "permissions": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "code": {
+                                    "type": "string"
+                                  },
+                                  "area": {
+                                    "type": "string"
+                                  },
+                                  "module": {
+                                    "type": "string"
+                                  },
+                                  "level": {
+                                    "type": "string"
+                                  },
+                                  "meaning": {
+                                    "type": "string"
+                                  },
+                                  "checked": {
+                                    "type": "boolean"
+                                  },
+                                  "baseline": {
+                                    "type": "boolean"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "departments": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "order": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "roles": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "department": {
+                                "type": "string"
+                              },
+                              "platform": {
+                                "type": "boolean"
+                              },
+                              "fullAccess": {
+                                "type": "boolean"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "inherits": {
+                                "type": "array",
+                                "items": {}
+                              },
+                              "includedBy": {
+                                "type": "array",
+                                "items": {}
+                              },
+                              "users": {
+                                "type": "object",
+                                "properties": {
+                                  "active": {
+                                    "type": "integer"
+                                  },
+                                  "inactive": {
+                                    "type": "integer"
+                                  }
+                                }
+                              },
+                              "own": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "included": {
+                                "type": "object",
+                                "properties": {}
+                              },
+                              "pending": {},
+                              "editBlocked": {}
+                            }
+                          }
+                        },
+                        "pendingCount": {
+                          "type": "integer"
+                        },
+                        "abilities": {
+                          "type": "object",
+                          "properties": {
+                            "edit": {
+                              "type": "boolean"
+                            },
+                            "approve": {
+                              "type": "boolean"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "approval": true,
+                    "catalogue": {
+                      "areas": [
+                        {
+                          "code": "accounts",
+                          "name": "Accounts",
+                          "order": 3
+                        }
+                      ],
+                      "modules": [
+                        {
+                          "code": "receipts",
+                          "area": "accounts",
+                          "name": "Receipts",
+                          "screens": [
+                            "Receipts",
+                            "Post-Dated Cheques"
+                          ],
+                          "levels": [
+                            "view",
+                            "edit"
+                          ]
+                        }
+                      ],
+                      "permissions": [
+                        {
+                          "code": "read:receipts",
+                          "area": "accounts",
+                          "module": "receipts",
+                          "level": "view",
+                          "meaning": "See receipts and post-dated cheques",
+                          "checked": true,
+                          "baseline": false
+                        }
+                      ]
+                    },
+                    "departments": [
+                      {
+                        "name": "Cash Control",
+                        "order": 3
+                      }
+                    ],
+                    "roles": [
+                      {
+                        "code": "tis-ccd-bp",
+                        "name": "CCD-BP / QRPh (Receipting)",
+                        "department": "Cash Control",
+                        "platform": false,
+                        "fullAccess": false,
+                        "status": "active",
+                        "inherits": [],
+                        "includedBy": [],
+                        "users": {
+                          "active": 2,
+                          "inactive": 0
+                        },
+                        "own": [
+                          "read:receipts",
+                          "write:receipts"
+                        ],
+                        "included": {},
+                        "pending": null,
+                        "editBlocked": null
+                      }
+                    ],
+                    "pendingCount": 0,
+                    "abilities": {
+                      "edit": true,
+                      "approve": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Role Permissions",
+        "x-permissions": [
+          "read:access-control"
+        ]
+      }
+    },
+    "/access-control/role-access/{role}/changes": {
+      "post": {
+        "operationId": "postAccessControlRoleAccessRoleChanges",
+        "summary": "Change the access of a role (reason required); it applies once another administrator approves it (or at once with access.change_approval off)",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Role Permissions\n\nAccess: write:roles",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "change": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "ref": {
+                              "type": "string"
+                            },
+                            "kind": {
+                              "type": "string"
+                            },
+                            "kindLabel": {
+                              "type": "string"
+                            },
+                            "target": {
+                              "type": "string"
+                            },
+                            "targetLabel": {
+                              "type": "string"
+                            },
+                            "summary": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "requestedBy": {
+                              "type": "string"
+                            },
+                            "requestedAt": {
+                              "type": "string"
+                            },
+                            "canDecide": {
+                              "type": "boolean"
+                            },
+                            "canWithdraw": {
+                              "type": "boolean"
+                            },
+                            "link": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "applied": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "change": {
+                      "id": 12,
+                      "ref": "CFG-12",
+                      "kind": "role-access",
+                      "kindLabel": "Role access",
+                      "target": "tis-finance",
+                      "targetLabel": "TIS Finance & General Accounting",
+                      "summary": [
+                        "Added: Accounts › Bank reconciliation › Approve"
+                      ],
+                      "status": "pending",
+                      "requestedBy": "IT administrator",
+                      "requestedAt": "2026-10-09T02:15:00Z",
+                      "canDecide": true,
+                      "canWithdraw": true,
+                      "link": "/master/generals/usermanagement/role-permissions?view=pending&change=12"
+                    },
+                    "applied": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Role Permissions",
+        "x-permissions": [
+          "write:roles"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "grant": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "revoke": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "grant": [
+                  "approve:bank-reconciliation"
+                ],
+                "revoke": [
+                  "write:fixed-assets"
+                ],
+                "reasonCode": "ACC-REDESIGN",
+                "note": "Bank reconciliation approval moves to Finance"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/access-control/role-access/check": {
+      "post": {
+        "operationId": "postAccessControlRoleAccessCheck",
+        "summary": "What a change of a role's access would do (dry run): the change without no-ops, segregation-of-duties warnings for the role and its users, who is affected",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Role Permissions\n\nAccess: write:roles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "grant": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "revoke": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "added": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "removed": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "warnings": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "blocked": {
+                          "type": "boolean"
+                        },
+                        "affected": {
+                          "type": "object",
+                          "properties": {
+                            "users": {
+                              "type": "integer"
+                            },
+                            "throughUsers": {
+                              "type": "integer"
+                            },
+                            "throughRoles": {
+                              "type": "array",
+                              "items": {}
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "grant": [
+                      "approve:bank-reconciliation"
+                    ],
+                    "revoke": [],
+                    "added": [
+                      "Accounts › Bank reconciliation › Approve"
+                    ],
+                    "removed": [],
+                    "warnings": [],
+                    "blocked": false,
+                    "affected": {
+                      "users": 6,
+                      "throughUsers": 0,
+                      "throughRoles": []
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Role Permissions",
+        "x-permissions": [
+          "write:roles"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "role": {
+                    "type": "string"
+                  },
+                  "grant": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "revoke": {
+                    "type": "array",
+                    "items": {}
+                  }
+                }
+              },
+              "example": {
+                "role": "tis-finance",
+                "grant": [
+                  "approve:bank-reconciliation"
+                ],
+                "revoke": []
+              }
+            }
+          }
+        }
+      }
+    },
+    "/access-control/role-access/export": {
+      "get": {
+        "operationId": "getAccessControlRoleAccessExport",
+        "summary": "Role permissions for audit (?roles=a,b&base=1&format=xlsx|csv): access by role x module x level, the matrix, the changes waiting for approval and the permission codes",
+        "tags": [
+          "Access Control"
+        ],
+        "description": "Front-end touchpoint: Master > User Management > Role Permissions\n\nAccess: read:access-control",
+        "parameters": [
+          {
+            "name": "roles",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "tis-sales-associate,tis-sales-officer"
+          },
+          {
+            "name": "base",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 0
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "xlsx"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > User Management > Role Permissions",
+        "x-permissions": [
+          "read:access-control"
+        ]
+      }
+    },
     "/access-control/role-matrix": {
       "get": {
         "operationId": "getAccessControlRoleMatrix",
@@ -1630,7 +2787,7 @@
     "/access-control/sod-rules": {
       "get": {
         "operationId": "getAccessControlSodRules",
-        "summary": "Segregation-of-duties rules: pairs of roles one person may not hold together",
+        "summary": "Segregation-of-duties rules: pairs of roles one person may not hold together, and access a role or a person should not combine",
         "tags": [
           "Access Control"
         ],
@@ -1658,11 +2815,22 @@
                           "code": {
                             "type": "string"
                           },
+                          "kind": {
+                            "type": "string"
+                          },
                           "roleA": {
                             "type": "string"
                           },
                           "roleB": {
                             "type": "string"
+                          },
+                          "accessA": {
+                            "type": "array",
+                            "items": {}
+                          },
+                          "accessB": {
+                            "type": "array",
+                            "items": {}
                           },
                           "action": {
                             "type": "string"
@@ -1678,9 +2846,32 @@
                     {
                       "id": 1,
                       "code": "SOD-PROC-ACCT",
+                      "kind": "roles",
                       "roleA": "processing",
                       "roleB": "accounting",
+                      "accessA": [],
+                      "accessB": [],
                       "action": "block"
+                    },
+                    {
+                      "id": 7,
+                      "code": "SOD-ACC-CLAIM-PAY",
+                      "kind": "access",
+                      "roleA": null,
+                      "roleB": null,
+                      "accessA": [
+                        "write:claims"
+                      ],
+                      "accessB": [
+                        "write:disbursements"
+                      ],
+                      "accessANames": [
+                        "Operations › Claims › Create and edit"
+                      ],
+                      "accessBNames": [
+                        "Accounts › Disbursements and petty cash › Create and edit"
+                      ],
+                      "action": "warn"
                     }
                   ]
                 }
@@ -143612,7 +144803,7 @@
     "/roles/{id}": {
       "put": {
         "operationId": "putRolesId",
-        "summary": "Update a role and its permissions",
+        "summary": "Update a role and its permissions (with access.change_approval, a new permission list waits for approval as a change of the role's access)",
         "tags": [
           "User Management"
         ],

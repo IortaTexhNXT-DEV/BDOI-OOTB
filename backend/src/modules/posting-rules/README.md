@@ -38,6 +38,9 @@ maps are settings: `accounting.account.<role>`, `accounting.payable_account_by_p
   Configuration refuse to change the controlled keys (`accounting.account.*`, the two maps, the commission tax keys).
   Proposing needs `write:settings`, `write:masters` or `write:posting-rules` (Accounting Manager). Write-off reasons are
   not under maker-checker.
+- The same table holds the changes of access (kind `role-access`, `src/modules/access-control/changes.js`): the
+  changes routes of this module list, decide and withdraw only the kinds of `CHANGE_LABELS`, so a change of access is
+  never approved with `approve:posting-rules`; it is decided on Role Permissions with `approve:access-control`.
 
 ## Key settings
 
