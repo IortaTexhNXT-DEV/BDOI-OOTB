@@ -119,9 +119,11 @@ describe("Fleet Schedules", () => {
     render(<MemoryRouter><FleetSchedules /></MemoryRouter>);
     fireEvent.click(await screen.findByRole("button", { name: "New fleet schedule" }));
     await screen.findByText("Period to");
-    const [from, to] = screen.getAllByDisplayValue(/^\d{4}-\d{2}-\d{2}$/).map((e) => e.value);
-    expect(Number(to.slice(0, 4))).toBe(Number(from.slice(0, 4)) + 1);
-    expect(to.slice(4)).toBe(from.slice(4));
+    // the dates show in the date format of the application: the same day and month, the next year
+    const [from, to] = screen.getAllByDisplayValue(/^(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})$/).map((e) => e.value);
+    const year = (v) => Number(v.match(/\d{4}/)[0]);
+    expect(year(to)).toBe(year(from) + 1);
+    expect(to.replace(/\d{4}/, "")).toBe(from.replace(/\d{4}/, ""));
     fireEvent.click(screen.getByRole("button", { name: "Start" }));
     expect(await screen.findByText("Choose the client")).toBeInTheDocument();
     expect(service.createFleet).not.toHaveBeenCalled();
