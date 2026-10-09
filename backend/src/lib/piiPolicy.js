@@ -22,7 +22,7 @@ import { logger } from './logger.js';
 
 export const VIEW_PII = 'view:pii';
 export const UNMASK_HEADER = 'x-unmask-pii';
-export const DEFAULT_EXEMPT_PATHS = ['/api/auth', '/api/s3', '/api/settings', '/api/system-settings', '/api/data-load', '/api/privacy/parties', '/api/health'];
+export const DEFAULT_EXEMPT_PATHS = ['/api/auth', '/api/s3', '/api/settings', '/api/system-settings', '/api/data-load', '/api/health'];
 
 async function loadPolicySettings() {
   const enabled = (await getSetting('privacy.masking_enabled', true)) !== false;

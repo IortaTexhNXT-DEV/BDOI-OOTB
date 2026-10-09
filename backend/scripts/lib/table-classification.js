@@ -48,8 +48,8 @@ export const TRANSACTION_TABLES = [
   'package_endorsements', 'package_sections', 'package_quotes', 'payment_events', 'payment_links',
   // access reviews held, calendar events of users
   'access_review_items', 'access_reviews', 'agent_events',
-  // data privacy: consents and data subject requests belong to the clients and leads that go
-  'data_subject_requests', 'privacy_consents',
+  // consents (marketing and messaging) belong to the clients and leads that go
+  'privacy_consents',
   // the work diary of Operations > My Work (tasks and follow-ups on the records that go)
   'work_tasks',
   // integrations: CTPL authentication of each cover, bank payment batches and their lines

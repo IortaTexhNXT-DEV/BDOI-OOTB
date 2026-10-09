@@ -6,7 +6,7 @@
  * client_name, due_date, priority (low / normal / high / urgent), status (of the record), next_action, owner_id (the
  * user the item waits on; null for a queue item), queue (true: waits on whoever holds the permission, e.g. an
  * approval), link (front-end path of the record), amount, created_at, reassign (null, or the kind of reassignment the
- * owning module supports: claim, privacy).
+ * owning module supports: claim, task).
  *
  * A category is built only when the user holds the permission to read its records, and every source applies the
  * record scope of lib/scope.js (a user limited to their own book never sees another book's item, whatever the tab).
@@ -224,7 +224,7 @@ function claims(ctx) {
   WHERE cl.status IN ('registered', 'in-review', 'approved', 'pending-approval') AND ${rec(ctx, 'claim', 'cl')}`;
 }
 
-/** Approval queues (maker-checker) the user can decide, plus the data subject requests assigned to them. */
+/** Approval queues (maker-checker) the user can decide. */
 async function approvals(ctx) {
   const out = [];
   const due = (ts) => `${localDate(ctx, ts)} + ${ctx.P(ctx.slaDays)}::int`;
@@ -328,14 +328,6 @@ async function approvals(ctx) {
       amount: 'pp.amount', created_at: 'pp.created_at' })}
       FROM policy_payments pp JOIN policies p ON p.id = pp.policy_id LEFT JOIN clients c ON c.id = p.client_id
       WHERE pp.status = 'submitted' AND ${notMine(ctx, 'pp.submitted_by')}`);
-  }
-  // data subject requests (Data Privacy Act): the assignee's, or the privacy team's queue while unassigned
-  if ((ctx.can('read:privacy') || ctx.can('write:privacy')) && await has('data_subject_requests')) {
-    out.push(`SELECT ${select({ ...base, kind: "'Data subject request'", id: 'ds.id', ref: 'ds.request_number', title: "initcap(ds.request_type) || ' request'", client_name: 'ds.requester_name',
-      due_date: 'ds.due_on', status: 'ds.status', next_action: "CASE WHEN ds.assigned_to IS NULL THEN 'Assign and verify the identity' ELSE 'Respond to the data subject' END",
-      owner_id: 'ds.assigned_to', queue: ctx.can('write:privacy') ? 'ds.assigned_to IS NULL' : 'false', link: "'/master/data-privacy/requests'", created_at: 'ds.created_at',
-      reassign: "'privacy'" })}
-      FROM data_subject_requests ds WHERE ds.status IN ('open', 'in-progress')`);
   }
   return out.length ? out.join(' UNION ALL ') : null;
 }

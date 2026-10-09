@@ -56,7 +56,7 @@ describe('audit value formatting', () => {
     expect(formatValue('handlerUserId', 'usr_0123456789abcdef', ctx({ refs: new Map([['usr_0123456789abcdef', 'Jasmine Cruz']]) }))).toBe('Jasmine Cruz');
     expect(formatValue('tags', ['a', 'b'], ctx())).toBe('a, b');
   });
-  it('never shows secrets and masks ID numbers without read:privacy', () => {
+  it('never shows secrets and masks ID numbers without view:pii', () => {
     expect(formatValue('password', 'Secret#123', ctx())).toBe(MASK);
     expect(formatValue('password_hash', '$2a$10$abc', ctx())).toBe(MASK);
     expect(formatValue('totpSecret', 'JBSWY3DPEHPK3PXP', ctx())).toBe(MASK);

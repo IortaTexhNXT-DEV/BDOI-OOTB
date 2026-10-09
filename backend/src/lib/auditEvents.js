@@ -7,7 +7,7 @@
  * one row per changed claim field; both are read here and turned into events.
  *
  * Privacy: secrets (passwords, tokens, 2FA secrets, PINs ...) are never shown; government ID and bank account numbers
- * are shown masked (last four characters) unless the viewer holds read:privacy; the personal data of an anonymised
+ * are shown masked (last four characters) unless the viewer holds view:pii; the personal data of an anonymised
  * client or prospect are shown as "Anonymised".
  */
 import { many } from '../db/pool.js';
@@ -42,7 +42,7 @@ const IDENTIFIER = new Set(['tin', 'tinno', 'tinnumber', 'taxnumber', 'taxid', '
   'bankaccount', 'bankaccountnumber', 'bankaccountno', 'iban']);
 export const isIdentifierKey = (path) => IDENTIFIER.has(norm(leaf(path)));
 
-/** Personal data of a party (cleared when the party is anonymised; mirrors the privacy module's anonymisation keys). */
+/** Personal data of a party (shown as Anonymised once the party's personal data were anonymised). */
 const PERSONAL = new Set(['firstname', 'lastname', 'middlename', 'middleinitial', 'suffix', 'fullname', 'displayname', 'preferredname', 'name', 'insuredname',
   'customername', 'clientname', 'companyname', 'email', 'emailid', 'emailaddress', 'phone', 'phonenumber', 'mobile', 'mobileno', 'mobilenumber',
   'contactnumber', 'contactno', 'telephone', 'landline', 'fax', 'address', 'address1', 'address2', 'addressline1', 'addressline2', 'fulladdress',
@@ -81,7 +81,7 @@ const TECH_ID = /^[a-z]{1,8}_[0-9a-f]{8,}$/;
 /** Format context: settings read once per request. */
 export async function formatContext({ viewer = null, statusLabels = {}, refs = new Map(), fieldLabels = {}, masterLabels = {}, anonymised = false } = {}) {
   const fmt = await printFormat().catch(() => DEFAULT_FORMAT);
-  return { fmt, viewer, canSeePersonal: !viewer || hasPermission(viewer, 'read:privacy') || hasPermission(viewer, VIEW_PII), statusLabels, refs, fieldLabels, masterLabels, anonymised };
+  return { fmt, viewer, canSeePersonal: !viewer || hasPermission(viewer, VIEW_PII), statusLabels, refs, fieldLabels, masterLabels, anonymised };
 }
 
 const timeIn = (d, timeZone) => {

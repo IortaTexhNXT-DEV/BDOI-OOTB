@@ -257,12 +257,6 @@ export const CATALOGUE = {
   // ---------------------------------------------------------------- privacy, audit, messages, files, loads
   'privacy_consents.evidence': 'freeText',
   'privacy_consents.withdrawal_reason': 'freeText',
-  'data_subject_requests.requester_name': 'partyName',
-  'data_subject_requests.requester_contact': 'contact',
-  'data_subject_requests.description': 'freeText',
-  'data_subject_requests.outcome': 'freeText',
-  'data_subject_requests.response_notes': 'freeText',
-  'data_subject_requests.actions': 'json',
   'audit_log.before_data': 'json',
   'audit_log.after_data': 'json',
   'audit_log.ip': 'ip',

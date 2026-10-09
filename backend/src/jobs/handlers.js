@@ -85,9 +85,6 @@ export { monthEndReminder, recurringJournals, accrualReversal, periodAutoSoftClo
 // Bank reconciliation: daily automatic matching (disabled by default)
 export { bankAutoMatch } from '../modules/bank-reconciliation/jobs.js';
 
-// Data privacy: remind the privacy team (read:privacy) of overdue data subject requests (daily, disabled by default)
-export { privacyRequestsDue } from '../modules/privacy/jobs.js';
-
 // My Work: follow-up tasks from collection promises, renewal next steps and claim follow-up dates; task reminders and
 // overdue alerts (every 15 minutes)
 export const myWorkReminders = async () => {

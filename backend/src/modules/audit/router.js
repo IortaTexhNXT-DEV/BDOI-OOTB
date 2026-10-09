@@ -31,7 +31,7 @@ const event = {
 
 define({
   method: 'GET', path: '/records/:entity/:id',
-  summary: 'History of one record as business events, newest first (sort=asc for oldest first): who (display name and roles), when (date and time in general.timezone, general.date_format), from where (screen / API / system job), the event and its changed fields as label, old value, new value (formatted; secrets never shown; ID numbers masked without read:privacy). :id is the id or the record number',
+  summary: 'History of one record as business events, newest first (sort=asc for oldest first): who (display name and roles), when (date and time in general.timezone, general.date_format), from where (screen / API / system job), the event and its changed fields as label, old value, new value (formatted; secrets never shown; ID numbers masked without view:pii). :id is the id or the record number',
   screen: 'Detail screens > History (policy, quotation, claim, client, endorsement, receipt, master records)',
   query: { sort: 'desc' }, response: { success: true, data: [event], total: 1, today: '2026-10-04' },
   handler: async (req, res) => {
