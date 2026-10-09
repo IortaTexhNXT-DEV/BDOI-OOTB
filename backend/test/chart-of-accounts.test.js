@@ -35,8 +35,8 @@ describe('chart of accounts', () => {
       expect(rows.some((r) => r.key === `accounting.account.${role}`), role).toBe(true);
     }
     // codes hard-wired in the sample ledger seed and the petty-cash samples
-    const seedSql = fs.readFileSync(path.join(here, '../src/db/seeds/sample/40_finance.sql'), 'utf8');
-    for (const m of seedSql.matchAll(/'([1-5]\d{6})'/g)) codes.add(m[1]);
+    const seedSql = fs.readFileSync(path.join(here, '../src/db/seeds/sample/89_finance.sql'), 'utf8');
+    for (const m of seedSql.matchAll(/'([1-6]\d{5,6})'/g)) codes.add(m[1]);
     const chart = new Map((await accounts()).map((a) => [a.code, a]));
     for (const c of codes) {
       expect(chart.has(c), `account ${c}`).toBe(true);
@@ -115,7 +115,8 @@ describe('chart of accounts', () => {
     expect(tb.body.data.byType.map((t) => t.accountType)).toEqual(['asset', 'liability', 'equity', 'income', 'expense']);
     const types = tb.body.data.rows.map((r) => r.accountType);
     expect(types).toEqual([...types].sort((a, b) => ['asset', 'liability', 'equity', 'income', 'expense'].indexOf(a) - ['asset', 'liability', 'equity', 'income', 'expense'].indexOf(b)));
-    expect(tb.body.data.rows.find((r) => r.accountCode === '1102001').accountName).toBe('Cash in Bank – Operating Account');
+    // the trial balance shows the accounts under their current names
+    for (const r of tb.body.data.rows) expect(r.accountName, r.accountCode).toBe(byCode.get(r.accountCode).name);
   });
 
   it('the Main / Sub Account masters list the GL chart', async () => {

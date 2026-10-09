@@ -47,6 +47,13 @@ export function applyDatePattern(iso, pattern = DEFAULT_FORMAT.dateFormat) {
   return String(pattern || DEFAULT_FORMAT.dateFormat).replace(/YYYY|YY|MMMM|MMM|MM|M|DD|D/g, (t) => tokens[t]);
 }
 
+/**
+ * Text with its yyyy-mm-dd dates in the configured format ("2026-02-01 to 2026-02-28" -> "01/02/2026 to 28/02/2026");
+ * references that contain a date, such as JV-2026-10-01, are left as they are.
+ */
+export const formatDatesIn = (text, fmt = DEFAULT_FORMAT) => String(text ?? '')
+  .replace(/(?<![\w-])(\d{4}-\d{2}-\d{2})(?![\w-])/g, (iso) => applyDatePattern(iso, fmt.dateFormat));
+
 /** A date in the configured format; a value that is not a date is returned as text ('' for empty). */
 export function formatDate(v, fmt = DEFAULT_FORMAT) {
   const iso = isoDateOf(v, fmt.timeZone);

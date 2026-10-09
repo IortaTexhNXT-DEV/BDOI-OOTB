@@ -2,7 +2,7 @@
 -- short-period scale, post-dated cheques, instalment invoices, the claim document checklist, motor claim repairs, the
 -- accounts payable sub-ledger and the fixed asset register. Settings, document numbering series, scheduled jobs,
 -- e-mail templates and the masters a broker reviews before go-live. Idempotent: rows are added only when missing, so
--- administrator changes are kept. Fictional repair shops and suppliers are in sample/73_ops_accounting.sql.
+-- administrator changes are kept. Fictional repair shops and suppliers are in sample/96_ops_accounting.sql.
 
 -- ---------------------------------------------------------------- settings
 INSERT INTO app_settings(key, value, "group", label, type) VALUES

@@ -3,7 +3,7 @@
 -- The sample template HOME-PROTECT (home fire and allied perils, a product TISPH does not sell) is set inactive while
 -- nobody has changed it, so it is no longer offered for a new campaign; the campaigns already made with it keep it.
 -- The TISPH templates (Motor renewal, new Toyota owners, Personal Accident, Credit Life) are reference seed
--- 84_tisph_campaign_templates.sql.
+-- 85_tisph_campaign_templates.sql.
 --
 -- Marketing campaigns get their own number series (CPG-YYYY-00001): they took the next number of the win-back
 -- campaigns of Renewals (WB), so the two registers shared one sequence. Campaigns numbered before keep their number.

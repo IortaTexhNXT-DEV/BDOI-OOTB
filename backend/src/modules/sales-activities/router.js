@@ -54,7 +54,7 @@ define({
   handler: async (req, res) => {
     const r = await svc.activityReport(pool, req.query, { recordScope: await scopeOf(req) });
     if (['xlsx', 'csv'].includes(req.query.format)) {
-      sendTable(res, { header: ['Account Executive', 'Activities', 'Calls', 'Meetings', 'E-mails', 'Visits', 'Other', 'Prospects', 'Clients', 'Quotations', 'Positive Outcomes', 'Next Steps',
+      await sendTable(res, { header: ['Account Executive', 'Activities', 'Calls', 'Meetings', 'E-mails', 'Visits', 'Other', 'Prospects', 'Clients', 'Quotations', 'Positive Outcomes', 'Next Steps',
         'Follow-ups Done', 'Follow-ups Open', 'Follow-ups Overdue'],
       rows: r.rows.map((x) => [x.accountExecutiveName, x.total, x.call, x.meeting, x.email, x.visit, x.other, x.prospects, x.clients, x.quotations, x.positive, x.nextSteps, x.followUpsDone,
         x.followUpsOpen, x.followUpsOverdue]), fileBase: `sales-activity-report-${r.from}-${r.to}`, format: req.query.format, sheetName: 'Activity report' });
@@ -69,7 +69,7 @@ define({
   handler: async (req, res) => {
     const rows = await svc.listActivities(pool, req.query, { recordScope: await scopeOf(req) });
     if (['xlsx', 'csv'].includes(req.query.format)) {
-      sendTable(res, { header: ['Date', 'Account Executive', 'Type', 'Subject', 'Record', 'Prospect / Client', 'Contact', 'Outcome', 'Next Step', 'Next Step Date', 'Follow-up'],
+      await sendTable(res, { header: ['Date', 'Account Executive', 'Type', 'Subject', 'Record', 'Prospect / Client', 'Contact', 'Outcome', 'Next Step', 'Next Step Date', 'Follow-up'],
         rows: rows.map((a) => [String(a.activityAt instanceof Date ? a.activityAt.toISOString() : a.activityAt).slice(0, 16).replace('T', ' '), a.accountExecutiveName, a.activityTypeName, a.subject,
           a.recordNumber || '', a.partyName || '', a.contactPerson || '', a.outcomeName || '', a.nextStep || '', a.nextStepDate || '', a.taskStatus || '']),
         fileBase: 'sales-activities', format: req.query.format, sheetName: 'Activities' });

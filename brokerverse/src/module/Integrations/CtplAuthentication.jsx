@@ -14,6 +14,7 @@ import { Toast } from "primereact/toast";
 import service from "../../services/integrationsService";
 import { useServerList } from "../../hooks/useServerList";
 import { IntTag, PageHeader, dateTime, insurerOptions, isoDay, showError, showSuccess } from "./common";
+import { calendarDateFormat } from "../../utility/dateFormat";
 
 const STATUSES = ["pending", "requested", "authenticated", "failed", "cancelled"];
 const VEHICLE = ["plateNumber", "mvFileNumber", "chassisNumber", "engineNumber", "cocNumber"];
@@ -92,7 +93,7 @@ const CocSeries = ({ toast, insurers }) => {
             <div className="col-6 md:col-3"><label>{t("integrations.to")} *</label><InputNumber value={form.seriesTo} useGrouping={false} min={0} onValueChange={(e) => setForm({ ...form, seriesTo: e.value })} className={`w-full${rangeError ? " p-invalid" : ""}`} />
               {rangeError ? <small className="p-error block mt-1" role="alert">{rangeError}</small> : null}</div>
             <div className="col-6 md:col-3"><label>{t("integrations.digits")}</label><InputNumber value={form.numberWidth} min={1} max={20} onValueChange={(e) => setForm({ ...form, numberWidth: e.value })} className="w-full" /></div>
-            <div className="col-6 md:col-4"><label>{t("integrations.received")}</label><Calendar value={form.receivedDate} onChange={(e) => setForm({ ...form, receivedDate: e.value })} dateFormat="yy-mm-dd" className="w-full" /></div>
+            <div className="col-6 md:col-4"><label>{t("integrations.received")}</label><Calendar value={form.receivedDate} onChange={(e) => setForm({ ...form, receivedDate: e.value })} dateFormat={calendarDateFormat()} className="w-full" /></div>
             <div className="col-6 md:col-4"><label>{t("integrations.lowStock")}</label><InputNumber value={form.lowStockThreshold} min={0} onValueChange={(e) => setForm({ ...form, lowStockThreshold: e.value })} className="w-full" /></div>
             <div className="col-12"><label>{t("integrations.remarks")}</label><InputText value={form.remarks} maxLength={500} onChange={(e) => setForm({ ...form, remarks: e.target.value })} className="w-full" /></div>
           </div>
@@ -220,7 +221,7 @@ const CtplAuthentication = () => {
             <div className="col-12 md:col-6"><label>{t("integrations.cocNumber")}</label><InputText value={manual.cocNumber} onChange={(e) => setManual({ ...manual, cocNumber: e.target.value })} className="w-full" /></div>
             <div className="col-12 md:col-6"><label>{t("integrations.authCode")} *</label><InputText value={manual.authCode} onChange={(e) => setManual({ ...manual, authCode: e.target.value })} className="w-full" /></div>
             <div className="col-12 md:col-6"><label>{t("integrations.providerReference")}</label><InputText value={manual.providerReference} onChange={(e) => setManual({ ...manual, providerReference: e.target.value })} className="w-full" /></div>
-            <div className="col-12 md:col-6"><label>{t("integrations.authenticatedOn")}</label><Calendar value={manual.authenticatedAt} onChange={(e) => setManual({ ...manual, authenticatedAt: e.value })} dateFormat="yy-mm-dd" className="w-full" /></div>
+            <div className="col-12 md:col-6"><label>{t("integrations.authenticatedOn")}</label><Calendar value={manual.authenticatedAt} onChange={(e) => setManual({ ...manual, authenticatedAt: e.value })} dateFormat={calendarDateFormat()} className="w-full" /></div>
           </div>
         )}
       </Dialog>

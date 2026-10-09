@@ -4,7 +4,10 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { writeXlsx, colLetter } from '../src/lib/xlsx.js';
+import { writeXlsx, colLetter, excelDateFormat } from '../src/lib/xlsx.js';
+import { formatDatesIn } from '../src/lib/pdf/format.js';
+import { writeXlsx as writeTable } from '../src/modules/documents/xlsx.js';
+import { columnMessage, uploadResult } from '../src/modules/documents/tabular.js';
 import { buildReportPdf } from '../src/lib/pdf/index.js';
 import { toCsv } from '../src/lib/csv.js';
 import { collectRoutes } from '../src/tools/export-api.js';
@@ -43,6 +46,31 @@ describe('file writers', () => {
     const wb = unzipText(file, 'xl/workbook.xml');
     expect(wb).toContain('name="Data 1"');
     expect(wb).toContain('name="Data 1 2"');
+  });
+  it('shows date cells in the configured date format and types the cells of a header-only table', () => {
+    expect(excelDateFormat('DD/MM/YYYY')).toBe('dd/mm/yyyy');
+    expect(excelDateFormat('DD MMM YYYY')).toBe('dd mmm yyyy');
+    const typed = path.join(tmp, 'd.xlsx');
+    fs.writeFileSync(typed, writeXlsx({ sheets: [{ name: 'S', columns: [{ header: 'Date', type: 'date' }], rows: [['2026-10-09']] }], dateFormat: 'DD/MM/YYYY' }));
+    expect(unzipText(typed, 'xl/styles.xml')).toContain('<numFmt numFmtId="164" formatCode="dd/mm/yyyy"/>');
+    const table = path.join(tmp, 't.xlsx');
+    fs.writeFileSync(table, writeTable(['Policy', 'Issued', 'Premium', 'Count', 'Reference'], [['POL-2026-1', '2026-10-09', '12525.00', 3, 'JV-2026-10-01']], 'T', { dateFormat: 'DD/MM/YYYY' }));
+    const xml = unzipText(table, 'xl/worksheets/sheet1.xml');
+    expect(readSheet(table, 1)[1]).toEqual(['POL-2026-1', 46304, 12525, 3, 'JV-2026-10-01']);
+    expect(xml).toContain('<c r="B2" s="3"><v>46304</v></c>');
+    expect(xml).toContain('<c r="C2" s="2"><v>12525</v></c>');
+    expect(unzipText(table, 'xl/styles.xml')).toContain('formatCode="dd/mm/yyyy"');
+  });
+  it('prints the yyyy-mm-dd dates of a text in the configured format, references left as they are', () => {
+    expect(formatDatesIn('2026-02-01 to 2026-02-28')).toBe('01/02/2026 to 28/02/2026');
+    expect(formatDatesIn('Due 2027-01-31; ACCR-2026-10-01', { dateFormat: 'DD MMM YYYY' })).toBe('Due 31 Jan 2027; ACCR-2026-10-01');
+  });
+  it('names the upload columns in row errors and counts the rows of an upload', () => {
+    const columns = [{ key: 'emailId', header: 'Email' }, { key: 'firstName', header: 'First Name' }, { key: 'companyName', header: 'Company Name' }, { key: 'source', header: 'Source' }];
+    expect(columnMessage('emailId must be a valid e-mail; firstName or companyName is required; unknown source', columns))
+      .toBe('Email must be a valid e-mail; First Name or Company Name is required; unknown source');
+    expect(uploadResult(3, 2, [{ row: 4, message: 'x' }], { ids: ['a', 'b'] }))
+      .toEqual({ message: 'Processed 3 rows: 2 created, 1 failed', total: 3, created: 2, failed: 1, errors: [{ row: 4, message: 'x' }], ids: ['a', 'b'] });
   });
   it('writes a multi-page PDF with a valid cross-reference table', () => {
     const rows = Array.from({ length: 120 }, (_, i) => ({ no: `POL-${i + 1}`, name: `Client (${i}) \\ ₱`, amt: i * 10.5 }));

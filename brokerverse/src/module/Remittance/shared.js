@@ -66,17 +66,7 @@ export const dateBody = (field) => (row) => {
 };
 
 /** Downloads rows as a CSV file (columns: [{ field, header }]). */
-export const downloadCsv = (fileName, rows, columns) => {
-  const esc = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
-  const lines = [columns.map((c) => esc(c.header)).join(",")];
-  (rows || []).forEach((r) => lines.push(columns.map((c) => esc(typeof c.field === "function" ? c.field(r) : r[c.field])).join(",")));
-  const url = URL.createObjectURL(new Blob([lines.join("\n")], { type: "text/csv" }));
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = fileName;
-  a.click();
-  URL.revokeObjectURL(url);
-};
+export { downloadCsv } from "../../utility/csvExport";
 
 /** Loads data with an async loader; returns [data, reload, loading]. Errors go to the toast. */
 export const useLoader = (loader, initial, toast, deps = []) => {

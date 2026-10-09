@@ -15450,6 +15450,40 @@
         }
       }
     },
+    "/bank-reconciliation/statements/template": {
+      "get": {
+        "operationId": "getBankReconciliationStatementsTemplate",
+        "summary": "Bank statement upload template of the GENERIC statement format (XLSX: Data, Columns and Instructions sheets)",
+        "tags": [
+          "Bank Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Bank Reconciliation > Reconciliation Workspace > Import statement > Download template\n\nAccess: read:bank-reconciliation",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Bank Reconciliation > Reconciliation Workspace > Import statement > Download template",
+        "x-permissions": [
+          "read:bank-reconciliation"
+        ]
+      }
+    },
     "/bank-reconciliation/transaction-types": {
       "get": {
         "operationId": "getBankReconciliationTransactionTypes",
@@ -47684,7 +47718,7 @@
                 "example": {
                   "success": true,
                   "data": {
-                    "message": "2 of 2 rows imported",
+                    "message": "Processed 2 rows: 2 created, 0 failed",
                     "total": 2,
                     "created": 2,
                     "failed": 0,
@@ -47726,6 +47760,40 @@
             }
           }
         }
+      }
+    },
+    "/disbursements/bulk-upload/template": {
+      "get": {
+        "operationId": "getDisbursementsBulkUploadTemplate",
+        "summary": "Payment vouchers upload template (XLSX: Data, Columns and Instructions sheets)",
+        "tags": [
+          "Disbursements"
+        ],
+        "description": "Front-end touchpoint: Accounts > Disbursement (Payment Voucher) > Bulk upload > Download template\n\nAccess: read:disbursements",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Disbursement (Payment Voucher) > Bulk upload > Download template",
+        "x-permissions": [
+          "read:disbursements"
+        ]
       }
     },
     "/disbursements/checkbook": {
@@ -65752,6 +65820,40 @@
         }
       }
     },
+    "/insurer-reconciliation/statements/template": {
+      "get": {
+        "operationId": "getInsurerReconciliationStatementsTemplate",
+        "summary": "Insurer statement upload template of the GENERIC insurer statement format (XLSX: Data, Columns and Instructions sheets)",
+        "tags": [
+          "Insurer Reconciliation"
+        ],
+        "description": "Front-end touchpoint: Accounts > Insurer Reconciliation > Insurer Statements > Import statement > Download template\n\nAccess: read:remittance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Insurer Reconciliation > Insurer Statements > Import statement > Download template",
+        "x-permissions": [
+          "read:remittance"
+        ]
+      }
+    },
     "/integrations/connectors": {
       "get": {
         "operationId": "getIntegrationsConnectors",
@@ -71361,6 +71463,40 @@
             }
           }
         }
+      }
+    },
+    "/leads/bulk-upload/template": {
+      "get": {
+        "operationId": "getLeadsBulkUploadTemplate",
+        "summary": "Leads upload template (XLSX: Data, Columns and Instructions sheets)",
+        "tags": [
+          "Leads"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Prospects > Bulk Upload > Download template\n\nAccess: read:leads",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Prospects > Bulk Upload > Download template",
+        "x-permissions": [
+          "read:leads"
+        ]
       }
     },
     "/leads/duplicates": {
@@ -100471,6 +100607,40 @@
         }
       }
     },
+    "/policies/bulk-upload/template": {
+      "get": {
+        "operationId": "getPoliciesBulkUploadTemplate",
+        "summary": "Policies upload template (XLSX: Data, Columns and Instructions sheets)",
+        "tags": [
+          "Policies"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Bulk Upload > Download template\n\nAccess: read:policies",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Bulk Upload > Download template",
+        "x-permissions": [
+          "read:policies"
+        ]
+      }
+    },
     "/policies/payment-captures": {
       "get": {
         "operationId": "getPoliciesPaymentCaptures",
@@ -121170,6 +121340,40 @@
         }
       }
     },
+    "/quotations/bulk-upload/template": {
+      "get": {
+        "operationId": "getQuotationsBulkUploadTemplate",
+        "summary": "Quotations upload template (XLSX: Data, Columns and Instructions sheets)",
+        "tags": [
+          "Quotations"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Quotations > Bulk Upload > Download template\n\nAccess: read:quotations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Quotations > Bulk Upload > Download template",
+        "x-permissions": [
+          "read:quotations"
+        ]
+      }
+    },
     "/quotations/by-status/{status}": {
       "get": {
         "operationId": "getQuotationsByStatusStatus",
@@ -123360,7 +123564,7 @@
                 "example": {
                   "success": true,
                   "data": {
-                    "message": "2 of 2 rows imported",
+                    "message": "Processed 2 rows: 2 created, 0 failed",
                     "total": 2,
                     "created": 2,
                     "failed": 0,
@@ -123402,6 +123606,40 @@
             }
           }
         }
+      }
+    },
+    "/receipts/bulk-upload/template": {
+      "get": {
+        "operationId": "getReceiptsBulkUploadTemplate",
+        "summary": "Official receipts upload template (XLSX: Data, Columns and Instructions sheets)",
+        "tags": [
+          "Receipts"
+        ],
+        "description": "Front-end touchpoint: Accounts > Receipts > Bulk upload > Download template\n\nAccess: read:receipts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Receipts > Bulk upload > Download template",
+        "x-permissions": [
+          "read:receipts"
+        ]
       }
     },
     "/receipts/open-receivables": {
@@ -125948,6 +126186,54 @@
         },
         "x-screen": "Accounts > Remittance > Bulk Processing > Process",
         "x-permissions": [
+          "write:remittance"
+        ]
+      }
+    },
+    "/remittance/bulk/template": {
+      "get": {
+        "operationId": "getRemittanceBulkTemplate",
+        "summary": "Remittance bulk upload template of a bulk-processing configuration (configCode; default: the first active one): the columns of its field mappings (XLSX: Data, Columns and Instructions sheets)",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Bulk Processing > Upload File > Download template\n\nAccess: read:remittance, write:remittance",
+        "parameters": [
+          {
+            "name": "configCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "ARM-001"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Bulk Processing > Upload File > Download template",
+        "x-permissions": [
+          "read:remittance",
           "write:remittance"
         ]
       }
@@ -130445,6 +130731,41 @@
             }
           }
         }
+      }
+    },
+    "/remittance/reconciliation/bank-transactions/template": {
+      "get": {
+        "operationId": "getRemittanceReconciliationBankTransactionsTemplate",
+        "summary": "Bank transactions import template (CSV: TransDate, Reference, Amount, Description)",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Reconciliation > Import > Template\n\nAccess: read:remittance, write:remittance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "(csv file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Reconciliation > Import > Template",
+        "x-permissions": [
+          "read:remittance",
+          "write:remittance"
+        ]
       }
     },
     "/remittance/reconciliation/match": {

@@ -172,9 +172,8 @@ define({
   response: 'binary file',
   handler: async (req, res) => {
     const { schedule: s, vehicles } = await svc.scheduleRows(req.params.id);
-    const f = { date: (d) => (d ? String(d).slice(0, 10) : '') };
-    const rows = scheduleTableRows(vehicles, f);
-    sendTable(res, { header: COLUMNS.map((c) => c.label), rows: rows.map((r) => COLUMNS.map((c) => r[c.key])), fileBase: `fleet-schedule-${s.policy_number || s.fleet_number}`,
+    const rows = scheduleTableRows(vehicles, formatters(await printContext()));
+    await sendTable(res, { header: COLUMNS.map((c) => c.label), rows: rows.map((r) => COLUMNS.map((c) => r[c.key])), fileBase: `fleet-schedule-${s.policy_number || s.fleet_number}`,
       format: req.query.format === 'csv' ? 'csv' : 'xlsx', sheetName: 'Vehicles' });
   },
 });

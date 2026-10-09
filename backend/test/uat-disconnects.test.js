@@ -227,7 +227,7 @@ describe('premium is collected on the receipt date', () => {
     const line = (await ctx.as('maker')('get', '/remittance/settlements/available-policies?insurerCode=STANDARD')).body.data.find((l) => l.remittanceId === rem.body.data.id);
     const s = await ctx.as('maker')('post', '/remittance/settlements').send({ insurerCode: 'STANDARD', settlementPeriod: [addDays(now, -60), addDays(now, -30)], lineIds: [line.id] });
     expect(s.status, JSON.stringify(s.body)).toBe(201);
-    await ctx.as('maker')('post', `/remittance/settlements/${s.body.data.id}/submit`).send({ paymentMethod: 'check', bankAccount: 'ACC-BDO-001' });
+    await ctx.as('maker')('post', `/remittance/settlements/${s.body.data.id}/submit`).send({ paymentMethod: 'check', bankAccount: 'ACC-MBT-001' });
     await approve(s.body.data.id);
     const item = await one('SELECT data FROM remittance_items WHERE id = $1', [s.body.data.id]);
     const pv = await ctx.as('maker')('get', `/disbursements/${item.data.disbursementId}`);

@@ -33,9 +33,9 @@ describe('policies', () => {
     expect(paid.body.data.every((p) => p.paymentStatus === 'Completed')).toBe(true);
     const client = await sales('get', '/policies?clientId=cl_sls_04');
     expect(client.body.data.map((p) => p.policyId)).toEqual(['pol_sls_04']);
-    const fire = await sales('get', '/policies?lob=FIRE&pageSize=50');
-    expect(fire.body.data.length).toBeGreaterThanOrEqual(2);
-    expect(fire.body.data.every((p) => p.lob === 'FIRE')).toBe(true);
+    const accident = await sales('get', '/policies?lob=ACCIDENT&pageSize=50');
+    expect(accident.body.data.length).toBeGreaterThanOrEqual(2);
+    expect(accident.body.data.every((p) => p.lob === 'ACCIDENT')).toBe(true);
     const search = await sales('get', '/policies?query=NBC%201452');
     expect(search.body.data[0].policyId).toBe('pol_sls_01');
     const range = await sales('get', `/policies?expiryDateFrom=${new Date(Date.now() + 400 * 86400000).toISOString()}`);
@@ -46,7 +46,7 @@ describe('policies', () => {
     expect(r.body).toMatchObject({ policyId: 'pol_sls_01', status: 'Active', paymentStatus: 'Completed', lob: 'MOTOR' });
     expect(r.body.quotation.quotationNumber).toMatch(/^QT-/);
     expect(r.body.lead.leadId).toBe('ld_sls_01');
-    expect(r.body.insuranceCompanyName).toBe('Malayan Insurance Co., Inc.');
+    expect(r.body.insuranceCompanyName).toBe('Pioneer Insurance & Surety Corp.');
     expect((await sales('get', '/policies/pol_missing')).status).toBe(404);
   });
   it('updates policy details and payment status', async () => {
@@ -65,9 +65,9 @@ describe('policies', () => {
     expect(audit.rows.map((a) => a.action)).toEqual(expect.arrayContaining(['update', 'payment-status']));
   });
   it('lists documents and renders PDFs', async () => {
-    const docs = await sales('get', '/policies/pol_sls_04/documents');
+    const docs = await sales('get', '/policies/pol_sls_06/documents');
     expect(docs.body.data.generated.map((g) => g.type)).toEqual(expect.arrayContaining(['policy-schedule', 'insurance-placing-slip']));
-    for (const path of ['/policies/pol_sls_04/documents/insurance-placing-slip-fire', '/document-templates/policy-schedule-fire/pol_sls_04', '/document-templates/policy-schedule/pol_sls_01', '/document-templates/receipt/or_sls_01']) {
+    for (const path of ['/policies/pol_sls_06/documents/insurance-placing-slip-fire', '/document-templates/policy-schedule-fire/pol_sls_06', '/document-templates/policy-schedule/pol_sls_01', '/document-templates/receipt/or_sls_01']) {
       const r = await sales('get', path).buffer(true).parse(binary);
       expect(r.status).toBe(200);
       expect(r.headers['content-type']).toContain('application/pdf');

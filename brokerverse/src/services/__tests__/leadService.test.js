@@ -86,4 +86,19 @@ describe('LeadService', () => {
     expect(result.success).toBe(false);
     expect(result.error).toBe('Network error');
   });
+
+  test('generateLeadReport saves the file under the name the server gives, without the closing quote', async () => {
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      headers: { get: (name) => (name === 'Content-Disposition' ? 'attachment; filename="lead-report-All-2026-10-09.xlsx"' : null) },
+      blob: async () => new Blob(['x']),
+    });
+    window.URL.createObjectURL = jest.fn(() => 'blob:report');
+    window.URL.revokeObjectURL = jest.fn();
+
+    const result = await leadService.generateLeadReport('All');
+
+    expect(result.success).toBe(true);
+    expect(result.data.fileName).toBe('lead-report-All-2026-10-09.xlsx');
+  });
 });

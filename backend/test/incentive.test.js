@@ -15,7 +15,8 @@ beforeAll(async () => {
   await ctx.api('post', '/users').send({ username: 'i.checker', password: 'Welcome@123', displayName: 'Ina Checker', roles: ['system-admin'] });
   agentTok = await loginAs(ctx.app, 'i.agent', 'Welcome@123');
   checkerTok = await loginAs(ctx.app, 'i.checker', 'Welcome@123');
-  await pool.query('UPDATE policies SET owner_user_id = $1 WHERE policy_number IN (\'POL-2026-90024\', \'POL-2026-95008\')', [agentId]);
+  // two policies of the agent incepting in September 2026, the period calculated below
+  await pool.query('UPDATE policies SET owner_user_id = $1, inception_date = \'2026-09-15\' WHERE id IN (\'pol_crs_24\', \'pol_sls_08\')', [agentId]);
 });
 afterAll(async () => { await pool.end(); });
 const as = (tok, m, p) => request(ctx.app)[m](`/api${p}`).set('Authorization', `Bearer ${tok}`);

@@ -4,6 +4,8 @@
  */
 import { csvCell } from '../../lib/csv.js';
 import { writeXlsx } from '../../lib/xlsx.js';
+import { getSetting } from '../../lib/settings.js';
+import { DEFAULT_FORMAT } from '../../lib/pdf/format.js';
 
 export { renderTemplate } from '../../lib/template.js';
 
@@ -12,8 +14,8 @@ export const toCsv = (columns, rows) => [columns.map((c) => csvCell(c.header)).j
 
 export const XLSX_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
-/** Send a workbook (or CSV when format=csv) as a download. */
-export function sendSheet(res, { fileName, sheets, format = 'excel' }) {
+/** Send a workbook (dates in general.date_format) or, with format=csv, a CSV as a download. */
+export async function sendSheet(res, { fileName, sheets, format = 'excel' }) {
   if (format === 'csv') {
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}.csv"`);
@@ -21,5 +23,6 @@ export function sendSheet(res, { fileName, sheets, format = 'excel' }) {
   }
   res.setHeader('Content-Type', XLSX_TYPE);
   res.setHeader('Content-Disposition', `attachment; filename="${fileName}.xlsx"`);
-  return res.send(writeXlsx({ sheets: sheets.map((sh) => ({ ...sh, columns: sh.columns.map((c) => ({ type: 'auto', ...c })) })) }));
+  const dateFormat = (await getSetting('general.date_format', DEFAULT_FORMAT.dateFormat)) || DEFAULT_FORMAT.dateFormat;
+  return res.send(writeXlsx({ sheets: sheets.map((sh) => ({ ...sh, columns: sh.columns.map((c) => ({ type: 'auto', ...c })) })), dateFormat }));
 }

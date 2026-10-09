@@ -21,6 +21,7 @@ import { InputNumber } from "primereact/inputnumber";
 import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
 import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
+import { downloadCsv } from "../../../utility/csvExport";
 import "./index.scss";
 import { progressValue } from "../../../utility/numberFormat";
 
@@ -154,6 +155,23 @@ const AtRiskAnalysis = () => {
 
     setFilteredPolicies(filtered);
     calculateDashboard(filtered);
+  };
+
+  const handleExport = () => {
+    downloadCsv(`at-risk-policies-${toIsoDate(new Date())}.csv`, filteredPolicies, [
+      { header: t("renewal.policyNumber"), field: "policyNumber" },
+      { header: t("renewal.insuredName"), field: "insuredName" },
+      { header: t("renewal.product"), field: "product" },
+      { header: t("renewal.riskScore"), field: "riskScore" },
+      { header: t("renewal.riskLevel"), field: "riskCategory" },
+      { header: t("renewal.expiry"), field: (p) => formatAppDate(p.expiryDate) },
+      { header: t("renewal.daysToExpiry"), field: "daysToExpiry" },
+      { header: t("renewal.premium"), field: "currentPremium" },
+      { header: t("renewal.agent"), field: "assignedAgent" },
+      { header: t("renewal.riskFactors"), field: (p) => (p.riskFactors || []).map((f) => `${f.factor}: ${f.details}`).join("; ") },
+      { header: t("renewal.recommendedActions"), field: (p) => (p.recommendedActions || []).join("; ") },
+    ]);
+    toast.current.show({ severity: "success", summary: t("renewal.exportStarted"), detail: t("renewal.rowsExported", { count: filteredPolicies.length }), life: 3000 });
   };
 
   const handleClear = () => {
@@ -485,15 +503,9 @@ const AtRiskAnalysis = () => {
                 <Button
                   icon="pi pi-file-excel"
                   className="p-button-text"
-                  onClick={() => {
-                    toast.current.show({
-                      severity: 'success',
-                      summary: 'Export Started',
-                      detail: 'At-risk analysis exported to Excel',
-                      life: 3000
-                    });
-                  }}
-                  tooltip="Export to Excel" aria-label="Export to Excel"
+                  onClick={handleExport}
+                  disabled={!filteredPolicies.length}
+                  tooltip={t("renewal.exportToCsv")} aria-label={t("renewal.exportToCsv")}
                 />
               </div>
             </div>

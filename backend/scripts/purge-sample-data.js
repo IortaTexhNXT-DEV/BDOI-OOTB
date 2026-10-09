@@ -46,18 +46,19 @@ export const AUDIT_TABLES = ['audit_log', 'login_history'];
 
 /** Sample master rows (seeds/sample/*.sql), by natural key. */
 export const SAMPLE_MASTERS = [
-  { table: 'override_agreements', label: 'sample overriding commission agreements', where: "agreement_code IN ('MERC-OVR-SAMPLE','PIONEER-LR-SAMPLE')" },
-  // distribution samples (seeds/sample/74_distribution.sql) first: the channels refer to sample referrers
+  { table: 'override_agreements', label: 'sample overriding commission agreements', where: "agreement_code IN ('PIONEER-OVR-SAMPLE','AXA-LR-SAMPLE','MERC-OVR-SAMPLE','PIONEER-LR-SAMPLE')" },
+  // distribution samples (seeds/sample/10_masters.sql, 97_distribution.sql) first: the channels refer to sample referrers
   { table: 'report_builder_reports', label: 'sample saved reports', where: "created_by = 'seed'" },
   { table: 'campaign_templates', label: 'sample campaign templates', where: "created_by = 'seed'" },
   { table: 'campaign_segments', label: 'sample campaign segments', where: "created_by = 'seed'" },
   { table: 'lead_assignment_rules', label: 'sample lead assignment rules', where: "created_by = 'seed'" },
   { table: 'motor_programmes', label: 'sample vehicle programmes', where: "created_by = 'seed'" },
   { table: 'distribution_channels', label: 'sample distribution channels', where: "created_by = 'seed'" },
+  // fictional insurers of releases before the TISPH sample (migration 0365 removes them from a database in use)
   { table: 'insurance_companies', label: 'fictional insurers', where: "code IN ('SECUREGUARD','APEX','LIBERTYSHIELD','SENTINEL','GOLDENHORIZON','INTEGRITY','EVERSAFE')" },
   { table: 'branches', label: 'demo branches', where: "code IN ('CEB','DAV')" },
   { table: 'signatories', label: 'fictional signatories', where: "name IN ('Maria Regina Cruz','Jose Antonio Reyes','Ana Patricia Lim')" },
-  { table: 'commission_referrers', label: 'fictional referrers', where: "id IN ('ref-jdelacruz','ref-rbautista','ref-amendoza','ref-pvillanueva','ref-mreyes','ref-lgarcia','ref-makatimotors','ref-cebuprime')" },
+  { table: 'commission_referrers', label: 'fictional referrers', where: "id IN ('ref-jdelacruz','ref-rbautista','ref-amendoza','ref-pvillanueva','ref-mreyes','ref-lgarcia','ref-toyotamakati','ref-toyotacebu','ref-makatimotors','ref-cebuprime')" },
   { table: 'incentive_programs', label: 'sample incentive programmes', where: "program_code IN ('INC-2026-001','INC-2026-002','INC-2026-003','INC-2026-004')" },
   { table: 'master_records', label: 'demo master records', where: "created_by = 'seed' AND type_code IN ('company','bank-account','employee','petty-cash','exchange-rate','commission')" },
   { table: 'master_records', label: 'sample repair shops and suppliers', where: "created_by = 'seed' AND type_code IN ('repair-shop','supplier')" },

@@ -263,55 +263,6 @@ class QuotationService {
   }
 
   /**
-   * Bulk upload quotations from Excel file
-   * @param {File} file - Excel file to upload
-   * @returns {Promise<Object>} API response with upload results
-   */
-  async bulkUploadQuotations(file) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout for file upload
-
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await fetch(`${this.baseURL}/quotations/bulk-upload`, {
-        method: "POST",
-        headers: {
-          ...authService.getAuthHeader(),
-          // Note: Don't set Content-Type for FormData, browser will set it with boundary
-        },
-        body: formData,
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message || "Failed to upload quotations file"
-        );
-      }
-
-      const data = await response.json();
-
-      return {
-        success: true,
-        data: data,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error:
-          error.name === "AbortError"
-            ? "Upload timeout. Please try again."
-            : error.message || "Failed to upload quotations file",
-      };
-    }
-  }
-
-  /**
    * Validate quotation for policy conversion
    * @param {string} quotationId - Quotation ID
    * @returns {Promise<Object>} Validation result with valid flag and error message

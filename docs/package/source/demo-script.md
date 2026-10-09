@@ -422,11 +422,11 @@ Each segment stands on its own and takes 4 to 6 minutes. Show it in place of a p
 
 **Login:** maria.rivera or jose.bernardo.
 
-**Data:** programme MMG-BDO-2026 (Makati Motors x BDO auto loans 2026: first year free paid by the dealer, CTPL 3 years, upload issues policies) and MMG-CASH-2026 (half subsidy, upload creates quotations), from the sample data.
+**Data:** programme TMK-TFS-2026 (Toyota Makati x TFS financed cars 2026: first year free paid by the dealer, CTPL 3 years, upload issues policies), TAL-CASH-2026 (Toyota Alabang, half subsidy, upload creates quotations, with an uploaded batch) and TCB-TFS-2026 (Toyota Cebu commercial pick-ups), from the sample data.
 
 **Click:**
 
-1. Operations > Sales & Marketing > Dealer Programmes. Open MMG-BDO-2026: rates, Who pays, Upload creates. Premium preview.
+1. Operations > Sales & Marketing > Dealer Programmes. Open TMK-TFS-2026: rates, Who pays, Upload creates. Premium preview.
 2. Template: the Dealer Sales upload template, one row per vehicle sold.
 3. Bank endorsement letter: the letter to the bank with the mortgagee clause.
 4. Reports > Operational Reports > Dealer Production: prospects, quotations, policies and premium per dealer.
@@ -451,7 +451,7 @@ Each segment stands on its own and takes 4 to 6 minutes. Show it in place of a p
 
 **Click:**
 
-1. Reports > Report Builder > Saved reports: open Premium by insurer (sample data).
+1. Reports > Report Builder > Saved reports: open Premium by panel insurer (sample data).
 2. Build: add a filter (line of business), group by insurer, Run; totals of the numeric columns.
 3. Export to Excel. Point to Share with roles.
 

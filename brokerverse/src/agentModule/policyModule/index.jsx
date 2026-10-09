@@ -10,9 +10,15 @@ import SvgDot from "../../assets/agentIcon/SvgDots";
 import SvgMotor from "../../assets/agentIcon/SvgMotor";
 import SvgFire from "../../assets/agentIcon/SvgFire";
 import SvgAdd from "../../assets/agentIcon/SvgAdd";
-import BulkUploadModal from "./BulkUploadModal";
+import ImportDialog from "../../components/ImportDialog";
 import { useLocation, useNavigate } from "react-router-dom";
 import { canOpen, hasPermission } from "../../utils/canOpen";
+
+/** Bulk upload: template and importer of the API (Data, Columns and Instructions sheets; failed rows listed). */
+const UPLOAD_TARGETS = [
+  { label: "New business policies", templatePath: "/policies/bulk-upload/template", uploadPath: "/policies/bulk-upload" },
+  { label: "Existing policies (go-live: no bill, journal or commission)", templatePath: "/policies/bulk-upload/template", uploadPath: "/policies/bulk-upload?mode=go-live" },
+];
 
 const ClientListingCard = () => {
   const { t } = useTranslation();
@@ -163,10 +169,12 @@ const ClientListingCard = () => {
           </Card>
         </div>
       </div>
-      <BulkUploadModal
+      <ImportDialog
         visible={showBulkUpload}
         onHide={() => setShowBulkUpload(false)}
-        onUploadSuccess={handleBulkUploadSuccess}
+        title={"Bulk upload policies"}
+        targets={UPLOAD_TARGETS}
+        onDone={handleBulkUploadSuccess}
       />
     </div>
   );

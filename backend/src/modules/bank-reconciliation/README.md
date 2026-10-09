@@ -28,7 +28,8 @@ master is a master type (`master_records`), linked to a GL cash account.
 
 ## Main flows
 
-1. Import a statement (or enter it by hand). The statement must balance when
+1. Import a statement (or enter it by hand). The import dialog offers the upload template of the GENERIC format
+   (`GET /bank-reconciliation/statements/template`, Data, Columns and Instructions sheets). The statement must balance when
    `bank_reconciliation.require_balanced_statement` is on. Automatic matching runs after import when
    `bank_reconciliation.auto_match_on_import` is on.
 2. Match the rest by hand. A difference is explained as an adjustment journal, a bank error or a book error.

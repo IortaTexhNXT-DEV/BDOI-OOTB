@@ -8,7 +8,8 @@ import { one, withTransaction } from '../../db/pool.js';
 import { kycPrefill } from '../policies/kyc.js';
 import { documentAttachment, queueEmail } from '../../lib/mailer.js';
 import { sendEntity, actor, renderTemplate, emailTemplate } from '../documents/common.js';
-import { uploadFile, parseUploadedRows } from '../documents/tabular.js';
+import { uploadFile, parseUploadedRows, columnMessage, uploadResult } from '../documents/tabular.js';
+import { sendTemplate } from '../documents/uploadTemplates.js';
 import { getPolicyRow, toPolicy } from '../policies/service.js';
 import { getClient, toClient } from '../clients/service.js';
 import { toQuote } from './shape.js';
@@ -86,6 +87,10 @@ define({
   handler: async (req, res) => res.json({ success: true, data: await premiumBreakdown(req.body || {}) }),
 });
 define({
+  method: 'GET', path: '/bulk-upload/template', summary: 'Quotations upload template (XLSX: Data, Columns and Instructions sheets)', screen: `${SCREEN} > Bulk Upload > Download template`,
+  middleware: canRead, response: '(xlsx file)', handler: async (_req, res) => sendTemplate(res, 'quotations'),
+});
+define({
   method: 'POST', path: '/bulk-upload', summary: 'Bulk upload quotations from CSV / XLSX (leadRefId or customer name columns, productType, sum insured, rate or net premium)', screen: `${SCREEN} > Bulk Upload`,
   middleware: [...canWrite, uploadFile], request: 'multipart/form-data file', response: { success: true, data: { message: 'Processed 2 rows: 2 created, 0 failed', created: 2, failed: 0, errors: [] } },
   handler: async (req, res) => {
@@ -97,9 +102,9 @@ define({
         const q = await withTransaction(async (db) => svc.createQuote(await svc.quoteFromRow(db, row, actor(req)), actor(req), db));
         await audit(req, { entity: 'quotation', entityId: q.id, action: 'bulk-create', after: out(q) });
         created += 1;
-      } catch (e) { errors.push({ row: i + 2, message: e.message }); }
+      } catch (e) { errors.push({ row: i + 2, message: columnMessage(e.details?.length ? e.details.map((d) => d.message).join('; ') : e.message, svc.QUOTE_UPLOAD_COLUMNS) }); }
     }
-    const data = { message: `Processed ${rows.length} rows: ${created} created, ${errors.length} failed`, total: rows.length, created, failed: errors.length, errors };
+    const data = uploadResult(rows.length, created, errors);
     res.json({ success: true, message: data.message, data });
   },
 });

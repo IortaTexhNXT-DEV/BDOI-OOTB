@@ -13,7 +13,8 @@ import { isoDate, num, pageParams, sendList, sendNoData } from '../accounting/li
 import { storeFile } from '../accounting/lib/files.js';
 import { vouchersPdf } from '../documents/finance.js';
 import { camel, excelDate, readSheet } from '../accounting/lib/sheet.js';
-import { mapColumns } from '../documents/tabular.js';
+import { columnMessage, issueText, mapColumns, uploadResult } from '../documents/tabular.js';
+import { sendTemplate } from '../documents/uploadTemplates.js';
 import * as svc from './service.js';
 
 const { router, define } = moduleRouter('Disbursements', '/disbursements');
@@ -75,9 +76,13 @@ define({
   },
 });
 define({
+  method: 'GET', path: '/bulk-upload/template', summary: 'Payment vouchers upload template (XLSX: Data, Columns and Instructions sheets)', screen: `${SCREEN} > Bulk upload > Download template`,
+  middleware: read, response: '(xlsx file)', handler: async (_req, res) => sendTemplate(res, 'disbursements'),
+});
+define({
   method: 'POST', path: '/bulk-upload', summary: 'Bulk create vouchers from an .xlsx / .csv file (multipart field "file")', screen: `${SCREEN} > Bulk upload`, middleware: [...write, upload.single('file')],
   request: { file: '(xlsx) columns: voucherDate, payeeType, customerCode, insurerName, policyNumber, referrerId, amount, transactionCode, transactionDescription, remarks' },
-  response: { success: true, data: { message: '2 of 2 rows imported', total: 2, created: 2, failed: 0, errors: [] } },
+  response: { success: true, data: { message: 'Processed 2 rows: 2 created, 0 failed', total: 2, created: 2, failed: 0, errors: [] } },
   handler: async (req, res) => {
     if (!req.file) throw badRequest('Attach the file in the "file" field');
     const rows = readSheet(req.file.buffer, req.file.originalname);
@@ -88,15 +93,16 @@ define({
       try {
         const v = mapColumns(r, svc.DISBURSEMENT_UPLOAD_COLUMNS, camel);
         const parsed = createSchema.parse({ ...r, ...v, payeeType: v.payeeType || 'Customer', voucherDate: excelDate(v.voucherDate) || undefined, amount: v.amount || '0' });
-        if (parsed.payeeType !== 'Agent/Referrer' && !(num(parsed.amount) > 0)) throw badRequest('amount must be greater than zero');
+        if (parsed.payeeType !== 'Agent/Referrer' && !(num(parsed.amount) > 0)) throw badRequest('Amount must be greater than zero');
         const d = await withTransaction((db) => svc.createDisbursement(db, parsed, req.user, { source: 'bulk-upload' }));
         ids.push(d.id);
       } catch (e) {
-        errors.push({ row: i + 2, error: e.issues ? e.issues.map((x) => `${x.path.join('.')}: ${x.message}`).join('; ') : e.message });
+        errors.push({ row: i + 2, message: e.issues ? issueText(e.issues, svc.DISBURSEMENT_UPLOAD_COLUMNS) : columnMessage(e.message, svc.DISBURSEMENT_UPLOAD_COLUMNS) });
       }
     }
     await audit(req, { entity: 'disbursement', entityId: null, action: 'bulk-upload', after: { file: req.file.originalname, created: ids.length, failed: errors.length } });
-    ok(res, { message: `${ids.length} of ${rows.length} rows imported`, total: rows.length, created: ids.length, failed: errors.length, errors, ids }, `${ids.length} disbursements imported`);
+    const data = uploadResult(rows.length, ids.length, errors, { ids });
+    ok(res, data, data.message);
   },
 });
 

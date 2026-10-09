@@ -16,6 +16,7 @@ import { getSetting } from '../../lib/settings.js';
 import { companyName } from '../../lib/letterhead.js';
 import { today } from '../../lib/dates.js';
 import { uploadFile } from '../documents/tabular.js';
+import { sendWorkbook, statementUpload } from '../documents/uploadTemplates.js';
 import { renderPdf, sendPdf } from '../documents/pdf.js';
 import { approve as approveJournal } from '../journal-vouchers/service.js';
 import { APPROVE, accountRow, getBankAccount, iso, isPeriod, linkedAccount, periodEnd, periodStart, round2, userNames } from './common.js';
@@ -263,6 +264,15 @@ define({
 const statementFields = (b) => ({ bankAccount: b.bankAccount, format: b.format || null, statementRef: b.statementRef || null, openingBalance: b.openingBalance, closingBalance: b.closingBalance,
   periodFrom: b.periodFrom || null, periodTo: b.periodTo || null });
 const previewOut = (p) => Object.fromEntries(Object.entries(p).filter(([k]) => !['_lines', 'account'].includes(k)));
+define({
+  method: 'GET', path: '/statements/template', summary: 'Bank statement upload template of the GENERIC statement format (XLSX: Data, Columns and Instructions sheets)',
+  screen: 'Accounts > Bank Reconciliation > Reconciliation Workspace > Import statement > Download template', middleware: read, response: '(xlsx file)',
+  handler: async (_req, res) => {
+    const format = (await pool.query('SELECT * FROM bank_statement_formats WHERE code = $1', ['GENERIC'])).rows[0];
+    if (!format) throw notFound('Bank statement format GENERIC not found');
+    sendWorkbook(res, statementUpload(format));
+  },
+});
 define({
   method: 'POST', path: '/statements/preview', summary: 'Parse a bank statement file with a statement format and show the lines, totals, balance check and duplicates before saving',
   screen: `${S} > Import statement`, middleware: [...write, uploadFile],

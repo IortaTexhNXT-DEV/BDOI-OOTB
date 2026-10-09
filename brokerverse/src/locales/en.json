@@ -853,8 +853,13 @@
     "policiesDueForRenewal": "Policies Due for Renewal",
     "refresh": "Refresh",
     "exportStarted": "Export Started",
-    "renewalQueueExportedToExcel": "Renewal queue exported to Excel",
-    "exportToExcel": "Export to Excel",
+    "exportToCsv": "Export to CSV",
+    "rowsExported": "{{count}} rows exported",
+    "expiry": "Expiry",
+    "riskFactors": "Risk factors",
+    "unit": "Unit",
+    "salesPerson": "Sales person",
+    "policiesRenewed": "Policies renewed",
     "noPoliciesFound": "No policies found",
     "policyNumber": "Policy Number",
     "insuredName": "Insured Name",
@@ -1024,7 +1029,6 @@
     "winBackHistory": "Win-back History",
     "sendWinBackOffer": "Send Win-back Offer",
     "createWinBackCampaign": "Create Win-back Campaign",
-    "lapseDataExportedToExcel": "Lapse management data exported to Excel",
     "currentMonth": "Current Month",
     "allTeams": "All Teams",
     "renewalTeamA": "Renewal Team A",
@@ -1033,7 +1037,6 @@
     "juniorAgents": "Junior sales",
     "performanceDataUpdatedSuccess": "Performance data updated successfully",
     "failedToLoadPerformanceData": "Failed to load performance data",
-    "performanceReportExportedToExcel": "Performance report exported to Excel",
     "trendAnalysis": "Trend Analysis",
     "agentPerformance": "Sales performance",
     "rank": "Rank",
@@ -1307,6 +1310,7 @@
     "premium": "Premium"
   },
   "remittance": {
+    "downloadTemplate": "Download template",
     "addExceptionType": "Add Exception Type",
     "addRule": "Add Rule",
     "addTemplate": "Add Template",
@@ -4928,33 +4932,7 @@
     "bulkUpload": "Bulk Upload"
   },
   "bulkUploadQuotations": {
-    "header": "Bulk Upload Quotations",
-    "instructions": "Instructions:",
-    "downloadTemplate": "Download Template",
-    "instruction1": "Download the sample template file",
-    "instruction2": "Fill in the quotation details in the Excel file",
-    "instruction3": "Upload the completed file (max 10MB)",
-    "instruction4": "Only .xlsx files are supported",
-    "chooseFile": "Choose File",
-    "selectExcelFile": "Select Excel file to upload",
-    "maxFileSize": "Maximum file size: 10MB",
-    "processingFile": "Processing your file...",
-    "cancel": "Cancel",
-    "uploading": "Uploading...",
-    "upload": "Upload",
-    "processing": "Processing...",
-    "fileBeingProcessed": "Your file is being processed. Quotations will be created shortly.",
-    "close": "Close",
-    "invalidFile": "Invalid File",
-    "onlyExcelFiles": "Please upload only Excel files (.xlsx)",
-    "fileTooLarge": "File Too Large",
-    "fileSizeLessThan10MB": "File size must be less than 10MB",
-    "noFileSelected": "No File Selected",
-    "pleaseSelectFile": "Please select a file to upload",
-    "uploadStarted": "Upload Started",
-    "uploadStartedDetail": "Quotation bulk upload started. Processing in background.",
-    "uploadFailed": "Upload Failed",
-    "uploadFailedDetail": "Failed to upload quotations file"
+    "header": "Bulk Upload Quotations"
   },
   "quoteStats": {
     "totalQuotations": "Total Quotations",
@@ -7391,6 +7369,7 @@
     "maxAmountAboveZero": "Leave empty or enter an amount above zero"
   },
   "bankReconciliation": {
+    "downloadTemplate": "Download template (GENERIC format)",
     "title": "Bank Reconciliation",
     "menu": "Bank Reconciliation",
     "accounts": "Accounts",
@@ -7883,6 +7862,7 @@
     }
   },
   "insurerRec": {
+    "downloadTemplate": "Download template (GENERIC format)",
     "accounts": "Accounts",
     "master": "Master",
     "finance": "Finance",

@@ -35,7 +35,7 @@ define({
   handler: async (req, res) => {
     const r = await svc.listAssets(pool, req.query);
     if (['xlsx', 'csv'].includes(req.query.format)) {
-      sendTable(res, { header: ['Asset No.', 'Name', 'Class', 'Location', 'Custodian', 'In Service', 'Cost', 'Accumulated Depreciation', 'Book Value', 'Status'],
+      await sendTable(res, { header: ['Asset No.', 'Name', 'Class', 'Location', 'Custodian', 'In Service', 'Cost', 'Accumulated Depreciation', 'Book Value', 'Status'],
         rows: r.rows.map((a) => [a.assetNumber, a.name, a.className || a.classCode, a.location || '', a.custodian || '', a.inServiceDate, a.cost, a.accumulatedDepreciation, a.bookValue, a.status]),
         fileBase: 'fixed-asset-register', format: req.query.format, sheetName: 'Fixed assets' });
       return;
@@ -120,7 +120,7 @@ define({
   handler: async (req, res) => {
     const r = await svc.listDisposals(pool, req.query);
     if (['xlsx', 'csv'].includes(req.query.format)) {
-      sendTable(res, { header: ['Disposal No.', 'Date', 'Type', 'Asset No.', 'Asset', 'Class', 'Buyer', 'Cost', 'Accumulated Depreciation', 'Book Value', 'Proceeds', 'Output VAT', 'Gain / (Loss)',
+      await sendTable(res, { header: ['Disposal No.', 'Date', 'Type', 'Asset No.', 'Asset', 'Class', 'Buyer', 'Cost', 'Accumulated Depreciation', 'Book Value', 'Proceeds', 'Output VAT', 'Gain / (Loss)',
         'Sales Invoice', 'Journal', 'Status'],
       rows: r.rows.map((d) => [d.disposalNumber, d.disposalDate, d.disposalType, d.assetNumber, d.assetName, d.className || d.classCode, d.buyerName || '', d.cost, d.accumulatedDepreciation,
         d.bookValue, d.proceeds, d.outputVat, d.gainLoss, d.salesInvoiceNumber || '', d.journalNumber || '', d.status]),

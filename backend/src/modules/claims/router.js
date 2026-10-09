@@ -8,6 +8,8 @@ import { audit } from '../../lib/audit.js';
 import { badRequest } from '../../lib/errors.js';
 import { ok, created, paging, pageMeta } from '../../lib/respond.js';
 import { sendSheet } from './docs.js';
+import { printFormat } from '../../lib/pdf/index.js';
+import { formatDatesIn } from '../../lib/pdf/format.js';
 import * as svc from './service.js';
 import * as cash from './cash.js';
 
@@ -44,7 +46,7 @@ define({
     if (['excel', 'xlsx', 'csv'].includes(String(req.query.format || '').toLowerCase())) {
       const rows = data.detailedClaims || (await svc.claimsReport(await withScope(req, { ...req.query, includeData: 'true' }))).detailedClaims;
       const summary = [
-        { k: 'Period', v: `${data.dateRange.startDate} to ${data.dateRange.endDate}` }, { k: 'Total claims', v: data.summary.totalClaims },
+        { k: 'Period', v: formatDatesIn(`${data.dateRange.startDate} to ${data.dateRange.endDate}`, await printFormat()) }, { k: 'Total claims', v: data.summary.totalClaims },
         { k: 'Open claims', v: data.summary.totalOpenClaims }, { k: 'Overdue claims', v: data.summary.totalAgingClaims },
         { k: "Today's claims", v: data.summary.todaysClaims }, { k: 'Estimated amount', v: data.summary.totalEstimatedAmount }, { k: 'Settled amount', v: data.summary.totalSettledAmount },
         ...data.breakdown.byStatus.map((s) => ({ k: `Status: ${s.status}`, v: s.count })),

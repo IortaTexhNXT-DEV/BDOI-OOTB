@@ -1,6 +1,7 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
 import { apiErrorMessage } from "../utility/apiError";
+import { toIsoDate } from "../utility/dateFormat";
 
 const toQueryString = (params = {}) =>
   new URLSearchParams(
@@ -577,7 +578,7 @@ class AccountingService {
         const value = filters[key];
         if (value !== null && value !== undefined && value !== "") {
           if (value instanceof Date) {
-            queryParams.append(key, value.toISOString().split("T")[0]);
+            queryParams.append(key, toIsoDate(value));
           } else {
             queryParams.append(key, value);
           }
