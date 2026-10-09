@@ -48,8 +48,9 @@ const reportsService = {
   getBranchOptions: async () =>
     toOptions((await request("/masters/branch/options")).data, "label", "value"),
 
+  /** Client filter: served to every report reader within their record scope (GET /clients needs read:clients). */
   getClientOptions: async () =>
-    toOptions((await request("/clients?perPage=500")).data?.clients, "displayName", "clientId"),
+    toOptions((await request("/reports/filters/clients")).data, "label", "value"),
 };
 
 export default reportsService;

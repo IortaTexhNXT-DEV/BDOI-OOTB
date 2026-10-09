@@ -16,6 +16,7 @@ import { buildReportPdf, printContext } from '../../lib/pdf/index.js';
 import { loadImage } from '../../lib/pdf/image.js';
 import { formatAmount, formatDate, humanize } from '../../lib/pdf/format.js';
 import { companyName } from '../../lib/letterhead.js';
+import { scopeSql } from '../../lib/scope.js';
 import { startScheduler } from '../../jobs/scheduler.js';
 import { execute } from './engine.js';
 import { QUERIES } from './queries.js';
@@ -39,6 +40,22 @@ export async function agentFilterOptions() {
     WHERE u.status = 'active' AND EXISTS (SELECT 1 FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id AND lower(r.code) = ANY($1))
     ORDER BY lower(COALESCE(u.display_name, u.username))`, [roles]);
   return rows.map((u) => ({ label: u.display_name || u.username, value: u.id, code: u.employee_code || u.username }));
+}
+
+/** At most this many clients are offered by the report Client filter (the first by name). */
+const CLIENT_FILTER_LIMIT = 500;
+
+/**
+ * Clients a report Client filter can use: not anonymised or deleted, within the reader's record scope (lib/scope.js),
+ * as { label, value, code }. Served to every report reader, so the filter does not need read:clients (Cash Control
+ * runs the statement of account and collection reports without the client register).
+ */
+export async function clientFilterOptions(scope) {
+  const params = [CLIENT_FILTER_LIMIT];
+  const rows = await many(`SELECT c.id, c.display_name, c.client_code FROM clients c
+    WHERE c.anonymised_at IS NULL AND COALESCE(c.status, 'active') <> 'deleted' AND ${scopeSql(scope, 'client', 'c', params)}
+    ORDER BY lower(c.display_name) LIMIT $1`, params);
+  return rows.map((c) => ({ label: c.display_name, value: c.id, code: c.client_code }));
 }
 
 /* ---------- catalogue ---------- */

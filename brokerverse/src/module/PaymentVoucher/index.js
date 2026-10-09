@@ -92,15 +92,12 @@ const Index = () => {
     navigate(`/accounts/paymentvoucher/detailview/${disbursementId}`);
   };
 
-  // Transform clients data to dropdown options for Customer Code (for bulk print modal)
+  // Customer codes as dropdown options (bulk print modal)
   const getCustomerCodeOptions = () => {
     return clientsData.map((client) => ({
-      name: client.generatedClientId || client.clientId,
-      code: client.generatedClientId || client.clientId,
+      name: client.customerCode,
+      code: client.customerCode,
       clientId: client.clientId,
-      firstName: client.firstName,
-      lastName: client.lastName,
-      companyName: client.companyName,
     }));
   };
 
@@ -386,14 +383,15 @@ const Index = () => {
     dispatch(paymentVocherMiddleware({ page: 1, pageSize: PAGE_SIZE }));
   }, [dispatch]);
 
-  // Fetch clients data from API for bulk print modal
+  // Customer codes of the bulk print modal (/customers/codes: also open to the receipting and disbursement roles,
+  // which do not read the client register)
   useEffect(() => {
     const fetchClients = async () => {
       setClientsLoading(true);
       try {
-        const response = await clientService.getClients(1, 100); // Fetch more clients for dropdown
-        if (response.success && response.data?.data?.clients) {
-          setClientsData(response.data.data.clients);
+        const response = await clientService.getCustomerCodes();
+        if (response.success && Array.isArray(response.data?.data)) {
+          setClientsData(response.data.data);
         } else {
           logger.error("Failed to fetch clients:", response.error);
         }
