@@ -5256,6 +5256,21 @@
     "help": "เกี่ยวกับหน้านี้",
     "back": "ย้อนกลับ"
   },
+  "configStatus": {
+    "state": {
+      "ready": "พร้อมใช้งาน",
+      "incomplete": "ตั้งค่าไม่ครบ",
+      "off": "ปิดอยู่"
+    },
+    "missing": "รายการที่ขาด",
+    "configure": "ตั้งค่า"
+  },
+  "technicalDetails": {
+    "title": "รายละเอียดทางเทคนิค",
+    "copy": "คัดลอก",
+    "copyNamed": "คัดลอก {{name}}",
+    "copied": "คัดลอกแล้ว"
+  },
   "opsAcc": {
     "masters": {
       "leadSources": {
