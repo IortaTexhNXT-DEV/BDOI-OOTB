@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
+import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
@@ -12,6 +13,7 @@ import authService from "../../services/authService";
 import s3Service from "../../services/s3Service";
 import { useEmailSending, withQueuedNotice } from "../../utility/emailNotice";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
+import { loadKycConfig, requiredKycFor } from "../../utility/kyc";
 import { hasPermission } from "../../utils/canOpen";
 import { Field, JourneyTimeline, PageHeader, ParticipantEditor, ParticipantsTable, StatusTag, formatDate, participantProblem, usePlacementOptions } from "./shared";
 import { EpolicyDialog, SlipComparison } from "./EpolicyForm";
@@ -42,6 +44,7 @@ const PlacementDetail = () => {
   const [editing, setEditing] = useState(null);
   const [booking, setBooking] = useState(null);
   const [cancelling, setCancelling] = useState(null);
+  const [kycConfig, setKycConfig] = useState(null);
   const userId = String(authService.getUser()?.userId || localStorage.getItem("USER_ID") || "");
 
   const notify = (severity, detail) => toast.current?.show({ severity, summary: severity === "error" ? t("common.error") : t("placement.messages.done"), detail, life: severity === "error" ? 6000 : 3000 });
@@ -54,6 +57,7 @@ const PlacementDetail = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
   useEffect(() => { load(); }, [load]);
+  useEffect(() => { if (booking && !kycConfig) loadKycConfig().then(setKycConfig); }, [booking, kycConfig]);
 
   const act = async (fn, message) => {
     setBusy(true);
@@ -69,6 +73,7 @@ const PlacementDetail = () => {
       setBusy(false);
     }
   };
+  const setKyc = (patch) => setBooking((b) => ({ ...b, kyc: { ...b.kyc, ...patch } }));
 
   if (!p) return <div className="placement-page"><Toast ref={toast} /><div className="placement-card">{t("placement.messages.loading")}</div></div>;
   const write = hasPermission("write:quotations");
@@ -255,7 +260,15 @@ const PlacementDetail = () => {
       <Dialog className="placement-dialog" header={t("placement.book.title")} visible={Boolean(booking)} onHide={() => setBooking(null)} style={{ width: "36rem" }}
         footer={<><Button label={t("placement.actions.cancel")} text onClick={() => setBooking(null)} /><Button label={t("placement.actions.book")} icon="pi pi-verified" severity="success" loading={busy}
           onClick={async () => {
-            const res = await act(() => placementService.bookPolicy(p.id, { additionalPolicyData: { ...booking.kyc } }),
+            const res = await act(async () => {
+              const kyc = { ...booking.kyc };
+              if (booking.idFile) {
+                const up = await s3Service.uploadFile(booking.idFile, "id-cards");
+                if (!up?.url) throw new Error(up?.error || t("placement.epolicy.errors.upload"));
+                kyc.idCardImage = up.url;
+              }
+              return placementService.bookPolicy(p.id, { additionalPolicyData: kyc });
+            },
               (r) => withQueuedNotice(t("placement.messages.booked", { number: r.data?.policy?.policyNumber }), emailSending));
             if (res?.policyId) navigate(`/agent/policydetail/${res.policyId}`);
           }} /></>}>
@@ -265,12 +278,22 @@ const PlacementDetail = () => {
             {p.lob === "MOTOR" && <p className="muted">{t("placement.book.verifyNote")}</p>}
             {p.lob === "MOTOR" && (
               <div className="grid mt-2">
-                {["idType", "idCardNumber"].map((k) => (
-                  <div className="col-12 md:col-6" key={k}>
-                    <label>{t(`placement.kyc.${k}`)}</label>
-                    <InputText value={booking.kyc[k] || ""} onChange={(e) => setBooking({ ...booking, kyc: { ...booking.kyc, [k]: e.target.value } })} className="w-full" placeholder={t("placement.kyc.notCaptured")} />
+                <div className="col-12 md:col-6">
+                  <label htmlFor="bk-idType">{t("placement.kyc.idType")}</label>
+                  <Dropdown inputId="bk-idType" value={booking.kyc.idType || null} options={(kycConfig?.idTypes || []).map((v) => ({ label: v, value: v }))} placeholder={t("placement.kyc.selectIdType")}
+                    onChange={(e) => setKyc({ idType: e.value })} className="w-full" />
+                </div>
+                <div className="col-12 md:col-6">
+                  <label htmlFor="bk-idNumber">{t("placement.kyc.idCardNumber")}</label>
+                  <InputText id="bk-idNumber" value={booking.kyc.idCardNumber || ""} onChange={(e) => setKyc({ idCardNumber: e.target.value })} className="w-full" placeholder={t("placement.kyc.notCaptured")} />
+                </div>
+                {requiredKycFor(kycConfig, p.lob).includes("idImage") && (
+                  <div className="col-12">
+                    <label htmlFor="bk-idImage">{t("placement.kyc.idCardImage")}</label>
+                    {booking.kyc.idCardImage && !booking.idFile && <div className="muted">{t("placement.kyc.idCardImageAttached")}</div>}
+                    <input id="bk-idImage" type="file" accept="image/*,application/pdf" onChange={(e) => setBooking({ ...booking, idFile: e.target.files?.[0] || null })} />
                   </div>
-                ))}
+                )}
               </div>
             )}
           </>

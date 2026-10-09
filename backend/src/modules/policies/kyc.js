@@ -78,8 +78,8 @@ export async function assertKyc({ lob, sources }) {
 }
 
 /** The identifiers shown on the issue-policy dialog (dialog field -> KYC item). */
-export const KYC_PREFILL_FIELDS = { idType: 'idType', idCardNumber: 'idNumber', chassisNumber: 'chassisNumber', motorNumber: 'motorNumber', plateNumber: 'plateNumber' };
-const ID_ITEMS = new Set(['idType', 'idNumber']);
+export const KYC_PREFILL_FIELDS = { idType: 'idType', idCardNumber: 'idNumber', idCardImage: 'idImage', chassisNumber: 'chassisNumber', motorNumber: 'motorNumber', plateNumber: 'plateNumber' };
+const ID_ITEMS = new Set(['idType', 'idNumber', 'idImage']);
 
 /**
  * Values already captured for a policy about to be issued, so the user only verifies them: the ID from the client's

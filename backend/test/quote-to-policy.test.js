@@ -56,10 +56,10 @@ describe('quotations for an existing client (no prospect)', () => {
 
   it('the ID captured on an earlier policy of the client is proposed for the new policy', async () => {
     await q(`INSERT INTO policies(policy_number, client_id, status, expiry_date, details) VALUES ('POL-KYC-1', $1, 'active', current_date + 300, $2)`,
-      [clientId, JSON.stringify({ idType: 'UMID', idCardNumber: '0111-2222333-4', chassisNumber: 'OTHER-VEHICLE' })]);
+      [clientId, JSON.stringify({ idType: 'UMID', idCardNumber: '0111-2222333-4', idCardImage: 'id-cards/carla-umid.jpg', chassisNumber: 'OTHER-VEHICLE' })]);
     const r = await ctx.api('get', `/quotations/${quoteId}/kyc-prefill`);
     expect(r.status).toBe(200);
-    expect(r.body.data).toMatchObject({ idType: 'UMID', idCardNumber: '0111-2222333-4', chassisNumber: '' });
+    expect(r.body.data).toMatchObject({ idType: 'UMID', idCardNumber: '0111-2222333-4', idCardImage: 'id-cards/carla-umid.jpg', chassisNumber: '' });
     // what the quotation itself holds wins over the history
     await q(`UPDATE quotes SET doc = doc || '{"idType":"Passport","insuranceVehicleDetails":[{"chassisNumber":"CH-123","plateNumber":"NAB 1234"}]}'::jsonb WHERE id = $1`, [quoteId]);
     const mine = await kycPrefill({ clientId, quoteId });

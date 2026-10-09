@@ -6815,7 +6815,10 @@
       "motorNumber": "Motor number",
       "plateNumber": "Plate number",
       "fromQuote": "From the quotation if blank",
-      "notCaptured": "Not captured yet"
+      "notCaptured": "Not captured yet",
+      "idCardImage": "ID card image",
+      "idCardImageAttached": "ID card image on file",
+      "selectIdType": "Select the ID type"
     },
     "journey": {
       "title": "Placement journey",
