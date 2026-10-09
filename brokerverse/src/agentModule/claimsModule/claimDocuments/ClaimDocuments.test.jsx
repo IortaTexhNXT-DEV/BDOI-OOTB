@@ -64,7 +64,7 @@ describe("claim Documents step", () => {
     service.claimChecklist.mockResolvedValue(checklist([item(2, "Affidavit of Theft", "pending")]));
     service.updateChecklistItem.mockResolvedValue({});
     wrap();
-    const row = (await screen.findByText("Affidavit of Theft")).closest("tr");
+    const row = await screen.findByRole("row", { name: /Affidavit of Theft/ });
     fireEvent.click(within(row).getByRole("button", { name: "More actions" }));
     fireEvent.click(await screen.findByText("Waive"));
     const dialog = await screen.findByRole("dialog", { name: "Waive Affidavit of Theft" });

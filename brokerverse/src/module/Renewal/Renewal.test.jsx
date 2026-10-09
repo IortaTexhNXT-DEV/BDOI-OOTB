@@ -23,6 +23,11 @@ jest.mock("../../services/myWorkService", () => ({
 
 const store = configureStore({ reducer: { systemSettingsReducer: () => ({ displayCurrency: "PHP" }) } });
 const wrap = (ui) => render(<Provider store={store}><MemoryRouter>{ui}</MemoryRouter></Provider>);
+/** The recommended action of the open renewal, with its button. */
+const actionItem = async (title) => {
+  await screen.findByText(title);
+  return screen.getAllByRole("listitem").find((li) => li.textContent.startsWith(title));
+};
 
 const RISK = {
   id: "rnw_1", renewalNumber: "RN-2026-00001", policyId: "pol_1", policyNumber: "POL-2025-00014", insuredName: "Mindanao Agri Trading Inc.", product: "Motor Vehicle Insurance",
@@ -53,10 +58,9 @@ describe("At-Risk Policies", () => {
     expect(screen.getByText("Premium up 33.3% on the renewal quote")).toBeInTheDocument();
     expect(screen.queryByText(/statistically/i)).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "POL-2025-00014" }));
-    const breakdown = (await screen.findByText("Score breakdown")).closest("section");
-    const rows = within(breakdown).getAllByRole("row");
-    expect(rows.map((r) => r.textContent)).toEqual(expect.arrayContaining([expect.stringMatching(/Unpaid premium.*Not found.*20.*0/)]));
-    expect(within(breakdown).getByText("Risk score (High)").closest("tr")).toHaveTextContent("60");
+    expect(await screen.findByRole("heading", { name: "Score breakdown" })).toBeInTheDocument();
+    expect(screen.getByRole("row", { name: /Unpaid premium.*Not found.*20.*0/ })).toBeInTheDocument();
+    expect(screen.getByRole("row", { name: /Risk score \(High\)/ })).toHaveTextContent("60");
     expect(await screen.findByText("Called the client")).toBeInTheDocument();
   });
 
@@ -64,7 +68,7 @@ describe("At-Risk Policies", () => {
     myWorkService.createTask.mockResolvedValue({ id: "tsk_1", title: "Prepare an alternative quote" });
     wrap(<AtRiskAnalysis />);
     fireEvent.click(await screen.findByRole("button", { name: "POL-2025-00014" }));
-    const item = (await screen.findByText("Prepare an alternative quote")).closest("li");
+    const item = await actionItem("Prepare an alternative quote");
     fireEvent.click(within(item).getByRole("button", { name: "Create task" }));
     const dialog = await screen.findByRole("dialog", { name: "New task" });
     expect(within(dialog).getByDisplayValue("Prepare an alternative quote")).toBeInTheDocument();
@@ -77,7 +81,7 @@ describe("At-Risk Policies", () => {
     service.escalate.mockResolvedValue({ escalatedTo: [{ id: "usr_9", name: "Carlo Mendoza" }] });
     wrap(<AtRiskAnalysis />);
     fireEvent.click(await screen.findByRole("button", { name: "POL-2025-00014" }));
-    const item = (await screen.findByText("Escalate to the unit head")).closest("li");
+    const item = await actionItem("Escalate to the unit head");
     fireEvent.click(within(item).getByRole("button", { name: "Escalate" }));
     const dialog = await screen.findByRole("dialog", { name: "Escalate to the unit head" });
     fireEvent.click(within(dialog).getByRole("button", { name: "Escalate" }));
