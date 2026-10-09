@@ -17,6 +17,7 @@ import * as an from './analytics.js';
 const { router, define } = moduleRouter('Renewals workspace', '/renewals');
 const read = [requireAuth, requirePermission('read:renewals')];
 const write = [requireAuth, requirePermission('write:renewals')];
+const approve = [requireAuth, requirePermission('write:renewals'), requirePermission('approve:renewals')];
 const noteSchema = z.object({ note: z.string().max(2000).optional(), reason: z.string().max(2000).optional() }).passthrough();
 const queueItem = { id: 'rnw_1', renewalNumber: 'RN-2026-00001', policyNumber: 'POL-2025-00012', insuredName: 'Maria Santos', product: 'Motor Vehicle Insurance', insurer: 'MAPFRE Insurance Corporation', expiryDate: '2026-10-30', daysToExpiry: 32, currentPremium: 18500, renewalPremium: 21450.5, premiumVariancePct: 15.95, status: 'Quote Sent', statusCode: 'quoted', retentionRisk: 'Medium', riskScore: 35, noticeStage: 1, nextNotice: { stage: 2, code: 'second', label: 'Second Notice' }, assignedAgent: 'Ana Reyes', renewalAttempts: 1 };
 
@@ -156,8 +157,8 @@ define({
   handler: command('submit', (req) => svc.submitForApproval(req.params.id, req.user, req.body.note), 'Submitted for approval'),
 });
 define({
-  method: 'POST', path: '/:id/approve', summary: 'Checker decision on renewal terms (decision approve | reject); approver must differ from the submitter', screen: 'Operations > Renewals > Negotiations (approval)',
-  middleware: [...write, validate(z.object({ decision: z.enum(['approve', 'reject']).default('approve'), note: z.string().max(2000).optional() }))],
+  method: 'POST', path: '/:id/approve', summary: 'Checker decision on renewal terms (decision approve | reject; approve:renewals); approver must differ from the submitter', screen: 'Operations > Renewals > Negotiations (approval)',
+  middleware: [...approve, validate(z.object({ decision: z.enum(['approve', 'reject']).default('approve'), note: z.string().max(2000).optional() }))],
   request: { decision: 'approve', note: 'Within authority' }, response: { success: true, data: { ...queueItem, status: 'Approved', statusCode: 'approved' } },
   handler: command('approve', (req) => svc.decide(req.params.id, req.user, req.body), 'Decision recorded'),
 });

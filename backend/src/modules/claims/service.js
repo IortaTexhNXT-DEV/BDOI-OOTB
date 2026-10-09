@@ -22,7 +22,7 @@ import { companyName } from '../../lib/letterhead.js';
 import { printContext, buildPdf } from '../../lib/pdf/index.js';
 import { SIGNATURE_PLACEHOLDER, documentState, renderSignatureBlock } from '../e-signatures/service.js';
 import { formatDate } from '../../lib/pdf/format.js';
-import { daysBetween, parseJsonField, round2, storeUpload, toBool, toNum, today, unprocessable, usersWithRole } from './util.js';
+import { daysBetween, parseJsonField, round2, storeUpload, toBool, toNum, today, unprocessable, usersWithPermission } from './util.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { businessDate, postingDate } from '../../lib/dates.js';
 
@@ -543,8 +543,8 @@ export async function settleClaim(id, input, user, files) {
   settlement.requestedBy = user?.username; settlement.requestedAt = new Date().toISOString();
   if (await getSetting('claims.settlement_maker_checker', true)) {
     await transition(row, 'pending-approval', user, { note: `Settlement of ${await formatMoney(amount)} submitted for approval`, action: 'Settlement Submitted', sets: { settlement: JSON.stringify(settlement), settlement_requested_by: user?.id ?? null } });
-    // decided by the Claims role (write:claims and role claims): each claims user but the requester
-    const approvers = (await usersWithRole('claims')).map((u) => u.id).filter((u) => u !== user?.id);
+    // decided by the holders of approve:claims: each of them but the requester
+    const approvers = (await usersWithPermission('approve:claims')).map((u) => u.id).filter((u) => u !== user?.id);
     await notifyApprovers({ users: approvers, document: 'Claim settlement', number: row.claim_number, by: user?.username || 'system',
       detail: `${await formatMoney(amount)}${settlement.settlementType ? `, ${settlement.settlementType}` : ''}`, link: settlementLink(row), entity: 'claim', entityId: row.id });
     return { from, claim: await getClaim(row.id), pendingApproval: true };

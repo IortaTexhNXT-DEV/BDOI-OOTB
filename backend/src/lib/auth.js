@@ -106,6 +106,16 @@ export async function requireAuth(req, _res, next) {
 export const ADMIN_ROLE = 'system-admin';
 export const ADMIN_ROLES = Object.freeze([ADMIN_ROLE]);
 export const isAdmin = (user) => !!user && (user.roles || []).some((r) => ADMIN_ROLES.includes(r));
+/**
+ * Role codes that make their holder an administrator: the administrator roles and every role that includes one through
+ * roles.inherits, at any depth (SUPERID of the TISPH roles includes the System Administrator). Granting or changing
+ * them is protected as the administrator role is.
+ */
+export async function adminEquivalentRoles(db = { query }) {
+  const { rows } = await db.query(`WITH RECURSIVE a(code) AS (SELECT unnest($1::text[]) UNION SELECT r.code FROM roles r JOIN a ON a.code = ANY(r.inherits))
+    SELECT code FROM a`, [ADMIN_ROLES]);
+  return rows.map((r) => r.code);
+}
 /** Does the user hold the permission (administrator roles hold every permission)? */
 export const hasPermission = (user, perm) => isAdmin(user) || (user?.permissions || []).includes(perm);
 

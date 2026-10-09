@@ -1,7 +1,7 @@
 import { memoryUpload } from '../../lib/uploadLimits.js';
 import { checkUploadedFiles } from '../uploads/fileTypes.js';
 import { moduleRouter } from '../../lib/registry.js';
-import { requireAuth, requirePermission, requireRole } from '../../lib/auth.js';
+import { requireAuth, requirePermission } from '../../lib/auth.js';
 import { ownRecord, withScope } from '../../lib/scope.js';
 import { validate, z } from '../../lib/validate.js';
 import { audit } from '../../lib/audit.js';
@@ -21,8 +21,8 @@ const multerAny = memoryUpload({ files: 5 }).any();
 const upload = { any: () => (req, res, next) => multerAny(req, res, (e) => next(e ? badRequest(e.message) : undefined)) };
 const read = [requireAuth, requirePermission('read:claims')];
 const write = [requireAuth, requirePermission('write:claims')];
-/** Status decisions (review, reject, settle, approve settlement, close) belong to the claims team; agents register, update and upload only. */
-const decide = [...write, requireRole('claims')];
+/** Status decisions (review, reject, settle, approve settlement, close) need approve:claims; the others register, update and upload only. */
+const decide = [...write, requirePermission('approve:claims')];
 const policyRef = (req) => [req.body?.policyRefId, req.body?.policyId, req.body?.policyNumber].find((v) => v && !svc.PLACEHOLDER_REFS.has(String(v)));
 const str = z.union([z.string(), z.number(), z.boolean()]).optional().nullable();
 

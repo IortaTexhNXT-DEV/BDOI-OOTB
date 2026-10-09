@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { HttpError } from '../../lib/errors.js';
 import { many, query } from '../../db/pool.js';
+import { ADMIN_ROLES } from '../../lib/auth.js';
 import { detectType } from '../uploads/fileTypes.js';
 import { newKey, resolveKey } from '../uploads/storage.js';
 
@@ -36,3 +37,7 @@ export async function storeUpload(file, { category, entity, entityId, userId }) 
 /** Active users holding a role code. */
 export const usersWithRole = (role) => many(`SELECT u.id, u.display_name, u.email FROM users u JOIN user_roles ur ON ur.user_id = u.id
   JOIN roles r ON r.id = ur.role_id WHERE r.code = $1 AND u.status = 'active' ORDER BY u.created_at`, [role]);
+/** Active users holding a permission through their roles (inherited roles included), System Administrators left out. */
+export const usersWithPermission = (permission) => many(`SELECT u.id, u.display_name, u.email FROM users u WHERE u.status = 'active'
+  AND EXISTS (SELECT 1 FROM user_effective_roles(u.id) er JOIN role_permissions rp ON rp.role_id = er.role_id JOIN permissions p ON p.id = rp.permission_id WHERE p.code = $1)
+  AND NOT EXISTS (SELECT 1 FROM user_effective_roles(u.id) er WHERE er.code = ANY($2)) ORDER BY u.created_at`, [permission, ADMIN_ROLES]);

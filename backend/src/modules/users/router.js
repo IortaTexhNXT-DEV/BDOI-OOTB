@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { moduleRouter } from '../../lib/registry.js';
-import { ADMIN_ROLES, isAdmin, loadUser, publicUser, requireAuth, requirePermission, revokeSessions } from '../../lib/auth.js';
+import { ADMIN_ROLES, adminEquivalentRoles, isAdmin, loadUser, publicUser, requireAuth, requirePermission, revokeSessions } from '../../lib/auth.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { validate, z } from '../../lib/validate.js';
 import { many, one, query, withTransaction } from '../../db/pool.js';
@@ -45,8 +45,11 @@ async function resolveStaffFields(b, before = null) {
   }
   if (errors.length) throw badRequest('Validation failed', errors);
 }
-function assertCanAssign(req, targetUserId, codes) {
-  if (!isAdmin(req.user) && hasAdminRole(codes)) throw forbidden('Only a System Administrator can grant the System Administrator role');
+async function assertCanAssign(req, targetUserId, codes) {
+  if (!isAdmin(req.user) && (codes || []).length) {
+    const admin = await adminEquivalentRoles();
+    if (codes.some((c) => admin.includes(c))) throw forbidden('Only a System Administrator can grant the System Administrator role or a role that includes it');
+  }
   if (targetUserId && targetUserId === req.user.id) throw forbidden('You cannot change your own roles or access');
 }
 /**
@@ -61,9 +64,10 @@ async function assertCanManage(req, targetId) {
   return target;
 }
 /** Roles: only a System Administrator changes the administrator role or a role they hold themselves (no self-escalation). */
-function assertCanEditRole(req, role) {
+async function assertCanEditRole(req, role) {
   if (isAdmin(req.user)) return;
   if (ADMIN_ROLES.includes(role.code)) throw forbidden('Only a System Administrator can change the System Administrator role');
+  if ((await adminEquivalentRoles()).includes(role.code)) throw forbidden('Only a System Administrator can change a role that includes the System Administrator role');
   if ((req.user.roles || []).includes(role.code)) throw forbidden('You cannot change a role you hold');
 }
 
@@ -193,7 +197,7 @@ define({
     const b = req.body;
     if (await one('SELECT 1 FROM users WHERE lower(username) = lower($1)', [b.username])) throw conflict('Username already exists');
     if (b.password) await assertPasswordAllowed(b.password);
-    assertCanAssign(req, null, b.roles);
+    await assertCanAssign(req, null, b.roles);
     await resolveStaffFields(b);
     const temporaryPassword = b.password ? null : temporaryPasswordFor(await passwordPolicy());
     if (temporaryPassword) b.mustChangePassword = true;
@@ -226,9 +230,9 @@ define({
       // Saving one's own profile with the same roles is fine; changing them is not.
       const assigned = (await many('SELECT r.code FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = $1', [before.id])).map((r) => r.code);
       const same = [...new Set(b.roles)].sort().join(',') === [...new Set(assigned)].sort().join(',');
-      if (!(before.id === req.user.id && same)) assertCanAssign(req, before.id, b.roles);
+      if (!(before.id === req.user.id && same)) await assertCanAssign(req, before.id, b.roles);
     }
-    if (before.id === req.user.id && b.status && b.status !== before.status) assertCanAssign(req, before.id, []);
+    if (before.id === req.user.id && b.status && b.status !== before.status) await assertCanAssign(req, before.id, []);
     await resolveStaffFields(b, before);
     // Details of an administrator account (e-mail, status) only by a System Administrator: a changed e-mail would let
     // the password reset code go elsewhere.
@@ -345,7 +349,7 @@ rolesRouter.define({
   handler: async (req, res) => {
     const role = await one('SELECT * FROM roles WHERE id::text = $1 OR code = $1', [req.params.id]);
     if (!role) throw notFound('Role not found');
-    assertCanEditRole(req, role);
+    await assertCanEditRole(req, role);
     const b = req.body;
     await withTransaction(async (c) => {
       await c.query('UPDATE roles SET name = COALESCE($2, name), description = COALESCE($3, description), status = COALESCE($4, status) WHERE id = $1', [role.id, b.name, b.description, b.status]);
@@ -365,7 +369,7 @@ rolesRouter.define({
     const role = await one('SELECT * FROM roles WHERE id::text = $1 OR code = $1', [req.params.id]);
     if (!role) throw notFound('Role not found');
     if (role.is_system) throw badRequest('System roles cannot be deleted');
-    assertCanEditRole(req, role);
+    await assertCanEditRole(req, role);
     if (await one('SELECT 1 FROM user_roles WHERE role_id = $1', [role.id])) throw conflict('Role is assigned to users');
     await query('DELETE FROM roles WHERE id = $1', [role.id]);
     await audit(req, { entity: 'role', entityId: role.id, action: 'delete', before: role });

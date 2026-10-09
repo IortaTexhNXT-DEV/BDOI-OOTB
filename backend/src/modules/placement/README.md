@@ -26,7 +26,7 @@ Statuses: broker slip `draft`, `submitted`, `responses-in`, `closed`, `cancelled
 | `sent` | Sent to insurer (SentToInsurer) | `POST /:id/send` (one e-mail per participant, its placement slip PDF attached) |
 | `acknowledged` | Acknowledged | `POST /:id/acknowledge`, or a check returned to the insurer |
 | `epolicy_received` | e-Policy received (EPolicyReceived) | `POST /:id/epolicy` (uploaded file and the ISSUE-02 figures; compared with the slip at once) |
-| `checked` | Checked against slip (CheckedAgainstSlip) | `POST /:id/check` with `confirm` (matches) or `accept` (differences, with a reason, `write:policies`) by another user |
+| `checked` | Checked against slip (CheckedAgainstSlip) | `POST /:id/check` with `confirm` (matches) or `accept` (differences, with a reason, `write:policies`) by another user holding `approve:policies` |
 | `issued` | Insurer issued (InsurerIssued) | `POST /:id/book`: the only way the policy is created |
 | `declined`, `cancelled` | Declined, Cancelled | `POST /:id/decline`, `POST /:id/cancel` |
 

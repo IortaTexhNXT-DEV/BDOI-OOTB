@@ -7,7 +7,7 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
 import { many, one, query } from '../../db/pool.js';
-import { isAdmin, ADMIN_ROLES, revokeSessions } from '../../lib/auth.js';
+import { isAdmin, ADMIN_ROLES, adminEquivalentRoles, revokeSessions } from '../../lib/auth.js';
 import { setSetting } from '../../lib/settings.js';
 import { settingOwner } from '../../lib/settingOwners.js';
 import { passwordPolicy, recordHistory } from '../../lib/password.js';
@@ -212,6 +212,7 @@ const usersSheet = () => ({
     const unknown = codes.filter((c) => !roles.some((r) => r.code === c));
     if (unknown.length) fail('roles', `Unknown role(s): ${unknown.join(', ')}`);
     if (!isAdmin(ctx.user) && codes.some((c) => ADMIN_ROLES.includes(c))) fail('roles', 'Only a System Administrator can grant the System Administrator role');
+    if (!isAdmin(ctx.user) && (await adminEquivalentRoles()).some((c) => codes.includes(c))) fail('roles', 'Only a System Administrator can grant a role that includes the System Administrator role');
     if (v.branchCode && !(await one('SELECT 1 FROM branches WHERE lower(code) = lower($1) AND status <> \'deleted\'', [v.branchCode]))) fail('branchCode', `Branch ${v.branchCode} is not in the Branch master`);
     let designation = v.designation || undefined;
     if (designation) {

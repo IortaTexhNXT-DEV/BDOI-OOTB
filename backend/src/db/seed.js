@@ -20,13 +20,29 @@ export const ROLES = [
   ['claims', 'Claims', 'Claims registration, follow-up with insurers, review and settlement', false],
   ['accounting', 'Accounting', 'Billing, collection, official receipts, remittance to insurers, commission, period end and BIR reporting', false],
   ['accounting-manager', 'Accounting Manager', 'Everything Accounting does, plus approving the month-end and year-end close and bank reconciliations, posting into soft-closed periods and reopening periods', false],
+  // TISPH personas of the RBAC v4 matrix (migration 0348_tisph_roles.sql); the names carry the matrix labels.
+  ['tis-sales-associate', 'TIS Sales Associate', 'RBAC v4 Sales Associate: leads, clients, quotations, placements, policies, endorsements and renewals (maker, no approval); reads claims, billing, receipting and commission', false],
+  ['tis-sales-officer', 'TIS Sales Officer', 'RBAC v4 Sales Officer (also the Corporate Sales Officers of the user list): as the Sales Associate, plus lead allocation, campaigns and approving quotations, placement checks and renewals of another user', false],
+  ['tis-sales-unit-head', 'TIS Sales Unit Head', 'RBAC v4 Sales Unit Head: as the Sales Officer, plus telesales incentives and approving supplier invoices; reads disbursements and payables', false],
+  ['tis-ops-associate', 'TIS Operations Associate', 'RBAC v4 Operations Associate: placements, policies, endorsements, renewals and claims (maker, no approval); reads leads, clients and billing', false],
+  ['tis-ops-officer', 'TIS Operations Officer', 'RBAC v4 Operations Officer: as the Operations Associate, plus reading journal vouchers and fixed assets', false],
+  ['tis-ops-unit-head', 'TIS Operations Unit Head', 'RBAC v4 Operations Unit Head: as the Operations Officer, plus approving quotations, placement checks, renewals, claim decisions and supplier invoices of another user', false],
+  ['tis-ccd-pdu', 'CCD-PDU (Post-Dated Cheques)', 'RBAC v4 CCD-PDU: post-dated cheque encoding, acknowledgement, deposit and cancellation (Cash Control)', false],
+  ['tis-ccd-pdc', 'CCD-PDC / CCD-ADA', 'RBAC v4 persona named CCD-PDC in the screen matrix and CCD-ADA (auto-debit arrangements) in the department table: post-dated cheques; reads billing, receipting and reconciliations (Cash Control)', false],
+  ['tis-ccd-bp', 'CCD-BP / QRPh (Receipting)', 'RBAC v4 CCD-BP/QRPh: official and acknowledgement receipts over the counter, bills payment and QRPh, posting of collections; no reversals (Cash Control)', false],
+  ['tis-ccd-recon', 'CCD-Recon (Reconciliation and Reversals)', 'RBAC v4 CCD-Recon: daily payment reconciliation, reversals and adjustments, bank and insurer statement reconciliation, approving insurer statement reconciliations (Cash Control)', false],
+  ['tis-finance', 'TIS Finance & General Accounting', 'RBAC v4 Finance & GenAcctg: disbursements, journal vouchers, payables, fixed assets, commission and remittance, period end, bank reconciliation and posting rule approvals; reads the front office', false],
+  ['tis-it-admin', 'TIS IT AppSupport / Admin', 'RBAC v4 IT AppSupport/Admin: users, roles, access control, settings, reference masters, product configurator, schedules and interfaces; reads business data, enters no business transactions', false],
+  ['tis-general-manager', 'TIS General Manager', 'RBAC v4 TIS General Manager: front office (leads to claims) with every approval of the front office and supplier invoices; reads accounting, administration and the audit trail', false],
+  ['tis-superid', 'SUPERID (UAT only)', 'RBAC v4 SUPERID for user acceptance testing: includes the System Administrator. Set the role Inactive before go-live', false],
 ];
 /** Role codes of earlier releases (renamed or merged by migration 0140_broker_roles.sql); a fresh seed never creates them. */
 export const RETIRED_ROLES = ['it-admin', 'ba', 'user-access-admin', 'underwriting', 'customer-services', 'finance', 'finance-manager', 'agent'];
 const MODULES = ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'claims', 'renewals', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'incentive', 'products', 'masters', 'users', 'roles', 'settings', 'reports', 'schedules', 'notifications', 'journal-vouchers', 'audit', 'period-end', 'bank-reconciliation',
   // go-live data workbench (Master > Go-Live Data Load, migration 0243): System Administrator only
   'data-load'];
-// write:receipts (official receipts, cash posting, payment verification) is Accounting-only: segregation of duties.
+// write:receipts (official receipts, cash posting, payment verification) is Accounting's (TISPH: Cash Control's), never
+// the front office's: segregation of duties.
 // Least privilege: the receipt register (read:receipts) is Accounting's; Sales and Operations see a policy's
 // payments through read:policies. Claims officers read the lead through the policy, not the lead register.
 // The System Administrator holds every permission (granted below), so it has no entry here.
@@ -70,8 +86,53 @@ for (const [role, items] of Object.entries(DISTRIBUTION_PERMS)) ROLE_PERMS[role]
 // Processing Team reads the timelines of the prospects and quotations it works on.
 const SALES_ACTIVITY_PERMS = { sales: ['sales-activities'], operations: ['sales-activities'], processing: ['sales-activities:read'] };
 for (const [role, items] of Object.entries(SALES_ACTIVITY_PERMS)) ROLE_PERMS[role].push(...items);
+// Approvals of the front office (permissions of migration 0348): approving a quotation, the check of a placement
+// against the slip, renewal terms and claim decisions. The approver is never the maker (maker-checker in the services).
+const APPROVAL_PERMS = { sales: ['quotations:approve', 'policies:approve', 'renewals:approve'], processing: ['quotations:approve', 'policies:approve', 'renewals:approve'],
+  operations: ['quotations:approve', 'policies:approve', 'renewals:approve'], claims: ['claims:approve'] };
+for (const [role, items] of Object.entries(APPROVAL_PERMS)) ROLE_PERMS[role].push(...items);
+
+// TISPH personas (RBAC v4 screen matrix, migration 0348). Screen rights map to module permissions: C/U -> write,
+// R -> read, A -> approve where the module has an approval. Sales and Operations both raise quotations, placements,
+// policies, endorsements and renewals; Officers and Unit Heads approve another user's (Operations: Unit Head only).
+const TIS_COMMON = ['profile', 'notifications', 'reports:read', 'masters:read'];
+const TIS_FRONT_READS = ['products:read', 'channels:read', 'motor-programmes:read', 'commission:read', 'remittance:read', 'incentive:read', 'collections:read', 'receipts:read',
+  'integrations:read', 'schedules:read'];
+const TIS_MAKER = ['quotations', 'policies', 'endorsements', 'renewals', 'fleet', 'marine', 'pii:view'];
+const TIS_FRONT_APPROVALS = ['quotations:approve', 'policies:approve', 'renewals:approve'];
+const TIS_SALES = [...TIS_COMMON, ...TIS_FRONT_READS, ...TIS_MAKER, 'leads', 'clients', 'sales-activities', 'privacy', 'claims:read'];
+const TIS_OPS = [...TIS_COMMON, ...TIS_FRONT_READS, ...TIS_MAKER, 'claims', 'leads:read', 'clients:read', 'sales-activities:read', 'lead-assignment:read', 'privacy:read'];
+const TIS_CCD = [...TIS_COMMON, 'receipts'];
+const TIS_ACCOUNTING_READS = ['disbursements:read', 'journal-vouchers:read', 'payables:read', 'fixed-assets:read'];
+const TIS_BUSINESS_READS = ['leads:read', 'clients:read', 'quotations:read', 'policies:read', 'endorsements:read', 'renewals:read', 'claims:read'];
+Object.assign(ROLE_PERMS, {
+  'tis-sales-associate': [...TIS_SALES, 'lead-assignment:read', 'campaigns:read'],
+  'tis-sales-officer': [...TIS_SALES, ...TIS_FRONT_APPROVALS, 'lead-assignment', 'campaigns'],
+  'tis-sales-unit-head': [...TIS_SALES, ...TIS_FRONT_APPROVALS, 'lead-assignment', 'campaigns', 'incentive', 'disbursements:read', 'payables:read', 'payables:approve'],
+  'tis-ops-associate': [...TIS_OPS],
+  'tis-ops-officer': [...TIS_OPS, 'journal-vouchers:read', 'fixed-assets:read'],
+  'tis-ops-unit-head': [...TIS_OPS, ...TIS_FRONT_APPROVALS, 'claims:approve', ...TIS_ACCOUNTING_READS, 'payables:approve'],
+  'tis-ccd-pdu': [...TIS_CCD],
+  'tis-ccd-pdc': [...TIS_CCD, 'collections:read', 'remittance:read', 'bank-reconciliation:read'],
+  'tis-ccd-bp': [...TIS_CCD, 'collections', 'remittance:read', 'bank-reconciliation:read'],
+  // insurer statement reconciliation is prepared under write:remittance (see the role guide)
+  'tis-ccd-recon': [...TIS_CCD, 'collections', 'remittance', 'insurer-reconciliation:approve', 'bank-reconciliation', 'disbursements:read'],
+  // commission and remittance runs: Finance (the v4 matrix gives that screen no maker; see the role guide)
+  'tis-finance': [...TIS_COMMON, ...TIS_BUSINESS_READS, 'collections:read', 'receipts:read', 'incentive:read', 'products:read', 'channels:read', 'motor-programmes:read',
+    'integrations:read', 'schedules:read', 'audit:read', 'pii:view', 'commission', 'remittance', 'disbursements', 'journal-vouchers', 'payables', 'payables:approve', 'fixed-assets',
+    'period-end', 'period-end:approve', 'bank-reconciliation', 'bank-reconciliation:approve', 'posting-rules:write', 'posting-rules:approve', 'credit-control:approve'],
+  'tis-it-admin': ['profile', 'notifications', 'reports:read', ...TIS_BUSINESS_READS, 'collections:read', 'receipts:read', 'remittance:read', 'commission:read', 'incentive:read',
+    ...TIS_ACCOUNTING_READS, 'masters', 'channels', 'products', 'motor-programmes', 'premium-charges:write', 'users', 'roles', 'access-control', 'access-control:approve', 'settings',
+    'integrations', 'schedules', 'audit:read'],
+  'tis-general-manager': [...TIS_COMMON, ...TIS_FRONT_READS, ...TIS_MAKER, ...TIS_FRONT_APPROVALS, 'leads', 'clients', 'claims', 'claims:approve', 'sales-activities',
+    'lead-assignment', 'campaigns', 'privacy:read', ...TIS_ACCOUNTING_READS, 'payables:approve', 'bank-reconciliation:read', 'period-end:read', 'audit:read', 'users:read',
+    'roles:read', 'access-control:read'],
+});
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
-const ROLE_INHERITS = { 'accounting-manager': ['accounting'] };
+const ROLE_INHERITS = { 'accounting-manager': ['accounting'], 'tis-superid': ['system-admin'] };
+/** The permission codes of a ROLE_PERMS entry: "module" is read and write, "module:action" that one permission. */
+export const permissionCodes = (items) => [...new Set(items.flatMap((i) => (i.includes(':') ? [`${i.split(':')[1]}:${i.split(':')[0]}`] : [`read:${i}`, `write:${i}`])))];
+export const ROLE_PERMISSIONS = Object.fromEntries(Object.entries(ROLE_PERMS).map(([role, items]) => [role, permissionCodes(items)]));
 
 /**
  * Whether the demo / sample seed files run (SEED_SAMPLE_DATA). An explicit value wins ("true"/"1"/"yes"/"on" or
@@ -109,10 +170,7 @@ export async function seed({ log = console.log, sampleData } = {}) {
     for (const c of codes) if (permIds[c]) await query('INSERT INTO role_permissions(role_id, permission_id) VALUES ($1,$2) ON CONFLICT DO NOTHING', [roleIds[role], permIds[c]]);
   };
   await grant('system-admin', Object.keys(permIds));
-  for (const [role, items] of Object.entries(ROLE_PERMS)) {
-    const codes = items.flatMap((i) => (i.includes(':') ? [`${i.split(':')[1]}:${i.split(':')[0]}`] : [`read:${i}`, `write:${i}`]));
-    await grant(role, codes);
-  }
+  for (const [role, codes] of Object.entries(ROLE_PERMISSIONS)) await grant(role, codes);
   for (const [role, inherits] of Object.entries(ROLE_INHERITS)) await query('UPDATE roles SET inherits = $2 WHERE code = $1', [role, inherits]);
   // First administrator. The password comes from ADMIN_PASSWORD; without it a random one is generated and shown once.
   // An existing administrator keeps the password it has.

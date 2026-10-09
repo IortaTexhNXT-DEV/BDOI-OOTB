@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import { config } from '../../config.js';
+import { hasPermission } from '../../lib/auth.js';
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { notFound, badRequest, forbidden, conflict } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
@@ -144,7 +145,7 @@ export async function deleteQuote(id, userId) {
   return q;
 }
 
-/** Status change following quotations.transitions (API labels). Approval is maker-checker when enabled. */
+/** Status change following quotations.transitions (API labels). Approval needs approve:quotations and is maker-checker when enabled. */
 export async function changeStatus(id, label, user) {
   const q = await getQuoteRow(id);
   const target = quoteStatusIn(label);
@@ -154,6 +155,7 @@ export async function changeStatus(id, label, user) {
   const transitions = await getSetting('quotations.transitions', {});
   if (!(transitions[from] || []).includes(to)) throw badRequest(`Cannot change a ${from} quotation to ${to}`);
   if (to === 'Approved') assertReferralCleared(q, 'approval');
+  if (to === 'Approved' && !hasPermission(user, 'approve:quotations')) throw forbidden('Requires permission: approve:quotations');
   if (to === 'Approved' && await getSetting('workflow.quote_maker_checker', true) && q.created_by === user.id) {
     throw forbidden('Maker-checker: the approver must be different from the user who created the quotation');
   }
