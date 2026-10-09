@@ -1,5 +1,6 @@
 /**
- * One screen per setting: System Settings owns the branding, display currency, language and application name; the
+ * One screen per setting: System Settings owns the display currency and language; the branding and the application
+ * name come from the brand pack, with the e-mail and document sections on their layout screens; the
  * Company master owns the legal identity (name, TIN, registered address, print logo) and the BIR forms read it from
  * the primary company; Premium Taxes & LGU Rates owns the premium tax rates. The generic configuration endpoints
  * refuse those keys, and the retired taxation master can no longer write tax.* settings.
@@ -14,6 +15,8 @@ import { clearSettingsCache, getSetting } from '../src/lib/settings.js';
 import { clearLetterheadCache } from '../src/lib/letterhead.js';
 import { settingOwner } from '../src/lib/settingOwners.js';
 
+const BRANDING = 'the brand pack (BRAND_PACK) and Master > System Configuration > E-mail Layout / Documents and Reports Layout';
+
 const MIGRATIONS = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src', 'db', 'migrations');
 let ctx;
 beforeAll(async () => { ctx = await setup(); });
@@ -23,8 +26,8 @@ const value = async (key) => (await one('SELECT value FROM app_settings WHERE ke
 
 describe('settings owned by another screen', () => {
   it('names the owning screen of each key', () => {
-    expect(settingOwner('branding.primary_color').screen).toBe('Master > System Settings');
-    expect(settingOwner('general.system_name').screen).toBe('Master > System Settings');
+    expect(settingOwner('branding.primary_color').screen).toBe(BRANDING);
+    expect(settingOwner('general.system_name').screen).toBe(BRANDING);
     expect(settingOwner('currency.default').screen).toBe('Master > System Settings');
     expect(settingOwner('bir.withholding_agent_tin').screen).toBe('Master > Company');
     expect(settingOwner('documents.default_logo_path').screen).toBe('Master > Company');
@@ -34,9 +37,9 @@ describe('settings owned by another screen', () => {
 
   it('PUT /settings refuses owned keys with the owning screen, and saves nothing of the request', async () => {
     const cases = [
-      ['branding.primary_color', '#123456', 'Master > System Settings'],
+      ['branding.primary_color', '#123456', BRANDING],
       ['general.default_language', 'fil', 'Master > System Settings'],
-      ['general.system_name', 'Other name', 'Master > System Settings'],
+      ['general.system_name', 'Other name', BRANDING],
       ['general.company_name', 'Another Corp.', 'Master > Company'],
       ['bir.withholding_agent_tin', '111-222-333-000', 'Master > Company'],
       ['tax.vat_rate', 0.1, 'Master > Finance > Premium Taxes & LGU Rates'],
@@ -70,7 +73,7 @@ describe('settings owned by another screen', () => {
   it('GET /settings and the configuration catalogue tell the screen where an owned key is changed', async () => {
     const rows = (await ctx.api('get', '/settings?group=branding')).body.data;
     expect(rows.find((s) => s.key === 'branding.logo_url')).toMatchObject({
-      label: 'Application logo (screen)', managedBy: { screen: 'Master > System Settings', path: '/master/configuration/system-settings' },
+      label: 'Application logo (screen)', managedBy: { screen: BRANDING, path: '/master/configuration/documents-layout' },
     });
     const general = (await ctx.api('get', '/settings?group=general')).body.data;
     expect(general.find((s) => s.key === 'general.company_name').managedBy.path).toBe('/master/generals/organization/companymaster');

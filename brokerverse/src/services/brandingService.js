@@ -1,6 +1,7 @@
 /**
- * Theme and Branding (Master > System Settings > Theme and Branding) and e-signatures: the theme editor, branding
- * images, sample document / e-mail, brand packs, signature capture and the document signature mapping.
+ * Branding and e-signatures: the theme of the environment (its e-mail and document sections are edited on
+ * Master > System Configuration > E-mail Layout and Documents and Reports Layout), sample document / e-mail, printable
+ * documents, signature capture and the document signature mapping (Document Signatures).
  */
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
@@ -40,29 +41,9 @@ const brandingService = {
   printEndorsement: async (id) => openPdf(await fetch(`${BASE_URL}/endorsements/${encodeURIComponent(id)}/pdf`, { headers: headers() })),
   getEditor: async () => json(await fetch(`${BASE_URL}/branding/theme`, { headers: headers() }), "Failed to load the theme"),
   validate: async (theme) => json(await fetch(`${BASE_URL}/branding/theme/validate`, send("POST", { theme })), "Failed to check the theme"),
-  save: async (theme, systemName) => json(await fetch(`${BASE_URL}/branding/theme`, send("PUT", { theme, systemName })), "Failed to save the theme"),
-  uploadImage: async (asset, file) => {
-    const form = new FormData();
-    form.append("file", file);
-    return json(await fetch(`${BASE_URL}/branding/upload/${asset}`, { method: "POST", headers: headers(), body: form }), "Upload failed");
-  },
-  resetImage: async (asset) => json(await fetch(`${BASE_URL}/branding/upload/${asset}`, { method: "DELETE", headers: headers() }), "Reset failed"),
+  save: async (theme) => json(await fetch(`${BASE_URL}/branding/theme`, send("PUT", { theme })), "Failed to save the theme"),
   previewDocument: async (theme) => blob(await fetch(`${BASE_URL}/branding/preview-document?lenient=1`, send("POST", { theme })), "Sample document failed"),
   previewEmail: async (theme) => json(await fetch(`${BASE_URL}/branding/preview-email`, send("POST", { theme })), "Sample e-mail failed"),
-  exportPack: async (format = "zip") => blob(await fetch(`${BASE_URL}/branding/brand-pack?format=${format}`, { headers: headers() }), "Export failed"),
-  importPack: async (file, { dryRun = false, applyDocumentLogo = true, applySystemName = true } = {}) => {
-    const form = new FormData();
-    form.append("file", file);
-    form.append("applyDocumentLogo", String(applyDocumentLogo));
-    form.append("applySystemName", String(applySystemName));
-    return json(await fetch(`${BASE_URL}/branding/brand-pack?dryRun=${dryRun ? "true" : "false"}`, { method: "POST", headers: headers(), body: form }), "Import failed");
-  },
-  // bundled brand packs (shipped with the product, enabled on the screen with the trademark acknowledgement)
-  bundledPacks: async () => json(await fetch(`${BASE_URL}/branding/packs/bundled`, { headers: headers() }), "Failed to load the bundled brand packs"),
-  checkBundledPack: async (id) => json(await fetch(`${BASE_URL}/branding/packs/bundled/${encodeURIComponent(id)}/check`, send("POST", {})), "Check failed"),
-  enableBundledPack: async (id, { acknowledgedPermission = false, applyDocumentLogo = true, applySystemName = true } = {}) =>
-    json(await fetch(`${BASE_URL}/branding/packs/bundled/${encodeURIComponent(id)}/enable`, send("POST", { acknowledgedPermission: acknowledgedPermission === true, applyDocumentLogo, applySystemName })), "Enable failed"),
-  resetDefaultBranding: async () => json(await fetch(`${BASE_URL}/branding/packs/reset-default`, send("POST", {})), "Reset failed"),
 
   // e-signatures
   consent: async (ownerType, ownerId) => json(await fetch(`${BASE_URL}/e-signatures/consent?ownerType=${ownerType}&ownerId=${encodeURIComponent(ownerId || "")}`, { headers: headers() }), "Failed to load the consent statement"),

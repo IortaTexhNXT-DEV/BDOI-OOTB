@@ -91,7 +91,7 @@ export async function updateSystemSettings(body, userId) {
   }
   if (errors.length) throw badRequest('Validation failed', errors);
   for (const [k, v] of Object.entries(changes)) await setSetting(k, v, userId);
-  // a saved broker theme (Theme and Branding) owns the colours: the two colour fields of this screen update it
+  // a saved broker theme (branding.theme) owns the colours: the two colour fields update it
   const theme = await getSetting('branding.theme', null);
   const lower = (v) => String(v || '').toLowerCase();
   const p = changes['branding.primary_color'] && lower(changes['branding.primary_color']) !== lower(theme?.colors?.primary) ? changes['branding.primary_color'] : null;

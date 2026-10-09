@@ -2,7 +2,7 @@
  * Bundled brand packs: packs that ship with the product under backend/assets/brand-packs/<id>/ (manifest.json with
  * the pack's identity and trademark terms, theme.json and the images it names, built the same way as a brand pack
  * folder of docs/package/04_Onboarding_and_Go_Live/Brand_Packs). None is applied by default: a System Administrator
- * enables one on Master > System Settings > Theme and Branding > Brand packs after acknowledging that the environment
+ * enables one through the API (POST /branding/packs/bundled/:id/enable) after acknowledging that the environment
  * belongs to the client engagement whose contract with iorta TechNXT covers the use of the marks the pack carries. The enablement is recorded (who, when, the
  * acknowledgement, the branding before it) so the broker can go back to the iorta TechNXT default at any time.
  * A deployment made for that client may name its pack in BRAND_PACK instead: the API enables it once at start-up

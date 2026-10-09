@@ -60,50 +60,6 @@ export const saveSystemSettings = createAsyncThunk(
   }
 );
 
-export const uploadSystemAsset = createAsyncThunk(
-  "systemSettings/upload",
-  async ({ field, file, applyOptions = {} }, { rejectWithValue }) => {
-    try {
-      const data = await systemSettingsService.uploadAsset(field, file);
-      applySystemSettings(data, applyOptions);
-      return data;
-    } catch (error) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
-
-export const addLogoPreset = createAsyncThunk(
-  "systemSettings/addLogoPreset",
-  async ({ label, url, file, setActive = true, applyOptions = {} }, { rejectWithValue }) => {
-    try {
-      const data = await systemSettingsService.addLogoPreset({
-        label,
-        url,
-        file,
-        setActive,
-      });
-      applySystemSettings(data, applyOptions);
-      return data;
-    } catch (error) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
-
-export const removeLogoPreset = createAsyncThunk(
-  "systemSettings/removeLogoPreset",
-  async ({ id, applyOptions = {} }, { rejectWithValue }) => {
-    try {
-      const data = await systemSettingsService.removeLogoPreset(id);
-      applySystemSettings(data, applyOptions);
-      return data;
-    } catch (error) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
-
 const initialState = {
   ...DEFAULT_SYSTEM_SETTINGS,
   logoPresets: mapLogoPresets(),
@@ -147,42 +103,6 @@ const systemSettingsSlice = createSlice({
         applyPayloadToState(state, action.payload);
       })
       .addCase(saveSystemSettings.rejected, (state, action) => {
-        state.saving = false;
-        state.error = action.payload;
-      })
-      .addCase(uploadSystemAsset.pending, (state) => {
-        state.saving = true;
-        state.error = null;
-      })
-      .addCase(uploadSystemAsset.fulfilled, (state, action) => {
-        state.saving = false;
-        applyPayloadToState(state, action.payload);
-      })
-      .addCase(uploadSystemAsset.rejected, (state, action) => {
-        state.saving = false;
-        state.error = action.payload;
-      })
-      .addCase(addLogoPreset.pending, (state) => {
-        state.saving = true;
-        state.error = null;
-      })
-      .addCase(addLogoPreset.fulfilled, (state, action) => {
-        state.saving = false;
-        applyPayloadToState(state, action.payload);
-      })
-      .addCase(addLogoPreset.rejected, (state, action) => {
-        state.saving = false;
-        state.error = action.payload;
-      })
-      .addCase(removeLogoPreset.pending, (state) => {
-        state.saving = true;
-        state.error = null;
-      })
-      .addCase(removeLogoPreset.fulfilled, (state, action) => {
-        state.saving = false;
-        applyPayloadToState(state, action.payload);
-      })
-      .addCase(removeLogoPreset.rejected, (state, action) => {
         state.saving = false;
         state.error = action.payload;
       });

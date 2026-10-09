@@ -70,7 +70,9 @@ import AddAccountDetail from "../module/FinanceMastersModule/BankMaster/AccountD
 import ViewAccountDetail from "../module/FinanceMastersModule/BankMaster/AccountDataView/ViewAccountData";
 import EditAccountDetail from "../module/FinanceMastersModule/BankMaster/AccountDataView/EditAccountData";
 import SystemSettingsPage from "../module/SystemSettings";
-import ThemeBrandingPage from "../module/ThemeBranding";
+import EmailLayoutPage from "../module/DocumentLayouts/EmailLayout";
+import DocumentsLayoutPage from "../module/DocumentLayouts/DocumentsLayout";
+import DocumentSignaturesPage from "../module/DocumentLayouts/DocumentSignatures";
 import ConfigurationPage from "../module/Administration/Configuration";
 import SchedulesPage from "../module/Administration/Schedules";
 import DocumentNumberingPage from "../module/Administration/DocumentNumbering";
@@ -911,7 +913,9 @@ const Maincomponent = () => {
             path="master/configuration/system-settings"
             element={<SystemSettingsPage />}
           />
-          <Route path="master/configuration/theme-branding" element={<ThemeBrandingPage />} />
+          <Route path="master/configuration/email-layout" element={<EmailLayoutPage />} />
+          <Route path="master/configuration/documents-layout" element={<DocumentsLayoutPage />} />
+          <Route path="master/configuration/document-signatures" element={<DocumentSignaturesPage />} />
           <Route path="master/configuration/settings" element={<ConfigurationPage />} />
           <Route path="master/configuration/schedules" element={<SchedulesPage />} />
           <Route path="master/configuration/document-numbering" element={<DocumentNumberingPage />} />

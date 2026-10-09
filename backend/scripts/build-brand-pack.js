@@ -1,6 +1,6 @@
 /**
  * Build an importable brand pack (.brandpack.zip) from a brand pack folder: theme.json plus the image files it names.
- * The zip is what Master > System Settings > Theme and Branding > Import brand pack takes.
+ * The zip is what the brand pack import (POST /api/branding/brand-pack) takes.
  *
  *   node scripts/build-brand-pack.js ../docs/package/04_Onboarding_and_Go_Live/Brand_Packs/toyota-insurance-services
  *

@@ -1460,7 +1460,28 @@ export const menuList = [
             id: 0,
             name: "System Settings",
             path: "/master/configuration/system-settings",
-            includes: ["/master/configuration/system-settings", "/master/configuration/theme-branding"],
+            includes: ["/master/configuration/system-settings"],
+          },
+          {
+            // the layout of every e-mail the system sends
+            id: 25,
+            name: "E-mail Layout",
+            path: "/master/configuration/email-layout",
+            includes: ["/master/configuration/email-layout"],
+          },
+          {
+            // print colours, logo, footer lines and Excel header of the documents and report files
+            id: 26,
+            name: "Documents and Reports Layout",
+            path: "/master/configuration/documents-layout",
+            includes: ["/master/configuration/documents-layout"],
+          },
+          {
+            // which signature prints on which document
+            id: 27,
+            name: "Document Signatures",
+            path: "/master/configuration/document-signatures",
+            includes: ["/master/configuration/document-signatures"],
           },
           {
             id: 20,

@@ -70,9 +70,9 @@ async function displayNameOf(user) {
 /**
  * What every printed document needs besides its content: { letterhead, format, generatedAt, generatedBy,
  * accentColor, brand }. The one branding source of every print: the letterhead (primary company of Master > Company:
- * logo, legal name, TIN, IC licence, address) and the document branding of the theme (Master > System Settings >
- * Theme and Branding: colours, footer line, logo size). The user defaults to the signed-in user of the current request.
- * `theme` prints with a theme that is not saved (the theme editor's sample document).
+ * logo, legal name, TIN, IC licence, address) and the document branding of the theme (Master > System
+ * Configuration > Documents and Reports Layout: colours, footer line, logo size). The user defaults to the signed-in
+ * user of the current request. `theme` prints with a theme that is not saved (the sample document of that screen).
  */
 export async function printContext({ user, theme = null } = {}) {
   const format = await printFormat();

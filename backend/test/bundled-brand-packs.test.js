@@ -1,5 +1,5 @@
 /**
- * Bundled brand packs (Master > System Settings > Theme and Branding > Brand packs > Bundled packs): the Toyota
+ * Bundled brand packs (API /branding/packs/bundled and BRAND_PACK): the Toyota
  * Insurance Services pack ships with the product but is never on by default; a System Administrator enables it after
  * acknowledging the client engagement whose contract covers the marks, the enablement is recorded and audited, and Back to default returns
  * the environment to the iorta TechNXT branding. A deployment for the client may name the pack in BRAND_PACK: the API
