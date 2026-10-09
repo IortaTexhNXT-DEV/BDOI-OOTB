@@ -60,6 +60,16 @@ describe("TISPH roles (RBAC v4): menus", () => {
     expect(helpSectionFor("/master/insurance/reason-codes").id).toBe("lead-sources-and-reason-codes");
   });
 
+  it("shows a persona only the screens its permissions open: no campaigns for Operations, no maker or unread screens for IT", () => {
+    const ops = ["tis-ops-associate", "tis-ops-officer", "tis-ops-unit-head"];
+    expect(ops.filter((role) => isPathAllowed("/sales/campaigns", menuList, [role]))).toEqual([]);
+    expect(ops.filter((role) => !isPathAllowed("/sales/activities", menuList, [role]) || !isPathAllowed("/operations/fleet-schedules", menuList, [role]))).toEqual([]);
+    expect(isPathAllowed("/sales/campaigns", menuList, ["tis-sales-officer"])).toBe(true);
+    expect(["/sales/quick-quote", "/sales/campaigns", "/sales/activities", "/operations/fleet-schedules", "/operations/open-covers"]
+      .filter((p) => isPathAllowed(p, menuList, ["tis-it-admin"]))).toEqual([]);
+    expect(["/agent/leadlisting", "/agent/Quotation", "/agent/clientlisting", "/agent/policy", "/agent/claim"].filter((p) => !isPathAllowed(p, menuList, ["tis-it-admin"]))).toEqual([]);
+  });
+
   it("System Configuration offers the e-mail and document layouts and the signatures, without the theme editor or Data Privacy", () => {
     const master = menuList.find((m) => m.name === "Master");
     const system = master.submenu.find((s) => s.name === "System Configuration").submenu.map((i) => i.name);

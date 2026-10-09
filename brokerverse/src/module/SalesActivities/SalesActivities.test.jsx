@@ -57,6 +57,15 @@ describe("activities of a prospect, quotation or client", () => {
     expect(screen.queryByRole("button", { name: "Log activity" })).not.toBeInTheDocument();
   });
 
+  it("shows nothing and calls nothing for a role that does not read the activities (the IT administrator on a client)", () => {
+    localStorage.setItem("USER_ROLES", JSON.stringify(["tis-it-admin"]));
+    localStorage.setItem("USER_PERMISSIONS", JSON.stringify(["read:clients", "read:leads"]));
+    const { container } = render(<ActivityPanel entity="client" recordId="cl_1" />);
+    expect(container).toBeEmptyDOMElement();
+    expect(service.timeline).not.toHaveBeenCalled();
+    expect(service.options).not.toHaveBeenCalled();
+  });
+
   it("lists the activities and the report by account executive", async () => {
     service.list.mockResolvedValue([ACTIVITY]);
     service.report.mockResolvedValue({ from: "2026-10-01", to: "2026-10-31", totals: { activities: 1, accountExecutives: 1, positive: 1, followUpsOpen: 1, followUpsOverdue: 0 },

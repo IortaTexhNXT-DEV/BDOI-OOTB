@@ -165,11 +165,17 @@ export const roleMenuPermissions = {
 const TIS_CASH_REPORTS = ["All Reports", "Financial Reports > SOA/Premium Receivable", "Financial Reports > Collection Report"];
 const TIS_CCD = (accounts) => ({ "my work": true, operations: ["Payments"], accounts, reports: TIS_CASH_REPORTS });
 const TIS_SALES = { ...roleMenuPermissions.sales, accounts: ["Receipts", "Collections"] };
+// Sales & Marketing item by item, for the personas that lack the permission of some of its screens
+const SALES_MARKETING = ["Prospects", "Quick Quote", "Request for Quotation", "Quotations", "Placement Slips", "Lead Assignment", "Dealer Programmes",
+  "Comparison Reports", "Campaigns", "Sales Activities"];
+const salesMarketingWithout = (...left) => SALES_MARKETING.filter((item) => !left.includes(item)).map((item) => `Sales & Marketing > ${item}`);
+const operationsWithout = (...left) => OPERATIONS_ALL.filter((item) => item !== "Sales & Marketing" && !left.includes(item));
 const TIS_OPERATIONS = {
   dashboard: ["Executive Dashboard", "Processing Dashboard", "Claims Dashboard"],
   "product configurator": ["Dashboard", "Product Templates"],
   "my work": true,
-  operations: [...OPERATIONS_ALL, "Claim Documents", "Motor Claim Repairs"],
+  // campaigns are Sales' (read:campaigns)
+  operations: [...operationsWithout(), ...salesMarketingWithout("Campaigns"), "Claim Documents", "Motor Claim Repairs"],
   accounts: ["Receipts", "Collections"],
   reports: ["All Reports", "Operational Reports", "Report Builder"],
   master: ["Insurance Management > Distribution Channels", "Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops"],
@@ -194,7 +200,9 @@ Object.assign(roleMenuPermissions, {
   "tis-it-admin": {
     dashboard: ["Executive Dashboard"],
     "my work": true,
-    operations: OPERATIONS_ALL,
+    // reads the business registers; not the quick quote (write:quotations), campaigns, sales activities, fleet schedules
+    // and open covers (read:campaigns, read:sales-activities, read:fleet, read:marine)
+    operations: [...operationsWithout("Fleet Schedules", "Marine Open Covers"), ...salesMarketingWithout("Quick Quote", "Campaigns", "Sales Activities")],
     accounts: ["Receipts", "Collections", "Post-Dated Cheques", "Disbursement", "Journal Voucher", "Payables", "Fixed Assets", "Remittance"],
     commission: ["Commission Dashboard"],
     reports: ["All Reports", "Operational Reports", "Financial Reports"],
