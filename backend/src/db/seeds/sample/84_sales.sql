@@ -59,8 +59,9 @@ CREATE OR REPLACE FUNCTION pg_temp.smp_comm_rate(p_insurer text, p_product text)
   FROM insurance_companies ic, products pr WHERE ic.code = p_insurer AND pr.code = p_product $$;
 
 -- ---------- Prospects ----------
--- Toyota Financial Services refers most prospects (channel TFS, with the loan and the dealer in the notes); two are not
--- yet tagged with a product. Lead sources are those of Master > Insurance Management > Lead Sources.
+-- Toyota Financial Services refers the prospects (channel TFS, with the loan and the dealer in the notes) but for a
+-- walk-in at a Toyota showroom and an agent's referral; two are not yet tagged with a product. Lead sources are those of
+-- Master > Insurance Management > Lead Sources.
 INSERT INTO leads(id, lead_number, lead_type, first_name, last_name, preferred_name, company_name, display_name, email, phone, birth_date, gender,
   house_no, barangay, city, state, country, postal_code, lead_category, lob, product_interest, product_id, source, status, notes, channel_id, branch_code,
   owner_user_id, created_by, created_at, updated_at)
@@ -76,24 +77,24 @@ FROM (VALUES
  ('ld_sls_03','95003','Rafael','Navarro',NULL,'rafael.navarro@example.ph','+639171110003',41,'Male','22 Gorordo Ave.','Lahug','Cebu City','Cebu','6000','MOTOR','MOTOR','Used-Cars - SCR','Converted',140,'ch_seed_tfs_ceb','agent.agarcia','TFS loan TFS-2504733, Hilux (own goods) from Toyota Cebu'),
  ('ld_sls_04','95004',NULL,NULL,'Kalayaan Foods Distribution Corp.','fleet@kalayaanfoods.example.ph','+63288110004',0,NULL,'101 Shaw Blvd.','Kapitolyo','Pasig','Metro Manila','1603','MOTOR','MOTOR','Company Car','Converted',120,'ch_seed_tfs_hq','agent.jdelacruz','Company cars financed by TFS (fleet account TFS-F-26018), Innova from Toyota Pasig'),
  ('ld_sls_05','95005','Bianca','Lorenzo',NULL,'bianca.lorenzo@example.ph','+639171110005',37,'Female','5 Molino Blvd.','Molino','Bacoor','Cavite','4102','MOTOR','MOTOR','Promo','Converted',95,'ch_seed_tfs_hq','agent.preyes','TFS loan TFS-2604855, Vios from Toyota Alabang'),
- ('ld_sls_06','95006',NULL,NULL,'Visayas Cold Chain Inc.','hr@visayascold.example.ph','+63322340006',0,NULL,'Pier 3 Rd.','Banilad','Mandaue','Cebu','6014','ACCIDENT','GPA','Corporate','Converted',70,NULL,'agent.agarcia','Group PA for 30 delivery drivers and helpers'),
+ ('ld_sls_06','95006',NULL,NULL,'Visayas Cold Chain Inc.','hr@visayascold.example.ph','+63322340006',0,NULL,'Pier 3 Rd.','Banilad','Mandaue','Cebu','6014','ACCIDENT','GPA','Corporate','Converted',70,'ch_seed_tfs_ceb','agent.agarcia','TFS Cebu fleet account TFS-F-25031 (12 Hilux units); group PA for 30 delivery drivers and helpers'),
  ('ld_sls_07','95007','Paolo','Fernandez',NULL,'paolo.fernandez@example.ph','+639171110007',45,'Male','3 Iznart St.','Jaro','Iloilo City','Iloilo','5000','MOTOR','MOTOR','Redemption','Converted',45,'ch_seed_tfs_hq','agent.msantos','TFS loan TFS-2104966 fully paid; OR/CR released, own cover from now on'),
- ('ld_sls_08','95008','Angela','Ramos',NULL,'angela.ramos@example.ph','+639171110008',31,'Female','77 Lacson St.','Mandalagan','Bacolod','Negros Occidental','6100','ACCIDENT','PA','Walk-In','Converted',20,NULL,'agent.preyes',NULL),
+ ('ld_sls_08','95008','Angela','Ramos',NULL,'angela.ramos@example.ph','+639171110008',31,'Female','77 Lacson St.','Mandalagan','Bacolod','Negros Occidental','6100','ACCIDENT','PA','Bundling','Converted',20,'ch_seed_tfs_ceb','agent.preyes','TFS borrower (loan TFS-2603412, Vios); personal accident with the TFS Borrower Protect offer'),
  ('ld_sls_09','95009','Dennis','Castillo',NULL,'dennis.castillo@example.ph','+639171110009',38,'Male','19 Ayala Ave.','San Lorenzo','Makati','Metro Manila','1223','MOTOR','MOTOR','Bundling','QuoteGenerated',12,'ch_seed_tfs_hq','agent.jdelacruz','TFS loan application TFS-2605077, Vios from Toyota Makati'),
  ('ld_sls_10','95010','Jasmine','Villareal',NULL,'jasmine.villareal@example.ph','+639171110010',27,'Female','2 Aurora Blvd.','Cubao','Quezon City','Metro Manila','1109','MOTOR','MOTOR','Promo','QuoteGenerated',10,'ch_seed_tfs_hq','agent.msantos','TFS loan TFS-2605088, Fortuner from Toyota Quezon Avenue'),
  ('ld_sls_11','95011',NULL,NULL,'Pampanga Agri-Supply Trading Inc.','finance@pampangaagri.example.ph','+63459610011',0,NULL,'Km 67 MacArthur Hwy.','Dolores','San Fernando','Pampanga','2000','MOTOR','MOTOR','Corporate','QuoteGenerated',9,'ch_seed_tfs_hq','agent.jdelacruz','Delivery pick-up financed by TFS (TFS-2605099)'),
- ('ld_sls_12','95012','Enrique','Tolentino',NULL,'enrique.tolentino@example.ph','+639171110012',52,'Male','40 Balibago Rd.','Balibago','Santa Rosa','Laguna','4026','MOTOR','MOTOR','Bundling','QuoteGenerated',7,'ch_seed_tal_alb','agent.preyes','Toyota Alabang sale TAL-SI-26-0412 financed by TFS (TFS-2605110)'),
- ('ld_sls_13','95013','Camille','Robles',NULL,'camille.robles@example.ph','+639171110013',33,'Female','11 Taft Ave.','Malate','Manila','Metro Manila','1004','MOTOR','MOTOR','Social Media / Website','QuoteGenerated',5,NULL,'agent.msantos','Cash buyer, Vios'),
- ('ld_sls_14','95014',NULL,NULL,'Davao Agro Processing Corp.','hr@davaoagro.example.ph','+63822270014',0,NULL,'8 Quirino Ave.','Poblacion District','Davao City','Davao del Sur','8000','ACCIDENT','GPA','Corporate','QuoteGenerated',4,NULL,'agent.jmartinez','Group PA for 60 plant workers'),
+ ('ld_sls_12','95012','Enrique','Tolentino',NULL,'enrique.tolentino@example.ph','+639171110012',52,'Male','40 Balibago Rd.','Balibago','Santa Rosa','Laguna','4026','MOTOR','MOTOR','Walk-In','QuoteGenerated',7,'ch_seed_tal_alb','agent.preyes','Walk-in buyer at the Toyota Alabang showroom, sale TAL-SI-26-0412 (TFS loan TFS-2605110) uploaded by the dealer'),
+ ('ld_sls_13','95013','Camille','Robles',NULL,'camille.robles@example.ph','+639171110013',33,'Female','11 Taft Ave.','Malate','Manila','Metro Manila','1004','MOTOR','MOTOR','Promo','QuoteGenerated',5,'ch_seed_tfs_hq','agent.msantos','TFS loan TFS-2605166, Vios from Toyota Makati'),
+ ('ld_sls_14','95014',NULL,NULL,'Davao Agro Processing Corp.','hr@davaoagro.example.ph','+63822270014',0,NULL,'8 Quirino Ave.','Poblacion District','Davao City','Davao del Sur','8000','ACCIDENT','GPA','Corporate','QuoteGenerated',4,'ch_seed_tfs_hq','agent.jmartinez','TFS fleet account TFS-F-26044 (6 Hilux units); group PA for 60 plant workers'),
  ('ld_sls_15','95015','Ricardo','Salazar',NULL,'ricardo.salazar@example.ph','+639171110015',48,'Male','6 Rizal St.','Santo Rosario','Malolos','Bulacan','3000','MOTOR','MOTOR','Bundling','New',2,'ch_seed_tfs_hq','agent.jdelacruz','TFS loan application TFS-2605121, Fortuner from Toyota Quezon Avenue'),
- ('ld_sls_16','95016','Therese','Manalo',NULL,NULL,'+639171110016',26,'Female','9 P. Burgos St.','Poblacion','Batangas City','Batangas','4200','MOTOR','MOTOR','Social Media / Website','Lost',30,NULL,'agent.preyes','Insured through the dealer''s in-house agent'),
+ ('ld_sls_16','95016','Therese','Manalo',NULL,NULL,'+639171110016',26,'Female','9 P. Burgos St.','Poblacion','Batangas City','Batangas','4200','MOTOR','MOTOR','Bundling','Lost',30,'ch_seed_tfs_hq','agent.preyes','TFS loan TFS-2604977, Vios; insured through the dealer''s in-house agent'),
  ('ld_sls_17','95017','Ronaldo','Pascual',NULL,'ronaldo.pascual@example.ph','+639171110017',44,'Male','27 Pasig Blvd.','Bagong Ilog','Pasig','Metro Manila','1600','MOTOR','MOTOR','Bundling','QuoteGenerated',16,'ch_seed_tfs_hq','agent.jdelacruz','TFS loan TFS-2605132, Fortuner from Toyota Pasig'),
  ('ld_sls_18','95018','Sheila','Cabrera',NULL,'sheila.cabrera@example.ph','+639171110018',36,'Female','12 C-5 Rd.','Ususan','Taguig','Metro Manila','1630','MOTOR','MOTOR','Promo','QuoteGenerated',14,'ch_seed_tfs_hq','agent.msantos','TFS loan TFS-2605143, Vios from Toyota Makati'),
  ('ld_sls_19','95019','Gilbert','Ong',NULL,'gilbert.ong@example.ph','+639171110019',50,'Male','45 Mango Ave.','Kamputhaw','Cebu City','Cebu','6000','MOTOR','MOTOR','Used-Cars - UCFP','QuoteGenerated',13,'ch_seed_tfs_ceb','agent.agarcia','TFS used-car loan TFS-2605154, Hilux (own goods)'),
  ('ld_sls_20','95020','Marvin','De Leon',NULL,'marvin.deleon@example.ph','+639171110020',30,'Male','88 Visayas Ave.','Vasra','Quezon City','Metro Manila','1128',NULL,NULL,'Bundling','New',1,'ch_seed_tfs_hq','agent.msantos','Referred by TFS on loan approval; product to confirm with the client'),
  ('ld_sls_21','95021','Rowena','Sison',NULL,'rowena.sison@example.ph','+639171110021',42,'Female','5 Alabang-Zapote Rd.','Pamplona Dos','Las Piñas','Metro Manila','1740',NULL,NULL,'Referral','New',3,NULL,'agent.preyes','Referred by agent Pia Villanueva'),
  ('ld_sls_22','95022','Arturo','Villanueva',NULL,'arturo.villanueva@example.ph','+639171110022',58,'Male','31 Dela Rosa St.','Legazpi Village','Makati','Metro Manila','1229','LIFE','CL-VOL','Credit Life','Contacted',6,'ch_seed_tfs_hq','agent.jdelacruz','Compulsory credit life of TFS loan TFS-2504399 ends with year 1; offer the voluntary cover'),
- ('ld_sls_23','95023','Katrina','Lim',NULL,'katrina.lim@example.ph','+639171110023',29,'Female','18 Shaw Blvd.','Wack-Wack','Mandaluyong','Metro Manila','1555','ACCIDENT','TRAVEL','Social Media / Website','Contacted',8,NULL,'agent.msantos','Annual multi-trip travel cover for Asia')
+ ('ld_sls_23','95023','Katrina','Lim',NULL,'katrina.lim@example.ph','+639171110023',29,'Female','18 Shaw Blvd.','Wack-Wack','Mandaluyong','Metro Manila','1555','ACCIDENT','TRAVEL','Promo','Contacted',8,'ch_seed_tfs_hq','agent.msantos','TFS borrower (loan TFS-2603288, Vios); annual multi-trip travel cover for Asia')
 ) AS v(id, num, fn, ln, co, email, phone, age, gender, house, brgy, city, prov, zip, lob, product, src, status, ago, ch, owner, notes)
 ON CONFLICT (id) DO NOTHING;
 
@@ -126,7 +127,7 @@ WITH v(id, num, lead, status, insurer, vclass, model, variant, yr, seats, color,
  ('qt_sls_10','95010','ld_sls_10','sent',     'PIONEER',   'private_cars',       'Fortuner','2.4 G 4x2 AT', '2026',7,'White Pearl',1890000,3,50000,'TBA',NULL,NULL,'ch_seed_tqa_qc','TFS-2605088',1323000,9),
  ('qt_sls_11','95011','ld_sls_11','accepted', 'STRONGHOLD','light_medium_trucks','Hilux',   '2.4 E 4x2 MT', '2026',5,'Super White',1365000,3,25000,'TBA','MR0HA3CD5T0311011','2GD-1101131',NULL,'TFS-2605099',955500,8),
  ('qt_sls_12','95012','ld_sls_12','submitted','AXA',       'private_cars',       'Innova',  '2.8 E AT',     '2026',8,'Silver Metallic',1646000,3,50000,'TBA','MHFJW8EM5T4121212','1GD-1212121','ch_seed_tal_alb','TFS-2605110',1152200,6),
- ('qt_sls_13','95013','ld_sls_13','approved', 'MALAYAN',   'private_cars',       'Vios',    '1.5 G MT',     '2026',5,'Red Mica',937000,3,25000,'TBA','MR2B29F31T1131313','2NR-1313131',NULL,NULL,NULL,4),
+ ('qt_sls_13','95013','ld_sls_13','approved', 'MALAYAN',   'private_cars',       'Vios',    '1.5 G MT',     '2026',5,'Red Mica',937000,3,25000,'TBA','MR2B29F31T1131313','2NR-1313131','ch_seed_tmk_mkt','TFS-2605166',655900,4),
  ('qt_sls_17','95017','ld_sls_17','submitted','MAAGAP',    'private_cars',       'Fortuner','2.4 G 4x2 AT', '2026',7,'Gray Metallic',1890000,3,50000,'TBA','MHFGB8GS4T0917017','2GD-1717017','ch_seed_tps_psg','TFS-2605132',1323000,15),
  ('qt_sls_18','95018','ld_sls_18','submitted','PIONEER',   'private_cars',       'Vios',    '1.3 XLE CVT',  '2026',5,'Silver Metallic',1098000,3,50000,'NIA 1818','MR2B29F30T1181818','2NR-1818181','ch_seed_tmk_mkt','TFS-2605143',768600,13),
  ('qt_sls_19','95019','ld_sls_19','submitted','STRONGHOLD','light_medium_trucks','Hilux',   '2.4 E 4x2 MT', '2023',5,'Super White',980000,1,25000,'GAD 1919','MR0HA3CD5P0191919','2GD-1919191','ch_seed_tcb_ceb','TFS-2605154',686000,12)
@@ -181,7 +182,7 @@ WITH v(id, num, lead, status, product, ptype, insurer, members, si_each, rate_mi
   FROM v JOIN insurance_companies ic ON ic.code = v.insurer JOIN products pr ON pr.code = v.product
 )
 INSERT INTO quotes(id, quote_number, lead_id, client_id, product_id, policy_type_id, insurance_company_id, agent_user_id, status, product_type, lob, sum_insured, premium_base,
-  vat, dst, lgt, fst, others, premium_total, commission_rate, commission_amount, currency, valid_until, doc, created_by, created_at, updated_at, customer_accepted_at,
+  vat, dst, lgt, fst, others, premium_total, commission_rate, commission_amount, currency, valid_until, doc, channel_id, created_by, created_at, updated_at, customer_accepted_at,
   approval_sent_to, approval_sent_at, submitted_to_insurer_at)
 SELECT c.id, (SELECT value#>>'{}' FROM app_settings WHERE key = 'numbering.quote.prefix') || '-' || to_char(current_date, 'YYYY') || '-' || c.num, c.lead,
   (SELECT cl.id FROM clients cl WHERE cl.lead_id = c.lead), c.pr_id, (SELECT id FROM policy_types WHERE code = c.ptype), c.ic_id, (SELECT id FROM users WHERE username = 'BrokerVerse'),
@@ -196,7 +197,8 @@ SELECT c.id, (SELECT value#>>'{}' FROM app_settings WHERE key = 'numbering.quote
       'benefits', 'Accidental death and disablement, medical reimbursement up to 10% of the sum insured, burial benefit PHP 10,000'),
     'participantDetails', jsonb_build_array(jsonb_build_object('insuranceCompanyName', c.ic_name, 'participantName', c.ic_name, 'insuranceCompanyId', c.ic_id,
       'sharePercentage', '100', 'isLead', true, 'sumInsuredCurrency', 'PHP', 'premiumCurrency', 'PHP'))),
-  (SELECT id FROM users WHERE username = 'BrokerVerse'), now() - make_interval(days => c.ago), now() - make_interval(days => GREATEST(c.ago - 2, 0)),
+  (SELECT channel_id FROM leads WHERE id = c.lead), (SELECT id FROM users WHERE username = 'BrokerVerse'), now() - make_interval(days => c.ago),
+  now() - make_interval(days => GREATEST(c.ago - 2, 0)),
   CASE WHEN c.status = 'converted' THEN now() - make_interval(days => GREATEST(c.ago - 2, 0)) END,
   (SELECT email FROM leads WHERE id = c.lead), now() - make_interval(days => GREATEST(c.ago - 1, 0)),
   CASE WHEN c.status = 'converted' THEN now() - make_interval(days => GREATEST(c.ago - 3, 0)) END
