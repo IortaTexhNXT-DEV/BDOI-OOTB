@@ -25,7 +25,7 @@ $text-strong: #1f2937;
 
   // Top bar spans the full content width and stays pinned while the page scrolls.
   .protected__layout__header {
-    margin: 0 (-$page-gutter) 20px;
+    margin: 0 (-$page-gutter) 24px;
 
     .Agentnavbar__container {
       min-height: 64px;
@@ -33,7 +33,7 @@ $text-strong: #1f2937;
       margin: 0 !important;
       width: auto !important;
       border-radius: 0 !important;
-      box-shadow: 0 1px 0 $color-border;
+      box-shadow: none;
     }
   }
 }
@@ -57,14 +57,15 @@ $text-strong: #1f2937;
   .label_header {
     font-size: 24px;
     line-height: 32px;
-    font-weight: 800;
+    font-weight: 700;
+    letter-spacing: -0.01em;
     margin: 0 0 4px;
   }
 
   h2 {
     font-size: 20px;
     line-height: 28px;
-    font-weight: 800;
+    font-weight: 700;
   }
 
   h3 {
@@ -73,10 +74,13 @@ $text-strong: #1f2937;
     font-weight: 700;
   }
 
+  // Breadcrumbs: one quiet line of muted words under the title, the current screen in the heading colour. Some screens
+  // drew theirs in a bordered box; none keeps a box.
   .p-breadcrumb {
-    background: transparent;
-    border: 0;
-    padding: 0;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
     margin-bottom: 16px;
     font-size: 13px;
 
@@ -84,17 +88,28 @@ $text-strong: #1f2937;
       color: $color-text-muted;
     }
 
+    .p-menuitem-separator {
+      margin: 0 6px;
+      color: $color-placeholder;
+
+      svg {
+        opacity: 0.45;
+      }
+    }
+
     li:last-child .p-menuitem-text {
-      color: $brand-navy;
+      color: $color-heading !important;
       font-weight: 600;
     }
   }
 
-  // Cards: white surface, hairline border, soft shadow, one radius, one padding.
+  // Cards: white surface, hairline border, soft shadow, one radius, one padding. Older screens drew their own (a 20px
+  // radius with a drop-shadow filter, a borderless float); they take the same surface.
   .p-card {
     border: 1px solid $color-border;
-    border-radius: $radius-md;
-    box-shadow: $shadow-sm;
+    border-radius: $radius-md !important;
+    box-shadow: $shadow-sm !important;
+    filter: none !important;
 
     .p-card-body {
       padding: 20px 24px;
@@ -125,6 +140,9 @@ $text-strong: #1f2937;
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.2px;
+    border-width: 0 0 1px;
+    border-style: solid;
+    border-color: var(--bv-table-header-rule, rgba(255, 255, 255, 0.18));
     text-align: left !important;
     white-space: nowrap;
     vertical-align: middle;
@@ -144,6 +162,10 @@ $text-strong: #1f2937;
 
     &:hover {
       background: $brand-blue-050;
+    }
+
+    &:last-child > td {
+      border-bottom-color: transparent;
     }
 
     > td {
@@ -240,12 +262,41 @@ $text-strong: #1f2937;
     font-variant-numeric: tabular-nums;
   }
 
+  // Paginator: compact 32px controls on the 8px grid, the current page filled in the primary colour.
   .p-paginator {
     border: 0;
     border-top: 1px solid $color-border;
     padding: 8px 12px;
     justify-content: flex-end;
+    gap: 4px;
     font-size: 13px;
+
+    :is(.p-paginator-first, .p-paginator-prev, .p-paginator-next, .p-paginator-last, .p-paginator-page) {
+      min-width: 32px !important;
+      height: 32px !important;
+      margin: 0;
+      border-radius: $radius-sm !important;
+      font-size: 13px;
+    }
+
+    .p-paginator-page.p-highlight {
+      background: $brand-blue !important;
+      border-color: $brand-blue !important;
+      color: var(--bv-primary-text, #ffffff) !important;
+    }
+
+    .p-dropdown {
+      height: 32px !important;
+      min-height: 32px !important;
+      align-items: center;
+
+      .p-dropdown-label {
+        display: flex;
+        align-items: center;
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+    }
   }
 }
 
@@ -285,6 +336,12 @@ $text-strong: #1f2937;
     padding-bottom: 9px;
   }
 
+  .p-inputtext:enabled:hover,
+  .p-dropdown:not(.p-disabled):hover,
+  .p-multiselect:not(.p-disabled):hover {
+    border-color: $color-border-strong;
+  }
+
   .p-inputtext:enabled:focus,
   .p-dropdown:not(.p-disabled).p-focus,
   .p-multiselect:not(.p-disabled).p-focus {
@@ -296,15 +353,37 @@ $text-strong: #1f2937;
   // are styled as one joined control further down, so they are left out here (the forced radius broke their corners).
   .p-button:not(.p-button-icon-only):not(.p-button-link):not(.p-selectbutton > .p-button) {
     min-height: 40px;
-    padding: 8px 18px;
-    border-radius: $radius-sm !important;
+    padding: 8px 16px;
+    border-radius: var(--bv-radius-button, 8px) !important;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
     gap: 8px;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 
     .p-button-icon-left {
       margin-right: 0;
     }
+
+    svg {
+      flex: 0 0 auto;
+      max-width: 18px;
+      max-height: 18px;
+    }
+  }
+
+  // Outlined buttons (the secondary action next to the primary one): theme-coloured text and border on white, a light
+  // tint on hover.
+  .p-button.p-button-outlined:not(.p-button-danger):not(.p-button-success):not(.p-button-warning):not(.p-button-help):not(.p-selectbutton > .p-button) {
+    background: $color-surface;
+
+    &:enabled:hover {
+      background: $brand-blue-050;
+    }
+  }
+
+  .p-button:focus-visible {
+    box-shadow: $focus-ring;
+    outline: none;
   }
 
   .p-button.p-button-sm:not(.p-button-icon-only) {
@@ -319,6 +398,46 @@ $text-strong: #1f2937;
     font-size: 12px;
     font-weight: 700;
     padding: 2px 10px;
+  }
+}
+
+// Secondary buttons are neutral: a grey tint (filled) or a grey border (outlined) with dark text, so they sit quietly
+// beside the primary action on any brand; the stock theme drew them in slate blue. Global: they also sit in dialogs.
+.p-button.p-button-secondary:not(.p-button-text):not(.p-button-link):not(.p-button-outlined) {
+  background: #f1f2f4;
+  border-color: $color-border-strong;
+  color: $color-heading;
+
+  &:enabled:hover {
+    background: #e6e8eb;
+    border-color: $color-border-strong;
+    color: $color-heading;
+  }
+}
+
+.p-button.p-button-secondary.p-button-outlined {
+  background: $color-surface;
+  border-color: $color-border-strong;
+  color: $color-heading;
+
+  &:enabled:hover {
+    background: $color-bg;
+    border-color: $color-placeholder;
+    color: $color-heading;
+  }
+}
+
+// Icons drawn in the default brand blue (assets/icons) inside a button take the button's text colour, so they follow
+// the theme like the label does.
+.p-button svg {
+  [stroke="#0072d8"],
+  [stroke="#0072D8"] {
+    stroke: currentColor;
+  }
+
+  [fill="#0072d8"],
+  [fill="#0072D8"] {
+    fill: currentColor;
   }
 }
 
@@ -919,7 +1038,7 @@ small.p-error {
 
 .p-tag {
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
   line-height: 1.5;
@@ -1133,10 +1252,44 @@ small.p-error {
     .Transaction__Code__Master__title, [class^="add__icon__title"], .header-section > h2) {
     font-family: $font-heading !important;
     font-size: 24px !important;
-    font-weight: 800 !important;
+    font-weight: 700 !important;
     line-height: 1.25 !important;
-    color: $color-text !important;
-    letter-spacing: 0;
+    color: $color-heading !important;
+    letter-spacing: -0.01em;
+  }
+
+  // The quote wizard (policy details, coverage, accessories, summary) and the screens built like it: the section name
+  // as the page title, the card title ("Create Quote") one step smaller, the form sections as small headings.
+  :is(.policy__container__title, .coverage__container__titles, .order__summary__main__title, .overall__create__quote__accessories > .header__title) {
+    font-family: $font-heading !important;
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    line-height: 32px !important;
+    color: $color-heading !important;
+    letter-spacing: -0.01em;
+  }
+
+  :is(.policy__details__card__container__title, .coverage__details__card__container__title, .order__summary__title, .overall__create__quote__accessories .table__header) {
+    font-family: $font-heading !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    line-height: 28px !important;
+    color: $color-heading !important;
+  }
+
+  :is(.policy__details__card__container__sub__title, .policy__details__card__sub__title, .coverage__details__card__container__sub__title, .order__summary__subtitle, .overall__create__quote__accessories .sub__heading) {
+    margin-top: 20px !important;
+    font-family: $font-heading !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    line-height: 24px !important;
+    color: $color-heading !important;
+  }
+
+  :is(.policy__container__back__btn__title, .coverage__container__back__btn__title, .order__summary__back__btn__title, .left__arrow__text) {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: $color-text-muted !important;
   }
 
   .p-datatable .p-datatable-tbody > tr > td {
@@ -1146,6 +1299,37 @@ small.p-error {
   .p-datatable .p-datatable-thead > tr > th {
     font-size: 13px !important;
     font-weight: 700 !important;
+  }
+
+  // tab labels: one size and weight on every screen, on the surface they sit on
+  .p-tabview .p-tabview-nav li .p-tabview-nav-link {
+    background: transparent !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+  }
+
+  .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+    color: $color-heading !important;
+  }
+
+  // breadcrumbs: one size on every screen
+  .p-breadcrumb .p-menuitem-text {
+    font-size: 13px !important;
+  }
+
+  // column headings: the heading cell sets the size and weight, whatever the screen set on the title inside it
+  .p-datatable .p-datatable-thead > tr > th .p-column-title {
+    font-size: inherit !important;
+    font-weight: inherit !important;
+  }
+
+  // a frozen column (the actions at the right edge) covers what scrolls under it and is set off by a hairline
+  .p-datatable .p-datatable-tbody > tr > td.p-frozen-column {
+    background: inherit;
+  }
+
+  .p-datatable :is(.p-datatable-thead > tr > th, .p-datatable-tbody > tr > td).p-frozen-column[style*="right"] {
+    box-shadow: inset 1px 0 0 $color-border;
   }
 
   // the label carries the button's size (PrimeReact sets 1rem on it)

@@ -90,6 +90,7 @@ export function themeToCssVars(theme = {}, { fontStack } = {}) {
     "--bv-sidebar-hover-bg": brandTheme ? mix(c.sidebarBg, c.sidebarText, 0.07) : "#f6f6f6",
     "--bv-sidebar-rule": brandTheme ? mix(c.sidebarBg, c.sidebarText, 0.15) : "#e4e4e4",
     "--bv-sidebar-marker": brandTheme ? c.accent : c.primary,
+    "--bv-marker": brandTheme ? c.accent : c.primary,
     "--bv-table-header-bg": c.tableHeaderBg,
     "--bv-table-header-text": c.tableHeaderText,
     "--bv-table-header-rule": darkTableHead ? "rgba(255, 255, 255, 0.18)" : "rgba(0, 0, 0, 0.08)",

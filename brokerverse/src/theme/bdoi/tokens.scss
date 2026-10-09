@@ -15,6 +15,7 @@ $brand-blue-050: var(--bv-primary-050, #e5f5ff); // Background Blue: highlights,
 $brand-field-blue: var(--bv-field-border, #99c1e7); // Text Field Blue: input borders
 $brand-gold: var(--bv-accent, #fdb913); // Yellow: accents (active tab bar), used sparingly
 $brand-gold-600: #e0a100;
+$marker: var(--bv-marker, #0072d8); // the current item (active tab, current menu item): accent of a brand theme
 $brand-gold-050: #fff4d6;
 
 // Neutrals (never pure black)
@@ -75,6 +76,7 @@ $sidebar-width: 280px;
   --bv-sidebar-sub-text: #4b4b4b;
   --bv-sidebar-rule: #e4e4e4;
   --bv-sidebar-marker: #0072d8;
+  --bv-marker: #0072d8;
   --bv-table-header-bg: #004ea8;
   --bv-table-header-text: #ffffff;
   --bv-table-stripe: #f5faff;

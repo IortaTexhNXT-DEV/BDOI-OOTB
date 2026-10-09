@@ -1,106 +1,104 @@
-.toggle__container{
-label {
+@import "../../theme/bdoi/tokens";
+
+// Active / Inactive switch of the lists (ToggleButton, masters' MasterStatusToggle): a small pill with the state
+// written in it. Active is a calm green, Inactive a neutral grey (an inactive record is a state, not an error). The
+// checkbox stays in the tab order (visually hidden), so the switch works from the keyboard with a visible focus ring.
+// (The class names are historical: .inactive-text carries the word "Active" and shows while checked.)
+.toggle__container {
+  label {
     pointer-events: none;
   }
 
   .input {
-    display: none;
-  }
-
-  .input:checked + .toggle-wrapper > .selector {
-    left: calc(100% - 22px);
-    background-color: #48c99e;
-  }
-
-  .input:checked ~ .toggle-wrapper .active-text {
-    display: none;
-    left: auto;
-    right: 10px;
-  }
-
-  .input:not(:checked) ~ .toggle-wrapper .inactive-text {
-    display: none;
-    left: 10px;
-    right: auto;
-    top: 17px;
-    font-family: "Nunito", Arial, sans-serif;
-    font-size: 10px;
-    
-    font-weight: 500;
-  }
-  .input:not(:checked) ~ .toggle-wrapper .active-text {
-    display: block;
-    left: 40%;
-    right: auto;
-    top: 17px;
-    font-family: "Nunito", Arial, sans-serif;
-    font-size: 10px;
-    
-    font-weight: 500;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 
   .toggle-wrapper {
     position: relative;
-    width: 75px;
-    height: 25px;
-    background-color: red;
-    border-radius: 999px;
-    margin: auto;
-    cursor: pointer;
-    pointer-events: all;
-    box-shadow: 0 8px 14px 0 rgba(0, 0, 0, 0.12);
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 10px;
+    width: 76px;
+    height: 24px;
+    margin: 0;
+    padding: 0 8px;
     box-sizing: border-box;
-    margin:0px 
+    border-radius: 999px;
+    cursor: pointer;
+    pointer-events: all;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
   }
 
   .selector {
-    width: 20px;
-    height: 20px;
     position: absolute;
-    top: 50.5%;
-    left: 4%;
-    transform: translateY(-50%);
-    background-color: #ee5f39;
-    transition: left 0.25s ease;
+    top: 50%;
+    left: 3px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
+    transform: translateY(-50%);
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.2);
+    transition: left 0.2s ease, background-color 0.2s ease;
   }
 
-  .active-text {
-    position: absolute;
-    top: 70%;
-    transform: translateY(-100%);
-    transition: all 0.25s ease;
-    white-space: nowrap;
-   
-    color: #ef0000;
-    font-family: "Nunito", Arial, sans-serif;
-    font-size: 10px;
-    
-    font-weight: 500;
-  }
-
+  .active-text,
   .inactive-text {
     position: absolute;
-    top: 74%;
-    transform: translateY(-100%);
-    transition: all 0.25s ease;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: $font-body;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
     white-space: nowrap;
-    font-size: 10px;
-    color: #008836;
+    transition: opacity 0.2s ease;
   }
+
   .input:checked ~ .toggle-wrapper {
-    border-radius: 50px;
-    border: 1px solid #48c99e;
-    background: #e2f6ef;
+    border: 1px solid #a8d5bd;
+    background: $color-success-050;
+
+    .selector {
+      left: calc(100% - 21px);
+      background-color: $color-success;
+    }
+
+    .inactive-text {
+      left: 10px;
+      color: $color-success;
+    }
+
+    .active-text {
+      display: none;
+    }
   }
 
   .input:not(:checked) ~ .toggle-wrapper {
-    border-radius: 50px;
-    border: 1px solid #f36156;
-    background: #f2dedc;
+    border: 1px solid $color-border-strong;
+    background: #f1f2f4;
+
+    .selector {
+      background-color: $color-placeholder;
+    }
+
+    .active-text {
+      right: 9px;
+      color: $color-text;
+    }
+
+    .inactive-text {
+      display: none;
+    }
+  }
+
+  .input:focus-visible ~ .toggle-wrapper {
+    box-shadow: $focus-ring;
   }
 }

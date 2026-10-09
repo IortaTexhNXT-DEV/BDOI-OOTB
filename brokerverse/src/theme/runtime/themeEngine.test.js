@@ -35,6 +35,7 @@ describe("theme engine", () => {
     expect(vars["--bv-table-header-bg"]).toBe("#eeeeee");
     expect(vars["--bv-table-header-rule"]).toBe("rgba(0, 0, 0, 0.08)");
     expect(vars["--bv-sidebar-marker"]).toBe("#eb0a1e");
+    expect(vars["--bv-marker"]).toBe("#eb0a1e");
     expect(vars["--bv-sidebar-sub-text"]).toBe("#353535");
     expect(vars["--bv-radius-button"]).toBe("4px");
     expect(vars["--bv-row-height"]).toBe("36px");

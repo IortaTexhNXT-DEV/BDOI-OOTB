@@ -3,8 +3,8 @@
 .bv-stat-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
-  gap: 12px;
-  margin: 12px 0 16px;
+  gap: 16px;
+  margin: 16px 0 24px;
 
   .bv-stat-card {
     display: flex;
@@ -46,8 +46,9 @@
 
   .bv-stat-value {
     font-size: 24px;
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1.25;
+    letter-spacing: -0.01em;
     color: $color-heading;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;

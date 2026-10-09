@@ -285,24 +285,53 @@ h6 {
   }
 }
 
-// Tabs: the active tab is white with a yellow top bar and CTA Blue text.
+// Tabs: quiet labels on a hairline, the active one in the heading colour over a 2px bar in the marker colour (the
+// accent of a brand theme, used sparingly: the current tab and the current menu item).
 .p-tabview .p-tabview-nav {
+  background: transparent;
+  border-width: 0 0 1px;
+  border-color: $color-border;
+
   li .p-tabview-nav-link {
+    margin: 0 0 -1px;
+    padding: 12px 16px;
+    border-width: 0 0 2px;
+    border-color: transparent;
+    border-radius: 0;
+    background: transparent;
     font-family: $font-heading;
+    font-weight: 600;
     color: $color-text-muted;
   }
 
+  li:not(.p-highlight):not(.p-disabled):hover .p-tabview-nav-link {
+    background: transparent;
+    border-color: $color-border-strong;
+    color: $color-heading;
+  }
+
+  // the bar under the active tab is the ink bar, which slides to the tab chosen
   li.p-highlight .p-tabview-nav-link {
-    color: $brand-blue;
-    border-color: $brand-blue;
-    box-shadow: inset 0 4px 0 $brand-gold;
+    background: transparent;
+    border-color: transparent;
+    color: $color-heading;
+    box-shadow: none;
+  }
+
+  .p-tabview-ink-bar {
+    height: 2px;
+    background-color: $marker;
+  }
+
+  li .p-tabview-nav-link:not(.p-disabled):focus-visible {
+    box-shadow: $focus-ring;
   }
 }
 
 .p-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight .p-menuitem-link {
-  color: $brand-blue;
-  border-color: $brand-blue;
-  box-shadow: inset 0 4px 0 $brand-gold;
+  color: $color-heading;
+  border-color: $marker;
+  box-shadow: none;
 }
 
 .p-paginator {
