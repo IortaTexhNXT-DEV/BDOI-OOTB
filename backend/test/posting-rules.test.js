@@ -294,7 +294,7 @@ describe('Posting Rules and Account Determination screens', () => {
     const ev = await ctx.as('maker')('get', '/posting-rules/events');
     expect(ev.status).toBe(200);
     expect(ev.body.data.map((e) => e.eventCode)).toEqual(expect.arrayContaining(['policy.issue.broker_billed', 'receipt.apply', 'endorsement.return_premium', 'policy.cancel',
-      'claim.settlement.paid_through_broker', 'write_off', 'ri.cession', 'ri.recovery', 'remittance.transfer', 'incentive.accrual']));
+      'claim.settlement.paid_through_broker', 'write_off', 'remittance.transfer', 'incentive.accrual']));
     // premium bookings and returns are on version 2 (commission taxes, migration 0170)
     const taxed = ['policy.issue.broker_billed', 'endorsement.additional_premium', 'policy.renewal.broker_billed', 'endorsement.return_premium', 'policy.cancel'];
     expect(ev.body.data.every((e) => e.activeVersion === (taxed.includes(e.eventCode) ? 2 : 1))).toBe(true);

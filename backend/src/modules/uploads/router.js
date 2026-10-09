@@ -28,7 +28,7 @@ const keyParam = (req) => safeKey(req.params[0] || req.params.key);
 const MODULE_BY_NAME = [
   [/^endorse/, 'endorsements'], [/^(claim|settlement)/, 'claims'], [/^(system-settings|logo|favicon|branding)/, 'settings'],
   [/^(receipt|payment|proof|billing|collection)/, 'receipts'], [/^disburse/, 'disbursements'], [/^remittance/, 'remittance'],
-  [/^(reinsurance|bordereaux|treat)/, 'reinsurance'], [/^incentive/, 'incentive'], [/^product/, 'products'],
+  [/^incentive/, 'incentive'], [/^product/, 'products'],
   [/^(template|master)/, 'masters'], [/^lead/, 'leads'], [/^(quot|quote)/, 'quotations'],
   [/^(vehicle|polic|upload-policy)/, 'policies'], [/^(id-card|kyc|client|customer)/, 'clients'],
 ];

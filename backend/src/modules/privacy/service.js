@@ -419,10 +419,6 @@ export async function blockers(db, party) {
   if (commissions) reasons.push({ code: 'unpaid-commissions', count: commissions, message: `${commissions} commission line(s) not yet paid` });
   const endorsements = await count(`SELECT count(*) AS n FROM endorsements WHERE (client_id = $1 OR policy_id IN (${POLICIES})) AND lower(coalesce(status, '')) <> ALL($2::text[])`, [id, CLOSED_ENDORSEMENT]);
   if (endorsements) reasons.push({ code: 'open-endorsements', count: endorsements, message: `${endorsements} endorsement(s) still open` });
-  // AMLA record keeping: open AML cases, and aml.record_retention_years after the last transaction or case
-  const { amlRetentionBlocker } = await import('../aml/retention.js');
-  const aml = await amlRetentionBlocker(db, id, now);
-  if (aml) reasons.push(aml);
   const years = Number(await getSetting('privacy.retention_years', 10));
   const last = (await db.query('SELECT max(expiry_date) AS d FROM policies WHERE client_id = $1', [id])).rows[0].d;
   const lastExpiry = iso(last);

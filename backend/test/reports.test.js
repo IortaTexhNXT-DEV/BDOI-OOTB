@@ -65,8 +65,6 @@ async function seedSample() {
   await query(`INSERT INTO leads(lead_number, display_name, status, owner_user_id, source, created_at) VALUES
     ('RPT-LD-1', 'Juan Reyes', 'new', 'usr_rpt_a1', 'referral', '2025-02-01'), ('RPT-LD-2', 'Ana Lim', 'new', 'usr_rpt_a1', 'walk-in', '2025-02-02'),
     ('RPT-LD-3', 'Pedro Tan', 'contacted', 'usr_rpt_a2', 'referral', '2025-02-03'), ('RPT-LD-4', 'Maria Santos', 'converted', 'usr_rpt_a2', 'website', '2025-02-04')`);
-  const t = await one(`INSERT INTO reinsurance_treaties(name, reinsurer, treaty_type, share) VALUES ('RPT Quota Share 2025', 'Fictional Re', 'quota-share', 0.5) RETURNING id`);
-  await query(`INSERT INTO cessions(treaty_id, policy_id, ceded_sum, ceded_premium, created_at, cession_date) VALUES ($1, 'pol_rpt2', 1000000, 10000, '2025-03-06', '2025-03-06')`, [t.id]);
   const ip = await one(`INSERT INTO incentive_programs(name, metric, target, period_from, period_to) VALUES ('RPT Q1 Motor Push', 'premium', 100000, '2025-01-01', '2025-03-31') RETURNING id`);
   await query(`INSERT INTO incentive_results(program_id, agent_user_id, achieved, payout, period) VALUES ($1, 'usr_rpt_a1', 30000, 0, '2025-Q1'), ($1, 'usr_rpt_a2', 120000, 5000, '2025-Q1')`, [ip.id]);
 }
@@ -218,7 +216,7 @@ describe('running reports', () => {
     expect(tb.data.totals).toMatchObject({ closingDebit: 11000, closingCredit: 11000 });
     expect(tb.data.summary.balanced).toBe(true);
   });
-  it('aggregate reports: premium by product/month, new vs renewal, lead funnel, cessions, incentives', async () => {
+  it('aggregate reports: premium by product/month, new vs renewal, lead funnel, incentives', async () => {
     const m = await run('premium-by-product', { ...Y, ReportCriteria: 'Month' });
     expect(m.data.rows).toEqual([expect.objectContaining({ month: '2025-02', premium: 10000 }), expect.objectContaining({ month: '2025-03', premium: 35000, policies: 2 })]);
     expect(m.data.columns.map((c) => c.key)).not.toContain('product');
@@ -229,8 +227,6 @@ describe('running reports', () => {
     const f = await run('lead-conversion-funnel', { ...Y });
     expect(f.data.rows.map((r) => [r.stage, r.leads])).toEqual([['new', 2], ['contacted', 1], ['converted', 1]]);
     expect(f.data.summary.conversionRate).toBe(25);
-    const cs = await run('cession-register', { ...Y });
-    expect(cs.data.rows[0]).toMatchObject({ treaty: 'RPT Quota Share 2025', cededSum: 1000000, cededPct: 50 });
     const inc = await run('incentive-results', { ...Y });
     expect(inc.data.rows.find((r) => r.agent === 'Liza Mercado')).toMatchObject({ achievementPct: 120, payout: 5000 });
   });

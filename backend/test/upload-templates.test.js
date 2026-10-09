@@ -67,7 +67,7 @@ describe('generated upload templates', () => {
     expect(defs.length).toBeGreaterThanOrEqual(52);
     for (const id of ['leads', 'quotations', 'policies', 'receipts', 'disbursements', 'chart-of-accounts', 'opening-balances', 'open-items', 'bank-statement', 'insurer-statement', 'remittance-bulk',
       'remittance-bank-transactions', 'users', 'master:insurance-company', 'master:branch', 'master:product', 'master:cover', 'master:vehicle-brand', 'master:vehicle-model',
-      'master:vehicle-variant', 'master:city', 'master:bank', 'master:bank-account', 'master:security-rating', 'master:remittance-bulk-processing']) expect(defs.map((d) => d.id)).toContain(id);
+      'master:vehicle-variant', 'master:city', 'master:bank', 'master:bank-account', 'master:remittance-bulk-processing']) expect(defs.map((d) => d.id)).toContain(id);
     // retired masters (migration 0241, taxation 0233) and masters without an upload have no template
     for (const code of [...masters.RETIRED_TYPES.keys(), ...masters.NOT_UPLOADABLE.keys()]) expect(defs.map((d) => d.id)).not.toContain(`master:${code}`);
     expect(new Set(defs.map((d) => d.file)).size).toBe(defs.length);

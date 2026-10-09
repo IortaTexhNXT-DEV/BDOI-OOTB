@@ -13,7 +13,7 @@ import { scopeSql } from '../../lib/scope.js';
 import { today as businessToday } from '../../lib/dates.js';
 
 /** Presets in order of precedence. */
-export const PRESETS = ['system-admin', 'compliance-officer', 'accounting-manager', 'accounting', 'claims', 'processing', 'operations', 'sales'];
+export const PRESETS = ['system-admin', 'accounting-manager', 'accounting', 'claims', 'processing', 'operations', 'sales'];
 
 /** The preset of a user: the first preset role they hold, else "general" (the plain My Work). */
 export const presetOf = (user) => PRESETS.find((p) => (user?.roles || []).includes(p)) || 'general';
@@ -29,8 +29,7 @@ async function context(user, { recordScope, db }) {
     const { rows } = await db.query(sql, params);
     return rows[0] || {};
   };
-  const exists = async (table) => (await db.query('SELECT to_regclass($1) IS NOT NULL AS ok', [table])).rows[0].ok;
-  return { today, tz, recordScope, ownBook, figure, exists };
+  return { today, tz, recordScope, ownBook, figure };
 }
 
 const FIGURES = {
@@ -71,15 +70,10 @@ const FIGURES = {
     const endorsements = await c.figure("SELECT count(*)::int AS n FROM endorsements e WHERE e.status IN ('draft', 'submitted', 'cancel-initiated', 'approved')");
     const renewals = await c.figure(`SELECT count(*)::int AS n FROM policies p WHERE ${policy} AND p.status IN ('active', 'issued') AND p.renewed_to IS NULL
       AND p.expiry_date BETWEEN $1::date AND $1::date + 30`, p);
-    const out = [
+    return [
       { key: 'endorsementsOpen', label: 'Endorsements in progress', value: num(endorsements.n), format: 'count' },
       { key: 'renewals30', label: 'Renewals due in 30 days', value: num(renewals.n), format: 'count' },
     ];
-    if (await c.exists('complaints')) {
-      const complaints = await c.figure("SELECT count(*)::int AS n FROM complaints x WHERE x.status NOT IN ('closed', 'resolved')");
-      out.push({ key: 'complaintsOpen', label: 'Open complaints', value: num(complaints.n), format: 'count' });
-    }
-    return out;
   },
   async claims(c) {
     const p = [c.today];
@@ -105,22 +99,6 @@ const FIGURES = {
     const vouchers = await c.figure(`SELECT (SELECT count(*)::int FROM journal_vouchers j WHERE j.status = 'for-approval')
       + (SELECT count(*)::int FROM disbursements d WHERE d.status = 'for-approval') AS n`);
     return [...(await FIGURES.accounting(c)), { key: 'vouchersForApproval', label: 'Vouchers awaiting approval', value: num(vouchers.n), format: 'count' }];
-  },
-  async 'compliance-officer'(c) {
-    const validUntil = "CASE WHEN (ic.attrs->>'icCertificateValidUntil') ~ '^\\d{4}-\\d{2}-\\d{2}' THEN substr(ic.attrs->>'icCertificateValidUntil', 1, 10)::date END";
-    const deadlines = await c.figure(`SELECT (SELECT count(*)::int FROM compliance_licences l WHERE l.status = 'active' AND l.renewal_status <> 'renewed' AND l.expiry_date BETWEEN $1::date AND $1::date + 30)
-      + (SELECT count(*)::int FROM compliance_fit_proper f WHERE f.status = 'active' AND f.next_review_on BETWEEN $1::date AND $1::date + 30)
-      + (SELECT count(*)::int FROM (SELECT ${validUntil} AS valid_until FROM insurance_companies ic WHERE ic.status = 'active') x WHERE x.valid_until BETWEEN $1::date AND $1::date + 30) AS n`, [c.today]);
-    const edd = await c.figure("SELECT count(*)::int AS n FROM aml_edd_reviews e WHERE e.status IN ('open', 'submitted')");
-    const out = [
-      { key: 'deadlines30', label: 'Deadlines in 30 days', value: num(deadlines.n), format: 'count' },
-      { key: 'eddOpen', label: 'Open EDD reviews', value: num(edd.n), format: 'count' },
-    ];
-    if (await c.exists('aml_cases')) {
-      const cases = await c.figure("SELECT count(*)::int AS n FROM aml_cases x WHERE x.status IN ('open', 'for-filing')");
-      out.push({ key: 'amlCases', label: 'Open AML cases', value: num(cases.n), format: 'count' });
-    }
-    return out;
   },
   async 'system-admin'(c) {
     const users = await c.figure("SELECT count(*)::int AS active, count(*) FILTER (WHERE last_login_at IS NULL AND COALESCE(created_by, '') <> 'seed')::int AS waiting FROM users WHERE status = 'active'");

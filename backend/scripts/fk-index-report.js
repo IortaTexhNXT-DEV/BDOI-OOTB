@@ -18,7 +18,7 @@ export const MASTER_TABLES = new Set([
   'commission_referrers', 'countries', 'coverages', 'currencies', 'districts', 'document_numbering', 'fiscal_years', 'gl_accounts', 'incentive_programs',
   'insurance_companies', 'master_records', 'master_types', 'opening_balances', 'period_close_checklist', 'permissions', 'petty_cash_funds',
   'policy_types', 'postal_codes', 'posting_rule_lines', 'posting_rules', 'product_components', 'product_risk_mappings', 'product_risk_sections',
-  'product_templates', 'products', 'recurring_journals', 'reinsurance_treaties', 'reinsurers', 'remittance_delegations', 'report_definitions',
+  'product_templates', 'products', 'recurring_journals', 'remittance_delegations', 'report_definitions',
   'report_schedules', 'role_permissions', 'roles', 'scheduled_jobs', 'signatories', 'states', 'tax_codes', 'user_roles', 'vehicle_brands',
   'vehicle_models', 'vehicle_variants', 'write_off_reasons',
 ]);

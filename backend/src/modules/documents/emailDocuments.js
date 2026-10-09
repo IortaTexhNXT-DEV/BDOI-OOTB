@@ -8,7 +8,6 @@
  *   policy-schedule        { policyId }      policy schedule
  *   bank-endorsement-letter { saleId }       letter to the financing bank of a dealer sale (motor programmes)
  *   comparison-report      { reportId }      client comparison and recommendation report
- *   fac-slip               { placementId, kind, shareId }  facultative slip, cover note, debit or credit note
  */
 import { pool } from '../../db/pool.js';
 import { notFound } from '../../lib/errors.js';
@@ -40,7 +39,7 @@ const GENERATORS = {
     const p = await printablePolicy(toPolicy(row), row);
     return { fileName: `policy-schedule-${p.policyNumber}.pdf`, content: buildPdf(await policyScheduleDoc(p)) };
   },
-  // distribution and product documents (motor programmes, comparison reports, facultative reinsurance, marine)
+  // distribution and product documents (motor programmes, comparison reports)
   'bank-endorsement-letter': async ({ saleId }) => {
     const { bankLetterSpec } = await import('../motor-programmes/letters.js');
     const spec = await bankLetterSpec(saleId);
@@ -50,11 +49,6 @@ const GENERATORS = {
     const { comparisonReportSpec } = await import('../comparison-reports/service.js');
     const spec = await comparisonReportSpec(reportId);
     return { fileName: `comparison-report-${spec.number}.pdf`, content: buildPdf(spec) };
-  },
-  'fac-slip': async ({ placementId, kind = 'slip', shareId = null }) => {
-    const { facDocumentSpec } = await import('../reinsurance/facultativeDocs.js');
-    const spec = await facDocumentSpec(placementId, kind, shareId);
-    return { fileName: `${kind}-${spec.number}.pdf`, content: buildPdf(spec) };
   },
 };
 

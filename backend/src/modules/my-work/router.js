@@ -48,7 +48,7 @@ define({
 });
 
 define({
-  method: 'GET', path: '/figures', summary: 'Home: the role preset of the signed-in user, their role, branch and company for the page subtitle, and the two or three figures of the role (sales: quotes this month, conversion, renewals due; claims: open claims, average days open; accounting: overdue receivables, collections this month; compliance: deadlines, EDD reviews; administrator: active users, failed jobs)',
+  method: 'GET', path: '/figures', summary: 'Home: the role preset of the signed-in user, their role, branch and company for the page subtitle, and the two or three figures of the role (sales: quotes this month, conversion, renewals due; claims: open claims, average days open; accounting: overdue receivables, collections this month; administrator: active users, failed jobs)',
   screen: `${S} (Home)`,
   response: { success: true, data: { asOf: '2026-10-04', preset: 'sales', roleCode: 'sales', roleName: 'Sales & Marketing (Account Executive)', firstName: 'Maria', branch: 'Makati', company: 'BrokerVerse',
     figures: [{ key: 'quotesMonth', label: 'Quotes this month', value: 12, format: 'count' }, { key: 'conversion', label: 'Conversion (90 days)', value: 38, format: 'percent' }, { key: 'renewals30', label: 'Renewals due in 30 days', value: 7, format: 'count' }] } },

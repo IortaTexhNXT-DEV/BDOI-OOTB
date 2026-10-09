@@ -409,15 +409,6 @@ export const QUERIES = {
     orderBy: (dims) => dims.map((d) => (d === 'stage' ? 'COALESCE(array_position($3::text[], f.stage), 999)' : `f."${d}"`)).join(', '),
     summary: { conversionRate: 'round(100.0 * sum(f.leads) FILTER (WHERE f.stage = \'converted\') / NULLIF(sum(f.leads), 0), 2)' },
   },
-  cessions: {
-    sql: `SELECT rt.name AS treaty, rt.reinsurer, rt.treaty_type AS "treatyType", p.policy_number AS "policyNumber", ${POLICY_DIMS},
-        COALESCE(cs.cession_date, cs.created_at::date) AS "cessionDate", p.sum_insured AS "sumInsured", cs.ceded_sum AS "cededSum", cs.ceded_premium AS "cededPremium",
-        round(100.0 * cs.ceded_sum / NULLIF(p.sum_insured, 0), 2) AS "cededPct"
-      FROM cessions cs JOIN reinsurance_treaties rt ON rt.id = cs.treaty_id JOIN policies p ON p.id = cs.policy_id ${POLICY_JOINS}
-      WHERE COALESCE(cs.cession_date, cs.created_at::date) BETWEEN $1 AND $2`,
-    filters: POLICY_FILTERS, criteria: { Overall: {}, Treaty: { groupBy: 'treaty' }, Reinsurer: { groupBy: 'reinsurer' }, 'Principal Insurer': { groupBy: 'insurer' } },
-    orderBy: 'f."cessionDate", f."policyNumber"',
-  },
   incentives: {
     sql: `SELECT ip.name AS program, ip.metric, ir.period, u.id AS _agent_id, u.username AS _agent_username, u.display_name AS agent,
         u.branch_code AS _branch_code, COALESCE(b.name, u.branch_code) AS branch, ip.target, ir.achieved,

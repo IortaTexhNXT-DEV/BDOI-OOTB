@@ -1,42 +1,10 @@
 /**
- * Reinsurance, incentives and the accounting extensions, so their registers carry the scenario's business: a property
- * quota share treaty (maker-checker) with cessions of large corporate risks, a facultative cession, the Account
- * Executives' monthly incentive (program, calculation, approval by a second user, payment), a supplier invoice with
- * expanded withholding tax paid by cheque and its BIR Form 2307, and a fixed asset registered and sold (disposal with
- * output VAT and a sales invoice).
+ * Incentives and the accounting extensions, so their registers carry the scenario's business: the Account Executives'
+ * monthly incentive (program, calculation, approval by a second user, payment), a supplier invoice with expanded
+ * withholding tax paid by cheque and its BIR Form 2307, and a fixed asset registered and sold (disposal with output VAT
+ * and a sales invoice).
  */
 import { dataOf, listOf } from '../http.js';
-
-async function reinsurance(ctx) {
-  const { as, log } = ctx;
-  const p1 = as.processing1;
-  const p2 = as.processing2;
-  const reinsurers = listOf(await p1.get('/reinsurance/reinsurers'));
-  let re = reinsurers.find((r) => r.name === 'Maharlika Reinsurance Corp.');
-  if (!re) {
-    re = dataOf(await p1.post('/reinsurance/reinsurers', { name: 'Maharlika Reinsurance Corp.', type: 'Local', rating: 'A', country: 'Philippines', contactPerson: 'Treaty Department', email: 'treaty@maharlikare.example.ph' }));
-    log.count('Reinsurers');
-  }
-  const year = ctx.today.slice(0, 4);
-  const number = `QS-PROP-${year}`;
-  let treaty = listOf(await p1.get('/reinsurance/treaties')).find((t) => t.treatyNumber === number);
-  if (!treaty) {
-    treaty = dataOf(await p1.post('/reinsurance/treaties', { treatyNumber: number, name: `Property Quota Share ${year}`, type: 'Quota Share', lineOfBusiness: 'Fire', reinsurers: [re.id || re.reinsurerId],
-      effectiveDate: `${year}-01-01`, expiryDate: `${year}-12-31`, capacity: 3000000000, cession: { percentage: 30, maxLimit: 600000000 }, commission: { type: 'Flat', rate: 25 } }));
-    await p2.post(`/reinsurance/treaties/${treaty.id}/approve`, { remarks: 'Terms per the signed treaty wording' });
-    log.count('Reinsurance treaties approved');
-  }
-  const big = ctx.policies.filter((p) => ['FIRE', 'IAR'].includes(p.product) && p.segment === 'corporate').sort((a, b) => b.gross - a.gross);
-  for (const [k, p] of big.slice(0, 3).entries()) {
-    const pol = await p1.get(`/policies/${p.id}`);
-    const body = k < 2
-      ? { treatyId: treaty.id, policyNumber: p.policyNumber, insured: pol.insuredName, sumInsured: Number(pol.sumInsured), grossPremium: p.gross, cessionDate: p.issueDate }
-      : { type: 'Facultative', facultativeReinsurer: re.id || re.reinsurerId, policyNumber: p.policyNumber, insured: pol.insuredName, sumInsured: Number(pol.sumInsured), grossPremium: p.gross, cessionPercentage: 20, cessionDate: p.issueDate };
-    const c = dataOf(await p1.post('/reinsurance/cessions', body));
-    await p2.post(`/reinsurance/cessions/${c.id}/confirm`, { remarks: 'Cession slip signed' });
-    log.count('Reinsurance cessions confirmed');
-  }
-}
 
 async function incentives(ctx) {
   const { as, log } = ctx;
@@ -103,8 +71,7 @@ async function fixedAssetDisposal(ctx) {
 }
 
 export async function extras(ctx) {
-  ctx.log.setPhase('Reinsurance, incentives, payables and fixed assets');
-  await ctx.log.step('Reinsurance: treaty and cessions of large property risks', () => reinsurance(ctx));
+  ctx.log.setPhase('Incentives, payables and fixed assets');
   await ctx.log.step('Account Executive incentives for the month', () => incentives(ctx));
   await ctx.log.step('Supplier invoice with EWT approved, paid by cheque; BIR 2307 issued to the supplier', () => supplierInvoice(ctx), { who: ctx.as.accounting1.username });
   await ctx.log.step('Fixed asset registered and sold: disposal journal with output VAT and the sales invoice', () => fixedAssetDisposal(ctx), { who: ctx.as.accounting1.username });

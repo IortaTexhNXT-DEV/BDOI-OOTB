@@ -258,11 +258,6 @@ async function approveCheque(db, c, amount, user) {
   const d = c.disbursement_id ? await getDisbursementRaw(db, c.disbursement_id, true) : null;
   if (d) await assertChecker(user, d.created_by, 'payment voucher');
   const payeeType = d?.payee_type || inv?.payee_type || 'Insurer';
-  // AML/CFT: a refund to a client is screened (payee and client); an undecided or confirmed match stops the cheque
-  if (['Customer', 'Client'].includes(payeeType)) {
-    const { atPayout } = await import('../aml/hooks.js');
-    await atPayout({ clientId: d?.client_id || inv?.client_id || null, payeeName: d?.payee_name || c.customer_name || null, referenceType: 'disbursement', referenceId: d?.id || c.id, userId: user?.id ?? null, db });
-  }
   const taxes = payeeType === 'Insurer' ? await remittedPremiumTaxes(db, { invoiceListId: inv?.id, disbursementId: d?.id }, amount) : { vat: 0, dst: 0, lgt: 0 };
   const jv = await postEvent('disbursement.payment', {
     source: 'disbursement', entryType: payeeType === 'Insurer' ? 'REMITTANCE' : payeeType === AGENT ? 'COMMISSION_PAYMENT' : 'REFUND',
@@ -351,7 +346,7 @@ export async function approveAgentPayout(db, id, lineIds, user, { bankAccount = 
   if (d.payee_type !== AGENT) throw badRequest('Voucher is not an Agent/Referrer payout');
   if (['paid', 'cancelled'].includes(d.status)) throw conflict(`Voucher ${d.voucher_number} is ${d.status}`);
   await assertChecker(user, d.created_by, 'payment voucher');
-  // the payee must still be payable when the payment is approved: bank account, licence in force (compliance.referrer_licence_check)
+  // the payee must still be payable when the payment is approved: bank account on file
   const { assertPayable } = await import('../commission/service.js');
   const referrer = (await db.query('SELECT * FROM commission_referrers WHERE id = $1', [d.referrer_id])).rows[0];
   if (referrer) await assertPayable(referrer);

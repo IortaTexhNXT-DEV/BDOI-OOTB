@@ -5,7 +5,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setupFinance, makePolicy, licenseReferrer } from './accounting.fixtures.js';
+import { setupFinance, makePolicy } from './accounting.fixtures.js';
 import { pool, query, withTransaction } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { addDays, today } from '../src/lib/dates.js';
@@ -189,7 +189,6 @@ describe('commission payout', () => {
     const c = await maker('post', '/commission/referrer-accounts').send({ name: 'Approval Referrer', type: 'Agent', level: 'L1', bankName: 'BDO', bankAccountNo: '009988776655' });
     expect(c.status).toBe(201);
     const ref = c.body.data.referrer.id;
-    await licenseReferrer(admin, ref);
     expect((await admin('put', '/settings').send({ settings: { 'commission.auto_eligible_on_full_payment': false } })).status).toBe(200);
     const pol = await makePolicy({ net: 40000, details: { commissionDetails: { brokeragePct: 18, primary: { referrerId: ref, level: 'L1', comsubPct: 8, comsubFixed: 0 }, chain: [] } } });
     expect((await maker('post', '/commission/accrue').send({ policyId: pol.policy.id })).status).toBe(201);

@@ -15,43 +15,38 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 export const ROLES = [
   ['system-admin', 'System Administrator (Super Admin Access)', 'Full access to every module, configuration, user and role administration', true],
   ['sales', 'Sales & Marketing (Account Executive)', 'Prospects, leads, clients, quotation requests, renewals follow-up and own production', false],
-  ['processing', 'Processing Team (Placement & Policy Processing)', 'Broker slips to insurers, offer comparison, quotation and placement slips, insurer confirmation, policy checking and issuance, endorsement processing, reinsurance, product templates', false],
+  ['processing', 'Processing Team (Placement & Policy Processing)', 'Broker slips to insurers, offer comparison, quotation and placement slips, insurer confirmation, policy checking and issuance, endorsement processing, product templates', false],
   ['operations', 'Operations (Client Servicing)', 'Client servicing, endorsement requests, renewals, open items and documents', false],
   ['claims', 'Claims', 'Claims registration, follow-up with insurers, review and settlement', false],
   ['accounting', 'Accounting', 'Billing, collection, official receipts, remittance to insurers, commission, period end and BIR reporting', false],
   ['accounting-manager', 'Accounting Manager', 'Everything Accounting does, plus approving the month-end and year-end close and bank reconciliations, posting into soft-closed periods and reopening periods', false],
-  // AML/CFT compliance officer (migration 0263): Compliance menu, EDD approval, screening decisions, AMLC reports
-  ['compliance-officer', 'Compliance Officer (AML/CFT)', 'Customer risk rating and EDD approval, sanctions and PEP screening decisions, transaction monitoring, AML cases and AMLC covered and suspicious transaction reports', false],
 ];
 /** Role codes of earlier releases (renamed or merged by migration 0140_broker_roles.sql); a fresh seed never creates them. */
 export const RETIRED_ROLES = ['it-admin', 'ba', 'user-access-admin', 'underwriting', 'customer-services', 'finance', 'finance-manager', 'agent'];
-const MODULES = ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'claims', 'renewals', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'reinsurance', 'incentive', 'products', 'masters', 'users', 'roles', 'settings', 'reports', 'schedules', 'notifications', 'journal-vouchers', 'audit', 'period-end', 'bank-reconciliation',
+const MODULES = ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'claims', 'renewals', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'incentive', 'products', 'masters', 'users', 'roles', 'settings', 'reports', 'schedules', 'notifications', 'journal-vouchers', 'audit', 'period-end', 'bank-reconciliation',
   // go-live data workbench (Master > Go-Live Data Load, migration 0243): System Administrator only
-  'data-load',
-  // AML/CFT (Compliance menu, migration 0263): read:aml and write:aml; approve:aml is created by the migration
-  'aml'];
+  'data-load'];
 // write:receipts (official receipts, cash posting, payment verification) is Accounting-only: segregation of duties.
 // Least privilege: the receipt register (read:receipts) is Accounting's; Sales and Operations see a policy's
 // payments through read:policies. Claims officers read the lead through the policy, not the lead register.
 // The System Administrator holds every permission (granted below), so it has no entry here.
 const ROLE_PERMS = {
   sales: ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'reports', 'notifications', 'products:read', 'masters:read', 'claims:read',
-    // full personal identifiers: account executives call and write to their clients (migration 0276); complaints
-    // register read only (complaints are logged and handled by Operations and Claims, migration 0272)
-    'pii:view', 'complaints:read'],
-  processing: ['profile', 'leads:read', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'reinsurance', 'products', 'reports', 'notifications', 'masters:read', 'claims:read'],
+    // full personal identifiers: account executives call and write to their clients (migration 0276)
+    'pii:view'],
+  processing: ['profile', 'leads:read', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'products', 'reports', 'notifications', 'masters:read', 'claims:read'],
   operations: ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'claims:read', 'reports', 'notifications', 'masters:read', 'products:read',
     // data privacy: data subject requests, consent register, personal data export and anonymisation (permissions of migration 0221)
     'privacy:read', 'privacy:write',
-    // full personal identifiers (migration 0276), Insurance Commission registers (0270) and the complaints register (0272)
-    'pii:view', 'compliance', 'complaints'],
-  claims: ['profile', 'clients:read', 'policies:read', 'claims', 'reports', 'notifications', 'masters:read', 'complaints'],
+    // full personal identifiers (migration 0276)
+    'pii:view'],
+  claims: ['profile', 'clients:read', 'policies:read', 'claims', 'reports', 'notifications', 'masters:read'],
   // Accounting calculates, approves (maker-checker) and pays incentives; program set-up stays with the system administrator.
   accounting: ['profile', 'clients:read', 'policies:read', 'claims:read', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'incentive', 'journal-vouchers', 'period-end', 'bank-reconciliation', 'reports', 'notifications', 'masters:read', 'schedules:read',
     // accounts payable sub-ledger and fixed asset register (permissions of migration 0298)
     'payables', 'fixed-assets',
-    // full personal identifiers for BIR forms and payees' bank accounts (migration 0276); licence register and IC reports (0270)
-    'pii:view', 'compliance:read'],
+    // full personal identifiers for BIR forms and payees' bank accounts (migration 0276)
+    'pii:view'],
   // Accounting Manager inherits Accounting (ROLE_INHERITS) and adds the period-end approval (maker-checker on the close).
   // and the bank reconciliation approval (approve:bank-reconciliation: approve / reopen a reconciliation; not its preparer),
   // the insurer statement reconciliation approval (approve:insurer-reconciliation, permission added by migration 0172) and
@@ -60,10 +55,6 @@ const ROLE_PERMS = {
   'accounting-manager': ['period-end:approve', 'bank-reconciliation:approve', 'insurer-reconciliation:approve', 'credit-control:approve', 'posting-rules:write', 'posting-rules:approve',
     // supplier invoices approved by a second user (migration 0298)
     'payables:approve'],
-  // Compliance Officer (AML/CFT): the Compliance menu with its decisions (approve:aml), client onboarding and KYC, and read
-  // access to the policies, claims, receipts and vouchers it reviews
-  // the IC registers and reports, the complaints register and the NPC breach register (write:privacy) belong to the same officer
-  'compliance-officer': ['profile', 'aml', 'aml:approve', 'compliance', 'complaints', 'privacy:read', 'privacy:write', 'clients', 'leads:read', 'policies:read', 'claims:read', 'receipts:read', 'disbursements:read', 'reports:read', 'notifications'],
 };
 // Distribution, programmes and products (permissions of migrations 0300 to 0308): lead assignment rules and queue,
 // distribution channels, brand-new vehicle programmes, fleet schedules, marine open covers, marketing campaigns.

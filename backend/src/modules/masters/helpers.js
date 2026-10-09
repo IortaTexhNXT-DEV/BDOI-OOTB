@@ -1,5 +1,5 @@
 /**
- * Helpers shared by the configuration, masters, product configurator, remittance, reinsurance and incentive modules.
+ * Helpers shared by the configuration, masters, product configurator, remittance and incentive modules.
  */
 import { publicUrl, reserveKey, writeObject } from '../uploads/storage.js';
 import { requireAuth, requirePermission } from '../../lib/auth.js';

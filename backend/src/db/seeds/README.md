@@ -42,13 +42,12 @@ A sample row that the purge script must remove needs a key listed in `scripts/pu
 | `sample/33_renewals.sql` | sample | renewals, renewal quotes, notices, activities, batches, win-back campaign |
 | `40_finance.sql` | reference | finance / accounting settings; chart of accounts |
 | `sample/40_finance.sql` | sample | 8 fictional commission referrers; sample ledger (receivables, receipts, collections, disbursements, cheque books, petty cash, journal vouchers) |
-| `50_system_settings.sql` | reference | System Settings / masters / product configurator / remittance / reinsurance / incentive settings |
-| `51_masters.sql` | reference | master screen registry (`master_types`) and reference master records: account categories / setup, covers, departments, designations, hierarchy, lines of business, main / sub accounts, product categories, risk sections, security ratings, taxation, transaction codes, vehicles, remittance / reinsurance / incentive templates; descriptions on countries, provinces, cities, currencies, policy types, products |
+| `50_system_settings.sql` | reference | System Settings / masters / product configurator / remittance / incentive settings |
+| `51_masters.sql` | reference | master screen registry (`master_types`) and reference master records: account categories / setup, covers, departments, designations, hierarchy, lines of business, main / sub accounts, product categories, risk sections, taxation, transaction codes, vehicles, remittance / incentive templates; descriptions on countries, provinces, cities, currencies, policy types, products |
 | `sample/51_masters.sql` | sample | demo master records: broker companies, employees, bank accounts, petty cash funds, dated exchange rates, insurer commission rates; demo contact details on banks, insurers, signatories, branches |
 | `52_product_configurator.sql` | reference | product templates, components, risk sections and mappings |
 | `62_period_end_reports.sql` | reference | report catalogue rows of period-end processing and BIR tax (income statement, balance sheet, trial balance with opening / movement / closing, GL detail, aged payables to insurers, month-end close status, VAT summary, SAWT, QAP, SLSP) |
 | `sample/53_remittance.sql` | sample | six sample users: five Account Executives with the Sales & Marketing role (`agent.jdelacruz`, `agent.msantos`, `agent.preyes`, `agent.agarcia`, `agent.jmartinez`; the usernames are kept from earlier releases) and an Accounting approver (`fin.approver`); random unusable passwords; remittances, bills, items, approvals, delegation |
-| `sample/54_reinsurance.sql` | sample | reinsurers, treaties, cessions, recoveries, bordereaux, reconciliations, exceptions |
 | `sample/55_incentive.sql` | sample | incentive programmes, calculations, results |
 | `56_chart_of_accounts_masters.sql` | reference | Main / Sub Account masters mirroring the chart of accounts |
 | `56_motor_tariff.sql`, `57_ctpl_inclusive_tariff.sql` | reference | motor tariff and CTPL premiums on the motor templates |

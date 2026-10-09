@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { setupFinance, makePolicy, ledgerIntegrity, licenseReferrer } from './accounting.fixtures.js';
+import { setupFinance, makePolicy, ledgerIntegrity } from './accounting.fixtures.js';
 import { pool, withTransaction } from '../src/db/pool.js';
 import { createReceivable, accrueCommission } from '../src/modules/policies/service.js';
 
@@ -138,7 +138,6 @@ describe('commission accrues only to producers (Sales & Marketing) and referrers
   it('a referrer without a bank account cannot be approved or paid out; the account shows the configured WHT rate', async () => {
     const c = await ctx.as('maker')('post', '/commission/referrer-accounts').send({ name: 'Nobank Referrer', type: 'Agent', level: 'L1' });
     const ref = c.body.data.referrer.id;
-    await licenseReferrer(ctx.api, ref);
     expect(c.body.data.referrer.bankAccountMissing).toBe(true);
     expect(c.body.data.referrer.payoutBlockedReason).toContain('no bank account');
     expect(c.body.data.referrer.whtPct).toBe(5);

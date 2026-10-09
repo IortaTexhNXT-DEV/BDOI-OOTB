@@ -217,7 +217,7 @@ export class Masker {
     }
   }
 
-  /** Institutions (insurers, reinsurers, banks, the broker itself) are not personal data: their names are kept. */
+  /** Institutions (insurers, banks, the broker itself) are not personal data: their names are kept. */
   addInstitution(name) {
     const k = (String(name ?? '').match(WORD_RE) || []).map(norm).join(' ');
     if (k) this.institutions.add(k);

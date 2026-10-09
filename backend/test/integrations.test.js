@@ -368,10 +368,6 @@ describe('bank payment files', () => {
     // referrer payout voucher (bank account on the referrer record)
     const c = await maker('post', '/commission/referrer-accounts').send({ name: 'Bank File Referrer', type: 'Agent', level: 'L1', bankName: 'BDO', bankAccountNo: '009988776655' });
     const ref = c.body.data.referrer.id;
-    // an agent is paid only with a valid IC licence on the register (compliance.referrer_licence_check, delivered as block)
-    const day = (d) => new Date(Date.now() + d * 864e5).toISOString().slice(0, 10);
-    const lic = await admin('post', '/compliance/licences').send({ holderType: 'referrer', referrerId: ref, licenceType: 'Non-life Insurance Agent', licenceNumber: 'NL-BANKFILE-001', issueDate: day(-30), expiryDate: day(300) });
-    expect(lic.status, JSON.stringify(lic.body)).toBe(201);
     await admin('put', '/settings').send({ settings: { 'commission.auto_eligible_on_full_payment': false } });
     const pol = await makePolicy({ net: 40000, details: { commissionDetails: { brokeragePct: 18, primary: { referrerId: ref, level: 'L1', comsubPct: 8, comsubFixed: 0 }, chain: [] } } });
     expect((await maker('post', '/commission/accrue').send({ policyId: pol.policy.id })).status).toBe(201);

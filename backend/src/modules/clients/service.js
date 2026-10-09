@@ -5,6 +5,7 @@ import { assertBirthDate } from '../../lib/birthDate.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { isoDate } from '../../lib/dates.js';
 import { fillRegion } from '../../lib/address.js';
+import { refreshKycStatus, saveOwner, saveSignatory } from './kyc.js';
 
 const FIELD_MAP = {
   firstName: 'first_name', lastName: 'last_name', preferredName: 'preferred_name', companyName: 'company_name',
@@ -19,7 +20,7 @@ const FIELD_MAP = {
   expectedPaymentMode: 'expected_payment_mode', expectedAnnualPremium: 'expected_annual_premium', onboardedVia: 'onboarded_via',
 };
 const KNOWN = new Set([...Object.keys(FIELD_MAP), 'DOB', 'email', 'phone', 'clientId', 'id', 'generatedClientId', 'policies', 'createdAt', 'updatedAt', 'leadId',
-  // set by the AML module or the onboarding route, never stored from a request body
+  // derived or set by the onboarding route, never stored from a request body
   'kycStatus', 'riskRating', 'riskScore', 'kycNextReviewOn', 'onboardedAt', 'signatories', 'beneficialOwners']);
 
 export function toClient(r, policies = null) {
@@ -35,15 +36,14 @@ export function toClient(r, policies = null) {
     // set on Accounts > Credit Control > Client Credit Limits (approve:credit-control), not on the client form
     creditLimit: r.credit_limit === null || r.credit_limit === undefined ? null : Number(r.credit_limit),
     policies: policies ?? r.policies ?? [], createdAt: r.created_at, updatedAt: r.updated_at,
-    // customer due diligence: identification, juridical registration, PEP, expected business; rating and status set by the AML module
+    // customer due diligence: identification, juridical registration, PEP, expected business; KYC status set from what is missing
     middleName: r.middle_name ?? null, suffix: r.suffix ?? null, placeOfBirth: r.place_of_birth ?? null, civilStatus: r.civil_status ?? null, nationality: r.nationality ?? null,
     occupation: r.occupation ?? null, employerName: r.employer_name ?? null, sourceOfFunds: r.source_of_funds ?? null, idType: r.id_type ?? null, idNumber: r.id_number ?? null,
     idExpiry: r.id_expiry ?? null, customerType: r.customer_type ?? null, tradeName: r.trade_name ?? null, registrationAuthority: r.registration_authority ?? null,
     registrationNumber: r.registration_number ?? null, registrationDate: r.registration_date ?? null, businessNature: r.business_nature ?? null,
     incorporationCountry: r.incorporation_country ?? null, isPep: !!r.is_pep, pepDetails: r.pep_details ?? null, expectedLines: r.expected_lines || [],
     expectedPaymentMode: r.expected_payment_mode ?? null, expectedAnnualPremium: r.expected_annual_premium === null || r.expected_annual_premium === undefined ? null : Number(r.expected_annual_premium),
-    kycStatus: r.kyc_status ?? null, riskRating: r.risk_rating ?? null, riskScore: r.risk_score ?? null, kycNextReviewOn: r.kyc_next_review_on ?? null,
-    onboardedVia: r.onboarded_via ?? null, onboardedAt: r.onboarded_at ?? null,
+    kycStatus: r.kyc_status ?? null, onboardedVia: r.onboarded_via ?? null, onboardedAt: r.onboarded_at ?? null,
   };
 }
 
@@ -166,8 +166,7 @@ export function customerCodes(scope = null) {
 /**
  * Onboard a client before its first policy (Operations > Clients > Onboard client): the client record with its
  * identification and, for a juridical client, its authorised signatories and beneficial owners, in one transaction;
- * then the AML onboarding checks (risk rating, screening of the client, owners and signatories). Returns the client and
- * the result of the checks.
+ * the KYC status is then set from what is still missing.
  */
 export async function onboardClient(body, userId) {
   const { signatories = [], beneficialOwners = [], ...fields } = body;
@@ -176,25 +175,19 @@ export async function onboardClient(body, userId) {
   cols.onboarded_via = 'onboarding';
   await assertBirthDate(cols.birth_date);
   await fillRegion(cols);
-  const { saveSignatory, saveOwner } = await import('../aml/kyc.js');
-  const { onClientOnboarded } = await import('../aml/hooks.js');
   const id = await withTransaction(async (db) => {
     const clientId = await insertClient(db, cols, extra, userId);
     for (const sg of signatories) await saveSignatory(clientId, null, sg, userId, db);
     for (const bo of beneficialOwners) await saveOwner(clientId, null, bo, userId, db);
+    await refreshKycStatus(clientId, db);
     return clientId;
   });
-  const aml = await withTransaction((db) => onClientOnboarded(db, id, userId));
-  return { client: await getClient(id), aml };
+  return getClient(id);
 }
 
-/** Update the identification of a client (onboarding screen) and rate it again. */
+/** Update the identification of a client (onboarding screen); its KYC status follows. */
 export async function updateKyc(id, body, userId) {
   const { before } = await updateClient(id, body, userId);
-  const { assessClient } = await import('../aml/risk.js');
-  const { screenClient } = await import('../aml/screening.js');
-  const nameChanged = ['first_name', 'last_name', 'middle_name', 'company_name', 'trade_name', 'birth_date'].some((k) => columnsFrom(body).cols[k] !== undefined && String(columnsFrom(body).cols[k] ?? '') !== String(before[k] ?? ''));
-  if (nameChanged) await screenClient(before.id, { event: 'onboarding', referenceType: 'client', referenceId: before.id, userId });
-  const assessment = await withTransaction((db) => assessClient(db, before.id, { trigger: 'manual', userId, reference: 'Identification updated' }));
-  return { before, after: await getClient(before.id), assessment };
+  await refreshKycStatus(before.id);
+  return { before, after: await getClient(before.id) };
 }

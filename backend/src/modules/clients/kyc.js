@@ -1,13 +1,22 @@
 /**
- * Client due diligence records: authorised signatories and beneficial owners of juridical clients, KYC documents, and
- * the AML profile of a client (identification, rating, screening, EDD) shown on the onboarding and compliance screens.
+ * Client due diligence records of the onboarding screen (Operations > Clients > Onboard client): authorised signatories
+ * and beneficial owners of juridical clients, KYC documents, the identification still missing and the KYC status.
  */
 import { query } from '../../db/pool.js';
+import { getSetting } from '../../lib/settings.js';
+import { num } from '../../lib/money.js';
 import { badRequest, notFound } from '../../lib/errors.js';
 import { storeFile } from '../uploads/storage.js';
-import { amlSetting, isoDay, num } from './common.js';
-import { assessments, listEdd, missingKyc, refreshKycStatus } from './risk.js';
-import { listHits, screeningsOf } from './screening.js';
+
+const isoDay = (v) => {
+  if (!v) return null;
+  if (v instanceof Date) return v.toISOString().slice(0, 10);
+  const s = String(v);
+  return /^\d{4}-\d{2}-\d{2}/.test(s) ? s.slice(0, 10) : null;
+};
+
+/** Ownership percentage from which a natural person is a beneficial owner of a juridical client. */
+const ownerThreshold = async () => num(await getSetting('clients.beneficial_owner_threshold', 25));
 
 export async function clientRow(id) {
   const c = (await query('SELECT * FROM clients WHERE id = $1 OR client_code = $1', [id])).rows[0];
@@ -40,14 +49,10 @@ const BO_COLS = { fullName: 'full_name', nationality: 'nationality', birthDate: 
 
 const pickCols = (map, b) => Object.fromEntries(Object.entries(map).filter(([k]) => b[k] !== undefined).map(([k, c]) => [c, b[k] === '' ? null : b[k]]));
 
-async function assertJuridical(c) {
-  if (c.client_type !== 'corporate') throw badRequest('Authorised signatories and beneficial owners are recorded for juridical clients (client type corporate)');
-}
-
 async function saveChild(table, map, rowFn, clientId, id, b, userId, db = { query }) {
   const c = (await db.query('SELECT * FROM clients WHERE id = $1 OR client_code = $1', [clientId])).rows[0];
   if (!c) throw notFound('Client not found');
-  await assertJuridical(c);
+  if (c.client_type !== 'corporate') throw badRequest('Authorised signatories and beneficial owners are recorded for juridical clients (client type corporate)');
   const cols = pickCols(map, b);
   if (id) {
     const before = (await db.query(`SELECT * FROM ${table} WHERE id = $1 AND client_id = $2`, [id, c.id])).rows[0];
@@ -78,14 +83,14 @@ export async function documents(clientId) {
     WHERE d.client_id = $1 ORDER BY d.uploaded_at DESC, d.id DESC`, [clientId])).rows.map(documentRow);
 }
 
-/** Store an uploaded KYC document (folder kyc) and link it to the client and, optionally, a signatory, owner or EDD review. */
+/** Store an uploaded KYC document (folder kyc) and link it to the client and, optionally, a signatory or beneficial owner. */
 export async function addDocument(clientId, file, b, user) {
   const c = await clientRow(clientId);
   if (!file?.buffer?.length) throw badRequest('Attach the document in the "file" field');
   const relatedType = b.relatedType || 'client';
   if (relatedType !== 'client') {
-    const table = { signatory: 'client_signatories', 'beneficial-owner': 'client_beneficial_owners', edd: 'aml_edd_reviews' }[relatedType];
-    if (!table) throw badRequest('relatedType must be client, signatory, beneficial-owner or edd');
+    const table = { signatory: 'client_signatories', 'beneficial-owner': 'client_beneficial_owners' }[relatedType];
+    if (!table) throw badRequest('relatedType must be client, signatory or beneficial-owner');
     const ok = (await query(`SELECT 1 FROM ${table} WHERE id = $1 AND client_id = $2`, [b.relatedId || '', c.id])).rows[0];
     if (!ok) throw badRequest(`relatedId is not a ${relatedType} of this client`);
   }
@@ -96,10 +101,43 @@ export async function addDocument(clientId, file, b, user) {
   return { ...documentRow(r), url: stored.url };
 }
 
+/** Identification still missing on the client record (labels shown on the onboarding screen). */
+export async function missingKyc(db, c) {
+  const missing = [];
+  const need = (v, label) => { if (v === null || v === undefined || String(v).trim() === '') missing.push(label); };
+  if (c.client_type === 'corporate') {
+    need(c.company_name, 'Registered name');
+    need(c.registration_number, 'SEC, DTI or CDA registration number');
+    need(c.tin, 'TIN');
+    need(c.city || c.state, 'Registered address');
+    const sig = Number((await db.query("SELECT count(*) AS n FROM client_signatories WHERE client_id = $1 AND status = 'active'", [c.id])).rows[0].n);
+    if (!sig) missing.push('Authorised signatory with board resolution or secretary\'s certificate');
+    const bo = Number((await db.query("SELECT count(*) AS n FROM client_beneficial_owners WHERE client_id = $1 AND status = 'active'", [c.id])).rows[0].n);
+    if (!bo) missing.push('Beneficial owner declaration');
+  } else {
+    need(c.first_name, 'First name');
+    need(c.last_name, 'Last name');
+    need(c.birth_date, 'Date of birth');
+    need(c.nationality, 'Nationality');
+    need(c.id_type, 'ID type');
+    need(c.id_number, 'ID number');
+    need(c.city || c.state, 'Address');
+  }
+  return missing;
+}
+
+/** Recompute and store the KYC status of a client (complete when nothing is missing, pending otherwise); returns it. */
+export async function refreshKycStatus(clientId, db = { query }) {
+  const c = (await db.query('SELECT * FROM clients WHERE id = $1', [clientId])).rows[0];
+  if (!c) return null;
+  const status = (await missingKyc(db, c)).length ? 'pending' : 'complete';
+  if (status !== c.kyc_status) await db.query('UPDATE clients SET kyc_status = $2 WHERE id = $1', [clientId, status]);
+  return status;
+}
+
 /** Beneficial owner checks of a juridical client: owners at or above the threshold, total declared, missing controller. */
-export async function ownerWarnings(c, list) {
+export function ownerWarnings(c, list, threshold) {
   if (c.client_type !== 'corporate') return [];
-  const threshold = num(await amlSetting('aml.beneficial_owner_threshold'));
   const active = list.filter((o) => o.status === 'active');
   const warnings = [];
   if (!active.length) warnings.push('No beneficial owner declared: record the natural persons who own or control the client, or its senior managing official');
@@ -110,27 +148,23 @@ export async function ownerWarnings(c, list) {
   return warnings;
 }
 
-/** AML profile of a client: identification, signatories, owners, documents, rating history, screening, EDD. */
+/** KYC profile of a client: identification gaps, signatories, beneficial owners and documents. */
 export async function profile(id) {
   const c = await clientRow(id);
-  await refreshKycStatus({ query }, c.id);
+  await refreshKycStatus(c.id);
   const fresh = await clientRow(c.id);
   const ownerList = await owners(c.id);
+  const threshold = await ownerThreshold();
   return {
     client: {
       id: fresh.id, clientCode: fresh.client_code, displayName: fresh.display_name, clientType: fresh.client_type, customerType: fresh.customer_type,
-      kycStatus: fresh.kyc_status, riskRating: fresh.risk_rating, riskScore: fresh.risk_score, riskAssessedAt: fresh.risk_assessed_at,
-      kycReviewedOn: isoDay(fresh.kyc_reviewed_on), kycNextReviewOn: isoDay(fresh.kyc_next_review_on), isPep: fresh.is_pep, onboardedVia: fresh.onboarded_via, onboardedAt: fresh.onboarded_at,
+      kycStatus: fresh.kyc_status, isPep: fresh.is_pep, onboardedVia: fresh.onboarded_via, onboardedAt: fresh.onboarded_at,
     },
     missing: await missingKyc({ query }, fresh),
     signatories: await signatories(c.id),
     beneficialOwners: ownerList,
-    ownerWarnings: await ownerWarnings(fresh, ownerList),
-    beneficialOwnerThreshold: num(await amlSetting('aml.beneficial_owner_threshold')),
+    ownerWarnings: ownerWarnings(fresh, ownerList, threshold),
+    beneficialOwnerThreshold: threshold,
     documents: await documents(c.id),
-    assessments: await assessments(c.id),
-    screenings: await screeningsOf(c.id),
-    hits: await listHits({ clientId: c.id }),
-    eddReviews: await listEdd({ clientId: c.id }),
   };
 }

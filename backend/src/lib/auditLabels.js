@@ -50,7 +50,7 @@ export const ENTITY_LABELS = {
   period_close_checklist: 'Month-end checklist', lgu_tax_rate: 'LGU tax rate', insurer_rate_table: 'Insurer rate table', gl_account: 'GL account',
   bank_transaction_type: 'Bank transaction type', bank_statement_line: 'Bank statement line', bank_statement_format: 'Bank statement format',
   bank_statement: 'Bank statement', access_review: 'Access review', year_end_run: 'Year-end close', write_off_reason: 'Write-off reason',
-  user_delegation: 'Delegation', treaty: 'Treaty', tax_code: 'Tax code', scheduled_job: 'Scheduled job', posting_rule: 'Posting rule',
+  user_delegation: 'Delegation', tax_code: 'Tax code', scheduled_job: 'Scheduled job', posting_rule: 'Posting rule',
   insurer_statement_format: 'Insurer statement format', instalment_plan: 'Instalment plan', incentive_calculation: 'Incentive calculation',
   generated_report: 'Report', entry_match: 'Entry match', document_numbering: 'Document numbering', direct_bill_client_payment: 'Direct bill payment',
   bank_rec_match: 'Bank reconciliation match', agent_event: 'Agent event', accounting_period: 'Accounting period', account_map: 'Account mapping',

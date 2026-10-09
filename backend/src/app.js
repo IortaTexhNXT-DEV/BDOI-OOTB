@@ -15,7 +15,6 @@ import { requestContext } from './lib/requestContext.js';
 import { healthHandler, livenessHandler } from './lib/health.js';
 import { logger, redactRequest } from './lib/logger.js';
 import { piiMiddleware } from './lib/piiPolicy.js';
-import { complianceWarningsMiddleware } from './lib/complianceWarnings.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
@@ -74,8 +73,6 @@ export async function createApp() {
   app.use(signFileLinks);
   // personal identifiers: decrypted on the way out and masked for users without view:pii (lib/piiPolicy.js)
   app.use(piiMiddleware);
-  // warnings of compliance controls set to warn (insurer authority, referrer licence) travel with the answer
-  app.use(complianceWarningsMiddleware);
 
   const api = express.Router();
   app.use('/api', api);

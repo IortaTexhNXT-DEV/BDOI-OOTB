@@ -33,9 +33,6 @@ export const RULES = [
   // BIR EIS: the acknowledgement of each e-invoice is tax evidence, kept 10 years by default (BIR record keeping); a queued or
   // sending submission is never deleted
   { key: 'housekeeping.eis_submissions_days', days: 3653, table: 'eis_submissions', where: "status IN ('accepted', 'rejected', 'failed', 'manual') AND COALESCE(accepted_at, submitted_at, updated_at) < $1" },
-  // AML screening provider calls: finished requests only (the screening itself stays in aml_screenings); 5 years by default
-  // (AMLA record keeping)
-  { key: 'housekeeping.aml_provider_requests_days', days: 1827, table: 'aml_provider_requests', where: "status IN ('succeeded', 'failed', 'abandoned') AND updated_at < $1" },
   // go-live workbench: the rows of a batch that was loaded or failed validation; the batch row (counts, sheets, result) stays.
   // The rows of a validated batch are kept: it can still be loaded
   { key: 'housekeeping.data_load_rows_days', days: 365, table: 'data_load_rows', where: "batch_id IN (SELECT id FROM data_load_batches b WHERE b.status IN ('loaded', 'failed') AND COALESCE(b.loaded_at, b.validated_at, b.created_at) < $1)" },
