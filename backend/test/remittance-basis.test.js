@@ -153,4 +153,13 @@ describe('gross remittance', () => {
     expect(credit).toMatchObject({ basis: 'gross', status: 'unbilled', reference: 'END-G-1' });
     expect([Number(credit.gross_premium), Number(credit.commission), Number(credit.vat)]).toEqual([-2505, -300, -36]);
   });
+
+  it('a cancellation credits the commission computed on the net premium returned, not the share of the gross', async () => {
+    // net 10,000 returned in full: the taxes kept (DST) do not reduce the commission taken back (1,500)
+    const r = await withTransaction(async (db) => returnPremium(db, { policy: await findPolicy(db, m.policy.id), amount: 11275, kind: 'cancellation',
+      breakdown: { netPremium: 10000, vat: 1200, lgt: 75, commissionAmount: 1500 }, reference: 'END-G-2', user: { id: ctx.userIds.maker } }));
+    expect(r.amount).toBe(11275);
+    const credit = (await items(m.policy.id)).find((i) => i.reference === 'END-G-2');
+    expect(Number(credit.commission)).toBe(-1200);
+  });
 });

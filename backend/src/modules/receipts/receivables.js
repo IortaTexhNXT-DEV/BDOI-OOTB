@@ -397,7 +397,10 @@ export async function returnPremium(db, { policy, amount, breakdown = {}, kind =
     participants: split.parts,
     vars: { policyNumber: policy.policy_number, reference: reference || '', billNumber: billNumbers || policy.bill_number || '', clientName: policy.client_name || 'client', insurer: policy.insurer_name || 'insurer', participantSuffix: '' },
   }, { db, user });
-  if (basis === 'gross') await returnGrossCommission(db, { policy, gross, reference, endorsementId, date, user });
+  if (basis === 'gross') {
+    const computedCommission = breakdown.commissionAmount !== undefined && breakdown.commissionAmount !== null ? round2(Math.abs(num(breakdown.commissionAmount))) : null;
+    await returnGrossCommission(db, { policy, gross, commission: computedCommission, reference, endorsementId, date, user });
+  }
   for (const c of credits) {
     await db.query(`INSERT INTO receivable_credits(receivable_id, policy_id, endorsement_id, kind, amount, refund_amount, journal_id, created_by) VALUES ($1,$2,$3,$4,$5,0,$6,$7)`,
       [c.receivable.id, policy.id, endorsementId, kind, c.amount, jv.id, user?.id ?? null]);
@@ -420,12 +423,15 @@ export async function returnPremium(db, { policy, amount, breakdown = {}, kind =
 
 /**
  * Gross basis: the commission on a return premium is credited to the insurer on the next billing statement (a negative
- * unbilled item), at the ratio of commission to premium of the policy's commission items.
+ * unbilled item): the commission computed for the return (a cancellation's, on the net premium returned), else the
+ * ratio of commission to premium of the policy's commission items.
  */
-async function returnGrossCommission(db, { policy, gross, reference, endorsementId, date, user }) {
-  const r = (await db.query(`SELECT COALESCE(sum(commission) FILTER (WHERE gross_premium > 0), 0) AS c, COALESCE(sum(gross_premium) FILTER (WHERE gross_premium > 0), 0) AS g
-    FROM direct_bill_items WHERE policy_id = $1 AND basis = 'gross' AND status <> 'cancelled'`, [policy.id])).rows[0];
-  const commission = Number(r.g) > 0 ? round2(Math.min(gross * (Number(r.c) / Number(r.g)), gross)) : 0;
+async function returnGrossCommission(db, { policy, gross, commission: computed = null, reference, endorsementId, date, user }) {
+  const r = (await db.query(`SELECT COALESCE(sum(commission) FILTER (WHERE gross_premium > 0), 0) AS c, COALESCE(sum(gross_premium) FILTER (WHERE gross_premium > 0), 0) AS g,
+      COALESCE(sum(commission), 0) AS left FROM direct_bill_items WHERE policy_id = $1 AND basis = 'gross' AND status <> 'cancelled'`, [policy.id])).rows[0];
+  const byRatio = Number(r.g) > 0 ? round2(Math.min(gross * (Number(r.c) / Number(r.g)), gross)) : 0;
+  // never more than the commission not yet taken back
+  const commission = computed !== null ? round2(Math.min(computed, Math.max(Number(r.left), 0))) : byRatio;
   if (!(commission > 0)) return;
   const { bookDirectBill } = await import('../remittance/directbill.js');
   await bookDirectBill(db, { policy, amount: -gross, breakdown: { commissionAmount: commission }, source: 'endorsement', reference, endorsementId, date: await postingDate(date), user, basis: 'gross' });

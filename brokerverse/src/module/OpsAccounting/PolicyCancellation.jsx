@@ -142,7 +142,7 @@ const PolicyCancellation = () => {
             <h3 className="m-0">{t("opsAcc.cancellation.resultTitle", { number: quote.policyNumber })}</h3>
             <span className="pe-muted">{t("opsAcc.cancellation.periodLine", { from: date(quote.inceptionDate), to: date(quote.expiryDate), on: date(quote.effectiveDate) })}</span>
           </div>
-          <StatCards items={resultCards(quote, t)} />
+          <StatCards items={resultCards(quote, t)} className="bv-stat-cards--wide" />
           <div className="flex align-items-center justify-content-between flex-wrap gap-2">
             {quote.method === "short-period" && canOpen(SHORT_PERIOD_MASTER) ? <Link to={SHORT_PERIOD_MASTER}>{t("opsAcc.cancellation.scaleLink")}</Link> : <span />}
             <Button icon="pi pi-check" label={t("opsAcc.cancellation.create")} onClick={create} loading={busy} />
