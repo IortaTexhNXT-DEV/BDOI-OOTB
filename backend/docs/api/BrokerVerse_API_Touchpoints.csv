@@ -4538,7 +4538,9 @@
       ""lgt"": 37.5
     },
     ""grossReturn"": 5637.5,
-    ""commissionReversed"": 750
+    ""commissionReversed"": 750,
+    ""remittanceBasis"": ""net"",
+    ""insurerReturn"": 4872.5
   }
 }"
 238,Cancellations,GET,/api/cancellations/reasons,Cancellation reasons (master cancellation-reason): who initiates and the return premium method,Operations > Policy Cancellation,Bearer JWT,read:endorsements,,"{
@@ -8623,7 +8625,7 @@
   ""success"": true
 }"
 431,Endorsements,GET,/api/endorsements/:id/pdf,"Printable endorsement (PDF, broker letterhead and branding; authorised signature once issued)",Operations > Policy > Endorsement > Detailed view > Print,Bearer JWT,read:endorsements,Query: ?download=1,(application/pdf)
-432,Endorsements,POST,/api/endorsements/complete-endorsement,"Complete the endorsement: apply changes and premium delta to the policy, bill a positive delta, notify the policy owner",Operations > Policy > Endorsement > Upload endorsement > Submit,Bearer JWT,write:endorsements,"{
+432,Endorsements,POST,/api/endorsements/complete-endorsement,"Complete the endorsement: apply changes and premium delta to the policy, bill a positive delta, notify the policy owner; a cancellation or return premium is completed by another user holding approve:policies (endorsements.return_approval)",Operations > Policy > Endorsement > Upload endorsement > Submit,Bearer JWT,write:endorsements,"{
   ""endorsementId"": ""end_1"",
   ""policyNumber"": ""POL-2026-00001"",
   ""endorsementNumber"": ""INS-END-778"",
@@ -8712,11 +8714,13 @@
     ]
   }
 }"
-436,Endorsements,POST,/api/endorsements/initiate-cancel-policy/:id,Initiate policy cancellation (InitiateCancel),Operations > Policy > Endorsement > Summary,Bearer JWT,write:endorsements,"{
+436,Endorsements,POST,/api/endorsements/initiate-cancel-policy/:id,Initiate policy cancellation: notice to the customer and request to the insurer (InitiateCancel),Operations > Policy > Endorsement > Summary,Bearer JWT,write:endorsements,"{
   ""sentBy"": ""agent""
 }","{
   ""success"": true,
   ""message"": ""Endorsement sent"",
+  ""emailedTo"": ""maria.santos@example.ph"",
+  ""insurerEmailedTo"": ""uw@malayan.example"",
   ""endorsement"": {
     ""endorsementId"": ""end_1"",
     ""endorsementNumber"": ""END-2026-00001"",
@@ -8729,11 +8733,13 @@
     ""premiumDelta"": 0
   }
 }"
-437,Endorsements,POST,/api/endorsements/send-endorsement-to-customer/:id,Send the endorsement to the customer (PendingCustomer),Operations > Policy > Endorsement > Summary,Bearer JWT,write:endorsements,"{
+437,Endorsements,POST,/api/endorsements/send-endorsement-to-customer/:id,Send the endorsement to the customer and the request to the insurer (PendingCustomer),Operations > Policy > Endorsement > Summary,Bearer JWT,write:endorsements,"{
   ""sentBy"": ""agent""
 }","{
   ""success"": true,
   ""message"": ""Endorsement sent"",
+  ""emailedTo"": ""maria.santos@example.ph"",
+  ""insurerEmailedTo"": ""uw@malayan.example"",
   ""endorsement"": {
     ""endorsementId"": ""end_1"",
     ""endorsementNumber"": ""END-2026-00001"",
