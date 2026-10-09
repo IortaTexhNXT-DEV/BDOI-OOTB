@@ -6475,6 +6475,9 @@
     "copyNamed": "Copy {{name}}",
     "copied": "Copied"
   },
+  "loadingBar": {
+    "refreshing": "Refreshing"
+  },
   "birTax": {
     "withholdingReturns": "Withholding Returns",
     "withholdingReturnsHelp": "BIR Form 0619-E for the first and second month of each quarter, 1601-EQ per quarter (with the QAP), 2551Q for a non-VAT broker and the annual 1604-E, computed from the payment vouchers and the ledger. Open a return to see it on the BIR layout, check the reconciliation and record the filing.",

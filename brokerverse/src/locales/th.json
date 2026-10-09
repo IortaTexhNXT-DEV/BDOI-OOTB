@@ -5271,6 +5271,9 @@
     "copyNamed": "คัดลอก {{name}}",
     "copied": "คัดลอกแล้ว"
   },
+  "loadingBar": {
+    "refreshing": "กำลังโหลดข้อมูลใหม่"
+  },
   "opsAcc": {
     "masters": {
       "leadSources": {
