@@ -2956,99 +2956,21 @@
   "claimAuditTrail": {
     "title": "ประวัติการตรวจสอบเคลม",
     "back": "กลับ",
-    "newestFirst": "ใหม่สุดก่อน",
-    "oldestFirst": "เก่าสุดก่อน",
-    "claimNumber": "เลขเคลม:",
-    "policyHolder": "ผู้ถือกรมธรรม์:",
-    "sortByDate": "เรียงตามวันที่:",
-    "selectSortOrder": "เลือกลำดับการเรียง",
-    "errorLoading": "โหลดประวัติการตรวจสอบไม่สำเร็จ: {{error}}",
-    "noRecordsFound": "ไม่พบรายการประวัติการตรวจสอบ",
-    "nA": "ไม่มีข้อมูล",
-    "invalidDate": "วันที่ไม่ถูกต้อง",
-    "dateError": "ข้อผิดพลาดของวันที่",
-    "system": "ระบบ"
+    "nA": "ไม่มีข้อมูล"
   },
   "claimRequestApproval": {
-    "clients": "ลูกค้า",
-    "claimLabel": "เคลม: {{claimNumber}}",
-    "loading": "กำลังโหลด...",
-    "waitingForUpdate": "รอการอัปเดต",
-    "claimRequestRaised": "คำขอเคลมสำหรับเลขกรมธรรม์: {{policyNumber}} ถูกส่งแล้ว",
-    "kindlyBePatient": "กรุณารอขณะที่บริษัทประกันดำเนินการและมอบหมายผู้ประเมิน",
-    "edit": "แก้ไข",
-    "proceed": "ดำเนินการต่อ",
-    "updating": "กำลังอัปเดต...",
     "error": "ข้อผิดพลาด",
     "failedToLoadClaimDetails": "โหลดรายละเอียดเคลมเพื่อแก้ไขไม่สำเร็จ",
-    "unexpectedErrorLoading": "เกิดข้อผิดพลาดที่ไม่คาดคิดขณะโหลดรายละเอียดเคลม",
     "success": "สำเร็จ",
     "claimStatusUpdated": "อัปเดตสถานะเคลมสำเร็จ",
-    "failedToUpdateStatus": "อัปเดตสถานะเคลมไม่สำเร็จ",
-    "unexpectedError": "เกิดข้อผิดพลาดที่ไม่คาดคิด"
-  },
-  "settlementApproval": {
-    "clients": "ลูกค้า",
-    "claimLabel": "เคลม: {{claimNumber}}",
-    "loading": "กำลังโหลด...",
-    "claimRejectedToast": "เคลมถูกปฏิเสธ",
-    "waitingForSettlement": "รอการชำระเคลม",
-    "claimBeingProcessed": "เคลมของคุณกำลังอยู่ระหว่างดำเนินการ",
-    "kindlyBePatientSettlement": "กรุณารอจนกว่าสถานะการชำระเคลมจะเสร็จสิ้น",
-    "reject": "ปฏิเสธ",
-    "rejecting": "กำลังปฏิเสธ...",
-    "proceed": "ดำเนินการต่อ"
+    "failedToUpdateStatus": "อัปเดตสถานะเคลมไม่สำเร็จ"
   },
   "claimSettlementDetail": {
-    "clients": "ลูกค้า",
-    "claimSettlement": "การชำระเคลม",
-    "loadingClaimDetails": "กำลังโหลดรายละเอียดเคลม...",
-    "errorLoadingClaimDetails": "โหลดรายละเอียดเคลมไม่สำเร็จ: {{error}}",
-    "claimLabel": "เคลม: {{claimNumber}}",
-    "policyNumber": "เลขกรมธรรม์",
-    "claimNumber": "เลขเคลม",
-    "dateReported": "วันที่แจ้ง",
-    "dateOfLoss": "วันที่เกิดความเสียหาย",
     "documents": "เอกสาร",
     "acknowledgmentLetter": "จดหมายรับรองเคลม",
     "claimsDischargeVoucher": "ใบรับรองการชำระเคลม",
     "claimsDataSheet": "แผ่นข้อมูลเคลม",
-    "fir": "FIR",
-    "downloading": "กำลังดาวน์โหลด...",
-    "view": "ดู"
-  },
-  "settlementDetails": {
-    "clients": "ลูกค้า",
-    "claimLabel": "เคลม: {{claimNumber}}",
-    "claimSettlement": "การชำระเคลม",
-    "claimSettledSuccess": "เคลมชำระสำเร็จ",
-    "settlementType": "ประเภทการชำระ",
-    "settlementAmount": "จำนวนเงินชำระ",
-    "issueDate": "วันที่ออก",
-    "settleDate": "วันที่ชำระ",
-    "documents": "เอกสาร",
-    "upload": "อัปโหลด",
-    "uploadMaxSize": "สูงสุด 2 MB (เฉพาะไฟล์ PNG หรือ JPEG)",
-    "select": "เลือก",
-    "back": "กลับ",
-    "submit": "ส่ง",
-    "submitting": "กำลังส่ง...",
-    "cash": "เงินสด",
-    "card": "บัตร",
-    "cheque": "เช็ค",
-    "coInsuranceDetails": "รายละเอียดประกันร่วม",
-    "coInsurancePolicyYes": "กรมธรรม์ประกันร่วม: ใช่",
-    "insurer": "บริษัทประกัน",
-    "role": "บทบาท",
-    "sharePercent": "ส่วนแบ่ง (%)",
-    "claimAmount": "จำนวนเงินเคลม",
-    "settlementAmountCol": "จำนวนเงินชำระ",
-    "status": "สถานะ",
-    "leadInsurer": "บริษัทประกันหลัก",
-    "coInsurer": "บริษัทประกันร่วม",
-    "total": "รวม",
-    "settled": "ชำระแล้ว",
-    "settlementAmountNote": "* จำนวนเงินชำระอาจต่างจากจำนวนเงินเคลมตามการอนุมัติและการปรับของบริษัทประกัน"
+    "fir": "FIR"
   },
   "policies": {
     "title": "กรมธรรม์",
@@ -4637,9 +4559,7 @@
     "update": "อัปเดต"
   },
   "expiredPolicies": {
-    "title": "กรมธรรม์ต่ออายุ",
-    "breadcrumb": "กรมธรรม์หมดอายุ",
-    "home": "หน้าแรก"
+    "title": "กรมธรรม์ต่ออายุ"
   },
   "openItems": {
     "activityTracker": "ตัวติดตามกิจกรรม",
@@ -4690,21 +4610,7 @@
     "reviewing": "กำลังตรวจสอบ"
   },
   "clientView": {
-    "clientDetails": "รายละเอียดลูกค้า",
-    "loading": "กำลังโหลด...",
-    "tabPolicy": "กรมธรรม์",
-    "tabClaim": "เคลม",
-    "tabRenewal": "ต่ออายุ",
-    "tabEndorsement": "การอนุมัติ",
-    "loadingClaims": "กำลังโหลดเคลม...",
-    "noClaimsForClient": "ไม่พบเคลมสำหรับลูกค้านี้",
-    "loadingPolicies": "กำลังโหลดกรมธรรม์...",
-    "noPoliciesForClient": "ไม่พบกรมธรรม์สำหรับลูกค้านี้",
-    "loadingRenewals": "กำลังโหลดการต่ออายุ...",
-    "noRenewalsFound": "ไม่พบการต่ออายุ",
-    "loadingEndorsements": "กำลังโหลดการอนุมัติ...",
-    "noEndorsementsFound": "ไม่พบการอนุมัติ",
-    "reminder": "การเตือน"
+    "loading": "กำลังโหลด..."
   },
   "client360": {
     "back": "ลูกค้าทั้งหมด",
