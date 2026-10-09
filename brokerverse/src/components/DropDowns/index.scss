@@ -6,6 +6,10 @@
   margin-left: 12px;
   margin-top: 5px;
 }
+// the star of a required drop-down, as on the text fields
+.required__label {
+  color: var(--color-danger);
+}
 .custom__dropdown__controller__over {
   .p-dropdown {
     background: #ffffff;
