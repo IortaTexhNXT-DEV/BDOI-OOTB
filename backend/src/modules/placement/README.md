@@ -16,6 +16,7 @@ differs from the slip, also need `write:policies`.
 | `brokerSlips.js` | Broker slips (`BS-`), the insurers they go to, their offers (`OFR-`), offer comparison, and turning the chosen offers into a quotation or a placement. |
 | `placements.js` | Placement slips (`PS-`): raised (automatically on acceptance), slip PDF stored, sent with the slip attached, acknowledged, e-policy recorded, compared with the slip, checked (maker-checker), booked; decline and cancel. |
 | `participants.js` | Co-insurance participants shared by broker slips, quotations, placements and policies: one lead, shares total 100%, amounts split by share with the rounding remainder on the lead. |
+| `productLines.js` | The active products grouped by line of business (`GET /placements/product-lines`, read by the product picker of every screen where a product is chosen for a prospect, a quotation or a placement: line of business first, then its products), and the check that a product chosen for a line belongs to it (prospects, quotations, broker slips). |
 | `journey.js` | Which steps a product or line of business requires: the default of its business type (package / non-package, Product master; setting `placement.journey_by_business_type`), overridden by `placement.journey` (an entry for the product type, product code or name, or the line). |
 
 Statuses: broker slip `draft`, `submitted`, `responses-in`, `closed`, `cancelled`; placement:

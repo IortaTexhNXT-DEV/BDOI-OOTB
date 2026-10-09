@@ -287,7 +287,7 @@ Most screens open on a list. The lists work the same way everywhere:
 
 - **Search**: type in the search box above the list. Some lists have a field selector next to the box (for example **Policy Number**) that sets which column is searched.
 - **Filters**: select **Show Filters** where offered, choose the values (status, product, insurer, dates, amounts) and select **Apply Filters**. **Clear Filters** removes them; **Hide Filters** closes the panel.
-- **Tabs and cards**: many lists have status cards or tabs at the top (for example **Motor**, **Fire and Allied Perils**, **Industrial All Risks** on Prospects). Select a card or tab to narrow the list.
+- **Tabs and cards**: many lists have status cards or tabs at the top (for example **Motor**, **Personal Accident** and **Product not yet tagged** on Prospects). Select a card or tab to narrow the list.
 - **Sorting**: select a column heading to sort by it; select it again to reverse the order.
 - **Paging**: lists are paged by the server, 20, 50 or 100 rows per page (**Rows per page**). Use the arrows at the bottom right (first, previous, next, last page). The text next to the arrows shows the rows on screen and the total, for example 1 - 20 of 82. Search and filters apply to the whole list, not only to the page on screen.
 - **Row actions**: at the end of the row. The arrow or eye opens the record, the pencil edits it, the three dots (**More actions**) open the other actions. An action that does not apply to the row is greyed out.
@@ -1019,14 +1019,15 @@ The Executive Dashboard is described in the chapter Reports, dashboards, schedul
 
 ![Operations > Sales & Marketing > Prospects](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-prospects.png)
 
-Choose Operations > Sales & Marketing > Prospects. The cards count **Total Prospects**, **Last 7 Days**, **Last 30 Days**, **Converted Prospects** (with the conversion rate), **With Quotations** and **Active Prospects**. The tabs **Motor**, **Fire and Allied Perils** and **Industrial All Risks** list the prospects of each line in a table with the columns **Prospect ID**, **Name**, **Category**, **Product line**, **Mobile**, **E-mail**, **Quotations**, **Created on**, **Status** and **Actions** (**View**, **Edit** and **Delete**). Use the search box (name or prospect ID), the **Category** filter and **Show Filters** (country, province, city) to narrow the list. The search, filters, tab and page are kept when you open a prospect and come back.
+Choose Operations > Sales & Marketing > Prospects. The cards count **Total Prospects**, **Last 7 Days**, **Last 30 Days**, **Converted Prospects** (with the conversion rate), **With Quotations** and **Active Prospects**. One tab per line of business of the active products (**Motor** first, then for example **Credit Life**, **Marine** and **Personal Accident**) lists the prospects of that line, and the last tab, **Product not yet tagged**, the prospects created without a product. The table has the columns **Prospect ID**, **Name**, **Category**, **Product line** (the product, or **Product not yet tagged**), **Mobile**, **E-mail**, **Quotations**, **Created on**, **Status** and **Actions** (**View**, **Tag product** or **Change product**, **Edit** and **Delete**). Use the search box (name or prospect ID), the **Category** filter and **Show Filters** (country, province, city) to narrow the list. The search, filters, tab and page are kept when you open a prospect and come back.
 
 ### Create a prospect
 
 1. Select **Create Prospect**. The **Create prospect** panel asks whether the customer is new or already a client.
 2. Choose **New customer** (enter the customer's details on the prospect form) or **Existing client** (find the client by name, mobile number or e-mail; the prospect is linked to that client), then select **Continue**.
-3. Choose the product the prospect is for: **Motor**, **Fire and Allied Perils**, **Industrial All Risks**, **Employee Benefit**, or **Package products (Quick Quote)**.
-4. Fill in the prospect form and select **Save & Continue**.
+3. Choose the product the prospect is for: first the **Line of Business** (only the lines that have active products are listed), then the **Product** (the active products of that line; a line with a single product selects it). Select **Continue**. A motor product opens the prospect form; Fire and Allied Perils, Industrial All Risks and Employee Benefits open their own forms while those products are active; any other product opens a Request for Quotation for the new prospect.
+4. If the customer has not chosen a product yet, select **Skip - tag product later** instead: the prospect form opens without a product.
+5. Fill in the prospect form and select **Save & Continue**.
 
 ![Create prospect: new customer or existing client](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-prospect-create.png)
 
@@ -1047,13 +1048,23 @@ Choose Operations > Sales & Marketing > Prospects. The cards count **Total Prosp
 | **ZIP Code** | Yes | 4 digits; filled in from the barangay or city when known. |
 | **House / Unit No.**, **Street / Subdivision** | House / Unit No. yes | The street address. |
 
-The system gives the prospect its number (LD-YYYY-NNNNN) with status New and, for a motor prospect, opens **Create Quote** for it. Fire and Allied Perils and Industrial All Risks prospects also ask for the risk location and the sums insured.
+The system gives the prospect its number (LD-YYYY-NNNNN) with status New and, for a motor prospect, opens **Create Quote** for it. Fire and Allied Perils and Industrial All Risks prospects also ask for the risk location and the sums insured. A prospect created with **Skip - tag product later** opens on its **Prospect Details**, with the note that its product is not yet tagged, and is listed on the tab **Product not yet tagged**.
+
+> **Note:** When the setting `leads.product_required` is on (System Settings, group leads), **Skip - tag product later** is not offered and every new prospect must name its line of business and product.
+
+### Tag the product later
+
+Select **Tag product** (the tag icon) on a prospect row, or **Tag product** on **Prospect Details**. Choose the **Line of Business**, then the **Product**, and select **Tag product**. The prospect moves to the tab of its line. The same action, shown as **Change product** once a product is tagged, changes the line and product; each change is kept in the audit trail (action tag-product, with the line and product before and after).
+
+When you select **Create Quote** (or **Add quote** on the prospect's quotations) for a prospect whose product is not yet tagged, the system first asks for the line of business and the product of the quotation, tags the prospect with them and then opens the screen of that product.
+
+Lead assignment: a rule with a line of business does not match a prospect without a product, so such a prospect follows the rules without a line, else `leads.assignment_fallback`. A prospect that waits in the reassignment queue because no rule matched it is offered to the rules again when its product is tagged.
 
 ### View, edit or delete a prospect
 
 ![Prospect Details](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-prospect-detail.png)
 
-Select the eye (**View**) on a prospect row. **Prospect Details** shows **Personal Information**, **Contact Information**, **Address Information** and **System Information** (created, last updated, number of quotes). Select **Create Quote** to start a quotation, **Edit** to correct the prospect (the form shows the same fields; select **Update** to save), **Delete** to remove a prospect entered by mistake, or **Back**. Keep prospects that have quotations.
+Select the eye (**View**) on a prospect row. **Prospect Details** shows **Personal Information** (with the **Line of business and product**, or **Product not yet tagged**), **Contact Information**, **Address Information** and **System Information** (created, last updated, number of quotes). Select **Create Quote** to start a quotation, **Tag product** or **Change product** to set the line of business and product, **Edit** to correct the prospect (the form shows the same fields; select **Update** to save), **Delete** to remove a prospect entered by mistake, or **Back**. Keep prospects that have quotations.
 
 | Prospect status | Set when |
 |---|---|
@@ -1066,7 +1077,7 @@ Select the eye (**View**) on a prospect row. **Prospect Details** shows **Person
 ### Upload many prospects
 
 1. Select **Bulk Upload**.
-2. Select **Download Template** and fill in one prospect per row.
+2. Select **Download Template** and fill in one prospect per row. **LOB** (line of business) and **Product** (code or name of an active product of that line) are optional: a row without them creates a prospect whose product is tagged later; a product that is not a product of the row's LOB is refused with the reason.
 3. Select **Choose File**, choose the file (.xlsx or .csv, at most 10 MB) and select **Upload**.
 
 The system checks every row and reports the rows it could not load with the reason. **Generate Report** downloads the prospect list as a spreadsheet.
@@ -1077,7 +1088,7 @@ The system checks every row and reports the rows it could not load with the reas
 
 ![Operations > Sales & Marketing > Quick Quote](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-quick-quote.png)
 
-Quick Quote lists the package products: standard tariff and wording, quoted on the spot. Each card shows the product, whether it is for retail or corporate clients, and one of two buttons:
+Quick Quote offers the package products: standard tariff and wording, quoted on the spot. Choose the **Line of Business**, then the **Product** (a line with a single product selects it). The card of the product shows whether it is for retail or corporate clients, and one of two buttons:
 
 - **Start quote**: the product has a quote wizard (Motor Vehicle Insurance, Compulsory Third Party Liability). Enter the customer and the vehicle; the premium is priced from the tariff. The wizard starts with the prospect form when the customer is not yet a prospect.
 - **Request quotation**: the product has no quote wizard yet. The button opens a Request for Quotation so the Processing Team gets the terms from the insurers.
@@ -1147,7 +1158,7 @@ When the quotation is saved the server prices it on the same covers (a mandatory
 
 ![Operations > Sales & Marketing > Quotations](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-quotations.png)
 
-Choose Operations > Sales & Marketing > Quotations. The cards count **Total Quotations**, **Active Quotations**, **Pending Review**, **Approved Quotations** (with the approval rate) and **Converted to Policy**, with the **Average Premium**. The list shows **Quote ID**, **Prospect Name**, **Policy Type**, **Gross premium**, **Date** and **Status**; **View Details** opens a quotation. **Create Quote** starts a quotation and **Bulk Upload** loads quotations from a template.
+Choose Operations > Sales & Marketing > Quotations. The cards count **Total Quotations**, **Active Quotations**, **Pending Review**, **Approved Quotations** (with the approval rate) and **Converted to Policy**, with the **Average Premium**. The list shows **Quote ID**, **Prospect Name**, **Policy Type**, **Gross premium**, **Date** and **Status**; **View Details** opens a quotation. **Create Quote** asks for the **Line of Business**, then the **Product**, and opens the screen the product is quoted on (motor and fire quotations start from a prospect; any product without a quote screen opens a Request for Quotation); **Bulk Upload** loads quotations from a template.
 
 | Status | Meaning | Next step |
 |---|---|---|
@@ -1345,7 +1356,7 @@ Choose Operations > Sales & Marketing > Request for Quotation (Broker Slip). The
 ![New Request for Quotation (Broker Slip)](/home/user/BDOI-OOTB/docs/package/source/manual-images/p-rfq-new.png)
 
 1. Select **New Request for Quotation**.
-2. Under **Customer and risk**, choose **Customer**: **Client** (an existing client), **Prospect** or **New prospect**, and search for the record. Choose the **Product** (tick **Include package products** to list package products as well). **Insured** fills in; change it if the slip is for another named insured.
+2. Under **Customer and risk**, choose **Customer**: **Client** (an existing client), **Prospect** or **New prospect**, and search for the record. Choose the **Line of Business**, then the **Product** of that line (tick **Include package products** to list package products as well). A new prospect saved with the request is tagged with the product. **Insured** fills in; change it if the slip is for another named insured.
 3. Enter **Inception** and **Expiry**. Leave **Response due** empty to use the default of the settings, or set the date by which insurers must answer.
 4. Under **Risk details**, add each detail of the risk as an item and a value (location, occupancy, construction, protection; for marine the cargo, voyage and conveyance) with the plus sign.
 5. Under **Requested covers**, select **Add cover** for each cover with its **Sum insured** and **Deductible**. The covers offered are those of the product.
@@ -1416,7 +1427,7 @@ A placement slip is raised automatically when the client accepts a quotation, fr
 ![Direct Placement](/home/user/BDOI-OOTB/docs/package/source/manual-images/p-ps-direct.png)
 
 1. Select **New direct placement**.
-2. Fill in **Customer and risk** (**Customer**: Client, Prospect or New insured; **Product**; **Insured**; **Risk details**). For CTPL attach the **LTO document / official receipt**; it is required (setting `placement.direct_document_products`) and goes to the insurer with the slip.
+2. Fill in **Customer and risk** (**Customer**: Client, Prospect or New insured; **Line of Business** and **Product**; **Insured**; **Risk details**). For CTPL attach the **LTO document / official receipt**; it is required (setting `placement.direct_document_products`) and goes to the insurer with the slip.
 3. Under **Period and premium**, enter **Inception** (required), **Expiry**, **Sum insured**, **Net premium** (required), **Commission rate** (empty: the insurer's default) and **Billing mode** (empty: System default), and **Remarks**.
 4. Under **Security (participating insurers)**, choose each insurer with **Add insurer**, enter its **Share** and tick **Lead** for one of them. The line under the table says whether the shares total 100% and whether the placement is a co-insurance or a single insurer.
 5. Select **Create Placement Slip**.

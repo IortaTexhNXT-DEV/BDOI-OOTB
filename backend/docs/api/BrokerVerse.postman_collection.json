@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1218 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1220 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -43692,7 +43692,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"leadId\": \"ld_1\",\n      \"generatedLeadId\": \"LD-2026-00001\",\n      \"firstName\": \"Juan\",\n      \"lastName\": \"Dela Cruz\",\n      \"leadCategory\": \"Retail\",\n      \"lob\": \"MOTOR\",\n      \"emailId\": \"juan@example.com\",\n      \"contactNumber\": \"09171234567\",\n      \"city\": \"Makati\",\n      \"province\": \"Metro Manila\",\n      \"country\": \"Philippines\",\n      \"status\": \"New\",\n      \"quotationsCount\": 0\n    }\n  ],\n  \"total\": 1\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"leadId\": \"ld_1\",\n      \"generatedLeadId\": \"LD-2026-00001\",\n      \"firstName\": \"Juan\",\n      \"lastName\": \"Dela Cruz\",\n      \"leadCategory\": \"Retail\",\n      \"lob\": \"MOTOR\",\n      \"productId\": 1,\n      \"productName\": \"Motor Vehicle Insurance\",\n      \"productTagged\": true,\n      \"emailId\": \"juan@example.com\",\n      \"contactNumber\": \"09171234567\",\n      \"city\": \"Makati\",\n      \"province\": \"Metro Manila\",\n      \"country\": \"Philippines\",\n      \"status\": \"New\",\n      \"quotationsCount\": 0\n    }\n  ],\n  \"total\": 1\n}"
             }
           ]
         },
@@ -43753,12 +43753,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"leadId\": \"ld_1\",\n      \"generatedLeadId\": \"LD-2026-00001\",\n      \"firstName\": \"Juan\",\n      \"lastName\": \"Dela Cruz\",\n      \"leadCategory\": \"Retail\",\n      \"lob\": \"MOTOR\",\n      \"emailId\": \"juan@example.com\",\n      \"contactNumber\": \"09171234567\",\n      \"city\": \"Makati\",\n      \"province\": \"Metro Manila\",\n      \"country\": \"Philippines\",\n      \"status\": \"New\",\n      \"quotationsCount\": 0\n    }\n  ],\n  \"total\": 1\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"leadId\": \"ld_1\",\n      \"generatedLeadId\": \"LD-2026-00001\",\n      \"firstName\": \"Juan\",\n      \"lastName\": \"Dela Cruz\",\n      \"leadCategory\": \"Retail\",\n      \"lob\": \"MOTOR\",\n      \"productId\": 1,\n      \"productName\": \"Motor Vehicle Insurance\",\n      \"productTagged\": true,\n      \"emailId\": \"juan@example.com\",\n      \"contactNumber\": \"09171234567\",\n      \"city\": \"Makati\",\n      \"province\": \"Metro Manila\",\n      \"country\": \"Philippines\",\n      \"status\": \"New\",\n      \"quotationsCount\": 0\n    }\n  ],\n  \"total\": 1\n}"
             }
           ]
         },
         {
-          "name": "List leads (filters leadCategory, country, province, city, lob, status; search query; paging)",
+          "name": "List leads (filters leadCategory, country, province, city, lob (none: product not yet tagged), status; search query; paging)",
           "request": {
             "method": "GET",
             "header": [],
@@ -43793,7 +43793,7 @@
                 }
               ]
             },
-            "description": "List leads (filters leadCategory, country, province, city, lob, status; search query; paging)\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects\n\nAccess: read:leads"
+            "description": "List leads (filters leadCategory, country, province, city, lob (none: product not yet tagged), status; search query; paging)\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects\n\nAccess: read:leads"
           },
           "response": [
             {
@@ -43832,7 +43832,7 @@
                     }
                   ]
                 },
-                "description": "List leads (filters leadCategory, country, province, city, lob, status; search query; paging)\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects\n\nAccess: read:leads"
+                "description": "List leads (filters leadCategory, country, province, city, lob (none: product not yet tagged), status; search query; paging)\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects\n\nAccess: read:leads"
               },
               "status": "OK",
               "code": 200,
@@ -43844,12 +43844,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"leadId\": \"ld_1\",\n      \"generatedLeadId\": \"LD-2026-00001\",\n      \"firstName\": \"Juan\",\n      \"lastName\": \"Dela Cruz\",\n      \"leadCategory\": \"Retail\",\n      \"lob\": \"MOTOR\",\n      \"emailId\": \"juan@example.com\",\n      \"contactNumber\": \"09171234567\",\n      \"city\": \"Makati\",\n      \"province\": \"Metro Manila\",\n      \"country\": \"Philippines\",\n      \"status\": \"New\",\n      \"quotationsCount\": 0\n    }\n  ],\n  \"page\": 1,\n  \"pageSize\": 10,\n  \"total\": 1\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"leadId\": \"ld_1\",\n      \"generatedLeadId\": \"LD-2026-00001\",\n      \"firstName\": \"Juan\",\n      \"lastName\": \"Dela Cruz\",\n      \"leadCategory\": \"Retail\",\n      \"lob\": \"MOTOR\",\n      \"productId\": 1,\n      \"productName\": \"Motor Vehicle Insurance\",\n      \"productTagged\": true,\n      \"emailId\": \"juan@example.com\",\n      \"contactNumber\": \"09171234567\",\n      \"city\": \"Makati\",\n      \"province\": \"Metro Manila\",\n      \"country\": \"Philippines\",\n      \"status\": \"New\",\n      \"quotationsCount\": 0\n    }\n  ],\n  \"page\": 1,\n  \"pageSize\": 10,\n  \"total\": 1\n}"
             }
           ]
         },
         {
-          "name": "Create a lead (Motor / Fire / IAR lead forms)",
+          "name": "Create a lead (Motor / Fire / IAR lead forms); lob and productId optional (the product is tagged later) unless leads.product_required",
           "request": {
             "method": "POST",
             "header": [
@@ -43867,7 +43867,7 @@
                 "leads"
               ]
             },
-            "description": "Create a lead (Motor / Fire / IAR lead forms)\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Create Lead\n\nAccess: write:leads",
+            "description": "Create a lead (Motor / Fire / IAR lead forms); lob and productId optional (the product is tagged later) unless leads.product_required\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Create Lead\n\nAccess: write:leads",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Dela Cruz\",\n  \"preferredName\": \"Juan\",\n  \"DOB\": \"1990-05-01\",\n  \"gender\": \"Male\",\n  \"emailId\": \"juan@example.com\",\n  \"contactNumber\": \"09171234567\",\n  \"houseNo\": \"12 Rizal St\",\n  \"barangay\": \"Poblacion\",\n  \"city\": \"Makati\",\n  \"province\": \"Metro Manila\",\n  \"country\": \"Philippines\",\n  \"zipCode\": \"1210\",\n  \"leadCategory\": \"Retail\",\n  \"lob\": \"FIRE\"\n}",
@@ -43898,7 +43898,7 @@
                     "leads"
                   ]
                 },
-                "description": "Create a lead (Motor / Fire / IAR lead forms)\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Create Lead\n\nAccess: write:leads",
+                "description": "Create a lead (Motor / Fire / IAR lead forms); lob and productId optional (the product is tagged later) unless leads.product_required\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Create Lead\n\nAccess: write:leads",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Dela Cruz\",\n  \"preferredName\": \"Juan\",\n  \"DOB\": \"1990-05-01\",\n  \"gender\": \"Male\",\n  \"emailId\": \"juan@example.com\",\n  \"contactNumber\": \"09171234567\",\n  \"houseNo\": \"12 Rizal St\",\n  \"barangay\": \"Poblacion\",\n  \"city\": \"Makati\",\n  \"province\": \"Metro Manila\",\n  \"country\": \"Philippines\",\n  \"zipCode\": \"1210\",\n  \"leadCategory\": \"Retail\",\n  \"lob\": \"FIRE\"\n}",
@@ -43919,7 +43919,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"leadId\": \"ld_1\",\n  \"generatedLeadId\": \"LD-2026-00001\",\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Dela Cruz\",\n  \"leadCategory\": \"Retail\",\n  \"lob\": \"MOTOR\",\n  \"emailId\": \"juan@example.com\",\n  \"contactNumber\": \"09171234567\",\n  \"city\": \"Makati\",\n  \"province\": \"Metro Manila\",\n  \"country\": \"Philippines\",\n  \"status\": \"New\",\n  \"quotationsCount\": 0,\n  \"success\": true,\n  \"data\": {\n    \"leadId\": \"ld_1\",\n    \"generatedLeadId\": \"LD-2026-00001\",\n    \"firstName\": \"Juan\",\n    \"lastName\": \"Dela Cruz\",\n    \"leadCategory\": \"Retail\",\n    \"lob\": \"MOTOR\",\n    \"emailId\": \"juan@example.com\",\n    \"contactNumber\": \"09171234567\",\n    \"city\": \"Makati\",\n    \"province\": \"Metro Manila\",\n    \"country\": \"Philippines\",\n    \"status\": \"New\",\n    \"quotationsCount\": 0\n  }\n}"
+              "body": "{\n  \"leadId\": \"ld_1\",\n  \"generatedLeadId\": \"LD-2026-00001\",\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Dela Cruz\",\n  \"leadCategory\": \"Retail\",\n  \"lob\": \"MOTOR\",\n  \"productId\": 1,\n  \"productName\": \"Motor Vehicle Insurance\",\n  \"productTagged\": true,\n  \"emailId\": \"juan@example.com\",\n  \"contactNumber\": \"09171234567\",\n  \"city\": \"Makati\",\n  \"province\": \"Metro Manila\",\n  \"country\": \"Philippines\",\n  \"status\": \"New\",\n  \"quotationsCount\": 0,\n  \"success\": true,\n  \"data\": {\n    \"leadId\": \"ld_1\",\n    \"generatedLeadId\": \"LD-2026-00001\",\n    \"firstName\": \"Juan\",\n    \"lastName\": \"Dela Cruz\",\n    \"leadCategory\": \"Retail\",\n    \"lob\": \"MOTOR\",\n    \"productId\": 1,\n    \"productName\": \"Motor Vehicle Insurance\",\n    \"productTagged\": true,\n    \"emailId\": \"juan@example.com\",\n    \"contactNumber\": \"09171234567\",\n    \"city\": \"Makati\",\n    \"province\": \"Metro Manila\",\n    \"country\": \"Philippines\",\n    \"status\": \"New\",\n    \"quotationsCount\": 0\n  }\n}"
             }
           ]
         },
@@ -43982,7 +43982,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"leadId\": \"ld_1\",\n  \"generatedLeadId\": \"LD-2026-00001\",\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Dela Cruz\",\n  \"leadCategory\": \"Retail\",\n  \"lob\": \"MOTOR\",\n  \"emailId\": \"juan@example.com\",\n  \"contactNumber\": \"09171234567\",\n  \"city\": \"Makati\",\n  \"province\": \"Metro Manila\",\n  \"country\": \"Philippines\",\n  \"status\": \"New\",\n  \"quotationsCount\": 0,\n  \"success\": true,\n  \"data\": {\n    \"leadId\": \"ld_1\",\n    \"generatedLeadId\": \"LD-2026-00001\",\n    \"firstName\": \"Juan\",\n    \"lastName\": \"Dela Cruz\",\n    \"leadCategory\": \"Retail\",\n    \"lob\": \"MOTOR\",\n    \"emailId\": \"juan@example.com\",\n    \"contactNumber\": \"09171234567\",\n    \"city\": \"Makati\",\n    \"province\": \"Metro Manila\",\n    \"country\": \"Philippines\",\n    \"status\": \"New\",\n    \"quotationsCount\": 0\n  }\n}"
+              "body": "{\n  \"leadId\": \"ld_1\",\n  \"generatedLeadId\": \"LD-2026-00001\",\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Dela Cruz\",\n  \"leadCategory\": \"Retail\",\n  \"lob\": \"MOTOR\",\n  \"productId\": 1,\n  \"productName\": \"Motor Vehicle Insurance\",\n  \"productTagged\": true,\n  \"emailId\": \"juan@example.com\",\n  \"contactNumber\": \"09171234567\",\n  \"city\": \"Makati\",\n  \"province\": \"Metro Manila\",\n  \"country\": \"Philippines\",\n  \"status\": \"New\",\n  \"quotationsCount\": 0,\n  \"success\": true,\n  \"data\": {\n    \"leadId\": \"ld_1\",\n    \"generatedLeadId\": \"LD-2026-00001\",\n    \"firstName\": \"Juan\",\n    \"lastName\": \"Dela Cruz\",\n    \"leadCategory\": \"Retail\",\n    \"lob\": \"MOTOR\",\n    \"productId\": 1,\n    \"productName\": \"Motor Vehicle Insurance\",\n    \"productTagged\": true,\n    \"emailId\": \"juan@example.com\",\n    \"contactNumber\": \"09171234567\",\n    \"city\": \"Makati\",\n    \"province\": \"Metro Manila\",\n    \"country\": \"Philippines\",\n    \"status\": \"New\",\n    \"quotationsCount\": 0\n  }\n}"
             }
           ]
         },
@@ -44073,7 +44073,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"leadId\": \"ld_1\",\n  \"generatedLeadId\": \"LD-2026-00001\",\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Dela Cruz\",\n  \"leadCategory\": \"Retail\",\n  \"lob\": \"MOTOR\",\n  \"emailId\": \"juan@example.com\",\n  \"contactNumber\": \"09171234567\",\n  \"city\": \"Makati\",\n  \"province\": \"Metro Manila\",\n  \"country\": \"Philippines\",\n  \"status\": \"New\",\n  \"quotationsCount\": 0,\n  \"success\": true,\n  \"data\": {\n    \"leadId\": \"ld_1\",\n    \"generatedLeadId\": \"LD-2026-00001\",\n    \"firstName\": \"Juan\",\n    \"lastName\": \"Dela Cruz\",\n    \"leadCategory\": \"Retail\",\n    \"lob\": \"MOTOR\",\n    \"emailId\": \"juan@example.com\",\n    \"contactNumber\": \"09171234567\",\n    \"city\": \"Makati\",\n    \"province\": \"Metro Manila\",\n    \"country\": \"Philippines\",\n    \"status\": \"New\",\n    \"quotationsCount\": 0\n  }\n}"
+              "body": "{\n  \"leadId\": \"ld_1\",\n  \"generatedLeadId\": \"LD-2026-00001\",\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Dela Cruz\",\n  \"leadCategory\": \"Retail\",\n  \"lob\": \"MOTOR\",\n  \"productId\": 1,\n  \"productName\": \"Motor Vehicle Insurance\",\n  \"productTagged\": true,\n  \"emailId\": \"juan@example.com\",\n  \"contactNumber\": \"09171234567\",\n  \"city\": \"Makati\",\n  \"province\": \"Metro Manila\",\n  \"country\": \"Philippines\",\n  \"status\": \"New\",\n  \"quotationsCount\": 0,\n  \"success\": true,\n  \"data\": {\n    \"leadId\": \"ld_1\",\n    \"generatedLeadId\": \"LD-2026-00001\",\n    \"firstName\": \"Juan\",\n    \"lastName\": \"Dela Cruz\",\n    \"leadCategory\": \"Retail\",\n    \"lob\": \"MOTOR\",\n    \"productId\": 1,\n    \"productName\": \"Motor Vehicle Insurance\",\n    \"productTagged\": true,\n    \"emailId\": \"juan@example.com\",\n    \"contactNumber\": \"09171234567\",\n    \"city\": \"Makati\",\n    \"province\": \"Metro Manila\",\n    \"country\": \"Philippines\",\n    \"status\": \"New\",\n    \"quotationsCount\": 0\n  }\n}"
             }
           ]
         },
@@ -44141,7 +44141,100 @@
           ]
         },
         {
-          "name": "Bulk upload leads from CSV or XLSX (multipart field \"file\"; header row with First Name, Last Name, Email, Contact Number ...)",
+          "name": "Tag or change the line of business and product of a lead; the product must be an active product of the line (audit action tag-product)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/leads/:id/product",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leads",
+                ":id",
+                "product"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Tag or change the line of business and product of a lead; the product must be an active product of the line (audit action tag-product)\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Tag product\n\nAccess: write:leads",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lob\": \"MOTOR\",\n  \"productId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/leads/:id/product",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "leads",
+                    ":id",
+                    "product"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Tag or change the line of business and product of a lead; the product must be an active product of the line (audit action tag-product)\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Tag product\n\nAccess: write:leads",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"lob\": \"MOTOR\",\n  \"productId\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"leadId\": \"ld_1\",\n  \"generatedLeadId\": \"LD-2026-00001\",\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Dela Cruz\",\n  \"leadCategory\": \"Retail\",\n  \"lob\": \"MOTOR\",\n  \"productId\": 1,\n  \"productName\": \"Motor Vehicle Insurance\",\n  \"productTagged\": true,\n  \"emailId\": \"juan@example.com\",\n  \"contactNumber\": \"09171234567\",\n  \"city\": \"Makati\",\n  \"province\": \"Metro Manila\",\n  \"country\": \"Philippines\",\n  \"status\": \"New\",\n  \"quotationsCount\": 0,\n  \"success\": true,\n  \"data\": {\n    \"leadId\": \"ld_1\",\n    \"generatedLeadId\": \"LD-2026-00001\",\n    \"firstName\": \"Juan\",\n    \"lastName\": \"Dela Cruz\",\n    \"leadCategory\": \"Retail\",\n    \"lob\": \"MOTOR\",\n    \"productId\": 1,\n    \"productName\": \"Motor Vehicle Insurance\",\n    \"productTagged\": true,\n    \"emailId\": \"juan@example.com\",\n    \"contactNumber\": \"09171234567\",\n    \"city\": \"Makati\",\n    \"province\": \"Metro Manila\",\n    \"country\": \"Philippines\",\n    \"status\": \"New\",\n    \"quotationsCount\": 0\n  },\n  \"message\": \"Product tagged\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Bulk upload leads from CSV or XLSX (multipart field \"file\"; header row with First Name, Last Name, Email, Contact Number ...; LOB and Product optional: empty, the product is tagged later)",
           "request": {
             "method": "POST",
             "header": [
@@ -44160,7 +44253,7 @@
                 "bulk-upload"
               ]
             },
-            "description": "Bulk upload leads from CSV or XLSX (multipart field \"file\"; header row with First Name, Last Name, Email, Contact Number ...)\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Bulk Upload\n\nAccess: write:leads",
+            "description": "Bulk upload leads from CSV or XLSX (multipart field \"file\"; header row with First Name, Last Name, Email, Contact Number ...; LOB and Product optional: empty, the product is tagged later)\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Bulk Upload\n\nAccess: write:leads",
             "body": {
               "mode": "raw",
               "raw": "\"multipart/form-data file\"",
@@ -44192,7 +44285,7 @@
                     "bulk-upload"
                   ]
                 },
-                "description": "Bulk upload leads from CSV or XLSX (multipart field \"file\"; header row with First Name, Last Name, Email, Contact Number ...)\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Bulk Upload\n\nAccess: write:leads",
+                "description": "Bulk upload leads from CSV or XLSX (multipart field \"file\"; header row with First Name, Last Name, Email, Contact Number ...; LOB and Product optional: empty, the product is tagged later)\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Bulk Upload\n\nAccess: write:leads",
                 "body": {
                   "mode": "raw",
                   "raw": "\"multipart/form-data file\"",
@@ -44343,7 +44436,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"leadId\": \"ld_1\",\n      \"generatedLeadId\": \"LD-2026-00001\",\n      \"firstName\": \"Juan\",\n      \"lastName\": \"Dela Cruz\",\n      \"leadCategory\": \"Retail\",\n      \"lob\": \"MOTOR\",\n      \"emailId\": \"juan@example.com\",\n      \"contactNumber\": \"09171234567\",\n      \"city\": \"Makati\",\n      \"province\": \"Metro Manila\",\n      \"country\": \"Philippines\",\n      \"status\": \"New\",\n      \"quotationsCount\": 0\n    }\n  ],\n  \"total\": 1\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"leadId\": \"ld_1\",\n      \"generatedLeadId\": \"LD-2026-00001\",\n      \"firstName\": \"Juan\",\n      \"lastName\": \"Dela Cruz\",\n      \"leadCategory\": \"Retail\",\n      \"lob\": \"MOTOR\",\n      \"productId\": 1,\n      \"productName\": \"Motor Vehicle Insurance\",\n      \"productTagged\": true,\n      \"emailId\": \"juan@example.com\",\n      \"contactNumber\": \"09171234567\",\n      \"city\": \"Makati\",\n      \"province\": \"Metro Manila\",\n      \"country\": \"Philippines\",\n      \"status\": \"New\",\n      \"quotationsCount\": 0\n    }\n  ],\n  \"total\": 1\n}"
             }
           ]
         },
@@ -60749,6 +60842,67 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"insurers\": [\n      {\n        \"id\": 2,\n        \"code\": \"MALAYAN\",\n        \"name\": \"Malayan Insurance Co., Inc.\",\n        \"commissionRate\": 0.15\n      }\n    ],\n    \"products\": [\n      {\n        \"id\": 3,\n        \"code\": \"FIRE\",\n        \"name\": \"Fire and Allied Perils\",\n        \"lob\": \"FIRE\",\n        \"businessType\": \"non_package\",\n        \"customerSegment\": \"corporate\",\n        \"journey\": {\n          \"placementSlip\": \"required\"\n        }\n      }\n    ],\n    \"defaultBillingMode\": \"broker\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Products grouped by line of business for the product pickers: active lines (Line of Business master) with their active products (Product master); businessType=package | non_package filters the products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/placements/product-lines?businessType=package",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "placements",
+                "product-lines"
+              ],
+              "query": [
+                {
+                  "key": "businessType",
+                  "value": "package"
+                }
+              ]
+            },
+            "description": "Products grouped by line of business for the product pickers: active lines (Line of Business master) with their active products (Product master); businessType=package | non_package filters the products\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects (Create Prospect, Tag product), Quick Quote, Quotations (Create Quote), Request for Quotation, Placement Slips\n\nAccess: read:quotations, read:leads"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/placements/product-lines?businessType=package",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "placements",
+                    "product-lines"
+                  ],
+                  "query": [
+                    {
+                      "key": "businessType",
+                      "value": "package"
+                    }
+                  ]
+                },
+                "description": "Products grouped by line of business for the product pickers: active lines (Line of Business master) with their active products (Product master); businessType=package | non_package filters the products\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects (Create Prospect, Tag product), Quick Quote, Quotations (Create Quote), Request for Quotation, Placement Slips\n\nAccess: read:quotations, read:leads"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"lines\": [\n      {\n        \"code\": \"ACCIDENT\",\n        \"name\": \"Personal Accident\",\n        \"products\": [\n          {\n            \"id\": 9,\n            \"code\": \"PA\",\n            \"name\": \"Personal Accident\",\n            \"line\": \"ACCIDENT\",\n            \"lob\": \"ACCIDENT\",\n            \"businessType\": \"package\",\n            \"customerSegment\": \"retail\"\n          }\n        ]\n      }\n    ]\n  }\n}"
             }
           ]
         }

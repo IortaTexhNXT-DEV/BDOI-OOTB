@@ -71092,6 +71092,15 @@
                           "lob": {
                             "type": "string"
                           },
+                          "productId": {
+                            "type": "integer"
+                          },
+                          "productName": {
+                            "type": "string"
+                          },
+                          "productTagged": {
+                            "type": "boolean"
+                          },
                           "emailId": {
                             "type": "string"
                           },
@@ -71131,6 +71140,9 @@
                       "lastName": "Dela Cruz",
                       "leadCategory": "Retail",
                       "lob": "MOTOR",
+                      "productId": 1,
+                      "productName": "Motor Vehicle Insurance",
+                      "productTagged": true,
                       "emailId": "juan@example.com",
                       "contactNumber": "09171234567",
                       "city": "Makati",
@@ -71211,6 +71223,15 @@
                           "lob": {
                             "type": "string"
                           },
+                          "productId": {
+                            "type": "integer"
+                          },
+                          "productName": {
+                            "type": "string"
+                          },
+                          "productTagged": {
+                            "type": "boolean"
+                          },
                           "emailId": {
                             "type": "string"
                           },
@@ -71250,6 +71271,9 @@
                       "lastName": "Dela Cruz",
                       "leadCategory": "Retail",
                       "lob": "MOTOR",
+                      "productId": 1,
+                      "productName": "Motor Vehicle Insurance",
+                      "productTagged": true,
                       "emailId": "juan@example.com",
                       "contactNumber": "09171234567",
                       "city": "Makati",
@@ -71283,7 +71307,7 @@
     "/leads": {
       "get": {
         "operationId": "getLeads",
-        "summary": "List leads (filters leadCategory, country, province, city, lob, status; search query; paging)",
+        "summary": "List leads (filters leadCategory, country, province, city, lob (none: product not yet tagged), status; search query; paging)",
         "tags": [
           "Leads"
         ],
@@ -71369,6 +71393,15 @@
                           "lob": {
                             "type": "string"
                           },
+                          "productId": {
+                            "type": "integer"
+                          },
+                          "productName": {
+                            "type": "string"
+                          },
+                          "productTagged": {
+                            "type": "boolean"
+                          },
                           "emailId": {
                             "type": "string"
                           },
@@ -71414,6 +71447,9 @@
                       "lastName": "Dela Cruz",
                       "leadCategory": "Retail",
                       "lob": "MOTOR",
+                      "productId": 1,
+                      "productName": "Motor Vehicle Insurance",
+                      "productTagged": true,
                       "emailId": "juan@example.com",
                       "contactNumber": "09171234567",
                       "city": "Makati",
@@ -71447,7 +71483,7 @@
       },
       "post": {
         "operationId": "postLeads",
-        "summary": "Create a lead (Motor / Fire / IAR lead forms)",
+        "summary": "Create a lead (Motor / Fire / IAR lead forms); lob and productId optional (the product is tagged later) unless leads.product_required",
         "tags": [
           "Leads"
         ],
@@ -71478,6 +71514,15 @@
                     },
                     "lob": {
                       "type": "string"
+                    },
+                    "productId": {
+                      "type": "integer"
+                    },
+                    "productName": {
+                      "type": "string"
+                    },
+                    "productTagged": {
+                      "type": "boolean"
                     },
                     "emailId": {
                       "type": "string"
@@ -71524,6 +71569,15 @@
                         "lob": {
                           "type": "string"
                         },
+                        "productId": {
+                          "type": "integer"
+                        },
+                        "productName": {
+                          "type": "string"
+                        },
+                        "productTagged": {
+                          "type": "boolean"
+                        },
                         "emailId": {
                           "type": "string"
                         },
@@ -71556,6 +71610,9 @@
                   "lastName": "Dela Cruz",
                   "leadCategory": "Retail",
                   "lob": "MOTOR",
+                  "productId": 1,
+                  "productName": "Motor Vehicle Insurance",
+                  "productTagged": true,
                   "emailId": "juan@example.com",
                   "contactNumber": "09171234567",
                   "city": "Makati",
@@ -71571,6 +71628,9 @@
                     "lastName": "Dela Cruz",
                     "leadCategory": "Retail",
                     "lob": "MOTOR",
+                    "productId": 1,
+                    "productName": "Motor Vehicle Insurance",
+                    "productTagged": true,
                     "emailId": "juan@example.com",
                     "contactNumber": "09171234567",
                     "city": "Makati",
@@ -71717,6 +71777,15 @@
                     "lob": {
                       "type": "string"
                     },
+                    "productId": {
+                      "type": "integer"
+                    },
+                    "productName": {
+                      "type": "string"
+                    },
+                    "productTagged": {
+                      "type": "boolean"
+                    },
                     "emailId": {
                       "type": "string"
                     },
@@ -71762,6 +71831,15 @@
                         "lob": {
                           "type": "string"
                         },
+                        "productId": {
+                          "type": "integer"
+                        },
+                        "productName": {
+                          "type": "string"
+                        },
+                        "productTagged": {
+                          "type": "boolean"
+                        },
                         "emailId": {
                           "type": "string"
                         },
@@ -71794,6 +71872,9 @@
                   "lastName": "Dela Cruz",
                   "leadCategory": "Retail",
                   "lob": "MOTOR",
+                  "productId": 1,
+                  "productName": "Motor Vehicle Insurance",
+                  "productTagged": true,
                   "emailId": "juan@example.com",
                   "contactNumber": "09171234567",
                   "city": "Makati",
@@ -71809,6 +71890,9 @@
                     "lastName": "Dela Cruz",
                     "leadCategory": "Retail",
                     "lob": "MOTOR",
+                    "productId": 1,
+                    "productName": "Motor Vehicle Insurance",
+                    "productTagged": true,
                     "emailId": "juan@example.com",
                     "contactNumber": "09171234567",
                     "city": "Makati",
@@ -71879,6 +71963,15 @@
                     "lob": {
                       "type": "string"
                     },
+                    "productId": {
+                      "type": "integer"
+                    },
+                    "productName": {
+                      "type": "string"
+                    },
+                    "productTagged": {
+                      "type": "boolean"
+                    },
                     "emailId": {
                       "type": "string"
                     },
@@ -71924,6 +72017,15 @@
                         "lob": {
                           "type": "string"
                         },
+                        "productId": {
+                          "type": "integer"
+                        },
+                        "productName": {
+                          "type": "string"
+                        },
+                        "productTagged": {
+                          "type": "boolean"
+                        },
                         "emailId": {
                           "type": "string"
                         },
@@ -71956,6 +72058,9 @@
                   "lastName": "Dela Cruz",
                   "leadCategory": "Retail",
                   "lob": "MOTOR",
+                  "productId": 1,
+                  "productName": "Motor Vehicle Insurance",
+                  "productTagged": true,
                   "emailId": "juan@example.com",
                   "contactNumber": "09171234567",
                   "city": "Makati",
@@ -71971,6 +72076,9 @@
                     "lastName": "Dela Cruz",
                     "leadCategory": "Retail",
                     "lob": "MOTOR",
+                    "productId": 1,
+                    "productName": "Motor Vehicle Insurance",
+                    "productTagged": true,
                     "emailId": "juan@example.com",
                     "contactNumber": "09171234567",
                     "city": "Makati",
@@ -72087,10 +72195,224 @@
         ]
       }
     },
+    "/leads/{id}/product": {
+      "put": {
+        "operationId": "putLeadsIdProduct",
+        "summary": "Tag or change the line of business and product of a lead; the product must be an active product of the line (audit action tag-product)",
+        "tags": [
+          "Leads"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Prospects > Tag product\n\nAccess: write:leads",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "leadId": {
+                      "type": "string"
+                    },
+                    "generatedLeadId": {
+                      "type": "string"
+                    },
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "leadCategory": {
+                      "type": "string"
+                    },
+                    "lob": {
+                      "type": "string"
+                    },
+                    "productId": {
+                      "type": "integer"
+                    },
+                    "productName": {
+                      "type": "string"
+                    },
+                    "productTagged": {
+                      "type": "boolean"
+                    },
+                    "emailId": {
+                      "type": "string"
+                    },
+                    "contactNumber": {
+                      "type": "string"
+                    },
+                    "city": {
+                      "type": "string"
+                    },
+                    "province": {
+                      "type": "string"
+                    },
+                    "country": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "quotationsCount": {
+                      "type": "integer"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "leadId": {
+                          "type": "string"
+                        },
+                        "generatedLeadId": {
+                          "type": "string"
+                        },
+                        "firstName": {
+                          "type": "string"
+                        },
+                        "lastName": {
+                          "type": "string"
+                        },
+                        "leadCategory": {
+                          "type": "string"
+                        },
+                        "lob": {
+                          "type": "string"
+                        },
+                        "productId": {
+                          "type": "integer"
+                        },
+                        "productName": {
+                          "type": "string"
+                        },
+                        "productTagged": {
+                          "type": "boolean"
+                        },
+                        "emailId": {
+                          "type": "string"
+                        },
+                        "contactNumber": {
+                          "type": "string"
+                        },
+                        "city": {
+                          "type": "string"
+                        },
+                        "province": {
+                          "type": "string"
+                        },
+                        "country": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "quotationsCount": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "leadId": "ld_1",
+                  "generatedLeadId": "LD-2026-00001",
+                  "firstName": "Juan",
+                  "lastName": "Dela Cruz",
+                  "leadCategory": "Retail",
+                  "lob": "MOTOR",
+                  "productId": 1,
+                  "productName": "Motor Vehicle Insurance",
+                  "productTagged": true,
+                  "emailId": "juan@example.com",
+                  "contactNumber": "09171234567",
+                  "city": "Makati",
+                  "province": "Metro Manila",
+                  "country": "Philippines",
+                  "status": "New",
+                  "quotationsCount": 0,
+                  "success": true,
+                  "data": {
+                    "leadId": "ld_1",
+                    "generatedLeadId": "LD-2026-00001",
+                    "firstName": "Juan",
+                    "lastName": "Dela Cruz",
+                    "leadCategory": "Retail",
+                    "lob": "MOTOR",
+                    "productId": 1,
+                    "productName": "Motor Vehicle Insurance",
+                    "productTagged": true,
+                    "emailId": "juan@example.com",
+                    "contactNumber": "09171234567",
+                    "city": "Makati",
+                    "province": "Metro Manila",
+                    "country": "Philippines",
+                    "status": "New",
+                    "quotationsCount": 0
+                  },
+                  "message": "Product tagged"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Prospects > Tag product",
+        "x-permissions": [
+          "write:leads"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "lob": {
+                    "type": "string"
+                  },
+                  "productId": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "lob": "MOTOR",
+                "productId": 1
+              }
+            }
+          }
+        }
+      }
+    },
     "/leads/bulk-upload": {
       "post": {
         "operationId": "postLeadsBulkUpload",
-        "summary": "Bulk upload leads from CSV or XLSX (multipart field \"file\"; header row with First Name, Last Name, Email, Contact Number ...)",
+        "summary": "Bulk upload leads from CSV or XLSX (multipart field \"file\"; header row with First Name, Last Name, Email, Contact Number ...; LOB and Product optional: empty, the product is tagged later)",
         "tags": [
           "Leads"
         ],
@@ -72279,6 +72601,15 @@
                           "lob": {
                             "type": "string"
                           },
+                          "productId": {
+                            "type": "integer"
+                          },
+                          "productName": {
+                            "type": "string"
+                          },
+                          "productTagged": {
+                            "type": "boolean"
+                          },
                           "emailId": {
                             "type": "string"
                           },
@@ -72318,6 +72649,9 @@
                       "lastName": "Dela Cruz",
                       "leadCategory": "Retail",
                       "lob": "MOTOR",
+                      "productId": 1,
+                      "productName": "Motor Vehicle Insurance",
+                      "productTagged": true,
                       "emailId": "juan@example.com",
                       "contactNumber": "09171234567",
                       "city": "Makati",
@@ -99591,6 +99925,128 @@
         "x-permissions": [
           "read:quotations",
           "write:premium-charges"
+        ]
+      }
+    },
+    "/placements/product-lines": {
+      "get": {
+        "operationId": "getPlacementsProductLines",
+        "summary": "Products grouped by line of business for the product pickers: active lines (Line of Business master) with their active products (Product master); businessType=package | non_package filters the products",
+        "tags": [
+          "Placement Slips"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Prospects (Create Prospect, Tag product), Quick Quote, Quotations (Create Quote), Request for Quotation, Placement Slips\n\nAccess: read:quotations, read:leads",
+        "parameters": [
+          {
+            "name": "businessType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "package"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "products": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "integer"
+                                    },
+                                    "code": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "line": {
+                                      "type": "string"
+                                    },
+                                    "lob": {
+                                      "type": "string"
+                                    },
+                                    "businessType": {
+                                      "type": "string"
+                                    },
+                                    "customerSegment": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "lines": [
+                      {
+                        "code": "ACCIDENT",
+                        "name": "Personal Accident",
+                        "products": [
+                          {
+                            "id": 9,
+                            "code": "PA",
+                            "name": "Personal Accident",
+                            "line": "ACCIDENT",
+                            "lob": "ACCIDENT",
+                            "businessType": "package",
+                            "customerSegment": "retail"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Prospects (Create Prospect, Tag product), Quick Quote, Quotations (Create Quote), Request for Quotation, Placement Slips",
+        "x-permissions": [
+          "read:quotations",
+          "read:leads"
         ]
       }
     },
