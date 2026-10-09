@@ -187,6 +187,7 @@ const AddRole = ({ action }) => {
           <div className="grid add__account__sub__container ">
             <div className="col-12 md:col-3 lg:col-3">
               <InputField
+                required
                 disabled={action !== "add"}
                 value={action === "view" ? roleViewData.roleCode : formik.values.roleCode}
                 
@@ -200,6 +201,7 @@ const AddRole = ({ action }) => {
             </div>
             <div className="col-12 md:col-3 lg:col-3">
               <InputField
+                required
                 disabled={action === "view" ? true : false}
                 
                 value={action === "view" ? roleViewData.roleName : formik.values.roleName}
@@ -226,6 +228,7 @@ const AddRole = ({ action }) => {
             </div>
             <div className="col-12 md:col-3 lg:col-3">
               <DropDowns
+                required
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? roleViewData.menuAccess : formik.values.menuAccess}
                 onChange={formik.handleChange("menuAccess")}
@@ -255,6 +258,7 @@ const AddRole = ({ action }) => {
             </div>
             <div className="col-12 md:col-3 lg:col-3">
               <DropDowns
+                required
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? roleViewData.permissions : formik.values.permissions}
                 onChange={formik.handleChange("permissions")}

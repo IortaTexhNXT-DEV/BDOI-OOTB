@@ -152,6 +152,7 @@ const TransactionCodeEdit = () => {
           <div className="grid mt-1">
             <div className="col-12 md:col-3 lg-col-3 input__view">
               <InputField
+                required
                 classNames="input__filed"
                 label="Transaction Code"
                 placeholder="Enter"

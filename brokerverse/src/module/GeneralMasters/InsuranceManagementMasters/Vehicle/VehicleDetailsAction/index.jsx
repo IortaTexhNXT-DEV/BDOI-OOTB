@@ -68,6 +68,8 @@ const VehicleDetailsAction = ({ action }) => {
 
     if (!values.seatingCapacity) {
       errors.seatingCapacity = t("validation.fieldRequired");
+    } else if (!/^\d{1,3}$/.test(String(values.seatingCapacity).trim()) || Number(values.seatingCapacity) < 1) {
+      errors.seatingCapacity = t("validation.wholeNumber");
     }
 
     return errors;
@@ -153,6 +155,7 @@ const VehicleDetailsAction = ({ action }) => {
         <div className="grid m-0 p-0">
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"
@@ -171,6 +174,7 @@ const VehicleDetailsAction = ({ action }) => {
           </div>
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"
@@ -189,6 +193,7 @@ const VehicleDetailsAction = ({ action }) => {
           </div>
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"
@@ -207,6 +212,7 @@ const VehicleDetailsAction = ({ action }) => {
           </div>
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"
@@ -225,6 +231,7 @@ const VehicleDetailsAction = ({ action }) => {
           </div>
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"
@@ -243,6 +250,7 @@ const VehicleDetailsAction = ({ action }) => {
           </div>
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"

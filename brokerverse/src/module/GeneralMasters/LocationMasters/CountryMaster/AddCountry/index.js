@@ -156,6 +156,7 @@ function AddExchange({ action }) {
           <div class="sm-col-12 col-12 md:col-3 lg-col-3">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label={t("generalMasters.countryName")}
                 placeholder={t("generalMasters.enter")}
@@ -175,6 +176,7 @@ function AddExchange({ action }) {
           <div class="sm-col-12 col-12 md:col-3 lg-col-3">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label={t("generalMasters.isoCode")}
                 placeholder={t("generalMasters.enter")}
@@ -194,6 +196,7 @@ function AddExchange({ action }) {
           <div class="sm-col-12 col-12 md:col-6 lg-col-6">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label={t("generalMasters.description")}
                 placeholder={t("generalMasters.enter")}

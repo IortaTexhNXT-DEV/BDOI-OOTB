@@ -69,6 +69,7 @@ const ModalAddData = ({
         <div className="grid m-0 p-0">
           <div className="col-12 md:col-12 lg:col-4 xl:col-4 ">
             <InputField
+              required
               classNames="input__field__corrections"
               className="input__label__corrections"
               label="Account Category Code"
@@ -86,6 +87,7 @@ const ModalAddData = ({
           </div>
           <div className="col-12 md:col-12 lg:col-8 xl:col-8 ">
             <InputField
+              required
               classNames="input__field__corrections"
               className="input__label__corrections"
               label="Account Category Name"
@@ -103,6 +105,7 @@ const ModalAddData = ({
           </div>
           <div className="col-12 md:col-12 lg:col-8 xl:col-8 ">
             <InputField
+              required
               classNames="input__field__corrections"
               className="input__label__corrections"
               label="Description"

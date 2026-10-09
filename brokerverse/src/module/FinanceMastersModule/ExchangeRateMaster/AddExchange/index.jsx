@@ -112,6 +112,7 @@ function AddExchange() {
           <div class="sm-col-12 col-12 md:col-3 lg-col-3">
             <div>
               <DropDowns
+                required
                 className="dropdown__container"
                 label={t("financeMasters.currencyCodeLabel")}
                 value={formik.values.CurrencyCode}
@@ -131,6 +132,7 @@ function AddExchange() {
           <div class="sm-col-12 col-12 md:col-6 lg-col-6">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label={t("financeMasters.currencyDescription")}
                 placeholder={t("financeMasters.enter")}
@@ -149,6 +151,7 @@ function AddExchange() {
           <div class="sm-col-12 col-12 md:col-3 lg-col-3">
             <div>
               <DropDowns
+                required
                 className="dropdown__container"
                 label={t("financeMasters.toCurrencyCode")}
                 value={formik.values.ToCurrencyCode}
@@ -171,6 +174,7 @@ function AddExchange() {
           <div class="sm-col-12 col-12 md:col-6 lg-col-6">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label={t("financeMasters.toCurrencyDescription")}
                 placeholder={t("financeMasters.enter")}
@@ -218,6 +222,7 @@ function AddExchange() {
           </div>
           <div class="col-3 md:col-3 lg-col-3">
             <InputField
+              required
               classNames="field__container"
               label={t("financeMasters.exchangeRateValue")}
               placeholder={t("financeMasters.enter")}

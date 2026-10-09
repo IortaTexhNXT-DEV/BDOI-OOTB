@@ -79,7 +79,7 @@ function AddCompany({ action }) {
     PinCode: "",
     City: "",
     State: "",
-    Country: "",
+    Country: "Philippines",
     PhoneNumber: "",
     Fax: "",
   };
@@ -236,6 +236,7 @@ function AddCompany({ action }) {
         <div class="grid">
           <div class="col-12 md:col-6 lg:col-3">
             <InputField
+              required
               classNames="field__container"
               label={t("generalMasters.companyCode")}
               placeholder={t("generalMasters.enter")}
@@ -258,6 +259,7 @@ function AddCompany({ action }) {
           </div>
           <div class="col-12 md:col-6 lg:col-3">
             <InputField
+              required
               classNames="field__container"
               label={t("generalMasters.companyName")}
               placeholder={t("generalMasters.enter")}
@@ -518,6 +520,7 @@ function AddCompany({ action }) {
         <div class="grid">
           <div class="col-12 md:col-6 lg:col-3">
             <DropDowns
+              required
               className="dropdown__container"
               label={t("generalMasters.city")}
               value={
@@ -542,6 +545,7 @@ function AddCompany({ action }) {
           </div>
           <div class="col-12 md:col-6 lg:col-3">
             <DropDowns
+              required
               className="dropdown__container"
               label={t("generalMasters.state")}
               value={
@@ -566,6 +570,7 @@ function AddCompany({ action }) {
           </div>
           <div class="col-12 md:col-6 lg:col-3">
             <DropDowns
+              required
               className="dropdown__container"
               label={t("generalMasters.country")}
               value={

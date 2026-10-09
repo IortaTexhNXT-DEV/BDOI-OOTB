@@ -141,6 +141,7 @@ const LineBusinessDetailsAction = ({ action }) => {
         <div className="grid m-0 p-0">
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"
@@ -160,6 +161,7 @@ const LineBusinessDetailsAction = ({ action }) => {
           </div>
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"
@@ -176,6 +178,7 @@ const LineBusinessDetailsAction = ({ action }) => {
           </div>
           <div className="col-12 md:col-6 lg:col-6 xl:col-6 ">
             <InputField
+              required
               disabled={action === "view" ? true : false}
               classNames="input__field__corrections"
               className="input__label__corrections"

@@ -28,7 +28,7 @@ const initialValues = {
   AddressLine3: "",
   City: "",
   state: "",
-  Country: "",
+  Country: "Philippines",
   mobile: "",
   Fax: "",
   email: ""
@@ -110,12 +110,6 @@ function AddBankMaster() {
     if (!values.AddressLine1) {
       errors.AddressLine1 = "This field is required";
     }
-    if (!values.AddressLine2) {
-      errors.AddressLine2 = "This field is required";
-    }
-    if (!values.AddressLine3) {
-      errors.AddressLine3 = "This field is required";
-    }
     if (!values.City) {
       errors.City = "This field is required";
     }
@@ -135,12 +129,6 @@ function AddBankMaster() {
       errors.mobile = "Phone Number is required";
     } else if (!/^\+?[\d\s()-]{7,20}$/.test(values.mobile)) {
       errors.mobile = "Invalid phone number";
-    }
-    if (!values.Fax) {
-      errors.Fax = "This field is required";
-    }
-    if (!values.email) {
-      errors.email = "This field is required";
     }
     return errors;
   };
@@ -176,6 +164,7 @@ function AddBankMaster() {
           <div class="sm-col-12 col-12 md:col-3 lg-col-3">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label="Bank Code"
                 placeholder={"Enter"}
@@ -196,6 +185,7 @@ function AddBankMaster() {
           <div class="sm-col-12 col-12 md:col-6 lg-col-6">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label="Bank Name"
                 placeholder={"Enter"}
@@ -217,6 +207,7 @@ function AddBankMaster() {
           <div class="sm-col-12 col-12 md:col-3 lg-col-3">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label="Bank Branch"
                 placeholder={"Enter"}
@@ -240,6 +231,7 @@ function AddBankMaster() {
           <div class="col-3 md:col-3 lg-col-3">
 
             <InputField
+              required
               classNames="field__container"
               label="SWIFT / BIC Code"
               placeholder={"Enter"}
@@ -258,6 +250,7 @@ function AddBankMaster() {
           </div>
           <div class="col-3 md:col-3 lg-col-3">
             <InputField
+              required
               classNames="field__container"
               label="Address Line 1"
               placeholder={"Enter"}
@@ -316,6 +309,7 @@ function AddBankMaster() {
           <div class="col-3 md:col-3 lg-col-3">
 
             <DropDowns
+              required
               className="dropdown__container"
               label="City / Municipality"
               value={formik.values.City}
@@ -339,6 +333,7 @@ function AddBankMaster() {
           </div>
           <div class="col-3 md:col-3 lg-col-3">
             <DropDowns
+              required
               className="dropdown__container"
               label="Province"
               value={formik.values.state}
@@ -362,6 +357,7 @@ function AddBankMaster() {
           </div>
           <div class="col-3 md:col-3 lg-col-3">
             <DropDowns
+              required
               className="dropdown__container"
               label="Country"
               value={formik.values.Country}
@@ -433,6 +429,7 @@ function AddBankMaster() {
           </div>
           <div class="sm-col-12  md:col-3 lg-col-3">
             <InputField
+              required
               classNames="field__container"
               label="Email ID"
               placeholder={"Enter"}

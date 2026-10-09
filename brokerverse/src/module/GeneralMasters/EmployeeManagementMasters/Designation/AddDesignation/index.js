@@ -173,6 +173,7 @@ const AddDesignation = ({ action }) => {
           <div className="grid add__account__sub__container p-3 ml-1">
             <div className="col-12 md:col-3 lg:col-3">
               <InputField
+                required
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? getViewData?.designationCode : formik.values.designationCode}
                 onChange={formik.handleChange("designationCode")}
@@ -190,6 +191,7 @@ const AddDesignation = ({ action }) => {
             </div>
             <div className="col-12 md:col-3 lg:col-3">
               <InputField
+                required
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? getViewData?.designationName : formik.values.designationName}
                 onChange={formik.handleChange("designationName")}
@@ -225,6 +227,7 @@ const AddDesignation = ({ action }) => {
             </div>
             <div className="col-12 md:col-3 lg:col-3">
               <DropDowns
+                required
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? getViewData?.departmentCode : formik.values.departmentCode}
                 onChange={formik.handleChange("departmentCode")}
@@ -247,6 +250,7 @@ const AddDesignation = ({ action }) => {
 
             <div className="col-12 md:col-3 lg:col-3">
               <DropDowns
+                required
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? getViewData?.level : formik.values.level}
                 onChange={formik.handleChange("level")}
@@ -269,6 +273,7 @@ const AddDesignation = ({ action }) => {
             </div>
             <div className="col-12 md:col-3 lg:col-3">
               <DropDowns
+                required
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? getViewData?.reportingtoLevel : formik.values.reportingtoLevel}
                 onChange={formik.handleChange("reportingtoLevel")}

@@ -172,6 +172,7 @@ function AddState({ action }) {
           <div class="sm-col-12 col-12 md:col-3 lg-col-3">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label={t("generalMasters.stateCode")}
                 placeholder={t("generalMasters.enter")}
@@ -197,6 +198,7 @@ function AddState({ action }) {
           <div class="sm-col-12 col-12 md:col-3 lg-col-3">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label={t("generalMasters.stateName")}
                 placeholder={t("generalMasters.enter")}
@@ -251,6 +253,7 @@ function AddState({ action }) {
 
             <div>
               <DropDowns
+                required
                 className="dropdown__container"
                 label={t("generalMasters.country")}
                 value={formik.values.Country}

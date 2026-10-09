@@ -178,6 +178,7 @@ function AddAccountDetail() {
           <div class="sm-col-12 col-12 md:col-3 lg-col-3">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label={t("financeMasters.accountNumber")}
                 placeholder={"Enter"}
@@ -194,6 +195,7 @@ function AddAccountDetail() {
           <div class="sm-col-12 col-12 md:col-6 lg-col-6">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label={t("financeMasters.accountName")}
                 placeholder={"Enter"}
@@ -210,6 +212,7 @@ function AddAccountDetail() {
           <div class="sm-col-12  md:col-3 lg-col-3">
             <div>
               <DropDowns
+                required
                 className="dropdown__container"
                 label={t("financeMasters.accountType")}
                 value={formik.values.AccountType}
@@ -232,6 +235,7 @@ function AddAccountDetail() {
           <div class="sm-col-12 col-12 md:col-3 lg-col-3">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label={t("financeMasters.mainAccount")}
                 placeholder={"Enter"}
@@ -248,6 +252,7 @@ function AddAccountDetail() {
           <div class="sm-col-12 col-12 md:col-6 lg-col-6">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label={t("financeMasters.mainAccountDescription")}
                 placeholder={"Enter"}
@@ -266,6 +271,7 @@ function AddAccountDetail() {
           <div class="sm-col-12 col-12 md:col-3 lg-col-3">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label={t("financeMasters.transactionLimit")}
                 placeholder={"Enter"}

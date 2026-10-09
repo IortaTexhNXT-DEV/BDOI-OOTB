@@ -241,6 +241,7 @@ const DepartMentList = ({ action, branchCode }) => {
           <div class="sm-col-12 col-12 md:col-6 lg-col-6">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label="Department Code"
                 placeholder={"Enter"}
@@ -258,6 +259,7 @@ const DepartMentList = ({ action, branchCode }) => {
           <div class="sm-col-12 col-12 md:col-6 lg-col-6">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label="Department Name"
                 placeholder={"Enter"}
@@ -277,6 +279,7 @@ const DepartMentList = ({ action, branchCode }) => {
           <div class="sm-col-12 col-12 md:col-12 lg-col-12">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label="Description"
                 placeholder={"Enter"}
@@ -354,6 +357,7 @@ const DepartMentList = ({ action, branchCode }) => {
           <div class="sm-col-12 col-12 md:col-6 lg-col-6">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label="Department Code"
                 placeholder={"Enter"}
@@ -365,6 +369,7 @@ const DepartMentList = ({ action, branchCode }) => {
           <div class="sm-col-12 col-12 md:col-6 lg-col-6">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label="Department Name"
                 placeholder={"Enter"}
@@ -378,6 +383,7 @@ const DepartMentList = ({ action, branchCode }) => {
           <div class="sm-col-12 col-12 md:col-12 lg-col-12">
             <div>
               <InputField
+                required
                 classNames="field__container"
                 label="Description"
                 placeholder={"Enter"}
