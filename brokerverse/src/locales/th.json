@@ -4894,6 +4894,11 @@
     "yes": "ใช่",
     "no": "ไม่ใช่"
   },
+  "makerChecker": {
+    "ownRecord": "คุณเป็นผู้สร้างรายการนี้ ผู้ใช้อื่นต้องเป็นผู้อนุมัติหรือปฏิเสธ",
+    "approve": "อนุมัติ",
+    "reject": "ปฏิเสธ"
+  },
   "customerResponse": {
     "waiting": "Waiting for customer approval",
     "copyLink": "Copy approval link",

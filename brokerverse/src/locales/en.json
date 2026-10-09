@@ -5882,6 +5882,11 @@
     "yes": "Yes",
     "no": "No"
   },
+  "makerChecker": {
+    "ownRecord": "You initiated this record. A different user must approve or reject it.",
+    "approve": "Approve",
+    "reject": "Reject"
+  },
   "security": {
     "changePassword": "Change password",
     "twoFactor": "Two-step verification",

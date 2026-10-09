@@ -1,0 +1,12 @@
+// A status chip keeps the width of its text: grid and flex parents (label / value rows of dialogs) must not stretch it
+// into a full-width pill. The colours are those of the shared status tags.
+
+.p-tag.bv-status-chip {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-self: center;
+  justify-self: start;
+  width: auto;
+  max-width: 100%;
+  vertical-align: middle;
+}
