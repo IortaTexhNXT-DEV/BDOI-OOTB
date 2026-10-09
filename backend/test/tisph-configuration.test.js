@@ -13,7 +13,7 @@ import { seed } from '../src/db/seed.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { clearLetterheadCache, getLetterhead, resolveLogo } from '../src/lib/letterhead.js';
 import { ensureCalendar, fiscalStartFor } from '../src/modules/period-end/fiscal.js';
-import { enableDeploymentPack } from '../src/modules/branding/bundled.js';
+import { enforceDeploymentPack } from '../src/modules/branding/bundled.js';
 
 let ctx;
 const q = (sql, params) => pool.query(sql, params).then((r) => r.rows);
@@ -139,7 +139,7 @@ describe('TISPH configuration of a database already in use', () => {
     // as before the TISPH seeds: the out-of-the-box company is the letterhead and BRAND_PACK puts its logo on it
     await q("UPDATE master_records SET data = data || jsonb_build_object('IsPrimary', code = 'ITX') WHERE type_code = 'company' AND code IN ('ITX', 'TISPH')");
     const ownLogo = (await company('ITX')).data.Logo;
-    expect(await enableDeploymentPack('toyota-insurance-services')).toMatchObject({ status: 'enabled' });
+    expect(await enforceDeploymentPack('toyota-insurance-services')).toMatchObject({ status: 'enabled' });
     const packLogo = (await company('ITX')).data.Logo;
     expect(packLogo).not.toBe(ownLogo);
 

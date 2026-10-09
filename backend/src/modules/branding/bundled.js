@@ -5,19 +5,21 @@
  * enables one through the API (POST /branding/packs/bundled/:id/enable) after acknowledging that the environment
  * belongs to the client engagement whose contract with iorta TechNXT covers the use of the marks the pack carries. The enablement is recorded (who, when, the
  * acknowledgement, the branding before it) so the broker can go back to the iorta TechNXT default at any time.
- * A deployment made for that client may name its pack in BRAND_PACK instead: the API enables it once at start-up
- * (enableDeploymentPack), recorded the same way with the deployment configuration as the source of the acknowledgement.
+ * A deployment made for that client names its pack in BRAND_PACK instead: the API enforces it at every start
+ * (enforceDeploymentPack), the first time recorded the same way with the deployment configuration as the source of the
+ * acknowledgement, and while it is set the look of the screens cannot be changed through the API (assertNotEnforced).
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import { one, pool, query } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
+import { config } from '../../config.js';
 import { badRequest, notFound } from '../../lib/errors.js';
 import { getSetting, setSetting } from '../../lib/settings.js';
 import { clearLetterheadCache, primaryCompany, ASSETS_DIR } from '../../lib/letterhead.js';
 import { saveFile } from '../masters/helpers.js';
-import { DEFAULT_THEME } from './presets.js';
-import { PACK_FORMAT, assertBrandImage, currentTheme, importBrandPack, saveTheme, validateTheme } from './service.js';
+import { DEFAULT_THEME, SCHEMA } from './presets.js';
+import { PACK_FORMAT, assertBrandImage, currentTheme, importBrandPack, saveTheme, storedImageBytes, validateTheme } from './service.js';
 
 export const BUNDLED_DIR = path.join(ASSETS_DIR, 'brand-packs');
 
@@ -30,7 +32,7 @@ export const ACKNOWLEDGEMENT_TEXT = 'This environment belongs to the client enga
 /** Added to the acknowledgement of an enablement made at start-up from the BRAND_PACK variable. */
 export const DEPLOYMENT_NOTE = 'Given by the deployment configuration (BRAND_PACK).';
 
-/** Who an enablement made at start-up is recorded against (no signed-in user). */
+/** Who an enablement or an application made at start-up is recorded against (no signed-in user). */
 const SYSTEM_USER = { id: null, username: 'system' };
 
 const str = (v) => (v === null || v === undefined ? '' : String(v).trim());
@@ -144,10 +146,11 @@ async function brandingSnapshot() {
 /**
  * Enable a bundled pack: the same checks and the same application as an imported pack (importBrandPack), plus the
  * acknowledgement, which the request must carry as true, and the enablement record. Returns the import summary with
- * the enablement. dryRun checks only (nothing applied, nothing recorded).
+ * the enablement. dryRun checks only (nothing applied, nothing recorded). `pack` is the pack already loaded (with the
+ * theme the start-up enforcement keeps the e-mail and document sections in).
  */
-export async function enableBundledPack(id, { user, acknowledgedPermission, acknowledgementText = ACKNOWLEDGEMENT_TEXT, dryRun = false, applyDocumentLogo = true, applySystemName = true, storeImage }) {
-  const pack = loadBundledPack(id);
+export async function enableBundledPack(id, { user, acknowledgedPermission, acknowledgementText = ACKNOWLEDGEMENT_TEXT, dryRun = false, applyDocumentLogo = true, applySystemName = true, storeImage, pack: loaded = null }) {
+  const pack = loaded || loadBundledPack(id);
   if (!dryRun && pack.bundled.requiresAcknowledgement && acknowledgedPermission !== true) {
     throw badRequest('Acknowledge the engagement first', [{ path: 'acknowledgedPermission', message: `Tick "${ACKNOWLEDGEMENT_TEXT}" to enable ${pack.bundled.name}; the marks of this pack belong to ${pack.bundled.trademarkOwner || 'their owner'}` }]);
   }
@@ -172,14 +175,92 @@ export async function storeBundledImage(file, _category, userId, ref) {
 
 const DEPLOYMENT_LOCK = "hashtext('brokerverse.brand_pack')";
 
+/** The bundled pack the deployment enforces (BRAND_PACK naming a shipped pack), else ''. */
+export const deploymentPackId = () => (config.brandPack && bundledPackIds().includes(config.brandPack) ? config.brandPack : '');
+
+/** Refuse a change to the look of the screens (`what`: "The logo", ...) while the deployment enforces a brand pack. */
+export function assertNotEnforced(what) {
+  const id = deploymentPackId();
+  if (id) throw badRequest(`${what} comes from the brand pack of the deployment (BRAND_PACK=${id}) and cannot be changed here; the e-mail and document layouts are changed on their screens`);
+}
+
+/** Theme values of the screens and the sign-in page: what a brand pack fixes (the e-mail and document sections are the broker's). */
+const SCREEN_SECTIONS = ['colors', 'layout', 'radius', 'login'];
+const SCREEN_LOGO = ['appHeight', 'loginHeight', 'showName'];
+const same = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+
+/** Paths of the screen values (name, preset, font, colours, layout, radius, sign-in page, logo sizes) where two resolved themes differ. */
+export function screenDifferences(theme, reference) {
+  const out = ['preset', 'name', 'font'].filter((k) => !same(theme[k], reference[k]));
+  for (const section of SCREEN_SECTIONS) {
+    for (const k of Object.keys(SCHEMA[section]).filter((x) => x !== 'panelImageUrl')) if (!same(theme[section]?.[k], reference[section]?.[k])) out.push(`${section}.${k}`);
+  }
+  for (const k of SCREEN_LOGO) if (!same(theme.logo?.[k], reference.logo?.[k])) out.push(`logo.${k}`);
+  return out;
+}
+
 /**
- * Enable the pack named by BRAND_PACK at start-up (after migrations and seed), once per environment: nothing is done
- * when a pack is already in force or when the pack was ever enabled here (by this start-up or on the screen), so an
- * administrator's later Back to default stands across restarts. The acknowledgement is recorded with a note that the
- * deployment configuration gave it, against the user "system", and audited. Several instances starting together take
- * an advisory lock so only one of them enables it. log is the application logger (info, warn). Returns { status: 'enabled' | 'skipped' | 'unknown', ... }.
+ * The theme a pack puts on the screens, with the parts the broker edits on the layout screens (e-mail, documents, the
+ * logo height on documents) kept from `current`; a part still at the iorta TechNXT default (never edited, or reset)
+ * takes the pack's.
  */
-export async function enableDeploymentPack(id, { log = { info() {}, warn() {} }, storeImage = storeBundledImage } = {}) {
+function enforcedTheme(pack, current) {
+  const login = pack.manifest.theme.login || {};
+  const assets = pack.manifest.assets || {};
+  const { theme } = validateTheme({ ...pack.manifest.theme, login: { ...login, panelImageUrl: '', panel: login.panel === 'image' ? 'library' : login.panel } });
+  if (assets.loginPanel) theme.login.panel = 'image';
+  const isDefault = (section) => Object.keys(DEFAULT_THEME[section]).every((k) => same(current[section]?.[k], DEFAULT_THEME[section][k]));
+  for (const section of ['email', 'documents']) if (!isDefault(section)) theme[section] = { ...current[section] };
+  if (current.logo.documentHeight !== DEFAULT_THEME.logo.documentHeight) theme.logo.documentHeight = current.logo.documentHeight;
+  return theme;
+}
+
+/**
+ * Where the branding of this environment differs from a pack: { reasons, theme (the one to apply), documentLogo (the
+ * print logo of the primary company is missing or not an uploaded image), reuse: role -> URL of an image already
+ * stored with the same bytes as the pack's, so applying again stores no new copy }.
+ */
+async function packDrift(pack) {
+  const current = await currentTheme();
+  const theme = enforcedTheme(pack, current);
+  const company = await primaryCompany().catch(() => null);
+  const refs = {
+    logo: str(await getSetting('branding.logo_url', '')),
+    favicon: str(await getSetting('branding.favicon_url', '')),
+    loginPanel: str(current.login.panelImageUrl),
+    documentLogo: str(company?.data?.Logo),
+  };
+  const stored = Object.fromEntries(Object.entries(refs).map(([role, ref]) => [role, storedImageBytes(ref)]));
+  const reasons = [];
+  const differences = screenDifferences(current, theme);
+  if (differences.length) reasons.push(`the theme differs (${differences.slice(0, 6).join(', ')}${differences.length > 6 ? ', ...' : ''})`);
+  const systemName = str(pack.manifest.systemName).slice(0, 120);
+  const nameNow = str(await getSetting('general.system_name', ''));
+  if (systemName && nameNow !== systemName) reasons.push(`the application name is "${nameNow}"`);
+  const reuse = {};
+  for (const [role, file] of Object.entries(pack.manifest.assets || {})) {
+    if (!file) continue;
+    const bytes = pack.files.get(path.basename(String(file)));
+    const match = Object.keys(refs).find((r) => stored[r]?.equals(bytes));
+    if (match) reuse[role] = refs[match];
+    if (role !== 'documentLogo' && !stored[role]?.equals(bytes)) reasons.push(`the ${role === 'loginPanel' ? 'sign-in picture' : role} is not the pack's`);
+  }
+  const documentLogo = !!company && !!pack.manifest.assets?.documentLogo && !stored.documentLogo;
+  if (documentLogo) reasons.push(refs.documentLogo ? `the print logo of the primary company is ${refs.documentLogo}` : 'the primary company has no print logo');
+  return { reasons, theme, documentLogo, reuse, before: current };
+}
+
+/**
+ * Enforce the pack named by BRAND_PACK at start-up (after migrations and seed): when it is not the enablement in force,
+ * or the branding of the screens has drifted from it (theme, application name, logo, favicon, the print logo of the
+ * primary company missing), it is applied again, keeping the e-mail and document sections the broker set on the layout
+ * screens. Images already stored with the pack's bytes are reused, so a start with nothing to do stores nothing. The
+ * first application records the acknowledgement with a note that the deployment configuration gave it, against the
+ * user "system"; every application is audited and logged with its reasons. Several instances starting together take
+ * an advisory lock so only one of them applies it. log is the application logger (info, warn). Returns
+ * { status: 'enabled' | 're-applied' | 'in-force' | 'unknown' | 'skipped', ... }.
+ */
+export async function enforceDeploymentPack(id, { log = { info() {}, warn() {} }, storeImage = storeBundledImage } = {}) {
   const packId = str(id);
   if (!packId) return { status: 'skipped', reason: 'not set' };
   if (!bundledPackIds().includes(packId)) {
@@ -189,16 +270,30 @@ export async function enableDeploymentPack(id, { log = { info() {}, warn() {} },
   const lock = await pool.connect();
   try {
     await lock.query(`SELECT pg_advisory_lock(${DEPLOYMENT_LOCK})`);
+    const pack = loadBundledPack(packId);
     const current = await currentEnablement();
-    if (current) return { status: 'skipped', packId, reason: `${current.packName} is in force` };
-    if (await one('SELECT id FROM brand_pack_enablements WHERE pack_id = $1 LIMIT 1', [packId])) return { status: 'skipped', packId, reason: 'enabled before in this environment' };
-    const before = await currentTheme();
+    const drift = await packDrift(pack);
+    const inForce = current?.packId === packId;
+    const reasons = [...(inForce ? [] : [current ? `${current.packName} was in force` : 'no brand pack was in force']), ...drift.reasons];
+    if (!reasons.length) {
+      log.info(`Brand pack ${pack.bundled.name} in force (BRAND_PACK=${packId})`);
+      return { status: 'in-force', packId, enablement: current };
+    }
+    const enforced = { ...pack, manifest: { ...pack.manifest, theme: drift.theme } };
+    const reuse = (file, category, userId, ref) => {
+      const url = drift.reuse[String(ref).split(':').pop()];
+      return url ? { url } : storeImage(file, category, userId, ref);
+    };
     const acknowledgementText = `${ACKNOWLEDGEMENT_TEXT} ${DEPLOYMENT_NOTE}`;
-    const result = await enableBundledPack(packId, { user: SYSTEM_USER, acknowledgedPermission: true, acknowledgementText, storeImage });
-    await audit({ user: SYSTEM_USER, auditSource: { channel: 'job', name: 'BRAND_PACK' } }, { entity: 'branding', entityId: `bundled-pack:${packId}`, action: 'enable-pack', before,
-      after: { pack: packId, name: result.pack.name, version: result.pack.version, trademarkOwner: result.pack.trademarkOwner, acknowledgedPermission: true, acknowledgementText, applied: result.applied, theme: result.theme } });
-    log.info(`Brand pack ${result.pack.name} enabled from BRAND_PACK=${packId} (${result.applied.join(', ')})`);
-    return { status: 'enabled', packId, enablement: result.enablement };
+    const options = { applyDocumentLogo: drift.documentLogo, storeImage: reuse };
+    const result = inForce
+      ? { ...(await importBrandPack(enforced, { userId: null, ...options })), pack: pack.bundled, enablement: current }
+      : await enableBundledPack(packId, { pack: enforced, user: SYSTEM_USER, acknowledgedPermission: true, acknowledgementText, ...options });
+    const action = inForce ? 'reapply-pack' : 'enable-pack';
+    await audit({ user: SYSTEM_USER, auditSource: { channel: 'job', name: 'BRAND_PACK' } }, { entity: 'branding', entityId: `bundled-pack:${packId}`, action, before: drift.before,
+      after: { pack: packId, name: result.pack.name, version: result.pack.version, trademarkOwner: result.pack.trademarkOwner, acknowledgedPermission: true, acknowledgementText, reasons, applied: result.applied, theme: result.theme } });
+    log.info(`Brand pack ${result.pack.name} ${inForce ? 'applied again' : 'enabled'} from BRAND_PACK=${packId}: ${reasons.join('; ')} (${result.applied.join(', ')})`);
+    return { status: inForce ? 're-applied' : 'enabled', packId, reasons, applied: result.applied, enablement: result.enablement };
   } finally {
     await lock.query(`SELECT pg_advisory_unlock(${DEPLOYMENT_LOCK})`).catch(() => {});
     lock.release();
