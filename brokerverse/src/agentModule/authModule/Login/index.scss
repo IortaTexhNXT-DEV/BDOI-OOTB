@@ -1,7 +1,8 @@
 @import "../../../theme/bdoi/tokens";
 
 // Sign-in, two-step code, forced password change / two-step set-up and password reset: the illustration on the left,
-// one full-height white panel on the right with the form card centred and the vendor footer at the bottom.
+// one full-height panel in the page colour on the right with the form on a white card centred in it and the vendor
+// footer at the bottom. A short bar in the marker colour (the accent of a brand theme) sits above the title.
 // Narrow screens: the panel only (the illustration is hidden).
 .agent__container__login.bv-auth {
   display: grid;
@@ -45,7 +46,7 @@
     min-height: 100vh;
     min-height: 100dvh;
     padding: 24px 48px;
-    background: $color-surface;
+    background: $color-bg;
     border-left: 1px solid $color-border;
 
     @media (max-width: 960px) {
@@ -79,14 +80,23 @@
 
   .bv-auth__card {
     width: 100%;
-    max-width: 400px;
+    max-width: 448px;
+    padding: 40px 40px 32px;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-lg;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 12px 32px rgba(16, 24, 40, 0.08);
+
+    @media (max-width: 480px) {
+      padding: 28px 20px 24px;
+    }
   }
 
   .bv-auth__brand {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
 
     .bv-auth__logo {
       margin-bottom: 0;
@@ -105,10 +115,21 @@
   h1.bv-auth__title {
     margin: 0;
     font-family: $font-heading;
-    font-size: 26px;
-    line-height: 34px;
-    font-weight: 800;
+    font-size: 24px;
+    line-height: 32px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
     color: $color-heading;
+
+    &::before {
+      content: "";
+      display: block;
+      width: 32px;
+      height: 3px;
+      margin-bottom: 16px;
+      border-radius: 2px;
+      background: $marker;
+    }
   }
 
   .bv-auth__subtitle {
@@ -128,7 +149,6 @@
     justify-content: center;
     gap: 8px;
     padding: 16px 0 8px;
-    border-top: 1px solid $color-border;
     font-size: 12px;
     color: $color-text-muted;
 
@@ -190,6 +210,10 @@
     border-color: $brand-field-blue;
     border-radius: $radius-sm;
 
+    &:enabled:hover {
+      border-color: $color-border-strong;
+    }
+
     &:enabled:focus {
       border-color: $brand-blue;
       box-shadow: $focus-ring;
@@ -238,11 +262,15 @@
       border-radius: $radius-sm;
       font-family: $font-heading;
       font-size: 15px;
-      font-weight: 700;
+      font-weight: 600;
 
       &:enabled:hover {
         background: $brand-blue-600;
         border-color: $brand-blue-600;
+      }
+
+      &:focus-visible {
+        box-shadow: $focus-ring;
       }
     }
 
