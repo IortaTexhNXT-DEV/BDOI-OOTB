@@ -12,7 +12,7 @@ const FORMS = {
 /** Router state of a prospect form opened from the Create prospect choice (the gate of the forms lets it through). */
 export const prospectFormState = ({ product = null, client = null, untagged = false } = {}) => ({
   ...(client ? { existingClient: client } : {}),
-  ...(product ? { product: { lob: product.lob, productId: product.id } } : {}),
+  ...(product ? { product: { lob: product.lob, productId: product.id, name: product.name } } : {}),
   ...(untagged ? { untagged: true } : {}),
 });
 

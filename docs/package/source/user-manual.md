@@ -906,12 +906,13 @@ Choose Operations > Sales & Marketing > Prospects. The cards count **Total Prosp
 ### Create a prospect
 
 1. Select **Create Prospect**. The **Create prospect** panel asks whether the customer is new or already a client.
-2. Choose **New customer** (enter the customer's details on the prospect form) or **Existing client** (find the client by name, mobile number or e-mail; the prospect is linked to that client), then select **Continue**.
+2. Choose **New customer** (enter the customer's details on the prospect form) or **Existing client**, then select **Continue**. For an existing client, type at least three characters of the client's name, mobile number or e-mail. The clients found are listed with their **Client code**, **Name** (with the city), **Mobile** and **E-mail**; a long value is cut short and shown in full when you point at it. Select a client with a click (or the arrow keys from the search box): its row is highlighted and its radio button set. Select **Use this client** (or press Enter, or double-click the row). When no client matches, select **Create a new customer instead**. The prospect form then starts from the client's details and the prospect is linked to that client: no second client is created when its quotation becomes a policy.
 3. Choose the product the prospect is for: first the **Line of Business** (only the lines that have active products are listed), then the **Product** (the active products of that line; a line with a single product selects it). Select **Continue**. A motor product opens the prospect form; Fire and Allied Perils, Industrial All Risks and Employee Benefits open their own forms while those products are active; any other product opens a Request for Quotation for the new prospect.
 4. If the customer has not chosen a product yet, select **Skip - tag product later** instead: the prospect form opens without a product.
 
 Every way of starting a new prospect goes through this panel: **Create Prospect** on Prospects, **Create Lead** on Clients, **New Quote** on the Executive Dashboard, the Underwriting Dashboard buttons and a prospect form opened from a link or the side bar. Editing a prospect or adding a quotation to an existing prospect opens its form at once.
-5. Fill in the prospect form and select **Save & Continue**.
+5. Fill in the prospect form and select **Save & Continue**. The form has the sections **Customer**, **Contact**, **Address** and **Source and product**, each field with its label above it, a red asterisk when it is required and the message of a wrong value under it.
+6. Before a new prospect is saved, the system looks for possible duplicates: clients and open prospects with the same e-mail, the same mobile number, or the same name with the same date of birth. When it finds some, the **Possible duplicate** window lists them with what matched. Select **Use this client** to link the prospect to an existing client (the form takes the client's details), **Open prospect** to work on the existing prospect instead, or **Save anyway** to create the new prospect. For an existing client, the window lists the client's open prospects. The check can be switched off with `leads.duplicate_check` (System Settings, group leads).
 
 ![Create prospect: new customer or existing client](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-prospect-create.png)
 
@@ -921,16 +922,18 @@ Every way of starting a new prospect goes through this panel: **Create Prospect*
 
 | Field | Required | Rules |
 |---|---|---|
-| **Select Category** | Yes | **Retail** (a person) or **Corporate** (a company). Corporate asks for the company name and TIN. |
-| **First Name**, **Last Name** | Yes | The prospect or the contact person. |
-| **Preferred Name** | Yes | The name used in letters and e-mails. |
-| **Date of Birth** | Yes | Not in the future; age 18 to 100 (`leads.min_age_years`, `leads.max_age_years`). |
-| **Select Gender** | Yes | **Male** or **Female**. |
-| **Email ID** | Yes | A valid e-mail address. Quotations and approval links are sent there. |
-| **Contact Number** | Yes | A Philippine mobile number: 0917 123 4567 or +63 917 123 4567. |
-| **Country**, **Region**, **Province**, **City / Municipality**, **Barangay** | Yes (Region optional) | From the PSGC address masters; choose the country first (Philippines by default), then the region or the province, then the city or municipality, then the barangay. |
-| **ZIP Code** | Yes | 4 digits; filled in from the barangay or city when known. |
+| **Category** (Customer) | Yes | **Retail** (a person) or **Corporate** (a company). |
+| **Company name**, **TIN** (Customer, Corporate) | Yes | The TIN as 9 digits, or 12 to 14 digits with the branch code (000-000-000-000). |
+| **First name**, **Last name** | Yes | The prospect, or for a corporate prospect its **Contact person**. |
+| **Preferred name** | Yes | The name used in letters and e-mails. |
+| **Date of birth** | Retail only | Not in the future; age 18 to 100 (`leads.min_age_years`, `leads.max_age_years`). Optional for the contact person of a corporate prospect. |
+| **Gender** | Retail only | **Male** or **Female**. |
+| **E-mail** (Contact) | Yes | A valid e-mail address. Quotations and approval links are sent there. |
+| **Mobile number** (Contact) | Yes | A Philippine mobile number: 0917 123 4567 or +63 917 123 4567. |
+| **Country**, **Region**, **Province**, **City / Municipality**, **Barangay** (Address) | Yes (Region optional) | From the PSGC address masters; choose the country first (Philippines by default), then the region or the province (the province fills its region), then the city or municipality (listed once the province is chosen), then the barangay. |
+| **ZIP Code** | Yes | 4 digits; suggested from the city. A ZIP code typed first fills the city, province and region. |
 | **House / Unit No.**, **Street / Subdivision** | House / Unit No. yes | The street address. |
+| **Source** (Source and product) | No | From Master > Insurance Management > Lead Sources. **Product** shows the product chosen, or **Product not yet tagged**. |
 
 The system gives the prospect its number (LD-YYYY-NNNNN) with status New and, for a motor prospect, opens **Create Quote** for it. Fire and Allied Perils and Industrial All Risks prospects also ask for the risk location and the sums insured. A prospect created with **Skip - tag product later** opens on its **Prospect Details**, with the note that its product is not yet tagged, and is listed on the tab **Product not yet tagged**.
 

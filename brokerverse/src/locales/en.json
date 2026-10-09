@@ -5181,7 +5181,38 @@
     "createLead": "Create Prospect",
     "editClient": "Edit Client",
     "editLead": "Edit Prospect",
-    "categoryColon": "Category :"
+    "categoryColon": "Category :",
+    "created": "Prospect created",
+    "updated": "Prospect updated",
+    "createdWithoutId": "Prospect created but its ID was not returned. Create the quote from the Prospects list.",
+    "form": {
+      "customer": "Customer",
+      "category": "Category",
+      "companyName": "Company name",
+      "tin": "TIN",
+      "contactPerson": "Contact person",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "preferredName": "Preferred name",
+      "birthDate": "Date of birth",
+      "gender": "Gender",
+      "contact": "Contact",
+      "email": "E-mail",
+      "mobile": "Mobile number",
+      "address": "Address",
+      "sourceProduct": "Source and product",
+      "chooseSource": "Choose the source",
+      "product": "Product",
+      "motor": "Motor",
+      "cancel": "Cancel"
+    },
+    "errors": {
+      "required": "Enter this field",
+      "email": "Enter a valid e-mail address",
+      "mobile": "Enter a valid mobile number (e.g. {{example}})",
+      "tin": "Enter the TIN as 9 digits, or 12 to 14 digits with the branch code",
+      "zip": "Enter the four-digit ZIP code"
+    }
   },
   "leadEdit": {
     "leads": "Prospects",
@@ -8572,7 +8603,7 @@
     "searchLabel": "Client name, mobile number or e-mail",
     "searchPlaceholder": "Type at least 3 characters",
     "typeMore": "Type at least 3 characters to search.",
-    "noMatch": "No client matches. Go back and choose New customer.",
+    "noMatch": "No client matches \"{{term}}\".",
     "clientCode": "Client code",
     "name": "Name",
     "mobile": "Mobile",
@@ -8582,7 +8613,13 @@
     "productQuestion": "Which product is the prospect for?",
     "cancel": "Cancel",
     "back": "Back",
-    "continue": "Continue"
+    "continue": "Continue",
+    "searching": "Searching...",
+    "createNew": "Create a new customer instead",
+    "resultsLabel": "Clients found",
+    "resultCount_one": "{{count}} client found",
+    "resultCount_other": "{{count}} clients found",
+    "moreResults": "Showing the first {{count}} clients: type more to narrow the search"
   },
   "productPicker": {
     "title": "Choose the product",
@@ -8732,7 +8769,8 @@
     "cityMunicipality": "City / Municipality",
     "barangay": "Barangay",
     "houseUnitNo": "House / Unit No.",
-    "street": "Street / Subdivision"
+    "street": "Street / Subdivision",
+    "chooseProvinceFirst": "Choose the province first"
   },
   "underwritingReferral": {
     "title": "Underwriting referral",
@@ -10739,5 +10777,27 @@
     "intro": "BIR Form 2307 for the expanded withholding tax withheld from suppliers on their invoices, one certificate per supplier and quarter. The same figures are in the QAP, the 0619-E and 1601-EQ and the 1604-E alphalist.",
     "issueAll": "Issue all certificates",
     "issuedAll": "{{count}} certificate(s) issued"
+  },
+  "prospectDuplicates": {
+    "title": "Possible duplicate",
+    "intro": "These clients or open prospects look like the customer you entered. Use the existing client, open the prospect, or save a new prospect anyway.",
+    "clientIntro": "The client already has these open prospects. Open one of them, or save a new prospect anyway.",
+    "kind": {
+      "client": "Client",
+      "lead": "Prospect"
+    },
+    "matchedOn": {
+      "email": "e-mail",
+      "mobile": "mobile number",
+      "name": "name",
+      "birthDate": "date of birth"
+    },
+    "sameAs": "Same {{fields}}",
+    "owner": "account executive {{name}}",
+    "useClient": "Use this client",
+    "openProspect": "Open prospect",
+    "saveAnyway": "Save anyway",
+    "back": "Back to the form",
+    "clientFailed": "The client could not be loaded"
   }
 }

@@ -40,7 +40,7 @@ describe("a new prospect", () => {
 
   it("carries the product, the client or the skip to the form", () => {
     expect(prospectFormState({ product: { id: 7, lob: "LIFE", name: "Credit Life" }, client: { clientId: "cl_1" } }))
-      .toEqual({ existingClient: { clientId: "cl_1" }, product: { lob: "LIFE", productId: 7 } });
+      .toEqual({ existingClient: { clientId: "cl_1" }, product: { lob: "LIFE", productId: 7, name: "Credit Life" } });
     expect(prospectFormState({ untagged: true })).toEqual({ untagged: true });
     expect(prospectChosen({ existingClient: { clientId: "cl_1" } })).toBe(false);
     expect(prospectChosen(null)).toBe(false);
