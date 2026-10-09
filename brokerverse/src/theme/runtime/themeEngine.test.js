@@ -27,6 +27,7 @@ afterEach(() => {
   ["data-bv-density", "data-bv-theme", "data-bv-header", "data-bv-sidebar"].forEach((a) => document.documentElement.removeAttribute(a));
   loadFontStylesheet(null);
   delete global.fetch;
+  window.localStorage.clear();
 });
 
 describe("theme engine", () => {
@@ -112,6 +113,7 @@ describe("branding provider", () => {
     const Ready = () => <span data-testid="ready">{String(useBranding().ready)}</span>;
     render(<Provider store={store}><MemoryRouter><BrandingProvider><Ready /></BrandingProvider></MemoryRouter></Provider>);
     await waitFor(() => expect(screen.getByTestId("ready").textContent).toBe("true"));
+    await waitFor(() => expect(JSON.parse(window.localStorage.getItem(BOOT_KEY))?.faviconUrl).toBeTruthy());
     const saved = JSON.parse(window.localStorage.getItem(BOOT_KEY));
     expect(saved).toMatchObject({ faviconUrl: "/api/branding/assets/favicon?v=1", title: "Toyota Insurance Services - Login", attrs: { "data-bv-theme": "custom" } });
     expect(saved.vars).toMatchObject({ "--bv-button-bg": "#1a1a1a", "--bv-alt-primary": "#1a1a1a" });
@@ -139,7 +141,24 @@ describe("branding provider", () => {
     new Function(fs.readFileSync(path.join(__dirname, "../../../public/branding-boot.js"), "utf8"))();
     expect(document.documentElement.getAttribute("style")).toBeNull();
     expect(icon.getAttribute("href")).toBe("/api/branding/assets/favicon?v=1");
-    window.localStorage.removeItem(BOOT_KEY);
+  });
+  it("shows a neutral page, never the default look, until the branding is known; the kept branding is used at once on the next load", async () => {
+    let answer;
+    global.fetch = jest.fn(() => new Promise((resolve) => { answer = resolve; }));
+    const store = configureStore({ reducer: { systemSettingsReducer: (s = {}) => s } });
+    const Probe = () => <span data-testid="name">{useBranding().branding?.systemName}</span>;
+    const view = render(<Provider store={store}><MemoryRouter><BrandingProvider><Probe /></BrandingProvider></MemoryRouter></Provider>);
+    expect(screen.getByRole("status")).toBeTruthy();
+    expect(screen.queryByTestId("name")).toBeNull();
+    answer({ ok: true, json: async () => ({ success: true, data: { systemName: "Toyota Insurance Services", logoUrl: "/api/branding/assets/logo?v=1", version: "v5", theme: TIS } }) });
+    expect((await screen.findByTestId("name")).textContent).toBe("Toyota Insurance Services");
+    view.unmount();
+
+    // the next load: the kept branding at once, while the API has not answered yet
+    global.fetch = jest.fn(() => new Promise(() => {}));
+    render(<Provider store={store}><MemoryRouter><BrandingProvider><Probe /></BrandingProvider></MemoryRouter></Provider>);
+    expect(screen.getByTestId("name").textContent).toBe("Toyota Insurance Services");
+    expect(screen.queryByRole("status")).toBeNull();
   });
   it("returns null when the API is down (the compiled look stays)", async () => {
     global.fetch = jest.fn(async () => ({ ok: false, json: async () => ({}) }));

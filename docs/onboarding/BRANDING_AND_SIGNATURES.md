@@ -59,10 +59,13 @@ settings, and texts with `<` or `>`.
   versioned, sandbox CSP).
 * Front end: `brokerverse/src/theme/runtime/`: `themeEngine.js` sets the `--bv-*` CSS custom properties on `<html>`,
   `BrandingProvider.jsx` revalidates the branding on every navigation (at most every 15 s), when the tab becomes
-  visible and every 5 minutes. It keeps a copy of what the first paint needs (CSS variables, layout attributes, tab
-  title, favicon) in the browser; `public/branding-boot.js` applies it before the application loads, so a returning
-  user never sees the default look first. On a first visit the sign-in page waits for `GET /api/branding` (at most
-  4 seconds) instead of painting the default logo and colours. `tokens.scss` defines the defaults (the iorta TechNXT preset, so the app looks exactly
+  visible and every 5 minutes. No screen is drawn in a look that is not the environment's, also during a refresh: the
+  browser keeps the last branding it received; `public/branding-boot.js` applies its colours, tab title and favicon
+  before the application loads and the provider uses its logo and name at once. A browser with nothing kept (first
+  visit, cleared data) shows a plain white page until `GET /api/branding` answers (at most 8 seconds). The page head
+  carries no icon, title or colour of its own, and the front end never falls back to the product's default logo or
+  name (the "Powered by" line of the sign-in page shows when the theme's `login.showPoweredBy` is on, as in the
+  Toyota Insurance Services pack). `tokens.scss` defines the defaults (the iorta TechNXT preset, so the app looks exactly
   as before when no theme is loaded). A PostCSS step (`brokerverse/scripts/postcss-brand-vars.js`, wired in
   `craco.config.js`) turns every literal brand colour in the compiled CSS into `var(--bv-..., <same colour>)`, so screen
   stylesheets follow the theme without being edited. Older stylesheets use other blues (#0066cc, #001e60, #1976d2 ...): saturated blues are mapped

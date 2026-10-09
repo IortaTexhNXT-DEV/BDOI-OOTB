@@ -1,6 +1,7 @@
 // First paint in the branding of this environment: the copy of the last branding this browser received (kept by
 // src/theme/runtime/BrandingProvider.jsx) is applied before the application loads, so the screens do not show the
-// default colours, title and icon first. A first visit has no copy; the sign-in page then waits for GET /api/branding.
+// default colours, title and icon first. A first visit has no copy: the application shows a neutral page until the
+// branding arrives.
 (function () {
   try {
     var saved = JSON.parse(window.localStorage.getItem("bv.branding.boot") || "null");

@@ -18,7 +18,7 @@ const mapLogoPresets = (presets) => {
 
 const applyPayloadToState = (state, payload) => {
   if (!payload) return;
-  state.logoUrl = payload.logoUrl || state.logoUrl || DEFAULT_SYSTEM_SETTINGS.logoUrl;
+  state.logoUrl = payload.logoUrl || state.logoUrl;
   state.logoPresets = mapLogoPresets(payload.logoPresets);
   state.displayCurrency = payload.displayCurrency ?? state.displayCurrency;
   state.primaryColor = payload.primaryColor ?? state.primaryColor;
@@ -41,7 +41,8 @@ export const fetchSystemSettings = createAsyncThunk(
       applySystemSettings(data, options);
       return data;
     } catch (error) {
-      applySystemSettings(DEFAULT_SYSTEM_SETTINGS, options);
+      // the formats fall back to their defaults; the tab keeps its title rather than the product name
+      applySystemSettings({}, options);
       return rejectWithValue(error.message);
     }
   }
@@ -60,8 +61,11 @@ export const saveSystemSettings = createAsyncThunk(
   }
 );
 
+// no product name or logo before the settings are loaded: the screens never show the default brand
 const initialState = {
   ...DEFAULT_SYSTEM_SETTINGS,
+  systemName: "",
+  logoUrl: "",
   logoPresets: mapLogoPresets(),
   currencies: [],
   loading: false,

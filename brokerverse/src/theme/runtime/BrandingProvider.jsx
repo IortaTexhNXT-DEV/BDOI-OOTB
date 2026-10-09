@@ -2,10 +2,12 @@
  * Broker branding at runtime: loads GET /api/branding (public: the sign-in page uses it too), applies it to the page
  * (themeEngine.applyBranding) and keeps it current. The request is revalidated with the ETag (304 when nothing
  * changed) on every navigation (at most every 15 seconds), when the tab becomes visible again and every 5 minutes, so
- * a theme saved by an administrator reaches every signed-in user without a reload or a rebuild. `ready` turns true once
- * the first request has answered (or failed), so a screen can wait for it instead of painting the default look first.
- * What the first paint needs (CSS variables, layout attributes, favicon, browser tab title) is kept in this browser for
- * public/branding-boot.js, which applies it before the application loads.
+ * a theme saved by an administrator reaches every signed-in user without a reload or a rebuild.
+ *
+ * No screen is drawn in a look that is not the environment's: the last branding this browser received is kept (with
+ * what the first paint needs: CSS variables, layout attributes, favicon, tab title, applied by public/branding-boot.js
+ * before the application loads) and used at once on the next load; without it (first visit) only a neutral page is
+ * shown until GET /api/branding answers. `ready` says the branding is known.
  *
  *   const { branding, ready, refresh } = useBranding();
  */
@@ -20,8 +22,8 @@ import "./branding.scss";
 
 export const BRANDING_UPDATED_EVENT = "bv:branding-updated";
 const MIN_INTERVAL_MS = 15000;
-// a slow API does not hold the sign-in page back longer than this
-const READY_TIMEOUT_MS = 4000;
+// an API that does not answer does not hold the application back longer than this
+const READY_TIMEOUT_MS = 8000;
 const POLL_MS = 5 * 60 * 1000;
 const apiBase = () => String(process.env.REACT_APP_BASE_URL || "/api").replace(/\/+$/, "");
 
@@ -30,16 +32,29 @@ const BrandingContext = createContext({ branding: null, ready: false, refresh: (
 /** Key of the first-paint copy of the branding (read by public/branding-boot.js). */
 export const BOOT_KEY = "bv.branding.boot";
 
-/** Keep what the first paint needs for the next visit; storage unavailable (private window) only loses the head start. */
+/** Keep the branding for the next load; storage unavailable (private window) only means waiting for the API next time. */
 export function saveBootBranding(data, vars, root = document.documentElement) {
   try {
     const user = getUserData();
     const attrs = Object.fromEntries(["data-bv-density", "data-bv-header", "data-bv-sidebar", "data-bv-theme"].map((a) => [a, root.getAttribute(a)]).filter(([, v]) => v));
-    window.localStorage.setItem(BOOT_KEY, JSON.stringify({ vars, attrs, faviconUrl: data.faviconUrl || "", title: appTitle(data.systemName, { authenticated: isAuthenticated(), userName: user?.displayName || user?.username }) }));
+    window.localStorage.setItem(BOOT_KEY, JSON.stringify({ vars, attrs, faviconUrl: data.faviconUrl || "", title: appTitle(data.systemName, { authenticated: isAuthenticated(), userName: user?.displayName || user?.username }), branding: data }));
   } catch {
-    // the next visit paints the default look until the branding arrives
+    // the next load waits for the branding behind the neutral page
   }
 }
+
+/** The branding kept by the last load of this browser, or null. */
+export function cachedBranding() {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(BOOT_KEY) || "null");
+    return saved?.branding && typeof saved.branding === "object" && saved.branding.theme ? saved.branding : null;
+  } catch {
+    return null;
+  }
+}
+
+/** What is shown while the branding is not known yet: a plain page, no logo, no name, no brand colour. */
+export const BrandingPending = () => <div className="bv-branding-pending" role="status" aria-busy="true" aria-label="Loading" />;
 
 /** GET /api/branding through the browser cache (If-None-Match: a 304 costs no body). */
 export async function fetchBranding(fetchImpl = typeof fetch !== "undefined" ? fetch : null) {
@@ -51,9 +66,9 @@ export async function fetchBranding(fetchImpl = typeof fetch !== "undefined" ? f
 }
 
 export const BrandingProvider = ({ children }) => {
-  const [branding, setBranding] = useState(null);
-  const [ready, setReady] = useState(false);
-  const last = useRef({ at: 0, version: null });
+  const [branding, setBranding] = useState(cachedBranding);
+  const [ready, setReady] = useState(() => branding !== null);
+  const last = useRef({ at: 0, version: branding?.version || null });
   const location = useLocation();
   const dispatch = useDispatch();
 
@@ -86,6 +101,12 @@ export const BrandingProvider = ({ children }) => {
     }
   }, [apply]);
 
+  // the kept branding also brings its font and favicon (public/branding-boot.js set the colours already)
+  useEffect(() => {
+    if (last.current.version) applyBranding(branding);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // first load, then on every navigation
   useEffect(() => {
     refresh();
@@ -110,7 +131,7 @@ export const BrandingProvider = ({ children }) => {
   }, [apply, refresh]);
 
   const value = useMemo(() => ({ branding, ready, refresh }), [branding, ready, refresh]);
-  return <BrandingContext.Provider value={value}>{children}</BrandingContext.Provider>;
+  return <BrandingContext.Provider value={value}>{ready ? children : <BrandingPending />}</BrandingContext.Provider>;
 };
 
 export const useBranding = () => useContext(BrandingContext);

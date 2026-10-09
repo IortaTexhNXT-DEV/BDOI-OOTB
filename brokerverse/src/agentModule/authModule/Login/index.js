@@ -55,16 +55,13 @@ const Login = () => {
   const languageOptions = useLanguageOptions();
   const currentLanguage =
     languageOptions.find((o) => i18n.language && i18n.language.startsWith(o.value))?.value || languageOptions[0]?.value || "en";
-  // Branding (Theme and Branding, GET /api/branding) first, then the System Settings values
-  const { branding, ready: brandingReady } = useBranding();
+  // Branding (GET /api/branding) first, then the loaded system settings; never the product's default name or logo
+  const { branding } = useBranding();
   const login = branding?.theme?.login || {};
-  const storedSystemName = useSelector(
-    (state) => state.systemSettingsReducer?.systemName || DEFAULT_SYSTEM_SETTINGS.systemName
-  );
+  const storedSystemName = useSelector((state) => state.systemSettingsReducer?.systemName || "");
   const systemName = branding?.systemName || storedSystemName;
   const storedLogoUrl = useSelector(
-    (state) =>
-      state.systemSettingsReducer?.logoUrl || DEFAULT_SYSTEM_SETTINGS.logoUrl
+    (state) => (state.systemSettingsReducer?.loaded ? state.systemSettingsReducer.logoUrl : "")
   );
   const logoUrl = branding?.logoUrl || storedLogoUrl;
   const primaryColor = useSelector(
@@ -366,13 +363,11 @@ const Login = () => {
     );
   }
 
-  const title = step === "signin" ? login.headline || t("login.title", { name: systemName }) : headings[step][0];
+  const welcome = systemName ? t("login.title", { name: systemName }) : t("login.subtitle");
+  const title = step === "signin" ? login.headline || welcome : headings[step][0];
   const subtitle =
     step === "signin" ? (passwordVisible ? t("login.subtitle") : t("login.subtitleMicrosoft")) : headings[step][1];
   const tagline = step === "signin" ? login.tagline : "";
-
-  // the page waits for the branding of the environment instead of painting the default logo and colours first
-  if (!brandingReady) return <div className="agent__container__login bv-auth" aria-busy="true" />;
 
   return (
     <div className="agent__container__login bv-auth">
@@ -393,7 +388,7 @@ const Login = () => {
         <div className="bv-auth__center">
           <div className="bv-auth__card" data-step={step}>
             <div className="bv-auth__brand">
-              <img src={logoUrl} alt={systemName} className="bv-auth__logo" />
+              {logoUrl && <img src={logoUrl} alt={systemName} className="bv-auth__logo" />}
               <EnvironmentBadge />
             </div>
             <h1 className="bv-auth__title">{title}</h1>
