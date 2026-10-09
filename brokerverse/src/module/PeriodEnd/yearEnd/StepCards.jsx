@@ -23,7 +23,8 @@ export const netFact = (t, net) => ({
 /** Why an action is not available, under its button. */
 export const Reason = ({ text }) => (text ? <p className="ye-reason"><i className="pi pi-lock" aria-hidden="true" /> {text}</p> : null);
 
-const NumColumn = (props) => <Column {...props} className="bv-num" headerClassName="bv-num" footerClassName="bv-num" />;
+// amount columns, right-aligned in the body, the heading and the totals (DataTable reads the props of its Column children)
+const NUM = { className: "bv-num", headerClassName: "bv-num", footerClassName: "bv-num" };
 
 /** Step 1: the prerequisites of the close. */
 export const PrerequisitesStep = ({ checks, onOpenYear }) => <CheckList checks={checks} onOpenYear={onOpenYear} />;
@@ -42,7 +43,7 @@ export const AdjustmentsStep = ({ data, checks, onOpenYear, onOpenJournal }) => 
         <Column header={t("periodEnd.date")} body={(r) => date(r.date)} />
         <Column field="description" header={t("periodEnd.description")} />
         <Column header={t("yearEndClose.adjustments.preparedBy")} body={(r) => r.createdByName || "-"} />
-        <NumColumn header={t("periodEnd.amount")} body={(r) => money(r.amount)} />
+        <Column {...NUM} header={t("periodEnd.amount")} body={(r) => money(r.amount)} />
         <Column header={t("periodEnd.statusLabel")} body={(r) => <StatusTag status={r.status} />} />
         {mayOpen && (
           <Column header="" style={{ width: "3.5rem" }} body={(r) => (
@@ -91,8 +92,8 @@ export const ClosingStep = ({ data, onOpenJournal }) => {
         <Column field="accountCode" header={t("periodEnd.account")} style={{ width: "8rem" }} footer={t("yearEndClose.total")} />
         <Column field="accountName" header={t("periodEnd.accountName")} />
         <Column header={t("yearEndClose.accountTypeLabel")} body={type} />
-        <NumColumn header={t("periodEnd.debit")} body={(r) => amount(r.debit)} footer={money(sumOf(rows, "debit"))} />
-        <NumColumn header={t("periodEnd.credit")} body={(r) => amount(r.credit)} footer={money(sumOf(rows, "credit"))} />
+        <Column {...NUM} header={t("periodEnd.debit")} body={(r) => amount(r.debit)} footer={money(sumOf(rows, "debit"))} />
+        <Column {...NUM} header={t("periodEnd.credit")} body={(r) => amount(r.credit)} footer={money(sumOf(rows, "credit"))} />
       </DataTable>
       {transferRows.length > 0 && (
         <>
@@ -100,8 +101,8 @@ export const ClosingStep = ({ data, onOpenJournal }) => {
           <DataTable value={transferRows} dataKey="accountCode" size="small">
             <Column field="accountCode" header={t("periodEnd.account")} style={{ width: "8rem" }} />
             <Column field="accountName" header={t("periodEnd.accountName")} />
-            <NumColumn header={t("periodEnd.debit")} body={(r) => amount(r.debit)} />
-            <NumColumn header={t("periodEnd.credit")} body={(r) => amount(r.credit)} />
+            <Column {...NUM} header={t("periodEnd.debit")} body={(r) => amount(r.debit)} />
+            <Column {...NUM} header={t("periodEnd.credit")} body={(r) => amount(r.credit)} />
           </DataTable>
         </>
       )}
@@ -205,8 +206,8 @@ export const OpeningStep = ({ data }) => {
         <Column field="accountCode" header={t("periodEnd.account")} style={{ width: "8rem" }} footer={t("yearEndClose.total")} />
         <Column field="accountName" header={t("periodEnd.accountName")} />
         <Column header={t("yearEndClose.accountTypeLabel")} body={(r) => t(`yearEndClose.accountType.${r.accountType}`, { defaultValue: r.accountType })} />
-        <NumColumn header={t("periodEnd.debit")} body={(r) => amount(r.debit)} footer={money(o.totalDebit)} />
-        <NumColumn header={t("periodEnd.credit")} body={(r) => amount(r.credit)} footer={money(o.totalCredit)} />
+        <Column {...NUM} header={t("periodEnd.debit")} body={(r) => amount(r.debit)} footer={money(o.totalDebit)} />
+        <Column {...NUM} header={t("periodEnd.credit")} body={(r) => amount(r.credit)} footer={money(o.totalCredit)} />
       </DataTable>
     </>
   );

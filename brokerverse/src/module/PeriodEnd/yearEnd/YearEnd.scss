@@ -19,6 +19,10 @@
     flex-wrap: wrap;
   }
 
+  h2.pe-card-title {
+    margin: 0 0 12px;
+  }
+
   .ye-subtitle {
     margin: 20px 0 8px;
     font-size: 14px;
@@ -28,6 +32,17 @@
 
   .ye-row-total td {
     font-weight: 700;
+  }
+
+  // totals under the columns they add up (the theme pads footer cells less than body cells)
+  .p-datatable .p-datatable-tfoot > tr > td {
+    padding-left: 14px;
+    padding-right: 14px;
+    font-weight: 700;
+  }
+
+  .ye-step .ye-facts {
+    margin-bottom: 16px;
   }
 }
 
@@ -60,6 +75,16 @@
   .ye-fact--numeric dd {
     font-variant-numeric: tabular-nums;
   }
+
+  .ye-fact__note {
+    display: block;
+    font-size: 12px;
+    color: $color-text-muted;
+  }
+}
+
+.ye-summary .ye-facts {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
 }
 
 // ---------------------------------------------------------------- stepper
@@ -92,7 +117,7 @@
       background: $color-border;
     }
 
-    &.ye-stepper__item--done:not(:first-child)::before {
+    &.is-linked::before {
       background: $color-success;
     }
   }
@@ -412,6 +437,10 @@
 @media (max-width: 640px) {
   .ye-checks .ye-check {
     flex-wrap: wrap;
+  }
+
+  .ye-checks .ye-check__main {
+    flex-basis: calc(100% - 28px);
   }
 
   .ye-checks .ye-check__side {

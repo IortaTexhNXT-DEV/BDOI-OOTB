@@ -886,6 +886,7 @@ $text-strong: #1f2937;
 
 .p-toast {
   width: 24rem;
+  max-width: calc(100vw - 40px);
 
   .p-toast-message {
     border-radius: $radius-sm;

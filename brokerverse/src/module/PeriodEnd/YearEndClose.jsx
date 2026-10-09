@@ -145,7 +145,7 @@ const YearEndClose = () => {
       <>
         <section className="pe-card ye-summary" aria-label={t("yearEndClose.summary")}>
           <Facts items={[
-            { label: t("periodEnd.fiscalYear"), value: `${fy.code} · ${date(fy.startDate)} – ${date(fy.endDate)}` },
+            { label: t("periodEnd.fiscalYear"), value: <>{fy.code}<span className="ye-fact__note">{`${date(fy.startDate)} – ${date(fy.endDate)}`}</span></> },
             { label: t("periodEnd.yearStatus"), value: <StatusTag status={fy.status} /> },
             { label: t("yearEndClose.run"), value: <span className="ye-inline">{run.runNumber} <StatusTag status={run.status} /></span> },
             { label: t("yearEndClose.approval.preparedBy"), value: run.preparedByName ? `${run.preparedByName}, ${date(run.preparedAt)}` : date(run.preparedAt) },
@@ -174,7 +174,7 @@ const YearEndClose = () => {
   const renderEmpty = () => (
     <section className="pe-card ye-empty" aria-labelledby="ye-empty-title">
       <div className="ye-empty__line">
-        <h2 className="ye-empty__text" id="ye-empty-title">{t("yearEndClose.empty", { fiscalYear: fy.code, from: date(fy.startDate), to: date(fy.endDate) })}</h2>
+        <p className="ye-empty__text" id="ye-empty-title">{t("yearEndClose.empty", { fiscalYear: fy.code, from: date(fy.startDate), to: date(fy.endDate) })}</p>
         {actions.start?.allowed && (
           <Button type="button" icon="pi pi-play" label={t("yearEndClose.start")} loading={busy === "start"}
             onClick={() => act("start", () => periodEndService.createYearEnd(fy.code), t("periodEnd.yearEndStarted"), { resetStep: true })} />
