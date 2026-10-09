@@ -6918,7 +6918,7 @@
   },
   "placement": {
     "status": {
-      "draft": "Draft",
+      "draft": "Placement raised",
       "submitted": "Submitted",
       "responses-in": "Responses in",
       "closed": "Closed",
@@ -6927,11 +6927,13 @@
       "offered": "Offered",
       "declined": "Declined",
       "sent": "Sent to insurer",
-      "bound": "Bound",
-      "issued": "Policy issued",
+      "issued": "Insurer issued (Booked)",
       "confirmed": "Confirmed",
       "active": "Active",
-      "withdrawn": "Withdrawn"
+      "withdrawn": "Withdrawn",
+      "acknowledged": "Acknowledged",
+      "epolicy_received": "e-Policy received",
+      "checked": "Checked against slip"
     },
     "source": {
       "quote": "From quotation slip",
@@ -6965,10 +6967,12 @@
       "steps": {
         "brokerSlip": "Request for Quotation",
         "quotationSlip": "Quotation Slip",
-        "placementSlip": "Placement Slip",
-        "sent": "Sent to insurer(s)",
-        "bound": "Bound / confirmed",
-        "policy": "Policy"
+        "placementSlip": "Placement raised",
+        "sent": "Sent to insurer",
+        "policy": "Insurer issued (Booked)",
+        "acknowledged": "Acknowledged",
+        "epolicy": "e-Policy received",
+        "checked": "Checked against slip"
       },
       "mode": {
         "required": "Required",
@@ -6977,7 +6981,7 @@
       },
       "hint": "Journey for this product: request for quotation {{brokerSlip}}, placement slip {{placementSlip}}",
       "issued": "Issued",
-      "placementRequired": "This line requires a Placement Slip before the policy is issued"
+      "placementRequired": "This line is placed through a placement slip; the policy is booked once the insurer has issued it"
     },
     "actions": {
       "add": "Add",
@@ -6987,12 +6991,10 @@
       "cancel": "Cancel",
       "cancelSlip": "Cancel slip",
       "closeSlip": "Close (not taken up)",
-      "confirm": "Confirm",
       "createPlacement": "Create Placement Slip",
       "declined": "Declined",
       "edit": "Edit",
       "editParticipants": "Edit participants",
-      "issuePolicy": "Issue Policy",
       "more": "Cancel / close",
       "openPlacement": "Open Placement Slip",
       "participantSlip": "Placement slip for this insurer (its share)",
@@ -7007,7 +7009,11 @@
       "saveDraft": "Save draft",
       "sendToInsurers": "Send to insurer(s)",
       "slipPdf": "Slip PDF",
-      "submitToMarket": "Submit to market"
+      "submitToMarket": "Submit to market",
+      "acknowledge": "Record acknowledgement",
+      "uploadEpolicy": "Upload e-policy",
+      "checkAgainstSlip": "Check against slip",
+      "book": "Book (Insurer issued)"
     },
     "brokerSlip": {
       "title": "Request for Quotation (Broker Slip)",
@@ -7025,26 +7031,17 @@
     "placementSlip": {
       "title": "Placement Slip",
       "listTitle": "Placement Slips",
-      "listSubtitle": "Firm orders to the insurers: participants and shares, binding confirmations and the policies issued from them.",
+      "listSubtitle": "Firm orders to the insurers and where each stands: sent, acknowledged, e-policy received, checked against the slip, booked once the insurer issued.",
       "newDirect": "New direct placement",
       "newTitle": "Direct Placement",
-      "newSubtitle": "The client instructs placement with named insurer(s): no quotation slip. The firm order is sent and bound before the policy is issued.",
+      "newSubtitle": "The client instructs placement with named insurer(s): no quotation slip. The placement follows the same steps to Insurer issued.",
       "participantsNote": "Lead insurer and co-insurers with their shares; the shares must total exactly 100%.",
       "blocked": "The {{lob}} placement journey does not allow a direct placement: start from a Quotation Slip.",
       "declinedNote": "An insurer declined its line: edit the participants so that the shares total 100% again, or cancel the placement slip.",
-      "boundNoPermission": "All insurers confirmed. A user with policy issuance rights can now issue the policy.",
-      "riskFromQuote": "Risk details as on the quotation slip."
-    },
-    "recordPolicy": {
-      "title": "Record Issued Policy",
-      "subtitle": "Record a policy the insurer already issued, with its participants and their policy / certificate numbers. The policy, bill and commission are created in one step.",
-      "policyNumber": "Insurer policy number",
-      "policyNumberPlaceholder": "Blank: numbered by the system",
-      "issuedDate": "Issued date",
-      "participantsNote": "Each participant with its share and its own policy / certificate number.",
-      "leadReferenceDefault": "The lead insurer's reference defaults to the policy number.",
-      "submit": "Record policy",
-      "blocked": "Direct policy entry is not allowed for {{lob}}: place the risk through the placement journey."
+      "riskFromQuote": "Risk details as on the quotation slip.",
+      "checkedNoPermission": "The e-policy was checked against the slip. A user with policy issuance rights can now book the policy.",
+      "ltoDocument": "LTO document / official receipt",
+      "ltoDocumentHint": "Sent to the insurer with the placement slip."
     },
     "sections": {
       "customerRisk": "Customer and risk",
@@ -7057,7 +7054,7 @@
       "premium": "Premium",
       "summary": "Summary",
       "terms": "Period and premium",
-      "policyTerms": "Policy, period and premium"
+      "epolicy": "e-Policy"
     },
     "fields": {
       "slipNumber": "Slip No.",
@@ -7074,7 +7071,6 @@
       "leadInsurer": "Lead insurer",
       "grossPremium": "Gross premium",
       "period": "Period",
-      "confirmed": "Confirmed",
       "source": "Source",
       "policy": "Policy",
       "customer": "Customer",
@@ -7111,10 +7107,11 @@
       "commissionDefault": "Insurer default",
       "billingMode": "Billing mode",
       "sent": "Sent",
-      "bound": "Bound",
       "chooseCover": "Select a cover",
       "chooseProductFirst": "Choose the product first",
-      "noCovers": "No cover for this line in the Cover master"
+      "noCovers": "No cover for this line in the Cover master",
+      "acknowledged": "Acknowledged",
+      "placementFile": "Placement file"
     },
     "list": {
       "allStatuses": "All statuses",
@@ -7200,20 +7197,8 @@
       "itemPlaceholder": "Item (e.g. Location)",
       "valuePlaceholder": "Value"
     },
-    "confirm": {
-      "title": "Confirmation of {{insurer}}",
-      "reference": "Insurer policy / certificate number",
-      "note": "Record the insurer's binding confirmation for its {{share}}% share."
-    },
     "decline": {
       "title": "{{insurer}} declined"
-    },
-    "issue": {
-      "title": "Issue policy",
-      "policyNumber": "Policy number",
-      "policyNumberPlaceholder": "Blank: numbered by the system",
-      "note": "All participants confirmed. The policy is issued with the participants and their references; the premium bill (or the direct-bill commission) and the commission accrual are created.",
-      "verifyNote": "The identifiers below are filled in from the client, the quotation and earlier policies. Check them before issuing."
     },
     "validation": {
       "title": "Check the form",
@@ -7221,7 +7206,8 @@
       "product": "Choose the product",
       "insurers": "Choose at least one insurer to approach",
       "premium": "Enter the premium agreed with the insurer",
-      "inception": "Enter the inception date"
+      "inception": "Enter the inception date",
+      "ltoDocument": "Attach the LTO document or official receipt"
     },
     "messages": {
       "done": "Done",
@@ -7233,12 +7219,13 @@
       "quotationPrepared": "Quotation slip {{number}} prepared",
       "placementPrepared": "Placement slip {{number}} prepared",
       "sent": "Firm order sent to {{count}} insurer(s)",
-      "confirmed": "Confirmation recorded",
-      "bound": "All insurers confirmed: the placement is bound",
       "declined": "Declined line recorded",
       "participantsSaved": "Participants saved",
-      "issued": "Policy {{number}} issued",
-      "cancelled": "Placement slip cancelled"
+      "cancelled": "Placement slip cancelled",
+      "acknowledged": "Insurer acknowledgement recorded",
+      "epolicyMatch": "e-Policy recorded: it matches the slip",
+      "epolicyMismatch": "e-Policy recorded: it differs from the slip",
+      "booked": "Policy {{number}} booked"
     },
     "quoteJourney": {
       "title": "Send to insurance company",
@@ -7249,6 +7236,106 @@
       "directHint": "Convert the accepted quotation slip to a policy now.",
       "created": "Placement slip {{number}}",
       "createdDetail": "Send it to the insurer(s) and record their confirmation to issue the policy."
+    },
+    "acknowledge": {
+      "title": "Insurer acknowledgement",
+      "note": "Record that the insurer confirmed receipt of the firm order.",
+      "reference": "Insurer acknowledgement reference"
+    },
+    "epolicy": {
+      "title": "e-Policy received - {{number}}",
+      "note": "Upload the e-policy the insurer issued and key what it says. It is compared with the placement slip at once; a user other than you then checks it.",
+      "file": "e-Policy file",
+      "keepFile": "Leave empty to keep {{name}}",
+      "vehiclePhoto": "Vehicle photo (optional)",
+      "insurerPolicyNumber": "Insurer policy number",
+      "brokerPolicyNumber": "BrokerVerse policy number",
+      "brokerPolicyNumberPlaceholder": "Blank: numbered at booking",
+      "participantName": "Participant name (insured on the policy)",
+      "sumInsured": "Sum insured",
+      "netPremium": "Net premium",
+      "grossPremium": "Gross premium",
+      "commissionAmount": "Commission",
+      "issueDate": "Issue date",
+      "issuanceDate": "Issuance date",
+      "effectiveDate": "Effective date",
+      "expiryDate": "Expiry date",
+      "productionDate": "Production date",
+      "deductible": "Deductible",
+      "vehicle": "Vehicle",
+      "vehicleNote": "Carried from the quotation: correct them to what the e-policy shows.",
+      "chassisNumber": "Chassis number",
+      "motorNumber": "Engine / motor number",
+      "plateNumber": "Plate number",
+      "mvFileNumber": "MV file number",
+      "registrationHint": "+ The plate number or the MV file number is required, even where the quotation said TBA.",
+      "coInsurerReferences": "Co-insurers' policy / certificate numbers",
+      "receivedBy": "Recorded by",
+      "save": "Save e-policy",
+      "errors": {
+        "file": "Attach the e-policy file",
+        "insurerPolicyNumber": "Enter the insurer policy number",
+        "participantName": "Enter the participant name",
+        "netPremium": "Enter the net premium",
+        "dates": "Enter the issue date and the effective date",
+        "registration": "Enter the plate number or the MV file number",
+        "upload": "The file could not be uploaded"
+      }
+    },
+    "check": {
+      "title": "Check against slip",
+      "item": "Item",
+      "slip": "Placement slip",
+      "epolicy": "e-Policy",
+      "difference": "Difference",
+      "result": "Result",
+      "items": {
+        "netPremium": "Net premium",
+        "grossPremium": "Gross premium",
+        "sumInsured": "Sum insured",
+        "commissionAmount": "Commission",
+        "effectiveDate": "Effective date",
+        "expiryDate": "Expiry date",
+        "insuredName": "Insured",
+        "chassisNumber": "Chassis number",
+        "motorNumber": "Engine / motor number",
+        "plateNumber": "Plate number",
+        "mvFileNumber": "MV file number",
+        "deductible": "Deductible"
+      },
+      "status": {
+        "match": "Matches",
+        "mismatch": "Differs",
+        "captured": "Captured",
+        "carried": "From the slip",
+        "not-given": "Not stated"
+      },
+      "decision": {
+        "confirmed": "Confirmed",
+        "accepted": "Differences accepted",
+        "returned": "Returned to the insurer"
+      },
+      "tolerance": "Amounts within {{amount}} or {{percent}}% of the slip match.",
+      "matchNote": "The e-policy matches the placement slip.",
+      "mismatchNote": "The e-policy differs from the placement slip in {{count}} item(s).",
+      "makerNote": "You recorded this e-policy: another user must check it against the slip.",
+      "returnedNote": "The e-policy was returned to the insurer: {{reason}}. Upload the corrected e-policy when it arrives.",
+      "reason": "Reason",
+      "reasonPlaceholder": "Required to return the e-policy or to accept differences",
+      "confirm": "Confirm check",
+      "acceptDifferences": "Accept differences",
+      "returnToInsurer": "Return to insurer",
+      "decidedBy": "Checked by"
+    },
+    "book": {
+      "title": "Book the policy (Insurer issued)",
+      "note": "The insurer issued e-policy {{number}} and it was checked against the slip. Booking creates the policy, the bill or direct-bill commission, the journal and the commission, ends the cover notes and e-mails the policy schedule to the client.",
+      "verifyNote": "The ID details below come from the client and the quotation. Check them before booking."
+    },
+    "recordEpolicy": {
+      "title": "Record e-Policy",
+      "subtitle": "Placement slips sent to the insurer and waiting for the e-policy. Select one to record the e-policy the insurer sent.",
+      "empty": "No placement slip is waiting for an e-policy"
     }
   },
   "postingRules": {

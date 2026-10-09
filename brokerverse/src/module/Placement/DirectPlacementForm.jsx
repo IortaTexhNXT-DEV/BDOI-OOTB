@@ -10,6 +10,7 @@ import { Calendar } from "primereact/calendar";
 import { Toast } from "primereact/toast";
 import { Message } from "primereact/message";
 import placementService from "../../services/placementService";
+import s3Service from "../../services/s3Service";
 import quotationService from "../../services/quotationService";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import { calendarDateFormat } from "../../utility/dateFormat";
@@ -18,11 +19,10 @@ import { isoDate } from "./dates";
 import "./index.scss";
 
 /**
- * Direct placement (a client instructs placement with named insurer(s), no quotation) and Record Issued Policy (a
- * policy the insurer already issued, recorded with its participants and their policy / certificate numbers).
+ * Direct placement: a client instructs placement with named insurer(s), no quotation (e.g. a CTPL, whose LTO document /
+ * official receipt goes to the insurer with the slip). The placement then follows the same chain to "Insurer issued".
  */
-const DirectPlacementForm = ({ mode = "placement" }) => {
-  const record = mode === "record";
+const DirectPlacementForm = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { formatCurrency } = useFormatCurrency();
@@ -38,15 +38,16 @@ const DirectPlacementForm = ({ mode = "placement" }) => {
   const [inception, setInception] = useState(null);
   const [expiry, setExpiry] = useState(null);
   const [billingMode, setBillingMode] = useState("default");
-  const [policyNumber, setPolicyNumber] = useState("");
-  const [issuedDate, setIssuedDate] = useState(null);
+  const [ltoFile, setLtoFile] = useState(null);
   const [remarks, setRemarks] = useState("");
   const [participants, setParticipants] = useState([{ insuranceCompanyId: null, sharePercent: 100, isLead: true, insurerReference: "" }]);
   const [breakdown, setBreakdown] = useState(null);
   const [saving, setSaving] = useState(false);
   const product = options.products.find((p) => p.id === productId);
   const journey = product?.journey;
-  const blocked = journey && (record ? journey.directPolicy === "skip" : journey.quotationSlip === "required" || journey.placementSlip === "skip");
+  const blocked = journey && (journey.quotationSlip === "required" || journey.placementSlip === "skip");
+  // a motor-line product placed without a quotation (CTPL) needs its LTO document (placement.direct_document_products)
+  const needsLto = product?.lob === "MOTOR";
 
   // server-side premium preview (taxes by line of business, commission) for the participant split
   useEffect(() => {
@@ -59,7 +60,6 @@ const DirectPlacementForm = ({ mode = "placement" }) => {
     return () => clearTimeout(h);
   }, [product, netPremium, sumInsured, commissionRate]);
 
-  const lead = participants.find((p) => p.isLead);
   const save = async () => {
     const who = customerFields(customer);
     const warn = (detail) => toast.current?.show({ severity: "warn", summary: t("placement.validation.title"), detail, life: 4000 });
@@ -69,21 +69,22 @@ const DirectPlacementForm = ({ mode = "placement" }) => {
     if (!inception) return warn(t("placement.validation.inception"));
     const problem = participantProblem(participants, t);
     if (problem) return warn(problem);
+    if (needsLto && !ltoFile) return warn(t("placement.validation.ltoDocument"));
     setSaving(true);
     try {
+      let lto = {};
+      if (needsLto) {
+        const up = await s3Service.uploadFile(ltoFile, "placement-documents");
+        if (!up?.key) throw new Error(up?.error || t("placement.epolicy.errors.upload"));
+        lto = { ltoDocumentKey: up.key, ltoDocumentName: ltoFile.name };
+      }
       const body = {
-        ...who, productId: product.id, productType: product.name, insuredName: insuredName || customerName(customer) || undefined, riskDetails, sumInsured: sumInsured || 0, netPremium,
+        ...who, productId: product.id, productType: product.name, insuredName: insuredName || customerName(customer) || undefined, riskDetails, doc: lto, sumInsured: sumInsured || 0, netPremium,
         commissionRate: commissionRate == null ? undefined : commissionRate / 100, inceptionDate: isoDate(inception), expiryDate: isoDate(expiry), billingMode: billingMode === "default" ? undefined : billingMode, remarks: remarks || undefined,
         participants: participants.map((p) => ({ insuranceCompanyId: p.insuranceCompanyId, sharePercent: p.sharePercent, isLead: p.isLead, insurerReference: p.insurerReference || undefined })),
       };
-      if (record) {
-        const r = await placementService.recordIssuedPolicy({ ...body, policyNumber: policyNumber || undefined, issuedDate: isoDate(issuedDate) });
-        toast.current?.show({ severity: "success", summary: t("placement.messages.done"), detail: r.message, life: 2500 });
-        navigate(`/agent/policydetail/${r.policyId}`);
-      } else {
-        const p = await placementService.createPlacement(body);
-        navigate(`/placement/placement-slips/${p.id}`);
-      }
+      const p = await placementService.createPlacement(body);
+      navigate(`/placement/placement-slips/${p.id}`);
     } catch (e) {
       toast.current?.show({ severity: "error", summary: t("common.error"), detail: e.message, life: 6000 });
     } finally {
@@ -95,7 +96,7 @@ const DirectPlacementForm = ({ mode = "placement" }) => {
   return (
     <div className="placement-page">
       <Toast ref={toast} />
-      <PageHeader title={t(record ? "placement.recordPolicy.title" : "placement.placementSlip.newTitle")}
+      <PageHeader title={t("placement.placementSlip.newTitle")}
         onBack={() => navigate("/placement/placement-slips")} />
 
       <div className="placement-card">
@@ -114,26 +115,20 @@ const DirectPlacementForm = ({ mode = "placement" }) => {
             <InputText value={insuredName} onChange={(e) => setInsuredName(e.target.value)} placeholder={customerName(customer)} className="w-full" />
           </div>
         </div>
-        {blocked && <Message severity="warn" className="w-full mt-2" text={t(record ? "placement.recordPolicy.blocked" : "placement.placementSlip.blocked", { lob: product.lob })} />}
+        {blocked && <Message severity="warn" className="w-full mt-2" text={t("placement.placementSlip.blocked", { lob: product.lob })} />}
+        {needsLto && !blocked && (
+          <div className="mt-3">
+            <label htmlFor="lto-file">{t("placement.placementSlip.ltoDocument")} *</label>
+            <input id="lto-file" type="file" accept="application/pdf,image/*" onChange={(e) => setLtoFile(e.target.files?.[0] || null)} />
+            <small className="hint">{t("placement.placementSlip.ltoDocumentHint")}</small>
+          </div>
+        )}
 
         <h3 className="section-title">{t("placement.sections.riskDetails")}</h3>
         <RiskDetailsEditor value={riskDetails} onChange={setRiskDetails} />
 
-        <h3 className="section-title">{t(record ? "placement.sections.policyTerms" : "placement.sections.terms")}</h3>
+        <h3 className="section-title">{t("placement.sections.terms")}</h3>
         <div className="grid">
-          {record && (
-            <>
-              <div className="col-12 md:col-4">
-                <label>{t("placement.recordPolicy.policyNumber")}</label>
-                <InputText value={policyNumber} onChange={(e) => setPolicyNumber(e.target.value)} className="w-full" placeholder={t("placement.recordPolicy.policyNumberPlaceholder")} />
-              </div>
-              <div className="col-12 md:col-4">
-                <label>{t("placement.recordPolicy.issuedDate")}</label>
-                <Calendar value={issuedDate} onChange={(e) => setIssuedDate(e.value)} dateFormat={calendarDateFormat()} showIcon className="w-full" />
-              </div>
-              <div className="col-12 md:col-4" />
-            </>
-          )}
           <div className="col-12 md:col-3">
             <label>{t("placement.fields.inception")} *</label>
             <Calendar value={inception} onChange={(e) => setInception(e.value)} dateFormat={calendarDateFormat()} showIcon className="w-full" />
@@ -174,13 +169,12 @@ const DirectPlacementForm = ({ mode = "placement" }) => {
         )}
 
         <h3 className="section-title">{t("placement.sections.security")}</h3>
-        <p className="muted">{t(record ? "placement.recordPolicy.participantsNote" : "placement.placementSlip.participantsNote")}</p>
-        <ParticipantEditor value={participants} onChange={setParticipants} insurers={options.insurers} totals={totals} showReference={record} />
-        {record && lead && !lead.insurerReference && policyNumber && <small className="hint">{t("placement.recordPolicy.leadReferenceDefault")}</small>}
+        <p className="muted">{t("placement.placementSlip.participantsNote")}</p>
+        <ParticipantEditor value={participants} onChange={setParticipants} insurers={options.insurers} totals={totals} />
 
         <div className="form-actions">
           <Button label={t("placement.actions.cancel")} text onClick={() => navigate("/placement/placement-slips")} />
-          <Button label={t(record ? "placement.recordPolicy.submit" : "placement.actions.createPlacement")} icon={record ? "pi pi-verified" : "pi pi-check"} onClick={save} loading={saving} disabled={blocked} />
+          <Button label={t("placement.actions.createPlacement")} icon="pi pi-check" onClick={save} loading={saving} disabled={blocked} />
         </div>
       </div>
     </div>

@@ -188,10 +188,8 @@ const CoverageDetailedView = () => {
   const handleSendToInsuranceCompany = async () => {
     if (!resolvedQuotationId || existingPolicy) return convertDirectly();
     const q = quotationData || {};
-    if (q.placementId) {
-      navigate(`/placement/placement-slips/${q.placementId}`);
-      return undefined;
-    }
+    // the placement raised when the client accepted: opened with the billing mode chosen here
+    if (q.placementId) return createPlacementSlip();
     let journey = q.journey;
     if (!journey) {
       journey = await placementService.journey({ lob: q.lob, productType: q.productType }).catch(() => null);

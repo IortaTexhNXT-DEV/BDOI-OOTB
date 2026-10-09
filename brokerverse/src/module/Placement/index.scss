@@ -1,4 +1,4 @@
-// Placement journey screens: broker slips, placement slips, record issued policy.
+// Placement journey screens: broker slips, placement slips, record e-policy.
 .hidden-file { display: none; }
 
 // dialogs are rendered outside the page container
@@ -373,6 +373,23 @@
 }
 
 .risk-details-editor .risk-key { font-weight: 500; color: #374151; }
+
+// Check against slip: the slip and the e-policy side by side, differences highlighted
+.check-status {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  vertical-align: middle;
+
+  &.match { background: #ecfdf3; color: #067647; }
+  &.mismatch { background: #fef3f2; color: #b42318; }
+  &.captured, &.carried { background: #eff8ff; color: #175cd3; }
+  &.not-given { background: #f2f4f7; color: #475467; }
+}
+.slip-comparison tr.check-mismatch td { background: #fff6f5; }
+.slip-comparison tr.check-mismatch td:first-child { box-shadow: inset 3px 0 0 #d92d20; }
 .empty-note { padding: 1rem; color: #6b7280; }
 .attachment-line { display: flex; align-items: center; gap: 0.5rem; }
 

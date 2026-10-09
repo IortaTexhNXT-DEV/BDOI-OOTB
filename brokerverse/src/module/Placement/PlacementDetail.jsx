@@ -8,13 +8,22 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
 import { Message } from "primereact/message";
 import placementService from "../../services/placementService";
+import authService from "../../services/authService";
+import s3Service from "../../services/s3Service";
 import { useEmailSending, withQueuedNotice } from "../../utility/emailNotice";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import { hasPermission } from "../../utils/canOpen";
 import { Field, JourneyTimeline, PageHeader, ParticipantEditor, ParticipantsTable, StatusTag, formatDate, participantProblem, usePlacementOptions } from "./shared";
+import { EpolicyDialog, SlipComparison } from "./EpolicyForm";
 import "./index.scss";
 
-/** Placement Slip detail: participants and their binding, the firm order to the insurers and the policy issuance. */
+const WITH_INSURER = ["sent", "acknowledged"];
+
+/**
+ * Placement Slip detail: the chain Placement raised -> Sent to insurer -> Acknowledged -> e-Policy received -> Checked
+ * against slip -> Insurer issued (Booked), one action per step. The broker never issues cover: the policy exists only
+ * once the insurer's e-policy has been checked against the slip by a second user and booked.
+ */
 const PlacementDetail = () => {
   const { t } = useTranslation();
   const { id } = useParams();
@@ -26,11 +35,14 @@ const PlacementDetail = () => {
   const emailSending = useEmailSending();
   const [p, setP] = useState(null);
   const [busy, setBusy] = useState(false);
-  const [confirming, setConfirming] = useState(null);
+  const [acknowledging, setAcknowledging] = useState(null);
+  const [recording, setRecording] = useState(false);
+  const [checking, setChecking] = useState(null);
   const [declining, setDeclining] = useState(null);
   const [editing, setEditing] = useState(null);
-  const [issuing, setIssuing] = useState(null);
+  const [booking, setBooking] = useState(null);
   const [cancelling, setCancelling] = useState(null);
+  const userId = String(authService.getUser()?.userId || localStorage.getItem("USER_ID") || "");
 
   const notify = (severity, detail) => toast.current?.show({ severity, summary: severity === "error" ? t("common.error") : t("placement.messages.done"), detail, life: severity === "error" ? 6000 : 3000 });
   const load = useCallback(async () => {
@@ -59,16 +71,33 @@ const PlacementDetail = () => {
   };
 
   if (!p) return <div className="placement-page"><Toast ref={toast} /><div className="placement-card">{t("placement.messages.loading")}</div></div>;
-  const editable = ["draft", "declined"].includes(p.status);
-  const canBind = ["draft", "sent", "declined"].includes(p.status);
-  const canIssue = p.status === "bound" && hasPermission("write:policies");
+  const write = hasPermission("write:quotations");
+  const approver = hasPermission("write:policies");
+  const editable = write && ["draft", "declined"].includes(p.status);
+  const keyedByMe = Boolean(p.epolicy?.receivedById) && String(p.epolicy.receivedById) === userId;
+  const canBook = p.status === "checked" && write && approver;
   const steps = (p.timeline || []).map((s) => ({ ...s, current: !s.done && (p.timeline.find((x) => !x.done)?.key === s.key) }));
   const pdf = (insurerId) => placementService.openPlacementPdf(p.id, insurerId).catch((e) => notify("error", e.message));
+  const openFile = async (key) => {
+    const r = await s3Service.generatePresignedDownloadUrl(key);
+    if (r.success) window.open(r.url, "_blank", "noopener,noreferrer");
+    else notify("error", r.error);
+  };
+  const openCheck = async () => {
+    try {
+      setChecking({ comparison: await placementService.slipCheck(p.id), reason: "" });
+    } catch (e) {
+      notify("error", e.message);
+    }
+  };
+  const decide = async (decision) => {
+    const ok = await act(() => placementService.decideCheck(p.id, decision, checking.reason), (r) => r.message);
+    if (ok) setChecking(null);
+  };
 
   const participantActions = (x) => (
     <>
-      {canBind && x.status !== "confirmed" && <Button label={t("placement.actions.confirm")} icon="pi pi-check" size="small" text onClick={() => setConfirming({ ...x, insurerReference: x.insurerReference || "" })} />}
-      {["draft", "sent"].includes(p.status) && x.status !== "confirmed" && <Button icon="pi pi-ban" size="small" text rounded severity="danger" tooltip={t("placement.actions.recordDecline")} tooltipOptions={{ position: "top" }} aria-label={t("placement.actions.recordDecline")} onClick={() => setDeclining({ ...x, reason: "" })} />}
+      {write && ["draft", ...WITH_INSURER].includes(p.status) && x.status !== "declined" && <Button icon="pi pi-ban" size="small" text rounded severity="danger" tooltip={t("placement.actions.recordDecline")} tooltipOptions={{ position: "top" }} aria-label={t("placement.actions.recordDecline")} onClick={() => setDeclining({ ...x, reason: "" })} />}
       <Button icon="pi pi-file-pdf" size="small" text rounded onClick={() => pdf(x.insuranceCompanyId)} tooltip={t("placement.actions.participantSlip")} tooltipOptions={{ position: "top" }} aria-label={t("placement.actions.participantSlip")} />
     </>
   );
@@ -81,16 +110,49 @@ const PlacementDetail = () => {
         <Button label={t("placement.actions.slipPdf")} icon="pi pi-file-pdf" severity="secondary" outlined onClick={() => pdf()} className="ml-2" />
         {editable && <Button label={t("placement.actions.editParticipants")} icon="pi pi-users" severity="secondary" outlined className="ml-2"
           onClick={() => setEditing(p.participants.filter((x) => x.status !== "declined").map((x) => ({ insuranceCompanyId: x.insuranceCompanyId, sharePercent: x.sharePercent, isLead: x.isLead })))} />}
-        {["draft", "sent"].includes(p.status) && <Button label={p.status === "sent" ? t("placement.actions.resend") : t("placement.actions.sendToInsurers")} icon="pi pi-send" className="ml-2" loading={busy}
+        {write && ["draft", ...WITH_INSURER].includes(p.status) && <Button label={p.status === "draft" ? t("placement.actions.sendToInsurers") : t("placement.actions.resend")} icon="pi pi-send" className="ml-2" loading={busy}
+          severity={p.status === "draft" ? undefined : "secondary"} outlined={p.status !== "draft"}
           onClick={() => act(() => placementService.sendPlacement(p.id), (r) => withQueuedNotice(t("placement.messages.sent", { count: r.sent?.length || 0 }), emailSending))} />}
-        {canIssue && <Button label={t("placement.actions.issuePolicy")} icon="pi pi-verified" severity="success" className="ml-2" onClick={() => setIssuing({ policyNumber: "", kyc: { ...(p.kycPrefill || {}) } })} />}
-        {!["issued", "cancelled"].includes(p.status) && <Button label={t("placement.actions.cancelSlip")} icon="pi pi-times" text severity="danger" className="ml-2" onClick={() => setCancelling({ reason: "" })} />}
+        {write && p.status === "sent" && <Button label={t("placement.actions.acknowledge")} icon="pi pi-inbox" className="ml-2" onClick={() => setAcknowledging({ reference: "", remarks: "" })} />}
+        {write && WITH_INSURER.includes(p.status) && <Button label={t("placement.actions.uploadEpolicy")} icon="pi pi-upload" className="ml-2" severity={p.status === "acknowledged" ? undefined : "secondary"} onClick={() => setRecording(true)} />}
+        {p.status === "epolicy_received" && <Button label={t("placement.actions.checkAgainstSlip")} icon="pi pi-list-check" className="ml-2" onClick={openCheck} />}
+        {canBook && <Button label={t("placement.actions.book")} icon="pi pi-verified" severity="success" className="ml-2" onClick={() => setBooking({ kyc: { ...(p.kycPrefill || {}) } })} />}
+        {write && !["issued", "cancelled"].includes(p.status) && <Button label={t("placement.actions.cancelSlip")} icon="pi pi-times" text severity="danger" className="ml-2" onClick={() => setCancelling({ reason: "" })} />}
       </PageHeader>
 
       <div className="placement-card"><JourneyTimeline steps={steps} /></div>
 
       {p.status === "declined" && <Message severity="warn" className="w-full mb-3" text={t("placement.placementSlip.declinedNote")} />}
-      {p.status === "bound" && !canIssue && <Message severity="info" className="w-full mb-3" text={t("placement.placementSlip.boundNoPermission")} />}
+      {p.status === "epolicy_received" && keyedByMe && <Message severity="info" className="w-full mb-3" text={t("placement.check.makerNote")} />}
+      {p.status === "checked" && !canBook && <Message severity="info" className="w-full mb-3" text={t("placement.placementSlip.checkedNoPermission")} />}
+      {p.status === "acknowledged" && p.check?.decision === "returned" && <Message severity="warn" className="w-full mb-3" text={t("placement.check.returnedNote", { reason: p.check.reason || "" })} />}
+
+      {p.epolicy && (
+        <div className="placement-card">
+          <h3 className="section-title">{t("placement.sections.epolicy")} {p.check?.status && <span className={`check-status ${p.check.status}`}>{t(`placement.check.status.${p.check.status}`)}</span>}</h3>
+          <div className="field-grid">
+            <Field label={t("placement.epolicy.insurerPolicyNumber")}>{p.epolicy.insurerPolicyNumber}</Field>
+            <Field label={t("placement.epolicy.brokerPolicyNumber")}>{p.policyNumber || p.epolicy.brokerPolicyNumber || t("placement.epolicy.brokerPolicyNumberPlaceholder")}</Field>
+            <Field label={t("placement.epolicy.participantName")}>{p.epolicy.participantName}</Field>
+            <Field label={t("placement.epolicy.sumInsured")}>{formatCurrency(p.epolicy.sumInsured)}</Field>
+            <Field label={t("placement.epolicy.netPremium")}>{formatCurrency(p.epolicy.netPremium)}</Field>
+            {p.epolicy.grossPremium != null && <Field label={t("placement.epolicy.grossPremium")}>{formatCurrency(p.epolicy.grossPremium)}</Field>}
+            {p.epolicy.commissionAmount != null && <Field label={t("placement.epolicy.commissionAmount")}>{formatCurrency(p.epolicy.commissionAmount)}</Field>}
+            <Field label={t("placement.epolicy.issueDate")}>{formatDate(p.epolicy.issueDate)}</Field>
+            <Field label={t("placement.epolicy.issuanceDate")}>{formatDate(p.epolicy.issuanceDate)}</Field>
+            <Field label={t("placement.epolicy.effectiveDate")}>{`${formatDate(p.epolicy.effectiveDate)} - ${formatDate(p.epolicy.expiryDate)}`}</Field>
+            {p.epolicy.productionDate && <Field label={t("placement.epolicy.productionDate")}>{formatDate(p.epolicy.productionDate)}</Field>}
+            {p.epolicy.vehicle && ["chassisNumber", "motorNumber", "plateNumber", "mvFileNumber"].filter((k) => p.epolicy.vehicle[k]).map((k) => <Field key={k} label={t(`placement.epolicy.${k}`)}>{p.epolicy.vehicle[k]}</Field>)}
+            <Field label={t("placement.epolicy.receivedBy")}>{`${p.epolicy.receivedBy || "-"} - ${formatDate(p.epolicy.receivedAt)}`}</Field>
+            {p.check?.at && <Field label={t("placement.check.decidedBy")}>{`${p.check.by || "-"} - ${t(`placement.check.decision.${p.check.decision}`)}`}</Field>}
+          </div>
+          <div className="attachment-line mt-2">
+            <Button label={p.epolicy.documentName || t("placement.epolicy.file")} icon="pi pi-file-pdf" text size="small" onClick={() => openFile(p.epolicy.documentKey)} />
+            {p.epolicy.vehiclePhotoKey && <Button label={t("placement.epolicy.vehiclePhoto")} icon="pi pi-image" text size="small" onClick={() => openFile(p.epolicy.vehiclePhotoKey)} />}
+          </div>
+          {p.check?.items && <><h4 className="mb-2">{t("placement.check.title")}</h4><SlipComparison check={p.check} /></>}
+        </div>
+      )}
 
       <div className="placement-card">
         <h3 className="section-title">{t("placement.sections.security")} {p.isCoInsurance && <span className="co-chip">{t("placement.participants.coInsurance")}</span>}</h3>
@@ -119,7 +181,8 @@ const PlacementDetail = () => {
             <Field label={t("placement.fields.period")}>{`${formatDate(p.inceptionDate)} - ${formatDate(p.expiryDate)}`}</Field>
             <Field label={t("placement.fields.billingMode")}>{p.billingMode ? t(`placement.billing.${p.billingMode}`) : t("placement.billing.default")}</Field>
             <Field label={t("placement.fields.sent")}>{formatDate(p.sentAt)}</Field>
-            <Field label={t("placement.fields.bound")}>{formatDate(p.boundAt)}</Field>
+            <Field label={t("placement.fields.acknowledged")}>{p.acknowledgement ? `${formatDate(p.acknowledgement.at)}${p.acknowledgement.reference ? ` (${p.acknowledgement.reference})` : ""}` : "-"}</Field>
+            {p.slipDocument && <Field label={t("placement.fields.placementFile")}><button type="button" className="journey-link" onClick={() => openFile(p.slipDocument.key)}>{p.slipDocument.fileName}</button></Field>}
             <Field label={t("placement.fields.createdBy")}>{p.createdBy}</Field>
             {p.remarks && <Field label={t("placement.fields.remarks")}>{p.remarks}</Field>}
             {p.cancelReason && <Field label={t("placement.fields.reason")}>{p.cancelReason}</Field>}
@@ -135,17 +198,42 @@ const PlacementDetail = () => {
         </div>
       </div>
 
-      <Dialog className="placement-dialog" header={confirming ? t("placement.confirm.title", { insurer: confirming.insuranceCompanyName }) : ""} visible={Boolean(confirming)} onHide={() => setConfirming(null)} style={{ width: "30rem" }}
-        footer={<><Button label={t("placement.actions.cancel")} text onClick={() => setConfirming(null)} /><Button label={t("placement.actions.confirm")} icon="pi pi-check" loading={busy} disabled={!confirming?.insurerReference?.trim()}
-          onClick={async () => { const ok = await act(() => placementService.confirmPlacement(p.id, [{ insuranceCompanyId: confirming.insuranceCompanyId, insurerReference: confirming.insurerReference.trim(), remarks: confirming.remarks || undefined }]),
-            (r) => (r.status === "bound" ? t("placement.messages.bound") : t("placement.messages.confirmed"))); if (ok) setConfirming(null); }} /></>}>
-        {confirming && (
+      <Dialog className="placement-dialog" header={t("placement.acknowledge.title")} visible={Boolean(acknowledging)} onHide={() => setAcknowledging(null)} style={{ width: "30rem" }}
+        footer={<><Button label={t("placement.actions.cancel")} text onClick={() => setAcknowledging(null)} /><Button label={t("placement.actions.acknowledge")} icon="pi pi-check" loading={busy}
+          onClick={async () => { const ok = await act(() => placementService.acknowledgePlacement(p.id, { reference: acknowledging.reference.trim() || undefined, remarks: acknowledging.remarks || undefined }),
+            t("placement.messages.acknowledged")); if (ok) setAcknowledging(null); }} /></>}>
+        {acknowledging && (
           <>
-            <p className="muted">{t("placement.confirm.note", { share: confirming.sharePercent })}</p>
-            <label htmlFor="ins-ref">{t("placement.confirm.reference")} *</label>
-            <InputText id="ins-ref" value={confirming.insurerReference} onChange={(e) => setConfirming({ ...confirming, insurerReference: e.target.value })} className="w-full mb-3" autoFocus />
-            <label htmlFor="ins-rem">{t("placement.fields.remarks")}</label>
-            <InputTextarea id="ins-rem" value={confirming.remarks || ""} onChange={(e) => setConfirming({ ...confirming, remarks: e.target.value })} rows={2} className="w-full" />
+            <p className="muted">{t("placement.acknowledge.note")}</p>
+            <label htmlFor="ack-ref">{t("placement.acknowledge.reference")}</label>
+            <InputText id="ack-ref" value={acknowledging.reference} onChange={(e) => setAcknowledging({ ...acknowledging, reference: e.target.value })} className="w-full mb-3" autoFocus />
+            <label htmlFor="ack-rem">{t("placement.fields.remarks")}</label>
+            <InputTextarea id="ack-rem" value={acknowledging.remarks} onChange={(e) => setAcknowledging({ ...acknowledging, remarks: e.target.value })} rows={2} className="w-full" />
+          </>
+        )}
+      </Dialog>
+
+      <EpolicyDialog placement={p} visible={recording} onHide={() => setRecording(false)}
+        onSaved={async (saved) => { setRecording(false); notify("success", t(saved.check?.status === "match" ? "placement.messages.epolicyMatch" : "placement.messages.epolicyMismatch")); await load(); }} />
+
+      <Dialog className="placement-dialog" header={t("placement.check.title")} visible={Boolean(checking)} onHide={() => setChecking(null)} style={{ width: "56rem" }} breakpoints={{ "960px": "96vw" }}
+        footer={checking && (
+          <>
+            <Button label={t("placement.actions.cancel")} text onClick={() => setChecking(null)} />
+            <Button label={t("placement.check.returnToInsurer")} icon="pi pi-replay" severity="warning" outlined loading={busy} disabled={keyedByMe || !write || !checking.reason.trim()} onClick={() => decide("return")} />
+            {checking.comparison.result === "mismatch"
+              ? <Button label={t("placement.check.acceptDifferences")} icon="pi pi-check" severity="danger" loading={busy} disabled={keyedByMe || !approver || !checking.reason.trim()} onClick={() => decide("accept")} />
+              : <Button label={t("placement.check.confirm")} icon="pi pi-check" severity="success" loading={busy} disabled={keyedByMe || !write} onClick={() => decide("confirm")} />}
+          </>
+        )}>
+        {checking && (
+          <>
+            <Message severity={checking.comparison.result === "match" ? "success" : "warn"} className="w-full mb-3"
+              text={t(checking.comparison.result === "match" ? "placement.check.matchNote" : "placement.check.mismatchNote", { count: checking.comparison.differences.length })} />
+            {keyedByMe && <Message severity="info" className="w-full mb-3" text={t("placement.check.makerNote")} />}
+            <SlipComparison check={checking.comparison} />
+            <label htmlFor="chk-reason" className="mt-3">{t("placement.check.reason")}</label>
+            <InputTextarea id="chk-reason" value={checking.reason} onChange={(e) => setChecking({ ...checking, reason: e.target.value })} rows={2} className="w-full" placeholder={t("placement.check.reasonPlaceholder")} />
           </>
         )}
       </Dialog>
@@ -162,25 +250,23 @@ const PlacementDetail = () => {
         {editing && <ParticipantEditor value={editing} onChange={setEditing} insurers={options.insurers} totals={p} />}
       </Dialog>
 
-      <Dialog className="placement-dialog" header={t("placement.issue.title")} visible={Boolean(issuing)} onHide={() => setIssuing(null)} style={{ width: "36rem" }}
-        footer={<><Button label={t("placement.actions.cancel")} text onClick={() => setIssuing(null)} /><Button label={t("placement.actions.issuePolicy")} icon="pi pi-verified" severity="success" loading={busy}
+      <Dialog className="placement-dialog" header={t("placement.book.title")} visible={Boolean(booking)} onHide={() => setBooking(null)} style={{ width: "36rem" }}
+        footer={<><Button label={t("placement.actions.cancel")} text onClick={() => setBooking(null)} /><Button label={t("placement.actions.book")} icon="pi pi-verified" severity="success" loading={busy}
           onClick={async () => {
-            const res = await act(() => placementService.issuePolicy(p.id, { additionalPolicyData: { ...(issuing.policyNumber ? { policyNumber: issuing.policyNumber } : {}), ...issuing.kyc } }),
-              (r) => t("placement.messages.issued", { number: r.data?.policy?.policyNumber }));
+            const res = await act(() => placementService.bookPolicy(p.id, { additionalPolicyData: { ...booking.kyc } }),
+              (r) => withQueuedNotice(t("placement.messages.booked", { number: r.data?.policy?.policyNumber }), emailSending));
             if (res?.policyId) navigate(`/agent/policydetail/${res.policyId}`);
           }} /></>}>
-        {issuing && (
+        {booking && (
           <>
-            <p className="muted">{t("placement.issue.note")}</p>
-            {p.lob === "MOTOR" && <p className="muted">{t("placement.issue.verifyNote")}</p>}
-            <label htmlFor="pol-no">{t("placement.issue.policyNumber")}</label>
-            <InputText id="pol-no" value={issuing.policyNumber} onChange={(e) => setIssuing({ ...issuing, policyNumber: e.target.value })} className="w-full mb-2" placeholder={t("placement.issue.policyNumberPlaceholder")} />
+            <p className="muted">{t("placement.book.note", { number: p.epolicy?.insurerPolicyNumber })}</p>
+            {p.lob === "MOTOR" && <p className="muted">{t("placement.book.verifyNote")}</p>}
             {p.lob === "MOTOR" && (
               <div className="grid mt-2">
-                {["idType", "idCardNumber", "chassisNumber", "motorNumber", "plateNumber"].map((k) => (
+                {["idType", "idCardNumber"].map((k) => (
                   <div className="col-12 md:col-6" key={k}>
                     <label>{t(`placement.kyc.${k}`)}</label>
-                    <InputText value={issuing.kyc[k] || ""} onChange={(e) => setIssuing({ ...issuing, kyc: { ...issuing.kyc, [k]: e.target.value } })} className="w-full" placeholder={t("placement.kyc.notCaptured")} />
+                    <InputText value={booking.kyc[k] || ""} onChange={(e) => setBooking({ ...booking, kyc: { ...booking.kyc, [k]: e.target.value } })} className="w-full" placeholder={t("placement.kyc.notCaptured")} />
                   </div>
                 ))}
               </div>
