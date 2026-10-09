@@ -152,6 +152,8 @@ const BrokerSlipDetail = () => {
         <Button label={t("placement.actions.slipPdf")} icon="pi pi-file-pdf" severity="secondary" outlined onClick={() => placementService.openSlipPdf(slip.id).catch((e) => notify("error", e.message))} className="ml-2" />
         {!["draft", "cancelled"].includes(slip.status) && canOpen("/sales/comparison-reports") && (
           <Button label={t("distribution.cr.clientReport", "Client comparison report")} icon="pi pi-star" severity="secondary" outlined className="ml-2"
+            disabled={offered.length < 2} tooltip={offered.length < 2 ? t("distribution.cr.notYet", { count: offered.length }) : undefined}
+            tooltipOptions={{ showOnDisabled: true, position: "bottom" }}
             onClick={() => navigate(`/sales/comparison-reports?brokerSlipId=${encodeURIComponent(slip.id)}&slipNumber=${encodeURIComponent(slip.slipNumber)}`)} />
         )}
         {OPEN.includes(slip.status) && <Button label={t("placement.actions.addInsurer")} icon="pi pi-plus" severity="secondary" outlined onClick={() => setAddInsurer({ insurer: null })} className="ml-2" />}

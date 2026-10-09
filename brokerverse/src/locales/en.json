@@ -1,4 +1,12 @@
 {
+  "apiErrors": {
+    "forbidden": "You do not have permission to do this.",
+    "notFound": "The record was not found. It may have been removed.",
+    "conflict": "The record was changed by someone else. Reload it and try again.",
+    "tooLarge": "The file is too large.",
+    "server": "The system could not complete the request. Please try again.",
+    "failed": "The request could not be completed."
+  },
   "common": {
     "language": "Language",
     "notification": "Notification",
@@ -2327,6 +2335,11 @@
     "displayName": "Display Name",
     "password": "Password",
     "roles": "Roles",
+    "standardRoles": "Standard roles",
+    "roleGroup": "{{group}} roles",
+    "searchRoles": "Search roles",
+    "rolesSelected": "{{count}} selected",
+    "noRolesMatch": "No role matches the search",
     "roleCode": "Role Code",
     "roleName": "Role Name",
     "roleDescription": "Role Description",
@@ -5182,7 +5195,38 @@
     "createLead": "Create Prospect",
     "editClient": "Edit Client",
     "editLead": "Edit Prospect",
-    "categoryColon": "Category :"
+    "categoryColon": "Category :",
+    "created": "Prospect created",
+    "updated": "Prospect updated",
+    "createdWithoutId": "Prospect created but its ID was not returned. Create the quote from the Prospects list.",
+    "form": {
+      "customer": "Customer",
+      "category": "Category",
+      "companyName": "Company name",
+      "tin": "TIN",
+      "contactPerson": "Contact person",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "preferredName": "Preferred name",
+      "birthDate": "Date of birth",
+      "gender": "Gender",
+      "contact": "Contact",
+      "email": "E-mail",
+      "mobile": "Mobile number",
+      "address": "Address",
+      "sourceProduct": "Source and product",
+      "chooseSource": "Choose the source",
+      "product": "Product",
+      "motor": "Motor",
+      "cancel": "Cancel"
+    },
+    "errors": {
+      "required": "Enter this field",
+      "email": "Enter a valid e-mail address",
+      "mobile": "Enter a valid mobile number (e.g. {{example}})",
+      "tin": "Enter the TIN as 9 digits, or 12 to 14 digits with the branch code",
+      "zip": "Enter the four-digit ZIP code"
+    }
   },
   "leadEdit": {
     "leads": "Prospects",
@@ -5593,20 +5637,20 @@
     "claimsBySource": "Claims by Source",
     "lossRatioByProduct": "Loss Ratio by Product",
     "claimsCount": "Claims Count",
-    "claimId": "CLAIM#",
+    "claimId": "Claim No.",
     "lob": "LOB",
-    "customer": "CUSTOMER",
-    "policy": "POLICY",
-    "lossDate": "LOSS DATE",
-    "reported": "REPORTED",
-    "reporter": "REPORTER",
-    "priority": "PRIORITY",
-    "status": "STATUS",
-    "amount": "AMOUNT",
+    "customer": "Customer",
+    "policy": "Policy",
+    "lossDate": "Loss Date",
+    "reported": "Reported",
+    "reporter": "Reporter",
+    "priority": "Priority",
+    "status": "Status",
+    "amount": "Amount",
     "claims": "claims"
   },
   "underwritingDashboard": {
-    "myWorkbench": "PROCESSING WORKBENCH",
+    "myWorkbench": "Processing Workbench",
     "thisWeek": "This Week",
     "thisMonth": "This Month",
     "thisQuarter": "This Quarter",
@@ -5619,14 +5663,14 @@
     "duplicateSubmissionDetected": "Duplicate Submission Detected",
     "missingTivAndDates": "Missing TIV and Proposed Dates",
     "missingLobTypeBroker": "Missing LOB, Type or Broker",
-    "workloadMetrics": "WORKLOAD METRICS",
+    "workloadMetrics": "Workload Metrics",
     "assignmentGroups": "Assignment Groups",
     "groupWorkloadTop5": "Group Workload (Top 5)",
     "missingCriticalInfo": "Missing Critical Information",
     "inReview": "In Review",
     "hold": "Hold",
     "ready": "Ready",
-    "submissionsList": "SUBMISSIONS LIST",
+    "submissionsList": "Submissions List",
     "caseId": "Case ID",
     "proposedInsured": "Proposed Insured",
     "agent": "Account Executive",
@@ -5772,17 +5816,6 @@
     "totalPremiumPreLevy": "Total premium (pre-levy)",
     "totalSumInsured": "Total Sum Insured",
     "totalSumInsuredAll": "Total sum insured (all sections)"
-  },
-  "systemSettings": {
-    "masters": "Master",
-    "baseCurrencyHint": "Accounts are kept in the base currency {{base}} (Master > Finance > Currency); the display currency only changes how amounts are labelled.",
-    "title": "System Settings",
-    "localization": "Localization",
-    "displayCurrency": "Display Currency",
-    "selectCurrency": "Select currency",
-    "defaultLanguage": "Default Language",
-    "saved": "System settings saved",
-    "saveFailed": "Failed to save settings"
   },
   "documentLayouts": {
     "master": "Master",
@@ -8584,7 +8617,7 @@
     "searchLabel": "Client name, mobile number or e-mail",
     "searchPlaceholder": "Type at least 3 characters",
     "typeMore": "Type at least 3 characters to search.",
-    "noMatch": "No client matches. Go back and choose New customer.",
+    "noMatch": "No client matches \"{{term}}\".",
     "clientCode": "Client code",
     "name": "Name",
     "mobile": "Mobile",
@@ -8594,7 +8627,14 @@
     "productQuestion": "Which product is the prospect for?",
     "cancel": "Cancel",
     "back": "Back",
-    "continue": "Continue"
+    "continue": "Continue",
+    "searching": "Searching...",
+    "createNew": "Create a new customer instead",
+    "resultsLabel": "Clients found",
+    "resultCount": "{{count}} clients found",
+    "resultCount_one": "{{count}} client found",
+    "resultCount_other": "{{count}} clients found",
+    "moreResults": "Showing the first {{count}} clients: type more to narrow the search"
   },
   "productPicker": {
     "title": "Choose the product",
@@ -8744,7 +8784,8 @@
     "cityMunicipality": "City / Municipality",
     "barangay": "Barangay",
     "houseUnitNo": "House / Unit No.",
-    "street": "Street / Subdivision"
+    "street": "Street / Subdivision",
+    "chooseProvinceFirst": "Choose the province first"
   },
   "underwritingReferral": {
     "title": "Underwriting referral",
@@ -10187,9 +10228,8 @@
       "email": "E-mail to the client",
       "prepare": "Prepare",
       "quotations": "Quotations",
-      "rfqHelp": "Its insurer offers become the options of the report",
-      "quoteNumbers": "Quotation numbers",
-      "quoteHelp": "Two or more quotations of the same prospect or client, separated by commas",
+      "rfqHelp": "Its insurer offers become the options of the report; a request with fewer than two offers cannot be compared yet",
+      "quoteHelp": "Two or more quotations of the same prospect or client",
       "titleLabel": "Title",
       "intro": "Introduction",
       "recommend": "Recommend",
@@ -10200,7 +10240,15 @@
       "highlights": "What stands out",
       "chosen": "Client chose",
       "reasons": "Why we recommend it (one reason per line)",
-      "disclaimer": "Disclaimer"
+      "disclaimer": "Disclaimer",
+      "chooseRfq": "Choose the request for quotation",
+      "noRfq": "No request for quotation has insurer offers yet",
+      "offerCount": "{{count}} offer(s)",
+      "needsTwo": "needs two offers",
+      "needsOffers": "{{number}} has {{count}} insurer offer(s); a comparison needs at least two",
+      "needsQuotes": "Choose at least two quotations",
+      "searchQuotes": "Quotation number or customer",
+      "notYet": "A comparison report needs at least two insurer offers ({{count}} so far)"
     },
     "fl": {
       "sumInsured": "Sum insured",
@@ -10383,7 +10431,6 @@
     },
     "la": {
       "open": "open",
-      "queueReason": "Why does this prospect need another account executive?",
       "deleteRule": "Remove the rule {{name}}?",
       "lead": "Prospect",
       "lob": "Line",
@@ -10432,7 +10479,8 @@
         "city": "City / municipality",
         "branchCode": "Branch",
         "source": "Source",
-        "leadCategory": "Category"
+        "leadCategory": "Category",
+        "productId": "Product"
       },
       "reassignTitle": "Reassign {{count}} prospect(s)",
       "to": "To account executive",
@@ -10452,7 +10500,47 @@
         "auto": "Assigned by rule",
         "queued": "Sent to the reassignment queue",
         "manual": "Reassigned",
-        "bulk": "Bulk reassignment"
+        "bulk": "Bulk reassignment",
+        "taken": "Taken from the queue"
+      },
+      "queueTitle": "Send {{count}} prospect(s) to the queue",
+      "andMore": "and {{count}} more",
+      "suggested": "Suggested by the assignment rules",
+      "others": "Other account executives",
+      "allAssignees": "Account executives",
+      "suggestedHelp": "The account executives of the assignment rule for these prospects come first",
+      "chooseAssignee": "Choose the account executive",
+      "noAssignee": "No active user can own prospects",
+      "openCount": "{{count}} open",
+      "sameOwner": "The prospect already belongs to this account executive",
+      "chooseReasonCode": "Choose the reason",
+      "chooseReason": "Choose the reason or enter a note",
+      "noReasons": "No reassignment reason in Master > Insurance Management > Reason Codes",
+      "note": "Note",
+      "notePlaceholder": "Details for the history (optional unless the reason asks for it)",
+      "noteRequired": "This reason needs a note",
+      "untagged": "Product not yet tagged",
+      "systemQueued": "Queued by the system or without a reason code",
+      "searchQueue": "Prospect name or number",
+      "take": "Take",
+      "runRules": "Assign by rules",
+      "runTitle": "Assign the queue by the rules",
+      "runHelp": "{{count}} prospect(s) match a rule; {{unmatched}} stay in the queue.",
+      "runConfirm": "Assign {{count}} prospect(s)",
+      "runNone": "No prospect in the queue matches an active rule",
+      "rule": "Rule",
+      "active": "Active",
+      "moveUp": "Check earlier",
+      "moveDown": "Check later",
+      "conditionsHelp": "Empty: any value",
+      "category": {
+        "Retail": "Retail",
+        "Corporate": "Corporate"
+      },
+      "methodHelp": {
+        "round_robin": "Each account executive in turn",
+        "load": "The account executive with the fewest open prospects",
+        "fixed": "Always the first account executive"
       }
     },
     "oc": {
@@ -10819,5 +10907,27 @@
     "bullets": "Bulleted list",
     "numbers": "Numbered list",
     "clear": "Clear formatting"
+  },
+  "prospectDuplicates": {
+    "title": "Possible duplicate",
+    "intro": "These clients or open prospects look like the customer you entered. Use the existing client, open the prospect, or save a new prospect anyway.",
+    "clientIntro": "The client already has these open prospects. Open one of them, or save a new prospect anyway.",
+    "kind": {
+      "client": "Client",
+      "lead": "Prospect"
+    },
+    "matchedOn": {
+      "email": "e-mail",
+      "mobile": "mobile number",
+      "name": "name",
+      "birthDate": "date of birth"
+    },
+    "sameAs": "Same {{fields}}",
+    "owner": "account executive {{name}}",
+    "useClient": "Use this client",
+    "openProspect": "Open prospect",
+    "saveAnyway": "Save anyway",
+    "back": "Back to the form",
+    "clientFailed": "The client could not be loaded"
   }
 }

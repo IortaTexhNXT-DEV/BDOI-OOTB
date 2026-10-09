@@ -11,10 +11,10 @@ import { currencySymbol } from "../../../utility/currencyConverter";
 import { formatPercent } from "../../../utility/numberFormat";
 import logger from "../../../utility/logger";
 import { DetailPageSkeleton } from "../../../components/Skeletons";
-
-const CHART_COLORS = ["#7c3aed", "#3b82f6", "#22c55e", "#f59e0b"];
+import { useChartTheme } from "../../../theme/chartTheme";
 
 const CommissionDashboard = () => {
+  const chart = useChartTheme();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(null);
   const [brokerageView, setBrokerageView] = useState("insurer");
@@ -53,38 +53,39 @@ const CommissionDashboard = () => {
 
   const trendChart = useMemo(() => {
     if (!data?.monthlyTrend) return null;
+    const [income, comsub, margin] = chart.series(3);
     return {
       labels: data.monthlyTrend.map((m) => m.month),
       datasets: [
         {
           label: "Brokerage income",
           data: data.monthlyTrend.map((m) => m.brokerageIncome),
-          borderColor: "#22c55e",
-          backgroundColor: "#22c55e",
+          borderColor: income,
+          backgroundColor: income,
           tension: 0,
           fill: false,
         },
         {
           label: "Comsub gross",
           data: data.monthlyTrend.map((m) => m.comsubGross),
-          borderColor: "#b42318",
-          backgroundColor: "#b42318",
+          borderColor: comsub,
+          backgroundColor: comsub,
           tension: 0,
           fill: false,
         },
         {
           label: "Net margin",
           data: data.monthlyTrend.map((m) => m.netMargin),
-          borderColor: "#1e3a5f",
-          backgroundColor: "#1e3a5f",
+          borderColor: margin,
+          backgroundColor: margin,
           tension: 0,
           fill: false,
         },
       ],
     };
-  }, [data]);
+  }, [data, chart]);
 
-  const trendOptions = {
+  const trendOptions = chart.options({
     responsive: true,
     maintainAspectRatio: false,
     layout: {
@@ -105,20 +106,19 @@ const CommissionDashboard = () => {
         ticks: {
           callback: (v) => currencySymbol() + Math.round(v / 1000) + "k",
         },
-        grid: { color: "#edf2f7" },
       },
       x: {
         grid: { display: false },
       },
     },
-  };
+  });
 
   const makeDonut = (items) => ({
     labels: items.map((i) => i.label),
     datasets: [
       {
         data: items.map((i) => i.amount),
-        backgroundColor: CHART_COLORS,
+        backgroundColor: chart.series(items.length),
         borderWidth: 0,
       },
     ],
@@ -174,31 +174,31 @@ const CommissionDashboard = () => {
       </div>
 
       <div className="kpi-row">
-        <div className="kpi-card accent-green">
+        <div className="kpi-card">
           <span className="label">Brokerage income</span>
-          <span className="value green">{formatAmount(kpis.brokerageIncome)}</span>
+          <span className="value">{formatAmount(kpis.brokerageIncome)}</span>
         </div>
-        <div className="kpi-card accent-red">
+        <div className="kpi-card">
           <span className="label">Comsub (gross)</span>
-          <span className="value red">{formatAmount(kpis.comsubGross)}</span>
+          <span className="value">{formatAmount(kpis.comsubGross)}</span>
         </div>
-        <div className="kpi-card accent-blue">
+        <div className="kpi-card">
           <span className="label">Net margin</span>
-          <span className="value blue">{formatAmount(kpis.netMargin)}</span>
+          <span className="value">{formatAmount(kpis.netMargin)}</span>
         </div>
-        <div className="kpi-card accent-navy">
+        <div className="kpi-card">
           <span className="label">Margin %</span>
-          <span className="value navy">{formatPercent(kpis.marginPct)}</span>
+          <span className="value">{formatPercent(kpis.marginPct)}</span>
         </div>
-        <div className="kpi-card accent-purple">
+        <div className="kpi-card">
           <span className="label">Outstanding payable</span>
-          <span className="value navy">
+          <span className="value">
             {formatAmount(kpis.outstandingPayable)}
           </span>
         </div>
-        <div className="kpi-card accent-purple">
+        <div className="kpi-card">
           <span className="label">WHT withheld (paid)</span>
-          <span className="value navy">
+          <span className="value">
             {formatAmount(kpis.whtWithheldPaid)}
           </span>
         </div>
@@ -215,7 +215,7 @@ const CommissionDashboard = () => {
                 </span>
                 <div className="hbar-track">
                   <div
-                    className="hbar-fill purple"
+                    className="hbar-fill"
                     style={{ width: `${(r.amount / maxReferrer) * 100}%` }}
                   />
                 </div>
@@ -293,7 +293,7 @@ const CommissionDashboard = () => {
                 <li key={item.label}>
                   <span
                     className="dot"
-                    style={{ background: CHART_COLORS[idx % CHART_COLORS.length] }}
+                    style={{ background: chart.series(idx + 1)[idx] }}
                   />
                   <span className="name">{item.label}</span>
                   <span className="amt">
@@ -342,7 +342,7 @@ const CommissionDashboard = () => {
                 <li key={item.label}>
                   <span
                     className="dot"
-                    style={{ background: CHART_COLORS[idx % CHART_COLORS.length] }}
+                    style={{ background: chart.series(idx + 1)[idx] }}
                   />
                   <span className="name">{item.label}</span>
                   <span className="amt">
@@ -373,7 +373,7 @@ const CommissionDashboard = () => {
               )}
               <div className="hbar-track">
                 <div
-                  className="hbar-fill blue"
+                  className="hbar-fill"
                   style={{ width: `${(f.amount / maxFunnel) * 100}%` }}
                 />
               </div>

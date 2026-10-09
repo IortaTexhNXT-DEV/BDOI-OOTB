@@ -10,6 +10,7 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import i18n from "../i18n";
 import logger from "./logger";
+import { readableError } from "./apiError";
 
 export const APP_DIALOG_TAG = "app-dialog";
 
@@ -44,7 +45,7 @@ const text = (message) => {
  * @param {*} message
  */
 export const notify = (severity, message) => {
-  const detail = text(message);
+  const detail = severity === "error" ? readableError(text(message)) : text(message);
   const toast = toastRef?.current;
   if (toast?.showToast) {
     toast.showToast(severity, (SUMMARY[severity] || SUMMARY.info)(), detail);

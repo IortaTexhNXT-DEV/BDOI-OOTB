@@ -113,7 +113,7 @@ const ElectronicTransfer = () => {
   const actionBodyTemplate = (rowData) => {
     return (
       <div className="action-buttons">
-        <Button icon="pi pi-check" className="p-button-rounded p-button-success p-button-text" tooltip={t("remittance.approve", "Approve")} onClick={() => handleApprove(rowData)} aria-label={t("remittance.approve", "Approve")} />
+        <Button icon="pi pi-check" className="p-button-rounded p-button-text" tooltip={t("remittance.approve", "Approve")} onClick={() => handleApprove(rowData)} aria-label={t("remittance.approve", "Approve")} />
         <Button icon="pi pi-times" className="p-button-rounded p-button-danger p-button-text" tooltip={t("common.reject", "Reject")} onClick={() => handleReject(rowData)} aria-label={t("common.reject", "Reject")} />
         <Button icon="pi pi-eye" className="p-button-rounded p-button-text" tooltip={t("remittance.view", "View")} onClick={() => handleView(rowData)} aria-label={t("remittance.view", "View")} />
       </div>
@@ -205,7 +205,7 @@ const ElectronicTransfer = () => {
       <Card title={t("remittance.pendingTransfers")} className="mt-4">
         <div className="toolbar mb-3">
           <Button label={t("remittance.newTransfer")} icon="pi pi-plus" onClick={() => { setForm(emptyTransfer); setShowTransferDialog(true); }} />
-          <Button label={t("remittance.batchProcess")} icon="pi pi-forward" className="p-button-success ml-2" onClick={handleBatchProcess} />
+          <Button label={t("remittance.batchProcess")} icon="pi pi-forward" className="ml-2" onClick={handleBatchProcess} />
           <Button label={t("remittance.export")} icon="pi pi-download" className="p-button-secondary ml-2" onClick={handleExport} />
         </div>
         <DataTable value={pendingTransfers} stripedRows loading={loading}>

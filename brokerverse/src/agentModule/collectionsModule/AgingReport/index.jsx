@@ -11,6 +11,8 @@ import { useNavigate } from "react-router-dom";
 import collectionService from "../../../services/collectionService";
 import "./index.scss";
 import logger from "../../../utility/logger";
+import { useChartTheme } from "../../../theme/chartTheme";
+import { mix } from "../../../theme/runtime/themeEngine";
 
 const AgingReport = () => {
   const { t } = useTranslation();
@@ -19,6 +21,7 @@ const AgingReport = () => {
   const [loading, setLoading] = useState(false);
   const toast = useRef(null);
   const navigate = useNavigate();
+  const chart = useChartTheme();
 
   useEffect(() => {
     loadAgingReport();
@@ -69,18 +72,19 @@ const AgingReport = () => {
           parseFloat(summary.total61to90),
           parseFloat(summary.totalOver90),
         ],
+        // older buckets in the warning, then the danger colour
         backgroundColor: [
-          "#4caf50",
-          "#ffc107",
-          "#ff9800",
-          "#f44336",
-          "#9c27b0",
+          chart.success,
+          mix(chart.warning, "#ffffff", 0.45),
+          chart.warning,
+          mix(chart.danger, "#ffffff", 0.35),
+          chart.danger,
         ],
       },
     ],
   };
 
-  const chartOptions = {
+  const chartOptions = chart.options({
     responsive: true,
     plugins: {
       legend: {
@@ -91,7 +95,7 @@ const AgingReport = () => {
         text: "Collections Aging Distribution",
       },
     },
-  };
+  });
 
   const clientBodyTemplate = (rowData) => {
     const client = rowData.client;

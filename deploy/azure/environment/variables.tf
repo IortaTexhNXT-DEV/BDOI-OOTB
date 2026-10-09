@@ -137,7 +137,7 @@ variable "trust_proxy" {
 }
 
 variable "brand_pack" {
-  description = "BRAND_PACK of the API: bundled brand pack enabled once at the first start (toyota-insurance-services); empty keeps the default branding."
+  description = "BRAND_PACK of the API: bundled brand pack enforced at every start (toyota-insurance-services); empty keeps the default branding."
   type        = string
   default     = ""
 }

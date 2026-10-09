@@ -246,7 +246,7 @@ const RemittanceNotifications = () => {
         />
         <Button
           icon="pi pi-send"
-          className="p-button-rounded p-button-success p-button-text"
+          className="p-button-rounded p-button-text"
           tooltip="Use Template"
           onClick={() => applyTemplate(rowData)} aria-label="Use Template"
         />
@@ -414,7 +414,7 @@ const RemittanceNotifications = () => {
                 <Button
                   label={`Mark as Read (${selectedRows.length})`}
                   icon="pi pi-check"
-                  className="p-button-success mr-2"
+                  className="mr-2"
                   onClick={handleMarkAsRead}
                 />
                 <Button

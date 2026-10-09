@@ -118,7 +118,7 @@ const PlacementDetail = () => {
         {write && p.status === "sent" && <Button label={t("placement.actions.acknowledge")} icon="pi pi-inbox" className="ml-2" onClick={() => setAcknowledging({ reference: "", remarks: "" })} />}
         {write && WITH_INSURER.includes(p.status) && <Button label={t("placement.actions.uploadEpolicy")} icon="pi pi-upload" className="ml-2" severity={p.status === "acknowledged" ? undefined : "secondary"} onClick={() => setRecording(true)} />}
         {p.status === "epolicy_received" && <Button label={t("placement.actions.checkAgainstSlip")} icon="pi pi-list-check" className="ml-2" onClick={openCheck} />}
-        {canBook && <Button label={t("placement.actions.book")} icon="pi pi-verified" severity="success" className="ml-2" onClick={() => setBooking({ kyc: { ...(p.kycPrefill || {}) } })} />}
+        {canBook && <Button label={t("placement.actions.book")} icon="pi pi-verified" className="ml-2" onClick={() => setBooking({ kyc: { ...(p.kycPrefill || {}) } })} />}
         {write && !["issued", "cancelled"].includes(p.status) && <Button label={t("placement.actions.cancelSlip")} icon="pi pi-times" text severity="danger" className="ml-2" onClick={() => setCancelling({ reason: "" })} />}
       </PageHeader>
 
@@ -225,7 +225,7 @@ const PlacementDetail = () => {
             <Button label={t("placement.check.returnToInsurer")} icon="pi pi-replay" severity="warning" outlined loading={busy} disabled={keyedByMe || !checker || !checking.reason.trim()} onClick={() => decide("return")} />
             {checking.comparison.result === "mismatch"
               ? <Button label={t("placement.check.acceptDifferences")} icon="pi pi-check" severity="danger" loading={busy} disabled={keyedByMe || !approver || !checker || !checking.reason.trim()} onClick={() => decide("accept")} />
-              : <Button label={t("placement.check.confirm")} icon="pi pi-check" severity="success" loading={busy} disabled={keyedByMe || !checker} onClick={() => decide("confirm")} />}
+              : <Button label={t("placement.check.confirm")} icon="pi pi-check" loading={busy} disabled={keyedByMe || !checker} onClick={() => decide("confirm")} />}
           </>
         )}>
         {checking && (
@@ -253,7 +253,7 @@ const PlacementDetail = () => {
       </Dialog>
 
       <Dialog className="placement-dialog" header={t("placement.book.title")} visible={Boolean(booking)} onHide={() => setBooking(null)} style={{ width: "36rem" }}
-        footer={<><Button label={t("placement.actions.cancel")} text onClick={() => setBooking(null)} /><Button label={t("placement.actions.book")} icon="pi pi-verified" severity="success" loading={busy}
+        footer={<><Button label={t("placement.actions.cancel")} text onClick={() => setBooking(null)} /><Button label={t("placement.actions.book")} icon="pi pi-verified" loading={busy}
           onClick={async () => {
             const res = await act(() => placementService.bookPolicy(p.id, { additionalPolicyData: { ...booking.kyc } }),
               (r) => withQueuedNotice(t("placement.messages.booked", { number: r.data?.policy?.policyNumber }), emailSending));

@@ -409,7 +409,7 @@ const ApproveQuote = () => {
               onClick={handleApprove}
               loading={approving}
               disabled={!quotationData}
-              className="p-button-success p-button-lg"
+              className="p-button-lg"
             />
           </div>
         </div>

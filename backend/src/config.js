@@ -40,8 +40,8 @@ export function buildConfig(source = process.env) {
     publicBaseUrl: env('PUBLIC_BASE_URL', 'http://localhost:8000').replace(/\/+$/, ''),
     smtpUrl: env('SMTP_URL', ''),
     /**
-     * Bundled brand pack (backend/assets/brand-packs/<id>) enabled at start-up in a deployment made for its client, once:
-     * an administrator's Back to default is kept across restarts (modules/branding/bundled.js, enableDeploymentPack).
+     * Bundled brand pack (backend/assets/brand-packs/<id>) of a deployment made for its client: enforced at every start
+     * and not changeable through the API while set (modules/branding/bundled.js, enforceDeploymentPack).
      */
     brandPack: env('BRAND_PACK', '').trim(),
     logLevel: env('LOG_LEVEL', 'info'),

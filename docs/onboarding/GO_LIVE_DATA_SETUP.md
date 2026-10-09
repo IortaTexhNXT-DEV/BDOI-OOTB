@@ -101,8 +101,8 @@ warranties, renewals and reminders).
 - **Screen:** Master > Generals > Organization > Company.
 - **Enter:** edit the delivered company record (iorta TechNXT Corp.) into your own: company name, TIN, Insurance
   Commission licence number, address, e-mail, telephone, web site, logo. Keep **Is Primary** on: the primary company
-  is the letterhead of every printed document and report. Then Master > System Settings for the application name and
-  logo shown on the sign-in page.
+  is the letterhead of every printed document and report. The application name and the logo of the screens and the
+  sign-in page come from the brand pack of the deployment (`BRAND_PACK`).
 - **Template:** `Company_Upload_Template.xlsx` only if you have more than one company (no Upload button on this screen).
 - **Check:** print a billing statement or run any report as PDF and look at the letterhead and TIN.
 

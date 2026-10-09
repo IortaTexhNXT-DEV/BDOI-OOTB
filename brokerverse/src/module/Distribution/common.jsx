@@ -39,10 +39,10 @@ export const PageHeader = ({ home, section, title, trail = [], subtitle, childre
   </div>
 );
 
-/** A labelled form field of the two-column form grid; a required field is starred and its error replaces the help line. */
-export const Field = ({ label, children, full = false, help, required = false, error }) => (
+/** A labelled form field of the two-column form grid (htmlFor: the id of its input); a required field is starred and its error replaces the help line. */
+export const Field = ({ label, children, full = false, help, htmlFor, required = false, error }) => (
   <div className={`dist-field${full ? " dist-field--full" : ""}${error ? " dist-field--invalid" : ""}`}>
-    <label>{label}{required ? <span className="dist-required" aria-hidden="true"> *</span> : null}</label>
+    <label htmlFor={htmlFor}>{label}{required ? <span className="dist-required" aria-hidden="true"> *</span> : null}</label>
     {children}
     {error ? <small className="p-error" role="alert">{error}</small> : help ? <small className="pe-muted">{help}</small> : null}
   </div>

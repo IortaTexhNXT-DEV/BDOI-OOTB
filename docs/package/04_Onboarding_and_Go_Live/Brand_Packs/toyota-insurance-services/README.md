@@ -19,7 +19,8 @@ contract reference with the engagement records and remove the pack from an envir
 | File | What it is |
 | --- | --- |
 | `theme.json` | The brand pack manifest: theme (colours, font, radius, logo sizes, sign-in page, document colours and footer line) and the image file names |
-| `logo.png` | Toyota Insurance Services logo (375 x 100 px, transparent PNG), used as the application logo and as the print logo |
+| `logo.png` | Toyota Insurance Services logo (375 x 100 px, PNG), used as the application logo and as the print logo |
+| `favicon.png` | The Toyota emblem of the logo on a square (64 x 64 px, PNG), the icon of the browser tab |
 | `toyota-insurance-services.brandpack.zip` | The importable pack (theme.json + logo.png + this README), built by `node backend/scripts/build-brand-pack.js <this folder>` |
 
 The bundled copy of this folder is `backend/assets/brand-packs/toyota-insurance-services/`, with a `manifest.json`
@@ -44,7 +45,8 @@ copyright): the broker supplies its own sign-in picture (branding image upload o
 | Document and Excel table headers | Near black `#1A1A1A`, white text | |
 | Font | Inter (Google Fonts, falls back to Arial) | Toyota's corporate typeface is licensed |
 | Radius | 4 / 8 / 12 px, buttons 4 px | |
-| Sign-in page | Library picture "Motor" on a dark gradient (`#2B2B2B` to `#0D0D0D`), headline "Welcome to Toyota Insurance Services" | |
+| Sign-in page | Library picture "Motor" on a dark gradient (`#2B2B2B` to `#0D0D0D`), headline "Welcome to Toyota Insurance Services", no "Powered by" line (`login.showPoweredBy` false): only the Toyota brand shows | |
+| Side bar | The logo only: it carries the name, so the application name is not repeated under it (`logo.showName` false) | |
 
 Document footer line: "Authorized by the Insurance Commission to act as an Insurance Agent, Licence No. {{licence}}" (the
 licence number comes from the primary company in Master > Company; the line is left out while it is empty). Excel report
@@ -56,18 +58,22 @@ the application name to "Toyota Insurance Services" (untick "Also set the applic
 1. Confirm the environment belongs to the Toyota Insurance Services engagement (see above) and keep the contract
    reference with the engagement records.
 2. Set `BRAND_PACK=toyota-insurance-services` on the API of the environment (deploy/REFERENCE.md, "Brand pack of the
-   deployment"): at its first start the API enables the pack with the acknowledgement of the deployment, sets the logo
-   as the print logo of the primary company (Master > Company) and the application name. Without the variable, a
-   System Administrator enables it through the API: `POST /api/branding/packs/bundled/toyota-insurance-services/check`,
-   then `.../enable` with `acknowledgedPermission: true` (the call is refused without it).
+   deployment"). The variable enforces the pack: at every start the API checks that the screens show it (theme, logo,
+   favicon, application name, the print logo of the primary company in Master > Company) and applies it again when
+   anything differs, keeping the e-mail and document sections of the theme as they were set on their screens. The
+   first application records the acknowledgement of the deployment. While the variable is set, the API refuses
+   changes to the look of the screens (theme colours, logo, favicon, application name, another brand pack, Back to
+   default). Without the variable, a System Administrator enables the pack through the API:
+   `POST /api/branding/packs/bundled/toyota-insurance-services/check`, then `.../enable` with
+   `acknowledgedPermission: true` (the call is refused without it).
 3. Every signed-in user gets the new look on their next navigation; documents and reports printed from now on use it.
-   `GET /api/branding/packs/bundled` shows the enablement with who and when; it and the acknowledgement are in the
-   audit trail.
-4. Back to default (`POST /api/branding/packs/reset-default`) returns the environment to the iorta TechNXT default
-   (theme, logo, favicon, and the application name and print logo as they were before the pack).
+   `GET /api/branding/packs/bundled` shows the enablement with who and when; it, the acknowledgement and every
+   application at start-up are in the audit trail.
+4. To take the pack out of an environment, remove `BRAND_PACK` and restart the API, then go back to the iorta TechNXT
+   default (`POST /api/branding/packs/reset-default`: theme, logo, favicon, and the application name and print logo as
+   they were before the pack).
 
-The e-mail layout, the documents and reports layout and the signature mapping are then adjusted on Master > System
+The e-mail layout, the documents and reports layout and the signature mapping are adjusted on Master > System
 Configuration (E-mail Layout, Documents and Reports Layout, Document Signatures). The zip remains importable
 (`POST /api/branding/brand-pack`) for an environment that does not list bundled packs. To promote the branding to
-another environment, enable the pack there the same way, or export the brand pack from UAT and import that file in
-Production. See `docs/onboarding/BRANDING_AND_SIGNATURES.md`.
+another environment, set the same `BRAND_PACK` there. See `docs/onboarding/BRANDING_AND_SIGNATURES.md`.

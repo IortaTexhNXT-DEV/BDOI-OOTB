@@ -380,7 +380,7 @@ const RenewalQueue = () => {
         {rowData.statusCode === 'approved' && (
           <Button
             icon="pi pi-check-circle"
-            className="p-button-text p-button-success"
+            className="p-button-text"
             onClick={() => handleComplete(rowData)}
             tooltip={t("renewal.completeRenewal", "Complete Renewal")} aria-label={t("renewal.completeRenewal", "Complete Renewal")}
           />

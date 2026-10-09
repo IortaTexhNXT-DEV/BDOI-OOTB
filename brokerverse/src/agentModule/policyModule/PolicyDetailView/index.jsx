@@ -16,7 +16,7 @@ import { Column } from "primereact/column";
 import StatusBadge from "../../../components/StatusBadge";
 import { policyDetailsDataMiddleWare } from "../store/policyMiddleWare";
 import SvgDot from "../../../assets/agentIcon/SvgDots";
-import { isFireLob } from "../../endorsementModule/constants/endorsementCategories";
+import { isFireLob, isOtherLob } from "../../endorsementModule/constants/endorsementCategories";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import s3Service, { browserFileUrl } from "../../../services/s3Service";
 import billingService from "../../../services/billingService";
@@ -947,7 +947,8 @@ const PolicyDetailView = () => {
     rawPolicyData?.product ||
     policyDetails?.ProductDescription;
   const isFireLOB = isFireLob(productType);
-  const isMotorLOB = !isFireLOB;
+  // vehicle details, photos and the motor coverage only for motor and CTPL (not Credit Life, Personal Accident ...)
+  const isMotorLOB = !isFireLOB && !isOtherLob(rawPolicyData?.lob || quotation?.lob || productType);
   // Co-insurance participants: risk_participants from the API (lead first, amounts split by share), else the quotation document
   const apiParticipants = Array.isArray(rawPolicyData?.participants) ? rawPolicyData.participants : [];
   const participantDetails = apiParticipants.length

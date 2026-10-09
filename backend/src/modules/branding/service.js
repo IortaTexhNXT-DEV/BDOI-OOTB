@@ -154,6 +154,12 @@ const storageKeyOf = (ref) => {
   return key && objectExists(key) ? key : null;
 };
 
+/** Bytes of a branding image stored in the uploads storage; null for an empty reference, a front-end path or a missing file. */
+export function storedImageBytes(ref) {
+  const key = storageKeyOf(ref);
+  return key ? fs.readFileSync(resolveKey(key)) : null;
+}
+
 async function assetRef(name, theme) {
   const a = ASSETS[name];
   if (!a) return '';

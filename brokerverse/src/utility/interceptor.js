@@ -5,6 +5,7 @@ import { logout } from "./logout";
 import { refreshAccessToken } from "./sessionRefresh";
 import logger from "./logger";
 import { revealHeaders } from "./piiReveal";
+import { apiErrorMessage } from "./apiError";
 
 const request = axios.create({
     baseURL: BASE_URL,
@@ -49,6 +50,9 @@ request.interceptors.response.use(
                 return request(original);
             }
         }
+        // the text a screen shows from error.message: the server's message and field messages, not "Request failed with status code 400"
+        const body = err.response?.data;
+        if (body && typeof body === "object" && (body.message || body.errors)) err.message = apiErrorMessage(body, err.response.status);
         if (err.response?.status === 401) {
             // Call logout API and clear data
             try {

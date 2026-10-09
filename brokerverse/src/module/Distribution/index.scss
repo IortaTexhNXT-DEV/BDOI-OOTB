@@ -134,3 +134,11 @@
     }
   }
 }
+
+// an option with a second line (Lead Assignment > Reassign: the account executive; Comparison Reports: the request for quotation)
+.la-assignee,
+.cr-slip-option {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}

@@ -1,6 +1,10 @@
 # Broker branding and e-signatures
 
-Version 1.3, 09 October 2026, iorta TechNXT. Changes: the Theme and Branding screen is withdrawn; the look of an
+Version 1.4, 09 October 2026, iorta TechNXT. Changes: `BRAND_PACK` enforces the pack at every start (applied again
+when the screens differ from it, the e-mail and document layouts kept) and locks the look of the screens in the API
+while set; the System Settings screen is withdrawn (display currency and language are on Master > Configuration); the
+side bar shows the application name under the logo only when the theme asks for it (`logo.showName`); the Toyota
+Insurance Services pack adds its favicon (section 3). 1.3: the Theme and Branding screen is withdrawn; the look of an
 environment comes from its brand pack (`BRAND_PACK` of the deployment, or the brand pack API), and the e-mail and
 document sections of the theme and the signature mapping have their own screens under Master > System Configuration
 (E-mail Layout, Documents and Reports Layout, Document Signatures); brand packs are exported, imported, enabled and
@@ -18,7 +22,7 @@ navigation and without a rebuild or a reload:
 
 | Area | What follows the theme |
 | --- | --- |
-| Screens | Colours (primary, hover, accent, header, side bar, active menu item, table headers, buttons, links, focus ring, field borders, page background, headings), header and side bar style (white / coloured, light / dark), density (comfortable / compact), corner radius, font (safe list), logo size |
+| Screens | Colours (primary, hover, accent, header, side bar, active menu item, table headers, buttons, links, focus ring, field borders, page background, headings), header and side bar style (white / coloured, light / dark), density (comfortable / compact), corner radius, font (safe list), logo size, the application name under the logo of the side bar (`logo.showName`: off when the logo already carries the name), the browser tab title (application name) and icon (favicon) |
 | Sign-in page | Logo, application name, picture (library, own upload or colour only, focal point, darkening, shown or not on phones), headline, tagline, "Powered by" line. Applied before sign-in (public `GET /api/branding`) |
 | Printed documents | Logo (primary company), legal name, TIN, IC licence, address (Master > Company); colours of titles, headings, rules and table headers; footer line (e.g. "Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}"); signatures |
 | Report files | PDF: same as documents. Excel: header row colours; optionally the logo and a company banner above the table |
@@ -41,7 +45,7 @@ BIR returns printed from Period End) are not restyled.
      colours and the optional Excel logo / banner. **Sample document** opens a PDF printed with the unsaved values.
    - *Document Signatures*: the signature mapping (section 2).
    Each screen saves its own section of the theme and keeps the rest (preset, colours, sign-in page) as the brand pack
-   set it. Saving is refused when text on the document table header does not reach WCAG AA (4.5:1); the e-mail header
+   set it; while `BRAND_PACK` is set the API refuses a save that changes anything else (section 3). Saving is refused when text on the document table header does not reach WCAG AA (4.5:1); the e-mail header
    and the document headings give a warning.
 
 Validation also refuses: fonts outside the safe list (Google Fonts only from `fonts.googleapis.com`, through the list),
@@ -55,7 +59,13 @@ settings, and texts with `<` or `>`.
   versioned, sandbox CSP).
 * Front end: `brokerverse/src/theme/runtime/`: `themeEngine.js` sets the `--bv-*` CSS custom properties on `<html>`,
   `BrandingProvider.jsx` revalidates the branding on every navigation (at most every 15 s), when the tab becomes
-  visible and every 5 minutes. `tokens.scss` defines the defaults (the iorta TechNXT preset, so the app looks exactly
+  visible and every 5 minutes. No screen is drawn in a look that is not the environment's, also during a refresh: the
+  browser keeps the last branding it received; `public/branding-boot.js` applies its colours, tab title and favicon
+  before the application loads and the provider uses its logo and name at once. A browser with nothing kept (first
+  visit, cleared data) shows a plain white page until `GET /api/branding` answers (at most 8 seconds). The page head
+  carries no icon, title or colour of its own, and the front end never falls back to the product's default logo or
+  name (the "Powered by" line of the sign-in page shows only when the theme's `login.showPoweredBy` is on; the
+  Toyota Insurance Services pack turns it off). `tokens.scss` defines the defaults (the iorta TechNXT preset, so the app looks exactly
   as before when no theme is loaded). A PostCSS step (`brokerverse/scripts/postcss-brand-vars.js`, wired in
   `craco.config.js`) turns every literal brand colour in the compiled CSS into `var(--bv-..., <same colour>)`, so screen
   stylesheets follow the theme without being edited. Older stylesheets use other blues (#0066cc, #001e60, #1976d2 ...): saturated blues are mapped
@@ -161,11 +171,22 @@ them and checks that the built zip is in step with the folder); change the docs 
 * **API**: `GET /api/branding/packs/bundled` (list with status and history), `POST .../bundled/<id>/check` (dry run),
   `POST .../bundled/<id>/enable`, `POST /api/branding/packs/reset-default`. All need the settings permission.
 * **Deployment** (`BRAND_PACK`, deploy/REFERENCE.md): an environment made for the client names its pack in the API's
-  `BRAND_PACK` variable (`toyota-insurance-services` in the TISPH Azure environments). At start-up, after the
-  migrations and the seed, the API enables it once through the same logic, recorded against the user `system` with
-  the acknowledgement and the note "Given by the deployment configuration (BRAND_PACK)", and audited. Nothing is done
-  when a pack is in force or when the pack was enabled before in that environment, so **Back to default** stands
-  across restarts. An unknown id logs a warning and the API starts with the branding it has.
+  `BRAND_PACK` variable (`toyota-insurance-services` in the TISPH environments). The variable **enforces** the pack.
+  At every start, after the migrations and the seed, the API compares the branding with the pack and applies the pack
+  again through the same logic when it is not the enablement in force or when anything differs: the theme of the
+  screens (name, preset, colours, layout, font, radius, sign-in page, logo sizes), the application name, the logo, the
+  favicon, or a missing print logo of the primary company. The e-mail and document sections of the theme and the
+  logo height on documents are kept as the broker set them on the layout screens (a section still at the iorta
+  TechNXT default takes the pack's); the signature mapping is not touched. Images already stored with the pack's
+  bytes are reused, so a start with nothing to apply stores nothing and logs `Brand pack <name> in force`. The first
+  application is recorded against the user `system` with the acknowledgement and the note "Given by the deployment
+  configuration (BRAND_PACK)" (action `enable-pack`); a later one is audited as `reapply-pack` with the reasons, and
+  both log one line saying what differed. An unknown id logs a warning and the API starts with the branding it has.
+* **Locked while set**: with `BRAND_PACK` set the API refuses, with a message naming the variable, a theme save that
+  changes anything but the e-mail and document sections, the branding image uploads and resets, a brand pack import
+  (the dry run is still accepted), enabling a pack, Back to default, and the logo, favicon, colours and application
+  name of `PUT /api/system-settings`. To take a pack out of an environment, remove the variable, restart the API and
+  go back to the default.
 
 ## 4. Client brand packs and trademarks
 
@@ -210,7 +231,7 @@ Support refuses the change in any other environment.
 1. **Engagement**: confirm the environment belongs to that client's engagement, whose contract covers its marks
    (section 4). The administrator who enables the pack acknowledges it in the call; the acknowledgement is stored with
    the enablement and in the audit trail, so the record must be true. A TISPH deployment does this through
-   `BRAND_PACK` at its first start.
+   `BRAND_PACK`, which also brings the pack back at the next start whenever the branding was changed.
 2. **Before**: export the current pack (`GET /api/branding/brand-pack?format=zip`) and keep it with the change
    record, as for an import. Back to default does not restore a custom theme saved before the pack (it restores the product default),
    so the export is the way back to a custom theme.

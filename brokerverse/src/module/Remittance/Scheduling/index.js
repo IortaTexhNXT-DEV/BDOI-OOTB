@@ -124,7 +124,7 @@ const SchedulingDashboard = () => {
   const actionBodyTemplate = (rowData) => {
     return (
       <div className="action-buttons">
-        <Button icon="pi pi-play" className="p-button-rounded p-button-success p-button-text" tooltip={t("remittance.runNow")}
+        <Button icon="pi pi-play" className="p-button-rounded p-button-text" tooltip={t("remittance.runNow")}
           disabled={rowData.status !== "Active"} onClick={() => runNow(rowData)} aria-label={t("remittance.runNow")}
           />
         <Button icon={rowData.status === "Active" ? "pi pi-pause" : "pi pi-refresh"} className="p-button-rounded p-button-warning p-button-text"
@@ -202,7 +202,7 @@ const SchedulingDashboard = () => {
       <Card title={t("remittance.scheduledJobs")} className="mt-4">
         <div className="toolbar mb-3">
           <Button label={t("remittance.newSchedule")} icon="pi pi-plus" className="p-button-primary" onClick={openNew} />
-          <Button label={t("remittance.runNow")} icon="pi pi-play" className="p-button-success ml-2"
+          <Button label={t("remittance.runNow")} icon="pi pi-play" className="ml-2"
             disabled={!selectedJob || selectedJob.status !== "Active"} onClick={() => runNow(selectedJob)} />
         </div>
         <DataTable value={scheduledJobs} stripedRows loading={loading} selectionMode="single" selection={selectedJob}

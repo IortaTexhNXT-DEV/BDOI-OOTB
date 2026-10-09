@@ -15,10 +15,9 @@ import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
 import dashboardService from "../../../services/dashboardService";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import { useChartTheme } from "../../../theme/chartTheme";
 import "./index.scss";
 
-const STATUS_COLORS = ["#4CAF50", "#2196F3", "#FFC107", "#9C27B0", "#FF5252", "#00BCD4"];
-const LOB_COLORS = ["#2196F3", "#4CAF50", "#00BCD4", "#FF9800", "#9C27B0", "#607D8B"];
 const OPEN_TASK_LIMIT = 5;
 
 const countBy = (rows, keyOf) =>
@@ -32,10 +31,14 @@ const isOverdue = (row) => row.requirementDue && new Date(row.requirementDue) < 
 
 const monthKey = (date) => (date ? String(date).slice(0, 7) : "-");
 
+/** An alert count is coloured only while there is something to look at. */
+const alertSeverity = (count, severity) => (Number(count) > 0 ? severity : "secondary");
+
 const UnderwritingDashboard = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const navigate = useNavigate();
+  const chart = useChartTheme();
   const toast = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedPeriod, setSelectedPeriod] = useState("week");
@@ -75,6 +78,7 @@ const UnderwritingDashboard = () => {
   const workloadData = useMemo(() => {
     const agents = Object.keys(countBy(myCases, (row) => row.agent || "-"));
     const statuses = Object.keys(countBy(myCases, (row) => row.status));
+    const colors = chart.statuses(statuses);
     return {
       labels: agents,
       datasets: statuses.map((status, index) => ({
@@ -82,10 +86,10 @@ const UnderwritingDashboard = () => {
         data: agents.map(
           (agent) => myCases.filter((row) => (row.agent || "-") === agent && row.status === status).length
         ),
-        backgroundColor: STATUS_COLORS[index % STATUS_COLORS.length],
+        backgroundColor: colors[index],
       })),
     };
-  }, [myCases]);
+  }, [myCases, chart]);
 
   // In Progress vs Overdue Tasks by requirement due month
   const tasksData = useMemo(() => {
@@ -98,20 +102,20 @@ const UnderwritingDashboard = () => {
         {
           label: t("underwritingDashboard.inProgressTasks"),
           data: months.map((month) => countFor(month, false)),
-          backgroundColor: "#2196F3",
-          borderColor: "#2196F3",
+          backgroundColor: chart.primary,
+          borderColor: chart.primary,
           borderWidth: 1,
         },
         {
           label: t("underwritingDashboard.overdueTasks"),
           data: months.map((month) => countFor(month, true)),
-          backgroundColor: "#FF5252",
-          borderColor: "#FF5252",
+          backgroundColor: chart.danger,
+          borderColor: chart.danger,
           borderWidth: 1,
         },
       ],
     };
-  }, [myCases, t]);
+  }, [myCases, t, chart]);
 
   // Volume by LOB Chart
   const volumeByLOBData = {
@@ -119,7 +123,8 @@ const UnderwritingDashboard = () => {
     datasets: [
       {
         data: dashboard?.volumeByLOB?.data || [],
-        backgroundColor: LOB_COLORS,
+        backgroundColor: chart.series((dashboard?.volumeByLOB?.labels || []).length),
+        borderColor: chart.surface,
       },
     ],
   };
@@ -131,7 +136,8 @@ const UnderwritingDashboard = () => {
     datasets: [
       {
         data: [assignedCount, myCases.length - assignedCount],
-        backgroundColor: ["#4CAF50", "#FF9800"],
+        backgroundColor: chart.series(2),
+        borderColor: chart.surface,
       },
     ],
   };
@@ -192,7 +198,7 @@ const UnderwritingDashboard = () => {
 
   const actionBodyTemplate = (rowData) => (
     <div className="flex gap-2">
-      <Button icon="pi pi-eye" rounded text severity="info" onClick={() => openCase(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
+      <Button icon="pi pi-eye" rounded text onClick={() => openCase(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
     </div>
   );
 
@@ -212,7 +218,6 @@ const UnderwritingDashboard = () => {
           <Button
             label={t("underwritingDashboard.newSubmission")}
             icon="pi pi-plus"
-            severity="success"
             onClick={() => navigate("/agent/createlead")}
           />
         </div>
@@ -225,7 +230,6 @@ const UnderwritingDashboard = () => {
           <Button
             label={t("underwritingDashboard.newSubmission")}
             icon="pi pi-plus"
-            severity="success"
             onClick={() => navigate("/agent/createlead")}
           />
         </div>
@@ -272,21 +276,21 @@ const UnderwritingDashboard = () => {
                   <span>{t("underwritingDashboard.duplicateSubmissionDetected")}</span>
                   <Badge
                     value={workbenchMetrics.openAlerts.duplicateSubmission}
-                    severity="danger"
+                    severity={alertSeverity(workbenchMetrics.openAlerts.duplicateSubmission, "danger")}
                   />
                 </div>
                 <div className="alert-item">
                   <span>{t("underwritingDashboard.missingTivAndDates")}</span>
                   <Badge
                     value={workbenchMetrics.openAlerts.missingDates}
-                    severity="warning"
+                    severity={alertSeverity(workbenchMetrics.openAlerts.missingDates, "warning")}
                   />
                 </div>
                 <div className="alert-item">
                   <span>{t("underwritingDashboard.missingLobTypeBroker")}</span>
                   <Badge
                     value={workbenchMetrics.openAlerts.missingLOB}
-                    severity="info"
+                    severity={alertSeverity(workbenchMetrics.openAlerts.missingLOB, "warning")}
                   />
                 </div>
               </div>
@@ -308,7 +312,7 @@ const UnderwritingDashboard = () => {
                 <Chart
                   type="bar"
                   data={workloadData}
-                  options={{
+                  options={chart.options({
                     indexAxis: "y",
                     maintainAspectRatio: false,
                     responsive: true,
@@ -326,7 +330,7 @@ const UnderwritingDashboard = () => {
                         stacked: true,
                       },
                     },
-                  }}
+                  })}
                   style={{ height: "300px" }}
                 />
               </div>
@@ -336,7 +340,7 @@ const UnderwritingDashboard = () => {
                 <Chart
                   type="bar"
                   data={workloadData}
-                  options={{
+                  options={chart.options({
                     indexAxis: "y",
                     maintainAspectRatio: false,
                     responsive: true,
@@ -345,7 +349,7 @@ const UnderwritingDashboard = () => {
                         position: "bottom",
                       },
                     },
-                  }}
+                  })}
                   style={{ height: "300px" }}
                 />
               </div>
@@ -388,7 +392,7 @@ const UnderwritingDashboard = () => {
             <Chart
               type="bar"
               data={tasksData}
-              options={{
+              options={chart.options({
                 maintainAspectRatio: false,
                 responsive: true,
                 plugins: {
@@ -396,7 +400,7 @@ const UnderwritingDashboard = () => {
                     position: "bottom",
                   },
                 },
-              }}
+              })}
               style={{ height: "250px" }}
             />
           </Card>
@@ -405,7 +409,7 @@ const UnderwritingDashboard = () => {
             <Chart
               type="pie"
               data={volumeByLOBData}
-              options={{
+              options={chart.options({
                 maintainAspectRatio: false,
                 responsive: true,
                 plugins: {
@@ -413,7 +417,7 @@ const UnderwritingDashboard = () => {
                     position: "bottom",
                   },
                 },
-              }}
+              })}
               style={{ height: "250px" }}
             />
           </Card>
@@ -422,7 +426,7 @@ const UnderwritingDashboard = () => {
             <Chart
               type="doughnut"
               data={submissionAssignmentData}
-              options={{
+              options={chart.options({
                 maintainAspectRatio: false,
                 responsive: true,
                 plugins: {
@@ -430,7 +434,7 @@ const UnderwritingDashboard = () => {
                     position: "bottom",
                   },
                 },
-              }}
+              })}
               style={{ height: "250px" }}
             />
           </Card>
@@ -451,7 +455,7 @@ const UnderwritingDashboard = () => {
                     <span className="task-meta">{`${task.caseId} · ${formatAppDate(task.requirementDue)}`}</span>
                   </div>
                 </div>
-                <Button icon="pi pi-eye" rounded text severity="info" size="small" onClick={() => openCase(task)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
+                <Button icon="pi pi-eye" rounded text size="small" onClick={() => openCase(task)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
               </div>
             ))}
           </div>

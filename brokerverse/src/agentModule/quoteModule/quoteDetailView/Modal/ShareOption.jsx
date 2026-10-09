@@ -455,7 +455,7 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
                   }
                   icon={isPreparingSuggestion ? "pi pi-spin pi-spinner" : "pi pi-file-edit"}
                   onClick={handleUseSuggestedContent}
-                  className="w-full p-button-help"
+                  className="w-full"
                   loading={isPreparingSuggestion}
                   disabled={isSending || isPreparingSuggestion}
                 />

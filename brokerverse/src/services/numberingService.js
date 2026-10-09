@@ -1,5 +1,6 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
+import { apiErrorMessage } from "../utility/apiError";
 
 /** Document Numbering, Commission Rate Matrix and insurer credit terms (BrokerVerse masters API). */
 const call = async (path, options = {}) => {
@@ -14,8 +15,7 @@ const call = async (path, options = {}) => {
   });
   const json = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const detail = Array.isArray(json.errors) && json.errors.length ? json.errors.map((e) => e.message).join("; ") : "";
-    throw new Error(detail || json.message || `Request failed (${response.status})`);
+    throw new Error(apiErrorMessage(json, response.status));
   }
   return json;
 };

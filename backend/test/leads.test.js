@@ -184,3 +184,29 @@ describe('prospect for an existing customer', () => {
     expect(bad.status).toBe(400);
   });
 });
+
+describe('possible duplicates of a new prospect', () => {
+  it('finds the client and the open prospects with the same e-mail, mobile number, or name and date of birth', async () => {
+    const client = (await ctx.api('post', '/clients').send({ firstName: 'Dupe', lastName: 'Santos', DOB: '1985-03-04', emailId: 'dupe.santos@example.ph', contactNumber: '09175550001' })).body.data;
+    const lead = (await sales('post', '/leads').send({ firstName: 'Lito', lastName: 'Garcia', emailId: 'lito.garcia@example.ph', contactNumber: '+63 917 555 0002' })).body.data;
+    const byMobile = await sales('get', '/leads/duplicates?firstName=Someone&contactNumber=%2B639175550001');
+    expect(byMobile.status).toBe(200);
+    expect(byMobile.body.data).toEqual([expect.objectContaining({ kind: 'client', id: client.clientId, name: 'Dupe Santos', matchedOn: ['mobile'] })]);
+    expect(byMobile.body.data[0].emailId).toBeUndefined();
+    const byName = await sales('get', '/leads/duplicates?firstName=dupe&lastName=santos&DOB=1985-03-04');
+    expect(byName.body.data[0].matchedOn).toEqual(['name', 'birthDate']);
+    expect((await sales('get', '/leads/duplicates?firstName=Dupe&lastName=Santos&DOB=1990-01-01')).body.data).toEqual([]);
+    const byEmail = await sales('get', '/leads/duplicates?emailId=LITO.GARCIA@example.ph&contactNumber=09175550002');
+    expect(byEmail.body.data).toEqual([expect.objectContaining({ kind: 'lead', id: lead.leadId, matchedOn: ['email', 'mobile'] })]);
+    // a prospect for an existing client: that client's open prospects
+    await sales('post', '/leads').send({ firstName: 'Dupe', lastName: 'Santos', clientId: client.clientId, lob: 'MOTOR' });
+    const forClient = await sales('get', `/leads/duplicates?clientId=${client.clientId}`);
+    expect(forClient.body.data).toEqual([expect.objectContaining({ kind: 'lead', name: 'Dupe Santos', lob: 'MOTOR', matchedOn: ['client'] })]);
+    await pool.query("UPDATE app_settings SET value = 'false' WHERE key = 'leads.duplicate_check'");
+    clearSettingsCache();
+    expect((await sales('get', '/leads/duplicates?emailId=lito.garcia@example.ph')).body.data).toEqual([]);
+    await pool.query("UPDATE app_settings SET value = 'true' WHERE key = 'leads.duplicate_check'");
+    clearSettingsCache();
+    expect((await finance('get', '/leads/duplicates?emailId=lito.garcia@example.ph')).status).toBe(403);
+  });
+});

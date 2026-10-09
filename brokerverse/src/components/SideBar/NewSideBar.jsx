@@ -14,6 +14,7 @@ import {
   getCommissionViewMode,
 } from "../../module/Commission/utils/commissionViewMode";
 import { DEFAULT_SYSTEM_SETTINGS } from "../../utility/systemCurrencies";
+import { useBranding } from "../../theme/runtime/BrandingProvider";
 
 // Open groups are remembered in this browser between sessions (a convenience only).
 const EXPANDED_KEY = "bv.sidebar.expanded";
@@ -61,13 +62,15 @@ const NewSideBar = ({ onNavigate }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  // Product name and logo from System Settings (general.system_name, branding.logo_url)
-  const systemName = useSelector(
-    (state) => state.systemSettingsReducer?.systemName || DEFAULT_SYSTEM_SETTINGS.systemName,
-  );
-  const logoUrl = useSelector(
-    (state) => state.systemSettingsReducer?.logoUrl || DEFAULT_SYSTEM_SETTINGS.logoUrl,
-  );
+  // Product name and logo of the branding (GET /api/branding), else of the system settings once loaded; nothing is
+  // shown before either answers, so the default logo never flashes. The name under the logo is left out when the
+  // theme says the logo carries it (logo.showName false).
+  const { branding } = useBranding();
+  const settings = useSelector((state) => state.systemSettingsReducer);
+  const systemName = branding?.systemName || (settings?.loaded && settings.systemName) || "";
+  const logoUrl = branding?.logoUrl || (settings?.loaded && settings.logoUrl) || "";
+  const showName = !!systemName && branding?.theme?.logo?.showName !== false;
+  const brandName = systemName || DEFAULT_SYSTEM_SETTINGS.systemName;
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSearchIndex, setSelectedSearchIndex] = useState(-1);
   const [expanded, setExpanded] = useState(readExpanded);
@@ -247,12 +250,12 @@ const NewSideBar = ({ onNavigate }) => {
   return (
     <div className="sidebar__overall__container bv-nav">
       <div className="bv-nav__top">
-        <a className="bdoi-brand" href="/" aria-label={`${systemName} home`} onClick={(e) => go(e, "/")}>
+        <a className="bdoi-brand" href="/" aria-label={`${brandName} home`} onClick={(e) => go(e, "/")}>
           <span className="bdoi-brand-logo-row">
-            <img src={logoUrl} alt={`${systemName} logo`} />
+            {logoUrl && <img src={logoUrl} alt={`${brandName} logo`} />}
             <EnvironmentBadge />
           </span>
-          <span className="bdoi-brand-product">{systemName}</span>
+          {showName && <span className="bdoi-brand-product">{systemName}</span>}
         </a>
 
         <div className="menu-search-container" role="search">

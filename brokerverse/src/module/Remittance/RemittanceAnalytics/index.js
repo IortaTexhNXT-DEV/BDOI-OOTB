@@ -17,11 +17,11 @@ import { Toast } from "primereact/toast";
 import remittanceService from "../../../services/remittanceService";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { calendarDateFormat, dateBody, downloadCsv, isoDate, showError } from "../shared";
+import { useChartTheme } from "../../../theme/chartTheme";
 import "./index.scss";
 
 import { numberLocale } from "../../../utility/currencyConverter";
 import { progressValue, roundTo } from "../../../utility/numberFormat";
-const CHART_COLORS = ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', '#20c997', '#fd7e14', '#e83e8c', '#6c757d'];
 const DAY_MS = 86400000;
 
 /** Date range for a period option. */
@@ -38,6 +38,7 @@ const periodRange = (period, custom) => {
 const pctChange = (current, previous) => (previous ? ((current - previous) / previous) * 100 : 0);
 
 const RemittanceAnalytics = () => {
+  const chart = useChartTheme();
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const toast = useRef(null);
@@ -94,8 +95,8 @@ const RemittanceAnalytics = () => {
       {
         label: 'Transactions',
         data: monthlyTrend.map((m) => m.count),
-        borderColor: '#007bff',
-        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+        borderColor: chart.primary,
+        backgroundColor: chart.alpha(chart.primary, 0.1),
         tension: 0,
         fill: false
       }
@@ -108,7 +109,7 @@ const RemittanceAnalytics = () => {
       {
         label: 'Value',
         data: monthlyTrend.map((m) => m.value),
-        backgroundColor: CHART_COLORS,
+        backgroundColor: chart.primary,
         borderWidth: 2
       }
     ]
@@ -119,7 +120,7 @@ const RemittanceAnalytics = () => {
     datasets: [
       {
         data: Object.values(statusDistribution),
-        backgroundColor: CHART_COLORS,
+        backgroundColor: chart.statuses(Object.keys(statusDistribution)),
         borderWidth: 0
       }
     ]
@@ -162,7 +163,7 @@ const RemittanceAnalytics = () => {
     { label: "Exception Rate", value: "Exception Rate" }
   ];
 
-  const chartOptions = {
+  const chartOptions = chart.options({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -172,20 +173,13 @@ const RemittanceAnalytics = () => {
     },
     scales: {
       y: {
-        beginAtZero: true,
-        grid: {
-          color: '#f0f0f0'
-        }
+        beginAtZero: true
       },
-      x: {
-        grid: {
-          color: '#f0f0f0'
-        }
-      }
+      x: {}
     }
-  };
+  });
 
-  const pieChartOptions = {
+  const pieChartOptions = chart.options({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -193,7 +187,7 @@ const RemittanceAnalytics = () => {
         position: 'right'
       }
     }
-  };
+  });
 
   const formatPercent = (value) => {
     const sign = value >= 0 ? '+' : '';

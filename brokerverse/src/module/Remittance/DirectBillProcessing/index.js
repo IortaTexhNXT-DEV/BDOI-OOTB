@@ -292,7 +292,7 @@ const DirectBillProcessing = () => {
       )}
       {row.statusCode === "for-approval" && (
         <>
-          <Button icon="pi pi-check" className="p-button-text p-button-success p-button-sm" tooltip="Approve" onClick={() => setDecision({ note: row, action: "approve", text: "" })} aria-label="Approve" />
+          <Button icon="pi pi-check" className="p-button-text p-button-sm" tooltip="Approve" onClick={() => setDecision({ note: row, action: "approve", text: "" })} aria-label="Approve" />
           <Button icon="pi pi-times" className="p-button-text p-button-danger p-button-sm" tooltip="Reject" onClick={() => setDecision({ note: row, action: "reject", text: "" })} aria-label="Reject" />
         </>
       )}
@@ -433,7 +433,7 @@ const DirectBillProcessing = () => {
                 </div>
                 <div className="action-buttons mt-3">
                   <Button label="Save draft" icon="pi pi-save" className="p-button-secondary mr-2" onClick={() => raise(false)} disabled={saving || !selected.length} />
-                  <Button label="Raise debit note and submit for approval" icon="pi pi-check" className="p-button-success" onClick={() => raise(true)} loading={saving} disabled={!selected.length} />
+                  <Button label="Raise debit note and submit for approval" icon="pi pi-check" onClick={() => raise(true)} loading={saving} disabled={!selected.length} />
                 </div>
               </>
             )}
@@ -564,7 +564,7 @@ const DirectBillProcessing = () => {
         footer={decision && (
           <div>
             <Button label="Close" className="p-button-text" onClick={() => setDecision(null)} />
-            <Button label={{ approve: "Approve", reject: "Reject", cancel: "Cancel debit note" }[decision.action]} className={decision.action === "approve" ? "p-button-success" : "p-button-danger"} onClick={submitDecision} />
+            <Button label={{ approve: "Approve", reject: "Reject", cancel: "Cancel debit note" }[decision.action]} className={decision.action === "approve" ? "" : "p-button-danger"} onClick={submitDecision} />
           </div>
         )}>
         {decision && (
@@ -583,7 +583,7 @@ const DirectBillProcessing = () => {
         footer={collect && (
           <div>
             <Button label="Close" className="p-button-text" onClick={() => setCollect(null)} />
-            <Button label="Post collection" icon="pi pi-check" className="p-button-success" onClick={submitCollect} />
+            <Button label="Post collection" icon="pi pi-check" onClick={submitCollect} />
           </div>
         )}>
         {collect && (

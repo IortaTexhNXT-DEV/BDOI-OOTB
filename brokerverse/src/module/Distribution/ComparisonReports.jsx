@@ -9,19 +9,30 @@ import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
+import { Message } from "primereact/message";
 import { RadioButton } from "primereact/radiobutton";
 import { SelectButton } from "primereact/selectbutton";
 import { Toast } from "primereact/toast";
 import service from "../../services/distributionService";
 import placementService from "../../services/placementService";
+import quotationService from "../../services/quotationService";
 import { hasPermission } from "../../utils/canOpen";
 import { promptText } from "../../utility/dialogs";
 import { Field, PageHeader, StatusTag, date, dateTime, money, showError, showSuccess } from "./common";
+
+/** Offers a comparison report needs (the server refuses fewer). */
+export const MIN_OPTIONS = 2;
+/** Requests for quotation as drop-down options: the ones with enough offers first, the others disabled with their count. */
+export const slipOptions = (slips) => slips
+  .map((s) => ({ id: s.id, slipNumber: s.slipNumber, insuredName: s.insuredName || s.customerName || "", offers: Number(s.offersReceived) || 0, disabled: (Number(s.offersReceived) || 0) < MIN_OPTIONS }))
+  .sort((a, b) => Number(a.disabled) - Number(b.disabled));
 
 /**
  * Operations > Sales & Marketing > Comparison Reports: the printable, branded report given to a client comparing the
  * insurers' offers (of a request for quotation, or of quotations prepared for the client), with the option the broker
  * recommends and why. Never shows commission. E-mailed to the client from here; the client's choice is recorded.
+ * A comparison needs two options: the request for quotation list shows each one's offers and only those with two or
+ * more can be chosen; quotations are chosen from the list, those of the same prospect or client as the first.
  */
 const ComparisonReports = () => {
   const { t } = useTranslation();
@@ -30,8 +41,9 @@ const ComparisonReports = () => {
   const write = hasPermission("write:quotations");
   const [rows, setRows] = useState([]);
   const [status, setStatus] = useState(null);
-  const [create, setCreate] = useState(null); // { source, slip, quoteNumbers }
+  const [create, setCreate] = useState(null); // { source, slipId, quotes }
   const [slips, setSlips] = useState([]);
+  const [quotes, setQuotes] = useState([]);
   const [edit, setEdit] = useState(null);
   const [defaults, setDefaults] = useState({ reasons: [] });
 
@@ -46,20 +58,42 @@ const ComparisonReports = () => {
   useEffect(() => { service.comparisonDefaults().then(setDefaults).catch(() => null); }, []);
   useEffect(() => {
     const slipId = params.get("brokerSlipId");
-    if (slipId && write) setCreate({ source: "broker_slip", slip: { id: slipId, label: params.get("slipNumber") || slipId }, quoteNumbers: "" });
+    if (slipId && write) setCreate({ source: "broker_slip", slipId, quotes: [] });
   }, [params, write]);
+  // the requests for quotation that have offers to compare, when the dialog opens
+  const creating = Boolean(create);
+  useEffect(() => {
+    if (!creating) return;
+    placementService.listSlips({ status: "submitted,responses-in,closed", pageSize: 200 })
+      .then((r) => setSlips(slipOptions(r?.data || [])))
+      .catch(() => setSlips([]));
+  }, [creating]);
 
-  const searchSlips = async (e) => {
-    try {
-      const r = await placementService.listSlips({ search: e.query, pageSize: 15 });
-      setSlips((r?.data || []).map((s) => ({ id: s.id, label: `${s.slipNumber} · ${s.insuredName || ""}` })));
-    } catch {
-      setSlips([]);
-    }
+  const searchQuotes = async (e) => {
+    const first = create.quotes[0];
+    const r = await quotationService.getAllQuotations(1, 20, first?.leadRefId || null, e.query || null);
+    const chosen = new Set(create.quotes.map((q) => q.id));
+    setQuotes((r.success ? r.data : [])
+      .filter((q) => !chosen.has(q.id) && (!first || (first.clientId ? q.clientId === first.clientId : q.leadRefId === first.leadRefId)))
+      .map((q) => ({ id: q.id, leadRefId: q.leadRefId, clientId: q.clientId,
+        label: `${q.quotationNumber} · ${q.insuranceCompanyName || "-"} · ${q.insured?.name || q.lead?.companyName || [q.lead?.firstName, q.lead?.lastName].filter(Boolean).join(" ")}` })));
   };
+  const slip = slips.find((x) => x.id === create?.slipId) || null;
+  const createProblem = !create ? null : create.source === "broker_slip"
+    ? (slip?.disabled ? t("distribution.cr.needsOffers", "{{number}} has {{count}} insurer offer(s); a comparison needs at least two", { number: slip.slipNumber, count: slip.offers }) : null)
+    : (create.quotes.length && create.quotes.length < MIN_OPTIONS ? t("distribution.cr.needsQuotes", "Choose at least two quotations") : null);
+  const canPrepare = create && !createProblem && (create.source === "broker_slip" ? Boolean(slip) : create.quotes.length >= MIN_OPTIONS);
+  const slipItem = (o) => (
+    <div className="cr-slip-option">
+      <span>{o.slipNumber} · {o.insuredName}</span>
+      <small className={o.disabled ? "p-error" : "pe-muted"}>
+        {t("distribution.cr.offerCount", "{{count}} offer(s)", { count: o.offers })}{o.disabled ? ` · ${t("distribution.cr.needsTwo", "needs two offers")}` : ""}
+      </small>
+    </div>
+  );
   const doCreate = async () => {
     try {
-      const body = create.source === "broker_slip" ? { brokerSlipId: create.slip.id } : { quoteIds: create.quoteNumbers.split(/[\s,;]+/).filter(Boolean) };
+      const body = create.source === "broker_slip" ? { brokerSlipId: create.slipId } : { quoteIds: create.quotes.map((q) => q.id) };
       const r = await service.createComparisonReport(body);
       showSuccess(toast, r.message);
       setCreate(null);
@@ -110,7 +144,7 @@ const ComparisonReports = () => {
       <Toast ref={toast} />
       <PageHeader home={t("distribution.home.operations", "Operations")} section={t("distribution.home.sales", "Sales & Marketing")} title={t("distribution.cr.title", "Comparison Reports")}
         subtitle={t("distribution.cr.subtitle", "The client's comparison of the insurers' offers with the broker's recommendation and reasons, printed on the letterhead.")}>
-        {write ? <Button label={t("distribution.cr.new", "New report")} icon="pi pi-plus" onClick={() => setCreate({ source: "broker_slip", slip: null, quoteNumbers: "" })} /> : null}
+        {write ? <Button label={t("distribution.cr.new", "New report")} icon="pi pi-plus" onClick={() => setCreate({ source: "broker_slip", slipId: null, quotes: [] })} /> : null}
       </PageHeader>
       <div className="pe-card">
         <div className="dist-toolbar">
@@ -136,7 +170,7 @@ const ComparisonReports = () => {
 
       <Dialog className="pe-dialog" header={t("distribution.cr.new", "New report")} visible={!!create} style={{ width: "min(620px, 96vw)" }} onHide={() => setCreate(null)}
         footer={<div><Button label={t("distribution.common.cancel", "Cancel")} text onClick={() => setCreate(null)} /><Button label={t("distribution.cr.prepare", "Prepare")} icon="pi pi-check" onClick={doCreate}
-          disabled={create?.source === "broker_slip" ? !create?.slip?.id : !create?.quoteNumbers} /></div>}>
+          disabled={!canPrepare} /></div>}>
         {create && (
           <div className="dist-grid">
             <Field label={t("distribution.cr.source", "Compared")} full>
@@ -144,14 +178,20 @@ const ComparisonReports = () => {
                 onChange={(e) => e.value && setCreate({ ...create, source: e.value })} />
             </Field>
             {create.source === "broker_slip" ? (
-              <Field label={t("distribution.cr.rfq", "Request for quotation")} full help={t("distribution.cr.rfqHelp", "Its insurer offers become the options of the report")}>
-                <AutoComplete value={create.slip} suggestions={slips} completeMethod={searchSlips} field="label" forceSelection onChange={(e) => setCreate({ ...create, slip: e.value })} />
+              <Field label={t("distribution.cr.rfq", "Request for quotation")} full htmlFor="cr-slip"
+                help={t("distribution.cr.rfqHelp", "Its insurer offers become the options of the report; a request with fewer than two offers cannot be compared yet")}>
+                <Dropdown inputId="cr-slip" value={create.slipId} options={slips} optionValue="id" optionLabel="slipNumber" optionDisabled="disabled" itemTemplate={slipItem}
+                  valueTemplate={(o, p) => (o ? `${o.slipNumber} · ${o.insuredName}` : p.placeholder)} filter filterBy="slipNumber,insuredName"
+                  placeholder={t("distribution.cr.chooseRfq", "Choose the request for quotation")} emptyMessage={t("distribution.cr.noRfq", "No request for quotation has insurer offers yet")}
+                  onChange={(e) => setCreate({ ...create, slipId: e.value })} />
               </Field>
             ) : (
-              <Field label={t("distribution.cr.quoteNumbers", "Quotation numbers")} full help={t("distribution.cr.quoteHelp", "Two or more quotations of the same prospect or client, separated by commas")}>
-                <InputText value={create.quoteNumbers} onChange={(e) => setCreate({ ...create, quoteNumbers: e.target.value })} />
+              <Field label={t("distribution.cr.quotations", "Quotations")} full htmlFor="cr-quotes" help={t("distribution.cr.quoteHelp", "Two or more quotations of the same prospect or client")}>
+                <AutoComplete inputId="cr-quotes" multiple value={create.quotes} suggestions={quotes} completeMethod={searchQuotes} field="label" forceSelection dropdown
+                  placeholder={create.quotes.length ? "" : t("distribution.cr.searchQuotes", "Quotation number or customer")} onChange={(e) => setCreate({ ...create, quotes: e.value || [] })} />
               </Field>
             )}
+            {createProblem ? <Message severity="warn" className="dist-field--full" text={createProblem} /> : null}
           </div>
         )}
       </Dialog>

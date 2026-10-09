@@ -15,6 +15,7 @@ import { BASE_URL } from "../../../utility/constant";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import { useChartTheme } from "../../../theme/chartTheme";
 import { formatPercent, progressValue } from "../../../utility/numberFormat";
 
 const pad = (n) => String(n).padStart(2, "0");
@@ -40,6 +41,7 @@ const ClaimsDashboard = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const navigate = useNavigate();
+  const chart = useChartTheme();
   const toast = useRef(null);
   const [dateRange, setDateRange] = useState([
     new Date(new Date().getFullYear(), 0, 1),
@@ -193,14 +195,8 @@ const ClaimsDashboard = () => {
     datasets: [
       {
         data: dashboardData?.breakdown?.byLOB?.map((lob) => lob.count) || [],
-        backgroundColor: [
-          "#0066CC",
-          "#4285F4",
-          "#7BAAF7",
-          "#FFA500",
-          "#FFD700",
-          "#90EE90",
-        ],
+        backgroundColor: chart.series((dashboardData?.breakdown?.byLOB || []).length),
+        borderColor: chart.surface,
       },
     ],
   };
@@ -213,22 +209,22 @@ const ClaimsDashboard = () => {
       {
         label: t("claimsDashboard.claimsSubmitted"),
         data: trend.submitted,
-        borderColor: "#0066CC",
-        backgroundColor: "rgba(0, 102, 204, 0.1)",
+        borderColor: chart.primary,
+        backgroundColor: chart.alpha(chart.primary, 0.1),
         tension: 0,
       },
       {
         label: t("claimsDashboard.claimsApproved"),
         data: trend.approved,
-        borderColor: "#00C851",
-        backgroundColor: "rgba(0, 200, 81, 0.1)",
+        borderColor: chart.success,
+        backgroundColor: chart.alpha(chart.success, 0.1),
         tension: 0,
       },
       {
         label: t("claimsDashboard.claimsRejected"),
         data: trend.rejected,
-        borderColor: "#FF4444",
-        backgroundColor: "rgba(255, 68, 68, 0.1)",
+        borderColor: chart.danger,
+        backgroundColor: chart.alpha(chart.danger, 0.1),
         tension: 0,
       },
     ],
@@ -244,15 +240,7 @@ const ClaimsDashboard = () => {
         data:
           dashboardData?.breakdown?.byStatus?.map((status) => status.count) ||
           [],
-        backgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#4CAF50",
-          "#FFCE56",
-          "#4BC0C0",
-          "#9966FF",
-          "#FF9F40",
-        ],
+        backgroundColor: chart.statuses((dashboardData?.breakdown?.byStatus || []).map((status) => status.status)),
       },
     ],
   };
@@ -313,7 +301,6 @@ const ClaimsDashboard = () => {
           icon="pi pi-eye"
           rounded
           text
-          severity="info"
           onClick={() => navigate(`/agent/claimdetail/${rowData.claimId}`)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
         <Button
           icon="pi pi-pencil"
@@ -341,7 +328,6 @@ const ClaimsDashboard = () => {
             <Button
               label={t("claimsDashboard.exportReport")}
               icon="pi pi-download"
-              severity="info"
               onClick={handleExportReport}
             />
           </div>
@@ -357,7 +343,6 @@ const ClaimsDashboard = () => {
           <Button
             label={t("claimsDashboard.exportReport")}
             icon="pi pi-download"
-            severity="info"
             onClick={handleExportReport}
           />
         </div>
@@ -474,7 +459,7 @@ const ClaimsDashboard = () => {
             <Chart
               type="line"
               data={claimsTrendData}
-              options={{
+              options={chart.options({
                 maintainAspectRatio: false,
                 responsive: true,
                 plugins: {
@@ -482,7 +467,7 @@ const ClaimsDashboard = () => {
                     position: "bottom",
                   },
                 },
-              }}
+              })}
               style={{ height: "300px" }}
             />
           </Card>
@@ -510,7 +495,7 @@ const ClaimsDashboard = () => {
             <Chart
               type="doughnut"
               data={claimsBySourceData}
-              options={{
+              options={chart.options({
                 maintainAspectRatio: false,
                 responsive: true,
                 plugins: {
@@ -518,7 +503,7 @@ const ClaimsDashboard = () => {
                     position: "bottom",
                   },
                 },
-              }}
+              })}
               style={{ height: "250px" }}
             />
           </Card>
@@ -528,7 +513,7 @@ const ClaimsDashboard = () => {
             <Chart
               type="bar"
               data={lossRatioData}
-              options={{
+              options={chart.options({
                 maintainAspectRatio: false,
                 responsive: true,
                 plugins: {
@@ -542,7 +527,7 @@ const ClaimsDashboard = () => {
                     max: 100,
                   },
                 },
-              }}
+              })}
               style={{ height: "200px" }}
             />
           </Card>

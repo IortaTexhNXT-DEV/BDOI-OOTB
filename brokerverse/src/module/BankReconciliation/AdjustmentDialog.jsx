@@ -6,6 +6,7 @@ import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Amount, date } from "./common";
+import DateField from "../../components/DateField";
 
 /**
  * Create the adjustment for an unrecorded bank item from a bank line: bank transaction type of the line's direction
@@ -61,7 +62,7 @@ const AdjustmentDialog = ({ visible, line, types, glAccounts, bookLines, busy, o
           {type?.action !== "returned-cheque" && (
             <div className="col-12 md:col-6">
               <label htmlFor="br-adj-date">{t("bankReconciliation.postingDate")}</label>
-              <InputText id="br-adj-date" type="date" value={postDate} onChange={(e) => setPostDate(e.target.value)} className="w-full" />
+              <DateField id="br-adj-date" value={postDate} onChange={(e) => setPostDate(e.target.value)} />
             </div>
           )}
           {type?.allowAccountOverride && (

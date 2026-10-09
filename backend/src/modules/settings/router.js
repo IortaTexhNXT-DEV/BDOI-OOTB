@@ -9,6 +9,7 @@ import { badRequest } from '../../lib/errors.js';
 import { businessTimeZone, today } from '../../lib/dates.js';
 import { assertNotControlled, assertParkedEvents } from '../posting-rules/service.js';
 import { assertNotOwnedElsewhere, settingOwner } from '../../lib/settingOwners.js';
+import { localizationErrors } from '../system-settings/service.js';
 import { EXPORT_COLUMNS, exportRows } from '../../lib/auditEvents.js';
 import { sendSheet } from '../claims/docs.js';
 import * as auditSvc from '../audit/service.js';
@@ -38,9 +39,11 @@ define({
     const before = Object.fromEntries((await getSettings()).map((s) => [s.key, s.value]));
     const changes = Object.entries(req.body.settings).map(([k, v]) => [k, v, before[k]]);
     assertNotOwnedElsewhere(changes);
+    const invalid = await localizationErrors(changes);
+    if (invalid.length) throw badRequest('Validation failed', invalid);
     await assertNotControlled(changes);
     assertParkedEvents(changes);
-    for (const [k, v] of Object.entries(req.body.settings)) {
+    for (const [k, v] of changes) {
       const exists = (await query('SELECT editable FROM app_settings WHERE key = $1', [k])).rows[0];
       if (!exists || !exists.editable) continue;
       await setSetting(k, v, req.user.id);

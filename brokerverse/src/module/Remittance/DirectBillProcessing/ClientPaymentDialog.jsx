@@ -75,7 +75,7 @@ const ClientPaymentDialog = ({ policy, paymentModes, toast, onClose, onChanged }
 
   return (
     <Dialog className="direct-bill-dialog" header={policy ? `Client payment to the insurer · ${policy.policyNo}` : ""} visible={!!policy} style={{ width: "min(900px, 95vw)" }} onHide={onClose}
-      footer={<div><Button label="Close" className="p-button-text" onClick={onClose} /><Button label="Record payment" icon="pi pi-check" className="p-button-success" loading={saving} onClick={save} /></div>}>
+      footer={<div><Button label="Close" className="p-button-text" onClick={onClose} /><Button label="Record payment" icon="pi pi-check" loading={saving} onClick={save} /></div>}>
       {data && form && (
         <>
           <Message severity="info" className="w-full justify-content-start mb-3"

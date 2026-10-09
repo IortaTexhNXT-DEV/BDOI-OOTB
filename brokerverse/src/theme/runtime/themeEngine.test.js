@@ -4,8 +4,11 @@ import { MemoryRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { applyBranding, contrastRatio, loadFontStylesheet, mix, themeToCssVars } from "./themeEngine";
-import { BrandingProvider, useBranding, fetchBranding } from "./BrandingProvider";
+import { BOOT_KEY, BrandingProvider, useBranding, fetchBranding } from "./BrandingProvider";
 import LoginArt, { loginPanelProps } from "./LoginArt";
+import NewSideBar from "../../components/SideBar/NewSideBar";
+const fs = require("fs");
+const path = require("path");
 const postcssBrandVars = require("../../../scripts/postcss-brand-vars");
 
 const TIS = {
@@ -24,6 +27,7 @@ afterEach(() => {
   ["data-bv-density", "data-bv-theme", "data-bv-header", "data-bv-sidebar"].forEach((a) => document.documentElement.removeAttribute(a));
   loadFontStylesheet(null);
   delete global.fetch;
+  window.localStorage.clear();
 });
 
 describe("theme engine", () => {
@@ -103,6 +107,59 @@ describe("branding provider", () => {
     expect(global.fetch.mock.calls[0][1]).toMatchObject({ cache: "no-cache" });
     expect(document.documentElement.style.getPropertyValue("--bv-button-bg")).toBe("#1a1a1a");
   });
+  it("keeps what the first paint needs, and public/branding-boot.js applies it before the application loads", async () => {
+    global.fetch = jest.fn(async () => ({ ok: true, json: async () => ({ success: true, data: { systemName: "Toyota Insurance Services", faviconUrl: "/api/branding/assets/favicon?v=1", version: "v2", theme: TIS } }) }));
+    const store = configureStore({ reducer: { systemSettingsReducer: (s = {}) => s } });
+    const Ready = () => <span data-testid="ready">{String(useBranding().ready)}</span>;
+    render(<Provider store={store}><MemoryRouter><BrandingProvider><Ready /></BrandingProvider></MemoryRouter></Provider>);
+    await waitFor(() => expect(screen.getByTestId("ready").textContent).toBe("true"));
+    await waitFor(() => expect(JSON.parse(window.localStorage.getItem(BOOT_KEY))?.faviconUrl).toBeTruthy());
+    const saved = JSON.parse(window.localStorage.getItem(BOOT_KEY));
+    expect(saved).toMatchObject({ faviconUrl: "/api/branding/assets/favicon?v=1", title: "Toyota Insurance Services - Login", attrs: { "data-bv-theme": "custom" } });
+    expect(saved.vars).toMatchObject({ "--bv-button-bg": "#1a1a1a", "--bv-alt-primary": "#1a1a1a" });
+
+    // a new page of this browser: the copy is applied before anything else
+    document.documentElement.removeAttribute("style");
+    document.documentElement.removeAttribute("data-bv-theme");
+    document.title = "Sign in";
+    document.head.innerHTML = "";
+    const icon = Object.assign(document.createElement("link"), { rel: "icon", href: "/favicon.ico" });
+    const themeColor = Object.assign(document.createElement("meta"), { name: "theme-color", content: "#000000" });
+    document.head.append(icon, themeColor);
+    // eslint-disable-next-line no-new-func
+    new Function(fs.readFileSync(path.join(__dirname, "../../../public/branding-boot.js"), "utf8"))();
+    expect(document.documentElement.style.getPropertyValue("--bv-button-bg")).toBe("#1a1a1a");
+    expect(document.documentElement.getAttribute("data-bv-theme")).toBe("custom");
+    expect(document.title).toBe("Toyota Insurance Services - Login");
+    expect(icon.getAttribute("href")).toBe("/api/branding/assets/favicon?v=1");
+    expect(themeColor.getAttribute("content")).toBe("#ffffff");
+
+    // a copy that is not one (another script, a broken value) changes nothing
+    document.documentElement.removeAttribute("style");
+    window.localStorage.setItem(BOOT_KEY, JSON.stringify({ vars: { color: "red", "--bv-primary": "url(data:x)" }, faviconUrl: "data:image/png;base64,x" }));
+    // eslint-disable-next-line no-new-func
+    new Function(fs.readFileSync(path.join(__dirname, "../../../public/branding-boot.js"), "utf8"))();
+    expect(document.documentElement.getAttribute("style")).toBeNull();
+    expect(icon.getAttribute("href")).toBe("/api/branding/assets/favicon?v=1");
+  });
+  it("shows a neutral page, never the default look, until the branding is known; the kept branding is used at once on the next load", async () => {
+    let answer;
+    global.fetch = jest.fn(() => new Promise((resolve) => { answer = resolve; }));
+    const store = configureStore({ reducer: { systemSettingsReducer: (s = {}) => s } });
+    const Probe = () => <span data-testid="name">{useBranding().branding?.systemName}</span>;
+    const view = render(<Provider store={store}><MemoryRouter><BrandingProvider><Probe /></BrandingProvider></MemoryRouter></Provider>);
+    expect(screen.getByRole("status")).toBeTruthy();
+    expect(screen.queryByTestId("name")).toBeNull();
+    answer({ ok: true, json: async () => ({ success: true, data: { systemName: "Toyota Insurance Services", logoUrl: "/api/branding/assets/logo?v=1", version: "v5", theme: TIS } }) });
+    expect((await screen.findByTestId("name")).textContent).toBe("Toyota Insurance Services");
+    view.unmount();
+
+    // the next load: the kept branding at once, while the API has not answered yet
+    global.fetch = jest.fn(() => new Promise(() => {}));
+    render(<Provider store={store}><MemoryRouter><BrandingProvider><Probe /></BrandingProvider></MemoryRouter></Provider>);
+    expect(screen.getByTestId("name").textContent).toBe("Toyota Insurance Services");
+    expect(screen.queryByRole("status")).toBeNull();
+  });
   it("returns null when the API is down (the compiled look stays)", async () => {
     global.fetch = jest.fn(async () => ({ ok: false, json: async () => ({}) }));
     expect(await fetchBranding()).toBeNull();
@@ -118,5 +175,33 @@ describe("sign-in picture", () => {
     render(<LoginArt theme={TIS} />);
     expect(screen.getByTestId("login-art-image").getAttribute("src")).toBe("/brand/library/motor.svg");
     expect(screen.getByTestId("login-art-overlay").style.background).toBe("rgba(0, 0, 0, 0.2)");
+  });
+});
+
+describe("side bar brand", () => {
+  const renderSideBar = (branding, settings = { loaded: true, systemName: "BrokerVerse", logoUrl: "/bdoi/iorta-technxt.png" }) => {
+    global.fetch = jest.fn(async () => (branding ? { ok: true, json: async () => ({ success: true, data: branding }) } : { ok: false, json: async () => ({}) }));
+    const store = configureStore({ reducer: { systemSettingsReducer: (s = settings) => s } });
+    return render(<Provider store={store}><MemoryRouter><BrandingProvider><NewSideBar /></BrandingProvider></MemoryRouter></Provider>);
+  };
+
+  it("shows the logo of the branding and leaves out the name the logo already carries", async () => {
+    renderSideBar({ systemName: "Toyota Insurance Services", logoUrl: "/api/branding/assets/logo?v=1", version: "v3", theme: { ...TIS, logo: { ...TIS.logo, showName: false } } });
+    expect((await screen.findByAltText("Toyota Insurance Services logo")).getAttribute("src")).toBe("/api/branding/assets/logo?v=1");
+    expect(screen.queryByText("Toyota Insurance Services")).toBeNull();
+    expect(screen.queryByText("BrokerVerse")).toBeNull();
+  });
+
+  it("shows the application name under the logo when the theme asks for it", async () => {
+    renderSideBar({ systemName: "Acme Brokers", logoUrl: "/api/branding/assets/logo?v=2", version: "v4", theme: { ...TIS, logo: { ...TIS.logo, showName: true } } });
+    expect(await screen.findByText("Acme Brokers")).toBeTruthy();
+  });
+
+  it("shows no default logo or name before the branding or the settings have loaded", () => {
+    global.fetch = jest.fn(() => new Promise(() => {}));
+    const store = configureStore({ reducer: { systemSettingsReducer: (s = { loaded: false, systemName: "BrokerVerse", logoUrl: "/bdoi/iorta-technxt.png" }) => s } });
+    render(<Provider store={store}><MemoryRouter><BrandingProvider><NewSideBar /></BrandingProvider></MemoryRouter></Provider>);
+    expect(screen.queryByAltText(/logo$/)).toBeNull();
+    expect(screen.queryByText("BrokerVerse")).toBeNull();
   });
 });

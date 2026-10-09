@@ -9,6 +9,9 @@ process.env.REACT_APP_BUILD_DATE = process.env.REACT_APP_BUILD_DATE || new Date(
 // the PrimeReact table with skeleton rows while the first rows load. The wrapper itself imports the PrimeReact
 // module by its file name, which this alias does not match.
 const DATATABLE_WRAPPER = path.resolve(__dirname, 'src/components/DataTable/index.jsx');
+// The same for `import { Calendar } from "primereact/calendar"`: the application's date field (components/Calendar),
+// in the configured date format with its calendar button.
+const CALENDAR_WRAPPER = path.resolve(__dirname, 'src/components/Calendar/index.jsx');
 const brandVars = require('./scripts/postcss-brand-vars');
 
 module.exports = {
@@ -28,6 +31,7 @@ module.exports = {
   webpack: {
     alias: {
       'primereact/datatable$': DATATABLE_WRAPPER,
+      'primereact/calendar$': CALENDAR_WRAPPER,
     },
     configure: (webpackConfig) => {
       const oneOfRule = webpackConfig.module.rules.find((rule) => rule.oneOf);
@@ -52,6 +56,8 @@ module.exports = {
         '^primereact/datatable$': '<rootDir>/src/components/DataTable/index.jsx',
         // Jest runs the CommonJS build of PrimeReact
         '^primereact/datatable/datatable\\.esm\\.js$': 'primereact/datatable/datatable.cjs.js',
+        '^primereact/calendar$': '<rootDir>/src/components/Calendar/index.jsx',
+        '^primereact/calendar/calendar\\.esm\\.js$': 'primereact/calendar/calendar.cjs.js',
       },
     }),
   },

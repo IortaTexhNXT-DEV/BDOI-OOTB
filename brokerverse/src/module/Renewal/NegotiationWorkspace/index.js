@@ -618,8 +618,7 @@ const NegotiationWorkspace = () => {
                     <Button
                       label={t("renewal.approve", "Approve")}
                       icon="pi pi-check"
-                      className="p-button-success"
-                      onClick={() => handleDecision('approve')}
+                                            onClick={() => handleDecision('approve')}
                     />
                     <Button
                       label={t("renewal.reject", "Reject")}

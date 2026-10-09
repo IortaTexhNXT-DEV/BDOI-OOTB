@@ -13,6 +13,7 @@ import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
 import { Message } from "primereact/message";
 import brandingService from "../../services/brandingService";
+import DateField from "../DateField";
 import "./index.scss";
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -166,7 +167,7 @@ const SignatureCapture = ({ visible, onHide, ownerType, ownerId, ownerName, canM
           )}
           <div className="bv-sig__row">
             <label htmlFor="sig-from">{t("signature.effectiveFrom", "Effective from")}</label>
-            <InputText id="sig-from" type="date" value={effectiveFrom} onChange={(e) => setEffectiveFrom(e.target.value)} />
+            <DateField id="sig-from" value={effectiveFrom} onChange={(e) => setEffectiveFrom(e.target.value)} />
           </div>
           <div className="bv-sig__consent">
             <Checkbox inputId="sig-consent" checked={consent} onChange={(e) => setConsent(e.checked)} />

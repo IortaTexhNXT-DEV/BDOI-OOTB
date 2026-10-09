@@ -35,6 +35,7 @@ import { numberLocale } from "../../utility/currencyConverter";
 import { calendarDateFormat, toIsoDate, formatDate } from "../../utility/dateFormat";
 import { requiredErrors, hasErrors, errorSummary } from "../../utility/requiredFields";
 import { statusLabel } from "../../utils/statusSeverity";
+import { useChartTheme } from "../../theme/chartTheme";
 import {
   ConfiguratorPage, FilterBar, HistoryDialog, RowActions, StatusTag, TemplateCell, ViewDialog, IconAction,
   pagingFor, templateText, productText, useComponentRows, useFilterOptions, toggleComponent,
@@ -1101,6 +1102,7 @@ export const DocumentManager = () => {
 export const ProductAnalytics = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
+  const chart = useChartTheme();
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const toast = useRef(null);
@@ -1116,9 +1118,9 @@ export const ProductAnalytics = () => {
   const top = analytics?.topProducts || [];
   const trend = analytics?.performanceTrend || [];
   const hasData = top.length > 0;
-  const performanceChart = { labels: trend.map((tr) => tr.month), datasets: [{ label: t("productAnalytics.premiumPhpMillions"), data: trend.map((tr) => tr.premium / 1000000), backgroundColor: "rgba(0, 114, 216, 0.15)", borderColor: "#0072d8", tension: 0 }] };
+  const performanceChart = { labels: trend.map((tr) => tr.month), datasets: [{ label: t("productAnalytics.premiumPhpMillions"), data: trend.map((tr) => tr.premium / 1000000), backgroundColor: chart.alpha(chart.primary, 0.15), borderColor: chart.primary, tension: 0 }] };
   const categories = Object.entries(analytics?.categoryBreakdown || {});
-  const categoryChart = { labels: categories.map(([k]) => k), datasets: [{ data: categories.map(([, c]) => c.premium / 1000000), backgroundColor: ["#0072d8", "#004ea8", "#fdb913", "#1d7f4e", "#99c1e7", "#8a5a00"] }] };
+  const categoryChart = { labels: categories.map(([k]) => k), datasets: [{ data: categories.map(([, c]) => c.premium / 1000000), backgroundColor: chart.series(categories.length), borderColor: chart.surface }] };
 
   return (
     <ConfiguratorPage screen="analytics" usage={t("productConfigurator.usage.analytics")}>
@@ -1135,11 +1137,11 @@ export const ProductAnalytics = () => {
           <div className="grid">
             <div className="col-12 lg:col-8">
               <h3 className="mt-0">{t("productAnalytics.premiumTrend")}</h3>
-              <Chart type="line" data={performanceChart} aria-label={t("productAnalytics.premiumTrend")} />
+              <Chart type="line" data={performanceChart} options={chart.options({ scales: { x: {}, y: {} } })} aria-label={t("productAnalytics.premiumTrend")} />
             </div>
             <div className="col-12 lg:col-4">
               <h3 className="mt-0">{t("productAnalytics.categoryDistribution")}</h3>
-              <Chart type="doughnut" data={categoryChart} aria-label={t("productAnalytics.categoryDistribution")} />
+              <Chart type="doughnut" data={categoryChart} options={chart.options({})} aria-label={t("productAnalytics.categoryDistribution")} />
             </div>
           </div>
           <h3>{t("productAnalytics.topProductsPerformance")}</h3>

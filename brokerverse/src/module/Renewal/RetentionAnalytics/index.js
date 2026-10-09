@@ -16,6 +16,8 @@ import { ProgressBar } from "primereact/progressbar";
 import renewalsWorkspaceService, { periodRange, productLabel } from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
 import { calendarDateFormat } from "../../../utility/dateFormat";
+import { useChartTheme } from "../../../theme/chartTheme";
+import { mix } from "../../../theme/runtime/themeEngine";
 import "./index.scss";
 import { currencySymbol } from "../../../utility/currencyConverter";
 import { formatPercent, formatWithUnit, progressValue } from "../../../utility/numberFormat";
@@ -33,6 +35,7 @@ const RetentionAnalytics = () => {
   const [analyticsData, setAnalyticsData] = useState({});
   const [riskCounts, setRiskCounts] = useState({});
   const [queueItems, setQueueItems] = useState([]);
+  const chart = useChartTheme();
   const toast = useRef(null);
 
   const timeFilterOptions = [
@@ -69,7 +72,7 @@ const RetentionAnalytics = () => {
 
   useEffect(() => {
     setupCharts();
-  }, [analyticsData, riskCounts, productFilter, agentFilter]);
+  }, [analyticsData, riskCounts, productFilter, agentFilter, chart]);
 
   const loadAnalyticsData = async () => {
     setLoading(true);
@@ -94,11 +97,7 @@ const RetentionAnalytics = () => {
   };
 
   const setupCharts = () => {
-    const documentStyle = getComputedStyle(document.documentElement);
-    const primaryColor = documentStyle.getPropertyValue('--primary-color') || '#3B82F6';
-    const successColor = documentStyle.getPropertyValue('--green-500') || '#10B981';
-    const warningColor = documentStyle.getPropertyValue('--yellow-500') || '#F59E0B';
-    const dangerColor = documentStyle.getPropertyValue('--red-500') || '#EF4444';
+    const [primaryColor, retainedColor] = chart.series(2);
 
     // Renewal Rate Trend Chart
     const renewalTrendData = {
@@ -108,7 +107,7 @@ const RetentionAnalytics = () => {
           label: 'Renewal Rate (%)',
           data: analyticsData.trends?.monthly?.map(item => item.rate) || [],
           fill: false,
-          backgroundColor: `${primaryColor}20`,
+          backgroundColor: chart.alpha(primaryColor, 0.12),
           borderColor: primaryColor,
           borderWidth: 2,
           tension: 0
@@ -123,7 +122,7 @@ const RetentionAnalytics = () => {
         {
           label: 'Renewal Rate (%)',
           data: shownProducts.map(key => analyticsData.byProduct[key]?.renewalRate || 0),
-          backgroundColor: [primaryColor, successColor, warningColor, dangerColor, '#8B5CF6'],
+          backgroundColor: chart.series(shownProducts.length),
           borderWidth: 0
         }
       ]
@@ -142,7 +141,7 @@ const RetentionAnalytics = () => {
         {
           label: 'Premium Retained (M)',
           data: shownAgents.map(agent => agent.premiumRetained / 1000000),
-          backgroundColor: successColor,
+          backgroundColor: retainedColor,
           borderWidth: 0,
           yAxisID: 'y1'
         }
@@ -155,8 +154,8 @@ const RetentionAnalytics = () => {
       datasets: [
         {
           data: ['Low', 'Medium', 'High', 'Critical'].map(level => riskCounts[level] || 0),
-          backgroundColor: [successColor, warningColor, dangerColor, '#DC2626'],
-          borderWidth: 0
+          backgroundColor: [chart.success, chart.warning, chart.danger, mix(chart.danger, "#000000", 0.35)],
+          borderColor: chart.surface
         }
       ]
     };
@@ -183,7 +182,7 @@ const RetentionAnalytics = () => {
     };
 
     setChartOptions({
-      renewalTrend: {
+      renewalTrend: chart.options({
         ...baseOptions,
         scales: {
           y: {
@@ -196,8 +195,8 @@ const RetentionAnalytics = () => {
             }
           }
         }
-      },
-      productPerformance: {
+      }),
+      productPerformance: chart.options({
         ...baseOptions,
         scales: {
           y: {
@@ -210,8 +209,8 @@ const RetentionAnalytics = () => {
             }
           }
         }
-      },
-      agentPerformance: {
+      }),
+      agentPerformance: chart.options({
         ...baseOptions,
         scales: {
           y: {
@@ -241,8 +240,8 @@ const RetentionAnalytics = () => {
             }
           }
         }
-      },
-      riskDistribution: {
+      }),
+      riskDistribution: chart.options({
         ...baseOptions,
         plugins: {
           ...baseOptions.plugins,
@@ -250,7 +249,7 @@ const RetentionAnalytics = () => {
             position: 'right'
           }
         }
-      }
+      })
     });
   };
 

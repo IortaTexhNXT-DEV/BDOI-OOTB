@@ -28,14 +28,16 @@ beforeAll(async () => {
 afterAll(async () => { await pool.end(); });
 
 describe('masters', () => {
-  it('ships the 14 TISPH lead sources and the 32 reason codes without a master of their own', async () => {
+  it('ships the 14 TISPH lead sources, the 32 reason codes without a master of their own and the 8 reassignment reasons', async () => {
     const sources = await q("SELECT code, name, data FROM master_records WHERE type_code = 'lead-source' AND status = 'active' ORDER BY (data->>'sortOrder')::int");
     expect(sources).toHaveLength(14);
     expect(sources[0]).toMatchObject({ code: 'CL', name: 'Call', data: { channelType: 'Direct', branchCode: 'HO' } });
     expect(sources.map((s) => s.code)).toContain('UCFP');
     const reasons = await q("SELECT data->>'context' AS context, count(*)::int AS n FROM master_records WHERE type_code = 'reason-code' GROUP BY 1 ORDER BY 1");
     expect(reasons).toEqual([{ context: 'adjustment', n: 1 }, { context: 'decline', n: 10 }, { context: 'lapse', n: 6 }, { context: 'non-materialise', n: 1 },
-      { context: 'refund', n: 1 }, { context: 'repudiation', n: 13 }]);
+      { context: 'reassignment', n: 8 }, { context: 'refund', n: 1 }, { context: 'repudiation', n: 13 }]);
+    const type = (await q("SELECT fields FROM master_types WHERE code = 'reason-code'"))[0];
+    expect(type.fields.find((f) => f.name === 'context').options).toContain('reassignment');
     expect(await q("SELECT 1 FROM master_records WHERE type_code = 'reason-code' AND code LIKE 'CAN-%'")).toEqual([]);
   });
 

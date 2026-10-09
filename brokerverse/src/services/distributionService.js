@@ -1,5 +1,6 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
+import { apiErrorMessage } from "../utility/apiError";
 
 /**
  * Distribution, programmes and products API: lead assignment (/lead-assignment), distribution channels (/channels),
@@ -13,8 +14,7 @@ const qs = (params = {}) => {
 const handle = async (response) => {
   const body = await response.json().catch(() => ({}));
   if (!response.ok || body.success === false) {
-    const detail = Array.isArray(body.errors) && body.errors.length ? ` (${body.errors.slice(0, 3).map((e) => (e.path ? `${e.path}: ${e.message}` : e.message)).join("; ")})` : "";
-    const error = new Error(`${body.message || `Request failed (${response.status})`}${detail}`);
+    const error = new Error(apiErrorMessage(body, response.status));
     error.errors = Array.isArray(body.errors) ? body.errors : [];
     throw error;
   }
@@ -74,11 +74,14 @@ const distributionService = {
   updateRule: (ruleId, body) => put(`${LA}/rules/${id(ruleId)}`, body),
   deleteRule: (ruleId) => remove(`${LA}/rules/${id(ruleId)}`),
   assignmentQueue: (params) => request(`${LA}/queue${qs(params)}`),
+  reorderRules: (ids) => put(`${LA}/rules/order`, { ids }),
+  runRules: (dryRun) => post(`${LA}/rules/run`, { dryRun }),
   reassign: (body) => post(`${LA}/reassign`, body),
   sendToQueue: (body) => post(`${LA}/queue`, body),
+  takeFromQueue: (leadIds) => post(`${LA}/queue/take`, { leadIds }),
   assignmentHistory: (leadId) => request(`${LA}/history/${id(leadId)}`),
   teamView: (params) => request(`${LA}/team${qs(params)}`),
-  assignees: () => request(`${LA}/assignees`),
+  assignees: (leadIds) => request(`${LA}/assignees${qs({ leadIds: leadIds?.length ? leadIds.join(",") : undefined })}`),
 
   // distribution channels
   channels: (params) => request(`${CH}${qs(params)}`),

@@ -130,6 +130,8 @@ acceptable for data no other screen needs.
 | Confirm or ask for text | `confirmAction`, `promptText` from `utility/dialogs` (never `window.confirm`) |
 | Amounts | `useFormatCurrency()` in components, `formatCurrency` / `formatNumber` from `utility/currencyConverter` elsewhere |
 | Dates | `formatDate(value, { withTime, empty })`, `toIsoDate`, `calendarDateFormat()` from `utility/dateFormat` |
+| Date fields | `Calendar` from `primereact/calendar` resolves to `components/Calendar` (craco alias): the configured format and the calendar button on every screen; `components/DateField` in place of `<input type="date">` (ISO text in and out) |
+| Error text of a failed request | `apiErrorMessage(body, status, fallback)` from `utility/apiError` in services (field messages, no "Validation failed" or field paths); the application toast cleans older text with `readableError` |
 | Percentages, rounding | `utility/numberFormat` |
 | Right-aligned numeric table columns | automatic: `utility/tableNumericAlign` marks numeric cells |
 | Status tags | `components/StatusBadge`, `utils/statusHelpers` |
@@ -140,11 +142,14 @@ acceptable for data no other screen needs.
 | Record history | `components/AuditTrail/AuditTimeline` (business events of `GET /api/audit/records/:entity/:id`) |
 | Philippine address | `agentModule/component/PhAddressFields` (region, province, city or municipality, barangay, ZIP code) |
 | Colours and logo | the theme tokens; the saved theme is applied at run time by `theme/runtime/themeEngine.js` and `BrandingProvider`; never hard-code a brand colour |
+| Chart colours | `useChartTheme()` from `theme/chartTheme`: `series(n)` (primary, tints, accent once), `statuses(values)` for status charts, `options(o)` for axes and legends |
+| Buttons | the primary button, `outlined` or `text` for secondary actions, `severity="danger"` / `"warning"` only for destructive or cautionary actions; no `info` / `help` / `success` buttons |
+| Form fields and pickers | label above the field (`agentModule/component` fields and `components/LabelWrapper` follow `theme/bdoi/_fields.scss`); roles: `components/RoleChecklist`; shared patterns in `theme/bdoi/consistency.scss` |
 | Masked identifiers (package B) | `utility/piiReveal.js`: the "Show full identifiers" switch for holders of `view:pii` |
 | Diagnostics | `utility/logger` (silent in production, see section 8) |
 
-The display currency and the date format come from System Settings. `module/SystemSettings/store`
-loads them after sign-in and `utility/applySystemSettings` passes them to the formatting helpers,
+The display currency and the date format come from the configuration (Master > Configuration, served by GET
+/api/system-settings). `module/SystemSettings/store` loads them at start-up and `utility/applySystemSettings` passes them to the formatting helpers,
 so formatted values follow the configuration without screens reading the settings. Do not format
 dates with `toLocaleDateString` or amounts with a fixed currency symbol.
 
@@ -152,7 +157,7 @@ dates with `toLocaleDateString` or amounts with a fixed currency symbol.
 
 Text is in `src/locales/en.json` and `th.json`, loaded by `src/i18n.js`, and read with
 `const { t } = useTranslation()`. Keys are grouped by screen (`"quoteDetailView.title"`). The
-language pickers offer the languages configured in System Settings that have a bundled translation
+language pickers offer the languages configured in Master > Configuration that have a bundled translation
 (`utility/languages.js`).
 
 - Add every new key to `en.json`; add the Thai text to `th.json` when known (English is shown

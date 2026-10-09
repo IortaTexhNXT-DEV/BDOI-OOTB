@@ -1457,12 +1457,6 @@ export const menuList = [
         section: true,
         submenu: [
           {
-            id: 0,
-            name: "System Settings",
-            path: "/master/configuration/system-settings",
-            includes: ["/master/configuration/system-settings"],
-          },
-          {
             // the layout of every e-mail the system sends
             id: 25,
             name: "E-mail Layout",

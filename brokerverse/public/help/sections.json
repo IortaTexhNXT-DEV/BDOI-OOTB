@@ -1,6 +1,6 @@
 {
  "title": "BrokerVerse User Manual",
- "version": "1.2.5",
+ "version": "1.2.6",
  "date": "09 October 2026",
  "sections": [
   {
@@ -1318,8 +1318,14 @@
    "chapter": "Distribution, programmes and products"
   },
   {
-   "id": "reassignment-queue-and-bulk-reassignment",
-   "title": "Reassignment queue and bulk reassignment",
+   "id": "reassignment-queue",
+   "title": "Reassignment queue",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "reassign-prospects",
+   "title": "Reassign prospects",
    "level": 3,
    "chapter": "Distribution, programmes and products"
   },

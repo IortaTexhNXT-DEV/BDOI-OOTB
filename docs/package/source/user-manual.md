@@ -1,10 +1,10 @@
 ---
 title: User Manual
 subtitle: BrokerVerse OOTB, by persona
-version: 1.2.5
+version: 1.2.6
 date: 09 October 2026
 prepared: iorta TechNXT
-change: Version 1.2.5 (09 October 2026): Theme and Branding withdrawn, the brand of the TISPH build comes from its brand pack; E-mail Layout, Documents and Reports Layout and Document Signatures are entries of Master > System; System Settings keeps the display currency and the language; Data Privacy (data subject requests, consent register, privacy panels) and the Go-Live Data Load screen withdrawn, the go-live workbooks are loaded through the API. Version 1.2.4 (09 October 2026): Reinsurance and the Compliance menu withdrawn (AML/CFT programme, Insurance Commission registers, complaints and breach registers, the Compliance Officer role); client onboarding keeps the identification, signatories, beneficial owners and KYC documents. Version 1.2.3 (04 October 2026): Home is the role-aware landing page built on My Work (presets per role, role figures, the new My Work categories of the compliance officer, accounting manager and system administrator); the Home dashboard and Open Items sections withdrawn. Version 1.2.2: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.2.1: release figures aligned (eight roles on the Role screen). Version 1.2 (release 1.1): Theme and Branding, the menus of every persona as delivered, My Work, the Compliance Officer with the Insurance Commission registers, the complaints register and the breach register, the operational masters, Help panel sections for every screen, screenshots recaptured
+change: Version 1.2.6 (09 October 2026): System Settings withdrawn: the display currency and the default language are set on Master > Configuration (area Company & Branding); the brand pack of the environment is applied again whenever the API starts and the screens differ from it, and the side bar shows only the logo when it carries the name. Version 1.2.5 (09 October 2026): Theme and Branding withdrawn, the brand of the TISPH build comes from its brand pack; E-mail Layout, Documents and Reports Layout and Document Signatures are entries of Master > System; System Settings keeps the display currency and the language; Data Privacy (data subject requests, consent register, privacy panels) and the Go-Live Data Load screen withdrawn, the go-live workbooks are loaded through the API. Version 1.2.4 (09 October 2026): Reinsurance and the Compliance menu withdrawn (AML/CFT programme, Insurance Commission registers, complaints and breach registers, the Compliance Officer role); client onboarding keeps the identification, signatories, beneficial owners and KYC documents. Version 1.2.3 (04 October 2026): Home is the role-aware landing page built on My Work (presets per role, role figures, the new My Work categories of the compliance officer, accounting manager and system administrator); the Home dashboard and Open Items sections withdrawn. Version 1.2.2: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.2.1: release figures aligned (eight roles on the Role screen). Version 1.2 (release 1.1): Theme and Branding, the menus of every persona as delivered, My Work, the Compliance Officer with the Insurance Commission registers, the complaints register and the breach register, the operational masters, Help panel sections for every screen, screenshots recaptured
 reviewed:
 approved:
 acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal Revenue; LTO=Land Transportation Office; RFQ=Request for quotation; CTPL=Compulsory third party liability; DST=Documentary stamp tax; LGT=Local government tax; LGU=Local government unit; FST=Fire service tax; VAT=Value-added tax; EWT=Expanded withholding tax; CWT=Creditable withholding tax; ATC=Alphanumeric tax code; OR=Official receipt; SOA=Statement of account; PV=Payment voucher; JV=Journal voucher; GL=General ledger; DN=Debit note; KYC=Know your customer; TIN=Taxpayer identification number; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; IAR=Industrial all risks; PA=Personal accident; APPA=Auto passenger personal accident; SoD=Segregation of duties; PEP=Politically exposed person; NPC=National Privacy Commission; COC=Certificate of cover; PDC=Post-dated cheque; LOA=Letter of authority; EIS=Electronic Invoicing System; CAS=Computerized accounting system; WCAG=Web Content Accessibility Guidelines
@@ -428,7 +428,7 @@ Every menu: Dashboard, Operations, Accounts, Commission, Reports, Master and Pro
 
 | Menu | Items |
 |---|---|
-| Master > System | System Settings, E-mail Layout, Documents and Reports Layout, Document Signatures, Configuration, Document Numbering, Schedules, Audit Trail, E-mail Outbox, Integrations, Message Templates, Insurer Integration |
+| Master > System | E-mail Layout, Documents and Reports Layout, Document Signatures, Configuration, Document Numbering, Schedules, Audit Trail, E-mail Outbox, Integrations, Message Templates, Insurer Integration |
 | Master | Organization (Company, Branch, Sales Activity Types, Sales Activity Outcomes); Insurance (Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Claim Document Checklist, Repair Shops, Distribution Channels); Location (Country, Province, City / Municipality); Employees (Hierarchy, Designation); Users and Access (User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews) |
 | Master > Finance | Account Determination, Posting Rules, Configuration Approvals, Accounting Flow, Package Bundles, Insurer Rate Tables, Premium Taxes & LGU Rates, Payment Gateways, Commission Rate Matrix, Transaction Code, Currency, Exchange Rate, Bank, Account Category, Main Account, Sub Account, Taxation, Close Checklist, Asset Classes, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats, Bank File Layouts, Remittance Master, Incentive Programs |
 
@@ -627,9 +627,7 @@ The group **Go-live** (area Company & Branding) holds the cutover date `golive.c
 
 > Change tax rates, GL accounts and maker-checker switches only with the agreement of the Accounting Manager. Settings that control postings are protected: the system refuses a change that must go through Configuration Approvals.
 
-**System Settings** (Master > System > System Settings) holds the localisation: **Display Currency** (amounts are labelled in it; the accounts stay in the base currency of the Currency master) and **Default Language**. **Save** applies them to every user. The application name, the logo, the favicon and the colours of the screens and the sign-in page come from the brand pack of the environment (the Toyota Insurance Services pack in the TISPH environments), set when the environment is deployed; they are not changed on a screen. Printed documents use the logo of the letterhead company in Master > Organization > Company.
-
-![Master > System Settings](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-system-settings.png)
+The localisation is in the area Company & Branding: **Display currency** (`currency.default`: amounts are labelled in it; the accounts stay in the base currency of the Currency master, and only an active currency of that master is accepted) and **Default language** (`general.default_language`). Saving applies them to every user. The application name, the logo, the favicon and the colours of the screens and the sign-in page come from the brand pack of the environment (the Toyota Insurance Services pack in the TISPH environments), set when the environment is deployed and applied again whenever the system starts and finds them changed; they are not changed on a screen. Printed documents use the logo of the letterhead company in Master > Organization > Company.
 
 ## E-mail Layout
 
@@ -835,7 +833,7 @@ The blank workbooks are delivered with the upload templates as GoLive_Configurat
 
 Each workbook has an **Instructions** sheet (load order, rules, every column), a **Lists** sheet with the allowed values, and one sheet per object in load order. Row 1 holds the headers; a required column ends with *. Row 2 is a sample row: a row whose first cell starts with SAMPLE is never loaded. Enter data from row 3. Dates are written YYYY-MM-DD.
 
-Some set-up is not in the workbooks and is entered on its own screen: roles and permissions, segregation of duties, delegations, access reviews, the approval of authority limits, tax codes, account determination and posting rules, statement formats, the close checklist, product templates and the motor tariff, package bundles, payment gateways, System Settings, schedules, fiscal years and periods, remittance masters, incentive programmes, referrer accounts and petty cash funds. The Instructions sheet lists them.
+Some set-up is not in the workbooks and is entered on its own screen: roles and permissions, segregation of duties, delegations, access reviews, the approval of authority limits, tax codes, account determination and posting rules, statement formats, the close checklist, product templates and the motor tariff, package bundles, payment gateways, schedules, fiscal years and periods, remittance masters, incentive programmes, referrer accounts and petty cash funds. The Instructions sheet lists them.
 
 ## Migration rules and reconciliation
 
@@ -906,12 +904,13 @@ Choose Operations > Sales & Marketing > Prospects. The cards count **Total Prosp
 ### Create a prospect
 
 1. Select **Create Prospect**. The **Create prospect** panel asks whether the customer is new or already a client.
-2. Choose **New customer** (enter the customer's details on the prospect form) or **Existing client** (find the client by name, mobile number or e-mail; the prospect is linked to that client), then select **Continue**.
+2. Choose **New customer** (enter the customer's details on the prospect form) or **Existing client**, then select **Continue**. For an existing client, type at least three characters of the client's name, mobile number or e-mail. The clients found are listed with their **Client code**, **Name** (with the city), **Mobile** and **E-mail**; a long value is cut short and shown in full when you point at it. Select a client with a click (or the arrow keys from the search box): its row is highlighted and its radio button set. Select **Use this client** (or press Enter, or double-click the row). When no client matches, select **Create a new customer instead**. The prospect form then starts from the client's details and the prospect is linked to that client: no second client is created when its quotation becomes a policy.
 3. Choose the product the prospect is for: first the **Line of Business** (only the lines that have active products are listed), then the **Product** (the active products of that line; a line with a single product selects it). Select **Continue**. A motor product opens the prospect form; Fire and Allied Perils, Industrial All Risks and Employee Benefits open their own forms while those products are active; any other product opens a Request for Quotation for the new prospect.
 4. If the customer has not chosen a product yet, select **Skip - tag product later** instead: the prospect form opens without a product.
 
 Every way of starting a new prospect goes through this panel: **Create Prospect** on Prospects, **Create Lead** on Clients, **New Quote** on the Executive Dashboard, the Underwriting Dashboard buttons and a prospect form opened from a link or the side bar. Editing a prospect or adding a quotation to an existing prospect opens its form at once.
-5. Fill in the prospect form and select **Save & Continue**.
+5. Fill in the prospect form and select **Save & Continue**. The form has the sections **Customer**, **Contact**, **Address** and **Source and product**, each field with its label above it, a red asterisk when it is required and the message of a wrong value under it.
+6. Before a new prospect is saved, the system looks for possible duplicates: clients and open prospects with the same e-mail, the same mobile number, or the same name with the same date of birth. When it finds some, the **Possible duplicate** window lists them with what matched. Select **Use this client** to link the prospect to an existing client (the form takes the client's details), **Open prospect** to work on the existing prospect instead, or **Save anyway** to create the new prospect. For an existing client, the window lists the client's open prospects. The check can be switched off with `leads.duplicate_check` (System Settings, group leads).
 
 ![Create prospect: new customer or existing client](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-prospect-create.png)
 
@@ -921,20 +920,22 @@ Every way of starting a new prospect goes through this panel: **Create Prospect*
 
 | Field | Required | Rules |
 |---|---|---|
-| **Select Category** | Yes | **Retail** (a person) or **Corporate** (a company). Corporate asks for the company name and TIN. |
-| **First Name**, **Last Name** | Yes | The prospect or the contact person. |
-| **Preferred Name** | Yes | The name used in letters and e-mails. |
-| **Date of Birth** | Yes | Not in the future; age 18 to 100 (`leads.min_age_years`, `leads.max_age_years`). |
-| **Select Gender** | Yes | **Male** or **Female**. |
-| **Email ID** | Yes | A valid e-mail address. Quotations and approval links are sent there. |
-| **Contact Number** | Yes | A Philippine mobile number: 0917 123 4567 or +63 917 123 4567. |
-| **Country**, **Region**, **Province**, **City / Municipality**, **Barangay** | Yes (Region optional) | From the PSGC address masters; choose the country first (Philippines by default), then the region or the province, then the city or municipality, then the barangay. |
-| **ZIP Code** | Yes | 4 digits; filled in from the barangay or city when known. |
+| **Category** (Customer) | Yes | **Retail** (a person) or **Corporate** (a company). |
+| **Company name**, **TIN** (Customer, Corporate) | Yes | The TIN as 9 digits, or 12 to 14 digits with the branch code (000-000-000-000). |
+| **First name**, **Last name** | Yes | The prospect, or for a corporate prospect its **Contact person**. |
+| **Preferred name** | Yes | The name used in letters and e-mails. |
+| **Date of birth** | Retail only | Not in the future; age 18 to 100 (`leads.min_age_years`, `leads.max_age_years`). Optional for the contact person of a corporate prospect. |
+| **Gender** | Retail only | **Male** or **Female**. |
+| **E-mail** (Contact) | Yes | A valid e-mail address. Quotations and approval links are sent there. |
+| **Mobile number** (Contact) | Yes | A Philippine mobile number: 0917 123 4567 or +63 917 123 4567. |
+| **Country**, **Region**, **Province**, **City / Municipality**, **Barangay** (Address) | Yes (Region optional) | From the PSGC address masters; choose the country first (Philippines by default), then the region or the province (the province fills its region), then the city or municipality (listed once the province is chosen), then the barangay. |
+| **ZIP Code** | Yes | 4 digits; suggested from the city. A ZIP code typed first fills the city, province and region. |
 | **House / Unit No.**, **Street / Subdivision** | House / Unit No. yes | The street address. |
+| **Source** (Source and product) | No | From Master > Insurance Management > Lead Sources. **Product** shows the product chosen, or **Product not yet tagged**. |
 
 The system gives the prospect its number (LD-YYYY-NNNNN) with status New and, for a motor prospect, opens **Create Quote** for it. Fire and Allied Perils and Industrial All Risks prospects also ask for the risk location and the sums insured. A prospect created with **Skip - tag product later** opens on its **Prospect Details**, with the note that its product is not yet tagged, and is listed on the tab **Product not yet tagged**.
 
-> **Note:** When the setting `leads.product_required` is on (System Settings, group leads), **Skip - tag product later** is not offered and every new prospect must name its line of business and product.
+> **Note:** When the setting `leads.product_required` is on (Master > Configuration, group leads), **Skip - tag product later** is not offered and every new prospect must name its line of business and product.
 
 ### Tag the product later
 
@@ -1336,8 +1337,10 @@ When the insurer sends the issued policy, select **Upload e-policy** (or use **R
 - **Insurer policy number** (required) and **BrokerVerse policy number** (blank: numbered by the system at booking);
 - **Participant name** (the insured named on the policy), **Sum insured**, **Net premium**, **Gross premium** and **Commission**;
 - **Issue date** and **Effective date** (required), **Issuance date**, **Expiry date** and **Production date**;
-- the **Deductible**, and for motor the **Chassis**, **Engine / motor**, **Plate** and **MV file** numbers. They are carried from the quotation; the plate number or the MV file number is required here even where the quotation said TBA;
-- the **References of the co-insurers**, an optional **Vehicle photo** and **Remarks**.
+- the **Deductible**, and for motor and CTPL only the **Chassis**, **Engine / motor**, **Plate** and **MV file** numbers. They are carried from the quotation; the plate number or the MV file number is required here even where the quotation said TBA;
+- the **References of the co-insurers**, for motor and CTPL only an optional **Vehicle photo**, and **Remarks**.
+
+Credit Life, Personal Accident, Group Personal Accident, Travel, Parcel and the other lines have no vehicle: the window shows neither the vehicle identifiers nor the vehicle photo, and the check against the slip compares the amounts, the period, the insured and the deductible only. In the same way the policy view shows the vehicle details, vehicle photos and motor coverage only for a motor or CTPL policy, an endorsement of another line offers only **Personal Details Change**, **Policy Extend** and **Policy Cancel**, and a claim of another line has no driver, plate number or repair shop and offers the causes of loss of its line (`claims.loss_causes`).
 
 The system compares the e-policy with the slip at once; the status becomes **e-Policy received** and the e-policy card shows **Matches the slip** or **Differs from the slip**.
 
@@ -2634,34 +2637,43 @@ The Sales Activities screen, also under Operations > Sales & Marketing, is descr
 
 ![Operations > Sales & Marketing > Lead Assignment](/home/user/BDOI-OOTB/docs/package/source/manual-images/d-lead-assignment.png)
 
-Choose Operations > Sales & Marketing > Lead Assignment. The screen has three tabs: **Team View**, **Queue** and **Assignment Rules**. Users without the lead assignment permissions see only the team view.
+Choose Operations > Sales & Marketing > Lead Assignment. The screen has three tabs: **Team View**, **Reassignment Queue** and **Assignment Rules**. Users without the lead assignment permissions (read / write:lead-assignment) see only the team view.
 
 ### Team view
 
-The team view lists each account executive of the reporting line (the users who report to the signed-in manager, and their own reports) with the prospects they hold: **Open**, **Converted**, **Lost**, **Last 30 days** and **In queue**. Choose a manager to see that manager's line (the default is your own team) or a **Team member** to see one person. Below the team, the open prospects of the selection are listed, with their **Assignment** status.
+The team view lists each account executive of the reporting line (the users who report to the signed-in manager, and their own reports) with the prospects they hold: **Open**, **New**, **Converted**, **Lost**, **In queue** and **Last 30 days**. Choose a manager to see that manager's line (the default is your own team) or a **Team member** to see one person. Below the team, the prospects of the selection are listed with their line and product (or **Product not yet tagged**), territory, channel, account executive and **Assignment** status. The history icon opens the prospect's **Assignment history**.
 
 ### Assignment rules
 
 Every new prospect, whether entered on the prospect screen, uploaded or created from a dealer sale, is given an account executive by the first active rule that matches it.
 
 1. Open **Assignment Rules** and select **Add rule**.
-2. Enter the **Name** and the **Priority** (lower numbers are tried first).
+2. Enter the **Name** and the **Priority** (lower numbers are checked first).
 3. Choose the **Method**: **Round robin** (each matching prospect goes to the next account executive in turn), **Fewest open prospects** (to whoever holds the fewest open prospects) or **Fixed account executive** (always the first one listed).
 4. Choose the **Account executives** who share the work. Only active users can receive prospects.
-5. Set the conditions the prospect must meet: **Line of business**, **Distribution channel**, **Province**, **City / municipality**, **Branch**, **Source** and **Category**. An empty condition matches anything.
+5. Set the **Conditions** the prospect must meet, each chosen from a list: **Line of business** (or **Product not yet tagged**, for the prospects created without a product), **Product** (the products of the line chosen), **Distribution channel**, **Branch** (Branch master), **Source** (Lead Sources master), **Category** (Retail or Corporate), **Province** and **City / municipality** (the cities of the province chosen). An empty condition matches anything.
 6. Select **Save**.
+
+On the list, the **Active** switch activates or deactivates a rule, the arrows move it up or down (the rules are renumbered 10, 20, 30 ... in the new order), the pencil edits it and the bin removes it (a rule that already assigned prospects is made inactive instead, its history refers to it).
 
 When rules exist but none matches, the setting **leads.assignment_fallback** decides: **creator** (the person who entered the prospect keeps it) or **queue** (the prospect waits in the reassignment queue). Assignment can be switched off with **leads.assignment_enabled**. Every assignment is written to the prospect's **Assignment history** (rule, from, to, reason, who and when).
 
-### Reassignment queue and bulk reassignment
+### Reassignment queue
 
-The **Queue** tab lists prospects waiting for an account executive: those no rule matched (with fallback queue), those sent to the queue by a manager, and those left untouched longer than **leads.assignment_sla_hours** (the **lead-assignment-sla** job moves them each morning once it is switched on in Master > Schedules).
+The **Reassignment Queue** tab lists the prospects waiting for an account executive: those no rule matched (with fallback queue), those whose rule had no active account executive, those sent to the queue by hand, and those left untouched longer than **leads.assignment_sla_hours** (the **lead-assignment-sla** job moves them each morning once it is switched on in Master > Schedules). Narrow the list by prospect name or number, **Line of business** (or **Product not yet tagged**), **Reason** and **Branch**.
 
-1. Tick one or more prospects (on the queue or on the team view).
-2. Select **Reassign**, choose **To account executive** and enter the **Reason**.
-3. Select **Save**. Each prospect changes owner, the history records a manual or bulk reassignment and the new owner is notified when **leads.assignment_notify** is on.
+- **Take** (on a row, or for the ticked prospects) assigns the prospects to you; the history records **Taken from the queue**.
+- **Reassign** gives them to another account executive (see below).
+- **Assign by rules** runs the queue through the active rules: a preview lists each prospect a rule now matches, with the rule and the account executive it would go to, and how many stay in the queue. Select **Assign** to apply it; use it after adding or changing a rule.
 
-**Send to queue** returns prospects to the queue with a reason, for example when an account executive leaves.
+### Reassign prospects
+
+1. Tick one or more prospects on the team view or the queue and select **Reassign** (or the reassign icon of one row).
+2. Choose **To account executive** from the list of active users who may own prospects; each shows the designation, branch and number of open prospects. The account executives of the assignment rule that matches the prospects are listed first, under **Suggested by the assignment rules**. Type in the list to search.
+3. Choose the **Reason** from the reassignment reasons of Master > Insurance Management > Reason Codes (Account executive left the company, Account executive on leave, Territory or branch change, Workload balancing, Customer request, Not worked in time, Needs a specialist for the product, Other) and add a **Note** if needed (**Other** needs one). A reason or a note is required while **leads.reassignment_reason_required** is on.
+4. Select **Reassign**. Each prospect changes owner, the history records a manual or bulk reassignment with the reason, and the new owner is notified when **leads.assignment_notify** is on.
+
+**Send to queue** (team view) returns the ticked prospects to the queue, with a reason and note chosen the same way, for example when an account executive leaves.
 
 ## Distribution Channels
 
@@ -2754,7 +2766,9 @@ Declarations are due **marine.declaration_due_days** days after the period ends.
 
 Choose Operations > Sales & Marketing > Comparison Reports. The comparison report is the printed, branded document given to the client comparing the insurers' offers, with the option the broker recommends and why. It never shows commission.
 
-1. Select **New report**. Choose what is **Compared**: a **Request for quotation** (its insurers' offers become the options) or two or more **Quotations** of the same client or prospect (enter their numbers). From a request for quotation the report can also be opened with the address /sales/comparison-reports?brokerSlipId= followed by the slip.
+1. Select **New report**. Choose what is **Compared**:
+   - a **Request for quotation**: its insurers' offers become the options. The list shows each request with its number of offers; a request with fewer than two offers is greyed out (**needs two offers**) and cannot be chosen until a second insurer has offered. On a request for quotation, **Client comparison report** opens this window with the request chosen; it is disabled, with the number of offers so far, until two insurers have offered.
+   - two or more **Quotations** of the same client or prospect: search by quotation number or customer and pick them; once the first is picked, only the quotations of the same client or prospect are offered.
 2. Select **Prepare**. The options are ranked by total premium.
 3. Edit **Prepared for**, **Title** and **Introduction** (defaults in the **comparison.*** settings). For each option enter **What stands out**.
 4. Choose the option to **Recommend** and write **Why we recommend it**, one reason per line; the suggested reasons of **comparison.default_reasons** can be added with one click. Adjust the **Disclaimer**.
@@ -2821,7 +2835,7 @@ This chapter lists every menu screen in menu order with its purpose, its main fi
 
 | Screen | Purpose | Main content and rules | Roles |
 |---|---|---|---|
-| Executive Dashboard | Business performance against target. | Period (This Month, This Quarter, This Year); Total Revenue, Active Policies, New Business, Claims Rate, Retention Rate, Premium Receivable (Clients), Commission Receivable (Insurers, Direct Bill), each change against the same number of days of the previous period; migrated policies are not premium written; trends, revenue by product line, regional performance, top products, top sales performance; **Export Report** (Production Register); **Settings** (roles that may open System Settings) opens Master > System Settings. Targets from `dashboard.targets`. | All but Claims |
+| Executive Dashboard | Business performance against target. | Period (This Month, This Quarter, This Year); Total Revenue, Active Policies, New Business, Claims Rate, Retention Rate, Premium Receivable (Clients), Commission Receivable (Insurers, Direct Bill), each change against the same number of days of the previous period; migrated policies are not premium written; trends, revenue by product line, regional performance, top products, top sales performance; **Export Report** (Production Register); **Settings** (roles that may open Configuration) opens Master > Configuration. Targets from `dashboard.targets`. | All but Claims |
 | Claims Dashboard | Claims workload. | Total Open Claims, Claims Overdue (`claims.sla_days`), Today's Claims, recent claims; **Export Report**. | Claims, System Administrator |
 | Processing Dashboard | Processing Workbench. | Submissions, cycle time, open alerts, workload, submissions list, open tasks; **New Submission**. | Processing Team, System Administrator |
 | Sales Dashboard | Sales team performance. | Sales person, period; prospects, quotations, conversion, policies issued, premium, open pipeline; trend and pipelines. | Sales & Marketing, System Administrator |
@@ -2964,7 +2978,6 @@ See the chapter Reports, dashboards, schedules and notifications.
 
 | Screen | Purpose |
 |---|---|
-| System Settings | Display currency and default language. |
 | E-mail Layout | The layout of every e-mail: header colours, logo, footer line; sample e-mail. |
 | Documents and Reports Layout | Print colours, logo, footer lines and Excel header of every document and report file, with the WCAG AA contrast check; sample document. |
 | Document Signatures | Which signature prints on which document: slots, signed by, prints when. |

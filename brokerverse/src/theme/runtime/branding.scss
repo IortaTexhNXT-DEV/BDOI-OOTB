@@ -92,3 +92,10 @@
     padding: 14px 18px;
   }
 }
+
+// The page shown while the branding is not known yet (first visit of a browser): neutral, nothing of any brand.
+.bv-branding-pending {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+}

@@ -62,7 +62,7 @@ export const SCHEMA = {
     tableHeaderStyle: { type: 'enum', values: ['solid', 'light'] },
   },
   radius: { sm: { type: 'int', min: 0, max: 24 }, md: { type: 'int', min: 0, max: 24 }, lg: { type: 'int', min: 0, max: 32 }, button: { type: 'int', min: 0, max: 24 } },
-  logo: { appHeight: { type: 'int', min: 20, max: 80 }, loginHeight: { type: 'int', min: 24, max: 140 }, documentHeight: { type: 'int', min: 24, max: 80 } },
+  logo: { appHeight: { type: 'int', min: 20, max: 80 }, loginHeight: { type: 'int', min: 24, max: 140 }, documentHeight: { type: 'int', min: 24, max: 80 }, showName: { type: 'bool' } },
   login: {
     panel: { type: 'enum', values: ['library', 'image', 'color'] },
     library: { type: 'enum', values: Object.keys(LOGIN_LIBRARY) },
@@ -103,7 +103,8 @@ export const DEFAULT_THEME = Object.freeze({
   layout: { headerStyle: 'light', sidebarStyle: 'light', density: 'comfortable', tableHeaderStyle: 'solid' },
   font: 'nunito',
   radius: { sm: 8, md: 12, lg: 16, button: 8 },
-  logo: { appHeight: 36, loginHeight: 56, documentHeight: 46 },
+  // showName: the application name under the logo of the side bar (off when the logo already carries the name)
+  logo: { appHeight: 36, loginHeight: 56, documentHeight: 46, showName: true },
   login: {
     panel: 'library', library: 'philippines', panelImageUrl: '', focalX: 50, focalY: 50, colorFrom: '#0072d8', colorTo: '#004ea8', overlay: 0,
     showOnMobile: false, headline: '', tagline: '', showPoweredBy: true,

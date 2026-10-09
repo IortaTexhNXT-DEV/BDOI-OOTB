@@ -19,7 +19,8 @@ import moment from "moment";
 import userService from "../../../../../services/userService";
 import mastersService from "../../../../../services/mastersService";
 import DropDowns from "../../../../../components/DropDowns";
-import { MultipleSelectRadioGroup } from "../../../../../components/RadioComponent/Multiselect";
+import RoleChecklist from "../../../../../components/RoleChecklist";
+import FieldError from "../../../../../components/FieldError";
 import { TemporaryPasswordDialog } from "../UserMaster/UserSecurityActions";
 import { ADMIN_ROLES } from "../../../../../utils/menuPermissions";
 
@@ -79,7 +80,7 @@ const AddUser = ({ action }) => {
           roles
             .filter((role) => role.status !== "inactive")
             .filter((role) => canGrantPrivileged() || !PRIVILEGED_ROLES.includes(role.code))
-            .map((role) => ({ name: "roles", label: role.name, value: role.code }))
+            .map((role) => ({ label: role.name, value: role.code }))
         )
       )
       .catch((error) => toastRef.current?.showToast({ severity: "error", detail: error.message }));
@@ -399,25 +400,19 @@ const AddUser = ({ action }) => {
             />
           </div>
 
-          <div className="col-12 md:col-12 lg:col-12">
-            <label
-              className="label__sub__add"
-              style={{ marginBottom: "10px", display: "block" }}
-            >
-              {t("generalMasters.roles")} *
+          <div className="col-12">
+            <label className="label__sub__add add__user__roles-label" htmlFor="roles">
+              {t("generalMasters.roles")}
+              <span className="bv-required">*</span>
             </label>
-            <MultipleSelectRadioGroup
-              options={roleOptions}
+            <RoleChecklist
+              roles={roleOptions}
+              value={formik.values.roles || []}
               onChange={handleRoleChange}
-              selectedValues={formik.values.roles || []}
-              isDisabled={action === "view"}
-              isRequired={true}
+              disabled={action === "view"}
+              invalid={!!(formik.touched.roles && formik.errors.roles)}
             />
-            {formik.touched.roles && formik.errors.roles && (
-              <div className="mt-2" style={{ fontSize: 10, color: "var(--color-danger)" }}>
-                {formik.errors.roles}
-              </div>
-            )}
+            <FieldError error={formik.touched.roles && formik.errors.roles} />
           </div>
         </div>
       </div>

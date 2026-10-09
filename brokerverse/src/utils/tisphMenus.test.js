@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { filterMenuForRoles, isPathAllowed, roleMenuPermissions } from "./menuPermissions";
 import { menuList } from "../components/SideBar/list";
 import { helpSectionFor } from "../components/HelpPanel/helpRoutes";
@@ -48,9 +50,9 @@ describe("TISPH roles (RBAC v4): menus", () => {
 
   it("the IT administrator reaches users, roles and masters; SUPERID (System Administrator included) sees every menu", () => {
     expect(["/master/generals/usermanagement/user", "/master/generals/usermanagement/role", "/master/insurance/lead-sources", "/master/insurance/reason-codes",
-      "/master/configuration/system-settings"].filter((p) => !isPathAllowed(p, menuList, ["tis-it-admin"]))).toEqual([]);
+      "/master/configuration/settings"].filter((p) => !isPathAllowed(p, menuList, ["tis-it-admin"]))).toEqual([]);
     expect(isPathAllowed("/master/generals/usermanagement/user", menuList, ["tis-general-manager"])).toBe(true);
-    expect(isPathAllowed("/master/configuration/system-settings", menuList, ["tis-general-manager"])).toBe(false);
+    expect(isPathAllowed("/master/configuration/settings", menuList, ["tis-general-manager"])).toBe(false);
     expect(filterMenuForRoles(menuList, ["tis-superid", "system-admin"])).toEqual(menuList);
   });
 
@@ -70,10 +72,17 @@ describe("TISPH roles (RBAC v4): menus", () => {
     expect(["/agent/leadlisting", "/agent/Quotation", "/agent/clientlisting", "/agent/policy", "/agent/claim"].filter((p) => !isPathAllowed(p, menuList, ["tis-it-admin"]))).toEqual([]);
   });
 
-  it("System Configuration offers the e-mail and document layouts and the signatures, without the theme editor or Data Privacy", () => {
+  it("System Configuration offers the e-mail and document layouts and the signatures, without the theme editor, System Settings or Data Privacy", () => {
     const master = menuList.find((m) => m.name === "Master");
     const system = master.submenu.find((s) => s.name === "System Configuration").submenu.map((i) => i.name);
-    expect(system).toEqual(expect.arrayContaining(["System Settings", "E-mail Layout", "Documents and Reports Layout", "Document Signatures"]));
+    expect(system).toEqual(expect.arrayContaining(["E-mail Layout", "Documents and Reports Layout", "Document Signatures", "Configuration"]));
+    expect(system).not.toContain("System Settings");
+    expect(JSON.stringify(menuList)).not.toContain("/master/configuration/system-settings");
+    expect(filterMenuForRoles(menuList, ["tis-superid"]).some((m) => JSON.stringify(m).includes("system-settings"))).toBe(false);
+    // no route, help link or configuration link leads to the withdrawn screen
+    for (const file of ["../routes/MainRoute.js", "../components/HelpPanel/helpRoutes.js", "../module/Administration/configuration/catalog.js"]) {
+      expect(fs.readFileSync(path.join(__dirname, file), "utf8")).not.toContain("configuration/system-settings");
+    }
     expect(master.submenu.map((s) => s.name)).not.toContain("Data Privacy");
     expect(master.submenu.map((s) => s.name)).not.toContain("Go-Live and Data");
     const layouts = ["/master/configuration/email-layout", "/master/configuration/documents-layout", "/master/configuration/document-signatures"];

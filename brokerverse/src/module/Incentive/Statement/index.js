@@ -16,6 +16,7 @@ import incentiveService from "../../../services/incentiveService";
 import { downloadCsv, showError } from "../../Remittance/shared";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import { useChartTheme } from "../../../theme/chartTheme";
 
 const emptyStatement = { agentName: "", agentCode: "", period: "", statementDate: null, totalEarnings: 0, ytdEarnings: 0, pendingPayment: 0, lastPayment: 0, lastPaymentDate: null, lastPaymentPeriods: [], pendingPeriods: [], programBreakdown: [], monthlyTrend: [], contact: null };
 
@@ -30,6 +31,7 @@ const recentMonths = () => {
 
 const Statement = () => {
   const { t } = useTranslation();
+  const chart = useChartTheme();
   const { formatCurrency } = useFormatCurrency();
   const toast = useRef(null);
   const periodOptions = recentMonths();
@@ -88,8 +90,6 @@ const Statement = () => {
   }, [selectedPeriod, agentId]);
 
   const initializeChart = (statement) => {
-    const documentStyle = getComputedStyle(document.documentElement);
-
     // Monthly trend chart
     const data = {
       labels: statement.monthlyTrend.map(item => item.month),
@@ -98,46 +98,34 @@ const Statement = () => {
           label: 'Monthly Earnings',
           data: statement.monthlyTrend.map(item => item.earnings),
           fill: false,
-          backgroundColor: 'rgba(102, 126, 234, 0.1)',
-          borderColor: documentStyle.getPropertyValue('--primary-color') || '#0072d8',
+          backgroundColor: chart.alpha(chart.primary, 0.1),
+          borderColor: chart.primary,
           tension: 0
         }
       ]
     };
 
-    const options = {
+    const options = chart.options({
       maintainAspectRatio: false,
       aspectRatio: 0.6,
       plugins: {
         legend: {
           labels: {
-            usePointStyle: true,
-            color: documentStyle.getPropertyValue('--text-color')
+            usePointStyle: true
           }
         }
       },
       scales: {
-        x: {
-          ticks: {
-            color: documentStyle.getPropertyValue('--text-color-secondary')
-          },
-          grid: {
-            color: documentStyle.getPropertyValue('--surface-border')
-          }
-        },
+        x: {},
         y: {
           ticks: {
-            color: documentStyle.getPropertyValue('--text-color-secondary'),
             callback: function(value) {
               return formatCurrency(value);
             }
-          },
-          grid: {
-            color: documentStyle.getPropertyValue('--surface-border')
           }
         }
       }
-    };
+    });
 
     setChartData(data);
     setChartOptions(options);

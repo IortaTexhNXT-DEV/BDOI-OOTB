@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1210 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1214 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -13144,7 +13144,7 @@
           ]
         },
         {
-          "name": "Import a brand pack (multipart \"file\": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name",
+          "name": "Import a brand pack (multipart \"file\": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name. Only the dry run while BRAND_PACK is set",
           "request": {
             "method": "POST",
             "header": [
@@ -13173,7 +13173,7 @@
                 }
               ]
             },
-            "description": "Import a brand pack (multipart \"file\": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Import\n\nAccess: write:settings",
+            "description": "Import a brand pack (multipart \"file\": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name. Only the dry run while BRAND_PACK is set\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Import\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"file\": \"(binary .zip or .json)\"\n}",
@@ -13215,7 +13215,7 @@
                     }
                   ]
                 },
-                "description": "Import a brand pack (multipart \"file\": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Import\n\nAccess: write:settings",
+                "description": "Import a brand pack (multipart \"file\": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name. Only the dry run while BRAND_PACK is set\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Import\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"file\": \"(binary .zip or .json)\"\n}",
@@ -13361,7 +13361,7 @@
           ]
         },
         {
-          "name": "Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name",
+          "name": "Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name. Refused while BRAND_PACK is set (the API enforces that pack at start-up)",
           "request": {
             "method": "POST",
             "header": [
@@ -13390,7 +13390,7 @@
                 }
               ]
             },
-            "description": "Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Bundled packs > Enable\n\nAccess: write:settings",
+            "description": "Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name. Refused while BRAND_PACK is set (the API enforces that pack at start-up)\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Bundled packs > Enable\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"acknowledgedPermission\": true,\n  \"applyDocumentLogo\": true,\n  \"applySystemName\": true\n}",
@@ -13432,7 +13432,7 @@
                     }
                   ]
                 },
-                "description": "Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Bundled packs > Enable\n\nAccess: write:settings",
+                "description": "Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name. Refused while BRAND_PACK is set (the API enforces that pack at start-up)\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Bundled packs > Enable\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"acknowledgedPermission\": true,\n  \"applyDocumentLogo\": true,\n  \"applySystemName\": true\n}",
@@ -13458,7 +13458,7 @@
           ]
         },
         {
-          "name": "Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited",
+          "name": "Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited. Refused while BRAND_PACK is set",
           "request": {
             "method": "POST",
             "header": [],
@@ -13473,7 +13473,7 @@
                 "reset-default"
               ]
             },
-            "description": "Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Back to default\n\nAccess: write:settings"
+            "description": "Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited. Refused while BRAND_PACK is set\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Back to default\n\nAccess: write:settings"
           },
           "response": [
             {
@@ -13492,7 +13492,7 @@
                     "reset-default"
                   ]
                 },
-                "description": "Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Back to default\n\nAccess: write:settings"
+                "description": "Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited. Refused while BRAND_PACK is set\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Back to default\n\nAccess: write:settings"
               },
               "status": "OK",
               "code": 200,
@@ -13712,7 +13712,7 @@
           ]
         },
         {
-          "name": "Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA",
+          "name": "Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA. While BRAND_PACK is set, only the e-mail and document sections (and the logo height on documents) can change: the request is laid over the theme in force and a change to anything else is refused",
           "request": {
             "method": "PUT",
             "header": [
@@ -13731,7 +13731,7 @@
                 "theme"
               ]
             },
-            "description": "Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA\n\nFront-end touchpoint: Master > System Configuration > E-mail Layout / Documents and Reports Layout\n\nAccess: write:settings",
+            "description": "Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA. While BRAND_PACK is set, only the e-mail and document sections (and the logo height on documents) can change: the request is laid over the theme in force and a change to anything else is refused\n\nFront-end touchpoint: Master > System Configuration > E-mail Layout / Documents and Reports Layout\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"theme\": {\n    \"preset\": \"iorta-technxt\",\n    \"name\": \"iorta TechNXT (default)\",\n    \"colors\": {\n      \"primary\": \"#0072d8\",\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"tableHeaderBg\": \"#004ea8\",\n      \"tableHeaderText\": \"#ffffff\"\n    },\n    \"layout\": {\n      \"headerStyle\": \"light\",\n      \"sidebarStyle\": \"light\",\n      \"density\": \"comfortable\",\n      \"tableHeaderStyle\": \"solid\"\n    },\n    \"font\": \"nunito\",\n    \"radius\": {\n      \"sm\": 8,\n      \"md\": 12,\n      \"lg\": 16,\n      \"button\": 8\n    },\n    \"logo\": {\n      \"appHeight\": 36,\n      \"loginHeight\": 56,\n      \"documentHeight\": 46\n    },\n    \"login\": {\n      \"panel\": \"library\",\n      \"library\": \"philippines\",\n      \"panelImageUrl\": \"\",\n      \"focalX\": 50,\n      \"focalY\": 50,\n      \"overlay\": 0,\n      \"showOnMobile\": false,\n      \"headline\": \"\",\n      \"tagline\": \"\"\n    },\n    \"documents\": {\n      \"accentColor\": \"\",\n      \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n    },\n    \"email\": {\n      \"enabled\": true,\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"accentColor\": \"#0072d8\",\n      \"showLogo\": true,\n      \"footerText\": \"{{companyName}} | {{address}}\"\n    }\n  },\n  \"systemName\": \"BrokerVerse\"\n}",
@@ -13763,7 +13763,7 @@
                     "theme"
                   ]
                 },
-                "description": "Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA\n\nFront-end touchpoint: Master > System Configuration > E-mail Layout / Documents and Reports Layout\n\nAccess: write:settings",
+                "description": "Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA. While BRAND_PACK is set, only the e-mail and document sections (and the logo height on documents) can change: the request is laid over the theme in force and a change to anything else is refused\n\nFront-end touchpoint: Master > System Configuration > E-mail Layout / Documents and Reports Layout\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"theme\": {\n    \"preset\": \"iorta-technxt\",\n    \"name\": \"iorta TechNXT (default)\",\n    \"colors\": {\n      \"primary\": \"#0072d8\",\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"tableHeaderBg\": \"#004ea8\",\n      \"tableHeaderText\": \"#ffffff\"\n    },\n    \"layout\": {\n      \"headerStyle\": \"light\",\n      \"sidebarStyle\": \"light\",\n      \"density\": \"comfortable\",\n      \"tableHeaderStyle\": \"solid\"\n    },\n    \"font\": \"nunito\",\n    \"radius\": {\n      \"sm\": 8,\n      \"md\": 12,\n      \"lg\": 16,\n      \"button\": 8\n    },\n    \"logo\": {\n      \"appHeight\": 36,\n      \"loginHeight\": 56,\n      \"documentHeight\": 46\n    },\n    \"login\": {\n      \"panel\": \"library\",\n      \"library\": \"philippines\",\n      \"panelImageUrl\": \"\",\n      \"focalX\": 50,\n      \"focalY\": 50,\n      \"overlay\": 0,\n      \"showOnMobile\": false,\n      \"headline\": \"\",\n      \"tagline\": \"\"\n    },\n    \"documents\": {\n      \"accentColor\": \"\",\n      \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n    },\n    \"email\": {\n      \"enabled\": true,\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"accentColor\": \"#0072d8\",\n      \"showLogo\": true,\n      \"footerText\": \"{{companyName}} | {{address}}\"\n    }\n  },\n  \"systemName\": \"BrokerVerse\"\n}",
@@ -13868,7 +13868,7 @@
           ]
         },
         {
-          "name": "Upload a branding image (multipart \"file\"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing",
+          "name": "Upload a branding image (multipart \"file\"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing. Refused while BRAND_PACK is set",
           "request": {
             "method": "POST",
             "header": [
@@ -13895,7 +13895,7 @@
                 }
               ]
             },
-            "description": "Upload a branding image (multipart \"file\"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Upload\n\nAccess: write:settings",
+            "description": "Upload a branding image (multipart \"file\"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing. Refused while BRAND_PACK is set\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Upload\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"file\": \"(binary)\"\n}",
@@ -13935,7 +13935,7 @@
                     }
                   ]
                 },
-                "description": "Upload a branding image (multipart \"file\"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Upload\n\nAccess: write:settings",
+                "description": "Upload a branding image (multipart \"file\"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing. Refused while BRAND_PACK is set\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Upload\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"file\": \"(binary)\"\n}",
@@ -13961,7 +13961,7 @@
           ]
         },
         {
-          "name": "Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library)",
+          "name": "Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library). Refused while BRAND_PACK is set",
           "request": {
             "method": "DELETE",
             "header": [],
@@ -13983,7 +13983,7 @@
                 }
               ]
             },
-            "description": "Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library)\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Reset image\n\nAccess: write:settings"
+            "description": "Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library). Refused while BRAND_PACK is set\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Reset image\n\nAccess: write:settings"
           },
           "response": [
             {
@@ -14009,7 +14009,7 @@
                     }
                   ]
                 },
-                "description": "Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library)\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Reset image\n\nAccess: write:settings"
+                "description": "Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library). Refused while BRAND_PACK is set\n\nFront-end touchpoint: Brand pack (BRAND_PACK, API only) > Reset image\n\nAccess: write:settings"
               },
               "status": "OK",
               "code": 200,
@@ -42045,21 +42045,27 @@
       "name": "Lead assignment",
       "item": [
         {
-          "name": "Active users who can receive prospects (name, branch, open prospects)",
+          "name": "Active users who can receive prospects (name, branch, open prospects); with leadIds (comma separated) the assignees of the rules matching those prospects are marked suggested",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/lead-assignment/assignees",
+              "raw": "{{baseUrl}}/lead-assignment/assignees?leadIds=ld_1,ld_2",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "lead-assignment",
                 "assignees"
+              ],
+              "query": [
+                {
+                  "key": "leadIds",
+                  "value": "ld_1,ld_2"
+                }
               ]
             },
-            "description": "Active users who can receive prospects (name, branch, open prospects)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment\n\nAccess: read:leads, read:lead-assignment"
+            "description": "Active users who can receive prospects (name, branch, open prospects); with leadIds (comma separated) the assignees of the rules matching those prospects are marked suggested\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment\n\nAccess: read:leads, read:lead-assignment"
           },
           "response": [
             {
@@ -42068,16 +42074,22 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/lead-assignment/assignees",
+                  "raw": "{{baseUrl}}/lead-assignment/assignees?leadIds=ld_1,ld_2",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "lead-assignment",
                     "assignees"
+                  ],
+                  "query": [
+                    {
+                      "key": "leadIds",
+                      "value": "ld_1,ld_2"
+                    }
                   ]
                 },
-                "description": "Active users who can receive prospects (name, branch, open prospects)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment\n\nAccess: read:leads, read:lead-assignment"
+                "description": "Active users who can receive prospects (name, branch, open prospects); with leadIds (comma separated) the assignees of the rules matching those prospects are marked suggested\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment\n\nAccess: read:leads, read:lead-assignment"
               },
               "status": "OK",
               "code": 200,
@@ -42089,7 +42101,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"usr_1\",\n      \"name\": \"Juan Dela Cruz\",\n      \"username\": \"agent.jdelacruz\",\n      \"branchCode\": \"HO\",\n      \"open\": 4\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"usr_1\",\n      \"name\": \"Juan Dela Cruz\",\n      \"username\": \"agent.jdelacruz\",\n      \"branchCode\": \"HO\",\n      \"designation\": \"Account Executive\",\n      \"open\": 4,\n      \"suggested\": true,\n      \"rules\": [\n        \"Metro Manila motor\"\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -42159,12 +42171,12 @@
           ]
         },
         {
-          "name": "Reassignment queue: prospects no rule could assign, whose assignee is inactive or that were not worked in time",
+          "name": "Reassignment queue: prospects no rule could assign, whose assignee is inactive, not worked in time or sent by hand (filters search, lob (NONE: product not yet tagged), branchCode, reasonCode)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/lead-assignment/queue?search=reyes",
+              "raw": "{{baseUrl}}/lead-assignment/queue?search=reyes&lob=MOTOR&reasonCode=REA-LEAVE",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -42176,10 +42188,18 @@
                 {
                   "key": "search",
                   "value": "reyes"
+                },
+                {
+                  "key": "lob",
+                  "value": "MOTOR"
+                },
+                {
+                  "key": "reasonCode",
+                  "value": "REA-LEAVE"
                 }
               ]
             },
-            "description": "Reassignment queue: prospects no rule could assign, whose assignee is inactive or that were not worked in time\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassignment Queue\n\nAccess: read:lead-assignment, write:lead-assignment"
+            "description": "Reassignment queue: prospects no rule could assign, whose assignee is inactive, not worked in time or sent by hand (filters search, lob (NONE: product not yet tagged), branchCode, reasonCode)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassignment Queue\n\nAccess: read:lead-assignment, write:lead-assignment"
           },
           "response": [
             {
@@ -42188,7 +42208,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/lead-assignment/queue?search=reyes",
+                  "raw": "{{baseUrl}}/lead-assignment/queue?search=reyes&lob=MOTOR&reasonCode=REA-LEAVE",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -42200,10 +42220,18 @@
                     {
                       "key": "search",
                       "value": "reyes"
+                    },
+                    {
+                      "key": "lob",
+                      "value": "MOTOR"
+                    },
+                    {
+                      "key": "reasonCode",
+                      "value": "REA-LEAVE"
                     }
                   ]
                 },
-                "description": "Reassignment queue: prospects no rule could assign, whose assignee is inactive or that were not worked in time\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassignment Queue\n\nAccess: read:lead-assignment, write:lead-assignment"
+                "description": "Reassignment queue: prospects no rule could assign, whose assignee is inactive, not worked in time or sent by hand (filters search, lob (NONE: product not yet tagged), branchCode, reasonCode)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassignment Queue\n\nAccess: read:lead-assignment, write:lead-assignment"
               },
               "status": "OK",
               "code": 200,
@@ -42220,7 +42248,7 @@
           ]
         },
         {
-          "name": "Send prospects to the reassignment queue with a reason",
+          "name": "Send prospects to the reassignment queue with a reason code of the Reason Codes master (reassignment) and / or a note",
           "request": {
             "method": "POST",
             "header": [
@@ -42239,10 +42267,10 @@
                 "queue"
               ]
             },
-            "description": "Send prospects to the reassignment queue with a reason\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Send to Queue\n\nAccess: write:lead-assignment",
+            "description": "Send prospects to the reassignment queue with a reason code of the Reason Codes master (reassignment) and / or a note\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Send to Queue\n\nAccess: write:lead-assignment",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"leadIds\": [\n    \"ld_1\"\n  ],\n  \"reason\": \"Account executive on leave\"\n}",
+              "raw": "{\n  \"leadIds\": [\n    \"ld_1\"\n  ],\n  \"reasonCode\": \"REA-LEAVE\",\n  \"reason\": \"Back on 20 October\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -42271,10 +42299,10 @@
                     "queue"
                   ]
                 },
-                "description": "Send prospects to the reassignment queue with a reason\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Send to Queue\n\nAccess: write:lead-assignment",
+                "description": "Send prospects to the reassignment queue with a reason code of the Reason Codes master (reassignment) and / or a note\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Send to Queue\n\nAccess: write:lead-assignment",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"leadIds\": [\n    \"ld_1\"\n  ],\n  \"reason\": \"Account executive on leave\"\n}",
+                  "raw": "{\n  \"leadIds\": [\n    \"ld_1\"\n  ],\n  \"reasonCode\": \"REA-LEAVE\",\n  \"reason\": \"Back on 20 October\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -42292,12 +42320,91 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"queued\": 1\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"queued\": 1,\n    \"reasonCode\": \"REA-LEAVE\",\n    \"reason\": \"Account executive on leave: Back on 20 October\"\n  }\n}"
             }
           ]
         },
         {
-          "name": "Reassign one or many prospects to an account executive (from the queue or in bulk)",
+          "name": "Take prospects waiting in the reassignment queue: they are assigned to the signed-in user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/lead-assignment/queue/take",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "lead-assignment",
+                "queue",
+                "take"
+              ]
+            },
+            "description": "Take prospects waiting in the reassignment queue: they are assigned to the signed-in user\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassignment Queue > Take\n\nAccess: write:lead-assignment",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"leadIds\": [\n    \"ld_1\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/lead-assignment/queue/take",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "lead-assignment",
+                    "queue",
+                    "take"
+                  ]
+                },
+                "description": "Take prospects waiting in the reassignment queue: they are assigned to the signed-in user\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassignment Queue > Take\n\nAccess: write:lead-assignment",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"leadIds\": [\n    \"ld_1\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"reassigned\": 1,\n    \"toUserId\": \"usr_1\",\n    \"toName\": \"Ana Garcia\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reassign one or many prospects to an account executive (from the queue or in bulk) with a reason code of the Reason Codes master (reassignment) and / or a note (required while leads.reassignment_reason_required)",
           "request": {
             "method": "POST",
             "header": [
@@ -42316,10 +42423,10 @@
                 "reassign"
               ]
             },
-            "description": "Reassign one or many prospects to an account executive (from the queue or in bulk)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassign\n\nAccess: write:lead-assignment",
+            "description": "Reassign one or many prospects to an account executive (from the queue or in bulk) with a reason code of the Reason Codes master (reassignment) and / or a note (required while leads.reassignment_reason_required)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassign\n\nAccess: write:lead-assignment",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"leadIds\": [\n    \"ld_1\",\n    \"ld_2\"\n  ],\n  \"toUserId\": \"usr_2\",\n  \"reason\": \"Territory change\"\n}",
+              "raw": "{\n  \"leadIds\": [\n    \"ld_1\",\n    \"ld_2\"\n  ],\n  \"toUserId\": \"usr_2\",\n  \"reasonCode\": \"REA-TERRITORY\",\n  \"reason\": \"Moved to the Cebu branch\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -42348,10 +42455,10 @@
                     "reassign"
                   ]
                 },
-                "description": "Reassign one or many prospects to an account executive (from the queue or in bulk)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassign\n\nAccess: write:lead-assignment",
+                "description": "Reassign one or many prospects to an account executive (from the queue or in bulk) with a reason code of the Reason Codes master (reassignment) and / or a note (required while leads.reassignment_reason_required)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassign\n\nAccess: write:lead-assignment",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"leadIds\": [\n    \"ld_1\",\n    \"ld_2\"\n  ],\n  \"toUserId\": \"usr_2\",\n  \"reason\": \"Territory change\"\n}",
+                  "raw": "{\n  \"leadIds\": [\n    \"ld_1\",\n    \"ld_2\"\n  ],\n  \"toUserId\": \"usr_2\",\n  \"reasonCode\": \"REA-TERRITORY\",\n  \"reason\": \"Moved to the Cebu branch\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -42369,7 +42476,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"reassigned\": 2,\n    \"toUserId\": \"usr_2\",\n    \"toName\": \"Maria Santos\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"reassigned\": 2,\n    \"toUserId\": \"usr_2\",\n    \"toName\": \"Maria Santos\",\n    \"reasonCode\": \"REA-TERRITORY\",\n    \"reason\": \"Territory or branch change: Moved to the Cebu branch\"\n  }\n}"
             }
           ]
         },
@@ -42512,7 +42619,7 @@
           ]
         },
         {
-          "name": "Change an assignment rule",
+          "name": "Change an assignment rule (status active / inactive activates or deactivates it)",
           "request": {
             "method": "PUT",
             "header": [
@@ -42539,7 +42646,7 @@
                 }
               ]
             },
-            "description": "Change an assignment rule\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Rules > Edit\n\nAccess: write:lead-assignment",
+            "description": "Change an assignment rule (status active / inactive activates or deactivates it)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Rules > Edit\n\nAccess: write:lead-assignment",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"priority\": 20,\n  \"status\": \"inactive\"\n}",
@@ -42579,7 +42686,7 @@
                     }
                   ]
                 },
-                "description": "Change an assignment rule\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Rules > Edit\n\nAccess: write:lead-assignment",
+                "description": "Change an assignment rule (status active / inactive activates or deactivates it)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Rules > Edit\n\nAccess: write:lead-assignment",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"priority\": 20,\n  \"status\": \"inactive\"\n}",
@@ -42666,6 +42773,164 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"message\": \"Assignment rule removed\",\n  \"data\": {\n    \"removed\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Order the assignment rules: priorities 10, 20, 30 ... in the order of the ids given",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/lead-assignment/rules/order",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "lead-assignment",
+                "rules",
+                "order"
+              ]
+            },
+            "description": "Order the assignment rules: priorities 10, 20, 30 ... in the order of the ids given\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Rules > Move up / down\n\nAccess: write:lead-assignment",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\n    3,\n    1,\n    2\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/lead-assignment/rules/order",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "lead-assignment",
+                    "rules",
+                    "order"
+                  ]
+                },
+                "description": "Order the assignment rules: priorities 10, 20, 30 ... in the order of the ids given\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Rules > Move up / down\n\nAccess: write:lead-assignment",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ids\": [\n    3,\n    1,\n    2\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Metro Manila motor\",\n      \"priority\": 10,\n      \"method\": \"round_robin\",\n      \"conditions\": {\n        \"lob\": \"MOTOR\",\n        \"province\": \"Metro Manila\"\n      },\n      \"assignees\": [\n        \"usr_1\",\n        \"usr_2\"\n      ],\n      \"assigneeNames\": [\n        \"Juan Dela Cruz\",\n        \"Maria Santos\"\n      ],\n      \"status\": \"active\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Run the reassignment queue through the active rules (dryRun: preview only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/lead-assignment/rules/run",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "lead-assignment",
+                "rules",
+                "run"
+              ]
+            },
+            "description": "Run the reassignment queue through the active rules (dryRun: preview only)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassignment Queue > Assign by rules\n\nAccess: write:lead-assignment",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dryRun\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/lead-assignment/rules/run",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "lead-assignment",
+                    "rules",
+                    "run"
+                  ]
+                },
+                "description": "Run the reassignment queue through the active rules (dryRun: preview only)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassignment Queue > Assign by rules\n\nAccess: write:lead-assignment",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"dryRun\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"dryRun\": true,\n    \"assigned\": [\n      {\n        \"leadNumber\": \"LD-2026-00012\",\n        \"name\": \"Jose Reyes\",\n        \"ruleName\": \"Metro Manila motor\",\n        \"toName\": \"Juan Dela Cruz\"\n      }\n    ],\n    \"unmatched\": 2\n  }\n}"
             }
           ]
         },
@@ -43411,6 +43676,99 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Processed 3 rows: 3 created, 0 failed\",\n    \"total\": 3,\n    \"created\": 3,\n    \"failed\": 0,\n    \"errors\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Possible duplicates of a new prospect: clients and open prospects with the same e-mail, mobile number, or name and date of birth (clientId: the open prospects of that client); off with leads.duplicate_check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leads/duplicates?firstName=Juan&lastName=Dela Cruz&DOB=1990-05-01&emailId=juan@example.com&contactNumber=09171234567",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leads",
+                "duplicates"
+              ],
+              "query": [
+                {
+                  "key": "firstName",
+                  "value": "Juan"
+                },
+                {
+                  "key": "lastName",
+                  "value": "Dela Cruz"
+                },
+                {
+                  "key": "DOB",
+                  "value": "1990-05-01"
+                },
+                {
+                  "key": "emailId",
+                  "value": "juan@example.com"
+                },
+                {
+                  "key": "contactNumber",
+                  "value": "09171234567"
+                }
+              ]
+            },
+            "description": "Possible duplicates of a new prospect: clients and open prospects with the same e-mail, mobile number, or name and date of birth (clientId: the open prospects of that client); off with leads.duplicate_check\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Create Prospect\n\nAccess: read:leads"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/leads/duplicates?firstName=Juan&lastName=Dela Cruz&DOB=1990-05-01&emailId=juan@example.com&contactNumber=09171234567",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "leads",
+                    "duplicates"
+                  ],
+                  "query": [
+                    {
+                      "key": "firstName",
+                      "value": "Juan"
+                    },
+                    {
+                      "key": "lastName",
+                      "value": "Dela Cruz"
+                    },
+                    {
+                      "key": "DOB",
+                      "value": "1990-05-01"
+                    },
+                    {
+                      "key": "emailId",
+                      "value": "juan@example.com"
+                    },
+                    {
+                      "key": "contactNumber",
+                      "value": "09171234567"
+                    }
+                  ]
+                },
+                "description": "Possible duplicates of a new prospect: clients and open prospects with the same e-mail, mobile number, or name and date of birth (clientId: the open prospects of that client); off with leads.duplicate_check\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Create Prospect\n\nAccess: read:leads"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"kind\": \"client\",\n      \"id\": \"cli_1\",\n      \"number\": \"CL-2026-00004\",\n      \"name\": \"Juan Dela Cruz\",\n      \"ownerName\": \"Ana Garcia\",\n      \"matchedOn\": [\n        \"email\",\n        \"name\",\n        \"birthDate\"\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -88210,7 +88568,7 @@
                 "system-settings"
               ]
             },
-            "description": "System settings (branding, display currency, language, application name); public because the sign-in page needs them\n\nFront-end touchpoint: Master > System Settings; Sign-in; App shell\n\nAccess: Public",
+            "description": "System settings (branding, display currency, language, application name); public because the sign-in page needs them\n\nFront-end touchpoint: System settings (API only); Sign-in; App shell\n\nAccess: Public",
             "auth": {
               "type": "noauth"
             }
@@ -88230,7 +88588,7 @@
                     "system-settings"
                   ]
                 },
-                "description": "System settings (branding, display currency, language, application name); public because the sign-in page needs them\n\nFront-end touchpoint: Master > System Settings; Sign-in; App shell\n\nAccess: Public",
+                "description": "System settings (branding, display currency, language, application name); public because the sign-in page needs them\n\nFront-end touchpoint: System settings (API only); Sign-in; App shell\n\nAccess: Public",
                 "auth": {
                   "type": "noauth"
                 }
@@ -88250,7 +88608,7 @@
           ]
         },
         {
-          "name": "Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName)",
+          "name": "Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName); while BRAND_PACK is set a change to logoUrl, faviconUrl, the colours or systemName is refused",
           "request": {
             "method": "PUT",
             "header": [
@@ -88268,7 +88626,7 @@
                 "system-settings"
               ]
             },
-            "description": "Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName)\n\nFront-end touchpoint: Master > System Settings\n\nAccess: write:settings",
+            "description": "Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName); while BRAND_PACK is set a change to logoUrl, faviconUrl, the colours or systemName is refused\n\nFront-end touchpoint: System settings (API only)\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"systemName\": \"BrokerVerse\",\n  \"displayCurrency\": \"PHP\",\n  \"primaryColor\": \"#0072d8\",\n  \"secondaryColor\": \"#004ea8\",\n  \"defaultLanguage\": \"en\",\n  \"logoUrl\": \"/iorta.png\"\n}",
@@ -88299,7 +88657,7 @@
                     "system-settings"
                   ]
                 },
-                "description": "Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName)\n\nFront-end touchpoint: Master > System Settings\n\nAccess: write:settings",
+                "description": "Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName); while BRAND_PACK is set a change to logoUrl, faviconUrl, the colours or systemName is refused\n\nFront-end touchpoint: System settings (API only)\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"systemName\": \"BrokerVerse\",\n  \"displayCurrency\": \"PHP\",\n  \"primaryColor\": \"#0072d8\",\n  \"secondaryColor\": \"#004ea8\",\n  \"defaultLanguage\": \"en\",\n  \"logoUrl\": \"/iorta.png\"\n}",
@@ -88386,7 +88744,7 @@
           ]
         },
         {
-          "name": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked; settings owned by another screen are refused",
+          "name": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked (the display currency must be an active currency); settings owned by another screen are refused",
           "request": {
             "method": "PUT",
             "header": [
@@ -88405,7 +88763,7 @@
                 "configuration"
               ]
             },
-            "description": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked; settings owned by another screen are refused\n\nFront-end touchpoint: Master > Configuration\n\nAccess: write:settings",
+            "description": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked (the display currency must be an active currency); settings owned by another screen are refused\n\nFront-end touchpoint: Master > Configuration\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"settings\": {\n    \"limits.bulk_upload_max_rows\": 1000,\n    \"notification.email_enabled\": true\n  }\n}",
@@ -88437,7 +88795,7 @@
                     "configuration"
                   ]
                 },
-                "description": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked; settings owned by another screen are refused\n\nFront-end touchpoint: Master > Configuration\n\nAccess: write:settings",
+                "description": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked (the display currency must be an active currency); settings owned by another screen are refused\n\nFront-end touchpoint: Master > Configuration\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"settings\": {\n    \"limits.bulk_upload_max_rows\": 1000,\n    \"notification.email_enabled\": true\n  }\n}",
@@ -88463,7 +88821,7 @@
           ]
         },
         {
-          "name": "Add a company logo preset (JSON { label, url, setActive } or multipart label + file + setActive)",
+          "name": "Add a company logo preset (JSON { label, url, setActive } or multipart label + file + setActive); setActive is refused while BRAND_PACK is set",
           "request": {
             "method": "POST",
             "header": [
@@ -88482,7 +88840,7 @@
                 "logo-presets"
               ]
             },
-            "description": "Add a company logo preset (JSON { label, url, setActive } or multipart label + file + setActive)\n\nFront-end touchpoint: Master > System Settings > Add Company Logo\n\nAccess: write:settings",
+            "description": "Add a company logo preset (JSON { label, url, setActive } or multipart label + file + setActive); setActive is refused while BRAND_PACK is set\n\nFront-end touchpoint: System settings (API only) > Add Company Logo\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"label\": \"Sample Bank\",\n  \"url\": \"https://example.com/logo.png\",\n  \"setActive\": true\n}",
@@ -88514,7 +88872,7 @@
                     "logo-presets"
                   ]
                 },
-                "description": "Add a company logo preset (JSON { label, url, setActive } or multipart label + file + setActive)\n\nFront-end touchpoint: Master > System Settings > Add Company Logo\n\nAccess: write:settings",
+                "description": "Add a company logo preset (JSON { label, url, setActive } or multipart label + file + setActive); setActive is refused while BRAND_PACK is set\n\nFront-end touchpoint: System settings (API only) > Add Company Logo\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"label\": \"Sample Bank\",\n  \"url\": \"https://example.com/logo.png\",\n  \"setActive\": true\n}",
@@ -88562,7 +88920,7 @@
                 }
               ]
             },
-            "description": "Remove a custom logo preset (built-in presets cannot be removed)\n\nFront-end touchpoint: Master > System Settings > Remove Logo\n\nAccess: write:settings"
+            "description": "Remove a custom logo preset (built-in presets cannot be removed)\n\nFront-end touchpoint: System settings (API only) > Remove Logo\n\nAccess: write:settings"
           },
           "response": [
             {
@@ -88588,7 +88946,7 @@
                     }
                   ]
                 },
-                "description": "Remove a custom logo preset (built-in presets cannot be removed)\n\nFront-end touchpoint: Master > System Settings > Remove Logo\n\nAccess: write:settings"
+                "description": "Remove a custom logo preset (built-in presets cannot be removed)\n\nFront-end touchpoint: System settings (API only) > Remove Logo\n\nAccess: write:settings"
               },
               "status": "OK",
               "code": 200,
@@ -88605,7 +88963,7 @@
           ]
         },
         {
-          "name": "Upload the logo or favicon (multipart \"file\"); stored under UPLOAD_DIR and recorded in documents",
+          "name": "Upload the logo or favicon (multipart \"file\"); stored under UPLOAD_DIR and recorded in documents. Refused while BRAND_PACK is set",
           "request": {
             "method": "POST",
             "header": [
@@ -88632,7 +88990,7 @@
                 }
               ]
             },
-            "description": "Upload the logo or favicon (multipart \"file\"); stored under UPLOAD_DIR and recorded in documents\n\nFront-end touchpoint: Master > System Settings > Upload\n\nAccess: write:settings",
+            "description": "Upload the logo or favicon (multipart \"file\"); stored under UPLOAD_DIR and recorded in documents. Refused while BRAND_PACK is set\n\nFront-end touchpoint: System settings (API only) > Upload\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"file\": \"(binary)\"\n}",
@@ -88672,7 +89030,7 @@
                     }
                   ]
                 },
-                "description": "Upload the logo or favicon (multipart \"file\"); stored under UPLOAD_DIR and recorded in documents\n\nFront-end touchpoint: Master > System Settings > Upload\n\nAccess: write:settings",
+                "description": "Upload the logo or favicon (multipart \"file\"); stored under UPLOAD_DIR and recorded in documents. Refused while BRAND_PACK is set\n\nFront-end touchpoint: System settings (API only) > Upload\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"file\": \"(binary)\"\n}",

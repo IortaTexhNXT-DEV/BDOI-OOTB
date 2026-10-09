@@ -18,6 +18,7 @@ import PhAddressFields from "../../component/PhAddressFields";
 import onboardingService, { errorMessage, fieldErrors } from "./onboardingService";
 import { AUTHORITY_DOCUMENTS, CONTROL_TYPES, KycStatusTag, PageHeader } from "./common";
 import KycDocuments from "./KycDocuments";
+import DateField from "../../../components/DateField";
 import "../../../module/Administration/index.scss";
 import "../../../module/AccessControl/index.scss";
 import "./index.scss";
@@ -173,7 +174,7 @@ const ClientOnboarding = () => {
   const date = (k, label) => (
     <div className="admin__field" key={k}>
       <label htmlFor={`ob-${k}`}>{t(label)}</label>
-      <InputText id={`ob-${k}`} type="date" value={v[k] || ""} onChange={(e) => formik.setFieldValue(k, e.target.value)} />
+      <DateField id={`ob-${k}`} value={v[k] || ""} onChange={(e) => formik.setFieldValue(k, e.target.value)} />
       {err(k)}
     </div>
   );
@@ -362,7 +363,7 @@ const ClientOnboarding = () => {
                 {partyField("position", "onboarding.colPosition", <InputText id="pt-position" value={party.row.position || ""} onChange={(e) => setRow("position", e.target.value)} />)}
                 {partyField("authorityDocument", "onboarding.colAuthority", <Dropdown inputId="pt-authorityDocument" value={party.row.authorityDocument} options={authorityDocs} onChange={(e) => setRow("authorityDocument", e.value)} />)}
                 {partyField("authorityReference", "onboarding.authorityReference", <InputText id="pt-authorityReference" value={party.row.authorityReference || ""} onChange={(e) => setRow("authorityReference", e.target.value)} />)}
-                {partyField("authorityDate", "onboarding.authorityDate", <InputText id="pt-authorityDate" type="date" value={party.row.authorityDate || ""} onChange={(e) => setRow("authorityDate", e.target.value)} />)}
+                {partyField("authorityDate", "onboarding.authorityDate", <DateField id="pt-authorityDate" value={party.row.authorityDate || ""} onChange={(e) => setRow("authorityDate", e.target.value)} />)}
               </>
             ) : (
               <>
@@ -374,7 +375,7 @@ const ClientOnboarding = () => {
               </>
             )}
             {partyField("nationality", "onboarding.nationality", <Dropdown inputId="pt-nationality" value={party.row.nationality || null} options={options.nationality} editable showClear onChange={(e) => setRow("nationality", e.value || "")} />)}
-            {partyField("birthDate", "onboarding.birthDate", <InputText id="pt-birthDate" type="date" value={party.row.birthDate || ""} onChange={(e) => setRow("birthDate", e.target.value)} />)}
+            {partyField("birthDate", "onboarding.birthDate", <DateField id="pt-birthDate" value={party.row.birthDate || ""} onChange={(e) => setRow("birthDate", e.target.value)} />)}
             {partyField("idType", "onboarding.idType", <Dropdown inputId="pt-idType" value={party.row.idType || null} options={options.idTypes} showClear onChange={(e) => setRow("idType", e.value || "")} />)}
             {partyField("idNumber", "onboarding.idNumber", <InputText id="pt-idNumber" value={party.row.idNumber || ""} onChange={(e) => setRow("idNumber", e.target.value)} />)}
           </div>

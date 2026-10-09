@@ -38,8 +38,9 @@ export const epolicyFormValues = (p) => {
 /**
  * e-Policy received (TIS-BRD-ISSUE-02): the issued policy the insurer returned is uploaded and its figures keyed - both
  * policy numbers, the participant name, sum insured, premium, commission, the issue / issuance / effective / production
- * dates and, for motor, the vehicle identifiers carried from the quotation (registration mandatory, TBA not accepted).
- * The server compares it with the slip at once.
+ * dates and, for motor and CTPL only, the vehicle identifiers carried from the quotation (registration mandatory, TBA
+ * not accepted) and an optional vehicle photo; Credit Life, Personal Accident, Travel, Parcel and the other lines have
+ * neither. The server compares it with the slip at once.
  */
 export const EpolicyDialog = ({ placement, visible, onHide, onSaved }) => {
   const { t } = useTranslation();
@@ -82,7 +83,7 @@ export const EpolicyDialog = ({ placement, visible, onHide, onSaved }) => {
         document = { documentKey: up.key, documentName: file.name };
       }
       let vehiclePhoto = {};
-      if (photo) {
+      if (motor && photo) {
         const up = await s3Service.uploadFile(photo, "vehicle-photos");
         if (!up?.key) throw new Error(up?.error || t("placement.epolicy.errors.upload"));
         vehiclePhoto = { vehiclePhotoKey: up.key, vehiclePhotoName: photo.name };
@@ -92,7 +93,7 @@ export const EpolicyDialog = ({ placement, visible, onHide, onSaved }) => {
         participantName: form.participantName.trim(), sumInsured: form.sumInsured || 0, netPremium: form.netPremium, grossPremium: form.grossPremium ?? undefined,
         commissionAmount: form.commissionAmount ?? undefined, issueDate: isoDate(form.issueDate), issuanceDate: isoDate(form.issuanceDate), effectiveDate: isoDate(form.effectiveDate),
         expiryDate: isoDate(form.expiryDate), productionDate: isoDate(form.productionDate), deductible: form.deductible || undefined, remarks: form.remarks || undefined,
-        vehicle: motor || VEHICLE.some((k) => form.vehicle[k]) ? Object.fromEntries(VEHICLE.map((k) => [k, form.vehicle[k] || undefined])) : undefined,
+        vehicle: motor ? Object.fromEntries(VEHICLE.map((k) => [k, form.vehicle[k] || undefined])) : undefined,
         participants: Object.entries(form.references).filter(([, ref]) => ref).map(([insuranceCompanyId, insurerReference]) => ({ insuranceCompanyId, insurerReference })),
       });
       onSaved?.(saved);
@@ -122,10 +123,12 @@ export const EpolicyDialog = ({ placement, visible, onHide, onSaved }) => {
           <input id="ep-file" type="file" accept="application/pdf,image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} />
           {!file && placement.epolicy?.documentName && <small className="hint">{t("placement.epolicy.keepFile", { name: placement.epolicy.documentName })}</small>}
         </div>
-        <div className="col-12 md:col-6">
-          <label htmlFor="ep-photo">{t("placement.epolicy.vehiclePhoto")}</label>
-          <input id="ep-photo" type="file" accept="image/*" onChange={(e) => setPhoto(e.target.files?.[0] || null)} />
-        </div>
+        {motor && (
+          <div className="col-12 md:col-6">
+            <label htmlFor="ep-photo">{t("placement.epolicy.vehiclePhoto")}</label>
+            <input id="ep-photo" type="file" accept="image/*" onChange={(e) => setPhoto(e.target.files?.[0] || null)} />
+          </div>
+        )}
         <div className="col-12 md:col-4">
           <label htmlFor="ep-ins">{t("placement.epolicy.insurerPolicyNumber")} *</label>
           <InputText id="ep-ins" value={form.insurerPolicyNumber} onChange={(e) => set("insurerPolicyNumber")(e.target.value)} className="w-full" />
@@ -154,19 +157,19 @@ export const EpolicyDialog = ({ placement, visible, onHide, onSaved }) => {
           <InputText id="ep-ded" value={form.deductible} onChange={(e) => set("deductible")(e.target.value)} className="w-full" />
         </div>
       </div>
-      {(motor || VEHICLE.some((k) => form.vehicle[k])) && (
+      {motor && (
         <>
           <h4 className="mt-2 mb-1">{t("placement.epolicy.vehicle")}</h4>
           <p className="muted mt-0">{t("placement.epolicy.vehicleNote")}</p>
           <div className="grid">
             {VEHICLE.map((k) => (
               <div className="col-12 md:col-3" key={k}>
-                <label htmlFor={`ep-v-${k}`}>{t(`placement.epolicy.${k}`)}{motor && ["plateNumber", "mvFileNumber"].includes(k) ? " +" : ""}</label>
+                <label htmlFor={`ep-v-${k}`}>{t(`placement.epolicy.${k}`)}{["plateNumber", "mvFileNumber"].includes(k) ? " +" : ""}</label>
                 <InputText id={`ep-v-${k}`} value={form.vehicle[k]} onChange={setVehicle(k)} className="w-full" />
               </div>
             ))}
           </div>
-          {motor && <small className="hint">{t("placement.epolicy.registrationHint")}</small>}
+          <small className="hint">{t("placement.epolicy.registrationHint")}</small>
         </>
       )}
       {coInsurers.length > 0 && (

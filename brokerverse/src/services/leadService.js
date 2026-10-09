@@ -1,5 +1,6 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
+import { apiErrorMessage } from "../utility/apiError";
 
 /**
  * Lead Service
@@ -192,12 +193,31 @@ class LeadService {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        const detail = Array.isArray(data.errors) ? data.errors.map((e) => e.message).filter(Boolean).join(", ") : "";
-        throw new Error(detail || data.message || "Failed to tag the product");
+        throw new Error(apiErrorMessage(data, response.status));
       }
       return { success: true, data };
     } catch (error) {
       return { success: false, error: error.message || "Failed to tag the product" };
+    }
+  }
+
+  /**
+   * Possible duplicates of a new prospect: clients and open prospects with the same e-mail, mobile number, or name and
+   * date of birth; with clientId, the open prospects of that client
+   * @param {Object} params - firstName, lastName, companyName, DOB (YYYY-MM-DD), emailId, contactNumber | clientId
+   * @returns {Promise<Object>} { success, data: [{ kind, id, number, name, ownerName, lob, productName, matchedOn }] }
+   */
+  async possibleDuplicates(params) {
+    try {
+      const query = new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== "")).toString();
+      const response = await fetch(`${this.baseURL}/leads/duplicates?${query}`, {
+        headers: { "Content-Type": "application/json", ...authService.getAuthHeader() },
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || "Failed to check for duplicates");
+      return { success: true, data: Array.isArray(data.data) ? data.data : [] };
+    } catch (error) {
+      return { success: false, error: error.message || "Failed to check for duplicates" };
     }
   }
 

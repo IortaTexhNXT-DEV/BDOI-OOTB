@@ -72,7 +72,7 @@ hidden or refused with a message.
 
 | Role | Menus |
 |---|---|
-| System Administrator (Super Admin) | Every menu, including Master (System Settings, Configuration, Document Numbering, Schedules, Audit Trail, all masters, User Management) |
+| System Administrator (Super Admin) | Every menu, including Master (Configuration, E-mail Layout, Documents and Reports Layout, Document Numbering, Schedules, Audit Trail, all masters, User Management) |
 | Sales & Marketing (Account Executive) | Dashboard: Executive Dashboard, Sales Dashboard. Product Configurator: Dashboard, Product Templates. Operations: Home, Leads/Prospects, Clients, Quotation, Broker Slips, Placement Slips, Policy, Claims, Renewals, Open Items, Payments. Commission: Commission Dashboard. Reports: All Reports, Operational Reports |
 | Processing Team (Placement & Policy Processing) | Dashboard: Processing Dashboard, Executive Dashboard. Product Configurator: all items (Dashboard, Product Templates, Coverage Builder, Rating Engine, Acceptance Rules, Document Manager, Market Mapping, Risk Mapping, Product Analytics). Operations: all items as for Sales & Marketing. Reinsurance: Treaty Dashboard, Cession Tracking, Claims Recovery, Reconciliation, Analytics. Reports: All Reports, Operational Reports |
 | Operations (Client Servicing) | Dashboard: Executive Dashboard. Product Configurator: Dashboard, Product Templates. Operations: all items as for Sales & Marketing. Reports: All Reports, Operational Reports |

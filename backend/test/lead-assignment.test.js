@@ -160,3 +160,83 @@ describe('reassignment queue, bulk reassignment and team view', () => {
     expect((await pool.query('SELECT status FROM lead_assignment_rules WHERE id = $1', [rule.id])).rows[0].status).toBe('inactive');
   });
 });
+
+describe('reassignment reasons, taking from the queue and running the rules', () => {
+  const lead = async (firstName) => (await pool.query('SELECT id, lead_number FROM leads WHERE first_name = $1', [firstName])).rows[0];
+
+  it('a reassignment needs a reason of the Reason Codes master (reassignment) or a note while leads.reassignment_reason_required', async () => {
+    const l = await lead('Robin2');
+    const none = await ops('post', '/lead-assignment/reassign').send({ leadIds: [l.id], toUserId: ids['la.ae1'] });
+    expect(none.status).toBe(400);
+    const wrong = await ops('post', '/lead-assignment/reassign').send({ leadIds: [l.id], toUserId: ids['la.ae1'], reasonCode: 'LAP-FUNDS' });
+    expect(wrong.status).toBe(400);
+    const noNote = await ops('post', '/lead-assignment/reassign').send({ leadIds: [l.id], toUserId: ids['la.ae1'], reasonCode: 'REA-OTHER' });
+    expect(noNote.status).toBe(400);
+    const r = await ops('post', '/lead-assignment/reassign').send({ leadIds: [l.id], toUserId: ids['la.ae1'], reasonCode: 'REA-TERRITORY', reason: 'Moved to Cebu' });
+    expect(r.status).toBe(200);
+    expect(r.body.data).toMatchObject({ reasonCode: 'REA-TERRITORY', reason: 'Territory or branch change: Moved to Cebu' });
+    const h = await ops('get', `/lead-assignment/history/${l.id}`);
+    expect(h.body.data[0]).toMatchObject({ action: 'manual', reasonCode: 'REA-TERRITORY', toName: 'la.ae1' });
+    await setting('leads.reassignment_reason_required', false);
+    expect((await ops('post', '/lead-assignment/reassign').send({ leadIds: [l.id], toUserId: ids['la.ae2'] })).status).toBe(200);
+    await setting('leads.reassignment_reason_required', true);
+  });
+
+  it('sends to the queue with a reason code, filters the queue by it, and the team takes a queued prospect', async () => {
+    const l = await lead('Robin2');
+    const q = await ops('post', '/lead-assignment/queue').send({ leadIds: [l.lead_number], reasonCode: 'REA-LEAVE' });
+    expect(q.status).toBe(200);
+    expect(q.body.data).toMatchObject({ queued: 1, reasonCode: 'REA-LEAVE', reason: 'Account executive on leave' });
+    const list = await ops('get', '/lead-assignment/queue?reasonCode=REA-LEAVE');
+    expect(list.body.data.map((x) => x.leadNumber)).toEqual([l.lead_number]);
+    expect(list.body.data[0]).toMatchObject({ queueReasonCode: 'REA-LEAVE', lob: 'MOTOR' });
+    expect((await ops('get', '/lead-assignment/queue?lob=FIRE&reasonCode=REA-LEAVE')).body.data).toEqual([]);
+    const notQueued = await lead('Fixed');
+    expect((await ops('post', '/lead-assignment/queue/take').send({ leadIds: [notQueued.id] })).status).toBe(400);
+    const taken = await ops('post', '/lead-assignment/queue/take').send({ leadIds: [l.id] });
+    expect(taken.status).toBe(200);
+    expect(taken.body.data.toUserId).toBe(ids['la.ops']);
+    const h = await ops('get', `/lead-assignment/history/${l.id}`);
+    expect(h.body.data[0]).toMatchObject({ action: 'taken', toName: 'la.ops' });
+    expect((await ae1('post', '/lead-assignment/queue/take').send({ leadIds: [l.id] })).status).toBe(403);
+  });
+
+  it('orders the rules; a rule on the line NONE takes prospects without a product, a rule on a product only that product', async () => {
+    await pool.query("UPDATE lead_assignment_rules SET status = 'inactive'");
+    const untagged = await ops('post', '/lead-assignment/rules').send({ name: 'Untagged', priority: 50, method: 'fixed', conditions: { lob: 'none' }, assignees: [ids['la.ae2']] });
+    expect(untagged.body.data.conditions).toEqual({ lob: 'NONE' });
+    const product = (await pool.query("SELECT id FROM products WHERE code = 'CTPL'")).rows[0].id;
+    const ctpl = await ops('post', '/lead-assignment/rules').send({ name: 'CTPL', priority: 60, method: 'fixed', conditions: { lob: 'MOTOR', productId: product }, assignees: [ids['la.ae1']] });
+    const order = await ops('put', '/lead-assignment/rules/order').send({ ids: [ctpl.body.data.id, untagged.body.data.id] });
+    expect(order.status).toBe(200);
+    expect(order.body.data.filter((r) => r.status === 'active').map((r) => [r.name, r.priority])).toEqual([['CTPL', 10], ['Untagged', 20]]);
+    const noProduct = await manager('post', '/leads').send({ firstName: 'Untagged1' });
+    expect(noProduct.body.ownerUserId).toBe(ids['la.ae2']);
+    const withCtpl = await manager('post', '/leads').send({ firstName: 'Ctpl1', lob: 'MOTOR', productId: product });
+    expect(withCtpl.body.ownerUserId).toBe(ids['la.ae1']);
+    const motor = await manager('post', '/leads').send({ firstName: 'Motor1', lob: 'MOTOR' });
+    expect(motor.body.ownerUserId).toBe(ids['la.manager']);
+  });
+
+  it('suggests the assignees of the rule that matches the prospects being reassigned', async () => {
+    const l = await lead('Untagged1');
+    const r = await ops('get', `/lead-assignment/assignees?leadIds=${l.id}`);
+    const ae2 = r.body.data.find((u) => u.id === ids['la.ae2']);
+    expect(ae2).toMatchObject({ suggested: true, rules: ['Untagged'] });
+    expect(r.body.data.find((u) => u.id === ids['la.ae1']).suggested).toBe(false);
+  });
+
+  it('runs the queue through the rules: a preview first, then the matching prospects are assigned', async () => {
+    const l = await lead('Untagged1');
+    await ops('post', '/lead-assignment/queue').send({ leadIds: [l.id], reason: 'Review' });
+    const preview = await ops('post', '/lead-assignment/rules/run').send({ dryRun: true });
+    expect(preview.status).toBe(200);
+    expect(preview.body.data.assigned).toEqual(expect.arrayContaining([expect.objectContaining({ leadNumber: expect.any(String), name: 'Untagged1', ruleName: 'Untagged', toUserId: ids['la.ae2'] })]));
+    expect((await pool.query('SELECT assignment_status FROM leads WHERE id = $1', [l.id])).rows[0].assignment_status).toBe('queued');
+    const run = await ops('post', '/lead-assignment/rules/run').send({});
+    expect(run.body.data.dryRun).toBe(false);
+    expect((await pool.query('SELECT assignment_status, owner_user_id FROM leads WHERE id = $1', [l.id])).rows[0]).toEqual({ assignment_status: 'assigned', owner_user_id: ids['la.ae2'] });
+    expect((await ops('get', `/lead-assignment/history/${l.id}`)).body.data[0]).toMatchObject({ action: 'auto', ruleName: 'Untagged' });
+    expect((await ae1('post', '/lead-assignment/rules/run').send({})).status).toBe(403);
+  });
+});

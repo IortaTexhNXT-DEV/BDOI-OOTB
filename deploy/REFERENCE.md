@@ -69,14 +69,32 @@ again, or the demo data is seeded back.
 ## Brand pack of the deployment
 
 A deployment made for a client whose brand pack ships with the product (`backend/assets/brand-packs/<id>/`) names it
-in `BRAND_PACK`, so the environment opens in the client's branding without a manual step. After the migrations and
-the seed, the API enables the pack once, as the bundled pack enablement of the API (POST /api/branding/packs/bundled/:id/enable)
-does: the enablement is recorded against the user `system` with the trademark acknowledgement and the note "Given by the
-deployment configuration (BRAND_PACK)", and audited (entity `branding`, action `enable-pack`). It logs one line.
+in `BRAND_PACK`, so the environment opens in the client's branding without a manual step, and keeps it. `BRAND_PACK`
+enforces the pack: after the migrations and the seed, at every start, the API checks that the screens show it and
+applies it again when the pack is not the enablement in force or when anything differs from it: the theme of the
+screens (name, preset, colours, layout, font, radius, sign-in page, logo sizes), the application name, the logo, the
+favicon, or the print logo of the primary company (Master > Company) when it is missing. The e-mail and document
+sections of the theme (Master > System Configuration > E-mail Layout, Documents and Reports Layout) and the document
+signature mapping are kept as the broker set them. An image already stored with the pack's bytes is reused, so a start
+with nothing to apply stores and records nothing; it logs `Brand pack <name> in force (BRAND_PACK=<id>)`.
+
+The first application is recorded like the bundled pack enablement of the API (POST
+/api/branding/packs/bundled/:id/enable): against the user `system`, with the trademark acknowledgement and the note
+"Given by the deployment configuration (BRAND_PACK)", audited as entity `branding`, action `enable-pack`. A later
+application is audited as action `reapply-pack`. Both log one line naming what differed, for example
+`Brand pack Toyota Insurance Services applied again from BRAND_PACK=toyota-insurance-services: the theme differs
+(colors.primary, ...); the application name is "BrokerVerse" (theme, logo, favicon, systemName)`.
+
+While the variable is set the API refuses every change to the look of the screens: a theme save that changes anything
+but the e-mail and document sections (PUT /api/branding/theme), the branding images (POST and DELETE
+/api/branding/upload/:asset, POST /api/system-settings/upload/:field), a brand pack import (only its dry run is
+accepted), enabling a pack, Back to default (POST /api/branding/packs/reset-default) and the branding fields of PUT
+/api/system-settings (logo, favicon, colours, application name). To take the pack out of an environment, remove the
+variable, restart the API and go back to the default through the API.
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `BRAND_PACK` | empty | Id of a bundled brand pack, e.g. `toyota-insurance-services` (TISPH environments). Applied only when no pack is in force and the pack was never enabled in this environment, so an administrator's Back to default is kept across restarts and a pack enabled on the screen is never replaced. An unknown id logs a warning; the API starts with the branding it has. |
+| `BRAND_PACK` | empty | Id of a bundled brand pack, e.g. `toyota-insurance-services` (TISPH environments). Enforced: applied again at every start when the branding of the screens differs from it, and not changeable through the API while set. An unknown id logs a warning; the API starts with the branding it has and nothing is locked. |
 
 Set it only in the client's own environments: the client's contract with iorta TechNXT covers the use of its marks
 there, and setting the variable is the acknowledgement the screen otherwise asks for.

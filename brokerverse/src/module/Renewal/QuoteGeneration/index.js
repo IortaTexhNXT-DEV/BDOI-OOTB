@@ -767,8 +767,7 @@ const QuoteGeneration = () => {
               icon="pi pi-file-o"
               onClick={handleGenerateQuote}
               loading={loading}
-              className="p-button-success"
-              disabled={!policyData?.isOpen || ['pending-approval'].includes(policyData?.statusCode)}
+                            disabled={!policyData?.isOpen || ['pending-approval'].includes(policyData?.statusCode)}
             />
 
             {policyData?.statusCode === 'approved' && (
@@ -785,8 +784,7 @@ const QuoteGeneration = () => {
                 <Button
                   label="View Comparison"
                   icon="pi pi-eye"
-                  className="p-button-info"
-                  onClick={() => setComparisonVisible(true)}
+                                    onClick={() => setComparisonVisible(true)}
                 />
 
                 <Button
