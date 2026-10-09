@@ -80,7 +80,7 @@ const renewalsWorkspaceService = {
   submitForApproval: (id, note) => call("POST", `${id}/submit`, { note }),
   decide: (id, decision, note) => call("POST", `${id}/approve`, { decision, note }),
   complete: (id, payload = {}) => call("POST", `${id}/complete`, payload),
-  lapse: (id, reason) => call("POST", `${id}/lapse`, { reason }),
+  lapse: (id, reason, reasonCode = null) => call("POST", `${id}/lapse`, { reason, ...(reasonCode ? { reasonCode } : {}) }),
   reinstate: (id, note) => call("POST", `${id}/reinstate`, { note }),
   winBack: (id, payload) => call("POST", `${id}/win-back`, payload),
 

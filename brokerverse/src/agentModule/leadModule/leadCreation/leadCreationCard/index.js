@@ -15,6 +15,8 @@ import {
 } from "../../Store/leadMiddleware";
 import { useFormik } from "formik";
 import PhAddressFields from "../../../component/PhAddressFields";
+import DropdownField from "../../../component/DropdownField";
+import useMasterOptions from "../../../component/useMasterOptions";
 import { patchClientEditMiddleWare } from "../../../quoteModule/clientListing/store/clientsMiddleware";
 import { isValidMobile, mobileHint, normalizeMobile } from "../../../../utility/phoneFormat";
 import { birthDateError, birthDateRange, useAgeLimits } from "../../../../utility/birthDate";
@@ -38,6 +40,7 @@ const initialValue = {
   DateofBirth: "",
   category: "Retail",
   gender: "Male",
+  Source: "",
   Quotes: "01",
   LeadID: "877",
 };
@@ -46,6 +49,8 @@ const LeadCreationCard = ({ flow, action }) => {
   const { t } = useTranslation();
   // Configured age range for the date of birth (System Settings leads.min_age_years / leads.max_age_years)
   const ageLimits = useAgeLimits();
+  // where the prospect came from: Master > Insurance Management > Lead Sources (stored by name)
+  const leadSources = useMasterOptions("lead-source", { value: (r) => r.name });
   const { leadId } = useParams();
   const { leadtabledata, currentLeadDetails } = useSelector(
     ({ leadReducers }) => {
@@ -306,6 +311,7 @@ const LeadCreationCard = ({ flow, action }) => {
           : "",
         category: currentLeadDetails.leadCategory || "Retail",
         gender: currentLeadDetails.gender || "Male",
+        Source: currentLeadDetails.source || "",
         Quotes: "01",
         LeadID:
           currentLeadDetails.generatedLeadId || currentLeadDetails.leadId || "",
@@ -575,6 +581,24 @@ const LeadCreationCard = ({ flow, action }) => {
             )}
           </div>
         </div>
+        {flow !== "client" && (
+          <div className="grid mt-2">
+            <div className="col-12 md:col-6 lg:col-6">
+              <DropdownField
+                inputId="lead-source"
+                label={t("leadCreation.source")}
+                value={formik.values.Source}
+                onChange={(e) => formik.setFieldValue("Source", e.value)}
+                options={
+                  formik.values.Source && !leadSources.some((o) => o.value === formik.values.Source)
+                    ? [...leadSources, { label: formik.values.Source, value: formik.values.Source }]
+                    : leadSources
+                }
+                filter
+              />
+            </div>
+          </div>
+        )}
         {/* Philippine address: Region -> Province -> City / Municipality -> Barangay, House / Unit No., Street, ZIP code */}
         <PhAddressFields
           formik={formik}

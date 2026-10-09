@@ -780,6 +780,9 @@
     "quoteGeneration": "การสร้างใบเสนอราคา",
     "negotiationWorkspace": "พื้นที่เจรจา",
     "lapseManagement": "การจัดการกรมธรรม์หมดอายุ",
+    "lapseReasonCodeNone": "เหตุผลที่หมดอายุ (รหัสเหตุผล)",
+    "lapseNote": "รายละเอียดของเหตุผล",
+    "lapseReasonText": "เหตุผลที่หมดอายุ",
     "performanceTracking": "การติดตามประสิทธิภาพ",
     "atRiskDataLoadedSuccess": "โหลดข้อมูลการวิเคราะห์ความเสี่ยงสำเร็จ",
     "failedToLoadAtRiskData": "โหลดข้อมูลความเสี่ยงไม่สำเร็จ",
@@ -4256,6 +4259,7 @@
     "numberOfQuotes": "จำนวนใบเสนอราคา:"
   },
   "leadCreation": {
+    "source": "แหล่งที่มา",
     "lead": "ลีด",
     "saveLead": "บันทึกลีด",
     "saveAndContinue": "บันทึกและดำเนินการต่อ",
@@ -5083,6 +5087,26 @@
       "noWizard": "No quote wizard for this product yet: request the terms from the insurers.",
       "start": "Start quote",
       "request": "Request quotation"
+    }
+  },
+  "claimJourney": {
+    "rejectReasonCode": "เหตุผลการปฏิเสธสินไหม",
+    "rejectReasonCodeNone": "ไม่มีรหัสเหตุผล (พิมพ์เหตุผล)",
+    "rejectNote": "หมายเหตุ",
+    "rejectNoteRequired": "เหตุผลนี้ต้องมีหมายเหตุ: กรอกรายละเอียด"
+  },
+  "opsAcc": {
+    "masters": {
+      "leadSources": {
+        "title": "แหล่งที่มาของลีด",
+        "section": "การจัดการประกันภัย",
+        "intro": "แหล่งที่มาของผู้มุ่งหวัง: ช่องแหล่งที่มาในแบบฟอร์มและการอัปโหลดลีด และเงื่อนไขการมอบหมายลีด"
+      },
+      "reasonCodes": {
+        "title": "รหัสเหตุผล",
+        "section": "การจัดการประกันภัย",
+        "intro": "รหัสเหตุผลของใบเสนอราคาที่ถูกปฏิเสธหรือยกเลิก การปฏิเสธสินไหม การหมดอายุของการต่ออายุ การคืนเงิน การปรับปรุง และธุรกิจที่ไม่เกิดขึ้น เหตุผลการยกเลิกและการตัดหนี้สูญมีข้อมูลหลักของตนเอง"
+      }
     }
   }
 }

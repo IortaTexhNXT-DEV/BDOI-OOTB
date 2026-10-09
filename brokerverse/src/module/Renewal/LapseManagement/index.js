@@ -19,6 +19,7 @@ import { Badge } from "primereact/badge";
 import { ProgressBar } from "primereact/progressbar";
 import { Calendar } from "primereact/calendar";
 import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
+import useMasterOptions from "../../../agentModule/component/useMasterOptions";
 import SvgDot from "../../../assets/icons/SvgDot";
 import FieldError from "../../../components/FieldError";
 import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
@@ -42,6 +43,9 @@ const LapseManagement = () => {
   const [winBackCampaigns, setWinBackCampaigns] = useState([]);
   const [lapseVisible, setLapseVisible] = useState(false);
   const [lapseReason, setLapseReason] = useState('');
+  const [lapseCode, setLapseCode] = useState(null);
+  // lapse reasons: Master > Insurance Management > Reason Codes (used for: lapse); the detail is free text
+  const lapseCodes = useMasterOptions("reason-code", { filter: (r) => r.context === "lapse" });
   const [dashboardData, setDashboardData] = useState({
     totalLapsed: 0,
     inGracePeriod: 0,
@@ -75,14 +79,9 @@ const LapseManagement = () => {
     { label: t("renewal.reinstated"), value: "Reinstated" }
   ];
 
-  const reasonOptions = [
-    { label: t("renewal.allReasons"), value: "All" },
-    { label: t("renewal.premiumTooHigh"), value: "Premium too high" },
-    { label: t("renewal.foundCheaperAlternative"), value: "Found cheaper alternative" },
-    { label: t("renewal.noLongerNeeded"), value: "No longer needed" },
-    { label: t("renewal.poorService"), value: "Poor service" },
-    { label: t("renewal.paymentIssues"), value: "Payment issues" }
-  ];
+  const reasonOptions = [{ label: t("renewal.allReasons"), value: "All" }, ...lapseCodes];
+  const lapseCodeRecord = lapseCodes.find((o) => o.value === lapseCode)?.record;
+  const lapseNoteNeeded = !lapseCodeRecord || lapseCodeRecord.requiresNote === true || String(lapseCodeRecord.requiresNote).toLowerCase() === "true";
 
   const benefitOptions = [
     "Waived reinstatement fee",
@@ -215,7 +214,7 @@ const LapseManagement = () => {
     }
 
     if (reasonFilter !== 'All') {
-      filtered = filtered.filter(p => p.lapseReason === reasonFilter);
+      filtered = filtered.filter(p => p.lapseReasonCode === reasonFilter);
     }
 
     setFilteredPolicies(filtered);
@@ -334,12 +333,13 @@ const LapseManagement = () => {
   const openLapse = (rowData) => {
     setSelectedPolicy(rowData);
     setLapseReason('');
+    setLapseCode(null);
     setLapseVisible(true);
   };
 
   const handleLapseConfirm = async () => {
     try {
-      await renewalsWorkspaceService.lapse(selectedPolicy.id, lapseReason);
+      await renewalsWorkspaceService.lapse(selectedPolicy.id, lapseReason.trim(), lapseCode);
       setLapseVisible(false);
       toast.current.show({
         severity: 'success',
@@ -875,19 +875,27 @@ const LapseManagement = () => {
             <div>
               <Button label="Cancel" icon="pi pi-times" className="p-button-text" onClick={() => setLapseVisible(false)} />
               <Button label={t("renewal.lapsed")} icon="pi pi-ban" className="p-button-danger"
-                onClick={handleLapseConfirm} disabled={lapseReason.trim().length < 3} />
+                onClick={handleLapseConfirm} disabled={lapseNoteNeeded && lapseReason.trim().length < 3} />
             </div>
           }
         >
           <div className="form-field">
             <label>{selectedPolicy?.policyNumber} - {selectedPolicy?.insuredName}</label>
             <Dropdown
-              value={lapseReason}
-              options={reasonOptions.filter(o => o.value !== 'All')}
-              onChange={(e) => setLapseReason(e.value || '')}
-              editable
-              placeholder={t("renewal.allReasons")}
+              value={lapseCode}
+              options={lapseCodes}
+              onChange={(e) => setLapseCode(e.value || null)}
+              showClear
+              placeholder={t("renewal.lapseReasonCodeNone")}
               style={{ width: '100%' }}
+            />
+            <InputTextarea
+              value={lapseReason}
+              onChange={(e) => setLapseReason(e.target.value)}
+              rows={3}
+              autoResize
+              placeholder={t(lapseCode ? "renewal.lapseNote" : "renewal.lapseReasonText")}
+              style={{ width: '100%', marginTop: '0.75rem' }}
             />
           </div>
         </Dialog>

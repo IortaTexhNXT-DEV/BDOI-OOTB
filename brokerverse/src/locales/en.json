@@ -890,6 +890,9 @@
     "quoteGeneration": "Quote Generation",
     "negotiationWorkspace": "Negotiation Workspace",
     "lapseManagement": "Lapse Management",
+    "lapseReasonCodeNone": "Lapse reason (Reason Codes)",
+    "lapseNote": "Detail of the reason",
+    "lapseReasonText": "Reason for the lapse",
     "performanceTracking": "Performance Tracking",
     "atRiskDataLoadedSuccess": "At-risk analysis data loaded successfully",
     "failedToLoadAtRiskData": "Failed to load at-risk data",
@@ -5139,6 +5142,7 @@
     "numberOfQuotes": "Number of Quotes:"
   },
   "leadCreation": {
+    "source": "Source",
     "lead": "Prospect",
     "saveLead": "Save Prospect",
     "saveAndContinue": "Save & Continue",
@@ -8518,6 +8522,10 @@
     "cancel": "Cancel",
     "rejectReason": "Reason for rejection",
     "rejectReasonRequired": "Enter the reason for rejecting the claim",
+    "rejectReasonCode": "Repudiation reason",
+    "rejectReasonCodeNone": "No reason code (type the reason)",
+    "rejectNote": "Note",
+    "rejectNoteRequired": "This reason needs a note: enter the detail",
     "settlementTitle": "Settlement",
     "settlementSection": "Settlement details",
     "settlementType": "Settlement type",
@@ -9837,6 +9845,16 @@
         "title": "Sales Activity Outcomes",
         "section": "Organization",
         "intro": "Outcomes of a sales activity and whether each is positive, neutral or negative for the activity report."
+      },
+      "leadSources": {
+        "title": "Lead Sources",
+        "section": "Insurance Management",
+        "intro": "Where prospects come from: the Source of the prospect form and of the lead upload, and a lead assignment condition."
+      },
+      "reasonCodes": {
+        "title": "Reason Codes",
+        "section": "Insurance Management",
+        "intro": "Coded reasons of a declined or dropped quotation, a claim repudiation, a renewal lapse, a refund, an adjustment or business that did not materialise. Cancellation and write-off reasons have their own masters."
       }
     },
     "instalments": {

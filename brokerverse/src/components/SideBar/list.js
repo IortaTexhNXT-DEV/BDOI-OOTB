@@ -1071,6 +1071,9 @@ export const menuList = [
           { id: 31, name: "Cancellation Reasons", path: "/master/insurance/cancellation-reasons", includes: ["/master/insurance/cancellation-reasons"] },
           { id: 32, name: "Claim Document Checklist", path: "/master/insurance/claim-document-checklist", includes: ["/master/insurance/claim-document-checklist"] },
           { id: 33, name: "Repair Shops", path: "/master/insurance/repair-shops", includes: ["/master/insurance/repair-shops"] },
+          // the Source of a prospect and the coded reasons of decisions without a master of their own
+          { id: 34, name: "Lead Sources", path: "/master/insurance/lead-sources", includes: ["/master/insurance/lead-sources"] },
+          { id: 35, name: "Reason Codes", path: "/master/insurance/reason-codes", includes: ["/master/insurance/reason-codes"] },
           {
             // dealer groups and branches, financing banks, affinity partners (hierarchy, referrer, mortgagee clause)
             id: 13,
