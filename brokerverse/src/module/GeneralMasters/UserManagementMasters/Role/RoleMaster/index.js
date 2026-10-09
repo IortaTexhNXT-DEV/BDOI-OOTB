@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "primereact/button";
 import SvgAdd from "../../../../../assets/icons/SvgAdd";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -11,8 +10,6 @@ import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
-import SvgEyeIcon from "../../../../../assets/icons/SvgEyeIcon";
-import SvgEditIcon from "../../../../../assets/icons/SvgEditIcon";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getSearchRoleMiddleware,
@@ -22,6 +19,7 @@ import MasterStatusToggle from "../../../common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
 import userService from "../../../../../services/userService";
 import { formatDate } from "../../../../../utility/dateFormat";
+import RowActions, { actionsColumn } from "../../../../../components/RowActions";
 
 const RoleMaster = () => {
   const { t } = useTranslation();
@@ -80,16 +78,6 @@ const RoleMaster = () => {
     color: "#000",
     border: "none",
   };
-  const ViewheaderStyle = {
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    padding: "1rem",
-    color: "#000",
-    border: "none",
-    display: "flex",
-    justifyContent: "center",
-  };
 
   const [, setFirst] = useState(0);
   const [, setRowsPerPage] = useState(10);
@@ -99,28 +87,7 @@ const RoleMaster = () => {
     setRowsPerPage(event.rows);
   };
 
-  const renderViewButton = (rowData) => {
-    return (
-      <div className="role__actions">
-        <Button
-          icon={<SvgEyeIcon />}
-          className="role__action__btn"
-          aria-label={t("common.view")}
-          tooltip={t("common.view")}
-          tooltipOptions={{ position: "top" }}
-          onClick={() => handleView(rowData)}
-        />
-        <Button
-          icon={<SvgEditIcon />}
-          className="role__action__btn"
-          aria-label={t("common.edit")}
-          tooltip={t("common.edit")}
-          tooltipOptions={{ position: "top" }}
-          onClick={() => handlEdit(rowData)}
-        />
-      </div>
-    );
-  };
+  const renderViewButton = (rowData) => <RowActions onView={() => handleView(rowData)} onEdit={() => handlEdit(rowData)} />;
 
   const template2 = {
     layout:
@@ -252,13 +219,10 @@ const RoleMaster = () => {
                   className="fieldvalue_container"
                 ></Column>
                 <Column
-                  field="action"
                   body={renderViewButton}
-                  header="Action"
-                  headerStyle={ViewheaderStyle}
-                  className="fieldvalue_container"
-                  style={{ minWidth: "9rem" }}
-                ></Column>
+                  header={t("common.actions")}
+                  {...actionsColumn}
+                />
               </DataTable>
             </div>
           </div>

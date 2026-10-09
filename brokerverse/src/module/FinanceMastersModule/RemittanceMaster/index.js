@@ -14,15 +14,14 @@ import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { Link, useNavigate } from "react-router-dom";
 import SvgTable from "../../../assets/icons/SvgTable";
-import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
 import ToggleButton from "../../../components/ToggleButton";
-import SvgEditicons from "../../../assets/icons/SvgEditicons";
 import { TieredMenu } from "primereact/tieredmenu";
 import { Card } from "primereact/card";
 import { Toast } from "primereact/toast";
 import remittanceService, { masterService } from "../../../services/remittanceService";
 import { showError, showSuccess } from "../../Remittance/shared";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import RowActions, { actionsColumn } from "../../../components/RowActions";
 
 const RemittanceMaster = () => {
   const { t } = useTranslation();
@@ -121,27 +120,7 @@ const RemittanceMaster = () => {
     },
   };
 
-  const renderViewButton = (rowData) => {
-    return (
-      <div className="center-content">
-        <Button
-          icon={<SvgEyeIcon />}
-          className="view-eye-button"
-          onClick={() => handleView(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
-      </div>
-    );
-  };
-
-  const renderEditButton = (rowData) => {
-    return (
-      <div className="center-content">
-        <Button
-          icon={<SvgEditicons />}
-          className="edit-button"
-          onClick={() => handleEdit(rowData)} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
-      </div>
-    );
-  };
+  const renderActions = (rowData) => <RowActions onView={() => handleView(rowData)} onEdit={() => handleEdit(rowData)} />;
 
   const renderStatus = (rowData) => {
     return (
@@ -334,18 +313,9 @@ const RemittanceMaster = () => {
                   headerStyle={{ textAlign: "center" }}
                 />
                 <Column
-                  body={renderViewButton}
-                  header={t("financeMasters.view")}
-                  style={{ width: "8%" }}
-                  bodyStyle={{ textAlign: "center" }}
-                  headerStyle={{ textAlign: "center" }}
-                />
-                <Column
-                  body={renderEditButton}
-                  header={t("financeMasters.edit")}
-                  style={{ width: "8%" }}
-                  bodyStyle={{ textAlign: "center" }}
-                  headerStyle={{ textAlign: "center" }}
+                  body={renderActions}
+                  header={t("common.actions")}
+                  {...actionsColumn}
                 />
                 </DataTable>
 

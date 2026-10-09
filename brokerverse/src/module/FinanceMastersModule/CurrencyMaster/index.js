@@ -11,7 +11,6 @@ import { useNavigate } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
 import SvgUploade from "../../../assets/icons/SvgUploade";
 import SvgTable from "../../../assets/icons/SvgTable";
-import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getCurrencyDetailEdit,
@@ -19,11 +18,11 @@ import {
   getCurrencySearchList,
   getCurrencyList,
 } from "./store/currencyMasterMiddlewar";
-import SvgEditicons from "../../../assets/icons/SvgEditicons";
 import { useTranslation } from "react-i18next";
 import MasterStatusToggle from "../../GeneralMasters/common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
 import ImportDialog, { masterTarget } from "../../../components/ImportDialog";
+import RowActions, { actionsColumn } from "../../../components/RowActions";
 
 const UPLOAD_TARGETS = [masterTarget("currency", "Currencies")];
 
@@ -86,20 +85,7 @@ const CurrencyMaster = () => {
     },
   };
 
-  const renderViewButton = (rowData) => {
-    return (
-      <div className="center-content">
-        <Button
-          icon={<SvgEyeIcon />}
-          className="eye__btn"
-          onClick={() => handleView(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
-        <Button
-          icon={<SvgEditicons />}
-          className="eye__btn"
-          onClick={() => handleEdit(rowData)} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
-      </div>
-    );
-  };
+  const renderViewButton = (rowData) => <RowActions onView={() => handleView(rowData)} onEdit={() => handleEdit(rowData)} />;
 
   const handleView = (rowData) => {
     dispatch(getCurrencyDetailView(rowData));
@@ -117,17 +103,6 @@ const CurrencyMaster = () => {
     padding: 6,
     color: "#000",
     border: "none",
-  };
-  const ViewheaderStyle = {
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    padding: 6,
-    color: "#000",
-    border: "none",
-    display: "flex",
-    justifyContent: "center",
-    width: "8rem",
   };
 
   const handleNavigate = () => {
@@ -278,10 +253,9 @@ const CurrencyMaster = () => {
                 ></Column>
                 <Column
                   body={renderViewButton}
-                  header={t("financeMasters.view")}
-                  headerStyle={{ ...ViewheaderStyle }}
-                  className="fieldvalue_container_centered"
-                ></Column>
+                  header={t("common.actions")}
+                  {...actionsColumn}
+                />
               </DataTable>
             </div>
           </div>

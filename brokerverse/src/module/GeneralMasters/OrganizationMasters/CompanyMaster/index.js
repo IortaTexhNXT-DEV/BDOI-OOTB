@@ -10,9 +10,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
-import SvgIconeye from "../../../../assets/icons/SvgIconeye";
 import { useDispatch, useSelector } from "react-redux";
-import SvgEditicons from "../../../../assets/icons/SvgEdits";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import {
   getCompanyEditData,
@@ -23,6 +21,7 @@ import {
 import { useFormik } from "formik";
 import MasterStatusToggle from "../../common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
+import RowActions, { actionsColumn } from "../../../../components/RowActions";
 
 const Index = () => {
   const { t } = useTranslation();
@@ -118,8 +117,6 @@ const Index = () => {
     },
   ];
   const home = { label: t("generalMasters.master") };
-
-
 
   const handleSubmit = (values) => {
     dispatch(getSearchCompanyMiddleware({ textSearch: values.search }));
@@ -235,16 +232,10 @@ const Index = () => {
               headerStyle={headerStyle}
             />
             <Column
-              body={(columnData) => (
-                <div className="action_icons">
-                  <SvgIconeye onClick={() => handleView(columnData)} />
-                  <SvgEditicons onClick={() => handleEdit(columnData)} />
-                </div>
-              )}
-              header={t("generalMasters.view")}
-              headerStyle={headerStyle}
-              className="fieldvalue_container"
-            ></Column>
+              body={(columnData) => <RowActions onView={() => handleView(columnData)} onEdit={() => handleEdit(columnData)} />}
+              header={t("common.actions")}
+              {...actionsColumn}
+            />
           </DataTable>
         </div>
       </Card>

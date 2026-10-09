@@ -1,0 +1,41 @@
+// Row buttons of the lists (components/RowActions): the same size, spacing and colour on every screen, whatever the
+// button rules of the screen around them. The column itself is placed by utility/tableNumericAlign.js (bv-actions).
+.bv-row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+
+  .p-button.p-button-icon-only {
+    flex: 0 0 auto;
+    width: 2.25rem !important;
+    height: 2.25rem !important;
+    min-width: 2.25rem;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 50% !important;
+    color: #6c737f;
+    background: transparent;
+    border: 0;
+
+    &:enabled:hover {
+      background: #f3f4f6;
+      color: #111927;
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 2px #d1d5db;
+    }
+
+    .p-button-icon {
+      font-size: 1rem;
+      margin: 0;
+    }
+  }
+}
+
+.p-datatable .p-datatable-thead > tr > th.bv-row-actions-head,
+.p-datatable .p-datatable-tbody > tr > td.bv-row-actions-cell {
+  white-space: nowrap;
+  overflow: visible;
+}

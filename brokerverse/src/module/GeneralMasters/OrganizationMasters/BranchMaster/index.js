@@ -10,8 +10,6 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
-import SvgIconeye from "../../../../assets/icons/SvgIconeye";
-import SvgEditicons from "../../../../assets/icons/SvgEdits";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -23,6 +21,7 @@ import {
 import { useFormik } from "formik";
 import MasterStatusToggle from "../../common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
+import RowActions, { actionsColumn } from "../../../../components/RowActions";
 
 const Index = () => {
   const { t } = useTranslation();
@@ -111,18 +110,7 @@ const Index = () => {
     },
   };
 
-
   const headerStyle = {
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    padding: "1rem",
-    color: "#000",
-    border: "none",
-  };
-  const headeractionStyle = {
-    display: "flex",
-    justifyContent: "center",
     fontSize: 16,
     fontFamily: "Nunito, Arial, sans-serif",
     fontWeight: 500,
@@ -139,9 +127,6 @@ const Index = () => {
     },
   ];
   const home = { label: t("generalMasters.master") };
-
-
-
 
   return (
     <div className="overall__branch__container">
@@ -230,16 +215,10 @@ const Index = () => {
               className="fieldvalue_container"
             ></Column>
             <Column
-              body={(columnData) => (
-                <div className="action_icons">
-                  <SvgIconeye onClick={() => handleView(columnData)} />
-                  <SvgEditicons onClick={() => handleEdit(columnData)} />
-                </div>
-              )}
+              body={(columnData) => <RowActions onView={() => handleView(columnData)} onEdit={() => handleEdit(columnData)} />}
               header={t("common.actions")}
-              headerStyle={headeractionStyle}
-              className="fieldvalueaction_container"
-            ></Column>
+              {...actionsColumn}
+            />
           </DataTable>
         </div>
       </Card>

@@ -10,7 +10,6 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
-import SvgIconeye from "../../../assets/icons/SvgIconeye";
 import { useDispatch, useSelector } from "react-redux";
 import SvgTable from "../../../assets/icons/SvgTable";
 import {
@@ -19,10 +18,10 @@ import {
   getExchangeSearchList,
   getExchangeList,
 } from "./store/exchangeMasterMiddleware";
-import SvgEditicons from "../../../assets/icons/SvgEditicons";
 import MasterStatusToggle from "../../GeneralMasters/common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import RowActions, { actionsColumn } from "../../../components/RowActions";
 
 const Index = () => {
   const { t } = useTranslation();
@@ -96,16 +95,6 @@ const Index = () => {
     },
   };
 
-
-  const headeraction = {
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    display: "flex",
-    justifyContent: "center",
-    border: "none",
-  };
-
   const headerStyle = {
     // width: '19%',
     // backgroundColor: 'var(--color-danger)',
@@ -127,8 +116,6 @@ const Index = () => {
   const home = { label: t("financeMasters.master") };
 
   const navigate = useNavigate();
-
-
 
   const handlePolicy = () => {
     navigate("/master/finance/exchangerate/addexchange");
@@ -232,16 +219,10 @@ const Index = () => {
               className="fieldvalue_container"
             ></Column>
             <Column
-              body={(columnData) => (
-                <div className="action_icons">
-                  <SvgIconeye onClick={() => handleView(columnData)} />
-                  <SvgEditicons onClick={() => handleEdit(columnData)} />
-                </div>
-              )}
-              header={t("financeMasters.action")}
-              headerStyle={headeraction}
-              className="fieldvalue_container"
-            ></Column>
+              body={(columnData) => <RowActions onView={() => handleView(columnData)} onEdit={() => handleEdit(columnData)} />}
+              header={t("common.actions")}
+              {...actionsColumn}
+            />
           </DataTable>
         </div>
       </Card>

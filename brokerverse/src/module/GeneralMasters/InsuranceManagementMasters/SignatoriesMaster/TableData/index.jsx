@@ -7,8 +7,6 @@ import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import SignatureCapture from "../../../../../components/SignatureCapture";
-import SvgIconeye from "../../../../../assets/icons/SvgIconeye";
-import SvgEdit from "../../../../../assets/icons/SvgEdits";
 import SvgTable from "../../../../../assets/icons/SvgTable";
 import { useSelector, useDispatch } from "react-redux";
 import { useFormik } from "formik";
@@ -16,6 +14,7 @@ import { getSearchInsuranceSignatoriesMiddleware, getInsuranceSignatoriesMiddleW
 import MasterStatusToggle from "../../../common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
 import { formatDate as formatAppDate } from "../../../../../utility/dateFormat";
+import RowActions, { actionsColumn } from "../../../../../components/RowActions";
 
 const TableData = ({ navigate }) => {
   const { t } = useTranslation();
@@ -75,24 +74,12 @@ const TableData = ({ navigate }) => {
       );
     },
   };
-  const renderActionButton = (rowData) => {
-    return (
-      <div className="action__button__container">
-        <Button
-          icon={<SvgIconeye />}
-          onClick={() => handleView(rowData.id)}
-          className="action__button p-0" aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
-        <Button
-          icon={<SvgEdit />}
-          onClick={() => handleEdit(rowData.id)}
-          className="action__button p-0 w-auto" aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
-        <Button
-          icon="pi pi-pencil"
-          onClick={() => setSignatureOf(rowData)}
-          className="action__button p-0 w-auto" aria-label={t("signature.title", "E-signature")} tooltip={t("signature.title", "E-signature")} tooltipOptions={{ position: "top" }} />
-      </div>
-    );
-  };
+  const renderActionButton = (rowData) => (
+    <RowActions onView={() => handleView(rowData.id)} onEdit={() => handleEdit(rowData.id)}>
+      <Button type="button" icon="pi pi-file-edit" text rounded onClick={() => setSignatureOf(rowData)}
+        aria-label={t("signature.title", "E-signature")} tooltip={t("signature.title", "E-signature")} tooltipOptions={{ position: "top" }} />
+    </RowActions>
+  );
 
   const handleView = (id) => {
     navigate(`/master/generals/insurancemanagement/signatories/view/${id}`);
@@ -185,14 +172,10 @@ const TableData = ({ navigate }) => {
           body={(columnData) => <MasterStatusToggle type="signatory" record={columnData} onChanged={reloadList} onError={showStatusError} />}
         ></Column>
         <Column
-          style={{
-            padding: "20px 1rem 17px 0px",
-          }}
-          field="id"
           body={renderActionButton}
-          header="Action"
-          className="fieldvalue_container"
-        ></Column>
+          header={t("common.actions")}
+          {...actionsColumn}
+        />
       </DataTable>
       <SignatureCapture visible={!!signatureOf} onHide={() => setSignatureOf(null)} ownerType="signatory" ownerId={signatureOf?.id} ownerName={signatureOf?.signatoryName} />
     </div>

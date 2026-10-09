@@ -21,10 +21,7 @@ import FieldError from "../../../../components/FieldError";
 import { useLocation } from "react-router-dom";
 import SvgAdd from "../../../../assets/icons/SvgAdd";
 import SvgDot from "../../../../assets/icons/SvgDot";
-import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
-import SvgEditicons from "../../../../assets/icons/SvgEditicons";
 import SvgSearchIcon from "../../../../assets/icons/SvgSearchIcon";
-import ToggleButton from "../../../../components/ToggleButton";
 import InputField from "../../../../components/InputField";
 import incentiveService from "../../../../services/incentiveService";
 import mastersService from "../../../../services/mastersService";
@@ -32,6 +29,7 @@ import { isoDate, loadSettings, showError, showSuccess } from "../../../Remittan
 import { calendarDateFormat, formatDate as formatAppDate } from "../../../../utility/dateFormat";
 import { requiredErrors, hasErrors, errorSummary } from "../../../../utility/requiredFields";
 import "./index.scss";
+import RowActions, { actionsColumn } from "../../../../components/RowActions";
 
 const IncentiveProgramMaster = () => {
   const { t } = useTranslation();
@@ -258,7 +256,6 @@ const IncentiveProgramMaster = () => {
     }
   };
 
-
   const handleStatusChange = async (rowData) => {
     const newStatus = rowData.status === "Active" ? "Inactive" : "Active";
     setLoading(true);
@@ -296,28 +293,11 @@ const IncentiveProgramMaster = () => {
     return formatCurrency(rowData[field], { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   };
 
-  const actionBodyTemplate = (rowData) => {
-    return (
-      <div className="action-buttons">
-        <Button
-          icon={<SvgEyeIcon />}
-          className="view-eye-button"
-          onClick={() => handleView(rowData)}
-          tooltip="View Details" aria-label="View Details"
-        />
-        <Button
-          icon={<SvgEditicons />}
-          className="edit-button"
-          onClick={() => handleEdit(rowData)}
-          tooltip="Edit" aria-label="Edit"
-        />
-        <ToggleButton
-          isChecked={rowData.status === "Active"}
-          onChange={() => handleStatusChange(rowData)}
-        />
-      </div>
-    );
-  };
+  // a draft or completed programme is not switched on or off from the list
+  const actionBodyTemplate = (rowData) => (
+    <RowActions onView={() => handleView(rowData)} onEdit={() => handleEdit(rowData)} active={rowData.status === "Active"}
+      onStatus={["Active", "Inactive"].includes(rowData.status) ? () => handleStatusChange(rowData) : undefined} />
+  );
 
   // Dialog footer
   const dialogFooter = (
@@ -436,8 +416,8 @@ const IncentiveProgramMaster = () => {
             />
             <Column
               body={actionBodyTemplate}
-              header="Actions"
-              style={{ width: "10%" }}
+              header={t("common.actions")}
+              {...actionsColumn}
             />
           </DataTable>
         </Card>

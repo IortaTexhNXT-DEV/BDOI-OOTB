@@ -15,7 +15,6 @@ import SvgUpload from "../../../../assets/icons/SvgUpload";
 import { Dialog } from "primereact/dialog";
 import InputField from "../../../../components/InputField";
 import SvgTable from "../../../../assets/icons/SvgTable";
-import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getSearchStateMiddleware,
@@ -23,11 +22,11 @@ import {
   getStateMiddleware,
 } from "./store/stateMiddleware";
 import { useFormik } from "formik";
-import SvgEditicons from "../../../../assets/icons/SvgEditicons";
 import MasterStatusToggle from "../../common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
 import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 import ImportDialog, { masterTarget } from "../../../../components/ImportDialog";
+import RowActions, { actionsColumn } from "../../../../components/RowActions";
 
 const UPLOAD_TARGETS = [masterTarget("state", "Provinces")];
 
@@ -130,17 +129,6 @@ const State = () => {
     padding: "1rem",
     color: "#000",
     border: "none",
-  };
-  const headeraction = {
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    padding: "1rem",
-    color: "#000",
-    border: "none",
-    display: "flex",
-    justifyContent: "space-around",
-    alignItem: "center",
   };
 
   const items = [{ label: t("generalMasters.location") }, { label: t("generalMasters.state") }];
@@ -269,16 +257,10 @@ const State = () => {
               className="fieldvalue_container"
             ></Column>
             <Column
-              body={(rowData) => (
-                <div className="action_icons">
-                  <SvgEyeIcon onClick={() => handleView(rowData)} />
-                  <SvgEditicons onClick={() => handleEdit(rowData)} />
-                </div>
-              )}
+              body={(rowData) => <RowActions onView={() => handleView(rowData)} onEdit={() => handleEdit(rowData)} />}
               header={t("common.actions")}
-              headerStyle={headeraction}
-              className="fieldvalue_container"
-            ></Column>
+              {...actionsColumn}
+            />
           </DataTable>
         </div>
       </Card>
