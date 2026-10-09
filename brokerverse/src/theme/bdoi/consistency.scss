@@ -12,3 +12,13 @@
 .p-sidebar-mask {
   --maskbg: rgba(17, 24, 39, 0.32);
 }
+
+// ---------------------------------------------------------------- form fields
+// The required mark after a field label, the same on the older field components (required__label, required-marker).
+
+.bv-required,
+.required__label,
+.required-marker {
+  margin-left: 2px;
+  color: $color-danger;
+}

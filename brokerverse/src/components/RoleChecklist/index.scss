@@ -1,0 +1,91 @@
+@import "../../theme/bdoi/tokens";
+
+// Role checkboxes in equal columns: each box at the top of its cell, the name wrapping beside it.
+.bv-role-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &__bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  &__search {
+    flex: 0 1 320px;
+
+    .p-inputtext {
+      width: 100%;
+    }
+  }
+
+  &__count {
+    margin-left: auto;
+    font-size: 13px;
+    color: $color-text-muted;
+  }
+
+  &__group {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+
+  &__heading {
+    padding: 0;
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: $color-text-muted;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 8px;
+  }
+
+  &__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-height: 40px;
+    padding: 9px 12px;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    background: $color-surface;
+
+    &.is-checked {
+      border-color: $brand-blue;
+      background: $brand-blue-050;
+    }
+
+    .p-checkbox {
+      flex: 0 0 auto;
+      margin-top: 1px;
+    }
+
+    label {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 20px;
+      color: $color-text;
+      cursor: pointer;
+    }
+  }
+
+  &--invalid &__item {
+    border-color: $color-danger;
+  }
+
+  &__empty {
+    margin: 0;
+    color: $color-text-muted;
+  }
+}
