@@ -2637,34 +2637,43 @@ The Sales Activities screen, also under Operations > Sales & Marketing, is descr
 
 ![Operations > Sales & Marketing > Lead Assignment](/home/user/BDOI-OOTB/docs/package/source/manual-images/d-lead-assignment.png)
 
-Choose Operations > Sales & Marketing > Lead Assignment. The screen has three tabs: **Team View**, **Queue** and **Assignment Rules**. Users without the lead assignment permissions see only the team view.
+Choose Operations > Sales & Marketing > Lead Assignment. The screen has three tabs: **Team View**, **Reassignment Queue** and **Assignment Rules**. Users without the lead assignment permissions (read / write:lead-assignment) see only the team view.
 
 ### Team view
 
-The team view lists each account executive of the reporting line (the users who report to the signed-in manager, and their own reports) with the prospects they hold: **Open**, **Converted**, **Lost**, **Last 30 days** and **In queue**. Choose a manager to see that manager's line (the default is your own team) or a **Team member** to see one person. Below the team, the open prospects of the selection are listed, with their **Assignment** status.
+The team view lists each account executive of the reporting line (the users who report to the signed-in manager, and their own reports) with the prospects they hold: **Open**, **New**, **Converted**, **Lost**, **In queue** and **Last 30 days**. Choose a manager to see that manager's line (the default is your own team) or a **Team member** to see one person. Below the team, the prospects of the selection are listed with their line and product (or **Product not yet tagged**), territory, channel, account executive and **Assignment** status. The history icon opens the prospect's **Assignment history**.
 
 ### Assignment rules
 
 Every new prospect, whether entered on the prospect screen, uploaded or created from a dealer sale, is given an account executive by the first active rule that matches it.
 
 1. Open **Assignment Rules** and select **Add rule**.
-2. Enter the **Name** and the **Priority** (lower numbers are tried first).
+2. Enter the **Name** and the **Priority** (lower numbers are checked first).
 3. Choose the **Method**: **Round robin** (each matching prospect goes to the next account executive in turn), **Fewest open prospects** (to whoever holds the fewest open prospects) or **Fixed account executive** (always the first one listed).
 4. Choose the **Account executives** who share the work. Only active users can receive prospects.
-5. Set the conditions the prospect must meet: **Line of business**, **Distribution channel**, **Province**, **City / municipality**, **Branch**, **Source** and **Category**. An empty condition matches anything.
+5. Set the **Conditions** the prospect must meet, each chosen from a list: **Line of business** (or **Product not yet tagged**, for the prospects created without a product), **Product** (the products of the line chosen), **Distribution channel**, **Branch** (Branch master), **Source** (Lead Sources master), **Category** (Retail or Corporate), **Province** and **City / municipality** (the cities of the province chosen). An empty condition matches anything.
 6. Select **Save**.
+
+On the list, the **Active** switch activates or deactivates a rule, the arrows move it up or down (the rules are renumbered 10, 20, 30 ... in the new order), the pencil edits it and the bin removes it (a rule that already assigned prospects is made inactive instead, its history refers to it).
 
 When rules exist but none matches, the setting **leads.assignment_fallback** decides: **creator** (the person who entered the prospect keeps it) or **queue** (the prospect waits in the reassignment queue). Assignment can be switched off with **leads.assignment_enabled**. Every assignment is written to the prospect's **Assignment history** (rule, from, to, reason, who and when).
 
-### Reassignment queue and bulk reassignment
+### Reassignment queue
 
-The **Queue** tab lists prospects waiting for an account executive: those no rule matched (with fallback queue), those sent to the queue by a manager, and those left untouched longer than **leads.assignment_sla_hours** (the **lead-assignment-sla** job moves them each morning once it is switched on in Master > Schedules).
+The **Reassignment Queue** tab lists the prospects waiting for an account executive: those no rule matched (with fallback queue), those whose rule had no active account executive, those sent to the queue by hand, and those left untouched longer than **leads.assignment_sla_hours** (the **lead-assignment-sla** job moves them each morning once it is switched on in Master > Schedules). Narrow the list by prospect name or number, **Line of business** (or **Product not yet tagged**), **Reason** and **Branch**.
 
-1. Tick one or more prospects (on the queue or on the team view).
-2. Select **Reassign**, choose **To account executive** and enter the **Reason**.
-3. Select **Save**. Each prospect changes owner, the history records a manual or bulk reassignment and the new owner is notified when **leads.assignment_notify** is on.
+- **Take** (on a row, or for the ticked prospects) assigns the prospects to you; the history records **Taken from the queue**.
+- **Reassign** gives them to another account executive (see below).
+- **Assign by rules** runs the queue through the active rules: a preview lists each prospect a rule now matches, with the rule and the account executive it would go to, and how many stay in the queue. Select **Assign** to apply it; use it after adding or changing a rule.
 
-**Send to queue** returns prospects to the queue with a reason, for example when an account executive leaves.
+### Reassign prospects
+
+1. Tick one or more prospects on the team view or the queue and select **Reassign** (or the reassign icon of one row).
+2. Choose **To account executive** from the list of active users who may own prospects; each shows the designation, branch and number of open prospects. The account executives of the assignment rule that matches the prospects are listed first, under **Suggested by the assignment rules**. Type in the list to search.
+3. Choose the **Reason** from the reassignment reasons of Master > Insurance Management > Reason Codes (Account executive left the company, Account executive on leave, Territory or branch change, Workload balancing, Customer request, Not worked in time, Needs a specialist for the product, Other) and add a **Note** if needed (**Other** needs one). A reason or a note is required while **leads.reassignment_reason_required** is on.
+4. Select **Reassign**. Each prospect changes owner, the history records a manual or bulk reassignment with the reason, and the new owner is notified when **leads.assignment_notify** is on.
+
+**Send to queue** (team view) returns the ticked prospects to the queue, with a reason and note chosen the same way, for example when an account executive leaves.
 
 ## Distribution Channels
 

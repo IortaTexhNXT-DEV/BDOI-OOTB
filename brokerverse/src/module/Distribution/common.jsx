@@ -38,10 +38,10 @@ export const PageHeader = ({ home, section, title, trail = [], subtitle, childre
   </div>
 );
 
-/** A labelled form field of the two-column form grid. */
-export const Field = ({ label, children, full = false, help }) => (
+/** A labelled form field of the two-column form grid (htmlFor: the id of its input). */
+export const Field = ({ label, children, full = false, help, htmlFor }) => (
   <div className={`dist-field${full ? " dist-field--full" : ""}`}>
-    <label>{label}</label>
+    <label htmlFor={htmlFor}>{label}</label>
     {children}
     {help ? <small className="pe-muted">{help}</small> : null}
   </div>

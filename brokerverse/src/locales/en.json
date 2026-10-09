@@ -10359,7 +10359,6 @@
     },
     "la": {
       "open": "open",
-      "queueReason": "Why does this prospect need another account executive?",
       "deleteRule": "Remove the rule {{name}}?",
       "lead": "Prospect",
       "lob": "Line",
@@ -10408,7 +10407,8 @@
         "city": "City / municipality",
         "branchCode": "Branch",
         "source": "Source",
-        "leadCategory": "Category"
+        "leadCategory": "Category",
+        "productId": "Product"
       },
       "reassignTitle": "Reassign {{count}} prospect(s)",
       "to": "To account executive",
@@ -10428,7 +10428,47 @@
         "auto": "Assigned by rule",
         "queued": "Sent to the reassignment queue",
         "manual": "Reassigned",
-        "bulk": "Bulk reassignment"
+        "bulk": "Bulk reassignment",
+        "taken": "Taken from the queue"
+      },
+      "queueTitle": "Send {{count}} prospect(s) to the queue",
+      "andMore": "and {{count}} more",
+      "suggested": "Suggested by the assignment rules",
+      "others": "Other account executives",
+      "allAssignees": "Account executives",
+      "suggestedHelp": "The account executives of the assignment rule for these prospects come first",
+      "chooseAssignee": "Choose the account executive",
+      "noAssignee": "No active user can own prospects",
+      "openCount": "{{count}} open",
+      "sameOwner": "The prospect already belongs to this account executive",
+      "chooseReasonCode": "Choose the reason",
+      "chooseReason": "Choose the reason or enter a note",
+      "noReasons": "No reassignment reason in Master > Insurance Management > Reason Codes",
+      "note": "Note",
+      "notePlaceholder": "Details for the history (optional unless the reason asks for it)",
+      "noteRequired": "This reason needs a note",
+      "untagged": "Product not yet tagged",
+      "systemQueued": "Queued by the system or without a reason code",
+      "searchQueue": "Prospect name or number",
+      "take": "Take",
+      "runRules": "Assign by rules",
+      "runTitle": "Assign the queue by the rules",
+      "runHelp": "{{count}} prospect(s) match a rule; {{unmatched}} stay in the queue.",
+      "runConfirm": "Assign {{count}} prospect(s)",
+      "runNone": "No prospect in the queue matches an active rule",
+      "rule": "Rule",
+      "active": "Active",
+      "moveUp": "Check earlier",
+      "moveDown": "Check later",
+      "conditionsHelp": "Empty: any value",
+      "category": {
+        "Retail": "Retail",
+        "Corporate": "Corporate"
+      },
+      "methodHelp": {
+        "round_robin": "Each account executive in turn",
+        "load": "The account executive with the fewest open prospects",
+        "fixed": "Always the first account executive"
       }
     },
     "oc": {
