@@ -24,6 +24,8 @@ const CocSeries = ({ toast, insurers }) => {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(null);
+  const [rangeError, setRangeError] = useState(null);
+  const openForm = (value) => { setRangeError(null); setForm(value); };
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -36,11 +38,14 @@ const CocSeries = ({ toast, insurers }) => {
   }, [toast]);
   useEffect(() => { load(); }, [load]);
   const save = async () => {
+    const wrong = form.seriesTo < form.seriesFrom ? t("integrations.toBeforeFrom") : null;
+    setRangeError(wrong);
+    if (wrong) return;
     try {
       const r = await service.createCocSeries({ insuranceCompanyId: form.insuranceCompanyId, branchCode: form.branchCode || null, prefix: form.prefix || "", seriesFrom: form.seriesFrom,
         seriesTo: form.seriesTo, numberWidth: form.numberWidth, receivedDate: isoDay(form.receivedDate), lowStockThreshold: form.lowStockThreshold, remarks: form.remarks || null });
       showSuccess(toast, r.message);
-      setForm(null);
+      openForm(null);
       load();
     } catch (e) {
       showError(toast, e);
@@ -58,7 +63,7 @@ const CocSeries = ({ toast, insurers }) => {
   return (
     <>
       <div className="flex justify-content-end mb-2">
-        <Button icon="pi pi-plus" label={t("integrations.newSeries")} onClick={() => setForm({ insuranceCompanyId: null, branchCode: "", prefix: "", seriesFrom: null, seriesTo: null, numberWidth: 8, receivedDate: new Date(), lowStockThreshold: 20, remarks: "" })} />
+        <Button icon="pi pi-plus" label={t("integrations.newSeries")} onClick={() => openForm({ insuranceCompanyId: null, branchCode: "", prefix: "", seriesFrom: null, seriesTo: null, numberWidth: 8, receivedDate: new Date(), lowStockThreshold: 20, remarks: "" })} />
       </div>
       <DataTable value={rows} loading={loading} dataKey="id" size="small" stripedRows emptyMessage={t("integrations.noSeries")}>
         <Column field="insurerName" header={t("integrations.insurer")} />
@@ -72,23 +77,24 @@ const CocSeries = ({ toast, insurers }) => {
             tooltip={t(s.status === "active" ? "integrations.closeSeries" : "integrations.reopenSeries")} tooltipOptions={{ position: "top" }} onClick={() => toggle(s)} />
         ))} />
       </DataTable>
-      <Dialog className="pe-dialog" header={t("integrations.newSeries")} visible={!!form} style={{ width: "min(720px, 96vw)" }} onHide={() => setForm(null)}
-        footer={<div><Button label={t("integrations.cancel")} text onClick={() => setForm(null)} /><Button label={t("integrations.save")} icon="pi pi-save" onClick={save}
+      <Dialog className="pe-dialog" header={t("integrations.newSeries")} visible={!!form} style={{ width: "min(720px, 96vw)" }} onHide={() => openForm(null)}
+        footer={<div><Button label={t("integrations.cancel")} text onClick={() => openForm(null)} /><Button label={t("integrations.save")} icon="pi pi-save" onClick={save}
           disabled={!form?.insuranceCompanyId || form?.seriesFrom === null || form?.seriesTo === null} /></div>}>
         {form && (
           <div className="grid">
             <div className="col-12 md:col-8"><label>{t("integrations.insurer")} *</label>
               <Dropdown value={form.insuranceCompanyId} options={insurers} filter onChange={(e) => setForm({ ...form, insuranceCompanyId: e.value })} className="w-full" /></div>
             <div className="col-12 md:col-4"><label>{t("integrations.branch")}</label>
-              <InputText value={form.branchCode} placeholder={t("integrations.allBranches")} onChange={(e) => setForm({ ...form, branchCode: e.target.value })} className="w-full" /></div>
+              <InputText value={form.branchCode} maxLength={20} placeholder={t("integrations.allBranches")} onChange={(e) => setForm({ ...form, branchCode: e.target.value })} className="w-full" /></div>
             <div className="col-6 md:col-3"><label>{t("integrations.prefix")}</label>
-              <InputText value={form.prefix} onChange={(e) => setForm({ ...form, prefix: e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, "") })} className="w-full" /></div>
+              <InputText value={form.prefix} maxLength={10} onChange={(e) => setForm({ ...form, prefix: e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, "") })} className="w-full" /></div>
             <div className="col-6 md:col-3"><label>{t("integrations.from")} *</label><InputNumber value={form.seriesFrom} useGrouping={false} min={0} onValueChange={(e) => setForm({ ...form, seriesFrom: e.value })} className="w-full" /></div>
-            <div className="col-6 md:col-3"><label>{t("integrations.to")} *</label><InputNumber value={form.seriesTo} useGrouping={false} min={0} onValueChange={(e) => setForm({ ...form, seriesTo: e.value })} className="w-full" /></div>
+            <div className="col-6 md:col-3"><label>{t("integrations.to")} *</label><InputNumber value={form.seriesTo} useGrouping={false} min={0} onValueChange={(e) => setForm({ ...form, seriesTo: e.value })} className={`w-full${rangeError ? " p-invalid" : ""}`} />
+              {rangeError ? <small className="p-error block mt-1" role="alert">{rangeError}</small> : null}</div>
             <div className="col-6 md:col-3"><label>{t("integrations.digits")}</label><InputNumber value={form.numberWidth} min={1} max={20} onValueChange={(e) => setForm({ ...form, numberWidth: e.value })} className="w-full" /></div>
             <div className="col-6 md:col-4"><label>{t("integrations.received")}</label><Calendar value={form.receivedDate} onChange={(e) => setForm({ ...form, receivedDate: e.value })} dateFormat="yy-mm-dd" className="w-full" /></div>
             <div className="col-6 md:col-4"><label>{t("integrations.lowStock")}</label><InputNumber value={form.lowStockThreshold} min={0} onValueChange={(e) => setForm({ ...form, lowStockThreshold: e.value })} className="w-full" /></div>
-            <div className="col-12"><label>{t("integrations.remarks")}</label><InputText value={form.remarks} onChange={(e) => setForm({ ...form, remarks: e.target.value })} className="w-full" /></div>
+            <div className="col-12"><label>{t("integrations.remarks")}</label><InputText value={form.remarks} maxLength={500} onChange={(e) => setForm({ ...form, remarks: e.target.value })} className="w-full" /></div>
           </div>
         )}
       </Dialog>

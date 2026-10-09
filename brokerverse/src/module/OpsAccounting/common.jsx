@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Tag } from "primereact/tag";
@@ -32,13 +32,33 @@ export const PageHeader = ({ title, group, section, subtitle, children }) => {
   );
 };
 
-/** A labelled form field (label above the input, PrimeFlex grid column). */
-export const Field = ({ label, children, col = "col-12 md:col-6", required = false }) => (
+/** A labelled form field (label above the input, PrimeFlex grid column), with its validation message under it. */
+export const Field = ({ label, children, col = "col-12 md:col-6", required = false, error }) => (
   <div className={col}>
     <label className="block mb-1">{label}{required ? " *" : ""}</label>
     {children}
+    {error ? <small className="p-error block mt-1" role="alert">{error}</small> : null}
   </div>
 );
+
+/** Whether a form value is empty (nothing chosen or only spaces typed). */
+export const blank = (v) => v === null || v === undefined || String(v).trim() === "";
+
+/**
+ * Messages of a form under its fields. check({ field: message or null }) keeps the messages of the failed rules and
+ * says whether every rule passed; fromApi(error) puts the messages of an API validation error on their fields.
+ */
+export const useFieldErrors = () => {
+  const [errors, setErrors] = useState({});
+  const check = useCallback((rules) => {
+    const out = Object.fromEntries(Object.entries(rules).filter(([, message]) => message));
+    setErrors(out);
+    return !Object.keys(out).length;
+  }, []);
+  const fromApi = useCallback((e) => setErrors(Object.fromEntries((e?.errors || []).filter((x) => x.path).map((x) => [String(x.path).split(".")[0], x.message]))), []);
+  const clear = useCallback(() => setErrors({}), []);
+  return { errors, check, fromApi, clear };
+};
 
 /** Today as YYYY-MM-DD in local time; a Date as YYYY-MM-DD. */
 export const isoOf = (d) => (d ? new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10) : null);

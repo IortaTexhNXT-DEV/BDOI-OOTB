@@ -14,7 +14,9 @@ const handle = async (response) => {
   const body = await response.json().catch(() => ({}));
   if (!response.ok || body.success === false) {
     const detail = Array.isArray(body.errors) && body.errors.length ? ` (${body.errors.slice(0, 3).map((e) => `${e.path}: ${e.message}`).join("; ")})` : "";
-    throw new Error(`${body.message || `Request failed (${response.status})`}${detail}`);
+    const error = new Error(`${body.message || `Request failed (${response.status})`}${detail}`);
+    error.errors = Array.isArray(body.errors) ? body.errors : [];
+    throw error;
   }
   return body;
 };

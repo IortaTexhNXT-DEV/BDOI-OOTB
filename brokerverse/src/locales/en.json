@@ -9351,7 +9351,8 @@
       "batch.count": "Batch: number of payments",
       "batch.channel": "Batch: channel",
       "batch.createdDate": "Batch: created on"
-    }
+    },
+    "toBeforeFrom": "The last number must not be below the first"
   },
   "onboarding": {
     "title": "Onboard client",
@@ -9987,7 +9988,8 @@
       "notDue": "Not due",
       "over": "Over {{days}}",
       "daysPastDue": "Days past due",
-      "bucket": "Bucket"
+      "bucket": "Bucket",
+      "lineAmounts": "Enter the amount of each line"
     },
     "fa": {
       "menu": "Fixed Assets",
@@ -10021,8 +10023,13 @@
       "due": "Due",
       "alreadyPosted": "Already posted",
       "journalDate": "Journal date",
-      "nothingDue": "Nothing to depreciate for this period"
-    }
+      "nothingDue": "Nothing to depreciate for this period",
+      "inServiceBeforeAcquired": "The asset cannot be in service before it was acquired"
+    },
+    "required": "Required",
+    "amountAboveZero": "Enter an amount above zero",
+    "invalidEmail": "Enter a valid e-mail address",
+    "tooLong": "At most {{max}} characters"
   },
   "distribution": {
     "cp": {
