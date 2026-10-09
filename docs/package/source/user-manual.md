@@ -254,6 +254,29 @@ Your role decides which menus you see and which screens you may open. The server
 
 Each persona chapter lists the exact items of each menu. The Accounting Manager holds the Accounting role as well, so the menus are the same; the difference is in the approvals.
 
+### TISPH roles
+
+The TISPH roles follow the RBAC v4 sheet of the Pre-BSM workbook: thirteen TIS personas and SUPERID for user acceptance testing. Each starts from the menus of the broker role closest to it; the permissions decide what the role may change. Sales and Operations both raise quotations, placement slips, policies, endorsements and renewals; the approval is always another user's who holds the approval permission (**approve:quotations** approves a quotation, **approve:policies** decides the check of a placement against the slip, **approve:renewals** approves renewal terms, **approve:claims** takes the claim decisions: review, reject, settle, approve a settlement, close).
+
+| Role | Code | May change | Approves (never own work) | Menus |
+|---|---|---|---|---|
+| TIS Sales Associate | `tis-sales-associate` | Prospects, clients, quotations, placement slips, policies, endorsements, renewals, sales activities, data privacy requests | Nothing | Those of Sales & Marketing, plus Accounts (Receipts, Collections) to read |
+| TIS Sales Officer | `tis-sales-officer` | As the Sales Associate, plus lead assignment and campaigns | Quotations, placement checks, renewal terms | As the Sales Associate |
+| TIS Sales Unit Head | `tis-sales-unit-head` | As the Sales Officer, plus telesales incentives | As the Sales Officer, plus supplier invoices | As the Sales Associate, plus Disbursement, Payables and Incentive |
+| TIS Operations Associate | `tis-ops-associate` | Quotations, placement slips, policies, endorsements, renewals, claims (register, follow up, documents), fleet schedules, open covers | Nothing | Operations, claim screens and masters, Accounts (Receipts, Collections) to read |
+| TIS Operations Officer | `tis-ops-officer` | As the Operations Associate | Nothing | As the Operations Associate, plus Journal Voucher and Fixed Assets to read |
+| TIS Operations Unit Head | `tis-ops-unit-head` | As the Operations Associate | Quotations, placement checks, renewal terms, claim decisions, supplier invoices | As the Operations Officer, plus Disbursement and Payables |
+| CCD-PDU (Post-Dated Cheques) | `tis-ccd-pdu` | Post-dated cheques and receipts | Nothing | Post-Dated Cheques, Receipts, cash reports |
+| CCD-PDC / CCD-ADA | `tis-ccd-pdc` | Post-dated cheques and receipts | Nothing | As CCD-PDU, plus Collections, Bank Reconciliation and Insurer Reconciliation to read |
+| CCD-BP / QRPh (Receipting) | `tis-ccd-bp` | Receipts and collections | Nothing | As CCD-PDC |
+| CCD-Recon (Reconciliation and Reversals) | `tis-ccd-recon` | Receipts (reversals), collections (adjustments), bank and insurer statement reconciliation | Insurer statement reconciliations | As CCD-BP, plus Open Entry Matching and Unmatching, Disbursement |
+| TIS Finance & General Accounting | `tis-finance` | Commission, remittance, disbursements, journal vouchers, payables, fixed assets, period end, bank reconciliation | Supplier invoices, period close, bank reconciliations, posting rule changes, credit control | Those of Accounting, plus Audit Trail and Schedules |
+| TIS IT AppSupport / Admin | `tis-it-admin` | Users, roles, access control, settings, reference masters, product configurator, schedules and interfaces; no business transaction | Authority limits | Master (without Go-Live Data Load and Data Privacy), Product Configurator; business screens to read |
+| TIS General Manager | `tis-general-manager` | Prospects to claims, as the Sales Unit Head and the Operations Unit Head together | Quotations, placement checks, renewal terms, claim decisions, supplier invoices | Every front-office and accounting screen; User Management and Audit Trail to read |
+| SUPERID (UAT only) | `tis-superid` | Everything: the role includes the System Administrator | Everything | Every menu |
+
+The persona the RBAC v4 screen matrix calls CCD-PDC is called CCD-ADA in its department table; the one role carries both names until TISPH confirms one. The Corporate Sales Officers of the user list take the Sales Officer role. SUPERID is for user acceptance testing: set the role **Inactive** on Master > Users and Access > Role before go-live, and its users lose every access at once. Only a System Administrator may give SUPERID to a user or change the role, as for the System Administrator role itself.
+
 If you open the address of a screen your role may not use, BrokerVerse shows that you are not authorised. Choose a screen from your menu instead.
 
 ![A Claims user opening Accounts > Receipts by its address](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-not-auth.png)
@@ -292,9 +315,10 @@ Maker-checker means that the user who enters a transaction cannot approve it. Br
 
 | Transaction | Maker | Checker | Setting |
 |---|---|---|---|
-| Quotation approval | The creator of the quotation | Another user; the Processing Team is notified | `workflow.quote_maker_checker` |
-| Renewal terms | Operations or Sales & Marketing | Processing Team | `renewals.maker_checker` |
-| Claim settlement | The Claims user who submits it | Another Claims user | `claims.settlement_maker_checker` |
+| Quotation approval | The creator of the quotation | Another user holding approve:quotations; the roles of `quotations.approval_notify_roles` are notified | `workflow.quote_maker_checker` |
+| Check of a placement against the slip | The user who recorded the e-policy | Another user holding approve:policies | `placement.check_maker_checker` |
+| Renewal terms | Operations or Sales & Marketing | Another user holding approve:renewals; the roles of `renewals.approver_roles` are notified | `renewals.maker_checker` |
+| Claim settlement | The user who submits it | Another user holding approve:claims (Claims; TIS Operations Unit Head) | `claims.settlement_maker_checker` |
 | Journal voucher, correction and reversal | Accounting | Another Accounting user or the Accounting Manager | `journal.require_approval`, `finance.maker_checker_enabled` |
 | Payment voucher, cheque, commission payout, petty cash | Accounting | Another Accounting user | `finance.maker_checker_enabled` |
 | Remittance, settlement and adjustment | Accounting | Another user within the Remittance approval or Remittance settlement limit (Accounting up to PHP 1,000,000.00, Accounting Manager without limit) | Authority Matrix |
@@ -458,7 +482,7 @@ The eye opens the user, the pencil edits the display name, e-mail and roles (a r
 
 ### Roles and role permissions
 
-**Role** lists the seven roles. **Role Permissions** shows, for each permission (for example read:receipts, write:bank-reconciliation, approve:period-end), which roles hold it. A role that builds on another (the Accounting Manager on Accounting) also has that role's permissions. **Edit roles** changes the permissions of a role; do this only with the process owner, because the menus and the server checks follow the permissions.
+**Role** lists the seven broker roles and the TISPH roles (see TISPH roles under Roles and menus). **Role Permissions** shows, for each permission (for example read:receipts, write:bank-reconciliation, approve:period-end, approve:quotations), which roles hold it. A role that builds on another (the Accounting Manager on Accounting, SUPERID on the System Administrator) also has that role's permissions. **Edit roles** changes the permissions of a role; do this only with the process owner, because the menus and the server checks follow the permissions.
 
 ![Master > Users and Access > Role Permissions](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-role-permissions.png)
 
@@ -486,7 +510,7 @@ A delegation lets another user approve for an approver who is away.
 
 ### Segregation of Duties
 
-Each rule names two roles that one person should not hold together, what happens when they are assigned (**When assigned**: **Block** refuses the combination, **Warn** allows it with a warning), the reason and the status. The delivered rules are SOD-CLM-ACCT (Claims and Accounting: the claims handler should not also release claim payments), SOD-PROC-ACCT (Processing Team and Accounting: the person who places and issues business should not also release premium to insurers) and SOD-PROC-MGR (Processing Team and Accounting Manager: the person who places business should not approve its payments), all three Block; and SOD-SALES-ACCT (Sales & Marketing and Accounting) and SOD-SALES-CLM (Sales & Marketing and Claims), both Warn. **New rule** adds a rule; **Switch off** disables one.
+Each rule names two roles that one person should not hold together, what happens when they are assigned (**When assigned**: **Block** refuses the combination, **Warn** allows it with a warning), the reason and the status. The delivered rules are SOD-CLM-ACCT (Claims and Accounting: the claims handler should not also release claim payments), SOD-PROC-ACCT (Processing Team and Accounting: the person who places and issues business should not also release premium to insurers) and SOD-PROC-MGR (Processing Team and Accounting Manager: the person who places business should not approve its payments), all three Block; and SOD-SALES-ACCT (Sales & Marketing and Accounting), SOD-SALES-CLM (Sales & Marketing and Claims) and SOD-TIS-BP-RECON (CCD-BP and CCD-Recon: the user who issues receipts should not also reverse them), all three Warn. **New rule** adds a rule; **Switch off** disables one.
 
 ![Master > Users and Access > Segregation of Duties](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-sod.png)
 
@@ -544,12 +568,26 @@ All masters work alike: a list with search, **Add** (the form opens on its own p
 | Cancellation Reasons | Master > Insurance | System Administrator |
 | Claim Document Checklist | Master > Insurance | Claims, System Administrator |
 | Repair Shops | Master > Insurance | Claims, System Administrator |
+| Lead Sources | Master > Insurance | System Administrator, TIS IT AppSupport |
+| Reason Codes | Master > Insurance | System Administrator, TIS IT AppSupport |
 | Asset Classes | Master > Finance | Accounting, System Administrator |
 | Suppliers | Accounts > Payables > Suppliers | Accounting, System Administrator |
 
-Each screen lists the records with **Add**, the edit icon and activate / deactivate. The six masters are also in the go-live configuration workbook and have upload templates. **Sales Activity Types** and **Sales Activity Outcomes** (Master > Organization) work the same way and are described under Sales activities in the Sales & Marketing chapter; **Distribution Channels** (Master > Insurance) in the chapter Distribution, programmes and products.
+Each screen lists the records with **Add**, the edit icon and activate / deactivate. The eight masters are also in the go-live configuration workbook and have upload templates. **Sales Activity Types** and **Sales Activity Outcomes** (Master > Organization) work the same way and are described under Sales activities in the Sales & Marketing chapter; **Distribution Channels** (Master > Insurance) in the chapter Distribution, programmes and products.
 
 ![Master > Insurance > Short-Period Rates, one of the operational masters](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-ops-masters.png)
+
+### Lead sources and reason codes
+
+**Lead Sources** lists where prospects come from (for TISPH: Call, Walk-In, Referral, Corporate, Used-Cars SCR and UCFP, Company Car, Redemption, Renewal, Promo, Agent, Credit Life, Social Media / Website, Bundling) with a channel type and the linked office. The **Source** list of the prospect form offers the active lead sources; the lead upload accepts a lead source by its code or its name and stores its name. A source the list does not know is kept as typed, unless `leads.source_list_only` is on, in which case the prospect is refused with a message on the Source. An upload row without a source is stored as bulk-upload.
+
+**Reason Codes** holds the coded reasons of decisions that have no master of their own. **Used For** says where a code is offered: decline (a quotation rejected or dropped), repudiation (a claim rejected), lapse (a renewal lapsed), refund, adjustment and non-materialise. **Requires Note** makes the user write the detail as well. Cancellation reasons and write-off reasons keep their own masters.
+
+- Claims: **Reject Claim** offers the repudiation codes and a note. The claim keeps the code and shows the reason with the note.
+- Renewals > Lapse Management: **Lapse** offers the lapse codes and the detail. The **Lapse Reason** filter of the list works on the code.
+- A quotation set to Rejected or Dropped through the API may carry a decline or non-materialise code, which is kept in the audit trail.
+
+A reason typed without a code is still accepted everywhere.
 
 ### Uploads
 

@@ -29466,7 +29466,7 @@
         "tags": [
           "Claims"
         ],
-        "description": "Front-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: role:claims, write:claims",
+        "description": "Front-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: write:claims, approve:claims",
         "parameters": [
           {
             "name": "id",
@@ -29578,7 +29578,8 @@
         },
         "x-screen": "Operations > Claims > Settlement approval",
         "x-permissions": [
-          "write:claims"
+          "write:claims",
+          "approve:claims"
         ],
         "requestBody": {
           "required": true,
@@ -29725,7 +29726,7 @@
         "tags": [
           "Claims"
         ],
-        "description": "Front-end touchpoint: Operations > Claims\n\nAccess: role:claims, write:claims",
+        "description": "Front-end touchpoint: Operations > Claims\n\nAccess: write:claims, approve:claims",
         "parameters": [
           {
             "name": "id",
@@ -29837,7 +29838,8 @@
         },
         "x-screen": "Operations > Claims",
         "x-permissions": [
-          "write:claims"
+          "write:claims",
+          "approve:claims"
         ],
         "requestBody": {
           "required": true,
@@ -30057,11 +30059,11 @@
     "/claims/rejectclaim/{id}": {
       "put": {
         "operationId": "putClaimsRejectclaimId",
-        "summary": "Reject a claim",
+        "summary": "Reject (repudiate) a claim: reason as text, or reasonCode of the Reason Codes master (repudiation) with the reason as its note",
         "tags": [
           "Claims"
         ],
-        "description": "Front-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: role:claims, write:claims",
+        "description": "Front-end touchpoint: Operations > Claims > Settlement approval\n\nAccess: write:claims, approve:claims",
         "parameters": [
           {
             "name": "id",
@@ -30173,7 +30175,8 @@
         },
         "x-screen": "Operations > Claims > Settlement approval",
         "x-permissions": [
-          "write:claims"
+          "write:claims",
+          "approve:claims"
         ],
         "requestBody": {
           "required": true,
@@ -30182,13 +30185,17 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
                   "reason": {
                     "type": "string"
                   }
                 }
               },
               "example": {
-                "reason": "Loss not covered"
+                "reasonCode": "REP-NOTCOVERED",
+                "reason": "Flood damage excluded from the motor policy"
               }
             }
           }
@@ -30519,7 +30526,7 @@
         "tags": [
           "Claims"
         ],
-        "description": "Front-end touchpoint: Operations > Claims > Settlement details\n\nAccess: role:claims, write:claims",
+        "description": "Front-end touchpoint: Operations > Claims > Settlement details\n\nAccess: write:claims, approve:claims",
         "parameters": [
           {
             "name": "id",
@@ -30631,7 +30638,8 @@
         },
         "x-screen": "Operations > Claims > Settlement details",
         "x-permissions": [
-          "write:claims"
+          "write:claims",
+          "approve:claims"
         ],
         "requestBody": {
           "required": true,
@@ -30676,7 +30684,7 @@
         "tags": [
           "Claims"
         ],
-        "description": "Front-end touchpoint: Operations > Claims > Request approval\n\nAccess: role:claims, write:claims",
+        "description": "Front-end touchpoint: Operations > Claims > Request approval\n\nAccess: write:claims, approve:claims",
         "parameters": [
           {
             "name": "id",
@@ -30788,7 +30796,8 @@
         },
         "x-screen": "Operations > Claims > Request approval",
         "x-permissions": [
-          "write:claims"
+          "write:claims",
+          "approve:claims"
         ],
         "requestBody": {
           "required": true,
@@ -98095,11 +98104,11 @@
       },
       "post": {
         "operationId": "postPlacementsIdCheck",
-        "summary": "Decide the check against the slip (never the user who recorded the e-policy): confirm (matches -> Checked), accept (differences accepted with a reason by an approver with write:policies -> Checked) or return (back to the insurer with the differences -> Acknowledged)",
+        "summary": "Decide the check against the slip (approve:policies; never the user who recorded the e-policy): confirm (matches -> Checked), accept (differences accepted with a reason by an approver with write:policies -> Checked) or return (back to the insurer with the differences -> Acknowledged)",
         "tags": [
           "Placement Slips"
         ],
-        "description": "Front-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Confirm check / Return to insurer\n\nAccess: write:quotations",
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Confirm check / Return to insurer\n\nAccess: write:quotations, approve:policies",
         "parameters": [
           {
             "name": "id",
@@ -98356,7 +98365,8 @@
         },
         "x-screen": "Operations > Sales & Marketing > Placement Slips > Detail > Confirm check / Return to insurer",
         "x-permissions": [
-          "write:quotations"
+          "write:quotations",
+          "approve:policies"
         ],
         "requestBody": {
           "required": true,
@@ -120496,7 +120506,7 @@
     "/quotations/{id}/status": {
       "put": {
         "operationId": "putQuotationsIdStatus",
-        "summary": "Change quotation status along quotations.transitions (Approved is maker-checker: approver differs from creator)",
+        "summary": "Change quotation status along quotations.transitions (Approved needs approve:quotations and is maker-checker: approver differs from creator; Rejected / Dropped take a decline or non-materialise reasonCode of the Reason Codes master)",
         "tags": [
           "Quotations"
         ],
@@ -120628,7 +120638,7 @@
       },
       "patch": {
         "operationId": "patchQuotationsIdStatus",
-        "summary": "Change quotation status along quotations.transitions (Approved is maker-checker: approver differs from creator)",
+        "summary": "Change quotation status along quotations.transitions (Approved needs approve:quotations and is maker-checker: approver differs from creator; Rejected / Dropped take a decline or non-materialise reasonCode of the Reason Codes master)",
         "tags": [
           "Quotations"
         ],
@@ -134101,11 +134111,11 @@
     "/renewals/{id}/approve": {
       "post": {
         "operationId": "postRenewalsIdApprove",
-        "summary": "Checker decision on renewal terms (decision approve | reject); approver must differ from the submitter",
+        "summary": "Checker decision on renewal terms (decision approve | reject; approve:renewals); approver must differ from the submitter",
         "tags": [
           "Renewals workspace"
         ],
-        "description": "Front-end touchpoint: Operations > Renewals > Negotiations (approval)\n\nAccess: write:renewals",
+        "description": "Front-end touchpoint: Operations > Renewals > Negotiations (approval)\n\nAccess: write:renewals, approve:renewals",
         "parameters": [
           {
             "name": "id",
@@ -134245,7 +134255,8 @@
         },
         "x-screen": "Operations > Renewals > Negotiations (approval)",
         "x-permissions": [
-          "write:renewals"
+          "write:renewals",
+          "approve:renewals"
         ],
         "requestBody": {
           "required": true,
@@ -134481,7 +134492,7 @@
     "/renewals/{id}/lapse": {
       "post": {
         "operationId": "postRenewalsIdLapse",
-        "summary": "Lapse a renewal (reason required)",
+        "summary": "Lapse a renewal: reason (text), or reasonCode of the Reason Codes master (lapse) with the reason as its note",
         "tags": [
           "Renewals workspace"
         ],
@@ -134634,12 +134645,16 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
                   "reason": {
                     "type": "string"
                   }
                 }
               },
               "example": {
+                "reasonCode": "LAP-NONRENEW",
                 "reason": "Client moved to another broker"
               }
             }
@@ -136163,6 +136178,9 @@
                           "lapseReason": {
                             "type": "string"
                           },
+                          "lapseReasonCode": {
+                            "type": "string"
+                          },
                           "reinstatementEligible": {
                             "type": "boolean"
                           },
@@ -136184,7 +136202,8 @@
                       "lapseDate": "2026-09-01",
                       "daysLapsed": 27,
                       "premiumLost": 85000,
-                      "lapseReason": "Premium too high",
+                      "lapseReason": "Customer No Longer Needs Coverage: sold the vehicle",
+                      "lapseReasonCode": "LAP-COV",
                       "reinstatementEligible": true,
                       "winBackAttempts": []
                     }
