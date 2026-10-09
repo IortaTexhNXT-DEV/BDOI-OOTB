@@ -9364,7 +9364,8 @@
       "batch.channel": "Batch: channel",
       "batch.createdDate": "Batch: created on"
     },
-    "toBeforeFrom": "The last number must not be below the first"
+    "toBeforeFrom": "The last number must not be below the first",
+    "paymentChannels": "Payment channels"
   },
   "onboarding": {
     "title": "Onboard client",

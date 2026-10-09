@@ -123,7 +123,7 @@ const Layouts = ({ toast, banks }) => {
         <Column field="code" header={t("integrations.code")} />
         <Column header={t("integrations.name")} body={(l) => <div><div>{l.name}</div><div className="pe-muted">{l.description}</div></div>} style={{ maxWidth: "30rem" }} />
         <Column field="bankCode" header={t("integrations.bank")} />
-        <Column header={t("integrations.channels")} body={(l) => l.channels.map((c) => t(`integrations.channelTypes.${c}`)).join(", ")} />
+        <Column header={t("integrations.paymentChannels")} body={(l) => l.channels.map((c) => t(`integrations.channelTypes.${c}`)).join(", ")} />
         <Column header={t("integrations.fileFormat")} body={(l) => t(`integrations.fileFormats.${l.format}`)} />
         <Column header={t("integrations.status.label")} body={(l) => <span className="flex gap-1">{l.isExample && <IntTag status="test" />}<IntTag status={l.active ? "active" : "closed"} /></span>} />
         <Column header="" body={(l) => <Button icon="pi pi-pencil" text rounded size="small" aria-label={t("integrations.edit")} tooltip={t("integrations.edit")} tooltipOptions={{ position: "top" }} onClick={() => open(l)} />} />
@@ -138,7 +138,7 @@ const Layouts = ({ toast, banks }) => {
               <InputText value={v.code} disabled={!editing.isNew} onChange={(e) => set({ code: e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, "") })} className="w-full" /></div>
             <div className="col-12 md:col-6"><label>{t("integrations.name")} *</label><InputText value={v.name} onChange={(e) => set({ name: e.target.value })} className="w-full" /></div>
             <div className="col-12 md:col-3"><label>{t("integrations.bank")}</label><Dropdown value={v.bankCode} options={banks} showClear filter onChange={(e) => set({ bankCode: e.value })} className="w-full" /></div>
-            <div className="col-12 md:col-4"><label>{t("integrations.channels")}</label>
+            <div className="col-12 md:col-4"><label>{t("integrations.paymentChannels")}</label>
               <MultiSelect value={v.channels} options={(meta.channels.length ? meta.channels : ["bulk_credit", "instapay", "pesonet"]).map((c) => ({ label: t(`integrations.channelTypes.${c}`), value: c }))}
                 onChange={(e) => set({ channels: e.value })} className="w-full" display="chip" /></div>
             <div className="col-6 md:col-2"><label>{t("integrations.fileFormat")}</label>
