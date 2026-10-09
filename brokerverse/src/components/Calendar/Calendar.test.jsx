@@ -11,7 +11,7 @@ describe("date fields", () => {
   it("show the configured date format whatever format the screen asked for, with the calendar button", () => {
     render(<Calendar inputId="d" value={new Date(2026, 9, 9)} dateFormat="yy-mm-dd" onChange={() => {}} />);
     expect(screen.getByRole("textbox")).toHaveValue("09/10/2026");
-    expect(document.querySelector(".p-datepicker-trigger")).not.toBeNull();
+    expect(screen.getByRole("button", { hidden: true })).toBeInTheDocument();
   });
 
   it("keep a month picker to the month and year, and a time field as it is", () => {
@@ -19,8 +19,8 @@ describe("date fields", () => {
     expect(viewDateFormat()).toBe("dd/mm/yy");
     setDateFormat("YYYY-MM-DD");
     expect(viewDateFormat("month")).toBe("yy-mm");
-    const { container } = render(<Calendar value={null} timeOnly onChange={() => {}} />);
-    expect(container.querySelector(".p-datepicker-trigger")).toBeNull();
+    render(<Calendar value={null} timeOnly onChange={() => {}} />);
+    expect(screen.queryByRole("button", { hidden: true })).toBeNull();
   });
 
   it("replace the browser date input: ISO text in and out, an input-like change event", () => {
