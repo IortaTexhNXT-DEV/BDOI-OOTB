@@ -168,9 +168,9 @@ export const compareRows = (idx, roles, { diffOnly = false, query = "", technica
     const cells = Object.fromEntries(roles.map((r) => [r.code, heldLevels(idx, r, m)]));
     const signature = (r) => cells[r.code].filter((x) => x.granted).map((x) => x.level).join(",");
     const differs = new Set(roles.map(signature)).size > 1;
-    return { key: m.code, area: m.area, areaOrder: idx.area(m.area)?.order || 0, module: m, cells, differs };
+    return { key: m.code, area: m.area, module: m, cells, differs };
   })
   .filter((row) => !diffOnly || row.differs);
 
-/** Number of staged changes and of the levels they turn on or off. */
+/** Number of levels the staged edits turn on or off. */
 export const changeCount = (staged = {}) => Object.keys(staged).length;
