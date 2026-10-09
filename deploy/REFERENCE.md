@@ -137,6 +137,7 @@ Deployment variables (all optional; defaults shown):
 | `JSON_BODY_LIMIT` | 2mb | Largest JSON request body. |
 | `TRUST_PROXY` | 1 | Proxies in front of the API whose `X-Forwarded-For` is believed: a hop count, `true` / `false`, or addresses and subnets separated by commas. The client address feeds the sign-in rate limits and the sign-in history. 1 for one reverse proxy (nginx, Railway); 4 on Azure (Front Door, the web app's ingress, nginx, the API's ingress). |
 | `ENTRA_TENANT_ID`, `ENTRA_CLIENT_ID`, `ENTRA_CLIENT_SECRET`, `ENTRA_REDIRECT_URI` | empty | Sign-in with Microsoft Entra ID (OpenID Connect, authorization code with PKCE). All four set: the sign-in page shows "Sign in with Microsoft". The redirect address is the web address followed by `/login`. App registration: [AZURE.md](AZURE.md), section 14. |
+| `HTTP_KEEP_ALIVE_SECONDS` | 65 | How long the API keeps an idle keep-alive connection open; longer than the idle timeout of the proxy in front (ALB 60 s), so the proxy never reuses a connection being closed. |
 | `ENTRA_AUTHORITY` | https://login.microsoftonline.com | Microsoft sign-in host (another national cloud only). |
 
 Configuration (Master > Configuration, group Security / Uploads): `security.api_rate_limit` (requests per signed-in
