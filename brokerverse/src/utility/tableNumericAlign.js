@@ -5,7 +5,8 @@
  * DOM and classifies each column of each table from its cells:
  *  - "bv-num": most non-empty cells are numbers (amounts, counts, percentages): right-aligned, tabular digits;
  *  - "bv-date": most non-empty cells are dates (or date ranges, with or without a time): never wrap;
- *  - "bv-code": most non-empty cells are document numbers or codes (POL-2026-00001): never wrap;
+ *  - "bv-code": most non-empty cells are document numbers or codes (POL-2026-00001), or the heading names a code (a
+ *    code made of digits, such as cost centre 900901, is still a code, left-aligned): never wrap;
  *  - "bv-actions": every cell holds only buttons or icons and no text: narrow, at the right, on one line.
  * theme/bdoi/enterprise.scss styles those classes. (A table waiting for its first rows shows skeleton rows:
  * components/DataTable.)
@@ -21,6 +22,8 @@ const PHONE = /^(?:\+?63|0)\d{9,10}$/;
 const MIN_SHARE = 0.6;
 
 const cellText = (td) => (td.innerText || "").replace(/\s+/g, " ").trim();
+/** A column whose heading names a code ("Cost Centre Code", "Rank Code") holds identifiers, never amounts. */
+export const isCodeHeading = (text) => /\bcode\b/i.test(text || "");
 const onlyControls = (td) => !cellText(td) && !!td.querySelector("button, a, .pi, svg");
 
 /** Classify one cell text: "num", "date", "code" or null. */
@@ -52,9 +55,10 @@ const markTable = (table) => {
   });
   const headCells = table.querySelectorAll(":scope > thead > tr:last-child > th");
   stats.forEach((s, i) => {
-    const numeric = !!s && s.filled > 0 && s.num / s.filled >= MIN_SHARE;
+    const codeHeading = !!headCells[i] && isCodeHeading(cellText(headCells[i]));
+    const numeric = !!s && !codeHeading && s.filled > 0 && s.num / s.filled >= MIN_SHARE;
     const date = !!s && !numeric && s.filled > 0 && s.date / s.filled >= MIN_SHARE;
-    const code = !!s && !numeric && !date && s.filled > 0 && s.code / s.filled >= MIN_SHARE;
+    const code = !!s && !numeric && !date && s.filled > 0 && (codeHeading || s.code / s.filled >= MIN_SHARE);
     // the last column of buttons only (not a selection checkbox column at the start)
     const actions = !!s && i > 0 && s.filled === 0 && s.controls === s.cells && i === stats.length - 1;
     const mark = (el) => {

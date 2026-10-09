@@ -1,4 +1,4 @@
-import { kindOfText } from "./tableNumericAlign";
+import { isCodeHeading, kindOfText } from "./tableNumericAlign";
 
 describe("table column classification", () => {
   it("recognises amounts, counts and percentages as numbers", () => {
@@ -27,5 +27,12 @@ describe("table column classification", () => {
     expect(kindOfText("Juan dela Cruz")).toBeNull();
     expect(kindOfText("09171234599")).toBeNull();
     expect(kindOfText("")).toBeNull();
+  });
+
+  it("treats a column headed as a code as text, even when its codes are digits", () => {
+    expect(isCodeHeading("Cost Centre Code")).toBe(true);
+    expect(isCodeHeading("Rank Code")).toBe(true);
+    expect(isCodeHeading("Amount")).toBe(false);
+    expect(isCodeHeading("Encoded By")).toBe(false);
   });
 });

@@ -1,7 +1,12 @@
--- BIR Revenue District Offices offered for the RDO code of a company (Master > Organization > Company > Tax
--- registration), as { code, name }. The list is kept in System Settings (bir.rdo_codes), so an office the BIR adds or
--- renames is maintained there; the company form still takes a code that is not in the list (3 digits and a letter at
--- most). Starter list of the district offices of the BIR revenue regions; the large taxpayers offices are not listed.
+-- Lists offered on master forms instead of free text:
+--   bir.rdo_codes                       BIR Revenue District Offices offered for the RDO code of a company (Master >
+--                                       Organization > Company > Tax registration), as { code, name }. The list is kept in
+--                                       System Settings, so an office the BIR adds or renames is maintained there; the
+--                                       company form still takes a code that is not in the list (3 digits and a letter at
+--                                       most). Starter list of the district offices of the BIR revenue regions; the large
+--                                       taxpayers offices are not listed.
+--   cost-centre responsiblePerson       Master > Finance > Cost Centres: the responsible person is picked from the active
+--                                       users (the department already comes from the department master).
 -- Idempotent.
 
 INSERT INTO app_settings(key, value, "group", label, type) VALUES
@@ -132,3 +137,9 @@ INSERT INTO app_settings(key, value, "group", label, type) VALUES
   {"code": "115", "name": "Digos, Davao del Sur"}
 ]$j$, 'bir', 'Revenue District Offices offered for the RDO code of a company (code and name)', 'json')
 ON CONFLICT (key) DO NOTHING;
+
+UPDATE master_types t SET fields = (
+    SELECT jsonb_agg(CASE WHEN f->>'name' = 'responsiblePerson' THEN f || '{"optionsFrom":"user"}'::jsonb ELSE f END ORDER BY ord)
+    FROM jsonb_array_elements(t.fields) WITH ORDINALITY AS x(f, ord)),
+  updated_at = now()
+WHERE t.code = 'cost-centre' AND t.fields @> '[{"name":"responsiblePerson"}]' AND NOT t.fields @> '[{"name":"responsiblePerson","optionsFrom":"user"}]';

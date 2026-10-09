@@ -573,7 +573,7 @@ All masters work alike: a list with search, **Add** (the form opens on its own p
 | Cost Centres | Master > Finance | Accounting, System Administrator |
 | Suppliers | Accounts > Payables > Suppliers | Accounting, System Administrator |
 
-Each screen lists the records with **Add**, the edit icon and activate / deactivate. The nine masters are also in the go-live configuration workbook and have upload templates. **Sales Activity Types** and **Sales Activity Outcomes** (Master > Organization) work the same way and are described under Sales activities in the Sales & Marketing chapter; **Distribution Channels** (Master > Insurance) in the chapter Distribution, programmes and products.
+Each screen lists the records with a search box, **Add**, the edit icon and activate / deactivate; the info icon next to the title says in one sentence what the master is for. A field taken from another master is a list: on Cost Centres the company, the department (Master > Organization > Department) and the responsible person (the active users). The nine masters are also in the go-live configuration workbook and have upload templates. **Sales Activity Types** and **Sales Activity Outcomes** (Master > Organization) work the same way and are described under Sales activities in the Sales & Marketing chapter; **Distribution Channels** (Master > Insurance) in the chapter Distribution, programmes and products.
 
 ![Master > Insurance > Short-Period Rates, one of the operational masters](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-ops-masters.png)
 

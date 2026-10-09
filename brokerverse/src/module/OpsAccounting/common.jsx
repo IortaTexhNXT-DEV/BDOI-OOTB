@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Tag } from "primereact/tag";
+import { Tooltip } from "primereact/tooltip";
 import SvgDot from "../../assets/icons/SvgDot";
 import { statusSeverity } from "../../utils/statusSeverity";
 import { date, dateTime, money, showError, showSuccess } from "../PeriodEnd/common";
@@ -16,14 +17,22 @@ export const OpsTag = ({ status }) => {
   return <Tag className="pe-tag" value={t(`opsAcc.status.${status}`, { defaultValue: String(status).replace(/[_-]/g, " ") })} severity={statusSeverity(status)} />;
 };
 
-/** Page title with the breadcrumb (menu group > section > page) and the page actions. */
-export const PageHeader = ({ title, group, section, subtitle, children }) => {
+/** Page title with the breadcrumb (menu group > section > page) and the page actions; help is one sentence in a tooltip. */
+export const PageHeader = ({ title, group, section, subtitle, help, children }) => {
   const { t } = useTranslation();
   const model = [section, title].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).map((label) => ({ label }));
   return (
     <div className="pe-header">
       <div>
-        <h1 className="pe-title">{title}</h1>
+        <h1 className="pe-title">
+          {title}
+          {help ? (
+            <>
+              <Tooltip target=".pe-title-help" position="right" />
+              <i className="pi pi-info-circle pe-title-help" role="img" tabIndex={0} aria-label={help} data-pr-tooltip={help} />
+            </>
+          ) : null}
+        </h1>
         <BreadCrumb home={{ label: group || t("opsAcc.accounts") }} model={model} separatorIcon={<SvgDot color={"#000"} />} className="pe-breadcrumb" />
         {subtitle && <p className="pe-subtitle">{subtitle}</p>}
       </div>

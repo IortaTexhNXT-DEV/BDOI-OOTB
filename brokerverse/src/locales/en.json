@@ -67,7 +67,9 @@
     "total": "Total",
     "warning": "Warning",
     "information": "Information",
-    "validation": "Validation"
+    "validation": "Validation",
+    "activate": "Activate",
+    "deactivate": "Deactivate"
   },
   "login": {
     "title": "Welcome to {{name}}",
@@ -2410,7 +2412,29 @@
     "uploadProvinces": "Upload provinces",
     "provinceAdded": "Province added",
     "tinInvalid": "Enter the TIN as 000-000-000 or 000-000-000-00000",
-    "tin": "TIN"
+    "tin": "TIN",
+    "websiteInvalid": "Enter the address as https://www.example.com",
+    "rdoInvalid": "Choose the RDO or enter its code, e.g. 047",
+    "faxInvalid": "Invalid fax number",
+    "companySection": {
+      "details": "Company details",
+      "tax": "Tax registration",
+      "taxHint": "Printed on the BIR forms (2307, alphalists) of the letterhead company",
+      "address": "Registered address",
+      "addressHint": "As registered with the BIR; printed on the letterhead and the BIR forms",
+      "contact": "Contact",
+      "logo": "Logo",
+      "logoHint": "PNG or JPEG, printed at the top of the documents of this company"
+    },
+    "rdoCode": "RDO code",
+    "rdoPlaceholder": "Revenue District Office",
+    "letterheadCompany": "Letterhead company",
+    "letterheadHint": "Its name, address, TIN and logo head the documents, reports and BIR forms",
+    "noLogo": "No logo",
+    "uploading": "Uploading...",
+    "replaceLogo": "Replace logo",
+    "uploadLogo": "Upload logo",
+    "removeLogo": "Remove"
   },
   "agent": {
     "createQuote": "Create Quote",
@@ -9694,57 +9718,57 @@
       "shortPeriod": {
         "title": "Short-Period Rates",
         "section": "Insurance Management",
-        "intro": "Premium the insurer keeps when the insured cancels, by the days the policy was in force. Used by Operations > Policy Cancellation."
+        "help": "Premium the insurer keeps when a policy is cancelled, by the days it was in force."
       },
       "cancellationReasons": {
         "title": "Cancellation Reasons",
         "section": "Insurance Management",
-        "intro": "Why a policy is cancelled, who initiates it (insured: short-period scale; insurer: pro-rata) and the return premium method."
+        "help": "Why a policy is cancelled, who initiates it and how the return premium is worked out."
       },
       "claimChecklist": {
         "title": "Claim Document Checklist",
         "section": "Insurance Management",
-        "intro": "Documents a claim needs by line of business and claim type (* = all), required or optional. Copied onto each claim."
+        "help": "Documents a claim needs, by line of business and claim type."
       },
       "repairShops": {
         "title": "Repair Shops",
         "section": "Insurance Management",
-        "intro": "Repair shops that may take motor claim estimates; only accredited shops are offered."
+        "help": "Repair shops for motor claim estimates; only accredited shops are offered."
       },
       "suppliers": {
         "title": "Suppliers",
         "section": "Payables",
-        "intro": "Suppliers of goods and services: TIN, VAT registration, EWT tax code withheld, payment terms and default expense account."
+        "help": "Suppliers of goods and services, with their tax details and payment terms."
       },
       "assetClasses": {
         "title": "Asset Classes",
         "section": "Finance",
-        "intro": "Useful life (months) and the asset, accumulated depreciation and depreciation expense accounts of each class of fixed asset."
+        "help": "Useful life and accounts of each class of fixed asset."
       },
       "costCentres": {
         "title": "Cost Centres",
         "section": "Finance",
-        "intro": "Cost centres tagged on journal lines and in the SAP GL file. The one marked Default is stamped on every line that names none (TISPH: 900901 Toyota Insurance Services)."
+        "help": "Cost centres for journal lines; the default one goes on lines that name none."
       },
       "salesActivityTypes": {
         "title": "Sales Activity Types",
         "section": "Organization",
-        "intro": "Kinds of sales activity account executives log (call, meeting, e-mail, visit...), their channel and the default days to the next step."
+        "help": "Kinds of sales activity account executives log."
       },
       "salesActivityOutcomes": {
         "title": "Sales Activity Outcomes",
         "section": "Organization",
-        "intro": "Outcomes of a sales activity and whether each is positive, neutral or negative for the activity report."
+        "help": "Outcomes of a sales activity for the activity report."
       },
       "leadSources": {
         "title": "Lead Sources",
         "section": "Insurance Management",
-        "intro": "Where prospects come from: the Source of the prospect form and of the lead upload, and a lead assignment condition."
+        "help": "Where prospects come from."
       },
       "reasonCodes": {
         "title": "Reason Codes",
         "section": "Insurance Management",
-        "intro": "Coded reasons of a declined or dropped quotation, a claim repudiation, a renewal lapse, a refund, an adjustment or business that did not materialise. Cancellation and write-off reasons have their own masters."
+        "help": "Coded reasons for declined quotations, repudiated claims, lapsed renewals, refunds and adjustments."
       }
     },
     "instalments": {
@@ -10085,7 +10109,8 @@
     "amountAboveZero": "Enter an amount above zero",
     "invalidEmail": "Enter a valid e-mail address",
     "tooLong": "At most {{max}} characters",
-    "notBefore": "Must be on or after {{other}}"
+    "notBefore": "Must be on or after {{other}}",
+    "select": "Select"
   },
   "distribution": {
     "cp": {

@@ -12,7 +12,10 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { MultiSelect } from "primereact/multiselect";
 import { Toast } from "primereact/toast";
+import RowActions, { actionsColumn } from "../../components/RowActions";
+import mastersService from "../../services/mastersService";
 import service from "../../services/opsAccountingService";
+import userService from "../../services/userService";
 import { Field, OpsTag, PageHeader, blank, isoOf, showError, showSuccess, toDate, useFieldErrors } from "./common";
 
 const HIDDEN = ["audit-user", "audit-date"];
@@ -22,17 +25,26 @@ const display = (f, v) => {
   if (f.type === "boolean") return v === true || v === "true" ? "Yes" : "No";
   return String(v);
 };
+// a field picked from another master (optionsFrom) or from the users: a field named ...Code keeps the code, any other the name
+const lookup = async (f) => {
+  if (f.optionsFrom === "user") return (await userService.lookupUsers()).map((u) => ({ label: u.name, value: u.name }));
+  const byCode = /Code$/.test(f.name);
+  return (await mastersService.options(f.optionsFrom, { valueField: byCode ? "code" : "label" }))
+    .map((o) => ({ label: byCode ? `${o.code} - ${o.label}` : o.label, value: o.value }));
+};
 
 /**
  * A master kept on the generic master store and maintained by the team that uses it (Repair Shops, Suppliers, Asset
  * Classes, Short-Period Rates, Cancellation Reasons, Claim Document Checklist): list, add, edit, activate / deactivate.
- * The fields come from the master type definition, so a field added on Master > Configuration shows here too.
+ * The fields come from the master type definition, so a field added on Master > Configuration shows here too; a field
+ * taken from another master or from the users is a list (it stays a text box when the list cannot be read).
  */
-const MasterRecordsPage = ({ type, title, group, section, intro, columns }) => {
+const MasterRecordsPage = ({ type, title, group, section, help, columns }) => {
   const { t } = useTranslation();
   const toast = useRef(null);
   const [rows, setRows] = useState([]);
   const [fields, setFields] = useState([]);
+  const [lists, setLists] = useState({});
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [edit, setEdit] = useState(null); // { id, values }
@@ -52,6 +64,11 @@ const MasterRecordsPage = ({ type, title, group, section, intro, columns }) => {
     }
   }, [type, search]);
   useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    const listed = fields.filter((f) => f.optionsFrom);
+    Promise.all(listed.map((f) => lookup(f).then((options) => [f.name, options]).catch(() => null)))
+      .then((loaded) => setLists(Object.fromEntries(loaded.filter(Boolean))));
+  }, [fields]);
 
   const shown = useMemo(() => (columns ? fields.filter((f) => columns.includes(f.name)) : fields.slice(0, 6)), [fields, columns]);
   // the rules of the type definition the API applies: required (a code the system numbers may be left empty), e-mail, length
@@ -90,6 +107,10 @@ const MasterRecordsPage = ({ type, title, group, section, intro, columns }) => {
   const input = (f) => {
     const v = edit.values[f.name];
     if (f.type === "boolean") return <Checkbox inputId={`f-${f.name}`} checked={v === true || v === "true"} onChange={(e) => set(f.name, e.checked)} />;
+    if (lists[f.name]) {
+      const options = v && !lists[f.name].some((o) => o.value === v) ? [{ label: String(v), value: v }, ...lists[f.name]] : lists[f.name];
+      return <Dropdown inputId={`f-${f.name}`} value={v ?? null} options={options} onChange={(e) => set(f.name, e.value)} className="w-full" filter showClear placeholder={t("opsAcc.select", "Select")} />;
+    }
     if (f.type === "select" && Array.isArray(f.options)) return <Dropdown value={v ?? null} options={f.options} onChange={(e) => set(f.name, e.value)} className="w-full" showClear />;
     if (f.type === "multiselect" && Array.isArray(f.options)) return <MultiSelect value={Array.isArray(v) ? v : []} options={f.options} onChange={(e) => set(f.name, e.value)} className="w-full" display="chip" />;
     if (f.type === "date") return <Calendar value={toDate(v)} onChange={(e) => set(f.name, isoOf(e.value))} dateFormat="yy-mm-dd" showIcon showButtonBar className="w-full" />;
@@ -104,22 +125,21 @@ const MasterRecordsPage = ({ type, title, group, section, intro, columns }) => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader title={title} group={group} section={section} subtitle={intro}>
+      <PageHeader title={title} group={group} section={section} help={help}>
         <Button icon="pi pi-plus" label={t("opsAcc.masters.add")} onClick={() => open({ id: null, values: {} })} />
       </PageHeader>
       <div className="pe-card">
-        <div className="flex gap-2 mb-2">
-          <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("opsAcc.search")} className="w-20rem" />
+        <div className="bv-list-toolbar">
+          <span className="p-input-icon-left bv-list-search">
+            <i className="pi pi-search" />
+            <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("opsAcc.search")} aria-label={t("opsAcc.search")} />
+          </span>
         </div>
         <DataTable value={rows} dataKey="id" loading={loading} size="small" stripedRows paginator rows={25} emptyMessage={t("opsAcc.none")}>
           {shown.map((f) => <Column key={f.name} header={f.label} body={(r) => display(f, r[f.name])} />)}
           <Column header={t("opsAcc.statusLabel")} body={(r) => <OpsTag status={r.isActive ? "active" : "inactive"} />} />
-          <Column body={(r) => (
-            <span className="flex gap-1">
-              <Button icon="pi pi-pencil" text size="small" aria-label={t("opsAcc.edit")} tooltip={t("opsAcc.edit")} onClick={() => open({ id: r.id, values: { ...r } })} />
-              <Button icon={r.isActive ? "pi pi-ban" : "pi pi-check"} text size="small" aria-label={r.isActive ? t("opsAcc.deactivate") : t("opsAcc.activate")}
-                tooltip={r.isActive ? t("opsAcc.deactivate") : t("opsAcc.activate")} onClick={() => toggle(r)} />
-            </span>
+          <Column header={t("common.actions")} {...actionsColumn} body={(r) => (
+            <RowActions onEdit={() => open({ id: r.id, values: { ...r } })} editLabel={t("opsAcc.edit")} active={r.isActive} onStatus={() => toggle(r)} />
           )} />
         </DataTable>
       </div>

@@ -68,7 +68,8 @@ reversal keeps the cost centres of the original. The accounting query (filter `c
 voucher and the general ledger detail report show it, and the SAP GL file carries it (`modules/sap-gl`). Lines posted
 before migration 0346 have none. The screen keeps the master through `/ops-masters/cost-centre` (read with the journal
 voucher or masters permissions, maintained with `write:journal-vouchers` or `write:masters`); `/masters/cost-centre`
-and the upload template serve the same records.
+and the upload template serve the same records. The form offers the company and the department from their masters and
+the responsible person from the active users (`optionsFrom: "user"`, migration 0362).
 
 ## Key settings
 
