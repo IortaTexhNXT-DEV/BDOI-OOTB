@@ -1,5 +1,5 @@
 import React from "react";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import "../../../i18n";
 import CreateProspectDialog from "./CreateProspectDialog";
 import clientService from "../../../services/clientService";
@@ -84,7 +84,7 @@ describe("Create prospect for an existing client", () => {
     await act(async () => {
       jest.advanceTimersByTime(400);
     });
-    await waitFor(() => expect(screen.getByText('No client matches "nobody".')).toBeInTheDocument());
+    expect(await screen.findByText('No client matches "nobody".')).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Create a new customer instead" }));
     fireEvent.click(screen.getByRole("button", { name: "Skip - tag product later" }));
     expect(onSkip).toHaveBeenCalledWith(null);

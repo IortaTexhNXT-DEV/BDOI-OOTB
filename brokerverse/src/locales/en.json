@@ -8617,6 +8617,7 @@
     "searching": "Searching...",
     "createNew": "Create a new customer instead",
     "resultsLabel": "Clients found",
+    "resultCount": "{{count}} clients found",
     "resultCount_one": "{{count}} client found",
     "resultCount_other": "{{count}} clients found",
     "moreResults": "Showing the first {{count}} clients: type more to narrow the search"
