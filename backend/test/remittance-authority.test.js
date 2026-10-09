@@ -1,7 +1,7 @@
 /**
- * Remittance decisions (seed 89_remittance_reasons.sql): the reasons of the remittance, exception, insurer
- * reconciliation and insurer billing decisions on the Reason Codes master, the reason check of the routes
- * (requiredReason) and who may read them.
+ * Remittance decisions: the reasons of the remittance, exception, insurer reconciliation and insurer billing decisions
+ * on the Reason Codes master (seed 89_remittance_reasons.sql), the reason check of the routes (requiredReason) and who
+ * may read them; the steps of a remittance in its activity log (lib/auditLabels.js).
  */
 import fs from 'node:fs';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
@@ -9,6 +9,7 @@ import request from 'supertest';
 import { setup, loginAs } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { requiredReason } from '../src/modules/ops-masters/records.js';
+import { actionTitle } from '../src/lib/auditLabels.js';
 
 const CONTEXTS = ['remittance_reject', 'remittance_withdraw', 'remittance_cancel', 'remittance_revoke', 'remittance_off_cycle', 'remittance_line_exclude',
   'exception_escalate', 'exception_resolve', 'exception_reopen', 'reconciliation_difference', 'reconciliation_unmatch', 'confirmation_difference',
@@ -89,5 +90,38 @@ describe('the remittance contexts of the Reason Codes master', () => {
     expect(res.status).toBe(200);
     expect(res.body.data.map((r) => r.code).sort()).toEqual(['RWD-CORRECT', 'RWD-OTHER', 'RWD-WEEK']);
     expect((await viewer('post', '/ops-masters/reason-code').send({ code: 'RWD-X', name: 'X', context: 'remittance_withdraw' })).status).toBe(403);
+  });
+});
+
+describe('the steps of a remittance in its activity log', () => {
+  const STEPS = ['create', 'submit', 'withdraw', 'return', 'approve', 'revoke', 'cancel', 'exclude-line', 'include-line', 'recompute', 'raise-voucher',
+    'in-payment', 'pay', 'payment-failed', 'send-advice', 'record-confirmation', 'remind', 'import', 'run'];
+
+  it('each of the 19 steps, and the codes of earlier releases, reads as a sentence', () => {
+    const titles = Object.fromEntries([...STEPS, 'reject', 'create-agency-bill', 'send-bill', 'settle'].map((a) => [a, actionTitle('remittance', a)]));
+    expect(titles).toEqual({
+      create: 'Remittance created', submit: 'Remittance submitted', withdraw: 'Remittance withdrawn from approval', return: 'Remittance returned to the maker',
+      approve: 'Remittance approved', revoke: 'Remittance approval revoked', cancel: 'Remittance cancelled', 'exclude-line': 'Policy line excluded from the remittance',
+      'include-line': 'Policy line included in the remittance again', recompute: 'Remittance recomputed', 'raise-voucher': 'Payment voucher raised for the remittance',
+      'in-payment': 'Payment to the insurer started', pay: 'Remittance paid to the insurer', 'payment-failed': 'Payment to the insurer failed',
+      'send-advice': 'Remittance advice sent to the insurer', 'record-confirmation': 'Insurer confirmation recorded', remind: 'Reminder sent',
+      import: 'Remittance created from an imported policy list', run: 'Remittance created by a remittance run',
+      reject: 'Remittance returned to the maker', 'create-agency-bill': 'Agency bill created', 'send-bill': 'Bill sent to the insurer', settle: 'Remittance settled',
+    });
+    expect(actionTitle('remittance_approval', 'approve')).toBe('Approval given');
+  });
+
+  it('the activity log of a remittance shows no raw action code', async () => {
+    const c = await ctx.api('post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo: 'EXT-STEPS-1', premium: 1000, commission: 150, tax: 0 }] });
+    expect(c.status).toBe(201);
+    const id = c.body.data.id;
+    // the steps the later screens record, as the audit trail keeps them
+    for (const action of [...STEPS.filter((a) => a !== 'create'), 'create-agency-bill', 'send-bill']) {
+      await q(`INSERT INTO audit_log(user_id, username, entity, entity_id, action, after_data) SELECT id, username, 'remittance', $1, $2, '{}'::jsonb FROM users WHERE username = 'BrokerVerse'`, [id, action]);
+    }
+    const log = (await ctx.api('get', `/remittance/remittances/${id}`)).body.data.activityLog;
+    expect(log).toHaveLength(STEPS.length + 2);
+    expect(log.filter((e) => !e.actionLabel || /-/.test(e.actionLabel) || e.actionLabel === e.actionCode)).toEqual([]);
+    expect(log.map((e) => e.actionLabel)).toEqual(expect.arrayContaining(['Remittance created', 'Policy line excluded from the remittance', 'Agency bill created']));
   });
 });

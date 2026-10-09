@@ -5934,7 +5934,17 @@
       "assignQueued": "Sent to the queue",
       "assignManual": "Reassigned",
       "assignBulk": "Reassigned in bulk",
-      "assignTaken": "Taken from the queue"
+      "assignTaken": "Taken from the queue",
+      "revoke": "Revoked",
+      "excludeLine": "Line excluded",
+      "includeLine": "Line included",
+      "raiseVoucher": "Payment voucher raised",
+      "inPayment": "In payment",
+      "paymentFailed": "Payment failed",
+      "sendAdvice": "Advice sent",
+      "recordConfirmation": "Confirmation recorded",
+      "createAgencyBill": "Agency bill created",
+      "sendBill": "Bill sent"
     },
     "fields": {
       "version": "Version",

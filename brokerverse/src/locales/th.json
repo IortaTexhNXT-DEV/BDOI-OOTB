@@ -4946,7 +4946,17 @@
       "assignQueued": "ส่งเข้าคิว",
       "assignManual": "มอบหมายใหม่",
       "assignBulk": "มอบหมายใหม่แบบกลุ่ม",
-      "assignTaken": "รับจากคิว"
+      "assignTaken": "รับจากคิว",
+      "revoke": "เพิกถอนแล้ว",
+      "excludeLine": "ตัดรายการออก",
+      "includeLine": "นำรายการกลับเข้า",
+      "raiseVoucher": "ออกใบสำคัญจ่ายแล้ว",
+      "inPayment": "อยู่ระหว่างชำระเงิน",
+      "paymentFailed": "ชำระเงินไม่สำเร็จ",
+      "sendAdvice": "ส่งใบแจ้งการนำส่งเบี้ยแล้ว",
+      "recordConfirmation": "บันทึกการยืนยันแล้ว",
+      "createAgencyBill": "สร้างใบแจ้งหนี้ตัวแทนแล้ว",
+      "sendBill": "ส่งใบแจ้งหนี้แล้ว"
     },
     "fields": {
       "version": "เวอร์ชัน",

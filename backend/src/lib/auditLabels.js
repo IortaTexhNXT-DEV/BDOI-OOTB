@@ -74,11 +74,30 @@ const ACTION_VERBS = {
   run: 'run', status: 'status changed', assign: 'assigned', renew: 'renewed', lapse: 'lapsed', endorse: 'endorsed', print: 'printed', email: 'e-mailed',
   'payment-capture': 'payment captured', 'pay-later': 'set to pay later', 'payment-confirm': 'payment confirmed', 'payment-reject': 'payment rejected',
   'payment-status': 'payment status changed', 'funds-received': 'funds received from the insurer', 'paid-to-claimant': 'paid to the claimant',
-  purge: 'purged', reset: 'reset', complete: 'completed', reassign: 'reassigned',
+  purge: 'purged', reset: 'reset', complete: 'completed', reassign: 'reassigned', withdraw: 'withdrawn', return: 'returned', revoke: 'revoked',
+  recompute: 'recomputed', import: 'imported', remind: 'reminder sent', pay: 'paid', 'exclude-line': 'line excluded', 'include-line': 'line included',
+  'raise-voucher': 'payment voucher raised', 'in-payment': 'in payment', 'payment-failed': 'payment failed', 'send-advice': 'advice sent',
+  'record-confirmation': 'confirmation recorded', 'create-agency-bill': 'agency bill created', 'send-bill': 'bill sent',
 };
 
-/** Sign-in events read as what the user did. */
-const SESSION_TITLES = { login: 'Signed in', logout: 'Signed out', 'refresh-token-reuse': 'Session token reused (session ended)', 'login-failed': 'Sign-in failed' };
+/**
+ * Headlines of the actions of a record type that "<record type> <verb>" does not tell well: the sign-in events, and the
+ * steps in the life of a remittance (Accounts > Remittance) with the codes of earlier releases (create-agency-bill,
+ * send-bill, settle). A rejected remittance goes back to its maker, so reject reads as returned.
+ */
+const ACTION_TITLES = {
+  session: { login: 'Signed in', logout: 'Signed out', 'refresh-token-reuse': 'Session token reused (session ended)', 'login-failed': 'Sign-in failed' },
+  remittance: {
+    create: 'Remittance created', submit: 'Remittance submitted', withdraw: 'Remittance withdrawn from approval', return: 'Remittance returned to the maker',
+    reject: 'Remittance returned to the maker', approve: 'Remittance approved', revoke: 'Remittance approval revoked', cancel: 'Remittance cancelled',
+    'exclude-line': 'Policy line excluded from the remittance', 'include-line': 'Policy line included in the remittance again', recompute: 'Remittance recomputed',
+    'raise-voucher': 'Payment voucher raised for the remittance', 'in-payment': 'Payment to the insurer started', pay: 'Remittance paid to the insurer',
+    'payment-failed': 'Payment to the insurer failed', 'send-advice': 'Remittance advice sent to the insurer', 'record-confirmation': 'Insurer confirmation recorded',
+    remind: 'Reminder sent', import: 'Remittance created from an imported policy list', run: 'Remittance created by a remittance run',
+    'create-agency-bill': 'Agency bill created', settle: 'Remittance settled', 'send-bill': 'Bill sent to the insurer',
+  },
+  remittance_approval: { approve: 'Approval given', reject: 'Approval refused and returned to the maker', delegate: 'Approval delegated to another approver' },
+};
 
 /**
  * The headline of an event: "Policy updated", "Claim registered", "Settlement submitted", "Insurance company deactivated".
@@ -98,7 +117,7 @@ export function actionTitle(entity, action, masterLabels = {}) {
     return `Status changed to ${sentenceCase(s).toLowerCase()}`;
   }
   const key = a.toLowerCase();
-  if (entity === 'session' && SESSION_TITLES[key]) return SESSION_TITLES[key];
+  if (ACTION_TITLES[entity]?.[key]) return ACTION_TITLES[entity][key];
   if (ACTION_VERBS[key]) return `${label} ${ACTION_VERBS[key]}`;
   const words = sentenceCase(a);
   return words.toLowerCase().startsWith(label.toLowerCase()) ? words : `${label}: ${words.charAt(0).toLowerCase()}${words.slice(1)}`;
