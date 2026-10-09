@@ -206,6 +206,8 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
       try {
         const payload = {
           lob: "IAR",
+          // the product chosen on Create prospect tags the prospect
+          ...(location.state?.product?.productId ? { productId: location.state.product.productId } : {}),
           ...(existingClient ? { clientId: existingClient.clientId || existingClient.id } : {}),
           companyName: values.CompanyName || null,
           taxInformationNumber: values.TaxNumber || null,

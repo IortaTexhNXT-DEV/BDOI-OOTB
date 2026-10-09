@@ -4,6 +4,7 @@ import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import LeadCreationCard from "./leadCreationCard";
 import { useNavigate } from "react-router-dom";
 import LeadEdit from "../leadEdit";
+import NewProspectGate from "./NewProspectGate";
 
 const LeadCreation = ({ flow, action }) => {
   const { t } = useTranslation();
@@ -14,13 +15,15 @@ const LeadCreation = ({ flow, action }) => {
   return (
     <>
       {action === "post" ?
-        <div className="overall_Leadcreat_container">
-          <div onClick={handleLeadNavigation} className="innerlead_container mt-3 cursor-pointer">
-            <SvgLeftArrow />
-            <div className="arrowlabel_txt">{t("leadCreation.lead")}</div>
+        <NewProspectGate>
+          <div className="overall_Leadcreat_container">
+            <div onClick={handleLeadNavigation} className="innerlead_container mt-3 cursor-pointer">
+              <SvgLeftArrow />
+              <div className="arrowlabel_txt">{t("leadCreation.lead")}</div>
+            </div>
+            <LeadCreationCard flow={flow} action={action} />
           </div>
-          <LeadCreationCard flow={flow} action={action} />
-        </div>
+        </NewProspectGate>
         : <div>
           <LeadEdit flow={flow} action={action} /><LeadCreationCard flow={flow} action={action} />
         </div>

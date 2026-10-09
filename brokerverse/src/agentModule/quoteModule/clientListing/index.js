@@ -7,7 +7,7 @@ import ClientListingCard from "./clientListingCard";
 import { useNavigate } from "react-router-dom";
 import { canOpen, hasPermission } from "../../../utils/canOpen";
 import { Button } from "primereact/button";
-import { RFQ_PATH, entryOf, rfqState, useProductRequired } from "../../../module/Sales/salesProducts";
+import useProspectStart from "../../leadModule/leadListing/useProspectStart";
 import { ProductPickerDialog } from "../../../module/Sales/ProductPicker";
 
 const ClientListing = () => {
@@ -22,16 +22,12 @@ const ClientListing = () => {
   // only roles that may open Leads/Prospects are offered "Create Lead" (claims users view clients only)
   const canCreateLead = canOpen("/agent/createlead");
 
-  // "Create Lead": the line of business and product open the screen the product is quoted on (the motor form tagged with
-  // the product); Skip - tag product later opens the prospect form without a product
-  const productRequired = useProductRequired();
-  const forms = { fire: "/agent/createlead/fire-allied-perils", iar: "/agent/createlead/iar", eb: "/agent/createlead/employee-benefit" };
+  // "Create Lead": the line of business and product open the screen the product is quoted on, tagged with the product;
+  // Skip - tag product later opens the prospect form without a product
+  const { openProduct, skipProduct, productRequired } = useProspectStart();
   const createLead = (p) => {
-    const entry = entryOf(p);
     setChoosingProduct(false);
-    if (entry === "motor") navigate("/agent/createlead", { state: { product: { lob: p.lob, productId: p.id } } });
-    else if (forms[entry]) navigate(forms[entry]);
-    else navigate(RFQ_PATH, { state: rfqState(p, { newProspect: true }) });
+    openProduct(p);
   };
   return (
     <div className="clientlisting__overal__container">
@@ -50,7 +46,7 @@ const ClientListing = () => {
               <>
                 <Button icon="pi pi-plus" label={t("clients.createLead")} onClick={() => setChoosingProduct(true)} />
                 <ProductPickerDialog visible={choosingProduct} onHide={() => setChoosingProduct(false)} onSelect={createLead}
-                  onSkip={productRequired ? undefined : () => navigate("/agent/createlead", { state: { untagged: true } })}
+                  onSkip={productRequired ? undefined : () => skipProduct()}
                   header={t("clients.createLead")} hint={t("productPicker.createLeadHint")} />
               </>
             )}

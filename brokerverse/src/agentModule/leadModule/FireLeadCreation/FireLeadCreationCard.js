@@ -260,6 +260,8 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
       // Step 1 = Lead only: Create Lead API with personal details
       const leadPayload = {
         lob: "FIRE",
+        // the product chosen on Create prospect tags the prospect
+        ...(locationState?.product?.productId ? { productId: locationState.product.productId } : {}),
         ...(existingClient ? { clientId: existingClient.clientId || existingClient.id } : {}),
         companyName: values.CompanyName || null,
         taxInformationNumber: values.TaxNumber || null,

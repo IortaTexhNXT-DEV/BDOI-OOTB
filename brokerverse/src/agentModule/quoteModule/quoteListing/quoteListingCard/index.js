@@ -526,7 +526,7 @@ const QuoteListingCard = () => {
     if (entry === "motor") handleclick();
     else if (entry === "fire") handleClickFireAndAlliedPerils();
     else if (entry === "iar") handleClickIar();
-    else if (entry === "eb") navigate("/agent/createlead/employee-benefit");
+    else if (entry === "eb") navigate("/agent/createlead/employee-benefit", { state: { leadRefId, lead: currentLeadDetails } });
     else navigate(RFQ_PATH, { state: rfqState(p, { lead: leadRefId ? { ...currentLeadDetails, leadId: leadRefId } : null }) });
   };
   // a prospect whose product is not yet tagged is tagged with the product of its first quotation

@@ -1027,6 +1027,8 @@ Choose Operations > Sales & Marketing > Prospects. The cards count **Total Prosp
 2. Choose **New customer** (enter the customer's details on the prospect form) or **Existing client** (find the client by name, mobile number or e-mail; the prospect is linked to that client), then select **Continue**.
 3. Choose the product the prospect is for: first the **Line of Business** (only the lines that have active products are listed), then the **Product** (the active products of that line; a line with a single product selects it). Select **Continue**. A motor product opens the prospect form; Fire and Allied Perils, Industrial All Risks and Employee Benefits open their own forms while those products are active; any other product opens a Request for Quotation for the new prospect.
 4. If the customer has not chosen a product yet, select **Skip - tag product later** instead: the prospect form opens without a product.
+
+Every way of starting a new prospect goes through this panel: **Create Prospect** on Prospects, **Create Lead** on Clients, **New Quote** on the Executive Dashboard, the Underwriting Dashboard buttons and a prospect form opened from a link or the side bar. Editing a prospect or adding a quotation to an existing prospect opens its form at once.
 5. Fill in the prospect form and select **Save & Continue**.
 
 ![Create prospect: new customer or existing client](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-prospect-create.png)
@@ -1356,7 +1358,7 @@ Choose Operations > Sales & Marketing > Request for Quotation (Broker Slip). The
 ![New Request for Quotation (Broker Slip)](/home/user/BDOI-OOTB/docs/package/source/manual-images/p-rfq-new.png)
 
 1. Select **New Request for Quotation**.
-2. Under **Customer and risk**, choose **Customer**: **Client** (an existing client), **Prospect** or **New prospect**, and search for the record. Choose the **Line of Business**, then the **Product** of that line (tick **Include package products** to list package products as well). A new prospect saved with the request is tagged with the product. **Insured** fills in; change it if the slip is for another named insured.
+2. Under **Customer and risk**, choose **Customer**: **Client** (an existing client), **Prospect** or **New prospect**, and search for the record. Choose the **Line of Business**, then the **Product** of that line (every active product is offered, package or not). A new prospect saved with the request is tagged with the product. **Insured** fills in; change it if the slip is for another named insured.
 3. Enter **Inception** and **Expiry**. Leave **Response due** empty to use the default of the settings, or set the date by which insurers must answer.
 4. Under **Risk details**, add each detail of the risk as an item and a value (location, occupancy, construction, protection; for marine the cargo, voyage and conveyance) with the plus sign.
 5. Under **Requested covers**, select **Add cover** for each cover with its **Sum insured** and **Deductible**. The covers offered are those of the product.

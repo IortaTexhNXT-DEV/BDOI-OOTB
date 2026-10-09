@@ -9,6 +9,7 @@ import BulkUploadModal from "./BulkUploadModal";
 import { useNavigate } from "react-router-dom";
 import QuoteStatsCards from "../quoteModule/quoteListing/QuoteStatsCards";
 import { RFQ_PATH, entryOf, rfqState } from "../../module/Sales/salesProducts";
+import { prospectFormState } from "../leadModule/leadListing/useProspectStart";
 import { ProductPickerDialog } from "../../module/Sales/ProductPicker";
 
 const ClientListingCard = () => {
@@ -32,8 +33,8 @@ const ClientListingCard = () => {
     setChoosingProduct(false);
     const entry = entryOf(p);
     if (entry === "motor" || entry === "fire") navigate("/agent/leadlisting");
-    else if (entry === "iar") navigate("/agent/createlead/iar");
-    else if (entry === "eb") navigate("/agent/createlead/employee-benefit");
+    else if (entry === "iar") navigate("/agent/createlead/iar", { state: prospectFormState({ product: p }) });
+    else if (entry === "eb") navigate("/agent/createlead/employee-benefit", { state: prospectFormState({ product: p }) });
     else navigate(RFQ_PATH, { state: rfqState(p) });
   };
 

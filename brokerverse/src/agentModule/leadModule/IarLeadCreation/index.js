@@ -4,6 +4,7 @@ import "../leadCreation/index.scss";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { useNavigate, useLocation } from "react-router-dom";
 import IarLeadCreationCard from "./IarLeadCreationCard";
+import NewProspectGate from "../leadCreation/NewProspectGate";
 
 const IarLeadCreation = () => {
   const { t } = useTranslation();
@@ -21,18 +22,20 @@ const IarLeadCreation = () => {
   };
 
   return (
-    <div className="overall_Leadcreat_container">
-      {step !== 4 && (
-        <div
-          onClick={handleLeadNavigation}
-          className="innerlead_container mt-3 cursor-pointer"
-        >
-          <SvgLeftArrow />
-          <div className="arrowlabel_txt">{t("iarLead.lead", "Lead")}</div>
-        </div>
-      )}
-      <IarLeadCreationCard step={step} onStepChange={setStep} />
-    </div>
+    <NewProspectGate>
+      <div className="overall_Leadcreat_container">
+        {step !== 4 && (
+          <div
+            onClick={handleLeadNavigation}
+            className="innerlead_container mt-3 cursor-pointer"
+          >
+            <SvgLeftArrow />
+            <div className="arrowlabel_txt">{t("iarLead.lead", "Lead")}</div>
+          </div>
+        )}
+        <IarLeadCreationCard step={step} onStepChange={setStep} />
+      </div>
+    </NewProspectGate>
   );
 };
 

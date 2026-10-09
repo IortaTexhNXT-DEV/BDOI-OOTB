@@ -4,6 +4,7 @@ import "../leadCreation/index.scss";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { useNavigate, useLocation } from "react-router-dom";
 import FireLeadCreationCard from "./FireLeadCreationCard";
+import NewProspectGate from "../leadCreation/NewProspectGate";
 
 const FireLeadCreation = () => {
   const { t } = useTranslation();
@@ -21,18 +22,20 @@ const FireLeadCreation = () => {
   };
 
   return (
-    <div className="overall_Leadcreat_container">
-      {step !== 4 && (
-        <div
-          onClick={handleLeadNavigation}
-          className="innerlead_container mt-3 cursor-pointer"
-        >
-          <SvgLeftArrow />
-          <div className="arrowlabel_txt">{t("employeeBenefit.lead")}</div>
-        </div>
-      )}
-      <FireLeadCreationCard step={step} onStepChange={setStep} />
-    </div>
+    <NewProspectGate>
+      <div className="overall_Leadcreat_container">
+        {step !== 4 && (
+          <div
+            onClick={handleLeadNavigation}
+            className="innerlead_container mt-3 cursor-pointer"
+          >
+            <SvgLeftArrow />
+            <div className="arrowlabel_txt">{t("employeeBenefit.lead")}</div>
+          </div>
+        )}
+        <FireLeadCreationCard step={step} onStepChange={setStep} />
+      </div>
+    </NewProspectGate>
   );
 };
 

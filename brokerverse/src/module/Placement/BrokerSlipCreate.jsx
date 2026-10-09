@@ -8,7 +8,6 @@ import { InputText } from "primereact/inputtext";
 import { InputNumber } from "primereact/inputnumber";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Calendar } from "primereact/calendar";
-import { Checkbox } from "primereact/checkbox";
 import { Toast } from "primereact/toast";
 import placementService from "../../services/placementService";
 import { calendarDateFormat } from "../../utility/dateFormat";
@@ -53,7 +52,6 @@ const BrokerSlipCreate = () => {
   const options = usePlacementOptions();
   const [customer, setCustomer] = useState(() => prefilledCustomer(prefill));
   const [productId, setProductId] = useState(prefill?.productId || null);
-  const [showPackage, setShowPackage] = useState(false);
   const [insuredName, setInsuredName] = useState(prefill?.leadName || prefill?.clientName || "");
   const [riskDetails, setRiskDetails] = useState(prefill?.riskDetails || {});
   const [vehicle, setVehicle] = useState({ vehicleBrand: "", vehicleModel: "", modelYear: "", plateNumber: "", fmv: null });
@@ -82,8 +80,6 @@ const BrokerSlipCreate = () => {
     const list = coverOptions.map((o) => ({ label: o.label, value: o.label }));
     return current && !list.some((o) => o.value === current) ? [...list, { label: current, value: current }] : list;
   };
-  // non-package products are placed through requests for quotation; package ones are offered on request
-  const offered = (p) => showPackage || p.businessType !== "package" || p.id === productId;
   const motor = product?.lob === "MOTOR";
   // the risk details the acceptance rules and rating factors of the product's template test (number of members...)
   const ruleSetup = useQuoteSetup(product ? { productId: product.id, lob: product.lob } : { lob: "NONE" });
@@ -129,12 +125,8 @@ const BrokerSlipCreate = () => {
             <CustomerPicker value={customer} onChange={setCustomer} allowNew newLabel={t("salesMarketing.newProspect")} />
           </div>
           <div className="col-12 md:col-6">
-            <ProductPicker value={{ productId }} onChange={(v) => setProductId(v.productId)} keep={offered} idPrefix="rfq" required
-              emptyText={showPackage ? undefined : t("productPicker.noneNonPackage")} />
-            <div className="flex align-items-center gap-2 mt-1">
-              <Checkbox inputId="rfq-package" checked={showPackage} onChange={(e) => setShowPackage(e.checked)} />
-              <label htmlFor="rfq-package" className="m-0">{t("salesMarketing.includePackage")}</label>
-            </div>
+            {/* every active product, package or not: a product without a quote wizard is quoted through a request */}
+            <ProductPicker value={{ productId }} onChange={(v) => setProductId(v.productId)} idPrefix="rfq" required />
             {product && <small className="hint">{t("placement.journey.hint", { brokerSlip: t(`placement.journey.mode.${product.journey.brokerSlip}`), placementSlip: t(`placement.journey.mode.${product.journey.placementSlip}`) })}</small>}
           </div>
           <div className="col-12 md:col-3">

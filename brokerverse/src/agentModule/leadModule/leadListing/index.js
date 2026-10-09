@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 import BulkUploadModal from "./BulkUploadModal";
 import leadService from "../../../services/leadService";
 import CreateProspectDialog from "./CreateProspectDialog";
-import { RFQ_PATH, entryOf, rfqState, useProductRequired } from "../../../module/Sales/salesProducts";
+import useProspectStart from "./useProspectStart";
 
 const LeadListing = () => {
   const { t } = useTranslation();
@@ -25,30 +25,13 @@ const LeadListing = () => {
   const [showReportModal, setShowReportModal] = useState(false);
   const toast = useRef(null);
   const navigate = useNavigate();
-  const productRequired = useProductRequired();
+  const { openProduct, skipProduct, productRequired } = useProspectStart();
 
   const items = [
     { label: t("leads.title"), command: () => navigate("/agent/leadlisting") },
   ];
   const Initiate = { label: t("sidebar.Operations") };
 
-
-  // an existing customer picked in the Create prospect dialog travels to the prospect form
-  const withClient = (client) => (client ? { state: { existingClient: client } } : undefined);
-  // the product chosen opens the screen it is quoted on; the motor form is tagged with the product
-  const forms = {
-    motor: (client, p) => navigate("/agent/createlead", { state: { ...(client ? { existingClient: client } : {}), product: { lob: p.lob, productId: p.id } } }),
-    fire: (client) => navigate("/agent/createlead/fire-allied-perils", withClient(client)),
-    iar: (client) => navigate("/agent/createlead/iar", withClient(client)),
-    eb: (client) => navigate("/agent/createlead/employee-benefit", withClient(client)),
-  };
-  const openProduct = (p, client) => {
-    const form = forms[entryOf(p)];
-    if (form) form(client, p);
-    else navigate(RFQ_PATH, { state: rfqState(p, { client, newProspect: !client }) });
-  };
-  // Skip - tag product later: the prospect form without a product
-  const skipProduct = (client) => navigate("/agent/createlead", { state: { ...(client ? { existingClient: client } : {}), untagged: true } });
 
   const handleBulkUploadSuccess = () => {
     // Refresh the leads table by updating key
