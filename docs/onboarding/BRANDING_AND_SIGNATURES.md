@@ -1,6 +1,6 @@
 # Broker branding and e-signatures
 
-Version 1.2.1, 04 October 2026, iorta TechNXT. Changes: client brand packs are used under the client's contract with iorta TechNXT (no separate permission letter); 1.2: bundled brand packs (shipped with the product, enabled on the
+Version 1.2.2, 09 October 2026, iorta TechNXT. Changes: the `BRAND_PACK` deployment variable enables a bundled pack once at start-up (section 3); the theme's font, side bar colours and marker reach every screen (section 1). 1.2.1: client brand packs are used under the client's contract with iorta TechNXT (no separate permission letter); 1.2: bundled brand packs (shipped with the product, enabled on the
 screen with the trademark acknowledgement, Back to default), their support procedure in section 5. Version 1.1:
 section 5, support procedures for brand pack import and e-signature revocation.
 
@@ -58,7 +58,11 @@ settings, and texts with `<` or `>`.
   `craco.config.js`) turns every literal brand colour in the compiled CSS into `var(--bv-..., <same colour>)`, so screen
   stylesheets follow the theme without being edited. Older stylesheets use other blues (#0066cc, #001e60, #1976d2 ...): saturated blues are mapped
   by lightness to `--bv-alt-*` variables that only a brand theme sets, so the default theme keeps every original
-  shade. Not themed: colours written inline in JavaScript (chart series, a few status chips) and status colours.
+  shade. The same step makes the default font named literally in screen stylesheets (`"Nunito", Arial, sans-serif`)
+  follow the theme's font, and a rule of `bdoi.scss` does it for inline styles naming it. The side bar reads the
+  side bar colours of the theme (`--bv-sidebar-*`); the current menu item and the active tab are marked in
+  `--bv-marker` (the accent of a brand theme, the primary colour of the default). Not themed: colours written inline
+  in JavaScript (chart series, a few status chips) and status colours.
 * Documents: every PDF goes through `lib/pdf` `printContext()` (letterhead of the primary company + `documentBranding()`
   of the theme). A backend test fails when a module builds a PDF without it.
 
@@ -154,6 +158,12 @@ them and checks that the built zip is in step with the folder); change the docs 
   enablement row becomes `reverted` and the audit trail carries `reset-default`.
 * **API**: `GET /api/branding/packs/bundled` (list with status and history), `POST .../bundled/<id>/check` (dry run),
   `POST .../bundled/<id>/enable`, `POST /api/branding/packs/reset-default`. All need the settings permission.
+* **Deployment** (`BRAND_PACK`, deploy/REFERENCE.md): an environment made for the client names its pack in the API's
+  `BRAND_PACK` variable (`toyota-insurance-services` in the TISPH Azure environments). At start-up, after the
+  migrations and the seed, the API enables it once through the same logic, recorded against the user `system` with
+  the acknowledgement and the note "Given by the deployment configuration (BRAND_PACK)", and audited. Nothing is done
+  when a pack is in force or when the pack was enabled before in that environment, so **Back to default** stands
+  across restarts. An unknown id logs a warning and the API starts with the branding it has.
 
 ## 4. Client brand packs and trademarks
 
@@ -165,8 +175,8 @@ prospects. Do not copy photographs from a client's web site into the repository;
 broker uploads its own sign-in picture.
 
 The Toyota Insurance Services pack is delivered as a bundled pack (section 3): it is enabled from Theme and Branding
-> Brand packs > Bundled packs, with the acknowledgement that the environment belongs to that engagement, and never by
-default. The
+> Brand packs > Bundled packs, with the acknowledgement that the environment belongs to that engagement, or by the
+`BRAND_PACK` variable of a TISPH deployment, and never by default. The
 importable zip in `Brand_Packs/` remains for an environment that cannot reach the bundled list (an older release).
 
 The Toyota Insurance Services pack: white header and side bar, near-black text and buttons, light grey backgrounds,
