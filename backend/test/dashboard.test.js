@@ -28,8 +28,10 @@ describe('dashboard period: calendar month in Manila time', () => {
     const range = await calendarPeriod('month');
     // Two policies moved to just after / just before the Manila month start (16:00 UTC the day before)
     const ids = (await pool.query('SELECT id FROM policies ORDER BY id LIMIT 2')).rows.map((r) => r.id);
-    const saved = (await pool.query('SELECT id, created_at FROM policies WHERE id = ANY($1)', [ids])).rows;
+    const saved = (await pool.query('SELECT id, created_at, issued_date FROM policies WHERE id = ANY($1)', [ids])).rows;
     try {
+      // without an issue date the policy is written on its creation time
+      await pool.query('UPDATE policies SET issued_date = NULL WHERE id = ANY($1)', [ids]);
       await pool.query(`UPDATE policies SET created_at = ($2::date::timestamp AT TIME ZONE 'Asia/Manila') + interval '30 minutes' WHERE id = $1`, [ids[0], range.from]);
       await pool.query(`UPDATE policies SET created_at = ($2::date::timestamp AT TIME ZONE 'Asia/Manila') - interval '30 minutes' WHERE id = $1`, [ids[1], range.from]);
       const d = (await ctx.api('get', '/dashboard/executive?period=month')).body.data;
@@ -44,7 +46,7 @@ describe('dashboard period: calendar month in Manila time', () => {
       const prev = await sum(range.prevFrom, range.prevTo);
       expect(prev).toBeGreaterThan(0);
     } finally {
-      for (const r of saved) await pool.query('UPDATE policies SET created_at = $2 WHERE id = $1', [r.id, r.created_at]);
+      for (const r of saved) await pool.query('UPDATE policies SET created_at = $2, issued_date = $3 WHERE id = $1', [r.id, r.created_at, r.issued_date]);
     }
   });
 

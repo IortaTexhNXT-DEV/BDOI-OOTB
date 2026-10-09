@@ -139,3 +139,44 @@ export async function withProducts(codes = null) {
   await query(`UPDATE package_bundles b SET status = 'active' WHERE NOT EXISTS (SELECT 1 FROM package_bundle_sections s
     JOIN products p ON p.id = s.product_id WHERE s.bundle_id = b.id AND p.status <> 'active')`);
 }
+
+/**
+ * The packaged products the package suites price (test/fixtures/packaged-products.sql: insurer rate tables and the SME
+ * Shield and Home Protect bundles, on lines TISPH does not sell), loaded before withProducts() switches those lines on.
+ */
+export async function withPackagedProducts() {
+  const fs = await import('node:fs');
+  const { query } = await import('../src/db/pool.js');
+  await query(fs.readFileSync(new URL('./fixtures/packaged-products.sql', import.meta.url), 'utf8'));
+  await withProducts();
+}
+
+/**
+ * A sample motor policy (and its quotation) reduced to own damage only: sum insured x rate, no acts of nature, excess
+ * liability, auto passenger PA or CTPL, with VAT, DST and LGT at the tax.*_rate settings. For the endorsement suites
+ * whose figures start from a plain own damage premium.
+ */
+export async function withOwnDamageOnly(policyId, sumInsured, ratePercent) {
+  const { query } = await import('../src/db/pool.js');
+  const rate = Object.fromEntries((await query("SELECT key, (value #>> '{}')::numeric AS v FROM app_settings WHERE key IN ('tax.vat_rate', 'tax.dst_rate', 'tax.lgt_rate')"))
+    .rows.map((r) => [r.key, Number(r.v)]));
+  const cents = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+  const net = cents((sumInsured * ratePercent) / 100);
+  const vat = cents(net * rate['tax.vat_rate']);
+  const dst = cents(net * rate['tax.dst_rate']);
+  const lgt = cents(net * rate['tax.lgt_rate']);
+  const gross = cents(net + vat + dst + lgt);
+  const drop = ['actsOfNatureRate', 'actsOfNaturePremium', 'bodilyInjury', 'bodilyInjuryCoveragePremium', 'biCoverageId', 'propertyDamage', 'propertyDamageCoveragePremium',
+    'pdCoverageId', 'autoPassengerPersonalAccident', 'APPAtotalCoverage', 'APPAcoveragePremium', 'appaSeats', 'APPARate', 'includeCTPL', 'ctplTermYears', 'ctplCoveragePremium',
+    'ctplCoverageRate', 'cocNumber', 'premiumBreakdown'];
+  const doc = JSON.stringify({ lossAndDamageCoverage: String(sumInsured), lossAndDamageCoverageRate: String(ratePercent), lossAndDamageCoveragePremium: net, totalSumInsured: sumInsured,
+    netPremium: net, valueAddedTax: vat, documentaryStampTax: dst, localGovernmentTax: lgt, grossPremium: gross });
+  const { rows: [p] } = await query(`UPDATE policies SET doc = (doc - $2::text[]) || $3::jsonb, sum_insured = $4, net_premium = $5, premium_total = $6,
+      commission_amount = round($5 * COALESCE((SELECT commission_rate FROM quotes WHERE id = policies.quote_id), 0.15), 2) WHERE id = $1 RETURNING quote_id`,
+  [policyId, drop, doc, sumInsured, net, gross]);
+  if (p?.quote_id) {
+    await query(`UPDATE quotes SET doc = (doc - $2::text[]) || $3::jsonb, sum_insured = $4, premium_base = $5, vat = $6, dst = $7, lgt = $8, premium_total = $9,
+        commission_amount = round($5 * commission_rate, 2) WHERE id = $1`, [p.quote_id, drop, doc, sumInsured, net, vat, dst, lgt, gross]);
+  }
+  return { net, gross };
+}

@@ -405,27 +405,27 @@ describe('motor: TBA identifiers, tolerance and the decision on a mismatch', () 
 describe('direct placement (client instructs a named insurer)', () => {
   it('places a marine cargo risk directly with co-insurers; a declined line is re-arranged before the insurer issues', async () => {
     const r = await sales('post', '/placements').send({ clientId: 'cl_sls_92', productType: 'Marine Cargo', riskDetails: { voyage: 'Manila to Cebu', cargo: 'Appliances' }, sumInsured: 10000000,
-      netPremium: 25000.05, inceptionDate: '2026-11-01', participants: [{ insuranceCompanyId: ic.SECUREGUARD, sharePercent: 70, isLead: true }, { insuranceCompanyName: 'Apex Assurance', sharePercentage: '30' }] });
+      netPremium: 25000.05, inceptionDate: '2026-11-01', participants: [{ insuranceCompanyId: ic.PIONEER, sharePercent: 70, isLead: true }, { insuranceCompanyName: 'AXA Philippines Life and General Insurance Corporation', sharePercentage: '30' }] });
     expect(r.status, JSON.stringify(r.body)).toBe(201);
-    expect(r.body).toMatchObject({ source: 'direct', lob: 'MARINE', netPremium: 25000.05, insuranceCompanyId: ic.SECUREGUARD, status: 'draft' });
+    expect(r.body).toMatchObject({ source: 'direct', lob: 'MARINE', netPremium: 25000.05, insuranceCompanyId: ic.PIONEER, status: 'draft' });
     expect(r.body.slipDocument.key).toBeTruthy();
-    const [lead, apex] = r.body.participants;
-    expect(apex.premium).toBe(7500.02);
+    const [lead, axa] = r.body.participants;
+    expect(axa.premium).toBe(7500.02);
     expect(lead.premium).toBe(17500.03);
-    const bad = await sales('put', `/placements/${r.body.id}`).send({ participants: [{ insuranceCompanyId: ic.SECUREGUARD, sharePercent: 70, isLead: true }, { insuranceCompanyId: ic.APEX, sharePercent: 20 }] });
+    const bad = await sales('put', `/placements/${r.body.id}`).send({ participants: [{ insuranceCompanyId: ic.PIONEER, sharePercent: 70, isLead: true }, { insuranceCompanyId: ic.AXA, sharePercent: 20 }] });
     expect(bad.body.message).toContain('total exactly 100%');
     await sales('post', `/placements/${r.body.id}/send`).send({});
-    expect((await sales('post', `/placements/${r.body.id}/decline`).send({ insuranceCompanyId: ic.APEX, reason: 'No capacity' })).body.status).toBe('declined');
-    const re = await sales('put', `/placements/${r.body.id}`).send({ participants: [{ insuranceCompanyId: ic.SECUREGUARD, sharePercent: 70, isLead: true }, { insuranceCompanyId: ic.SENTINEL, sharePercent: 30 }] });
+    expect((await sales('post', `/placements/${r.body.id}/decline`).send({ insuranceCompanyId: ic.AXA, reason: 'No capacity' })).body.status).toBe('declined');
+    const re = await sales('put', `/placements/${r.body.id}`).send({ participants: [{ insuranceCompanyId: ic.PIONEER, sharePercent: 70, isLead: true }, { insuranceCompanyId: ic.STRONGHOLD, sharePercent: 30 }] });
     expect(re.body.status).toBe('draft');
     await sales('post', `/placements/${r.body.id}/send`).send({});
-    await sales('post', `/placements/${r.body.id}/epolicy`).send(await epolicyOf(sales, re.body, { participants: [{ insuranceCompanyId: ic.SENTINEL, insurerReference: 'SEN-MC-12' }] }));
+    await sales('post', `/placements/${r.body.id}/epolicy`).send(await epolicyOf(sales, re.body, { participants: [{ insuranceCompanyId: ic.STRONGHOLD, insurerReference: 'STR-MC-12' }] }));
     await uw('post', `/placements/${r.body.id}/check`).send({ decision: 'confirm' });
     const issued = await uw('post', `/placements/${r.body.id}/book`).send({});
     expect(issued.status, JSON.stringify(issued.body)).toBe(201);
     const rows = await q("SELECT insurance_company_id, share_percent, premium, insurer_reference FROM risk_participants WHERE entity_type = 'policy' AND entity_id = $1 ORDER BY is_lead DESC", [issued.body.policyId]);
     expect(rows.map((x) => [x.insurance_company_id, Number(x.share_percent), Number(x.premium), x.insurer_reference])).toEqual([
-      [ic.SECUREGUARD, 70, 17500.03, `INS-${re.body.placementNumber}`], [ic.SENTINEL, 30, 7500.02, 'SEN-MC-12']]);
+      [ic.PIONEER, 70, 17500.03, `INS-${re.body.placementNumber}`], [ic.STRONGHOLD, 30, 7500.02, 'STR-MC-12']]);
   });
 
   it('a CTPL may be placed without a quotation, with its LTO document sent to the insurer; Motor comprehensive may not', async () => {

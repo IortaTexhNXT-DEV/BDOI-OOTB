@@ -21,12 +21,12 @@ describe('distribution channels master', () => {
   let groupId;
   let branchId;
   it('builds the hierarchy: a dealer branch sits under a dealer group, a bank branch under a financing bank', async () => {
-    const g = await ctx.api('post', '/channels').send({ code: 'NSM', name: 'Northstar Motors Group', channelType: 'dealer_group', referrerId: 'ref-makatimotors', comsubPct: 4 });
+    const g = await ctx.api('post', '/channels').send({ code: 'NSM', name: 'Northstar Motors Group', channelType: 'dealer_group', referrerId: 'ref-toyotamakati', comsubPct: 4 });
     expect(g.status).toBe(201);
     groupId = g.body.data.id;
     const orphan = await ctx.api('post', '/channels').send({ code: 'NSM-X', name: 'Branch without group', channelType: 'dealer_branch' });
     expect(orphan.status).toBe(400);
-    const wrong = await ctx.api('post', '/channels').send({ code: 'NSM-Y', name: 'Branch under a bank', channelType: 'dealer_branch', parentId: 'ch_seed_bdo' });
+    const wrong = await ctx.api('post', '/channels').send({ code: 'NSM-Y', name: 'Branch under a bank', channelType: 'dealer_branch', parentId: 'ch_seed_tfs' });
     expect(wrong.status).toBe(400);
     const b = await ctx.api('post', '/channels').send({ code: 'NSM-QC', name: 'Northstar Quezon City', channelType: 'dealer_branch', parentId: groupId, province: 'Metro Manila', city: 'Quezon City' });
     expect(b.status).toBe(201);
@@ -42,7 +42,7 @@ describe('distribution channels master', () => {
   it('sales reads the channels for the drop-downs but cannot change them', async () => {
     const opts = await sales('get', '/channels/options?type=dealer_branch');
     expect(opts.status).toBe(200);
-    expect(opts.body.data.map((o) => o.code)).toEqual(expect.arrayContaining(['MMG-MKT', 'MMG-ALB', 'NSM-QC']));
+    expect(opts.body.data.map((o) => o.code)).toEqual(expect.arrayContaining(['TMK-MKT', 'TAL-ALB', 'NSM-QC']));
     expect(opts.body.data.every((o) => o.channelType === 'dealer_branch')).toBe(true);
     expect((await sales('post', '/channels').send({ code: 'Z', name: 'Z', channelType: 'affinity_partner' })).status).toBe(403);
   });
@@ -75,10 +75,10 @@ describe('distribution channels master', () => {
     expect(p.channel_id).toBe(branchId);
     // the branch has no referrer of its own: no comsub line; the group has one but the comsub follows the channel of the policy
     expect(p.details.commissionDetails).toBeNull();
-    const upd = await ctx.api('put', `/channels/${branchId}`).send({ referrerId: 'ref-makatimotors', comsubPct: 4 });
+    const upd = await ctx.api('put', `/channels/${branchId}`).send({ referrerId: 'ref-toyotamakati', comsubPct: 4 });
     expect(upd.body).toMatchObject({ success: true });
     const ref = await (await import('../src/modules/channels/service.js')).channelReferral(pool, issued.policyId);
-    expect(ref.primary).toEqual({ referrerId: 'ref-makatimotors', comsubPct: 4 });
+    expect(ref.primary).toEqual({ referrerId: 'ref-toyotamakati', comsubPct: 4 });
   });
 
   it('Dealer Production totals prospects, quotations and policies per channel, rolled up to the dealer group', async () => {

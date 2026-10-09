@@ -209,10 +209,10 @@ describe('renewal quote wizard -> customer approval -> new policy term', () => {
     expect(r.status).toBe(200);
     const p = r.body.data;
     expect(p.source).toBe('quotation');
-    expect(Number(p.coverageDetails.lossAndDamageCoverage)).toBe(1450000);
-    expect(Number(p.coverageDetails.lossAndDamageCoverageRate)).toBe(1.6);
+    expect(Number(p.coverageDetails.lossAndDamageCoverage)).toBe(1890000);
+    expect(Number(p.coverageDetails.lossAndDamageCoverageRate)).toBe(2);
     expect(p.vehicle.insuranceVehicleDetails[0]).toMatchObject({ vehicleBrand: 'Toyota', vehicleModel: 'Fortuner' });
-    expect(p.insuranceCompanyName).toMatch(/Malayan/i);
+    expect(p.insuranceCompanyName).toMatch(/Pioneer/i);
     expect(p.clientCode).toBeTruthy();
     expect(Object.values(p.accessories).every((v) => v === '')).toBe(true);
   });
@@ -222,8 +222,8 @@ describe('renewal quote wizard -> customer approval -> new policy term', () => {
     expect(r.status).toBe(200);
     const p = r.body.data;
     expect(p.quoteId).toBeNull();
-    expect(p.coverageDetails.lossAndDamageCoverage).toBe(1300000);
-    expect(p.coverageDetails.totalSumInsured).toBe(1300000);
+    expect(Number(p.coverageDetails.lossAndDamageCoverage)).toBe(1600000);
+    expect(p.coverageDetails.totalSumInsured).toBe(2350000);
     expect(p.clientCode).toBe('CL-2026-90010');
     expect(p.insuranceCompanyId).toBeTruthy();
     expect(p.renewal.renewalNumber).toBe('RN-2026-90021');
@@ -262,7 +262,7 @@ describe('renewal quote wizard -> customer approval -> new policy term', () => {
     expect(again.status).toBe(200);
     expect(again.body.data.quotationId).toBe(quoteId);
     const detail = await ctx.api('get', `/quotations/${quoteId}`);
-    expect(detail.body.insuranceCompanyName || detail.body.data?.insuranceCompanyName).toMatch(/Malayan/i);
+    expect(detail.body.insuranceCompanyName || detail.body.data?.insuranceCompanyName).toMatch(/Pioneer/i);
   });
 
   it('books the accepted renewal quotation through its placement as the new term: old policy renewed, receivable and balanced journal, commission', async () => {
@@ -327,7 +327,8 @@ describe('renewal quote wizard -> customer approval -> new policy term', () => {
     expect(q.client_id).toBe('cl_crs_10');
     expect(q.lead_id).toBeNull();
     expect(q.insurance_company_id).toBeTruthy();
-    expect(Number(q.premium_base)).toBe(19500);
+    // own damage 19,500 plus the covers carried from the expiring term: acts of nature 6,500, BI 700, PD 800, APPA 350
+    expect(Number(q.premium_base)).toBe(27850);
     const sent = await ctx.api('post', `/quotations/${q.id}/send-for-approval`).send({});
     expect(sent.status).toBe(200);
     expect(sent.body.sentTo).toBe('patricia.garcia@example.ph');

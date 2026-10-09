@@ -88,7 +88,7 @@ describe('remittances and approvals', () => {
     expect(s.body.data).toMatchObject({ status: 'Draft', netAmount: 17300, insurerName: 'Malayan Insurance Co., Inc.' });
     expect((await ctx.api('post', '/remittance/settlements').send({ insurerCode: 'MALAYAN', settlementPeriod: ['2026-09-01', '2026-09-30'], lineIds: [line.id] })).status).toBe(400);
     expect((await ctx.api('post', `/remittance/settlements/${s.body.data.id}/submit`).send({})).status).toBe(400);
-    const sub = await ctx.api('post', `/remittance/settlements/${s.body.data.id}/submit`).send({ paymentMethod: 'bank_transfer', bankAccount: 'ACC-BDO-001' });
+    const sub = await ctx.api('post', `/remittance/settlements/${s.body.data.id}/submit`).send({ paymentMethod: 'bank_transfer', bankAccount: 'ACC-MBT-001' });
     expect(sub.body.data.status).toBe('Pending Approval');
     const ap = await as(fin, 'post', `/remittance/approvals/${(await ctx.api('get', '/remittance/approvals?transactionType=Settlement')).body.data[0].id}/approve`).send({ comments: 'Paid' });
     expect(ap.body.data.status).toBe('Approved');
@@ -99,16 +99,16 @@ describe('remittances and approvals', () => {
 describe('settlement to money out', () => {
   it('an approved settlement raises the insurer payment voucher for the collected premium', async () => {
     const { rows: [pol] } = await pool.query(`SELECT p.id, p.policy_number FROM receipt_applications a JOIN receivables r ON r.id = a.receivable_id JOIN policies p ON p.id = r.policy_id
-      JOIN insurance_companies i ON i.id = p.insurance_company_id WHERE a.status = 'applied' AND a.remitted_invoice_id IS NULL AND i.code = 'FPG' LIMIT 1`);
+      JOIN insurance_companies i ON i.id = p.insurance_company_id WHERE a.status = 'applied' AND a.remitted_invoice_id IS NULL AND i.code = 'STANDARD' LIMIT 1`);
     expect(pol).toBeTruthy();
-    const rem = await ctx.api('post', '/remittance/remittances').send({ insurerCode: 'FPG', period: '2026-09', lines: [{ policyId: pol.id }] });
+    const rem = await ctx.api('post', '/remittance/remittances').send({ insurerCode: 'STANDARD', period: '2026-09', lines: [{ policyId: pol.id }] });
     expect(rem.status).toBe(201);
     await ctx.api('post', '/remittance/remittances/process').send({ ids: [rem.body.data.id] });
     const a = (await ctx.api('get', '/remittance/approvals')).body.data.find((x) => x.entityId === rem.body.data.id);
     expect((await as(fin, 'post', `/remittance/approvals/${a.id}/approve`).send({ comments: 'ok' })).status).toBe(200);
-    const line = (await ctx.api('get', '/remittance/settlements/available-policies?insurerCode=FPG')).body.data.find((l) => l.remittanceId === rem.body.data.id);
-    const s = await ctx.api('post', '/remittance/settlements').send({ insurerCode: 'FPG', settlementPeriod: ['2026-09-01', '2026-09-30'], lineIds: [line.id] });
-    await ctx.api('post', `/remittance/settlements/${s.body.data.id}/submit`).send({ paymentMethod: 'bank_transfer', bankAccount: 'ACC-BDO-001' });
+    const line = (await ctx.api('get', '/remittance/settlements/available-policies?insurerCode=STANDARD')).body.data.find((l) => l.remittanceId === rem.body.data.id);
+    const s = await ctx.api('post', '/remittance/settlements').send({ insurerCode: 'STANDARD', settlementPeriod: ['2026-09-01', '2026-09-30'], lineIds: [line.id] });
+    await ctx.api('post', `/remittance/settlements/${s.body.data.id}/submit`).send({ paymentMethod: 'bank_transfer', bankAccount: 'ACC-MBT-001' });
     const ap = (await ctx.api('get', '/remittance/approvals?transactionType=Settlement')).body.data.find((x) => x.entityId === s.body.data.id);
     expect((await as(fin, 'post', `/remittance/approvals/${ap.id}/approve`).send({ comments: 'Pay' })).status).toBe(200);
     const { rows: [item] } = await pool.query('SELECT data FROM remittance_items WHERE id = $1', [s.body.data.id]);
@@ -117,7 +117,7 @@ describe('settlement to money out', () => {
     expect(v.body.data).toMatchObject({ payeeType: 'Insurer', status: 'draft' });
     expect(v.body.data.invoiceList.map((i) => i.policyNumber)).toEqual([pol.policy_number]);
     // collected premium is now on a voucher, so it cannot be paid again
-    const again = await ctx.api('post', '/disbursements/insurer-remittance').send({ insurerName: 'FPG Insurance Co., Inc.' });
+    const again = await ctx.api('post', '/disbursements/insurer-remittance').send({ insurerName: 'Standard Insurance Co., Inc.' });
     expect(again.status === 409 || !again.body.data.invoiceList.some((i) => i.policyNumber === pol.policy_number)).toBe(true);
   });
   it('broker-billed policies are not offered for direct-bill commission debit notes', async () => {
@@ -132,7 +132,7 @@ describe('settlement to money out', () => {
 describe('bills', () => {
   it('direct-bill policies are never remitted to the insurer (the client paid the insurer)', async () => {
     const { eligiblePolicies } = await import('../src/modules/remittance/service.js');
-    const pols = await policyFor('SECUREGUARD');
+    const pols = await policyFor('PIONEER');
     if (!pols.length) return;
     const ids = pols.map((p) => p.id);
     const before = await eligiblePolicies({ policyIds: ids });
@@ -146,8 +146,9 @@ describe('bills', () => {
     const ag = await ctx.api('get', '/remittance/agency-bill/agencies?billPeriod=2026-09');
     expect(ag.body.data.map((a) => a.agencyCode)).toEqual(expect.arrayContaining(['AG001', 'AG002']));
     const agentId = ag.body.data.find((a) => a.agencyCode === 'AG004').id;
-    const [pol] = await policyFor('APEX');
-    await pool.query('UPDATE policies SET owner_user_id = $1 WHERE id = $2', [agentId, pol.id]);
+    const [pol] = await policyFor('MALAYAN');
+    // the agent's policy incepts in the bill period
+    await pool.query('UPDATE policies SET owner_user_id = $1, inception_date = \'2026-09-15\' WHERE id = $2', [agentId, pol.id]);
     const g = await ctx.api('post', '/remittance/agency-bill/generate').send({ billPeriod: '2026-09', billRunDate: '2026-09-28', agencyCodes: ['AG004'] });
     expect(g.status).toBe(201);
     expect(g.body.data.agencyBills[0]).toMatchObject({ agencyCode: 'AG004', billDate: '2026-09-28', dueDate: '2026-10-28', status: 'Generated' });
@@ -177,7 +178,7 @@ describe('work items', () => {
     const m = await ctx.api('get', '/remittance/transfers/methods');
     expect(m.body.data.find((x) => x.value === 'InstaPay').limit).toBe(50000);
     expect((await ctx.api('post', '/remittance/transfers').send({ beneficiary: 'X', amount: 60000, method: 'InstaPay' })).status).toBe(400);
-    const t = await ctx.api('post', '/remittance/transfers').send({ beneficiary: 'FPG Insurance Co., Inc.', amount: 40000, method: 'InstaPay', purpose: 'Premium' });
+    const t = await ctx.api('post', '/remittance/transfers').send({ beneficiary: 'Standard Insurance Co., Inc.', amount: 40000, method: 'InstaPay', purpose: 'Premium' });
     expect(t.body.data).toMatchObject({ status: 'Pending', method: 'InstaPay' });
     expect((await ctx.api('post', `/remittance/transfers/${t.body.data.id}/execute`).send({ status: 'Completed' })).status).toBe(409);
     await as(fin, 'post', `/remittance/approvals/${(await ctx.api('get', '/remittance/approvals?transactionType=Electronic%20Transfer')).body.data.find((a) => a.entityId === t.body.data.id).id}/approve`).send({ comments: 'ok' });
@@ -230,7 +231,7 @@ describe('work items', () => {
     expect((await ctx.api('get', '/remittance/automated/history')).body.data.length).toBeGreaterThanOrEqual(3);
   });
   it('bulk upload validates rows against the configuration and processes valid ones', async () => {
-    const [pol] = await policyFor('MERCANTILE');
+    const [pol] = await policyFor('MAAGAP');
     await pool.query('DELETE FROM remittance_lines WHERE policy_id = $1', [pol.id]);
     const csv = `PolicyNo,Premium,Commission,InsuredName\n${pol.policy_number},10000,1500,Test\nNOPE-1,500,10,X\n,abc,1,Y\n`;
     const u = await ctx.api('post', '/remittance/bulk/upload').field('configCode', 'BFM-001').attach('file', Buffer.from(csv), { filename: 'sept.csv', contentType: 'text/csv' });

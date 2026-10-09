@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs, withProducts } from './helpers.js';
+import { setup, loginAs, withPackagedProducts } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { premiumOnRate } from '../src/modules/packages/rateTables.js';
 import { insurerTotals } from '../src/modules/packages/issue.js';
@@ -21,7 +21,7 @@ async function persona(username, roles) {
 
 beforeAll(async () => {
   ctx = await setup();
-  await withProducts();
+  await withPackagedProducts();
   sales = await persona('pk.sales', ['sales']);
   processing = await persona('pk.processing', ['processing']);
   claims = await persona('pk.claims', ['claims']);
@@ -89,7 +89,7 @@ describe('bundles: master, quotation, issuance, endorsement, renewal', () => {
 
   it('maintains bundle products (Processing Team)', async () => {
     const list = await sales('get', '/packages/bundles?status=active');
-    expect(list.body.data.map((b) => b.code)).toEqual(['HOME-PROTECT', 'SME-SHIELD']);
+    expect(list.body.data.map((b) => b.code)).toEqual(['HOME-PROTECT', 'SME-SHIELD', 'TFS-BORROWER']);
     const body = { code: 'shop-lite', name: 'Shop Lite', discountPercent: 5, sections: [{ name: 'Burglary', productId: await idOf('products', 'BURGLARY'), defaultSumInsured: 100000, ratePercent: 0.5, insurerIds: [ids.FPG] }] };
     expect((await sales('post', '/packages/bundles').send(body)).status).toBe(403);
     const add = await processing('post', '/packages/bundles').send(body);

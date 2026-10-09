@@ -86,7 +86,7 @@ describe('report builder', () => {
     const xl = await accounting('get', `/report-builder/reports/${mine}/export?format=csv`);
     expect(xl.text.split('\r\n')[0]).toMatch(/Policy No\.,Gross Premium/);
     // the sample report is shared with sales
-    expect((await sales('get', '/report-builder/reports')).body.data.some((r) => r.name === 'Premium by insurer')).toBe(true);
+    expect((await sales('get', '/report-builder/reports')).body.data.some((r) => r.name === 'Premium by panel insurer')).toBe(true);
     expect((await sales('delete', `/report-builder/reports/${mine}`)).status).toBe(200);
   });
 
