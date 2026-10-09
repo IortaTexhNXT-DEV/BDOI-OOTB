@@ -361,7 +361,11 @@ describe('go-live imports', () => {
       const res = await api('post', `/period-end/periods/2026-${String(m).padStart(2, '0')}/status`).send({ status: 'closed', remarks: 'year end' });
       expect(res.status, res.body.message).toBe(200);
     }
-    const closed = await api('post', `/period-end/year-end/${ye.id}/close`).send({});
+    // an Accounting Manager other than the user who started the close closes the year (maker-checker)
+    const mgr = await api('post', '/users').send({ username: 'gl.manager', password: 'Welcome@123', displayName: 'GL manager', roles: ['accounting-manager'], email: 'gl.manager@example.ph' });
+    expect(mgr.status, JSON.stringify(mgr.body)).toBe(201);
+    const token = (await request(app).post('/api/auth/login').send({ username: 'gl.manager', password: 'Welcome@123' })).body.accessToken;
+    const closed = await request(app).post(`/api/period-end/year-end/${ye.id}/close`).set('Authorization', `Bearer ${token}`).send({});
     expect(closed.status, JSON.stringify(closed.body)).toBe(200);
     const ob = Object.fromEntries((await query('SELECT account_code, balance FROM opening_balances WHERE fiscal_year = \'FY2027\'')).rows.map((x) => [x.account_code, Number(x.balance)]));
     expect(ob['1102001']).toBeCloseTo(1000000 + cash, 2);

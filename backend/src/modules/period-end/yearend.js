@@ -370,7 +370,8 @@ export async function yearEndOverview(db, fiscalYear, user) {
       ['closing', 'pending'],
       ['approval', failed('prerequisites') || failed('adjustments') ? 'blocked' : 'pending-approval'],
       ['opening', 'pending']];
-  const current = closed ? 'approval' : (steps.find(([, s]) => !['passed', 'done', 'posted'].includes(s)) || steps[0])[0];
+  // the step to work on: the first of steps 1 and 2 still to resolve, else the close (steps 3 and 5 are previews)
+  const current = closed ? 'approval' : (steps.slice(0, 2).find(([, s]) => s !== 'passed') || ['approval'])[0];
   const { closing, opening } = run ? (closed ? await closingPosted(db, run) : await closingPreview(db, fy)) : { closing: null, opening: null };
 
   return {

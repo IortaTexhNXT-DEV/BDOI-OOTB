@@ -128,7 +128,7 @@ describe('pre-checks', () => {
     const o = await overview(mgr2);
     expect(o.checks.filter((x) => x.status === 'failed')).toEqual([]);
     expect(step(o, 'approval')).toBe('pending-approval');
-    expect(o.currentStep).toBe('closing');
+    expect(o.currentStep).toBe('approval');
     expect(o.actions.close).toEqual({ allowed: true, reason: null });
   });
 });
