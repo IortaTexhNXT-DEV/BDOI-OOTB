@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import CalculaitionTextInputs from "../../../component/calculaitionTextInputs";
 import DatepickerField from "../../../component/datePicker";
+import { toIsoDate } from "../../../../utility/dateFormat";
 import { InputTextarea } from "primereact/inputtextarea";
 import InputTextField from "../../../component/inputText";
 import DropdownField from "../../../component/DropdownField";
@@ -147,9 +148,7 @@ const PolicyExtend = ({
       }
 
       if (value instanceof Date) {
-        const iso = value.toISOString();
-
-        return iso.split("T")[0];
+        return toIsoDate(value);
       }
 
       return value;

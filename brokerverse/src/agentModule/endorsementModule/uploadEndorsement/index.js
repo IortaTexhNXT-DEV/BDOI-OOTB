@@ -12,6 +12,8 @@ import { useFormik } from "formik";
 import endorsementService from "../../../services/endorsementService";
 import S3FileUpload from "../../../components/S3FileUpload";
 import { notifyError, notifyWarn } from "../../../utility/dialogs";
+import LoadState from "../../../components/LoadState";
+import { toIsoDate } from "../../../utility/dateFormat";
 
 const UploadEndorsement = () => {
   const { t } = useTranslation();
@@ -22,23 +24,19 @@ const UploadEndorsement = () => {
 
   const [endorsementData, setEndorsementData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [documentUrl, setDocumentUrl] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Dynamic initial values based on endorsement data
+  // The insurer's endorsement: its own number, effective from the endorsement's date to the policy's expiry
   const initialValues = useMemo(
     () => ({
       policyNumber: endorsementData?.policyNumber || "",
-      endrosementNumber: endorsementData?.endorsementNumber || "",
+      endrosementNumber: "",
       production: new Date(),
-      inception: new Date(),
+      inception: endorsementData?.effectiveDate ? new Date(`${String(endorsementData.effectiveDate).slice(0, 10)}T00:00:00`) : new Date(),
       issuedDate: new Date(),
-      expiry: (() => {
-        const currentDate = new Date();
-        const oneYearLater = new Date(currentDate);
-        oneYearLater.setFullYear(currentDate.getFullYear() + 1);
-        return oneYearLater;
-      })(),
+      expiry: endorsementData?.policyExpiry ? new Date(`${String(endorsementData.policyExpiry).slice(0, 10)}T00:00:00`) : null,
       file: null,
     }),
     [endorsementData]
@@ -54,6 +52,7 @@ const UploadEndorsement = () => {
 
     const fetchEndorsement = async () => {
       setLoading(true);
+      setLoadError(null);
       try {
         const response = await endorsementService.getEndorsementById(
           endorsementId
@@ -61,10 +60,10 @@ const UploadEndorsement = () => {
         if (response.success) {
           setEndorsementData(response.data);
         } else {
-          notifyError("Failed to load endorsement: " + response.error);
+          setLoadError(response.error || t("endorsement.errorLoadingEndorsement"));
         }
       } catch (error) {
-        notifyError(t("endorsement.errorLoadingEndorsement"));
+        setLoadError(t("endorsement.errorLoadingEndorsement"));
       } finally {
         setLoading(false);
       }
@@ -113,10 +112,11 @@ const UploadEndorsement = () => {
         endorsementId,
         policyNumber: values.policyNumber,
         endorsementNumber: values.endrosementNumber,
-        productionDate: values.production?.toISOString?.() || values.production,
-        inceptionDate: values.inception?.toISOString?.() || values.inception,
-        issuedDate: values.issuedDate?.toISOString?.() || values.issuedDate,
-        expiryDate: values.expiry?.toISOString?.() || values.expiry,
+        // the dates as picked (YYYY-MM-DD): an ISO timestamp of local midnight is the day before in UTC
+        productionDate: toIsoDate(values.production),
+        inceptionDate: toIsoDate(values.inception),
+        issuedDate: toIsoDate(values.issuedDate),
+        expiryDate: toIsoDate(values.expiry),
         documentKey: documentUrl,
         notes: "",
       };
@@ -159,27 +159,17 @@ const UploadEndorsement = () => {
   });
 
   const handleIssuedDateChange = (e) => {
-    const issuedDate = e.target.value || e.value;
-    formik.setFieldValue("issuedDate", issuedDate);
-
-    // Auto-calculate expiry date (1 year from issued date)
-    if (issuedDate) {
-      const expiryDate = new Date(issuedDate);
-      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-      formik.setFieldValue("expiry", expiryDate);
-    }
+    formik.setFieldValue("issuedDate", e.target.value || e.value);
   };
 
   const handleBackNavigation = () => {
     navigate(-1);
   };
 
-  if (loading) {
+  if (loading || !endorsementData) {
     return (
       <div className="upload__endorsement__container">
-        <Card className="mt-4">
-          <div className="p-4 text-center">Loading endorsement details...</div>
-        </Card>
+        <LoadState loading={loading} error={loadError} notFound={!endorsementData} onBack={handleBackNavigation} />
       </div>
     );
   }

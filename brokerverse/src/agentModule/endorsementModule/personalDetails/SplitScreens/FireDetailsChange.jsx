@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import InputTextField from "../../../component/inputText";
 import DropdownField from "../../../component/DropdownField";
 import DatepickerField from "../../../component/datePicker";
+import { toIsoDate } from "../../../../utility/dateFormat";
 import { useFormik } from "formik";
 import {
   CONSTRUCTION_TYPES,
@@ -171,9 +172,7 @@ const FireDetailsChange = ({
           totalPremium: totalCoverPremium || totalPremium,
         },
         premiumDelta,
-        effectiveDate: values.effectiveDate
-          ? new Date(values.effectiveDate).toISOString().split("T")[0]
-          : null,
+        effectiveDate: values.effectiveDate ? toIsoDate(values.effectiveDate) : null,
       });
     },
   });
