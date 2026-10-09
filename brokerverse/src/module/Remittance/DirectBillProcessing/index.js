@@ -43,6 +43,8 @@ const PAYMENT_RULES = {
  * due, raises a numbered debit note (maker-checker approval), prints / e-mails it and records the insurer's payments
  * (cash plus the creditable withholding tax the insurer deducts). The commission receivable is booked when the policy is
  * issued, so the screen does not post GL entries itself; each collection posts Dr Cash / Dr CWT / Cr Commission Receivable.
+ * Gross remittance (broker-billed premium remitted in full): its commission is billed here on a billing statement, which
+ * posts the commission when it is approved (basis "gross"); a debit note or statement bills commission of one basis.
  */
 const DirectBillProcessing = () => {
   const { t } = useTranslation();
@@ -58,6 +60,7 @@ const DirectBillProcessing = () => {
 
   // raise debit note
   const [insurer, setInsurer] = useState(null);
+  const [basis, setBasis] = useState("direct");
   const [periodFrom, setPeriodFrom] = useState(firstOfMonth());
   const [periodTo, setPeriodTo] = useState(new Date());
   const [productLines, setProductLines] = useState([]);
@@ -109,7 +112,7 @@ const DirectBillProcessing = () => {
     }
     setLoadingItems(true);
     try {
-      const res = await remittanceService.directBillItems({ insurerCode: insurer, from: isoDate(periodFrom), to: isoDate(periodTo), productLine: productLines });
+      const res = await remittanceService.directBillItems({ insurerCode: insurer, basis, from: isoDate(periodFrom), to: isoDate(periodTo), productLine: productLines });
       setItems(res.data || []);
       setItemsSummary(res.summary || null);
       setSelected(res.data || []);
@@ -161,7 +164,7 @@ const DirectBillProcessing = () => {
     try {
       const dn = await remittanceService.raiseDebitNote({
         insurerCode: insurer, periodFrom: isoDate(periodFrom), periodTo: isoDate(periodTo), dnDate: isoDate(dnDate), dueDate: dueDate ? isoDate(dueDate) : undefined,
-        itemIds: selected.map((x) => x.id), remarks: remarks || undefined, submit,
+        itemIds: selected.map((x) => x.id), basis, remarks: remarks || undefined, submit,
       });
       showSuccess(toast, `${dn.dnNumber} ${submit ? "raised and sent for approval" : "saved as draft"} (${formatCurrency(dn.amount)})`);
       setItems([]);
@@ -344,7 +347,7 @@ const DirectBillProcessing = () => {
           <TabPanel header="1. Raise Debit Note">
             <div className="filter-section mb-3">
               <div className="grid">
-                <div className="col-12 md:col-3">
+                <div className="col-12 md:col-2">
                   <label>Insurer *</label>
                   <Dropdown value={insurer} options={insurerOptions} onChange={(e) => setInsurer(e.value)} placeholder="Select insurer" filter className="w-full" />
                 </div>
@@ -356,7 +359,12 @@ const DirectBillProcessing = () => {
                   <label>Issued to</label>
                   <Calendar value={periodTo} onChange={(e) => setPeriodTo(e.value)} dateFormat={calendarDateFormat()} showIcon className="w-full" />
                 </div>
-                <div className="col-12 md:col-3">
+                <div className="col-12 md:col-2">
+                  <label>{t("directBillBasis.label")}</label>
+                  <Dropdown value={basis} options={["direct", "gross"].map((b) => ({ label: t(`directBillBasis.${b}`), value: b }))}
+                    onChange={(e) => { setBasis(e.value); setItems([]); setSelected([]); setItemsSummary(null); }} className="w-full" />
+                </div>
+                <div className="col-12 md:col-2">
                   <label>Line of business</label>
                   <MultiSelect value={productLines} options={lineOptions} onChange={(e) => setProductLines(e.value)} placeholder="All lines" className="w-full" />
                 </div>
@@ -450,7 +458,7 @@ const DirectBillProcessing = () => {
             </div>
             <DataTable value={notes} dataKey="id" loading={loadingNotes} paginator rows={20} stripedRows size="small" scrollable
               emptyMessage="No commission debit notes" footer={notesSummary ? `${notesTotal} debit note(s) · total ${formatCurrency(notesSummary.amount)} · outstanding ${formatCurrency(notesSummary.outstanding)}` : null}>
-              <Column field="dnNumber" header="Debit Note" />
+              <Column field="dnNumber" header="Debit Note" body={(r) => <div><div>{r.dnNumber}</div><div className="text-sm text-500">{t(`directBillBasis.document.${r.basis || "direct"}`)}</div></div>} />
               <Column field="dnDate" body={dateBody("dnDate")} header="Date" />
               <Column field="insurerName" header="Insurer" />
               <Column field="policyCount" header="Policies" />

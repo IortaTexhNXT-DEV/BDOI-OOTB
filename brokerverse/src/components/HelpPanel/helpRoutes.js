@@ -73,6 +73,7 @@ export const HELP_ROUTES = [
   ["/accounts/fixed-assets/disposals", "asset-disposal"],
   ["/master/insurance/", "operational-masters"],
   ["/master/finance/asset-classes", "operational-masters"],
+  ["/master/finance/cost-centres", "operational-masters"],
   ["/accounts/paymentvoucher", "disbursement-payment-vouchers-and-cheques"],
   ["/finance/remittance", "remittance-to-insurers"],
   ["/finance/remittance/directbill", "direct-bill-commission-debit-notes"],
@@ -144,6 +145,7 @@ export const HELP_ROUTES = [
   ["/operations/ctpl-authentication", "ctpl-authentication"],
   ["/master/finance/bank-file-layouts", "bank-file-layouts-and-payee-bank-accounts"],
   ["/accounts/bank-payment-files", "bank-payment-files"],
+  ["/accounts/sap-gl-export", "sap-gl-export"],
   ["/master/data-privacy", "data-privacy"],
   // client onboarding (Operations chapter of the user manual)
   ["/agent/client-onboarding", "onboard-a-client-before-the-first-policy"],

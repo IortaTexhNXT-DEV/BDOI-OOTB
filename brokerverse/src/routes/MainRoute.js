@@ -227,7 +227,7 @@ import MotorClaimRepairs from "../module/OpsAccounting/MotorClaimRepairs";
 import SupplierInvoices from "../module/OpsAccounting/SupplierInvoices";
 import { ApAgeing, SupplierPayments } from "../module/OpsAccounting/SupplierPayments";
 import { AssetRegister, DepreciationRun } from "../module/OpsAccounting/FixedAssets";
-import { AssetClasses, CancellationReasons, ClaimDocumentChecklist, RepairShops, ShortPeriodRates, Suppliers } from "../module/OpsAccounting/Masters";
+import { AssetClasses, CancellationReasons, ClaimDocumentChecklist, CostCentres, RepairShops, ShortPeriodRates, Suppliers } from "../module/OpsAccounting/Masters";
 // sales activities, asset disposal and the BIR 2307 of suppliers
 import SalesActivities from "../module/SalesActivities/SalesActivities";
 import { AssetDisposals } from "../module/OpsAccounting/AssetDisposals";
@@ -323,6 +323,7 @@ import InsurerIntegration from "../module/Integrations/InsurerIntegration";
 import CtplAuthentication from "../module/Integrations/CtplAuthentication";
 import BankFileLayouts from "../module/Integrations/BankFileLayouts";
 import BankPaymentFiles from "../module/Integrations/BankPaymentFiles";
+import SapGlExport from "../module/Integrations/SapGlExport";
 
 // Commission Module Imports
 import CommissionDashboard from "../module/Commission/CommissionDashboard";
@@ -1153,6 +1154,7 @@ const Maincomponent = () => {
           <Route path="/operations/ctpl-authentication" element={<CtplAuthentication />} />
           <Route path="/master/finance/bank-file-layouts" element={<BankFileLayouts />} />
           <Route path="/accounts/bank-payment-files" element={<BankPaymentFiles />} />
+          <Route path="/accounts/sap-gl-export" element={<SapGlExport />} />
           <Route path="/placement/broker-slips" element={<BrokerSlipList />} />
           <Route path="/placement/broker-slips/new" element={<BrokerSlipCreate />} />
           <Route path="/placement/broker-slips/:id" element={<BrokerSlipDetail />} />
@@ -1714,6 +1716,7 @@ const Maincomponent = () => {
           <Route path="/master/insurance/claim-document-checklist" element={<ClaimDocumentChecklist />} />
           <Route path="/master/insurance/repair-shops" element={<RepairShops />} />
           <Route path="/master/finance/asset-classes" element={<AssetClasses />} />
+          <Route path="/master/finance/cost-centres" element={<CostCentres />} />
 
           {/* OperationalReports */}
           <Route

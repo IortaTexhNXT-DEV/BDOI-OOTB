@@ -15,6 +15,7 @@ import { Button } from "primereact/button";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { patchJVMiddleware } from "../../store/journalVoucherMiddleware";
 import useJvMasterData from "../../useJvMasterData";
+import { useTranslation } from "react-i18next";
 
 const ENTRY_TYPES = [
   { label: "Debit", value: "Debit" },
@@ -22,6 +23,7 @@ const ENTRY_TYPES = [
 ];
 
 const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
+  const { t } = useTranslation();
   const [, setFirst] = useState(0);
   const [visibleEdit, setVisibleEdit] = useState(false);
   const [, setRowsPerPage] = useState(10);
@@ -152,6 +154,8 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
     subAccountsData,
     branchCodesData,
     departmentCodesData,
+    costCentresData,
+    defaultCostCentre,
     currencyCodesData,
   } = useJvMasterData();
   const toOptions = (rows) =>
@@ -187,6 +191,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
       currencyCode: currencyC || "",
       currencyDescription: targetInvoice?.currencyDescription || "",
       foreignAmount: targetInvoice?.foreignAmount || "",
+      costCentre: targetInvoice?.costCentre || "",
     };
 
     formik.setValues({ ...formik.values, ...updatedValues });
@@ -206,6 +211,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
       currencyCode: "",
       currencyDescription: "",
       foreignAmount: "",
+      costCentre: "",
     },
     validate: customValidation,
     onSubmit: (values) => {
@@ -286,6 +292,13 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
           className="fieldvalue_container"
           headerStyle={headerStyle}
           style={{ paddingLeft: "0.5rem !important" }}
+        ></Column>
+        <Column
+          header={t("jvTools.costCentre")}
+          body={(row) => row.costCentre || defaultCostCentre || ""}
+          className="fieldvalue_container"
+          headerStyle={headerStyle}
+          style={{ paddingLeft: "0.5rem" }}
         ></Column>
         <Column
           body={(columnData) => (
@@ -465,6 +478,20 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
                     {formik.errors.departmentDescription}
                   </div>
                 )}
+            </div>
+          </div>
+          <div className="grid m-0 ">
+            <div className="col-12 md:col-6 lg:col-6 xl:col-6">
+              <DropDowns
+                dropdownIcon={<SvgDropdown color={"#000"} />}
+                className="dropdown__container"
+                optionLabel="label"
+                label={t("jvTools.costCentre")}
+                value={formik.values.costCentre}
+                onChange={(e) => formik.setFieldValue("costCentre", e.value || "")}
+                options={costCentresData.map((c) => ({ label: `${c.code} - ${c.name}`, value: c.code }))}
+                placeholder={defaultCostCentre ? t("jvTools.costCentreDefault", { code: defaultCostCentre }) : t("jvTools.costCentreNone")}
+              />
             </div>
           </div>
           <div

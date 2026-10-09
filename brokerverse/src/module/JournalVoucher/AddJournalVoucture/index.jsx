@@ -172,6 +172,7 @@ const AddJournalVocture = () => {
         currencyDescription: item.currencyDescription || "",
         foreignAmount: parseFloat(item.foreignAmount) || 0,
         remarks: item.Remarks || item.remarks || "",
+        costCentre: item.costCentre || undefined,
       }));
 
       // Prepare payload

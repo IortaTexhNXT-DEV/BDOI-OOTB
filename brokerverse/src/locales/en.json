@@ -157,6 +157,7 @@
     "Main Account": "Main Account",
     "Sub Account": "Sub Account",
     "Taxation": "Taxation",
+    "Cost Centres": "Cost Centres",
     "Remittance Master": "Remittance Master",
     "Incentive Programs": "Incentive Programs",
     "Operations": "Operations",
@@ -189,6 +190,7 @@
     "Request": "Request",
     "Replenish": "Replenish",
     "Journal Voucher": "Journal Voucher",
+    "SAP GL Export": "SAP GL Export",
     "Correction JV": "Correction JV",
     "Reversal JV": "Reversal JV",
     "Remittance": "Remittance",
@@ -9710,6 +9712,66 @@
     "uploadFailed": "Could not upload the document",
     "fileFailed": "Could not open the file"
   },
+  "jvTools": {
+    "upload": "Upload",
+    "uploadTitle": "Upload journal vouchers",
+    "uploadIntro": "Download the template, enter one row per journal line (rows with the same Voucher Ref make one voucher) and upload it. The whole file is checked first: nothing is saved while a row is wrong. Every voucher waits for the approval of another user.",
+    "downloadTemplate": "Download template",
+    "chooseFile": "Choose file",
+    "noFile": "No file chosen (XLSX or CSV)",
+    "uploadFailed": "The file could not be uploaded",
+    "row": "Row",
+    "problem": "Problem",
+    "voucherRef": "Voucher Ref",
+    "lines": "Lines",
+    "total": "Total",
+    "awaitingApproval": "Awaiting approval",
+    "showParked": "System journals parked for approval",
+    "costCentre": "Cost Centre",
+    "costCentreDefault": "Default cost centre ({{code}})",
+    "costCentreNone": "No cost centre",
+    "posting": {
+      "parked": "Parked for approval",
+      "posted": "Posted at once"
+    }
+  },
+  "sapGl": {
+    "title": "SAP GL Export",
+    "intro": "The daily SAP GL header and line files: the entries posted since the previous cut-off, written to the SAP pick-up folder at the cut-off. Run now or re-generate a day; every run keeps its files.",
+    "runNow": "Run now / re-generate",
+    "exportDate": "Day",
+    "runNo": "Run {{n}}",
+    "window": "Posted between",
+    "status": "Status",
+    "allStatuses": "All statuses",
+    "lines": "Journals / lines",
+    "debit": "Debit",
+    "credit": "Credit",
+    "trigger": "Started by",
+    "notes": "Warnings",
+    "files": "Files",
+    "noRuns": "No SAP GL file written yet",
+    "settingsLine": "Folder {{folder}} · cut-off {{cutOff}} · {{format}} layout (Master > Configuration, group integrations)",
+    "statuses": {
+      "done": "Written",
+      "empty": "Nothing posted",
+      "failed": "Failed",
+      "running": "Running"
+    },
+    "triggers": {
+      "schedule": "Schedule",
+      "manual": "Run now"
+    }
+  },
+  "directBillBasis": {
+    "label": "Commission of",
+    "direct": "Direct-bill policies (debit note)",
+    "gross": "Gross remittance (billing statement)",
+    "document": {
+      "direct": "Commission debit note",
+      "gross": "Billing statement"
+    }
+  },
   "opsAcc": {
     "accounts": "Accounts",
     "operations": "Operations",
@@ -9827,6 +9889,11 @@
         "title": "Asset Classes",
         "section": "Finance",
         "intro": "Useful life (months) and the asset, accumulated depreciation and depreciation expense accounts of each class of fixed asset."
+      },
+      "costCentres": {
+        "title": "Cost Centres",
+        "section": "Finance",
+        "intro": "Cost centres tagged on journal lines and in the SAP GL file. The one marked Default is stamped on every line that names none (TISPH: 900901 Toyota Insurance Services)."
       },
       "salesActivityTypes": {
         "title": "Sales Activity Types",

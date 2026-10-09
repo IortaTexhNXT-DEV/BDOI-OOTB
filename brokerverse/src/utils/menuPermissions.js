@@ -116,6 +116,8 @@ export const roleMenuPermissions = {
       "Disbursement",
       "Petty Cash",
       "Journal Voucher",
+      // daily SAP GL text files (run now / re-generate: write:journal-vouchers)
+      "SAP GL Export",
       "Correction JV",
       "Reversal JV",
       "Remittance",
@@ -147,7 +149,9 @@ export const roleMenuPermissions = {
       // bank payment file layouts and payee bank accounts (write:disbursements)
       "Finance > Bank File Layouts",
       // asset classes of the fixed asset register (write:fixed-assets)
-      "Finance > Asset Classes"],
+      "Finance > Asset Classes",
+      // cost centres of the journal lines (write:masters)
+      "Finance > Cost Centres"],
     commission: ["Commission Dashboard", "Agents/Referrer Accounts",
       // overriding, profit and contingent commission from insurers (read:commission / write:commission)
       "Insurer Overrides"],

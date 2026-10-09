@@ -21,3 +21,5 @@ export const Suppliers = page("supplier", "suppliers", "opsAcc.accounts", ["code
 export const SalesActivityTypes = page("sales-activity-type", "salesActivityTypes", "opsAcc.master", ["code", "name", "channel", "followUpDays", "sortOrder"]);
 export const SalesActivityOutcomes = page("sales-activity-outcome", "salesActivityOutcomes", "opsAcc.master", ["code", "name", "result", "sortOrder"]);
 export const AssetClasses = page("asset-class", "assetClasses", "opsAcc.master", ["code", "name", "usefulLifeMonths", "assetAccount", "accumulatedAccount", "expenseAccount"]);
+// cost centres stamped on journal lines (FGA.04); the one marked Default goes on lines that name none
+export const CostCentres = page("cost-centre", "costCentres", "opsAcc.master", ["code", "name", "companyCode", "department", "responsiblePerson", "isDefault"]);

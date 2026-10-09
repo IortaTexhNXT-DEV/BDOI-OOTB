@@ -72,6 +72,8 @@ const AccountingFlow = () => {
             </div>
             <div className="flex align-items-center gap-2">
               {e.version ? <Tag value={`v${e.version}`} severity="success" /> : <Tag value={t("postingRules.none")} severity="danger" />}
+              {/* parked on save until another user approves it (accounting.parked_events), or posted at once */}
+              <Tag value={t(`jvTools.posting.${e.posting === "parked" ? "parked" : "posted"}`)} severity={e.posting === "parked" ? "warning" : "info"} title={e.alwaysPosted || undefined} />
               <Button label={t("postingRules.flow.openRule")} className="p-button-text p-button-sm" onClick={() => navigate("/master/finance/posting-rules")} />
             </div>
           </div>

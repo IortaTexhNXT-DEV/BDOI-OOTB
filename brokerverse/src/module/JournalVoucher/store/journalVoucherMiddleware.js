@@ -156,6 +156,7 @@ export const postAddJournalVoucher = createAsyncThunk(
       branchCodeDescription: payload?.branchCodeDescription,
       departmentDescription: payload?.departmentDescription,
       currencyDescription: payload?.currencyDescription,
+      costCentre: payload?.costCentre || "",
     };
     try {
       return bodyTableData;
@@ -193,12 +194,14 @@ export const getJournalVoucherHistory = createAsyncThunk(
         pageSize = 20,
         transactionCode,
         transactionNumber,
+        parked,
       } = payload;
 
-      // Build query parameters
+      // Build query parameters (parked: the system journals waiting for approval instead of the manual vouchers)
       const params = {
         page,
         pageSize,
+        ...(parked ? { parked: true } : {}),
       };
 
       if (transactionCode) {
@@ -314,6 +317,7 @@ export const getJournalVoucherDetails = createAsyncThunk(
           departmentCode: item.departmentCode || "",
           departmentDescription: item.departmentDescription || "",
           currencyDescription: item.currencyDescription || "",
+          costCentre: item.costCentre || "",
         };
       });
 

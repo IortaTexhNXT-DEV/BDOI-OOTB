@@ -8,17 +8,22 @@ import { Button } from "primereact/button";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { postAddJournalVoucher } from "../../store/journalVoucherMiddleware";
 import { useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import useJvMasterData from "../../useJvMasterData";
 
 const AddData = ({ visible, setVisible, handleUpdate, voucherDate }) => {
+  const { t } = useTranslation();
   const {
     mainAccountsData,
     subAccountsData,
     branchCodesData,
     departmentCodesData,
+    costCentresData,
+    defaultCostCentre,
     currencyCodesData,
     rateOn,
   } = useJvMasterData();
+  const codeOptionsCostCentre = costCentresData.map((c) => ({ label: `${c.code} - ${c.name}`, value: c.code }));
 
   const mainAccountsWithSubAccounts = mainAccountsData;
 
@@ -163,6 +168,7 @@ const AddData = ({ visible, setVisible, handleUpdate, voucherDate }) => {
       currencyDescription: "",
       foreignAmount: "",
       localAmount: "",
+      costCentre: "",
     },
     validate: customValidation,
     onSubmit: (values) => {
@@ -429,6 +435,20 @@ const AddData = ({ visible, setVisible, handleUpdate, voucherDate }) => {
                 {formik.errors.departmentDescription}
               </div>
             )}
+        </div>
+      </div>
+      <div className="grid m-0">
+        <div className="col-12 md:col-6 lg:col-6 xl:col-6">
+          <DropDowns
+            className="dropdown__container"
+            dropdownIcon={<SvgDropdown color={"#000"} />}
+            optionLabel="label"
+            label={t("jvTools.costCentre")}
+            value={formik.values.costCentre}
+            onChange={(e) => formik.setFieldValue("costCentre", e.value || "")}
+            options={codeOptionsCostCentre}
+            placeholder={defaultCostCentre ? t("jvTools.costCentreDefault", { code: defaultCostCentre }) : t("jvTools.costCentreNone")}
+          />
         </div>
       </div>
       <div className="grid m-0">

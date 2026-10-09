@@ -116,6 +116,12 @@ const integrationsService = {
   downloadBatchFile: (batchId, name) => download(`/bank-payments/batches/${id(batchId)}/file`, name || "payment-file.txt"),
   importStatusFile: (batchId, file) => upload(`/bank-payments/batches/${id(batchId)}/status-file`, file),
   lineResult: (batchId, lineId, body) => post(`/bank-payments/batches/${id(batchId)}/lines/${id(lineId)}/result`, body),
+
+  // SAP GL text files (Accounts > SAP GL Export)
+  sapGlRuns: (params) => getPage(`/sap-gl/runs${qs(params)}`),
+  sapGlSettings: () => get("/sap-gl/settings"),
+  runSapGl: (date) => post("/sap-gl/runs", { date }),
+  downloadSapGlFile: (runId, kind, name) => download(`/sap-gl/runs/${id(runId)}/files/${id(kind)}`, name || `${kind}.txt`),
 };
 
 export default integrationsService;

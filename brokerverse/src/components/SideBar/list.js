@@ -603,6 +603,14 @@ export const menuList = [
         permissions: ["read:journalvoucher"],
       },
   {
+        // daily SAP GL header and line files (TIS-BRD-INTG-04)
+        id: 46,
+        name: "SAP GL Export",
+        path: "/accounts/sap-gl-export",
+        includes: ["/accounts/sap-gl-export"],
+        permissions: ["read:journalvoucher"],
+      },
+  {
         id: 5,
         name: "Correction JV",
         path: "/accounts/correctionsjv/correctionsjvdetails",
@@ -1369,6 +1377,8 @@ export const menuList = [
           },
           // fixed asset classes: useful life and accounts of the depreciation
           { id: 40, name: "Asset Classes", path: "/master/finance/asset-classes", includes: ["/master/finance/asset-classes"] },
+          // cost centres of the journal lines (FGA.04)
+          { id: 45, name: "Cost Centres", path: "/master/finance/cost-centres", includes: ["/master/finance/cost-centres"] },
           {
             id: 21,
             name: "Bank Statement Formats",

@@ -4,6 +4,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import SvgTable from "../../../../assets/icons/SvgTable";
+import { useTranslation } from "react-i18next";
 const ViewDataTabel = ({
   handleEdit,
   newDataTable,
@@ -14,6 +15,7 @@ const ViewDataTabel = ({
   first,
   rowsPerPage,
 }) => {
+  const { t } = useTranslation();
   const headerStyle = {
     fontSize: 16,
     fontFamily: "Nunito, Arial, sans-serif",
@@ -33,6 +35,7 @@ const ViewDataTabel = ({
     localAmount: item.localAmount || item.local || "500.00",
     Remarks: item.remarks || item.Remarks || "",
     Entry: item.entryType || item.Entry || "",
+    costCentre: item.costCentre || "",
   }));
 
   const isEmpty = mappedTableData.length === 0;
@@ -135,6 +138,13 @@ const ViewDataTabel = ({
           className="fieldvalue_container"
           headerStyle={headerStyle}
           body={(rowData) => rowData.localAmount || "0.00"}
+        ></Column>
+        <Column
+          field="costCentre"
+          header={t("jvTools.costCentre")}
+          className="fieldvalue_container"
+          headerStyle={headerStyle}
+          style={{ paddingLeft: "0.5rem" }}
         ></Column>
         <Column
           field="Entry"

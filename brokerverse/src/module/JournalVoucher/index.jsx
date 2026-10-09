@@ -13,6 +13,9 @@ import {
 } from "./store/journalVoucherMiddleware";
 import SvgDropdownicon from "../../assets/icons/SvgDropdownicon";
 import { useTranslation } from "react-i18next";
+import { Button } from "primereact/button";
+import { Checkbox } from "primereact/checkbox";
+import UploadJournalVouchers from "./UploadJournalVouchers";
 
 const JournalVoucher = () => {
   const { t } = useTranslation();
@@ -52,6 +55,9 @@ const JournalVoucher = () => {
 
   const [first, setFirst] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
+  const [uploading, setUploading] = useState(false);
+  const [parked, setParked] = useState(false);
+  const [reloads, setReloads] = useState(0);
   const loadedOnce = useRef(false);
 
   const handleEdit = () => {
@@ -61,12 +67,12 @@ const JournalVoucher = () => {
 
   // One request per change of page, page size or search (the search is debounced while typing).
   useEffect(() => {
-    const params = { page: Math.floor(first / rowsPerPage) + 1, pageSize: rowsPerPage };
+    const params = { page: Math.floor(first / rowsPerPage) + 1, pageSize: rowsPerPage, parked };
     if (globalFilter && search) params[globalFilter] = search;
     const h = setTimeout(() => dispatch(getJournalVoucherHistory(params)), loadedOnce.current ? 250 : 0);
     loadedOnce.current = true;
     return () => clearTimeout(h);
-  }, [dispatch, first, rowsPerPage, search, globalFilter]);
+  }, [dispatch, first, rowsPerPage, search, globalFilter, parked, reloads]);
 
   // a new search starts on the first page
   const onSearch = (value) => {
@@ -113,7 +119,9 @@ const JournalVoucher = () => {
           </div>
           <div className="add__text__Journal__Voture">{t("accounts.voucher")}</div>
         </div>
+        <Button className="ml-2" icon="pi pi-upload" label={t("jvTools.upload")} outlined onClick={() => setUploading(true)} />
       </div>
+      <UploadJournalVouchers visible={uploading} onHide={() => setUploading(false)} onUploaded={() => { setFirst(0); setReloads((n) => n + 1); }} />
       <div className="col-12 m-0 ">
         <div className="sub__container__Journal__Voture">
           <div className="col-12 search__filter__view__Journal__Voture">
@@ -168,6 +176,10 @@ const JournalVoucher = () => {
               style={{ paddingLeft: 10, paddingRight: 10 }}
             >
               {t("accounts.journalVoucherHistory", { defaultValue: "Journal voucher history" })}
+            </div>
+            <div className="flex align-items-center gap-2" style={{ paddingLeft: 10, paddingRight: 10 }}>
+              <Checkbox inputId="jv-parked" checked={parked} onChange={(e) => { setParked(e.checked); setFirst(0); }} />
+              <label htmlFor="jv-parked">{t("jvTools.showParked")}</label>
             </div>
           </div>
           <div

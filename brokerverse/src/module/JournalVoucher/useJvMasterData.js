@@ -7,6 +7,8 @@ const EMPTY = {
   subAccountsData: [],
   branchCodesData: [],
   departmentCodesData: [],
+  costCentresData: [],
+  defaultCostCentre: null,
   currencyCodesData: [],
   transactionCodesData: [],
   exchangeRates: {},
@@ -59,7 +61,7 @@ export const rateOnDate = (rows, base, code, date) => {
 
 const settle = (promise) => promise.catch(() => []);
 
-/** Chart of accounts and code masters for the Journal Voucher screens. */
+/** Chart of accounts, cost centres and code masters for the Journal Voucher screens. */
 const useJvMasterData = () => {
   const [data, setData] = useState(EMPTY);
 
@@ -73,7 +75,8 @@ const useJvMasterData = () => {
       settle(mastersService.options("transaction-code")),
       settle(mastersService.list("exchange-rate", { status: "Active" })),
       settle(mastersService.list("currency", { status: "Active", isBase: "true" })),
-    ]).then(([accounts, branches, departments, currencies, codes, rates, bases]) => {
+      settle(mastersService.list("cost-centre", { status: "Active" })),
+    ]).then(([accounts, branches, departments, currencies, codes, rates, bases, centres]) => {
       if (!active) return;
       const manual = accounts.filter((a) => a.allowManual !== false);
       // the accounting base currency (Currency master); the display currency never decides it
@@ -87,6 +90,9 @@ const useJvMasterData = () => {
         subAccountsData: manual.filter((a) => a.parentCode).map(toSubAccount),
         branchCodesData: branches.map(fromOption),
         departmentCodesData: departments.map(fromOption),
+        // cost centres of the journal lines; the one marked Default is proposed (and used by the server when none is chosen)
+        costCentresData: centres.map((c) => ({ code: c.code, name: c.name, description: c.name })),
+        defaultCostCentre: (centres.find((c) => c.isDefault === true || c.isDefault === "true") || {}).code || null,
         currencyCodesData: currencies.map(fromOption),
         transactionCodesData: codes.map(fromOption),
         exchangeRates,
