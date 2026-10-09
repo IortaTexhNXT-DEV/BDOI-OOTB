@@ -1,4 +1,6 @@
-// Application menu (NewSideBar.jsx). Brand lock-up and search box colours: theme/bdoi/bdoi.scss.
+// Application menu (NewSideBar.jsx). Brand lock-up and search box colours: theme/bdoi/bdoi.scss. Colours come from the
+// side bar colours of the theme (--bv-sidebar-*, src/theme/runtime/themeEngine.js); the current screen is marked by a
+// bar in the theme's marker colour (the accent of a brand theme, the primary colour of the default).
 //
 // Geometry: a top-level row is icon (20px box) + label; the second level hangs from a thin guide line under the
 // centre of the icons and its labels start where the top-level labels start; the third level hangs from a second
@@ -19,7 +21,7 @@ $label-3: $label-x + 18px; // x where third-level labels start
   height: 100vh;
   width: 100%;
   overflow: hidden;
-  background-color: var(--color-surface, #ffffff);
+  background-color: var(--bv-sidebar-bg, #ffffff);
   font-family: var(--font-body, "Nunito", Arial, sans-serif);
 
   .bv-nav__top {
@@ -178,11 +180,11 @@ $label-3: $label-x + 18px; // x where third-level labels start
     transition: background-color 0.12s ease, color 0.12s ease;
 
     &:hover {
-      background-color: var(--color-bg, #f6f6f6);
+      background-color: var(--bv-sidebar-hover-bg, #f6f6f6);
     }
 
     &:focus-visible {
-      outline: 2px solid var(--brand-blue, #0072d8);
+      outline: 2px solid var(--bv-focus-color, #0072d8);
       outline-offset: -2px;
     }
   }
@@ -202,13 +204,13 @@ $label-3: $label-x + 18px; // x where third-level labels start
     text-align: center;
     font-size: 16px;
     line-height: 1;
-    color: var(--color-text-muted, #656565);
+    color: var(--bv-sidebar-muted, #656565);
   }
 
   .bv-nav__chevron {
     flex: 0 0 auto;
     font-size: 11px;
-    color: var(--color-placeholder, #919191);
+    color: var(--bv-sidebar-muted, #919191);
     transition: transform 0.15s ease;
 
     &.is-open {
@@ -222,27 +224,29 @@ $label-3: $label-x + 18px; // x where third-level labels start
     padding: 8px 10px 8px $row-pad;
     font-size: 14px;
     font-weight: 600;
-    color: var(--color-heading, #2e2e2e);
+    color: var(--bv-sidebar-text, #2e2e2e);
 
     &.has-active,
     &.is-active {
-      color: var(--brand-navy, #004ea8);
+      color: var(--bv-sidebar-active-text, #004ea8);
 
       .bv-nav__icon {
-        color: var(--brand-navy, #004ea8);
+        color: var(--bv-sidebar-active-text, #004ea8);
       }
     }
 
     &.is-active {
-      background-color: var(--brand-blue-050, #e5f5ff);
+      background-color: var(--bv-sidebar-active-bg, #e5f5ff);
       font-weight: 700;
+      box-shadow: inset 3px 0 0 var(--bv-sidebar-marker, #0072d8);
+      border-radius: 0 6px 6px 0;
     }
   }
 
   // second and third levels: text only, regular weight, hanging from the guide lines
   .bv-nav__list--l2 {
     margin: 2px 0 6px $guide-1;
-    border-left: 1px solid var(--color-border, #e4e4e4);
+    border-left: 1px solid var(--bv-sidebar-rule, #e4e4e4);
   }
 
   .bv-nav__link--l2,
@@ -253,36 +257,36 @@ $label-3: $label-x + 18px; // x where third-level labels start
     font-size: 14px;
     font-weight: 400;
     line-height: 1.35;
-    color: var(--color-text, #4b4b4b);
+    color: var(--bv-sidebar-sub-text, #4b4b4b);
     border-radius: 0 6px 6px 0;
 
     &.has-active {
-      color: var(--brand-navy, #004ea8);
+      color: var(--bv-sidebar-active-text, #004ea8);
       font-weight: 600;
     }
 
     &.is-active {
-      background-color: var(--brand-blue-050, #e5f5ff);
-      color: var(--brand-navy, #004ea8);
+      background-color: var(--bv-sidebar-active-bg, #e5f5ff);
+      color: var(--bv-sidebar-active-text, #004ea8);
       font-weight: 600;
 
-      // the guide line turns into a short accent bar beside the current screen
+      // the guide line turns into the marker bar beside the current screen
       &::before {
         content: "";
         position: absolute;
-        left: -1px;
-        top: 4px;
-        bottom: 4px;
-        width: 2px;
+        left: -2px;
+        top: 3px;
+        bottom: 3px;
+        width: 3px;
         border-radius: 2px;
-        background: var(--brand-blue, #0072d8);
+        background: var(--bv-sidebar-marker, #0072d8);
       }
     }
   }
 
   .bv-nav__list--l3 {
     margin: 0 0 4px ($guide-2 - $guide-1 - 1px);
-    border-left: 1px solid var(--color-border, #e4e4e4);
+    border-left: 1px solid var(--bv-sidebar-rule, #e4e4e4);
   }
 
   .bv-nav__link--l3 {
@@ -307,7 +311,7 @@ $label-3: $label-x + 18px; // x where third-level labels start
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--color-text-muted, #656565);
+    color: var(--bv-sidebar-muted, #656565);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

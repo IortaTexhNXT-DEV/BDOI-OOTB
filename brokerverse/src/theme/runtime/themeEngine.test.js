@@ -35,13 +35,15 @@ describe("theme engine", () => {
     expect(vars["--bv-table-header-bg"]).toBe("#eeeeee");
     expect(vars["--bv-table-header-rule"]).toBe("rgba(0, 0, 0, 0.08)");
     expect(vars["--bv-sidebar-marker"]).toBe("#eb0a1e");
+    expect(vars["--bv-sidebar-sub-text"]).toBe("#353535");
     expect(vars["--bv-radius-button"]).toBe("4px");
     expect(vars["--bv-row-height"]).toBe("36px");
     expect(vars["--bv-font-family"]).toBe('"Inter", Arial, sans-serif');
     expect(vars["--bv-primary-dark"]).toBe("#000000");
     const def = themeToCssVars({});
     expect(def["--bv-primary"]).toBe("#0072d8");
-    expect(def["--bv-sidebar-marker"]).toBe("transparent");
+    expect(def["--bv-sidebar-marker"]).toBe("#0072d8");
+    expect(def["--bv-sidebar-sub-text"]).toBe("#4b4b4b");
     expect(def["--bv-row-height"]).toBe("44px");
     expect(def["--bv-table-stripe"]).toBe("#f5faff");
   });
