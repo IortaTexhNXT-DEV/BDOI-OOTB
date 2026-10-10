@@ -125114,29 +125114,65 @@
     "/remittance/approvals": {
       "get": {
         "operationId": "getRemittanceApprovals",
-        "summary": "Approval queue (status=Pending by default; filter transactionType, priority)",
+        "summary": "Approvals. With view=mine|submitted|all|decided (type=remittance|settlement|adjustment|transfer, insurerId, q, page, perPage): the inbox rows with the decision block, next step, SLA and level, server totals and the KPI figures (awaiting my decision, past SLA, submitted by me, decided by me today in the business time zone); decided covers the last 30 days. Without view: the legacy queue (status=Pending by default; filter transactionType, priority)",
         "tags": [
           "Remittance"
         ],
-        "description": "Front-end touchpoint: Accounts > Remittance > Approval\n\nAccess: read:remittance, write:remittance",
+        "description": "Front-end touchpoint: Accounts > Remittance > Approvals; Accounts > Remittance > Approval\n\nAccess: read:remittance, write:remittance",
         "parameters": [
           {
-            "name": "status",
+            "name": "view",
             "in": "query",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "example": "Pending"
+            "example": "mine"
           },
           {
-            "name": "transactionType",
+            "name": "type",
             "in": "query",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "example": "Settlement"
+            "example": "remittance"
+          },
+          {
+            "name": "insurerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 3
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "REM-2026"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 50
           }
         ],
         "responses": {
@@ -125158,32 +125194,286 @@
                           "id": {
                             "type": "integer"
                           },
-                          "priority": {
+                          "version": {
+                            "type": "integer"
+                          },
+                          "type": {
                             "type": "string"
                           },
-                          "referenceNo": {
+                          "typeLabel": {
                             "type": "string"
                           },
-                          "transactionType": {
+                          "reference": {
                             "type": "string"
                           },
-                          "initiator": {
+                          "entity": {
                             "type": "string"
                           },
-                          "submissionDate": {
+                          "entityId": {
+                            "type": "string"
+                          },
+                          "recordLink": {
+                            "type": "string"
+                          },
+                          "insurer": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "productLine": {
                             "type": "string"
                           },
                           "amount": {
-                            "type": "integer"
+                            "type": "number"
                           },
-                          "description": {
+                          "submittedBy": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "submittedAt": {
                             "type": "string"
                           },
-                          "slaHours": {
-                            "type": "integer"
+                          "status": {
+                            "type": "string"
                           },
-                          "currentLevel": {
-                            "type": "integer"
+                          "statusLabel": {
+                            "type": "string"
+                          },
+                          "level": {
+                            "type": "object",
+                            "properties": {
+                              "current": {
+                                "type": "integer"
+                              },
+                              "required": {
+                                "type": "integer"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "sla": {
+                            "type": "object",
+                            "properties": {
+                              "hours": {
+                                "type": "integer"
+                              },
+                              "dueAt": {
+                                "type": "string"
+                              },
+                              "ageHours": {
+                                "type": "number"
+                              },
+                              "overdue": {
+                                "type": "boolean"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "decision": {
+                            "type": "object",
+                            "properties": {
+                              "canDecide": {
+                                "type": "boolean"
+                              },
+                              "blockedCode": {
+                                "type": "string"
+                              },
+                              "blockedReason": {
+                                "type": "string"
+                              },
+                              "level": {
+                                "type": "object",
+                                "properties": {
+                                  "current": {
+                                    "type": "integer"
+                                  },
+                                  "required": {
+                                    "type": "integer"
+                                  }
+                                }
+                              },
+                              "amount": {
+                                "type": "number"
+                              },
+                              "myLimit": {},
+                              "unlimited": {
+                                "type": "boolean"
+                              },
+                              "limitSource": {},
+                              "limitSourceLabel": {},
+                              "eligibleApprovers": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "role": {
+                                      "type": "string"
+                                    },
+                                    "limit": {
+                                      "type": "integer"
+                                    },
+                                    "limitSourceLabel": {
+                                      "type": "string"
+                                    },
+                                    "coveringFor": {}
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "nextStep": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "actor": {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string"
+                                  },
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "dueAt": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "reminder": {
+                            "type": "object",
+                            "properties": {
+                              "remindedAt": {},
+                              "nextAt": {},
+                              "allowed": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "outcome": {},
+                          "actions": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "code": {
+                                  "type": "string"
+                                },
+                                "label": {
+                                  "type": "string"
+                                },
+                                "allowed": {
+                                  "type": "boolean"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    },
+                    "totalPages": {
+                      "type": "integer"
+                    },
+                    "view": {
+                      "type": "string"
+                    },
+                    "totals": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer"
+                        },
+                        "amount": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "kpis": {
+                      "type": "object",
+                      "properties": {
+                        "awaitingMine": {
+                          "type": "object",
+                          "properties": {
+                            "count": {
+                              "type": "integer"
+                            },
+                            "amount": {
+                              "type": "number"
+                            }
+                          }
+                        },
+                        "pastSla": {
+                          "type": "object",
+                          "properties": {
+                            "count": {
+                              "type": "integer"
+                            },
+                            "oldestHours": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "submittedByMe": {
+                          "type": "object",
+                          "properties": {
+                            "count": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "decidedByMeToday": {
+                          "type": "object",
+                          "properties": {
+                            "count": {
+                              "type": "integer"
+                            },
+                            "approved": {
+                              "type": "integer"
+                            },
+                            "rejected": {
+                              "type": "integer"
+                            }
                           }
                         }
                       }
@@ -125194,18 +125484,126 @@
                   "success": true,
                   "data": [
                     {
-                      "id": 1,
-                      "priority": "High",
-                      "referenceNo": "SET-2026-00001",
-                      "transactionType": "Settlement",
-                      "initiator": "Finance Officer",
-                      "submissionDate": "2026-09-26 10:30",
-                      "amount": 87500,
-                      "description": "Settlement to Malayan",
-                      "slaHours": 12,
-                      "currentLevel": 1
+                      "id": 21,
+                      "version": 1,
+                      "type": "remittance",
+                      "typeLabel": "Remittance",
+                      "reference": "REM-2026-00021",
+                      "entity": "remittance",
+                      "entityId": "rm_21",
+                      "recordLink": "/finance/remittance/remittances/rm_21",
+                      "insurer": {
+                        "id": 3,
+                        "name": "Pioneer Insurance"
+                      },
+                      "productLine": "Motor",
+                      "amount": 409141.43,
+                      "submittedBy": {
+                        "id": "usr_4",
+                        "name": "M. Reyes"
+                      },
+                      "submittedAt": "2026-10-06T02:12:00.000Z",
+                      "status": "Pending",
+                      "statusLabel": "Pending Approval",
+                      "level": {
+                        "current": 1,
+                        "required": 1,
+                        "label": "1 of 1"
+                      },
+                      "sla": {
+                        "hours": 24,
+                        "dueAt": "2026-10-07T02:12:00.000Z",
+                        "ageHours": 6.5,
+                        "overdue": false,
+                        "label": "Due in 18 h"
+                      },
+                      "decision": {
+                        "canDecide": false,
+                        "blockedCode": "SUBMITTER",
+                        "blockedReason": "You submitted this remittance. Another user with remittance authority must approve it.",
+                        "level": {
+                          "current": 1,
+                          "required": 1
+                        },
+                        "amount": 409141.43,
+                        "myLimit": null,
+                        "unlimited": false,
+                        "limitSource": null,
+                        "limitSourceLabel": null,
+                        "eligibleApprovers": [
+                          {
+                            "id": "usr_9",
+                            "name": "J. Cruz",
+                            "role": "TIS Finance & General Accounting",
+                            "limit": 1000000,
+                            "limitSourceLabel": "Role limit: TIS Finance & General Accounting",
+                            "coveringFor": null
+                          }
+                        ]
+                      },
+                      "nextStep": {
+                        "code": "approve",
+                        "label": "Awaiting remittance approver: J. Cruz",
+                        "actor": {
+                          "type": "user",
+                          "id": "usr_9",
+                          "name": "J. Cruz"
+                        },
+                        "dueAt": "2026-10-07T02:12:00.000Z"
+                      },
+                      "reminder": {
+                        "remindedAt": null,
+                        "nextAt": null,
+                        "allowed": true
+                      },
+                      "outcome": null,
+                      "actions": [
+                        {
+                          "code": "view",
+                          "label": "View",
+                          "allowed": true
+                        },
+                        {
+                          "code": "approve",
+                          "label": "Approve",
+                          "allowed": false,
+                          "blockedCode": "SUBMITTER"
+                        },
+                        {
+                          "code": "remind",
+                          "label": "Remind approver",
+                          "allowed": true
+                        }
+                      ]
                     }
-                  ]
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "perPage": 50,
+                  "totalPages": 1,
+                  "view": "mine",
+                  "totals": {
+                    "count": 1,
+                    "amount": 409141.43
+                  },
+                  "kpis": {
+                    "awaitingMine": {
+                      "count": 1,
+                      "amount": 409141.43
+                    },
+                    "pastSla": {
+                      "count": 0,
+                      "oldestHours": 0
+                    },
+                    "submittedByMe": {
+                      "count": 0
+                    },
+                    "decidedByMeToday": {
+                      "count": 2,
+                      "approved": 2,
+                      "rejected": 0
+                    }
+                  }
                 }
               }
             }
@@ -125220,7 +125618,679 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Accounts > Remittance > Approval",
+        "x-screen": "Accounts > Remittance > Approvals; Accounts > Remittance > Approval",
+        "x-permissions": [
+          "read:remittance",
+          "write:remittance"
+        ]
+      }
+    },
+    "/remittance/approvals/{id}": {
+      "get": {
+        "operationId": "getRemittanceApprovalsId",
+        "summary": "Review panel of one approval (id, or remittance:<id>): the inbox row with the decision block, the record header, totals and first 10 lines, the previous remittance of the insurer with the change in %, the checks (content unchanged since submission; accounting period open, as information), open exceptions and the latest activity",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Approvals > Review\n\nAccess: read:remittance, write:remittance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "version": {
+                          "type": "integer"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "typeLabel": {
+                          "type": "string"
+                        },
+                        "reference": {
+                          "type": "string"
+                        },
+                        "entity": {
+                          "type": "string"
+                        },
+                        "entityId": {
+                          "type": "string"
+                        },
+                        "recordLink": {
+                          "type": "string"
+                        },
+                        "insurer": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "productLine": {
+                          "type": "string"
+                        },
+                        "amount": {
+                          "type": "number"
+                        },
+                        "submittedBy": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "submittedAt": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "level": {
+                          "type": "object",
+                          "properties": {
+                            "current": {
+                              "type": "integer"
+                            },
+                            "required": {
+                              "type": "integer"
+                            },
+                            "label": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "sla": {
+                          "type": "object",
+                          "properties": {
+                            "hours": {
+                              "type": "integer"
+                            },
+                            "dueAt": {
+                              "type": "string"
+                            },
+                            "ageHours": {
+                              "type": "number"
+                            },
+                            "overdue": {
+                              "type": "boolean"
+                            },
+                            "label": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "decision": {
+                          "type": "object",
+                          "properties": {
+                            "canDecide": {
+                              "type": "boolean"
+                            },
+                            "blockedCode": {
+                              "type": "string"
+                            },
+                            "blockedReason": {
+                              "type": "string"
+                            },
+                            "level": {
+                              "type": "object",
+                              "properties": {
+                                "current": {
+                                  "type": "integer"
+                                },
+                                "required": {
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "amount": {
+                              "type": "number"
+                            },
+                            "myLimit": {},
+                            "unlimited": {
+                              "type": "boolean"
+                            },
+                            "limitSource": {},
+                            "limitSourceLabel": {},
+                            "eligibleApprovers": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "role": {
+                                    "type": "string"
+                                  },
+                                  "limit": {
+                                    "type": "integer"
+                                  },
+                                  "limitSourceLabel": {
+                                    "type": "string"
+                                  },
+                                  "coveringFor": {}
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "nextStep": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            },
+                            "actor": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string"
+                                },
+                                "id": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "dueAt": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "reminder": {
+                          "type": "object",
+                          "properties": {
+                            "remindedAt": {},
+                            "nextAt": {},
+                            "allowed": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "outcome": {},
+                        "actions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "allowed": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        },
+                        "record": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "remittanceNo": {
+                              "type": "string"
+                            },
+                            "statusLabel": {
+                              "type": "string"
+                            },
+                            "insurer": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "integer"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "version": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "totals": {
+                          "type": "object",
+                          "properties": {
+                            "policies": {
+                              "type": "integer"
+                            },
+                            "premium": {
+                              "type": "integer"
+                            },
+                            "commission": {
+                              "type": "integer"
+                            },
+                            "tax": {
+                              "type": "number"
+                            },
+                            "adjustments": {
+                              "type": "integer"
+                            },
+                            "dueToInsurer": {
+                              "type": "number"
+                            }
+                          }
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "policyNo": {
+                                "type": "string"
+                              },
+                              "client": {
+                                "type": "string"
+                              },
+                              "premium": {
+                                "type": "number"
+                              },
+                              "dueToInsurer": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        },
+                        "lineCount": {
+                          "type": "integer"
+                        },
+                        "previous": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "remittanceNo": {
+                              "type": "string"
+                            },
+                            "amount": {
+                              "type": "integer"
+                            },
+                            "changePercent": {
+                              "type": "number"
+                            }
+                          }
+                        },
+                        "checks": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "result": {
+                                "type": "string"
+                              },
+                              "detail": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "exceptions": {
+                          "type": "object",
+                          "properties": {
+                            "count": {
+                              "type": "integer"
+                            },
+                            "items": {
+                              "type": "array",
+                              "items": {}
+                            }
+                          }
+                        },
+                        "activity": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "action": {
+                                "type": "string"
+                              },
+                              "by": {
+                                "type": "string"
+                              },
+                              "at": {
+                                "type": "string"
+                              },
+                              "notes": {},
+                              "id": {
+                                "type": "string"
+                              },
+                              "day": {
+                                "type": "string"
+                              },
+                              "date": {
+                                "type": "string"
+                              },
+                              "time": {
+                                "type": "string"
+                              },
+                              "atText": {
+                                "type": "string"
+                              },
+                              "actionCode": {
+                                "type": "string"
+                              },
+                              "actionLabel": {
+                                "type": "string"
+                              },
+                              "user": {
+                                "type": "object",
+                                "properties": {
+                                  "username": {
+                                    "type": "string"
+                                  },
+                                  "displayName": {
+                                    "type": "string"
+                                  },
+                                  "roles": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "role": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "fromStatus": {
+                                "type": "string"
+                              },
+                              "toStatus": {
+                                "type": "string"
+                              },
+                              "remarks": {},
+                              "changes": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "field": {
+                                      "type": "string"
+                                    },
+                                    "label": {
+                                      "type": "string"
+                                    },
+                                    "before": {},
+                                    "after": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              },
+                              "source": {
+                                "type": "object",
+                                "properties": {
+                                  "channel": {
+                                    "type": "string"
+                                  },
+                                  "label": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 21,
+                    "version": 1,
+                    "type": "remittance",
+                    "typeLabel": "Remittance",
+                    "reference": "REM-2026-00021",
+                    "entity": "remittance",
+                    "entityId": "rm_21",
+                    "recordLink": "/finance/remittance/remittances/rm_21",
+                    "insurer": {
+                      "id": 3,
+                      "name": "Pioneer Insurance"
+                    },
+                    "productLine": "Motor",
+                    "amount": 409141.43,
+                    "submittedBy": {
+                      "id": "usr_4",
+                      "name": "M. Reyes"
+                    },
+                    "submittedAt": "2026-10-06T02:12:00.000Z",
+                    "status": "Pending",
+                    "statusLabel": "Pending Approval",
+                    "level": {
+                      "current": 1,
+                      "required": 1,
+                      "label": "1 of 1"
+                    },
+                    "sla": {
+                      "hours": 24,
+                      "dueAt": "2026-10-07T02:12:00.000Z",
+                      "ageHours": 6.5,
+                      "overdue": false,
+                      "label": "Due in 18 h"
+                    },
+                    "decision": {
+                      "canDecide": false,
+                      "blockedCode": "SUBMITTER",
+                      "blockedReason": "You submitted this remittance. Another user with remittance authority must approve it.",
+                      "level": {
+                        "current": 1,
+                        "required": 1
+                      },
+                      "amount": 409141.43,
+                      "myLimit": null,
+                      "unlimited": false,
+                      "limitSource": null,
+                      "limitSourceLabel": null,
+                      "eligibleApprovers": [
+                        {
+                          "id": "usr_9",
+                          "name": "J. Cruz",
+                          "role": "TIS Finance & General Accounting",
+                          "limit": 1000000,
+                          "limitSourceLabel": "Role limit: TIS Finance & General Accounting",
+                          "coveringFor": null
+                        }
+                      ]
+                    },
+                    "nextStep": {
+                      "code": "approve",
+                      "label": "Awaiting remittance approver: J. Cruz",
+                      "actor": {
+                        "type": "user",
+                        "id": "usr_9",
+                        "name": "J. Cruz"
+                      },
+                      "dueAt": "2026-10-07T02:12:00.000Z"
+                    },
+                    "reminder": {
+                      "remindedAt": null,
+                      "nextAt": null,
+                      "allowed": true
+                    },
+                    "outcome": null,
+                    "actions": [
+                      {
+                        "code": "view",
+                        "label": "View",
+                        "allowed": true
+                      },
+                      {
+                        "code": "approve",
+                        "label": "Approve",
+                        "allowed": false,
+                        "blockedCode": "SUBMITTER"
+                      },
+                      {
+                        "code": "remind",
+                        "label": "Remind approver",
+                        "allowed": true
+                      }
+                    ],
+                    "record": {
+                      "id": "rm_21",
+                      "remittanceNo": "REM-2026-00021",
+                      "statusLabel": "Pending Approval",
+                      "insurer": {
+                        "id": 3,
+                        "name": "Pioneer Insurance"
+                      },
+                      "version": 3
+                    },
+                    "totals": {
+                      "policies": 12,
+                      "premium": 520000,
+                      "commission": 98000,
+                      "tax": 12858.57,
+                      "adjustments": 0,
+                      "dueToInsurer": 409141.43
+                    },
+                    "lines": [
+                      {
+                        "policyNo": "POL-2026-95021",
+                        "client": "J. Santos",
+                        "premium": 64159.68,
+                        "dueToInsurer": 40857.86
+                      }
+                    ],
+                    "lineCount": 12,
+                    "previous": {
+                      "id": "rm_17",
+                      "remittanceNo": "REM-2026-00017",
+                      "amount": 371210,
+                      "changePercent": 10.22
+                    },
+                    "checks": [
+                      {
+                        "code": "content-unchanged",
+                        "label": "Content unchanged since submission",
+                        "result": "pass",
+                        "detail": "v3 · unchanged since submission"
+                      },
+                      {
+                        "code": "period-open",
+                        "label": "Period Oct 2026 open",
+                        "result": "pass",
+                        "detail": null
+                      }
+                    ],
+                    "exceptions": {
+                      "count": 0,
+                      "items": []
+                    },
+                    "activity": [
+                      {
+                        "action": "submit",
+                        "by": "r.finance",
+                        "at": "2026-10-10T01:03:00.000Z",
+                        "notes": null,
+                        "id": "812",
+                        "day": "2026-10-10",
+                        "date": "10/10/2026",
+                        "time": "09:03",
+                        "atText": "10/10/2026 09:03",
+                        "actionCode": "submit",
+                        "actionLabel": "Remittance submitted",
+                        "user": {
+                          "username": "r.finance",
+                          "displayName": "Rosa Finance",
+                          "roles": [
+                            "Finance Officer"
+                          ],
+                          "role": "Finance Officer"
+                        },
+                        "fromStatus": "Draft",
+                        "toStatus": "Pending Approval",
+                        "remarks": null,
+                        "changes": [
+                          {
+                            "field": "batchId",
+                            "label": "Batch ID",
+                            "before": null,
+                            "after": "BLK-2026-00001"
+                          }
+                        ],
+                        "source": {
+                          "channel": "screen",
+                          "label": "Screen",
+                          "name": "Accounts > Remittance > Tracking"
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Approvals > Review",
         "x-permissions": [
           "read:remittance",
           "write:remittance"
@@ -125230,7 +126300,7 @@
     "/remittance/approvals/{id}/approve": {
       "post": {
         "operationId": "postRemittanceApprovalsIdApprove",
-        "summary": "Approve an approval (approve:remittance; maker-checker: the initiator cannot decide; within the approver's Authority Matrix limit)",
+        "summary": "Approve an approval (approve:remittance; refused with errors[0].code SUBMITTER, MAKER, EARLIER_LEVEL, ABOVE_LIMIT, NO_AUTHORITY, DELEGATED_AWAY (403) or ALREADY_DECIDED, STALE (409); a rejection needs a remittance_reject reasonCode)",
         "tags": [
           "Remittance"
         ],
@@ -125302,11 +126372,15 @@
                 "properties": {
                   "comments": {
                     "type": "string"
+                  },
+                  "version": {
+                    "type": "integer"
                   }
                 }
               },
               "example": {
-                "comments": "Verified"
+                "comments": "Verified",
+                "version": 1
               }
             }
           }
@@ -125406,7 +126480,7 @@
     "/remittance/approvals/{id}/reject": {
       "post": {
         "operationId": "postRemittanceApprovalsIdReject",
-        "summary": "Reject an approval (approve:remittance; maker-checker: the initiator cannot decide; within the approver's Authority Matrix limit)",
+        "summary": "Reject an approval (approve:remittance; refused with errors[0].code SUBMITTER, MAKER, EARLIER_LEVEL, ABOVE_LIMIT, NO_AUTHORITY, DELEGATED_AWAY (403) or ALREADY_DECIDED, STALE (409); a rejection needs a remittance_reject reasonCode)",
         "tags": [
           "Remittance"
         ],
@@ -125481,16 +126555,116 @@
                   },
                   "note": {
                     "type": "string"
+                  },
+                  "version": {
+                    "type": "integer"
                   }
                 }
               },
               "example": {
                 "reasonCode": "RRJ-OTHER",
-                "note": "Missing documents"
+                "note": "Missing documents",
+                "version": 1
               }
             }
           }
         }
+      }
+    },
+    "/remittance/approvals/{id}/remind": {
+      "post": {
+        "operationId": "postRemittanceApprovalsIdRemind",
+        "summary": "Remind the eligible approvers of a pending approval (its submitter; at most once per remittance.reminder_interval_hours, 409 REMINDED \"Reminded 10:15 · next at 14:15\"; 409 NO_ELIGIBLE_APPROVER)",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Approvals > Remind approver\n\nAccess: write:remittance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "sentTo": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "remindedAt": {
+                          "type": "string"
+                        },
+                        "nextReminderAt": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 21,
+                    "sentTo": [
+                      {
+                        "id": "usr_9",
+                        "name": "J. Cruz"
+                      }
+                    ],
+                    "remindedAt": "2026-10-06T02:15:00.000Z",
+                    "nextReminderAt": "2026-10-06T06:15:00.000Z",
+                    "message": "Reminder sent to J. Cruz."
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Approvals > Remind approver",
+        "x-permissions": [
+          "write:remittance"
+        ]
       }
     },
     "/remittance/approvals/approvers": {
@@ -125557,6 +126731,153 @@
           "read:remittance",
           "write:remittance"
         ]
+      }
+    },
+    "/remittance/approvals/decide": {
+      "post": {
+        "operationId": "postRemittanceApprovalsDecide",
+        "summary": "Approve or reject several approvals, each decided on its own with the version it was shown (approve:remittance); per-item results: Approved / Rejected, or the refusal code and text (ALREADY_DECIDED \"Already approved by J. Cruz at 10:32\", STALE, ABOVE_LIMIT ...). A rejection needs a remittance_reject reasonCode",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Approvals > Approve selected\n\nAccess: approve:remittance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "action": {
+                          "type": "string"
+                        },
+                        "decided": {
+                          "type": "integer"
+                        },
+                        "refused": {
+                          "type": "integer"
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "reference": {
+                                "type": "string"
+                              },
+                              "ok": {
+                                "type": "boolean"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "action": "approve",
+                    "decided": 1,
+                    "refused": 1,
+                    "results": [
+                      {
+                        "id": 21,
+                        "reference": "REM-2026-00021",
+                        "ok": true,
+                        "status": "Approved",
+                        "message": "Approved"
+                      },
+                      {
+                        "id": 22,
+                        "ok": false,
+                        "code": "ALREADY_DECIDED",
+                        "message": "Already approved by J. Cruz at 10:32."
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Approvals > Approve selected",
+        "x-permissions": [
+          "approve:remittance"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "version": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  },
+                  "action": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "items": [
+                  {
+                    "id": 21,
+                    "version": 1
+                  },
+                  {
+                    "id": 22,
+                    "version": 1
+                  }
+                ],
+                "action": "approve",
+                "note": "Checked against the statement"
+              }
+            }
+          }
+        }
       }
     },
     "/remittance/approvals/history": {
@@ -131377,7 +132698,7 @@
     "/remittance/remittances/{id}": {
       "get": {
         "operationId": "getRemittanceRemittancesId",
-        "summary": "Remittance details: insurer, policies, documents, activity log (oldest first: the remittance's audit rows, its approval decisions and the settlement that settled it; each entry with action label, user display name and roles, status from / to, remarks and changed fields)",
+        "summary": "Remittance details: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, and the activity log (as GET /remittances/:id/activity)",
         "tags": [
           "Remittance"
         ],
@@ -131659,10 +132980,245 @@
         ]
       }
     },
+    "/remittance/remittances/{id}/activity": {
+      "get": {
+        "operationId": "getRemittanceRemittancesIdActivity",
+        "summary": "Activity log of a remittance, oldest first: its audit, the approval decisions (display name, level, limit at decision and its source, reason), the settlement, the payment voucher with its batch and cheque audit, and the e-mails sent; the same action of the same user within 2 s is one entry (format=xlsx: Download log)",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Remittances > Record > Activity\n\nAccess: read:remittance, write:remittance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "xlsx"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "action": {
+                            "type": "string"
+                          },
+                          "by": {
+                            "type": "string"
+                          },
+                          "at": {
+                            "type": "string"
+                          },
+                          "notes": {},
+                          "id": {
+                            "type": "string"
+                          },
+                          "day": {
+                            "type": "string"
+                          },
+                          "date": {
+                            "type": "string"
+                          },
+                          "time": {
+                            "type": "string"
+                          },
+                          "atText": {
+                            "type": "string"
+                          },
+                          "actionCode": {
+                            "type": "string"
+                          },
+                          "actionLabel": {
+                            "type": "string"
+                          },
+                          "user": {
+                            "type": "object",
+                            "properties": {
+                              "username": {
+                                "type": "string"
+                              },
+                              "displayName": {
+                                "type": "string"
+                              },
+                              "roles": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "role": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "fromStatus": {
+                            "type": "string"
+                          },
+                          "toStatus": {
+                            "type": "string"
+                          },
+                          "remarks": {},
+                          "changes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "field": {
+                                  "type": "string"
+                                },
+                                "label": {
+                                  "type": "string"
+                                },
+                                "before": {},
+                                "after": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "source": {
+                            "type": "object",
+                            "properties": {
+                              "channel": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "approval": {
+                            "type": "object",
+                            "properties": {
+                              "level": {
+                                "type": "integer"
+                              },
+                              "requiredLevels": {
+                                "type": "integer"
+                              },
+                              "limitAtDecision": {
+                                "type": "integer"
+                              },
+                              "limitSource": {
+                                "type": "string"
+                              },
+                              "limitSourceLabel": {
+                                "type": "string"
+                              },
+                              "reason": {}
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "action": "submit",
+                      "by": "r.finance",
+                      "at": "2026-10-10T01:03:00.000Z",
+                      "notes": null,
+                      "id": "812",
+                      "day": "2026-10-10",
+                      "date": "10/10/2026",
+                      "time": "09:03",
+                      "atText": "10/10/2026 09:03",
+                      "actionCode": "approve",
+                      "actionLabel": "Remittance approved",
+                      "user": {
+                        "username": "r.finance",
+                        "displayName": "Rosa Finance",
+                        "roles": [
+                          "Finance Officer"
+                        ],
+                        "role": "Finance Officer"
+                      },
+                      "fromStatus": "Pending Approval",
+                      "toStatus": "Approved",
+                      "remarks": null,
+                      "changes": [
+                        {
+                          "field": "limitAtDecision",
+                          "label": "Limit at decision",
+                          "before": null,
+                          "after": "PHP 1,000,000.00"
+                        },
+                        {
+                          "field": "limitSource",
+                          "label": "Limit source",
+                          "before": null,
+                          "after": "Role limit: TIS Finance & General Accounting"
+                        }
+                      ],
+                      "source": {
+                        "channel": "screen",
+                        "label": "Screen",
+                        "name": "Accounts > Remittance > Tracking"
+                      },
+                      "approval": {
+                        "level": 1,
+                        "requiredLevels": 1,
+                        "limitAtDecision": 1000000,
+                        "limitSource": "role tis-finance",
+                        "limitSourceLabel": "Role limit: TIS Finance & General Accounting",
+                        "reason": null
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Remittances > Record > Activity",
+        "x-permissions": [
+          "read:remittance",
+          "write:remittance"
+        ]
+      }
+    },
     "/remittance/remittances/{id}/approve": {
       "post": {
         "operationId": "postRemittanceRemittancesIdApprove",
-        "summary": "Approve a remittance (approve:remittance; maker-checker: not the submitter; within the approver's Authority Matrix limit)",
+        "summary": "Approve a remittance (approve:remittance; maker-checker: not the submitter or maker; within the approver's Authority Matrix limit; version: 409 STALE when the approval moved on, 409 ALREADY_DECIDED when decided)",
         "tags": [
           "Remittance"
         ],
@@ -131730,11 +133286,15 @@
                 "properties": {
                   "comments": {
                     "type": "string"
+                  },
+                  "version": {
+                    "type": "integer"
                   }
                 }
               },
               "example": {
-                "comments": "Verified"
+                "comments": "Verified",
+                "version": 1
               }
             }
           }
@@ -131800,7 +133360,7 @@
     "/remittance/remittances/{id}/reject": {
       "post": {
         "operationId": "postRemittanceRemittancesIdReject",
-        "summary": "Reject a remittance (approve:remittance; maker-checker: not the submitter; within the approver's Authority Matrix limit)",
+        "summary": "Reject (return to the maker, with a remittance_reject reason) a remittance (approve:remittance; maker-checker: not the submitter or maker; within the approver's Authority Matrix limit; version: 409 STALE when the approval moved on, 409 ALREADY_DECIDED when decided)",
         "tags": [
           "Remittance"
         ],
@@ -131871,12 +133431,16 @@
                   },
                   "note": {
                     "type": "string"
+                  },
+                  "version": {
+                    "type": "integer"
                   }
                 }
               },
               "example": {
                 "reasonCode": "RRJ-OTHER",
-                "note": "Missing documents"
+                "note": "Missing documents",
+                "version": 1
               }
             }
           }

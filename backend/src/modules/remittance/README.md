@@ -56,26 +56,57 @@ recorded payment, or is paid in full.
 
 Approval: every work item that needs approval opens a row in `remittance_approvals`. Approval limits are the
 Authority Matrix's (Master > User Management > Authority Matrix): transaction type `remittance` for remittances and
-agency bills, `remittance_settlement` for settlements, adjustments and electronic transfers. Approving checks the
-approver's limit (`assertAuthority`, delegations of Master > User Management > Delegations included); one approval
-within the limit decides. Only while the matrix has no limit for the type are the fallback levels of
-`remittance.approval_levels` used. The approver must differ from the maker. Deciding (approve, reject, delegate) needs
-`approve:remittance`, on the routes and again in `decide()`: System Administrator, Accounting (so the Accounting
-Manager) and, for TISPH, TIS Finance and the TIS General Manager. With `remittance.require_authority_limit` on (TISPH),
-a user without a remittance limit (own, role or delegated) decides nothing and gets `NO_AUTHORITY` (403,
-`errors[0].code`), whatever `access.authority_without_limit` says. Each decision on the approval history keeps
-`limitAtDecision` (null: no limit) and `limitSource` (`user limit`, `role <code>`, `delegated by <name> (...)`), and a
-rejection the reason of context `remittance_reject` (`reasonCode`, the note an Other needs; free-text `comments` is
-still accepted). While `remittance.item_delegation_enabled` is off (TISPH), `POST /approvals/:id/delegate` returns 409:
-an absent approver is covered by a dated delegation. The `remittance_delegations` table of
-earlier releases is no longer read or written.
+agency bills, `remittance_settlement` for settlements, adjustments and electronic transfers. One approval within the
+approver's limit decides; only while the matrix has no limit for the type are the fallback levels of
+`remittance.approval_levels` used. Deciding (approve, reject, delegate) needs `approve:remittance`, on the routes and
+again in `decide()`: System Administrator, Accounting (so the Accounting Manager) and, for TISPH, TIS Finance and the
+TIS General Manager.
 
-Activity log and print: GET `/remittance/remittances/:id` returns `activityLog` oldest first, built by
-`remittanceActivity` from the remittance's audit rows, the decisions taken on its approval (audited as
-`remittance_approval` by approval id) and the approval of the settlement that settled it. Each entry carries the action
-code and label, the user's display name and roles, the status move (from / to, labelled by `remittance.status_labels`),
-the remarks and the other changed fields (`lib/auditEvents.js#activityEntries`); the fields of earlier releases
-(`action`, `by`, `at`, `notes`) are kept. The print icon of Tracking prints GET `/remittance/remittances/:id/pdf`, the
+Who may decide is `decision.js`: `decisionFor(approval, user)` answers `{ canDecide, blockedCode, blockedReason,
+level, amount, myLimit, unlimited, limitSource, limitSourceLabel }` with the codes of the shared contract, in this
+order: `ALREADY_DECIDED` ("Approved by J. Cruz at 10:32."), `NO_PERMISSION`, `SUBMITTER` (the remittance's submitter)
+or `MAKER` (an item's initiator, or the remittance's creator), `EARLIER_LEVEL`, `DELEGATED_AWAY` (legacy per-item
+delegation), `NO_AUTHORITY` (no limit, own, role or delegated, while `remittance.require_authority_limit` is on, TISPH;
+or `access.authority_without_limit` = refuse) and, to approve, `ABOVE_LIMIT` ("PHP 1,820,000.00 is above your approval
+limit of PHP 1,000,000.00."). A rejection is not bound by the amount. `decide()` refuses with the same code
+(`errors[0].code`; 403, or 409 for `ALREADY_DECIDED` and `STALE`). `eligibleApprovers(amount, initiatorIds, type)`
+lists the active users with the permission whose limit covers the amount, delegates included (`coveringFor`); they are
+the "next step" of a pending approval ("Awaiting remittance approver: J. Cruz, A. Tan", or "No eligible approver") and
+the only people told of it. My Work's remittance source applies the same rules in SQL and links to
+`/finance/remittance/approvals?approval=<id>`.
+
+Each decision on the approval history keeps `limitAtDecision` (null: no limit) and `limitSource` (`user limit`,
+`role <code>`, `delegated by <name> (...)`; shown as "User limit", "Role limit: Accounting", "Delegation from A. Santos
+(...)"); a rejection needs a reason of context `remittance_reject` (`reasonCode`, the note an Other needs; the legacy
+`comments` are taken as the note). Every decision names the `version` it was shown (`remittance_approvals.version`,
+bumped by a trigger on every decision, migration 0401): an older version is refused `STALE`. A decision is audited
+under the approval and, for a remittance, under the remittance. The maker is told of the decision with a link to the
+remittance record (`/finance/remittance/remittances/:id`; "returned" for a rejection). While
+`remittance.item_delegation_enabled` is off (TISPH), `POST /approvals/:id/delegate` returns 409: an absent approver is
+covered by a dated delegation. The `remittance_delegations` table of earlier releases is no longer read or written.
+
+Approvals inbox (`approvals.js`): `GET /approvals?view=mine|submitted|all|decided` (`type`, `insurerId`, `q`, paging)
+answers rows with the decision block, next step, SLA ("Due in 6 h" / "Overdue 2 h"), level and reminder state, server
+totals and the KPI figures (awaiting my decision, past SLA, submitted by me, decided by me today). Decided covers the
+last 30 days. Without `view` the legacy queue of the Approval Workflow screen is answered. `GET /approvals/:id` (or
+`remittance:<id>`) is the review panel: header, totals, first 10 lines, the previous remittance of the insurer with
+the change in %, the checks R1 can answer (content unchanged since submission, from `remittances.version` against the
+version kept at submission; today's accounting period, as information), open exceptions and the latest activity.
+`POST /approvals/decide {items:[{id,version}], action, reasonCode, note}` decides each item on its own and answers a
+result per item ("Approved", "Already approved by J. Cruz at 10:32."). `POST /approvals/:id/remind` lets the submitter
+remind the eligible approvers once per `remittance.reminder_interval_hours` (4). Instants are ISO (UTC); "today" and
+the SLA ages are taken in the business time zone (`general.timezone`). Agency bills are not on the inbox.
+
+Activity log and print: `activity.js#remittanceActivity` builds the log of a remittance, oldest first, from its audit
+rows and those of its lines, the decisions on its approval (with level, limit at decision and its source, and the
+reason, from the approval history; a decision kept only on the history is shown too), the approval of the settlement
+that settled it, the payment voucher raised for it with the audit of the voucher, its bank payment batches and its
+cheques, and the e-mails sent about it. The same action by the same user within 2 seconds is one entry. Each entry
+carries the action code and label, the user's display name and roles, the status move (from / to, labelled by
+`remittance.status_labels`), the remarks and the other changed fields (`lib/auditEvents.js#activityEntries`); the
+fields of earlier releases (`action`, `by`, `at`, `notes`) are kept. GET `/remittance/remittances/:id/activity` answers
+it (`format=xlsx`: Download log), and GET `/remittance/remittances/:id` returns it as `activityLog` with the record's
+`version`, `decision` and `nextStep`. The print icon of Tracking prints GET `/remittance/remittances/:id/pdf`, the
 remittance advice on the broker letterhead (`documents/templates.js#remittanceAdviceDoc`, signature slots of document
 type `remittance-advice`); an agency bill prints with its own title.
 
@@ -87,7 +118,8 @@ active schedules whose next run date has come, in the business time zone, and mo
 ## Key settings
 
 `remittance.approval_levels` (fallback only), `remittance.require_authority_limit` (default false, TISPH true),
-`remittance.item_delegation_enabled` (default true, TISPH false), `remittance.priority_thresholds`, `remittance.priority_sla_hours`,
+`remittance.item_delegation_enabled` (default true, TISPH false), `remittance.reminder_interval_hours` (4),
+`remittance.priority_thresholds`, `remittance.priority_sla_hours`,
 `remittance.default_due_days` (due date of a new remittance when the insurer has no `remittance_terms_days`), `remittance.transfer_methods`, `remittance.status_labels`,
 `remittance.advice_title` / `remittance.agency_bill_title` (titles of the printed remittance advice and agency bill),
 `remittance.default_basis`, `remittance.basis_rules` (`[{ "insurer": "MALAYAN", "product": "MOTOR", "basis": "gross" }]`; the most
@@ -110,10 +142,14 @@ before approval).
   line without a date, reference or amount refuses the file and nothing is imported.
 - The Remittance > Reconciliation screen matches bank transactions for remittances only. The bank reconciliation of the
   cash accounts is the separate bank-reconciliation module.
-- "... is above your approval authority": the approver's Authority Matrix limit for `remittance` or
+- "... is above your approval limit": the approver's Authority Matrix limit for `remittance` or
   `remittance_settlement` is below the amount. A user with a higher limit approves, or the limit is changed (and
   approved) in Master > User Management > Authority Matrix.
 - "You have no approval limit for Remittance approval": `remittance.require_authority_limit` is on and the user has
   no limit for the type, neither their own, nor a role's, nor one delegated to them today. Add (and approve) a limit in
   the Authority Matrix, or record a dated delegation from an approver in Master > User Management > Delegations.
 - A user sees the approvals but no decision: they lack `approve:remittance` (preparers such as TIS CCD-Recon).
+- A remittance shows "No eligible approver": nobody active holds `approve:remittance` with a limit covering the
+  amount (other than its submitter and maker). Add or raise a limit in the Authority Matrix, or record a delegation.
+- A decision is refused `STALE` (409): the approval was decided at another level or delegated since the screen loaded
+  it. Reload and decide again.

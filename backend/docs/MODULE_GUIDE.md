@@ -32,7 +32,11 @@ minimal, clearly-correct front-end fix.
   (migration 0348): `approve:quotations` (quotation approval), `approve:policies` (check of a placement against the slip),
   `approve:renewals` (renewal terms) and `approve:claims` (claim decisions), and `approve:remittance` (remittance
   approvals, migration 0400; an approver needs no `write:remittance`). An approval route requires the approval
-  permission besides the write permission, and the service keeps its maker-checker rule. Which role holds which
+  permission besides the write permission, and the service keeps its maker-checker rule. Where the screens must
+  explain a refused decision before anyone acts, the module answers a decision block with the shared codes
+  (`canDecide`, `blockedCode` such as SUBMITTER, ABOVE_LIMIT, NO_AUTHORITY, ALREADY_DECIDED, and the sentence in
+  `blockedReason`), refuses with the same code in `errors[0].code`, and takes the record `version` the screen showed
+  (409 when it moved on); `src/modules/remittance/decision.js` is the model. Which role holds which
   permission is `ROLE_PERMS` in the same file (the broker roles and the TISPH roles `tis-*` of the RBAC v4 sheet); a
   role added there for databases in use also needs a migration, as `0348_tisph_roles.sql` does. Roles that include
   the System Administrator role through `roles.inherits` (SUPERID) are protected like it: `adminEquivalentRoles()` in

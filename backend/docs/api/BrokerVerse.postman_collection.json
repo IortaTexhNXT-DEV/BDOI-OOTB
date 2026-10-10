@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1222 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1226 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -77488,12 +77488,12 @@
           ]
         },
         {
-          "name": "Approval queue (status=Pending by default; filter transactionType, priority)",
+          "name": "Approvals. With view=mine|submitted|all|decided (type=remittance|settlement|adjustment|transfer, insurerId, q, page, perPage): the inbox rows with the decision block, next step, SLA and level, server totals and the KPI figures (awaiting my decision, past SLA, submitted by me, decided by me today in the business time zone); decided covers the last 30 days. Without view: the legacy queue (status=Pending by default; filter transactionType, priority)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/remittance/approvals?status=Pending&transactionType=Settlement",
+              "raw": "{{baseUrl}}/remittance/approvals?view=mine&type=remittance&insurerId=3&q=REM-2026&page=1&perPage=50",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -77503,16 +77503,32 @@
               ],
               "query": [
                 {
-                  "key": "status",
-                  "value": "Pending"
+                  "key": "view",
+                  "value": "mine"
                 },
                 {
-                  "key": "transactionType",
-                  "value": "Settlement"
+                  "key": "type",
+                  "value": "remittance"
+                },
+                {
+                  "key": "insurerId",
+                  "value": "3"
+                },
+                {
+                  "key": "q",
+                  "value": "REM-2026"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "50"
                 }
               ]
             },
-            "description": "Approval queue (status=Pending by default; filter transactionType, priority)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: read:remittance, write:remittance"
+            "description": "Approvals. With view=mine|submitted|all|decided (type=remittance|settlement|adjustment|transfer, insurerId, q, page, perPage): the inbox rows with the decision block, next step, SLA and level, server totals and the KPI figures (awaiting my decision, past SLA, submitted by me, decided by me today in the business time zone); decided covers the last 30 days. Without view: the legacy queue (status=Pending by default; filter transactionType, priority)\n\nFront-end touchpoint: Accounts > Remittance > Approvals; Accounts > Remittance > Approval\n\nAccess: read:remittance, write:remittance"
           },
           "response": [
             {
@@ -77521,7 +77537,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/remittance/approvals?status=Pending&transactionType=Settlement",
+                  "raw": "{{baseUrl}}/remittance/approvals?view=mine&type=remittance&insurerId=3&q=REM-2026&page=1&perPage=50",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -77531,16 +77547,32 @@
                   ],
                   "query": [
                     {
-                      "key": "status",
-                      "value": "Pending"
+                      "key": "view",
+                      "value": "mine"
                     },
                     {
-                      "key": "transactionType",
-                      "value": "Settlement"
+                      "key": "type",
+                      "value": "remittance"
+                    },
+                    {
+                      "key": "insurerId",
+                      "value": "3"
+                    },
+                    {
+                      "key": "q",
+                      "value": "REM-2026"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "perPage",
+                      "value": "50"
                     }
                   ]
                 },
-                "description": "Approval queue (status=Pending by default; filter transactionType, priority)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: read:remittance, write:remittance"
+                "description": "Approvals. With view=mine|submitted|all|decided (type=remittance|settlement|adjustment|transfer, insurerId, q, page, perPage): the inbox rows with the decision block, next step, SLA and level, server totals and the KPI figures (awaiting my decision, past SLA, submitted by me, decided by me today in the business time zone); decided covers the last 30 days. Without view: the legacy queue (status=Pending by default; filter transactionType, priority)\n\nFront-end touchpoint: Accounts > Remittance > Approvals; Accounts > Remittance > Approval\n\nAccess: read:remittance, write:remittance"
               },
               "status": "OK",
               "code": 200,
@@ -77552,12 +77584,77 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"priority\": \"High\",\n      \"referenceNo\": \"SET-2026-00001\",\n      \"transactionType\": \"Settlement\",\n      \"initiator\": \"Finance Officer\",\n      \"submissionDate\": \"2026-09-26 10:30\",\n      \"amount\": 87500,\n      \"description\": \"Settlement to Malayan\",\n      \"slaHours\": 12,\n      \"currentLevel\": 1\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 21,\n      \"version\": 1,\n      \"type\": \"remittance\",\n      \"typeLabel\": \"Remittance\",\n      \"reference\": \"REM-2026-00021\",\n      \"entity\": \"remittance\",\n      \"entityId\": \"rm_21\",\n      \"recordLink\": \"/finance/remittance/remittances/rm_21\",\n      \"insurer\": {\n        \"id\": 3,\n        \"name\": \"Pioneer Insurance\"\n      },\n      \"productLine\": \"Motor\",\n      \"amount\": 409141.43,\n      \"submittedBy\": {\n        \"id\": \"usr_4\",\n        \"name\": \"M. Reyes\"\n      },\n      \"submittedAt\": \"2026-10-06T02:12:00.000Z\",\n      \"status\": \"Pending\",\n      \"statusLabel\": \"Pending Approval\",\n      \"level\": {\n        \"current\": 1,\n        \"required\": 1,\n        \"label\": \"1 of 1\"\n      },\n      \"sla\": {\n        \"hours\": 24,\n        \"dueAt\": \"2026-10-07T02:12:00.000Z\",\n        \"ageHours\": 6.5,\n        \"overdue\": false,\n        \"label\": \"Due in 18 h\"\n      },\n      \"decision\": {\n        \"canDecide\": false,\n        \"blockedCode\": \"SUBMITTER\",\n        \"blockedReason\": \"You submitted this remittance. Another user with remittance authority must approve it.\",\n        \"level\": {\n          \"current\": 1,\n          \"required\": 1\n        },\n        \"amount\": 409141.43,\n        \"myLimit\": null,\n        \"unlimited\": false,\n        \"limitSource\": null,\n        \"limitSourceLabel\": null,\n        \"eligibleApprovers\": [\n          {\n            \"id\": \"usr_9\",\n            \"name\": \"J. Cruz\",\n            \"role\": \"TIS Finance & General Accounting\",\n            \"limit\": 1000000,\n            \"limitSourceLabel\": \"Role limit: TIS Finance & General Accounting\",\n            \"coveringFor\": null\n          }\n        ]\n      },\n      \"nextStep\": {\n        \"code\": \"approve\",\n        \"label\": \"Awaiting remittance approver: J. Cruz\",\n        \"actor\": {\n          \"type\": \"user\",\n          \"id\": \"usr_9\",\n          \"name\": \"J. Cruz\"\n        },\n        \"dueAt\": \"2026-10-07T02:12:00.000Z\"\n      },\n      \"reminder\": {\n        \"remindedAt\": null,\n        \"nextAt\": null,\n        \"allowed\": true\n      },\n      \"outcome\": null,\n      \"actions\": [\n        {\n          \"code\": \"view\",\n          \"label\": \"View\",\n          \"allowed\": true\n        },\n        {\n          \"code\": \"approve\",\n          \"label\": \"Approve\",\n          \"allowed\": false,\n          \"blockedCode\": \"SUBMITTER\"\n        },\n        {\n          \"code\": \"remind\",\n          \"label\": \"Remind approver\",\n          \"allowed\": true\n        }\n      ]\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 50,\n  \"totalPages\": 1,\n  \"view\": \"mine\",\n  \"totals\": {\n    \"count\": 1,\n    \"amount\": 409141.43\n  },\n  \"kpis\": {\n    \"awaitingMine\": {\n      \"count\": 1,\n      \"amount\": 409141.43\n    },\n    \"pastSla\": {\n      \"count\": 0,\n      \"oldestHours\": 0\n    },\n    \"submittedByMe\": {\n      \"count\": 0\n    },\n    \"decidedByMeToday\": {\n      \"count\": 2,\n      \"approved\": 2,\n      \"rejected\": 0\n    }\n  }\n}"
             }
           ]
         },
         {
-          "name": "Approve an approval (approve:remittance; maker-checker: the initiator cannot decide; within the approver's Authority Matrix limit)",
+          "name": "Review panel of one approval (id, or remittance:<id>): the inbox row with the decision block, the record header, totals and first 10 lines, the previous remittance of the insurer with the change in %, the checks (content unchanged since submission; accounting period open, as information), open exceptions and the latest activity",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/approvals/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "approvals",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Review panel of one approval (id, or remittance:<id>): the inbox row with the decision block, the record header, totals and first 10 lines, the previous remittance of the insurer with the change in %, the checks (content unchanged since submission; accounting period open, as information), open exceptions and the latest activity\n\nFront-end touchpoint: Accounts > Remittance > Approvals > Review\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/approvals/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "approvals",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Review panel of one approval (id, or remittance:<id>): the inbox row with the decision block, the record header, totals and first 10 lines, the previous remittance of the insurer with the change in %, the checks (content unchanged since submission; accounting period open, as information), open exceptions and the latest activity\n\nFront-end touchpoint: Accounts > Remittance > Approvals > Review\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 21,\n    \"version\": 1,\n    \"type\": \"remittance\",\n    \"typeLabel\": \"Remittance\",\n    \"reference\": \"REM-2026-00021\",\n    \"entity\": \"remittance\",\n    \"entityId\": \"rm_21\",\n    \"recordLink\": \"/finance/remittance/remittances/rm_21\",\n    \"insurer\": {\n      \"id\": 3,\n      \"name\": \"Pioneer Insurance\"\n    },\n    \"productLine\": \"Motor\",\n    \"amount\": 409141.43,\n    \"submittedBy\": {\n      \"id\": \"usr_4\",\n      \"name\": \"M. Reyes\"\n    },\n    \"submittedAt\": \"2026-10-06T02:12:00.000Z\",\n    \"status\": \"Pending\",\n    \"statusLabel\": \"Pending Approval\",\n    \"level\": {\n      \"current\": 1,\n      \"required\": 1,\n      \"label\": \"1 of 1\"\n    },\n    \"sla\": {\n      \"hours\": 24,\n      \"dueAt\": \"2026-10-07T02:12:00.000Z\",\n      \"ageHours\": 6.5,\n      \"overdue\": false,\n      \"label\": \"Due in 18 h\"\n    },\n    \"decision\": {\n      \"canDecide\": false,\n      \"blockedCode\": \"SUBMITTER\",\n      \"blockedReason\": \"You submitted this remittance. Another user with remittance authority must approve it.\",\n      \"level\": {\n        \"current\": 1,\n        \"required\": 1\n      },\n      \"amount\": 409141.43,\n      \"myLimit\": null,\n      \"unlimited\": false,\n      \"limitSource\": null,\n      \"limitSourceLabel\": null,\n      \"eligibleApprovers\": [\n        {\n          \"id\": \"usr_9\",\n          \"name\": \"J. Cruz\",\n          \"role\": \"TIS Finance & General Accounting\",\n          \"limit\": 1000000,\n          \"limitSourceLabel\": \"Role limit: TIS Finance & General Accounting\",\n          \"coveringFor\": null\n        }\n      ]\n    },\n    \"nextStep\": {\n      \"code\": \"approve\",\n      \"label\": \"Awaiting remittance approver: J. Cruz\",\n      \"actor\": {\n        \"type\": \"user\",\n        \"id\": \"usr_9\",\n        \"name\": \"J. Cruz\"\n      },\n      \"dueAt\": \"2026-10-07T02:12:00.000Z\"\n    },\n    \"reminder\": {\n      \"remindedAt\": null,\n      \"nextAt\": null,\n      \"allowed\": true\n    },\n    \"outcome\": null,\n    \"actions\": [\n      {\n        \"code\": \"view\",\n        \"label\": \"View\",\n        \"allowed\": true\n      },\n      {\n        \"code\": \"approve\",\n        \"label\": \"Approve\",\n        \"allowed\": false,\n        \"blockedCode\": \"SUBMITTER\"\n      },\n      {\n        \"code\": \"remind\",\n        \"label\": \"Remind approver\",\n        \"allowed\": true\n      }\n    ],\n    \"record\": {\n      \"id\": \"rm_21\",\n      \"remittanceNo\": \"REM-2026-00021\",\n      \"statusLabel\": \"Pending Approval\",\n      \"insurer\": {\n        \"id\": 3,\n        \"name\": \"Pioneer Insurance\"\n      },\n      \"version\": 3\n    },\n    \"totals\": {\n      \"policies\": 12,\n      \"premium\": 520000,\n      \"commission\": 98000,\n      \"tax\": 12858.57,\n      \"adjustments\": 0,\n      \"dueToInsurer\": 409141.43\n    },\n    \"lines\": [\n      {\n        \"policyNo\": \"POL-2026-95021\",\n        \"client\": \"J. Santos\",\n        \"premium\": 64159.68,\n        \"dueToInsurer\": 40857.86\n      }\n    ],\n    \"lineCount\": 12,\n    \"previous\": {\n      \"id\": \"rm_17\",\n      \"remittanceNo\": \"REM-2026-00017\",\n      \"amount\": 371210,\n      \"changePercent\": 10.22\n    },\n    \"checks\": [\n      {\n        \"code\": \"content-unchanged\",\n        \"label\": \"Content unchanged since submission\",\n        \"result\": \"pass\",\n        \"detail\": \"v3 · unchanged since submission\"\n      },\n      {\n        \"code\": \"period-open\",\n        \"label\": \"Period Oct 2026 open\",\n        \"result\": \"pass\",\n        \"detail\": null\n      }\n    ],\n    \"exceptions\": {\n      \"count\": 0,\n      \"items\": []\n    },\n    \"activity\": [\n      {\n        \"action\": \"submit\",\n        \"by\": \"r.finance\",\n        \"at\": \"2026-10-10T01:03:00.000Z\",\n        \"notes\": null,\n        \"id\": \"812\",\n        \"day\": \"2026-10-10\",\n        \"date\": \"10/10/2026\",\n        \"time\": \"09:03\",\n        \"atText\": \"10/10/2026 09:03\",\n        \"actionCode\": \"submit\",\n        \"actionLabel\": \"Remittance submitted\",\n        \"user\": {\n          \"username\": \"r.finance\",\n          \"displayName\": \"Rosa Finance\",\n          \"roles\": [\n            \"Finance Officer\"\n          ],\n          \"role\": \"Finance Officer\"\n        },\n        \"fromStatus\": \"Draft\",\n        \"toStatus\": \"Pending Approval\",\n        \"remarks\": null,\n        \"changes\": [\n          {\n            \"field\": \"batchId\",\n            \"label\": \"Batch ID\",\n            \"before\": null,\n            \"after\": \"BLK-2026-00001\"\n          }\n        ],\n        \"source\": {\n          \"channel\": \"screen\",\n          \"label\": \"Screen\",\n          \"name\": \"Accounts > Remittance > Tracking\"\n        }\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve an approval (approve:remittance; refused with errors[0].code SUBMITTER, MAKER, EARLIER_LEVEL, ABOVE_LIMIT, NO_AUTHORITY, DELEGATED_AWAY (403) or ALREADY_DECIDED, STALE (409); a rejection needs a remittance_reject reasonCode)",
           "request": {
             "method": "POST",
             "header": [
@@ -77585,10 +77682,10 @@
                 }
               ]
             },
-            "description": "Approve an approval (approve:remittance; maker-checker: the initiator cannot decide; within the approver's Authority Matrix limit)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
+            "description": "Approve an approval (approve:remittance; refused with errors[0].code SUBMITTER, MAKER, EARLIER_LEVEL, ABOVE_LIMIT, NO_AUTHORITY, DELEGATED_AWAY (403) or ALREADY_DECIDED, STALE (409); a rejection needs a remittance_reject reasonCode)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"comments\": \"Verified\"\n}",
+              "raw": "{\n  \"comments\": \"Verified\",\n  \"version\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -77626,10 +77723,10 @@
                     }
                   ]
                 },
-                "description": "Approve an approval (approve:remittance; maker-checker: the initiator cannot decide; within the approver's Authority Matrix limit)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
+                "description": "Approve an approval (approve:remittance; refused with errors[0].code SUBMITTER, MAKER, EARLIER_LEVEL, ABOVE_LIMIT, NO_AUTHORITY, DELEGATED_AWAY (403) or ALREADY_DECIDED, STALE (409); a rejection needs a remittance_reject reasonCode)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"comments\": \"Verified\"\n}",
+                  "raw": "{\n  \"comments\": \"Verified\",\n  \"version\": 1\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -77747,7 +77844,7 @@
           ]
         },
         {
-          "name": "Reject an approval (approve:remittance; maker-checker: the initiator cannot decide; within the approver's Authority Matrix limit)",
+          "name": "Reject an approval (approve:remittance; refused with errors[0].code SUBMITTER, MAKER, EARLIER_LEVEL, ABOVE_LIMIT, NO_AUTHORITY, DELEGATED_AWAY (403) or ALREADY_DECIDED, STALE (409); a rejection needs a remittance_reject reasonCode)",
           "request": {
             "method": "POST",
             "header": [
@@ -77775,10 +77872,10 @@
                 }
               ]
             },
-            "description": "Reject an approval (approve:remittance; maker-checker: the initiator cannot decide; within the approver's Authority Matrix limit)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
+            "description": "Reject an approval (approve:remittance; refused with errors[0].code SUBMITTER, MAKER, EARLIER_LEVEL, ABOVE_LIMIT, NO_AUTHORITY, DELEGATED_AWAY (403) or ALREADY_DECIDED, STALE (409); a rejection needs a remittance_reject reasonCode)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reasonCode\": \"RRJ-OTHER\",\n  \"note\": \"Missing documents\"\n}",
+              "raw": "{\n  \"reasonCode\": \"RRJ-OTHER\",\n  \"note\": \"Missing documents\",\n  \"version\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -77816,10 +77913,10 @@
                     }
                   ]
                 },
-                "description": "Reject an approval (approve:remittance; maker-checker: the initiator cannot decide; within the approver's Authority Matrix limit)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
+                "description": "Reject an approval (approve:remittance; refused with errors[0].code SUBMITTER, MAKER, EARLIER_LEVEL, ABOVE_LIMIT, NO_AUTHORITY, DELEGATED_AWAY (403) or ALREADY_DECIDED, STALE (409); a rejection needs a remittance_reject reasonCode)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"reasonCode\": \"RRJ-OTHER\",\n  \"note\": \"Missing documents\"\n}",
+                  "raw": "{\n  \"reasonCode\": \"RRJ-OTHER\",\n  \"note\": \"Missing documents\",\n  \"version\": 1\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -77838,6 +77935,73 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"status\": \"Rejected\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Remind the eligible approvers of a pending approval (its submitter; at most once per remittance.reminder_interval_hours, 409 REMINDED \"Reminded 10:15 · next at 14:15\"; 409 NO_ELIGIBLE_APPROVER)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/approvals/:id/remind",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "approvals",
+                ":id",
+                "remind"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Remind the eligible approvers of a pending approval (its submitter; at most once per remittance.reminder_interval_hours, 409 REMINDED \"Reminded 10:15 · next at 14:15\"; 409 NO_ELIGIBLE_APPROVER)\n\nFront-end touchpoint: Accounts > Remittance > Approvals > Remind approver\n\nAccess: write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/approvals/:id/remind",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "approvals",
+                    ":id",
+                    "remind"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Remind the eligible approvers of a pending approval (its submitter; at most once per remittance.reminder_interval_hours, 409 REMINDED \"Reminded 10:15 · next at 14:15\"; 409 NO_ELIGIBLE_APPROVER)\n\nFront-end touchpoint: Accounts > Remittance > Approvals > Remind approver\n\nAccess: write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 21,\n    \"sentTo\": [\n      {\n        \"id\": \"usr_9\",\n        \"name\": \"J. Cruz\"\n      }\n    ],\n    \"remindedAt\": \"2026-10-06T02:15:00.000Z\",\n    \"nextReminderAt\": \"2026-10-06T06:15:00.000Z\",\n    \"message\": \"Reminder sent to J. Cruz.\"\n  }\n}"
             }
           ]
         },
@@ -77889,6 +78053,85 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"userId\": \"usr_1\",\n      \"username\": \"fe.approver\",\n      \"displayName\": \"Fe Approver\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve or reject several approvals, each decided on its own with the version it was shown (approve:remittance); per-item results: Approved / Rejected, or the refusal code and text (ALREADY_DECIDED \"Already approved by J. Cruz at 10:32\", STALE, ABOVE_LIMIT ...). A rejection needs a remittance_reject reasonCode",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/approvals/decide",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "approvals",
+                "decide"
+              ]
+            },
+            "description": "Approve or reject several approvals, each decided on its own with the version it was shown (approve:remittance); per-item results: Approved / Rejected, or the refusal code and text (ALREADY_DECIDED \"Already approved by J. Cruz at 10:32\", STALE, ABOVE_LIMIT ...). A rejection needs a remittance_reject reasonCode\n\nFront-end touchpoint: Accounts > Remittance > Approvals > Approve selected\n\nAccess: approve:remittance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"id\": 21,\n      \"version\": 1\n    },\n    {\n      \"id\": 22,\n      \"version\": 1\n    }\n  ],\n  \"action\": \"approve\",\n  \"note\": \"Checked against the statement\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/approvals/decide",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "approvals",
+                    "decide"
+                  ]
+                },
+                "description": "Approve or reject several approvals, each decided on its own with the version it was shown (approve:remittance); per-item results: Approved / Rejected, or the refusal code and text (ALREADY_DECIDED \"Already approved by J. Cruz at 10:32\", STALE, ABOVE_LIMIT ...). A rejection needs a remittance_reject reasonCode\n\nFront-end touchpoint: Accounts > Remittance > Approvals > Approve selected\n\nAccess: approve:remittance",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"items\": [\n    {\n      \"id\": 21,\n      \"version\": 1\n    },\n    {\n      \"id\": 22,\n      \"version\": 1\n    }\n  ],\n  \"action\": \"approve\",\n  \"note\": \"Checked against the statement\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"action\": \"approve\",\n    \"decided\": 1,\n    \"refused\": 1,\n    \"results\": [\n      {\n        \"id\": 21,\n        \"reference\": \"REM-2026-00021\",\n        \"ok\": true,\n        \"status\": \"Approved\",\n        \"message\": \"Approved\"\n      },\n      {\n        \"id\": 22,\n        \"ok\": false,\n        \"code\": \"ALREADY_DECIDED\",\n        \"message\": \"Already approved by J. Cruz at 10:32.\"\n      }\n    ]\n  }\n}"
             }
           ]
         },
@@ -81629,7 +81872,7 @@
           ]
         },
         {
-          "name": "Remittance details: insurer, policies, documents, activity log (oldest first: the remittance's audit rows, its approval decisions and the settlement that settled it; each entry with action label, user display name and roles, status from / to, remarks and changed fields)",
+          "name": "Remittance details: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, and the activity log (as GET /remittances/:id/activity)",
           "request": {
             "method": "GET",
             "header": [],
@@ -81651,7 +81894,7 @@
                 }
               ]
             },
-            "description": "Remittance details: insurer, policies, documents, activity log (oldest first: the remittance's audit rows, its approval decisions and the settlement that settled it; each entry with action label, user display name and roles, status from / to, remarks and changed fields)\n\nFront-end touchpoint: Accounts > Remittance > Tracking > View\n\nAccess: read:remittance, write:remittance"
+            "description": "Remittance details: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, and the activity log (as GET /remittances/:id/activity)\n\nFront-end touchpoint: Accounts > Remittance > Tracking > View\n\nAccess: read:remittance, write:remittance"
           },
           "response": [
             {
@@ -81677,7 +81920,7 @@
                     }
                   ]
                 },
-                "description": "Remittance details: insurer, policies, documents, activity log (oldest first: the remittance's audit rows, its approval decisions and the settlement that settled it; each entry with action label, user display name and roles, status from / to, remarks and changed fields)\n\nFront-end touchpoint: Accounts > Remittance > Tracking > View\n\nAccess: read:remittance, write:remittance"
+                "description": "Remittance details: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, and the activity log (as GET /remittances/:id/activity)\n\nFront-end touchpoint: Accounts > Remittance > Tracking > View\n\nAccess: read:remittance, write:remittance"
               },
               "status": "OK",
               "code": 200,
@@ -81694,7 +81937,86 @@
           ]
         },
         {
-          "name": "Approve a remittance (approve:remittance; maker-checker: not the submitter; within the approver's Authority Matrix limit)",
+          "name": "Activity log of a remittance, oldest first: its audit, the approval decisions (display name, level, limit at decision and its source, reason), the settlement, the payment voucher with its batch and cheque audit, and the e-mails sent; the same action of the same user within 2 s is one entry (format=xlsx: Download log)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/remittances/:id/activity?format=xlsx",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "remittances",
+                ":id",
+                "activity"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "xlsx"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Activity log of a remittance, oldest first: its audit, the approval decisions (display name, level, limit at decision and its source, reason), the settlement, the payment voucher with its batch and cheque audit, and the e-mails sent; the same action of the same user within 2 s is one entry (format=xlsx: Download log)\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Record > Activity\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/remittances/:id/activity?format=xlsx",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "remittances",
+                    ":id",
+                    "activity"
+                  ],
+                  "query": [
+                    {
+                      "key": "format",
+                      "value": "xlsx"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Activity log of a remittance, oldest first: its audit, the approval decisions (display name, level, limit at decision and its source, reason), the settlement, the payment voucher with its batch and cheque audit, and the e-mails sent; the same action of the same user within 2 s is one entry (format=xlsx: Download log)\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Record > Activity\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"action\": \"submit\",\n      \"by\": \"r.finance\",\n      \"at\": \"2026-10-10T01:03:00.000Z\",\n      \"notes\": null,\n      \"id\": \"812\",\n      \"day\": \"2026-10-10\",\n      \"date\": \"10/10/2026\",\n      \"time\": \"09:03\",\n      \"atText\": \"10/10/2026 09:03\",\n      \"actionCode\": \"approve\",\n      \"actionLabel\": \"Remittance approved\",\n      \"user\": {\n        \"username\": \"r.finance\",\n        \"displayName\": \"Rosa Finance\",\n        \"roles\": [\n          \"Finance Officer\"\n        ],\n        \"role\": \"Finance Officer\"\n      },\n      \"fromStatus\": \"Pending Approval\",\n      \"toStatus\": \"Approved\",\n      \"remarks\": null,\n      \"changes\": [\n        {\n          \"field\": \"limitAtDecision\",\n          \"label\": \"Limit at decision\",\n          \"before\": null,\n          \"after\": \"PHP 1,000,000.00\"\n        },\n        {\n          \"field\": \"limitSource\",\n          \"label\": \"Limit source\",\n          \"before\": null,\n          \"after\": \"Role limit: TIS Finance & General Accounting\"\n        }\n      ],\n      \"source\": {\n        \"channel\": \"screen\",\n        \"label\": \"Screen\",\n        \"name\": \"Accounts > Remittance > Tracking\"\n      },\n      \"approval\": {\n        \"level\": 1,\n        \"requiredLevels\": 1,\n        \"limitAtDecision\": 1000000,\n        \"limitSource\": \"role tis-finance\",\n        \"limitSourceLabel\": \"Role limit: TIS Finance & General Accounting\",\n        \"reason\": null\n      }\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve a remittance (approve:remittance; maker-checker: not the submitter or maker; within the approver's Authority Matrix limit; version: 409 STALE when the approval moved on, 409 ALREADY_DECIDED when decided)",
           "request": {
             "method": "POST",
             "header": [
@@ -81722,10 +82044,10 @@
                 }
               ]
             },
-            "description": "Approve a remittance (approve:remittance; maker-checker: not the submitter; within the approver's Authority Matrix limit)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
+            "description": "Approve a remittance (approve:remittance; maker-checker: not the submitter or maker; within the approver's Authority Matrix limit; version: 409 STALE when the approval moved on, 409 ALREADY_DECIDED when decided)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"comments\": \"Verified\"\n}",
+              "raw": "{\n  \"comments\": \"Verified\",\n  \"version\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -81763,10 +82085,10 @@
                     }
                   ]
                 },
-                "description": "Approve a remittance (approve:remittance; maker-checker: not the submitter; within the approver's Authority Matrix limit)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
+                "description": "Approve a remittance (approve:remittance; maker-checker: not the submitter or maker; within the approver's Authority Matrix limit; version: 409 STALE when the approval moved on, 409 ALREADY_DECIDED when decided)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"comments\": \"Verified\"\n}",
+                  "raw": "{\n  \"comments\": \"Verified\",\n  \"version\": 1\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -81868,7 +82190,7 @@
           ]
         },
         {
-          "name": "Reject a remittance (approve:remittance; maker-checker: not the submitter; within the approver's Authority Matrix limit)",
+          "name": "Reject (return to the maker, with a remittance_reject reason) a remittance (approve:remittance; maker-checker: not the submitter or maker; within the approver's Authority Matrix limit; version: 409 STALE when the approval moved on, 409 ALREADY_DECIDED when decided)",
           "request": {
             "method": "POST",
             "header": [
@@ -81896,10 +82218,10 @@
                 }
               ]
             },
-            "description": "Reject a remittance (approve:remittance; maker-checker: not the submitter; within the approver's Authority Matrix limit)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
+            "description": "Reject (return to the maker, with a remittance_reject reason) a remittance (approve:remittance; maker-checker: not the submitter or maker; within the approver's Authority Matrix limit; version: 409 STALE when the approval moved on, 409 ALREADY_DECIDED when decided)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reasonCode\": \"RRJ-OTHER\",\n  \"note\": \"Missing documents\"\n}",
+              "raw": "{\n  \"reasonCode\": \"RRJ-OTHER\",\n  \"note\": \"Missing documents\",\n  \"version\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -81937,10 +82259,10 @@
                     }
                   ]
                 },
-                "description": "Reject a remittance (approve:remittance; maker-checker: not the submitter; within the approver's Authority Matrix limit)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
+                "description": "Reject (return to the maker, with a remittance_reject reason) a remittance (approve:remittance; maker-checker: not the submitter or maker; within the approver's Authority Matrix limit; version: 409 STALE when the approval moved on, 409 ALREADY_DECIDED when decided)\n\nFront-end touchpoint: Accounts > Remittance > Approval\n\nAccess: approve:remittance",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"reasonCode\": \"RRJ-OTHER\",\n  \"note\": \"Missing documents\"\n}",
+                  "raw": "{\n  \"reasonCode\": \"RRJ-OTHER\",\n  \"note\": \"Missing documents\",\n  \"version\": 1\n}",
                   "options": {
                     "raw": {
                       "language": "json"
