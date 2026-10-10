@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import ClaimTable from "../../agentModule/claimModule/claimTable";
 import ClientListingCard from "../../agentModule/quoteModule/clientListing/clientListingCard";
@@ -41,7 +41,7 @@ describe("Origin filter of the lists", () => {
     await waitFor(() => expect(claimsService.getClaimsList).toHaveBeenCalled());
     expect(claimsService.getClaimsList.mock.calls[0][2]).toMatchObject({ origin: "migrated" });
     const chips = await screen.findAllByTestId("origin-chip");
-    expect(chips.map((c) => c.querySelector(".p-tag-value").textContent)).toEqual(["Migrated", "Migrated policy"]);
+    expect(chips.map((c) => within(c).getByText(/^Migrated/).textContent)).toEqual(["Migrated", "Migrated policy"]);
   });
 
   it("clients: the origin kept with the list goes to the API, the Origin column marks migrated clients only", async () => {

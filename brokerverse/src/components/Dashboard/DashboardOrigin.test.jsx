@@ -57,11 +57,11 @@ describe("useDashboardOrigin", () => {
     expect(localStorage.getItem(KEY)).toBe("issued");
     // a later visit starts from the choice, without asking the server
     dashboardService.getSettings.mockClear();
-    const again = renderHook(() => useDashboardOrigin());
-    expect(again.result.current).toMatchObject({ origin: "issued", ready: true });
+    const { result: later } = renderHook(() => useDashboardOrigin());
+    expect(later.current).toMatchObject({ origin: "issued", ready: true });
     expect(dashboardService.getSettings).not.toHaveBeenCalled();
-    act(() => again.result.current.setOrigin("anything"));
-    expect(again.result.current.origin).toBe("issued");
+    act(() => later.current.setOrigin("anything"));
+    expect(later.current.origin).toBe("issued");
   });
 
   it("works when the browser blocks storage: the default applies and the switch holds for the visit", async () => {

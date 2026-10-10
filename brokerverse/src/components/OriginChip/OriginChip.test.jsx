@@ -26,8 +26,8 @@ afterEach(() => localStorage.clear());
 
 describe("OriginChip", () => {
   it("renders nothing for a record issued in BrokerVerse or without origin", () => {
-    const { container } = show(<><OriginChip origin={{ kind: "issued", label: "Issued in BrokerVerse" }} /><OriginChip origin={null} /><OriginChip origin="issued" /></>);
-    expect(container.querySelector("[data-testid='origin-chip']")).toBeNull();
+    show(<><OriginChip origin={{ kind: "issued", label: "Issued in BrokerVerse" }} /><OriginChip origin={null} /><OriginChip origin="issued" /></>);
+    expect(screen.queryByTestId("origin-chip")).toBeNull();
     expect(isMigrated({ kind: "issued" })).toBe(false);
     expect(isMigrated("migrated")).toBe(true);
   });
@@ -63,14 +63,14 @@ describe("OriginChip", () => {
 
   it("in a list column shows the chip alone, the record's own origin first, the policy's otherwise", () => {
     signIn(["read:data-load"]);
-    const { container, rerender } = show(originColumnBody({ origin: migrated }));
+    const { rerender } = show(originColumnBody({ origin: migrated }));
     expect(screen.getByText("Migrated")).toBeInTheDocument();
-    expect(container.querySelector(".bv-origin__legacy")).toBeNull();
+    expect(screen.queryByText("Legacy no. PC-MLY-2026-000101", { ignore: ".p-hidden-accessible" })).toBeNull();
     expect(screen.queryByRole("link")).toBeNull();
     rerender(<MemoryRouter>{originColumnBody({ origin: { kind: "issued" }, policyOrigin: "migrated", policyLegacyNumber: "X-1" })}</MemoryRouter>);
     expect(screen.getByText("Migrated policy")).toBeInTheDocument();
     rerender(<MemoryRouter>{originColumnBody({ origin: { kind: "issued" }, policyOrigin: "issued" })}</MemoryRouter>);
-    expect(container.querySelector("[data-testid='origin-chip']")).toBeNull();
+    expect(screen.queryByTestId("origin-chip")).toBeNull();
   });
 });
 
