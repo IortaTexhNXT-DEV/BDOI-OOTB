@@ -106,14 +106,18 @@ export async function getCollection(db, id) {
   const t = await thresholds();
   const x = (await db.query(`SELECT * FROM (${BASE}) y WHERE id = $8 OR receivable_id = $8`, [...baseParams(t), id])).rows[0];
   if (!x) throw notFound('Collection not found');
-  const actions = (await db.query('SELECT * FROM collection_actions WHERE collection_id = $1 ORDER BY action_date DESC', [x.id])).rows;
+  // the user of each action by display name and roles, for the activity log (action_by keeps the login name)
+  const actions = (await db.query(`SELECT a.*, u.display_name AS action_by_name,
+      (SELECT array_agg(r.name ORDER BY r.name) FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id) AS action_by_roles
+    FROM collection_actions a LEFT JOIN users u ON u.username = a.action_by WHERE a.collection_id = $1 ORDER BY a.action_date DESC`, [x.id])).rows;
   const pays = (await db.query(`SELECT a.*, rc.receipt_number, rc.remarks FROM receipt_applications a LEFT JOIN receipts rc ON rc.id = a.receipt_id
     WHERE a.receivable_id = $1 ORDER BY a.applied_at DESC`, [x.receivable_id])).rows;
   const coRows = x.participant_count > 1 ? await coInsuranceRows(db, x) : [];
   return {
     ...itemRow(x),
     isCoInsurancePolicy: coRows.length > 0, coInsuranceCollectionRows: coRows,
-    followUpActions: actions.map((a) => ({ id: a.id, actionType: a.action_type, actionDate: a.action_date, actionBy: a.action_by, callOutcome: a.call_outcome, notes: a.notes, commitmentDate: a.commitment_date })),
+    followUpActions: actions.map((a) => ({ id: a.id, actionType: a.action_type, actionDate: a.action_date, actionBy: a.action_by, actionByName: a.action_by_name || a.action_by,
+      actionByRoles: a.action_by_roles || [], callOutcome: a.call_outcome, notes: a.notes, commitmentDate: a.commitment_date })),
     paymentHistory: pays.map((a) => ({ id: a.id, paymentDate: a.collected_on || a.applied_at, paymentAmount: Number(a.amount), paymentMethod: a.payment_mode, referenceNumber: a.receipt_number || a.reference_no,
       remarks: a.status === 'reversed' ? 'Reversed' : a.remarks, status: a.status })),
   };

@@ -388,6 +388,42 @@ export async function commissionDebitNoteDoc(dn, lines) {
 }
 
 /**
+ * Remittance advice to an insurer (Accounts > Remittance > Tracking > Print), or the agency bill of an agent: the
+ * remittance, the policies it pays with premium, commission, tax and net amount, the amount due and the signatures.
+ * `rem` and `lines` are the API shapes (remittance/service.js#remittanceDetails and its policies).
+ */
+export async function remittanceAdviceDoc(rem, lines) {
+  const agency = rem.kind === 'agency-bill';
+  const title = agency ? await getSetting('remittance.agency_bill_title', 'Agency Bill') : await getSetting('remittance.advice_title', 'Remittance Advice');
+  const h = await header(title || (agency ? 'Agency Bill' : 'Remittance Advice'), rem.remittanceNo);
+  const f = formatters(h);
+  const currency = rem.currency || h.format?.currency || 'PHP';
+  const sum = (k) => round2(lines.reduce((s, l) => s + num(l[k]), 0));
+  const ins = rem.insurerDetails || {};
+  const totals = [['Gross premium', money(rem.grossAmount)], ['Less: commission', -money(rem.commission)]];
+  if (num(rem.tax)) totals.push(['Tax', money(rem.tax)]);
+  if (num(rem.adjustments)) totals.push(['Adjustments', money(rem.adjustments)]);
+  totals.push(['Net amount', money(rem.netAmount)]);
+  if (num(rem.previousBalance)) totals.push(['Previous balance', money(rem.previousBalance)], ['Total due', money(rem.billAmount)]);
+  const sig = await signatures(h, 'remittance-advice', { status: rem.statusCode, date: rem.approvedAt || rem.remittanceDate, issuedBy: rem.createdById, approvedBy: rem.approvedById,
+    names: { 'issuing-user': rem.createdBy, 'approving-user': rem.approvedBy } }, { blocks: [{ slot: 'prepared-by', label: 'Prepared by' }, { slot: 'approved-by', label: 'Approved by' }], perRow: 3 });
+  return { ...h, watermark: sig.watermark,
+    meta: kv([['Date', f.date(rem.remittanceDate)], ['Due date', f.date(rem.dueDate)], [agency ? 'Agency' : 'Insurer', agency ? rem.agencyName : (ins.name || rem.insurerName)],
+      ['Insurer code', agency ? '' : (ins.code || rem.insurerCode)], ['Address', agency ? '' : ins.address], ['Period', rem.period], ['Currency', currency],
+      ['Status', rem.status], ['Policies', String(lines.length)], ['Batch', rem.batchRef], ['Payment reference', rem.paymentReference]]),
+    sections: [
+      { heading: 'Policies',
+        table: { columns: [{ label: 'Policy no.', wrap: true }, 'Insured', 'Product', 'Effective date', { label: 'Premium', type: 'money' }, { label: 'Commission', type: 'money' },
+          { label: 'Tax', type: 'money' }, { label: 'Net amount', type: 'money' }],
+        rows: [...lines.map((l) => [val(l.policyNo), val(l.insuredName), val(l.product), f.date(l.effectiveDate) || '-', money(l.premium), money(l.commission), money(l.tax), money(l.netAmount)]),
+          ['TOTAL', '', '', '', sum('premium'), sum('commission'), sum('tax'), sum('netAmount')]], totalRow: true } },
+      { heading: `Amount due (${currency})`, table: { columns: ['Item', { label: 'Amount', type: 'money' }], widths: [375, 140], rows: totals } },
+      ...(present(rem.remarks) ? [{ heading: 'Remarks', text: rem.remarks }] : []),
+      sig.section,
+    ] };
+}
+
+/**
  * Endorsement (Operations > Endorsement > Print): the policy, the type and effective date, the premium change, every
  * change group recorded on the endorsement (personal details, vehicle, coverage, extension ...) and the authorised
  * signature once issued. `e` is endorsements/service.js#toEndorsement, `row` its endorsements row.

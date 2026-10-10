@@ -38,6 +38,7 @@ describe('core', () => {
     expect(r.body.data.status).toBe('success');
     const runs = await ctx.api('get', '/schedules/policy-expiry/runs');
     expect(runs.body.data.length).toBeGreaterThan(0);
+    expect(runs.body.data[0]).toMatchObject({ triggeredBy: 'BrokerVerse', triggeredByName: 'BrokerVerse Administrator' });
   });
   it('writes an audit trail', async () => {
     const a = await ctx.api('get', '/settings/audit?entity=user');

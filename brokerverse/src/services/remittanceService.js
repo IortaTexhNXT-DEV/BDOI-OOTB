@@ -37,6 +37,8 @@ export const remittanceService = {
   // remittances / tracking / automated processing
   listRemittances: (params) => apiRequest("GET", `${R}/remittances`, { params }),
   getRemittance: (remId) => get(`${R}/remittances/${id(remId)}`),
+  /** API path of the printable remittance advice (agency bill), for components/Print printPdf. */
+  remittanceAdvicePath: (remId) => `${R}/remittances/${id(remId)}/pdf`,
   createRemittance: (payload) => post(`${R}/remittances`, payload),
   validateRemittances: (ids) => post(`${R}/remittances/validate`, { ids }),
   processRemittances: (ids) => post(`${R}/remittances/process`, { ids }),

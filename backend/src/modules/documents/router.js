@@ -6,7 +6,8 @@ import { moduleRouter } from '../../lib/registry.js';
 import { requireAuth, requirePermission } from '../../lib/auth.js';
 import { many, one, withTransaction } from '../../db/pool.js';
 import { notFound } from '../../lib/errors.js';
-import { buildPdf, sendPdf } from './pdf.js';
+import { buildPdf, printContext, sendPdf } from './pdf.js';
+import { ok } from '../../lib/respond.js';
 import { quoteDoc, policyScheduleDoc, receiptDoc, acknowledgementReceiptDoc, printablePolicy } from './templates.js';
 import { captureForReceipt } from '../policies/payments.js';
 import { quoteById } from '../quotations/service.js';
@@ -80,6 +81,27 @@ define({
     await assertVisible(req, 'policy', ref.policy_id);
     const c = await withTransaction((db) => captureForReceipt(db, req.params.paymentId));
     sendPdf(res, buildPdf(await acknowledgementReceiptDoc(c)), `acknowledgement-receipt-${c.arNumber}.pdf`);
+  },
+});
+define({
+  method: 'GET', path: '/document-templates/letterhead',
+  summary: 'Letterhead and document colours for a page printed from the browser (the same as on the server documents): company name, address lines, TIN, licence, contact, the print logo as a data URL and the documents section of the theme',
+  screen: 'Printable views (Print on screens that print a page of their own)',
+  response: { success: true, data: { name: 'Toyota Insurance Services Philippines, Inc.', addressLines: ['31F Net Park, 5th Avenue', 'Taguig City, Metro Manila 1634, Philippines'], tin: '000-000-000-000',
+    licence: 'IC-B-1234', phone: '+63 2 8888 0000', email: 'tisph@example.ph', website: '', logo: 'data:image/png;base64,...',
+    documents: { accent: '#eb0a1e', headingColor: '#eb0a1e', headingBg: '#f7f7f7', tableHeaderBg: '#eb0a1e', tableHeaderText: '#ffffff', footerText: 'Authorized by the Insurance Commission ...', showLogo: true, logoHeight: 46 },
+    generatedBy: 'Rosa Finance', generatedAt: '10/10/2026 09:03' } },
+  handler: async (req, res) => {
+    const ctx = await printContext({ user: req.user });
+    const lh = ctx.letterhead || {};
+    const b = ctx.brand || {};
+    const logo = lh.logo?.buffer && b.showLogo !== false ? `data:image/${lh.logo.type};base64,${lh.logo.buffer.toString('base64')}` : null;
+    ok(res, {
+      name: lh.name || '', addressLines: lh.addressLines || [], tin: lh.tin || '', licence: lh.licence || '', phone: lh.phone || '', email: lh.email || '', website: lh.website || '', logo,
+      documents: { accent: b.accent || ctx.accentColor, headingColor: b.headingColor || b.accent, headingBg: b.headingBg || null, tableHeaderBg: b.tableHeaderBg || b.accent,
+        tableHeaderText: b.tableHeaderText || '#ffffff', footerText: b.footerText || '', showLogo: b.showLogo !== false, logoHeight: b.logoHeight || 46 },
+      generatedBy: ctx.generatedBy, generatedAt: ctx.generatedAt,
+    });
   },
 });
 export default router;
