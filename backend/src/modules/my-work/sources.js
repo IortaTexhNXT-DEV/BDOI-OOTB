@@ -202,7 +202,18 @@ function collections(ctx) {
     AND (ci.assigned_to IS NOT NULL OR ci.commitment_date IS NOT NULL OR rv.due_date < ${ctx.T}::date)
     -- a promise to pay already followed up by a task of the collector who recorded it is listed through that task
     AND NOT EXISTS (SELECT 1 FROM work_tasks wt WHERE wt.source = 'collection' AND wt.entity_id = ci.id AND wt.status = 'open')
-    AND (p.id IS NULL OR ${rec(ctx, 'policy', 'p')})`;
+    AND (p.id IS NULL OR ${rec(ctx, 'policy', 'p')})`
+    + (ctx.can('write:receipts') ? ` UNION ALL ${unappliedCollections()}` : '');
+}
+
+/** Unapplied collections (On Account, floating, advance) to allocate by their SLA date (collections.unapplied_sla_days). */
+function unappliedCollections() {
+  return `SELECT ${select({
+    category: "'collections'", kind: "'Unapplied collection'", id: 'uc.id', ref: 'COALESCE(ucr.receipt_number, uc.reference_no, uc.id)',
+    title: "initcap(uc.kind) || ' payment' || COALESCE(' - ' || ucp.policy_number, '')", client_name: 'COALESCE(ucc.display_name, uc.payer_name)', due_date: 'uc.allocate_by',
+    status: "'open'", queue: 'true', next_action: "'Allocate it to a bill or refund it'", link: "'/accounts/unapplied-collections?item=' || uc.id", amount: 'uc.balance', created_at: 'uc.created_at',
+  })} FROM unapplied_collections uc LEFT JOIN receipts ucr ON ucr.id = uc.receipt_id LEFT JOIN clients ucc ON ucc.id = uc.client_id LEFT JOIN policies ucp ON ucp.id = uc.policy_id
+  WHERE uc.status = 'open'`;
 }
 
 function endorsements(ctx) {
@@ -276,13 +287,14 @@ async function approvals(ctx) {
         AND NOT EXISTS (SELECT 1 FROM jsonb_array_elements(COALESCE(a.history, '[]'::jsonb)) h WHERE h->>'action' = 'Approved' AND h->>'by' = ANY(${ctx.ME}::text[]))
         AND (CASE WHEN a.entity = 'remittance' THEN ${remit} ELSE ${settle} END)`);
   }
-  if (ctx.can('write:remittance')) {
-    if (await has('commission_debit_notes')) {
-      out.push(`SELECT ${select({ ...base, kind: "'Commission debit note'", id: 'dn.id', ref: 'dn.dn_number', title: "COALESCE(ic.name, 'Commission debit note')", due_date: due('COALESCE(dn.submitted_at, dn.created_at)'),
-        status: 'dn.status', link: "'/finance/remittance/billing'", amount: 'dn.amount', created_at: 'dn.created_at' })}
-        FROM commission_debit_notes dn LEFT JOIN insurance_companies ic ON ic.id = dn.insurance_company_id
-        WHERE dn.status = 'for-approval' AND ${notMine(ctx, 'COALESCE(dn.submitted_by, dn.created_by)')}`);
-    }
+  // commission debit notes are decided with write:remittance, billing statements with approve:insurer-billing
+  const bases = [...(ctx.can('write:remittance') ? ['direct'] : []), ...(ctx.can('approve:insurer-billing') ? ['gross', 'net'] : [])];
+  if (bases.length && await has('commission_debit_notes')) {
+    out.push(`SELECT ${select({ ...base, kind: "CASE WHEN dn.basis = 'direct' THEN 'Commission debit note' ELSE 'Billing statement' END", id: 'dn.id', ref: 'dn.dn_number',
+      title: "COALESCE(ic.name, 'Commission debit note')", due_date: due('COALESCE(dn.submitted_at, dn.created_at)'),
+      status: 'dn.status', link: "'/finance/remittance/billing'", amount: 'dn.amount', created_at: 'dn.created_at' })}
+      FROM commission_debit_notes dn LEFT JOIN insurance_companies ic ON ic.id = dn.insurance_company_id
+      WHERE dn.status = 'for-approval' AND dn.basis = ANY(${ctx.P(bases)}::text[]) AND ${notMine(ctx, 'COALESCE(dn.submitted_by, dn.created_by)')}`);
   }
   if (ctx.can('approve:access-control') && await has('authority_limits')) {
     out.push(`SELECT ${select({ ...base, kind: "'Authority limit'", id: 'al.id', ref: "'AL-' || al.id", title: "COALESCE(t.name, al.transaction_type) || ' - ' || COALESCE(r.name, al.role_code, u.display_name, '')",
@@ -334,6 +346,22 @@ async function approvals(ctx) {
       due_date: 'LEAST(wx.current_deadline, ' + due('wx.requested_at') + ')', status: 'wx.status', link: "'/accounts/credit-control/warranty'", created_at: 'wx.requested_at' })}
       FROM premium_warranty_extensions wx JOIN policies p ON p.id = wx.policy_id LEFT JOIN clients c ON c.id = p.client_id
       WHERE wx.status = 'pending' AND ${notMine(ctx, 'wx.requested_by')}`);
+  }
+  // post-dated cheque cancellations: decided by the holders of approve:pdc, never by the user who requested them
+  if (ctx.can('approve:pdc') && await has('post_dated_cheques')) {
+    out.push(`SELECT ${select({ ...base, kind: "'PDC cancellation'", id: 'pd.id', ref: 'pd.pdc_number', title: "'Cheque ' || pd.cheque_number || COALESCE(' - ' || rc.name, '')",
+      client_name: CLIENT('c'), due_date: due('pd.cancel_requested_at'), status: 'pd.status', link: "'/accounts/post-dated-cheques?cheque=' || pd.id", amount: 'pd.amount',
+      created_at: 'pd.cancel_requested_at' })}
+      FROM post_dated_cheques pd LEFT JOIN clients c ON c.id = pd.client_id
+      LEFT JOIN master_records rc ON rc.type_code = 'reason-code' AND rc.code = pd.cancel_reason_code
+      WHERE pd.status = 'cancellation-pending' AND pd.cancel_approved_at IS NULL AND ${notMine(ctx, 'pd.cancel_requested_by')}`);
+  }
+  // receipt reversals: decided by the holders of approve:receipt-reversal, never by the user who requested them
+  if (ctx.can('approve:receipt-reversal')) {
+    out.push(`SELECT ${select({ ...base, kind: "'Receipt reversal'", id: 'rr.id', ref: 'rr.receipt_number', title: "'Reverse ' || rr.receipt_number || COALESCE(' - ' || rr.reversal_reason, '')",
+      client_name: 'rr.customer_name', due_date: due('rr.reversal_requested_at'), status: "'pending'", link: "'/accounts/receipts/receiptdetailview?receipt=' || rr.id", amount: 'rr.amount',
+      created_at: 'rr.reversal_requested_at' })}
+      FROM receipts rr WHERE rr.reversal_status = 'pending' AND ${notMine(ctx, 'rr.reversal_requested_by')}`);
   }
   // incentive batches: decided by the holders of approve:incentive, never by the user who ran or submitted the batch
   if (ctx.can('approve:incentive') && await has('incentive_calculations')) {

@@ -23,7 +23,7 @@ export const BRANCH_SOURCES = ['policy_owner', 'user', 'context', 'none'];
 /** Account Determination sections (the former Premium / Customer / Miscellaneous / Claims account setup screens). */
 export const ROLE_SECTIONS = {
   premium: ['premium_receivable', 'due_to_insurer', 'premium_vat_payable', 'premium_dst_payable', 'premium_lgt_payable', 'commission_income', 'commission_receivable', 'insurer_refund_receivable', 'output_vat', 'creditable_wht'],
-  customer: ['cash_in_bank', 'cash_on_hand', 'client_refund_payable', 'agent_receivable', 'commission_payable', 'commission_expense', 'wht_payable', 'incentive_expense', 'incentive_payable'],
+  customer: ['cash_in_bank', 'cash_on_hand', 'client_refund_payable', 'unapplied_collections', 'agent_receivable', 'commission_payable', 'commission_expense', 'wht_payable', 'incentive_expense', 'incentive_payable'],
   miscellaneous: ['petty_cash_fund', 'employee_advances', 'input_vat', 'supplier_payable', 'write_off', 'remittance_adjustment'],
   claims: ['claims_receivable', 'claims_payable'],
 };

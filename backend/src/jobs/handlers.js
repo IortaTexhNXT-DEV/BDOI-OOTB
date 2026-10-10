@@ -97,6 +97,16 @@ export async function remittanceSchedules() {
   if (!(await tableExists('remittances'))) return { skipped: 'remittances table missing' };
   return (await import('../modules/remittance/runs.js')).runDueSchedules();
 }
+/** Insurer billing run: on a billing date (15th and 26th, moved off non-working days) draft the billing statements of the remitted policies (remittance/billing.js). */
+export async function insurerBillingRun() {
+  if (!(await tableExists('insurer_billing_runs'))) return { skipped: 'insurer_billing_runs table missing' };
+  return (await import('../modules/remittance/billing.js')).billingJob();
+}
+/** Instalment hold check: record the part-paid policies held from remittance and release those now fully paid (remittance/holds.js). */
+export async function remittanceHoldCheck() {
+  if (!(await tableExists('remittance_holds'))) return { skipped: 'remittance_holds table missing' };
+  return (await import('../modules/remittance/holds.js')).holdCheckJob();
+}
 
 /**
  * Integrations (Master > System Configuration > Integrations): send the integration messages that are due and retry
@@ -119,9 +129,9 @@ export async function eisOutbox() {
   if (!(await tableExists('eis_submissions'))) return { skipped: 'eis_submissions table missing' };
   return (await import('../modules/bir/eis.js')).processOutbox();
 }
-// operations and accounting: cover note expiry, post-dated cheques due for deposit, missing claim documents
+// operations and accounting: cover note expiry, post-dated cheques due for deposit and their follow-up, missing claim documents
 export { coverNoteExpiry } from '../modules/cover-notes/jobs.js';
-export { pdcDepositDue } from '../modules/pdc/jobs.js';
+export { pdcDepositDue, pdcFollowUp } from '../modules/pdc/jobs.js';
 export { claimDocumentReminders } from '../modules/claim-documents/jobs.js';
 /** End-of-day claim service levels: FNOL not submitted to the insurer, authorisation code overdue, follow-ups past their date. */
 export const claimServiceLevels = async () => (await import('../modules/claims/insurer.js')).serviceLevels();

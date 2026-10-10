@@ -18,6 +18,7 @@ import { badRequest, notFound } from '../../../lib/errors.js';
 import { round2, today } from './http.js';
 import { account, cashAccountFor, createJournal, payableAccountFor } from './ledger.js';
 import { commissionTaxAccount } from './commissionTax.js';
+import { cutoffPeriod } from '../../period-end/posting.js';
 
 const P = (insurerName, share, amounts) => ({ insurerId: null, insurerName, share, amounts });
 /** Business events: label, module, amount keys the operation supplies, template variables and a sample context. */
@@ -34,6 +35,18 @@ export const EVENTS = {
   'policy.cancel': { label: 'Policy cancellation', module: 'endorsements', participants: true, sameAs: 'endorsement.return_premium' },
   'receipt.apply': { label: 'Premium collection applied', module: 'receipts', amounts: ['amount'], vars: ['policyNumber', 'receiptSuffix', 'memoRef', 'billNumber'],
     sample: { amounts: { amount: 11200 }, vars: { policyNumber: 'POL-SAMPLE', receiptSuffix: ' (OR-SAMPLE)', memoRef: 'Premium collection', billNumber: 'INV-SAMPLE' }, paymentMode: 'bank-transfer' } },
+  'pdc.partner_collected': { label: 'Post-dated cheque collected by the Insurance Partner', module: 'receipts', amounts: ['amount'],
+    vars: ['policyNumber', 'chequeNumber', 'insurer', 'memoRef', 'billNumber', 'receiptSuffix'],
+    sample: { amounts: { amount: 12787.5 }, vars: { policyNumber: 'POL-SAMPLE', chequeNumber: '0045121', insurer: 'Sample Insurer', memoRef: 'Cheque 0045121 BPI', billNumber: 'INV-SAMPLE', receiptSuffix: ' (OR-SAMPLE)' } } },
+  'receipt.insurer_direct': { label: 'Premium paid directly to the insurance company', module: 'receipts', amounts: ['amount'],
+    vars: ['policyNumber', 'insurer', 'memoRef', 'billNumber', 'receiptSuffix'],
+    sample: { amounts: { amount: 12787.5 }, vars: { policyNumber: 'POL-SAMPLE', insurer: 'Sample Insurer', memoRef: 'Insurer OR 004512', billNumber: 'INV-SAMPLE', receiptSuffix: ' (OR-SAMPLE)' } } },
+  'receipt.unapplied': { label: 'Collection held unapplied (On Account, floating, advance)', module: 'receipts', amounts: ['amount'], vars: ['kind', 'payer', 'memoRef', 'receiptSuffix'],
+    sample: { amounts: { amount: 1500 }, vars: { kind: 'excess', payer: 'Sample Client', memoRef: 'Excess on POL-SAMPLE', receiptSuffix: ' (OR-SAMPLE)' }, paymentMode: 'bank-transfer' } },
+  'unapplied.allocate': { label: 'Unapplied collection allocated to a bill', module: 'receipts', amounts: ['amount'], vars: ['billNumber', 'policyNumber', 'reference'],
+    sample: { amounts: { amount: 1500 }, vars: { billNumber: 'INV-SAMPLE', policyNumber: 'POL-SAMPLE', reference: 'OR-SAMPLE' } } },
+  'unapplied.refund': { label: 'Unapplied collection refunded to the client', module: 'receipts', amounts: ['amount'], vars: ['payer', 'reference'],
+    sample: { amounts: { amount: 1500 }, vars: { payer: 'Sample Client', reference: 'OR-SAMPLE' } } },
   'directbill.commission': { label: 'Direct bill – commission booked', module: 'remittance', amounts: ['amount', 'commission', 'vat', 'gross_premium'], vars: ['policyNumber', 'referenceSuffix', 'insurer'],
     sample: { amounts: { amount: 1680, commission: 1500, vat: 180, gross_premium: 11200 }, vars: { policyNumber: 'POL-SAMPLE', referenceSuffix: '', insurer: 'Sample Insurer' } } },
   'directbill.commission_return': { label: 'Direct bill – commission returned', module: 'remittance', sameAs: 'directbill.commission' },
@@ -265,6 +278,7 @@ export async function buildJournal(db, eventCode, ctx, { user = null, rule: give
     entryType: ctx.entryType || rule.entry_type, entrySubType: ctx.entrySubType ?? null, transactionCode: ctx.transactionCode, referenceType: ctx.referenceType,
     referenceId: ctx.referenceId, clientId: ctx.clientId, policyId: ctx.policyId, policyNumber: ctx.policyNumber, currency: ctx.currency, dueDate: ctx.dueDate,
     status: ctx.status, requiresApproval: ctx.requiresApproval, reversalOf: ctx.reversalOf, correctionOf: ctx.correctionOf,
+    period: ctx.period || (await cutoffPeriod(eventCode, date)),
   };
   return { rule, lines: out, header };
 }

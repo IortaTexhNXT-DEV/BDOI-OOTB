@@ -310,32 +310,31 @@ Collections received in a file (bills payment and QRPh settlement reports) are r
 
 ### Post-dated cheques {#process-pdc}
 
-A client who pays by post-dated cheques hands them to Cash Control. Nothing is posted until a cheque is deposited.
+A client who pays the instalments by post-dated cheques hands them to Cash Control. Nothing is posted when they are
+received.
 
-1. Choose {{menu:/accounts/post-dated-cheques}}.
-2. Select **Register cheque** and enter the bill or policy, the drawee bank, the cheque number, the cheque date
-   (picked from the calendar), the amount and where the cheque is kept. The cheque is **On Hand**.
-3. Cheques due within three days appear under **Deposit due**. On or after the cheque date, select **Deposit** and
-   the bank account. The system creates and posts the official receipt.
-4. When the bank clears the cheque, record it as cleared.
-5. If the cheque bounces, record the bounce with the reason. The system cancels its receipt (the journal is reversed
-   and the bill is open again) and informs Accounting and the client. Select **Replace** to register the new cheque.
+1. CCD-PDU (Post-Dated Cheques) chooses {{menu:/accounts/post-dated-cheques}} and encodes the cheques as a set
+   against the instalments of the bill (**Encode PDCs**), then prints the acknowledgement receipt for the client.
+2. Cheques payable to the Insurance Partner are forwarded with a transmittal and warehoused by the partner. When the
+   partner advises that a cheque was paid (**Partner cleared**), its acknowledgement receipt is posted and the
+   instalment is paid; a bounced cheque re-opens the instalment for a replacement.
+3. Cheques payable to TISPH are deposited on their dates to the one collection account; the official receipt is
+   posted.
+4. A cancellation is asked for with a reason and approved by another user; a replacement keeps the instalment.
 
-**Return** gives a cheque back to the client; **Cancel** removes a cheque registered in error.
-
-![Accounts > Post-Dated Cheques, with the cheques on hand and their actions](images/process/post-dated-cheques.png)
+![Accounts > Post-Dated Cheques, with the cheques at TIS](images/process/post-dated-cheques.png)
 
 ### Reconciliation and reversals {#process-reversals}
 
 Each day the bank statements are matched by {{roles:write:bank-reconciliation}} with the receipts on
 [Bank reconciliation](#bank-reconciliation), and the reconciliation is approved by {{roles:approve:bank-reconciliation}}.
 
-Receipts are never cancelled on the Receipts screen, which has no cancel action. The receipt of a cheque that the
-bank returns is cancelled by CCD-Recon (Reconciliation and Reversals): on the Reconciliation Workspace (adjustment
-**RCHQ – Returned cheque**) or, for a post-dated cheque, by recording the bounce on Post-Dated Cheques. The payment
-journals are reversed and the bill is open again. Any other receipt issued in error is reported to CCD-Recon, who
-corrects it with TIS Finance & General Accounting. The user who issued a receipt never reverses it; the
-segregation-of-duties rule **Receipting and reversals** warns when one person holds both roles.
+A receipt is reversed from the receipt page by CCD-Recon (Reconciliation and Reversals) with a reason, and another
+user approves the reversal: {{roles:approve:receipt-reversal}} (see [Reverse a receipt](#reverse-a-receipt)). On
+approval the payment journals are reversed and the bill is open again. The receipt of a cheque that the bank returns
+is also cancelled on the Reconciliation Workspace (adjustment **RCHQ – Returned cheque**) or, for a post-dated cheque,
+by recording the bounce on Post-Dated Cheques. CCD-BP / QRPh (Receipting), who issues the receipts, does not reverse
+them.
 
 Premium warranty extensions, instalment plans and client credit limits are handled on
 [Credit control](#credit-control) and approved by {{roles:approve:credit-control}}.

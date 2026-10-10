@@ -7,12 +7,14 @@ import DirectBillProcessing, { noteActions } from ".";
 
 jest.mock("../../../services/remittanceService", () => ({
   __esModule: true,
-  default: { directBillSummary: jest.fn(), listDebitNotes: jest.fn(), getDebitNote: jest.fn() },
+  default: { directBillSummary: jest.fn(), listDebitNotes: jest.fn(), getDebitNote: jest.fn(), billingRuns: jest.fn(), runBilling: jest.fn() },
   remittanceService: {},
   masterService: { options: jest.fn() },
   apiRequest: jest.fn(),
 }));
 jest.mock("../../../hooks/useFormatCurrency", () => ({ useFormatCurrency: () => ({ formatCurrency: (v) => `PHP ${Number(v || 0).toFixed(2)}`, currencyCode: "PHP" }) }));
+let mockPerms = [];
+jest.mock("../../../utils/canOpen", () => ({ ...jest.requireActual("../../../utils/canOpen"), hasPermission: (p) => mockPerms.includes(p) }));
 jest.mock("../../../services/reportsService", () => ({ __esModule: true, default: { generateReport: jest.fn() } }));
 jest.mock("../../../services/opsAccountingService", () => ({ __esModule: true, default: { masterRecords: jest.fn().mockResolvedValue({ rows: [] }) } }));
 
@@ -31,6 +33,10 @@ beforeEach(() => {
   remittanceService.getDebitNote.mockResolvedValue(note());
   masterService.options.mockResolvedValue([]);
   apiRequest.mockResolvedValue({ data: [] });
+  mockPerms = [];
+  remittanceService.billingRuns.mockResolvedValue({ nextBillingDates: ["2026-10-26", "2026-11-13"],
+    runs: [{ id: 1, billingDate: "2026-10-15", trigger: "job", statements: 2, result: "success", message: "Billing run done: 2 billing statement(s) drafted." }] });
+  remittanceService.runBilling.mockResolvedValue({ message: "Billing run done: 1 billing statement(s) drafted.", notes: [] });
 });
 
 describe("Insurer billing", () => {
@@ -65,5 +71,28 @@ describe("Insurer billing", () => {
     expect(codes(note())).not.toContain("approve");
     expect(codes(note({ decision: { canDecide: true } }))).toEqual(["view", "print", "approve", "reject", "cancel"]);
     expect(codes(note({ statusCode: "open" }))).toEqual(["view", "print", "collect", "email", "cancel"]);
+  });
+
+  it("a settled billing statement can still be cancelled but not collected", () => {
+    const codes = noteActions(note({ statusCode: "settled", status: "Settled by retention", basis: "net", balance: 0 })).map((a) => a.code);
+    expect(codes).toContain("cancel");
+    expect(codes).not.toContain("collect");
+  });
+
+  it("the billing run tab lists the runs and the next billing dates; Run billing needs write:remittance", async () => {
+    show();
+    fireEvent.click(screen.getByText("Billing run"));
+    expect(await screen.findByText("Billing run done: 2 billing statement(s) drafted.")).toBeInTheDocument();
+    expect(screen.getByText("Scheduled job")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Run billing" })).not.toBeInTheDocument();
+  });
+
+  it("a remittance user runs the billing for a billing date", async () => {
+    mockPerms = ["write:remittance"];
+    show();
+    fireEvent.click(screen.getByText("Billing run"));
+    fireEvent.click(await screen.findByRole("button", { name: "Run billing" }));
+    expect(await screen.findByText("Billing run done: 1 billing statement(s) drafted.")).toBeInTheDocument();
+    expect(remittanceService.runBilling).toHaveBeenCalledWith(expect.objectContaining({ billingDate: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/) }));
   });
 });

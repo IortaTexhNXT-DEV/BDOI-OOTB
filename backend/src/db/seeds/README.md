@@ -86,6 +86,10 @@ A sample row that the purge script must remove needs a key listed in `scripts/pu
 | `93_feature_reasons.sql` | reference | the contexts feature_change and feature_reject on the Reason Code master and their reasons (contracted release, change request, promotion from another environment, function withdrawn by the client, other; for a rejection: reference not found, outside the contracted scope, wrong effective date, other): the reasons of the enabling and disabling of platform features (modules/features), each Other needs a note |
 | `91_access_reasons.sql` | reference | the contexts of the access decisions on the Reason Code master (delegation, end of a delegation, segregation-of-duties exception, access review removal) and their reasons, each with an Other that needs a note; Rule no longer needed for a change of a segregation-of-duties rule |
 | `91_accounting_reference.sql` | reference | the setting `accounting.provisional_accounts` (accounts the Accounting Flow shows as Mapping pending until Finance confirms them), TISPH: the placeholder 210245 Accounts Payable - Insurance Company |
+| `92_cash_control.sql` | reference | the reason contexts of Cash Control on the Reason Code master and their reasons: cancelling a post-dated cheque (cash or cheque replacement, technical defect, policy cancelled, paid off, encoded in error), a bounced cheque (DAIF, account closed, stop payment, signature, stale, other), reversing a receipt and returning a reversal |
+| `93_remittance_eligibility.sql` | reference | the remittance schedule fields eligibility and proof of payment, the TIS weekly schedule on the fully paid basis, the exception type No proof of payment |
+| `94_fs_versions.sql` | reference | the financial statement versions TIS01 (local FS), TIS02 (balance sheet and income statement) and TIS03 (budget) with their lines and GL ranges (proposal until Finance confirms them) |
+| `95_tisph_reports.sql` | reference | the TISPH report layouts in the report catalogue: Financial Statement by Version, Daily GL Balance; Payment Summary, Daily Reversals, the PDC reports (encoded, cancelled, maturing, maturing by product and warehouse bank, history, acknowledgement receipts), Insufficient Payments, Overpayments; Net Remittance fully and partially paid, Premium Report by payment status, Invoice Tracker, Statement of Account per Insurance Partner, Reconciliation Schedule |
 
 ### Sample files (TISPH sample business)
 
@@ -125,8 +129,17 @@ as nil.
 | `sample/97_distribution.sql` | dealer programmes (Toyota Makati free first year on TFS loans, Toyota Alabang half subsidy with an uploaded batch, Toyota Cebu commercial pick-ups), lead assignment rules for the TFS referrals, campaign segments, templates and campaigns, a shared Report Builder report |
 | `sample/98_integrations.sql` | demo CTPL COC series (Pioneer, Maagap, Stronghold), payee bank accounts of the panel insurers, an insurer API mapping for Pioneer |
 | `sample/99_tisph_sales.sql` | the TFS account details of the TFS-sourced prospects, a TFS import batch (LIB-2026-00001) with two accounts waiting for assignment, a direct customer, and the vehicles of five Motor policies (Toyota, a Hino unit as OEM, a repossessed unit as ROPA) for Talkbot and the APR Operation Report |
+| `sample/99_cash_control.sql` | Cash Control: a set of post-dated cheques forwarded to the Insurance Partner and one kept for TISPH, a floating and an advance payment held unapplied, a receipt voucher batch with commission kept apart, a receipt reversal waiting for approval, a policy held from the fully paid remittance; the collection account of retained cheques and the panel insurers' TINs where empty |
 
 The TISPH files replace a reference value only while it is still the reference value and nobody has changed it, so
 they apply to a new database and, at the next start, to a database already in use, without undoing administrator changes.
 
-No test users are seeded: the tests and the end-to-end checks create their own users.
+No test users are seeded by default: the tests and the end-to-end checks create their own users. On a UAT or demo
+site, `TISPH_TEST_USERS_PASSWORD` seeds one test user per TISPH role (`tisph_test_users.json`: `carla.mendoza` Sales
+Associate, `paolo.villanueva` Sales Officer, `teresa.lim` Sales Unit Head, `jenny.bautista` Operations Associate,
+`mark.castillo` Operations Officer, `liza.fernandez` Operations Unit Head, `rowena.cruz` CCD-PDU, `allan.domingo`
+CCD-PDC / CCD-ADA, `grace.navarro` CCD-BP / QRPh, `edwin.ramos` CCD-Recon, `cecilia.tan` Finance & General Accounting,
+`kevin.santiago` IT AppSupport / Admin, `antonio.delrosario` General Manager; e-mail `<username>@tisph.example.ph`),
+each with that password (checked against the password policy) and the role only, and each must change the password at
+the first sign-in. An existing user keeps its password and roles. The variable is for non-production environments
+only: with `NODE_ENV=production` the step logs a warning and creates nobody. Unset, nothing is created.

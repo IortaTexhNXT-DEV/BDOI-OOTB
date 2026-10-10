@@ -47,6 +47,8 @@ const id = (v) => encodeURIComponent(v);
 export const remittanceService = {
   // remittances
   getRemittance: (remId) => get(`${R}/remittances/${id(remId)}`),
+  // policies held part-paid on the fully paid basis (instalment hold)
+  heldPolicies: (params) => apiRequest("GET", `${R}/held`, { params }).then((r) => r.data),
 
   // direct bill: the client pays the insurer; the broker bills its commission with a commission debit note
   directBillSummary: () => get(`${R}/direct-bill/summary`),
@@ -69,6 +71,11 @@ export const remittanceService = {
   voidClientPayment: (paymentId, reason) => post(`${R}/direct-bill/client-payments/${id(paymentId)}/void`, { reason }),
   /** API path of the printable debit note, for components/Print printPdf. */
   debitNotePdfPath: (dnId) => `${R}/direct-bill/${id(dnId)}/pdf`,
+  /** API path of a billing statement with its schedule as Excel or CSV. */
+  statementExportPath: (dnId, format = "xlsx") => `${R}/direct-bill/${id(dnId)}/export?format=${format}`,
+  // insurer billing run: on the billing days, or now for a billing date
+  billingRuns: () => get(`${R}/billing-runs`),
+  runBilling: (payload) => apiRequest("POST", `${R}/billing-runs`, { body: payload }),
   // agency bills
   listAgencyBills: (params) => get(`${R}/agency-bill`, params),
 

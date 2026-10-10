@@ -246,6 +246,16 @@ The Commission Rate Matrix sets the broker's commission rate that applies to a p
 | **Bank Transaction Types** | The bank lines with no book entry (bank charges, interest income, final tax on interest): direction, the account they post to, whether they need approval and the description pattern that recognises them on the statement. |
 | **Insurer Statement Formats** | How each insurer's statement file is read; the standard format applies to any insurer without its own. |
 
+## Financial statement versions {#financial-statement-versions}
+
+{{screen:/master/finance/fs-versions}}
+
+![Master > Finance > Financial Statement Versions](images/screens-master/fs-versions.png)
+
+A financial statement version lists the lines of the statements in order, each with the range of GL accounts it carries: **TIS01 Local financial statements**, **TIS02 Balance sheet and income statement** and **TIS03 Budget** (income statement lines only). A range is given by the first digits of the accounts: **GL from** 110 and **GL to** 112 take every account from 110 to 112, whatever its length. An account belongs to the first line, by line number, whose range takes it; the accounts no line takes are listed under **Accounts not in this version** and show on that line in the reports, so the statements always add up.
+
+Select a version to see its lines: **Line**, **Statement**, **Section**, **FS line**, **GL from**, **GL to**, **Shown as** (debit or credit balance) and the number of **Accounts** each line takes. TIS Finance & General Accounting edits the name, purpose and status and the lines (**Add line**, the bin of a line, **Save**); the lines are checked before they are saved. **Add version** starts a new version from the lines of another. The version of the reports when none is chosen is TIS01. See [Financial Statement by Version and Daily GL Balance](#reports-by-department).
+
 ## Operational masters {#operational-masters}
 
 {{screen:/master/finance/asset-classes}}

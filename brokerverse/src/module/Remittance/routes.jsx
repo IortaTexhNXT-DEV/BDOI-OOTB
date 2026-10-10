@@ -17,6 +17,7 @@ import Remittances from "./Remittances";
 import Landing from "./Landing";
 import RemittanceRecord from "./Record";
 import Setup from "./Setup";
+import HeldPolicies from "./Held";
 import { REMITTANCE_ROUTES } from "./shared";
 
 /** The target with the query of the old address added (the target's own parameters win). */
@@ -71,6 +72,7 @@ export const remittanceRoutes = () => [
   <Route key="reconciliation" path={`${OLD}/reconciliation/insurer-statements`} element={<InsurerStatements />} />,
   <Route key="statement" path={`${OLD}/reconciliation/statements/:id`} element={<InsurerStatementWorkspace />} />,
   <Route key="exceptions" path={`${OLD}/exceptions`} element={<RemittanceExceptions />} />,
+  <Route key="held" path={`${OLD}/held`} element={<HeldPolicies />} />,
   <Route key="billing" path={`${OLD}/billing`} element={<DirectBillProcessing />} />,
   <Route key="setup" path={`${OLD}/setup/:tab`} element={<Setup />} />,
   <Route key="settlement" path={`${OLD}/settlement/process`} element={<SettlementProcessing />} />,

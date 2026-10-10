@@ -1,5 +1,6 @@
 import { moduleRouter } from '../../lib/registry.js';
 import { formatMoney } from '../../lib/money.js';
+import { getSetting } from '../../lib/settings.js';
 import { requireAuth, requirePermission } from '../../lib/auth.js';
 import { validate, z } from '../../lib/validate.js';
 import { audit } from '../../lib/audit.js';
@@ -97,8 +98,9 @@ define({
     const r = await withTransaction((db) => payments.capturePayment(db, policy, req.body, req.user));
     await audit(req, { entity: 'policy', entityId: policy.id, action: r.option === 'pay-later' ? 'pay-later' : 'payment-capture', after: { ...(r.capture || {}), receiptNumber: r.receipt?.receiptNumber } });
     if (r.capture && !r.posted) {
-      // verified by Accounting (the confirm route also accepts other finance permissions; the role is who is asked)
-      await notifyApprovers({ users: (await usersWithRoles(['accounting'])).map((u) => u.id).filter((id) => id !== req.user.id), title: 'Premium payment to verify',
+      // verified by the receipting roles of payments.verification_notify_roles (the confirm route checks the permission)
+      const roles = (await getSetting('payments.verification_notify_roles', ['accounting'])) || ['accounting'];
+      await notifyApprovers({ users: (await usersWithRoles(roles)).map((u) => u.id).filter((id) => id !== req.user.id), title: 'Premium payment to verify',
         message: `${req.user.username} recorded ${r.capture.paymentModeLabel} ${await formatMoney(r.capture.amount)} (ref ${r.capture.referenceNo || '-'}) on policy ${policy.policy_number}`,
         link: `/agent/policy/paymentoptions/${policy.id}`, entity: 'policy', entityId: policy.id });
     }

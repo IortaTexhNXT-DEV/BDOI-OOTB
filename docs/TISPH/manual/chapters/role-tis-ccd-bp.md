@@ -21,9 +21,11 @@ The acknowledgement receipt (AR) is not issued on your screens: the system issue
 records a client's payment on the policy. You then confirm that payment against the bank, and the confirmation issues
 the official receipt.
 
-On Collections you record the follow-ups, the promises to pay and the receipts of the premiums. You do not cancel,
-reverse or adjust receipts and collections: the Receipts screen has no cancel action, and a returned payment or a
-receipt issued in error is handled by CCD-Recon (Reconciliation and Reversals).
+On Collections you record the follow-ups, the promises to pay and the receipts of the premiums. You allocate the money
+held On Account (excess, floating and advance payments) to the bills, upload the bank's payment reports and the
+payments made directly to the insurers, and receipt the auto-debits of CCD-PDC / CCD-ADA. You do not reverse
+receipts: a returned payment or a receipt issued in error is reversed by CCD-Recon (Reconciliation and Reversals) with
+another user's approval.
 Premium warranty extensions and client credit limits are approved by TIS Finance & General Accounting.
 
 {{include:generated/roles/tis-ccd-bp.md}}
@@ -38,7 +40,9 @@ Premium warranty extensions and client credit limits are approved by TIS Finance
 | Print or e-mail the receipts to the clients | Daily | [Receipts](#verify-payments-and-post-official-receipts) |
 | Follow up overdue premiums, record notes and promises to pay | Daily | [Collections](#collections) |
 | Send payment reminders to the clients when needed (each morning the system also e-mails the clients whose premiums fall due) | As needed | [Collections](#collections) |
-| Register and deposit post-dated cheques | Daily | [Post-Dated Cheques](#post-dated-cheques) |
+| Upload the bank's payment report and the payments made to the insurers | Daily | [Receipts](#receipt-batches) |
+| Allocate or refund the unapplied collections by their date | Daily, from My Work | [Unapplied Collections](#unapplied-collections) |
+| Attach the proof of payment of the receipts | Daily | [Receipts](#verify-payments-and-post-official-receipts) |
 | Record claim settlement funds received from insurers | As insurers pay | [Claims Settlements](#claims-settlements-paid-through-the-broker) |
 | Print the receipts of a client for a period | As requested | [Receipts](#verify-payments-and-post-official-receipts) |
 | Run the collection report and the statement of account | Month-end | [All Reports](#reports-catalogue) |
@@ -145,9 +149,26 @@ then **Send reminders**. Each reminder is recorded in the follow-up history of i
 
 ### Post-dated cheques {#ccd-bp-qrph-receipting-cheques}
 
-A client paying the counter with post-dated cheques: register them on {{menu:/accounts/post-dated-cheques}} as in
-[Register a post-dated cheque](#ccd-pdu-post-dated-cheques-encode). The official receipt is issued when the cheque is
-deposited on its date ([Deposit a cheque on its date](#ccd-pdu-post-dated-cheques-deposit)).
+Post-dated cheques handed in at the counter go to CCD-PDU (Post-Dated Cheques), who encodes them (see
+[Encode the cheques of a client](#ccd-pdu-post-dated-cheques-encode)). You see them on
+{{menu:/accounts/post-dated-cheques}}; their receipts are raised when they are collected.
+
+### Upload bank payments and payments made to the insurer {#ccd-bp-qrph-receipting-uploads}
+
+1. Choose {{menu:/accounts/receipts}} and select **Bulk Upload**.
+2. Choose the file: **Bank payments (matched by reference)** for the bank's report of the day, **Payments made to the
+   insurer** for the payments the insurers report, or **Official receipts** for the receipt voucher file. Download its
+   template the first time.
+3. Upload the file. The result says how many lines were matched, overpaid, underpaid, not found or failed, with the
+   reason of each failed row.
+4. Open **Receipt batches** to see the batch and export its lines. Allocate what was held On Account or not found on
+   [Unapplied Collections](#unapplied-collections).
+
+### Allocate an unapplied collection {#ccd-bp-qrph-receipting-unapplied}
+
+1. Choose {{menu:/accounts/unapplied-collections}}, or open the item from My Work.
+2. Select **Allocate** in the row, type the amount against each bill and select **Allocate**.
+3. An overpayment the client asks back is refunded with **Refund** and its reason; Finance pays the refund.
 
 ### Record claim settlement funds received from an insurer {#ccd-bp-qrph-receipting-claim-funds}
 
