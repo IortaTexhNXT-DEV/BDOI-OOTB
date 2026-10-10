@@ -226,7 +226,8 @@ const LeadAssignment = () => {
       // the assignment moves, with the prospect's own trail (created, assigned on capture) around them
       const [rows, trail] = await Promise.all([service.assignmentHistory(lead.id), auditService.getRecordHistory("lead", lead.id).catch(() => ({ events: [] }))]);
       const assignments = fromAssignmentHistory(rows);
-      const own = fromAuditEvents(trail.events).filter((e) => !(assignments.length && /assign/.test(e.actionCode || "")));
+      // the moves (assigned, queued, taken) are told by the assignment history itself
+      const own = fromAuditEvents(trail.events).filter((e) => !(assignments.length && /assign|queue|take/.test(e.actionCode || "")));
       setHistory({ lead, entries: [...assignments, ...own], loading: false, error: null });
     } catch (e) {
       setHistory({ lead, entries: [], loading: false, error: e?.message || true });
