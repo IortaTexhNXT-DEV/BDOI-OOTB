@@ -54,6 +54,13 @@ const EndorsementSummary = ({ action }) => {
   }, [navState?.endorsementData, endorsementIdFromUrl]);
   const state = navState?.endorsementData ? navState : loadedState || navState;
   const [modalVisible, setModalVisible] = useState(false);
+  const [approvalRequired, setApprovalRequired] = useState(false);
+  useEffect(() => {
+    if (!state?.endorsementId) return;
+    endorsementService.getEndorsementWorkflow(state.endorsementId)
+      .then((e) => setApprovalRequired(Boolean(e?.workflow?.approvalRequired) && e?.status === "Draft"))
+      .catch(() => setApprovalRequired(false));
+  }, [state?.endorsementId]);
 
   const [policyData, setPolicyData] = useState(null);
   const [, setRelatedPolicy] = useState(null);
@@ -804,12 +811,13 @@ const EndorsementSummary = ({ action }) => {
             flexWrap: "wrap",
           }}
         >
-          {/* Draft: Can send for approval */}
+          {/* a draft goes to the insurer directly, or first to a second user for approval (endorsements.approval_before_send) */}
           <Button
             loading={isSending}
-            label={t("endorsementSummary.sendToInsuranceCompany")}
-            icon="pi pi-send"
-            onClick={handleSendForApproval}
+            label={approvalRequired ? t("endorsementSummary.continueToApproval") : t("endorsementSummary.sendToInsuranceCompany")}
+            icon={approvalRequired ? "pi pi-arrow-right" : "pi pi-send"}
+            onClick={approvalRequired ? () => navigate(`/agent/endorsementdetailedview/${state?.endorsementId}`, { state: { clientId: state?.clientId, clientNumber: state?.clientNumber } })
+              : handleSendForApproval}
             className="p-button-primary"
           />
         </div>

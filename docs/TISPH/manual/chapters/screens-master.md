@@ -91,6 +91,12 @@ The Claim Document Checklist lists the documents a claim needs, by line of busin
 
 ![Master > Insurance > Claim Document Checklist](images/screens-master/claim-document-checklist.png)
 
+## Endorsement types {#endorsement-types}
+
+{{screen:/master/insurance/endorsement-types}}
+
+Endorsement Types lists the kinds of mid-term change of the TISPH list: **Code**, **Endorsement Type**, **Financial**, **Premium Impact**, **Lines** (`*` = all) and **Section** (insured, vehicle, cover, period, cancellation, other). An endorsement names its types; the types of one endorsement are printed by section on the endorsement, so several changes make one grouped endorsement. A line without financial endorsements (Credit Life) is offered only the non-financial types. **Add** adds a type; the switch withdraws it.
+
 ## Lead sources and reason codes {#lead-sources-and-reason-codes}
 
 {{screen:/master/insurance/lead-sources}}
@@ -99,7 +105,7 @@ The Claim Document Checklist lists the documents a claim needs, by line of busin
 
 **Lead Sources** lists where prospects come from (for example Walk-In, Referral, Agent, Bundling, Promo, Used-Cars - SCR, Used-Cars - UCFP), with the **Channel Type**, the **Linked Office (branch code)** and the **Sort Order**. The source is chosen on the prospect.
 
-**Reason Codes** holds the coded reasons of decisions, by what they are used for (**Used For**): quotations declined, claims rejected, renewals lost, refunds and adjustments, prospect reassignment, access review removals, the accounting reversals, and the remittance decisions (rejection of a remittance, off-cycle remittance, escalation of a remittance exception, rejection or cancellation of a commission debit note). **Requires Note** asks the user for a note with the reason. A screen that asks for a reason offers only the codes of its use.
+**Reason Codes** holds the coded reasons of decisions, by what they are used for (**Used For**): quotations declined, claims rejected, renewals lost, refunds and adjustments, prospect reassignment, access review removals, policy corrections and their rejection, endorsement rejections, the accounting reversals, and the remittance decisions (rejection of a remittance, off-cycle remittance, escalation of a remittance exception, rejection or cancellation of a commission debit note). **Requires Note** asks the user for a note with the reason. A screen that asks for a reason offers only the codes of its use.
 
 ![Master > Insurance > Reason Codes](images/screens-master/reason-codes.png)
 

@@ -18,6 +18,7 @@ import { placingSlipDoc, printablePolicy } from '../documents/templates.js';
 import { ownRecord, withScope } from '../../lib/scope.js';
 import * as svc from './service.js';
 import * as corrections from './corrections.js';
+import { policyVersions } from '../endorsements/workflow.js';
 import { getSetting } from '../../lib/settings.js';
 import { hasPermission } from '../../lib/auth.js';
 
@@ -162,6 +163,12 @@ define({
     await audit(req, { entity: 'policy', entityId: after.id, action: 'update', before: out(before), after: out(after) });
     sendEntity(res, out(after), { message: 'Policy updated' });
   },
+});
+define({
+  method: 'GET', path: '/:id/versions', summary: 'Versions of a policy: as issued and after each booked endorsement, with the figures before and after (ENDT-03)', screen: `${SCREEN} > Policy detail > Endorsements`,
+  middleware: [...canRead, ownRecord('policy')],
+  response: { success: true, data: [{ version: 2, endorsementNumber: 'END-2026-00001', premiumDelta: 1520.5, before: { grossPremium: 23171.25 }, after: { grossPremium: 24691.75 } }] },
+  handler: async (req, res) => res.json({ success: true, data: await policyVersions(await svc.getPolicyRow(req.params.id)) }),
 });
 const correctionExample = { id: 'pcr_1', policyId: 'pol_1', status: 'pending', statusLabel: 'Pending approval', changes: [{ field: 'expiry', label: 'Expiry date', from: '2027-10-01', to: '2027-10-02', fromText: '01/10/2027', toText: '02/10/2027' }],
   reasonCode: 'PCR-INSURER', reason: 'Insurer issued a corrected policy', insurerReference: 'MAL-END-2026-0042', requestedBy: 'Maria Santos', requestedAt: '2026-10-10T02:00:00Z' };

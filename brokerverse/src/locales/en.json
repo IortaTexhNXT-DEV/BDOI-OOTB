@@ -4730,6 +4730,42 @@
     "approved": "Correction approved and applied",
     "rejected": "Correction rejected"
   },
+  "endorsementWorkflow": {
+    "title": "Approval and insurer",
+    "types": "Endorsement types",
+    "chooseTypes": "Choose the endorsement types",
+    "submit": "Submit for approval",
+    "submitted": "Endorsement submitted for approval",
+    "approve": "Approve endorsement",
+    "reject": "Reject endorsement",
+    "approveTitle": "Approve the endorsement",
+    "rejectTitle": "Reject the endorsement",
+    "approved": "Endorsement approved",
+    "rejected": "Endorsement rejected",
+    "send": "Send to insurer",
+    "sendTitle": "Send the endorsement to the insurer",
+    "sent": "Endorsement sent to the insurer",
+    "book": "Book endorsement",
+    "endorsement": "Endorsement",
+    "policy": "Policy",
+    "premiumChange": "Premium change",
+    "submittedAt": "Submitted on",
+    "approvedBy": "Approved by",
+    "approvedAt": "Approved on",
+    "rejectionReason": "Rejection reason",
+    "unexpiredDays": "Unexpired days",
+    "daysOf": "{{days}} of {{term}} days",
+    "annualChange": "Annual net premium change",
+    "insurerNumber": "Insurer endorsement number",
+    "sections": {
+      "insured": "Insured",
+      "vehicle": "Vehicle",
+      "cover": "Cover",
+      "period": "Period",
+      "cancellation": "Cancellation",
+      "other": "Other"
+    }
+  },
   "uploadPolicy": {
     "title": "Prospects",
     "leadIdLabel": "Prospect ID:",
@@ -5955,7 +5991,8 @@
       "Submitted": "Submitted",
       "InitiateCancel": "Cancellation initiated",
       "Completed": "Completed",
-      "Cancelled": "Cancelled"
+      "Cancelled": "Cancelled",
+      "PendingApproval": "Pending approval"
     },
     "types": {
       "cancellation": "Cancellation"
@@ -6020,7 +6057,8 @@
     "policyNo": "Policy no.",
     "endorsementType": "Endorsement type",
     "sendToInsurer": "Send to insurer",
-    "policyExtension": "Policy extension"
+    "policyExtension": "Policy extension",
+    "continueToApproval": "Continue to approval"
   },
   "coverageDetailsReview": {
     "pageTitle": "Coverage Details Review",
@@ -13162,7 +13200,13 @@
       "months_other": "{{count}} months",
       "history": "History",
       "historyOf": "History of {{item}} {{name}}",
-      "allOf": "{{name}}: all"
+      "allOf": "{{name}}: all",
+      "endorsementTypes": {
+        "title": "Endorsement Types",
+        "section": "Insurance Management",
+        "item": "endorsement type",
+        "help": "The endorsement types, whether they change the premium and the lines they apply to."
+      }
     },
     "instalments": {
       "issueInvoices": "Issue instalment invoices",
@@ -15051,7 +15095,8 @@
       "sod_exception": "Segregation of duties exception",
       "access_review": "Access review removal",
       "policy_correction": "Policy correction",
-      "policy_correction_reject": "Policy correction rejection"
+      "policy_correction_reject": "Policy correction rejection",
+      "endorsement_reject": "Endorsement rejection"
     }
   },
   "financialStatements": {

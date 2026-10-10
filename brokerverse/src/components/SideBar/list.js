@@ -984,6 +984,7 @@ export const menuList = [
           // cancellation and claims masters: short-period scale, cancellation reasons, claim document checklist, repair shops
           { id: 30, name: "Short-Period Rates", path: "/master/insurance/short-period-rates", includes: ["/master/insurance/short-period-rates"] },
           { id: 31, name: "Cancellation Reasons", path: "/master/insurance/cancellation-reasons", includes: ["/master/insurance/cancellation-reasons"] },
+          { id: 36, name: "Endorsement Types", path: "/master/insurance/endorsement-types", includes: ["/master/insurance/endorsement-types"] },
           { id: 32, name: "Claim Document Checklist", path: "/master/insurance/claim-document-checklist", includes: ["/master/insurance/claim-document-checklist"] },
           { id: 33, name: "Repair Shops", path: "/master/insurance/repair-shops", includes: ["/master/insurance/repair-shops"] },
           // the Source of a prospect and the coded reasons of decisions without a master of their own

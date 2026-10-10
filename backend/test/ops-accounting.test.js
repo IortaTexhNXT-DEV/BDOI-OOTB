@@ -7,6 +7,8 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { ledgerIntegrity, makePolicy, setupFinance } from './accounting.fixtures.js';
+import { withDirectEndorsements } from './helpers.js';
+import { clearSettingsCache } from '../src/lib/settings.js';
 import { one, pool, query, withTransaction } from '../src/db/pool.js';
 import { addDays, today } from '../src/lib/dates.js';
 import { createReceivable, findPolicy } from '../src/modules/receipts/receivables.js';
@@ -27,6 +29,11 @@ const bill = async (m, amount = m.gross) => withTransaction(async (db) => create
 
 beforeAll(async () => {
   ctx = await setupFinance();
+  await withDirectEndorsements();
+  // the broker cancellation rules (short-period scale for the insured, commission taken back); TISPH's pro-rata without
+  // commission reversal (CANC-03) is covered by test/endorsement-workflow.test.js
+  await query("UPDATE app_settings SET value = 'true' WHERE key IN ('endorsements.short_period_for_insured', 'endorsements.cancellation_reverses_commission')");
+  clearSettingsCache();
   admin = await one("SELECT id, username FROM users WHERE username = 'BrokerVerse'");
   await ctx.api('post', '/users').send({ username: 'ops.manager', password: 'Welcome@123', displayName: 'AP manager', roles: ['accounting-manager'], email: 'ops.manager@example.ph' });
   const token = (await request(ctx.app).post('/api/auth/login').send({ username: 'ops.manager', password: 'Welcome@123' })).body.accessToken;

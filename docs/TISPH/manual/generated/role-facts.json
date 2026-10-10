@@ -7999,6 +7999,15 @@
     },
     {
      "section": "Master > Insurance",
+     "screen": "Endorsement Types",
+     "path": "/master/insurance/endorsement-types",
+     "access": "Create and edit",
+     "modules": [
+      "Reference masters"
+     ]
+    },
+    {
+     "section": "Master > Insurance",
      "screen": "Claim Document Checklist",
      "path": "/master/insurance/claim-document-checklist",
      "access": "Create and edit",
@@ -13689,6 +13698,15 @@
   },
   "/master/insurance/cancellation-reasons": {
    "menu": "Master > Insurance > Cancellation Reasons",
+   "roles": [
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "Create and edit"
+    }
+   ]
+  },
+  "/master/insurance/endorsement-types": {
+   "menu": "Master > Insurance > Endorsement Types",
    "roles": [
     {
      "role": "TIS IT AppSupport / Admin",

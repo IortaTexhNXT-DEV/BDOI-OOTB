@@ -59479,11 +59479,124 @@
     "/endorsements/{id}": {
       "get": {
         "operationId": "getEndorsementsId",
-        "summary": "Get one endorsement (by id or number)",
+        "summary": "Get one endorsement (by id or number) with the workflow actions open to the user",
         "tags": [
           "Endorsements"
         ],
         "description": "Front-end touchpoint: Operations > Policy > Endorsement > Detailed view\n\nAccess: read:endorsements",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "endorsementId": {
+                      "type": "string"
+                    },
+                    "endorsementNumber": {
+                      "type": "string"
+                    },
+                    "policyId": {
+                      "type": "string"
+                    },
+                    "policyNumber": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "endorsementTypeIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    },
+                    "premiumDelta": {
+                      "type": "integer"
+                    },
+                    "workflow": {
+                      "type": "object",
+                      "properties": {
+                        "approvalRequired": {
+                          "type": "boolean"
+                        },
+                        "canSubmit": {
+                          "type": "boolean"
+                        },
+                        "canApprove": {
+                          "type": "boolean"
+                        },
+                        "canSend": {
+                          "type": "boolean"
+                        },
+                        "canComplete": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "endorsementId": "end_1",
+                  "endorsementNumber": "END-2026-00001",
+                  "policyId": "pol_1",
+                  "policyNumber": "POL-2026-00001",
+                  "status": "Draft",
+                  "endorsementTypeIds": [
+                    1
+                  ],
+                  "premiumDelta": 0,
+                  "workflow": {
+                    "approvalRequired": true,
+                    "canSubmit": false,
+                    "canApprove": true,
+                    "canSend": false,
+                    "canComplete": false
+                  },
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Endorsement > Detailed view",
+        "x-permissions": [
+          "read:endorsements"
+        ]
+      }
+    },
+    "/endorsements/{id}/approve": {
+      "post": {
+        "operationId": "postEndorsementsIdApprove",
+        "summary": "Approve an endorsement waiting for approval (approve:policies; never the raiser; a return premium within the Authority Matrix limit)",
+        "tags": [
+          "Endorsements"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Endorsement > Detailed view > Approval\n\nAccess: approve:policies",
         "parameters": [
           {
             "name": "id",
@@ -59536,7 +59649,7 @@
                   "endorsementNumber": "END-2026-00001",
                   "policyId": "pol_1",
                   "policyNumber": "POL-2026-00001",
-                  "status": "Draft",
+                  "status": "Approved",
                   "endorsementTypeIds": [
                     1
                   ],
@@ -59556,10 +59669,22 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Operations > Policy > Endorsement > Detailed view",
+        "x-screen": "Operations > Policy > Endorsement > Detailed view > Approval",
         "x-permissions": [
-          "read:endorsements"
-        ]
+          "approve:policies"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
       }
     },
     "/endorsements/{id}/pdf": {
@@ -59615,6 +59740,332 @@
         "x-permissions": [
           "read:endorsements"
         ]
+      }
+    },
+    "/endorsements/{id}/reject": {
+      "post": {
+        "operationId": "postEndorsementsIdReject",
+        "summary": "Reject an endorsement waiting for approval with a reason code (endorsement_reject) (approve:policies; never the raiser)",
+        "tags": [
+          "Endorsements"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Endorsement > Detailed view > Approval\n\nAccess: approve:policies",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "endorsementId": {
+                      "type": "string"
+                    },
+                    "endorsementNumber": {
+                      "type": "string"
+                    },
+                    "policyId": {
+                      "type": "string"
+                    },
+                    "policyNumber": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "endorsementTypeIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    },
+                    "premiumDelta": {
+                      "type": "integer"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "endorsementId": "end_1",
+                  "endorsementNumber": "END-2026-00001",
+                  "policyId": "pol_1",
+                  "policyNumber": "POL-2026-00001",
+                  "status": "Rejected",
+                  "endorsementTypeIds": [
+                    1
+                  ],
+                  "premiumDelta": 0,
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Endorsement > Detailed view > Approval",
+        "x-permissions": [
+          "approve:policies"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reasonCode": "ENR-DOCS",
+                "note": "OR/CR of the new owner missing"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/endorsements/{id}/submit-for-approval": {
+      "post": {
+        "operationId": "postEndorsementsIdSubmitForApproval",
+        "summary": "Submit a draft endorsement for approval by a second user (endorsements.approval_before_send)",
+        "tags": [
+          "Endorsements"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Endorsement > Summary > Submit for approval\n\nAccess: write:endorsements",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "endorsementId": {
+                      "type": "string"
+                    },
+                    "endorsementNumber": {
+                      "type": "string"
+                    },
+                    "policyId": {
+                      "type": "string"
+                    },
+                    "policyNumber": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "endorsementTypeIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    },
+                    "premiumDelta": {
+                      "type": "integer"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "endorsementId": "end_1",
+                  "endorsementNumber": "END-2026-00001",
+                  "policyId": "pol_1",
+                  "policyNumber": "POL-2026-00001",
+                  "status": "PendingApproval",
+                  "endorsementTypeIds": [
+                    1
+                  ],
+                  "premiumDelta": 0,
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Endorsement > Summary > Submit for approval",
+        "x-permissions": [
+          "write:endorsements"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/endorsements/{id}/types": {
+      "put": {
+        "operationId": "putEndorsementsIdTypes",
+        "summary": "Choose the endorsement types of a draft endorsement (applicable to the policy line; a premium change needs a type with premium impact)",
+        "tags": [
+          "Endorsements"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Endorsement > Summary > Endorsement types\n\nAccess: write:endorsements",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "endorsementId": {
+                      "type": "string"
+                    },
+                    "endorsementNumber": {
+                      "type": "string"
+                    },
+                    "policyId": {
+                      "type": "string"
+                    },
+                    "policyNumber": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "endorsementTypeIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    },
+                    "premiumDelta": {
+                      "type": "integer"
+                    },
+                    "endorsementTypeCodes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "endorsementId": "end_1",
+                  "endorsementNumber": "END-2026-00001",
+                  "policyId": "pol_1",
+                  "policyNumber": "POL-2026-00001",
+                  "status": "Draft",
+                  "endorsementTypeIds": [
+                    1
+                  ],
+                  "premiumDelta": 0,
+                  "endorsementTypeCodes": [
+                    "CPLT",
+                    "CADR"
+                  ],
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Endorsement > Summary > Endorsement types",
+        "x-permissions": [
+          "write:endorsements"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "endorsementTypeCodes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "endorsementTypeCodes": [
+                  "CPLT",
+                  "CADR"
+                ]
+              }
+            }
+          }
+        }
       }
     },
     "/endorsements/complete-endorsement": {
@@ -60372,6 +60823,92 @@
             }
           }
         }
+      }
+    },
+    "/endorsements/types": {
+      "get": {
+        "operationId": "getEndorsementsTypes",
+        "summary": "Endorsement types (Endorsement Types master, M12) that apply to the line of a policy",
+        "tags": [
+          "Endorsements"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Endorsement > Summary > Endorsement types\n\nAccess: read:endorsements",
+        "parameters": [
+          {
+            "name": "policyId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "pol_1"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "financial": {
+                            "type": "boolean"
+                          },
+                          "premiumImpact": {
+                            "type": "boolean"
+                          },
+                          "section": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "code": "CPLT",
+                      "name": "Change of Plate Number",
+                      "financial": false,
+                      "premiumImpact": false,
+                      "section": "vehicle"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Endorsement > Summary > Endorsement types",
+        "x-permissions": [
+          "read:endorsements"
+        ]
       }
     },
     "/endorsements/upload-document": {
@@ -110464,6 +111001,105 @@
             }
           }
         }
+      }
+    },
+    "/policies/{id}/versions": {
+      "get": {
+        "operationId": "getPoliciesIdVersions",
+        "summary": "Versions of a policy: as issued and after each booked endorsement, with the figures before and after (ENDT-03)",
+        "tags": [
+          "Policies"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Policy detail > Endorsements\n\nAccess: read:policies",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "version": {
+                            "type": "integer"
+                          },
+                          "endorsementNumber": {
+                            "type": "string"
+                          },
+                          "premiumDelta": {
+                            "type": "number"
+                          },
+                          "before": {
+                            "type": "object",
+                            "properties": {
+                              "grossPremium": {
+                                "type": "number"
+                              }
+                            }
+                          },
+                          "after": {
+                            "type": "object",
+                            "properties": {
+                              "grossPremium": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "version": 2,
+                      "endorsementNumber": "END-2026-00001",
+                      "premiumDelta": 1520.5,
+                      "before": {
+                        "grossPremium": 23171.25
+                      },
+                      "after": {
+                        "grossPremium": 24691.75
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Policy detail > Endorsements",
+        "x-permissions": [
+          "read:policies"
+        ]
       }
     },
     "/policies/bulk-upload": {

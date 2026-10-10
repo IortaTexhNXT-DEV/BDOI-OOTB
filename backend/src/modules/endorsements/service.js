@@ -16,6 +16,7 @@ import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { companyName } from '../../lib/letterhead.js';
 import { isoDate, postingDate } from '../../lib/dates.js';
+import { resolveTypes, prorataTerm, assertSendable, assertBookable } from './workflow.js';
 
 export function toEndorsement(r) {
   if (!r) return null;
@@ -27,6 +28,9 @@ export function toEndorsement(r) {
     clientId: r.client_id, clientCode: r.client_code || null, clientName: r.client_name, insuredName: r.insured_name, status, endorsementStatus: status, endorsementType: r.endorsement_type,
     endorsementTypeIds: r.endorsement_type_ids || [], isCancelPolicy: r.is_cancel, cancellationType: r.cancellation_type,
     cancellationMethod: r.cancellation_method || null, cancellationReason: r.cancellation_reason || null, returnCalculation: r.return_calculation || null,
+    endorsementTypes: r.endorsement_type_codes || [], endorsementTypeCodes: (r.endorsement_type_codes || []).map((t) => t.code),
+    submittedAt: r.submitted_at || null, approvedAt: r.approved_at || null, approvedBy: r.approved_by_name || r.approved_by || null, rejectedAt: r.rejected_at || null,
+    rejectionReason: r.rejection_reason || null, createdById: r.created_by || null,
     premiumDelta: Number(r.premium_delta), effectiveDate: r.effective_date, remarks: r.remarks, documentKey: r.document_key,
     documentUrl: r.document_key ? (/^https?:/.test(r.document_key) ? r.document_key : publicUrl(r.document_key)) : null, completionDetails: r.completion || {},
     policyExpiry: r.policy_expiry, lob: r.lob, receivableId: r.receivable_id, sentAt: r.sent_at, completedAt: r.completed_at,
@@ -37,7 +41,7 @@ export function toEndorsement(r) {
 }
 
 const SELECT = `SELECT e.*, p.policy_number, p.expiry_date AS policy_expiry, p.lob, p.insured_name, c.display_name AS client_name, c.client_code,
-  (SELECT u.display_name FROM users u WHERE u.id = e.created_by) AS created_by_name
+  (SELECT u.display_name FROM users u WHERE u.id = e.created_by) AS created_by_name, (SELECT u.display_name FROM users u WHERE u.id = e.approved_by) AS approved_by_name
   FROM endorsements e JOIN policies p ON p.id = e.policy_id LEFT JOIN clients c ON c.id = e.client_id`;
 
 export async function getEndorsementRow(id, db = null) {
@@ -47,7 +51,7 @@ export async function getEndorsementRow(id, db = null) {
 }
 
 /** Request fields that drive the endorsement itself; everything else is the change set. */
-const CONTROL_FIELDS = ['policyId', 'endorsementTypeIds', 'isCancelPolicy', 'cancellationType', 'premiumDelta', 'effectiveDate', 'remarks',
+const CONTROL_FIELDS = ['policyId', 'endorsementTypeIds', 'endorsementTypeCodes', 'isCancelPolicy', 'cancellationType', 'premiumDelta', 'effectiveDate', 'remarks',
   'cancellationMethod', 'cancellationReason', 'partialPremium', 'partialPercent', 'returnPremium'];
 
 /** Endorsement type label from the selected type ids (endorsements.types in app_settings). */
@@ -89,7 +93,7 @@ const TOLERANCE = 1 + 1e-9;
  * and charge engine): the policy's current cover inputs overlaid with the edited ones. Returns null when the change
  * carries no sum insured (nothing to price). When no pricing input differs from the policy the premium is unchanged.
  */
-async function priceCoverageChange(cc, policy) {
+async function priceCoverageChange(cc, policy, term = { factor: 1 }) {
   if (!cc || !SUM_INSURED_KEYS.some((k) => given(cc[k]))) return null;
   const doc = policy.doc || {};
   const current = { grossPremium: round2(Number(policy.premium_total)), netPremium: round2(Number(policy.net_premium)),
@@ -114,7 +118,9 @@ async function priceCoverageChange(cc, policy) {
   const priced = await premiumBreakdown(input, { keep });
   // The additional (or return) premium carries its own taxes, charged on its amount with the policy's product and
   // location: DST on each P4.00 of the additional premium, not the difference of two separately rounded totals.
-  const netDelta = round2(priced.netPremium - current.netPremium);
+  // a financial change runs from its effective date to the expiry: the annual difference times the unexpired share
+  const annualNetDelta = round2(priced.netPremium - current.netPremium);
+  const netDelta = round2(annualNetDelta * term.factor);
   const sign = Math.sign(netDelta);
   const ap = sign ? await quotationCharges({ productId: policy.product_id || null, lguCode: doc.lguCode || null, lguCity: doc.lguCity || null,
     premiumTaxRegime: doc.premiumTaxRegime || null }, Math.abs(netDelta), policy.lob) : null;
@@ -122,13 +128,13 @@ async function priceCoverageChange(cc, policy) {
   const taxes = ap ? sign * (num(ap.tax.valueAddedTax) + num(ap.tax.documentaryStampTax) + num(ap.tax.localGovernmentTax) + num(ap.tax.fireServiceTax) + num(ap.others)) : 0;
   const next = {
     ...priced,
-    netPremium: round2(priced.netPremium),
+    netPremium: round2(current.netPremium + netDelta),
     valueAddedTax: round2(current.valueAddedTax + t('valueAddedTax')),
     documentaryStampTax: round2(current.documentaryStampTax + t('documentaryStampTax')),
     localGovernmentTax: round2(current.localGovernmentTax + t('localGovernmentTax')),
     grossPremium: round2(current.grossPremium + netDelta + taxes),
   };
-  return { changed, current, next };
+  return { changed, current, next, term: term.basis === 'pro-rata' ? { ...term, annualNetDelta, annualNetPremium: round2(priced.netPremium) } : null };
 }
 
 /** The coverage change as stored: the edited inputs with the server-priced figures. */
@@ -146,7 +152,7 @@ function premiumChangeOf(priced) {
   const previous = pick(priced.current);
   const next = pick(priced.next);
   const delta = Object.fromEntries(Object.keys(next).map((k) => [k, round2(next[k] - previous[k])]));
-  return { changed: priced.changed, previous, next, delta, taxRates: priced.next.taxRates || null };
+  return { changed: priced.changed, previous, next, delta, taxRates: priced.next.taxRates || null, ...(priced.term ? { prorata: priced.term } : {}) };
 }
 
 export async function createEndorsement(body, userId) {
@@ -155,10 +161,16 @@ export async function createEndorsement(body, userId) {
   const ids = Array.isArray(body.endorsementTypeIds) ? body.endorsementTypeIds : (body.endorsementTypeIds ? [body.endorsementTypeIds] : []);
   const isCancel = body.isCancelPolicy === true;
   const { cancellationType, premiumDelta, effectiveDate, remarks } = body;
+  if (isCancel && (await getSetting('endorsements.cancellation_note_required', true)) && !String(remarks || '').trim()) {
+    throw badRequest('Validation failed', [{ path: 'remarks', message: 'Enter the note of the cancellation' }]);
+  }
+  const typeCodes = await resolveTypes({ query }, policy, body.endorsementTypeCodes || (isCancel ? ['CAN'] : []))
+    .catch((e) => { if (isCancel && !body.endorsementTypeCodes) return []; throw e; });
   const changes = Object.fromEntries(Object.entries(body).filter(([k]) => !CONTROL_FIELDS.includes(k)));
   const clientDelta = given(premiumDelta) ? num(premiumDelta) : null;
   let delta = clientDelta ?? 0;
-  const priced = isCancel ? null : await priceCoverageChange(changes.coverageChanges, policy);
+  const term = isCancel ? null : await prorataTerm(policy, effectiveDate);
+  const priced = isCancel ? null : await priceCoverageChange(changes.coverageChanges, policy, term);
   if (priced) {
     // the server price wins; a client figure that disagrees means the screen priced something else
     const serverDelta = round2(priced.next.grossPremium - priced.current.grossPremium);
@@ -189,13 +201,26 @@ export async function createEndorsement(body, userId) {
   const r = await withTransaction(async (db) => {
     const number = await nextDocumentNumber('endorsement', { db, unique: { table: 'endorsements', column: 'endorsement_number' } });
     return (await db.query(`INSERT INTO endorsements(endorsement_number, policy_id, client_id, endorsement_type, status, changes, premium_delta, effective_date, remarks,
-        endorsement_type_ids, is_cancel, cancellation_type, created_by, cancellation_method, cancellation_reason, return_calculation)
-      VALUES ($1,$2,$3,$4,'draft',$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING id`,
-    [number, policy.id, policy.client_id, type, JSON.stringify(changes), round2(delta), calc?.effectiveDate || isoDate(effectiveDate) || isoDate(new Date()), remarks || null,
+        endorsement_type_ids, is_cancel, cancellation_type, created_by, cancellation_method, cancellation_reason, return_calculation, endorsement_type_codes)
+      VALUES ($1,$2,$3,$4,'draft',$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING id`,
+    [number, policy.id, policy.client_id, type, JSON.stringify(changes), round2(delta), calc?.effectiveDate || term?.effectiveDate || isoDate(effectiveDate) || isoDate(new Date()), remarks || null,
       JSON.stringify(ids), isCancel, calc?.cancellationType || cancellationType || (isCancel ? 'FULL' : null), userId, calc?.method || null, calc?.reason.code || null,
-      calc ? JSON.stringify(calc) : null])).rows[0];
+      calc ? JSON.stringify(calc) : null, JSON.stringify(typeCodes)])).rows[0];
   });
   return getEndorsementRow(r.id);
+}
+
+/** Choose the endorsement types of a draft endorsement (Endorsement Types master, applicable to the policy's line). */
+export async function setTypes(id, codes, userId) {
+  const e = await getEndorsementRow(id);
+  if (e.status !== 'draft') throw badRequest(`The types of a ${endorsementStatusOut(e.status)} endorsement cannot be changed`);
+  const types = await resolveTypes({ query }, { lob: e.lob }, codes);
+  if (!types.length) throw badRequest('Validation failed', [{ path: 'endorsementTypeCodes', message: 'Choose at least one endorsement type' }]);
+  if (Number(e.premium_delta) !== 0 && !types.some((t) => t.premiumImpact)) {
+    throw badRequest('Validation failed', [{ path: 'endorsementTypeCodes', message: 'The endorsement changes the premium: choose a type with premium impact' }]);
+  }
+  await query('UPDATE endorsements SET endorsement_type_codes = $2, updated_by = $3, updated_at = now() WHERE id = $1', [e.id, JSON.stringify(types), userId]);
+  return { before: e, after: await getEndorsementRow(e.id) };
 }
 
 export async function listEndorsements(q, pg) {
@@ -254,7 +279,7 @@ async function emailInsurer(e, cancel) {
  */
 export async function sendToCustomer(id, userId, cancel) {
   const e = await getEndorsementRow(id);
-  if (!['draft', 'submitted', 'cancel-initiated'].includes(e.status)) throw badRequest(`A ${endorsementStatusOut(e.status)} endorsement cannot be sent`);
+  await assertSendable(e);
   const target = cancel ? 'cancel-initiated' : 'submitted';
   const client = e.client_id ? await one('SELECT display_name, email FROM clients WHERE id = $1', [e.client_id]) : null;
   if (client?.email) {
@@ -267,7 +292,8 @@ export async function sendToCustomer(id, userId, cancel) {
   const insurerEmail = await emailInsurer(e, cancel);
   await query('UPDATE endorsements SET status = $2, sent_at = now(), sent_by = $3, updated_by = $3, updated_at = now() WHERE id = $1', [e.id, target, userId]);
   // money going back is completed by another user (endorsements.return_approval): the approvers are told it is coming
-  if ((Number(e.premium_delta) < 0 || e.is_cancel) && (await getSetting('endorsements.return_approval', true)) !== false) {
+  if ((Number(e.premium_delta) < 0 || e.is_cancel) && (await getSetting('endorsements.return_approval', true)) !== false
+    && !(await getSetting('endorsements.approval_before_send', true))) {
     const by = (await one('SELECT display_name FROM users WHERE id = $1', [userId]))?.display_name || 'A user';
     await notifyApprovers({ audience: 'approve:policies', document: e.is_cancel ? 'Cancellation' : 'Return premium', number: e.endorsement_number, by,
       detail: `${e.policy_number}, ${Number(e.premium_delta).toFixed(2)}`, link: `/agent/uploadendorsement/${e.id}`, entity: 'endorsement', entityId: e.id });
@@ -320,7 +346,10 @@ async function applyToPolicy(db, e, completion, userId) {
 export async function completeEndorsement(body, userId, { approver = null } = {}) {
   const e0 = await getEndorsementRow(body.endorsementId);
   if (['completed', 'cancelled', 'rejected'].includes(e0.status)) throw badRequest(`Endorsement is already ${endorsementStatusOut(e0.status)}`);
-  if (approver) await assertReturnApproval(e0, approver);
+  if (approver) {
+    await assertBookable(e0, body, approver);
+    await assertReturnApproval(e0, approver);
+  }
   const completion = {
     policyNumber: body.policyNumber || e0.policy_number, insurerEndorsementNumber: body.endorsementNumber || null,
     productionDate: isoDate(body.productionDate), inceptionDate: isoDate(body.inceptionDate), issuedDate: isoDate(body.issuedDate), expiryDate: isoDate(body.expiryDate), notes: body.notes || '',
@@ -328,6 +357,11 @@ export async function completeEndorsement(body, userId, { approver = null } = {}
   const policy = await withTransaction(async (db) => {
     const e = (await db.query('SELECT * FROM endorsements WHERE id = $1 FOR UPDATE', [e0.id])).rows[0];
     const p = await applyToPolicy(db, e, completion, userId);
+    // the policy before and after the endorsement: every version of the policy stays readable (ENDT-03)
+    const snap = (x) => ({ grossPremium: Number(x.premium_total), netPremium: Number(x.net_premium), sumInsured: Number(x.sum_insured), insuredName: x.insured_name,
+      inceptionDate: isoDate(x.inception_date), expiryDate: isoDate(x.expiry_date), status: x.status });
+    completion.policyBefore = snap(p);
+    completion.policyAfter = snap((await db.query('SELECT * FROM policies WHERE id = $1', [p.id])).rows[0]);
     let receivableId = null;
     const delta = Number(e.premium_delta);
     // Billing mode of the premium change: the one chosen on completion (billingMode), else the endorsement's, else the policy's.
@@ -368,7 +402,8 @@ export async function completeEndorsement(body, userId, { approver = null } = {}
     // The referrers' comsub follows the returned premium (broker or direct billed): unpaid lines are reduced or their
     // accrual reversed, paid lines clawed back, in proportion to the return (commission/service.js adjustForReturnPremium)
     const returnedGross = credit?.amount || (billingMode === 'direct' && delta < 0 ? -delta : 0);
-    if (returnedGross > 0) {
+    const reverseCommission = !e.is_cancel || (await getSetting('endorsements.cancellation_reverses_commission', true)) !== false;
+    if (returnedGross > 0 && reverseCommission) {
       const { adjustForReturnPremium } = await import('../commission/service.js');
       const comsub = await adjustForReturnPremium(db, { policyId: p.id, returnedGross, baseGross: Number(p.premium_total), endorsementId: e.id, reference: e.endorsement_number, user: { id: userId } });
       if (comsub.adjustments.length || comsub.skipped.length) completion.comsubAdjustments = comsub;
@@ -378,6 +413,7 @@ export async function completeEndorsement(body, userId, { approver = null } = {}
     return p;
   });
   const after = await getEndorsementRow(e0.id);
+  if (approver && await getSetting('endorsements.notify_client_on_booking', true)) await emailClientBooked(after);
   const owner = policy.owner_user_id || e0.created_by;
   if (owner) {
     await notify({ userId: owner, type: 'info', title: after.is_cancel ? 'Policy cancelled by endorsement' : 'Endorsement completed',
@@ -385,6 +421,20 @@ export async function completeEndorsement(body, userId, { approver = null } = {}
       link: `/agent/endorsementdetailedview/${after.id}`, entity: 'endorsement', entityId: after.id });
   }
   return { before: e0, after };
+}
+
+/** The booked endorsement to the client (endorsements.notify_client_on_booking), its PDF attached. */
+async function emailClientBooked(e) {
+  const client = e.client_id ? await one('SELECT display_name, email FROM clients WHERE id = $1', [e.client_id]) : null;
+  if (!client?.email) return null;
+  const ins = await one('SELECT ic.name FROM policies p LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id WHERE p.id = $1', [e.policy_id]);
+  const t = await emailTemplate('endorsement_booked');
+  const { formatDate } = await import('../../lib/pdf/format.js');
+  const v = { customerName: client.display_name, endorsementNumber: e.endorsement_number, policyNumber: e.policy_number, insurerName: ins?.name || 'the insurer',
+    insurerEndorsementNumber: e.completion?.insurerEndorsementNumber || '', effectiveDate: formatDate(e.effective_date), premiumDelta: Number(e.premium_delta).toFixed(2),
+    currency: await getSetting('currency.default', 'PHP'), companyName: await companyName(), action: e.is_cancel ? 'cancellation' : 'endorsement' };
+  return queueEmail({ to: client.email, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: 'endorsement_booked', entity: 'endorsement',
+    entityId: e.id, attachments: [documentAttachment('endorsement', { endorsementId: e.id }, `endorsement-${e.endorsement_number}.pdf`)] });
 }
 
 export async function attachDocument(id, key, userId) {

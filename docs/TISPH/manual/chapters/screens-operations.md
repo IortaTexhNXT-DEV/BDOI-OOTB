@@ -355,13 +355,17 @@ One correction at a time waits for approval on a policy.
 
 ### Raise an endorsement request {#raise-an-endorsement-request}
 
+An endorsement goes through the broker: it is raised, approved by a second user, sent to the insurer and booked once the insurer confirms it with its own endorsement number.
+
 1. Choose {{menu:/agent/policy}}.
 2. In the row of the policy, select **More actions**, then **Endorsement** (or **Endorsement** on the policy page).
-3. Choose the kind of change (insured details, vehicle, cover, extension), enter the new values and the effective date.
-4. Upload the endorsement document of the insurer.
-5. Complete the endorsement.
+3. Choose the kind of change (insured details, vehicle, cover, extension, cancellation), enter the new values and the effective date, and check the summary. A change of cover is priced from the effective date to the expiry: the **Unexpired days** and the **Annual net premium change** are shown with the premium change.
+4. Select **Continue to approval**. In **Approval and insurer**, choose the **Endorsement types** (the types that apply to the line of the policy; a Credit Life policy takes no financial type) and select **Submit for approval**. {{roles:approve:policies}} are notified.
+5. A user other than the one who raised it selects **Approve endorsement**, or **Reject endorsement** with a reason.
+6. Select **Send to insurer**: the client and the insurer receive the endorsement.
+7. When the insurer confirms, select **Book endorsement**, upload the insurer's endorsement, enter the **Endorsement Number** of the insurer and complete it. A user other than the one who raised it books it; the client is e-mailed the endorsement.
 
-The endorsement is not available while the payment is **Pending** or **Reviewing**, or once the policy has expired, lapsed, was cancelled or renewed. An additional premium is billed to the client. An endorsement that returns premium is completed by {{roles:approve:policies}}, a user other than the one who entered it. See [Endorsements and cancellations](#process-endorsement).
+The endorsement is not available while the payment is **Pending** or **Reviewing**, or once the policy has expired, lapsed, was cancelled or renewed. An additional premium is billed to the client. A cancellation needs a note; the premium is returned pro-rata on the days left and no commission is taken back. See [Endorsements and cancellations](#process-endorsement).
 
 ## Fleet Schedules {#fleet-schedules}
 

@@ -16,6 +16,7 @@ import KeyValueGrid from "../../../components/KeyValueGrid";
 import { RecordActivityLog } from "../../../components/ActivityLog";
 import { printPdf } from "../../../components/Print";
 import { statusLabel } from "../../../utils/statusSeverity";
+import EndorsementWorkflowPanel from "../endorsementWorkflow/EndorsementWorkflowPanel";
 
 const EndorsementDetailedView = ({ action }) => {
   const { t } = useTranslation();
@@ -204,6 +205,11 @@ const EndorsementDetailedView = ({ action }) => {
             ]} />
           </DetailSection>
 
+          <EndorsementWorkflowPanel endorsementId={endorsementData?.endorsementId || endorsementId}
+            onChanged={async () => {
+              const response = await endorsementService.getEndorsementById(endorsementData?.endorsementId || endorsementId);
+              if (response.success) setEndorsementData(response.data);
+            }} />
           {hasDocument && (
           <>
           <div className="detailed__endorsement__card__sub__title mt-2 mb-2">

@@ -28,3 +28,14 @@ SELECT 'pcr_sample_01', p.id, jsonb_build_object('expiry', jsonb_build_object('f
  WHERE p.id = 'pol_sls_02' AND p.status = 'active'
    AND NOT EXISTS (SELECT 1 FROM policy_corrections c WHERE c.policy_id = p.id)
 ON CONFLICT (id) DO NOTHING;
+
+-- An endorsement waiting for a second user: change of plate number on POL-2026-95003, raised by the account executive.
+INSERT INTO endorsements(id, endorsement_number, policy_id, client_id, endorsement_type, status, changes, premium_delta, effective_date, remarks, endorsement_type_ids,
+  is_cancel, created_by, endorsement_type_codes, submitted_at, submitted_by, created_at, updated_at)
+SELECT 'end_sample_95101', 'END-2026-95101', p.id, p.client_id, 'motor-details', 'for-approval', '{"motorDetails":{"PlateNumber":"NDQ 5521"}}'::jsonb, 0, current_date,
+       'New plate issued by the LTO', '[2]'::jsonb, false, u.id,
+       '[{"code":"CPLT","name":"Change of Plate Number","section":"vehicle","financial":false,"premiumImpact":false}]'::jsonb, now() - interval '3 hours', u.id,
+       now() - interval '4 hours', now() - interval '3 hours'
+  FROM policies p, users u
+ WHERE p.id = 'pol_sls_03' AND p.status = 'active' AND u.username = 'agent.msantos'
+ON CONFLICT (id) DO NOTHING;

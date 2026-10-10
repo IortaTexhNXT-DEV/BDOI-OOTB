@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 import request from 'supertest';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { setupFinance, makePolicy, ledgerIntegrity } from './accounting.fixtures.js';
-import { withOwnDamageOnly } from './helpers.js';
+import { withOwnDamageOnly, withDirectEndorsements } from './helpers.js';
 import { pool, withTransaction } from '../src/db/pool.js';
 import { createReceivable } from '../src/modules/policies/service.js';
 
@@ -41,6 +41,7 @@ async function billedPolicy(net, owner = null) {
 
 beforeAll(async () => {
   ctx = await setupFinance();
+  await withDirectEndorsements();
   uw = await persona('sod.uw', 'processing');
   cs = await persona('sod.cs', 'operations');
   await withOwnDamageOnly('pol_sls_02', 980000, 1.75);

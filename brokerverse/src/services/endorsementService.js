@@ -235,6 +235,49 @@ class EndorsementService {
       };
     }
   }
+
+  /** An endorsements API call that returns its data and throws the server's message. */
+  async call(path, { method = 'GET', body } = {}) {
+    const response = await fetch(`${this.baseURL}/endorsements${path}`, {
+      method,
+      headers: { 'Content-Type': 'application/json', ...this.getAuthHeader() },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const json = await response.json().catch(() => ({}));
+    if (!response.ok || json.success === false) {
+      throw new Error(json.errors?.[0]?.message || json.message || `Request failed (${response.status})`);
+    }
+    return json.data;
+  }
+
+  /** The endorsement with the workflow actions open to the user. */
+  getEndorsementWorkflow(endorsementId) {
+    return this.call(`/${encodeURIComponent(endorsementId)}`);
+  }
+
+  /** Endorsement types (Endorsement Types master) that apply to the line of a policy. */
+  getEndorsementTypes(policyId) {
+    return this.call(`/types?policyId=${encodeURIComponent(policyId)}`);
+  }
+
+  setEndorsementTypes(endorsementId, endorsementTypeCodes) {
+    return this.call(`/${encodeURIComponent(endorsementId)}/types`, { method: 'PUT', body: { endorsementTypeCodes } });
+  }
+
+  submitEndorsementForApproval(endorsementId) {
+    return this.call(`/${encodeURIComponent(endorsementId)}/submit-for-approval`, { method: 'POST', body: {} });
+  }
+
+  /** Approve, or reject with { reasonCode, note }, an endorsement waiting for approval. */
+  decideEndorsement(endorsementId, decision, body = {}) {
+    return this.call(`/${encodeURIComponent(endorsementId)}/${decision}`, { method: 'POST', body });
+  }
+
+  /** Send an approved endorsement (or cancellation) to the client and the insurer. */
+  sendEndorsementToInsurer(endorsementId, cancel) {
+    const path = cancel ? '/initiate-cancel-policy/' : '/send-endorsement-to-customer/';
+    return this.call(`${path}${encodeURIComponent(endorsementId)}`, { method: 'POST', body: { sentBy: 'agent' } });
+  }
 }
 
 const endorsementService = new EndorsementService();

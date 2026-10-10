@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1322 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1328 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -35088,7 +35088,7 @@
       "name": "Endorsements",
       "item": [
         {
-          "name": "Get one endorsement (by id or number)",
+          "name": "Get one endorsement (by id or number) with the workflow actions open to the user",
           "request": {
             "method": "GET",
             "header": [],
@@ -35109,7 +35109,7 @@
                 }
               ]
             },
-            "description": "Get one endorsement (by id or number)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Detailed view\n\nAccess: read:endorsements"
+            "description": "Get one endorsement (by id or number) with the workflow actions open to the user\n\nFront-end touchpoint: Operations > Policy > Endorsement > Detailed view\n\nAccess: read:endorsements"
           },
           "response": [
             {
@@ -35134,7 +35134,7 @@
                     }
                   ]
                 },
-                "description": "Get one endorsement (by id or number)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Detailed view\n\nAccess: read:endorsements"
+                "description": "Get one endorsement (by id or number) with the workflow actions open to the user\n\nFront-end touchpoint: Operations > Policy > Endorsement > Detailed view\n\nAccess: read:endorsements"
               },
               "status": "OK",
               "code": 200,
@@ -35146,7 +35146,100 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"endorsementId\": \"end_1\",\n  \"endorsementNumber\": \"END-2026-00001\",\n  \"policyId\": \"pol_1\",\n  \"policyNumber\": \"POL-2026-00001\",\n  \"status\": \"Draft\",\n  \"endorsementTypeIds\": [\n    1\n  ],\n  \"premiumDelta\": 0,\n  \"success\": true\n}"
+              "body": "{\n  \"endorsementId\": \"end_1\",\n  \"endorsementNumber\": \"END-2026-00001\",\n  \"policyId\": \"pol_1\",\n  \"policyNumber\": \"POL-2026-00001\",\n  \"status\": \"Draft\",\n  \"endorsementTypeIds\": [\n    1\n  ],\n  \"premiumDelta\": 0,\n  \"workflow\": {\n    \"approvalRequired\": true,\n    \"canSubmit\": false,\n    \"canApprove\": true,\n    \"canSend\": false,\n    \"canComplete\": false\n  },\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve an endorsement waiting for approval (approve:policies; never the raiser; a return premium within the Authority Matrix limit)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/endorsements/:id/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "endorsements",
+                ":id",
+                "approve"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve an endorsement waiting for approval (approve:policies; never the raiser; a return premium within the Authority Matrix limit)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Detailed view > Approval\n\nAccess: approve:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/endorsements/:id/approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "endorsements",
+                    ":id",
+                    "approve"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve an endorsement waiting for approval (approve:policies; never the raiser; a return premium within the Authority Matrix limit)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Detailed view > Approval\n\nAccess: approve:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"endorsementId\": \"end_1\",\n  \"endorsementNumber\": \"END-2026-00001\",\n  \"policyId\": \"pol_1\",\n  \"policyNumber\": \"POL-2026-00001\",\n  \"status\": \"Approved\",\n  \"endorsementTypeIds\": [\n    1\n  ],\n  \"premiumDelta\": 0,\n  \"success\": true\n}"
             }
           ]
         },
@@ -35224,6 +35317,285 @@
               ],
               "cookie": [],
               "body": "(application/pdf)"
+            }
+          ]
+        },
+        {
+          "name": "Reject an endorsement waiting for approval with a reason code (endorsement_reject) (approve:policies; never the raiser)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/endorsements/:id/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "endorsements",
+                ":id",
+                "reject"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reject an endorsement waiting for approval with a reason code (endorsement_reject) (approve:policies; never the raiser)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Detailed view > Approval\n\nAccess: approve:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"ENR-DOCS\",\n  \"note\": \"OR/CR of the new owner missing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/endorsements/:id/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "endorsements",
+                    ":id",
+                    "reject"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reject an endorsement waiting for approval with a reason code (endorsement_reject) (approve:policies; never the raiser)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Detailed view > Approval\n\nAccess: approve:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"ENR-DOCS\",\n  \"note\": \"OR/CR of the new owner missing\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"endorsementId\": \"end_1\",\n  \"endorsementNumber\": \"END-2026-00001\",\n  \"policyId\": \"pol_1\",\n  \"policyNumber\": \"POL-2026-00001\",\n  \"status\": \"Rejected\",\n  \"endorsementTypeIds\": [\n    1\n  ],\n  \"premiumDelta\": 0,\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Submit a draft endorsement for approval by a second user (endorsements.approval_before_send)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/endorsements/:id/submit-for-approval",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "endorsements",
+                ":id",
+                "submit-for-approval"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Submit a draft endorsement for approval by a second user (endorsements.approval_before_send)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Summary > Submit for approval\n\nAccess: write:endorsements",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/endorsements/:id/submit-for-approval",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "endorsements",
+                    ":id",
+                    "submit-for-approval"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Submit a draft endorsement for approval by a second user (endorsements.approval_before_send)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Summary > Submit for approval\n\nAccess: write:endorsements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"endorsementId\": \"end_1\",\n  \"endorsementNumber\": \"END-2026-00001\",\n  \"policyId\": \"pol_1\",\n  \"policyNumber\": \"POL-2026-00001\",\n  \"status\": \"PendingApproval\",\n  \"endorsementTypeIds\": [\n    1\n  ],\n  \"premiumDelta\": 0,\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Choose the endorsement types of a draft endorsement (applicable to the policy line; a premium change needs a type with premium impact)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/endorsements/:id/types",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "endorsements",
+                ":id",
+                "types"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Choose the endorsement types of a draft endorsement (applicable to the policy line; a premium change needs a type with premium impact)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Summary > Endorsement types\n\nAccess: write:endorsements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"endorsementTypeCodes\": [\n    \"CPLT\",\n    \"CADR\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/endorsements/:id/types",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "endorsements",
+                    ":id",
+                    "types"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Choose the endorsement types of a draft endorsement (applicable to the policy line; a premium change needs a type with premium impact)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Summary > Endorsement types\n\nAccess: write:endorsements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"endorsementTypeCodes\": [\n    \"CPLT\",\n    \"CADR\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"endorsementId\": \"end_1\",\n  \"endorsementNumber\": \"END-2026-00001\",\n  \"policyId\": \"pol_1\",\n  \"policyNumber\": \"POL-2026-00001\",\n  \"status\": \"Draft\",\n  \"endorsementTypeIds\": [\n    1\n  ],\n  \"premiumDelta\": 0,\n  \"endorsementTypeCodes\": [\n    \"CPLT\",\n    \"CADR\"\n  ],\n  \"success\": true\n}"
             }
           ]
         },
@@ -35704,6 +36076,67 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"message\": \"Endorsement sent\",\n  \"emailedTo\": \"maria.santos@example.ph\",\n  \"insurerEmailedTo\": \"uw@malayan.example\",\n  \"endorsement\": {\n    \"endorsementId\": \"end_1\",\n    \"endorsementNumber\": \"END-2026-00001\",\n    \"policyId\": \"pol_1\",\n    \"policyNumber\": \"POL-2026-00001\",\n    \"status\": \"PendingCustomer\",\n    \"endorsementTypeIds\": [\n      1\n    ],\n    \"premiumDelta\": 0\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Endorsement types (Endorsement Types master, M12) that apply to the line of a policy",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/endorsements/types?policyId=pol_1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "endorsements",
+                "types"
+              ],
+              "query": [
+                {
+                  "key": "policyId",
+                  "value": "pol_1"
+                }
+              ]
+            },
+            "description": "Endorsement types (Endorsement Types master, M12) that apply to the line of a policy\n\nFront-end touchpoint: Operations > Policy > Endorsement > Summary > Endorsement types\n\nAccess: read:endorsements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/endorsements/types?policyId=pol_1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "endorsements",
+                    "types"
+                  ],
+                  "query": [
+                    {
+                      "key": "policyId",
+                      "value": "pol_1"
+                    }
+                  ]
+                },
+                "description": "Endorsement types (Endorsement Types master, M12) that apply to the line of a policy\n\nFront-end touchpoint: Operations > Policy > Endorsement > Summary > Endorsement types\n\nAccess: read:endorsements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"CPLT\",\n      \"name\": \"Change of Plate Number\",\n      \"financial\": false,\n      \"premiumImpact\": false,\n      \"section\": \"vehicle\"\n    }\n  ]\n}"
             }
           ]
         },
@@ -66072,6 +66505,71 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"capture\": {\n      \"id\": \"pp_1\",\n      \"policyId\": \"pol_1\",\n      \"policyNumber\": \"POL-2026-00001\",\n      \"receivableId\": \"rcv_1\",\n      \"billNumber\": \"INV-2026-00001\",\n      \"amount\": 11862.5,\n      \"paymentMode\": \"bank-transfer\",\n      \"referenceNo\": \"BDO-778812\",\n      \"paymentDate\": \"2026-09-28\",\n      \"status\": \"rejected\",\n      \"receiptNumber\": null\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Versions of a policy: as issued and after each booked endorsement, with the figures before and after (ENDT-03)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/policies/:id/versions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "policies",
+                ":id",
+                "versions"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Versions of a policy: as issued and after each booked endorsement, with the figures before and after (ENDT-03)\n\nFront-end touchpoint: Operations > Policy > Policy detail > Endorsements\n\nAccess: read:policies"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/policies/:id/versions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "policies",
+                    ":id",
+                    "versions"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Versions of a policy: as issued and after each booked endorsement, with the figures before and after (ENDT-03)\n\nFront-end touchpoint: Operations > Policy > Policy detail > Endorsements\n\nAccess: read:policies"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"version\": 2,\n      \"endorsementNumber\": \"END-2026-00001\",\n      \"premiumDelta\": 1520.5,\n      \"before\": {\n        \"grossPremium\": 23171.25\n      },\n      \"after\": {\n        \"grossPremium\": 24691.75\n      }\n    }\n  ]\n}"
             }
           ]
         },

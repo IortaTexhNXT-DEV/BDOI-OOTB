@@ -117,6 +117,7 @@ export const HELP_ROUTES = [
   ["/master/insurance/repair-shops", "motor-claim-repairs-and-letters-of-authority"],
   ["/master/insurance/short-period-rates", "cancel-a-policy-computed-return-premium"],
   ["/master/insurance/cancellation-reasons", "cancel-a-policy-computed-return-premium"],
+  ["/master/insurance/endorsement-types", "endorsement-types"],
   ["/master/insurance/lead-sources", "lead-sources-and-reason-codes"],
   ["/master/insurance/reason-codes", "lead-sources-and-reason-codes"],
   ["/accounts/period-end", "period-end"],
