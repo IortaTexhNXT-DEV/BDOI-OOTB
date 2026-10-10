@@ -10,7 +10,7 @@ import { setup, loginAs } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { requiredReason } from '../src/modules/ops-masters/records.js';
 
-const CONTEXTS = ['period_close', 'period_reopen', 'year_end_reverse', 'cas_print_void', 'cas_document_change', 'incentive_batch_reject'];
+const CONTEXTS = ['period_close', 'period_reopen', 'year_end_reverse', 'year_end_cancel', 'cas_print_void', 'cas_document_change', 'incentive_batch_reject', 'incentive_adjustment'];
 const SEED = path.join(path.dirname(new URL(import.meta.url).pathname), '../src/db/seeds/88_accounting_reasons.sql');
 
 let ctx;
@@ -34,8 +34,9 @@ describe('the accounting contexts of the Reason Codes master', () => {
     expect(options).toEqual(expect.arrayContaining(['decline', 'reassignment', ...CONTEXTS]));
     expect(new Set(options).size).toBe(options.length);
     const counts = await q("SELECT data->>'context' AS context, count(*)::int AS n FROM master_records WHERE type_code = 'reason-code' AND data->>'context' = ANY($1) GROUP BY 1 ORDER BY 1", [CONTEXTS]);
-    expect(counts).toEqual([{ context: 'cas_document_change', n: 6 }, { context: 'cas_print_void', n: 5 }, { context: 'incentive_batch_reject', n: 6 },
-      { context: 'period_close', n: 6 }, { context: 'period_reopen', n: 6 }, { context: 'year_end_reverse', n: 4 }]);
+    expect(counts).toEqual([{ context: 'cas_document_change', n: 6 }, { context: 'cas_print_void', n: 5 }, { context: 'incentive_adjustment', n: 5 },
+      { context: 'incentive_batch_reject', n: 6 }, { context: 'period_close', n: 6 }, { context: 'period_reopen', n: 6 }, { context: 'year_end_cancel', n: 4 },
+      { context: 'year_end_reverse', n: 4 }]);
     const others = await q("SELECT data->>'context' AS context, data->'requiresNote' AS note FROM master_records WHERE type_code = 'reason-code' AND code LIKE '%-OTHER' AND data->>'context' = ANY($1)", [CONTEXTS]);
     expect(others).toHaveLength(CONTEXTS.length);
     expect(others.every((o) => o.note === true)).toBe(true);
