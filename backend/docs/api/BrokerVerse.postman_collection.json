@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1317 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1322 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -64984,6 +64984,485 @@
               ],
               "cookie": [],
               "body": "{\n  \"policyId\": \"pol_1\",\n  \"policyNumber\": \"POL-2026-00001\",\n  \"clientId\": \"cl_1\",\n  \"insuredName\": \"Juan Dela Cruz\",\n  \"status\": \"Active\",\n  \"paymentStatus\": \"Pending\",\n  \"inception\": \"2026-10-01\",\n  \"expiry\": \"2027-10-01\",\n  \"grossPremium\": 23171.25,\n  \"billNumber\": \"INV-2026-00001\",\n  \"quoteRefId\": \"qt_1\",\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Corrections of the core data of a policy (requested, approved, rejected), newest first",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/policies/:id/corrections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "policies",
+                ":id",
+                "corrections"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Corrections of the core data of a policy (requested, approved, rejected), newest first\n\nFront-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: read:policies"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/policies/:id/corrections",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "policies",
+                    ":id",
+                    "corrections"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Corrections of the core data of a policy (requested, approved, rejected), newest first\n\nFront-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: read:policies"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"pcr_1\",\n      \"policyId\": \"pol_1\",\n      \"status\": \"pending\",\n      \"statusLabel\": \"Pending approval\",\n      \"changes\": [\n        {\n          \"field\": \"expiry\",\n          \"label\": \"Expiry date\",\n          \"from\": \"2027-10-01\",\n          \"to\": \"2027-10-02\",\n          \"fromText\": \"01/10/2027\",\n          \"toText\": \"02/10/2027\"\n        }\n      ],\n      \"reasonCode\": \"PCR-INSURER\",\n      \"reason\": \"Insurer issued a corrected policy\",\n      \"insurerReference\": \"MAL-END-2026-0042\",\n      \"requestedBy\": \"Maria Santos\",\n      \"requestedAt\": \"2026-10-10T02:00:00Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Request a correction of the policy number, insured name, period or insurer (policies.correction_fields) with a reason code (policy_correction) and the insurer's reference (policies.correction_insurer_fields); applied once a second user approves it",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/policies/:id/corrections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "policies",
+                ":id",
+                "corrections"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Request a correction of the policy number, insured name, period or insurer (policies.correction_fields) with a reason code (policy_correction) and the insurer's reference (policies.correction_insurer_fields); applied once a second user approves it\n\nFront-end touchpoint: Operations > Policy > Policy detail > Request correction\n\nAccess: write:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"changes\": {\n    \"expiry\": \"2027-10-02\"\n  },\n  \"reasonCode\": \"PCR-INSURER\",\n  \"note\": \"Corrected policy issued by the insurer\",\n  \"insurerReference\": \"MAL-END-2026-0042\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/policies/:id/corrections",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "policies",
+                    ":id",
+                    "corrections"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Request a correction of the policy number, insured name, period or insurer (policies.correction_fields) with a reason code (policy_correction) and the insurer's reference (policies.correction_insurer_fields); applied once a second user approves it\n\nFront-end touchpoint: Operations > Policy > Policy detail > Request correction\n\nAccess: write:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"changes\": {\n    \"expiry\": \"2027-10-02\"\n  },\n  \"reasonCode\": \"PCR-INSURER\",\n  \"note\": \"Corrected policy issued by the insurer\",\n  \"insurerReference\": \"MAL-END-2026-0042\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Correction requested\",\n  \"data\": {\n    \"id\": \"pcr_1\",\n    \"policyId\": \"pol_1\",\n    \"status\": \"pending\",\n    \"statusLabel\": \"Pending approval\",\n    \"changes\": [\n      {\n        \"field\": \"expiry\",\n        \"label\": \"Expiry date\",\n        \"from\": \"2027-10-01\",\n        \"to\": \"2027-10-02\",\n        \"fromText\": \"01/10/2027\",\n        \"toText\": \"02/10/2027\"\n      }\n    ],\n    \"reasonCode\": \"PCR-INSURER\",\n    \"reason\": \"Insurer issued a corrected policy\",\n    \"insurerReference\": \"MAL-END-2026-0042\",\n    \"requestedBy\": \"Maria Santos\",\n    \"requestedAt\": \"2026-10-10T02:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve a pending correction and apply it to the policy (approve:policies; never the requester)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/policies/:id/corrections/:correctionId/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "policies",
+                ":id",
+                "corrections",
+                ":correctionId",
+                "approve"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "correctionId",
+                  "value": "",
+                  "description": "correctionId (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve a pending correction and apply it to the policy (approve:policies; never the requester)\n\nFront-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: approve:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/policies/:id/corrections/:correctionId/approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "policies",
+                    ":id",
+                    "corrections",
+                    ":correctionId",
+                    "approve"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "correctionId",
+                      "value": "",
+                      "description": "correctionId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve a pending correction and apply it to the policy (approve:policies; never the requester)\n\nFront-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: approve:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Correction approved and applied\",\n  \"data\": {\n    \"id\": \"pcr_1\",\n    \"policyId\": \"pol_1\",\n    \"status\": \"approved\",\n    \"statusLabel\": \"Pending approval\",\n    \"changes\": [\n      {\n        \"field\": \"expiry\",\n        \"label\": \"Expiry date\",\n        \"from\": \"2027-10-01\",\n        \"to\": \"2027-10-02\",\n        \"fromText\": \"01/10/2027\",\n        \"toText\": \"02/10/2027\"\n      }\n    ],\n    \"reasonCode\": \"PCR-INSURER\",\n    \"reason\": \"Insurer issued a corrected policy\",\n    \"insurerReference\": \"MAL-END-2026-0042\",\n    \"requestedBy\": \"Maria Santos\",\n    \"requestedAt\": \"2026-10-10T02:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reject a pending correction with a reason code (policy_correction_reject) (approve:policies; never the requester)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/policies/:id/corrections/:correctionId/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "policies",
+                ":id",
+                "corrections",
+                ":correctionId",
+                "reject"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "correctionId",
+                  "value": "",
+                  "description": "correctionId (path parameter)"
+                }
+              ]
+            },
+            "description": "Reject a pending correction with a reason code (policy_correction_reject) (approve:policies; never the requester)\n\nFront-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: approve:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"PCRR-NOPROOF\",\n  \"note\": \"No corrected policy from the insurer yet\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/policies/:id/corrections/:correctionId/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "policies",
+                    ":id",
+                    "corrections",
+                    ":correctionId",
+                    "reject"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "correctionId",
+                      "value": "",
+                      "description": "correctionId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reject a pending correction with a reason code (policy_correction_reject) (approve:policies; never the requester)\n\nFront-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: approve:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"PCRR-NOPROOF\",\n  \"note\": \"No corrected policy from the insurer yet\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Correction rejected\",\n  \"data\": {\n    \"id\": \"pcr_1\",\n    \"policyId\": \"pol_1\",\n    \"status\": \"rejected\",\n    \"statusLabel\": \"Pending approval\",\n    \"changes\": [\n      {\n        \"field\": \"expiry\",\n        \"label\": \"Expiry date\",\n        \"from\": \"2027-10-01\",\n        \"to\": \"2027-10-02\",\n        \"fromText\": \"01/10/2027\",\n        \"toText\": \"02/10/2027\"\n      }\n    ],\n    \"reasonCode\": \"PCR-INSURER\",\n    \"reason\": \"Insurer issued a corrected policy\",\n    \"insurerReference\": \"MAL-END-2026-0042\",\n    \"requestedBy\": \"Maria Santos\",\n    \"requestedAt\": \"2026-10-10T02:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Withdraw an own pending correction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/policies/:id/corrections/:correctionId/withdraw",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "policies",
+                ":id",
+                "corrections",
+                ":correctionId",
+                "withdraw"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "correctionId",
+                  "value": "",
+                  "description": "correctionId (path parameter)"
+                }
+              ]
+            },
+            "description": "Withdraw an own pending correction\n\nFront-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: write:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/policies/:id/corrections/:correctionId/withdraw",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "policies",
+                    ":id",
+                    "corrections",
+                    ":correctionId",
+                    "withdraw"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "correctionId",
+                      "value": "",
+                      "description": "correctionId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Withdraw an own pending correction\n\nFront-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: write:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Correction withdrawn\",\n  \"data\": {\n    \"id\": \"pcr_1\",\n    \"policyId\": \"pol_1\",\n    \"status\": \"withdrawn\",\n    \"statusLabel\": \"Pending approval\",\n    \"changes\": [\n      {\n        \"field\": \"expiry\",\n        \"label\": \"Expiry date\",\n        \"from\": \"2027-10-01\",\n        \"to\": \"2027-10-02\",\n        \"fromText\": \"01/10/2027\",\n        \"toText\": \"02/10/2027\"\n      }\n    ],\n    \"reasonCode\": \"PCR-INSURER\",\n    \"reason\": \"Insurer issued a corrected policy\",\n    \"insurerReference\": \"MAL-END-2026-0042\",\n    \"requestedBy\": \"Maria Santos\",\n    \"requestedAt\": \"2026-10-10T02:00:00Z\"\n  }\n}"
             }
           ]
         },

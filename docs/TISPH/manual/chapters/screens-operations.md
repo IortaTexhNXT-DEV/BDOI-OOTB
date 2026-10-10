@@ -332,7 +332,7 @@ Choose Operations > Policy. The list shows **Policy Number**, **Client Id**, **C
 
 {{screen:/agent/policy}}
 
-Policies are booked from the placement slip (see [Placement Slips](#placement-slips)); **Bulk Upload** loads policies from a file, validated first. The **Payment** status is **Pending** (billed, not paid), **Reviewing** (a payment waits for Cash Control), **Partial** or **Completed**.
+Policies are booked from the placement slip (see [Placement Slips](#placement-slips)); **Bulk Upload** loads the policies in force at go-live from a file, validated first, without bill, journal or commission. The **Payment** status is **Pending** (billed, not paid), **Reviewing** (a payment waits for Cash Control), **Partial** or **Completed**.
 
 In **Actions**, the eye (**View policy**) opens the policy and **More actions** offers **Claim** (register a claim on the policy, see [Register a claim](#register-a-claim)) and **Endorsement**.
 
@@ -341,6 +341,17 @@ In **Actions**, the eye (**View policy**) opens the policy and **More actions** 
 The policy page shows the cards **Gross Premium**, **Expiry Date** and **Client ID**, and the panels **Policy Details**, **Insured Details**, **Vehicle Details** (motor: motor, chassis and plate numbers, mortgagee), **Coverage Details**, **Premium Breakdown**, **Endorsements**, **History** and **Documents & Billing** (**Generate Policy Invoice**, **Premium Accounting Entries**, the policy document to **Preview**, **Open** or **Print**). **View Policy** opens the policy schedule.
 
 ![The policy page, with Documents & Billing](images/screens-operations/policy-details.png)
+
+### Correct the policy details {#correct-the-policy-details}
+
+The policy number, insured name, inception and expiry dates and insurer of a policy are not edited: they are corrected with the approval of a second user, and the status of a policy only follows its endorsements, cancellation, renewal and expiry.
+
+1. On the policy page, in **Corrections**, select **Request correction**.
+2. Change the values to correct. For the policy number, the period or the insurer, enter the **Insurer reference** of the corrected policy.
+3. Choose the **Reason** and select **Request correction**. The correction is listed as **Pending approval** and {{roles:approve:policies}} are notified.
+4. A user other than the requester selects **Approve correction** (the policy is updated) or **Reject correction** with a reason. The requester may **Withdraw** it before.
+
+One correction at a time waits for approval on a policy.
 
 ### Raise an endorsement request {#raise-an-endorsement-request}
 

@@ -50,10 +50,13 @@ describe('policies', () => {
     expect((await sales('get', '/policies/pol_missing')).status).toBe(404);
   });
   it('updates policy details and payment status', async () => {
-    const u = await sales('put', '/policies/pol_sls_05').send({ policyNumber: 'FPG-MC-2026-0005', plateNumber: 'NEF 5511', inception: '2026-06-01', expiry: '2027-06-01', paymentStatus: 'Pending' });
+    const u = await sales('put', '/policies/pol_sls_05').send({ plateNumber: 'NEF 5511', inception: '2026-07-17', paymentStatus: 'Pending' });
     expect(u.status).toBe(200);
-    expect(u.body).toMatchObject({ policyNumber: 'FPG-MC-2026-0005', plateNumber: 'NEF 5511', inception: '2026-06-01', expiry: '2027-06-01' });
-    expect((await sales('put', '/policies/pol_sls_07').send({ policyNumber: 'FPG-MC-2026-0005' })).status).toBe(409);
+    expect(u.body).toMatchObject({ plateNumber: 'NEF 5511', inception: '2026-07-17' });
+    // the core data of an issued policy changes by an approved correction (test/policy-corrections.test.js)
+    const core = await sales('put', '/policies/pol_sls_05').send({ policyNumber: 'FPG-MC-2026-0005' });
+    expect(core.status).toBe(400);
+    expect(core.body.message).toContain('Policy number of policy');
     // a policy editor cannot mark the premium paid: only finance sets the payment status
     expect((await sales('patch', '/policies/pol_sls_05/payment-status').send({ paymentStatus: 'Completed', paymentMethod: 'GCash' })).status).toBe(403);
     expect((await sales('put', '/policies/pol_sls_05').send({ paymentStatus: 'Completed' })).status).toBe(403);

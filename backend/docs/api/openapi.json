@@ -108793,6 +108793,792 @@
         }
       }
     },
+    "/policies/{id}/corrections": {
+      "get": {
+        "operationId": "getPoliciesIdCorrections",
+        "summary": "Corrections of the core data of a policy (requested, approved, rejected), newest first",
+        "tags": [
+          "Policies"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: read:policies",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "policyId": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "statusLabel": {
+                            "type": "string"
+                          },
+                          "changes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "field": {
+                                  "type": "string"
+                                },
+                                "label": {
+                                  "type": "string"
+                                },
+                                "from": {
+                                  "type": "string"
+                                },
+                                "to": {
+                                  "type": "string"
+                                },
+                                "fromText": {
+                                  "type": "string"
+                                },
+                                "toText": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "reasonCode": {
+                            "type": "string"
+                          },
+                          "reason": {
+                            "type": "string"
+                          },
+                          "insurerReference": {
+                            "type": "string"
+                          },
+                          "requestedBy": {
+                            "type": "string"
+                          },
+                          "requestedAt": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "pcr_1",
+                      "policyId": "pol_1",
+                      "status": "pending",
+                      "statusLabel": "Pending approval",
+                      "changes": [
+                        {
+                          "field": "expiry",
+                          "label": "Expiry date",
+                          "from": "2027-10-01",
+                          "to": "2027-10-02",
+                          "fromText": "01/10/2027",
+                          "toText": "02/10/2027"
+                        }
+                      ],
+                      "reasonCode": "PCR-INSURER",
+                      "reason": "Insurer issued a corrected policy",
+                      "insurerReference": "MAL-END-2026-0042",
+                      "requestedBy": "Maria Santos",
+                      "requestedAt": "2026-10-10T02:00:00Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Policy detail > Corrections",
+        "x-permissions": [
+          "read:policies"
+        ]
+      },
+      "post": {
+        "operationId": "postPoliciesIdCorrections",
+        "summary": "Request a correction of the policy number, insured name, period or insurer (policies.correction_fields) with a reason code (policy_correction) and the insurer's reference (policies.correction_insurer_fields); applied once a second user approves it",
+        "tags": [
+          "Policies"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Policy detail > Request correction\n\nAccess: write:policies",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "policyId": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "changes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "from": {
+                                "type": "string"
+                              },
+                              "to": {
+                                "type": "string"
+                              },
+                              "fromText": {
+                                "type": "string"
+                              },
+                              "toText": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "reasonCode": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
+                        "insurerReference": {
+                          "type": "string"
+                        },
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "requestedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Correction requested",
+                  "data": {
+                    "id": "pcr_1",
+                    "policyId": "pol_1",
+                    "status": "pending",
+                    "statusLabel": "Pending approval",
+                    "changes": [
+                      {
+                        "field": "expiry",
+                        "label": "Expiry date",
+                        "from": "2027-10-01",
+                        "to": "2027-10-02",
+                        "fromText": "01/10/2027",
+                        "toText": "02/10/2027"
+                      }
+                    ],
+                    "reasonCode": "PCR-INSURER",
+                    "reason": "Insurer issued a corrected policy",
+                    "insurerReference": "MAL-END-2026-0042",
+                    "requestedBy": "Maria Santos",
+                    "requestedAt": "2026-10-10T02:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Policy detail > Request correction",
+        "x-permissions": [
+          "write:policies"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "changes": {
+                    "type": "object",
+                    "properties": {
+                      "expiry": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  },
+                  "insurerReference": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "changes": {
+                  "expiry": "2027-10-02"
+                },
+                "reasonCode": "PCR-INSURER",
+                "note": "Corrected policy issued by the insurer",
+                "insurerReference": "MAL-END-2026-0042"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/policies/{id}/corrections/{correctionId}/approve": {
+      "post": {
+        "operationId": "postPoliciesIdCorrectionsCorrectionIdApprove",
+        "summary": "Approve a pending correction and apply it to the policy (approve:policies; never the requester)",
+        "tags": [
+          "Policies"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: approve:policies",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "correctionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "policyId": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "changes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "from": {
+                                "type": "string"
+                              },
+                              "to": {
+                                "type": "string"
+                              },
+                              "fromText": {
+                                "type": "string"
+                              },
+                              "toText": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "reasonCode": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
+                        "insurerReference": {
+                          "type": "string"
+                        },
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "requestedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Correction approved and applied",
+                  "data": {
+                    "id": "pcr_1",
+                    "policyId": "pol_1",
+                    "status": "approved",
+                    "statusLabel": "Pending approval",
+                    "changes": [
+                      {
+                        "field": "expiry",
+                        "label": "Expiry date",
+                        "from": "2027-10-01",
+                        "to": "2027-10-02",
+                        "fromText": "01/10/2027",
+                        "toText": "02/10/2027"
+                      }
+                    ],
+                    "reasonCode": "PCR-INSURER",
+                    "reason": "Insurer issued a corrected policy",
+                    "insurerReference": "MAL-END-2026-0042",
+                    "requestedBy": "Maria Santos",
+                    "requestedAt": "2026-10-10T02:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Policy detail > Corrections",
+        "x-permissions": [
+          "approve:policies"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/policies/{id}/corrections/{correctionId}/reject": {
+      "post": {
+        "operationId": "postPoliciesIdCorrectionsCorrectionIdReject",
+        "summary": "Reject a pending correction with a reason code (policy_correction_reject) (approve:policies; never the requester)",
+        "tags": [
+          "Policies"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: approve:policies",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "correctionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "policyId": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "changes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "from": {
+                                "type": "string"
+                              },
+                              "to": {
+                                "type": "string"
+                              },
+                              "fromText": {
+                                "type": "string"
+                              },
+                              "toText": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "reasonCode": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
+                        "insurerReference": {
+                          "type": "string"
+                        },
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "requestedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Correction rejected",
+                  "data": {
+                    "id": "pcr_1",
+                    "policyId": "pol_1",
+                    "status": "rejected",
+                    "statusLabel": "Pending approval",
+                    "changes": [
+                      {
+                        "field": "expiry",
+                        "label": "Expiry date",
+                        "from": "2027-10-01",
+                        "to": "2027-10-02",
+                        "fromText": "01/10/2027",
+                        "toText": "02/10/2027"
+                      }
+                    ],
+                    "reasonCode": "PCR-INSURER",
+                    "reason": "Insurer issued a corrected policy",
+                    "insurerReference": "MAL-END-2026-0042",
+                    "requestedBy": "Maria Santos",
+                    "requestedAt": "2026-10-10T02:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Policy detail > Corrections",
+        "x-permissions": [
+          "approve:policies"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reasonCode": "PCRR-NOPROOF",
+                "note": "No corrected policy from the insurer yet"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/policies/{id}/corrections/{correctionId}/withdraw": {
+      "post": {
+        "operationId": "postPoliciesIdCorrectionsCorrectionIdWithdraw",
+        "summary": "Withdraw an own pending correction",
+        "tags": [
+          "Policies"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Policy detail > Corrections\n\nAccess: write:policies",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "correctionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "policyId": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "statusLabel": {
+                          "type": "string"
+                        },
+                        "changes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "from": {
+                                "type": "string"
+                              },
+                              "to": {
+                                "type": "string"
+                              },
+                              "fromText": {
+                                "type": "string"
+                              },
+                              "toText": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "reasonCode": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
+                        "insurerReference": {
+                          "type": "string"
+                        },
+                        "requestedBy": {
+                          "type": "string"
+                        },
+                        "requestedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Correction withdrawn",
+                  "data": {
+                    "id": "pcr_1",
+                    "policyId": "pol_1",
+                    "status": "withdrawn",
+                    "statusLabel": "Pending approval",
+                    "changes": [
+                      {
+                        "field": "expiry",
+                        "label": "Expiry date",
+                        "from": "2027-10-01",
+                        "to": "2027-10-02",
+                        "fromText": "01/10/2027",
+                        "toText": "02/10/2027"
+                      }
+                    ],
+                    "reasonCode": "PCR-INSURER",
+                    "reason": "Insurer issued a corrected policy",
+                    "insurerReference": "MAL-END-2026-0042",
+                    "requestedBy": "Maria Santos",
+                    "requestedAt": "2026-10-10T02:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Policy detail > Corrections",
+        "x-permissions": [
+          "write:policies"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
     "/policies/{id}/documents": {
       "get": {
         "operationId": "getPoliciesIdDocuments",

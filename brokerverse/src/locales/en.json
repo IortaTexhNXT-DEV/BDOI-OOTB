@@ -4700,6 +4700,36 @@
     "download": "Download",
     "noVehicleDetails": "No vehicle details recorded"
   },
+  "policyCorrections": {
+    "title": "Corrections",
+    "request": "Request correction",
+    "requestTitle": "Request a policy correction",
+    "policyNumber": "Policy number",
+    "insuredName": "Insured name",
+    "inception": "Inception date",
+    "expiry": "Expiry date",
+    "insurer": "Insurer",
+    "insurerReference": "Insurer reference",
+    "reason": "Reason",
+    "submit": "Request correction",
+    "cancel": "Cancel",
+    "nothingChanged": "Change at least one value",
+    "requested": "Correction requested for approval",
+    "requestedAt": "Requested on",
+    "requestedBy": "Requested by",
+    "changes": "Changes",
+    "status": "Status",
+    "decision": "Decision",
+    "approve": "Approve correction",
+    "reject": "Reject correction",
+    "withdraw": "Withdraw",
+    "approveTitle": "Approve the correction",
+    "approveMessage": "The policy is updated with the new values.",
+    "rejectTitle": "Reject the correction",
+    "withdrawTitle": "Withdraw the correction",
+    "approved": "Correction approved and applied",
+    "rejected": "Correction rejected"
+  },
   "uploadPolicy": {
     "title": "Prospects",
     "leadIdLabel": "Prospect ID:",
@@ -15019,7 +15049,9 @@
       "delegation": "Delegation of approval authority",
       "delegation_end": "Delegation ended early",
       "sod_exception": "Segregation of duties exception",
-      "access_review": "Access review removal"
+      "access_review": "Access review removal",
+      "policy_correction": "Policy correction",
+      "policy_correction_reject": "Policy correction rejection"
     }
   },
   "financialStatements": {

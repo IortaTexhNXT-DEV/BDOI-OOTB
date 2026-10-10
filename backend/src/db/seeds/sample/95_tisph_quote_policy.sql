@@ -19,3 +19,12 @@ UPDATE quotes SET version = 2, version_started_at = created_at + interval '1 day
 UPDATE quotes SET valid_until = valid_until + 30, extension_count = 1, extended_at = created_at + interval '5 days',
        extended_by = (SELECT id FROM users WHERE username = 'agent.msantos'), extension_remarks = 'Customer waiting for the release of the auto loan'
  WHERE id = 'qt_sls_11' AND extension_count = 0 AND status = 'accepted';
+
+-- POL-2026-95002: the insurer corrected the expiry date after issuance; the correction waits for a second user.
+INSERT INTO policy_corrections(id, policy_id, changes, reason_code, reason, insurer_reference, requested_by, requested_at)
+SELECT 'pcr_sample_01', p.id, jsonb_build_object('expiry', jsonb_build_object('from', p.expiry_date, 'to', p.expiry_date + 1)),
+       'PCR-INSURER', 'Corrected policy issued by the insurer', 'MAP-END-2026-0042', (SELECT id FROM users WHERE username = 'agent.msantos'), now() - interval '2 hours'
+  FROM policies p
+ WHERE p.id = 'pol_sls_02' AND p.status = 'active'
+   AND NOT EXISTS (SELECT 1 FROM policy_corrections c WHERE c.policy_id = p.id)
+ON CONFLICT (id) DO NOTHING;

@@ -14,9 +14,12 @@ import ImportDialog from "../../components/ImportDialog";
 import { useLocation, useNavigate } from "react-router-dom";
 import { canOpen, hasPermission } from "../../utils/canOpen";
 
-/** Bulk upload: template and importer of the API (Data, Columns and Instructions sheets; failed rows listed). */
+/**
+ * Bulk upload: template and importer of the API (Data, Columns and Instructions sheets; failed rows listed). A TISPH
+ * policy is issued through its placement slip once the insurer confirms, so the upload only loads the in-force
+ * policies at go-live (no bill, journal or commission), by the go-live data owner.
+ */
 const UPLOAD_TARGETS = [
-  { label: "New business policies", templatePath: "/policies/bulk-upload/template", uploadPath: "/policies/bulk-upload" },
   { label: "Existing policies (go-live: no bill, journal or commission)", templatePath: "/policies/bulk-upload/template", uploadPath: "/policies/bulk-upload?mode=go-live" },
 ];
 
@@ -40,9 +43,9 @@ const ClientListingCard = () => {
   };
 
   // A policy is issued from a lead's quotation: offer Create Policy only to roles that may open Leads (not claims,
-  // as for Create Lead), and Bulk Upload only to roles the server lets write policies.
+  // as for Create Lead), and Bulk Upload only to the go-live data owner the server lets load policies.
   const mayCreatePolicy = canOpen("/agent/leadlisting");
-  const mayBulkUpload = hasPermission("write:policies");
+  const mayBulkUpload = hasPermission("write:policies") && hasPermission("write:data-load");
 
   const handleCreatePolicy = (lob) => {
     // Navigate to lead listing to select a lead for policy creation

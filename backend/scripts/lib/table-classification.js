@@ -19,7 +19,7 @@
 export const TRANSACTION_TABLES = [
   // sales and policy administration
   'leads', 'clients', 'quotes', 'policies', 'endorsements', 'policy_payments',
-  'broker_slips', 'insurer_offers', 'placements', 'risk_participants', 'quote_customer_responses', 'quote_versions',
+  'broker_slips', 'insurer_offers', 'placements', 'risk_participants', 'quote_customer_responses', 'quote_versions', 'policy_corrections',
   // receivables, receipts, collections, disbursements, petty cash movements (the funds themselves are masters)
   'receivables', 'receipts', 'receipt_lines', 'receipt_applications', 'entry_matches', 'invoice_lists', 'receivable_participants', 'receivable_credits', 'remittance_allocations',
   'collection_items', 'collection_actions', 'disbursements', 'checkbooks',
