@@ -19,6 +19,7 @@ import { journeyFor, resolveLob, assertStep } from './journey.js';
 import { productOfLine } from './productLines.js';
 import { createLead } from '../leads/service.js';
 import { assertOnMarket, evaluate, assertNotDeclined } from '../product-configurator/underwriting.js';
+import { assertFeature } from '../features/service.js';
 
 export const SLIP_STATUSES = ['draft', 'submitted', 'responses-in', 'closed', 'cancelled'];
 const OPEN = ['draft', 'submitted', 'responses-in'];
@@ -179,6 +180,8 @@ export async function createSlip(input, userId) {
     assertStep(journey, 'brokerSlip', ['skip'], `Broker slips are not used for ${journey.lob}: start with the Quotation Slip`);
     const defaults = (await getSetting('broker_slips.default_insurers', [])) || [];
     const insurers = await resolveInsurers(db, body.insurers?.length ? body.insurers : defaults);
+    // one request to several insurers is a future-release feature (modules/features): one insurer per client
+    if (insurers.length > 1) await assertFeature('rfq-multi-insurer', { write: true });
     const number = await nextDocumentNumber('broker_slip', { db, unique: { table: 'broker_slips', column: 'slip_number' } });
     const covers = Array.isArray(body.requestedCovers) ? body.requestedCovers : [];
     const r = await db.query(`INSERT INTO broker_slips(slip_number, lead_id, client_id, product_id, product_type, lob, insured_name, risk_details, doc, requested_covers,
@@ -220,6 +223,7 @@ export async function updateSlip(id, body, userId) {
     }
     if (Array.isArray(body.insurers)) {
       const ids = await resolveInsurers(db, body.insurers);
+      if (ids.length > 1) await assertFeature('rfq-multi-insurer', { write: true });
       await addOffers(db, before.id, ids, userId);
       // an insurer taken off the list is removed only while it has not answered
       await db.query("DELETE FROM insurer_offers WHERE broker_slip_id = $1 AND status = 'pending' AND NOT (insurance_company_id = ANY($2::int[]))", [before.id, ids]);
@@ -270,6 +274,7 @@ export async function submitSlip(id, user) {
 export async function addInsurer(id, ref, user) {
   const slip = await getSlipRow(id);
   if (!OPEN.includes(slip.status)) throw conflict(`Insurers cannot be added to a ${slip.status} broker slip`);
+  await assertFeature('rfq-multi-insurer', { write: true });
   const [ic] = await resolveInsurers(null, [ref]);
   await withTransaction((db) => addOffers(db, slip.id, [ic], user.id));
   let mail = null;

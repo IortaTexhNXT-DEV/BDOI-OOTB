@@ -15,6 +15,7 @@ import { hasPermission } from "../../utils/canOpen";
 import { ADMIN_ROLES, getUserRoles } from "../../utils/menuPermissions";
 import { openConfirm } from "../../components/ConfirmDialog";
 import { Field, PageHeader, StatusTag, date, dateTime, money, num, showError, showSuccess } from "./common";
+import { useFeature } from "../../features/Feature";
 
 const ROLES = ["sales", "processing", "operations", "claims", "accounting", "accounting-manager"];
 const NUMERIC = ["integer", "number", "money"];
@@ -41,7 +42,10 @@ const ReportBuilder = () => {
   const { t } = useTranslation();
   const toast = useRef(null);
   const write = hasPermission("write:reports");
+  const biFeature = useFeature("bi-extract");
   const admin = getUserRoles().some((r) => ADMIN_ROLES.includes(r));
+  // the nightly extract for a BI tool is a future-release feature (features/entitlements.js)
+  const bi = admin && biFeature.on;
   const [tab, setTab] = useState(0);
   const [datasets, setDatasets] = useState([]);
   const [saved, setSaved] = useState([]);
@@ -60,13 +64,13 @@ const ReportBuilder = () => {
     }
   }, []);
   const loadRuns = useCallback(async () => {
-    if (!admin) return;
+    if (!bi) return;
     try {
       setRuns(await service.biRuns());
     } catch (e) {
       showError(toast, e);
     }
-  }, [admin]);
+  }, [bi]);
   useEffect(() => {
     service.datasets().then(setDatasets).catch((e) => showError(toast, e));
     loadSaved();
@@ -247,7 +251,7 @@ const ReportBuilder = () => {
             </DataTable>
           </TabPanel>
 
-          {admin ? (
+          {bi ? (
             <TabPanel header={t("distribution.rb.bi", "BI extract")}>
               <div className="dist-toolbar">
                 <p className="pe-muted">{t("distribution.rb.biHelp", "The bi-extract job writes one CSV per dataset (Settings: bi.extract_datasets) to the storage folder for the BI tool to pick up.")}</p>

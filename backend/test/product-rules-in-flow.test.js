@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs, withProducts } from './helpers.js';
+import { setup, loginAs, withProducts, enableFeatures } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { parseCondition, bandOf, test as testCondition, adjustNet } from '../src/modules/product-configurator/underwriting.js';
@@ -38,6 +38,8 @@ const ruleId = async (code) => (await q("SELECT c.id FROM product_components c J
 
 beforeAll(async () => {
   ctx = await setup();
+  // requests for quotation to several insurers are a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['rfq-multi-insurer']);
   await withProducts();
   sales = await persona('r.sales', ['sales']);
   proc = await persona('r.proc', ['tis-ops-unit-head']);

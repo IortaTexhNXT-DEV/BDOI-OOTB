@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, enableFeatures } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 
 let ctx;
@@ -16,6 +16,8 @@ async function persona(username, roles) {
 
 beforeAll(async () => {
   ctx = await setup();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['sales-dashboard']);
   sales = await persona('d.sales', ['sales']);
   finance = await persona('d.finance', ['accounting']);
   claims = await persona('d.claims', ['claims']);

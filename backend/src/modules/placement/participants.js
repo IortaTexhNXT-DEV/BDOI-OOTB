@@ -12,6 +12,7 @@ import { query } from '../../db/pool.js';
 import { badRequest } from '../../lib/errors.js';
 import { num, round2 } from '../documents/common.js';
 import { insurerId } from '../policies/service.js';
+import { assertFeature } from '../features/service.js';
 
 const TOLERANCE = 0.0001;
 const truthy = (v) => v === true || ['true', 'yes', '1'].includes(String(v ?? '').toLowerCase());
@@ -55,6 +56,8 @@ export async function normaliseParticipants(list, { db = null } = {}) {
       insurerReference: p.insurerReference || null,
     });
   }
+  // more than one insurer on a risk is co-insurance, a feature this environment may not run (modules/features)
+  if (out.length > 1) await assertFeature('coinsurance', { write: true });
   if (!out.some((p) => p.isLead)) out[0].isLead = true;
   const r = participantsSchema.safeParse(out.map((p) => ({ ...p, sharePercent: Number.isNaN(p.sharePercent) ? undefined : p.sharePercent })));
   if (!r.success) {

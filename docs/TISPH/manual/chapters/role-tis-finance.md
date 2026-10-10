@@ -164,9 +164,11 @@ Manager. See [Remittance to insurers](#remittance-to-insurers) and [Remittance t
 3. Generate the payout. The approved lines go to a payment voucher, net of the referrer's withholding tax, and are
    **Paid** when the voucher is paid.
 
+::: feature insurer-overrides
 Overriding, profit and contingent commission due from the insurers is computed on
 {{menu:/commission/insurer-overrides/computations}}. See [Commission and incentives](#process-commission) and
 [Commission to agents and referrers](#commission-to-agents-and-referrers).
+:::
 
 ### Reconcile a bank account {#tis-finance-and-general-accounting-bank-reconciliation}
 

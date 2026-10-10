@@ -21,6 +21,7 @@ import { AREAS, LEVEL_NAMES, LEVELS, catalogue } from '../modules/access-control
 import { roleDirectory } from '../modules/access-control/roles.js';
 import { AUTHORITY_STEPS, authorityMatrix, limitWords } from '../modules/access-control/authority.js';
 import { listSodRules } from '../modules/access-control/service.js';
+import { clientState } from '../modules/features/service.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(here, '..', '..', '..');
@@ -56,11 +57,11 @@ const listAnd = (names) => (names.length > 1 ? `${names.slice(0, -1).join(', ')}
 /** The menu of the front end: the tree, the role grants and the side bar labels. */
 export async function loadMenu(web = WEB) {
   const load = (file) => import(pathToFileURL(path.join(web, file)).href);
-  const [{ menuList }, { filterMenuForRoles }, { flattenLeaves }] = await Promise.all([
-    load('components/SideBar/list.js'), load('utils/menuPermissions.js'), load('components/SideBar/menuTree.js'),
+  const [{ menuList }, { filterMenuForRoles }, { flattenLeaves }, { setFeatureState }] = await Promise.all([
+    load('components/SideBar/list.js'), load('utils/menuPermissions.js'), load('components/SideBar/menuTree.js'), load('features/entitlements.js'),
   ]);
   const labels = JSON.parse(fs.readFileSync(path.join(web, 'locales', 'en.json'), 'utf8')).sidebar || {};
-  return { menuList, filterMenuForRoles, flattenLeaves, label: (name) => labels[name] || name };
+  return { menuList, filterMenuForRoles, flattenLeaves, setFeatureState, label: (name) => labels[name] || name };
 }
 
 /** Permissions of every role with those of the active roles it includes. */
@@ -120,9 +121,12 @@ function accessLevel(leaf, modules, held, cat) {
 }
 
 /**
- * The facts of every TISPH role. `menu` is loadMenu(); `db` a pool or client of a migrated and seeded database.
+ * The facts of every TISPH role. `menu` is loadMenu(); `db` a pool or client of a migrated and seeded database. The
+ * menus are those of the features enabled in that database (modules/features).
  */
 export async function roleFacts(db, menu) {
+  // the menus of the features this environment runs (Phase 1 and platform functions in a delivered environment)
+  menu.setFeatureState(await clientState());
   const dir = await roleDirectory(db);
   const roles = dir.roles.filter((r) => r.department && !r.platform && !r.fullAccess && r.status === 'active');
   const perms = await effectivePermissions(db);

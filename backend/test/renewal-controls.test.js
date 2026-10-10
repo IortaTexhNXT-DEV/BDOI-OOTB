@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs, withoutCommissionTaxes } from './helpers.js';
+import { setup, loginAs, withoutCommissionTaxes, enableFeatures } from './helpers.js';
 import { pool, query, one } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { today, addDays } from '../src/lib/dates.js';
@@ -39,6 +39,8 @@ async function submitted(id, days = 40) {
 
 beforeAll(async () => {
   ctx = await setup();
+  // the at-risk register is a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['renewal-at-risk']);
   await withoutCommissionTaxes();
   todayStr = await today();
   await makeUser('rc.sales', ['tis-sales-associate'], 'Rhea Cruz');

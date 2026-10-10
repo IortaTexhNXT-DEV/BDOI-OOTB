@@ -20,6 +20,7 @@ import { formatDateTime } from '../../lib/pdf/format.js';
 import { requiredReason } from '../ops-masters/records.js';
 import { AREAS, BASELINE, LEVEL_NAMES, LEVELS, businessName, catalogue } from './catalogue.js';
 import { roleDirectory } from './roles.js';
+import { PLATFORM_PERMISSIONS } from '../../lib/platform.js';
 import { changeApproval, listAccessChanges, registerAccessKind, requestAccessChange, rolesHeldBy } from './changes.js';
 import { breaksAccessRule as breaks, listSodRules } from './service.js';
 
@@ -85,8 +86,9 @@ function assertMayChange(role, user) {
   if (!isAdmin(user) && (user.roles || []).includes(role.code)) throw forbidden('You cannot change the access of a role you hold');
 }
 
+/** Permissions of the tenant: the platform permissions (lib/platform.js) are never offered, never granted here. */
 async function permissionRows(db) {
-  return (await db.query('SELECT code, module, description FROM permissions ORDER BY code')).rows;
+  return (await db.query('SELECT code, module, description FROM permissions WHERE NOT (code = ANY($1)) ORDER BY code', [PLATFORM_PERMISSIONS])).rows;
 }
 
 /** Everything the screen shows: catalogue, departments, roles with their own and included grants, users and pending change. */

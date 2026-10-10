@@ -25,6 +25,8 @@ import { setNextNumber, updateSeries, validatePattern } from '../document-number
 import { isControlledSetting } from '../posting-rules/service.js';
 import { MIGRATED_NUMBER_TARGETS, collidingNumber } from './numbering.js';
 import { amountValue, cell, dateValue, fail, isDate, keyText, toBool, numberCell, yesNo } from './common.js';
+import { PLATFORM_ROLE } from '../../lib/platform.js';
+import { exportState as exportFeatureState } from '../features/service.js';
 
 // ------------------------------------------------------------------ masters (generic master types)
 
@@ -200,7 +202,9 @@ const usersSheet = () => ({
   async exportRows() {
     const rows = await many(`SELECT u.*, (SELECT r.username FROM users r WHERE r.id = u.reporting_to) AS reporting_username,
         COALESCE((SELECT string_agg(ro.code, ', ' ORDER BY ro.code) FROM user_roles ur JOIN roles ro ON ro.id = ur.role_id WHERE ur.user_id = u.id), '') AS role_codes
-      FROM users u WHERE u.status <> 'deleted' ORDER BY (u.reporting_to IS NOT NULL), u.username`);
+      FROM users u WHERE u.status <> 'deleted'
+        AND NOT EXISTS (SELECT 1 FROM user_roles ur JOIN roles ro ON ro.id = ur.role_id WHERE ur.user_id = u.id AND ro.code = $1)
+      ORDER BY (u.reporting_to IS NOT NULL), u.username`, [PLATFORM_ROLE]);
     return rows.map((u) => ({
       username: u.username, displayName: u.display_name, firstName: cell(u.first_name), lastName: cell(u.last_name), email: cell(u.email), phone: cell(u.phone),
       employeeCode: cell(u.employee_code), branchCode: cell(u.branch_code), department: cell(u.department), designation: cell(u.designation),
@@ -214,6 +218,7 @@ const usersSheet = () => ({
     if (!['active', 'inactive'].includes(status)) fail('status', 'Status must be active or inactive');
     const codes = [...new Set(String(v.roles || '').split(/[;,]/).map((r) => r.trim().toLowerCase()).filter(Boolean))];
     if (!codes.length) fail('roles', 'Give at least one role');
+    if (codes.includes(PLATFORM_ROLE)) fail('roles', 'The iorta TechNXT platform administrator role is not loaded from a workbook');
     const roles = await many('SELECT id, code FROM roles WHERE code = ANY($1)', [codes]);
     const unknown = codes.filter((c) => !roles.some((r) => r.code === c));
     if (unknown.length) fail('roles', `Unknown role(s): ${unknown.join(', ')}`);
@@ -236,6 +241,7 @@ const usersSheet = () => ({
     if (warnings?.length) ctx.warn(`Segregation of duties: ${warnings.join('; ')}`);
     const before = await one(`SELECT u.*, COALESCE((SELECT array_agg(ro.code ORDER BY ro.code) FROM user_roles ur JOIN roles ro ON ro.id = ur.role_id WHERE ur.user_id = u.id), '{}') AS roles
       FROM users u WHERE lower(u.username) = lower($1)`, [v.username]);
+    if ((before?.roles || []).includes(PLATFORM_ROLE)) fail('username', 'A platform administrator account is not changed from a workbook');
     const displayName = v.displayName || [v.firstName, v.lastName].filter(Boolean).join(' ') || v.username;
     if (!before) {
       // A new user gets a temporary password, shown once to the administrator after the load and never stored in clear.
@@ -678,6 +684,31 @@ const cocSeriesSheet = () => ({
   },
 });
 
+// ------------------------------------------------------------------ feature entitlements
+
+/**
+ * Feature entitlements of the environment, so that a comparison of environments shows them. They are never loaded from
+ * the workbook: a different status is an error of its row, and the platform administrator promotes the state with
+ * approval (Master > Platform > Features & Releases > Promote).
+ */
+const featuresSheet = () => ({
+  key: 'features', name: 'Feature Entitlements', menu: 'Master > System Configuration > Features & Releases',
+  columns: [
+    { key: 'feature', header: 'Feature Key', required: true, format: 'Key of a feature of the catalogue (Phase 2 and future releases)' },
+    { key: 'name', header: 'Feature' },
+    { key: 'tier', header: 'Tier' },
+    { key: 'status', header: 'Status', required: true, format: 'on, read-only or off' },
+  ],
+  keyColumns: ['feature'], keyOf: (v) => keyText(v.feature),
+  sample: { feature: 'payables', name: 'Accounts payable', tier: 'PHASE_2', status: 'off' },
+  async exportRows() {
+    return (await exportFeatureState(null)).features.map((f) => ({ feature: f.key, name: f.name, tier: f.tier, status: f.status }));
+  },
+  async importRow() {
+    fail('status', 'Feature entitlements are promoted by the iorta TechNXT platform administrator with approval (Master > Platform > Features & Releases), not loaded from a workbook');
+  },
+});
+
 // ------------------------------------------------------------------ the kit
 
 /** Sheets of the configuration kit, in load order. */
@@ -696,6 +727,8 @@ export async function configurationSheets() {
     commissionSheet(), chargesSheet(), lguSheet(), authoritySheet(), numberingSheet(),
     // integrations: bank accounts of the payees paid by bank file, COC number series of the insurers
     payeeAccountsSheet(), cocSeriesSheet(),
+    // the releases this environment runs: compared, never loaded
+    featuresSheet(),
   ];
 }
 

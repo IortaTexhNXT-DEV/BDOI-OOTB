@@ -322,6 +322,16 @@ Master > System > Audit Trail shows every change made in the system: **Date & Ti
 
 ![Master > System > Audit Trail](images/screens-master/audit-trail.png)
 
+## Features & Releases {#features-and-releases}
+
+{{screen:/master/configuration/features}}
+
+Master > System > Features & Releases lists every function of the system with its release: **Phase 1** (the TISPH scope, always on), **Platform** (users, configuration, audit and jobs, always on), **Phase 2** and **Future release** (available on request). Each line shows the **Tier**, the **Status** (Enabled, Read-only or Not enabled), the **Requirement IDs**, the **Enabled On** date, **Enabled By** (the system supplier) and the **Release Reference** of the change that enabled it. **Decision pending** marks a function whose release TISPH still has to confirm; open the line to read the question.
+
+The tab **Future releases** lists the functions TISPH can ask for, with their description. **Export to Excel** downloads both lists.
+
+The screen is read only. Phase 2 and future-release functions are enabled by the platform administrator of the system supplier under a signed change request, approved by a second platform administrator; IT AppSupport / Admin and the General Manager receive an e-mail and a notification when a function is enabled or disabled. A function disabled while it holds records stays **Read-only**: its records can be viewed and exported, not changed. An address of a function that is not enabled shows **Not available in this edition**.
+
 ## E-mail Outbox {#e-mail-outbox}
 
 {{screen:/master/configuration/email-outbox}}

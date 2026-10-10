@@ -15,6 +15,7 @@ import { configurationSheets } from './configuration.js';
 import { migrationSheets, reconciliation } from './migration.js';
 import { KITS, kitWorkbook, readKitWorkbook } from './workbook.js';
 import { comparable, isDate } from './common.js';
+import { assertFeature } from '../features/service.js';
 
 export { KITS };
 const LOCK = "hashtext('brokerverse.data-load'), hashtext('data_load_batches')";
@@ -252,6 +253,8 @@ async function saveResults(batchId, results, statusOf) {
 
 /** Guards of a kit: the migration kit needs a cutover date and is refused once go-live is locked. */
 async function assertKitAllowed(kit) {
+  // the legacy book migration is a Phase 2 feature (modules/features)
+  if (kit === 'migration') await assertFeature('legacy-migration', { write: true });
   const state = await goLiveState();
   if (kit === 'migration') {
     if (state.locked) throw conflict('Go-live is locked (golive.locked): the migration workbook can no longer be loaded. The configuration workbook stays available');

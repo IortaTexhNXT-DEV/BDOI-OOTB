@@ -33,7 +33,7 @@ export const OWNERS = {
   'claim-document-requirement': { module: 'claims' }, 'repair-shop': { module: 'claims' }, supplier: { module: 'payables' }, 'asset-class': { module: 'fixed-assets' },
   'cost-centre': { module: 'journal-vouchers' },
   'sales-activity-type': { module: 'sales-activities', write: false }, 'sales-activity-outcome': { module: 'sales-activities', write: false },
-  'lead-source': { module: 'leads', write: false }, 'reason-code': { module: ['quotations', 'claims', 'renewals', 'period-end', 'incentive', 'roles', 'access-control', 'remittance'], write: false },
+  'lead-source': { module: 'leads', write: false }, 'reason-code': { module: ['quotations', 'claims', 'renewals', 'period-end', 'incentive', 'roles', 'access-control', 'remittance', 'features'], write: false },
 };
 const SCREEN = 'Master > Insurance Management / Accounts > Payables / Master > Finance (operational masters)';
 

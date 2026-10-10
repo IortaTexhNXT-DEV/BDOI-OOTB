@@ -101,9 +101,11 @@ e-policy to the client. The placement slip becomes **Insurer issued (Booked)**. 
 4. Select **Issue cover note**. The cover note is **Active** until the insurer's policy is booked, which ends it, or
    until its end date.
 
+::: feature ctpl-authentication
 For a CTPL cover, choose {{menu:/operations/ctpl-authentication}}: the list shows each certificate of cover with its
 status (**Pending**, **Requested**, **Authenticated**, **Failed**). A certificate is released to the client only
 when it is **Authenticated**. See [CTPL Authentication](#ctpl-authentication).
+:::
 
 ### Raise an endorsement or a cancellation {#tis-operations-associate-endorsement}
 

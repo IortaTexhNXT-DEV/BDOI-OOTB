@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs, createOwnBookRole } from './helpers.js';
+import { setup, loginAs, createOwnBookRole, enableFeatures } from './helpers.js';
 import { pool, query } from '../src/db/pool.js';
 
 let ctx;
@@ -18,6 +18,8 @@ async function makeUser(username, roles) {
 
 beforeAll(async () => {
   ctx = await setup();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['sales-dashboard']);
   const ownBook = await createOwnBookRole(ctx.api);
   await makeUser('ag.one', [ownBook]);
   await makeUser('ag.two', [ownBook]);

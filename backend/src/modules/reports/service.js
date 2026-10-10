@@ -20,6 +20,7 @@ import { scopeSql } from '../../lib/scope.js';
 import { startScheduler } from '../../jobs/scheduler.js';
 import { execute } from './engine.js';
 import { QUERIES } from './queries.js';
+import { reportAllowed } from '../features/service.js';
 
 export const FORMATS = {
   csv: { ext: 'csv', contentType: 'text/csv; charset=utf-8' },
@@ -80,7 +81,9 @@ const publicDef = (d) => {
 export async function listCatalogue(user, { category, search } = {}) {
   const rows = await many(`SELECT * FROM report_definitions WHERE status = 'active' AND ($1::text IS NULL OR category = $1)
     AND ($2::text IS NULL OR name ILIKE '%' || $2 || '%' OR code ILIKE '%' || $2 || '%') ORDER BY category DESC, sort_order, name`, [category || null, search || null]);
-  return rows.filter((d) => canAccess(user, d)).map(publicDef);
+  // reports of features this environment does not run (modules/features) are not in the catalogue
+  const inEdition = await Promise.all(rows.map((d) => reportAllowed(d.code)));
+  return rows.filter((d, i) => inEdition[i] && canAccess(user, d)).map(publicDef);
 }
 
 async function loadDef(code) {
