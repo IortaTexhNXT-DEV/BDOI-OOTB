@@ -73,11 +73,14 @@ const periodEndService = {
 
   // year-end
   yearEnd: () => request("/period-end/year-end"),
+  yearEndOverview: (fiscalYear) => request(`/period-end/year-end/overview${qs({ fiscalYear })}`),
   yearEndRun: (id) => request(`/period-end/year-end/${id}`),
   createYearEnd: (fiscalYear) => post("/period-end/year-end", { fiscalYear }),
   checkYearEnd: (id) => post(`/period-end/year-end/${id}/check`),
-  closeYearEnd: (id) => post(`/period-end/year-end/${id}/close`),
-  reverseYearEnd: (id, reason) => post(`/period-end/year-end/${id}/reverse`, { reason }),
+  closeYearEnd: (id, remarks) => post(`/period-end/year-end/${id}/close`, { remarks: remarks || undefined }),
+  requestYearEndReversal: (id, reason) => post(`/period-end/year-end/${id}/reverse-request`, reason),
+  withdrawYearEndReversal: (id) => post(`/period-end/year-end/${id}/reverse-request/withdraw`),
+  reverseYearEnd: (id, remarks) => post(`/period-end/year-end/${id}/reverse`, { remarks: remarks || undefined }),
   cancelYearEnd: (id) => post(`/period-end/year-end/${id}/cancel`),
   createAdjustment: (body) => post("/period-end/adjustments", body),
 

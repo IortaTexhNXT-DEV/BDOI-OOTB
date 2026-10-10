@@ -92,7 +92,8 @@ define({
 });
 define({
   method: 'GET', path: '/products/:id/history', summary: 'Change history of a product template (audit trail)', screen: 'Product Configurator > Product Templates > History', middleware: read,
-  response: { success: true, data: [{ id: 1, action: 'update', at: '2026-01-01T00:00:00Z', user: 'admin', changes: [{ field: 'status', from: 'Draft', to: 'Active' }] }] },
+  response: { success: true, data: [{ id: 1, action: 'update', actionLabel: 'Updated', at: '2026-01-01T00:00:00Z', user: 'admin', userName: 'Administrator', roles: ['System Administrator'],
+    changes: [{ field: 'status', label: 'Status', from: 'Draft', to: 'Active' }] }] },
   handler: async (req, res) => ok(res, await svc.templateHistory(req.params.id)),
 });
 define({
@@ -151,7 +152,8 @@ for (const [kind, def] of Object.entries(svc.KINDS)) {
   });
   define({
     method: 'GET', path: `/${kind}/:id/history`, summary: `Change history of a ${def.label.toLowerCase()} (audit trail)`, screen, middleware: read,
-    response: { success: true, data: [{ id: 1, action: 'update', at: '2026-01-01T00:00:00Z', user: 'admin', changes: [{ field: 'status', from: 'Active', to: 'Inactive' }] }] },
+    response: { success: true, data: [{ id: 1, action: 'update', actionLabel: 'Updated', at: '2026-01-01T00:00:00Z', user: 'admin', userName: 'Administrator', roles: ['System Administrator'],
+      changes: [{ field: 'status', label: 'Status', from: 'Active', to: 'Inactive' }] }] },
     handler: async (req, res) => ok(res, await svc.componentHistory(kind, req.params.id)),
   });
   define({
@@ -281,7 +283,8 @@ define({
 });
 define({
   method: 'GET', path: '/risk-mappings/:id/history', summary: 'Change history of a risk mapping (audit trail)', screen: 'Product Configurator > Risk Mapping > History', middleware: read,
-  response: { success: true, data: [{ id: 1, action: 'update', at: '2026-01-01T00:00:00Z', user: 'admin', changes: [{ field: 'status', from: 'Draft', to: 'Active' }] }] },
+  response: { success: true, data: [{ id: 1, action: 'update', actionLabel: 'Updated', at: '2026-01-01T00:00:00Z', user: 'admin', userName: 'Administrator', roles: ['System Administrator'],
+    changes: [{ field: 'status', label: 'Status', from: 'Draft', to: 'Active' }] }] },
   handler: async (req, res) => ok(res, await svc.riskMappingHistory(req.params.id)),
 });
 define({

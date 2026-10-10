@@ -1,0 +1,78 @@
+// Label above value grid of a detail view (components/KeyValueGrid). Theme CSS variables only.
+
+.bv-kv {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px 24px;
+  margin: 0;
+  font-family: var(--font-body);
+
+  &--cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  &--cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  &--cols-auto {
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  }
+}
+
+.bv-kv__item {
+  min-width: 0;
+
+  &--span-2 {
+    grid-column: span 2;
+  }
+
+  &--full {
+    grid-column: 1 / -1;
+  }
+}
+
+.bv-kv__label {
+  margin: 0 0 2px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+}
+
+.bv-kv__value {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--color-heading);
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+
+  &--num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  &--empty {
+    color: var(--color-placeholder);
+  }
+}
+
+@media (max-width: 960px) {
+  .bv-kv--cols-3,
+  .bv-kv--cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .bv-kv--cols-2,
+  .bv-kv--cols-3,
+  .bv-kv--cols-4,
+  .bv-kv--cols-auto {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bv-kv__item--span-2 {
+    grid-column: auto;
+  }
+}

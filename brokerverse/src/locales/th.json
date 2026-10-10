@@ -4881,6 +4881,124 @@
       "addSlot": "เพิ่มช่อง"
     }
   },
+  "confirmDialog": {
+    "cancel": "ยกเลิก",
+    "confirm": "ยืนยัน",
+    "required": "ต้องระบุ{{label}}",
+    "minLength": "กรอกอย่างน้อย {{count}} ตัวอักษร",
+    "invalidDate": "กรอกวันที่ให้ถูกต้อง",
+    "failed": "ไม่สามารถดำเนินการได้ โปรดลองอีกครั้ง"
+  },
+  "detailView": {
+    "close": "ปิด",
+    "yes": "ใช่",
+    "no": "ไม่ใช่"
+  },
+  "makerChecker": {
+    "ownRecord": "คุณเป็นผู้สร้างรายการนี้ ผู้ใช้อื่นต้องเป็นผู้อนุมัติหรือปฏิเสธ",
+    "approve": "อนุมัติ",
+    "reject": "ปฏิเสธ"
+  },
+  "activityLog": {
+    "empty": "ยังไม่มีการบันทึกกิจกรรมของรายการนี้",
+    "failed": "ไม่สามารถโหลดบันทึกกิจกรรมได้",
+    "retry": "ลองอีกครั้ง",
+    "today": "วันนี้",
+    "yesterday": "เมื่อวาน",
+    "system": "ระบบ",
+    "remarks": "หมายเหตุ",
+    "whatChanged": "รายการที่เปลี่ยนแปลง",
+    "field": "ฟิลด์",
+    "before": "ก่อน",
+    "after": "หลัง",
+    "hidden": "ซ่อนไว้",
+    "statusChange": "สถานะเปลี่ยนจาก {{from}} เป็น {{to}}",
+    "actions": {
+      "create": "สร้าง",
+      "update": "แก้ไข",
+      "submit": "ส่งเรื่อง",
+      "approve": "อนุมัติ",
+      "reject": "ปฏิเสธ",
+      "return": "ส่งกลับ",
+      "post": "ลงบัญชี",
+      "reverse": "กลับรายการ",
+      "cancel": "ยกเลิก",
+      "void": "ยกเลิกเอกสาร",
+      "delete": "ลบ",
+      "send": "ส่ง",
+      "acknowledge": "รับทราบ",
+      "settle": "ชำระแล้ว",
+      "process": "ประมวลผล",
+      "generate": "สร้างเอกสาร",
+      "issue": "ออกเอกสาร",
+      "print": "พิมพ์",
+      "assign": "มอบหมาย",
+      "reassign": "มอบหมายใหม่",
+      "delegate": "มอบอำนาจ",
+      "escalate": "ส่งต่อ",
+      "resolve": "แก้ไขแล้ว",
+      "close": "ปิด",
+      "reopen": "เปิดใหม่",
+      "activate": "เปิดใช้งาน",
+      "deactivate": "ปิดใช้งาน",
+      "withdraw": "ถอนเรื่อง",
+      "match": "จับคู่",
+      "unmatch": "ยกเลิกการจับคู่",
+      "pay": "จ่ายแล้ว",
+      "remind": "ส่งการแจ้งเตือน",
+      "complete": "เสร็จสิ้น",
+      "fail": "ไม่สำเร็จ",
+      "retry": "ลองใหม่",
+      "schedule": "ตั้งเวลา",
+      "run": "เรียกใช้งาน",
+      "upload": "อัปโหลด",
+      "import": "นำเข้า",
+      "export": "ส่งออก",
+      "calculate": "คำนวณ",
+      "recalculate": "คำนวณใหม่",
+      "adjust": "ปรับปรุง",
+      "signOff": "ลงนามรับรอง",
+      "collect": "บันทึกการรับชำระ",
+      "status": "เปลี่ยนสถานะ",
+      "note": "เพิ่มบันทึก",
+      "call": "บันทึกการโทร",
+      "email": "ส่งอีเมล",
+      "commitment": "บันทึกนัดชำระ",
+      "assignAuto": "มอบหมายตามกฎ",
+      "assignQueued": "ส่งเข้าคิว",
+      "assignManual": "มอบหมายใหม่",
+      "assignBulk": "มอบหมายใหม่แบบกลุ่ม",
+      "assignTaken": "รับจากคิว"
+    },
+    "fields": {
+      "version": "เวอร์ชัน",
+      "approvalLevel": "ระดับการอนุมัติ",
+      "assignedTo": "ผู้รับมอบหมาย",
+      "rule": "กฎ",
+      "outcome": "ผลการติดต่อ",
+      "commitmentDate": "วันที่นัดชำระ",
+      "endorsement": "สลักหลัง",
+      "reference": "เลขอ้างอิง",
+      "result": "ผลลัพธ์"
+    },
+    "sources": {
+      "screen": "หน้าจอ",
+      "api": "API",
+      "job": "งานตามกำหนดเวลา",
+      "manual": "ดำเนินการเอง",
+      "closeRun": "ปิดงวดสิ้นเดือน",
+      "yearEnd": "ปิดบัญชีสิ้นปี",
+      "yearEndReversal": "ยกเลิกการปิดบัญชีสิ้นปี"
+    }
+  },
+  "print": {
+    "failed": "ไม่สามารถพิมพ์เอกสารได้",
+    "empty": "เอกสารว่างเปล่า",
+    "printedBy": "พิมพ์เมื่อ {{at}} โดย {{name}}",
+    "number": "เลขที่ {{number}}",
+    "tin": "เลขประจำตัวผู้เสียภาษี {{tin}}",
+    "frameTitle": "เอกสารที่กำลังพิมพ์"
+  },
   "customerResponse": {
     "waiting": "Waiting for customer approval",
     "copyLink": "Copy approval link",
@@ -5364,6 +5482,178 @@
     "rejectReasonCodeNone": "ไม่มีรหัสเหตุผล (พิมพ์เหตุผล)",
     "rejectNote": "หมายเหตุ",
     "rejectNoteRequired": "เหตุผลนี้ต้องมีหมายเหตุ: กรอกรายละเอียด"
+  },
+  "yearEndClose": {
+    "help": "ปิดปีบัญชีในห้าขั้นตอน: เงื่อนไขก่อนปิด รายการปรับปรุง รายการปิดบัญชี การปิดปีโดยผู้จัดการฝ่ายบัญชี และยอดยกมาของปีถัดไป ผู้ที่เริ่มการปิดปีไม่สามารถปิดปีเองได้",
+    "stepsLabel": "ขั้นตอนการปิดปีบัญชี",
+    "step": {
+      "prerequisites": "เงื่อนไขก่อนปิด",
+      "adjustments": "รายการปรับปรุงสิ้นปี",
+      "closing": "รายการปิดบัญชี",
+      "approval": "ปิดปีบัญชี",
+      "opening": "ยอดยกมา"
+    },
+    "summary": "สรุปการปิดปีบัญชี",
+    "run": "รอบการปิด",
+    "runChecks": "ตรวจสอบอีกครั้ง",
+    "remark": "หมายเหตุ",
+    "empty": "ยังไม่ได้เริ่มการปิดปีบัญชี {{fiscalYear}} ({{from}} – {{to}})",
+    "start": "เริ่มการปิดปีบัญชี",
+    "previous": "ขั้นตอนก่อนหน้า",
+    "next": "ขั้นตอนถัดไป",
+    "none": "ไม่มี",
+    "nil": "เป็นศูนย์",
+    "more": "และอีก {{count}} รายการ",
+    "more_one": "และอีก {{count}} รายการ",
+    "more_other": "และอีก {{count}} รายการ",
+    "total": "รวม",
+    "accountTypeLabel": "ประเภท",
+    "accountType": {
+      "income": "รายได้",
+      "expense": "ค่าใช้จ่าย",
+      "asset": "สินทรัพย์",
+      "liability": "หนี้สิน",
+      "equity": "ส่วนของเจ้าของ"
+    },
+    "check": {
+      "periods_closed": {
+        "label": "งวด 1 ถึง 12 ปิดแล้ว",
+        "labelSoft": "งวด 1 ถึง 12 ปิดชั่วคราวหรือปิดแล้ว",
+        "count": "ปิดแล้ว {{closed}} จาก {{total}} งวด",
+        "open": "ยังไม่ปิด: {{list}}"
+      },
+      "unposted_journals": {
+        "label": "ไม่มีสมุดรายวันที่ยังไม่ผ่านรายการในปี",
+        "count": "สมุดรายวันยังไม่ผ่านรายการ {{count}} รายการ",
+        "count_one": "สมุดรายวันยังไม่ผ่านรายการ {{count}} รายการ",
+        "count_other": "สมุดรายวันยังไม่ผ่านรายการ {{count}} รายการ"
+      },
+      "suspense_balance": {
+        "label": "บัญชีพักเป็นศูนย์",
+        "notSet": "ยังไม่ได้กำหนดบัญชีพัก"
+      },
+      "trial_balance": {
+        "label": "งบทดลองสมดุล ณ วันสิ้นปี",
+        "result": "เดบิต {{debit}} เครดิต {{credit}}",
+        "difference": "ผลต่าง {{amount}}"
+      },
+      "closing_accounts": {
+        "label": "กำหนดบัญชีสำหรับการปิดบัญชีแล้ว",
+        "result": "กำไร (ขาดทุน) ปีปัจจุบัน {{currentYearPl}}; กำไรสะสม {{retainedEarnings}}",
+        "failed": "บัญชีกำไร (ขาดทุน) ปีปัจจุบันและกำไรสะสมต้องเป็นบัญชีส่วนของเจ้าของที่ใช้งานอยู่"
+      },
+      "previous_year": {
+        "label": "ปิดปีบัญชีก่อนหน้าแล้ว",
+        "first": "ปีบัญชีแรก",
+        "result": "{{fiscalYear}}: {{status}}"
+      },
+      "adjustment_period": {
+        "label": "งวดปรับปรุงเปิดอยู่",
+        "missing": "ไม่มีงวดปรับปรุง {{period}}"
+      },
+      "adjustments_posted": {
+        "label": "รายการปรับปรุงผ่านรายการแล้ว",
+        "none": "ผ่านรายการครบแล้ว",
+        "count": "รออนุมัติ {{count}} รายการ",
+        "count_one": "รออนุมัติ {{count}} รายการ",
+        "count_other": "รออนุมัติ {{count}} รายการ"
+      }
+    },
+    "link": {
+      "periods": "การจัดการงวดบัญชี",
+      "journals": "ใบสำคัญรายวัน",
+      "accountingQuery": "สอบถามข้อมูลบัญชี",
+      "statements": "งบการเงิน",
+      "openYear": "เปิด {{fiscalYear}}",
+      "configure": "ตั้งค่า"
+    },
+    "adjustments": {
+      "title": "รายการปรับปรุง",
+      "empty": "ไม่มีรายการปรับปรุง",
+      "preparedBy": "ผู้จัดทำ",
+      "open": "เปิดใบสำคัญรายวัน",
+      "add": "เพิ่มรายการปรับปรุง"
+    },
+    "closing": {
+      "journalDate": "วันที่รายการ",
+      "totalIncome": "รายได้รวม",
+      "totalExpense": "ค่าใช้จ่ายรวม",
+      "journals": "รายการปิดบัญชี",
+      "toCurrentYear": "ปิดรายได้และค่าใช้จ่ายเข้ากำไร (ขาดทุน) ปีปัจจุบัน",
+      "toRetainedEarnings": "โอนกำไร (ขาดทุน) ปีปัจจุบันเข้ากำไรสะสม",
+      "empty": "ไม่มียอดคงเหลือของรายได้หรือค่าใช้จ่าย",
+      "netToCurrentYear": "ผลการดำเนินงานสุทธิ"
+    },
+    "approval": {
+      "preparedBy": "ผู้จัดทำ",
+      "approver": "ผู้อนุมัติ",
+      "accountingManager": "ผู้จัดการฝ่ายบัญชี",
+      "checks": "การตรวจสอบ",
+      "close": "ปิดปีบัญชี",
+      "closedBy": "ปิดโดย",
+      "remark": "หมายเหตุ"
+    },
+    "reason": {
+      "closePermission": "การปิดปีต้องทำโดยผู้จัดการฝ่ายบัญชี",
+      "closeMaker": "คุณเป็นผู้เริ่มการปิดปีนี้ ผู้จัดการฝ่ายบัญชีคนอื่นต้องเป็นผู้ปิดปี",
+      "closeChecks": "แก้ไขรายการตรวจสอบที่ไม่ผ่านในขั้นตอนที่ 1 และ 2 ก่อน",
+      "nextPeriod": "ทำไม่ได้แล้ว: งวด {{period}} ของ {{fiscalYear}} ไม่ได้เปิดอยู่",
+      "nextYear": "ทำไม่ได้แล้ว: {{fiscalYear}} ปิดแล้ว",
+      "reversePermission": "การอนุมัติการยกเลิกการปิดปีต้องทำโดยผู้จัดการฝ่ายบัญชี",
+      "reverseMaker": "คุณเป็นผู้ขอยกเลิกการปิดปีนี้ ผู้จัดการฝ่ายบัญชีคนอื่นต้องเป็นผู้อนุมัติ"
+    },
+    "reversal": {
+      "pending": "ขอยกเลิกการปิดปีแล้ว",
+      "requestedBy": "ผู้ขอ",
+      "reason": "เหตุผล",
+      "approve": "ยกเลิกการปิดปี",
+      "withdraw": "ถอนคำขอ",
+      "request": "ขอยกเลิกการปิดปี"
+    },
+    "opening": {
+      "accounts": "จำนวนบัญชีที่ยกไป",
+      "totalDebit": "เดบิตรวม",
+      "totalCredit": "เครดิตรวม",
+      "empty": "ไม่มียอดคงเหลือในงบแสดงฐานะการเงิน"
+    },
+    "activity": {
+      "title": "ประวัติการดำเนินการ"
+    },
+    "action": {
+      "start": "เริ่มการปิดปีบัญชี",
+      "check": "ตรวจสอบ",
+      "close": "ปิดปีบัญชี",
+      "reverse-request": "ขอยกเลิกการปิดปี",
+      "reverse-withdraw": "ถอนคำขอยกเลิกการปิดปี",
+      "reverse": "ยกเลิกการปิดปี",
+      "cancel": "ยกเลิกรอบการปิด"
+    },
+    "dialog": {
+      "closeMessage": "ผ่านรายการปิดบัญชีในงวด {{period}} ลงวันที่ {{date}} และยกยอดคงเหลือไปยัง {{fiscalYear}}",
+      "reverseMessage": "ยกเลิกการปิดปี {{fiscalYear}} ตามเหตุผลของคำขอ",
+      "withdrawMessage": "ถอนคำขอยกเลิกการปิดปี {{fiscalYear}} ยังคงปิดอยู่",
+      "cancelMessage": "ยกเลิกรอบการปิด {{runNumber}}",
+      "closeTitle": "ปิดปีบัญชี {{fiscalYear}}",
+      "closeConsequence": "งวดบัญชีของ {{fiscalYear}} จะถูกล็อก และไม่สามารถผ่านรายการได้จนกว่าจะยกเลิกการปิดปี",
+      "requestTitle": "ขอยกเลิกการปิดปี {{fiscalYear}}",
+      "requestConsequence": "ผู้จัดการฝ่ายบัญชีคนอื่นเป็นผู้อนุมัติการยกเลิก",
+      "reverseTitle": "ยกเลิกการปิดปี {{fiscalYear}}",
+      "reverseConsequence": "รายการปิดบัญชีจะถูกกลับรายการ ยอดยกมาของ {{fiscalYear}} จะถูกลบ และงวดบัญชีจะถูกปลดล็อก",
+      "withdrawTitle": "ถอนคำขอยกเลิกการปิดปี",
+      "keepRequest": "เก็บคำขอไว้",
+      "cancelTitle": "ยกเลิกรอบการปิด {{runNumber}}",
+      "cancelConsequence": "{{fiscalYear}} จะกลับเป็นสถานะเปิด",
+      "keepRun": "เก็บรอบการปิดไว้",
+      "adjustmentTitle": "รายการปรับปรุง {{fiscalYear}}",
+      "adjustmentConsequence": "ผ่านรายการในงวดปรับปรุงหลังจากผู้ใช้คนที่สองอนุมัติ",
+      "submitAdjustment": "ส่งเพื่ออนุมัติ"
+    },
+    "toast": {
+      "checked": "ตรวจสอบแล้ว",
+      "reversalRequested": "ส่งคำขอยกเลิกการปิดปีแล้ว รอการอนุมัติ",
+      "reversalWithdrawn": "ถอนคำขอยกเลิกการปิดปีแล้ว",
+      "cancelled": "ยกเลิกรอบการปิดปีบัญชีแล้ว"
+    }
   },
   "pageHeader": {
     "help": "เกี่ยวกับหน้านี้",

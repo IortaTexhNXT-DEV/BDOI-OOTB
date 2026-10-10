@@ -876,8 +876,17 @@ $text-strong: #1f2937;
   }
 }
 
+// A toast at the top opens under the top bar, not over the notifications and the user menu (PrimeReact places it
+// 20px from the top with an inline style).
+.p-toast.p-toast-top-right,
+.p-toast.p-toast-top-left,
+.p-toast.p-toast-top-center {
+  top: calc(#{$header-height} + 12px) !important;
+}
+
 .p-toast {
   width: 24rem;
+  max-width: calc(100vw - 40px);
 
   .p-toast-message {
     border-radius: $radius-sm;

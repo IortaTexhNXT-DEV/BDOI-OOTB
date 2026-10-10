@@ -49854,6 +49854,136 @@
         ]
       }
     },
+    "/document-templates/letterhead": {
+      "get": {
+        "operationId": "getDocumentTemplatesLetterhead",
+        "summary": "Letterhead and document colours for a page printed from the browser (the same as on the server documents): company name, address lines, TIN, licence, contact, the print logo as a data URL and the documents section of the theme",
+        "tags": [
+          "Documents"
+        ],
+        "description": "Front-end touchpoint: Printable views (Print on screens that print a page of their own)\n\nAccess: Any authenticated user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "addressLines": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "tin": {
+                          "type": "string"
+                        },
+                        "licence": {
+                          "type": "string"
+                        },
+                        "phone": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "website": {
+                          "type": "string"
+                        },
+                        "logo": {
+                          "type": "string"
+                        },
+                        "documents": {
+                          "type": "object",
+                          "properties": {
+                            "accent": {
+                              "type": "string"
+                            },
+                            "headingColor": {
+                              "type": "string"
+                            },
+                            "headingBg": {
+                              "type": "string"
+                            },
+                            "tableHeaderBg": {
+                              "type": "string"
+                            },
+                            "tableHeaderText": {
+                              "type": "string"
+                            },
+                            "footerText": {
+                              "type": "string"
+                            },
+                            "showLogo": {
+                              "type": "boolean"
+                            },
+                            "logoHeight": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "generatedBy": {
+                          "type": "string"
+                        },
+                        "generatedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "name": "Toyota Insurance Services Philippines, Inc.",
+                    "addressLines": [
+                      "31F Net Park, 5th Avenue",
+                      "Taguig City, Metro Manila 1634, Philippines"
+                    ],
+                    "tin": "000-000-000-000",
+                    "licence": "IC-B-1234",
+                    "phone": "+63 2 8888 0000",
+                    "email": "tisph@example.ph",
+                    "website": "",
+                    "logo": "data:image/png;base64,...",
+                    "documents": {
+                      "accent": "#eb0a1e",
+                      "headingColor": "#eb0a1e",
+                      "headingBg": "#f7f7f7",
+                      "tableHeaderBg": "#eb0a1e",
+                      "tableHeaderText": "#ffffff",
+                      "footerText": "Authorized by the Insurance Commission ...",
+                      "showLogo": true,
+                      "logoHeight": 46
+                    },
+                    "generatedBy": "Rosa Finance",
+                    "generatedAt": "10/10/2026 09:03"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Printable views (Print on screens that print a page of their own)"
+      }
+    },
     "/document-templates/policy-schedule-fire/{id}": {
       "get": {
         "operationId": "getDocumentTemplatesPolicyScheduleFireId",
@@ -92976,7 +93106,7 @@
       },
       "post": {
         "operationId": "postPeriodEndYearEnd",
-        "summary": "Start the year-end close of a fiscal year (the year becomes \"closing\")",
+        "summary": "Start the year-end close of a fiscal year (the year becomes \"closing\"); the pre-checks run at once (status checked when they all pass)",
         "tags": [
           "Period End"
         ],
@@ -93250,7 +93380,7 @@
     "/period-end/year-end/{id}/check": {
       "post": {
         "operationId": "postPeriodEndYearEndIdCheck",
-        "summary": "Run the year-end pre-checks",
+        "summary": "Run the year-end pre-checks again and keep the result on the run",
         "tags": [
           "Period End"
         ],
@@ -93346,7 +93476,7 @@
     "/period-end/year-end/{id}/close": {
       "post": {
         "operationId": "postPeriodEndYearEndIdClose",
-        "summary": "Close the fiscal year: closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year (approve:period-end)",
+        "summary": "Close the fiscal year (approve:period-end; maker-checker: not the user who started the run): closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year",
         "tags": [
           "Period End"
         ],
@@ -93423,6 +93553,317 @@
         },
         "x-screen": "Accounts > Period End > Year-End Close",
         "x-permissions": [
+          "approve:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "remarks": "Audit adjustments reviewed"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/period-end/year-end/{id}/reverse": {
+      "post": {
+        "operationId": "postPeriodEndYearEndIdReverse",
+        "summary": "Approve the requested reversal and reverse the close (approve:period-end; maker-checker: not the requester): closing entries reversed, opening balances removed, periods unlocked",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "runNumber": {
+                          "type": "string"
+                        },
+                        "fiscalYear": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "netIncome": {
+                          "type": "integer"
+                        },
+                        "nextFiscalYear": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "yec_1",
+                    "runNumber": "YEC-2026-00001",
+                    "fiscalYear": "FY2025",
+                    "status": "closed",
+                    "netIncome": 1250000,
+                    "nextFiscalYear": "FY2026"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Year-End Close",
+        "x-permissions": [
+          "approve:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "remarks": "Reversal agreed with the external auditor"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/period-end/year-end/{id}/reverse-request": {
+      "post": {
+        "operationId": "postPeriodEndYearEndIdReverseRequest",
+        "summary": "Request the reversal of a closed year with a reason (Reason Codes master, context year_end_reverse); possible until the first period of the next year is closed",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "runNumber": {
+                          "type": "string"
+                        },
+                        "fiscalYear": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "netIncome": {
+                          "type": "integer"
+                        },
+                        "nextFiscalYear": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "yec_1",
+                    "runNumber": "YEC-2026-00001",
+                    "fiscalYear": "FY2025",
+                    "status": "closed",
+                    "netIncome": 1250000,
+                    "nextFiscalYear": "FY2026"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Year-End Close",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reasonCode": "YER-AUDITADJ",
+                "note": "Adjustments of the external auditor"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/period-end/year-end/{id}/reverse-request/withdraw": {
+      "post": {
+        "operationId": "postPeriodEndYearEndIdReverseRequestWithdraw",
+        "summary": "Withdraw a reversal request (the requester, or a user with approve:period-end)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end, approve:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "runNumber": {
+                          "type": "string"
+                        },
+                        "fiscalYear": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "netIncome": {
+                          "type": "integer"
+                        },
+                        "nextFiscalYear": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "yec_1",
+                    "runNumber": "YEC-2026-00001",
+                    "fiscalYear": "FY2025",
+                    "status": "closed",
+                    "netIncome": 1250000,
+                    "nextFiscalYear": "FY2026"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Year-End Close",
+        "x-permissions": [
+          "write:period-end",
           "approve:period-end"
         ],
         "requestBody": {
@@ -93439,22 +93880,23 @@
         }
       }
     },
-    "/period-end/year-end/{id}/reverse": {
-      "post": {
-        "operationId": "postPeriodEndYearEndIdReverse",
-        "summary": "Reverse a year-end close until the first period of the next year is closed (approve:period-end; reason required)",
+    "/period-end/year-end/overview": {
+      "get": {
+        "operationId": "getPeriodEndYearEndOverview",
+        "summary": "The Year-End Close screen of a fiscal year (default: the year being closed, else the oldest open year): run, the five steps with their checks, adjustment journals, closing entries and opening balances (previewed until the close), history of the runs and the actions the user may take with the reason when not",
         "tags": [
           "Period End"
         ],
-        "description": "Front-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
+        "description": "Front-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: read:period-end, read:journal-vouchers",
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "required": true,
+            "name": "fiscalYear",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "string"
-            }
+            },
+            "example": "FY2026"
           }
         ],
         "responses": {
@@ -93471,23 +93913,161 @@
                     "data": {
                       "type": "object",
                       "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "runNumber": {
-                          "type": "string"
-                        },
                         "fiscalYear": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "adjustmentPeriod": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "run": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "runNumber": {
+                              "type": "string"
+                            },
+                            "fiscalYear": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "netIncome": {
+                              "type": "integer"
+                            },
+                            "nextFiscalYear": {
+                              "type": "string"
+                            },
+                            "preparedByName": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "steps": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "currentStep": {
                           "type": "string"
                         },
-                        "status": {
-                          "type": "string"
+                        "checks": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "step": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "data": {
+                                "type": "object",
+                                "properties": {
+                                  "total": {
+                                    "type": "integer"
+                                  },
+                                  "closed": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            }
+                          }
                         },
-                        "netIncome": {
-                          "type": "integer"
+                        "closing": {
+                          "type": "object",
+                          "properties": {
+                            "source": {
+                              "type": "string"
+                            },
+                            "netIncome": {
+                              "type": "integer"
+                            },
+                            "lines": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "accountCode": {
+                                    "type": "string"
+                                  },
+                                  "accountType": {
+                                    "type": "string"
+                                  },
+                                  "balance": {
+                                    "type": "integer"
+                                  },
+                                  "debit": {
+                                    "type": "integer"
+                                  },
+                                  "credit": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            }
+                          }
                         },
-                        "nextFiscalYear": {
-                          "type": "string"
+                        "opening": {
+                          "type": "object",
+                          "properties": {
+                            "source": {
+                              "type": "string"
+                            },
+                            "fiscalYear": {
+                              "type": "string"
+                            },
+                            "totalDebit": {
+                              "type": "integer"
+                            },
+                            "totalCredit": {
+                              "type": "integer"
+                            },
+                            "lines": {
+                              "type": "array",
+                              "items": {}
+                            }
+                          }
+                        },
+                        "actions": {
+                          "type": "object",
+                          "properties": {
+                            "close": {
+                              "type": "object",
+                              "properties": {
+                                "allowed": {
+                                  "type": "boolean"
+                                },
+                                "reason": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -93496,12 +94076,80 @@
                 "example": {
                   "success": true,
                   "data": {
-                    "id": "yec_1",
-                    "runNumber": "YEC-2026-00001",
-                    "fiscalYear": "FY2025",
-                    "status": "closed",
-                    "netIncome": 1250000,
-                    "nextFiscalYear": "FY2026"
+                    "fiscalYear": {
+                      "code": "FY2026",
+                      "status": "closing",
+                      "adjustmentPeriod": "2026-13"
+                    },
+                    "run": {
+                      "id": "yec_1",
+                      "runNumber": "YEC-2026-00001",
+                      "fiscalYear": "FY2025",
+                      "status": "checked",
+                      "netIncome": 1250000,
+                      "nextFiscalYear": "FY2026",
+                      "preparedByName": "Ana Santos"
+                    },
+                    "steps": [
+                      {
+                        "key": "prerequisites",
+                        "status": "passed"
+                      },
+                      {
+                        "key": "adjustments",
+                        "status": "passed"
+                      },
+                      {
+                        "key": "closing",
+                        "status": "pending"
+                      },
+                      {
+                        "key": "approval",
+                        "status": "pending-approval"
+                      },
+                      {
+                        "key": "opening",
+                        "status": "pending"
+                      }
+                    ],
+                    "currentStep": "approval",
+                    "checks": [
+                      {
+                        "code": "periods_closed",
+                        "step": "prerequisites",
+                        "status": "passed",
+                        "data": {
+                          "total": 12,
+                          "closed": 12
+                        }
+                      }
+                    ],
+                    "closing": {
+                      "source": "preview",
+                      "netIncome": 1250000,
+                      "lines": [
+                        {
+                          "accountCode": "3201001",
+                          "accountType": "income",
+                          "balance": -1800000,
+                          "debit": 1800000,
+                          "credit": 0
+                        }
+                      ]
+                    },
+                    "opening": {
+                      "source": "preview",
+                      "fiscalYear": "FY2027",
+                      "totalDebit": 2102400,
+                      "totalCredit": 2102400,
+                      "lines": []
+                    },
+                    "actions": {
+                      "close": {
+                        "allowed": false,
+                        "reason": "maker-checker"
+                      }
+                    }
                   }
                 }
               }
@@ -93519,20 +94167,9 @@
         },
         "x-screen": "Accounts > Period End > Year-End Close",
         "x-permissions": [
-          "approve:period-end"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {}
-              },
-              "example": {}
-            }
-          }
-        }
+          "read:period-end",
+          "read:journal-vouchers"
+        ]
       }
     },
     "/petty-cash/disbursements": {
@@ -105221,8 +105858,20 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "username": {
                             "type": "string"
+                          },
+                          "displayName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "at": {
                             "type": "string"
@@ -105240,7 +105889,12 @@
                   "data": [
                     {
                       "action": "create-version",
+                      "actionLabel": "Create version",
                       "username": "BrokerVerse",
+                      "displayName": "BrokerVerse Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "at": "2026-09-29T08:00:00Z",
                       "version": 2
                     }
@@ -108381,11 +109035,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -108393,6 +109059,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -108415,11 +109084,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Active",
                           "to": "Inactive"
                         }
@@ -108992,11 +109667,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -109004,6 +109691,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -109026,11 +109716,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Active",
                           "to": "Inactive"
                         }
@@ -109468,11 +110164,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -109480,6 +110188,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -109502,11 +110213,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Active",
                           "to": "Inactive"
                         }
@@ -110258,11 +110975,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -110270,6 +110999,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -110292,11 +111024,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Active",
                           "to": "Inactive"
                         }
@@ -110929,11 +111667,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -110941,6 +111691,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -110963,11 +111716,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Active",
                           "to": "Inactive"
                         }
@@ -111898,11 +112657,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -111910,6 +112681,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -111932,11 +112706,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Draft",
                           "to": "Active"
                         }
@@ -113734,11 +114514,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -113746,6 +114538,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -113768,11 +114563,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Active",
                           "to": "Inactive"
                         }
@@ -114206,11 +115007,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -114218,6 +115031,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -114240,11 +115056,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Active",
                           "to": "Inactive"
                         }
@@ -114958,11 +115780,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -114970,6 +115804,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -114992,11 +115829,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Draft",
                           "to": "Active"
                         }
@@ -115981,11 +116824,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -115993,6 +116848,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -116015,11 +116873,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Active",
                           "to": "Inactive"
                         }
@@ -116461,11 +117325,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -116473,6 +117349,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -116495,11 +117374,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Active",
                           "to": "Inactive"
                         }
@@ -117188,11 +118073,23 @@
                           "action": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "at": {
                             "type": "string"
                           },
                           "user": {
                             "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          },
+                          "roles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changes": {
                             "type": "array",
@@ -117200,6 +118097,9 @@
                               "type": "object",
                               "properties": {
                                 "field": {
+                                  "type": "string"
+                                },
+                                "label": {
                                   "type": "string"
                                 },
                                 "from": {
@@ -117222,11 +118122,17 @@
                     {
                       "id": 1,
                       "action": "update",
+                      "actionLabel": "Updated",
                       "at": "2026-01-01T00:00:00Z",
                       "user": "admin",
+                      "userName": "Administrator",
+                      "roles": [
+                        "System Administrator"
+                      ],
                       "changes": [
                         {
                           "field": "status",
+                          "label": "Status",
                           "from": "Active",
                           "to": "Inactive"
                         }
@@ -129402,6 +130308,9 @@
                           "actionType": {
                             "type": "string"
                           },
+                          "actionLabel": {
+                            "type": "string"
+                          },
                           "previousValue": {
                             "type": "string"
                           },
@@ -129411,7 +130320,19 @@
                           "changedBy": {
                             "type": "string"
                           },
+                          "changedByName": {
+                            "type": "string"
+                          },
+                          "changedByRoles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
                           "changeDate": {
+                            "type": "string"
+                          },
+                          "changedAt": {
                             "type": "string"
                           }
                         }
@@ -129425,10 +130346,16 @@
                     {
                       "referenceNo": "REM-2026-00001",
                       "actionType": "approve",
+                      "actionLabel": "Approved",
                       "previousValue": "Pending Approval",
                       "newValue": "Approved",
                       "changedBy": "finance.head",
-                      "changeDate": "2026-09-26 15:45"
+                      "changedByName": "Fe Head",
+                      "changedByRoles": [
+                        "Finance Manager"
+                      ],
+                      "changeDate": "2026-09-26 15:45",
+                      "changedAt": "2026-09-26T15:45:00.000Z"
                     }
                   ]
                 }
@@ -131014,7 +131941,7 @@
     "/remittance/remittances/{id}": {
       "get": {
         "operationId": "getRemittanceRemittancesId",
-        "summary": "Remittance details: insurer, policies, documents, activity log",
+        "summary": "Remittance details: insurer, policies, documents, activity log (oldest first: the remittance's audit rows, its approval decisions and the settlement that settled it; each entry with action label, user display name and roles, status from / to, remarks and changed fields)",
         "tags": [
           "Remittance"
         ],
@@ -131109,7 +132036,101 @@
                         },
                         "activityLog": {
                           "type": "array",
-                          "items": {}
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "action": {
+                                "type": "string"
+                              },
+                              "by": {
+                                "type": "string"
+                              },
+                              "at": {
+                                "type": "string"
+                              },
+                              "notes": {},
+                              "id": {
+                                "type": "string"
+                              },
+                              "day": {
+                                "type": "string"
+                              },
+                              "date": {
+                                "type": "string"
+                              },
+                              "time": {
+                                "type": "string"
+                              },
+                              "atText": {
+                                "type": "string"
+                              },
+                              "actionCode": {
+                                "type": "string"
+                              },
+                              "actionLabel": {
+                                "type": "string"
+                              },
+                              "user": {
+                                "type": "object",
+                                "properties": {
+                                  "username": {
+                                    "type": "string"
+                                  },
+                                  "displayName": {
+                                    "type": "string"
+                                  },
+                                  "roles": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "role": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "fromStatus": {
+                                "type": "string"
+                              },
+                              "toStatus": {
+                                "type": "string"
+                              },
+                              "remarks": {},
+                              "changes": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "field": {
+                                      "type": "string"
+                                    },
+                                    "label": {
+                                      "type": "string"
+                                    },
+                                    "before": {},
+                                    "after": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              },
+                              "source": {
+                                "type": "object",
+                                "properties": {
+                                  "channel": {
+                                    "type": "string"
+                                  },
+                                  "label": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -131141,7 +132162,45 @@
                         "commission": 2250
                       }
                     ],
-                    "activityLog": []
+                    "activityLog": [
+                      {
+                        "action": "submit",
+                        "by": "r.finance",
+                        "at": "2026-10-10T01:03:00.000Z",
+                        "notes": null,
+                        "id": "812",
+                        "day": "2026-10-10",
+                        "date": "10/10/2026",
+                        "time": "09:03",
+                        "atText": "10/10/2026 09:03",
+                        "actionCode": "submit",
+                        "actionLabel": "Remittance submitted",
+                        "user": {
+                          "username": "r.finance",
+                          "displayName": "Rosa Finance",
+                          "roles": [
+                            "Finance Officer"
+                          ],
+                          "role": "Finance Officer"
+                        },
+                        "fromStatus": "Draft",
+                        "toStatus": "Pending Approval",
+                        "remarks": null,
+                        "changes": [
+                          {
+                            "field": "batchId",
+                            "label": "Batch ID",
+                            "before": null,
+                            "after": "BLK-2026-00001"
+                          }
+                        ],
+                        "source": {
+                          "channel": "screen",
+                          "label": "Screen",
+                          "name": "Accounts > Remittance > Tracking"
+                        }
+                      }
+                    ]
                   }
                 }
               }
@@ -131244,6 +132303,62 @@
             }
           }
         }
+      }
+    },
+    "/remittance/remittances/{id}/pdf": {
+      "get": {
+        "operationId": "getRemittanceRemittancesIdPdf",
+        "summary": "Printable remittance advice (agency bill for an agency bill): broker letterhead, the policies, the amount due and the signatures (PDF; download=1 for an attachment)",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Tracking > Print\n\nAccess: read:remittance, write:remittance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "application/pdf",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Tracking > Print",
+        "x-permissions": [
+          "read:remittance",
+          "write:remittance"
+        ]
       }
     },
     "/remittance/remittances/{id}/reject": {
@@ -141708,7 +142823,7 @@
     "/schedules/{code}/runs": {
       "get": {
         "operationId": "getSchedulesCodeRuns",
-        "summary": "Run history of a job",
+        "summary": "Run history of a job (who started a run: triggeredBy, triggeredByName)",
         "tags": [
           "Schedules"
         ],
@@ -141755,6 +142870,12 @@
                                 "type": "integer"
                               }
                             }
+                          },
+                          "triggeredBy": {
+                            "type": "string"
+                          },
+                          "triggeredByName": {
+                            "type": "string"
                           }
                         }
                       }
@@ -141770,7 +142891,9 @@
                       "startedAt": "2026-01-01T06:00:00Z",
                       "output": {
                         "notifications": 3
-                      }
+                      },
+                      "triggeredBy": "r.finance",
+                      "triggeredByName": "Rosa Finance"
                     }
                   ]
                 }

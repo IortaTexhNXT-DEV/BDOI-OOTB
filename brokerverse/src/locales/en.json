@@ -5869,6 +5869,124 @@
       "addSlot": "Add slot"
     }
   },
+  "confirmDialog": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "required": "{{label}} is required.",
+    "minLength": "Enter at least {{count}} characters.",
+    "invalidDate": "Enter a valid date.",
+    "failed": "The action could not be completed. Try again."
+  },
+  "detailView": {
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "makerChecker": {
+    "ownRecord": "You initiated this record. A different user must approve or reject it.",
+    "approve": "Approve",
+    "reject": "Reject"
+  },
+  "activityLog": {
+    "empty": "No activity has been recorded for this record.",
+    "failed": "The activity log could not be loaded.",
+    "retry": "Retry",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "system": "System",
+    "remarks": "Remarks",
+    "whatChanged": "What changed",
+    "field": "Field",
+    "before": "Before",
+    "after": "After",
+    "hidden": "Hidden",
+    "statusChange": "Status changed from {{from}} to {{to}}",
+    "actions": {
+      "create": "Created",
+      "update": "Updated",
+      "submit": "Submitted",
+      "approve": "Approved",
+      "reject": "Rejected",
+      "return": "Returned",
+      "post": "Posted",
+      "reverse": "Reversed",
+      "cancel": "Cancelled",
+      "void": "Voided",
+      "delete": "Deleted",
+      "send": "Sent",
+      "acknowledge": "Acknowledged",
+      "settle": "Settled",
+      "process": "Processed",
+      "generate": "Generated",
+      "issue": "Issued",
+      "print": "Printed",
+      "assign": "Assigned",
+      "reassign": "Reassigned",
+      "delegate": "Delegated",
+      "escalate": "Escalated",
+      "resolve": "Resolved",
+      "close": "Closed",
+      "reopen": "Reopened",
+      "activate": "Activated",
+      "deactivate": "Deactivated",
+      "withdraw": "Withdrawn",
+      "match": "Matched",
+      "unmatch": "Unmatched",
+      "pay": "Paid",
+      "remind": "Reminder sent",
+      "complete": "Completed",
+      "fail": "Failed",
+      "retry": "Retried",
+      "schedule": "Scheduled",
+      "run": "Run",
+      "upload": "Uploaded",
+      "import": "Imported",
+      "export": "Exported",
+      "calculate": "Calculated",
+      "recalculate": "Recalculated",
+      "adjust": "Adjusted",
+      "signOff": "Signed off",
+      "collect": "Collection recorded",
+      "status": "Status changed",
+      "note": "Note added",
+      "call": "Call logged",
+      "email": "E-mail sent",
+      "commitment": "Payment commitment recorded",
+      "assignAuto": "Assigned by rule",
+      "assignQueued": "Sent to the queue",
+      "assignManual": "Reassigned",
+      "assignBulk": "Reassigned in bulk",
+      "assignTaken": "Taken from the queue"
+    },
+    "fields": {
+      "version": "Version",
+      "approvalLevel": "Approval level",
+      "assignedTo": "Assigned to",
+      "rule": "Rule",
+      "outcome": "Outcome",
+      "commitmentDate": "Commitment date",
+      "endorsement": "Endorsement",
+      "reference": "Reference",
+      "result": "Result"
+    },
+    "sources": {
+      "screen": "Screen",
+      "api": "API",
+      "job": "Scheduled job",
+      "manual": "Manual",
+      "closeRun": "Month-end close",
+      "yearEnd": "Year-end close",
+      "yearEndReversal": "Year-end close reversed"
+    }
+  },
+  "print": {
+    "failed": "The document could not be printed.",
+    "empty": "The document is empty.",
+    "printedBy": "Printed {{at}} by {{name}}",
+    "number": "No. {{number}}",
+    "tin": "TIN {{tin}}",
+    "frameTitle": "Document being printed"
+  },
   "security": {
     "changePassword": "Change password",
     "twoFactor": "Two-step verification",
@@ -6139,6 +6257,178 @@
       "broker": "Broker billed",
       "direct": "Direct billed",
       "daysInvalid": "Enter a whole number of days"
+    }
+  },
+  "yearEndClose": {
+    "help": "Closes the fiscal year in five steps: prerequisites, adjustments, closing entries, the close by an Accounting Manager and the opening balances of the next year. The user who starts the close cannot close the year.",
+    "stepsLabel": "Year-end close steps",
+    "step": {
+      "prerequisites": "Prerequisites",
+      "adjustments": "Year-end adjustments",
+      "closing": "Closing entries",
+      "approval": "Close the year",
+      "opening": "Opening balances"
+    },
+    "summary": "Year-end close summary",
+    "run": "Run",
+    "runChecks": "Run checks again",
+    "remark": "Remark",
+    "empty": "No year-end close has been started for {{fiscalYear}} ({{from}} – {{to}}).",
+    "start": "Start year-end close",
+    "previous": "Previous step",
+    "next": "Next step",
+    "none": "None",
+    "nil": "Nil",
+    "more": "and {{count}} more",
+    "more_one": "and {{count}} more",
+    "more_other": "and {{count}} more",
+    "total": "Total",
+    "accountTypeLabel": "Type",
+    "accountType": {
+      "income": "Income",
+      "expense": "Expense",
+      "asset": "Asset",
+      "liability": "Liability",
+      "equity": "Equity"
+    },
+    "check": {
+      "periods_closed": {
+        "label": "Periods 1 to 12 closed",
+        "labelSoft": "Periods 1 to 12 soft-closed or closed",
+        "count": "{{closed}} of {{total}} closed",
+        "open": "not closed: {{list}}"
+      },
+      "unposted_journals": {
+        "label": "No unposted journals in the year",
+        "count": "{{count}} journals not posted",
+        "count_one": "{{count}} journal not posted",
+        "count_other": "{{count}} journals not posted"
+      },
+      "suspense_balance": {
+        "label": "Suspense account nil",
+        "notSet": "No suspense account is set up"
+      },
+      "trial_balance": {
+        "label": "Trial balance balanced at the year end",
+        "result": "Debits {{debit}}, credits {{credit}}",
+        "difference": "difference {{amount}}"
+      },
+      "closing_accounts": {
+        "label": "Closing accounts set up",
+        "result": "Current year P/L {{currentYearPl}}; retained earnings {{retainedEarnings}}",
+        "failed": "Current year P/L and retained earnings must be active equity accounts"
+      },
+      "previous_year": {
+        "label": "Previous fiscal year closed",
+        "first": "First fiscal year",
+        "result": "{{fiscalYear}}: {{status}}"
+      },
+      "adjustment_period": {
+        "label": "Adjustment period open",
+        "missing": "Adjustment period {{period}} does not exist"
+      },
+      "adjustments_posted": {
+        "label": "Adjustment journals posted",
+        "none": "All posted",
+        "count": "{{count}} journals awaiting approval",
+        "count_one": "{{count}} journal awaiting approval",
+        "count_other": "{{count}} journals awaiting approval"
+      }
+    },
+    "link": {
+      "periods": "Period Management",
+      "journals": "Journal Voucher",
+      "accountingQuery": "Accounting Query",
+      "statements": "Financial Statements",
+      "openYear": "Open {{fiscalYear}}",
+      "configure": "Configure"
+    },
+    "adjustments": {
+      "title": "Adjustment journals",
+      "empty": "No adjustment journals",
+      "preparedBy": "Prepared by",
+      "open": "Open journal voucher",
+      "add": "Add adjustment"
+    },
+    "closing": {
+      "journalDate": "Journal date",
+      "totalIncome": "Total income",
+      "totalExpense": "Total expense",
+      "journals": "Closing journals",
+      "toCurrentYear": "Income and expense to current year P/L",
+      "toRetainedEarnings": "Current year P/L to retained earnings",
+      "empty": "No income or expense balances",
+      "netToCurrentYear": "Net result"
+    },
+    "approval": {
+      "preparedBy": "Prepared by",
+      "approver": "Approver",
+      "accountingManager": "Accounting Manager",
+      "checks": "Checks",
+      "close": "Close fiscal year",
+      "closedBy": "Closed by",
+      "remark": "Remark"
+    },
+    "reason": {
+      "closePermission": "Closing the year needs an Accounting Manager.",
+      "closeMaker": "You started this year-end close; another Accounting Manager closes the year.",
+      "closeChecks": "Resolve the failed checks of steps 1 and 2 first.",
+      "nextPeriod": "No longer possible: period {{period}} of {{fiscalYear}} is not open.",
+      "nextYear": "No longer possible: {{fiscalYear}} is closed.",
+      "reversePermission": "Approving a reversal needs an Accounting Manager.",
+      "reverseMaker": "You requested this reversal; another Accounting Manager approves it."
+    },
+    "reversal": {
+      "pending": "Reversal requested",
+      "requestedBy": "Requested by",
+      "reason": "Reason",
+      "approve": "Reverse close",
+      "withdraw": "Withdraw request",
+      "request": "Request reversal"
+    },
+    "opening": {
+      "accounts": "Accounts carried forward",
+      "totalDebit": "Total debit",
+      "totalCredit": "Total credit",
+      "empty": "No balance-sheet balances"
+    },
+    "activity": {
+      "title": "Activity"
+    },
+    "action": {
+      "start": "Year-end close started",
+      "check": "Checks run",
+      "close": "Fiscal year closed",
+      "reverse-request": "Reversal requested",
+      "reverse-withdraw": "Reversal request withdrawn",
+      "reverse": "Close reversed",
+      "cancel": "Run cancelled"
+    },
+    "dialog": {
+      "closeMessage": "The closing entries are posted in {{period}}, dated {{date}}, and the balances are carried into {{fiscalYear}}.",
+      "reverseMessage": "The close of {{fiscalYear}} is reversed with the reason of the request.",
+      "withdrawMessage": "The reversal request is withdrawn; {{fiscalYear}} stays closed.",
+      "cancelMessage": "Run {{runNumber}} is cancelled.",
+      "closeTitle": "Close fiscal year {{fiscalYear}}",
+      "closeConsequence": "The periods of {{fiscalYear}} are locked; no journal can be posted in them until the close is reversed.",
+      "requestTitle": "Request reversal of the {{fiscalYear}} close",
+      "requestConsequence": "Another Accounting Manager approves the reversal.",
+      "reverseTitle": "Reverse the {{fiscalYear}} close",
+      "reverseConsequence": "The closing entries are reversed, the opening balances of {{fiscalYear}} removed and the periods unlocked.",
+      "withdrawTitle": "Withdraw reversal request",
+      "keepRequest": "Keep request",
+      "cancelTitle": "Cancel run {{runNumber}}",
+      "cancelConsequence": "{{fiscalYear}} returns to Open.",
+      "keepRun": "Keep run",
+      "adjustmentTitle": "Adjustment journal {{fiscalYear}}",
+      "adjustmentConsequence": "Posted in the adjustment period after approval by a second user.",
+      "submitAdjustment": "Submit for approval"
+    },
+    "toast": {
+      "checked": "Checks run",
+      "reversalRequested": "Reversal requested; awaiting approval",
+      "reversalWithdrawn": "Reversal request withdrawn",
+      "cancelled": "Year-end close run cancelled"
     }
   },
   "periodEnd": {

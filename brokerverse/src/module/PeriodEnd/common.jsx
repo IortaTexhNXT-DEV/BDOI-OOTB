@@ -14,7 +14,7 @@ export const money = (v) => (v === null || v === undefined || v === "" ? "" : fo
 export const date = (v) => (v ? formatDate(v) : "-");
 export const dateTime = (v) => (v ? formatDate(v, { withTime: true }) : "-");
 export const showError = (toast, e) => toast.current?.show({ severity: "error", summary: "Error", detail: e.message, life: 7000 });
-export const showSuccess = (toast, detail) => toast.current?.show({ severity: "success", summary: "Done", detail, life: 3500 });
+export const showSuccess = (toast, detail) => toast.current?.show({ severity: "success", summary: "Done", detail, life: 5000 });
 
 const SEVERITY = {
   open: "success", soft_closed: "warning", closed: "danger", locked: "secondary", closing: "warning",

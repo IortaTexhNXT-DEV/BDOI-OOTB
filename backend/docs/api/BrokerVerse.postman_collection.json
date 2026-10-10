@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1213 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1216 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -29996,6 +29996,55 @@
           ]
         },
         {
+          "name": "Letterhead and document colours for a page printed from the browser (the same as on the server documents): company name, address lines, TIN, licence, contact, the print logo as a data URL and the documents section of the theme",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/document-templates/letterhead",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "document-templates",
+                "letterhead"
+              ]
+            },
+            "description": "Letterhead and document colours for a page printed from the browser (the same as on the server documents): company name, address lines, TIN, licence, contact, the print logo as a data URL and the documents section of the theme\n\nFront-end touchpoint: Printable views (Print on screens that print a page of their own)\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/document-templates/letterhead",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "document-templates",
+                    "letterhead"
+                  ]
+                },
+                "description": "Letterhead and document colours for a page printed from the browser (the same as on the server documents): company name, address lines, TIN, licence, contact, the print logo as a data URL and the documents section of the theme\n\nFront-end touchpoint: Printable views (Print on screens that print a page of their own)\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"name\": \"Toyota Insurance Services Philippines, Inc.\",\n    \"addressLines\": [\n      \"31F Net Park, 5th Avenue\",\n      \"Taguig City, Metro Manila 1634, Philippines\"\n    ],\n    \"tin\": \"000-000-000-000\",\n    \"licence\": \"IC-B-1234\",\n    \"phone\": \"+63 2 8888 0000\",\n    \"email\": \"tisph@example.ph\",\n    \"website\": \"\",\n    \"logo\": \"data:image/png;base64,...\",\n    \"documents\": {\n      \"accent\": \"#eb0a1e\",\n      \"headingColor\": \"#eb0a1e\",\n      \"headingBg\": \"#f7f7f7\",\n      \"tableHeaderBg\": \"#eb0a1e\",\n      \"tableHeaderText\": \"#ffffff\",\n      \"footerText\": \"Authorized by the Insurance Commission ...\",\n      \"showLogo\": true,\n      \"logoHeight\": 46\n    },\n    \"generatedBy\": \"Rosa Finance\",\n    \"generatedAt\": \"10/10/2026 09:03\"\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Fire / IAR policy schedule PDF",
           "request": {
             "method": "GET",
@@ -56126,12 +56175,12 @@
           ]
         },
         {
-          "name": "Financial statement (income-statement, balance-sheet, trial-balance; gl-detail: postings of an Account with the opening and running balance) for FromDate / ToDate, from the report catalogue; statement: the layout (sections, groups, lines, totals, the date range of each column, the card figures)",
+          "name": "Financial statement (income-statement, balance-sheet, trial-balance, gl-detail) for FromDate / ToDate, from the report catalogue",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/period-end/statements/:type?FromDate=2026-10-01&ToDate=2026-10-31",
+              "raw": "{{baseUrl}}/period-end/statements/:type?FromDate=2026-01-01&ToDate=2026-09-30",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -56143,11 +56192,11 @@
               "query": [
                 {
                   "key": "FromDate",
-                  "value": "2026-10-01"
+                  "value": "2026-01-01"
                 },
                 {
                   "key": "ToDate",
-                  "value": "2026-10-31"
+                  "value": "2026-09-30"
                 }
               ],
               "variable": [
@@ -56158,7 +56207,7 @@
                 }
               ]
             },
-            "description": "Financial statement (income-statement, balance-sheet, trial-balance; gl-detail: postings of an Account with the opening and running balance) for FromDate / ToDate, from the report catalogue; statement: the layout (sections, groups, lines, totals, the date range of each column, the card figures)\n\nFront-end touchpoint: Accounts > Period End > Financial Statements\n\nAccess: read:period-end, read:journal-vouchers, read:reports"
+            "description": "Financial statement (income-statement, balance-sheet, trial-balance, gl-detail) for FromDate / ToDate, from the report catalogue\n\nFront-end touchpoint: Accounts > Period End > Financial Statements\n\nAccess: read:period-end, read:journal-vouchers, read:reports"
           },
           "response": [
             {
@@ -56167,7 +56216,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/period-end/statements/:type?FromDate=2026-10-01&ToDate=2026-10-31",
+                  "raw": "{{baseUrl}}/period-end/statements/:type?FromDate=2026-01-01&ToDate=2026-09-30",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -56179,11 +56228,11 @@
                   "query": [
                     {
                       "key": "FromDate",
-                      "value": "2026-10-01"
+                      "value": "2026-01-01"
                     },
                     {
                       "key": "ToDate",
-                      "value": "2026-10-31"
+                      "value": "2026-09-30"
                     }
                   ],
                   "variable": [
@@ -56194,7 +56243,7 @@
                     }
                   ]
                 },
-                "description": "Financial statement (income-statement, balance-sheet, trial-balance; gl-detail: postings of an Account with the opening and running balance) for FromDate / ToDate, from the report catalogue; statement: the layout (sections, groups, lines, totals, the date range of each column, the card figures)\n\nFront-end touchpoint: Accounts > Period End > Financial Statements\n\nAccess: read:period-end, read:journal-vouchers, read:reports"
+                "description": "Financial statement (income-statement, balance-sheet, trial-balance, gl-detail) for FromDate / ToDate, from the report catalogue\n\nFront-end touchpoint: Accounts > Period End > Financial Statements\n\nAccess: read:period-end, read:journal-vouchers, read:reports"
               },
               "status": "OK",
               "code": 200,
@@ -56206,153 +56255,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"rows\": [\n      {\n        \"accountType\": \"income\",\n        \"fsGroup\": \"Revenue\",\n        \"accountCode\": \"3201001\",\n        \"currentPeriod\": 183803.75\n      }\n    ],\n    \"summary\": {\n      \"netIncome\": 120000\n    },\n    \"statement\": {\n      \"type\": \"income-statement\",\n      \"title\": \"Income Statement\",\n      \"from\": \"2026-10-01\",\n      \"to\": \"2026-10-31\",\n      \"measures\": [\n        {\n          \"key\": \"currentPeriod\",\n          \"label\": \"This period\",\n          \"from\": \"2026-10-01\",\n          \"to\": \"2026-10-31\"\n        }\n      ],\n      \"sections\": [\n        {\n          \"key\": \"income\",\n          \"label\": \"Income\",\n          \"groups\": [\n            {\n              \"label\": \"Revenue\",\n              \"lines\": [\n                {\n                  \"accountCode\": \"3201001\",\n                  \"accountName\": \"Brokerage Commission Income\",\n                  \"values\": {\n                    \"currentPeriod\": 183803.75\n                  },\n                  \"drill\": true\n                }\n              ],\n              \"total\": {\n                \"currentPeriod\": 183803.75\n              }\n            }\n          ]\n        }\n      ],\n      \"result\": {\n        \"key\": \"netIncome\",\n        \"label\": \"Net income (loss)\",\n        \"values\": {\n          \"currentPeriod\": 120000\n        }\n      },\n      \"cards\": {\n        \"totalIncome\": 183803.75,\n        \"totalExpense\": 63803.75,\n        \"netIncome\": 120000\n      }\n    }\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Financial statement file: format=xlsx (default) or pdf, with the company, the statement title, the period, printed by / at and the currency",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/period-end/statements/:type/export?FromDate=2026-10-01&ToDate=2026-10-31&format=pdf",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "period-end",
-                "statements",
-                ":type",
-                "export"
-              ],
-              "query": [
-                {
-                  "key": "FromDate",
-                  "value": "2026-10-01"
-                },
-                {
-                  "key": "ToDate",
-                  "value": "2026-10-31"
-                },
-                {
-                  "key": "format",
-                  "value": "pdf"
-                }
-              ],
-              "variable": [
-                {
-                  "key": "type",
-                  "value": "",
-                  "description": "type (path parameter)"
-                }
-              ]
-            },
-            "description": "Financial statement file: format=xlsx (default) or pdf, with the company, the statement title, the period, printed by / at and the currency\n\nFront-end touchpoint: Accounts > Period End > Financial Statements > Export, Print\n\nAccess: read:period-end, read:journal-vouchers, read:reports"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/period-end/statements/:type/export?FromDate=2026-10-01&ToDate=2026-10-31&format=pdf",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "period-end",
-                    "statements",
-                    ":type",
-                    "export"
-                  ],
-                  "query": [
-                    {
-                      "key": "FromDate",
-                      "value": "2026-10-01"
-                    },
-                    {
-                      "key": "ToDate",
-                      "value": "2026-10-31"
-                    },
-                    {
-                      "key": "format",
-                      "value": "pdf"
-                    }
-                  ],
-                  "variable": [
-                    {
-                      "key": "type",
-                      "value": "",
-                      "description": "type (path parameter)"
-                    }
-                  ]
-                },
-                "description": "Financial statement file: format=xlsx (default) or pdf, with the company, the statement title, the period, printed by / at and the currency\n\nFront-end touchpoint: Accounts > Period End > Financial Statements > Export, Print\n\nAccess: read:period-end, read:journal-vouchers, read:reports"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "text",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/octet-stream"
-                }
-              ],
-              "cookie": [],
-              "body": "(application/pdf | application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)"
-            }
-          ]
-        },
-        {
-          "name": "Fiscal years with their twelve periods for the period choice of the financial statements, and the default period (the one containing today)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/period-end/statements/periods",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "period-end",
-                "statements",
-                "periods"
-              ]
-            },
-            "description": "Fiscal years with their twelve periods for the period choice of the financial statements, and the default period (the one containing today)\n\nFront-end touchpoint: Accounts > Period End > Financial Statements\n\nAccess: read:period-end, read:journal-vouchers, read:reports"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/period-end/statements/periods",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "period-end",
-                    "statements",
-                    "periods"
-                  ]
-                },
-                "description": "Fiscal years with their twelve periods for the period choice of the financial statements, and the default period (the one containing today)\n\nFront-end touchpoint: Accounts > Period End > Financial Statements\n\nAccess: read:period-end, read:journal-vouchers, read:reports"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"today\": \"2026-10-09\",\n    \"current\": {\n      \"fiscalYear\": \"FY2027\",\n      \"period\": \"2026-10\"\n    },\n    \"fiscalYears\": [\n      {\n        \"code\": \"FY2027\",\n        \"startDate\": \"2026-04-01\",\n        \"endDate\": \"2027-03-31\",\n        \"status\": \"open\",\n        \"periods\": [\n          {\n            \"period\": \"2026-10\",\n            \"periodNo\": 7,\n            \"startDate\": \"2026-10-01\",\n            \"endDate\": \"2026-10-31\",\n            \"status\": \"open\"\n          }\n        ]\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"rows\": [\n      {\n        \"accountType\": \"income\",\n        \"fsGroup\": \"Revenue\",\n        \"accountCode\": \"3201001\",\n        \"currentPeriod\": 183803.75\n      }\n    ],\n    \"summary\": {\n      \"netIncome\": 120000\n    }\n  }\n}"
             }
           ]
         },
@@ -56625,7 +56528,7 @@
           ]
         },
         {
-          "name": "Start the year-end close of a fiscal year (the year becomes \"closing\")",
+          "name": "Start the year-end close of a fiscal year (the year becomes \"closing\"); the pre-checks run at once (status checked when they all pass)",
           "request": {
             "method": "POST",
             "header": [
@@ -56644,7 +56547,7 @@
                 "year-end"
               ]
             },
-            "description": "Start the year-end close of a fiscal year (the year becomes \"closing\")\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+            "description": "Start the year-end close of a fiscal year (the year becomes \"closing\"); the pre-checks run at once (status checked when they all pass)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"fiscalYear\": \"FY2025\"\n}",
@@ -56676,7 +56579,7 @@
                     "year-end"
                   ]
                 },
-                "description": "Start the year-end close of a fiscal year (the year becomes \"closing\")\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+                "description": "Start the year-end close of a fiscal year (the year becomes \"closing\"); the pre-checks run at once (status checked when they all pass)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"fiscalYear\": \"FY2025\"\n}",
@@ -56862,7 +56765,7 @@
           ]
         },
         {
-          "name": "Run the year-end pre-checks",
+          "name": "Run the year-end pre-checks again and keep the result on the run",
           "request": {
             "method": "POST",
             "header": [
@@ -56890,7 +56793,7 @@
                 }
               ]
             },
-            "description": "Run the year-end pre-checks\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+            "description": "Run the year-end pre-checks again and keep the result on the run\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
             "body": {
               "mode": "raw",
               "raw": "{}",
@@ -56931,7 +56834,7 @@
                     }
                   ]
                 },
-                "description": "Run the year-end pre-checks\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+                "description": "Run the year-end pre-checks again and keep the result on the run\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
                 "body": {
                   "mode": "raw",
                   "raw": "{}",
@@ -56957,7 +56860,7 @@
           ]
         },
         {
-          "name": "Close the fiscal year: closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year (approve:period-end)",
+          "name": "Close the fiscal year (approve:period-end; maker-checker: not the user who started the run): closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year",
           "request": {
             "method": "POST",
             "header": [
@@ -56985,10 +56888,10 @@
                 }
               ]
             },
-            "description": "Close the fiscal year: closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year (approve:period-end)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
+            "description": "Close the fiscal year (approve:period-end; maker-checker: not the user who started the run): closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
             "body": {
               "mode": "raw",
-              "raw": "{}",
+              "raw": "{\n  \"remarks\": \"Audit adjustments reviewed\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -57026,10 +56929,10 @@
                     }
                   ]
                 },
-                "description": "Close the fiscal year: closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year (approve:period-end)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
+                "description": "Close the fiscal year (approve:period-end; maker-checker: not the user who started the run): closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
                 "body": {
                   "mode": "raw",
-                  "raw": "{}",
+                  "raw": "{\n  \"remarks\": \"Audit adjustments reviewed\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -57052,7 +56955,7 @@
           ]
         },
         {
-          "name": "Reverse a year-end close until the first period of the next year is closed (approve:period-end; reason required)",
+          "name": "Approve the requested reversal and reverse the close (approve:period-end; maker-checker: not the requester): closing entries reversed, opening balances removed, periods unlocked",
           "request": {
             "method": "POST",
             "header": [
@@ -57080,10 +56983,10 @@
                 }
               ]
             },
-            "description": "Reverse a year-end close until the first period of the next year is closed (approve:period-end; reason required)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
+            "description": "Approve the requested reversal and reverse the close (approve:period-end; maker-checker: not the requester): closing entries reversed, opening balances removed, periods unlocked\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
             "body": {
               "mode": "raw",
-              "raw": "{}",
+              "raw": "{\n  \"remarks\": \"Reversal agreed with the external auditor\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -57121,7 +57024,199 @@
                     }
                   ]
                 },
-                "description": "Reverse a year-end close until the first period of the next year is closed (approve:period-end; reason required)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
+                "description": "Approve the requested reversal and reverse the close (approve:period-end; maker-checker: not the requester): closing entries reversed, opening balances removed, periods unlocked\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: approve:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"remarks\": \"Reversal agreed with the external auditor\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"yec_1\",\n    \"runNumber\": \"YEC-2026-00001\",\n    \"fiscalYear\": \"FY2025\",\n    \"status\": \"closed\",\n    \"netIncome\": 1250000,\n    \"nextFiscalYear\": \"FY2026\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Request the reversal of a closed year with a reason (Reason Codes master, context year_end_reverse); possible until the first period of the next year is closed",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/year-end/:id/reverse-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "year-end",
+                ":id",
+                "reverse-request"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Request the reversal of a closed year with a reason (Reason Codes master, context year_end_reverse); possible until the first period of the next year is closed\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"YER-AUDITADJ\",\n  \"note\": \"Adjustments of the external auditor\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/year-end/:id/reverse-request",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "year-end",
+                    ":id",
+                    "reverse-request"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Request the reversal of a closed year with a reason (Reason Codes master, context year_end_reverse); possible until the first period of the next year is closed\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"YER-AUDITADJ\",\n  \"note\": \"Adjustments of the external auditor\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"yec_1\",\n    \"runNumber\": \"YEC-2026-00001\",\n    \"fiscalYear\": \"FY2025\",\n    \"status\": \"closed\",\n    \"netIncome\": 1250000,\n    \"nextFiscalYear\": \"FY2026\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Withdraw a reversal request (the requester, or a user with approve:period-end)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/year-end/:id/reverse-request/withdraw",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "year-end",
+                ":id",
+                "reverse-request",
+                "withdraw"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Withdraw a reversal request (the requester, or a user with approve:period-end)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end, approve:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/year-end/:id/reverse-request/withdraw",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "year-end",
+                    ":id",
+                    "reverse-request",
+                    "withdraw"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Withdraw a reversal request (the requester, or a user with approve:period-end)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end, approve:period-end",
                 "body": {
                   "mode": "raw",
                   "raw": "{}",
@@ -57143,6 +57238,69 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"yec_1\",\n    \"runNumber\": \"YEC-2026-00001\",\n    \"fiscalYear\": \"FY2025\",\n    \"status\": \"closed\",\n    \"netIncome\": 1250000,\n    \"nextFiscalYear\": \"FY2026\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "The Year-End Close screen of a fiscal year (default: the year being closed, else the oldest open year): run, the five steps with their checks, adjustment journals, closing entries and opening balances (previewed until the close), history of the runs and the actions the user may take with the reason when not",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/year-end/overview?fiscalYear=FY2026",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "year-end",
+                "overview"
+              ],
+              "query": [
+                {
+                  "key": "fiscalYear",
+                  "value": "FY2026"
+                }
+              ]
+            },
+            "description": "The Year-End Close screen of a fiscal year (default: the year being closed, else the oldest open year): run, the five steps with their checks, adjustment journals, closing entries and opening balances (previewed until the close), history of the runs and the actions the user may take with the reason when not\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: read:period-end, read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/year-end/overview?fiscalYear=FY2026",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "year-end",
+                    "overview"
+                  ],
+                  "query": [
+                    {
+                      "key": "fiscalYear",
+                      "value": "FY2026"
+                    }
+                  ]
+                },
+                "description": "The Year-End Close screen of a fiscal year (default: the year being closed, else the oldest open year): run, the five steps with their checks, adjustment journals, closing entries and opening balances (previewed until the close), history of the runs and the actions the user may take with the reason when not\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: read:period-end, read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"fiscalYear\": {\n      \"code\": \"FY2026\",\n      \"status\": \"closing\",\n      \"adjustmentPeriod\": \"2026-13\"\n    },\n    \"run\": {\n      \"id\": \"yec_1\",\n      \"runNumber\": \"YEC-2026-00001\",\n      \"fiscalYear\": \"FY2025\",\n      \"status\": \"checked\",\n      \"netIncome\": 1250000,\n      \"nextFiscalYear\": \"FY2026\",\n      \"preparedByName\": \"Ana Santos\"\n    },\n    \"steps\": [\n      {\n        \"key\": \"prerequisites\",\n        \"status\": \"passed\"\n      },\n      {\n        \"key\": \"adjustments\",\n        \"status\": \"passed\"\n      },\n      {\n        \"key\": \"closing\",\n        \"status\": \"pending\"\n      },\n      {\n        \"key\": \"approval\",\n        \"status\": \"pending-approval\"\n      },\n      {\n        \"key\": \"opening\",\n        \"status\": \"pending\"\n      }\n    ],\n    \"currentStep\": \"approval\",\n    \"checks\": [\n      {\n        \"code\": \"periods_closed\",\n        \"step\": \"prerequisites\",\n        \"status\": \"passed\",\n        \"data\": {\n          \"total\": 12,\n          \"closed\": 12\n        }\n      }\n    ],\n    \"closing\": {\n      \"source\": \"preview\",\n      \"netIncome\": 1250000,\n      \"lines\": [\n        {\n          \"accountCode\": \"3201001\",\n          \"accountType\": \"income\",\n          \"balance\": -1800000,\n          \"debit\": 1800000,\n          \"credit\": 0\n        }\n      ]\n    },\n    \"opening\": {\n      \"source\": \"preview\",\n      \"fiscalYear\": \"FY2027\",\n      \"totalDebit\": 2102400,\n      \"totalCredit\": 2102400,\n      \"lines\": []\n    },\n    \"actions\": {\n      \"close\": {\n        \"allowed\": false,\n        \"reason\": \"maker-checker\"\n      }\n    }\n  }\n}"
             }
           ]
         }
@@ -64198,7 +64356,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"action\": \"create-version\",\n      \"username\": \"BrokerVerse\",\n      \"at\": \"2026-09-29T08:00:00Z\",\n      \"version\": 2\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"action\": \"create-version\",\n      \"actionLabel\": \"Create version\",\n      \"username\": \"BrokerVerse\",\n      \"displayName\": \"BrokerVerse Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"at\": \"2026-09-29T08:00:00Z\",\n      \"version\": 2\n    }\n  ]\n}"
             }
           ]
         },
@@ -66108,7 +66266,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -66585,7 +66743,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -67013,7 +67171,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -67539,7 +67697,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -68162,7 +68320,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -68644,7 +68802,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Draft\",\n          \"to\": \"Active\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Draft\",\n          \"to\": \"Active\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -69710,7 +69868,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -70138,7 +70296,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -70529,7 +70687,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Draft\",\n          \"to\": \"Active\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Draft\",\n          \"to\": \"Active\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -71307,7 +71465,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -71735,7 +71893,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -72293,7 +72451,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"actionLabel\": \"Updated\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"userName\": \"Administrator\",\n      \"roles\": [\n        \"System Administrator\"\n      ],\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"label\": \"Status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         }
@@ -80229,7 +80387,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"referenceNo\": \"REM-2026-00001\",\n      \"actionType\": \"approve\",\n      \"previousValue\": \"Pending Approval\",\n      \"newValue\": \"Approved\",\n      \"changedBy\": \"finance.head\",\n      \"changeDate\": \"2026-09-26 15:45\"\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"referenceNo\": \"REM-2026-00001\",\n      \"actionType\": \"approve\",\n      \"actionLabel\": \"Approved\",\n      \"previousValue\": \"Pending Approval\",\n      \"newValue\": \"Approved\",\n      \"changedBy\": \"finance.head\",\n      \"changedByName\": \"Fe Head\",\n      \"changedByRoles\": [\n        \"Finance Manager\"\n      ],\n      \"changeDate\": \"2026-09-26 15:45\",\n      \"changedAt\": \"2026-09-26T15:45:00.000Z\"\n    }\n  ]\n}"
             }
           ]
         },
@@ -81253,7 +81411,7 @@
           ]
         },
         {
-          "name": "Remittance details: insurer, policies, documents, activity log",
+          "name": "Remittance details: insurer, policies, documents, activity log (oldest first: the remittance's audit rows, its approval decisions and the settlement that settled it; each entry with action label, user display name and roles, status from / to, remarks and changed fields)",
           "request": {
             "method": "GET",
             "header": [],
@@ -81275,7 +81433,7 @@
                 }
               ]
             },
-            "description": "Remittance details: insurer, policies, documents, activity log\n\nFront-end touchpoint: Accounts > Remittance > Tracking > View\n\nAccess: read:remittance, write:remittance"
+            "description": "Remittance details: insurer, policies, documents, activity log (oldest first: the remittance's audit rows, its approval decisions and the settlement that settled it; each entry with action label, user display name and roles, status from / to, remarks and changed fields)\n\nFront-end touchpoint: Accounts > Remittance > Tracking > View\n\nAccess: read:remittance, write:remittance"
           },
           "response": [
             {
@@ -81301,7 +81459,7 @@
                     }
                   ]
                 },
-                "description": "Remittance details: insurer, policies, documents, activity log\n\nFront-end touchpoint: Accounts > Remittance > Tracking > View\n\nAccess: read:remittance, write:remittance"
+                "description": "Remittance details: insurer, policies, documents, activity log (oldest first: the remittance's audit rows, its approval decisions and the settlement that settled it; each entry with action label, user display name and roles, status from / to, remarks and changed fields)\n\nFront-end touchpoint: Accounts > Remittance > Tracking > View\n\nAccess: read:remittance, write:remittance"
               },
               "status": "OK",
               "code": 200,
@@ -81313,7 +81471,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rm_1\",\n    \"remittanceNo\": \"REM-2026-00001\",\n    \"remittanceDate\": \"2026-09-15\",\n    \"insurerCode\": \"MALAYAN\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"policyCount\": 3,\n    \"grossAmount\": 45000,\n    \"commission\": 6750,\n    \"tax\": 0,\n    \"netAmount\": 38250,\n    \"status\": \"Pending Approval\",\n    \"statusCode\": \"for-approval\",\n    \"insurerDetails\": {\n      \"code\": \"MALAYAN\",\n      \"name\": \"Malayan Insurance Co., Inc.\"\n    },\n    \"policies\": [\n      {\n        \"policyNo\": \"POL-2026-00001\",\n        \"premium\": 15000,\n        \"commission\": 2250\n      }\n    ],\n    \"activityLog\": []\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rm_1\",\n    \"remittanceNo\": \"REM-2026-00001\",\n    \"remittanceDate\": \"2026-09-15\",\n    \"insurerCode\": \"MALAYAN\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"policyCount\": 3,\n    \"grossAmount\": 45000,\n    \"commission\": 6750,\n    \"tax\": 0,\n    \"netAmount\": 38250,\n    \"status\": \"Pending Approval\",\n    \"statusCode\": \"for-approval\",\n    \"insurerDetails\": {\n      \"code\": \"MALAYAN\",\n      \"name\": \"Malayan Insurance Co., Inc.\"\n    },\n    \"policies\": [\n      {\n        \"policyNo\": \"POL-2026-00001\",\n        \"premium\": 15000,\n        \"commission\": 2250\n      }\n    ],\n    \"activityLog\": [\n      {\n        \"action\": \"submit\",\n        \"by\": \"r.finance\",\n        \"at\": \"2026-10-10T01:03:00.000Z\",\n        \"notes\": null,\n        \"id\": \"812\",\n        \"day\": \"2026-10-10\",\n        \"date\": \"10/10/2026\",\n        \"time\": \"09:03\",\n        \"atText\": \"10/10/2026 09:03\",\n        \"actionCode\": \"submit\",\n        \"actionLabel\": \"Remittance submitted\",\n        \"user\": {\n          \"username\": \"r.finance\",\n          \"displayName\": \"Rosa Finance\",\n          \"roles\": [\n            \"Finance Officer\"\n          ],\n          \"role\": \"Finance Officer\"\n        },\n        \"fromStatus\": \"Draft\",\n        \"toStatus\": \"Pending Approval\",\n        \"remarks\": null,\n        \"changes\": [\n          {\n            \"field\": \"batchId\",\n            \"label\": \"Batch ID\",\n            \"before\": null,\n            \"after\": \"BLK-2026-00001\"\n          }\n        ],\n        \"source\": {\n          \"channel\": \"screen\",\n          \"label\": \"Screen\",\n          \"name\": \"Accounts > Remittance > Tracking\"\n        }\n      }\n    ]\n  }\n}"
             }
           ]
         },
@@ -81409,6 +81567,85 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"status\": \"Approved\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Printable remittance advice (agency bill for an agency bill): broker letterhead, the policies, the amount due and the signatures (PDF; download=1 for an attachment)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/remittances/:id/pdf?download=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "remittances",
+                ":id",
+                "pdf"
+              ],
+              "query": [
+                {
+                  "key": "download",
+                  "value": "1"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Printable remittance advice (agency bill for an agency bill): broker letterhead, the policies, the amount due and the signatures (PDF; download=1 for an attachment)\n\nFront-end touchpoint: Accounts > Remittance > Tracking > Print\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/remittances/:id/pdf?download=1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "remittances",
+                    ":id",
+                    "pdf"
+                  ],
+                  "query": [
+                    {
+                      "key": "download",
+                      "value": "1"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Printable remittance advice (agency bill for an agency bill): broker letterhead, the policies, the amount due and the signatures (PDF; download=1 for an attachment)\n\nFront-end touchpoint: Accounts > Remittance > Tracking > Print\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "application/pdf"
             }
           ]
         },
@@ -87800,7 +88037,7 @@
           ]
         },
         {
-          "name": "Run history of a job",
+          "name": "Run history of a job (who started a run: triggeredBy, triggeredByName)",
           "request": {
             "method": "GET",
             "header": [],
@@ -87822,7 +88059,7 @@
                 }
               ]
             },
-            "description": "Run history of a job\n\nFront-end touchpoint: Master > Schedules > History\n\nAccess: read:schedules"
+            "description": "Run history of a job (who started a run: triggeredBy, triggeredByName)\n\nFront-end touchpoint: Master > Schedules > History\n\nAccess: read:schedules"
           },
           "response": [
             {
@@ -87848,7 +88085,7 @@
                     }
                   ]
                 },
-                "description": "Run history of a job\n\nFront-end touchpoint: Master > Schedules > History\n\nAccess: read:schedules"
+                "description": "Run history of a job (who started a run: triggeredBy, triggeredByName)\n\nFront-end touchpoint: Master > Schedules > History\n\nAccess: read:schedules"
               },
               "status": "OK",
               "code": 200,
@@ -87860,7 +88097,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"status\": \"success\",\n      \"startedAt\": \"2026-01-01T06:00:00Z\",\n      \"output\": {\n        \"notifications\": 3\n      }\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"status\": \"success\",\n      \"startedAt\": \"2026-01-01T06:00:00Z\",\n      \"output\": {\n        \"notifications\": 3\n      },\n      \"triggeredBy\": \"r.finance\",\n      \"triggeredByName\": \"Rosa Finance\"\n    }\n  ]\n}"
             }
           ]
         }
