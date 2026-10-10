@@ -353,11 +353,11 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/:id/cancel', summary: 'Cancel the placement slip', screen: `${PS} > Detail > Cancel`,
+  method: 'POST', path: '/:id/cancel', summary: 'Cancel the placement slip with its reason; once with the insurer only by an approver (approve:policies, not the raiser), and the insurers are told (placement.cancel_approval)', screen: `${PS} > Detail > Cancel`,
   middleware: [...canWrite, ownRecord('placement'), validate(z.object({ reason: z.string().max(1000).optional().nullable() }))], request: { reason: 'Client withdrew' }, response: { success: true, data: { ...placementExample, status: 'cancelled' } },
   handler: async (req, res) => {
     const r = await plc.cancelPlacement(req.params.id, req.body.reason, req.user);
-    await audit(req, { entity: 'placement', entityId: r.after.id, action: 'cancel', before: { status: r.before.status }, after: { status: 'cancelled', reason: req.body.reason } });
+    await audit(req, { entity: 'placement', entityId: r.after.id, action: 'cancel', before: { status: r.before.status }, after: { status: 'cancelled', reason: req.body.reason, insurersTold: r.insurersTold } });
     sendEntity(res, r.after, { message: 'Placement slip cancelled' });
   },
 });

@@ -107117,7 +107117,7 @@
     "/placements/{id}/cancel": {
       "post": {
         "operationId": "postPlacementsIdCancel",
-        "summary": "Cancel the placement slip",
+        "summary": "Cancel the placement slip with its reason; once with the insurer only by an approver (approve:policies, not the raiser), and the insurers are told (placement.cancel_approval)",
         "tags": [
           "Placement Slips"
         ],

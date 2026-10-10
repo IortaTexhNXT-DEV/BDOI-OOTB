@@ -64347,7 +64347,7 @@
           ]
         },
         {
-          "name": "Cancel the placement slip",
+          "name": "Cancel the placement slip with its reason; once with the insurer only by an approver (approve:policies, not the raiser), and the insurers are told (placement.cancel_approval)",
           "request": {
             "method": "POST",
             "header": [
@@ -64374,7 +64374,7 @@
                 }
               ]
             },
-            "description": "Cancel the placement slip\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Cancel\n\nAccess: write:quotations",
+            "description": "Cancel the placement slip with its reason; once with the insurer only by an approver (approve:policies, not the raiser), and the insurers are told (placement.cancel_approval)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Cancel\n\nAccess: write:quotations",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"reason\": \"Client withdrew\"\n}",
@@ -64414,7 +64414,7 @@
                     }
                   ]
                 },
-                "description": "Cancel the placement slip\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Cancel\n\nAccess: write:quotations",
+                "description": "Cancel the placement slip with its reason; once with the insurer only by an approver (approve:policies, not the raiser), and the insurers are told (placement.cancel_approval)\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips > Detail > Cancel\n\nAccess: write:quotations",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"reason\": \"Client withdrew\"\n}",

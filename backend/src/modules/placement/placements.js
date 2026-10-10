@@ -376,9 +376,16 @@ export async function sendPlacement(id, user, { insurerIds = null } = {}) {
 }
 
 /** Sent to insurer -> Acknowledged: the insurer confirmed receipt of the order (its reference and remark). */
+/** Whether the moves of a placement slip must carry a reference or remark (placement.remarks_required). */
+const remarksRequired = async () => (await getSetting('placement.remarks_required', true)) !== false;
+const blank = (v) => !String(v ?? '').trim();
+
 export async function acknowledgePlacement(id, { reference = null, acknowledgedAt = null, remarks = null }, user) {
   const p = await getPlacementRow(id);
   if (p.status !== 'sent') throw conflict(`Only a placement slip sent to the insurer can be acknowledged (placement status: ${LABELS[p.status] || p.status})`);
+  if (await remarksRequired() && blank(reference) && blank(remarks)) {
+    throw badRequest('Validation failed', [{ path: 'reference', message: "Enter the insurer's acknowledgement reference or a remark" }]);
+  }
   await query(`UPDATE placements SET status = 'acknowledged', acknowledged_at = COALESCE($2::timestamptz, now()), acknowledged_by = $3, acknowledgement_reference = $4,
     acknowledgement_remarks = $5, updated_by = $3, updated_at = now() WHERE id = $1`, [p.id, acknowledgedAt || null, user.id, reference || null, remarks || null]);
   return placementById(p.id);
@@ -388,6 +395,7 @@ export async function acknowledgePlacement(id, { reference = null, acknowledgedA
 export async function declineParticipant(id, { insuranceCompanyId, reason }, user) {
   const p = await getPlacementRow(id);
   if (!['draft', ...WITH_INSURER].includes(p.status)) throw conflict(`A ${LABELS[p.status] || p.status} placement slip cannot be changed`);
+  if (await remarksRequired() && blank(reason)) throw badRequest('Validation failed', [{ path: 'reason', message: 'Enter why the insurer declined' }]);
   const r = await query(`UPDATE risk_participants SET status = 'declined', remarks = $3, confirmed_at = NULL, updated_at = now()
     WHERE entity_type = 'placement' AND entity_id = $1 AND insurance_company_id = $2`, [p.id, Number(insuranceCompanyId), reason || null]);
   if (!r.rowCount) throw badRequest(`Insurer ${insuranceCompanyId} is not a participant of placement ${p.placement_number}`);
@@ -395,11 +403,37 @@ export async function declineParticipant(id, { insuranceCompanyId, reason }, use
   return placementById(p.id);
 }
 
+/**
+ * Cancel a placement slip with its reason. Once the insurer holds the order (sent and after; placement.cancel_approval)
+ * only a user holding approve:policies who did not raise it may cancel, and each insurer holding it is e-mailed the
+ * cancellation (email.template.placement_cancelled).
+ */
 export async function cancelPlacement(id, reason, user) {
   const p = await getPlacementRow(id);
   if (['issued', 'cancelled'].includes(p.status)) throw conflict(`A ${LABELS[p.status]} placement slip cannot be cancelled`);
+  if (await remarksRequired() && blank(reason)) throw badRequest('Validation failed', [{ path: 'reason', message: 'Enter the reason for cancelling the placement slip' }]);
+  const withInsurer = !['draft', 'declined'].includes(p.status) && Boolean(p.sent_at);
+  if (withInsurer && (await getSetting('placement.cancel_approval', true)) !== false) {
+    if (!hasPermission(user, 'approve:policies')) throw forbidden(`Placement slip ${p.placement_number} is with the insurer: an approver (approve:policies) cancels it`);
+    if (p.created_by === user.id) throw forbidden(`Maker-checker: placement slip ${p.placement_number} is cancelled by a user other than the one who raised it`);
+  }
   await query("UPDATE placements SET status = 'cancelled', cancel_reason = $2, updated_by = $3, updated_at = now() WHERE id = $1", [p.id, reason || null, user.id]);
-  return { before: toPlacement(p), after: await placementById(p.id) };
+  const told = withInsurer ? await tellInsurersCancelled(await placementById(p.id), reason) : [];
+  return { before: toPlacement(p), after: await placementById(p.id), insurersTold: told };
+}
+
+/** The cancellation of a placement slip to each insurer that holds it (participants not declined, with a contact e-mail). */
+async function tellInsurersCancelled(p, reason) {
+  const t = await emailTemplate('placement_cancelled');
+  const company = await companyName();
+  const told = [];
+  for (const x of p.participants.filter((r) => r.status !== 'declined' && r.insurerEmail)) {
+    const v = { companyName: company, placementNumber: p.placementNumber, insuredName: p.insuredName || '', productType: p.productType || p.lob,
+      period: `${p.inceptionDate} to ${p.expiryDate}`, insurerName: x.insuranceCompanyName, reason: reason || '' };
+    await queueEmail({ to: x.insurerEmail, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: 'placement_cancelled', entity: 'placement', entityId: p.id });
+    told.push(x.insurerEmail);
+  }
+  return told;
 }
 
 // ---------------------------------------------------------------- e-policy and check against the slip
