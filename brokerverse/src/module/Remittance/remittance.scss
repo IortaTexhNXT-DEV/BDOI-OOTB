@@ -1,0 +1,168 @@
+// Accounts > Remittance screens of R1 (Setup, Run now, Run history; the lists that follow). Theme CSS variables only.
+
+.rm-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.rm-tabs {
+  margin-top: -4px;
+}
+
+.rm-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.rm-strip__facts {
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.rm-card {
+  background: var(--color-surface, #fff);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.rm-table {
+  .p-datatable-thead > tr > th,
+  .p-datatable-tbody > tr > td {
+    white-space: nowrap;
+  }
+}
+
+.rm-ref {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rm-num {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.rm-nowrap {
+  white-space: nowrap;
+}
+
+.rm-covers.p-button {
+  padding: 0;
+}
+
+.rm-covers__list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+}
+
+.rm-empty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  color: var(--color-text);
+}
+
+.rm-inline-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-danger);
+}
+
+.rm-panel {
+  .bv-detail-section + .bv-detail-section {
+    margin-top: 16px;
+  }
+}
+
+.rm-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.rm-form-grid {
+  display: grid;
+  grid-template-columns: minmax(14rem, 1fr) 2fr;
+  gap: 12px 16px;
+  align-items: end;
+  margin-bottom: 12px;
+}
+
+.rm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rm-readonly {
+  font-size: 14px;
+  color: var(--color-heading);
+}
+
+.rm-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.rm-form__error,
+.rm-run-now__error {
+  margin: 0;
+  color: var(--color-danger);
+}
+
+.rm-run-now__reason {
+  margin-bottom: 12px;
+}
+
+.rm-run-now__block {
+  margin: 12px 0 0;
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+.rm-run-now__message {
+  margin: 0 0 8px;
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+.rm-run-now__drafts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns: 10rem 1fr auto;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+}
+
+.rm-run-created {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+@media (max-width: 640px) {
+  .rm-page {
+    padding: 16px;
+  }
+
+  .rm-form-grid {
+    grid-template-columns: 1fr;
+  }
+}

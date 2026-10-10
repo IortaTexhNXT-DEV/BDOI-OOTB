@@ -1748,7 +1748,33 @@
     "resolveException": "Resolve exception",
     "resolvedToday": "Resolved today",
     "revoke": "Revoke",
-    "runNow": "Run now",
+    "runNow": {
+      "title": "Run now",
+      "previewTitle": "Preview run · {{code}}",
+      "schedule": "Schedule",
+      "window": "Window",
+      "runDate": "Run date",
+      "insurers": "Insurers",
+      "insurer": "Insurer",
+      "productLine": "Product line",
+      "basis": "Basis",
+      "ready": "Ready",
+      "held": "Held",
+      "exceptions": "Exceptions",
+      "dueToInsurer": "Due to insurer",
+      "resultColumn": "Result",
+      "total": "Total",
+      "draftCount_one": "{{count}} draft",
+      "draftCount_other": "{{count}} drafts",
+      "create_one": "Create {{count}} draft remittance",
+      "create_other": "Create {{count}} draft remittances",
+      "goToDrafts": "Go to drafts",
+      "result": "Run result",
+      "paused": "{{code}} is paused. Resume it to run it.",
+      "nothing": "Nothing to remit in this window.",
+      "noInsurers": "No insurer to remit.",
+      "loadError": "Could not compute the preview."
+    },
     "saveDraft": "Save draft",
     "saveFailed": "Save failed",
     "saveProgress": "Save progress",
@@ -1841,6 +1867,142 @@
     "approvals": {
       "rejectHeader": "Reject and return to maker ({{count}})",
       "rejectVerb": "Reject and return to maker"
+    },
+    "common": {
+      "accounts": "Accounts",
+      "remittance": "Remittance",
+      "cancel": "Cancel",
+      "close": "Close",
+      "moreActions": "More actions",
+      "tryAgain": "Try again",
+      "viewOnly": "View only"
+    },
+    "landing": {
+      "loading": "Opening your remittance work",
+      "loadError": "Could not open Remittance."
+    },
+    "setup": {
+      "title": "Setup",
+      "help": "What the remittance cycle reads: the schedules of the runs.",
+      "tabs": {
+        "schedules": "Schedules"
+      }
+    },
+    "automation": {
+      "name": "Automation",
+      "on": "On",
+      "off": "Off",
+      "checkedDaily": "Checked daily {{time}} ({{zone}})",
+      "lastCheck": "Last check {{at}} {{status}}",
+      "turnOn": "Turn on",
+      "turnOnTitle": "Turn on the daily remittance job?",
+      "cron": "Cron",
+      "job": "Job"
+    },
+    "schedules": {
+      "new": "New schedule",
+      "empty": "No schedules. Create the weekly remittance schedule.",
+      "loadError": "Could not load the schedules.",
+      "actionsFor": "Actions for {{code}}",
+      "allActive": "All active ({{count}})",
+      "cutOff_one": "Cut-off {{count}} day",
+      "cutOff_other": "Cut-off {{count}} days",
+      "lastCounts": "{{created}} created · {{held}} held · {{exceptions}} exception(s)",
+      "lastFailed": "Failed: {{message}}",
+      "msgRmt007": "The payment window \"Previous Monday to Friday\" needs a weekly schedule. Choose Weekly, or the window \"Cut-off days\".",
+      "pauseTitle": "Pause {{code}}?",
+      "pauseMessage": "No remittance is created until it is resumed.",
+      "pauseVerb": "Pause schedule",
+      "resumeTitle": "Resume {{code}}?",
+      "resumeMessage": "The schedule runs again from its next run date.",
+      "resumeVerb": "Resume schedule",
+      "viewTitle": "Schedule {{code}}",
+      "details": "Details",
+      "latestRuns": "Latest runs",
+      "runHistory": "Run history",
+      "activity": "Activity",
+      "columns": {
+        "code": "Code",
+        "name": "Name",
+        "kind": "Kind",
+        "covers": "Covers",
+        "groupBy": "Group by",
+        "window": "Window",
+        "runs": "Runs",
+        "nextRun": "Next run",
+        "lastRun": "Last run",
+        "lastResult": "Last result",
+        "status": "Status",
+        "actions": "Actions",
+        "frequency": "Frequency",
+        "timeZone": "Time zone"
+      },
+      "actions": {
+        "view": "View",
+        "edit": "Edit",
+        "preview": "Preview run",
+        "run-now": "Run now…",
+        "pause": "Pause",
+        "resume": "Resume"
+      },
+      "statuses": {
+        "Active": "Active",
+        "Paused": "Paused"
+      },
+      "kinds": {
+        "Remittance run": "Remittance run",
+        "Billing run": "Billing run",
+        "Hold check": "Hold check"
+      },
+      "frequencies": {
+        "Weekly": "Weekly",
+        "Monthly": "Monthly",
+        "Daily": "Daily"
+      },
+      "windows": {
+        "Previous Monday to Friday": "Previous Monday to Friday",
+        "Cut-off days": "Cut-off days"
+      },
+      "groupByOptions": {
+        "Insurer": "Insurer",
+        "Insurer and product line": "Insurer and product line"
+      },
+      "form": {
+        "newTitle": "New schedule",
+        "editTitle": "Edit {{code}}",
+        "name": "Name",
+        "kind": "Kind",
+        "insurers": "Insurers",
+        "allInsurers": "All active insurers",
+        "chooseInsurers": "Choose the insurers",
+        "frequency": "Frequency",
+        "nextRun": "Next run",
+        "runTime": "Run time",
+        "paymentWindow": "Payment window",
+        "cutOffDays": "Cut-off days before the run date",
+        "groupBy": "Group remittances by",
+        "save": "Save schedule",
+        "create": "Create schedule",
+        "required": "Enter the name",
+        "monday": "The next run of a weekly schedule is a Monday"
+      }
+    },
+    "runHistory": {
+      "title": "Run history · {{code}}",
+      "empty": "No runs yet.",
+      "loadError": "Could not load the run history.",
+      "started": "Started",
+      "trigger": "Trigger",
+      "reason": "Reason",
+      "window": "Window",
+      "scanned": "Scanned",
+      "ready": "Ready",
+      "held": "Held",
+      "exceptions": "Exceptions",
+      "created": "Created",
+      "dueToInsurer": "Due to insurer",
+      "result": "Result",
+      "message": "Message"
     }
   },
   "incentive": {

@@ -64,6 +64,19 @@
     }
   }
 
+  &--danger {
+    border-color: $color-danger-050;
+    background: $color-danger-050;
+
+    .bv-config-status__dot {
+      background: $color-danger;
+    }
+
+    .bv-config-status__state {
+      color: $color-danger;
+    }
+  }
+
   &--action {
     cursor: pointer;
 

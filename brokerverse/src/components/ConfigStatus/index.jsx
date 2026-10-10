@@ -39,18 +39,19 @@ export const mayConfigure = (path, permission) => {
  * Compact chip for a feature that works only once it is configured (an e-invoicing connection, a CAS permit, a
  * numbering series): Ready, Incomplete or Off. When items are missing, or when the user may configure the feature,
  * the chip opens a small panel with the missing items and, for those users only, a Configure link to the screen
- * where it is set up.
+ * where it is set up. `label` names the state in the feature's own words (Automation: On / Off) and `tone="danger"` marks
+ * a state that stops the business (a job that is off).
  */
-const ConfigStatus = ({ state, feature, missing = [], to = SETTINGS_PATH, area, permission, className = "" }) => {
+const ConfigStatus = ({ state, feature, label, tone, missing = [], to = SETTINGS_PATH, area, permission, className = "" }) => {
   const { t } = useTranslation();
   const panel = useRef(null);
   const panelId = `bv-config-${useId().replace(/:/g, "")}`;
   const items = businessItems(missing);
   const path = configurePath(to, area);
   const configurable = mayConfigure(path, permission);
-  const stateLabel = t(`configStatus.state.${state}`, { defaultValue: state });
+  const stateLabel = label || t(`configStatus.state.${state}`, { defaultValue: state });
   const name = feature ? `${feature}: ${stateLabel}` : stateLabel;
-  const classes = `bv-config-status bv-config-status--${state} ${className}`.trim();
+  const classes = `bv-config-status bv-config-status--${state}${tone ? ` bv-config-status--${tone}` : ""} ${className}`.trim();
   const body = (
     <>
       <span className="bv-config-status__dot" aria-hidden="true" />
@@ -92,6 +93,10 @@ ConfigStatus.propTypes = {
   state: PropTypes.oneOf(CONFIG_STATES).isRequired,
   /** business name of the feature shown before the state ("E-invoicing", "CAS permit") */
   feature: PropTypes.string,
+  /** the state in the feature's words ("On", "Off") instead of Ready / Incomplete / Off */
+  label: PropTypes.string,
+  /** danger: the state stops the business (shown in the danger colour; the text still says it) */
+  tone: PropTypes.oneOf(["danger"]),
   /** what is missing, in business words ("BIR permit number", "Backup custodian") */
   missing: PropTypes.arrayOf(PropTypes.node),
   /** screen where the feature is configured (Master > Configuration by default) */

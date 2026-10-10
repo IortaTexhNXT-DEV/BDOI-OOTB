@@ -55,4 +55,14 @@ describe("ConfigStatus", () => {
     expect(businessItems(["Company TIN (Master > Company)", "ATP number (invoice.atp_number / invoice.cas_permit_number)", "eis.enabled", ""]))
       .toEqual(["Company TIN", "ATP number"]);
   });
+
+  it("names the state in the feature's words and marks a state that stops the business as danger, in text and colour", () => {
+    signIn(["accounting"]);
+    const { rerender } = inApp(<ConfigStatus state="off" feature="Automation" label="Off" tone="danger" />);
+    const chip = screen.getByRole("status", { name: "Automation: Off" });
+    expect(chip).toHaveClass("bv-config-status--off", "bv-config-status--danger");
+    expect(chip).toHaveTextContent("AutomationOff");
+    rerender(<MemoryRouter><ConfigStatus state="ready" feature="Automation" label="On" /></MemoryRouter>);
+    expect(screen.getByRole("status", { name: "Automation: On" })).not.toHaveClass("bv-config-status--danger");
+  });
 });
