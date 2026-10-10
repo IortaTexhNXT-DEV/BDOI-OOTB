@@ -22046,7 +22046,7 @@
     ""status"": ""Validated""
   }
 }"
-1088,Remittance,GET,/api/remittance/direct-bill,"Commission debit notes (insurerCode, status code or label, from / to, search, attention=mine: my drafts and the notes overdue with a balance; paging)",Accounts > Remittance > Direct Bill Processing > Debit Notes,Bearer JWT,"read:remittance, write:remittance",Query: ?status=Open%2CPartially%20Collected&insurerCode=MALAYAN&page=1&perPage=20,"{
+1088,Remittance,GET,/api/remittance/direct-bill,"Commission debit notes (insurerCode, status code or label, from / to, search, attention=mine: my drafts and the notes overdue with a balance; paging), each with the caller's decision block (canDecide, blockedCode MAKER / SUBMITTER / NO_PERMISSION / WRONG_STATUS, blockedReason)",Accounts > Remittance > Direct Bill Processing > Debit Notes,Bearer JWT,"read:remittance, write:remittance",Query: ?status=Open%2CPartially%20Collected&insurerCode=MALAYAN&page=1&perPage=20,"{
   ""success"": true,
   ""data"": [
     {
@@ -22113,7 +22113,7 @@
     ""lines"": []
   }
 }"
-1090,Remittance,GET,/api/remittance/direct-bill/:id,One commission debit note with its policy lines and collections,Accounts > Remittance > Direct Bill Processing > Debit Notes > View,Bearer JWT,"read:remittance, write:remittance",,"{
+1090,Remittance,GET,/api/remittance/direct-bill/:id,"One commission debit note with its policy lines, collections and the caller's decision block (Approve and Reject only when canDecide; otherwise the reason)",Accounts > Remittance > Direct Bill Processing > Debit Notes > View,Bearer JWT,"read:remittance, write:remittance",,"{
   ""success"": true,
   ""data"": {
     ""id"": ""dn_1"",
@@ -22139,7 +22139,12 @@
     ""statusCode"": ""for-approval"",
     ""currency"": ""PHP"",
     ""lines"": [],
-    ""collections"": []
+    ""collections"": [],
+    ""decision"": {
+      ""canDecide"": false,
+      ""blockedCode"": ""MAKER"",
+      ""blockedReason"": ""You raised DN-2026-00001. Another user must approve it.""
+    }
   }
 }"
 1091,Remittance,POST,/api/remittance/direct-bill/:id/approve,Approve (opens it for sending and collection) a debit note; maker-checker: not the maker,Accounts > Remittance > Direct Bill Processing > Debit Notes,Bearer JWT,write:remittance,"{

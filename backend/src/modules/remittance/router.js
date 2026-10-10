@@ -282,12 +282,14 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/direct-bill', summary: 'Commission debit notes (insurerCode, status code or label, from / to, search, attention=mine: my drafts and the notes overdue with a balance; paging)', screen: S('Direct Bill Processing > Debit Notes'), middleware: read,
+  method: 'GET', path: '/direct-bill', summary: 'Commission debit notes (insurerCode, status code or label, from / to, search, attention=mine: my drafts and the notes overdue with a balance; paging), each with the caller\'s decision block (canDecide, blockedCode MAKER / SUBMITTER / NO_PERMISSION / WRONG_STATUS, blockedReason)', screen: S('Direct Bill Processing > Debit Notes'), middleware: read,
   query: { status: 'Open,Partially Collected', insurerCode: 'MALAYAN', page: 1, perPage: 20 }, response: { success: true, data: [dnExample] },
   handler: async (req, res) => {
     const pg = paging(req.query, { page: 1, perPage: 50 });
     const { rows, total, summary } = await directBill.listDebitNotes({ ...req.query, userId: req.user.id }, pg);
-    sendList(res, rows, total, pg, { summary });
+    const out = [];
+    for (const dn of rows) out.push(await directBill.withDecision(dn, req.user));
+    sendList(res, out, total, pg, { summary });
   },
 });
 define({
@@ -348,8 +350,10 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/direct-bill/:id', summary: 'One commission debit note with its policy lines and collections', screen: S('Direct Bill Processing > Debit Notes > View'), middleware: read,
-  response: { success: true, data: { ...dnExample, lines: [], collections: [] } }, handler: async (req, res) => ok(res, await directBill.getDebitNote(req.params.id)),
+  method: 'GET', path: '/direct-bill/:id', summary: 'One commission debit note with its policy lines, collections and the caller\'s decision block (Approve and Reject only when canDecide; otherwise the reason)',
+  screen: S('Direct Bill Processing > Debit Notes > View'), middleware: read,
+  response: { success: true, data: { ...dnExample, lines: [], collections: [], decision: { canDecide: false, blockedCode: 'MAKER', blockedReason: 'You raised DN-2026-00001. Another user must approve it.' } } },
+  handler: async (req, res) => ok(res, await directBill.withDecision(await directBill.getDebitNote(req.params.id), req.user)),
 });
 define({
   method: 'GET', path: '/direct-bill/:id/pdf', summary: 'Printable commission debit note (PDF, broker letterhead; download=1 for an attachment)', screen: S('Direct Bill Processing > Debit Notes > Print'), middleware: read,

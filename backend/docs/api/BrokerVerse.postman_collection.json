@@ -80419,7 +80419,7 @@
           ]
         },
         {
-          "name": "Commission debit notes (insurerCode, status code or label, from / to, search, attention=mine: my drafts and the notes overdue with a balance; paging)",
+          "name": "Commission debit notes (insurerCode, status code or label, from / to, search, attention=mine: my drafts and the notes overdue with a balance; paging), each with the caller's decision block (canDecide, blockedCode MAKER / SUBMITTER / NO_PERMISSION / WRONG_STATUS, blockedReason)",
           "request": {
             "method": "GET",
             "header": [],
@@ -80451,7 +80451,7 @@
                 }
               ]
             },
-            "description": "Commission debit notes (insurerCode, status code or label, from / to, search, attention=mine: my drafts and the notes overdue with a balance; paging)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: read:remittance, write:remittance"
+            "description": "Commission debit notes (insurerCode, status code or label, from / to, search, attention=mine: my drafts and the notes overdue with a balance; paging), each with the caller's decision block (canDecide, blockedCode MAKER / SUBMITTER / NO_PERMISSION / WRONG_STATUS, blockedReason)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: read:remittance, write:remittance"
           },
           "response": [
             {
@@ -80487,7 +80487,7 @@
                     }
                   ]
                 },
-                "description": "Commission debit notes (insurerCode, status code or label, from / to, search, attention=mine: my drafts and the notes overdue with a balance; paging)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: read:remittance, write:remittance"
+                "description": "Commission debit notes (insurerCode, status code or label, from / to, search, attention=mine: my drafts and the notes overdue with a balance; paging), each with the caller's decision block (canDecide, blockedCode MAKER / SUBMITTER / NO_PERMISSION / WRONG_STATUS, blockedReason)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: read:remittance, write:remittance"
               },
               "status": "OK",
               "code": 200,
@@ -80581,7 +80581,7 @@
           ]
         },
         {
-          "name": "One commission debit note with its policy lines and collections",
+          "name": "One commission debit note with its policy lines, collections and the caller's decision block (Approve and Reject only when canDecide; otherwise the reason)",
           "request": {
             "method": "GET",
             "header": [],
@@ -80603,7 +80603,7 @@
                 }
               ]
             },
-            "description": "One commission debit note with its policy lines and collections\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes > View\n\nAccess: read:remittance, write:remittance"
+            "description": "One commission debit note with its policy lines, collections and the caller's decision block (Approve and Reject only when canDecide; otherwise the reason)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes > View\n\nAccess: read:remittance, write:remittance"
           },
           "response": [
             {
@@ -80629,7 +80629,7 @@
                     }
                   ]
                 },
-                "description": "One commission debit note with its policy lines and collections\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes > View\n\nAccess: read:remittance, write:remittance"
+                "description": "One commission debit note with its policy lines, collections and the caller's decision block (Approve and Reject only when canDecide; otherwise the reason)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes > View\n\nAccess: read:remittance, write:remittance"
               },
               "status": "OK",
               "code": 200,
@@ -80641,7 +80641,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"dn_1\",\n    \"dnNumber\": \"DN-2026-00001\",\n    \"dnDate\": \"2026-09-30\",\n    \"dueDate\": \"2026-10-30\",\n    \"periodFrom\": \"2026-09-01\",\n    \"periodTo\": \"2026-09-30\",\n    \"insurerCode\": \"MALAYAN\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"policyCount\": 2,\n    \"grossPremium\": 45000,\n    \"commission\": 6750,\n    \"vat\": 810,\n    \"amount\": 7560,\n    \"ewtRate\": 0.1,\n    \"expectedEwt\": 675,\n    \"netPayable\": 6885,\n    \"collectedCash\": 0,\n    \"collectedEwt\": 0,\n    \"balance\": 7560,\n    \"status\": \"Pending Approval\",\n    \"statusCode\": \"for-approval\",\n    \"currency\": \"PHP\",\n    \"lines\": [],\n    \"collections\": []\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"dn_1\",\n    \"dnNumber\": \"DN-2026-00001\",\n    \"dnDate\": \"2026-09-30\",\n    \"dueDate\": \"2026-10-30\",\n    \"periodFrom\": \"2026-09-01\",\n    \"periodTo\": \"2026-09-30\",\n    \"insurerCode\": \"MALAYAN\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"policyCount\": 2,\n    \"grossPremium\": 45000,\n    \"commission\": 6750,\n    \"vat\": 810,\n    \"amount\": 7560,\n    \"ewtRate\": 0.1,\n    \"expectedEwt\": 675,\n    \"netPayable\": 6885,\n    \"collectedCash\": 0,\n    \"collectedEwt\": 0,\n    \"balance\": 7560,\n    \"status\": \"Pending Approval\",\n    \"statusCode\": \"for-approval\",\n    \"currency\": \"PHP\",\n    \"lines\": [],\n    \"collections\": [],\n    \"decision\": {\n      \"canDecide\": false,\n      \"blockedCode\": \"MAKER\",\n      \"blockedReason\": \"You raised DN-2026-00001. Another user must approve it.\"\n    }\n  }\n}"
             }
           ]
         },

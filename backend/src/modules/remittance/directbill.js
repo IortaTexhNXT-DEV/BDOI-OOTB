@@ -30,6 +30,7 @@
 import { many, one, pool, withTransaction } from '../../db/pool.js';
 import { baseCurrency } from '../../lib/currency.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
+import { hasPermission } from '../../lib/auth.js';
 import { getSetting } from '../../lib/settings.js';
 import { documentAttachment, queueEmail } from '../../lib/mailer.js';
 import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
@@ -326,7 +327,7 @@ export function debitNoteOut(d) {
     ewtRate: Number(d.ewt_rate), expectedEwt: Number(d.expected_ewt), netPayable: round2(Number(d.amount) - Number(d.expected_ewt)),
     collectedCash: Number(d.collected_cash), collectedEwt: Number(d.collected_ewt), collectedAmount: collected, balance: Number(d.balance),
     status: DN_STATUS_LABELS[d.status] || d.status, statusCode: d.status, remarks: d.remarks,
-    createdBy: d.created_by_name || d.created_by, createdById: d.created_by, createdAt: d.created_at, submittedAt: d.submitted_at,
+    createdBy: d.created_by_name || d.created_by, createdById: d.created_by, createdAt: d.created_at, submittedById: d.submitted_by, submittedAt: d.submitted_at,
     approvedBy: d.approved_by_name || d.approved_by, approvedAt: d.approved_at, rejectedBy: d.rejected_by_name || d.rejected_by, rejectedAt: d.rejected_at,
     rejectionReason: d.rejection_reason, sentTo: d.sent_to, sentAt: d.sent_at, updatedAt: d.updated_at,
     basis: d.basis, documentType: d.basis === 'gross' ? 'Billing Statement' : 'Commission Debit Note', journalNumber: d.journal_number || null,
@@ -446,9 +447,12 @@ export async function raiseDebitNote(b, user) {
   return out;
 }
 
-// approved with write:remittance (Remittance > Direct Bill)
+/** Insurer billing with the debit note open (?note=). */
+export const billingLink = (id) => `/finance/remittance/billing?note=${encodeURIComponent(id)}`;
+
+// approved with write:remittance (Remittance > Insurer billing)
 const askApproval = async (dn, user) => notifyApprovers({ audience: 'write:remittance', document: dn.documentType, number: dn.dnNumber, by: user?.username || 'system',
-  detail: `${dn.insurerName}, ${await formatMoney(dn.amount, dn.currency)}`, link: '/finance/remittance/directbill', entity: 'commission_debit_note', entityId: dn.id });
+  detail: `${dn.insurerName}, ${await formatMoney(dn.amount, dn.currency)}`, link: billingLink(dn.id), entity: 'commission_debit_note', entityId: dn.id });
 
 /** Release the items of a rejected / cancelled note so they can be billed again. */
 async function releaseItems(db, dnId) {
@@ -466,6 +470,25 @@ export async function submitDebitNote(id, user) {
   await askApproval(after, user);
   return { before, after };
 }
+
+/**
+ * Can `user` approve or reject debit note `dn` (debitNoteOut)? The rules of decideDebitNote as a code and the sentence
+ * the screen shows instead of Approve and Reject: { canDecide, blockedCode, blockedReason }. Read only; decideDebitNote
+ * enforces them. Codes: WRONG_STATUS (not pending approval), NO_PERMISSION, MAKER (raised it), SUBMITTER.
+ */
+export async function debitNoteDecision(dn, user) {
+  const no = (blockedCode, blockedReason) => ({ canDecide: false, blockedCode, blockedReason });
+  if (dn.statusCode !== 'for-approval') return no('WRONG_STATUS', null);
+  if (!hasPermission(user, 'write:remittance')) return no('NO_PERMISSION', 'You can view debit notes but not decide them.');
+  if (await getSetting('finance.maker_checker_enabled', true)) {
+    if (dn.createdById && dn.createdById === user?.id) return no('MAKER', `You raised ${dn.dnNumber}. Another user must approve it.`);
+    if (dn.submittedById && dn.submittedById === user?.id) return no('SUBMITTER', `You submitted ${dn.dnNumber}. Another user must approve it.`);
+  }
+  return { canDecide: true, blockedCode: null, blockedReason: null };
+}
+
+/** A debit note (debitNoteOut / getDebitNote) with the decision block of `user`. */
+export const withDecision = async (dn, user) => ({ ...dn, decision: await debitNoteDecision(dn, user) });
 
 /** Maker-checker decision: approve (-> Open, ready to send and collect) or reject (items released). */
 export async function decideDebitNote(id, action, body, user) {
@@ -490,7 +513,7 @@ export async function decideDebitNote(id, action, body, user) {
   });
   const after = await getDebitNote(id);
   await notifyDecision({ userId: before.createdById, decidedBy: user.id, document: after.documentType, number: after.dnNumber, approved: action === 'approve', by: user.username,
-    reason: action === 'approve' ? null : reason, link: '/finance/remittance/directbill', entity: 'commission_debit_note', entityId: after.id });
+    reason: action === 'approve' ? null : reason, link: billingLink(after.id), entity: 'commission_debit_note', entityId: after.id });
   return { before, after: { ...after, decisionRemarks: reason } };
 }
 

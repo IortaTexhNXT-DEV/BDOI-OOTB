@@ -61,7 +61,10 @@ Direct bill: the client pays the insurer. At issue the broker books commission r
 collections from the insurer post `directbill.collection` (cash, creditable withholding tax). The client's payment to
 the insurer is recorded on Direct Bill Processing (Client paid insurer column); it posts nothing, and with
 `direct_bill.client_payment_required` = `any` or `full` a debit note is approved only when every policy on it has a
-recorded payment, or is paid in full.
+recorded payment, or is paid in full. `GET /direct-bill` and `GET /direct-bill/:id` carry the caller's decision block
+(`debitNoteDecision`: `MAKER` "You raised DN-…. Another user must approve it.", `SUBMITTER`, `NO_PERMISSION`,
+`WRONG_STATUS`), so Insurer billing shows Approve and Reject only to a user who may decide; the approval request and the
+decision notice link to `/finance/remittance/billing?note=<id>`.
 
 Approval: every work item that needs approval opens a row in `remittance_approvals`. Approval limits are the
 Authority Matrix's (Master > User Management > Authority Matrix): transaction type `remittance` for remittances and
