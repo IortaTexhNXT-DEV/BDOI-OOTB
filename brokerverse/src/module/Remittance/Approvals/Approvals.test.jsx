@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { configure, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import "../../../i18n";
 import { ConfirmDialogHost } from "../../../components/ConfirmDialog";
@@ -19,6 +19,11 @@ jest.mock("../../../services/remittanceService", () => ({
   default: {},
 }));
 jest.mock("../../../services/opsAccountingService", () => ({ __esModule: true, default: { masterRecords: jest.fn() } }));
+
+// the whole inbox renders with its table, tabs and review panel: on a loaded machine (the full suite runs one file per
+// core) a test takes several seconds and an answer can take more than a second to reach the screen
+jest.setTimeout(20000);
+configure({ asyncUtilTimeout: 5000 });
 
 const SUBMITTER = "You submitted this remittance. Another user with remittance authority must approve it.";
 const APPROVERS = [{ id: "u9", name: "J. Cruz", role: "TIS Finance & General Accounting", limit: 1000000 }, { id: "u7", name: "A. Tan", role: "General Manager", limit: null }];
@@ -186,13 +191,13 @@ describe("Approvals", () => {
   it("empty and error states", async () => {
     remittanceService.approvalInbox.mockResolvedValueOnce(inbox([], { kpis: kpis({ submittedByMe: { count: 2 } }) }));
     const { unmount } = show("/finance/remittance/approvals?segment=mine");
-    expect(await screen.findByText("Nothing is waiting for your decision.", {}, { timeout: 3000 })).toBeInTheDocument();
+    expect(await screen.findByText("Nothing is waiting for your decision.")).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "Submitted by me (2)" }).length).toBeGreaterThan(0);
     unmount();
     remittanceService.approvalInbox.mockRejectedValueOnce(new Error("down")).mockResolvedValue(inbox([]));
     show("/finance/remittance/approvals?segment=all");
     expect(await screen.findByText("The approvals could not be loaded.")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
-    expect(await screen.findByText("Nothing is pending approval.", {}, { timeout: 3000 })).toBeInTheDocument();
+    expect(await screen.findByText("Nothing is pending approval.")).toBeInTheDocument();
   });
 });
