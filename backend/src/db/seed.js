@@ -97,6 +97,9 @@ for (const [role, items] of Object.entries(APPROVAL_PERMS)) ROLE_PERMS[role].pus
 // the Accounting Manager approves cancellations, Operations reads.
 const PDC_PERMS = { accounting: ['pdc'], 'accounting-manager': ['pdc:approve'], operations: ['pdc:read'] };
 for (const [role, items] of Object.entries(PDC_PERMS)) ROLE_PERMS[role].push(...items);
+// Insurer billing statements are approved by a second user holding approve:insurer-billing (migration 0522, FRS COMM-06);
+// Accounting kept the decision it had with write:remittance, the Accounting Manager has it through Accounting
+ROLE_PERMS.accounting.push('insurer-billing:approve');
 
 // TISPH personas (RBAC v4 screen matrix, migration 0348). Screen rights map to module permissions: C/U -> write,
 // R -> read, A -> approve where the module has an approval. Sales and Operations both raise quotations, placements,
@@ -139,6 +142,7 @@ Object.assign(ROLE_PERMS, {
 });
 for (const role of ['tis-sales-associate', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-ops-associate', 'tis-ops-officer', 'tis-ops-unit-head', 'tis-ccd-bp', 'tis-ccd-recon',
   'tis-finance', 'tis-it-admin', 'tis-general-manager']) ROLE_PERMS[role].push('pdc:read');
+for (const role of ['tis-finance', 'tis-general-manager']) ROLE_PERMS[role].push('insurer-billing:approve');
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'], 'tis-superid': ['system-admin'] };
 /** The permission codes of a ROLE_PERMS entry: "module" is read and write, "module:action" that one permission. */

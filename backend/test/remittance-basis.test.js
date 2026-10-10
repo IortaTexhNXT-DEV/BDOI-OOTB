@@ -95,6 +95,11 @@ describe('gross remittance', () => {
     expect(statement).toMatchObject({ basis: 'gross', documentType: 'Billing Statement', statusCode: 'for-approval', amount: 1680, journalNumber: null });
     expect(statement.dnNumber).toMatch(/^CBS-\d{4}-\d{5}$/);
     expect((await ctx.as('maker')('post', `/remittance/direct-bill/${statement.id}/approve`).send({})).status).toBe(403);
+    // a billing statement is approved only when the insurer has a TIN (FRS FR-RMT-021)
+    const noTin = await ctx.as('checker')('post', `/remittance/direct-bill/${statement.id}/approve`).send({});
+    expect(noTin.status).toBe(409);
+    expect(noTin.body.message).toMatch(/has no TIN/);
+    await query("UPDATE insurance_companies SET tin = '000-123-456-000' WHERE code = 'MALAYAN'");
     const ok = await ctx.as('checker')('post', `/remittance/direct-bill/${statement.id}/approve`).send({});
     expect(ok.status, JSON.stringify(ok.body)).toBe(200);
     expect(ok.body.data).toMatchObject({ statusCode: 'open' });

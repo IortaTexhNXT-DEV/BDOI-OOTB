@@ -2410,6 +2410,7 @@
       "tabs": {
         "raise": "Raise debit note",
         "notes": "Debit notes",
+        "run": "Billing run",
         "mode": "Billing mode"
       },
       "actionsHeader": "Actions",
@@ -2490,7 +2491,30 @@
         "balance": "Balance",
         "due": "Due",
         "status": "Status"
-      }
+      },
+      "run": {
+        "nextDates": "Next billing dates",
+        "lastRun": "Last run",
+        "billingDate": "Billing date",
+        "runNow": "Run billing",
+        "empty": "No billing runs yet.",
+        "trigger": "Run by",
+        "job": "Scheduled job",
+        "user": "User",
+        "statements": "Statements",
+        "message": "Result",
+        "results": {
+          "running": "Running",
+          "success": "Done",
+          "nothing": "Nothing to bill",
+          "failed": "Failed"
+        }
+      },
+      "export": {
+        "xlsx": "Export Excel",
+        "csv": "Export CSV"
+      },
+      "overdue": "Overdue"
     },
     "held": {
       "title": "Held policies",
@@ -12987,8 +13011,10 @@
     "gross": "Gross remittance (billing statement)",
     "document": {
       "direct": "Commission debit note",
-      "gross": "Billing statement"
-    }
+      "gross": "Billing statement",
+      "net": "Billing statement"
+    },
+    "net": "Net remittance (billing statement)"
   },
   "opsAcc": {
     "accounts": "Accounts",

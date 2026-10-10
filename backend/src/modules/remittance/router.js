@@ -22,6 +22,7 @@ import * as documents from './documents.js';
 import * as imports from './imports.js';
 import * as runs from './runs.js';
 import { listHeld } from './holds.js';
+import * as billing from './billing.js';
 import * as payments from './payments.js';
 import { remittanceSummary } from './summary.js';
 import { requiredReason } from '../ops-masters/records.js';
@@ -365,6 +366,36 @@ define({
   },
 });
 define({
+  method: 'GET', path: '/direct-bill/:id/export', summary: 'A billing statement with its schedule as Excel or CSV (format=xlsx | csv): particulars per product line (Gross Amount, VAT, Net of VAT, EWT, Net Amount Payable) and the policy lines',
+  screen: S('Insurer billing > Billing statement > Export'), middleware: read, query: { format: 'xlsx' }, response: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  handler: async (req, res) => {
+    const dn = await directBill.getDebitNote(req.params.id);
+    const fmt = req.query.format === 'csv' ? 'csv' : 'xlsx';
+    const cols = ['Line', 'Policy', 'Insured', 'Remittance', 'Premium', 'Commission (Net of VAT)', 'VAT', 'Gross Amount', 'EWT', 'Net Amount Payable'];
+    const rows = dn.lines.map((l) => [l.lineNo, l.policyNo, l.insuredName, l.remittanceNumber || '', l.grossPremium, l.commission, l.vat, l.amount, l.ewt,
+      Math.round((l.amount - l.ewt) * 100) / 100]);
+    rows.push(['', 'Total', `${dn.policyCount} booked account/s`, '', dn.grossPremium, dn.commission, dn.vat, dn.amount, dn.expectedEwt, dn.netPayable]);
+    await sendTable(res, { header: cols, rows, fileBase: `billing-statement-${dn.dnNumber}`, format: fmt, sheetName: dn.dnNumber });
+  },
+});
+define({
+  method: 'GET', path: '/billing-runs', summary: 'Insurer billing runs (newest first) and the next billing dates (insurer_billing.run_days moved off non-working days)', screen: S('Insurer billing > Billing run'),
+  middleware: read, response: { success: true, data: { nextBillingDates: ['2026-10-26', '2026-11-13'], runs: [{ id: 3, billingDate: '2026-10-15', trigger: 'job', statements: 2, result: 'success',
+    message: 'Billing run done: 2 billing statement(s) drafted.' }] } },
+  handler: async (_req, res) => ok(res, await billing.billingRuns()),
+});
+define({
+  method: 'POST', path: '/billing-runs', summary: 'Run the insurer billing now for a billing date (default today, not in the future) and optionally one insurer: drafts the billing statements of the remittances approved before that date and not yet billed',
+  screen: S('Insurer billing > Billing run'), middleware: write, request: { billingDate: '2026-10-15', insurerId: 4 },
+  response: { success: true, data: { run: { id: 4, billingDate: '2026-10-15', statements: 1 }, notes: [{ number: 'CBS-2026-00031', insurer: 'Malayan Insurance Co., Inc.', productLine: 'Motor', basis: 'net', amount: 26905.2 }] },
+    message: 'Billing run done: 1 billing statement(s) drafted.' },
+  handler: async (req, res) => {
+    const r = await billing.runBilling({ billingDate: req.body?.billingDate, insurerId: req.body?.insurerId, trigger: 'user', user: req.user });
+    await audit(req, { entity: 'insurer_billing', entityId: String(r.run.id), action: 'run', after: { billingDate: r.run.billingDate, statements: r.notes.map((n) => n.number), message: r.message } });
+    ok(res, r, r.message);
+  },
+});
+define({
   method: 'POST', path: '/direct-bill/:id/submit', summary: 'Submit a draft debit note for approval', screen: S('Direct Bill Processing > Debit Notes'), middleware: write,
   response: { success: true, data: { ...dnExample } },
   handler: async (req, res) => ok(res, (await logged('commission_debit_note', 'submit', (r) => directBill.submitDebitNote(r.params.id, r.user))(req, res)).after, 'Debit note submitted for approval'),
@@ -372,8 +403,9 @@ define({
 for (const action of ['approve', 'reject']) {
   define({
     method: 'POST', path: `/direct-bill/:id/${action}`,
-    summary: `${action === 'approve' ? 'Approve (opens it for sending and collection)' : 'Reject (a billing_reject reasonCode with its note, or a reason; its commission becomes unbilled again)'} a debit note; maker-checker: not the maker`,
-    screen: S('Direct Bill Processing > Debit Notes'), middleware: write, request: action === 'approve' ? { remarks: 'Checked against the placements' } : { reasonCode: 'BRJ-AMOUNT', note: 'Wrong period' },
+    summary: `${action === 'approve' ? 'Approve (opens it for sending and collection; a net-basis billing statement is settled by retention)' : 'Reject (a billing_reject reasonCode with its note, or a reason; its commission becomes unbilled again)'} a debit note (write:remittance) or billing statement (approve:insurer-billing, insurer TIN required); maker-checker: not the maker`,
+    screen: S('Direct Bill Processing > Debit Notes'), middleware: [requireAuth, requirePermission('write:remittance', 'approve:insurer-billing')],
+    request: action === 'approve' ? { remarks: 'Checked against the placements' } : { reasonCode: 'BRJ-AMOUNT', note: 'Wrong period' },
     response: { success: true, data: { ...dnExample, status: action === 'approve' ? 'Open' : 'Rejected' } },
     handler: async (req, res) => ok(res, (await logged('commission_debit_note', action, (r) => directBill.decideDebitNote(r.params.id, action, r.body || {}, r.user))(req, res)).after,
       `Debit note ${action === 'approve' ? 'approved' : 'rejected'}`),

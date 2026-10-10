@@ -112,6 +112,11 @@ export async function remittanceSchedules() {
   if (!(await tableExists('remittances'))) return { skipped: 'remittances table missing' };
   return (await import('../modules/remittance/runs.js')).runDueSchedules();
 }
+/** Insurer billing run: on a billing date (15th and 26th, moved off non-working days) draft the billing statements of the remitted policies (remittance/billing.js). */
+export async function insurerBillingRun() {
+  if (!(await tableExists('insurer_billing_runs'))) return { skipped: 'insurer_billing_runs table missing' };
+  return (await import('../modules/remittance/billing.js')).billingJob();
+}
 /** Instalment hold check: record the part-paid policies held from remittance and release those now fully paid (remittance/holds.js). */
 export async function remittanceHoldCheck() {
   if (!(await tableExists('remittance_holds'))) return { skipped: 'remittance_holds table missing' };

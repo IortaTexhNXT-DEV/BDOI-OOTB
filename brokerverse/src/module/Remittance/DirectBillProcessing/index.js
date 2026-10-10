@@ -21,11 +21,14 @@ import StatCards from "../../../components/StatCards";
 import StatusChip from "../../../components/StatusChip";
 import RowActions from "../../../components/RowActions";
 import EligibilityNote from "../../../components/EligibilityNote";
+import DateField from "../../../components/DateField";
+import KeyValueGrid from "../../../components/KeyValueGrid";
+import { hasPermission } from "../../../utils/canOpen";
 import ConfirmDialog, { openConfirm } from "../../../components/ConfirmDialog";
 import { printPdf } from "../../../components/Print";
 import remittanceService, { masterService } from "../../../services/remittanceService";
 import reportsService from "../../../services/reportsService";
-import { REMITTANCE_ROUTES, calendarDateFormat, dateBody, isoDate, loadInsurerOptions, loadSettings, money as codeMoney, showError, showSuccess, statusSeverity } from "../shared";
+import { REMITTANCE_ROUTES, calendarDateFormat, dateBody, formatDate, isoDate, loadInsurerOptions, loadSettings, money as codeMoney, showError, showSuccess, statusSeverity } from "../shared";
 import "./index.scss";
 import ClientPaymentDialog, { PAYMENT_SEVERITY } from "./ClientPaymentDialog";
 
@@ -34,7 +37,8 @@ const firstOfMonth = () => {
   const d = new Date();
   return new Date(d.getFullYear(), d.getMonth(), 1);
 };
-const STATUS_FILTERS = ["All", "Draft", "Pending Approval", "Open", "Partially Collected", "Collected", "Rejected", "Cancelled"];
+const STATUS_FILTERS = ["All", "Draft", "Pending Approval", "Open", "Partially Collected", "Collected", "Settled by retention", "Rejected", "Cancelled"];
+const TABS = ["raise", "notes", "run", "mode"];
 const MODE_LABELS = { "bank-transfer": "Bank transfer", check: "Cheque", cash: "Cash", card: "Card", gcash: "GCash", online: "Online" };
 
 /** The row menu of a debit note, View first; Approve and Reject only when the server's decision allows them. */
@@ -48,7 +52,7 @@ export const noteActions = (row) => {
     { code: "reject", allowed: s === "for-approval" && !!row.decision?.canDecide },
     { code: "collect", allowed: ["open", "partial"].includes(s) },
     { code: "email", allowed: ["open", "partial"].includes(s) },
-    { code: "cancel", allowed: ["draft", "for-approval", "open"].includes(s) && !(Number(row.collectedAmount) > 0) },
+    { code: "cancel", allowed: ["draft", "for-approval", "open", "settled"].includes(s) && !(Number(row.collectedAmount) > 0) },
   ].filter((a) => a.allowed);
 };
 
@@ -70,6 +74,11 @@ const DirectBillProcessing = () => {
   const toast = useRef(null);
   const [params, setParams] = useSearchParams();
   const [activeIndex, setActiveIndex] = useState(0);
+  const tab = TABS[activeIndex];
+  // billing run: the next billing dates, the runs and Run billing now
+  const [runs, setRuns] = useState(null);
+  const [runForm, setRunForm] = useState({ billingDate: isoDate(new Date()), insurer: null });
+  const [running, setRunning] = useState(false);
   const [summary, setSummary] = useState(null);
   const [insurerOptions, setInsurerOptions] = useState([]);
   const [lineOptions, setLineOptions] = useState([]);
@@ -159,11 +168,12 @@ const DirectBillProcessing = () => {
   }, [statusFilter, noteInsurer]);
 
   useEffect(() => {
-    if (activeIndex === 1) loadNotes();
-  }, [activeIndex, loadNotes]);
+    if (tab === "notes") loadNotes();
+    if (tab === "run") remittanceService.billingRuns().then(setRuns).catch((e) => showError(toast, e));
+  }, [tab, loadNotes]);
 
   const refreshAll = async () => {
-    await Promise.all([loadSummary(), activeIndex === 1 ? loadNotes() : Promise.resolve()]);
+    await Promise.all([loadSummary(), tab === "notes" ? loadNotes() : Promise.resolve()]);
   };
 
   const raise = async (submit) => {
@@ -329,7 +339,25 @@ const DirectBillProcessing = () => {
     if (items.length) await loadItems();
     if (viewNote) setViewNote(await remittanceService.getDebitNote(viewNote.id));
   };
-  const statusTag = (row) => <StatusChip label={row.status} severity={statusSeverity(row.statusCode === "collected" ? "completed" : row.statusCode)} />;
+  const statusTag = (row) => (
+    <>
+      <StatusChip label={row.status} severity={statusSeverity(["collected", "settled"].includes(row.statusCode) ? "completed" : row.statusCode)} />
+      {row.overdue ? <StatusChip label={t("remittance.billing.overdue")} severity="danger" className="ml-1" /> : null}
+    </>
+  );
+  const runBillingNow = async () => {
+    setRunning(true);
+    try {
+      const r = await remittanceService.runBilling({ billingDate: runForm.billingDate, insurerId: insurerOptions.find((o) => o.value === runForm.insurer)?.id });
+      showSuccess(toast, r.message);
+      setRuns(await remittanceService.billingRuns());
+      await loadSummary();
+    } catch (e) {
+      showError(toast, e);
+    } finally {
+      setRunning(false);
+    }
+  };
 
   const onNoteAction = (row) => (action) => {
     if (action.code === "view") openView(row);
@@ -367,10 +395,10 @@ const DirectBillProcessing = () => {
         ["unbilled", summary?.unbilled], ["outstanding", summary?.billedOutstanding], ["overdue", summary?.overdue], ["receivable", summary?.total],
       ].map(([key, value]) => ({ key, label: t(`remittance.billing.kpis.${key}`), value: summary ? codeMoney(value || 0) : null }))} />
 
-      <TabMenu model={["raise", "notes", "mode"].map((key) => ({ label: t(`remittance.billing.tabs.${key}`) }))} activeIndex={activeIndex}
+      <TabMenu model={TABS.map((key) => ({ label: t(`remittance.billing.tabs.${key}`) }))} activeIndex={activeIndex}
         onTabChange={(e) => setActiveIndex(e.index)} className="rm-tabs" />
       <Card>
-        {activeIndex === 0 ? (
+        {tab === "raise" ? (
           <div>
             <div className="filter-section mb-3">
               <div className="grid">
@@ -466,7 +494,7 @@ const DirectBillProcessing = () => {
           </div>
         ) : null}
 
-        {activeIndex === 1 ? (
+        {tab === "notes" ? (
           <div>
             <div className="filter-section mb-3">
               <div className="grid">
@@ -485,7 +513,12 @@ const DirectBillProcessing = () => {
             </div>
             <DataTable value={notes} dataKey="id" loading={loadingNotes} paginator rows={20} stripedRows size="small" scrollable
               emptyMessage={t("remittance.billing.emptyNotes")} footer={notesSummary ? `${notesTotal} debit note(s) · total ${formatCurrency(notesSummary.amount)} · outstanding ${formatCurrency(notesSummary.outstanding)}` : null}>
-              <Column field="dnNumber" header={t("remittance.billing.columns.debitNote")} body={(r) => <div><div>{r.dnNumber}</div><div className="text-sm text-500">{t(`directBillBasis.document.${r.basis || "direct"}`)}</div></div>} />
+              <Column field="dnNumber" header={t("remittance.billing.columns.debitNote")} body={(r) => (
+                <div>
+                  <div>{r.dnNumber}</div>
+                  <div className="text-sm text-500">{[t(`directBillBasis.document.${r.basis || "direct"}`), r.productLine].filter(Boolean).join(" · ")}</div>
+                </div>
+              )} />
               <Column field="dnDate" body={dateBody("dnDate")} header={t("remittance.billing.columns.date")} />
               <Column field="insurerName" header={t("remittance.billing.columns.insurer")} />
               <Column field="policyCount" header={t("remittance.billing.columns.policies")} />
@@ -502,7 +535,40 @@ const DirectBillProcessing = () => {
           </div>
         ) : null}
 
-        {activeIndex === 2 ? (
+        {tab === "run" ? (
+          <div>
+            <KeyValueGrid columns={3} className="mb-3" items={[
+              { label: t("remittance.billing.run.nextDates"), value: (runs?.nextBillingDates || []).map((d) => formatDate(d)).join(" · ") || null },
+              { label: t("remittance.billing.run.lastRun"), value: runs?.runs?.[0] ? `${formatDate(runs.runs[0].billingDate)} · ${runs.runs[0].message || ""}` : null, span: 2 },
+            ]} />
+            {hasPermission("write:remittance") ? (
+              <div className="grid align-items-end mb-2">
+                <div className="col-12 md:col-3">
+                  <label className="bv-field-label" htmlFor="rm-bill-date">{t("remittance.billing.run.billingDate")}<span className="required-marker">*</span></label>
+                  <DateField id="rm-bill-date" value={runForm.billingDate} max={isoDate(new Date())} onChange={(e) => setRunForm({ ...runForm, billingDate: e.target.value })} />
+                </div>
+                <div className="col-12 md:col-4">
+                  <label className="bv-field-label">{t("remittance.billing.fields.insurer")}</label>
+                  <Dropdown value={runForm.insurer} options={insurerOptions} onChange={(e) => setRunForm({ ...runForm, insurer: e.value })} placeholder={t("remittance.billing.fields.allInsurers")}
+                    showClear filter className="w-full" />
+                </div>
+                <div className="col-12 md:col-5 flex justify-content-end">
+                  <Button label={t("remittance.billing.run.runNow")} icon="pi pi-play" loading={running} disabled={!runForm.billingDate} onClick={runBillingNow} />
+                </div>
+              </div>
+            ) : null}
+            <DataTable value={runs?.runs || []} dataKey="id" size="small" stripedRows paginator rows={10} emptyMessage={t("remittance.billing.run.empty")}>
+              <Column header={t("remittance.billing.run.billingDate")} body={(r) => formatDate(r.billingDate)} />
+              <Column header={t("remittance.billing.run.trigger")} body={(r) => (r.trigger === "job" ? t("remittance.billing.run.job") : r.user || t("remittance.billing.run.user"))} />
+              <Column header={t("remittance.billing.fields.insurer")} body={(r) => r.insurer || t("remittance.billing.fields.allInsurers")} />
+              <Column field="statements" header={t("remittance.billing.run.statements")} className="text-right" headerClassName="text-right" />
+              <Column header={t("remittance.billing.columns.status")} body={(r) => <StatusChip code={r.result} label={t(`remittance.billing.run.results.${r.result}`)} />} />
+              <Column field="message" header={t("remittance.billing.run.message")} />
+            </DataTable>
+          </div>
+        ) : null}
+
+        {tab === "mode" ? (
           <div>
             <div className="grid">
               <div className="col-12 md:col-4">
@@ -579,6 +645,10 @@ const DirectBillProcessing = () => {
               {viewNote.statusCode === "for-approval" && viewNote.decision && !viewNote.decision.canDecide && viewNote.decision.blockedReason
                 ? <EligibilityNote reason={viewNote.decision.blockedReason} className="mr-auto" /> : null}
               <Button label={t("remittance.billing.actions.print")} outlined onClick={() => printNote(viewNote)} />
+              {viewNote.basis !== "direct" ? ["xlsx", "csv"].map((f) => (
+                <Button key={f} label={t(`remittance.billing.export.${f}`)} icon="pi pi-download" outlined
+                  onClick={() => remittanceService.download(remittanceService.statementExportPath(viewNote.id, f), `billing-statement-${viewNote.dnNumber}.${f}`).catch((e) => showError(toast, e))} />
+              )) : null}
               {viewNote.statusCode === "for-approval" && viewNote.decision?.canDecide ? (
                 <>
                   <Button label={t("remittance.billing.actions.reject")} outlined severity="danger" onClick={() => setDecision({ note: viewNote, action: "reject" })} />

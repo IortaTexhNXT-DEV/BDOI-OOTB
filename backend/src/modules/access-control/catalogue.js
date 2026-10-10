@@ -131,6 +131,7 @@ const PERMISSION_LIST = {
   'read:period-end': ['period-end', 'view', 'See period status, the close checklist and BIR tax'],
   'write:period-end': ['period-end', 'edit', 'Run the month-end and year-end steps and BIR tax returns'],
   'approve:period-end': ['period-end', 'approve', 'Approve the close, post into soft-closed periods, reopen periods, reverse a year-end close'],
+  'approve:insurer-billing': ['remittance', 'approve', 'Approve or reject an insurer billing statement raised or submitted by another user'],
   'read:incentive': ['incentive', 'view', 'See incentive programmes, calculations and statements'],
   'write:incentive': ['incentive', 'edit', 'Calculate, submit and pay incentives'],
   'approve:incentive': ['incentive', 'approve', 'Approve or reject an incentive calculation batch submitted by another user'],

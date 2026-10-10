@@ -274,13 +274,14 @@ async function approvals(ctx) {
         AND NOT EXISTS (SELECT 1 FROM jsonb_array_elements(COALESCE(a.history, '[]'::jsonb)) h WHERE h->>'action' = 'Approved' AND h->>'by' = ANY(${ctx.ME}::text[]))
         AND (CASE WHEN a.entity = 'remittance' THEN ${remit} ELSE ${settle} END)`);
   }
-  if (ctx.can('write:remittance')) {
-    if (await has('commission_debit_notes')) {
-      out.push(`SELECT ${select({ ...base, kind: "'Commission debit note'", id: 'dn.id', ref: 'dn.dn_number', title: "COALESCE(ic.name, 'Commission debit note')", due_date: due('COALESCE(dn.submitted_at, dn.created_at)'),
-        status: 'dn.status', link: "'/finance/remittance/billing'", amount: 'dn.amount', created_at: 'dn.created_at' })}
-        FROM commission_debit_notes dn LEFT JOIN insurance_companies ic ON ic.id = dn.insurance_company_id
-        WHERE dn.status = 'for-approval' AND ${notMine(ctx, 'COALESCE(dn.submitted_by, dn.created_by)')}`);
-    }
+  // commission debit notes are decided with write:remittance, billing statements with approve:insurer-billing
+  const bases = [...(ctx.can('write:remittance') ? ['direct'] : []), ...(ctx.can('approve:insurer-billing') ? ['gross', 'net'] : [])];
+  if (bases.length && await has('commission_debit_notes')) {
+    out.push(`SELECT ${select({ ...base, kind: "CASE WHEN dn.basis = 'direct' THEN 'Commission debit note' ELSE 'Billing statement' END", id: 'dn.id', ref: 'dn.dn_number',
+      title: "COALESCE(ic.name, 'Commission debit note')", due_date: due('COALESCE(dn.submitted_at, dn.created_at)'),
+      status: 'dn.status', link: "'/finance/remittance/billing'", amount: 'dn.amount', created_at: 'dn.created_at' })}
+      FROM commission_debit_notes dn LEFT JOIN insurance_companies ic ON ic.id = dn.insurance_company_id
+      WHERE dn.status = 'for-approval' AND dn.basis = ANY(${ctx.P(bases)}::text[]) AND ${notMine(ctx, 'COALESCE(dn.submitted_by, dn.created_by)')}`);
   }
   if (ctx.can('approve:access-control') && await has('authority_limits')) {
     out.push(`SELECT ${select({ ...base, kind: "'Authority limit'", id: 'al.id', ref: "'AL-' || al.id", title: "COALESCE(t.name, al.transaction_type) || ' - ' || COALESCE(r.name, al.role_code, u.display_name, '')",

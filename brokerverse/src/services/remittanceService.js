@@ -71,6 +71,11 @@ export const remittanceService = {
   voidClientPayment: (paymentId, reason) => post(`${R}/direct-bill/client-payments/${id(paymentId)}/void`, { reason }),
   /** API path of the printable debit note, for components/Print printPdf. */
   debitNotePdfPath: (dnId) => `${R}/direct-bill/${id(dnId)}/pdf`,
+  /** API path of a billing statement with its schedule as Excel or CSV. */
+  statementExportPath: (dnId, format = "xlsx") => `${R}/direct-bill/${id(dnId)}/export?format=${format}`,
+  // insurer billing run: on the billing days, or now for a billing date
+  billingRuns: () => get(`${R}/billing-runs`),
+  runBilling: (payload) => apiRequest("POST", `${R}/billing-runs`, { body: payload }),
   // agency bills
   listAgencyBills: (params) => get(`${R}/agency-bill`, params),
 
