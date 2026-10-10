@@ -4,6 +4,7 @@
  * without a server; the route adds the letterhead and sends the file.
  */
 import { MAPPING_TEXT } from './flow.js';
+import { formatDate } from '../../lib/pdf/format.js';
 
 const SCREENS = {
   '/master/finance/account-determination': 'Master › Finance › Account Determination',
@@ -31,7 +32,7 @@ export function flowWorkbook(flow, { technical = false, examples = [] } = {}) {
   const entries = all(flow).flatMap((e) => e.lines.map((l) => [areaName(flow, e.area), e.label, e.when, e.where, e.approval, journalText(e), l.side, l.account.glCode || '',
     l.account.glName || '', sourceText(l.account), l.amount, yesNo(l.perParticipant), appliesWhen(l), lineMapping(l.account), accountPending(l.account) || pendingText(e)]));
   const events = all(flow).map((e) => [areaName(flow, e.area), e.label, e.summary || '', e.when, e.where, e.approval, e.authority?.name || '', journalText(e), pendingText(e),
-    e.scheduled ? `Version from ${e.scheduled.effectiveFrom}` : '', e.lastPosted || (e.fixed ? '' : 'Not posted yet')]);
+    e.scheduled ? `Version from ${formatDate(e.scheduled.effectiveFrom)}` : '', e.lastPosted || (e.fixed ? '' : 'Not posted yet')]);
   const mapping = flow.mapping.pending.map((p) => [p.item, p.glCode || '', p.glName || '', MAPPING_TEXT[p.reason], p.events.map((x) => x.label).join('; '), SCREENS[p.configure] || '']);
   const exampleRows = examples.flatMap((x) => x.lines.map((l) => [x.label, x.coInsurance ? 'Two insurers (60 / 40)' : 'Single insurer', l.accountCode, l.accountName || '', l.debit || null, l.credit || null]));
   const sheets = [
@@ -71,7 +72,7 @@ export function flowHandbookSpec(flow, examples = [], { asOf } = {}) {
     list.forEach((e, n) => {
       sections.push({ heading: n === 0 ? `${area.name}: ${e.label}` : e.label, columns: 1, rows: [['When', e.when], ['Where', e.where], ['Approval before posting', e.approval],
         ...(e.authority ? [['Approval limit', `Authority Matrix: ${e.authority.name}`]] : []), ['Journal', journalText(e)], ...(e.summary ? [['Summary', e.summary]] : []),
-        ...(e.pending ? [['Pending change', pendingText(e)]] : []), ...(e.scheduled ? [['New rule', `Version from ${e.scheduled.effectiveFrom}`]] : [])] });
+        ...(e.pending ? [['Pending change', pendingText(e)]] : []), ...(e.scheduled ? [['New rule', `Version from ${formatDate(e.scheduled.effectiveFrom)}`]] : [])] });
       if (e.lines.length) {
         const formulas = e.lines.filter((l) => l.formula).map((l) => `${l.amount}: ${l.formula}`);
         sections.push({ table: { columns: [{ label: 'Dr/Cr', type: 'code' }, { label: 'Account', type: 'code' }, { label: 'Name' }, { label: 'Amount' }, { label: 'Notes' }],
@@ -91,5 +92,5 @@ export function flowHandbookSpec(flow, examples = [], { asOf } = {}) {
       rows: flow.mapping.pending.map((p) => [p.item, p.glCode || '', p.glName || '', MAPPING_TEXT[p.reason], p.events.length]) } });
   }
   sections.push({ heading: 'Sign-off', signatures: ['Prepared by', 'Reviewed by', 'Approved by'], perRow: 3 });
-  return { title: 'Accounting Entries Handbook', params: `Rules in force on ${asOf || flow.asOf} · Edition ${flow.edition}`, sections };
+  return { title: 'Accounting Entries Handbook', params: `Rules in force on ${formatDate(asOf || flow.asOf)}`, sections };
 }

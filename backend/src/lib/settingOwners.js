@@ -12,6 +12,9 @@
  *                                  company exists (lib/letterhead.js, period-end/tax.js)
  *   Master > Finance > Premium Taxes & LGU Rates
  *                                  premium tax rates and which taxes apply per line of business
+ *   Master > Users and Access > Role Permissions > Access controls
+ *                                  the approval of access changes and the enforcement of segregation of duties and
+ *                                  approval limits: a change waits for a second administrator (access-control/controls.js)
  */
 import { badRequest } from './errors.js';
 
@@ -32,6 +35,12 @@ export const SETTING_OWNERS = [
     screen: 'Master > Finance > Premium Taxes & LGU Rates',
     path: '/master/finance/premium-taxes',
     keys: ['tax.vat_rate', 'tax.dst_rate', 'tax.lgt_rate', 'tax.fst_rate', 'premium.taxes_by_lob'],
+    prefixes: [],
+  },
+  {
+    screen: 'Master > Users and Access > Role Permissions > Access controls, where a second administrator approves the change',
+    path: '/master/generals/usermanagement/role-permissions?controls=1',
+    keys: ['access.change_approval', 'access.sod_enforced', 'access.authority_enforced', 'access.authority_without_limit'],
     prefixes: [],
   },
 ];

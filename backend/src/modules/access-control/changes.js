@@ -3,7 +3,8 @@
  * accounting_config_changes beside the accounting changes of posting-rules/service.js, which leaves these kinds alone.
  *
  * A change is requested by one administrator and approved (applied) or rejected by a different user holding
- * approve:access-control, whatever finance.maker_checker_enabled says; the requester or an approver may withdraw it.
+ * approve:access-control, whatever finance.maker_checker_enabled says, and who holds none of the roles it changes;
+ * only the requester may withdraw it (an approver rejects it, with a reason).
  * One change per kind and target waits at a time. access.change_approval (on by default) switches the approval off for
  * a small team: the change is then applied at once by the module that requests it.
  *
@@ -56,8 +57,17 @@ async function changeOut(db, c, user) {
     id: Number(c.id), ref: `CFG-${c.id}`, kind: c.kind, kindLabel: k.label, target: c.target, targetLabel, summary, payload: c.payload, before: c.before,
     changeNote: c.change_note, status: c.status, requestedBy: c.requested_by_name || c.requested_by, requestedById: c.requested_by, requestedAt: c.requested_at,
     decidedBy: c.decided_by_name || c.decided_by, decidedAt: c.decided_at, decisionRemarks: c.decision_remarks, link: k.link(c),
-    canDecide, canWithdraw: pending && !!user && (c.requested_by === user.id || mayApprove(user)),
+    canDecide, canWithdraw: pending && !!user && c.requested_by === user.id,
   };
+}
+
+/**
+ * Codes of the roles a user holds, with every role those include at any depth: an approver holding one of them does
+ * not approve a change of its access or its approval limits.
+ */
+export async function rolesHeldBy(db, userId) {
+  const { rows } = await db.query('SELECT code FROM user_effective_roles($1)', [userId]);
+  return new Set(rows.map((r) => r.code));
 }
 
 /** Record a change waiting for approval; 409 when one of the same kind and target is already waiting. */
@@ -123,10 +133,10 @@ export const askAccessApproval = (c, user) => notifyApprovers({ audience: APPROV
 /** What approving a change did, for the requester and the screen: "the access of TIS Finance is changed". */
 export const appliedText = (c) => KINDS.get(c.kind)?.applied?.(c) || `the access of ${c.targetLabel} is changed`;
 
-/** Withdraw a waiting change: the requester, or a user who may approve it. */
+/** Withdraw a waiting change: the requester only; an approver rejects it with a reason instead. */
 export async function withdrawAccessChange(db, id, user) {
   const c = await lock(db, id);
-  if (c.requested_by !== user?.id && !mayApprove(user)) throw forbidden('Only the requester or an approver can withdraw the change');
+  if (c.requested_by !== user?.id) throw forbidden('Only the requester can withdraw the change; an approver rejects it with a reason');
   if (KINDS.get(c.kind).closed) await KINDS.get(c.kind).closed(db, c, 'withdrawn', user);
   await db.query("UPDATE accounting_config_changes SET status = 'withdrawn', decided_by = $2, decided_at = now() WHERE id = $1", [c.id, user?.id ?? null]);
   return getAccessChange(db, c.id, user);

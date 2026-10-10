@@ -206,3 +206,6 @@ export function businessName(code, cat = null) {
   const a = AREAS.find((x) => x.code === p.area);
   return [a?.name || 'Other', m?.name || p.module, LEVEL_NAMES[p.level]].join(' › ');
 }
+
+/** "1 user", "3 users": a count with its noun. */
+export const countOf = (n, noun) => `${n} ${noun}${Number(n) === 1 ? '' : 's'}`;

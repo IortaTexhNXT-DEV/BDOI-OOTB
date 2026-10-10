@@ -18,7 +18,8 @@ import { badRequest, conflict, forbidden } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { adminEquivalentRoles, hasPermission } from '../../lib/auth.js';
 import { today } from '../../lib/dates.js';
-import { APPROVER, listAccessChanges, registerAccessKind, requestAccessChange } from './changes.js';
+import { formatDate } from '../../lib/pdf/format.js';
+import { APPROVER, listAccessChanges, registerAccessKind, requestAccessChange, rolesHeldBy } from './changes.js';
 import { roleDirectory } from './roles.js';
 import { applyLimit, listLimits, transactionTypes } from './service.js';
 
@@ -283,11 +284,11 @@ async function peopleOf(db, ids) {
   return new Map(rows.map((u) => [u.id, u]));
 }
 
-/** "Journal voucher approval · TIS Finance: Not set → PHP 1,000,000.00 from 2026-11-01 (BR-2026-014)". */
+/** "Journal voucher approval · TIS Finance: Not set → PHP 1,000,000.00 from 01/11/2026 (BR-2026-014)". */
 export const lineText = (l) => {
   const was = limitWords(l.measure, l.before?.maxAmount, l.before?.unlimited, !!l.before?.set);
   const next = l.removes ? 'removed' : limitWords(l.measure, l.maxAmount, l.unlimited);
-  return `${l.transactionName} · ${l.who}: ${was} → ${next} from ${l.effectiveFrom}${l.referenceNo ? ` (${l.referenceNo})` : ''}`;
+  return `${l.transactionName} · ${l.who}: ${was} → ${next} from ${formatDate(l.effectiveFrom)}${l.referenceNo ? ` (${l.referenceNo})` : ''}`;
 };
 
 /**
@@ -336,8 +337,11 @@ registerAccessKind(KIND, {
   label: 'Authority matrix',
   link: (c) => `${AUTHORITY_PATH}?tab=pending&change=${c.id}`,
   describe: async (_db, c) => ({ targetLabel: c.payload?.title || c.target, summary: (c.payload?.lines || []).map(lineText) }),
-  assertDecider: async (_db, c, user) => {
+  assertDecider: async (db, c, user) => {
     if ((c.payload?.lines || []).some((l) => l.userId && l.userId === user.id)) throw forbidden('You cannot approve a change of your own approval limit');
+    const held = await rolesHeldBy(db, user.id);
+    const own = (c.payload?.lines || []).find((l) => l.roleCode && held.has(l.roleCode));
+    if (own) throw forbidden(`You cannot approve a change of the approval limit of a role you hold (${own.who || own.roleCode})`);
   },
   apply: async (db, c, user) => {
     const ids = [];
@@ -357,7 +361,7 @@ registerAccessKind(KIND, {
   },
   applied: (c) => {
     const n = c.payload?.lines?.length || 0;
-    return n === 1 ? `the approval limit of ${c.targetLabel} is changed from ${c.payload.lines[0].effectiveFrom}` : `${n} approval limits are changed from their effective dates`;
+    return n === 1 ? `the approval limit of ${c.targetLabel} is changed from ${formatDate(c.payload.lines[0].effectiveFrom)}` : `${n} approval limits are changed from their effective dates`;
   },
 });
 
@@ -453,14 +457,16 @@ export async function checkUpload(db, rows, user) {
       return;
     }
     seen.set(key, row);
+    // the problems of a cell name its transaction and role, so the row is found without the file
+    const failCell = (message) => fail(`${t.item.name} · ${r.item.name} · ${message}`);
     const noLimit = yesNo(v.noLimit);
     const limit = readNumber(v.limit);
-    if (noLimit === undefined) return fail(`${HEADER.noLimit}: write Yes or No`);
-    if (limit !== null && Number.isNaN(limit)) return fail(`${HEADER.limit}: "${v.limit}" is not a number`);
-    if (limit !== null && noLimit) return fail(`${HEADER.limit}: give a limit or No limit = Yes, not both`);
+    if (noLimit === undefined) return failCell(`${HEADER.noLimit}: write Yes or No`);
+    if (limit !== null && Number.isNaN(limit)) return failCell(`${HEADER.limit}: "${v.limit}" is not a number`);
+    if (limit !== null && noLimit) return failCell(`${HEADER.limit}: give a limit or No limit = Yes, not both`);
     const cell = st.cells.get(key) || {};
     if (limit === null && !noLimit) {
-      if (cell.inEffect) fail(`${HEADER.limit}: empty, but ${r.item.name} has a limit for ${t.item.name}; a limit is removed on the Authority Matrix screen`);
+      if (cell.inEffect) failCell(`${HEADER.limit}: empty, but the role has a limit; a limit is removed on the Authority Matrix screen`);
       else unchanged += 1;
       return;
     }
@@ -479,7 +485,7 @@ export async function checkUpload(db, rows, user) {
       return;
     }
     if (c.errors.length) {
-      c.errors.forEach((e) => fail(`${FIELD_COLUMN[e.field] || e.field}: ${e.message}`));
+      c.errors.forEach((e) => failCell(`${FIELD_COLUMN[e.field] || e.field}: ${e.message}`));
       return;
     }
     changes.push({ row, ...c.line });
@@ -530,6 +536,9 @@ export async function templateSheets(db, user, { base = false, unchecked = false
 export const AUTHORITY_MATRIX_HEADER = ['Department', 'Role', 'Base platform role', 'Transaction', 'Checked at', 'Measure', 'Limit in effect', 'Effective from',
   'Ends on', 'Authority reference', 'Reference date', 'Approved by', 'Approved on', 'Scheduled change', 'Waiting for approval', 'Transaction code', 'Role code'];
 
+/** A date of an export or a text, as the screens show it (dd/mm/yyyy); '' without one. */
+const dayText = (v) => (v ? formatDate(v) : '');
+
 /** Every active role (base platform roles flagged) and every active transaction type, one row each. */
 export async function authorityMatrixRows(db, user) {
   const st = await loadState(db, user);
@@ -540,10 +549,10 @@ export async function authorityMatrixRows(db, user) {
       const s = c.scheduled;
       const p = c.pending;
       out.push([r.department || (r.platform ? 'Base platform roles' : 'Other roles'), r.name, r.platform ? 'Yes' : 'No', t.name, AUTHORITY_STEPS[t.code]?.step || 'Not checked by an approval step',
-        t.measure === 'percent' ? 'Percent of premium' : 'Amount in PHP', limitWords(t.measure, c.maxAmount, c.unlimited, c.set), c.effectiveFrom || '', c.endsOn || '',
-        c.referenceNo || '', c.referenceDate || '', c.approvedBy || '', c.approvedAt ? new Date(c.approvedAt).toISOString().slice(0, 10) : '',
-        s ? `${limitWords(t.measure, s.maxAmount, s.unlimited)} from ${s.effectiveFrom}` : '',
-        p ? `${p.ref}: ${p.removes ? 'remove' : limitWords(t.measure, p.maxAmount, p.unlimited)} from ${p.effectiveFrom}` : '', t.code, r.code]);
+        t.measure === 'percent' ? 'Percent of premium' : 'Amount in PHP', limitWords(t.measure, c.maxAmount, c.unlimited, c.set), dayText(c.effectiveFrom), dayText(c.endsOn),
+        c.referenceNo || '', dayText(c.referenceDate), c.approvedBy || '', dayText(c.approvedAt),
+        s ? `${limitWords(t.measure, s.maxAmount, s.unlimited)} from ${dayText(s.effectiveFrom)}` : '',
+        p ? `${p.ref}: ${p.removes ? 'remove' : limitWords(t.measure, p.maxAmount, p.unlimited)} from ${dayText(p.effectiveFrom)}` : '', t.code, r.code]);
     }
   }
   return out;
@@ -570,7 +579,6 @@ export async function limitHistory(db, { transactionType = null } = {}) {
     .sort((a, b) => String(b.requestedAt || '').localeCompare(String(a.requestedAt || '')) || b.id - a.id);
 }
 
-const dayOf = (v) => (v ? new Date(v).toISOString().slice(0, 10) : '');
 export const limitHistoryRows = (list) => list.map((l) => [l.transactionName, l.roleName || l.userName || l.roleCode || l.userId, limitWords(l.measure, l.maxAmount, l.unlimited),
-  l.effectiveFrom || '', l.effectiveTo || '', l.statusLabel, l.referenceNo || '', l.referenceDate || '', l.changeId ? `CFG-${l.changeId}` : '', l.requestedBy || '',
-  dayOf(l.requestedAt), l.decidedBy || '', dayOf(l.decidedAt), l.decisionNote || '', l.remarks || '', l.transactionType, l.roleCode || '']);
+  dayText(l.effectiveFrom), dayText(l.effectiveTo), l.statusLabel, l.referenceNo || '', dayText(l.referenceDate), l.changeId ? `CFG-${l.changeId}` : '', l.requestedBy || '',
+  dayText(l.requestedAt), l.decidedBy || '', dayText(l.decidedAt), l.decisionNote || '', l.remarks || '', l.transactionType, l.roleCode || '']);

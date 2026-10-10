@@ -10,7 +10,7 @@
  *
  * With access.change_approval (on by default) the removals wait: once every line is decided the review is submitted
  * for sign-off (status awaiting-signoff, a change of kind access-review in changes.js). A different user holding
- * approve:access-control, who decided none of its removals, signs it off: the removals apply (only roles still held;
+ * approve:access-control, who decided none of its lines, signs it off: the removals apply (only roles still held;
  * an account already inactive is noted), the sessions of the users concerned are renewed and the review closes.
  * Returning it (a rejection, remarks required) or withdrawing it opens it again for changes. Without approval the
  * removals apply when decided and the review is closed when every line is decided.
@@ -20,6 +20,7 @@ import { getSetting } from '../../lib/settings.js';
 import { hasPermission, isAdmin } from '../../lib/auth.js';
 import { businessTimeZone, today } from '../../lib/dates.js';
 import { formatDate, formatDateTime } from '../../lib/pdf/format.js';
+import { countOf } from './catalogue.js';
 import { requiredReason } from '../ops-masters/records.js';
 import { changeApproval, listAccessChanges, registerAccessKind, requestAccessChange } from './changes.js';
 import { BUILT_IN_ADMIN, departmentOf, isAdminAccount, roleDirectory } from './roles.js';
@@ -288,11 +289,11 @@ export async function submitReview(db, id, user) {
   if (r.status !== 'open') throw conflict(r.status === 'closed' ? 'This review is closed' : 'This review is already waiting for sign-off');
   if (!(await changeApproval())) throw conflict('Removals apply when they are decided; close the review instead');
   const review = await getReview(db, r.id, user);
-  if (!review.items.length || review.pending > 0) throw conflict(`${review.pending} user(s) still to be reviewed`);
+  if (!review.items.length || review.pending > 0) throw conflict(`${countOf(review.pending, 'user')} still to be reviewed`);
   const removals = review.items.filter((i) => removal(i.decision)).map((i) => ({ itemId: i.id, userId: i.userId, userName: i.displayName, outcome: i.decision,
     roles: i.removeRoles, roleNames: i.removeRoleNames, reason: i.remarks }));
   const payload = { reviewId: r.id, name: r.name, users: review.users, kept: review.kept, removals, title: r.name };
-  const change = await requestAccessChange(db, { kind: KIND, target: `AR-${r.id}`, payload, user, note: `${removals.length} removal(s), ${review.kept} kept` });
+  const change = await requestAccessChange(db, { kind: KIND, target: `AR-${r.id}`, payload, user, note: `${countOf(removals.length, 'removal')}, ${review.kept} kept` });
   await db.query("UPDATE access_reviews SET status = 'awaiting-signoff', submitted_by = $2, submitted_at = now(), change_id = $3 WHERE id = $1", [r.id, user.id, change.id]);
   return { review: await getReview(db, r.id, user), change };
 }
@@ -302,7 +303,7 @@ export async function closeReview(db, id, user) {
   if (await changeApproval()) throw conflict('A review is closed by its sign-off: submit it for sign-off');
   const r = await getReview(db, id, user);
   if (r.status !== 'open') throw conflict('This review is already closed');
-  if (r.pending > 0) throw conflict(`${r.pending} user(s) still to be reviewed`);
+  if (r.pending > 0) throw conflict(`${countOf(r.pending, 'user')} still to be reviewed`);
   await db.query("UPDATE access_reviews SET status = 'closed', closed_by = $2, closed_at = now() WHERE id = $1", [r.id, user.id]);
   return getReview(db, id, user);
 }
@@ -315,12 +316,12 @@ registerAccessKind(KIND, {
   link: (c) => `${REVIEWS_PATH}?review=${c.payload?.reviewId}`,
   describe: async (_db, c) => {
     const removals = c.payload?.removals || [];
-    return { targetLabel: c.payload?.name || c.target, summary: removals.length ? removals.map(removalText) : [`${c.payload?.users || 0} user(s) kept; nothing to remove`] };
+    return { targetLabel: c.payload?.name || c.target, summary: removals.length ? removals.map(removalText) : [`${countOf(c.payload?.users || 0, 'user')} kept; nothing to remove`] };
   },
   assertDecider: async (db, c, user) => {
-    const deciders = (await db.query(`SELECT DISTINCT decided_by FROM access_review_items WHERE review_id = $1 AND decision IN ('remove-roles', 'deactivate')`,
+    const deciders = (await db.query('SELECT DISTINCT decided_by FROM access_review_items WHERE review_id = $1 AND decided_by IS NOT NULL',
       [c.payload.reviewId])).rows.map((r) => r.decided_by);
-    if (deciders.includes(user.id)) throw forbidden('You decided a removal of this review; another administrator signs it off');
+    if (deciders.includes(user.id)) throw forbidden('You decided users of this review; another administrator signs it off');
     if (!isAdmin(user)) {
       for (const x of c.payload.removals || []) {
         if (await isAdminAccount(db, x.userId)) throw forbidden('A removal of an administrator account is signed off by a System Administrator');
@@ -338,7 +339,7 @@ registerAccessKind(KIND, {
   closed: async (db, c) => {
     await db.query(`UPDATE access_reviews SET status = 'open', change_id = NULL WHERE id = $1 AND status = 'awaiting-signoff'`, [c.payload.reviewId]);
   },
-  requested: (c, user) => `${user.username} submitted the access review ${c.payload?.name} for sign-off: ${(c.payload?.removals || []).length} removal(s)`,
+  requested: (c, user) => `${user.username} submitted the access review ${c.payload?.name} for sign-off: ${countOf((c.payload?.removals || []).length, 'removal')}`,
   applied: (c) => `the access review ${c.payload?.name} is signed off and closed${(c.payload?.removals || []).length ? '; its removals are applied' : ''}`,
 });
 

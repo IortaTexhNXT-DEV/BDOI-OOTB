@@ -32,7 +32,10 @@ import * as delegations from './delegations.js';
 import * as sod from './sod.js';
 import * as reviews from './reviews.js';
 import * as userAccess from './userAccess.js';
+import * as controls from './controls.js';
 import { roleDirectory } from './roles.js';
+import { countOf } from './catalogue.js';
+import { formatDate } from '../../lib/pdf/format.js';
 
 const { router, define } = moduleRouter('Access Control', '/access-control');
 const read = [requireAuth, requirePermission('read:access-control')];
@@ -146,7 +149,10 @@ define({
       res.setHeader('Content-Disposition', `attachment; filename="${base}.csv"`);
       return res.send(toCsv(sheets[0].columns, sheets[0].rows));
     }
-    const banner = [ctx.letterhead?.name, 'Role permissions', `As at ${ctx.generatedAt} · exported by ${ctx.generatedBy}`].filter(Boolean);
+    const names = new Map((await roleDirectory(pool)).roles.map((r) => [r.code, r.name]));
+    const scope = roles.length ? `Roles: ${roles.map((c) => names.get(c) || c).join(', ')}`
+      : `All ${['1', 'true'].includes(String(req.query.base)) ? 'roles, base platform roles included' : 'TISPH roles'}`;
+    const banner = [ctx.letterhead?.name, 'Role permissions', scope, `As at ${ctx.generatedAt} · exported by ${ctx.generatedBy}`].filter(Boolean);
     const buf = writeXlsx({ title: 'Role permissions', brand: excelBrand(ctx), sheets: sheets.map((sh, i) => (i === 0 ? { ...sh, banner, logo: true } : sh)) });
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename="${base}.xlsx"`);
@@ -180,12 +186,34 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/changes/:id/withdraw', summary: 'Withdraw a change of access waiting for approval (the requester or an approver)', screen: `${S} > Role Permissions`,
+  method: 'POST', path: '/changes/:id/withdraw', summary: 'Withdraw a change of access waiting for approval (the requester only; an approver rejects it with a reason)', screen: `${S} > Role Permissions`,
   middleware: [requireAuth, requirePermission('write:roles', 'write:access-control', 'approve:access-control')], response: { success: true, data: { ...changeExample, status: 'withdrawn' } },
   handler: async (req, res) => {
     const c = await withTransaction((db) => changes.withdrawAccessChange(db, req.params.id, req.user));
     await audit(req, { entity: 'accounting_config_change', entityId: c.id, action: 'withdraw', after: c });
     ok(res, c, `Change ${c.ref} withdrawn`);
+  },
+});
+
+// ---------- access controls ----------
+define({
+  method: 'GET', path: '/controls', summary: 'The access controls (approval of access changes, segregation of duties and approval limits enforced) with their values and the change waiting for approval',
+  screen: `${S} > Role Permissions`, middleware: read,
+  response: { success: true, data: { items: [{ key: 'access.change_approval', name: 'Changes of access wait for a second administrator', type: 'boolean', options: null, value: true }], pending: null } },
+  handler: async (req, res) => ok(res, await controls.controlsOverview(pool, req.user)),
+});
+define({
+  method: 'POST', path: '/controls', summary: 'Propose new values of the access controls with a reason (access_change); applies only once a different administrator approves it, whatever access.change_approval says',
+  screen: `${S} > Role Permissions`, middleware: [...write, validate(z.object({ values: z.record(z.union([z.boolean(), z.string().max(20)])), reasonCode: z.string().max(40).optional(),
+    note: z.string().max(500).optional() }))],
+  request: { values: { 'access.sod_enforced': false }, reasonCode: 'ACC-REDESIGN', note: 'Data migration week' },
+  response: { success: true, data: { ...changeExample, kind: 'access-controls', kindLabel: 'Access controls', target: 'access-controls', targetLabel: 'Access controls',
+    summary: ['Segregation of duties is checked when roles are given: On → Off'] } },
+  handler: async (req, res) => {
+    const c = await withTransaction((db) => controls.proposeControls(db, req.body, req.user));
+    await audit(req, { entity: 'accounting_config_change', entityId: c.id, action: 'request', after: c });
+    await changes.askAccessApproval(c, req.user);
+    created(res, c, `Change ${c.ref} sent for approval; it applies once another administrator approves it`);
   },
 });
 
@@ -311,6 +339,10 @@ define({
     changes: [{ row: 5, transactionType: 'journal_voucher', roleCode: 'tis-finance', maxAmount: 1000000, effectiveFrom: '2026-10-10', referenceNo: 'BR-2026-014' }],
     file: { key: 'authority-matrix/1760000000000-ab12-authority.xlsx', name: 'authority.xlsx' } } },
   handler: async (req, res) => {
+    // only the template's own formats are read and kept as evidence of the change
+    if (req.file && !/\.(xlsx|csv)$/i.test(req.file.originalname || '')) {
+      throw badRequest('Validation failed', [{ path: 'file', message: 'Upload the template as an Excel workbook (.xlsx) or a CSV file (.csv)' }]);
+    }
     const rows = parseUploadedRows(req.file);
     const max = Number(await getSetting('limits.bulk_upload_max_rows', 1000));
     if (rows.length > max) throw badRequest(`The file has ${rows.length} rows; the limit is ${max}`);
@@ -351,13 +383,13 @@ define({
     await audit(req, { entity: 'authority_limit', entityId: req.params.id, action: req.body.decision, after: r });
     const approved = req.body.decision === 'approve';
     await notifyDecision({ userId: r.requestedById, decidedBy: req.user.id, document: 'Authority limit', number: limitNumber(r), approved, by: req.user.username,
-      reason: approved ? null : req.body.note || null, message: approved ? `${await limitText(r)}, approved by ${req.user.username}, in effect from ${r.effectiveFrom}` : null,
+      reason: approved ? null : req.body.note || null, message: approved ? `${await limitText(r)}, approved by ${req.user.username}, in effect from ${formatDate(r.effectiveFrom)}` : null,
       link: AUTHORITY, entity: 'authority_limit', entityId: r.id });
-    ok(res, r, approved ? `Limit approved; in effect from ${r.effectiveFrom}` : 'Limit rejected');
+    ok(res, r, approved ? `Limit approved; in effect from ${formatDate(r.effectiveFrom)}` : 'Limit rejected');
   },
 });
 define({
-  method: 'DELETE', path: '/authority-limits/:id', summary: 'A proposal waiting for approval: withdraw it (the proposer or an approver). A limit in effect or scheduled: propose its removal (write permission; authority reference in the body), which applies once another administrator approves it',
+  method: 'DELETE', path: '/authority-limits/:id', summary: 'A proposal waiting for approval: withdraw it (the proposer only). A limit in effect or scheduled: propose its removal (write permission; authority reference in the body), which applies once another administrator approves it',
   screen: `${S} > Authority Matrix`, middleware: [requireAuth, requirePermission('write:access-control', 'approve:access-control')],
   request: { referenceNo: 'BR-2026-020', referenceDate: '2026-10-05', remarks: 'Role merged into Finance' },
   response: { success: true, data: { id: 1, status: 'withdrawn' } },
@@ -418,7 +450,7 @@ define({
   response: { success: true, data: { asOf: '2026-10-10', maxDays: 90, approval: true, withoutLimit: 'allow', departments: [{ name: 'Finance and Accounting', order: 4 }],
     types: [{ code: 'journal_voucher', name: 'Journal voucher approval', measure: 'amount', step: 'Accounts > Journal Vouchers > Approve' }],
     people: [{ id: 'usr_1', name: 'Mariela S. Valentino', department: 'Finance and Accounting', roleNames: ['TIS Finance & General Accounting'], approves: ['journal_voucher'],
-      authority: { journal_voucher: { set: true, limit: 750000, unlimited: false, source: 'user limit' } } }] } },
+      authority: { journal_voucher: { set: true, limit: 750000, unlimited: false, source: 'personal limit' } } }] } },
   handler: async (_req, res) => ok(res, await delegations.delegationOptions(pool)),
 });
 define({
@@ -601,9 +633,9 @@ define({
     await audit(req, { entity: 'access_review', entityId: String(r.id), action: 'start', after: { name: r.name, scope: r.scope, users: r.items.length, dueDate: r.dueDate } });
     // the users are decided with write:access-control (not by the person reviewed)
     await notifyApprovers({ audience: 'write:access-control', document: 'Access review', number: r.name, by: req.user.username, title: `Access review ${r.name} awaiting decisions`,
-      message: `${req.user.username} started ${r.name} (${r.scopeText}): ${r.items.length} user(s) to decide by ${r.dueDate}`,
+      message: `${req.user.username} started ${r.name} (${r.scopeText}): ${countOf(r.items.length, 'user')} to decide by ${formatDate(r.dueDate)}`,
       link: `${reviews.REVIEWS_PATH}?review=${r.id}`, entity: 'access_review', entityId: r.id });
-    created(res, r, `Access review started for ${r.items.length} user(s)`);
+    created(res, r, `Access review started for ${countOf(r.items.length, 'user')}`);
   },
 });
 define({
@@ -626,7 +658,7 @@ define({
   handler: async (req, res) => {
     const r = await withTransaction((db) => reviews.keepReviewItems(db, req.params.id, req.body, req.user));
     await audit(req, { entity: 'access_review_item', entityId: `AR-${req.params.id}`, action: 'keep', after: { kept: r.kept, skipped: r.skipped, note: req.body.note || null } });
-    ok(res, r, `${r.kept.length} user(s) kept${r.skipped.length ? `; ${r.skipped.length} left out` : ''}`);
+    ok(res, r, `${countOf(r.kept.length, 'user')} kept${r.skipped.length ? `; ${r.skipped.length} left out` : ''}`);
   },
 });
 define({

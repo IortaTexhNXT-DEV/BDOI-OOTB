@@ -20,7 +20,7 @@ import { formatDateTime } from '../../lib/pdf/format.js';
 import { requiredReason } from '../ops-masters/records.js';
 import { AREAS, BASELINE, LEVEL_NAMES, LEVELS, businessName, catalogue } from './catalogue.js';
 import { roleDirectory } from './roles.js';
-import { changeApproval, listAccessChanges, registerAccessKind, requestAccessChange } from './changes.js';
+import { changeApproval, listAccessChanges, registerAccessKind, requestAccessChange, rolesHeldBy } from './changes.js';
 import { breaksAccessRule as breaks, listSodRules } from './service.js';
 
 export const KIND = 'role-access';
@@ -263,6 +263,7 @@ registerAccessKind(KIND, {
   assertDecider: async (db, c, user) => {
     const role = (await roleDirectory(db)).roles.find((r) => r.code === c.target);
     if (role) assertMayChange(role, user);
+    if ((await rolesHeldBy(db, user.id)).has(c.target)) throw forbidden('You cannot approve a change of the access of a role you hold');
   },
   apply: (db, c, user) => applyRoleAccess(db, c, user),
 });

@@ -113,7 +113,7 @@ describe('a change of a role\'s access', () => {
     expect(fin.pending.id).toBe(c.id);
     expect(fin.editBlocked).toBe('pending');
     const listed = await as['ra.it2']('get', '/access-control/changes?kind=role-access');
-    expect(listed.body.data.find((x) => x.id === c.id)).toMatchObject({ canDecide: true, canWithdraw: true });
+    expect(listed.body.data.find((x) => x.id === c.id)).toMatchObject({ canDecide: true, canWithdraw: false });
   });
 
   it('allows one change per role at a time', async () => {
@@ -310,7 +310,7 @@ describe('export for audit', () => {
   });
 });
 
-describe('migrations 0391-0393 on a database in use', () => {
+describe('migrations 0391-0395 on a database in use', () => {
   it('change nothing when run again', async () => {
     const state = async () => ({
       settings: await q("SELECT key, value FROM app_settings WHERE key IN ('access.role_groups', 'access.platform_roles', 'access.change_approval') ORDER BY key"),
@@ -318,10 +318,29 @@ describe('migrations 0391-0393 on a database in use', () => {
       perm: await q("SELECT description FROM permissions WHERE code = 'approve:access-control'"),
     });
     const first = await state();
-    for (const f of ['0391_role_directory.sql', '0392_access_change_approval.sql', '0393_sod_access_rules.sql']) {
+    for (const f of ['0391_role_directory.sql', '0392_access_change_approval.sql', '0393_sod_access_rules.sql', '0394_authority_matrix_changes.sql', '0395_access_controls_approval.sql']) {
       await pool.query(fs.readFileSync(new URL(`../src/db/migrations/${f}`, import.meta.url), 'utf8'));
     }
     expect(await state()).toEqual(first);
     expect(first.perm[0].description).toBe('Approve role access changes and authority limits proposed by another administrator');
+  });
+});
+
+describe('access controls', () => {
+  it('change only through a second administrator, never through the generic settings', async () => {
+    expect((await ctx.api('put', '/settings').send({ settings: { 'access.sod_enforced': false } })).status).toBe(400);
+    const before = (await as['ra.it']('get', '/access-control/controls')).body.data;
+    expect(before.items.find((i) => i.key === 'access.sod_enforced')).toMatchObject({ value: true, name: 'Segregation of duties is checked when roles are given' });
+    await setApproval(false);
+    const r = await as['ra.it']('post', '/access-control/controls').send({ values: { 'access.sod_enforced': false }, reasonCode: 'ACC-REDESIGN', note: 'Data migration' });
+    await setApproval(true);
+    expect(r.status, JSON.stringify(r.body)).toBe(201);
+    expect(r.body.data).toMatchObject({ status: 'pending', summary: ['Segregation of duties is checked when roles are given: On → Off'], canDecide: false });
+    expect((await q("SELECT value FROM app_settings WHERE key = 'access.sod_enforced'"))[0].value).toBe(true);
+    expect((await as['ra.it2']('post', `/access-control/changes/${r.body.data.id}/decision`).send({ decision: 'approve' })).status).toBe(200);
+    clearSettingsCache();
+    expect((await as['ra.it']('get', '/access-control/controls')).body.data.items.find((i) => i.key === 'access.sod_enforced').value).toBe(false);
+    await q("UPDATE app_settings SET value = 'true' WHERE key = 'access.sod_enforced'");
+    clearSettingsCache();
   });
 });

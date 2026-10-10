@@ -12,6 +12,7 @@ import { setup, loginAs } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { addDays, today } from '../src/lib/dates.js';
+import { formatDate } from '../src/lib/pdf/format.js';
 import { writeXlsx } from '../src/lib/xlsx.js';
 import { readWorkbook, readZip } from '../src/modules/documents/xlsx.js';
 import { effectiveAuthority } from '../src/modules/access-control/service.js';
@@ -76,6 +77,9 @@ describe('the matrix', () => {
     expect((await as['am.fin']('get', '/access-control/authority-matrix')).status).toBe(403);
     expect((await propose('am.gm', [{ transactionType: 'journal_voucher', roleCode: 'tis-finance', maxAmount: 1, ...REF }])).status).toBe(403);
     expect((await as['am.gm']('post', '/access-control/authority-matrix/uploads').attach('file', workbook([]), 'a.xlsx')).status).toBe(403);
+    const html = await as['am.it']('post', '/access-control/authority-matrix/uploads').attach('file', Buffer.from('Transaction,Role\n'), 'm.html');
+    expect(html.status).toBe(400);
+    expect(html.body.errors[0].message).toMatch(/\.xlsx.*\.csv/);
   });
 
   it('every transaction type an approval step checks is in the registry', () => {
@@ -129,6 +133,18 @@ describe('a change of one limit', () => {
     const items = (await as['am.it2']('get', '/my-work/items?category=approvals')).body.data;
     expect(items.find((i) => i.ref === `CFG-${changeId}`)).toMatchObject({ kind: 'Authority matrix change', title: 'Journal voucher approval · TIS Finance & General Accounting' });
     expect((await as['am.it']('get', '/my-work/items?category=approvals')).body.data.map((i) => i.ref)).not.toContain(`CFG-${changeId}`);
+    // an approver rejects with a reason; only the requester withdraws
+    expect((await as['am.it2']('post', `/access-control/changes/${changeId}/withdraw`)).status).toBe(403);
+  });
+
+  it('refuses an approver who holds the role whose limit changes', async () => {
+    const r = await propose('am.it', [{ transactionType: 'write_off', roleCode: 'tis-it-admin', maxAmount: 1000, ...REF }]);
+    expect(r.status, JSON.stringify(r.body)).toBe(201);
+    expect((await as['am.it2']('get', `/access-control/changes/${r.body.data.id}`)).body.data.canDecide).toBe(false);
+    const refused = await decide('am.it2', r.body.data.id, 'approve');
+    expect(refused.status).toBe(403);
+    expect(refused.body.message).toMatch(/role you hold/);
+    expect((await as['am.it']('post', `/access-control/changes/${r.body.data.id}/withdraw`)).status).toBe(200);
   });
 
   it('applies when approved, with the reference and the change it came from', async () => {
@@ -283,7 +299,7 @@ describe('exports for audit', () => {
     const header = rows.findIndex((r) => r[0] === 'Department');
     expect(rows[header].slice(0, 7)).toEqual(['Department', 'Role', 'Base platform role', 'Transaction', 'Checked at', 'Measure', 'Limit in effect']);
     expect(rows.find((r) => r[1] === 'TIS Finance & General Accounting' && r[3] === 'Journal voucher approval').slice(6, 10))
-      .toEqual(['PHP 1,000,000.00', day, addDays(day, 4), 'BR-2026-014']);
+      .toEqual(['PHP 1,000,000.00', formatDate(day), formatDate(addDays(day, 4)), 'BR-2026-014']);
     const csv = await as['am.gm']('get', '/access-control/authority-matrix?format=csv');
     expect(csv.text).toContain('Base platform roles,Accounting,Yes,Journal voucher approval');
     const history = await as['am.gm']('get', '/access-control/authority-limits?status=all&format=csv');

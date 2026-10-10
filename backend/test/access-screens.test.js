@@ -243,6 +243,9 @@ describe('user access matrix', () => {
     const m = (await as['gm.one']('get', '/access-control/user-matrix')).body.data;
     const superid = m.rows.find((u) => u.id === ids['uat.super']);
     expect(superid.included.map((x) => x.code)).toContain('system-admin');
+    // a full-access role holds every permission: administration and transactions together
+    const superConflicts = (await as['it.one']('get', '/access-control/sod-conflicts')).body.data.rows.filter((c) => c.userId === ids['uat.super']);
+    expect(superConflicts.map((c) => c.ruleCode)).toContain('SOD-ACC-ADMIN-TXN');
     expect(m.rows.find((u) => u.id === ids['fin.two'])).toMatchObject({ department: 'Finance and Accounting', roleNames: ['TIS Finance & General Accounting'],
       pending: expect.arrayContaining([expect.objectContaining({ ref: pending.body.data.change.ref, kindLabel: 'Delegation' })]) });
     expect(m.rows.find((u) => u.id === ids['ccd.both']).lastReview).toMatchObject({ outcome: 'Remove roles', name: 'Cash Control review' });

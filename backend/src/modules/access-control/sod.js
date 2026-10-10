@@ -3,7 +3,7 @@
  * person (exceptions).
  *
  * Conflicts by user: every user (active by default) whose effective roles break an active rule (roles held together,
- * or access combined on the permissions of the active roles, full-access roles left out). A conflict is open,
+ * or access combined on the permissions of the active roles; a full-access role holds every permission). A conflict is open,
  * accepted until a date (an exception in force), waiting for approval (an exception requested), or expired (the
  * exception's date has passed: open again, without any job).
  *
@@ -44,9 +44,10 @@ async function holders(db, { status = 'active', userId = null } = {}) {
     FROM users u WHERE u.status <> 'deleted' AND ($1::text = 'all' OR u.status = $1) AND ($2::text IS NULL OR u.id = $2) ORDER BY u.display_name`, [status || 'active', userId]);
   const full = await adminEquivalentRoles(db);
   const { rows: perms } = await db.query(`SELECT u.id, array_agg(DISTINCT p.code) AS codes FROM users u CROSS JOIN LATERAL user_effective_roles(u.id) er
-    JOIN role_permissions rp ON rp.role_id = er.role_id JOIN permissions p ON p.id = rp.permission_id WHERE NOT (er.code = ANY($1)) GROUP BY u.id`, [full]);
+    JOIN role_permissions rp ON rp.role_id = er.role_id JOIN permissions p ON p.id = rp.permission_id GROUP BY u.id`);
   const codes = new Map(perms.map((r) => [r.id, new Set(r.codes)]));
-  return rows.map((u) => ({ ...u, codes: codes.get(u.id) || new Set() }));
+  const every = new Set((await db.query('SELECT code FROM permissions')).rows.map((r) => r.code));
+  return rows.map((u) => ({ ...u, codes: u.effective.some((c) => full.includes(c)) ? every : codes.get(u.id) || new Set() }));
 }
 
 /** Rules a user breaks: role rules on the effective roles, access rules on the permissions. */
@@ -225,11 +226,11 @@ export async function requestSodException(db, b, user) {
   if (b.userId === user.id) throw forbidden('You cannot request an exception for yourself');
   const found = (await sodConflictList(db, { status: 'active', userId: b.userId, ruleId: b.ruleId }, user)).rows[0];
   if (!found) throw conflict('This person does not break the rule today; no exception is needed');
-  if (found.state === 'accepted') throw conflict(`An exception is in force until ${found.exception.validUntil}`);
+  if (found.state === 'accepted') throw conflict(`An exception is in force until ${formatDate(found.exception.validUntil)}`);
   if (found.state === 'pending') throw conflict(`An exception is waiting for approval (${found.change.ref})`);
   const reason = await requiredReason(db, 'sod_exception', b);
   const payload = { ruleId: found.ruleId, ruleName: found.ruleName, action: found.action, userId: found.userId, userName: found.userName, heldTogether: found.heldTogether,
-    validUntil: b.validUntil, reasonCode: reason.code, reason: reason.text, title: `${found.userName} · ${found.ruleName} until ${b.validUntil}` };
+    validUntil: b.validUntil, reasonCode: reason.code, reason: reason.text, title: `${found.userName} · ${found.ruleName} until ${formatDate(b.validUntil)}` };
   if (await changeApproval()) return { change: await requestAccessChange(db, { kind: EXCEPTION_KIND, target: found.key, payload, note: reason.text, user }) };
   const id = await insertException(db, payload, { requestedBy: user.id });
   return { exception: (await listExceptions(db, { userId: found.userId })).find((e) => e.id === id) };
@@ -255,7 +256,7 @@ registerAccessKind(EXCEPTION_KIND, {
   label: 'Segregation of duties exception',
   link: (c) => `${SOD_PATH}?tab=pending&change=${c.id}`,
   describe: async (_db, c) => ({ targetLabel: `${c.payload?.userName} · ${c.payload?.ruleName}`,
-    summary: [`${c.payload?.userName} may hold ${(c.payload?.heldTogether || []).join(' with ')} (${c.payload?.ruleName}) until ${c.payload?.validUntil}`,
+    summary: [`${c.payload?.userName} may hold ${(c.payload?.heldTogether || []).join(' with ')} (${c.payload?.ruleName}) until ${formatDate(c.payload?.validUntil)}`,
       c.payload?.reason ? `Reason: ${c.payload.reason}` : null].filter(Boolean) }),
   assertDecider: async (_db, c, user) => {
     if (c.payload?.userId === user.id) throw forbidden('You cannot approve an exception for yourself');
@@ -267,7 +268,7 @@ registerAccessKind(EXCEPTION_KIND, {
     return { audit: { entity: 'sod_exception', entityId: String(id), action: 'approve', after: { ...p, id, change: c.id } } };
   },
   requested: (c, user) => `${user.username} requested a segregation-of-duties exception: ${c.summary.join('; ')}`,
-  applied: (c) => `the conflict of ${c.payload?.userName} is accepted until ${c.payload?.validUntil}`,
+  applied: (c) => `the conflict of ${c.payload?.userName} is accepted until ${formatDate(c.payload?.validUntil)}`,
 });
 
 // ---------------------------------------------------------------- export for audit

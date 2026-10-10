@@ -9,6 +9,7 @@ import * as svc from './service.js';
 import { EVENTS } from '../accounting/lib/posting.js';
 import { writeXlsx } from '../../lib/xlsx.js';
 import { printContext, renderPdf, sendPdf } from '../documents/pdf.js';
+import { formatDate } from '../../lib/pdf/format.js';
 import { excelBrand } from '../reports/service.js';
 import { accountingFlow, flowExample } from './flow.js';
 import { flowHandbookSpec, flowWorkbook } from './flowExport.js';
@@ -85,7 +86,7 @@ define({
     const base = `accounting-${format === 'pdf' ? 'entries-handbook' : 'reference'}-${flow.asOf.replace(/-/g, '')}`;
     if (format === 'pdf') return sendPdf(res, await renderPdf(flowHandbookSpec(flow, examples)), `${base}.pdf`, req.query.download ? 'attachment' : 'inline');
     const ctx = await printContext();
-    const banner = [ctx.letterhead?.name, 'Accounting reference', `Rules in force on ${flow.asOf} · Edition ${flow.edition} · exported by ${ctx.generatedBy}`].filter(Boolean);
+    const banner = [ctx.letterhead?.name, 'Accounting reference', `Rules in force on ${formatDate(flow.asOf)} · exported by ${ctx.generatedBy}`].filter(Boolean);
     const sheets = flowWorkbook(flow, { technical: hasPermission(req.user, 'write:posting-rules'), examples });
     const buf = writeXlsx({ title: 'Accounting reference', brand: excelBrand(ctx), sheets: sheets.map((sh, i) => (i === 0 ? { ...sh, banner, logo: true } : sh)) });
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

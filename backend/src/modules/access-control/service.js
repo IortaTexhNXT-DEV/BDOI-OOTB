@@ -11,12 +11,14 @@
  * When no row applies at all, access.authority_without_limit decides (allow, the default, or refuse); under allow a
  * person without a limit of their own is not restricted, and a delegation does not restrict them.
  */
-import { adminEquivalentRoles, hasPermission, isAdmin } from '../../lib/auth.js';
+import { adminEquivalentRoles, isAdmin } from '../../lib/auth.js';
 import { businessName } from './catalogue.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { isoDate, today } from '../../lib/dates.js';
+import { formatDate } from '../../lib/pdf/format.js';
 import { BUILT_IN_ADMIN, isAdminAccount } from './roles.js';
+import { rolesHeldBy } from './changes.js';
 
 const money = (v) => (v === null || v === undefined ? null : Math.round(Number(v) * 100) / 100);
 
@@ -134,6 +136,10 @@ export async function decideLimit(db, id, { decision, note }, user) {
   if (!l) throw notFound('Authority limit not found');
   if (l.status !== 'pending') throw conflict(`This limit is ${l.status}; only proposals waiting for approval can be decided`);
   if (l.requested_by === user.id) throw forbidden('Maker-checker: a limit is approved by another administrator, not the one who proposed it');
+  if (decision === 'approve' && l.user_id === user.id) throw forbidden('You cannot approve a change of your own approval limit');
+  if (decision === 'approve' && l.role_code && (await rolesHeldBy(db, user.id)).has(l.role_code)) {
+    throw forbidden('You cannot approve a change of the approval limit of a role you hold');
+  }
   if (decision === 'reject' && !String(note || '').trim()) throw badRequest('Validation failed', [{ path: 'note', message: 'Give the reason for rejecting the limit' }]);
   if (decision === 'approve') {
     const live = (await db.query(`SELECT t.active AND (r.code IS NULL OR r.status = 'active') AS ok FROM authority_transaction_types t
@@ -147,12 +153,12 @@ export async function decideLimit(db, id, { decision, note }, user) {
   return getLimit(db, id);
 }
 
-/** Withdraw a proposal waiting for approval: the person who proposed it, or a user who may approve it. */
+/** Withdraw a proposal waiting for approval: only the person who proposed it (an approver rejects it with a reason). */
 export async function withdrawLimit(db, id, user) {
   const l = (await db.query('SELECT * FROM authority_limits WHERE id = $1 FOR UPDATE', [id])).rows[0];
   if (!l) throw notFound('Authority limit not found');
   if (l.status !== 'pending') throw conflict(`This limit is ${l.status}; only a proposal waiting for approval can be withdrawn`);
-  if (l.requested_by !== user.id && !hasPermission(user, 'approve:access-control')) throw forbidden('Only the person who proposed the limit or an approver can withdraw it');
+  if (l.requested_by !== user.id) throw forbidden('Only the person who proposed the limit can withdraw it; an approver rejects it with a reason');
   await db.query("UPDATE authority_limits SET status = 'withdrawn', decided_by = $2, decided_at = now(), decision_note = 'Withdrawn' WHERE id = $1", [id, user.id]);
   return getLimit(db, id);
 }
@@ -162,14 +168,16 @@ export async function ownLimit(db, userId, type, onDate) {
   const inEffect = `status = 'active' AND effective_from <= $3::date AND (effective_to IS NULL OR effective_to >= $3::date)`;
   const own = (await db.query(`SELECT max_amount FROM authority_limits WHERE transaction_type = $1 AND user_id = $2 AND ${inEffect}
     ORDER BY requested_at DESC LIMIT 1`, [type, userId, onDate])).rows[0];
-  if (own) return { found: true, limit: money(own.max_amount), source: 'user limit' };
-  const { rows } = await db.query(`SELECT role_code, max_amount FROM authority_limits
-    WHERE transaction_type = $1 AND role_code IN (SELECT code FROM user_effective_roles($2)) AND ${inEffect}`, [type, userId, onDate]);
+  if (own) return { found: true, limit: money(own.max_amount), source: 'personal limit' };
+  const { rows } = await db.query(`SELECT l.role_code, COALESCE(r.name, l.role_code) AS role_name, l.max_amount FROM authority_limits l
+    LEFT JOIN roles r ON r.code = l.role_code
+    WHERE l.transaction_type = $1 AND l.role_code IN (SELECT code FROM user_effective_roles($2)) AND l.status = 'active'
+      AND l.effective_from <= $3::date AND (l.effective_to IS NULL OR l.effective_to >= $3::date)`, [type, userId, onDate]);
   if (!rows.length) return { found: false, limit: null, source: null };
   const unlimited = rows.find((r) => r.max_amount === null);
-  if (unlimited) return { found: true, limit: null, source: `role ${unlimited.role_code}` };
+  if (unlimited) return { found: true, limit: null, source: `role ${unlimited.role_name}` };
   const best = rows.reduce((a, r) => (Number(r.max_amount) > Number(a.max_amount) ? r : a));
-  return { found: true, limit: money(best.max_amount), source: `role ${best.role_code}` };
+  return { found: true, limit: money(best.max_amount), source: `role ${best.role_name}` };
 }
 
 /**
@@ -262,7 +270,7 @@ export const breaksAccessRule = (rule, codes) => rule.accessA.some((c) => codes.
 
 /**
  * Rules broken by a set of role codes: the active roles and the active roles they include (as user_effective_roles
- * gives them to a user); access rules on the permissions of those roles.
+ * gives them to a user); access rules on the permissions of those roles, every permission with a full-access role.
  */
 export async function sodConflicts(db, roleCodes) {
   if (!(await db.query("SELECT to_regclass('sod_rules') IS NOT NULL AS ok")).rows[0].ok) return [];
@@ -275,8 +283,9 @@ export async function sodConflicts(db, roleCodes) {
   const access = rules.filter((s) => s.kind === 'access');
   if (!access.length) return byRoles;
   const full = await adminEquivalentRoles(db);
-  const { rows } = await db.query(`SELECT DISTINCT p.code FROM roles r JOIN role_permissions rp ON rp.role_id = r.id JOIN permissions p ON p.id = rp.permission_id
-    WHERE r.code = ANY($1) AND r.status = 'active'`, [[...have].filter((c) => !full.includes(c))]);
+  const { rows } = [...have].some((c) => full.includes(c)) ? await db.query('SELECT code FROM permissions')
+    : await db.query(`SELECT DISTINCT p.code FROM roles r JOIN role_permissions rp ON rp.role_id = r.id JOIN permissions p ON p.id = rp.permission_id
+      WHERE r.code = ANY($1) AND r.status = 'active'`, [[...have]]);
   const codes = new Set(rows.map((r) => r.code));
   return [...byRoles, ...access.filter((s) => breaksAccessRule(s, codes))];
 }
@@ -305,7 +314,7 @@ export async function assertSod(db, roleCodes, { userId = null } = {}) {
   const accepted = await exceptionsInForce(db, userId);
   return found.map((s) => {
     const text = s.kind === 'access' ? `${s.name}: ${s.reason || sodBetween(s)}` : `${s.roleAName} with ${s.roleBName}: ${s.reason || s.name}`;
-    return accepted.has(Number(s.id)) ? `${text} (exception in force until ${accepted.get(Number(s.id))})` : text;
+    return accepted.has(Number(s.id)) ? `${text} (exception in force until ${formatDate(accepted.get(Number(s.id)))})` : text;
   });
 }
 

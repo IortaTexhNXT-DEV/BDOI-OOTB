@@ -12,6 +12,7 @@ import { addDays, today } from '../src/lib/dates.js';
 
 let ctx;
 let admin2;
+let admin3;
 const PASSWORD = 'Welcome@123';
 const login = async (username) => (await request(ctx.app).post('/api/auth/login').send({ username, password: PASSWORD })).body.accessToken;
 
@@ -20,6 +21,9 @@ beforeAll(async () => {
   await ctx.api('post', '/users').send({ username: 'ac.admin2', password: PASSWORD, displayName: 'Second administrator', roles: ['system-admin'], email: 'ac.admin2@example.ph' });
   const token = await login('ac.admin2');
   admin2 = (m, p) => request(ctx.app)[m](`/api${p}`).set('Authorization', `Bearer ${token}`);
+  await ctx.api('post', '/users').send({ username: 'ac.admin3', password: PASSWORD, displayName: 'Third administrator', roles: ['system-admin'], email: 'ac.admin3@example.ph' });
+  const token3 = await login('ac.admin3');
+  admin3 = (m, p) => request(ctx.app)[m](`/api${p}`).set('Authorization', `Bearer ${token3}`);
 });
 afterAll(async () => { await pool.end(); });
 
@@ -110,7 +114,7 @@ describe('matrices', () => {
 });
 
 describe('access reviews and sessions', () => {
-  it('reviews every active user; a removal applies when another administrator signs the review off', async () => {
+  it('reviews every active user; a removal applies when an administrator who decided none of it signs the review off', async () => {
     const started = await ctx.api('post', '/access-control/reviews').send({ name: 'Quarterly access review', dueDate: '2099-12-15' });
     expect(started.status).toBe(201);
     const id = started.body.data.id;
@@ -132,12 +136,13 @@ describe('access reviews and sessions', () => {
     const submitted = await ctx.api('post', `/access-control/reviews/${id}/submit`);
     expect(submitted.status, JSON.stringify(submitted.body)).toBe(201);
     expect(submitted.body.data.review.status).toBe('awaiting-signoff');
-    // the administrator who decided the removal does not sign it off
+    // neither the administrator who decided the removal nor the one who kept an account signs it off
     expect((await ctx.api('post', `/access-control/changes/${submitted.body.data.change.id}/decision`).send({ decision: 'approve' })).status).toBe(403);
-    expect((await admin2('post', `/access-control/changes/${submitted.body.data.change.id}/decision`).send({ decision: 'approve' })).status).toBe(200);
+    expect((await admin2('post', `/access-control/changes/${submitted.body.data.change.id}/decision`).send({ decision: 'approve' })).status).toBe(403);
+    expect((await admin3('post', `/access-control/changes/${submitted.body.data.change.id}/decision`).send({ decision: 'approve' })).status).toBe(200);
     expect((await query('SELECT status FROM users WHERE username = $1', ['ac.sod2'])).rows[0].status).toBe('inactive');
     const closed = (await ctx.api('get', `/access-control/reviews/${id}`)).body.data;
-    expect(closed).toMatchObject({ status: 'closed', deactivate: 1, pending: 0, applied: 1, signedOffBy: 'Second administrator' });
+    expect(closed).toMatchObject({ status: 'closed', deactivate: 1, pending: 0, applied: 1, signedOffBy: 'Third administrator' });
   });
 
   it('ends every session of a user', async () => {

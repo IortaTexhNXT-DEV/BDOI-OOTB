@@ -13,6 +13,7 @@ import { EVENTS, postEvent } from '../src/modules/accounting/lib/posting.js';
 import { AMOUNT_WORDING, AREAS, EVENT_FLOW, SYSTEM_JOURNALS } from '../src/modules/posting-rules/flow.js';
 import { flowHandbookSpec, flowWorkbook } from '../src/modules/posting-rules/flowExport.js';
 import { readWorkbook } from '../src/modules/documents/xlsx.js';
+import { formatDate } from '../src/lib/pdf/format.js';
 import { withoutConfigurationApproval } from './helpers.js';
 
 let ctx;
@@ -260,7 +261,7 @@ describe('accounting flow: examples and exports', () => {
     expect(sheets[1].rows).toHaveLength(f.events.length + f.systemJournals.length);
     expect(sheets[2].rows).toHaveLength(f.mapping.pending.length);
     const spec = flowHandbookSpec(f, []);
-    expect(spec).toMatchObject({ title: 'Accounting Entries Handbook', params: `Rules in force on ${f.asOf} · Edition ${f.edition}` });
+    expect(spec).toMatchObject({ title: 'Accounting Entries Handbook', params: `Rules in force on ${formatDate(f.asOf)}` });
     expect(spec.sections.at(-1).signatures).toEqual(['Prepared by', 'Reviewed by', 'Approved by']);
     expect(JSON.stringify(spec)).not.toContain('policy.issue.broker_billed');
   });

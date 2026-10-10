@@ -230,8 +230,8 @@ async function assertDelegation(db, b, { exceptChange = null } = {}) {
   return { types: chosen, names: chosen.map(name), delegatorName: users.get(b.delegatorId).display_name, delegateName: users.get(b.delegateId).display_name };
 }
 
-/** "Chrystal Malinay covers Journal voucher approval for Mariela Valentino from 2026-10-12 to 2026-10-16 (5 days)". */
-export const delegationText = (p) => `${p.delegateName} covers ${(p.transactionNames || []).join(', ')} for ${p.delegatorName} from ${p.dateFrom} to ${p.dateTo}`
+/** "Chrystal Malinay covers Journal voucher approval for Mariela Valentino from 12/10/2026 to 16/10/2026 (5 days)". */
+export const delegationText = (p) => `${p.delegateName} covers ${(p.transactionNames || []).join(', ')} for ${p.delegatorName} from ${formatDate(p.dateFrom)} to ${formatDate(p.dateTo)}`
   + ` (${days(p.dateFrom, p.dateTo)} day${days(p.dateFrom, p.dateTo) === 1 ? '' : 's'})`;
 
 async function insertDelegation(db, p, { requestedBy, changeId = null, approvedBy = null }) {
@@ -294,7 +294,7 @@ registerAccessKind(KIND, {
     };
   },
   requested: (c, user) => `${user.username} requested a delegation: ${c.summary.join('; ')}`,
-  applied: (c) => `${c.payload?.delegateName} covers for ${c.payload?.delegatorName} from ${c.payload?.dateFrom}`,
+  applied: (c) => `${c.payload?.delegateName} covers for ${c.payload?.delegatorName} from ${formatDate(c.payload?.dateFrom)}`,
 });
 
 // ---------------------------------------------------------------- export for audit

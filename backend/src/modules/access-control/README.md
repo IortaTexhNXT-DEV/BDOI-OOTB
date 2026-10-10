@@ -17,6 +17,7 @@ themselves are in `src/modules/users/router.js`.
 | `catalogue.js` | The access catalogue: every permission code in business words (area of the menu, module, level, what it allows). |
 | `roles.js` | Role directory: department, summary and order of each role, the base platform roles, full-access roles. |
 | `roleAccess.js` | Role Permissions: the overview, the check of a change of a role's access, the request, applying it, the export for audit. |
+| `controls.js` | Access controls (Role Permissions > More options): `access.change_approval`, `access.sod_enforced`, `access.authority_enforced`, `access.authority_without_limit`, changed only through a change of kind `access-controls` that always waits for another approver. |
 | `authority.js` | Authority Matrix: the registry of the approval steps (`AUTHORITY_STEPS`), the matrix by department, changes of limits through the configuration approval (kind `authority-limits`), the upload template and its check, the exports for audit. |
 | `changes.js` | Changes of access waiting for approval (maker-checker) on the configuration approval table. |
 
@@ -62,10 +63,11 @@ access: the System Administrator role and every role that includes it (SUPERID).
   `{ applied }`). One change per role waits at a time (409). Nobody but a System Administrator changes a full-access
   role or a role he or she holds (403).
 - `POST /access-control/changes/:id/decision` (`approve:access-control`): approve or reject (remarks required). The
-  approver is never the requester (`assertChecker(..., { configurable: false })`) and may not decide a change of a
-  role he or she holds. Approving checks again (the rules may have changed), applies the delta and renews the sessions
-  (`token_version`) of the users of the role and of every role that includes it. `POST /changes/:id/withdraw`: the
-  requester or an approver. Audit: `accounting_config_change` request / approve / reject / withdraw, and `role`
+  approver is never the requester (`assertChecker(..., { configurable: false })`) and holds neither the role changed
+  nor a role that includes it (`rolesHeldBy`, the roles of `user_effective_roles`), System Administrators included.
+  Approving checks again (the rules may have changed), applies the delta and renews the sessions (`token_version`) of
+  the users of the role and of every role that includes it. `POST /changes/:id/withdraw`: the requester only; an
+  approver rejects, with a reason. Audit: `accounting_config_change` request / approve / reject / withdraw, and `role`
   `access-change` with the permissions before and after.
 - `PUT /roles/:id` with a permission list (the Role form) records the difference as a change waiting for approval
   while `access.change_approval` is on (Basic access kept), so the approval cannot be bypassed; a new role
@@ -92,15 +94,17 @@ access: the System Administrator role and every role that includes it (SUPERID).
   or a cell with a change already waiting refuses the whole change. One line: target `<type>|role:<code>` (or
   `user:<id>`); an upload: target `upload` (one upload waits at a time). Approved or rejected (reason required) with
   `POST /changes/:id/decision` by another holder of `approve:access-control`; nobody approves a change of his or her
-  own personal limit. Approving applies every line in one transaction.
+  own personal limit or of the limit of a role he or she holds (directly or through a role that includes it), the
+  API proposals (`POST /authority-limits/:id/decision`) included. Approving applies every line in one transaction.
 - Effective dating (`applyLimit`, also for the API proposals): from the later of the effective date and today; rows
   of the same cell that would start on or after it are retired ("Superseded before taking effect"); the row in effect
   ends the day before (retired at once when that day has passed). Readers decide "in effect" by the dates.
-- `DELETE /authority-limits/:id`: a proposal waiting for approval is withdrawn (proposer or approver); a limit in
+- `DELETE /authority-limits/:id`: a proposal waiting for approval is withdrawn (by its proposer only); a limit in
   effect gets a removal proposal (the reference in the body), applied once approved.
 - Upload: `GET /authority-matrix/template` (Data sheet prefilled with the matrix, drop-down lists, Instructions;
-  `?base=1`, `unchecked=1`, `all=1`) and `POST /authority-matrix/uploads` (the upload target of the shared import
-  dialog). The whole file is checked and nothing is saved: unknown or ambiguous names, Limit with No limit = Yes,
+  `?base=1`, `unchecked=1`, `all=1`) and `POST /authority-matrix/uploads` (a `.xlsx` or `.csv` file only: the file is
+  kept as the evidence of the change). The whole file is checked and nothing is saved; a problem of a cell names its
+  transaction and role after the row: unknown or ambiguous names, Limit with No limit = Yes,
   percent over 100, more than 2 decimals, past effective date, missing reference, the same cell twice, an emptied
   limit (a limit is removed on the screen), a cell with a change waiting (unless the file holds the waiting value).
   Rows equal to the limit in effect or scheduled are unchanged. Without errors the file is stored and the changes
@@ -122,8 +126,8 @@ states it in the cell tooltip and the toolbar chip.
 
 Two kinds of rule (migration 0393): `roles` (two roles one person may not hold together) and `access` (two sets of
 permissions a role or a person should not combine: `access_a`, `access_b`). An access rule is broken by a set of
-permissions holding a code of each set, worked out on the permissions of the active roles held, the full-access roles
-left out. Rules are checked when roles are given to a user (`assertSod`), on the User Access Matrix and when the
+permissions holding a code of each set, worked out on the permissions of the active roles held; a full-access role
+(System Administrator, SUPERID) holds every permission, so its holders break every access rule. Rules are checked when roles are given to a user (`assertSod`), on the User Access Matrix and when the
 access of a role changes. The default access rules (seed `91_role_access.sql`) warn.
 
 ## Delegations
@@ -166,7 +170,7 @@ access of a role changes. The default access rules (seed `91_role_access.sql`) w
   administrator) only a System Administrator; the built-in administrator is never deactivated. The earlier
   `{ decision: 'revoke' }` means deactivate. `POST /reviews/:id/items/keep` keeps several lines.
 - `POST /reviews/:id/submit` once every line is decided: status `awaiting-signoff`, kind `access-review`, target
-  `AR-<id>`. Another approver who decided none of its removals signs it off: the roles still held are removed, an
+  `AR-<id>`. Another approver who decided none of its lines (Keep access included) signs it off: the roles still held are removed, an
   account is deactivated (or noted as already inactive), sessions are renewed, the review closes. A rejection
   (returned) or a withdrawal opens it again. With approval off the removals apply when decided and
   `POST /reviews/:id/close` closes it.
@@ -190,7 +194,8 @@ user, Exceptions, Waiting for approval), the list of reviews and one review (Sum
 `changes.js` keeps the changes in `accounting_config_changes`; a kind registers its handler with
 `registerAccessKind(kind, { label, link, describe, assertDecider, apply, closed, requested, applied })`
 (`role-access` in `roleAccess.js`, `authority-limits` in `authority.js`, `delegation` in `delegations.js`, `sod-rule`
-and `sod-exception` in `sod.js`, `access-review` in `reviews.js`). `closed` runs on a rejection or a withdrawal (a
+and `sod-exception` in `sod.js`, `access-review` in `reviews.js`, `access-controls` in `controls.js`). Only the
+requester withdraws a change; an approver rejects it with a reason. `closed` runs on a rejection or a withdrawal (a
 review returns to Open). `apply` may return `notices` (personal notifications after the commit). My Work lists every
 waiting change to the approvers other than the requester and the person concerned. `posting-rules/service.js` only
 lists and decides its own kinds.
@@ -200,7 +205,8 @@ lists and decides its own kinds.
 `access.change_approval`, `access.sod_enforced`, `access.role_groups`, `access.platform_roles`, `access.delegation_max_days`,
 `access.sod_exception_max_days`, `access.review_due_days`,
 `access.authority_enforced`, `access.authority_without_limit`, `access.authority_reference_required`, `access.dormant_days`,
-`limits.bulk_upload_max_rows` (rows of an upload).
+`limits.bulk_upload_max_rows` (rows of an upload). The first four of `controls.js` are refused by the generic
+configuration endpoints (`lib/settingOwners.js`, migration 0395 adds the kind `access-controls`).
 
 ## Debugging
 
