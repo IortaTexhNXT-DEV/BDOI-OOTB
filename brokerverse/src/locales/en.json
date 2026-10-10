@@ -12578,7 +12578,8 @@
       "productMap": "Product codes (line or product type: insurer code)",
       "requestMap": "Issuance request map",
       "responseMap": "Answer map (field: path in the answer)",
-      "claimStatusMap": "Claim statuses (insurer status: label)"
+      "claimStatusMap": "Claim statuses (insurer status: label)",
+      "help": "How a map is written"
     },
     "channelTypes": {
       "bulk_credit": "Bulk credit",
