@@ -1,7 +1,7 @@
 /**
  * Seeds: roles, permissions, the BrokerVerse admin, configuration defaults, scheduled jobs and the reference data in
  * seeds/*.sql; the demo data in seeds/sample/*.sql only when SEED_SAMPLE_DATA is on, the TISPH test users only when
- * TISPH_TEST_USERS_PASSWORD is set outside production (see seeds/README.md). Idempotent.
+ * TISPH_TEST_USERS_PASSWORD is set outside the production environment (see seeds/README.md). Idempotent.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -11,6 +11,7 @@ import bcrypt from 'bcryptjs';
 import { pool, query } from './pool.js';
 import { encryptSecret, isEncrypted } from '../lib/secrets.js';
 import { assertPasswordAllowed, recordHistory } from '../lib/password.js';
+import { getSetting } from '../lib/settings.js';
 import { PLATFORM_PERMISSIONS, PLATFORM_ROLE, isPlatformPermission } from '../lib/platform.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -224,15 +225,28 @@ const nameParts = (username) => {
 };
 
 /**
+ * Whether this deployment is the production environment: APP_ENVIRONMENT "production" or "prod" (any case) or, when
+ * APP_ENVIRONMENT is not set, the environment name of Help > About (setting release.environment_label) being Production.
+ * NODE_ENV says nothing about it: every deployed site (DEV, SIT, UAT, PROD) runs with NODE_ENV=production.
+ */
+export async function isProductionEnvironment(source = process.env) {
+  const label = typeof source.APP_ENVIRONMENT === 'string' && source.APP_ENVIRONMENT.trim()
+    ? source.APP_ENVIRONMENT
+    : await getSetting('release.environment_label', '');
+  const name = String(label || '').trim().toLowerCase();
+  return name === 'production' || name === 'prod';
+}
+
+/**
  * One test user per TISPH role (seeds/tisph_test_users.json), for user acceptance testing and demonstrations, only when
- * TISPH_TEST_USERS_PASSWORD is set and never in production. Every user gets that password (checked against the password
- * policy) and must change it at the first sign-in. An existing user keeps its password and its roles. Returns the user
- * names created.
+ * TISPH_TEST_USERS_PASSWORD is set and never in the production environment (isProductionEnvironment). Every user gets
+ * that password (checked against the password policy) and must change it at the first sign-in. An existing user keeps
+ * its password and its roles. Returns the user names created.
  */
 export async function seedTisphTestUsers({ log = console.log, warn = log, source = process.env } = {}) {
   const password = String(source.TISPH_TEST_USERS_PASSWORD || '');
   if (!password) return [];
-  if (source.NODE_ENV === 'production') {
+  if (await isProductionEnvironment(source)) {
     warn('WARNING: TISPH_TEST_USERS_PASSWORD is set in production; the TISPH test users are for UAT and demo sites only and were not created');
     return [];
   }

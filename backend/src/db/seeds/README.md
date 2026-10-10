@@ -139,4 +139,7 @@ CCD-PDC / CCD-ADA, `grace.navarro` CCD-BP / QRPh, `edwin.ramos` CCD-Recon, `ceci
 `kevin.santiago` IT AppSupport / Admin, `antonio.delrosario` General Manager; e-mail `<username>@tisph.example.ph`),
 each with that password (checked against the password policy) and the role only, and each must change the password at
 the first sign-in. An existing user keeps its password and roles. The variable is for non-production environments
-only: with `NODE_ENV=production` the step logs a warning and creates nobody. Unset, nothing is created.
+only: in the production environment (`APP_ENVIRONMENT` Production or Prod, any case, or, when `APP_ENVIRONMENT` is not
+set, the environment name of Help > About, setting `release.environment_label`, being Production) the step logs a
+warning and creates nobody. `NODE_ENV` plays no part: every deployed site runs with `NODE_ENV=production`. Unset,
+nothing is created.
