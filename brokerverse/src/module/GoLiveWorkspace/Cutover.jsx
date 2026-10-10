@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { Button } from "primereact/button";
@@ -158,16 +158,13 @@ const Cutover = () => {
   const runsLoader = useCallback(() => goLiveService.runs({ perPage: 100 }), []);
   const { data: runsData } = useStableLoad(runsLoader, { initialData: { rows: [] } });
   const runs = useMemo(() => runsData?.rows || [], [runsData]);
-  const [runId, setRunId] = useState(null);
+  const [chosen, setChosen] = useState(null);
+  const runId = chosen ?? (runs.length ? defaultRun(runs, params.get("run")) : null);
   const usersLoader = useCallback(() => (canWrite ? goLiveService.users() : Promise.resolve([])), [canWrite]);
   const { data: users } = useStableLoad(usersLoader, { initialData: [] });
   const [done, setDone] = useState(null);
   const [editing, setEditing] = useState(null);
   const [evidenceOf, setEvidenceOf] = useState(null);
-
-  useEffect(() => {
-    if (runId === null && runs.length) setRunId(defaultRun(runs, params.get("run")));
-  }, [runs, runId, params]);
 
   const loader = useCallback(() => goLiveService.steps(runId), [runId]);
   const { data, loading, refreshing, reload } = useStableLoad(loader, { enabled: !!runId });
@@ -179,7 +176,7 @@ const Cutover = () => {
     reloadOverview();
   };
   const choose = (id) => {
-    setRunId(id);
+    setChosen(id);
     setParams(id ? { run: String(id) } : {});
   };
 

@@ -48,6 +48,7 @@ describe("cutover checklist", () => {
   it("marks a step done only with its evidence or a note, and CO-3 with the restore point", async () => {
     goLiveService.steps.mockResolvedValue(steps([step({ status: "in-progress", actualStart: "2026-10-31T14:02:00Z" })]));
     renderPage();
+    await waitFor(() => expect(goLiveService.steps).toHaveBeenCalledWith(3));
     fireEvent.click(within(await rowOf("CO-3")).getByRole("button", { name: "goLive.cutover.markDone" }));
     const dialog = await screen.findByRole("dialog");
     fireEvent.click(within(dialog).getByRole("button", { name: "goLive.cutover.markDone" }));
@@ -59,6 +60,7 @@ describe("cutover checklist", () => {
   it("blocks a step with a note", async () => {
     goLiveService.steps.mockResolvedValue(steps([step({ status: "in-progress" })]));
     renderPage();
+    await waitFor(() => expect(goLiveService.steps).toHaveBeenCalledWith(3));
     const row = await rowOf("CO-3");
     fireEvent.click(within(row).getByRole("button", { name: "recordPage.moreActions" }));
     fireEvent.click(await screen.findByText("goLive.cutover.noted.block.confirm"));
