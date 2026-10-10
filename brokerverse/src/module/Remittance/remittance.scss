@@ -376,6 +376,100 @@
   color: var(--color-danger);
 }
 
+// Remittances worklist and Import policy list (RM-07)
+
+.rm-strip__link {
+  font-size: 13px;
+}
+
+.rm-filters__columns {
+  margin-left: auto;
+  min-width: 10rem;
+}
+
+.rm-status-cell {
+  display: inline-flex;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.rm-overdue {
+  color: var(--color-danger);
+}
+
+.rm-next-step {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  white-space: normal;
+}
+
+.rm-row-result {
+  font-size: 12px;
+}
+
+.rm-row-result--refused {
+  color: var(--color-danger);
+}
+
+.rm-import {
+  .p-dialog-content {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.rm-import__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rm-import__choose {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  max-width: 640px;
+}
+
+.rm-import__template.p-button {
+  align-self: flex-start;
+}
+
+.rm-import__heading {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.rm-import__result {
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+
+  p {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    margin: 0;
+  }
+}
+
+.rm-import__skipped {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: var(--color-danger);
+}
+
+.rm-import__footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: 8px;
+}
+
 @media (max-width: 760px) {
   .rm-review.p-sidebar {
     width: 100vw;

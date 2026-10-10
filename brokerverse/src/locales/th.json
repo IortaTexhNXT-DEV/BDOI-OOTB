@@ -1366,6 +1366,206 @@
     "back": "กลับ"
   },
   "remittance": {
+    "list": {
+      "title": "การนำส่งเบี้ยประกัน",
+      "help": "การนำส่งเบี้ยประกันให้บริษัทประกันตั้งแต่ฉบับร่างจนถึงการชำระเงิน ฉบับร่างที่คุณจัดทำจะได้รับอนุมัติจากผู้ใช้อื่นที่มีอำนาจอนุมัติการนำส่ง",
+      "submitSelected": "ส่งขออนุมัติ ({{count}})",
+      "selectDrafts": "เลือกฉบับร่างที่จะส่ง",
+      "import": "นำเข้ารายการกรมธรรม์",
+      "selectAll": "เลือกฉบับร่างทั้งหมดในหน้านี้",
+      "select": "เลือก {{reference}}",
+      "actionsFor": "การดำเนินการของ {{reference}}",
+      "loadError": "โหลดรายการนำส่งไม่ได้",
+      "total_other": "รวม ({{count}} รายการ)",
+      "policiesHeld": "{{count}} · พัก {{held}}",
+      "overdueOn": "{{date}} · เกินกำหนด",
+      "exceptions_other": "ข้อยกเว้น {{count}} รายการ",
+      "columnChooser": "คอลัมน์",
+      "columnsChosen": "คอลัมน์ (+{{count}})",
+      "strip": {
+        "label": "การรัน",
+        "lastRun": "การรันรายสัปดาห์",
+        "lastFailed": "การรันล่าสุดล้มเหลว",
+        "nextRun": "การรันถัดไป",
+        "schedules": "กำหนดการ"
+      },
+      "segments": {
+        "my-work": "งานของฉัน ({{count}})",
+        "drafts": "ฉบับร่าง ({{count}})",
+        "in-approval": "รออนุมัติ ({{count}})",
+        "in-payment": "อยู่ระหว่างชำระ ({{count}})",
+        "all": "ทั้งหมด"
+      },
+      "kpis": {
+        "to-submit": "รอส่ง",
+        "awaiting-approval": "รออนุมัติ",
+        "approved-not-paid": "อนุมัติแล้ว ยังไม่ชำระ",
+        "overdue": "เกินกำหนดชำระบริษัทประกัน",
+        "oldest_other": "นานสุด {{count}} วัน"
+      },
+      "overflow": {
+        "run-now": "รันทันที…",
+        "run-history": "ประวัติการรัน",
+        "import-history": "ประวัติการนำเข้า",
+        "export": "ส่งออก XLSX"
+      },
+      "actions": {
+        "view": "ดู",
+        "submit": "ส่งขออนุมัติ",
+        "download-schedule-xlsx": "ดาวน์โหลดตารางนำส่ง (XLSX)",
+        "download-schedule-pdf": "ดาวน์โหลดตารางนำส่ง (PDF)",
+        "download-advice": "ดาวน์โหลดใบแจ้งการนำส่ง (PDF)",
+        "open-voucher": "เปิดใบสำคัญจ่าย"
+      },
+      "submit": {
+        "title": "ส่งขออนุมัติ",
+        "message_other": "ส่งการนำส่ง {{count}} รายการ ยอดรวม {{amount}} เพื่อขออนุมัติหรือไม่ ผู้ใช้อื่นที่มีอำนาจอนุมัติการนำส่งจะเป็นผู้อนุมัติ",
+        "verb_other": "ส่ง {{count}} รายการ",
+        "results": "ส่งแล้ว {{submitted}} · ไม่ได้ส่ง {{refused}}",
+        "submitted": "ส่งแล้ว"
+      },
+      "empty": {
+        "myWork": "ไม่มีรายการที่ต้องดำเนินการ",
+        "myWorkNext": "ไม่มีรายการที่ต้องดำเนินการ การรันถัดไป {{next}}",
+        "week": "ไม่มีการนำส่งของ {{week}}",
+        "drafts": "ไม่มีฉบับร่าง",
+        "in-approval": "ไม่มีการนำส่งที่รออนุมัติ",
+        "in-payment": "ไม่มีการนำส่งที่อยู่ระหว่างชำระ",
+        "all": "ไม่มีการนำส่ง"
+      },
+      "filters": {
+        "week": "สัปดาห์ความคุ้มครอง",
+        "allWeeks": "ทุกสัปดาห์",
+        "insurer": "บริษัทประกัน",
+        "allInsurers": "บริษัทประกันทั้งหมด",
+        "productLine": "สายผลิตภัณฑ์",
+        "allLines": "สายผลิตภัณฑ์ทั้งหมด",
+        "status": "สถานะ",
+        "allStatuses": "ทุกสถานะ",
+        "source": "ที่มา",
+        "allSources": "ทุกที่มา",
+        "search": "เลข REM กรมธรรม์ หรือใบเสร็จ"
+      },
+      "productLines": {
+        "Motor": "รถยนต์",
+        "Personal Accident": "อุบัติเหตุส่วนบุคคล",
+        "Credit Life": "ประกันชีวิตสินเชื่อ",
+        "Marine": "ขนส่งทางทะเล"
+      },
+      "statuses": {
+        "draft": "ฉบับร่าง",
+        "rejected": "ส่งคืน",
+        "for-approval": "รออนุมัติ",
+        "approved": "อนุมัติแล้ว",
+        "settled": "ชำระบัญชีแล้ว (ออกใบสำคัญจ่าย)",
+        "cancelled": "ยกเลิก"
+      },
+      "sources": {
+        "weekly-run": "การรันรายสัปดาห์",
+        "run-now": "รันทันที",
+        "import": "นำเข้า"
+      },
+      "columns": {
+        "remittanceNo": "เลขที่การนำส่ง",
+        "insurer": "บริษัทประกัน",
+        "productLine": "สายผลิตภัณฑ์",
+        "basis": "ฐาน",
+        "coverageWeek": "สัปดาห์ความคุ้มครอง",
+        "policies": "กรมธรรม์",
+        "dueToInsurer": "ยอดค้างชำระบริษัทประกัน",
+        "dueDate": "วันครบกำหนด",
+        "status": "สถานะ",
+        "nextStep": "ขั้นตอนถัดไป",
+        "source": "ที่มา",
+        "voucherNo": "เลขที่ใบสำคัญจ่าย",
+        "paidOn": "วันที่ชำระ",
+        "bankRef": "อ้างอิงธนาคาร",
+        "submittedBy": "ผู้ส่ง",
+        "createdOn": "วันที่สร้าง",
+        "actions": "การดำเนินการ"
+      }
+    },
+    "import": {
+      "title": "นำเข้ารายการกรมธรรม์",
+      "template": "แม่แบบ",
+      "downloadTemplate": "ดาวน์โหลดแม่แบบ",
+      "purpose": "วัตถุประสงค์",
+      "file": "ไฟล์",
+      "fileRule": "เลือกไฟล์ .xlsx หรือ .csv ขนาดไม่เกิน {{mb}} MB",
+      "validate": "ตรวจสอบ",
+      "discard": "ทิ้ง",
+      "create_other": "สร้างการนำส่งฉบับร่าง {{count}} รายการ",
+      "createTitle": "สร้างการนำส่งฉบับร่าง",
+      "createMessage_other": "สร้างการนำส่งฉบับร่าง {{count}} รายการ ยอด {{amount}} จากกรมธรรม์ {{policies}} ฉบับหรือไม่ แถวที่มีข้อผิดพลาดจะไม่ถูกรวม ฉบับร่างยังต้องได้รับอนุมัติ",
+      "createVerb_other": "สร้างฉบับร่าง {{count}} รายการ",
+      "submitDrafts_other": "ส่งฉบับร่าง {{count}} รายการเพื่อขออนุมัติ",
+      "goToDrafts": "ไปที่ฉบับร่าง",
+      "importNo": "เลขที่การนำเข้า",
+      "fileName": "ไฟล์",
+      "status": "สถานะ",
+      "counts": "แถวที่อ่าน",
+      "result": "ผลลัพธ์",
+      "created_other": "สร้างฉบับร่างแล้ว {{count}} รายการ:",
+      "skippedRow": "แถว {{row}} · {{policy}}: {{message}}",
+      "chips": {
+        "rows": "แถว {{count}}",
+        "ready": "พร้อม {{count}}",
+        "errors": "ข้อผิดพลาด {{count}}",
+        "warnings": "คำเตือน {{count}}",
+        "fullyPaid": "การตรวจชำระครบ: ยังไม่เปิดใช้"
+      },
+      "filters": {
+        "all": "ทุกแถว",
+        "ready": "พร้อม",
+        "warnings": "คำเตือน",
+        "errors": "ข้อผิดพลาด"
+      },
+      "rows": {
+        "row": "แถว",
+        "policyNo": "เลขที่กรมธรรม์",
+        "insurer": "บริษัทประกัน",
+        "productLine": "สายผลิตภัณฑ์",
+        "result": "ผล",
+        "message": "ข้อความ",
+        "systemDue": "ยอดค้างชำระบริษัทประกัน (ระบบ)",
+        "expectedDue": "ยอดที่คาด (ไฟล์)",
+        "variance": "ผลต่าง"
+      },
+      "toCreate": {
+        "title": "การนำส่งที่จะสร้าง",
+        "total": "รวม",
+        "empty": "ไม่มีการนำส่งที่จะสร้าง",
+        "insurer": "บริษัทประกัน",
+        "productLine": "สายผลิตภัณฑ์",
+        "basis": "ฐาน",
+        "policies": "กรมธรรม์",
+        "dueToInsurer": "ยอดค้างชำระบริษัทประกัน",
+        "varianceRows": "แถวที่มีผลต่าง"
+      }
+    },
+    "importHistory": {
+      "title": "ประวัติการนำเข้า",
+      "loadError": "โหลดรายการนำเข้าไม่ได้",
+      "empty": "ยังไม่มีการนำเข้ารายการกรมธรรม์",
+      "importNo": "เลขที่ IMP",
+      "uploadedOn": "วันที่อัปโหลด",
+      "by": "โดย",
+      "file": "ไฟล์",
+      "purpose": "วัตถุประสงค์",
+      "rows": "แถว",
+      "ready": "พร้อม",
+      "errors": "ข้อผิดพลาด",
+      "drafts": "ฉบับร่างที่สร้าง",
+      "status": "สถานะ",
+      "actionsColumn": "การดำเนินการ",
+      "actionsFor": "การดำเนินการของ {{reference}}",
+      "downloadFile": "ดาวน์โหลด {{name}}",
+      "actions": {
+        "view": "ดูผลลัพธ์",
+        "errors": "ดาวน์โหลดรายงานข้อผิดพลาด",
+        "file": "ดาวน์โหลดไฟล์"
+      }
+    },
     "downloadTemplate": "ดาวน์โหลดแม่แบบ",
     "addExceptionType": "เพิ่มประเภทข้อยกเว้น",
     "addRule": "เพิ่มกฎ",

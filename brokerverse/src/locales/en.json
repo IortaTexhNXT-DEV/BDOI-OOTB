@@ -1516,6 +1516,216 @@
     "premium": "Premium"
   },
   "remittance": {
+    "list": {
+      "title": "Remittances",
+      "help": "The insurer remittances from draft to payment. A draft you prepare is approved by another user with remittance authority.",
+      "submitSelected": "Submit for approval ({{count}})",
+      "selectDrafts": "Select drafts to submit",
+      "import": "Import policy list",
+      "selectAll": "Select every draft on this page",
+      "select": "Select {{reference}}",
+      "actionsFor": "Actions for {{reference}}",
+      "loadError": "Could not load remittances.",
+      "total_one": "Total ({{count}} remittance)",
+      "total_other": "Total ({{count}} remittances)",
+      "policiesHeld": "{{count}} · {{held}} held",
+      "overdueOn": "{{date}} · Overdue",
+      "exceptions_one": "{{count}} exception",
+      "exceptions_other": "{{count}} exceptions",
+      "columnChooser": "Columns",
+      "columnsChosen": "Columns (+{{count}})",
+      "strip": {
+        "label": "Runs",
+        "lastRun": "Weekly run",
+        "lastFailed": "Last run failed",
+        "nextRun": "Next run",
+        "schedules": "Schedules"
+      },
+      "segments": {
+        "my-work": "My work ({{count}})",
+        "drafts": "Drafts ({{count}})",
+        "in-approval": "In approval ({{count}})",
+        "in-payment": "In payment ({{count}})",
+        "all": "All"
+      },
+      "kpis": {
+        "to-submit": "To submit",
+        "awaiting-approval": "Awaiting approval",
+        "approved-not-paid": "Approved, not paid",
+        "overdue": "Overdue to insurer",
+        "oldest_one": "oldest {{count}} day",
+        "oldest_other": "oldest {{count}} days"
+      },
+      "overflow": {
+        "run-now": "Run now…",
+        "run-history": "Run history",
+        "import-history": "Import history",
+        "export": "Export XLSX"
+      },
+      "actions": {
+        "view": "View",
+        "submit": "Submit for approval",
+        "download-schedule-xlsx": "Download schedule (XLSX)",
+        "download-schedule-pdf": "Download schedule (PDF)",
+        "download-advice": "Download advice (PDF)",
+        "open-voucher": "Open voucher"
+      },
+      "submit": {
+        "title": "Submit for approval",
+        "message_one": "Submit {{count}} remittance totalling {{amount}} for approval? Another user with remittance authority approves it.",
+        "message_other": "Submit {{count}} remittances totalling {{amount}} for approval? Another user with remittance authority approves them.",
+        "verb_one": "Submit {{count}} remittance",
+        "verb_other": "Submit {{count}} remittances",
+        "results": "{{submitted}} submitted · {{refused}} not submitted",
+        "submitted": "Submitted"
+      },
+      "empty": {
+        "myWork": "Nothing needs your action.",
+        "myWorkNext": "Nothing needs your action. Next run {{next}}.",
+        "week": "No remittances for {{week}}.",
+        "drafts": "No drafts.",
+        "in-approval": "No remittances awaiting approval.",
+        "in-payment": "No remittances in payment.",
+        "all": "No remittances."
+      },
+      "filters": {
+        "week": "Coverage week",
+        "allWeeks": "All weeks",
+        "insurer": "Insurer",
+        "allInsurers": "All insurers",
+        "productLine": "Product line",
+        "allLines": "All product lines",
+        "status": "Status",
+        "allStatuses": "All statuses",
+        "source": "Source",
+        "allSources": "All sources",
+        "search": "REM, policy or OR no."
+      },
+      "productLines": {
+        "Motor": "Motor",
+        "Personal Accident": "Personal Accident",
+        "Credit Life": "Credit Life",
+        "Marine": "Marine"
+      },
+      "statuses": {
+        "draft": "Draft",
+        "rejected": "Returned",
+        "for-approval": "Pending approval",
+        "approved": "Approved",
+        "settled": "Settled (voucher raised)",
+        "cancelled": "Cancelled"
+      },
+      "sources": {
+        "weekly-run": "Weekly run",
+        "run-now": "Run now",
+        "import": "Import"
+      },
+      "columns": {
+        "remittanceNo": "Remittance no",
+        "insurer": "Insurer",
+        "productLine": "Product line",
+        "basis": "Basis",
+        "coverageWeek": "Coverage week",
+        "policies": "Policies",
+        "dueToInsurer": "Due to insurer",
+        "dueDate": "Due date",
+        "status": "Status",
+        "nextStep": "Next step",
+        "source": "Source",
+        "voucherNo": "Voucher no",
+        "paidOn": "Paid on",
+        "bankRef": "Bank ref",
+        "submittedBy": "Submitted by",
+        "createdOn": "Created on",
+        "actions": "Actions"
+      }
+    },
+    "import": {
+      "title": "Import policy list",
+      "template": "Template",
+      "downloadTemplate": "Download template",
+      "purpose": "Purpose",
+      "file": "File",
+      "fileRule": "Choose an .xlsx or .csv file of at most {{mb}} MB.",
+      "validate": "Validate",
+      "discard": "Discard",
+      "create_one": "Create {{count}} draft remittance",
+      "create_other": "Create {{count}} draft remittances",
+      "createTitle": "Create draft remittances",
+      "createMessage_one": "Create {{count}} draft remittance for {{amount}} from {{policies}} policies? Rows with an error are not included. The draft still needs approval.",
+      "createMessage_other": "Create {{count}} draft remittances for {{amount}} from {{policies}} policies? Rows with an error are not included. The drafts still need approval.",
+      "createVerb_one": "Create {{count}} draft",
+      "createVerb_other": "Create {{count}} drafts",
+      "submitDrafts_one": "Submit the draft for approval",
+      "submitDrafts_other": "Submit the {{count}} drafts for approval",
+      "goToDrafts": "Go to drafts",
+      "importNo": "Import no",
+      "fileName": "File",
+      "status": "Status",
+      "counts": "Rows read",
+      "result": "Result",
+      "created_one": "{{count}} draft created:",
+      "created_other": "{{count}} drafts created:",
+      "skippedRow": "Row {{row}} · {{policy}}: {{message}}",
+      "chips": {
+        "rows": "Rows {{count}}",
+        "ready": "Ready {{count}}",
+        "errors": "Errors {{count}}",
+        "warnings": "Warnings {{count}}",
+        "fullyPaid": "Fully paid check: not yet available"
+      },
+      "filters": {
+        "all": "All rows",
+        "ready": "Ready",
+        "warnings": "Warnings",
+        "errors": "Errors"
+      },
+      "rows": {
+        "row": "Row",
+        "policyNo": "Policy no",
+        "insurer": "Insurer",
+        "productLine": "Product line",
+        "result": "Result",
+        "message": "Message",
+        "systemDue": "Due to insurer (system)",
+        "expectedDue": "Expected (file)",
+        "variance": "Variance"
+      },
+      "toCreate": {
+        "title": "Remittances to create",
+        "total": "Total",
+        "empty": "No remittance to create.",
+        "insurer": "Insurer",
+        "productLine": "Product line",
+        "basis": "Basis",
+        "policies": "Policies",
+        "dueToInsurer": "Due to insurer",
+        "varianceRows": "Variance rows"
+      }
+    },
+    "importHistory": {
+      "title": "Import history",
+      "loadError": "Could not load the imports.",
+      "empty": "No policy list imported yet.",
+      "importNo": "IMP no",
+      "uploadedOn": "Uploaded on",
+      "by": "By",
+      "file": "File",
+      "purpose": "Purpose",
+      "rows": "Rows",
+      "ready": "Ready",
+      "errors": "Errors",
+      "drafts": "Drafts created",
+      "status": "Status",
+      "actionsColumn": "Actions",
+      "actionsFor": "Actions for {{reference}}",
+      "downloadFile": "Download {{name}}",
+      "actions": {
+        "view": "View result",
+        "errors": "Download error report",
+        "file": "Download file"
+      }
+    },
     "downloadTemplate": "Download template",
     "addExceptionType": "Add Exception Type",
     "addRule": "Add Rule",
@@ -8688,7 +8898,6 @@
       "invoiceOverrideMessage": "A sales invoice with the next serial number is issued to the insurer for the receivable.",
       "invoiceOverride": "Issue invoice"
     },
-    "vatAmount": "VAT",
     "previewFigures": "Figures of the period",
     "claimsFromSystem": "Claims recorded in the system"
   },

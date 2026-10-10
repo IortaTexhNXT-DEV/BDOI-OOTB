@@ -210,12 +210,20 @@ export const remittanceService = {
   legacyTransfers: (params) => apiRequest("GET", `${R}/transfers`, { params: { legacy: 1, ...params } }),
   getTransfer: (transferId) => get(`${R}/transfers/${id(transferId)}`),
   importTemplatePath: `${R}/imports/template`,
-  importValidatePath: `${R}/imports/validate`,
   importLimits: () => get(`${R}/imports/limits`),
+  // multipart: the file with purposeCode (a remittance_off_cycle reason) and note; the import with its results per row
+  validateImport: async (file, { purposeCode, note } = {}) => {
+    const form = new FormData();
+    form.append("purposeCode", purposeCode);
+    if (note) form.append("note", note);
+    form.append("file", file);
+    return (await apiRequest("POST", `${R}/imports/validate`, { form })).data;
+  },
   listImports: (params) => apiRequest("GET", `${R}/imports`, { params }),
   getImport: (importId) => get(`${R}/imports/${id(importId)}`),
   importRows: (importId, params) => apiRequest("GET", `${R}/imports/${id(importId)}/rows`, { params }),
   importErrorsPath: (importId) => `${R}/imports/${id(importId)}/errors.xlsx`,
+  importFilePath: (importId) => `${R}/imports/${id(importId)}/file`,
   commitImport: (importId, version) => apiRequest("POST", `${R}/imports/${id(importId)}/commit`, { body: { version } }),
   discardImport: (importId) => post(`${R}/imports/${id(importId)}/discard`),
   myExceptions: (params) => apiRequest("GET", `${R}/exceptions`, { params: { assignedTo: "me", ...params } }),
