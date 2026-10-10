@@ -52493,6 +52493,59 @@
         ]
       }
     },
+    "/dashboard/settings": {
+      "get": {
+        "operationId": "getDashboardSettings",
+        "summary": "Dashboard defaults for the signed-in user: the business counted when the user has not chosen (defaultOrigin issued = Issued since go-live, all = All business) and the cutover date",
+        "tags": [
+          "Dashboards"
+        ],
+        "description": "Front-end touchpoint: Dashboard > Executive Dashboard; Sales Dashboard\n\nAccess: Any authenticated user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "defaultOrigin": {
+                          "type": "string"
+                        },
+                        "cutoverDate": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "defaultOrigin": "issued",
+                    "cutoverDate": "2026-11-01"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Dashboard > Executive Dashboard; Sales Dashboard"
+      }
+    },
     "/data-load/batches": {
       "get": {
         "operationId": "getDataLoadBatches",
@@ -78483,7 +78536,7 @@
     "/endorsements/{id}": {
       "get": {
         "operationId": "getEndorsementsId",
-        "summary": "Get one endorsement (by id or number)",
+        "summary": "Get one endorsement (by id or number); policyOrigin migrated and policyLegacyNumber when the policy was migrated at go-live",
         "tags": [
           "Endorsements"
         ],
@@ -126322,7 +126375,7 @@
     "/policy-renewals": {
       "get": {
         "operationId": "getPolicyRenewals",
-        "summary": "Renewals (clientId, policyId, status, search, page, limit)",
+        "summary": "Renewals (clientId, policyId, status, origin of the expiring policy issued / migrated, search, page, limit); each carries policyOrigin and policyLegacyNumber (renewal of a legacy policy)",
         "tags": [
           "Policy renewals"
         ],
@@ -160333,6 +160386,12 @@
                         "renewalAttempts": {
                           "type": "integer"
                         },
+                        "policyOrigin": {
+                          "type": "string"
+                        },
+                        "policyLegacyNumber": {
+                          "type": "string"
+                        },
                         "quotes": {
                           "type": "array",
                           "items": {}
@@ -160375,6 +160434,8 @@
                     },
                     "assignedAgent": "Ana Reyes",
                     "renewalAttempts": 1,
+                    "policyOrigin": "migrated",
+                    "policyLegacyNumber": "PC-MLY-2025-000101",
                     "quotes": [],
                     "notices": [],
                     "activities": []
@@ -160612,6 +160673,12 @@
                         },
                         "renewalAttempts": {
                           "type": "integer"
+                        },
+                        "policyOrigin": {
+                          "type": "string"
+                        },
+                        "policyLegacyNumber": {
+                          "type": "string"
                         }
                       }
                     }
@@ -160642,7 +160709,9 @@
                       "label": "Second Notice"
                     },
                     "assignedAgent": "Ana Reyes",
-                    "renewalAttempts": 1
+                    "renewalAttempts": 1,
+                    "policyOrigin": "migrated",
+                    "policyLegacyNumber": "PC-MLY-2025-000101"
                   }
                 }
               }
@@ -160809,6 +160878,12 @@
                             },
                             "renewalAttempts": {
                               "type": "integer"
+                            },
+                            "policyOrigin": {
+                              "type": "string"
+                            },
+                            "policyLegacyNumber": {
+                              "type": "string"
                             }
                           }
                         }
@@ -160849,7 +160924,9 @@
                         "label": "Second Notice"
                       },
                       "assignedAgent": "Ana Reyes",
-                      "renewalAttempts": 1
+                      "renewalAttempts": 1,
+                      "policyOrigin": "migrated",
+                      "policyLegacyNumber": "PC-MLY-2025-000101"
                     }
                   }
                 }
@@ -161110,6 +161187,12 @@
                         },
                         "renewalAttempts": {
                           "type": "integer"
+                        },
+                        "policyOrigin": {
+                          "type": "string"
+                        },
+                        "policyLegacyNumber": {
+                          "type": "string"
                         }
                       }
                     }
@@ -161140,7 +161223,9 @@
                       "label": "Second Notice"
                     },
                     "assignedAgent": "Ana Reyes",
-                    "renewalAttempts": 1
+                    "renewalAttempts": 1,
+                    "policyOrigin": "migrated",
+                    "policyLegacyNumber": "PC-MLY-2025-000101"
                   }
                 }
               }
@@ -161283,6 +161368,12 @@
                         },
                         "renewalAttempts": {
                           "type": "integer"
+                        },
+                        "policyOrigin": {
+                          "type": "string"
+                        },
+                        "policyLegacyNumber": {
+                          "type": "string"
                         }
                       }
                     }
@@ -161313,7 +161404,9 @@
                       "label": "Second Notice"
                     },
                     "assignedAgent": "Ana Reyes",
-                    "renewalAttempts": 1
+                    "renewalAttempts": 1,
+                    "policyOrigin": "migrated",
+                    "policyLegacyNumber": "PC-MLY-2025-000101"
                   }
                 }
               }
@@ -161586,6 +161679,12 @@
                         },
                         "renewalAttempts": {
                           "type": "integer"
+                        },
+                        "policyOrigin": {
+                          "type": "string"
+                        },
+                        "policyLegacyNumber": {
+                          "type": "string"
                         }
                       }
                     }
@@ -161616,7 +161715,9 @@
                       "label": "Second Notice"
                     },
                     "assignedAgent": "Ana Reyes",
-                    "renewalAttempts": 1
+                    "renewalAttempts": 1,
+                    "policyOrigin": "migrated",
+                    "policyLegacyNumber": "PC-MLY-2025-000101"
                   }
                 }
               }
@@ -161755,6 +161856,12 @@
                         },
                         "renewalAttempts": {
                           "type": "integer"
+                        },
+                        "policyOrigin": {
+                          "type": "string"
+                        },
+                        "policyLegacyNumber": {
+                          "type": "string"
                         }
                       }
                     }
@@ -161785,7 +161892,9 @@
                       "label": "Second Notice"
                     },
                     "assignedAgent": "Ana Reyes",
-                    "renewalAttempts": 2
+                    "renewalAttempts": 2,
+                    "policyOrigin": "migrated",
+                    "policyLegacyNumber": "PC-MLY-2025-000101"
                   }
                 }
               }
@@ -161928,6 +162037,12 @@
                         },
                         "renewalAttempts": {
                           "type": "integer"
+                        },
+                        "policyOrigin": {
+                          "type": "string"
+                        },
+                        "policyLegacyNumber": {
+                          "type": "string"
                         }
                       }
                     }
@@ -161958,7 +162073,9 @@
                       "label": "Second Notice"
                     },
                     "assignedAgent": "Ana Reyes",
-                    "renewalAttempts": 1
+                    "renewalAttempts": 1,
+                    "policyOrigin": "migrated",
+                    "policyLegacyNumber": "PC-MLY-2025-000101"
                   }
                 }
               }
@@ -163247,6 +163364,12 @@
                         },
                         "renewalAttempts": {
                           "type": "integer"
+                        },
+                        "policyOrigin": {
+                          "type": "string"
+                        },
+                        "policyLegacyNumber": {
+                          "type": "string"
                         }
                       }
                     }
@@ -163277,7 +163400,9 @@
                       "label": "Second Notice"
                     },
                     "assignedAgent": "Ana Reyes",
-                    "renewalAttempts": 1
+                    "renewalAttempts": 1,
+                    "policyOrigin": "migrated",
+                    "policyLegacyNumber": "PC-MLY-2025-000101"
                   }
                 }
               }
@@ -163302,7 +163427,7 @@
     "/renewals/queue": {
       "get": {
         "operationId": "getRenewalsQueue",
-        "summary": "Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, page, pageSize)",
+        "summary": "Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, origin of the expiring policy issued / migrated, page, pageSize); each item carries policyOrigin and policyLegacyNumber",
         "tags": [
           "Renewals workspace"
         ],
@@ -163352,6 +163477,15 @@
               "type": "string"
             },
             "example": "2026-12-31"
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "migrated"
           },
           {
             "name": "page",
@@ -163455,6 +163589,12 @@
                           },
                           "renewalAttempts": {
                             "type": "integer"
+                          },
+                          "policyOrigin": {
+                            "type": "string"
+                          },
+                          "policyLegacyNumber": {
+                            "type": "string"
                           }
                         }
                       }
@@ -163516,7 +163656,9 @@
                         "label": "Second Notice"
                       },
                       "assignedAgent": "Ana Reyes",
-                      "renewalAttempts": 1
+                      "renewalAttempts": 1,
+                      "policyOrigin": "migrated",
+                      "policyLegacyNumber": "PC-MLY-2025-000101"
                     }
                   ],
                   "dashboard": {

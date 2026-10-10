@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1365 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1366 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -30409,6 +30409,55 @@
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"period\": {\n      \"from\": \"2026-09-01\",\n      \"to\": \"2026-09-30\",\n      \"compare\": \"previous\",\n      \"comparedFrom\": \"2026-08-01\",\n      \"comparedTo\": \"2026-08-30\"\n    },\n    \"kpis\": {\n      \"prospects\": 61,\n      \"newProspects\": 12,\n      \"quotations\": 9,\n      \"policies\": 4,\n      \"premium\": 125000,\n      \"prospectConversionRate\": 25,\n      \"pipelineValue\": 350000\n    },\n    \"previous\": {\n      \"prospects\": 58,\n      \"newProspects\": 9,\n      \"quotations\": 7,\n      \"policies\": 3,\n      \"premium\": 98000\n    },\n    \"pipeline\": {\n      \"prospects\": [\n        {\n          \"stage\": \"New\",\n          \"count\": 7\n        }\n      ],\n      \"quotations\": [\n        {\n          \"stage\": \"Draft\",\n          \"count\": 2,\n          \"premium\": 45000\n        }\n      ]\n    },\n    \"bySalesPerson\": [\n      {\n        \"userId\": \"usr_0123\",\n        \"name\": \"Paolo Dizon\",\n        \"prospects\": 5,\n        \"quotations\": 3,\n        \"policies\": 2,\n        \"premium\": 64000,\n        \"conversionRate\": 40\n      }\n    ],\n    \"salesPersons\": [\n      {\n        \"id\": \"usr_0123\",\n        \"name\": \"Paolo Dizon\"\n      }\n    ],\n    \"scoped\": false\n  }\n}"
             }
           ]
+        },
+        {
+          "name": "Dashboard defaults for the signed-in user: the business counted when the user has not chosen (defaultOrigin issued = Issued since go-live, all = All business) and the cutover date",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "settings"
+              ]
+            },
+            "description": "Dashboard defaults for the signed-in user: the business counted when the user has not chosen (defaultOrigin issued = Issued since go-live, all = All business) and the cutover date\n\nFront-end touchpoint: Dashboard > Executive Dashboard; Sales Dashboard\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/dashboard/settings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dashboard",
+                    "settings"
+                  ]
+                },
+                "description": "Dashboard defaults for the signed-in user: the business counted when the user has not chosen (defaultOrigin issued = Issued since go-live, all = All business) and the cutover date\n\nFront-end touchpoint: Dashboard > Executive Dashboard; Sales Dashboard\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"defaultOrigin\": \"issued\",\n    \"cutoverDate\": \"2026-11-01\"\n  }\n}"
+            }
+          ]
         }
       ]
     },
@@ -42865,7 +42914,7 @@
       "name": "Endorsements",
       "item": [
         {
-          "name": "Get one endorsement (by id or number)",
+          "name": "Get one endorsement (by id or number); policyOrigin migrated and policyLegacyNumber when the policy was migrated at go-live",
           "request": {
             "method": "GET",
             "header": [],
@@ -42886,7 +42935,7 @@
                 }
               ]
             },
-            "description": "Get one endorsement (by id or number)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Detailed view\n\nAccess: read:endorsements"
+            "description": "Get one endorsement (by id or number); policyOrigin migrated and policyLegacyNumber when the policy was migrated at go-live\n\nFront-end touchpoint: Operations > Policy > Endorsement > Detailed view\n\nAccess: read:endorsements"
           },
           "response": [
             {
@@ -42911,7 +42960,7 @@
                     }
                   ]
                 },
-                "description": "Get one endorsement (by id or number)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Detailed view\n\nAccess: read:endorsements"
+                "description": "Get one endorsement (by id or number); policyOrigin migrated and policyLegacyNumber when the policy was migrated at go-live\n\nFront-end touchpoint: Operations > Policy > Endorsement > Detailed view\n\nAccess: read:endorsements"
               },
               "status": "OK",
               "code": 200,
@@ -72278,7 +72327,7 @@
       "name": "Policy renewals",
       "item": [
         {
-          "name": "Renewals (clientId, policyId, status, search, page, limit)",
+          "name": "Renewals (clientId, policyId, status, origin of the expiring policy issued / migrated, search, page, limit); each carries policyOrigin and policyLegacyNumber (renewal of a legacy policy)",
           "request": {
             "method": "GET",
             "header": [],
@@ -72305,7 +72354,7 @@
                 }
               ]
             },
-            "description": "Renewals (clientId, policyId, status, search, page, limit)\n\nFront-end touchpoint: Clients > Renewals tab; renewal quote wizard\n\nAccess: read:renewals, write:renewals, write:quotations"
+            "description": "Renewals (clientId, policyId, status, origin of the expiring policy issued / migrated, search, page, limit); each carries policyOrigin and policyLegacyNumber (renewal of a legacy policy)\n\nFront-end touchpoint: Clients > Renewals tab; renewal quote wizard\n\nAccess: read:renewals, write:renewals, write:quotations"
           },
           "response": [
             {
@@ -72336,7 +72385,7 @@
                     }
                   ]
                 },
-                "description": "Renewals (clientId, policyId, status, search, page, limit)\n\nFront-end touchpoint: Clients > Renewals tab; renewal quote wizard\n\nAccess: read:renewals, write:renewals, write:quotations"
+                "description": "Renewals (clientId, policyId, status, origin of the expiring policy issued / migrated, search, page, limit); each carries policyOrigin and policyLegacyNumber (renewal of a legacy policy)\n\nFront-end touchpoint: Clients > Renewals tab; renewal quote wizard\n\nAccess: read:renewals, write:renewals, write:quotations"
               },
               "status": "OK",
               "code": 200,
@@ -94571,7 +94620,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rnw_1\",\n    \"renewalNumber\": \"RN-2026-00001\",\n    \"policyNumber\": \"POL-2025-00012\",\n    \"insuredName\": \"Maria Santos\",\n    \"product\": \"Motor Vehicle Insurance\",\n    \"insurer\": \"MAPFRE Insurance Corporation\",\n    \"expiryDate\": \"2026-10-30\",\n    \"daysToExpiry\": 32,\n    \"currentPremium\": 18500,\n    \"renewalPremium\": 21450.5,\n    \"premiumVariancePct\": 15.95,\n    \"status\": \"Quote Sent\",\n    \"statusCode\": \"quoted\",\n    \"retentionRisk\": \"Medium\",\n    \"riskScore\": 35,\n    \"noticeStage\": 1,\n    \"nextNotice\": {\n      \"stage\": 2,\n      \"code\": \"second\",\n      \"label\": \"Second Notice\"\n    },\n    \"assignedAgent\": \"Ana Reyes\",\n    \"renewalAttempts\": 1,\n    \"quotes\": [],\n    \"notices\": [],\n    \"activities\": []\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rnw_1\",\n    \"renewalNumber\": \"RN-2026-00001\",\n    \"policyNumber\": \"POL-2025-00012\",\n    \"insuredName\": \"Maria Santos\",\n    \"product\": \"Motor Vehicle Insurance\",\n    \"insurer\": \"MAPFRE Insurance Corporation\",\n    \"expiryDate\": \"2026-10-30\",\n    \"daysToExpiry\": 32,\n    \"currentPremium\": 18500,\n    \"renewalPremium\": 21450.5,\n    \"premiumVariancePct\": 15.95,\n    \"status\": \"Quote Sent\",\n    \"statusCode\": \"quoted\",\n    \"retentionRisk\": \"Medium\",\n    \"riskScore\": 35,\n    \"noticeStage\": 1,\n    \"nextNotice\": {\n      \"stage\": 2,\n      \"code\": \"second\",\n      \"label\": \"Second Notice\"\n    },\n    \"assignedAgent\": \"Ana Reyes\",\n    \"renewalAttempts\": 1,\n    \"policyOrigin\": \"migrated\",\n    \"policyLegacyNumber\": \"PC-MLY-2025-000101\",\n    \"quotes\": [],\n    \"notices\": [],\n    \"activities\": []\n  }\n}"
             }
           ]
         },
@@ -94757,7 +94806,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rnw_1\",\n    \"renewalNumber\": \"RN-2026-00001\",\n    \"policyNumber\": \"POL-2025-00012\",\n    \"insuredName\": \"Maria Santos\",\n    \"product\": \"Motor Vehicle Insurance\",\n    \"insurer\": \"MAPFRE Insurance Corporation\",\n    \"expiryDate\": \"2026-10-30\",\n    \"daysToExpiry\": 32,\n    \"currentPremium\": 18500,\n    \"renewalPremium\": 21450.5,\n    \"premiumVariancePct\": 15.95,\n    \"status\": \"Approved\",\n    \"statusCode\": \"approved\",\n    \"retentionRisk\": \"Medium\",\n    \"riskScore\": 35,\n    \"noticeStage\": 1,\n    \"nextNotice\": {\n      \"stage\": 2,\n      \"code\": \"second\",\n      \"label\": \"Second Notice\"\n    },\n    \"assignedAgent\": \"Ana Reyes\",\n    \"renewalAttempts\": 1\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rnw_1\",\n    \"renewalNumber\": \"RN-2026-00001\",\n    \"policyNumber\": \"POL-2025-00012\",\n    \"insuredName\": \"Maria Santos\",\n    \"product\": \"Motor Vehicle Insurance\",\n    \"insurer\": \"MAPFRE Insurance Corporation\",\n    \"expiryDate\": \"2026-10-30\",\n    \"daysToExpiry\": 32,\n    \"currentPremium\": 18500,\n    \"renewalPremium\": 21450.5,\n    \"premiumVariancePct\": 15.95,\n    \"status\": \"Approved\",\n    \"statusCode\": \"approved\",\n    \"retentionRisk\": \"Medium\",\n    \"riskScore\": 35,\n    \"noticeStage\": 1,\n    \"nextNotice\": {\n      \"stage\": 2,\n      \"code\": \"second\",\n      \"label\": \"Second Notice\"\n    },\n    \"assignedAgent\": \"Ana Reyes\",\n    \"renewalAttempts\": 1,\n    \"policyOrigin\": \"migrated\",\n    \"policyLegacyNumber\": \"PC-MLY-2025-000101\"\n  }\n}"
             }
           ]
         },
@@ -94850,7 +94899,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"newPolicy\": {\n      \"id\": \"pol_9\",\n      \"policyNumber\": \"POL-2026-00031\",\n      \"inceptionDate\": \"2026-10-31\",\n      \"expiryDate\": \"2027-10-30\",\n      \"premium\": 21450.5\n    },\n    \"renewal\": {\n      \"id\": \"rnw_1\",\n      \"renewalNumber\": \"RN-2026-00001\",\n      \"policyNumber\": \"POL-2025-00012\",\n      \"insuredName\": \"Maria Santos\",\n      \"product\": \"Motor Vehicle Insurance\",\n      \"insurer\": \"MAPFRE Insurance Corporation\",\n      \"expiryDate\": \"2026-10-30\",\n      \"daysToExpiry\": 32,\n      \"currentPremium\": 18500,\n      \"renewalPremium\": 21450.5,\n      \"premiumVariancePct\": 15.95,\n      \"status\": \"Renewed\",\n      \"statusCode\": \"quoted\",\n      \"retentionRisk\": \"Medium\",\n      \"riskScore\": 35,\n      \"noticeStage\": 1,\n      \"nextNotice\": {\n        \"stage\": 2,\n        \"code\": \"second\",\n        \"label\": \"Second Notice\"\n      },\n      \"assignedAgent\": \"Ana Reyes\",\n      \"renewalAttempts\": 1\n    }\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"newPolicy\": {\n      \"id\": \"pol_9\",\n      \"policyNumber\": \"POL-2026-00031\",\n      \"inceptionDate\": \"2026-10-31\",\n      \"expiryDate\": \"2027-10-30\",\n      \"premium\": 21450.5\n    },\n    \"renewal\": {\n      \"id\": \"rnw_1\",\n      \"renewalNumber\": \"RN-2026-00001\",\n      \"policyNumber\": \"POL-2025-00012\",\n      \"insuredName\": \"Maria Santos\",\n      \"product\": \"Motor Vehicle Insurance\",\n      \"insurer\": \"MAPFRE Insurance Corporation\",\n      \"expiryDate\": \"2026-10-30\",\n      \"daysToExpiry\": 32,\n      \"currentPremium\": 18500,\n      \"renewalPremium\": 21450.5,\n      \"premiumVariancePct\": 15.95,\n      \"status\": \"Renewed\",\n      \"statusCode\": \"quoted\",\n      \"retentionRisk\": \"Medium\",\n      \"riskScore\": 35,\n      \"noticeStage\": 1,\n      \"nextNotice\": {\n        \"stage\": 2,\n        \"code\": \"second\",\n        \"label\": \"Second Notice\"\n      },\n      \"assignedAgent\": \"Ana Reyes\",\n      \"renewalAttempts\": 1,\n      \"policyOrigin\": \"migrated\",\n      \"policyLegacyNumber\": \"PC-MLY-2025-000101\"\n    }\n  }\n}"
             }
           ]
         },
@@ -95036,7 +95085,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rnw_1\",\n    \"renewalNumber\": \"RN-2026-00001\",\n    \"policyNumber\": \"POL-2025-00012\",\n    \"insuredName\": \"Maria Santos\",\n    \"product\": \"Motor Vehicle Insurance\",\n    \"insurer\": \"MAPFRE Insurance Corporation\",\n    \"expiryDate\": \"2026-10-30\",\n    \"daysToExpiry\": 32,\n    \"currentPremium\": 18500,\n    \"renewalPremium\": 21450.5,\n    \"premiumVariancePct\": 15.95,\n    \"status\": \"Lapsed\",\n    \"statusCode\": \"lapsed\",\n    \"retentionRisk\": \"Medium\",\n    \"riskScore\": 35,\n    \"noticeStage\": 1,\n    \"nextNotice\": {\n      \"stage\": 2,\n      \"code\": \"second\",\n      \"label\": \"Second Notice\"\n    },\n    \"assignedAgent\": \"Ana Reyes\",\n    \"renewalAttempts\": 1\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rnw_1\",\n    \"renewalNumber\": \"RN-2026-00001\",\n    \"policyNumber\": \"POL-2025-00012\",\n    \"insuredName\": \"Maria Santos\",\n    \"product\": \"Motor Vehicle Insurance\",\n    \"insurer\": \"MAPFRE Insurance Corporation\",\n    \"expiryDate\": \"2026-10-30\",\n    \"daysToExpiry\": 32,\n    \"currentPremium\": 18500,\n    \"renewalPremium\": 21450.5,\n    \"premiumVariancePct\": 15.95,\n    \"status\": \"Lapsed\",\n    \"statusCode\": \"lapsed\",\n    \"retentionRisk\": \"Medium\",\n    \"riskScore\": 35,\n    \"noticeStage\": 1,\n    \"nextNotice\": {\n      \"stage\": 2,\n      \"code\": \"second\",\n      \"label\": \"Second Notice\"\n    },\n    \"assignedAgent\": \"Ana Reyes\",\n    \"renewalAttempts\": 1,\n    \"policyOrigin\": \"migrated\",\n    \"policyLegacyNumber\": \"PC-MLY-2025-000101\"\n  }\n}"
             }
           ]
         },
@@ -95129,7 +95178,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rnw_1\",\n    \"renewalNumber\": \"RN-2026-00001\",\n    \"policyNumber\": \"POL-2025-00012\",\n    \"insuredName\": \"Maria Santos\",\n    \"product\": \"Motor Vehicle Insurance\",\n    \"insurer\": \"MAPFRE Insurance Corporation\",\n    \"expiryDate\": \"2026-10-30\",\n    \"daysToExpiry\": 32,\n    \"currentPremium\": 18500,\n    \"renewalPremium\": 21450.5,\n    \"premiumVariancePct\": 15.95,\n    \"status\": \"First Notice Sent\",\n    \"statusCode\": \"quoted\",\n    \"retentionRisk\": \"Medium\",\n    \"riskScore\": 35,\n    \"noticeStage\": 1,\n    \"nextNotice\": {\n      \"stage\": 2,\n      \"code\": \"second\",\n      \"label\": \"Second Notice\"\n    },\n    \"assignedAgent\": \"Ana Reyes\",\n    \"renewalAttempts\": 1\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rnw_1\",\n    \"renewalNumber\": \"RN-2026-00001\",\n    \"policyNumber\": \"POL-2025-00012\",\n    \"insuredName\": \"Maria Santos\",\n    \"product\": \"Motor Vehicle Insurance\",\n    \"insurer\": \"MAPFRE Insurance Corporation\",\n    \"expiryDate\": \"2026-10-30\",\n    \"daysToExpiry\": 32,\n    \"currentPremium\": 18500,\n    \"renewalPremium\": 21450.5,\n    \"premiumVariancePct\": 15.95,\n    \"status\": \"First Notice Sent\",\n    \"statusCode\": \"quoted\",\n    \"retentionRisk\": \"Medium\",\n    \"riskScore\": 35,\n    \"noticeStage\": 1,\n    \"nextNotice\": {\n      \"stage\": 2,\n      \"code\": \"second\",\n      \"label\": \"Second Notice\"\n    },\n    \"assignedAgent\": \"Ana Reyes\",\n    \"renewalAttempts\": 1,\n    \"policyOrigin\": \"migrated\",\n    \"policyLegacyNumber\": \"PC-MLY-2025-000101\"\n  }\n}"
             }
           ]
         },
@@ -95287,7 +95336,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rnw_1\",\n    \"renewalNumber\": \"RN-2026-00001\",\n    \"policyNumber\": \"POL-2025-00012\",\n    \"insuredName\": \"Maria Santos\",\n    \"product\": \"Motor Vehicle Insurance\",\n    \"insurer\": \"MAPFRE Insurance Corporation\",\n    \"expiryDate\": \"2026-10-30\",\n    \"daysToExpiry\": 32,\n    \"currentPremium\": 18500,\n    \"renewalPremium\": 21450.5,\n    \"premiumVariancePct\": 15.95,\n    \"status\": \"Pending\",\n    \"statusCode\": \"pipeline\",\n    \"retentionRisk\": \"Medium\",\n    \"riskScore\": 35,\n    \"noticeStage\": 1,\n    \"nextNotice\": {\n      \"stage\": 2,\n      \"code\": \"second\",\n      \"label\": \"Second Notice\"\n    },\n    \"assignedAgent\": \"Ana Reyes\",\n    \"renewalAttempts\": 1\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rnw_1\",\n    \"renewalNumber\": \"RN-2026-00001\",\n    \"policyNumber\": \"POL-2025-00012\",\n    \"insuredName\": \"Maria Santos\",\n    \"product\": \"Motor Vehicle Insurance\",\n    \"insurer\": \"MAPFRE Insurance Corporation\",\n    \"expiryDate\": \"2026-10-30\",\n    \"daysToExpiry\": 32,\n    \"currentPremium\": 18500,\n    \"renewalPremium\": 21450.5,\n    \"premiumVariancePct\": 15.95,\n    \"status\": \"Pending\",\n    \"statusCode\": \"pipeline\",\n    \"retentionRisk\": \"Medium\",\n    \"riskScore\": 35,\n    \"noticeStage\": 1,\n    \"nextNotice\": {\n      \"stage\": 2,\n      \"code\": \"second\",\n      \"label\": \"Second Notice\"\n    },\n    \"assignedAgent\": \"Ana Reyes\",\n    \"renewalAttempts\": 1,\n    \"policyOrigin\": \"migrated\",\n    \"policyLegacyNumber\": \"PC-MLY-2025-000101\"\n  }\n}"
             }
           ]
         },
@@ -95380,7 +95429,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rnw_1\",\n    \"renewalNumber\": \"RN-2026-00001\",\n    \"policyNumber\": \"POL-2025-00012\",\n    \"insuredName\": \"Maria Santos\",\n    \"product\": \"Motor Vehicle Insurance\",\n    \"insurer\": \"MAPFRE Insurance Corporation\",\n    \"expiryDate\": \"2026-10-30\",\n    \"daysToExpiry\": 32,\n    \"currentPremium\": 18500,\n    \"renewalPremium\": 21450.5,\n    \"premiumVariancePct\": 15.95,\n    \"status\": \"Quote Sent\",\n    \"statusCode\": \"quoted\",\n    \"retentionRisk\": \"Medium\",\n    \"riskScore\": 35,\n    \"noticeStage\": 1,\n    \"nextNotice\": {\n      \"stage\": 2,\n      \"code\": \"second\",\n      \"label\": \"Second Notice\"\n    },\n    \"assignedAgent\": \"Ana Reyes\",\n    \"renewalAttempts\": 2\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rnw_1\",\n    \"renewalNumber\": \"RN-2026-00001\",\n    \"policyNumber\": \"POL-2025-00012\",\n    \"insuredName\": \"Maria Santos\",\n    \"product\": \"Motor Vehicle Insurance\",\n    \"insurer\": \"MAPFRE Insurance Corporation\",\n    \"expiryDate\": \"2026-10-30\",\n    \"daysToExpiry\": 32,\n    \"currentPremium\": 18500,\n    \"renewalPremium\": 21450.5,\n    \"premiumVariancePct\": 15.95,\n    \"status\": \"Quote Sent\",\n    \"statusCode\": \"quoted\",\n    \"retentionRisk\": \"Medium\",\n    \"riskScore\": 35,\n    \"noticeStage\": 1,\n    \"nextNotice\": {\n      \"stage\": 2,\n      \"code\": \"second\",\n      \"label\": \"Second Notice\"\n    },\n    \"assignedAgent\": \"Ana Reyes\",\n    \"renewalAttempts\": 2,\n    \"policyOrigin\": \"migrated\",\n    \"policyLegacyNumber\": \"PC-MLY-2025-000101\"\n  }\n}"
             }
           ]
         },
@@ -95473,7 +95522,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rnw_1\",\n    \"renewalNumber\": \"RN-2026-00001\",\n    \"policyNumber\": \"POL-2025-00012\",\n    \"insuredName\": \"Maria Santos\",\n    \"product\": \"Motor Vehicle Insurance\",\n    \"insurer\": \"MAPFRE Insurance Corporation\",\n    \"expiryDate\": \"2026-10-30\",\n    \"daysToExpiry\": 32,\n    \"currentPremium\": 18500,\n    \"renewalPremium\": 21450.5,\n    \"premiumVariancePct\": 15.95,\n    \"status\": \"Pending Approval\",\n    \"statusCode\": \"pending-approval\",\n    \"retentionRisk\": \"Medium\",\n    \"riskScore\": 35,\n    \"noticeStage\": 1,\n    \"nextNotice\": {\n      \"stage\": 2,\n      \"code\": \"second\",\n      \"label\": \"Second Notice\"\n    },\n    \"assignedAgent\": \"Ana Reyes\",\n    \"renewalAttempts\": 1\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rnw_1\",\n    \"renewalNumber\": \"RN-2026-00001\",\n    \"policyNumber\": \"POL-2025-00012\",\n    \"insuredName\": \"Maria Santos\",\n    \"product\": \"Motor Vehicle Insurance\",\n    \"insurer\": \"MAPFRE Insurance Corporation\",\n    \"expiryDate\": \"2026-10-30\",\n    \"daysToExpiry\": 32,\n    \"currentPremium\": 18500,\n    \"renewalPremium\": 21450.5,\n    \"premiumVariancePct\": 15.95,\n    \"status\": \"Pending Approval\",\n    \"statusCode\": \"pending-approval\",\n    \"retentionRisk\": \"Medium\",\n    \"riskScore\": 35,\n    \"noticeStage\": 1,\n    \"nextNotice\": {\n      \"stage\": 2,\n      \"code\": \"second\",\n      \"label\": \"Second Notice\"\n    },\n    \"assignedAgent\": \"Ana Reyes\",\n    \"renewalAttempts\": 1,\n    \"policyOrigin\": \"migrated\",\n    \"policyLegacyNumber\": \"PC-MLY-2025-000101\"\n  }\n}"
             }
           ]
         },
@@ -96203,17 +96252,17 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rnw_1\",\n    \"renewalNumber\": \"RN-2026-00001\",\n    \"policyNumber\": \"POL-2025-00012\",\n    \"insuredName\": \"Maria Santos\",\n    \"product\": \"Motor Vehicle Insurance\",\n    \"insurer\": \"MAPFRE Insurance Corporation\",\n    \"expiryDate\": \"2026-10-30\",\n    \"daysToExpiry\": 32,\n    \"currentPremium\": 18500,\n    \"renewalPremium\": 21450.5,\n    \"premiumVariancePct\": 15.95,\n    \"status\": \"Quote Sent\",\n    \"statusCode\": \"quoted\",\n    \"retentionRisk\": \"Medium\",\n    \"riskScore\": 35,\n    \"noticeStage\": 1,\n    \"nextNotice\": {\n      \"stage\": 2,\n      \"code\": \"second\",\n      \"label\": \"Second Notice\"\n    },\n    \"assignedAgent\": \"Ana Reyes\",\n    \"renewalAttempts\": 1\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rnw_1\",\n    \"renewalNumber\": \"RN-2026-00001\",\n    \"policyNumber\": \"POL-2025-00012\",\n    \"insuredName\": \"Maria Santos\",\n    \"product\": \"Motor Vehicle Insurance\",\n    \"insurer\": \"MAPFRE Insurance Corporation\",\n    \"expiryDate\": \"2026-10-30\",\n    \"daysToExpiry\": 32,\n    \"currentPremium\": 18500,\n    \"renewalPremium\": 21450.5,\n    \"premiumVariancePct\": 15.95,\n    \"status\": \"Quote Sent\",\n    \"statusCode\": \"quoted\",\n    \"retentionRisk\": \"Medium\",\n    \"riskScore\": 35,\n    \"noticeStage\": 1,\n    \"nextNotice\": {\n      \"stage\": 2,\n      \"code\": \"second\",\n      \"label\": \"Second Notice\"\n    },\n    \"assignedAgent\": \"Ana Reyes\",\n    \"renewalAttempts\": 1,\n    \"policyOrigin\": \"migrated\",\n    \"policyLegacyNumber\": \"PC-MLY-2025-000101\"\n  }\n}"
             }
           ]
         },
         {
-          "name": "Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, page, pageSize)",
+          "name": "Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, origin of the expiring policy issued / migrated, page, pageSize); each item carries policyOrigin and policyLegacyNumber",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/renewals/queue?search=Santos&status=Pending&risk=High&from=2026-10-01&to=2026-12-31&page=1&pageSize=20",
+              "raw": "{{baseUrl}}/renewals/queue?search=Santos&status=Pending&risk=High&from=2026-10-01&to=2026-12-31&origin=migrated&page=1&pageSize=20",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -96243,6 +96292,10 @@
                   "value": "2026-12-31"
                 },
                 {
+                  "key": "origin",
+                  "value": "migrated"
+                },
+                {
                   "key": "page",
                   "value": "1"
                 },
@@ -96252,7 +96305,7 @@
                 }
               ]
             },
-            "description": "Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, page, pageSize)\n\nFront-end touchpoint: Operations > Renewals > Renewal Queue\n\nAccess: read:renewals"
+            "description": "Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, origin of the expiring policy issued / migrated, page, pageSize); each item carries policyOrigin and policyLegacyNumber\n\nFront-end touchpoint: Operations > Renewals > Renewal Queue\n\nAccess: read:renewals"
           },
           "response": [
             {
@@ -96261,7 +96314,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/renewals/queue?search=Santos&status=Pending&risk=High&from=2026-10-01&to=2026-12-31&page=1&pageSize=20",
+                  "raw": "{{baseUrl}}/renewals/queue?search=Santos&status=Pending&risk=High&from=2026-10-01&to=2026-12-31&origin=migrated&page=1&pageSize=20",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -96291,6 +96344,10 @@
                       "value": "2026-12-31"
                     },
                     {
+                      "key": "origin",
+                      "value": "migrated"
+                    },
+                    {
                       "key": "page",
                       "value": "1"
                     },
@@ -96300,7 +96357,7 @@
                     }
                   ]
                 },
-                "description": "Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, page, pageSize)\n\nFront-end touchpoint: Operations > Renewals > Renewal Queue\n\nAccess: read:renewals"
+                "description": "Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, origin of the expiring policy issued / migrated, page, pageSize); each item carries policyOrigin and policyLegacyNumber\n\nFront-end touchpoint: Operations > Renewals > Renewal Queue\n\nAccess: read:renewals"
               },
               "status": "OK",
               "code": 200,
@@ -96312,7 +96369,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"rnw_1\",\n      \"renewalNumber\": \"RN-2026-00001\",\n      \"policyNumber\": \"POL-2025-00012\",\n      \"insuredName\": \"Maria Santos\",\n      \"product\": \"Motor Vehicle Insurance\",\n      \"insurer\": \"MAPFRE Insurance Corporation\",\n      \"expiryDate\": \"2026-10-30\",\n      \"daysToExpiry\": 32,\n      \"currentPremium\": 18500,\n      \"renewalPremium\": 21450.5,\n      \"premiumVariancePct\": 15.95,\n      \"status\": \"Quote Sent\",\n      \"statusCode\": \"quoted\",\n      \"retentionRisk\": \"Medium\",\n      \"riskScore\": 35,\n      \"noticeStage\": 1,\n      \"nextNotice\": {\n        \"stage\": 2,\n        \"code\": \"second\",\n        \"label\": \"Second Notice\"\n      },\n      \"assignedAgent\": \"Ana Reyes\",\n      \"renewalAttempts\": 1\n    }\n  ],\n  \"dashboard\": {\n    \"totalPolicies\": 14,\n    \"dueSoon\": 5,\n    \"atRisk\": 3,\n    \"inGracePeriod\": 1\n  },\n  \"total\": 14,\n  \"page\": 1,\n  \"perPage\": 20,\n  \"totalPages\": 1\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"rnw_1\",\n      \"renewalNumber\": \"RN-2026-00001\",\n      \"policyNumber\": \"POL-2025-00012\",\n      \"insuredName\": \"Maria Santos\",\n      \"product\": \"Motor Vehicle Insurance\",\n      \"insurer\": \"MAPFRE Insurance Corporation\",\n      \"expiryDate\": \"2026-10-30\",\n      \"daysToExpiry\": 32,\n      \"currentPremium\": 18500,\n      \"renewalPremium\": 21450.5,\n      \"premiumVariancePct\": 15.95,\n      \"status\": \"Quote Sent\",\n      \"statusCode\": \"quoted\",\n      \"retentionRisk\": \"Medium\",\n      \"riskScore\": 35,\n      \"noticeStage\": 1,\n      \"nextNotice\": {\n        \"stage\": 2,\n        \"code\": \"second\",\n        \"label\": \"Second Notice\"\n      },\n      \"assignedAgent\": \"Ana Reyes\",\n      \"renewalAttempts\": 1,\n      \"policyOrigin\": \"migrated\",\n      \"policyLegacyNumber\": \"PC-MLY-2025-000101\"\n    }\n  ],\n  \"dashboard\": {\n    \"totalPolicies\": 14,\n    \"dueSoon\": 5,\n    \"atRisk\": 3,\n    \"inGracePeriod\": 1\n  },\n  \"total\": 14,\n  \"page\": 1,\n  \"perPage\": 20,\n  \"totalPages\": 1\n}"
             }
           ]
         }
