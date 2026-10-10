@@ -6230,7 +6230,8 @@
     "remindOutstanding": "Total outstanding",
     "remindLevel": "{{level}}",
     "remindNoEmail": "Clients without an e-mail address (not sent)",
-    "noneToRemind": "No premium is due or overdue for a reminder now."
+    "noneToRemind": "No premium is due or overdue for a reminder now.",
+    "notYetOverdue": "Due, not yet overdue"
   },
   "iarLead": {
     "lead": "Prospect",

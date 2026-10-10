@@ -249,7 +249,10 @@ const CollectionsList = () => {
         { label: t("collectionsList.remindClients"), value: scope.clients, type: "number", decimals: 0 },
         { label: t("collectionsList.remindItems"), value: scope.items, type: "number", decimals: 0 },
         { label: t("collectionsList.remindOutstanding"), value: scope.totalOutstanding, type: "amount" },
-        ...(scope.byLevel || []).map((l) => ({ label: t("collectionsList.remindLevel", { level: l.level }), value: `${l.count} · ${formatCurrency(l.amount)}` })),
+        ...(scope.byLevel || []).map((l) => ({
+          label: overdueLevelOptions.find((o) => o.value === String(l.level))?.label || t("collectionsList.notYetOverdue"),
+          value: `${l.count} · ${formatCurrency(l.amount)}`,
+        })),
         { label: t("collectionsList.remindNoEmail"), value: scope.withoutEmail, type: "number", decimals: 0, hidden: !scope.withoutEmail },
       ],
       confirmLabel: t("collectionsList.sendReminders"),
