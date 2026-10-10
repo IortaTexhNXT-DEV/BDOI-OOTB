@@ -13,12 +13,12 @@
 
 DO $$
 DECLARE
-  v_admin text := (SELECT id FROM users WHERE username = 'BrokerVerse');
+  v_user text := COALESCE((SELECT id FROM users WHERE username = 'fin.approver'), (SELECT id FROM users WHERE username = 'BrokerVerse'));
   v_bank text := COALESCE((SELECT value #>> '{}' FROM app_settings WHERE key = 'accounting.account.cash_in_bank'), '106010');
   v_hold text := COALESCE((SELECT value #>> '{}' FROM app_settings WHERE key = 'accounting.account.unapplied_collections'), '2202001');
   v_set text; v_tr text; v_jv text; r record; v_n int := 0;
 BEGIN
-  IF v_admin IS NULL THEN RETURN; END IF;
+  IF v_user IS NULL THEN RETURN; END IF;
 
   -- settings left empty by the reference data
   IF EXISTS (SELECT 1 FROM master_records WHERE type_code = 'bank-account' AND code = 'ACC-MBT-001') THEN
@@ -36,17 +36,17 @@ BEGIN
      WHERE rv.id = 'rcv_crs_03' AND rv.status IN ('open', 'partial');
     IF r.id IS NOT NULL THEN
       INSERT INTO pdc_sets(set_number, policy_id, receivable_id, client_id, insurance_company_id, payee, received_date, received_by, storage_location, status, remarks, created_by, updated_by)
-      VALUES (next_number('pdc_set', 'PCS'), r.policy_id, r.id, r.client_id, r.insurer_id, 'insurance-partner', current_date - 6, v_admin, 'Cash Control vault, tray 1', 'open',
-        'Sample: three monthly cheques for the instalments of the bill', v_admin, v_admin) RETURNING id INTO v_set;
+      VALUES (next_number('pdc_set', 'PCS'), r.policy_id, r.id, r.client_id, r.insurer_id, 'insurance-partner', current_date - 6, v_user, 'Cash Control vault, tray 1', 'open',
+        'Sample: three monthly cheques for the instalments of the bill', v_user, v_user) RETURNING id INTO v_set;
       INSERT INTO pdc_transmittals(transmittal_number, insurance_company_id, forwarded_on, sent_by, courier_reference, remarks, status, created_by, updated_by)
-      VALUES (next_number('pdc_transmittal', 'PT'), r.insurer_id, current_date - 4, 'courier', 'LBC 1029-5512', 'Sample: cheques of set for warehousing', 'sent', v_admin, v_admin)
+      VALUES (next_number('pdc_transmittal', 'PT'), r.insurer_id, current_date - 4, 'courier', 'LBC 1029-5512', 'Sample: cheques of set for warehousing', 'sent', v_user, v_user)
       RETURNING id INTO v_tr;
       INSERT INTO post_dated_cheques(pdc_number, client_id, policy_id, receivable_id, set_id, bank_id, drawee_bank, branch, account_number, cheque_number, cheque_date, amount,
           received_date, storage_location, status, payee, insurance_company_id, custody, transmittal_id, forwarded_on, instalment_seq, instalment_count, instalment_due_date,
           remarks, created_by, updated_by)
       SELECT next_number('pdc', 'PDC'), r.client_id, r.policy_id, r.id, v_set, b.id, b.name, 'Makati Ayala', '0021-4455-6677', x.chq, current_date + x.days,
         round(r.balance / 3, 2) + CASE WHEN x.seq = 3 THEN r.balance - 3 * round(r.balance / 3, 2) ELSE 0 END, current_date - 6, 'In transit', 'forwarded', 'insurance-partner',
-        r.insurer_id, 'in-transit', v_tr, current_date - 4, x.seq, 3, current_date + x.days, 'Sample: instalment ' || x.seq || ' of 3', v_admin, v_admin
+        r.insurer_id, 'in-transit', v_tr, current_date - 4, x.seq, 3, current_date + x.days, 'Sample: instalment ' || x.seq || ' of 3', v_user, v_user
       FROM (VALUES (1, '0081201', 15), (2, '0081202', 45), (3, '0081203', 75)) AS x(seq, chq, days)
       LEFT JOIN banks b ON b.code = 'BDO';
     END IF;
@@ -54,13 +54,13 @@ BEGIN
     SELECT rv.* INTO r FROM receivables rv WHERE rv.id = 'rcv_crs_16' AND rv.status IN ('open', 'partial');
     IF r.id IS NOT NULL THEN
       INSERT INTO pdc_sets(set_number, policy_id, receivable_id, client_id, insurance_company_id, payee, received_date, received_by, storage_location, status, remarks, created_by, updated_by)
-      SELECT next_number('pdc_set', 'PCS'), r.policy_id, r.id, r.client_id, p.insurance_company_id, 'tisph', current_date - 2, v_admin, 'Cash Control vault, tray 2', 'open',
-        'Sample: two cheques payable to TISPH', v_admin, v_admin FROM policies p WHERE p.id = r.policy_id RETURNING id INTO v_set;
+      SELECT next_number('pdc_set', 'PCS'), r.policy_id, r.id, r.client_id, p.insurance_company_id, 'tisph', current_date - 2, v_user, 'Cash Control vault, tray 2', 'open',
+        'Sample: two cheques payable to TISPH', v_user, v_user FROM policies p WHERE p.id = r.policy_id RETURNING id INTO v_set;
       INSERT INTO post_dated_cheques(pdc_number, client_id, policy_id, receivable_id, set_id, bank_id, drawee_bank, branch, account_number, cheque_number, cheque_date, amount,
           received_date, storage_location, status, payee, custody, instalment_seq, instalment_count, instalment_due_date, remarks, created_by, updated_by)
       SELECT next_number('pdc', 'PDC'), r.client_id, r.policy_id, r.id, v_set, b.id, b.name, 'Cebu Mango', '1182-0099-21', x.chq, current_date + x.days,
         round(r.balance / 2, 2) + CASE WHEN x.seq = 2 THEN r.balance - 2 * round(r.balance / 2, 2) ELSE 0 END, current_date - 2, 'Cash Control vault, tray 2', 'on-hand', 'tisph',
-        'tis-vault', x.seq, 2, current_date + x.days, 'Sample: instalment ' || x.seq || ' of 2', v_admin, v_admin
+        'tis-vault', x.seq, 2, current_date + x.days, 'Sample: instalment ' || x.seq || ' of 2', v_user, v_user
       FROM (VALUES (1, '5520031', 10), (2, '5520032', 40)) AS x(seq, chq, days)
       LEFT JOIN banks b ON b.code = 'MBT';
     END IF;
@@ -76,14 +76,14 @@ BEGIN
       v_n := v_n + 1;
       INSERT INTO journal_vouchers(jv_number, jv_date, description, status, total_debit, total_credit, source, transaction_code, entry_type, reference_type, client_id, period, created_by)
       VALUES (next_number('journal', 'JV'), r.received, 'Unapplied collection ' || r.kind || ' – ' || COALESCE(r.payer, (SELECT display_name FROM clients WHERE id = r.client)),
-        'pending', r.amount, r.amount, 'receipt', r.ref, 'PAYMENT_RECEIPT', 'Unapplied collection', r.client, to_char(r.received, 'YYYY-MM'), v_admin) RETURNING id INTO v_jv;
+        'pending', r.amount, r.amount, 'receipt', r.ref, 'PAYMENT_RECEIPT', 'Unapplied collection', r.client, to_char(r.received, 'YYYY-MM'), v_user) RETURNING id INTO v_jv;
       INSERT INTO journal_lines(jv_id, line_no, account_code, account_name, debit, credit, memo, currency_code, client_id) VALUES
         (v_jv, 1, v_bank, (SELECT name FROM gl_accounts WHERE code = v_bank), r.amount, 0, r.ref, 'PHP', r.client),
         (v_jv, 2, v_hold, (SELECT name FROM gl_accounts WHERE code = v_hold), 0, r.amount, 'Held unapplied', 'PHP', r.client);
-      UPDATE journal_vouchers SET status = 'posted', posted_by = v_admin, posted_at = now() WHERE id = v_jv;
+      UPDATE journal_vouchers SET status = 'posted', posted_by = v_user, posted_at = now() WHERE id = v_jv;
       INSERT INTO unapplied_collections(client_id, kind, amount, balance, received_date, allocate_by, reference_no, payment_mode, payer_name, remarks, journal_id, created_by, updated_by)
       VALUES (r.client, r.kind, r.amount, r.amount, r.received, r.allocate_by, r.ref, 'bank-transfer', COALESCE(r.payer, (SELECT display_name FROM clients WHERE id = r.client)),
-        r.remarks, v_jv, v_admin, v_admin);
+        r.remarks, v_jv, v_user, v_user);
     END LOOP;
   END IF;
 
@@ -93,13 +93,13 @@ BEGIN
     SELECT next_number('receipt_batch', 'RVB'), 'receipts', 'sample-rv-batch.xlsx', 3, 2, 1, COALESCE(sum(rc.amount), 0), 1850.00,
       jsonb_build_array(jsonb_build_object('row', 2, 'policyNumber', min(rc.policy_number), 'clientName', min(rc.customer_name), 'insurer', 'Malayan Insurance Co., Inc.', 'amount', 1850.00,
         'premium', min(rc.amount), 'receiptNumber', min(rc.receipt_number), 'referenceNo', 'RV-SAMPLE-1', 'receiptDate', to_char(current_date - 3, 'YYYY-MM-DD'))),
-      v_admin, now() - interval '3 days'
+      v_user, now() - interval '3 days'
     FROM (SELECT * FROM receipts WHERE receipt_status = 'Converted' ORDER BY received_date DESC, receipt_number LIMIT 2) rc;
   END IF;
 
   -- a receipt whose reversal waits for a second user
   IF NOT EXISTS (SELECT 1 FROM receipts WHERE reversal_status IS NOT NULL) THEN
-    UPDATE receipts SET reversal_status = 'pending', reversal_reason_code = 'RCT-REV-DAIF', reversal_reason = 'Cheque returned DAIF', reversal_requested_by = v_admin,
+    UPDATE receipts SET reversal_status = 'pending', reversal_reason_code = 'RCT-REV-DAIF', reversal_reason = 'Cheque returned DAIF', reversal_requested_by = v_user,
         reversal_requested_at = now() - interval '2 hours'
      WHERE id = (SELECT id FROM receipts WHERE receipt_status = 'Converted' AND payment_mode = 'check' ORDER BY received_date DESC, receipt_number LIMIT 1);
   END IF;
