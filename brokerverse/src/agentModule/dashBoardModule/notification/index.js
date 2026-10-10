@@ -8,11 +8,9 @@ import { Paginator } from "primereact/paginator";
 import { PAGE_SIZES, PAGE_REPORT, PAGINATOR_TEMPLATE } from "../../../hooks/useServerList";
 import { useNavigate } from "react-router-dom";
 import { useNotifications } from "../../../hooks/useNotifications";
-import {
-  showSuccessMessage,
-  showErrorMessage,
-} from "../../../utility/toastUtils";
+import { showSuccessMessage } from "../../../utility/toastUtils";
 import NotificationFallback from "../../../components/NotificationFallback";
+import { openConfirm } from "../../../components/ConfirmDialog";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
@@ -51,14 +49,22 @@ const Notification = () => {
     setSelectedNotification(notification);
   };
 
-  const handleDeleteNotification = async (notificationId, e) => {
+  const handleDeleteNotification = async (notification, e) => {
     e.stopPropagation();
-    try {
-      await deleteNotification(notificationId);
-      showSuccessMessage(t("notificationPage.deleteSuccess"));
-    } catch (err) {
-      showErrorMessage(t("notificationPage.deleteFailed"));
-    }
+    const deleted = await openConfirm({
+      title: t("notificationPage.deleteTitle"),
+      severity: "danger",
+      message: t("notificationPage.deleteMessage"),
+      facts: [
+        { label: t("notificationPage.notification"), value: notification.title },
+        { label: t("notificationPage.received"), value: notification.createdAt, type: "datetime", hidden: !notification.createdAt },
+      ],
+      confirmLabel: t("notificationPage.deleteAction"),
+      onConfirm: () => deleteNotification(notification.id).catch(() => {
+        throw new Error(t("notificationPage.deleteFailed"));
+      }),
+    });
+    if (deleted) showSuccessMessage(t("notificationPage.deleteSuccess"));
   };
 
   const formatDate = (dateString) => {
@@ -202,7 +208,7 @@ const Notification = () => {
                         icon="pi pi-trash"
                         className="p-button-rounded p-button-text p-button-sm p-button-danger delete-btn"
                         onClick={(e) =>
-                          handleDeleteNotification(notification.id, e)
+                          handleDeleteNotification(notification, e)
                         }
                         tooltip={t("notificationPage.deleteNotificationTooltip")}
                         aria-label={t("notificationPage.deleteNotificationTooltip")}

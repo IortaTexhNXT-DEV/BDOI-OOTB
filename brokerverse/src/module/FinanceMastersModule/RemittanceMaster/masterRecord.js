@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Dropdown } from "primereact/dropdown";
+import i18n from "../../../i18n";
 import { masterService } from "../../../services/remittanceService";
+import { openConfirm } from "../../../components/ConfirmDialog";
 import { showError, showSuccess } from "../../Remittance/shared";
 
 export const MASTER_HOME = "/master/finance/remittance";
@@ -23,18 +25,29 @@ export const saveAndReturn = async ({ type, id, record, toast, navigate }) => {
   }
 };
 
-export const deleteAndReturn = async ({ type, id, toast, navigate }) => {
+/**
+ * Ask before deleting the record open on the screen, delete it from the confirmation (an error stays in the dialog)
+ * and go back to the Remittance Master list. `kind` names the record type (remittanceMasters.kinds.<kind>) and `facts`
+ * identify the record ([{ label, value }]).
+ */
+export const confirmDeleteAndReturn = async ({ type, id, kind, facts, toast, navigate }) => {
   if (!id) {
     navigate(MASTER_HOME);
     return;
   }
-  try {
-    await masterService.remove(type, id);
-    showSuccess(toast, "Record deleted");
-    setTimeout(() => navigate(MASTER_HOME), 800);
-  } catch (error) {
-    showError(toast, error, "Delete failed");
-  }
+  const what = i18n.t(`remittanceMasters.kinds.${kind}`);
+  const deleted = await openConfirm({
+    title: i18n.t("remittanceMasters.delete.title", { what }),
+    severity: "danger",
+    message: i18n.t("remittanceMasters.delete.message", { what: what.toLowerCase() }),
+    facts,
+    note: i18n.t("remittanceMasters.delete.note"),
+    confirmLabel: i18n.t("remittanceMasters.delete.action", { what }),
+    onConfirm: () => masterService.remove(type, id),
+  });
+  if (!deleted) return;
+  showSuccess(toast, i18n.t("remittanceMasters.delete.done", { what }));
+  setTimeout(() => navigate(MASTER_HOME), 800);
 };
 
 /** Loads { label: "CODE - name", value: code, name } options of a master type once. */

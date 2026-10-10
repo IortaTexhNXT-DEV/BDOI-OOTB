@@ -236,39 +236,13 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             label="Bulk Upload"
                             icon={<SvgUploadArrowIcon />}
                             onClick={() => setShowBulkUploadModal(true)}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                backgroundColor: 'var(--bv-primary)',
-                                gap: '8px',
-                                padding: '10px',
-                                color: '#fff',
-                                border: '1px solid var(--bv-primary)',
-                                borderRadius: '6px',
-                                fontFamily: "Nunito, Arial, sans-serif",
-                                fontSize: '16px',
-                                fontWeight: 400,
-                                lineHeight: '24px',
-                            }}
+                            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
                         />
                         <Button
                             label="Add Employee"
                             onClick={() => setShowAddEmployeeModal(true)}
                             icon={<PlusIcon />}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                backgroundColor: 'var(--bv-primary)',
-                                gap: '8px',
-                                padding: '10px',
-                                color: '#fff',
-                                border: '1px solid var(--bv-primary)',
-                                borderRadius: '6px',
-                                fontFamily: "Nunito, Arial, sans-serif",
-                                fontSize: '16px',
-                                fontWeight: 400,
-                                lineHeight: '24px',
-                            }}
+                            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
                         />
                     </div>
 
@@ -445,14 +419,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             <Button
                                 type="submit"
                                 label="Submit"
-                                style={{
-                                    backgroundColor: 'var(--bv-primary)',
-                                    color: '#fff',
-                                    border: 'none',
-                                    borderRadius: '6px',
-                                    padding: '10px 20px',
-                                    fontSize: '16px',
-                                }}
                             />
                         </div>
                     </form>
@@ -511,14 +477,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             <Button
                                 label="Upload"
                                 icon={<SvgUploadArrowIcon />}
-                                style={{
-                                    backgroundColor: 'var(--bv-primary)',
-                                    color: '#fff',
-                                    border: 'none',
-                                    borderRadius: '6px',
-                                    padding: '10px 20px',
-                                    fontSize: '16px',
-                                }}
                                 onClick={handleDummyUpload}
                             />
                         </div>

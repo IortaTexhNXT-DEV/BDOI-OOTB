@@ -2094,7 +2094,10 @@
     "accountCategoryCodeHeader": "Account Category Code",
     "accountCategoryNameHeader": "Account Category Name",
     "remittanceMasterNote": "Approval limits, schedules and remittance settings are kept on their own screens:",
-    "configurationSettings": "Configuration (remittance settings)"
+    "configurationSettings": "Configuration (remittance settings)",
+    "address": "Address",
+    "contact": "Contact",
+    "accountCategoryDetail": "Account category"
   },
   "automatedRemittance": {
     "pageTitle": "Automated Remittance Master",
@@ -2166,7 +2169,43 @@
     "addProgram": "Add Program",
     "createIncentiveProgram": "Create Incentive Program",
     "editIncentiveProgram": "Edit Incentive Program",
-    "viewIncentiveProgram": "View Incentive Program"
+    "viewIncentiveProgram": "View Incentive Program",
+    "programCode": "Program code",
+    "programName": "Program name",
+    "description": "Description",
+    "programType": "Program type",
+    "applicableTo": "Applicable to",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "status": "Status",
+    "currency": "Currency",
+    "targetMetric": "Target metric",
+    "frequency": "Calculation frequency",
+    "baseTarget": "Base target",
+    "stretchTarget": "Stretch target",
+    "programSection": "Program",
+    "targetsSection": "Targets",
+    "structureSection": "Incentive structure",
+    "achievementLevel": "Achievement level",
+    "incentiveType": "Incentive type",
+    "rateOrAmount": "Rate or amount",
+    "maxPayout": "Maximum payout",
+    "viewDetails": "View details",
+    "edit": "Edit",
+    "close": "Close",
+    "cancel": "Cancel",
+    "createProgram": "Create program",
+    "saveProgram": "Save program",
+    "activateTitle": "Activate incentive program",
+    "activateMessage": "The program below becomes active and is included in incentive calculations.",
+    "activateAction": "Activate program",
+    "deactivateTitle": "Deactivate incentive program",
+    "deactivateMessage": "The program below becomes inactive.",
+    "deactivateNote": "Calculations not yet run do not include it. Calculations already approved are not changed.",
+    "deactivateAction": "Deactivate program",
+    "activated": "Program {{code}} activated",
+    "deactivated": "Program {{code}} deactivated",
+    "codeWhenBlank": "Assigned automatically when left blank"
   },
   "generalMasters": {
     "organization": "Organization",
@@ -2409,7 +2448,11 @@
     "uploadProvinces": "Upload provinces",
     "provinceAdded": "Province added",
     "tinInvalid": "Enter the TIN as 000-000-000 or 000-000-000-00000",
-    "tin": "TIN"
+    "tin": "TIN",
+    "departmentDetails": "Department",
+    "departmentName": "Department Name",
+    "branchAndDepartment": "Branch and department",
+    "userGroupAccess": "User group access"
   },
   "agent": {
     "createQuote": "Create Quote",
@@ -2761,7 +2804,12 @@
     "minutesAgo": "{{count}}m ago",
     "hoursAgo": "{{count}}h ago",
     "daysAgo": "{{count}}d ago",
-    "viewAll": "View All"
+    "viewAll": "View All",
+    "deleteTitle": "Delete notification",
+    "deleteMessage": "The notification below is removed from your list.",
+    "deleteAction": "Delete notification",
+    "notification": "Notification",
+    "received": "Received"
   },
   "dashboard": {
     "Motor": "Motor",
@@ -3891,7 +3939,11 @@
     "usage": "The IAR risk sections are used by the IAR prospect and quotation screens: only the active sections are offered, with their default rates. The other definitions are kept for reference and are not read by the quotation screens yet.",
     "usedBy": "Used by",
     "usedByIar": "IAR prospect and quotation",
-    "referenceOnly": "Reference only"
+    "referenceOnly": "Reference only",
+    "removeTitle": "Remove risk section",
+    "removeMessage": "The risk section below is removed from the product.",
+    "removeNote": "New prospects and quotations no longer offer it. Quotations that already use it keep it.",
+    "removeAction": "Remove section"
   },
   "coverageBuilder": {
     "addCoverage": "Add Coverage",
@@ -6111,6 +6163,23 @@
       "password-change-required": "Password change required",
       "password-expired": "Password expired",
       "refresh-token-reuse": "Session ended (token reuse)"
+    },
+    "user": "User",
+    "userName": "User name",
+    "roles": "Roles",
+    "unlockTitle": "Unlock account",
+    "unlockAction": "Unlock account",
+    "unlockMessage": "The account below is unlocked and its failed sign-in attempts are cleared.",
+    "resetMessage": "The account below receives a temporary password, shown once.",
+    "resetNote": "The user's sessions end and the user must choose a new password at the next sign-in.",
+    "turnOffAction": "Turn off two-step verification",
+    "turnOff2faMessage": "Two-step verification is turned off for the account below (for example after a lost phone).",
+    "turnOff2faNote": "The user signs in with the password alone until two-step verification is set up again.",
+    "methods": {
+      "password": "Password",
+      "sso": "Single sign-on",
+      "refresh": "Session renewed",
+      "2fa": "Two-step verification"
     }
   },
   "numberingMasters": {
@@ -6245,7 +6314,10 @@
         "matrix": "Commission Rate Matrix",
         "insurer": "Insurer default rate",
         "default": "System default rate"
-      }
+      },
+      "deleteTitle": "Delete commission rate",
+      "deleteAction": "Delete rate",
+      "deleteMessage": "The commission rate below will be deleted."
     },
     "creditTerms": {
       "title": "Credit terms",
@@ -7473,7 +7545,34 @@
       "perInsurer": "per insurer",
       "decidedAtPosting": "Decided when posting",
       "else": "else"
-    }
+    },
+    "requestedBy": "Requested by",
+    "requestedAt": "Requested on",
+    "decided": "Decision",
+    "decidedBy": "Decided by",
+    "decidedAt": "Decided on",
+    "decisionRemarks": "Decision remarks",
+    "accountSource": "Account from",
+    "confirm": {
+      "approveTitle": "Approve configuration change",
+      "approveMessage": "The change below takes effect for posting once approved.",
+      "approveNote": "Journals posted after approval use the new configuration.",
+      "approveAction": "Approve change",
+      "rejectTitle": "Reject configuration change",
+      "rejectMessage": "The change below will not be applied. The requester sees the reason.",
+      "rejectAction": "Reject change",
+      "withdrawTitle": "Withdraw configuration change",
+      "withdrawMessage": "The change below is withdrawn and no longer waits for approval.",
+      "withdrawAction": "Withdraw change",
+      "activateTitle": "Activate posting rule",
+      "activateMessage": "The posting rule version below is used for posting from its effective date.",
+      "activateAction": "Activate rule",
+      "deactivateTitle": "Deactivate posting rule",
+      "deactivateMessage": "The posting rule version below is no longer used for posting.",
+      "deactivateAction": "Deactivate rule",
+      "approvalNote": "Where configuration changes need a second user, the change waits in Configuration Approvals."
+    },
+    "historyOf": "History: {{event}}"
   },
   "bankReconciliation": {
     "title": "Bank Reconciliation",
@@ -7849,7 +7948,37 @@
     "activated": "Activated",
     "deactivated": "Deactivated",
     "notApplied": "Template not in use",
-    "notAppliedHelp": "Another template is in use for this product (Product Templates > In use): this entry is not applied to quotations until its template is the one in use."
+    "notAppliedHelp": "Another template is in use for this product (Product Templates > In use): this entry is not applied to quotations until its template is the one in use.",
+    "close": "Close",
+    "view": {
+      "template": "Product template",
+      "coverage": "Coverage",
+      "rule": "Acceptance rule",
+      "mapping": "Market mapping"
+    },
+    "kinds": {
+      "template": "Product template",
+      "coverages": "Coverage",
+      "rating-factors": "Rating factor",
+      "underwriting-rules": "Acceptance rule",
+      "market-mappings": "Market mapping",
+      "documents": "Document",
+      "risk-mapping": "Risk mapping"
+    },
+    "status": {
+      "recordType": "Record type",
+      "code": "Code",
+      "name": "Name",
+      "activateTitle": "Activate {{kind}}",
+      "deactivateTitle": "Deactivate {{kind}}",
+      "activateMessage": "The record below becomes active and applies to new quotations.",
+      "deactivateMessage": "The record below becomes inactive.",
+      "deactivateNote": "New quotations no longer use it. Quotations already issued are not changed.",
+      "retireMessage": "The product template below is retired.",
+      "retireNote": "It is no longer applied to new business. Policies already issued keep it.",
+      "retireAction": "Retire template",
+      "activateTemplateAction": "Activate template"
+    }
   },
   "customerResponse": {
     "waiting": "Waiting for customer approval",
@@ -8954,7 +9083,8 @@
       "titleRequired": "Enter what is to be done",
       "dueDateRequired": "Choose the due date",
       "timeInvalid": "Use HH:MM",
-      "recordRequired": "Choose the record"
+      "recordRequired": "Choose the record",
+      "deleteMessage": "The task below will be deleted and its reminder cancelled."
     },
     "items": {
       "empty": "Nothing waiting here"
@@ -9510,6 +9640,86 @@
       "batch.count": "Batch: number of payments",
       "batch.channel": "Batch: channel",
       "batch.createdDate": "Batch: created on"
+    },
+    "batchDetail": "Bank payment batch",
+    "batchFacts": "Batch",
+    "totalAmount": "Total amount",
+    "createdBy": "Created by",
+    "createdAt": "Created on",
+    "approvedBy": "Approved by",
+    "approvedAt": "Approved on",
+    "fileWrittenAt": "File written on",
+    "uploadedAt": "Uploaded on",
+    "returnedReason": "Reason returned",
+    "activity": "Activity",
+    "saveResult": "Save result",
+    "batchSteps": {
+      "submit": {
+        "title": "Submit batch for approval",
+        "message": "The batch below is sent to a second user for approval.",
+        "note": "The batch can no longer be changed while it waits for approval.",
+        "action": "Submit for approval"
+      },
+      "approve": {
+        "title": "Approve bank payment batch",
+        "message": "The payments below are approved for the bank file.",
+        "note": "The bank file can be written once the batch is approved.",
+        "action": "Approve batch"
+      },
+      "reject": {
+        "title": "Return bank payment batch",
+        "message": "The batch below goes back to its maker as a draft.",
+        "action": "Return batch"
+      },
+      "cancel": {
+        "title": "Cancel bank payment batch",
+        "message": "The batch below is cancelled and its vouchers can be paid again.",
+        "action": "Cancel batch"
+      },
+      "generate": {
+        "title": "Write bank file",
+        "message": "The upload file for the bank portal is written from the batch below.",
+        "action": "Write file"
+      },
+      "rewrite": {
+        "title": "Write bank file again",
+        "message": "The upload file of the batch below is written again.",
+        "note": "Upload only the new file to the bank portal; discard the earlier one.",
+        "action": "Write file again"
+      },
+      "sent": {
+        "title": "Mark batch as uploaded",
+        "message": "The file of the batch below has been uploaded to the bank portal.",
+        "action": "Mark as uploaded"
+      }
+    },
+    "messageDetail": "Outgoing message",
+    "inboxDetail": "Incoming message",
+    "messageFacts": "Message",
+    "content": "Content",
+    "record": "Record",
+    "sentAt": "Sent on",
+    "receivedBy": "Received by",
+    "processedAt": "Processed on",
+    "signature": "Signature valid",
+    "outboxSteps": {
+      "resend": {
+        "title": "Resend message",
+        "message": "The message below is queued again and sent to the provider.",
+        "action": "Resend message"
+      },
+      "cancel": {
+        "title": "Cancel message",
+        "message": "The message below is cancelled and is not sent.",
+        "action": "Cancel message"
+      }
+    },
+    "inboxSteps": {
+      "reprocess": {
+        "title": "Process message again",
+        "message": "The incoming message below is processed again.",
+        "action": "Process again"
+      }
     }
   },
   "onboarding": {
@@ -10790,7 +11000,30 @@
     "reason": "Reason for the revocation",
     "confirmRevoke": "Revoke version",
     "mySignature": "My e-signature",
-    "mine": "my signature"
+    "mine": "my signature",
+    "signer": "Signer",
+    "version": "Version",
+    "versionNo": "Version {{version}}",
+    "effectiveTo": "Effective to",
+    "openEnded": "Until replaced",
+    "method": "Captured as",
+    "capturedBy": "Captured by",
+    "capturedAt": "Captured on",
+    "revokedBy": "Revoked by",
+    "revokedAt": "Revoked on",
+    "revokeReason": "Reason revoked",
+    "methods": {
+      "drawn": "Drawn on screen",
+      "uploaded": "Uploaded image"
+    },
+    "statuses": {
+      "active": "Active",
+      "revoked": "Revoked",
+      "replaced": "Replaced"
+    },
+    "revokeTitle": "Revoke signature version",
+    "revokeMessage": "The signature version below is revoked and no longer printed.",
+    "revokeNote": "Documents printed before keep the signature they were printed with."
   },
   "salesActivities": {
     "title": "Activities",
@@ -10864,7 +11097,11 @@
       "open": "Open",
       "done": "Done",
       "cancelled": "Cancelled"
-    }
+    },
+    "activity": "Activity",
+    "cancelMessage": "The activity below is kept on the record and marked as cancelled.",
+    "cancelNote": "Its open follow-up task in My Work is cancelled too.",
+    "byName": "by {{name}}"
   },
   "quoteSteps": {
     "label": "Steps of the quote",
@@ -10967,5 +11204,184 @@
     "saveAnyway": "Save anyway",
     "back": "Back to the form",
     "clientFailed": "The client could not be loaded"
+  },
+  "remittanceMasters": {
+    "code": "Code",
+    "name": "Name",
+    "kinds": {
+      "settlementParameter": "Settlement parameters",
+      "statementTemplate": "Statement template",
+      "automatedRule": "Remittance rule"
+    },
+    "delete": {
+      "title": "Delete {{what}}",
+      "message": "The {{what}} below will be deleted.",
+      "note": "Remittances already processed with it are not changed.",
+      "action": "Delete {{what}}",
+      "done": "{{what}} deleted"
+    },
+    "notifications": {
+      "view": "View",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteTitle": "Delete notification template",
+      "deleteMessage": "The notification template below will be deleted.",
+      "deleteNote": "Notifications already sent are not affected.",
+      "deleteAction": "Delete template",
+      "deleted": "{{name}} deleted",
+      "addTitle": "Add notification template",
+      "editTitle": "Edit notification template",
+      "templateTitle": "Notification template",
+      "ruleTitle": "Notification rule",
+      "templateName": "Template name",
+      "eventType": "Event",
+      "recipient": "Recipient",
+      "recipients": "Recipients",
+      "channel": "Channel",
+      "priority": "Priority",
+      "autoSend": "Sent automatically",
+      "subject": "Subject",
+      "message": "Message",
+      "body": "Body",
+      "delivery": "Delivery",
+      "active": "Active",
+      "inactive": "Inactive",
+      "condition": "Condition",
+      "frequency": "Frequency",
+      "escalationLevel": "Escalation level"
+    }
+  },
+  "s3Upload": {
+    "uploadFiles_one": "Upload {{count}} file",
+    "uploadFiles_other": "Upload {{count}} files",
+    "retryFiles_one": "Retry {{count}} file",
+    "retryFiles_other": "Retry {{count}} files"
+  },
+  "masterStatus": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "recordType": "Record type",
+    "name": "Name",
+    "code": "Code",
+    "deactivateTitle": "Deactivate {{kind}}",
+    "deactivateMessage": "The {{kind}} below will be set to inactive.",
+    "deactivateAction": "Deactivate {{kind}}",
+    "note": {
+      "default": "It is no longer offered on new transactions. Existing records keep it.",
+      "role": "Users who hold only this role lose access to the screens it grants.",
+      "user": "The user can no longer sign in."
+    },
+    "types": {
+      "hierarchy": "Hierarchy",
+      "designation": "Designation",
+      "role": "Role",
+      "user": "User",
+      "company": "Company",
+      "branch": "Branch",
+      "vehicle": "Vehicle",
+      "product": "Product",
+      "cover": "Cover",
+      "policy-type": "Policy type",
+      "signatory": "Signatory",
+      "line-of-business": "Line of business",
+      "insurance-company": "Insurance company",
+      "city": "City",
+      "country": "Country",
+      "state": "Province",
+      "exchange-rate": "Exchange rate",
+      "bank": "Bank",
+      "bank-account": "Bank account",
+      "department": "Department",
+      "account-category": "Account category",
+      "currency": "Currency",
+      "transaction-code": "Transaction code"
+    }
+  },
+  "schedules": {
+    "title": "Schedules",
+    "master": "Master",
+    "job": "Job",
+    "whatItDoes": "What it does",
+    "schedule": "Schedule",
+    "scheduleIn": "Schedule ({{zone}})",
+    "status": "Status",
+    "scheduled": "Scheduled",
+    "switchedOff": "Switched off",
+    "nextRun": "Next run",
+    "lastRun": "Last run",
+    "lastStatus": "Last status",
+    "runNow": "Run now",
+    "runHistory": "Run history",
+    "edit": "Edit schedule",
+    "editTitle": "Edit schedule: {{job}}",
+    "historyTitle": "Run history: {{job}}",
+    "noRuns": "No runs yet",
+    "saved": "Schedule saved",
+    "cancel": "Cancel",
+    "saveSchedule": "Save schedule",
+    "cronLabel": "Schedule (cron)",
+    "cronHelp": "minute hour day month weekday, for example 0 6 * * * runs daily at 06:00",
+    "cronHelpZone": "minute hour day month weekday, for example 0 6 * * * runs daily at 06:00 {{zone}} time",
+    "enabled": "Enabled",
+    "done": "Done",
+    "runTitle": "Run job now",
+    "runMessage": "The job below runs now, outside its schedule.",
+    "runNote": "What it sends or updates (notices, e-mails, balances) is sent or updated as on a scheduled run.",
+    "runAction": "Run job",
+    "runStatus": {
+      "success": "Completed",
+      "failed": "Failed",
+      "running": "Running"
+    },
+    "cron": {
+      "everyMinute": "Every minute",
+      "everyMinutes": "Every {{count}} minutes",
+      "hourly": "Hourly at :{{minute}}",
+      "daily": "Daily at {{at}}",
+      "weekdays": "Weekdays at {{at}}",
+      "weekly": "Every {{day}} at {{at}}",
+      "monthly": "Monthly on day {{day}} at {{at}}"
+    },
+    "days": {
+      "sunday": "Sunday",
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday"
+    }
+  },
+  "configuration": {
+    "leaveTitle": "Leave without saving",
+    "leaveMessage_one": "{{count}} setting has changed and is not saved.",
+    "leaveMessage_other": "{{count}} settings have changed and are not saved.",
+    "leaveMore": "And {{count}} more",
+    "notSaved": "Not saved",
+    "leaveAction": "Discard changes and leave",
+    "stay": "Stay on this page"
+  },
+  "paymentCapture": {
+    "mode": "Payment mode",
+    "reference": "Reference",
+    "paymentDate": "Payment date",
+    "bill": "Bill",
+    "acknowledgement": "Acknowledgement receipt no.",
+    "submittedBy": "Recorded by",
+    "amount": "Amount",
+    "confirmTitle": "Confirm payment",
+    "confirmMessage": "The payment below is verified against the bank or cashier records.",
+    "confirmNote": "The official receipt is issued and posted to the ledger.",
+    "confirmAction": "Confirm payment",
+    "confirmed": "Payment confirmed",
+    "rejectTitle": "Reject payment",
+    "rejectMessage": "The payment below is rejected and the bill stays open.",
+    "rejectReason": "Reason",
+    "rejectReasonHint": "For example: no matching credit in the bank statement",
+    "rejectAction": "Reject payment",
+    "rejected": "Payment rejected",
+    "printFailed": "Could not print the receipt",
+    "acknowledgementReceipt": "Acknowledgement receipt",
+    "officialReceipt": "Official receipt"
   }
 }

@@ -11,9 +11,8 @@ import { useNavigate, useLocation, useParams } from "react-router-dom";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { Toast } from "primereact/toast";
 import FieldError from "../../../../components/FieldError";
-import { MasterLookup, deleteAndReturn, saveAndReturn, useMasterOptions } from "../masterRecord";
+import { MasterLookup, confirmDeleteAndReturn, saveAndReturn, useMasterOptions } from "../masterRecord";
 import "./index.scss";
-import { confirmAction } from "../../../../utility/dialogs";
 import { requiredErrors, hasErrors, errorSummary } from "../../../../utility/requiredFields";
 
 const AutomatedRemittanceMaster = () => {
@@ -135,9 +134,17 @@ const AutomatedRemittanceMaster = () => {
   });
 
   const handleDelete = async () => {
-    if (await confirmAction("Are you sure you want to delete this remittance rule?", { danger: true })) {
-      deleteAndReturn({ type: TYPE, id: data?.id, toast, navigate });
-    }
+    await confirmDeleteAndReturn({
+      type: TYPE,
+      id: data?.id,
+      kind: "automatedRule",
+      facts: [
+        { label: t("remittanceMasters.code"), value: formData.ruleCode },
+        { label: t("remittanceMasters.name"), value: formData.ruleName },
+      ],
+      toast,
+      navigate,
+    });
   };
 
   const handleClose = () => {

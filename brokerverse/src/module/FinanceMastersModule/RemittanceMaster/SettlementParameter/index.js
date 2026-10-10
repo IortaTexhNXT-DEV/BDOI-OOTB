@@ -9,9 +9,8 @@ import { Checkbox } from "primereact/checkbox";
 import { Link, useNavigate, useLocation, useParams } from "react-router-dom";
 import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
 import { Toast } from "primereact/toast";
-import { MasterLookup, deleteAndReturn, saveAndReturn } from "../masterRecord";
+import { MasterLookup, confirmDeleteAndReturn, saveAndReturn } from "../masterRecord";
 import "./index.scss";
-import { confirmAction } from "../../../../utility/dialogs";
 
 const SettlementParameterMaster = () => {
   const { t } = useTranslation();
@@ -98,9 +97,17 @@ const SettlementParameterMaster = () => {
   });
 
   const handleDelete = async () => {
-    if (await confirmAction("Are you sure you want to delete these settlement parameters?", { danger: true })) {
-      deleteAndReturn({ type: TYPE, id: data?.id, toast, navigate });
-    }
+    await confirmDeleteAndReturn({
+      type: TYPE,
+      id: data?.id,
+      kind: "settlementParameter",
+      facts: [
+        { label: t("remittanceMasters.code"), value: formData.paramCode },
+        { label: t("remittanceMasters.name"), value: formData.paramName },
+      ],
+      toast,
+      navigate,
+    });
   };
 
   const handleClose = () => {

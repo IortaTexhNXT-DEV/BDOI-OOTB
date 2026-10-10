@@ -17,3 +17,45 @@
     font-family: monospace;
   }
 }
+
+// Bank payment batch pop-up: workflow actions under the header, the maker-checker reason next to Approve / Reject
+.bv-int-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 16px;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.bv-int-approval {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.bv-int-approval__reason {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.bv-int-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bv-int-pre-title {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}

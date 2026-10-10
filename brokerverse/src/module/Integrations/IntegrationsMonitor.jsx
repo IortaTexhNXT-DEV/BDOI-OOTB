@@ -14,7 +14,13 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
 import service from "../../services/integrationsService";
 import { useServerList } from "../../hooks/useServerList";
-import { IntTag, PageHeader, dateTime, parseJson, pretty, showError, showSuccess } from "./common";
+import DetailDialog from "../../components/DetailDialog";
+import DetailHeader from "../../components/DetailHeader";
+import DetailSection from "../../components/DetailSection";
+import KeyValueGrid from "../../components/KeyValueGrid";
+import { openConfirm } from "../../components/ConfirmDialog";
+import { humanize } from "../../components/ActivityLog";
+import { IntTag, PageHeader, SEVERITY, dateTime, parseJson, pretty, showError, showSuccess } from "./common";
 
 const OUTBOX_STATUSES = ["queued", "retry", "processing", "sent", "failed", "cancelled", "skipped"];
 const INBOX_STATUSES = ["received", "processed", "failed", "ignored"];
@@ -93,8 +99,13 @@ const ConnectorDialog = ({ connector, adapters, onHide, onSaved, toast }) => {
   );
 };
 
-/** Message detail: payload, the provider's answer and every attempt. */
-const MessageDialog = ({ messageId, onHide }) => {
+/** A message type in words: its label in the registry, else the code humanised ("policy.issued" -> "Policy issued"). */
+const typeLabel = (types, code) => types.find((x) => x.type === code)?.label || humanize(String(code || "").replace(/\./g, " "));
+
+const statusChip = (t, status) => ({ code: status, label: t(`integrations.status.${status}`, { defaultValue: humanize(status) }), severity: SEVERITY[status] });
+
+/** Message detail: who and what it went to, the payload, the provider's answer and every attempt. */
+const MessageDialog = ({ messageId, onHide, messageTypes }) => {
   const { t } = useTranslation();
   const [m, setM] = useState(null);
   const [error, setError] = useState(null);
@@ -104,37 +115,59 @@ const MessageDialog = ({ messageId, onHide }) => {
     setError(null);
     service.message(messageId).then(setM).catch((e) => setError(e.message));
   }, [messageId]);
+  if (!messageId) return null;
   return (
-    <Dialog className="pe-dialog" header={messageId ? `${t("integrations.message")} #${messageId}` : ""} visible={!!messageId} onHide={onHide} style={{ width: "min(900px, 96vw)" }}>
+    <DetailDialog visible onHide={onHide} header={t("integrations.messageDetail")} size="lg">
       {error && <div className="pe-error">{error}</div>}
       {m && (
-        <div className="grid">
-          <div className="col-12 md:col-6"><strong>{t("integrations.messageType")}:</strong> {m.messageType}</div>
-          <div className="col-12 md:col-6"><strong>{t("integrations.status.label")}:</strong> <IntTag status={m.status} /> <IntTag status={m.mode} /></div>
-          <div className="col-12 md:col-6"><strong>{t("integrations.reference")}:</strong> {m.reference || "-"}</div>
-          <div className="col-12 md:col-6"><strong>{t("integrations.externalRef")}:</strong> {m.externalRef || "-"}</div>
-          {m.lastError && <div className="col-12"><Message severity="error" text={m.lastError} className="w-full" /></div>}
-          <div className="col-12 md:col-6"><label>{t("integrations.payload")}</label><pre className="pe-pre">{pretty(m.payload)}</pre></div>
-          <div className="col-12 md:col-6"><label>{t("integrations.response")}</label><pre className="pe-pre">{pretty(m.response) || "-"}</pre></div>
-          <div className="col-12">
+        <>
+          <DetailHeader
+            title={`${t("integrations.message")} #${m.id}`}
+            subtitle={typeLabel(messageTypes, m.messageType)}
+            status={statusChip(t, m.status)}
+            meta={[
+              { label: t("integrations.connector"), value: m.connectorName || m.connectorCode },
+              { label: t("integrations.mode"), value: t(`integrations.status.${m.mode}`, { defaultValue: humanize(m.mode) }) },
+              { label: t("integrations.attempts"), value: `${m.attempts} / ${m.maxAttempts}` },
+              { label: t("integrations.created"), value: m.createdAt, type: "datetime" },
+            ]}
+          />
+          {m.lastError && <Message severity="error" text={m.lastError} className="w-full mb-3" />}
+          <DetailSection title={t("integrations.messageFacts")}>
+            <KeyValueGrid columns={3} items={[
+              { label: t("integrations.reference"), value: m.reference },
+              { label: t("integrations.externalRef"), value: m.externalRef },
+              { label: t("integrations.record"), value: m.entity ? `${humanize(m.entity)} ${m.entityId || ""}`.trim() : null },
+              { label: t("integrations.createdBy"), value: m.createdBy },
+              { label: t("integrations.sentAt"), value: m.sentAt, type: "datetime" },
+              { label: t("integrations.nextAttempt"), value: ["queued", "retry"].includes(m.status) ? m.nextAttemptAt : null, type: "datetime" },
+            ]} />
+          </DetailSection>
+          <DetailSection title={t("integrations.content")}>
+            <div className="grid">
+              <div className="col-12 md:col-6"><h4 className="bv-int-pre-title">{t("integrations.payload")}</h4><pre className="pe-pre">{pretty(m.payload)}</pre></div>
+              <div className="col-12 md:col-6"><h4 className="bv-int-pre-title">{t("integrations.response")}</h4><pre className="pe-pre">{pretty(m.response) || "-"}</pre></div>
+            </div>
+          </DetailSection>
+          <DetailSection title={t("integrations.attempts")} flush>
             <DataTable value={m.attemptLog} size="small" stripedRows emptyMessage={t("integrations.noAttempts")}>
               <Column field="attempt" header="#" />
               <Column header={t("integrations.mode")} body={(a) => <IntTag status={a.mode} />} />
               <Column header={t("integrations.result")} body={(a) => <IntTag status={a.ok ? "sent" : "failed"} />} />
               <Column field="httpStatus" header="HTTP" />
-              <Column field="durationMs" header={t("integrations.durationMs")} />
+              <Column field="durationMs" header={t("integrations.durationMs")} className="bv-num" headerClassName="bv-num" />
               <Column field="error" header={t("integrations.lastError")} style={{ maxWidth: "24rem", wordBreak: "break-word" }} />
               <Column header={t("integrations.at")} body={(a) => dateTime(a.at)} />
             </DataTable>
-          </div>
-        </div>
+          </DetailSection>
+        </>
       )}
-    </Dialog>
+    </DetailDialog>
   );
 };
 
 /** The outbox list with its filters, shared by the monitor and the screens that show their own messages. */
-export const OutboxTable = ({ fixed = {}, connectors = [], toast, allowActions = true, listKey = "integration-outbox" }) => {
+export const OutboxTable = ({ fixed = {}, connectors = [], messageTypes = [], toast, allowActions = true, listKey = "integration-outbox" }) => {
   const { t } = useTranslation();
   const [filters, setFilters] = useState({ status: null, connectorCode: null, search: "" });
   const [counts, setCounts] = useState({});
@@ -146,17 +179,31 @@ export const OutboxTable = ({ fixed = {}, connectors = [], toast, allowActions =
     return r;
   }, [filters, fixed]);
   const list = useServerList(fetchPage, { key: listKey });
-  const act = async (row, fn) => {
+  // resend and cancel reach an outside system (SMS gateway, insurer, LTO): asked first, run inside the confirmation
+  const act = async (row, action, fn) => {
+    let r;
     setBusy(row.id);
-    try {
-      const r = await fn();
-      showSuccess(toast, r.message);
-      list.reload();
-    } catch (e) {
-      showError(toast, e);
-    } finally {
-      setBusy(null);
-    }
+    const done = await openConfirm({
+      title: t(`integrations.outboxSteps.${action}.title`),
+      severity: action === "cancel" ? "danger" : "warning",
+      message: t(`integrations.outboxSteps.${action}.message`),
+      facts: [
+        { label: t("integrations.message"), value: `#${row.id}` },
+        { label: t("integrations.messageType"), value: typeLabel(messageTypes, row.messageType) },
+        { label: t("integrations.connector"), value: row.connectorName },
+        { label: t("integrations.reference"), value: row.reference, hidden: !row.reference },
+        { label: t("integrations.status.label"), value: t(`integrations.status.${row.status}`, { defaultValue: humanize(row.status) }) },
+        { label: t("integrations.attempts"), value: `${row.attempts} / ${row.maxAttempts}` },
+      ],
+      confirmLabel: t(`integrations.outboxSteps.${action}.action`),
+      onConfirm: async () => {
+        r = await fn();
+      },
+    });
+    setBusy(null);
+    if (!done) return;
+    showSuccess(toast, r?.message);
+    list.reload();
   };
   return (
     <>
@@ -174,7 +221,7 @@ export const OutboxTable = ({ fixed = {}, connectors = [], toast, allowActions =
       <DataTable {...list.tableProps} dataKey="id" size="small" stripedRows emptyMessage={list.error || t("integrations.noMessages")}>
         <Column field="id" header="#" />
         <Column header={t("integrations.status.label")} body={(r) => <IntTag status={r.status} />} />
-        <Column header={t("integrations.messageType")} body={(r) => <div><div>{r.messageType}</div><div className="pe-muted">{r.connectorName}</div></div>} />
+        <Column header={t("integrations.messageType")} body={(r) => <div><div>{typeLabel(messageTypes, r.messageType)}</div><div className="pe-muted">{r.connectorName}</div></div>} />
         <Column field="reference" header={t("integrations.reference")} />
         <Column header={t("integrations.attempts")} body={(r) => `${r.attempts} / ${r.maxAttempts}`} />
         <Column header={t("integrations.lastError")} body={(r) => r.lastError || "-"} style={{ maxWidth: "20rem", wordBreak: "break-word" }} />
@@ -185,34 +232,46 @@ export const OutboxTable = ({ fixed = {}, connectors = [], toast, allowActions =
             <Button icon="pi pi-eye" text rounded size="small" aria-label={t("integrations.view")} tooltip={t("integrations.view")} tooltipOptions={{ position: "top" }} onClick={() => setDetail(r.id)} />
             {allowActions && !["sent", "processing"].includes(r.status) && (
               <Button icon="pi pi-replay" text rounded size="small" loading={busy === r.id} aria-label={t("integrations.resend")} tooltip={t("integrations.resend")} tooltipOptions={{ position: "top" }}
-                onClick={() => act(r, () => service.resend(r.id))} />
+                onClick={() => act(r, "resend", () => service.resend(r.id))} />
             )}
             {allowActions && ["queued", "retry", "failed", "skipped"].includes(r.status) && (
               <Button icon="pi pi-times" text rounded size="small" severity="danger" aria-label={t("integrations.cancelMessage")} tooltip={t("integrations.cancelMessage")} tooltipOptions={{ position: "top" }}
-                onClick={() => act(r, () => service.cancel(r.id))} />
+                onClick={() => act(r, "cancel", () => service.cancel(r.id))} />
             )}
           </span>
         )} />
       </DataTable>
-      <MessageDialog messageId={detail} onHide={() => setDetail(null)} />
+      <MessageDialog messageId={detail} onHide={() => setDetail(null)} messageTypes={messageTypes} />
     </>
   );
 };
 
-const InboxTable = ({ toast }) => {
+const InboxTable = ({ toast, messageTypes = [] }) => {
   const { t } = useTranslation();
   const [status, setStatus] = useState(null);
   const [detail, setDetail] = useState(null);
   const fetchPage = useCallback(({ page, pageSize }) => service.inbox({ status, page, pageSize }), [status]);
   const list = useServerList(fetchPage, { key: "integration-inbox" });
   const reprocess = async (r) => {
-    try {
-      const res = await service.reprocess(r.id);
-      showSuccess(toast, res.message);
-      list.reload();
-    } catch (e) {
-      showError(toast, e);
-    }
+    let res;
+    const done = await openConfirm({
+      title: t("integrations.inboxSteps.reprocess.title"),
+      severity: "warning",
+      message: t("integrations.inboxSteps.reprocess.message"),
+      facts: [
+        { label: t("integrations.messageType"), value: typeLabel(messageTypes, r.messageType) },
+        { label: t("integrations.source"), value: t(`integrations.sourceType.${r.source}`, { defaultValue: r.source }) },
+        { label: t("integrations.reference"), value: r.externalRef || r.entityId },
+        { label: t("integrations.received"), value: r.receivedAt, type: "datetime" },
+      ],
+      confirmLabel: t("integrations.inboxSteps.reprocess.action"),
+      onConfirm: async () => {
+        res = await service.reprocess(r.id);
+      },
+    });
+    if (!done) return;
+    showSuccess(toast, res?.message);
+    list.reload();
   };
   return (
     <>
@@ -224,7 +283,7 @@ const InboxTable = ({ toast }) => {
       <DataTable {...list.tableProps} dataKey="id" size="small" stripedRows emptyMessage={list.error || t("integrations.noMessages")}>
         <Column field="id" header="#" />
         <Column header={t("integrations.status.label")} body={(r) => <IntTag status={r.status} />} />
-        <Column field="messageType" header={t("integrations.messageType")} />
+        <Column header={t("integrations.messageType")} body={(r) => typeLabel(messageTypes, r.messageType)} />
         <Column header={t("integrations.source")} body={(r) => t(`integrations.sourceType.${r.source}`, { defaultValue: r.source })} />
         <Column header={t("integrations.reference")} body={(r) => r.externalRef || r.entityId || "-"} />
         <Column header={t("integrations.lastError")} body={(r) => r.lastError || "-"} style={{ maxWidth: "20rem", wordBreak: "break-word" }} />
@@ -236,14 +295,37 @@ const InboxTable = ({ toast }) => {
           </span>
         )} />
       </DataTable>
-      <Dialog className="pe-dialog" header={detail ? `${t("integrations.inbox")} #${detail.id}` : ""} visible={!!detail} onHide={() => setDetail(null)} style={{ width: "min(800px, 96vw)" }}>
-        {detail && (
-          <div className="grid">
-            <div className="col-12 md:col-6"><label>{t("integrations.payload")}</label><pre className="pe-pre">{pretty(detail.payload)}</pre></div>
-            <div className="col-12 md:col-6"><label>{t("integrations.result")}</label><pre className="pe-pre">{pretty(detail.result) || "-"}</pre></div>
-          </div>
-        )}
-      </Dialog>
+      {detail ? (
+        <DetailDialog visible onHide={() => setDetail(null)} header={t("integrations.inboxDetail")} size="lg">
+          <DetailHeader
+            title={`${t("integrations.inbox")} #${detail.id}`}
+            subtitle={typeLabel(messageTypes, detail.messageType)}
+            status={statusChip(t, detail.status)}
+            meta={[
+              { label: t("integrations.source"), value: t(`integrations.sourceType.${detail.source}`, { defaultValue: detail.source }) },
+              { label: t("integrations.received"), value: detail.receivedAt, type: "datetime" },
+              { label: t("integrations.attempts"), value: detail.attempts, type: "number" },
+            ]}
+          />
+          {detail.lastError && <Message severity="error" text={detail.lastError} className="w-full mb-3" />}
+          <DetailSection title={t("integrations.messageFacts")}>
+            <KeyValueGrid columns={3} items={[
+              { label: t("integrations.reference"), value: detail.externalRef },
+              { label: t("integrations.record"), value: detail.entity ? `${humanize(detail.entity)} ${detail.entityId || ""}`.trim() : null },
+              { label: t("integrations.connector"), value: detail.connectorCode },
+              { label: t("integrations.receivedBy"), value: detail.receivedBy },
+              { label: t("integrations.processedAt"), value: detail.processedAt, type: "datetime" },
+              { label: t("integrations.signature"), value: detail.signatureValid === null || detail.signatureValid === undefined ? null : detail.signatureValid, type: "boolean" },
+            ]} />
+          </DetailSection>
+          <DetailSection title={t("integrations.content")}>
+            <div className="grid">
+              <div className="col-12 md:col-6"><h4 className="bv-int-pre-title">{t("integrations.payload")}</h4><pre className="pe-pre">{pretty(detail.payload)}</pre></div>
+              <div className="col-12 md:col-6"><h4 className="bv-int-pre-title">{t("integrations.result")}</h4><pre className="pe-pre">{pretty(detail.result) || "-"}</pre></div>
+            </div>
+          </DetailSection>
+        </DetailDialog>
+      ) : null}
     </>
   );
 };
@@ -329,10 +411,10 @@ const IntegrationsMonitor = () => {
             </DataTable>
           </TabPanel>
           <TabPanel header={t("integrations.outbox")}>
-            {tab === 1 && <OutboxTable connectors={connectors} toast={toast} />}
+            {tab === 1 && <OutboxTable connectors={connectors} messageTypes={registry.messageTypes} toast={toast} />}
           </TabPanel>
           <TabPanel header={t("integrations.inbox")}>
-            {tab === 2 && <InboxTable toast={toast} />}
+            {tab === 2 && <InboxTable toast={toast} messageTypes={registry.messageTypes} />}
           </TabPanel>
         </TabView>
       </div>

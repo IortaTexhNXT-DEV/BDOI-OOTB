@@ -2,14 +2,13 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
-import { InputText } from "primereact/inputtext";
 import { Skeleton } from "primereact/skeleton";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import salesActivityService from "../../services/salesActivityService";
 import { hasPermission } from "../../utils/canOpen";
-import { formatDate } from "../../utility/dateFormat";
+import { formatDate, formatInstant } from "../../utility/dateFormat";
+import { openConfirm } from "../ConfirmDialog";
 import ActivityForm from "./ActivityForm";
 import "./activities.scss";
 
@@ -30,8 +29,6 @@ const ActivityPanel = ({ entity, recordId, onLogged }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [form, setForm] = useState(null);
-  const [cancelling, setCancelling] = useState(null);
-  const [reason, setReason] = useState("");
   const canWrite = hasPermission("write:sales-activities");
   const canRead = canWrite || hasPermission("read:sales-activities");
 
@@ -69,16 +66,27 @@ const ActivityPanel = ({ entity, recordId, onLogged }) => {
       notify("error", e.message);
     }
   };
-  const cancel = async () => {
-    try {
-      await salesActivityService.cancel(cancelling.id, reason);
-      notify("success", t("salesActivities.cancelled"));
-      setCancelling(null);
-      setReason("");
-      load();
-    } catch (e) {
-      notify("error", e.message);
-    }
+  const cancel = async (a) => {
+    const reason = await openConfirm({
+      title: t("salesActivities.cancelActivity"),
+      severity: "danger",
+      message: t("salesActivities.cancelMessage"),
+      facts: [
+        { label: t("salesActivities.activity"), value: a.activityTypeName },
+        { label: t("salesActivities.when"), value: a.activityAt, type: "datetime" },
+        { label: t("salesActivities.subject"), value: a.subject },
+        { label: t("salesActivities.accountExecutive"), value: a.accountExecutiveName, hidden: !a.accountExecutiveName },
+        { label: t("salesActivities.record"), value: a.recordNumber, hidden: !a.recordNumber },
+      ],
+      note: a.nextStep && a.taskStatus === "open" ? t("salesActivities.cancelNote") : null,
+      input: { type: "text", label: t("salesActivities.reason"), required: true, minLength: 3, maxLength: 500 },
+      confirmLabel: t("salesActivities.cancelActivity"),
+      cancelLabel: t("salesActivities.back"),
+      onConfirm: (text) => salesActivityService.cancel(a.id, text),
+    });
+    if (reason === null) return;
+    notify("success", t("salesActivities.cancelled"));
+    load();
   };
 
   if (!canRead) return null;
@@ -107,8 +115,8 @@ const ActivityPanel = ({ entity, recordId, onLogged }) => {
             <div className="bv-activity-body">
               <div className="bv-activity-line">
                 <b>{a.activityTypeName}</b>
-                <span>{formatDate(a.activityAt, { withTime: true })}</span>
-                <span>{a.accountExecutiveName}</span>
+                <span className="bv-activity-when">{formatInstant(a.activityAt)}</span>
+                {a.accountExecutiveName && <span className="bv-activity-by">{t("salesActivities.byName", { name: a.accountExecutiveName })}</span>}
                 {a.entity !== entity && a.recordNumber && <Tag severity="info" value={a.recordNumber} />}
                 {a.outcomeName && <Tag value={a.outcomeName} />}
               </div>
@@ -126,18 +134,13 @@ const ActivityPanel = ({ entity, recordId, onLogged }) => {
                 <Button icon="pi pi-pencil" text rounded size="small" aria-label={t("salesActivities.edit")} tooltip={t("salesActivities.edit")} tooltipOptions={{ position: "top" }}
                   onClick={() => setForm({ activity: a })} />
                 <Button icon="pi pi-times" text rounded size="small" severity="secondary" aria-label={t("salesActivities.cancelActivity")} tooltip={t("salesActivities.cancelActivity")}
-                  tooltipOptions={{ position: "top" }} onClick={() => setCancelling(a)} />
+                  tooltipOptions={{ position: "top" }} onClick={() => cancel(a)} />
               </div>
             )}
           </li>
         ))}
       </ol>
       <ActivityForm visible={!!form} options={options} activity={form?.activity || null} onSave={save} onHide={() => setForm(null)} />
-      <Dialog className="pe-dialog" header={t("salesActivities.cancelActivity")} visible={!!cancelling} style={{ width: "min(520px, 96vw)" }} onHide={() => setCancelling(null)}
-        footer={<div><Button label={t("salesActivities.back")} text onClick={() => setCancelling(null)} /><Button label={t("salesActivities.cancelActivity")} severity="danger" disabled={reason.trim().length < 3} onClick={cancel} /></div>}>
-        <label htmlFor="sa-cancel-reason" className="block mb-1">{t("salesActivities.reason")}</label>
-        <InputText id="sa-cancel-reason" value={reason} onChange={(e) => setReason(e.target.value)} className="w-full" maxLength={500} />
-      </Dialog>
     </div>
   );
 };

@@ -13,6 +13,10 @@ import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import SvgUpload from "../../../assets/icons/SvgUpload";
 import { Dialog } from "primereact/dialog";
+import DetailDialog from "../../../components/DetailDialog";
+import DetailHeader from "../../../components/DetailHeader";
+import DetailSection from "../../../components/DetailSection";
+import KeyValueGrid from "../../../components/KeyValueGrid";
 import InputField from "../../../components/InputField";
 import SvgTable from "../../../assets/icons/SvgTable";
 import { useDispatch, useSelector } from "react-redux";
@@ -33,7 +37,7 @@ const BankMaster = () => {
   const { t } = useTranslation();
   const [showUpload, setShowUpload] = useState(false);
   const [visible, setVisible] = useState(false);
-  const [visibleview, setVisibleview] = useState(false);
+  const [viewing, setViewing] = useState(null);
   const [, setDialog] = useState({});
   const [search, setSearch] = useState("");
   const dispatch = useDispatch();
@@ -80,11 +84,7 @@ const BankMaster = () => {
     fillBankForm(rowData);
   };
 
-  const handleView = (rowData) => {
-    setVisibleview(true);
-    setDialog(rowData);
-    fillBankForm(rowData);
-  };
+  const handleView = (rowData) => setViewing(rowData);
 
   const { bankList, BankSearchList } = useSelector(({ bankMasterReducer }) => {
     return {
@@ -511,142 +511,42 @@ const BankMaster = () => {
         </div>
       </Dialog>
 
-      <Dialog
-        header={t("financeMasters.bankDetails")}
-        visible={visibleview}
-        style={{ width: "60vw", boxShadow: "none" }}
-        onHide={() => setVisibleview(false)}
-        className="master__flow__common__dialog__container"
-      >
-        <div class="grid">
-          <div class="col-12 md:col-3 lg:col-3">
-            <InputField
-              classNames="field__container"
-              label={t("financeMasters.bankCode")}
-              placeholder={t("financeMasters.enter")}
-              value={formik.values.bankCode}
-              onChange={formik.handleChange("bankCode")}
-            />
-          </div>
-          <div class="col-12 md:col-6 lg:col-6">
-            <InputField
-              classNames="field__container"
-              label={t("financeMasters.bankName")}
-              placeholder={t("financeMasters.enter")}
-              value={formik.values.bankName}
-              onChange={formik.handleChange("bankName")}
-            />
-          </div>
-          <div class="col-12 md:col-3 lg:col-3">
-            <InputField
-              classNames="field__container"
-              label={t("financeMasters.bankBranch")}
-              placeholder={t("financeMasters.enter")}
-              value={formik.values.bankBranch}
-              onChange={formik.handleChange("bankBranch")}
-            />
-          </div>
-        </div>
-
-        <div class="grid">
-          <div class="col-12 md:col-6 lg:col-3">
-            <InputField
-              classNames="field__container"
-              label={t("financeMasters.ifscCode")}
-              placeholder={t("financeMasters.enter")}
-              value={formik.values.ifscCode}
-              onChange={formik.handleChange("ifscCode")}
-            />
-          </div>
-          <div class="col-12 md:col-6 lg:col-3">
-            <InputField
-              classNames="field__container"
-              label={t("financeMasters.addressLine1")}
-              placeholder={t("financeMasters.enter")}
-              value={formik.values.addressLine1}
-              onChange={formik.handleChange("addressLine1")}
-            />
-          </div>
-          <div class="col-12 md:col-6 lg:col-3">
-            <InputField
-              classNames="field__container"
-              label={t("financeMasters.addressLine2")}
-              placeholder={t("financeMasters.enter")}
-              value={formik.values.addressLine2}
-              onChange={formik.handleChange("addressLine2")}
-            />
-          </div>
-          <div class="col-12 md:col-6 lg:col-3">
-            <InputField
-              classNames="field__container"
-              label={t("financeMasters.addressLine3")}
-              placeholder={t("financeMasters.enter")}
-              value={formik.values.addressLine3}
-              onChange={formik.handleChange("addressLine3")}
-            />
-          </div>
-        </div>
-
-        <div class="grid">
-          <div class="col-12 md:col-6 lg:col-3">
-            <InputField
-              classNames="field__container"
-              label={t("generalMasters.city")}
-              placeholder={t("financeMasters.enter")}
-              value={formik.values.city}
-              onChange={formik.handleChange("city")}
-            />
-          </div>
-          <div class="col-12 md:col-6 lg:col-3">
-            <InputField
-              classNames="field__container"
-              label={t("financeMasters.state")}
-              placeholder={t("financeMasters.enter")}
-              value={formik.values.state}
-              onChange={formik.handleChange("state")}
-            />
-          </div>
-          <div class="col-12 md:col-6 lg:col-3">
-            <InputField
-              classNames="field__container"
-              label={t("generalMasters.country")}
-              placeholder={t("financeMasters.enter")}
-              value={formik.values.country}
-              onChange={formik.handleChange("country")}
-            />
-          </div>
-          <div class="col-12 md:col-6 lg:col-3">
-            <InputField
-              classNames="field__container"
-              label={t("financeMasters.phoneNumber")}
-              placeholder={t("financeMasters.enter")}
-              value={formik.values.mobile}
-              onChange={formik.handleChange("mobile")}
-            />
-          </div>
-        </div>
-
-        <div class="grid">
-          <div class="col-12 md:col-6 lg:col-3">
-            <InputField
-              classNames="field__container"
-              label={t("financeMasters.fax")}
-              placeholder={t("financeMasters.enter")}
-              value={formik.values.fax}
-              onChange={formik.handleChange("fax")}
-            />
-          </div>
-          <div class="col-12 md:col-6 lg:col-3">
-            <InputField
-              classNames="field__container"
-              label={t("financeMasters.emailId")}
-              placeholder={t("financeMasters.enter")}
-              value={formik.values.email}
-              onChange={formik.handleChange("email")}
-            />
-          </div>
-        </div>
-      </Dialog>
+      {viewing ? (
+        <DetailDialog visible onHide={() => setViewing(null)} header={t("financeMasters.bankDetails")} size="lg"
+          footer={(
+            <>
+              <Button type="button" label={t("detailView.close")} outlined onClick={() => setViewing(null)} />
+              <Button type="button" label={t("financeMasters.edit")} icon="pi pi-pencil" onClick={() => { const row = viewing; setViewing(null); handleEdit(row); }} />
+            </>
+          )}>
+          <DetailHeader
+            title={viewing.bankName || viewing.bankCode}
+            subtitle={viewing.bankCode}
+            status={viewing.status ? { code: String(viewing.status).toLowerCase(), label: String(viewing.status) } : null}
+            meta={[
+              { label: t("financeMasters.bankBranch"), value: viewing.bankBranch },
+              { label: t("financeMasters.ifscCode"), value: viewing.ifscCode },
+            ]}
+          />
+          <DetailSection title={t("financeMasters.address")}>
+            <KeyValueGrid columns={3} items={[
+              { label: t("financeMasters.addressLine1"), value: viewing.AddressLine1 },
+              { label: t("financeMasters.addressLine2"), value: viewing.AddressLine2 },
+              { label: t("financeMasters.addressLine3"), value: viewing.AddressLine3 },
+              { label: t("generalMasters.city"), value: viewing.City },
+              { label: t("financeMasters.state"), value: viewing.state },
+              { label: t("generalMasters.country"), value: viewing.Country },
+            ]} />
+          </DetailSection>
+          <DetailSection title={t("financeMasters.contact")}>
+            <KeyValueGrid columns={3} items={[
+              { label: t("financeMasters.phoneNumber"), value: viewing.mobile },
+              { label: t("financeMasters.fax"), value: viewing.Fax },
+              { label: t("financeMasters.emailId"), value: viewing.email },
+            ]} />
+          </DetailSection>
+        </DetailDialog>
+      ) : null}
     </div>
   );
 };

@@ -19,12 +19,27 @@ const DocumentsLayoutPage = () => {
   const { editor, theme, errors, saving, set, discard, save } = useBrandingTheme(notify);
   const [printing, setPrinting] = useState(false);
 
+  // the tab is opened within the click (a tab opened after the PDF arrives is taken for a pop-up and blocked) and
+  // receives the PDF once it is drawn; where no tab could open, the PDF is saved instead
   const sample = async () => {
+    const tab = window.open("", "_blank");
+    if (tab) tab.opener = null;
     setPrinting(true);
     try {
-      const pdf = await brandingService.previewDocument(theme);
-      window.open(URL.createObjectURL(pdf), "_blank", "noopener");
+      const url = URL.createObjectURL(await brandingService.previewDocument(theme));
+      if (tab && !tab.closed) {
+        tab.location.href = url;
+      } else {
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "sample-document.pdf";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
     } catch (e) {
+      if (tab && !tab.closed) tab.close();
       notify("error", t("common.error", "Error"), e.message);
     } finally {
       setPrinting(false);
