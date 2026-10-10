@@ -5242,7 +5242,6 @@
     "failedToLoad": "Failed to load market mappings",
     "failedToSave": "Failed to save mapping",
     "agreedCommission": "Agreed comm. % (ref.)",
-    "commissionNote": "The agreed commission, override and profit share are kept for reference; commission on policies is taken from the Commission Rate Matrix.",
     "editMapping": "Edit market mapping",
     "valid": "Valid",
     "validFrom": "Valid from",
@@ -12445,7 +12444,6 @@
     "quoteValues": "Quote every value",
     "statusFile": "Status file",
     "statusFileHelp": "How the bank's payment status file is read: format, delimiter, skipRows, hasHeader, columns (reference, status, bankReference, reason, amount: header text, column number or start and width), paidValues and rejectedValues.",
-    "exampleLayout": "Starter layout: validate it against the bank's current file specification (and a test file accepted by the bank) before paying with it.",
     "fieldName": "Field",
     "fieldSource": "Source",
     "constant": "Value",
@@ -12721,7 +12719,8 @@
     "editLayout": "Edit bank file layout: {{name}}",
     "editTemplate": "Edit message template: {{name}}",
     "credentialSet": "Set on the server",
-    "credentialNotSet": "Not set on the server"
+    "credentialNotSet": "Not set on the server",
+    "starterLayout": "Starter layout"
   },
   "onboarding": {
     "title": "Onboard client",

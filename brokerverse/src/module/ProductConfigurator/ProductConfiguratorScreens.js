@@ -967,7 +967,6 @@ export const MarketMapping = () => {
               </div>
               <div className="field col-12 md:col-6"><StatusField value={selected.status} onChange={(status) => setSelected({ ...selected, status })} /></div>
             </div>
-            <small className="block mb-3 pc-muted">{t("marketMapping.commissionNote")}</small>
             <div className="flex justify-content-end gap-2"><Button label={t("common.cancel")} outlined onClick={() => setSelected(null)} className="w-auto" /><Button label={t("common.save")} icon="pi pi-check" onClick={save} className="w-auto" /></div>
           </div>
         )}
