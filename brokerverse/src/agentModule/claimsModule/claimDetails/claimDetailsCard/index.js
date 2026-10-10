@@ -93,6 +93,8 @@ const ClaimDetailsCard = ({
     estimatedClaimAmount: claimThirdParty?.estimatedClaimAmount ?? null,
     insuranceCompanyClaimNumber:
       claimThirdParty?.insuranceCompanyClaimNumber || "",
+    fnolSource: claimThirdParty?.fnolSource || "",
+    lossExtent: claimThirdParty?.lossExtent || "",
   };
 
   const dispatch = useDispatch();
@@ -380,6 +382,8 @@ const ClaimDetailsCard = ({
         estimatedClaimAmount: claimThirdParty?.estimatedClaimAmount ?? null,
         insuranceCompanyClaimNumber:
           claimThirdParty?.insuranceCompanyClaimNumber || "",
+        fnolSource: claimThirdParty?.fnolSource || "",
+        lossExtent: claimThirdParty?.lossExtent || "",
       };
 
       formik.setValues(updatedValues);
@@ -469,6 +473,18 @@ const ClaimDetailsCard = ({
             <FieldError error={fieldError("estimatedClaimAmount")} />
           </div>
           {text("insuranceCompanyClaimNumber", t("claimDetails.insuranceCompanyClaimNumber"))}
+          <div className={FIELD_COL}>
+            <DropdownField label={t("claimHandling.source")} value={formik.values.fnolSource}
+              onChange={(e) => formik.setFieldValue("fnolSource", e.value || "")} options={(config.fnolSources || []).map((x) => ({ label: x, value: x }))}
+              optionLabel="label" optionValue="value" placeholder={t("claimDetails.select")} />
+          </div>
+          {usesVehicle ? (
+            <div className={FIELD_COL}>
+              <DropdownField label={t("claimHandling.lossExtent")} value={formik.values.lossExtent}
+                onChange={(e) => formik.setFieldValue("lossExtent", e.value || "")} optionLabel="label" optionValue="value" placeholder={t("claimDetails.select")}
+                options={[{ label: t("claimHandling.extent.partial"), value: "partial" }, { label: t("claimHandling.extent.total"), value: "total" }]} />
+            </div>
+          ) : null}
         </div>
       </ClaimSection>
 
