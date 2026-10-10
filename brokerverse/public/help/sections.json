@@ -1,8 +1,76 @@
 {
- "title": "BrokerVerse User Manual",
- "version": "1.2.6",
- "date": "09 October 2026",
+ "edition": "tisph",
+ "title": "Toyota Insurance Services Philippines – User Manual",
+ "version": "1.0",
+ "date": "10 October 2026",
+ "status": "Draft",
+ "brandPack": "toyota-insurance-services",
+ "files": {
+  "pdf": "TISPH_User_Manual.pdf",
+  "word": "TISPH_User_Manual.docx"
+ },
+ "sourceHash": "b22da3d36cd90c0c9c5dc3e8855a0fa4bc088a901e2dc92af88450ef0925379d",
+ "roles": {
+  "tis-sales-associate": {
+   "id": "tis-sales-associate",
+   "title": "TIS Sales Associate"
+  },
+  "tis-sales-officer": {
+   "id": "tis-sales-officer",
+   "title": "TIS Sales Officer"
+  },
+  "tis-sales-unit-head": {
+   "id": "tis-sales-unit-head",
+   "title": "TIS Sales Unit Head"
+  },
+  "tis-ops-associate": {
+   "id": "tis-operations-associate",
+   "title": "TIS Operations Associate"
+  },
+  "tis-ops-officer": {
+   "id": "tis-operations-officer",
+   "title": "TIS Operations Officer"
+  },
+  "tis-ops-unit-head": {
+   "id": "tis-operations-unit-head",
+   "title": "TIS Operations Unit Head"
+  },
+  "tis-ccd-pdu": {
+   "id": "ccd-pdu-post-dated-cheques",
+   "title": "CCD-PDU (Post-Dated Cheques)"
+  },
+  "tis-ccd-pdc": {
+   "id": "ccd-pdc-ccd-ada",
+   "title": "CCD-PDC / CCD-ADA"
+  },
+  "tis-ccd-bp": {
+   "id": "ccd-bp-qrph-receipting",
+   "title": "CCD-BP / QRPh (Receipting)"
+  },
+  "tis-ccd-recon": {
+   "id": "ccd-recon-reconciliation-and-reversals",
+   "title": "CCD-Recon (Reconciliation and Reversals)"
+  },
+  "tis-finance": {
+   "id": "tis-finance-and-general-accounting",
+   "title": "TIS Finance & General Accounting"
+  },
+  "tis-it-admin": {
+   "id": "tis-it-appsupport-admin",
+   "title": "TIS IT AppSupport / Admin"
+  },
+  "tis-general-manager": {
+   "id": "tis-general-manager",
+   "title": "TIS General Manager"
+  }
+ },
  "sections": [
+  {
+   "id": "document-control",
+   "title": "Document control",
+   "level": 1,
+   "chapter": null
+  },
   {
    "id": "about-this-manual",
    "title": "About this manual",
@@ -40,93 +108,27 @@
    "chapter": "Getting started"
   },
   {
-   "id": "password-rules",
-   "title": "Password rules",
-   "level": 3,
-   "chapter": "Getting started"
-  },
-  {
-   "id": "change-your-password-at-sign-in",
-   "title": "Change your password at sign-in",
-   "level": 3,
-   "chapter": "Getting started"
-  },
-  {
-   "id": "forgotten-password",
-   "title": "Forgotten password",
-   "level": 3,
-   "chapter": "Getting started"
-  },
-  {
-   "id": "failed-sign-ins-and-locked-accounts",
-   "title": "Failed sign-ins and locked accounts",
-   "level": 3,
-   "chapter": "Getting started"
-  },
-  {
-   "id": "two-step-verification-at-sign-in",
-   "title": "Two-step verification at sign-in",
-   "level": 3,
-   "chapter": "Getting started"
-  },
-  {
-   "id": "automatic-sign-out",
-   "title": "Automatic sign-out",
-   "level": 3,
-   "chapter": "Getting started"
-  },
-  {
    "id": "the-screen-layout",
    "title": "The screen layout",
    "level": 2,
    "chapter": "Getting started"
   },
   {
-   "id": "the-account-menu",
-   "title": "The account menu",
-   "level": 3,
-   "chapter": "Getting started"
-  },
-  {
-   "id": "notifications",
-   "title": "Notifications",
-   "level": 3,
-   "chapter": "Getting started"
-  },
-  {
-   "id": "my-profile-and-account-security",
-   "title": "My Profile and account security",
+   "id": "my-work",
+   "title": "My Work",
    "level": 2,
    "chapter": "Getting started"
   },
   {
    "id": "my-profile",
    "title": "My Profile",
-   "level": 3,
-   "chapter": "Getting started"
-  },
-  {
-   "id": "change-password",
-   "title": "Change password",
-   "level": 3,
-   "chapter": "Getting started"
-  },
-  {
-   "id": "set-up-two-step-verification",
-   "title": "Set up two-step verification",
-   "level": 3,
-   "chapter": "Getting started"
-  },
-  {
-   "id": "roles-and-menus",
-   "title": "Roles and menus",
    "level": 2,
    "chapter": "Getting started"
   },
   {
-   "id": "tisph-roles",
-   "title": "TISPH roles",
-   "level": 3,
+   "id": "notifications",
+   "title": "Notifications",
+   "level": 2,
    "chapter": "Getting started"
   },
   {
@@ -143,7 +145,7 @@
   },
   {
    "id": "statuses-approvals-and-maker-checker",
-   "title": "Statuses, approvals and maker-checker",
+   "title": "Approvals and maker-checker",
    "level": 2,
    "chapter": "Getting started"
   },
@@ -154,1298 +156,1130 @@
    "chapter": "Getting started"
   },
   {
+   "id": "the-help-panel",
+   "title": "The Help panel",
+   "level": 2,
+   "chapter": "Getting started"
+  },
+  {
    "id": "the-business-process-end-to-end",
-   "title": "The business process end to end",
+   "title": "The TISPH process end to end",
    "level": 1,
    "chapter": null
   },
   {
-   "id": "the-broking-cycle",
-   "title": "The broking cycle",
+   "id": "process-leads",
+   "title": "Leads from TFS, dealers and walk-in clients",
    "level": 2,
-   "chapter": "The business process end to end"
+   "chapter": "The TISPH process end to end"
   },
   {
-   "id": "who-does-each-step-and-where",
-   "title": "Who does each step and where",
+   "id": "process-quotation",
+   "title": "Quotation and request for quotation",
    "level": 2,
-   "chapter": "The business process end to end"
+   "chapter": "The TISPH process end to end"
   },
   {
-   "id": "the-placement-journey-by-line",
-   "title": "The placement journey by line",
+   "id": "process-placement",
+   "title": "Placement with the insurer",
    "level": 2,
-   "chapter": "The business process end to end"
+   "chapter": "The TISPH process end to end"
   },
   {
-   "id": "what-the-system-posts",
-   "title": "What the system posts",
+   "id": "process-policy",
+   "title": "Policy, billing and endorsements",
    "level": 2,
-   "chapter": "The business process end to end"
+   "chapter": "The TISPH process end to end"
   },
   {
-   "id": "system-administrator",
-   "title": "System Administrator",
+   "id": "process-collection",
+   "title": "Collection by Cash Control",
+   "level": 2,
+   "chapter": "The TISPH process end to end"
+  },
+  {
+   "id": "process-remittance",
+   "title": "Remittance to the insurers",
+   "level": 2,
+   "chapter": "The TISPH process end to end"
+  },
+  {
+   "id": "process-commission",
+   "title": "Commission and incentives",
+   "level": 2,
+   "chapter": "The TISPH process end to end"
+  },
+  {
+   "id": "process-claims",
+   "title": "Claims",
+   "level": 2,
+   "chapter": "The TISPH process end to end"
+  },
+  {
+   "id": "process-renewals",
+   "title": "Renewals",
+   "level": 2,
+   "chapter": "The TISPH process end to end"
+  },
+  {
+   "id": "process-month-end",
+   "title": "Month-end and tax",
+   "level": 2,
+   "chapter": "The TISPH process end to end"
+  },
+  {
+   "id": "tis-sales-associate",
+   "title": "TIS Sales Associate",
    "level": 1,
    "chapter": null
   },
   {
-   "id": "system-administrator-role-summary",
+   "id": "tis-sales-associate-summary",
    "title": "Role summary",
    "level": 2,
-   "chapter": "System Administrator"
+   "chapter": "TIS Sales Associate"
   },
   {
-   "id": "system-administrator-menus-available",
+   "id": "tis-sales-associate-menus",
    "title": "Menus available",
    "level": 2,
-   "chapter": "System Administrator"
+   "chapter": "TIS Sales Associate"
   },
   {
-   "id": "system-administrator-daily-and-periodic-tasks",
-   "title": "Daily and periodic tasks",
+   "id": "tis-sales-associate-access",
+   "title": "What you can view, change and approve",
    "level": 2,
-   "chapter": "System Administrator"
+   "chapter": "TIS Sales Associate"
   },
   {
-   "id": "users",
-   "title": "Users",
-   "level": 2,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "add-a-user",
-   "title": "Add a user",
-   "level": 3,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "account-actions",
-   "title": "Account actions",
-   "level": 3,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "roles-and-role-permissions",
-   "title": "Roles and role permissions",
-   "level": 3,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "user-access-matrix",
-   "title": "User Access Matrix",
-   "level": 3,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "authority-matrix",
-   "title": "Authority Matrix",
-   "level": 3,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "delegations",
-   "title": "Delegations",
-   "level": 3,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "segregation-of-duties",
-   "title": "Segregation of Duties",
-   "level": 3,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "access-reviews",
-   "title": "Access Reviews",
-   "level": 3,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "company-branches-and-the-letterhead",
-   "title": "Company, branches and the letterhead",
-   "level": 2,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "insurers-and-the-other-masters",
-   "title": "Insurers and the other masters",
-   "level": 2,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "insurance-companies",
-   "title": "Insurance companies",
-   "level": 3,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "masters-that-work-the-same-way",
-   "title": "Masters that work the same way",
-   "level": 3,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "operational-masters",
-   "title": "Operational masters",
-   "level": 3,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "lead-sources-and-reason-codes",
-   "title": "Lead sources and reason codes",
-   "level": 3,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "uploads",
-   "title": "Uploads",
-   "level": 3,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "document-numbering",
-   "title": "Document Numbering",
-   "level": 2,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "configuration",
-   "title": "Configuration",
-   "level": 2,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "e-mail-layout",
-   "title": "E-mail Layout",
-   "level": 2,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "documents-and-reports-layout",
-   "title": "Documents and Reports Layout",
-   "level": 2,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "document-signatures",
-   "title": "Document Signatures",
-   "level": 2,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "system-administrator-schedules",
-   "title": "Schedules",
-   "level": 2,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "e-mail-outbox",
-   "title": "E-mail Outbox",
-   "level": 2,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "integrations",
-   "title": "Integrations",
-   "level": 2,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "connectors",
-   "title": "Connectors",
-   "level": 3,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "outbox-and-inbox",
-   "title": "Outbox and inbox",
-   "level": 3,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "go-live-with-a-provider",
-   "title": "Go live with a provider",
-   "level": 3,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "sms-and-message-templates",
-   "title": "SMS and message templates",
-   "level": 2,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "insurer-integration",
-   "title": "Insurer integration",
-   "level": 2,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "audit-trail",
-   "title": "Audit Trail",
-   "level": 2,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "personal-identifiers",
-   "title": "Personal identifiers",
-   "level": 2,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "finance-set-up-shared-with-the-accounting-manager",
-   "title": "Finance set-up shared with the Accounting Manager",
-   "level": 2,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "incentive-programmes",
-   "title": "Incentive programmes",
-   "level": 2,
-   "chapter": "System Administrator"
-  },
-  {
-   "id": "system-administrator-approvals",
+   "id": "tis-sales-associate-approvals",
    "title": "Approvals",
    "level": 2,
-   "chapter": "System Administrator"
+   "chapter": "TIS Sales Associate"
   },
   {
-   "id": "go-live-data-load",
-   "title": "Go-Live Data Load",
-   "level": 1,
-   "chapter": null
-  },
-  {
-   "id": "the-two-workbooks",
-   "title": "The two workbooks",
+   "id": "tis-sales-associate-sod",
+   "title": "Segregation of duties",
    "level": 2,
-   "chapter": "Go-Live Data Load"
+   "chapter": "TIS Sales Associate"
   },
   {
-   "id": "migration-rules-and-reconciliation",
-   "title": "Migration rules and reconciliation",
-   "level": 2,
-   "chapter": "Go-Live Data Load"
-  },
-  {
-   "id": "go-live-lock",
-   "title": "Go-live lock",
-   "level": 2,
-   "chapter": "Go-Live Data Load"
-  },
-  {
-   "id": "sales-and-marketing-account-executive",
-   "title": "Sales & Marketing (Account Executive)",
-   "level": 1,
-   "chapter": null
-  },
-  {
-   "id": "sales-and-marketing-account-executive-role-summary",
-   "title": "Role summary",
-   "level": 2,
-   "chapter": "Sales & Marketing (Account Executive)"
-  },
-  {
-   "id": "sales-and-marketing-account-executive-menus-available",
-   "title": "Menus available",
-   "level": 2,
-   "chapter": "Sales & Marketing (Account Executive)"
-  },
-  {
-   "id": "sales-and-marketing-account-executive-daily-and-periodic-tasks",
+   "id": "tis-sales-associate-tasks",
    "title": "Daily and periodic tasks",
    "level": 2,
-   "chapter": "Sales & Marketing (Account Executive)"
+   "chapter": "TIS Sales Associate"
   },
   {
-   "id": "sales-dashboard",
-   "title": "Sales Dashboard",
+   "id": "tis-sales-associate-procedures",
+   "title": "Procedures",
    "level": 2,
-   "chapter": "Sales & Marketing (Account Executive)"
+   "chapter": "TIS Sales Associate"
+  },
+  {
+   "id": "tis-sales-officer",
+   "title": "TIS Sales Officer",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "tis-sales-officer-summary",
+   "title": "Role summary",
+   "level": 2,
+   "chapter": "TIS Sales Officer"
+  },
+  {
+   "id": "tis-sales-officer-menus",
+   "title": "Menus available",
+   "level": 2,
+   "chapter": "TIS Sales Officer"
+  },
+  {
+   "id": "tis-sales-officer-access",
+   "title": "What you can view, change and approve",
+   "level": 2,
+   "chapter": "TIS Sales Officer"
+  },
+  {
+   "id": "tis-sales-officer-approvals",
+   "title": "Approvals",
+   "level": 2,
+   "chapter": "TIS Sales Officer"
+  },
+  {
+   "id": "tis-sales-officer-sod",
+   "title": "Segregation of duties",
+   "level": 2,
+   "chapter": "TIS Sales Officer"
+  },
+  {
+   "id": "tis-sales-officer-tasks",
+   "title": "Daily and periodic tasks",
+   "level": 2,
+   "chapter": "TIS Sales Officer"
+  },
+  {
+   "id": "tis-sales-officer-procedures",
+   "title": "Procedures",
+   "level": 2,
+   "chapter": "TIS Sales Officer"
+  },
+  {
+   "id": "tis-sales-unit-head",
+   "title": "TIS Sales Unit Head",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "tis-sales-unit-head-summary",
+   "title": "Role summary",
+   "level": 2,
+   "chapter": "TIS Sales Unit Head"
+  },
+  {
+   "id": "tis-sales-unit-head-menus",
+   "title": "Menus available",
+   "level": 2,
+   "chapter": "TIS Sales Unit Head"
+  },
+  {
+   "id": "tis-sales-unit-head-access",
+   "title": "What you can view, change and approve",
+   "level": 2,
+   "chapter": "TIS Sales Unit Head"
+  },
+  {
+   "id": "tis-sales-unit-head-approvals",
+   "title": "Approvals",
+   "level": 2,
+   "chapter": "TIS Sales Unit Head"
+  },
+  {
+   "id": "tis-sales-unit-head-sod",
+   "title": "Segregation of duties",
+   "level": 2,
+   "chapter": "TIS Sales Unit Head"
+  },
+  {
+   "id": "tis-sales-unit-head-tasks",
+   "title": "Daily and periodic tasks",
+   "level": 2,
+   "chapter": "TIS Sales Unit Head"
+  },
+  {
+   "id": "tis-sales-unit-head-procedures",
+   "title": "Procedures",
+   "level": 2,
+   "chapter": "TIS Sales Unit Head"
+  },
+  {
+   "id": "tis-operations-associate",
+   "title": "TIS Operations Associate",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "tis-operations-associate-summary",
+   "title": "Role summary",
+   "level": 2,
+   "chapter": "TIS Operations Associate"
+  },
+  {
+   "id": "tis-operations-associate-menus",
+   "title": "Menus available",
+   "level": 2,
+   "chapter": "TIS Operations Associate"
+  },
+  {
+   "id": "tis-operations-associate-access",
+   "title": "What you can view, change and approve",
+   "level": 2,
+   "chapter": "TIS Operations Associate"
+  },
+  {
+   "id": "tis-operations-associate-approvals",
+   "title": "Approvals",
+   "level": 2,
+   "chapter": "TIS Operations Associate"
+  },
+  {
+   "id": "tis-operations-associate-sod",
+   "title": "Segregation of duties",
+   "level": 2,
+   "chapter": "TIS Operations Associate"
+  },
+  {
+   "id": "tis-operations-associate-tasks",
+   "title": "Daily and periodic tasks",
+   "level": 2,
+   "chapter": "TIS Operations Associate"
+  },
+  {
+   "id": "tis-operations-associate-procedures",
+   "title": "Procedures",
+   "level": 2,
+   "chapter": "TIS Operations Associate"
+  },
+  {
+   "id": "tis-operations-officer",
+   "title": "TIS Operations Officer",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "tis-operations-officer-summary",
+   "title": "Role summary",
+   "level": 2,
+   "chapter": "TIS Operations Officer"
+  },
+  {
+   "id": "tis-operations-officer-menus",
+   "title": "Menus available",
+   "level": 2,
+   "chapter": "TIS Operations Officer"
+  },
+  {
+   "id": "tis-operations-officer-access",
+   "title": "What you can view, change and approve",
+   "level": 2,
+   "chapter": "TIS Operations Officer"
+  },
+  {
+   "id": "tis-operations-officer-approvals",
+   "title": "Approvals",
+   "level": 2,
+   "chapter": "TIS Operations Officer"
+  },
+  {
+   "id": "tis-operations-officer-sod",
+   "title": "Segregation of duties",
+   "level": 2,
+   "chapter": "TIS Operations Officer"
+  },
+  {
+   "id": "tis-operations-officer-tasks",
+   "title": "Daily and periodic tasks",
+   "level": 2,
+   "chapter": "TIS Operations Officer"
+  },
+  {
+   "id": "tis-operations-officer-procedures",
+   "title": "Procedures",
+   "level": 2,
+   "chapter": "TIS Operations Officer"
+  },
+  {
+   "id": "tis-operations-unit-head",
+   "title": "TIS Operations Unit Head",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "tis-operations-unit-head-summary",
+   "title": "Role summary",
+   "level": 2,
+   "chapter": "TIS Operations Unit Head"
+  },
+  {
+   "id": "tis-operations-unit-head-menus",
+   "title": "Menus available",
+   "level": 2,
+   "chapter": "TIS Operations Unit Head"
+  },
+  {
+   "id": "tis-operations-unit-head-access",
+   "title": "What you can view, change and approve",
+   "level": 2,
+   "chapter": "TIS Operations Unit Head"
+  },
+  {
+   "id": "tis-operations-unit-head-approvals",
+   "title": "Approvals",
+   "level": 2,
+   "chapter": "TIS Operations Unit Head"
+  },
+  {
+   "id": "tis-operations-unit-head-sod",
+   "title": "Segregation of duties",
+   "level": 2,
+   "chapter": "TIS Operations Unit Head"
+  },
+  {
+   "id": "tis-operations-unit-head-tasks",
+   "title": "Daily and periodic tasks",
+   "level": 2,
+   "chapter": "TIS Operations Unit Head"
+  },
+  {
+   "id": "tis-operations-unit-head-procedures",
+   "title": "Procedures",
+   "level": 2,
+   "chapter": "TIS Operations Unit Head"
+  },
+  {
+   "id": "ccd-pdu-post-dated-cheques",
+   "title": "CCD-PDU (Post-Dated Cheques)",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "ccd-pdu-post-dated-cheques-summary",
+   "title": "Role summary",
+   "level": 2,
+   "chapter": "CCD-PDU (Post-Dated Cheques)"
+  },
+  {
+   "id": "ccd-pdu-post-dated-cheques-menus",
+   "title": "Menus available",
+   "level": 2,
+   "chapter": "CCD-PDU (Post-Dated Cheques)"
+  },
+  {
+   "id": "ccd-pdu-post-dated-cheques-access",
+   "title": "What you can view, change and approve",
+   "level": 2,
+   "chapter": "CCD-PDU (Post-Dated Cheques)"
+  },
+  {
+   "id": "ccd-pdu-post-dated-cheques-approvals",
+   "title": "Approvals",
+   "level": 2,
+   "chapter": "CCD-PDU (Post-Dated Cheques)"
+  },
+  {
+   "id": "ccd-pdu-post-dated-cheques-sod",
+   "title": "Segregation of duties",
+   "level": 2,
+   "chapter": "CCD-PDU (Post-Dated Cheques)"
+  },
+  {
+   "id": "ccd-pdu-post-dated-cheques-tasks",
+   "title": "Daily and periodic tasks",
+   "level": 2,
+   "chapter": "CCD-PDU (Post-Dated Cheques)"
+  },
+  {
+   "id": "ccd-pdu-post-dated-cheques-procedures",
+   "title": "Procedures",
+   "level": 2,
+   "chapter": "CCD-PDU (Post-Dated Cheques)"
+  },
+  {
+   "id": "ccd-pdc-ccd-ada",
+   "title": "CCD-PDC / CCD-ADA",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "ccd-pdc-ccd-ada-summary",
+   "title": "Role summary",
+   "level": 2,
+   "chapter": "CCD-PDC / CCD-ADA"
+  },
+  {
+   "id": "ccd-pdc-ccd-ada-menus",
+   "title": "Menus available",
+   "level": 2,
+   "chapter": "CCD-PDC / CCD-ADA"
+  },
+  {
+   "id": "ccd-pdc-ccd-ada-access",
+   "title": "What you can view, change and approve",
+   "level": 2,
+   "chapter": "CCD-PDC / CCD-ADA"
+  },
+  {
+   "id": "ccd-pdc-ccd-ada-approvals",
+   "title": "Approvals",
+   "level": 2,
+   "chapter": "CCD-PDC / CCD-ADA"
+  },
+  {
+   "id": "ccd-pdc-ccd-ada-sod",
+   "title": "Segregation of duties",
+   "level": 2,
+   "chapter": "CCD-PDC / CCD-ADA"
+  },
+  {
+   "id": "ccd-pdc-ccd-ada-tasks",
+   "title": "Daily and periodic tasks",
+   "level": 2,
+   "chapter": "CCD-PDC / CCD-ADA"
+  },
+  {
+   "id": "ccd-pdc-ccd-ada-procedures",
+   "title": "Procedures",
+   "level": 2,
+   "chapter": "CCD-PDC / CCD-ADA"
+  },
+  {
+   "id": "ccd-bp-qrph-receipting",
+   "title": "CCD-BP / QRPh (Receipting)",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "ccd-bp-qrph-receipting-summary",
+   "title": "Role summary",
+   "level": 2,
+   "chapter": "CCD-BP / QRPh (Receipting)"
+  },
+  {
+   "id": "ccd-bp-qrph-receipting-menus",
+   "title": "Menus available",
+   "level": 2,
+   "chapter": "CCD-BP / QRPh (Receipting)"
+  },
+  {
+   "id": "ccd-bp-qrph-receipting-access",
+   "title": "What you can view, change and approve",
+   "level": 2,
+   "chapter": "CCD-BP / QRPh (Receipting)"
+  },
+  {
+   "id": "ccd-bp-qrph-receipting-approvals",
+   "title": "Approvals",
+   "level": 2,
+   "chapter": "CCD-BP / QRPh (Receipting)"
+  },
+  {
+   "id": "ccd-bp-qrph-receipting-sod",
+   "title": "Segregation of duties",
+   "level": 2,
+   "chapter": "CCD-BP / QRPh (Receipting)"
+  },
+  {
+   "id": "ccd-bp-qrph-receipting-tasks",
+   "title": "Daily and periodic tasks",
+   "level": 2,
+   "chapter": "CCD-BP / QRPh (Receipting)"
+  },
+  {
+   "id": "ccd-bp-qrph-receipting-procedures",
+   "title": "Procedures",
+   "level": 2,
+   "chapter": "CCD-BP / QRPh (Receipting)"
+  },
+  {
+   "id": "ccd-recon-reconciliation-and-reversals",
+   "title": "CCD-Recon (Reconciliation and Reversals)",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "ccd-recon-reconciliation-and-reversals-summary",
+   "title": "Role summary",
+   "level": 2,
+   "chapter": "CCD-Recon (Reconciliation and Reversals)"
+  },
+  {
+   "id": "ccd-recon-reconciliation-and-reversals-menus",
+   "title": "Menus available",
+   "level": 2,
+   "chapter": "CCD-Recon (Reconciliation and Reversals)"
+  },
+  {
+   "id": "ccd-recon-reconciliation-and-reversals-access",
+   "title": "What you can view, change and approve",
+   "level": 2,
+   "chapter": "CCD-Recon (Reconciliation and Reversals)"
+  },
+  {
+   "id": "ccd-recon-reconciliation-and-reversals-approvals",
+   "title": "Approvals",
+   "level": 2,
+   "chapter": "CCD-Recon (Reconciliation and Reversals)"
+  },
+  {
+   "id": "ccd-recon-reconciliation-and-reversals-sod",
+   "title": "Segregation of duties",
+   "level": 2,
+   "chapter": "CCD-Recon (Reconciliation and Reversals)"
+  },
+  {
+   "id": "ccd-recon-reconciliation-and-reversals-tasks",
+   "title": "Daily and periodic tasks",
+   "level": 2,
+   "chapter": "CCD-Recon (Reconciliation and Reversals)"
+  },
+  {
+   "id": "ccd-recon-reconciliation-and-reversals-procedures",
+   "title": "Procedures",
+   "level": 2,
+   "chapter": "CCD-Recon (Reconciliation and Reversals)"
+  },
+  {
+   "id": "tis-finance-and-general-accounting",
+   "title": "TIS Finance & General Accounting",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "tis-finance-and-general-accounting-summary",
+   "title": "Role summary",
+   "level": 2,
+   "chapter": "TIS Finance & General Accounting"
+  },
+  {
+   "id": "tis-finance-and-general-accounting-menus",
+   "title": "Menus available",
+   "level": 2,
+   "chapter": "TIS Finance & General Accounting"
+  },
+  {
+   "id": "tis-finance-and-general-accounting-access",
+   "title": "What you can view, change and approve",
+   "level": 2,
+   "chapter": "TIS Finance & General Accounting"
+  },
+  {
+   "id": "tis-finance-and-general-accounting-approvals",
+   "title": "Approvals",
+   "level": 2,
+   "chapter": "TIS Finance & General Accounting"
+  },
+  {
+   "id": "tis-finance-and-general-accounting-sod",
+   "title": "Segregation of duties",
+   "level": 2,
+   "chapter": "TIS Finance & General Accounting"
+  },
+  {
+   "id": "tis-finance-and-general-accounting-tasks",
+   "title": "Daily and periodic tasks",
+   "level": 2,
+   "chapter": "TIS Finance & General Accounting"
+  },
+  {
+   "id": "tis-finance-and-general-accounting-procedures",
+   "title": "Procedures",
+   "level": 2,
+   "chapter": "TIS Finance & General Accounting"
+  },
+  {
+   "id": "tis-it-appsupport-admin",
+   "title": "TIS IT AppSupport / Admin",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "tis-it-appsupport-admin-summary",
+   "title": "Role summary",
+   "level": 2,
+   "chapter": "TIS IT AppSupport / Admin"
+  },
+  {
+   "id": "tis-it-appsupport-admin-menus",
+   "title": "Menus available",
+   "level": 2,
+   "chapter": "TIS IT AppSupport / Admin"
+  },
+  {
+   "id": "tis-it-appsupport-admin-access",
+   "title": "What you can view, change and approve",
+   "level": 2,
+   "chapter": "TIS IT AppSupport / Admin"
+  },
+  {
+   "id": "tis-it-appsupport-admin-approvals",
+   "title": "Approvals",
+   "level": 2,
+   "chapter": "TIS IT AppSupport / Admin"
+  },
+  {
+   "id": "tis-it-appsupport-admin-sod",
+   "title": "Segregation of duties",
+   "level": 2,
+   "chapter": "TIS IT AppSupport / Admin"
+  },
+  {
+   "id": "tis-it-appsupport-admin-tasks",
+   "title": "Daily and periodic tasks",
+   "level": 2,
+   "chapter": "TIS IT AppSupport / Admin"
+  },
+  {
+   "id": "tis-it-appsupport-admin-procedures",
+   "title": "Procedures",
+   "level": 2,
+   "chapter": "TIS IT AppSupport / Admin"
+  },
+  {
+   "id": "tis-general-manager",
+   "title": "TIS General Manager",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "tis-general-manager-summary",
+   "title": "Role summary",
+   "level": 2,
+   "chapter": "TIS General Manager"
+  },
+  {
+   "id": "tis-general-manager-menus",
+   "title": "Menus available",
+   "level": 2,
+   "chapter": "TIS General Manager"
+  },
+  {
+   "id": "tis-general-manager-access",
+   "title": "What you can view, change and approve",
+   "level": 2,
+   "chapter": "TIS General Manager"
+  },
+  {
+   "id": "tis-general-manager-approvals",
+   "title": "Approvals",
+   "level": 2,
+   "chapter": "TIS General Manager"
+  },
+  {
+   "id": "tis-general-manager-sod",
+   "title": "Segregation of duties",
+   "level": 2,
+   "chapter": "TIS General Manager"
+  },
+  {
+   "id": "tis-general-manager-tasks",
+   "title": "Daily and periodic tasks",
+   "level": 2,
+   "chapter": "TIS General Manager"
+  },
+  {
+   "id": "tis-general-manager-procedures",
+   "title": "Procedures",
+   "level": 2,
+   "chapter": "TIS General Manager"
+  },
+  {
+   "id": "screens-operations",
+   "title": "Screen reference: Operations",
+   "level": 1,
+   "chapter": null
   },
   {
    "id": "prospects",
    "title": "Prospects",
    "level": 2,
-   "chapter": "Sales & Marketing (Account Executive)"
+   "chapter": "Screen reference: Operations"
   },
   {
    "id": "create-a-prospect",
    "title": "Create a prospect",
    "level": 3,
-   "chapter": "Sales & Marketing (Account Executive)"
-  },
-  {
-   "id": "tag-the-product-later",
-   "title": "Tag the product later",
-   "level": 3,
-   "chapter": "Sales & Marketing (Account Executive)"
+   "chapter": "Screen reference: Operations"
   },
   {
    "id": "view-edit-or-delete-a-prospect",
    "title": "View, edit or delete a prospect",
    "level": 3,
-   "chapter": "Sales & Marketing (Account Executive)"
-  },
-  {
-   "id": "upload-many-prospects",
-   "title": "Upload many prospects",
-   "level": 3,
-   "chapter": "Sales & Marketing (Account Executive)"
+   "chapter": "Screen reference: Operations"
   },
   {
    "id": "quick-quote",
    "title": "Quick Quote",
    "level": 2,
-   "chapter": "Sales & Marketing (Account Executive)"
-  },
-  {
-   "id": "create-a-motor-quotation",
-   "title": "Create a motor quotation",
-   "level": 2,
-   "chapter": "Sales & Marketing (Account Executive)"
-  },
-  {
-   "id": "covers-and-risk-details-of-the-product",
-   "title": "Covers and risk details of the product",
-   "level": 3,
-   "chapter": "Sales & Marketing (Account Executive)"
-  },
-  {
-   "id": "quotations",
-   "title": "Quotations",
-   "level": 2,
-   "chapter": "Sales & Marketing (Account Executive)"
-  },
-  {
-   "id": "send-the-quotation-and-record-the-customer-s-response",
-   "title": "Send the quotation and record the customer's response",
-   "level": 3,
-   "chapter": "Sales & Marketing (Account Executive)"
-  },
-  {
-   "id": "from-the-accepted-quotation-to-the-policy",
-   "title": "From the accepted quotation to the policy",
-   "level": 3,
-   "chapter": "Sales & Marketing (Account Executive)"
-  },
-  {
-   "id": "sales-activities",
-   "title": "Sales activities",
-   "level": 2,
-   "chapter": "Sales & Marketing (Account Executive)"
-  },
-  {
-   "id": "request-a-quotation-from-the-market",
-   "title": "Request a quotation from the market",
-   "level": 2,
-   "chapter": "Sales & Marketing (Account Executive)"
-  },
-  {
-   "id": "sales-and-marketing-account-executive-record-the-client-s-payment",
-   "title": "Record the client's payment",
-   "level": 2,
-   "chapter": "Sales & Marketing (Account Executive)"
-  },
-  {
-   "id": "policies",
-   "title": "Policies",
-   "level": 2,
-   "chapter": "Sales & Marketing (Account Executive)"
-  },
-  {
-   "id": "renewals-open-items-payments-and-clients",
-   "title": "Renewals, open items, payments and clients",
-   "level": 2,
-   "chapter": "Sales & Marketing (Account Executive)"
-  },
-  {
-   "id": "commission-and-reports",
-   "title": "Commission and reports",
-   "level": 2,
-   "chapter": "Sales & Marketing (Account Executive)"
-  },
-  {
-   "id": "sales-and-marketing-account-executive-approvals",
-   "title": "Approvals",
-   "level": 2,
-   "chapter": "Sales & Marketing (Account Executive)"
-  },
-  {
-   "id": "processing-team",
-   "title": "Processing Team",
-   "level": 1,
-   "chapter": null
-  },
-  {
-   "id": "processing-team-role-summary",
-   "title": "Role summary",
-   "level": 2,
-   "chapter": "Processing Team"
-  },
-  {
-   "id": "processing-team-menus-available",
-   "title": "Menus available",
-   "level": 2,
-   "chapter": "Processing Team"
-  },
-  {
-   "id": "processing-team-daily-and-periodic-tasks",
-   "title": "Daily and periodic tasks",
-   "level": 2,
-   "chapter": "Processing Team"
-  },
-  {
-   "id": "processing-dashboard",
-   "title": "Processing Dashboard",
-   "level": 2,
-   "chapter": "Processing Team"
+   "chapter": "Screen reference: Operations"
   },
   {
    "id": "requests-for-quotation-broker-slips",
    "title": "Requests for quotation (broker slips)",
    "level": 2,
-   "chapter": "Processing Team"
+   "chapter": "Screen reference: Operations"
   },
   {
-   "id": "create-a-request-for-quotation",
-   "title": "Create a request for quotation",
-   "level": 3,
-   "chapter": "Processing Team"
-  },
-  {
-   "id": "record-the-insurers-answers",
-   "title": "Record the insurers' answers",
-   "level": 3,
-   "chapter": "Processing Team"
-  },
-  {
-   "id": "compare-the-offers-and-choose-the-security",
-   "title": "Compare the offers and choose the security",
-   "level": 3,
-   "chapter": "Processing Team"
-  },
-  {
-   "id": "quotation-slips",
-   "title": "Quotation Slips",
+   "id": "quotations",
+   "title": "Quotations",
    "level": 2,
-   "chapter": "Processing Team"
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "create-a-motor-quotation",
+   "title": "Create a motor quotation",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
   },
   {
    "id": "placement-slips",
    "title": "Placement Slips",
    "level": 2,
-   "chapter": "Processing Team"
-  },
-  {
-   "id": "create-a-direct-placement",
-   "title": "Create a direct placement",
-   "level": 3,
-   "chapter": "Processing Team"
-  },
-  {
-   "id": "send-to-the-insurer-and-record-the-acknowledgement",
-   "title": "Send to the insurer and record the acknowledgement",
-   "level": 3,
-   "chapter": "Processing Team"
-  },
-  {
-   "id": "upload-the-e-policy",
-   "title": "Upload the e-policy",
-   "level": 3,
-   "chapter": "Processing Team"
-  },
-  {
-   "id": "check-against-the-slip",
-   "title": "Check against the slip",
-   "level": 3,
-   "chapter": "Processing Team"
-  },
-  {
-   "id": "book-the-policy-insurer-issued",
-   "title": "Book the policy (Insurer issued)",
-   "level": 3,
-   "chapter": "Processing Team"
+   "chapter": "Screen reference: Operations"
   },
   {
    "id": "record-e-policy",
    "title": "Record e-Policy",
-   "level": 2,
-   "chapter": "Processing Team"
-  },
-  {
-   "id": "co-insured-policies-and-premium-accounting-entries",
-   "title": "Co-insured policies and premium accounting entries",
-   "level": 2,
-   "chapter": "Processing Team"
-  },
-  {
-   "id": "complete-an-endorsement",
-   "title": "Complete an endorsement",
-   "level": 2,
-   "chapter": "Processing Team"
-  },
-  {
-   "id": "approve-renewal-terms",
-   "title": "Approve renewal terms",
-   "level": 2,
-   "chapter": "Processing Team"
-  },
-  {
-   "id": "processing-team-product-configurator",
-   "title": "Product Configurator",
-   "level": 2,
-   "chapter": "Processing Team"
-  },
-  {
-   "id": "processing-team-approvals",
-   "title": "Approvals",
-   "level": 2,
-   "chapter": "Processing Team"
-  },
-  {
-   "id": "operations-client-servicing",
-   "title": "Operations (client servicing)",
-   "level": 1,
-   "chapter": null
-  },
-  {
-   "id": "operations-client-servicing-role-summary",
-   "title": "Role summary",
-   "level": 2,
-   "chapter": "Operations (client servicing)"
-  },
-  {
-   "id": "operations-client-servicing-menus-available",
-   "title": "Menus available",
-   "level": 2,
-   "chapter": "Operations (client servicing)"
-  },
-  {
-   "id": "operations-client-servicing-daily-and-periodic-tasks",
-   "title": "Daily and periodic tasks",
-   "level": 2,
-   "chapter": "Operations (client servicing)"
-  },
-  {
-   "id": "operations-client-servicing-home",
-   "title": "Home",
-   "level": 2,
-   "chapter": "Operations (client servicing)"
-  },
-  {
-   "id": "my-work",
-   "title": "My Work",
-   "level": 2,
-   "chapter": "Operations (client servicing)"
-  },
-  {
-   "id": "clients",
-   "title": "Clients",
-   "level": 2,
-   "chapter": "Operations (client servicing)"
-  },
-  {
-   "id": "onboard-a-client-before-the-first-policy",
-   "title": "Onboard a client before the first policy",
    "level": 3,
-   "chapter": "Operations (client servicing)"
-  },
-  {
-   "id": "raise-an-endorsement-request",
-   "title": "Raise an endorsement request",
-   "level": 2,
-   "chapter": "Operations (client servicing)"
-  },
-  {
-   "id": "cover-notes-binders",
-   "title": "Cover notes (binders)",
-   "level": 2,
-   "chapter": "Operations (client servicing)"
-  },
-  {
-   "id": "cancel-a-policy-computed-return-premium",
-   "title": "Cancel a policy: computed return premium",
-   "level": 2,
-   "chapter": "Operations (client servicing)"
-  },
-  {
-   "id": "operations-client-servicing-record-the-client-s-payment",
-   "title": "Record the client's payment",
-   "level": 2,
-   "chapter": "Operations (client servicing)"
-  },
-  {
-   "id": "payments",
-   "title": "Payments",
-   "level": 2,
-   "chapter": "Operations (client servicing)"
-  },
-  {
-   "id": "ctpl-authentication",
-   "title": "CTPL authentication",
-   "level": 2,
-   "chapter": "Operations (client servicing)"
-  },
-  {
-   "id": "operations-client-servicing-renewals",
-   "title": "Renewals",
-   "level": 2,
-   "chapter": "Operations (client servicing)"
-  },
-  {
-   "id": "renew-a-policy",
-   "title": "Renew a policy",
-   "level": 3,
-   "chapter": "Operations (client servicing)"
-  },
-  {
-   "id": "renewal-queue-and-at-risk-policies",
-   "title": "Renewal Queue and At-Risk Policies",
-   "level": 3,
-   "chapter": "Operations (client servicing)"
-  },
-  {
-   "id": "negotiations",
-   "title": "Negotiations",
-   "level": 3,
-   "chapter": "Operations (client servicing)"
-  },
-  {
-   "id": "renewal-batch-lapse-management-and-the-analytics",
-   "title": "Renewal Batch, Lapse Management and the analytics",
-   "level": 3,
-   "chapter": "Operations (client servicing)"
-  },
-  {
-   "id": "operations-client-servicing-approvals",
-   "title": "Approvals",
-   "level": 2,
-   "chapter": "Operations (client servicing)"
-  },
-  {
-   "id": "claims",
-   "title": "Claims",
-   "level": 1,
-   "chapter": null
-  },
-  {
-   "id": "claims-role-summary",
-   "title": "Role summary",
-   "level": 2,
-   "chapter": "Claims"
-  },
-  {
-   "id": "claims-menus-available",
-   "title": "Menus available",
-   "level": 2,
-   "chapter": "Claims"
-  },
-  {
-   "id": "claims-daily-and-periodic-tasks",
-   "title": "Daily and periodic tasks",
-   "level": 2,
-   "chapter": "Claims"
-  },
-  {
-   "id": "claims-dashboard",
-   "title": "Claims Dashboard",
-   "level": 2,
-   "chapter": "Claims"
-  },
-  {
-   "id": "the-claims-list",
-   "title": "The claims list",
-   "level": 2,
-   "chapter": "Claims"
-  },
-  {
-   "id": "register-a-claim",
-   "title": "Register a claim",
-   "level": 2,
-   "chapter": "Claims"
-  },
-  {
-   "id": "adjuster-report",
-   "title": "Adjuster report",
-   "level": 2,
-   "chapter": "Claims"
-  },
-  {
-   "id": "assessment-and-settlement-maker",
-   "title": "Assessment and settlement (maker)",
-   "level": 2,
-   "chapter": "Claims"
-  },
-  {
-   "id": "approve-a-settlement-checker",
-   "title": "Approve a settlement (checker)",
-   "level": 2,
-   "chapter": "Claims"
-  },
-  {
-   "id": "claim-details-documents-and-audit-trail",
-   "title": "Claim details, documents and audit trail",
-   "level": 2,
-   "chapter": "Claims"
-  },
-  {
-   "id": "claim-documents",
-   "title": "Claim documents",
-   "level": 2,
-   "chapter": "Claims"
-  },
-  {
-   "id": "claims-awaiting-documents",
-   "title": "Claims awaiting documents",
-   "level": 2,
-   "chapter": "Claims"
-  },
-  {
-   "id": "motor-claim-repairs-and-letters-of-authority",
-   "title": "Motor claim repairs and letters of authority",
-   "level": 2,
-   "chapter": "Claims"
-  },
-  {
-   "id": "claims-approvals",
-   "title": "Approvals",
-   "level": 2,
-   "chapter": "Claims"
-  },
-  {
-   "id": "accounting",
-   "title": "Accounting",
-   "level": 1,
-   "chapter": null
-  },
-  {
-   "id": "accounting-role-summary",
-   "title": "Role summary",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "accounting-menus-available",
-   "title": "Menus available",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "accounting-daily-and-periodic-tasks",
-   "title": "Daily and periodic tasks",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "verify-payments-and-post-official-receipts",
-   "title": "Verify payments and post official receipts",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "post-a-receipt",
-   "title": "Post a receipt",
-   "level": 3,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "collections",
-   "title": "Collections",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "import-open-items-at-go-live",
-   "title": "Import open items at go-live",
-   "level": 3,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "credit-control",
-   "title": "Credit control",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "separate-instalment-invoices",
-   "title": "Separate instalment invoices",
-   "level": 3,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "post-dated-cheques",
-   "title": "Post-dated cheques",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "claims-settlements-paid-through-the-broker",
-   "title": "Claims settlements paid through the broker",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "disbursement-payment-vouchers-and-cheques",
-   "title": "Disbursement: payment vouchers and cheques",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "bank-payment-files",
-   "title": "Bank payment files",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "sap-gl-export",
-   "title": "SAP GL export",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "bank-file-layouts-and-payee-bank-accounts",
-   "title": "Bank file layouts and payee bank accounts",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "remittance-to-insurers",
-   "title": "Remittance to insurers",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "direct-bill-commission-debit-notes",
-   "title": "Direct bill: commission debit notes",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "gross-remittance-commission-billing-statements",
-   "title": "Gross remittance: commission billing statements",
-   "level": 3,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "commission-to-agents-and-referrers",
-   "title": "Commission to agents and referrers",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "overriding-profit-and-contingent-commission-from-insurers",
-   "title": "Overriding, profit and contingent commission from insurers",
-   "level": 3,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "journal-vouchers",
-   "title": "Journal vouchers",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "upload-journal-vouchers",
-   "title": "Upload journal vouchers",
-   "level": 3,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "open-entry-matching-and-write-offs",
-   "title": "Open entry matching and write-offs",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "accounting-query-and-all-clients-accounting",
-   "title": "Accounting Query and All Clients Accounting",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "petty-cash",
-   "title": "Petty cash",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "bank-reconciliation",
-   "title": "Bank reconciliation",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "import-a-bank-statement",
-   "title": "Import a bank statement",
-   "level": 3,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "match-and-post-bank-items",
-   "title": "Match and post bank items",
-   "level": 3,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "prepare-the-reconciliation",
-   "title": "Prepare the reconciliation",
-   "level": 3,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "insurer-statement-reconciliation",
-   "title": "Insurer statement reconciliation",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "tax-bir-forms-and-returns",
-   "title": "Tax: BIR forms and returns",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "withholding-returns-0619-e-1601-eq-and-their-filing-records",
-   "title": "Withholding returns: 0619-E, 1601-EQ and their filing records",
-   "level": 3,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "annual-information-return-1604-e-and-alphalist-of-payees",
-   "title": "Annual information return 1604-E and alphalist of payees",
-   "level": 3,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "percentage-tax-2551q-non-vat-broker-or-agent",
-   "title": "Percentage tax 2551Q (non-VAT broker or agent)",
-   "level": 3,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "bir-dat-files",
-   "title": "BIR DAT files",
-   "level": 3,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "sales-invoices-eopt-act",
-   "title": "Sales invoices (EOPT Act)",
-   "level": 3,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "e-invoicing-eis",
-   "title": "E-invoicing (EIS)",
-   "level": 3,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "cas-books-and-documents",
-   "title": "CAS books and documents",
-   "level": 3,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "period-end",
-   "title": "Period end",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "run-the-month-end-close-preparer",
-   "title": "Run the month-end close (preparer)",
-   "level": 3,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "recurring-journals",
-   "title": "Recurring journals",
-   "level": 3,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "year-end-close-preparer",
-   "title": "Year-end close (preparer)",
-   "level": 3,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "accounts-payable",
-   "title": "Accounts payable",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "bir-form-2307-for-suppliers",
-   "title": "BIR Form 2307 for suppliers",
-   "level": 3,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "fixed-assets-and-depreciation",
-   "title": "Fixed assets and depreciation",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "asset-disposal",
-   "title": "Asset disposal",
-   "level": 3,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "incentives",
-   "title": "Incentives",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "finance-masters-kept-by-accounting",
-   "title": "Finance masters kept by Accounting",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "accounting-approvals",
-   "title": "Approvals",
-   "level": 2,
-   "chapter": "Accounting"
-  },
-  {
-   "id": "accounting-manager",
-   "title": "Accounting Manager",
-   "level": 1,
-   "chapter": null
-  },
-  {
-   "id": "accounting-manager-role-summary",
-   "title": "Role summary",
-   "level": 2,
-   "chapter": "Accounting Manager"
-  },
-  {
-   "id": "accounting-manager-menus-available",
-   "title": "Menus available",
-   "level": 2,
-   "chapter": "Accounting Manager"
-  },
-  {
-   "id": "accounting-manager-daily-and-periodic-tasks",
-   "title": "Daily and periodic tasks",
-   "level": 2,
-   "chapter": "Accounting Manager"
-  },
-  {
-   "id": "approve-the-month-end-close",
-   "title": "Approve the month-end close",
-   "level": 2,
-   "chapter": "Accounting Manager"
-  },
-  {
-   "id": "period-control",
-   "title": "Period control",
-   "level": 2,
-   "chapter": "Accounting Manager"
-  },
-  {
-   "id": "approve-a-bank-reconciliation",
-   "title": "Approve a bank reconciliation",
-   "level": 2,
-   "chapter": "Accounting Manager"
-  },
-  {
-   "id": "approve-an-insurer-statement-reconciliation",
-   "title": "Approve an insurer statement reconciliation",
-   "level": 2,
-   "chapter": "Accounting Manager"
-  },
-  {
-   "id": "credit-control-decisions",
-   "title": "Credit control decisions",
-   "level": 2,
-   "chapter": "Accounting Manager"
-  },
-  {
-   "id": "year-end-close",
-   "title": "Year-end close",
-   "level": 2,
-   "chapter": "Accounting Manager"
-  },
-  {
-   "id": "posting-configuration-configuration-approvals-posting-rules-account-determination",
-   "title": "Posting configuration: Configuration Approvals, Posting Rules, Account Determination",
-   "level": 2,
-   "chapter": "Accounting Manager"
-  },
-  {
-   "id": "commission-rate-matrix",
-   "title": "Commission Rate Matrix",
-   "level": 2,
-   "chapter": "Accounting Manager"
-  },
-  {
-   "id": "approve-supplier-invoices",
-   "title": "Approve supplier invoices",
-   "level": 2,
-   "chapter": "Accounting Manager"
-  },
-  {
-   "id": "approvals-summary",
-   "title": "Approvals summary",
-   "level": 2,
-   "chapter": "Accounting Manager"
-  },
-  {
-   "id": "distribution-programmes-and-products",
-   "title": "Distribution, programmes and products",
-   "level": 1,
-   "chapter": null
+   "chapter": "Screen reference: Operations"
   },
   {
    "id": "lead-assignment",
    "title": "Lead Assignment",
    "level": 2,
-   "chapter": "Distribution, programmes and products"
-  },
-  {
-   "id": "team-view",
-   "title": "Team view",
-   "level": 3,
-   "chapter": "Distribution, programmes and products"
-  },
-  {
-   "id": "assignment-rules",
-   "title": "Assignment rules",
-   "level": 3,
-   "chapter": "Distribution, programmes and products"
-  },
-  {
-   "id": "reassignment-queue",
-   "title": "Reassignment queue",
-   "level": 3,
-   "chapter": "Distribution, programmes and products"
-  },
-  {
-   "id": "reassign-prospects",
-   "title": "Reassign prospects",
-   "level": 3,
-   "chapter": "Distribution, programmes and products"
-  },
-  {
-   "id": "distribution-channels",
-   "title": "Distribution Channels",
-   "level": 2,
-   "chapter": "Distribution, programmes and products"
+   "chapter": "Screen reference: Operations"
   },
   {
    "id": "dealer-programmes",
    "title": "Dealer Programmes",
    "level": 2,
-   "chapter": "Distribution, programmes and products"
-  },
-  {
-   "id": "set-up-a-programme",
-   "title": "Set up a programme",
-   "level": 3,
-   "chapter": "Distribution, programmes and products"
-  },
-  {
-   "id": "upload-the-dealer-s-sales",
-   "title": "Upload the dealer's sales",
-   "level": 3,
-   "chapter": "Distribution, programmes and products"
-  },
-  {
-   "id": "bank-endorsement-letter",
-   "title": "Bank endorsement letter",
-   "level": 3,
-   "chapter": "Distribution, programmes and products"
-  },
-  {
-   "id": "fleet-schedules",
-   "title": "Fleet Schedules",
-   "level": 2,
-   "chapter": "Distribution, programmes and products"
-  },
-  {
-   "id": "marine-open-covers",
-   "title": "Marine Open Covers",
-   "level": 2,
-   "chapter": "Distribution, programmes and products"
-  },
-  {
-   "id": "set-up-the-open-cover",
-   "title": "Set up the open cover",
-   "level": 3,
-   "chapter": "Distribution, programmes and products"
-  },
-  {
-   "id": "certificates-and-shipments",
-   "title": "Certificates and shipments",
-   "level": 3,
-   "chapter": "Distribution, programmes and products"
-  },
-  {
-   "id": "declarations-billing-and-remittance",
-   "title": "Declarations, billing and remittance",
-   "level": 3,
-   "chapter": "Distribution, programmes and products"
+   "chapter": "Screen reference: Operations"
   },
   {
    "id": "comparison-reports",
    "title": "Comparison Reports",
    "level": 2,
-   "chapter": "Distribution, programmes and products"
+   "chapter": "Screen reference: Operations"
   },
   {
    "id": "campaigns",
    "title": "Campaigns",
    "level": 2,
-   "chapter": "Distribution, programmes and products"
+   "chapter": "Screen reference: Operations"
   },
   {
-   "id": "marketing-consents",
-   "title": "Marketing consents",
-   "level": 3,
-   "chapter": "Distribution, programmes and products"
-  },
-  {
-   "id": "segments",
-   "title": "Segments",
-   "level": 3,
-   "chapter": "Distribution, programmes and products"
-  },
-  {
-   "id": "templates",
-   "title": "Templates",
-   "level": 3,
-   "chapter": "Distribution, programmes and products"
-  },
-  {
-   "id": "send-a-campaign-and-read-the-results",
-   "title": "Send a campaign and read the results",
-   "level": 3,
-   "chapter": "Distribution, programmes and products"
-  },
-  {
-   "id": "report-builder",
-   "title": "Report Builder",
+   "id": "sales-activities",
+   "title": "Sales activities",
    "level": 2,
-   "chapter": "Distribution, programmes and products"
+   "chapter": "Screen reference: Operations"
   },
   {
-   "id": "bi-extract",
-   "title": "BI extract",
+   "id": "clients",
+   "title": "Clients",
+   "level": 2,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "onboard-a-client-before-the-first-policy",
+   "title": "Onboard a client before the first policy",
    "level": 3,
-   "chapter": "Distribution, programmes and products"
+   "chapter": "Screen reference: Operations"
   },
   {
-   "id": "module-reference",
-   "title": "Module reference",
+   "id": "policies",
+   "title": "Policies",
+   "level": 2,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "raise-an-endorsement-request",
+   "title": "Raise an endorsement request",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "fleet-schedules",
+   "title": "Fleet Schedules",
+   "level": 2,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "marine-open-covers",
+   "title": "Marine Open Covers",
+   "level": 2,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "the-claims-list",
+   "title": "The claims list",
+   "level": 2,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "register-a-claim",
+   "title": "Register a claim",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "adjuster-report",
+   "title": "Adjuster report",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "assessment-and-settlement-maker",
+   "title": "Assessment and settlement (maker)",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "approve-a-settlement-checker",
+   "title": "Approve a settlement (checker)",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "claim-details-documents-and-audit-trail",
+   "title": "Claim details, documents and audit trail",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "renewal-policy",
+   "title": "Renewal Policy",
+   "level": 2,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "renew-a-policy",
+   "title": "Renew a policy",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "renewal-batch-lapse-management-and-the-analytics",
+   "title": "Renewal Batch, Lapse Management and the analytics",
+   "level": 2,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "renewal-queue-and-at-risk-policies",
+   "title": "Renewal Queue and At-Risk Policies",
+   "level": 2,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "negotiations",
+   "title": "Negotiations",
+   "level": 2,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "payments",
+   "title": "Payments",
+   "level": 2,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "ctpl-authentication",
+   "title": "CTPL authentication",
+   "level": 2,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "cover-notes-binders",
+   "title": "Cover notes (binders)",
+   "level": 2,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "cancel-a-policy-computed-return-premium",
+   "title": "Cancel a policy: computed return premium",
+   "level": 2,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "claims-awaiting-documents",
+   "title": "Claims awaiting documents",
+   "level": 2,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "motor-claim-repairs-and-letters-of-authority",
+   "title": "Motor claim repairs and letters of authority",
+   "level": 2,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "screens-accounts",
+   "title": "Screen reference: Accounts",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "verify-payments-and-post-official-receipts",
+   "title": "Verify payments and post official receipts",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "collections",
+   "title": "Collections",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "credit-control",
+   "title": "Credit control",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "post-dated-cheques",
+   "title": "Post-dated cheques",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "claims-settlements-paid-through-the-broker",
+   "title": "Claims settlements paid through the broker",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "accounts-payable",
+   "title": "Accounts payable",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "bir-form-2307-for-suppliers",
+   "title": "BIR Form 2307 for suppliers",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "fixed-assets-and-depreciation",
+   "title": "Fixed assets and depreciation",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "asset-disposal",
+   "title": "Asset disposal",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "disbursement-payment-vouchers-and-cheques",
+   "title": "Disbursement: payment vouchers and cheques",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "bank-payment-files",
+   "title": "Bank payment files",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "remittance-to-insurers",
+   "title": "Remittance to insurers",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "direct-bill-commission-debit-notes",
+   "title": "Direct bill: commission debit notes",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "journal-vouchers",
+   "title": "Journal vouchers",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "sap-gl-export",
+   "title": "SAP GL export",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "open-entry-matching-and-write-offs",
+   "title": "Open entry matching and write-offs",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "accounting-query-and-all-clients-accounting",
+   "title": "Accounting Query and All Clients Accounting",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "petty-cash",
+   "title": "Petty cash",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "bank-reconciliation",
+   "title": "Bank reconciliation",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "insurer-statement-reconciliation",
+   "title": "Insurer statement reconciliation",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "tax-bir-forms-and-returns",
+   "title": "Tax: BIR forms and returns",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "withholding-returns-0619-e-1601-eq-and-their-filing-records",
+   "title": "Withholding returns: 0619-E, 1601-EQ and their filing records",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "annual-information-return-1604-e-and-alphalist-of-payees",
+   "title": "Annual information return 1604-E and alphalist of payees",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "percentage-tax-2551q-non-vat-broker-or-agent",
+   "title": "Percentage tax 2551Q (non-VAT broker or agent)",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "bir-dat-files",
+   "title": "BIR DAT files",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "sales-invoices-eopt-act",
+   "title": "Sales invoices (EOPT Act)",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "e-invoicing-eis",
+   "title": "E-invoicing (EIS)",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "cas-books-and-documents",
+   "title": "CAS books and documents",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "period-end",
+   "title": "Period end",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "year-end-close-preparer",
+   "title": "Year-end close (preparer)",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "recurring-journals",
+   "title": "Recurring journals",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "incentives",
+   "title": "Incentives",
+   "level": 2,
+   "chapter": "Screen reference: Accounts"
+  },
+  {
+   "id": "screens-dashboards-and-commission",
+   "title": "Screen reference: Dashboards and Commission",
    "level": 1,
    "chapter": null
   },
@@ -1453,163 +1287,307 @@
    "id": "dashboard",
    "title": "Dashboard",
    "level": 2,
-   "chapter": "Module reference"
+   "chapter": "Screen reference: Dashboards and Commission"
   },
   {
-   "id": "operations",
-   "title": "Operations",
+   "id": "claims-dashboard",
+   "title": "Claims Dashboard",
    "level": 2,
-   "chapter": "Module reference"
+   "chapter": "Screen reference: Dashboards and Commission"
   },
   {
-   "id": "module-reference-home",
-   "title": "Home",
-   "level": 3,
-   "chapter": "Module reference"
-  },
-  {
-   "id": "sales-and-marketing",
-   "title": "Sales & Marketing",
-   "level": 3,
-   "chapter": "Module reference"
-  },
-  {
-   "id": "clients-policy-and-claims",
-   "title": "Clients, Policy and Claims",
-   "level": 3,
-   "chapter": "Module reference"
-  },
-  {
-   "id": "module-reference-renewals",
-   "title": "Renewals",
-   "level": 3,
-   "chapter": "Module reference"
-  },
-  {
-   "id": "my-work-payments-ctpl-authentication-cover-notes-and-policy-cancellation",
-   "title": "My Work, Payments, CTPL Authentication, Cover Notes and Policy Cancellation",
-   "level": 3,
-   "chapter": "Module reference"
-  },
-  {
-   "id": "accounts",
-   "title": "Accounts",
+   "id": "processing-dashboard",
+   "title": "Processing Dashboard",
    "level": 2,
-   "chapter": "Module reference"
+   "chapter": "Screen reference: Dashboards and Commission"
   },
   {
-   "id": "remittance",
-   "title": "Remittance",
-   "level": 3,
-   "chapter": "Module reference"
-  },
-  {
-   "id": "commission",
-   "title": "Commission",
+   "id": "sales-dashboard",
+   "title": "Sales Dashboard",
    "level": 2,
-   "chapter": "Module reference"
+   "chapter": "Screen reference: Dashboards and Commission"
   },
   {
-   "id": "module-reference-reports",
-   "title": "Reports",
+   "id": "commission-to-agents-and-referrers",
+   "title": "Commission to agents and referrers",
    "level": 2,
-   "chapter": "Module reference"
+   "chapter": "Screen reference: Dashboards and Commission"
   },
   {
-   "id": "master",
-   "title": "Master",
+   "id": "overriding-profit-and-contingent-commission-from-insurers",
+   "title": "Overriding, profit and contingent commission from insurers",
    "level": 2,
-   "chapter": "Module reference"
+   "chapter": "Screen reference: Dashboards and Commission"
   },
   {
-   "id": "configuration-screens",
-   "title": "Configuration screens",
-   "level": 3,
-   "chapter": "Module reference"
+   "id": "screens-master",
+   "title": "Screen reference: Master",
+   "level": 1,
+   "chapter": null
   },
   {
-   "id": "organization-insurance-location-employees-users-and-access",
-   "title": "Organization, Insurance, Location, Employees, Users and Access",
-   "level": 3,
-   "chapter": "Module reference"
+   "id": "distribution-channels",
+   "title": "Distribution Channels",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "company-branches-and-the-letterhead",
+   "title": "Company, branches and the letterhead",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "insurance-companies",
+   "title": "Insurance companies",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "masters-that-work-the-same-way",
+   "title": "Masters that work the same way",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "claim-documents",
+   "title": "Claim documents",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "lead-sources-and-reason-codes",
+   "title": "Lead sources and reason codes",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "users",
+   "title": "Users",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "roles-and-role-permissions",
+   "title": "Roles and role permissions",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "user-access-matrix",
+   "title": "User Access Matrix",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "authority-matrix",
+   "title": "Authority Matrix",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "delegations",
+   "title": "Delegations",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "segregation-of-duties",
+   "title": "Segregation of Duties",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "access-reviews",
+   "title": "Access Reviews",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "posting-configuration-configuration-approvals-posting-rules-account-determination",
+   "title": "Posting configuration: Configuration Approvals, Posting Rules, Account Determination",
+   "level": 2,
+   "chapter": "Screen reference: Master"
   },
   {
    "id": "finance",
-   "title": "Finance",
-   "level": 3,
-   "chapter": "Module reference"
-  },
-  {
-   "id": "incentive-masters",
-   "title": "Incentive masters",
-   "level": 3,
-   "chapter": "Module reference"
-  },
-  {
-   "id": "module-reference-product-configurator",
-   "title": "Product Configurator",
+   "title": "Other finance masters",
    "level": 2,
-   "chapter": "Module reference"
+   "chapter": "Screen reference: Master"
   },
   {
-   "id": "number-series",
-   "title": "Number series",
+   "id": "commission-rate-matrix",
+   "title": "Commission Rate Matrix",
    "level": 2,
-   "chapter": "Module reference"
+   "chapter": "Screen reference: Master"
   },
   {
-   "id": "reports-dashboards-schedules-and-notifications",
-   "title": "Reports, dashboards, schedules and notifications",
-   "level": 1,
-   "chapter": null
-  },
-  {
-   "id": "reports-dashboards-schedules-and-notifications-reports",
-   "title": "Reports",
+   "id": "finance-masters-kept-by-accounting",
+   "title": "Accounting masters",
    "level": 2,
-   "chapter": "Reports, dashboards, schedules and notifications"
+   "chapter": "Screen reference: Master"
   },
   {
-   "id": "dashboards",
-   "title": "Dashboards",
+   "id": "operational-masters",
+   "title": "Operational masters",
    "level": 2,
-   "chapter": "Reports, dashboards, schedules and notifications"
+   "chapter": "Screen reference: Master"
   },
   {
-   "id": "reports-dashboards-schedules-and-notifications-schedules",
+   "id": "bank-file-layouts-and-payee-bank-accounts",
+   "title": "Bank file layouts and payee bank accounts",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "e-mail-layout",
+   "title": "E-mail Layout",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "documents-and-reports-layout",
+   "title": "Documents and Reports Layout",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "document-signatures",
+   "title": "Document Signatures",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "configuration",
+   "title": "Configuration",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "document-numbering",
+   "title": "Document Numbering",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "schedules",
    "title": "Schedules",
    "level": 2,
-   "chapter": "Reports, dashboards, schedules and notifications"
+   "chapter": "Screen reference: Master"
   },
   {
-   "id": "notifications-and-e-mails",
-   "title": "Notifications and e-mails",
+   "id": "audit-trail",
+   "title": "Audit Trail",
    "level": 2,
-   "chapter": "Reports, dashboards, schedules and notifications"
+   "chapter": "Screen reference: Master"
   },
   {
-   "id": "troubleshooting-faq-and-glossary",
-   "title": "Troubleshooting, FAQ and glossary",
+   "id": "e-mail-outbox",
+   "title": "E-mail Outbox",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "integrations",
+   "title": "Integrations",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "sms-and-message-templates",
+   "title": "SMS and message templates",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "insurer-integration",
+   "title": "Insurer integration",
+   "level": 2,
+   "chapter": "Screen reference: Master"
+  },
+  {
+   "id": "screens-product-configurator",
+   "title": "Screen reference: Product Configurator",
    "level": 1,
    "chapter": null
   },
   {
-   "id": "common-messages-and-what-to-do",
-   "title": "Common messages and what to do",
+   "id": "product-configurator-dashboard",
+   "title": "Product Configurator dashboard",
    "level": 2,
-   "chapter": "Troubleshooting, FAQ and glossary"
+   "chapter": "Screen reference: Product Configurator"
   },
   {
-   "id": "frequently-asked-questions",
-   "title": "Frequently asked questions",
+   "id": "product-templates",
+   "title": "Product Templates",
    "level": 2,
-   "chapter": "Troubleshooting, FAQ and glossary"
+   "chapter": "Screen reference: Product Configurator"
+  },
+  {
+   "id": "coverage-builder",
+   "title": "Coverage Builder",
+   "level": 2,
+   "chapter": "Screen reference: Product Configurator"
+  },
+  {
+   "id": "rating-engine",
+   "title": "Rating Engine",
+   "level": 2,
+   "chapter": "Screen reference: Product Configurator"
+  },
+  {
+   "id": "acceptance-rules",
+   "title": "Acceptance Rules",
+   "level": 2,
+   "chapter": "Screen reference: Product Configurator"
+  },
+  {
+   "id": "document-manager",
+   "title": "Document Manager",
+   "level": 2,
+   "chapter": "Screen reference: Product Configurator"
+  },
+  {
+   "id": "market-mapping",
+   "title": "Market Mapping",
+   "level": 2,
+   "chapter": "Screen reference: Product Configurator"
+  },
+  {
+   "id": "risk-mapping",
+   "title": "Risk Mapping",
+   "level": 2,
+   "chapter": "Screen reference: Product Configurator"
+  },
+  {
+   "id": "product-analytics",
+   "title": "Product Analytics",
+   "level": 2,
+   "chapter": "Screen reference: Product Configurator"
+  },
+  {
+   "id": "reports",
+   "title": "Reports",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "reports-catalogue",
+   "title": "All Reports and the report menus",
+   "level": 2,
+   "chapter": "Reports"
+  },
+  {
+   "id": "report-builder",
+   "title": "Report Builder",
+   "level": 2,
+   "chapter": "Reports"
   },
   {
    "id": "glossary",
    "title": "Glossary",
-   "level": 2,
-   "chapter": "Troubleshooting, FAQ and glossary"
+   "level": 1,
+   "chapter": null
   }
  ]
 }
