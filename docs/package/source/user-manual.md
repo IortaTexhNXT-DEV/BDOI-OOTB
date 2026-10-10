@@ -399,17 +399,7 @@ Each quotation, request for quotation and placement slip shows its journey as a 
 
 ## What the system posts
 
-Every journal is built from the posting rule of its business event (Master > Finance > Posting Rules); **Accounting Flow** shows, for each event, the screen that triggers it, the approval before it posts and the accounts it debits and credits. The main events of the cycle:
-
-| Event | Journal (summary) |
-|---|---|
-| Policy issued, broker billed | Dr Premiums Receivable at the gross premium; Cr Premiums Payable to Insurers (each insurer by its share), the premium VAT, DST and LGT due to insurers, and Brokerage Commission Income. |
-| Policy issued, direct bill | Dr Commission Receivable from the insurer; Cr Brokerage Commission Income and Output VAT. No premium bill. |
-| Official receipt | Dr Cash in Bank (or the account of the receipt mode); Cr Premiums Receivable. |
-| Remittance settlement paid | Dr Premiums Payable to Insurers; Cr Cash in Bank. |
-| Commission approved and paid | Dr Commission Expense; Cr Commission Payable; at payout Dr Commission Payable; Cr Cash in Bank and Withholding Tax Payable. |
-| Endorsement | Additional premium: as a new bill. Return premium: the reverse, and the refund due from each insurer when the premium was already remitted. |
-| Debit note collected | Dr Cash in Bank and Creditable Withholding Tax (BIR Form 2307); Cr Commission Receivable. |
+Every journal is built from the posting rule of its business event (Master > Finance > Posting Rules). **Accounting Flow** (Master > Finance) is the accounting reference of these entries: for every event, grouped by module, when it posts, the approval before posting and its debit and credit lines with the accounts in force today. It is built from the rules and accounts in force, so it is always current; export it as the **Accounting Entries Handbook** (PDF) for Finance sign-off, or to Excel for audit.
 
 Each payable and commission line carries the insurer, so the remittance, the Co-insurance Register and the Due to Insurers by Co-insurer report show each insurer's part. A rounding difference of a share split goes to the lead insurer.
 
@@ -480,41 +470,81 @@ The eye opens the user, the pencil edits the display name, e-mail and roles (a r
 
 ### Roles and role permissions
 
-**Role** lists the TISPH roles by department, with who changed each role last and when (**System set-up** for a role that has not been changed since it was set up); tick **Include the base platform roles** to list the seven broker roles of the base platform as well (see TISPH roles under Roles and menus). **Role Permissions** shows, for each permission (for example read:receipts, write:bank-reconciliation, approve:period-end, approve:quotations), which roles hold it. A role that builds on another (the Accounting Manager on Accounting, SUPERID on the System Administrator) also has that role's permissions. **Edit roles** changes the permissions of a role; do this only with the process owner, because the menus and the server checks follow the permissions.
+**Role** lists the TISPH roles by department, with who changed each role last and when (**System set-up** for a role that has not been changed since it was set up); tick **Include the base platform roles** to list the seven broker roles of the base platform as well (see TISPH roles under Roles and menus). **Role Permissions** shows what each role may do, in business words and in the order of the menu, on three tabs:
+
+- **By role**: on the left the TISPH roles by department (Sales, Operations, Cash Control, Finance and Accounting, IT, Management) with their active users; **Include base platform roles** adds the generic roles of the platform. On the right the selected role, area by area (Sales & Marketing, Operations, Accounts, Commission, Reports, Product Configurator, Master data and configuration, Users and access, Basic and special access): each module with its screens and the levels **View**, **Create and edit** and **Approve** (**Special** for full personal data), each with a tooltip of what it allows. A level that comes from an included role shows a link and "Through Accounting" (the Accounting Manager includes Accounting); the System Administrator and SUPERID have **Full access**. **Find a module or screen** searches the modules, their screens and what the levels allow; **Only modules with access** hides the others; the area names at the top jump to an area. **6 users** opens the User Access Matrix on the users of the role.
+- **Edit access** (users who may change roles) turns the levels into switches. Switching on Create and edit or Approve also switches on View; switching off View switches off the other levels of the module (you are asked first). A level that comes from an included role and Basic access cannot be changed here. The bar at the bottom counts the changes and the segregation-of-duties warnings; a rule set to Block refuses the change. **Review and submit** lists the change by area, who is affected and the warnings, and asks for the reason (Reason Codes, Change of access). The change then waits for the approval of another administrator: the role shows **Waiting for approval** with the requester, the date, what is added and removed and the reason; an approver who did not request it and does not hold the role approves or rejects it (with a reason) there or on the **Waiting for approval** tab; only the requester may withdraw it. Once approved, the users of the role (and of the roles that include it) sign in again with the new access. Nobody changes a role he or she holds, and only a System Administrator changes a full-access role.
+- **Compare roles**: two to four roles side by side, module by module; the modules where they differ are marked, and **Show differences only** keeps those.
+
+**Export to Excel** downloads, for an audit, every TISPH role from **By role** (the base platform roles too while they are shown), the compared roles from **Compare roles** and the roles with a change waiting from **Waiting for approval**: the access by role, module and level, the matrix of modules and roles, the changes waiting for approval and the list of permission codes. The first sheet names the roles exported. Administrators may switch on **Show technical names** (the **⋮** menu) to see the role and permission codes.
+
+**Access controls** (the **⋮** menu) shows the switches that decide how access is enforced: **Changes of access wait for a second administrator**, **Segregation of duties is checked when roles are given**, **Approvals are checked against the approval limits** and what happens to **An approver without a limit for the transaction** (May approve or Is refused). A change takes a reason and always waits for another administrator, even switching the approval off; Master > Configuration shows these settings read-only.
+
+The menus are set per role by the TISPH screen matrix and do not follow these levels: giving View on a module lets the role use that module where its menu reaches it. While **Changes of access wait for a second administrator** is on, a permission list saved on the Role form also waits for approval.
 
 ![Master > Users and Access > Role Permissions](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-role-permissions.png)
 
 ### User Access Matrix
 
-The matrix lists every user with roles, branch, status, last sign-in, two-step verification, password age and segregation-of-duties conflicts. The cards at the top count **Active users**, **Dormant (90+ days)**, **Segregation-of-duties conflicts** and **Active without two-step verification**; select a card to filter the list. **Export to Excel** downloads the matrix for an access review; **Sign out everywhere** ends every session of a user.
+The matrix lists who has access to what, for an audit: each user with roles by name (a role held through another role, such as the System Administrator through SUPERID, shows as an outlined chip), department, branch, status, last sign-in, two-step verification, password age and segregation-of-duties conflicts. Active users show by default; the **Status** filter shows the others. The cards at the top count **Active users**, **Dormant** (no sign-in for the dormant period), **Open SoD conflicts** (active users with a conflict and no exception in force), **Without two-step** and **Waiting for approval** (users concerned by a change of access waiting for approval); select a card to filter the list. Filter further by name, **Department** and **Role**; **Include base platform roles** adds the generic roles of the base platform to the role list.
+
+Select a user to open the access panel: roles with their department and the roles they include, what the person can do by area and module, approval authority today (with its source: a role, a personal limit or a delegation), delegations given and received, conflicts with their exceptions, the last access review and the changes waiting for approval. The **⋮** menu of a row opens the user record, the conflicts on Segregation of Duties and, for users who may manage users, **Sign out everywhere** (an administrator account only by a System Administrator).
+
+**Export to Excel** downloads the users, the roles of each user (direct or through another role), the conflicts with their exceptions and the delegations in effect, with the company, the date and time and who exported it.
 
 ![Master > Users and Access > User Access Matrix](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-access-matrix.png)
 
 ### Authority Matrix
 
-The Authority Matrix holds the approval limits per role and transaction type: amounts in PHP, discounts in percent of premium (for example a quotation discount of 10% for Sales & Marketing, policy issuance up to PHP 1,000,000.00). A role with **Not set** is not restricted by the matrix for that transaction type. **Limit for one person** sets a personal limit for one user. A change applies once a second administrator approves it.
+The Authority Matrix holds the largest amount (in PHP) or percent of premium each role may approve per transaction. It has four tabs:
+
+- **Limits**: the transactions down (each with the approval step that checks it under the info icon) and the roles across, grouped by department (Sales, Operations, Cash Control, Finance and Accounting, IT, Management). By default it shows the TISPH roles that can approve the transactions an approval step checks; **Include base platform roles**, **Include transactions not checked yet**, the department filter and **All roles** show the others. A cell shows the limit (for example PHP 1,000,000.00 or 10%), **No limit**, **Not set**, or a dash when the role cannot reach that approval step, with a **Pending** or **From** date chip when a change waits for approval or is scheduled. The chip on the right says what **Not set** means today (by default the approval is not restricted); the count beside it shows only the approver cells still without a limit.
+- **Pending approval**: the changes waiting for approval with their lines. Another administrator who may approve access changes, and who holds none of the roles changed, approves or rejects them (with the reason); only the proposer may withdraw them.
+- **Personal limits**: limits of one person for a transaction. A personal limit replaces the limits of the person's roles. **Add personal limit** opens the same panel with the person and the transaction.
+- **History**: every limit with its dates, authority reference, proposer and approver.
+
+Select a cell to open the **Approval limit** panel: the limit in effect, then the new limit (percent from 0 to 100, a higher percent is refused with a message, or an amount in PHP) with **No limit** beside it, **Effective from** (today or later; the current limit stays in effect until the day before), the **Authority reference** and **Reference date** (for example the board resolution number and date) and optional remarks. **Submit for approval** sends the change to another administrator; **Remove limit** sends its removal. Nothing changes until it is approved.
+
+**Upload** takes many limits at once: download the template (the matrix as it is, with drop-down lists and the rules on the Instructions sheet), change the Limit, No limit, Effective from, Authority reference and Reference date columns, choose the file (.xlsx or .csv) and select **Check the file**. The whole file is checked first; with any error nothing is saved and each error names the row, the transaction and role, and the column. Rows equal to the matrix are left unchanged, and a limit is not removed by emptying its row. Review the changes and select **Submit for approval**: they go to another administrator as one change. **Download** gives the matrix and its change history in Excel for audit.
 
 ![Master > Users and Access > Authority Matrix](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-authority.png)
 
 ### Delegations
 
-A delegation lets another user approve for an approver who is away.
+A delegation lets another user approve with the limit of an approver who is away, for chosen transactions and dates. It applies once another administrator who may approve access changes approves it; neither the requester nor the person covering approves it.
 
 1. Choose Users and Access > Delegations and select **New delegation**.
-2. Choose **Approver away** and **Covered by**, the **Transactions** covered (**All transactions** or a type), **From** and **To** dates and the **Reason**.
-3. Select **Save**.
+2. Choose the **Approver away**: only people who can approve a transaction checked by the Authority Matrix are offered, by department. The transactions he or she can approve are listed with the authority today; untick those not covered.
+3. Choose who it is **Covered by**. A person who cannot reach the approval step of a chosen transaction is shown but cannot be chosen, with the reason.
+4. Enter **From** (today or later) and **To** (at most 90 days, setting Longest delegation) and choose the **Reason** (Vacation or annual leave, Sick leave, Business travel, Training or seminar, Position vacant, or Other with a note). **Effect** shows what the person covering will be able to approve.
+5. Select **Submit for approval**.
+
+The list shows **Current and upcoming**, **Waiting for approval**, **Ended** and **All**, with the status of each delegation (Waiting for approval, Scheduled, In effect, Ended, Ended early, Rejected, Withdrawn). Select a delegation to see it, its approval and the authority of the person covering on a date. **End early** stops a delegation at once, with a reason; both people are told. A delegation never lowers the authority of the person covering: while no limit is set for him or her and Not set allows the approval, a delegation changes nothing. **Export to Excel** downloads the list for audit.
 
 ![New delegation](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-delegation-new.png)
 
 ### Segregation of Duties
 
-Each rule names two roles that one person should not hold together, what happens when they are assigned (**When assigned**: **Block** refuses the combination, **Warn** allows it with a warning), the reason and the status. The delivered rules are SOD-CLM-ACCT (Claims and Accounting: the claims handler should not also release claim payments), SOD-PROC-ACCT (Processing Team and Accounting: the person who places and issues business should not also release premium to insurers) and SOD-PROC-MGR (Processing Team and Accounting Manager: the person who places business should not approve its payments), all three Block; and SOD-SALES-ACCT (Sales & Marketing and Accounting), SOD-SALES-CLM (Sales & Marketing and Claims) and SOD-TIS-BP-RECON (CCD-BP and CCD-Recon: the user who issues receipts should not also reverse them), all three Warn. **New rule** adds a rule; **Switch off** disables one.
+A rule names either two roles that one person should not hold together (**Roles held together**) or two sets of access a role or a person should not combine (**Access combined**, for example issuing receipts and issuing policies), and what happens when roles are given (**Block** refuses the combination, **Warn** allows it and lists the person under Conflicts). The screen has three tabs:
+
+- **Conflicts**: every active user who breaks a rule, with the roles held and the state (a user with a full-access role, such as the System Administrator, holds every access and so breaks every access rule): **Open**, **Accepted until** a date (an exception in force), **Exception waiting for approval** or **Exception expired** (open again after its date). **Request exception** accepts a conflict for one person until a date (at most 365 days, setting Longest exception) with a reason (Small team, Temporary cover, Role change in progress, Compensating review in place with who reviews, Test account, Other); another administrator who is not the person concerned approves it. Nobody requests an exception for himself or herself. **End exception** opens the conflict again at once. An exception does not lift a Block rule when roles are given.
+- **Rules**: each rule with its two roles or sets of access, Block or Warn, the number of users breaking it and its status. **New rule**, **Edit**, **Switch off** and **Switch on** take a reason and wait for another administrator's approval; the rule code is given by the system. Rules between two base platform roles show with **Include base platform roles**. The delivered TISPH rule is Receipting and reversals (CCD-BP with CCD-Recon, Warn); the access rules Receipting and selling, Placing and paying insurers, Claims and payment and Administration and transactions all warn.
+- **Waiting for approval**: rule changes and exceptions to approve or reject (with the reason); the requester may withdraw his or her own.
+
+**Export to Excel** downloads the rules, the conflicts by user, the exceptions and the changes waiting for approval.
 
 ![Master > Users and Access > Segregation of Duties](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-sod.png)
 
 ### Access Reviews
 
-Confirm at least every quarter that each active user still needs his or her access. **Start a review** creates the review with every active user; for each user choose **Keep** or **Revoke** (the decision starts as **To review**). The closed review is kept as the audit record.
+Confirm at least every quarter that each active user still needs his or her access.
+
+1. Select **Start a review**: the name is proposed from the month, the **Due** date from the review period (14 days); choose the **Scope**: all active users, departments or roles. The panel says how many users will be reviewed.
+2. Open the review. The users are grouped by department with their roles at the start, last sign-in, conflicts and outcome. Select a user and choose **Keep access**, **Remove roles** (tick the roles to remove; removing every role deactivates the account) or **Deactivate account**. A removal needs a reason (Left the company, Moved to another job or department, Access no longer needed, More access than the job needs, Segregation of duties conflict, Account not used, Temporary assignment ended, Other); keeping a dormant user or one with an open conflict needs a note. **Save and next** moves to the next user to review. Tick several users and select **Keep selected** to keep them at once.
+3. Nobody decides his or her own line, and an administrator account is decided only by a System Administrator. The built-in administrator is never deactivated.
+4. When every user is decided, select **Submit for sign-off**. Another administrator who decided none of its users (Keep access included) signs it off: the removals then apply (the roles still held are removed, accounts are deactivated, their sessions end) and the review closes. **Return** sends it back with remarks for changes.
+
+The list shows each review with its scope, due date (Overdue when it has passed), progress, removals and status. **Export to Excel** downloads the list, or one review with its summary and every decision. My Work lists the open reviews and the reviews waiting for sign-off.
 
 ## Company, branches and the letterhead
 
@@ -2671,7 +2701,16 @@ Posting rule versions, their activation and account determination changes wait o
 
 ![Master > Finance > Account Determination](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-acct-det.png)
 
-**Accounting Flow** shows, for each operational event, what it posts, read from the posting rules in force: the screen or action that triggers it, the approval before it posts, whether its journal is **Parked for approval** or **Posted at once**, and the accounts it debits and credits. **Open the rule** opens the posting rule.
+**Accounting Flow** is the Finance accounting reference: the journal each business event posts, read from the posting rules and accounts in force. It is read only; rules change on Posting Rules and accounts on Account Determination, both through Configuration Approvals.
+
+- Under the title: the date of the rules in force, the **Account mapping** status (Ready, or Incomplete with the accounts Finance still has to confirm) and the number of **changes pending approval**.
+- **Contents** on the left lists the modules in the order of the accounting cycle (premium billing, collections, remittance to insurers, direct-bill commission, overriding commission, agent and referrer commission, incentives, claims, payments and payables, petty cash, sales invoices, write-offs, fixed assets, other system journals); click an event to go to it. A dot marks an event with an account to map or a change waiting for approval.
+- Filter with the search box (event, account code or name, amount), **Module**, **Account** (the events that post to an account) and **Mapping pending only**. The filters stay in the address, so the link can be shared.
+- Each event shows **When** it posts, **Where** (the screen, a link when you can open it), the **Approval before posting**, the **Approval limit** of the Authority Matrix where the approval checks one, and **Last posted**. Its chips say whether the journal is **Posted at once**, **Waits for approval** (posted when another user approves it in Journal Voucher) or **Saved as pending**, and show a **Change pending approval**, a **New rule from** a later date or **Mapping pending**.
+- The entries list the debits, then the credits: the account and where it comes from, the amount in business words (the info icon gives the formula of a derived amount; **For each insurer** marks a line posted per insurer of a co-insured policy) and the notes: a line that posts only when a setting is on, **Mapping pending** with **Map the account** (an account that is provisional, such as 210245, or outside the TISPH chart), **Account inactive**, **Account change pending**.
+- **Example** shows the journal of the event for sample amounts, for a single insurer or two insurers (60 / 40); nothing is posted.
+- **Export** gives the **Accounting reference (Excel)** (entries, events, accounts pending mapping, examples) and the **Accounting entries handbook (PDF)**, with a sign-off block (Prepared by, Reviewed by, Approved by). **Print** prints the page as filtered.
+- Finance administrators also see **Open the rule** (opens the event on Posting Rules) and, under **Technical details**, the rule code, version, lines and settings of the event.
 
 The events whose journals are parked are listed in the setting `accounting.parked_events` (Master > Configuration, group accounting). A parked journal waits on Accounts > Journal Voucher (tick **System journals parked for approval**) and in My Work > Approvals until a user other than the one whose action created it approves it, which posts it. It cannot be rejected on its own: cancel its source document (the collection, the invoice, the payment), which cancels the journal. TISPH parks the collection of commission from an insurer, the service invoice and its payment, and the payment of supplier invoices. Premium bookings, collections applied to bills, direct-bill commission, refunds due from insurers and write-offs always post at once, because the bill, the remittance or the matching that comes next reads them; the setting refuses them.
 
@@ -3099,7 +3138,7 @@ See the chapter Reports, dashboards, schedules and notifications.
 | Account Determination | GL account per account role, payable per payee type, cash account per payment mode, commission taxes, write-off reasons. |
 | Posting Rules | The journal rule of each business event; simulate, version, history. |
 | Configuration Approvals | Pending posting configuration changes for a second user. |
-| Accounting Flow | What each event posts, from the rules in force. |
+| Accounting Flow | The accounting reference: what each event posts, from the rules and accounts in force; Excel and the Accounting Entries Handbook. |
 | Package Bundles | Packages sold under one master policy (sections with their own insurer): code, bundle, customer segment, sections, bundle discount, default sum insured; **Add bundle**. |
 | Insurer Rate Tables | Each insurer's rates for package products: product, insurer, rate basis, rate, minimum premium, deductible, key benefits, commission, effective dates; used by Package Bundles; **Add rate**. |
 | Premium Taxes & LGU Rates | VAT or premium tax, DST, FST and the local government tax per city or municipality (code, city, province, rate, effective dates); tabs Local government tax, Tax and charge rules, Calculator; **Add city / municipality**. |

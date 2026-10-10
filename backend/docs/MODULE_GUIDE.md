@@ -35,7 +35,25 @@ minimal, clearly-correct front-end fix.
   permission is `ROLE_PERMS` in the same file (the broker roles and the TISPH roles `tis-*` of the RBAC v4 sheet); a
   role added there for databases in use also needs a migration, as `0348_tisph_roles.sql` does. Roles that include
   the System Administrator role through `roles.inherits` (SUPERID) are protected like it: `adminEquivalentRoles()` in
-  `src/lib/auth.js`.
+  `src/lib/auth.js`. A new permission code also needs its entry in `src/modules/access-control/catalogue.js` (area,
+  module, level and what it allows in business words): Role Permissions shows it from there, and
+  `test/role-permissions.test.js` fails while a code of the database has none. On a database in use, the access of a
+  role is changed on Role Permissions as a change another administrator approves (`access.change_approval`); a
+  migration that grants a permission for a release grants it directly, as `0348_tisph_roles.sql` does.
+- Approval limits: an approval step that checks the Authority Matrix calls `assertAuthority(db, user, type, amount)`
+  from `src/modules/access-control/service.js` and registers its type in `AUTHORITY_STEPS`
+  (`src/modules/access-control/authority.js`) with the screen and the permissions of the step; the matrix shows which
+  roles can approve it from there, and `test/authority-matrix.test.js` fails while a checked type is missing. Limits are
+  changed on the Authority Matrix (one change approved by another administrator, also for an uploaded workbook).
+- Changes of access: a screen of Master > Users and Access that changes access (role access, limits, delegations,
+  segregation-of-duties rules and exceptions, access review removals) requests it with `requestAccessChange` of
+  `src/modules/access-control/changes.js` and registers its kind with `registerAccessKind` (label, link, summary in
+  business words, extra checks on the approver, what approving applies, what a rejection undoes). The table is the
+  configuration approval (`accounting_config_changes`); a new kind is added to its kind CHECK by a migration. Changes
+  that only reduce access (ending a delegation or an exception early) apply at once. Only the requester withdraws a
+  change; the approver holds none of the roles it changes (`rolesHeldBy`). A setting that decides how access is
+  enforced is changed through `controls.js` (kind `access-controls`) and listed in `src/lib/settingOwners.js`, so the
+  generic configuration endpoints refuse it.
 - Coded reasons: a decision that records a reason (claim repudiation, renewal lapse, quotation declined or dropped)
   takes an optional `reasonCode` of the reason-code master besides the free-text reason; resolve it with
   `decisionReason(db, contexts, { reasonCode, reason })` from `src/modules/ops-masters/records.js`, which checks the
@@ -44,7 +62,8 @@ minimal, clearly-correct front-end fix.
   document, incentive batch rejection: the contexts of seed `88_accounting_reasons.sql`; cancellation of a sales
   invoice or a payment acknowledgement: seed `89_tax_invoice_reasons.sql`) takes `{ reasonCode, note }`
   and resolves it with `requiredReason(db, context, { reasonCode, note })` from the same file (the code is required;
-  returns `{ code, name, note, text }`); store the code beside the reason text (migration 0380 adds the columns).
+  returns `{ code, name, note, text }`); store the code beside the reason text (migration 0380 adds the columns). A
+  change of access takes its reason from the context `access_change` (seed `91_role_access.sql`).
 - Record scoping: users whose roles are all in `security.scoped_roles` only see their own book. Use
   `src/lib/scope.js`: pass `await withScope(req)` to list / stats services and add `scopeSql(q[SCOPE], '<entity>', alias, params)`
   to the WHERE clause; guard detail, update and workflow routes with `ownRecord('<entity>')` (answers 404, not 403).

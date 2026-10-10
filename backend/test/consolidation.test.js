@@ -65,7 +65,7 @@ describe('remittance approval limits come from the Authority Matrix', () => {
       const a = await pendingFor(t.body.data.id);
       const refused = await ctx.as('checker')('post', `/remittance/approvals/${a.id}/approve`).send({});
       expect(refused.status).toBe(403);
-      expect(refused.body.message).toMatch(/above your approval authority of PHP 10,000.00 \(user limit\)/);
+      expect(refused.body.message).toMatch(/above your approval authority of PHP 10,000.00 \(personal limit\)/);
       expect((await manager('post', `/remittance/approvals/${a.id}/approve`).send({})).body.data.status).toBe('Approved');
     } finally {
       await query("DELETE FROM authority_limits WHERE transaction_type = 'remittance_settlement' AND user_id = $1", [ctx.userIds.checker]);

@@ -1,135 +1,113 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
+import { Badge } from "primereact/badge";
 import { Button } from "primereact/button";
-import { Column } from "primereact/column";
-import { DataTable } from "primereact/datatable";
-import { Dialog } from "primereact/dialog";
-import { Dropdown } from "primereact/dropdown";
-import { InputText } from "primereact/inputtext";
-import { SelectButton } from "primereact/selectbutton";
-import { Tag } from "primereact/tag";
-import { Toast } from "primereact/toast";
+import { TabPanel, TabView } from "primereact/tabview";
+import LoadingBar from "../../components/LoadingBar";
+import PageHeader from "../../components/PageHeader";
+import StatCards from "../../components/StatCards";
+import { useStableLoad } from "../../hooks/useStableLoad";
 import accessControlService from "../../services/accessControlService";
-import { PageHeader, useLabels } from "./common";
+import AccessChanges from "./AccessChanges";
+import SodConflictsTab from "./SodConflictsTab";
+import SodExceptionPanel from "./SodExceptionPanel";
+import SodRulePanel from "./SodRulePanel";
+import SodRulesTab from "./SodRulesTab";
+import { TABS, sodStats } from "./sod";
+import { LoadError, TechnicalSwitch, download, useBaseRoles, useDirectory, useLabels, useQueryState, useTechnicalNames } from "./common";
 import "../Administration/index.scss";
 import "./index.scss";
 
-const EMPTY = { code: "", name: "", roleA: null, roleB: null, action: "block", reason: "", active: true };
-
 /**
- * Master > User Management > Segregation of Duties: pairs of roles one person should not hold together. "Block"
- * stops the roles being given to the same user; "Warn" allows it and says so. The User Access Matrix lists who breaks a rule.
+ * Master > Users and Access > Segregation of Duties: roles one person should not hold together and access a role or
+ * a person should not combine. Tabs Conflicts (the users breaking a rule, by user, with their exceptions), Rules and
+ * Waiting for approval (?tab, user, rule, change). Rule changes and exceptions wait for another administrator's
+ * approval. Exports to Excel for audit.
  */
 const SodRules = () => {
   const k = useLabels();
-  const toast = useRef(null);
-  const [rules, setRules] = useState([]);
-  const [roles, setRoles] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState(null);
-  const [saving, setSaving] = useState(false);
+  const [params, set] = useQueryState();
+  const tab = TABS.includes(params.get("tab")) ? params.get("tab") : "conflicts";
+  const { allowed, technical, setTechnical } = useTechnicalNames();
+  const { data: directory } = useDirectory();
+  const rulesLoader = useCallback(() => accessControlService.sodRules(), []);
+  const rules = useStableLoad(rulesLoader);
+  const allUsers = params.get("all") === "1";
+  const conflictsLoader = useCallback(() => accessControlService.sodConflicts({ status: allUsers ? "all" : undefined }), [allUsers]);
+  const conflicts = useStableLoad(conflictsLoader);
+  const [base, setBase] = useBaseRoles(params.get("base") === "1");
+  const [rulePanel, setRulePanel] = useState(null);
+  const [exceptionFor, setExceptionFor] = useState(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [r, m] = await Promise.all([accessControlService.sodRules(), accessControlService.userMatrix()]);
-      setRules(r);
-      setRoles(m.roles.map((x) => ({ label: x.name, value: x.code })));
-    } catch (e) {
-      toast.current?.show({ severity: "error", summary: e.message });
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const data = rules.data;
+  const stats = useMemo(() => sodStats(conflicts.data?.rows || [], data?.rows || [], conflicts.data?.asOf), [conflicts.data, data]);
+  const pendingCount = useMemo(() => (data?.rows || []).filter((r) => r.change).length + (data?.pendingNew || []).length
+    + (conflicts.data?.rows || []).filter((c) => c.state === "pending").length, [data, conflicts.data]);
+  const reloadAll = useCallback(async () => {
+    await Promise.all([rules.reload(), conflicts.reload()]);
+  }, [rules, conflicts]);
+  const edit = !!data?.abilities?.edit;
+  const ready = !!data && !!conflicts.data;
+  const show = (patch) => set({ tab: null, rule: null, user: null, state: null, ...patch });
 
-  useEffect(() => { load(); }, [load]);
+  const cards = [
+    { key: "users", label: k("sod.statUsers", "Users with conflicts"), value: ready ? stats.users : null,
+      note: ready ? k("sod.openNote", "{{count}} open", { count: stats.openUsers }) : null, onClick: () => show({}), active: tab === "conflicts" && !params.get("state") },
+    { key: "accepted", label: k("sod.statAccepted", "Accepted exceptions"), value: ready ? stats.accepted : null, onClick: () => show({ state: "accepted" }),
+      active: tab === "conflicts" && params.get("state") === "accepted" },
+    { key: "ending", label: k("sod.statEnding", "Exceptions ending in 30 days"), value: ready ? stats.endingSoon : null, onClick: () => show({ state: "accepted" }) },
+    { key: "rules", label: k("sod.statActiveRules", "Active rules"), value: ready ? stats.rulesOn : null,
+      note: ready && stats.platformOn ? k("sod.platformRulesNote", "And {{count}} for base platform roles", { count: stats.platformOn }) : null,
+      onClick: () => set({ tab: "rules" }), active: tab === "rules" },
+  ];
 
-  const save = async () => {
-    setSaving(true);
-    try {
-      const r = await accessControlService.saveSodRule({ ...form, reason: form.reason || undefined, code: form.id ? undefined : form.code.trim().toUpperCase() });
-      toast.current?.show({ severity: "success", summary: r.message });
-      setForm(null);
-      load();
-    } catch (e) {
-      toast.current?.show({ severity: "error", summary: e.message });
-    } finally {
-      setSaving(false);
-    }
-  };
+  const actions = (
+    <>
+      <Button label={k("exportExcel", "Export to Excel")} icon="pi pi-file-excel" outlined disabled={!data}
+        onClick={() => download(() => accessControlService.downloadSod({ technical: technical ? 1 : undefined, base: base ? 1 : undefined }))} />
+      {edit ? <Button label={k("newRule", "New rule")} icon="pi pi-plus" onClick={() => setRulePanel({ rule: null })} /> : null}
+      <TechnicalSwitch allowed={allowed} technical={technical} onChange={setTechnical} id="sod-technical" />
+    </>
+  );
+  const tabs = [
+    { key: "conflicts", label: k("sod.tabConflicts", "Conflicts"), icon: "pi pi-users" },
+    { key: "rules", label: k("sod.tabRules", "Rules"), icon: "pi pi-sitemap" },
+    { key: "pending", label: k("changes.waiting", "Waiting for approval"), icon: "pi pi-clock", badge: ready ? pendingCount : null },
+  ];
 
-  const switchOff = async (rule) => {
-    try {
-      const r = await accessControlService.switchOffSodRule(rule.id);
-      toast.current?.show({ severity: "success", summary: r.message });
-      load();
-    } catch (e) {
-      toast.current?.show({ severity: "error", summary: e.message });
-    }
-  };
-
-  const actions = [{ label: k("actionBlock", "Block"), value: "block" }, { label: k("actionWarn", "Warn"), value: "warn" }];
-  const valid = form && form.name.trim() && form.roleA && form.roleB && form.roleA !== form.roleB && (form.id || form.code.trim());
+  let body = null;
+  if (tab === "pending") {
+    body = <AccessChanges kinds="sod-rule,sod-exception" focus={Number(params.get("change")) || null} onChanged={reloadAll} />;
+  } else if (tab === "rules") {
+    body = <SodRulesTab state={rules} base={base} onBase={setBase} technical={technical} onEdit={(rule) => setRulePanel({ rule })}
+      onUsers={(rule) => show({ rule: String(rule.id) })} />;
+  } else {
+    body = <SodConflictsTab state={conflicts} rules={data?.rows || []} directory={directory} technical={technical} onException={setExceptionFor} onChanged={reloadAll} />;
+  }
 
   return (
-    <div className="admin__page access__page">
-      <Toast ref={toast} />
-      <PageHeader
-        title={k("sodTitle", "Segregation of Duties")}
-        actions={<Button icon="pi pi-plus" label={k("newRule", "New rule")} onClick={() => setForm({ ...EMPTY })} />}
-      />
-      <DataTable value={rules} dataKey="id" loading={loading} size="small" stripedRows className="access__table" emptyMessage={k("noRules", "No rules")}>
-        <Column field="code" header={k("colCode", "Code")} style={{ width: "10rem" }} body={(r) => <span className="access__code">{r.code}</span>} />
-        <Column field="name" header={k("colRule", "Rule")} />
-        <Column header={k("colRoles", "Roles")} body={(r) => `${r.roleAName} + ${r.roleBName}`} />
-        <Column header={k("colAction", "When assigned")} body={(r) => <Tag value={r.action === "block" ? k("actionBlock", "Block") : k("actionWarn", "Warn")} severity={r.action === "block" ? "danger" : "warning"} />} />
-        <Column field="reason" header={k("colReason", "Reason")} />
-        <Column header={k("colStatus", "Status")} body={(r) => <Tag value={r.active ? k("on", "On") : k("off", "Off")} severity={r.active ? "success" : "secondary"} />} />
-        <Column header="" style={{ width: "11rem" }} body={(r) => (
-          <div className="access__row-actions">
-            <Button icon="pi pi-pencil" text rounded aria-label={k("edit", "Edit")} onClick={() => setForm({ ...r, reason: r.reason || "" })} tooltip={k("edit", "Edit")} tooltipOptions={{ position: "top" }} />
-            {r.active ? <Button label={k("switchOff", "Switch off")} text size="small" onClick={() => switchOff(r)} /> : null}
-          </div>
-        )} />
-      </DataTable>
-
-      <Dialog header={form?.id ? k("editRule", "Edit rule") : k("newRule", "New rule")} visible={!!form} style={{ width: "32rem" }} modal onHide={() => setForm(null)}
-        footer={<>
-          <Button label={k("cancel", "Cancel")} text onClick={() => setForm(null)} />
-          <Button label={k("save", "Save")} icon="pi pi-check" loading={saving} disabled={!valid} onClick={save} />
-        </>}>
-        {form ? (
-          <div className="admin__grid admin__grid--single">
-            {!form.id ? (
-              <div className="admin__field">
-                <label htmlFor="sod-code">{k("colCode", "Code")}</label>
-                <InputText id="sod-code" value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))} placeholder="SOD-OPS-ACCT" />
-              </div>
-            ) : null}
-            <div className="admin__field">
-              <label htmlFor="sod-name">{k("colRule", "Rule")}</label>
-              <InputText id="sod-name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
-            </div>
-            <div className="access__two">
-              <div className="admin__field">
-                <label htmlFor="sod-a">{k("roleA", "Role")}</label>
-                <Dropdown inputId="sod-a" value={form.roleA} options={roles} onChange={(e) => setForm((f) => ({ ...f, roleA: e.value }))} />
-              </div>
-              <div className="admin__field">
-                <label htmlFor="sod-b">{k("roleB", "Not together with")}</label>
-                <Dropdown inputId="sod-b" value={form.roleB} options={roles.filter((r) => r.value !== form.roleA)} onChange={(e) => setForm((f) => ({ ...f, roleB: e.value }))} />
-              </div>
-            </div>
-            <div className="admin__field">
-              <label>{k("colAction", "When assigned")}</label>
-              <SelectButton value={form.action} options={actions} onChange={(e) => e.value && setForm((f) => ({ ...f, action: e.value }))} />
-            </div>
-            <div className="admin__field">
-              <label htmlFor="sod-reason">{k("colReason", "Reason")}</label>
-              <InputText id="sod-reason" value={form.reason} onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))} />
-            </div>
-          </div>
-        ) : null}
-      </Dialog>
+    <div className="admin__page access__page rp-page access-page">
+      <PageHeader title={k("sodTitle", "Segregation of Duties")} home={k("master", "Master")} section={k("userManagement", "Users and Access")}
+        trail={[k("sodTitle", "Segregation of Duties")]} actions={actions}
+        help={k("sod.help", "Roles one person should not hold together. Block refuses the combination when roles are given; Warn allows it and lists the person here until an exception is accepted.")} />
+      <StatCards items={cards} className="access-stats" />
+      <TabView className="bv-tabbar rp-tabs" activeIndex={TABS.indexOf(tab)} onTabChange={(e) => set({ tab: TABS[e.index] === "conflicts" ? null : TABS[e.index], change: null })}>
+        {tabs.map((t) => (
+          <TabPanel key={t.key} leftIcon={`${t.icon} mr-2`} header={(
+            <span className="rp-tab">
+              {t.label}
+              {t.badge ? <Badge value={t.badge} severity="warning" className="rp-tab__badge" /> : null}
+            </span>
+          )} />
+        ))}
+      </TabView>
+      <LoadError error={rules.error} onRetry={rules.reload} />
+      <div className="bv-loading-host">
+        <LoadingBar active={rules.refreshing} />
+        {body}
+      </div>
+      <SodRulePanel target={rulePanel} directory={directory} approval={data?.approval !== false} technical={technical} onHide={() => setRulePanel(null)} onDone={reloadAll} />
+      <SodExceptionPanel conflict={exceptionFor} asOf={conflicts.data?.asOf} maxDays={data?.maxExceptionDays} approval={data?.approval !== false}
+        onHide={() => setExceptionFor(null)} onDone={reloadAll} />
     </div>
   );
 };

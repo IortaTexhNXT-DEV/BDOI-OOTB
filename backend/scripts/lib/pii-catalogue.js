@@ -257,6 +257,8 @@ export const CATALOGUE = {
   'premium_warranty_actions.notes': 'freeText',
   'premium_warranty_extensions.decision_remarks': 'freeText',
   'access_review_items.remarks': 'freeText',
+  'sod_exceptions.reason': 'freeText',
+  'user_delegations.end_reason': 'freeText',
 
   // ---------------------------------------------------------------- privacy, audit, messages, files, loads
   'privacy_consents.evidence': 'freeText',
@@ -401,6 +403,7 @@ export const ALLOW_LIST = {
   'signatories.designation': 'job title printed under the signature',
   'commission_referrers.bank_name': 'name of the bank (an institution), not of the person; the account number is masked',
   'access_review_items.last_login_at': 'date and time only; the user is identified by the kept username',
+  'access_review_items.apply_note': 'written by the system: account already inactive, or role codes no longer held',
   'users.last_login_at': 'date and time only',
   'login_history.*': 'table emptied (TABLE_ACTIONS)',
   'refresh_tokens.*': 'table emptied (TABLE_ACTIONS)',

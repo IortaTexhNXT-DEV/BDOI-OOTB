@@ -18,6 +18,8 @@ import { getSetting } from '../../lib/settings.js';
 import { scopeSql } from '../../lib/scope.js';
 import { KYC_ITEMS, KYC_DEFAULT_REQUIRED } from '../policies/kyc.js';
 import { effectiveAuthority } from '../access-control/service.js';
+import { CHANGE_LABELS } from '../posting-rules/service.js';
+import { APPROVER as ACCESS_APPROVER } from '../access-control/changes.js';
 
 /** Categories in screen order: code, label, icon, permission needed to see it. */
 export const CATEGORIES = [
@@ -268,15 +270,34 @@ async function approvals(ctx) {
     }
   }
   if (ctx.can('approve:access-control') && await has('authority_limits')) {
-    out.push(`SELECT ${select({ ...base, kind: "'Authority limit'", id: 'al.id', ref: "'AL-' || al.id", title: "COALESCE(t.name, al.transaction_type) || ' - ' || COALESCE(al.role_code, u.display_name, '')",
-      due_date: due('al.requested_at'), status: 'al.status', link: "'/master/generals/usermanagement/authority-matrix'", amount: 'al.max_amount', created_at: 'al.requested_at' })}
+    out.push(`SELECT ${select({ ...base, kind: "'Authority limit'", id: 'al.id', ref: "'AL-' || al.id", title: "COALESCE(t.name, al.transaction_type) || ' - ' || COALESCE(r.name, al.role_code, u.display_name, '')",
+      due_date: due('al.requested_at'), status: 'al.status', link: "'/master/generals/usermanagement/authority-matrix?tab=pending'", amount: 'al.max_amount', created_at: 'al.requested_at' })}
       FROM authority_limits al LEFT JOIN authority_transaction_types t ON t.code = al.transaction_type LEFT JOIN users u ON u.id = al.user_id
+      LEFT JOIN roles r ON r.code = al.role_code
       WHERE al.status = 'pending' AND ${notMine(ctx, 'al.requested_by')}`);
   }
   if (ctx.can('approve:posting-rules') && await has('accounting_config_changes')) {
     out.push(`SELECT ${select({ ...base, kind: "'Configuration change'", id: 'cc.id', ref: "'CFG-' || cc.id", title: "initcap(replace(cc.kind, '_', ' ')) || COALESCE(' - ' || cc.target, '')",
       due_date: due('cc.requested_at'), status: 'cc.status', link: "'/master/finance/configuration-approvals'", created_at: 'cc.requested_at' })}
-      FROM accounting_config_changes cc WHERE cc.status = 'pending' AND ${notMine(ctx, 'cc.requested_by')}`);
+      FROM accounting_config_changes cc WHERE cc.status = 'pending' AND cc.kind = ANY(${ctx.P(Object.keys(CHANGE_LABELS))}) AND ${notMine(ctx, 'cc.requested_by')}`);
+  }
+  // changes of access (role access, authority limits) are approved on their own screens with approve:access-control
+  if (ctx.can(ACCESS_APPROVER) && await has('accounting_config_changes')) {
+    out.push(`SELECT ${select({ ...base, kind: "'Role access change'", id: 'cc.id', ref: "'CFG-' || cc.id", title: "COALESCE(r.name, cc.target)",
+      due_date: due('cc.requested_at'), status: 'cc.status', link: "'/master/generals/usermanagement/role-permissions?view=pending&change=' || cc.id", created_at: 'cc.requested_at' })}
+      FROM accounting_config_changes cc LEFT JOIN roles r ON r.code = cc.target WHERE cc.status = 'pending' AND cc.kind = 'role-access' AND ${notMine(ctx, 'cc.requested_by')}`);
+    out.push(`SELECT ${select({ ...base, kind: "'Authority matrix change'", id: 'cc.id', ref: "'CFG-' || cc.id", title: "COALESCE(cc.payload->>'title', cc.target)",
+      due_date: due('cc.requested_at'), status: 'cc.status', link: "'/master/generals/usermanagement/authority-matrix?tab=pending&change=' || cc.id", created_at: 'cc.requested_at' })}
+      FROM accounting_config_changes cc WHERE cc.status = 'pending' AND cc.kind = 'authority-limits' AND ${notMine(ctx, 'cc.requested_by')}`);
+    // delegations, segregation-of-duties rules and exceptions, access review sign-offs: not to the person a change is for
+    out.push(`SELECT ${select({ ...base, kind: `CASE cc.kind WHEN 'delegation' THEN 'Delegation' WHEN 'sod-rule' THEN 'Segregation of duties rule'
+        WHEN 'sod-exception' THEN 'Segregation of duties exception' ELSE 'Access review sign-off' END`, id: 'cc.id', ref: "'CFG-' || cc.id",
+      title: "COALESCE(cc.payload->>'title', cc.target)", due_date: due('cc.requested_at'), status: 'cc.status',
+      link: `CASE cc.kind WHEN 'delegation' THEN '/master/generals/usermanagement/delegations?view=pending&change=' || cc.id
+        WHEN 'access-review' THEN '/master/generals/usermanagement/access-reviews?review=' || (cc.payload->>'reviewId')
+        ELSE '/master/generals/usermanagement/segregation-of-duties?tab=pending&change=' || cc.id END`, created_at: 'cc.requested_at' })}
+      FROM accounting_config_changes cc WHERE cc.status = 'pending' AND cc.kind IN ('delegation', 'sod-rule', 'sod-exception', 'access-review') AND ${notMine(ctx, 'cc.requested_by')}
+        AND NOT (COALESCE(cc.payload->>'delegateId', cc.payload->>'userId', '') = ANY(${ctx.ME}::text[]))`);
   }
   if (ctx.can('approve:period-end') && await has('period_close_runs')) {
     out.push(`SELECT ${select({ ...base, kind: "'Month-end close'", id: 'pr.id', ref: 'pr.run_number', title: "'Close of period ' || pr.period", due_date: due('COALESCE(pr.submitted_at, pr.created_at)'),
@@ -397,8 +418,9 @@ async function access(ctx) {
   if (ctx.can('read:access-control') && await exists(ctx, 'access_reviews')) {
     out.push(`SELECT ${select({
       category: "'access'", kind: "'Access review'", id: "'ar-' || ar.id", ref: "'AR-' || ar.id", title: 'ar.name', due_date: 'ar.due_date', status: 'ar.status',
-      next_action: "'Decide ' || p.pending || ' of ' || p.total || ' users (keep or revoke)'", queue: ctx.can('write:access-control') ? 'true' : 'false',
-      link: "'/master/generals/usermanagement/access-reviews'", created_at: 'ar.created_at',
+      priority: `CASE WHEN ar.due_date < ${ctx.T}::date THEN 'high' ELSE 'normal' END`,
+      next_action: "CASE WHEN p.pending = 0 THEN 'Submit the review for sign-off' ELSE 'Decide ' || p.pending || ' of ' || p.total || ' users' END",
+      queue: ctx.can('write:access-control') ? 'true' : 'false', link: "'/master/generals/usermanagement/access-reviews?review=' || ar.id", created_at: 'ar.created_at',
     })} FROM access_reviews ar LEFT JOIN LATERAL (SELECT count(*)::int AS total, count(*) FILTER (WHERE i.decision = 'pending')::int AS pending
       FROM access_review_items i WHERE i.review_id = ar.id) p ON true WHERE ar.status = 'open'`);
   }

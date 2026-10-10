@@ -45,12 +45,12 @@ export const ENTITY_LABELS = {
   product_template: 'Product template', checkbook: 'Checkbook', authority_limit: 'Authority limit', report_schedule: 'Report schedule',
   premium_warranty_extension: 'Premium warranty extension', petty_cash_request: 'Petty cash request', petty_cash_fund: 'Petty cash fund',
   payment_link: 'Payment link', package_quote: 'Package quotation', package_bundle: 'Package', data_load_batch: 'Data load batch',
-  bank_reconciliation: 'Bank reconciliation', accounting_config_change: 'Accounting configuration change', sod_rule: 'Segregation of duties rule',
+  bank_reconciliation: 'Bank reconciliation', accounting_config_change: 'Accounting configuration change', accounting_flow: 'Accounting flow', sod_rule: 'Segregation of duties rule',
   recurring_journal: 'Recurring journal', receivable: 'Receivable', premium_charge_rule: 'Premium charge rule', period_close_run: 'Month-end close',
   period_close_checklist: 'Month-end checklist', lgu_tax_rate: 'LGU tax rate', insurer_rate_table: 'Insurer rate table', gl_account: 'GL account',
   bank_transaction_type: 'Bank transaction type', bank_statement_line: 'Bank statement line', bank_statement_format: 'Bank statement format',
   bank_statement: 'Bank statement', access_review: 'Access review', year_end_run: 'Year-end close', write_off_reason: 'Write-off reason',
-  user_delegation: 'Delegation', tax_code: 'Tax code', scheduled_job: 'Scheduled job', posting_rule: 'Posting rule',
+  user_delegation: 'Delegation', sod_exception: 'Segregation of duties exception', access_review_item: 'Access review decision', tax_code: 'Tax code', scheduled_job: 'Scheduled job', posting_rule: 'Posting rule',
   insurer_statement_format: 'Insurer statement format', instalment_plan: 'Instalment plan', incentive_calculation: 'Incentive calculation',
   generated_report: 'Report', entry_match: 'Entry match', document_numbering: 'Document numbering', direct_bill_client_payment: 'Direct bill payment',
   bank_rec_match: 'Bank reconciliation match', agent_event: 'Agent event', accounting_period: 'Accounting period', account_map: 'Account mapping',
@@ -75,7 +75,9 @@ const ACTION_VERBS = {
   run: 'run', status: 'status changed', assign: 'assigned', renew: 'renewed', lapse: 'lapsed', endorse: 'endorsed', print: 'printed', email: 'e-mailed',
   'payment-capture': 'payment captured', 'pay-later': 'set to pay later', 'payment-confirm': 'payment confirmed', 'payment-reject': 'payment rejected',
   'payment-status': 'payment status changed', 'funds-received': 'funds received from the insurer', 'paid-to-claimant': 'paid to the claimant',
-  purge: 'purged', reset: 'reset', complete: 'completed', reassign: 'reassigned', calculate: 'calculated', adjust: 'adjusted',
+  purge: 'purged', reset: 'reset', complete: 'completed', reassign: 'reassigned', calculate: 'calculated', adjust: 'adjusted', 'access-change': 'access changed',
+  request: 'requested', withdraw: 'withdrawn', end: 'ended early', 'sign-off': 'signed off', 'sign-out': 'signed out everywhere', keep: 'kept',
+  'remove-roles': 'roles removed', export: 'exported',
 };
 
 /** Sign-in events read as what the user did. */

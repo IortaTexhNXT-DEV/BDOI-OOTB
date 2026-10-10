@@ -247,7 +247,7 @@ describe('credit control', () => {
 
 describe('access control', () => {
   it('a proposed authority limit goes to approve:access-control; the proposer hears of the decision', async () => {
-    const p = await admin('post', '/access-control/authority-limits').send({ transactionType: 'payment_voucher', roleCode: 'accounting', maxAmount: 1500000, remarks: 'Board resolution 12' });
+    const p = await admin('post', '/access-control/authority-limits').send({ transactionType: 'payment_voucher', roleCode: 'accounting', maxAmount: 1500000, referenceNo: 'BR-2026-014', referenceDate: '2026-01-15', remarks: 'Board resolution 12' });
     expect(p.status, JSON.stringify(p.body)).toBe(201);
     const id = p.body.data.id;
     const [n] = await approvalRequests('authority_limit', id);
@@ -258,7 +258,7 @@ describe('access control', () => {
     expect(rej.title).toBe(`Authority limit #${id} rejected`);
     expect(rej.message).toContain('Too high');
 
-    const q = await admin('post', '/access-control/authority-limits').send({ transactionType: 'payment_voucher', roleCode: 'accounting', maxAmount: 1200000 });
+    const q = await admin('post', '/access-control/authority-limits').send({ transactionType: 'payment_voucher', roleCode: 'accounting', maxAmount: 1200000, referenceNo: 'BR-2026-014', referenceDate: '2026-01-15' });
     expect((await people.admin2.api('post', `/access-control/authority-limits/${q.body.data.id}/decision`).send({ decision: 'approve' })).status).toBe(200);
     expect((await personal(await adminId(), 'authority_limit', q.body.data.id)).map((x) => x.title)).toEqual([`Authority limit #${q.body.data.id} approved`]);
   });
@@ -267,7 +267,7 @@ describe('access control', () => {
     const r = await admin('post', '/access-control/reviews').send({ name: 'Approval test review', dueDate: '2026-12-15' });
     expect(r.status).toBe(201);
     const [n] = await approvalRequests('access_review', r.body.data.id);
-    expect(n).toMatchObject({ audience: 'write:access-control', link: '/master/generals/usermanagement/access-reviews', title: 'Access review Approval test review awaiting decisions' });
+    expect(n).toMatchObject({ audience: 'write:access-control', link: `/master/generals/usermanagement/access-reviews?review=${r.body.data.id}`, title: 'Access review Approval test review awaiting decisions' });
   });
 });
 
@@ -291,7 +291,7 @@ describe('notification.approval_requests', () => {
       expect((await maker('post', `/insurer-reconciliation/statements/${st.id}/submit`).send({})).status).toBe(200);
       expect((await people.mgr.api('post', `/insurer-reconciliation/statements/${st.id}/approve`).send({})).status).toBe(200);
       // authority limit proposed and approved
-      const p = await admin('post', '/access-control/authority-limits').send({ transactionType: 'payment_voucher', roleCode: 'accounting', maxAmount: 1100000 });
+      const p = await admin('post', '/access-control/authority-limits').send({ transactionType: 'payment_voucher', roleCode: 'accounting', maxAmount: 1100000, referenceNo: 'BR-2026-014', referenceDate: '2026-01-15' });
       expect(p.status).toBe(201);
       expect((await people.admin2.api('post', `/access-control/authority-limits/${p.body.data.id}/decision`).send({ decision: 'approve' })).status).toBe(200);
       // a journal voucher for approval

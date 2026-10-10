@@ -8,9 +8,11 @@ import request from 'supertest';
 import { setupFinance } from './accounting.fixtures.js';
 import { pool, query } from '../src/db/pool.js';
 import { assertAuthority, deactivateDormant, effectiveAuthority } from '../src/modules/access-control/service.js';
+import { addDays, today } from '../src/lib/dates.js';
 
 let ctx;
 let admin2;
+let admin3;
 const PASSWORD = 'Welcome@123';
 const login = async (username) => (await request(ctx.app).post('/api/auth/login').send({ username, password: PASSWORD })).body.accessToken;
 
@@ -19,6 +21,9 @@ beforeAll(async () => {
   await ctx.api('post', '/users').send({ username: 'ac.admin2', password: PASSWORD, displayName: 'Second administrator', roles: ['system-admin'], email: 'ac.admin2@example.ph' });
   const token = await login('ac.admin2');
   admin2 = (m, p) => request(ctx.app)[m](`/api${p}`).set('Authorization', `Bearer ${token}`);
+  await ctx.api('post', '/users').send({ username: 'ac.admin3', password: PASSWORD, displayName: 'Third administrator', roles: ['system-admin'], email: 'ac.admin3@example.ph' });
+  const token3 = await login('ac.admin3');
+  admin3 = (m, p) => request(ctx.app)[m](`/api${p}`).set('Authorization', `Bearer ${token3}`);
 });
 afterAll(async () => { await pool.end(); });
 
@@ -33,7 +38,7 @@ describe('authority matrix', () => {
   });
 
   it('a new limit applies only after another administrator approves it', async () => {
-    const proposed = await ctx.api('post', '/access-control/authority-limits').send({ transactionType: 'write_off', roleCode: 'accounting', maxAmount: 2500, remarks: 'Raised for small differences' });
+    const proposed = await ctx.api('post', '/access-control/authority-limits').send({ transactionType: 'write_off', roleCode: 'accounting', maxAmount: 2500, referenceNo: 'BR-2026-014', referenceDate: '2026-01-15', remarks: 'Raised for small differences' });
     expect(proposed.status).toBe(201);
     expect(proposed.body.data.status).toBe('pending');
     expect((await ctx.api('post', `/access-control/authority-limits/${proposed.body.data.id}/decision`).send({ decision: 'approve' })).status).toBe(403);
@@ -59,14 +64,21 @@ describe('authority matrix', () => {
     clearSettingsCache();
   });
 
-  it('a delegation lends the delegator\'s authority for its types and dates', async () => {
+  it('a delegation lends the delegator\'s authority for its types and dates once another administrator approves it', async () => {
     const manager = await ctx.api('post', '/users').send({ username: 'ac.manager', password: PASSWORD, displayName: 'Accounting manager', roles: ['accounting-manager'], email: 'ac.manager@example.ph' });
+    const day = await today();
     const d = await ctx.api('post', '/access-control/delegations').send({ delegatorId: manager.body.data.userId, delegateId: ctx.userIds.checker,
-      transactionTypes: ['journal_voucher'], dateFrom: '2020-01-01', dateTo: '2099-12-31', reason: 'Annual leave' });
-    expect(d.status).toBe(201);
+      transactionTypes: ['journal_voucher'], dateFrom: day, dateTo: addDays(day, 30), reasonCode: 'DLG-LEAVE' });
+    expect(d.status, JSON.stringify(d.body)).toBe(201);
+    expect(await effectiveAuthority(pool, ctx.userIds.checker, 'journal_voucher')).toMatchObject({ limit: 1000000 });
+    expect((await ctx.api('post', `/access-control/changes/${d.body.data.change.id}/decision`).send({ decision: 'approve' })).status).toBe(403);
+    expect((await admin2('post', `/access-control/changes/${d.body.data.change.id}/decision`).send({ decision: 'approve' })).status).toBe(200);
     expect(await effectiveAuthority(pool, ctx.userIds.checker, 'journal_voucher')).toMatchObject({ unlimited: true, source: expect.stringMatching(/delegated by Accounting manager/) });
     expect(await effectiveAuthority(pool, ctx.userIds.checker, 'payment_voucher')).toMatchObject({ limit: 2000000 });
-    await ctx.api('post', `/access-control/delegations/${d.body.data.id}/revoke`);
+    const current = (await ctx.api('get', '/access-control/delegations')).body.data.rows.find((x) => x.delegateId === ctx.userIds.checker);
+    expect(current).toMatchObject({ status: 'in-effect', transactionNames: ['Journal voucher approval'], reason: 'Vacation or annual leave', approvedBy: 'Second administrator' });
+    expect((await ctx.api('post', `/access-control/delegations/${current.id}/end`).send({})).status).toBe(400);
+    expect((await ctx.api('post', `/access-control/delegations/${current.id}/end`).send({ reasonCode: 'DLE-RETURNED' })).status).toBe(200);
     expect(await effectiveAuthority(pool, ctx.userIds.checker, 'journal_voucher')).toMatchObject({ limit: 1000000 });
   });
 });
@@ -80,7 +92,9 @@ describe('segregation of duties', () => {
     expect(warned.status).toBe(201);
     expect(warned.body.message).toMatch(/Segregation of duties/);
     const check = await ctx.api('post', '/access-control/sod-check').send({ roles: ['claims', 'accounting'] });
-    expect(check.body.data.map((r) => r.action)).toEqual(['block']);
+    expect(check.body.data.filter((r) => r.kind === 'roles').map((r) => r.action)).toEqual(['block']);
+    // and the access the two roles combine: registering claims with preparing payments (seed 91_role_access.sql)
+    expect(check.body.data.filter((r) => r.kind === 'access').map((r) => [r.code, r.action])).toEqual([['SOD-ACC-CLAIM-PAY', 'warn']]);
   });
 });
 
@@ -89,7 +103,8 @@ describe('matrices', () => {
     const m = await ctx.api('get', '/access-control/user-matrix');
     const row = m.body.data.rows.find((u) => u.username === 'ac.sod2');
     expect(row.roles).toEqual(['accounting', 'sales']);
-    expect(row.sodConflicts.map((c) => c.action)).toEqual(['warn']);
+    expect(row.sodConflicts.filter((c) => c.kind === 'roles').map((c) => c.action)).toEqual(['warn']);
+    expect(row.sodConflicts.filter((c) => c.kind === 'access').map((c) => c.name).sort()).toEqual(['Placing and paying insurers', 'Receipting and selling']);
     const file = await ctx.api('get', '/access-control/user-matrix?format=xlsx');
     expect(file.status).toBe(200);
     expect(file.headers['content-type']).toMatch(/spreadsheetml/);
@@ -99,23 +114,35 @@ describe('matrices', () => {
 });
 
 describe('access reviews and sessions', () => {
-  it('reviews every active user; a revoked user is deactivated and the review closes when all are decided', async () => {
-    const started = await ctx.api('post', '/access-control/reviews').send({ name: 'Quarterly access review', dueDate: '2026-12-15' });
+  it('reviews every active user; a removal applies when an administrator who decided none of it signs the review off', async () => {
+    const started = await ctx.api('post', '/access-control/reviews').send({ name: 'Quarterly access review', dueDate: '2099-12-15' });
     expect(started.status).toBe(201);
+    const id = started.body.data.id;
     const items = started.body.data.items;
     const target = items.find((i) => i.username === 'ac.sod2');
-    expect((await ctx.api('post', `/access-control/reviews/${started.body.data.id}/items/${target.id}`).send({ decision: 'revoke' })).status).toBe(400);
-    await ctx.api('post', `/access-control/reviews/${started.body.data.id}/items/${target.id}`).send({ decision: 'revoke', remarks: 'Moved to another company' });
+    expect((await ctx.api('post', `/access-control/reviews/${id}/items/${target.id}`).send({ decision: 'revoke' })).status).toBe(400);
+    expect((await ctx.api('post', `/access-control/reviews/${id}/items/${target.id}`).send({ decision: 'revoke', reasonCode: 'ARV-LEFT' })).status).toBe(200);
+    // the account stays as it is until the sign-off
+    expect((await query('SELECT status FROM users WHERE username = $1', ['ac.sod2'])).rows[0].status).toBe('active');
+    expect((await ctx.api('post', `/access-control/reviews/${id}/submit`)).status).toBe(409);
+    const own = items.find((i) => i.username === 'BrokerVerse');
+    expect((await ctx.api('post', `/access-control/reviews/${id}/items/${own.id}`).send({ outcome: 'keep' })).status).toBe(403);
+    await admin2('post', `/access-control/reviews/${id}/items/${own.id}`).send({ outcome: 'keep', note: 'Built-in administrator' });
+    const rest = items.filter((i) => ![target.id, own.id].includes(i.id)).map((i) => i.id);
+    const kept = await ctx.api('post', `/access-control/reviews/${id}/items/keep`).send({ itemIds: rest, note: 'Confirmed with the department heads' });
+    expect(kept.status).toBe(200);
+    expect(kept.body.data.skipped).toEqual([]);
+    expect((await ctx.api('post', `/access-control/reviews/${id}/close`)).status).toBe(409);
+    const submitted = await ctx.api('post', `/access-control/reviews/${id}/submit`);
+    expect(submitted.status, JSON.stringify(submitted.body)).toBe(201);
+    expect(submitted.body.data.review.status).toBe('awaiting-signoff');
+    // neither the administrator who decided the removal nor the one who kept an account signs it off
+    expect((await ctx.api('post', `/access-control/changes/${submitted.body.data.change.id}/decision`).send({ decision: 'approve' })).status).toBe(403);
+    expect((await admin2('post', `/access-control/changes/${submitted.body.data.change.id}/decision`).send({ decision: 'approve' })).status).toBe(403);
+    expect((await admin3('post', `/access-control/changes/${submitted.body.data.change.id}/decision`).send({ decision: 'approve' })).status).toBe(200);
     expect((await query('SELECT status FROM users WHERE username = $1', ['ac.sod2'])).rows[0].status).toBe('inactive');
-    expect((await ctx.api('post', `/access-control/reviews/${started.body.data.id}/close`)).status).toBe(409);
-    for (const i of items.filter((x) => x.id !== target.id)) {
-      // nobody reviews their own access: the second administrator decides the first one's
-      const who = i.username === 'BrokerVerse' ? admin2 : ctx.api;
-      await who('post', `/access-control/reviews/${started.body.data.id}/items/${i.id}`).send({ decision: 'keep' });
-    }
-    const closed = await ctx.api('post', `/access-control/reviews/${started.body.data.id}/close`);
-    expect(closed.status).toBe(200);
-    expect(closed.body.data).toMatchObject({ status: 'closed', revoked: 1, pending: 0 });
+    const closed = (await ctx.api('get', `/access-control/reviews/${id}`)).body.data;
+    expect(closed).toMatchObject({ status: 'closed', deactivate: 1, pending: 0, applied: 1, signedOffBy: 'Third administrator' });
   });
 
   it('ends every session of a user', async () => {

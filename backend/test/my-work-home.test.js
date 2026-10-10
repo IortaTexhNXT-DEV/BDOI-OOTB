@@ -85,8 +85,8 @@ describe('role sources', () => {
 
   it('the administrator sees the access reviews, the users awaiting their first sign-in and the failed jobs and messages', async () => {
     const access = await items('admin', 'category=access&pageSize=50');
-    expect(access.data.find((i) => i.ref === `AR-${ids.review}`)).toMatchObject({ kind: 'Access review', dueDate: addDays(now, 3), queue: true, nextAction: 'Decide 1 of 1 users (keep or revoke)',
-      link: '/master/generals/usermanagement/access-reviews' });
+    expect(access.data.find((i) => i.ref === `AR-${ids.review}`)).toMatchObject({ kind: 'Access review', dueDate: addDays(now, 3), queue: true, nextAction: 'Decide 1 of 1 users',
+      link: `/master/generals/usermanagement/access-reviews?review=${ids.review}` });
     expect(access.data.find((i) => i.ref === 'mw.newbie')).toMatchObject({ kind: 'User awaiting first sign-in', clientName: 'mw.newbie', dueDate: addDays(now, 7), link: `/master/generals/usermanagement/user/view/${ids['mw.newbie']}` });
     expect(access.data.find((i) => i.ref === 'mw.sales')).toBeUndefined();
     const systems = await items('admin', 'category=systems&pageSize=50');
