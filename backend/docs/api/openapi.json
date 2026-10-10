@@ -35194,7 +35194,7 @@
     "/claims": {
       "get": {
         "operationId": "getClaims",
-        "summary": "Claims list (filters: status, clientId, policyId, lob, handlerUserId, search, dateFrom, dateTo; paging page/pageSize)",
+        "summary": "Claims list (filters: status, clientId, policyId, lob, handlerUserId, origin issued / migrated, search, dateFrom, dateTo; paging page/pageSize); each claim carries its origin and the origin of its policy",
         "tags": [
           "Claims"
         ],
@@ -35235,6 +35235,15 @@
               "type": "string"
             },
             "example": "CLM-2026"
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "issued"
           }
         ],
         "responses": {
@@ -38452,7 +38461,7 @@
     "/clients": {
       "get": {
         "operationId": "getClients",
-        "summary": "List clients (search, leadCategory, clientType individual / corporate, status; paging)",
+        "summary": "List clients (search, leadCategory, clientType individual / corporate, status, origin issued / migrated; paging); each client carries its origin block",
         "tags": [
           "Clients"
         ],
@@ -38484,6 +38493,15 @@
               "type": "string"
             },
             "example": "juan"
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "migrated"
           }
         ],
         "responses": {
@@ -40220,7 +40238,7 @@
     "/collections": {
       "get": {
         "operationId": "getCollections",
-        "summary": "Collections register with ageing buckets (filter status, overdueLevel, clientId, search; sortField, sortOrder; paging)",
+        "summary": "Collections register with ageing buckets (filter status, overdueLevel, clientId, origin issued / migrated, search; sortField, sortOrder; paging); each item carries the origin of its bill and policy",
         "tags": [
           "Collections"
         ],
@@ -40288,6 +40306,15 @@
               "type": "string"
             },
             "example": "asc"
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "migrated"
           }
         ],
         "responses": {
@@ -63862,7 +63889,13 @@
                           "id": {
                             "type": "integer"
                           },
+                          "loadNumber": {
+                            "type": "string"
+                          },
                           "kit": {
+                            "type": "string"
+                          },
+                          "legacySystem": {
                             "type": "string"
                           },
                           "fileName": {
@@ -63961,7 +63994,9 @@
                   "data": [
                     {
                       "id": 7,
+                      "loadNumber": "MIG-000007",
                       "kit": "migration",
+                      "legacySystem": "TISPH Excel",
                       "fileName": "GoLive_Migration_Workbook.xlsx",
                       "status": "failed",
                       "cutoverDate": "2026-11-01",
@@ -64047,7 +64082,13 @@
                             "id": {
                               "type": "integer"
                             },
+                            "loadNumber": {
+                              "type": "string"
+                            },
                             "kit": {
+                              "type": "string"
+                            },
+                            "legacySystem": {
                               "type": "string"
                             },
                             "fileName": {
@@ -64159,7 +64200,9 @@
                   "data": {
                     "batch": {
                       "id": 7,
+                      "loadNumber": "MIG-000007",
                       "kit": "migration",
+                      "legacySystem": "TISPH Excel",
                       "fileName": "GoLive_Migration_Workbook.xlsx",
                       "status": "failed",
                       "cutoverDate": "2026-11-01",
@@ -64224,7 +64267,7 @@
               "schema": {
                 "type": "string"
               },
-              "example": "multipart/form-data file, kit=configuration|migration"
+              "example": "multipart/form-data file, kit=configuration|migration, legacySystem (migration: the source shown on the migrated records; the default legacy system when empty)"
             }
           }
         }
@@ -64268,7 +64311,13 @@
                             "id": {
                               "type": "integer"
                             },
+                            "loadNumber": {
+                              "type": "string"
+                            },
                             "kit": {
+                              "type": "string"
+                            },
+                            "legacySystem": {
                               "type": "string"
                             },
                             "fileName": {
@@ -64382,7 +64431,9 @@
                   "data": {
                     "batch": {
                       "id": 7,
+                      "loadNumber": "MIG-000007",
                       "kit": "migration",
+                      "legacySystem": "TISPH Excel",
                       "fileName": "GoLive_Migration_Workbook.xlsx",
                       "status": "failed",
                       "cutoverDate": "2026-11-01",
@@ -64494,7 +64545,7 @@
     "/data-load/batches/{id}/load": {
       "post": {
         "operationId": "postDataLoadBatchesIdLoad",
-        "summary": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation",
+        "summary": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation and writes one audit entry per record it creates or changes (values before and after, load number)",
         "tags": [
           "Go-Live Data Workbench"
         ],
@@ -64532,7 +64583,13 @@
                             "id": {
                               "type": "integer"
                             },
+                            "loadNumber": {
+                              "type": "string"
+                            },
                             "kit": {
+                              "type": "string"
+                            },
+                            "legacySystem": {
                               "type": "string"
                             },
                             "fileName": {
@@ -64639,7 +64696,9 @@
                   "data": {
                     "batch": {
                       "id": 7,
+                      "loadNumber": "MIG-000007",
                       "kit": "migration",
+                      "legacySystem": "TISPH Excel",
                       "fileName": "GoLive_Migration_Workbook.xlsx",
                       "status": "loaded",
                       "cutoverDate": "2026-11-01",
@@ -64801,7 +64860,13 @@
                             "id": {
                               "type": "integer"
                             },
+                            "loadNumber": {
+                              "type": "string"
+                            },
                             "kit": {
+                              "type": "string"
+                            },
+                            "legacySystem": {
                               "type": "string"
                             },
                             "fileName": {
@@ -64912,7 +64977,9 @@
                   "data": {
                     "batch": {
                       "id": 7,
+                      "loadNumber": "MIG-000007",
                       "kit": "migration",
+                      "legacySystem": "TISPH Excel",
                       "fileName": "GoLive_Migration_Workbook.xlsx",
                       "status": "failed",
                       "cutoverDate": "2026-11-01",
@@ -65983,7 +66050,7 @@
     "/data-load/kits": {
       "get": {
         "operationId": "getDataLoadKits",
-        "summary": "The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date and go-live lock",
+        "summary": "The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date, the go-live lock and the settings of the workspace",
         "tags": [
           "Go-Live Data Workbench"
         ],
@@ -66046,6 +66113,26 @@
                         },
                         "locked": {
                           "type": "boolean"
+                        },
+                        "settings": {
+                          "type": "object",
+                          "properties": {
+                            "legacySystemName": {
+                              "type": "string"
+                            },
+                            "loadApprovalRequired": {
+                              "type": "boolean"
+                            },
+                            "dashboardDefaultOrigin": {
+                              "type": "string"
+                            },
+                            "unlockWindowDays": {
+                              "type": "integer"
+                            },
+                            "unlockMaxHours": {
+                              "type": "integer"
+                            }
+                          }
                         }
                       }
                     }
@@ -66071,7 +66158,14 @@
                       }
                     ],
                     "cutoverDate": "2026-11-01",
-                    "locked": false
+                    "locked": false,
+                    "settings": {
+                      "legacySystemName": "Legacy",
+                      "loadApprovalRequired": true,
+                      "dashboardDefaultOrigin": "issued",
+                      "unlockWindowDays": 7,
+                      "unlockMaxHours": 4
+                    }
                   }
                 }
               }
@@ -75324,7 +75418,7 @@
     "/journal-vouchers/history": {
       "get": {
         "operationId": "getJournalVouchersHistory",
-        "summary": "Journal voucher register (manual, correction and reversal JVs; all=true for system journals too; parked=true for the system journals parked for approval)",
+        "summary": "Journal voucher register (manual, correction and reversal JVs; all=true for system journals too; parked=true for the system journals parked for approval; origin issued / migrated); each voucher carries its origin block",
         "tags": [
           "Journal Vouchers"
         ],
@@ -75383,6 +75477,15 @@
               "type": "boolean"
             },
             "example": false
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "issued"
           }
         ],
         "responses": {
@@ -107728,7 +107831,7 @@
     "/policies": {
       "get": {
         "operationId": "getPolicies",
-        "summary": "List policies (mine=true for own book; agents always get their own; paymentStatus, quoteRefId, clientId, productType, lob, status, insurer, client name, issued / expiry ranges, premium range, search; paging)",
+        "summary": "List policies (mine=true for own book; agents always get their own; paymentStatus, quoteRefId, clientId, productType, lob, status, insurer, client name, issued / expiry ranges, premium range, origin issued / migrated, search; paging); each policy carries its origin block",
         "tags": [
           "Policies"
         ],
@@ -107805,6 +107908,15 @@
               "type": "string"
             },
             "example": "go-live-migration"
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "migrated"
           }
         ],
         "responses": {
@@ -132844,7 +132956,7 @@
     "/receipts/open-receivables": {
       "get": {
         "operationId": "getReceiptsOpenReceivables",
-        "summary": "Open (unpaid / partial) bills to collect: customer, policy, bill number, amount, balance, due date (filter customerCode, policyNumber, search)",
+        "summary": "Open (unpaid / partial) bills to collect: customer, policy, bill number, amount, balance, due date (filter customerCode, policyNumber, origin issued / migrated, search); each bill carries its origin block",
         "tags": [
           "Receipts"
         ],

@@ -20418,12 +20418,12 @@
       "name": "Claims",
       "item": [
         {
-          "name": "Claims list (filters: status, clientId, policyId, lob, handlerUserId, search, dateFrom, dateTo; paging page/pageSize)",
+          "name": "Claims list (filters: status, clientId, policyId, lob, handlerUserId, origin issued / migrated, search, dateFrom, dateTo; paging page/pageSize); each claim carries its origin and the origin of its policy",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/claims?page=1&pageSize=10&status=Processing&search=CLM-2026",
+              "raw": "{{baseUrl}}/claims?page=1&pageSize=10&status=Processing&search=CLM-2026&origin=issued",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -20446,10 +20446,14 @@
                 {
                   "key": "search",
                   "value": "CLM-2026"
+                },
+                {
+                  "key": "origin",
+                  "value": "issued"
                 }
               ]
             },
-            "description": "Claims list (filters: status, clientId, policyId, lob, handlerUserId, search, dateFrom, dateTo; paging page/pageSize)\n\nFront-end touchpoint: Operations > Claims; Clients > Claims tab\n\nAccess: read:claims"
+            "description": "Claims list (filters: status, clientId, policyId, lob, handlerUserId, origin issued / migrated, search, dateFrom, dateTo; paging page/pageSize); each claim carries its origin and the origin of its policy\n\nFront-end touchpoint: Operations > Claims; Clients > Claims tab\n\nAccess: read:claims"
           },
           "response": [
             {
@@ -20458,7 +20462,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/claims?page=1&pageSize=10&status=Processing&search=CLM-2026",
+                  "raw": "{{baseUrl}}/claims?page=1&pageSize=10&status=Processing&search=CLM-2026&origin=issued",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -20481,10 +20485,14 @@
                     {
                       "key": "search",
                       "value": "CLM-2026"
+                    },
+                    {
+                      "key": "origin",
+                      "value": "issued"
                     }
                   ]
                 },
-                "description": "Claims list (filters: status, clientId, policyId, lob, handlerUserId, search, dateFrom, dateTo; paging page/pageSize)\n\nFront-end touchpoint: Operations > Claims; Clients > Claims tab\n\nAccess: read:claims"
+                "description": "Claims list (filters: status, clientId, policyId, lob, handlerUserId, origin issued / migrated, search, dateFrom, dateTo; paging page/pageSize); each claim carries its origin and the origin of its policy\n\nFront-end touchpoint: Operations > Claims; Clients > Claims tab\n\nAccess: read:claims"
               },
               "status": "OK",
               "code": 200,
@@ -22283,12 +22291,12 @@
       "name": "Clients",
       "item": [
         {
-          "name": "List clients (search, leadCategory, clientType individual / corporate, status; paging)",
+          "name": "List clients (search, leadCategory, clientType individual / corporate, status, origin issued / migrated; paging); each client carries its origin block",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/clients?page=1&pageSize=10&search=juan",
+              "raw": "{{baseUrl}}/clients?page=1&pageSize=10&search=juan&origin=migrated",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -22307,10 +22315,14 @@
                 {
                   "key": "search",
                   "value": "juan"
+                },
+                {
+                  "key": "origin",
+                  "value": "migrated"
                 }
               ]
             },
-            "description": "List clients (search, leadCategory, clientType individual / corporate, status; paging)\n\nFront-end touchpoint: Operations > Clients\n\nAccess: read:clients"
+            "description": "List clients (search, leadCategory, clientType individual / corporate, status, origin issued / migrated; paging); each client carries its origin block\n\nFront-end touchpoint: Operations > Clients\n\nAccess: read:clients"
           },
           "response": [
             {
@@ -22319,7 +22331,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/clients?page=1&pageSize=10&search=juan",
+                  "raw": "{{baseUrl}}/clients?page=1&pageSize=10&search=juan&origin=migrated",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -22338,10 +22350,14 @@
                     {
                       "key": "search",
                       "value": "juan"
+                    },
+                    {
+                      "key": "origin",
+                      "value": "migrated"
                     }
                   ]
                 },
-                "description": "List clients (search, leadCategory, clientType individual / corporate, status; paging)\n\nFront-end touchpoint: Operations > Clients\n\nAccess: read:clients"
+                "description": "List clients (search, leadCategory, clientType individual / corporate, status, origin issued / migrated; paging); each client carries its origin block\n\nFront-end touchpoint: Operations > Clients\n\nAccess: read:clients"
               },
               "status": "OK",
               "code": 200,
@@ -23523,12 +23539,12 @@
       "name": "Collections",
       "item": [
         {
-          "name": "Collections register with ageing buckets (filter status, overdueLevel, clientId, search; sortField, sortOrder; paging)",
+          "name": "Collections register with ageing buckets (filter status, overdueLevel, clientId, origin issued / migrated, search; sortField, sortOrder; paging); each item carries the origin of its bill and policy",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/collections?page=1&pageSize=10&status=Overdue&overdueLevel=1&search=Santos&sortField=dueDate&sortOrder=asc",
+              "raw": "{{baseUrl}}/collections?page=1&pageSize=10&status=Overdue&overdueLevel=1&search=Santos&sortField=dueDate&sortOrder=asc&origin=migrated",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -23563,10 +23579,14 @@
                 {
                   "key": "sortOrder",
                   "value": "asc"
+                },
+                {
+                  "key": "origin",
+                  "value": "migrated"
                 }
               ]
             },
-            "description": "Collections register with ageing buckets (filter status, overdueLevel, clientId, search; sortField, sortOrder; paging)\n\nFront-end touchpoint: Accounts > Collections\n\nAccess: read:collections, read:receipts"
+            "description": "Collections register with ageing buckets (filter status, overdueLevel, clientId, origin issued / migrated, search; sortField, sortOrder; paging); each item carries the origin of its bill and policy\n\nFront-end touchpoint: Accounts > Collections\n\nAccess: read:collections, read:receipts"
           },
           "response": [
             {
@@ -23575,7 +23595,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/collections?page=1&pageSize=10&status=Overdue&overdueLevel=1&search=Santos&sortField=dueDate&sortOrder=asc",
+                  "raw": "{{baseUrl}}/collections?page=1&pageSize=10&status=Overdue&overdueLevel=1&search=Santos&sortField=dueDate&sortOrder=asc&origin=migrated",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -23610,10 +23630,14 @@
                     {
                       "key": "sortOrder",
                       "value": "asc"
+                    },
+                    {
+                      "key": "origin",
+                      "value": "migrated"
                     }
                   ]
                 },
-                "description": "Collections register with ageing buckets (filter status, overdueLevel, clientId, search; sortField, sortOrder; paging)\n\nFront-end touchpoint: Accounts > Collections\n\nAccess: read:collections, read:receipts"
+                "description": "Collections register with ageing buckets (filter status, overdueLevel, clientId, origin issued / migrated, search; sortField, sortOrder; paging); each item carries the origin of its bill and policy\n\nFront-end touchpoint: Accounts > Collections\n\nAccess: read:collections, read:receipts"
               },
               "status": "OK",
               "code": 200,
@@ -38593,7 +38617,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 7,\n      \"kit\": \"migration\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 20,\n  \"totalPages\": 1\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 20,\n  \"totalPages\": 1\n}"
             }
           ]
         },
@@ -38620,7 +38644,7 @@
             "description": "Upload a workbook (multipart \"file\", field kit): creates a load batch and validates it without saving (all sheets in load order in one transaction that is rolled back)\n\nFront-end touchpoint: API (go-live scripts) > Upload and validate\n\nAccess: write:data-load",
             "body": {
               "mode": "raw",
-              "raw": "\"multipart/form-data file, kit=configuration|migration\"",
+              "raw": "\"multipart/form-data file, kit=configuration|migration, legacySystem (migration: the source shown on the migrated records; the default legacy system when empty)\"",
               "options": {
                 "raw": {
                   "language": "json"
@@ -38652,7 +38676,7 @@
                 "description": "Upload a workbook (multipart \"file\", field kit): creates a load batch and validates it without saving (all sheets in load order in one transaction that is rolled back)\n\nFront-end touchpoint: API (go-live scripts) > Upload and validate\n\nAccess: write:data-load",
                 "body": {
                   "mode": "raw",
-                  "raw": "\"multipart/form-data file, kit=configuration|migration\"",
+                  "raw": "\"multipart/form-data file, kit=configuration|migration, legacySystem (migration: the source shown on the migrated records; the default legacy system when empty)\"",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -38670,7 +38694,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Validated: 2 row(s) with errors\",\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"kit\": \"migration\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies\",\n        \"sheetName\": \"Policies\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Validated: 2 row(s) with errors\",\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies\",\n        \"sheetName\": \"Policies\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ]\n  }\n}"
             }
           ]
         },
@@ -38735,7 +38759,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"kit\": \"migration\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies\",\n        \"sheetName\": \"Policies\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ],\n    \"totalErrors\": 1\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies\",\n        \"sheetName\": \"Policies\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ],\n    \"totalErrors\": 1\n  }\n}"
             }
           ]
         },
@@ -38807,7 +38831,7 @@
           ]
         },
         {
-          "name": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation",
+          "name": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation and writes one audit entry per record it creates or changes (values before and after, load number)",
           "request": {
             "method": "POST",
             "header": [
@@ -38835,7 +38859,7 @@
                 }
               ]
             },
-            "description": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation\n\nFront-end touchpoint: API (go-live scripts) > Load\n\nAccess: write:data-load",
+            "description": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation and writes one audit entry per record it creates or changes (values before and after, load number)\n\nFront-end touchpoint: API (go-live scripts) > Load\n\nAccess: write:data-load",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"validRowsOnly\": false\n}",
@@ -38876,7 +38900,7 @@
                     }
                   ]
                 },
-                "description": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation\n\nFront-end touchpoint: API (go-live scripts) > Load\n\nAccess: write:data-load",
+                "description": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation and writes one audit entry per record it creates or changes (values before and after, load number)\n\nFront-end touchpoint: API (go-live scripts) > Load\n\nAccess: write:data-load",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"validRowsOnly\": false\n}",
@@ -38897,7 +38921,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Loaded\",\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"kit\": \"migration\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"loaded\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"temporaryPasswords\": [\n      {\n        \"username\": \"andrea.lim\",\n        \"displayName\": \"Andrea Lim\",\n        \"temporaryPassword\": \"<shown once>\"\n      }\n    ],\n    \"reconciliation\": null\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Loaded\",\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"loaded\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"temporaryPasswords\": [\n      {\n        \"username\": \"andrea.lim\",\n        \"displayName\": \"Andrea Lim\",\n        \"temporaryPassword\": \"<shown once>\"\n      }\n    ],\n    \"reconciliation\": null\n  }\n}"
             }
           ]
         },
@@ -39031,7 +39055,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"kit\": \"migration\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies\",\n        \"sheetName\": \"Policies\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies\",\n        \"sheetName\": \"Policies\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ]\n  }\n}"
             }
           ]
         },
@@ -39425,7 +39449,7 @@
           ]
         },
         {
-          "name": "The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date and go-live lock",
+          "name": "The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date, the go-live lock and the settings of the workspace",
           "request": {
             "method": "GET",
             "header": [],
@@ -39439,7 +39463,7 @@
                 "kits"
               ]
             },
-            "description": "The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date and go-live lock\n\nFront-end touchpoint: API (go-live scripts)\n\nAccess: read:data-load, write:data-load"
+            "description": "The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date, the go-live lock and the settings of the workspace\n\nFront-end touchpoint: API (go-live scripts)\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -39457,7 +39481,7 @@
                     "kits"
                   ]
                 },
-                "description": "The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date and go-live lock\n\nFront-end touchpoint: API (go-live scripts)\n\nAccess: read:data-load, write:data-load"
+                "description": "The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date, the go-live lock and the settings of the workspace\n\nFront-end touchpoint: API (go-live scripts)\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -39469,7 +39493,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"kits\": [\n      {\n        \"kit\": \"configuration\",\n        \"title\": \"Go-live configuration workbook\",\n        \"sheets\": [\n          {\n            \"key\": \"users\",\n            \"name\": \"Users\",\n            \"keyColumns\": [\n              \"username\"\n            ],\n            \"columns\": []\n          }\n        ]\n      }\n    ],\n    \"cutoverDate\": \"2026-11-01\",\n    \"locked\": false\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"kits\": [\n      {\n        \"kit\": \"configuration\",\n        \"title\": \"Go-live configuration workbook\",\n        \"sheets\": [\n          {\n            \"key\": \"users\",\n            \"name\": \"Users\",\n            \"keyColumns\": [\n              \"username\"\n            ],\n            \"columns\": []\n          }\n        ]\n      }\n    ],\n    \"cutoverDate\": \"2026-11-01\",\n    \"locked\": false,\n    \"settings\": {\n      \"legacySystemName\": \"Legacy\",\n      \"loadApprovalRequired\": true,\n      \"dashboardDefaultOrigin\": \"issued\",\n      \"unlockWindowDays\": 7,\n      \"unlockMaxHours\": 4\n    }\n  }\n}"
             }
           ]
         },
@@ -45092,12 +45116,12 @@
           ]
         },
         {
-          "name": "Journal voucher register (manual, correction and reversal JVs; all=true for system journals too; parked=true for the system journals parked for approval)",
+          "name": "Journal voucher register (manual, correction and reversal JVs; all=true for system journals too; parked=true for the system journals parked for approval; origin issued / migrated); each voucher carries its origin block",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/journal-vouchers/history?page=1&pageSize=20&transactionCode=JV01&transactionNumber=JV-2026&status=posted&parked=false",
+              "raw": "{{baseUrl}}/journal-vouchers/history?page=1&pageSize=20&transactionCode=JV01&transactionNumber=JV-2026&status=posted&parked=false&origin=issued",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -45129,10 +45153,14 @@
                 {
                   "key": "parked",
                   "value": "false"
+                },
+                {
+                  "key": "origin",
+                  "value": "issued"
                 }
               ]
             },
-            "description": "Journal voucher register (manual, correction and reversal JVs; all=true for system journals too; parked=true for the system journals parked for approval)\n\nFront-end touchpoint: Accounts > Journal Voucher\n\nAccess: read:journal-vouchers"
+            "description": "Journal voucher register (manual, correction and reversal JVs; all=true for system journals too; parked=true for the system journals parked for approval; origin issued / migrated); each voucher carries its origin block\n\nFront-end touchpoint: Accounts > Journal Voucher\n\nAccess: read:journal-vouchers"
           },
           "response": [
             {
@@ -45141,7 +45169,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/journal-vouchers/history?page=1&pageSize=20&transactionCode=JV01&transactionNumber=JV-2026&status=posted&parked=false",
+                  "raw": "{{baseUrl}}/journal-vouchers/history?page=1&pageSize=20&transactionCode=JV01&transactionNumber=JV-2026&status=posted&parked=false&origin=issued",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -45173,10 +45201,14 @@
                     {
                       "key": "parked",
                       "value": "false"
+                    },
+                    {
+                      "key": "origin",
+                      "value": "issued"
                     }
                   ]
                 },
-                "description": "Journal voucher register (manual, correction and reversal JVs; all=true for system journals too; parked=true for the system journals parked for approval)\n\nFront-end touchpoint: Accounts > Journal Voucher\n\nAccess: read:journal-vouchers"
+                "description": "Journal voucher register (manual, correction and reversal JVs; all=true for system journals too; parked=true for the system journals parked for approval; origin issued / migrated); each voucher carries its origin block\n\nFront-end touchpoint: Accounts > Journal Voucher\n\nAccess: read:journal-vouchers"
               },
               "status": "OK",
               "code": 200,
@@ -64342,12 +64374,12 @@
       "name": "Policies",
       "item": [
         {
-          "name": "List policies (mine=true for own book; agents always get their own; paymentStatus, quoteRefId, clientId, productType, lob, status, insurer, client name, issued / expiry ranges, premium range, search; paging)",
+          "name": "List policies (mine=true for own book; agents always get their own; paymentStatus, quoteRefId, clientId, productType, lob, status, insurer, client name, issued / expiry ranges, premium range, origin issued / migrated, search; paging); each policy carries its origin block",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/policies?page=1&pageSize=10&mine=true&paymentStatus=Pending&clientId=cl_1&expiryDateFrom=2026-10-01T00:00:00.000Z&query=POL-2026&source=go-live-migration",
+              "raw": "{{baseUrl}}/policies?page=1&pageSize=10&mine=true&paymentStatus=Pending&clientId=cl_1&expiryDateFrom=2026-10-01T00:00:00.000Z&query=POL-2026&source=go-live-migration&origin=migrated",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -64386,10 +64418,14 @@
                 {
                   "key": "source",
                   "value": "go-live-migration"
+                },
+                {
+                  "key": "origin",
+                  "value": "migrated"
                 }
               ]
             },
-            "description": "List policies (mine=true for own book; agents always get their own; paymentStatus, quoteRefId, clientId, productType, lob, status, insurer, client name, issued / expiry ranges, premium range, search; paging)\n\nFront-end touchpoint: Operations > Policy / Renewal Policy / Client view\n\nAccess: read:policies"
+            "description": "List policies (mine=true for own book; agents always get their own; paymentStatus, quoteRefId, clientId, productType, lob, status, insurer, client name, issued / expiry ranges, premium range, origin issued / migrated, search; paging); each policy carries its origin block\n\nFront-end touchpoint: Operations > Policy / Renewal Policy / Client view\n\nAccess: read:policies"
           },
           "response": [
             {
@@ -64398,7 +64434,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/policies?page=1&pageSize=10&mine=true&paymentStatus=Pending&clientId=cl_1&expiryDateFrom=2026-10-01T00:00:00.000Z&query=POL-2026&source=go-live-migration",
+                  "raw": "{{baseUrl}}/policies?page=1&pageSize=10&mine=true&paymentStatus=Pending&clientId=cl_1&expiryDateFrom=2026-10-01T00:00:00.000Z&query=POL-2026&source=go-live-migration&origin=migrated",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -64437,10 +64473,14 @@
                     {
                       "key": "source",
                       "value": "go-live-migration"
+                    },
+                    {
+                      "key": "origin",
+                      "value": "migrated"
                     }
                   ]
                 },
-                "description": "List policies (mine=true for own book; agents always get their own; paymentStatus, quoteRefId, clientId, productType, lob, status, insurer, client name, issued / expiry ranges, premium range, search; paging)\n\nFront-end touchpoint: Operations > Policy / Renewal Policy / Client view\n\nAccess: read:policies"
+                "description": "List policies (mine=true for own book; agents always get their own; paymentStatus, quoteRefId, clientId, productType, lob, status, insurer, client name, issued / expiry ranges, premium range, origin issued / migrated, search; paging); each policy carries its origin block\n\nFront-end touchpoint: Operations > Policy / Renewal Policy / Client view\n\nAccess: read:policies"
               },
               "status": "OK",
               "code": 200,
@@ -80649,7 +80689,7 @@
           ]
         },
         {
-          "name": "Open (unpaid / partial) bills to collect: customer, policy, bill number, amount, balance, due date (filter customerCode, policyNumber, search)",
+          "name": "Open (unpaid / partial) bills to collect: customer, policy, bill number, amount, balance, due date (filter customerCode, policyNumber, origin issued / migrated, search); each bill carries its origin block",
           "request": {
             "method": "GET",
             "header": [],
@@ -80673,7 +80713,7 @@
                 }
               ]
             },
-            "description": "Open (unpaid / partial) bills to collect: customer, policy, bill number, amount, balance, due date (filter customerCode, policyNumber, search)\n\nFront-end touchpoint: Accounts > Receipts > Add receipt\n\nAccess: read:receipts"
+            "description": "Open (unpaid / partial) bills to collect: customer, policy, bill number, amount, balance, due date (filter customerCode, policyNumber, origin issued / migrated, search); each bill carries its origin block\n\nFront-end touchpoint: Accounts > Receipts > Add receipt\n\nAccess: read:receipts"
           },
           "response": [
             {
@@ -80701,7 +80741,7 @@
                     }
                   ]
                 },
-                "description": "Open (unpaid / partial) bills to collect: customer, policy, bill number, amount, balance, due date (filter customerCode, policyNumber, search)\n\nFront-end touchpoint: Accounts > Receipts > Add receipt\n\nAccess: read:receipts"
+                "description": "Open (unpaid / partial) bills to collect: customer, policy, bill number, amount, balance, due date (filter customerCode, policyNumber, origin issued / migrated, search); each bill carries its origin block\n\nFront-end touchpoint: Accounts > Receipts > Add receipt\n\nAccess: read:receipts"
               },
               "status": "OK",
               "code": 200,

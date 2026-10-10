@@ -560,8 +560,10 @@ describe('migration kit', () => {
     expect((await request(app).post(`/api/renewals/${rn.body.data.id}/approve`).set('Authorization', `Bearer ${checker}`).send({ decision: 'approve' })).status).toBe(200);
     const done = await api('post', `/renewals/${rn.body.data.id}/complete`).send({});
     expect(done.status, JSON.stringify(done.body)).toBe(200);
-    const term = await one('SELECT doc, load_batch_id, renewed_from FROM policies WHERE id = $1', [done.body.data.newPolicy.id]);
+    const term = await one('SELECT doc, load_batch_id, renewed_from, origin, legacy_number, migrated_at FROM policies WHERE id = $1', [done.body.data.newPolicy.id]);
     expect(term.renewed_from).toBe(old.id);
+    // issued in BrokerVerse: none of the origin fields of the migrated term
+    expect(term).toMatchObject({ origin: 'issued', legacy_number: null, migrated_at: null });
     expect(term.doc.source).toBeUndefined();
     expect(term.doc.loadBatchId).toBeUndefined();
     expect(term.load_batch_id).toBeNull();

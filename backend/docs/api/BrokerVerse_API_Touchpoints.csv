@@ -5999,7 +5999,7 @@
     ""submittedToInsurerAt"": ""2026-10-04T03:00:00Z""
   }
 }"
-293,Claims,GET,/api/claims,"Claims list (filters: status, clientId, policyId, lob, handlerUserId, search, dateFrom, dateTo; paging page/pageSize)",Operations > Claims; Clients > Claims tab,Bearer JWT,read:claims,Query: ?page=1&pageSize=10&status=Processing&search=CLM-2026,"{
+293,Claims,GET,/api/claims,"Claims list (filters: status, clientId, policyId, lob, handlerUserId, origin issued / migrated, search, dateFrom, dateTo; paging page/pageSize); each claim carries its origin and the origin of its policy",Operations > Claims; Clients > Claims tab,Bearer JWT,read:claims,Query: ?page=1&pageSize=10&status=Processing&search=CLM-2026&origin=issued,"{
   ""success"": true,
   ""data"": {
     ""claims"": [
@@ -6558,7 +6558,7 @@
 }"
 314,Claims Settlements,GET,/api/claim-payments/claims/:id/release-form,Release and quitclaim (PDF) for the claimant to sign on payment of the settlement,Accounts > Claims Settlements > Release form,Bearer JWT,"read:receipts, read:disbursements, read:claims",,application/pdf
 315,Claims Settlements,GET,/api/claim-payments/movements/:movementId/voucher,Claim payment voucher (PDF) of a payment to the claimant,Accounts > Claims Settlements > Payment voucher,Bearer JWT,"read:receipts, read:disbursements, read:claims",,application/pdf
-316,Clients,GET,/api/clients,"List clients (search, leadCategory, clientType individual / corporate, status; paging)",Operations > Clients,Bearer JWT,read:clients,Query: ?page=1&pageSize=10&search=juan,"{
+316,Clients,GET,/api/clients,"List clients (search, leadCategory, clientType individual / corporate, status, origin issued / migrated; paging); each client carries its origin block",Operations > Clients,Bearer JWT,read:clients,Query: ?page=1&pageSize=10&search=juan&origin=migrated,"{
   ""success"": true,
   ""data"": {
     ""clients"": [
@@ -6833,7 +6833,7 @@
     }
   ]
 }"
-331,Collections,GET,/api/collections,"Collections register with ageing buckets (filter status, overdueLevel, clientId, search; sortField, sortOrder; paging)",Accounts > Collections,Bearer JWT,"read:collections, read:receipts",Query: ?page=1&pageSize=10&status=Overdue&overdueLevel=1&search=Santos&sortField=dueDate&sortOrder=asc,"{
+331,Collections,GET,/api/collections,"Collections register with ageing buckets (filter status, overdueLevel, clientId, origin issued / migrated, search; sortField, sortOrder; paging); each item carries the origin of its bill and policy",Accounts > Collections,Bearer JWT,"read:collections, read:receipts",Query: ?page=1&pageSize=10&status=Overdue&overdueLevel=1&search=Santos&sortField=dueDate&sortOrder=asc&origin=migrated,"{
   ""success"": true,
   ""data"": [
     {
@@ -10705,7 +10705,9 @@
   ""data"": [
     {
       ""id"": 7,
+      ""loadNumber"": ""MIG-000007"",
       ""kit"": ""migration"",
+      ""legacySystem"": ""TISPH Excel"",
       ""fileName"": ""GoLive_Migration_Workbook.xlsx"",
       ""status"": ""failed"",
       ""cutoverDate"": ""2026-11-01"",
@@ -10741,13 +10743,15 @@
   ""perPage"": 20,
   ""totalPages"": 1
 }"
-528,Go-Live Data Workbench,POST,/api/data-load/batches,"Upload a workbook (multipart ""file"", field kit): creates a load batch and validates it without saving (all sheets in load order in one transaction that is rolled back)",API (go-live scripts) > Upload and validate,Bearer JWT,write:data-load,"multipart/form-data file, kit=configuration|migration","{
+528,Go-Live Data Workbench,POST,/api/data-load/batches,"Upload a workbook (multipart ""file"", field kit): creates a load batch and validates it without saving (all sheets in load order in one transaction that is rolled back)",API (go-live scripts) > Upload and validate,Bearer JWT,write:data-load,"multipart/form-data file, kit=configuration|migration, legacySystem (migration: the source shown on the migrated records; the default legacy system when empty)","{
   ""success"": true,
   ""message"": ""Validated: 2 row(s) with errors"",
   ""data"": {
     ""batch"": {
       ""id"": 7,
+      ""loadNumber"": ""MIG-000007"",
       ""kit"": ""migration"",
+      ""legacySystem"": ""TISPH Excel"",
       ""fileName"": ""GoLive_Migration_Workbook.xlsx"",
       ""status"": ""failed"",
       ""cutoverDate"": ""2026-11-01"",
@@ -10793,7 +10797,9 @@
   ""data"": {
     ""batch"": {
       ""id"": 7,
+      ""loadNumber"": ""MIG-000007"",
       ""kit"": ""migration"",
+      ""legacySystem"": ""TISPH Excel"",
       ""fileName"": ""GoLive_Migration_Workbook.xlsx"",
       ""status"": ""failed"",
       ""cutoverDate"": ""2026-11-01"",
@@ -10836,7 +10842,7 @@
   }
 }"
 530,Go-Live Data Workbench,GET,/api/data-load/batches/:id/errors,"The rows in error of a batch as a workbook in the kit layout with an Errors column, to fix and upload again",API (go-live scripts) > Download errors,Bearer JWT,"read:data-load, write:data-load",,(xlsx file)
-531,Go-Live Data Workbench,POST,/api/data-load/batches/:id/load,Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation,API (go-live scripts) > Load,Bearer JWT,write:data-load,"{
+531,Go-Live Data Workbench,POST,/api/data-load/batches/:id/load,"Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation and writes one audit entry per record it creates or changes (values before and after, load number)",API (go-live scripts) > Load,Bearer JWT,write:data-load,"{
   ""validRowsOnly"": false
 }","{
   ""success"": true,
@@ -10844,7 +10850,9 @@
   ""data"": {
     ""batch"": {
       ""id"": 7,
+      ""loadNumber"": ""MIG-000007"",
       ""kit"": ""migration"",
+      ""legacySystem"": ""TISPH Excel"",
       ""fileName"": ""GoLive_Migration_Workbook.xlsx"",
       ""status"": ""loaded"",
       ""cutoverDate"": ""2026-11-01"",
@@ -10890,7 +10898,9 @@
   ""data"": {
     ""batch"": {
       ""id"": 7,
+      ""loadNumber"": ""MIG-000007"",
       ""kit"": ""migration"",
+      ""legacySystem"": ""TISPH Excel"",
       ""fileName"": ""GoLive_Migration_Workbook.xlsx"",
       ""status"": ""failed"",
       ""cutoverDate"": ""2026-11-01"",
@@ -11129,7 +11139,7 @@
   ""totalPages"": 1
 }"
 538,Go-Live Data Workbench,GET,/api/data-load/compare/:id/workbook,"Comparison workbook (XLSX): Summary with the counts per sheet and the verdict (Mirrored / Differences found), one sheet per object with a Difference column (only in the file green, only here amber, changed cells highlighted), environment-specific values and rules",API (go-live scripts) > Compare environments > Download,Bearer JWT,"read:data-load, write:data-load",,(xlsx file)
-539,Go-Live Data Workbench,GET,/api/data-load/kits,"The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date and go-live lock",API (go-live scripts),Bearer JWT,"read:data-load, write:data-load",,"{
+539,Go-Live Data Workbench,GET,/api/data-load/kits,"The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date, the go-live lock and the settings of the workspace",API (go-live scripts),Bearer JWT,"read:data-load, write:data-load",,"{
   ""success"": true,
   ""data"": {
     ""kits"": [
@@ -11149,7 +11159,14 @@
       }
     ],
     ""cutoverDate"": ""2026-11-01"",
-    ""locked"": false
+    ""locked"": false,
+    ""settings"": {
+      ""legacySystemName"": ""Legacy"",
+      ""loadApprovalRequired"": true,
+      ""dashboardDefaultOrigin"": ""issued"",
+      ""unlockWindowDays"": 7,
+      ""unlockMaxHours"": 4
+    }
   }
 }"
 540,Go-Live Data Workbench,GET,/api/data-load/kits/:kit/template,"Workbook of a kit (XLSX): Instructions, Lists and one sheet per object; prefill=true fills it with the current data of this environment (promotion to the next environment)",API (go-live scripts) > Download template,Bearer JWT,"read:data-load, write:data-load",Query: ?prefill=true,(xlsx file)
@@ -12672,7 +12689,7 @@
     ""correctionOf"": ""jv_1""
   }
 }"
-622,Journal Vouchers,GET,/api/journal-vouchers/history,"Journal voucher register (manual, correction and reversal JVs; all=true for system journals too; parked=true for the system journals parked for approval)",Accounts > Journal Voucher,Bearer JWT,read:journal-vouchers,Query: ?page=1&pageSize=20&transactionCode=JV01&transactionNumber=JV-2026&status=posted&parked=false,"{
+622,Journal Vouchers,GET,/api/journal-vouchers/history,"Journal voucher register (manual, correction and reversal JVs; all=true for system journals too; parked=true for the system journals parked for approval; origin issued / migrated); each voucher carries its origin block",Accounts > Journal Voucher,Bearer JWT,read:journal-vouchers,Query: ?page=1&pageSize=20&transactionCode=JV01&transactionNumber=JV-2026&status=posted&parked=false&origin=issued,"{
   ""success"": true,
   ""data"": [
     {
@@ -18312,7 +18329,7 @@
     ]
   }
 }"
-871,Policies,GET,/api/policies,"List policies (mine=true for own book; agents always get their own; paymentStatus, quoteRefId, clientId, productType, lob, status, insurer, client name, issued / expiry ranges, premium range, search; paging)",Operations > Policy / Renewal Policy / Client view,Bearer JWT,read:policies,Query: ?page=1&pageSize=10&mine=true&paymentStatus=Pending&clientId=cl_1&expiryDateFrom=2026-10-01T00%3A00%3A00.000Z&query=POL-2026&source=go-live-migration,"{
+871,Policies,GET,/api/policies,"List policies (mine=true for own book; agents always get their own; paymentStatus, quoteRefId, clientId, productType, lob, status, insurer, client name, issued / expiry ranges, premium range, origin issued / migrated, search; paging); each policy carries its origin block",Operations > Policy / Renewal Policy / Client view,Bearer JWT,read:policies,Query: ?page=1&pageSize=10&mine=true&paymentStatus=Pending&clientId=cl_1&expiryDateFrom=2026-10-01T00%3A00%3A00.000Z&query=POL-2026&source=go-live-migration&origin=migrated,"{
   ""success"": true,
   ""data"": [
     {
@@ -22416,7 +22433,7 @@
   }
 }"
 1087,Receipts,GET,/api/receipts/bulk-upload/template,"Official receipts upload template (XLSX: Data, Columns and Instructions sheets)",Accounts > Receipts > Bulk upload > Download template,Bearer JWT,read:receipts,,(xlsx file)
-1088,Receipts,GET,/api/receipts/open-receivables,"Open (unpaid / partial) bills to collect: customer, policy, bill number, amount, balance, due date (filter customerCode, policyNumber, search)",Accounts > Receipts > Add receipt,Bearer JWT,read:receipts,Query: ?customerCode=CL-2026-00001&policyNumber=POL-2026-00001,"{
+1088,Receipts,GET,/api/receipts/open-receivables,"Open (unpaid / partial) bills to collect: customer, policy, bill number, amount, balance, due date (filter customerCode, policyNumber, origin issued / migrated, search); each bill carries its origin block",Accounts > Receipts > Add receipt,Bearer JWT,read:receipts,Query: ?customerCode=CL-2026-00001&policyNumber=POL-2026-00001,"{
   ""success"": true,
   ""data"": [
     {

@@ -47,8 +47,11 @@ Download from the screen (**Download Template**: *Blank template* or *Current da
    since the validation, nothing is saved and the errors are recorded. The load is written to the audit trail and the
    administrator is notified. After a load of the valid rows only, the rows left out keep their errors: the batch still
    lists them and **Download errors** still gives them, to fix and upload again.
-5. **History** (`GET /api/data-load/batches`): status `validated`, `failed` or `loaded`, who uploaded and loaded, when,
-   counts; open a batch to see its result again.
+5. **History** (`GET /api/data-load/batches`): load number, status `validated`, `failed` or `loaded`, who uploaded and
+   loaded, when, counts; open a batch to see its result again. Every batch has a **load number** that never changes and
+   is never reused: `MIG-000012` for the migration workbook, `CFG-000045` for the configuration workbook
+   (`data_load_batches.load_number`, migration `0440_migration_origin.sql`). A migration upload may name its **legacy
+   system** (field `legacySystem`, e.g. "TISPH Excel"); without it the setting `migration.legacy_system_name` applies.
 
 ### Natural keys
 
@@ -170,8 +173,17 @@ not run (sign-in, network). The differing rows are printed; passwords never are.
 
 ## Rules
 
-- **Permission.** `read:data-load` (download, history, compare environments) and `write:data-load` (upload, validate, load), granted to the
-  System Administrator only (migration `0243_go_live_data_workbench.sql` and the seed).
+- **Permission.** `read:data-load` (download, history, compare environments), `write:data-load` (upload, validate,
+  load) and `approve:data-load` (second-person approval of loads, undo, reconciliation sign-off, Go / No-Go and the
+  go-live lock; never the maker of the same item). Default grants (migration `0440_migration_origin.sql` and the seed,
+  to be confirmed by TISPH): System Administrator all three; TIS IT AppSupport / Admin read and write; TIS Finance &
+  General Accounting, TIS Operations Unit Head and TIS General Manager read and approve; **TIS Audit (read only)**
+  (`tis-auditor`, new) read only, with the audit trail. The segregation of duties rule *Load and approve migration
+  data* (`SOD-ACC-LOAD-APPROVE`) flags anyone holding both `write:data-load` and `approve:data-load`; the named cutover
+  administrators are recorded as exceptions until the end of hypercare.
+- **Personal data.** `/api/data-load` is no longer answered unmasked (removed from `privacy.masking_exempt_paths` where
+  the setting held the shipped list): the workbooks with current data and the errors workbook mask TIN, birth date,
+  e-mail and mobile numbers for a user without `view:pii`, as every other download.
 - **Users.** Passwords are never in a workbook. A new user gets a temporary password that the load returns once to the
   administrator (shown in a dialog, `Cache-Control: no-store`, never stored in the batch); the user changes it at the
   first sign-in. A load cannot change the administrator's own account; only a System Administrator can grant the System
@@ -205,15 +217,43 @@ not run (sign-in, network). The differing rows are printed; passwords never are.
   nor a credit (or zero), an account whose movements net to zero, is accepted and ignored (counted as *ignored*, with
   a note in the batch message and `zeroBalanceRows` in the reconciliation totals); its account must still be in the
   chart of accounts. The sheet loads all or nothing: see *Result per sheet* above for how a failure is reported.
-- Migrated records are flagged and post nothing:
+- Migrated records carry their **origin** and post nothing:
 
-| Record | Flag | Not created |
-|---|---|---|
-| Client | `source = 'go-live-migration'`, `load_batch_id` | |
-| Policy | `doc.source = 'go-live-migration'`, `doc.loadBatchId`, `load_batch_id`; insurer at 100% | bill, booking journal, commission accrual (policy migration mode of `issuePolicy`) |
-| Open item | receivable `source = 'opening'`, `go_live_date` = cutover, `load_batch_id`; the old bill number as `bill_number` and `reference`; a collection item | booking journal (the GL carries it in the opening balance) |
-| Open claim | `details.source = 'go-live-migration'`, `load_batch_id`, a claim history line | acknowledgement e-mail, notifications, settlement journal |
-| Opening balance | `opening_balances.source_run = 'go-live:<cutover>'` | journal |
+| Record | Origin and flags | Legacy number | Not created |
+|---|---|---|---|
+| Client | `origin = 'migrated'`, `legacy_system`, `migrated_at`, `migrated_by`, `load_batch_id`; `source = 'go-live-migration'` | client code | |
+| Policy | as client; `doc.source = 'go-live-migration'`, `doc.loadBatchId`; insurer at 100% | policy number | bill, booking journal, commission accrual (policy migration mode of `issuePolicy`) |
+| Open item | as client; receivable `source = 'opening'`, `go_live_date` = cutover; the old bill number as `bill_number` and `reference`; a collection item | bill reference | booking journal (the GL carries it in the opening balance) |
+| Open claim | as client; `details.source = 'go-live-migration'`, a claim history line | claim number | acknowledgement e-mail, notifications, settlement journal |
+| Opening balance | `opening_balances.source_run = 'go-live:<cutover>'`, `load_batch_id` | | journal |
+
+  `migrated_by` is the user who uploaded the load. The single-object go-live imports tag their records the same way
+  (without a load): the go-live policy upload (`POST /api/policies/bulk-upload`, `mode=go-live`: the policy and the
+  client it creates) and the open items import (`POST /api/receipts/opening-items/import`), with the legacy system of
+  the setting.
+
+### Origin of the records
+
+Every client, policy, receivable, claim, journal voucher and post-dated cheque has `origin` (`issued`: entered or
+issued in BrokerVerse, the default; `migrated`: loaded from the legacy system), `legacy_system`, `legacy_number`,
+`migrated_at` and `migrated_by` (migration `0440_migration_origin.sql`, which also back-filled the records migrated
+before it from the flags above). `load_batch_id` exists on these tables and on `opening_balances` and
+`ctpl_authentications`. Readers use `origin` through `backend/src/lib/origin.js`; the older flags are still written for
+the reports and scripts that read them.
+
+- **API.** Clients, policies, claims, collections, the open bills of a receipt (`/receipts/open-receivables`) and
+  journal vouchers return an `origin` block on every row and detail:
+  `{ kind: 'migrated', label: 'Migrated', legacySystem, legacyNumber, loadId, loadNumber, migratedAt, migratedByName }`
+  or `{ kind: 'issued', label: 'Issued in BrokerVerse' }`; claims and collection items also carry `policyOrigin` and
+  `policyLegacyNumber` of their policy. The lists filter on `?origin=issued|migrated` (`all` or empty for both).
+- **Read-only.** The origin, legacy system and number, migration date and user and load cannot be changed after the
+  load: an update that changes them is refused (400); a body that sends back the values it read is accepted.
+- **Per-record audit.** A migration load writes one audit entry per record it creates (`migrate-create`, "migrated")
+  or changes (`migrate-update`, "updated by migration load"), with the values before and after, the batch and its load
+  number, in the load transaction (`auditMany`, `lib/audit.js`); the opening balances one entry per account. The record
+  history shows it as its first event, from the channel *Data load* with the load number. A validation and a load that
+  fails write none. Each row of the batch keeps the record it created or changed (`data_load_rows.record_table`,
+  `record_id`, `record_key`).
 
 ## New and migrated data side by side
 
@@ -221,15 +261,23 @@ not run (sign-in, network). The differing rows are printed; passwords never are.
   number of an open item). New
   business takes the next number of its Document Numbering series, which the Numbering sheet sets. Both workbooks refuse
   a collision: the configuration workbook when a series' next number would issue a number that a migrated record of
-  the same format already has, the migration workbook when a legacy number has the format of a series in the current
-  period at or above its next number (e.g. `CL-2026-00500` while the client series is at 1). Raise the next number
-  above the legacy range first.
+  the same format already has, the migration workbook when a legacy number has the format of a series at or above the
+  next number of its period (e.g. `CL-2026-00500` while the client series is at 1). Every form a series issues over the
+  go-live window is checked: each period from the cutover date (or today, when earlier) to the end of the year after
+  it, so `POL-2027-00001` is refused while the cutover is in 2026, because renewals issued from January 2027 draw from
+  that period; and, when the pattern holds `{BRANCH}` or `{LOB}`, each active branch code and each line of business in
+  use (`numbering.js` `seriesShapes`). Raise the next number above the legacy range first. `collidingNumbers` lists
+  every stored number a series would issue again; `cocCollisions` lists migrated COC numbers (certificate of a migrated
+  CTPL policy, CTPL authentication of a load) inside the range of a COC series of the same insurer at or above its next
+  number.
 - **Dates.** Opening balances are dated the day before cutover; every new transaction is dated on or after it.
 - **Renewals.** Migrated in-force policies are ordinary active policies: the renewal queue picks them up as they near
   expiry. Policies expiring soon need no separate sheet; the reconciliation counts those expiring within 90 days. The
-  renewal term is new business: it does not carry the `go-live-migration` source or the load batch of the expiring term.
-- **Reports.** The policy API and lists show `source` and filter on it (`GET /api/policies?source=go-live-migration`);
-  `load_batch_id` ties every migrated record to its batch.
+  renewal term is new business issued in BrokerVerse (`origin = 'issued'`, its own number, `renewed_from` = the
+  migrated term): it does not carry the origin, legacy number, `go-live-migration` source or load batch of the
+  expiring term.
+- **Reports.** The policy API and lists show `source` and filter on it (`GET /api/policies?source=go-live-migration`)
+  and on `origin`; `load_batch_id` ties every migrated record to its batch.
 - **Open items** keep the bill number of the old system (*Bill Reference*) as their bill number, under the same
   rule as the other legacy numbers: a bill number with the format of the invoice series at or above its next number
   (e.g. `INV-2026-00004` while the series is at 1) is refused until the invoice series' Next Number is raised above it
@@ -252,6 +300,14 @@ compares with the old system (`batch.reconciliation`; download: `GET /api/data-l
   debits and credits) and the records and totals in BrokerVerse after the load (all migrated records);
 - checks: trial balance debits = credits; premiums receivable control account (`accounting.account.premium_receivable`)
   opening balance = total open balance of the open items of the cutover date.
+
+## Load history and the transaction reset
+
+The transaction reset keeps the load history (`data_load_batches`, `data_load_rows`, `data_load_comparisons`) as the
+evidence of the mock runs: the loaded migration batches, whose records the reset removes, and their rows are marked
+`undone` with the reason "transaction reset" (`scripts/lib/table-classification.js`, action `mark-reset`). Batch
+statuses also include the approval and undo states of the Data Migration & Go-Live workspace (`pending-approval`,
+`rejected`, `withdrawn`, `expired`, `running`, `validating`, `undo-pending`, `undoing`, `undone`).
 
 ## Go-live rehearsal
 
@@ -288,6 +344,9 @@ failing row is undone alone and the next rows carry on. A transaction-level advi
 `getSetting` reads through the transaction and bypasses the settings cache inside it; the settings and letterhead
 caches are cleared after every dry run and load. Sequence counters advanced during a dry run are rolled back with it.
 
-Code: `backend/src/modules/data-load` (`configuration.js`, `migration.js`: the sheets; `workbook.js`: templates,
-reading, errors and reconciliation workbooks; `service.js`: batches, dry run, load; `numbering.js`: the collision
-check). Tests: `backend/test/go-live-workbench.test.js`.
+Code: `backend/src/modules/data-load` (`registry.js`: the objects of both kits, their dependencies and load order;
+`configuration.js`, `migration.js`: the sheets; `workbook.js`: templates, reading, errors and reconciliation workbooks;
+`service.js`: batches, dry run, load, per-record audit; `numbering.js`: the collision check), `backend/src/lib/origin.js`
+(origin filter, block and read-only rule). Module description: `backend/src/modules/data-load/README.md`. Tests:
+`backend/test/go-live-workbench.test.js`, `go-live-roundtrip.test.js`, `migration-registry.test.js`,
+`migration-origin.test.js`, `migration-audit.test.js`, `migration-numbers.test.js`.

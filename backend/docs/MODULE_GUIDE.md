@@ -30,7 +30,8 @@ minimal, clearly-correct front-end fix.
   `approve:period-end`, `approve:bank-reconciliation`, `approve:insurer-reconciliation`, `approve:credit-control`,
   `write:posting-rules`, `approve:posting-rules` and `view:pii` (full personal identifiers), and the approvals of the front office
   (migration 0348): `approve:quotations` (quotation approval), `approve:policies` (check of a placement against the slip),
-  `approve:renewals` (renewal terms) and `approve:claims` (claim decisions). An approval route requires the approval
+  `approve:renewals` (renewal terms) and `approve:claims` (claim decisions), and `approve:data-load` (second-person
+  approval of data loads and of the go-live steps, migration 0440). An approval route requires the approval
   permission besides the write permission, and the service keeps its maker-checker rule. Which role holds which
   permission is `ROLE_PERMS` in the same file (the broker roles and the TISPH roles `tis-*` of the RBAC v4 sheet); a
   role added there for databases in use also needs a migration, as `0348_tisph_roles.sql` does. Roles that include
@@ -78,7 +79,16 @@ minimal, clearly-correct front-end fix.
   hard-code prefixes, tax rates, currencies, limits, e-mail text or colours: read them from `app_settings` via
   `src/lib/settings.js`. New keys go into a seed or migration (`INSERT ... ON CONFLICT DO NOTHING`) with a group and
   a label; `npm run check:settings` lists keys read in code that nothing seeds.
-- Every mutation calls `audit(req, {...})` from `src/lib/audit.js`. Workflow events that someone must act on
+- Origin of a record: clients, policies, receivables, claims, journal vouchers and post-dated cheques carry `origin`
+  (`issued` or `migrated`), `legacy_system`, `legacy_number`, `migrated_at`, `migrated_by` and `load_batch_id`
+  (migration 0440). A list of these records filters on `?origin=` with `originWhere(alias, q.origin, params)` and
+  returns `origin: originOf(row)` on every row (select `originColumns(alias)` for the name of the user who migrated
+  it); an update passes the body through `withoutOriginFields(body, row)`, which refuses a change of the origin
+  fields. Figures that leave migrated business out (production, commission, incentive) add `kpiOriginWhere(alias,
+  kind)`. All in `src/lib/origin.js`; never test the older flags (`source = 'go-live-migration'`, `doc.source`) in new
+  code. A record created by an import of legacy business is written with `origin = 'migrated'`.
+- Every mutation calls `audit(req, {...})` from `src/lib/audit.js`; several entries of one request (one per record of a
+  data load) go in one insert with `auditMany(req, entries)`. Workflow events that someone must act on
   create a notification with `notify()` from `src/modules/notifications/service.js`; customer-facing e-mails go
   through `queueEmail()` in `src/lib/mailer.js`, with the text from `renderTemplate()` (`src/lib/template.js`;
   subjects with `{ html: false }`).
