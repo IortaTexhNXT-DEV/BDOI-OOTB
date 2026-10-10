@@ -26,6 +26,7 @@ import DetailSection from "../../../components/DetailSection";
 import KeyValueGrid from "../../../components/KeyValueGrid";
 import StatusChip from "../../../components/StatusChip";
 import { useMakerChecker } from "../../../components/ApprovalActions";
+import EligibilityNote from "../../../components/EligibilityNote";
 import { RecordActivityLog } from "../../../components/ActivityLog";
 import { printPdf } from "../../../components/Print";
 import { statusLabel } from "../../../utils/statusSeverity";
@@ -684,10 +685,13 @@ function Detailview() {
         actions={(
           <>
             {/* the cheque actions act on the cheque picked in the list; the maker of the voucher or cheque cannot approve it */}
-            {hasPendingItems && (
+            {hasPendingItems && (voucherChecker.blocked || chequeChecker.blocked) && (
+              <EligibilityNote reason={voucherChecker.reason || chequeChecker.reason} />
+            )}
+            {hasPendingItems && !voucherChecker.blocked && !chequeChecker.blocked && (
               <Button type="button" icon="pi pi-check" size="small" label={t("paymentVoucher.detail.approveCheque")} onClick={handleApprove}
-                disabled={!selectedProducts || selectedProducts.status !== "Pending" || chequeChecker.blocked || voucherChecker.blocked}
-                tooltip={voucherChecker.reason || chequeChecker.reason || (!selectedProducts || selectedProducts.status !== "Pending" ? t("paymentVoucher.detail.selectPendingCheque") : undefined)}
+                disabled={!selectedProducts || selectedProducts.status !== "Pending"}
+                tooltip={!selectedProducts || selectedProducts.status !== "Pending" ? t("paymentVoucher.detail.selectPendingCheque") : undefined}
                 tooltipOptions={{ showOnDisabled: true, position: "top" }} />
             )}
             {hasApprovedItems && (
