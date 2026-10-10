@@ -1,42 +1,133 @@
+// Spreadsheet import dialog (components/ImportDialog). Theme CSS variables only.
+
 .import-dialog {
-  &__note {
-    margin: 0 0 1rem;
-    color: #4d5761;
-    line-height: 1.4;
-  }
-  &__field {
-    display: flex;
-    flex-wrap: wrap;
+  &__title {
+    display: inline-flex;
     align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-    label, span { flex: 1 1 16rem; }
+    gap: 4px;
   }
+
+  &__steps {
+    display: grid;
+    gap: 12px;
+  }
+
+  &__step {
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr);
+    align-items: center;
+    gap: 16px;
+    min-height: 2.5rem;
+  }
+
+  &__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  &__no {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+  }
+
+  &__control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+
+    &--date {
+      max-width: 14rem;
+    }
+  }
+
+  &__button.p-button {
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+
+  &__hint {
+    font-size: 12px;
+    color: var(--color-text-muted);
+  }
+
+  &__file {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    max-width: 100%;
+    padding: 2px 4px 2px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--bv-radius-sm, 6px);
+    background: var(--color-surface-muted);
+  }
+
+  &__file-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+    color: var(--color-text);
+  }
+
+  &__file-size {
+    flex: 0 0 auto;
+    font-size: 12px;
+    color: var(--color-text-muted);
+  }
+
+  &__outcome {
+    display: grid;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-border);
+  }
+
+  &__outcome-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-heading);
+  }
+
+  &__message,
+  &__error {
+    margin: 0;
+    font-size: 14px;
+  }
+
+  &__error {
+    color: var(--color-danger);
+  }
+
   &__actions {
     display: flex;
     justify-content: flex-end;
-    gap: 0.5rem;
+    flex-wrap: wrap;
+    gap: 8px;
   }
-  &__error {
-    margin-top: 1rem;
-    padding: 0.75rem;
-    border-radius: 6px;
-    background: #fdecea;
-    color: #9c2a00;
-  }
-  &__result {
-    margin-top: 1rem;
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.875rem;
-    }
-    th, td {
-      text-align: left;
-      padding: 0.35rem 0.5rem;
-      border-bottom: 1px solid #e5e7eb;
-      vertical-align: top;
-    }
-    th:first-child, td:first-child { width: 4rem; }
+}
+
+@media (max-width: 640px) {
+  .import-dialog__step {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
   }
 }

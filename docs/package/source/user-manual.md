@@ -2399,7 +2399,7 @@ A fiscal year (FY2026) has twelve monthly periods and an adjustment period 13 us
 | Closed | Nobody; the Accounting Manager reopens it first. |
 | Locked | Nobody; the periods of a closed fiscal year are locked. |
 
-**Import opening balances** loads the old system's trial balance at the day before go-live (one row per account, debit or credit; debits must equal credits). The balances go into the fiscal year of the go-live date and are read by the trial balance and financial statements; no opening journal is posted.
+**Import opening balances** loads the old system's trial balance at the day before go-live (one row per account, debit or credit; debits must equal credits). **Validate** checks the file first and shows the rows, accounts, total debit and credit, the difference and every error with its row and column, without loading anything; **Load opening balances** then asks for a confirmation stating the go-live date and totals. Loading again for the same go-live date replaces the earlier load. The balances go into the fiscal year of the go-live date and are read by the trial balance and financial statements; no opening journal is posted.
 
 ### Run the month-end close (preparer)
 
@@ -2564,7 +2564,7 @@ The approver must be a different user from the preparer.
 
 ![Period Management seen by the Accounting Manager, with Reopen on closed periods](/home/user/BDOI-OOTB/docs/package/source/manual-images/m-pe-periods.png)
 
-On Accounts > Period End > Period Management the **Actions** column offers **Soft-close** and **Close** on open periods and **Reopen** on closed ones. Every change asks for remarks and is kept in the period history with user and time. Reopening a period and posting into a soft-closed period need the Accounting Manager (permission approve:period-end). Other users who post into a soft-closed period are refused with a message that the period is soft-closed.
+On Accounts > Period End > Period Management the **Actions** column offers **Soft-close** and **Close** on open periods and **Reopen** on soft-closed and closed ones. The side panel of a soft-close or close runs the blocking month-end checks first and lists them with their result and a **Resolve** link; the action stays disabled while a check fails. Every change asks for a reason from the Reason Codes master (with a note when the reason needs one) and is kept in the period history with the user, role, time and reason; the **Last change** column shows the latest. Reopening a period and posting into a soft-closed period need the Accounting Manager (permission approve:period-end); other users see **Reopen** disabled. Other users who post into a soft-closed period are refused with a message that the period is soft-closed.
 
 ## Approve a bank reconciliation
 

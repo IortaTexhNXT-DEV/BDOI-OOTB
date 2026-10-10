@@ -92712,7 +92712,7 @@
     "/period-end/fiscal-years/{code}": {
       "get": {
         "operationId": "getPeriodEndFiscalYearsCode",
-        "summary": "A fiscal year with its periods",
+        "summary": "A fiscal year with its periods, the latest status change of each period and the status moves the user may make",
         "tags": [
           "Period End"
         ],
@@ -92757,6 +92757,51 @@
                               },
                               "status": {
                                 "type": "string"
+                              },
+                              "lastChange": {
+                                "type": "object",
+                                "properties": {
+                                  "to": {
+                                    "type": "string"
+                                  },
+                                  "at": {
+                                    "type": "string"
+                                  },
+                                  "byName": {
+                                    "type": "string"
+                                  },
+                                  "reasonCode": {
+                                    "type": "string"
+                                  },
+                                  "reasonName": {
+                                    "type": "string"
+                                  },
+                                  "remarks": {
+                                    "type": "string"
+                                  },
+                                  "source": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "actions": {
+                                "type": "object",
+                                "properties": {
+                                  "reopen": {
+                                    "type": "object",
+                                    "properties": {
+                                      "allowed": {
+                                        "type": "boolean"
+                                      },
+                                      "reason": {
+                                        "type": "string"
+                                      },
+                                      "message": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  }
+                                }
                               }
                             }
                           }
@@ -92773,7 +92818,23 @@
                       {
                         "period": "2026-01",
                         "periodNo": 1,
-                        "status": "closed"
+                        "status": "closed",
+                        "lastChange": {
+                          "to": "closed",
+                          "at": "2026-02-05T02:00:00Z",
+                          "byName": "Ana Santos",
+                          "reasonCode": "PCL-MONTHEND",
+                          "reasonName": "Month-end close completed",
+                          "remarks": "Month-end close completed",
+                          "source": "manual"
+                        },
+                        "actions": {
+                          "reopen": {
+                            "allowed": false,
+                            "reason": "permission",
+                            "message": "Reopening a period requires permission approve:period-end"
+                          }
+                        }
                       }
                     ]
                   }
@@ -93064,6 +93125,182 @@
         ]
       }
     },
+    "/period-end/opening-balances/validate": {
+      "post": {
+        "operationId": "postPeriodEndOpeningBalancesValidate",
+        "summary": "Go-live: check the old system's trial balance (multipart \"file\" + goLiveDate) without loading it: rows, accounts, total debit and credit, difference, every error with its row and column, and the earlier load of the fiscal year that a load would replace",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "valid": {
+                          "type": "boolean"
+                        },
+                        "fiscalYear": {
+                          "type": "string"
+                        },
+                        "goLiveDate": {
+                          "type": "string"
+                        },
+                        "asAt": {
+                          "type": "string"
+                        },
+                        "rows": {
+                          "type": "integer"
+                        },
+                        "accounts": {
+                          "type": "integer"
+                        },
+                        "totalDebit": {
+                          "type": "integer"
+                        },
+                        "totalCredit": {
+                          "type": "integer"
+                        },
+                        "difference": {
+                          "type": "integer"
+                        },
+                        "ignored": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "row": {
+                                "type": "integer"
+                              },
+                              "accountCode": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "row": {
+                                "type": "integer"
+                              },
+                              "column": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "previous": {
+                          "type": "object",
+                          "properties": {
+                            "goLiveDate": {
+                              "type": "string"
+                            },
+                            "accounts": {
+                              "type": "integer"
+                            },
+                            "loadedAt": {
+                              "type": "string"
+                            },
+                            "loadedBy": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "valid": false,
+                    "fiscalYear": "FY2026",
+                    "goLiveDate": "2026-10-01",
+                    "asAt": "2026-09-30",
+                    "rows": 8,
+                    "accounts": 7,
+                    "totalDebit": 2102400,
+                    "totalCredit": 2102300,
+                    "difference": 100,
+                    "ignored": [
+                      {
+                        "row": 9,
+                        "accountCode": "1301001"
+                      }
+                    ],
+                    "errors": [
+                      {
+                        "row": 4,
+                        "column": "Account Code",
+                        "message": "Account 9999999 is not in the chart of accounts"
+                      }
+                    ],
+                    "previous": {
+                      "goLiveDate": "2026-10-01",
+                      "accounts": 7,
+                      "loadedAt": "2026-10-02T03:00:00Z",
+                      "loadedBy": "Ana Santos"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Period Management > Import opening balances",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "goLiveDate": {
+                    "type": "string"
+                  },
+                  "file": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "goLiveDate": "2026-10-01",
+                "file": "(multipart) Opening_Balances_Upload_Template.xlsx"
+              }
+            }
+          }
+        }
+      }
+    },
     "/period-end/periods/{period}/checks": {
       "get": {
         "operationId": "getPeriodEndPeriodsPeriodChecks",
@@ -93149,7 +93386,7 @@
     "/period-end/periods/{period}/history": {
       "get": {
         "operationId": "getPeriodEndPeriodsPeriodHistory",
-        "summary": "Status history of a period (who opened, soft-closed, closed, reopened or locked it and why)",
+        "summary": "Status history of a period (who opened, soft-closed, closed, reopened or locked it, with their roles, and why)",
         "tags": [
           "Period End"
         ],
@@ -93180,6 +93417,9 @@
                       "items": {
                         "type": "object",
                         "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
                           "from": {
                             "type": "string"
                           },
@@ -93189,8 +93429,26 @@
                           "remarks": {
                             "type": "string"
                           },
+                          "reasonCode": {
+                            "type": "string"
+                          },
+                          "reasonName": {
+                            "type": "string"
+                          },
+                          "source": {
+                            "type": "string"
+                          },
                           "changedBy": {
                             "type": "string"
+                          },
+                          "changedByName": {
+                            "type": "string"
+                          },
+                          "changedByRoles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
                           },
                           "changedAt": {
                             "type": "string"
@@ -93204,10 +93462,18 @@
                   "success": true,
                   "data": [
                     {
+                      "id": 12,
                       "from": "open",
                       "to": "closed",
-                      "remarks": "August closed",
+                      "remarks": "Month-end close completed",
+                      "reasonCode": "PCL-MONTHEND",
+                      "reasonName": "Month-end close completed",
+                      "source": "manual",
                       "changedBy": "Finance Manager",
+                      "changedByName": "Finance Manager",
+                      "changedByRoles": [
+                        "Accounting Manager"
+                      ],
                       "changedAt": "2026-09-05T02:00:00Z"
                     }
                   ]
@@ -93235,7 +93501,7 @@
     "/period-end/periods/{period}/status": {
       "post": {
         "operationId": "postPeriodEndPeriodsPeriodStatus",
-        "summary": "Open, soft-close or close a period (closing runs the blocking checks; reopening needs approve:period-end and remarks; locked periods cannot change)",
+        "summary": "Open, soft-close or close a period with a reason of the Reason Codes master (period_close to soft-close or close, period_reopen to reopen; note when the reason asks for one). Closing runs the blocking checks; reopening needs approve:period-end; locked periods cannot change",
         "tags": [
           "Period End"
         ],
@@ -93308,18 +93574,156 @@
                   "status": {
                     "type": "string"
                   },
-                  "remarks": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
                     "type": "string"
                   }
                 }
               },
               "example": {
                 "status": "soft_closed",
-                "remarks": "Pending insurer statements"
+                "reasonCode": "PCL-MONTHEND",
+                "note": "Insurer statements pending"
               }
             }
           }
         }
+      }
+    },
+    "/period-end/periods/{period}/status-preview": {
+      "get": {
+        "operationId": "getPeriodEndPeriodsPeriodStatusPreview",
+        "summary": "Before a status change (read-only): whether the user may make it and why not, the reason context to choose from, and the blocking month-end checks a soft-close or close runs first",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "soft_closed"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "period": {
+                          "type": "string"
+                        },
+                        "fiscalYear": {
+                          "type": "string"
+                        },
+                        "from": {
+                          "type": "string"
+                        },
+                        "to": {
+                          "type": "string"
+                        },
+                        "allowed": {
+                          "type": "boolean"
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
+                        "message": {},
+                        "reasonContext": {
+                          "type": "string"
+                        },
+                        "checks": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "severity": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "count": {
+                                "type": "integer"
+                              },
+                              "amount": {}
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "period": "2026-08",
+                    "fiscalYear": "FY2026",
+                    "from": "open",
+                    "to": "soft_closed",
+                    "allowed": false,
+                    "reason": "checks",
+                    "message": null,
+                    "reasonContext": "period_close",
+                    "checks": [
+                      {
+                        "code": "unposted_journals",
+                        "label": "No unposted or pending journals in the period",
+                        "severity": "blocking",
+                        "status": "failed",
+                        "count": 2,
+                        "amount": null
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Period End > Period Management",
+        "x-permissions": [
+          "read:period-end",
+          "read:journal-vouchers"
+        ]
       }
     },
     "/period-end/recurring-journals": {

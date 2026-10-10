@@ -6746,6 +6746,103 @@
       "issued": "Issued"
     }
   },
+  "importDialog": {
+    "about": "About this upload",
+    "uploadInto": "Upload into",
+    "template": "Template",
+    "downloadTemplate": "Download template",
+    "goLiveDate": "Go-live date",
+    "file": "File",
+    "chooseFile": "Choose file",
+    "fileTypes": "XLSX or CSV",
+    "removeFile": "Remove {{name}}",
+    "close": "Close",
+    "validate": "Validate",
+    "validating": "Validating...",
+    "upload": "Upload",
+    "uploading": "Uploading...",
+    "validationResult": "Validation result",
+    "uploadResult": "Upload result",
+    "valid": "Valid",
+    "invalid": "Errors found",
+    "rows": "Rows",
+    "errors": "Errors",
+    "row": "Row",
+    "column": "Column",
+    "message": "Message"
+  },
+  "periodManagement": {
+    "help": "Soft-closed periods take postings from Accounting Managers only; closed periods take none.",
+    "importOpening": "Import opening balances",
+    "panelTitle": "{{action}} {{period}}",
+    "action": {
+      "softClose": "Soft-close period",
+      "close": "Close period",
+      "reopen": "Reopen period"
+    },
+    "button": {
+      "softClose": "Soft-close",
+      "close": "Close",
+      "reopen": "Reopen"
+    },
+    "dates": "Dates",
+    "currentStatus": "Current status",
+    "newStatus": "New status",
+    "blockingChecks": "Blocking checks",
+    "recheck": "Run the checks again",
+    "check": "Check",
+    "countOrAmount": "Count or amount",
+    "resolve": "Resolve",
+    "noBlockingChecks": "No blocking checks",
+    "notAllowed": {
+      "checks": "A blocking check failed.",
+      "permission": "Reopening needs the approval permission.",
+      "locked": "Locked by the year-end close.",
+      "unchanged": "The period already has this status.",
+      "year-closed": "The fiscal year is closed.",
+      "year-end-closed": "The fiscal year is closed by a year-end close run.",
+      "adjustment-disabled": "The adjustment period is switched off."
+    },
+    "done": "Period {{period}}: {{status}}",
+    "system": "System",
+    "historyTitle": "History of period {{period}}",
+    "noHistory": "No status changes",
+    "historyAction": {
+      "reopened": "Reopened",
+      "softClosed": "Soft-closed",
+      "closed": "Closed",
+      "locked": "Locked",
+      "changed": "Status changed"
+    },
+    "source": {
+      "manual": "Period Management",
+      "close-run": "Month-end close",
+      "job": "Scheduled job",
+      "year-end": "Year-end close"
+    },
+    "createYear": "Create fiscal year",
+    "createYearTitle": "Create fiscal year {{code}}",
+    "createYearMessage": "Fiscal year {{code}} is added with its periods, all open.",
+    "createYearPeriods": "12 months and adjustment period 13",
+    "yearCreated": "Fiscal year {{code}} created",
+    "opening": {
+      "help": "Trial balance of the old system at the end of the day before the go-live date.",
+      "fiscalYear": "Fiscal year",
+      "asAt": "Balances as at",
+      "rows": "Rows",
+      "accounts": "Accounts",
+      "noBalanceRows": "Rows with no balance",
+      "totalDebit": "Total debit",
+      "totalCredit": "Total credit",
+      "difference": "Difference",
+      "goLiveDate": "Go-live date",
+      "load": "Load opening balances",
+      "confirmTitle": "Load opening balances",
+      "confirmMessage": "The opening balances of {{fiscalYear}} are loaded for go-live date {{date}}.",
+      "replaces": "This load replaces the earlier load for the same go-live date ({{accounts}} accounts, loaded by {{by}} on {{at}}).",
+      "replaceRule": "Loading again for the same go-live date replaces this load."
+    }
+  },
   "pageHeader": {
     "help": "About this page",
     "back": "Back"

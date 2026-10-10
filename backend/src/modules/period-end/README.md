@@ -10,7 +10,8 @@ Finance > Tax Codes). Permissions: `read:period-end` to view, `write:period-end`
 | File | What it does |
 |---|---|
 | `router.js` | All routes of the module. |
-| `fiscal.js` | Fiscal years (`FY2026`), their twelve periods (`2026-01` ...) and the adjustment period 13 (`2026-13`). Years are created on demand. |
+| `fiscal.js` | Fiscal years (`FY2026`), their twelve periods (`2026-01` ...) and the adjustment period 13 (`2026-13`). Years are created on demand. Manual status changes (`changePeriodStatus`, `transitionProblem`). |
+| `opening.js` | Go-live opening balances: `validateOpeningBalances` (Validate step, writes nothing) and `importOpeningBalances` (all or nothing). |
 | `posting.js` | `assertPostingAllowed`: which journals may post into a period (open, soft_closed, closed, locked). Called by the ledger for every journal. |
 | `close.js` | Month-end close runs (`MEC-` numbers): create, execute, sign checklist items, submit, approve, reject, cancel. |
 | `steps.js` | The valuation steps of a run: unearned commission deferral and FX revaluation. |
@@ -30,6 +31,21 @@ Finance > Tax Codes). Permissions: `read:period-end` to view, `write:period-end`
 `tax_codes`, `bir_2307_certificates`.
 
 ## Main flows
+
+Period status (Period Management): the side panel first calls `GET /periods/:period/status-preview?status=` (read
+only): whether the user may make the move (`reason`: `permission`, `locked`, `year-closed`, `year-end-closed`,
+`adjustment-disabled`, `checks`) and the results of the blocking auto items of the Close Checklist. The change itself,
+`POST /periods/:period/status { status, reasonCode, note }`, needs a reason of the Reason Codes master: context
+`period_close` to soft-close or close, `period_reopen` to reopen (the note when the reason asks for one). The code is
+kept in `period_status_history.reason_code`, the reason's name and the note in `remarks`, both in the audit entry.
+Reopening needs `approve:period-end`; the server runs the blocking checks again before a close. A period is locked only
+by the year-end close. `GET /fiscal-years/:code` gives each period its latest change (`lastChange`: who, when, reason)
+and the moves the user may make (`actions`).
+
+Go-live opening balances: `POST /opening-balances/validate` checks the file (rows, accounts, totals, difference, every
+error with its row and column, the earlier load of the year) without loading it; `POST /opening-balances/import` loads
+it (all or nothing; the same go-live date replaces the earlier load). No journal is posted: reports read
+`opening_balances` through `pe_balance_before`.
 
 Month-end close: create a run for the period, execute it (steps a to e: accruals, recurring journals, commission
 deferral, FX revaluation, checklist), sign the manual checklist items, submit. When
