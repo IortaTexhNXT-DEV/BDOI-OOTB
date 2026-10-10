@@ -788,6 +788,18 @@
       "approveTitle": "Approve the reversal of {{number}}?",
       "returnTitle": "Return the reversal of {{number}}?",
       "returnReasonLabel": "Reason for returning"
+    },
+    "receiptBatches": {
+      "open": "Receipt batches",
+      "title": "Receipt voucher batches",
+      "empty": "No receipts uploaded yet.",
+      "batch": "Batch",
+      "uploaded": "Uploaded",
+      "file": "File",
+      "receipted": "Receipted",
+      "premium": "Premium",
+      "commission": "Commission kept apart",
+      "exportCommission": "Export commission"
     }
   },
   "renewalWaiting": {

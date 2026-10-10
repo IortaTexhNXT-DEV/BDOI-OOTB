@@ -1,4 +1,5 @@
 import { getRequest, postRequest, putRequest } from '../utility/commonServices';
+import importService from './importService';
 
 export const receiptsService = {
   // Get all receipts with pagination
@@ -136,6 +137,10 @@ export const receiptsService = {
   // Reversal of a receipt: asked with a reason, approved or returned by another user
   requestReversal: async (receiptId, reason) => (await postRequest(`receipts/${encodeURIComponent(receiptId)}/reversal`, reason)).data,
   decideReversal: async (receiptId, decision) => (await postRequest(`receipts/${encodeURIComponent(receiptId)}/reversal/decision`, decision)).data,
+
+  // Receipt voucher batches (bulk uploads) and the commission part kept apart on each
+  receiptBatches: async () => (await getRequest('receipts/batches')).data?.data || [],
+  downloadBatchCommission: (batch, format = 'xlsx') => importService.downloadTemplate(`/receipts/batches/${encodeURIComponent(batch.id)}?format=${format}`, `commission-${batch.batchNumber}.${format}`),
 
   // Add payment to existing receipt
   addPaymentToReceipt: async (receiptId, paymentData) => {

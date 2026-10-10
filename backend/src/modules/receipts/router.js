@@ -11,11 +11,12 @@ import { isoDate, pageParams, sendList, sendNoData } from '../accounting/lib/htt
 import { storeFile } from '../accounting/lib/files.js';
 import { receiptsPdf } from '../documents/finance.js';
 import { camel, excelDate, readSheet } from '../accounting/lib/sheet.js';
-import { columnMessage, issueText, mapColumns, uploadResult } from '../documents/tabular.js';
+import { columnMessage, issueText, mapColumns, sendTable, uploadResult } from '../documents/tabular.js';
 import { ownRecord, withScope, scopeOf, scopeSql, canSee } from '../../lib/scope.js';
 import * as svc from './service.js';
 import * as billing from './billing.js';
 import * as reversal from './reversal.js';
+import * as batches from './batches.js';
 import { emailBill, emailReceipt } from './email.js';
 import { emailSendingStatus } from '../../lib/mailer.js';
 import { loadOpenItem, OPEN_ITEM_COLUMNS } from './opening.js';
@@ -105,22 +106,37 @@ define({
     const rows = readSheet(req.file.buffer, req.file.originalname);
     const max = Number(await getSetting('limits.bulk_upload_max_rows', 1000));
     if (rows.length > max) throw badRequest(`The file has ${rows.length} rows; the limit is ${max}`);
-    const errors = []; const ids = [];
-    for (const [i, r] of rows.entries()) {
-      try {
-        const v = mapColumns(r, svc.RECEIPT_UPLOAD_COLUMNS, camel);
-        const body = receiptSchema.parse({ policyId: v.policyNumber, amount: v.amount, receiptDate: excelDate(v.receiptDate) || undefined,
-          paymentMode: v.paymentMode ? String(v.paymentMode).toLowerCase().replace(/\s+/g, '-') : undefined, referenceNo: v.referenceNo,
-          customerCode: v.customerCode, remarks: v.remarks, transactionCode: v.transactionCode });
-        const rc = await withTransaction((db) => svc.createReceipt(db, body, req.user, { source: 'bulk-upload' }));
-        ids.push(rc.receiptId);
-      } catch (e) {
-        errors.push({ row: i + 2, message: e.issues ? issueText(e.issues, svc.RECEIPT_UPLOAD_COLUMNS) : columnMessage(e.message, svc.RECEIPT_UPLOAD_COLUMNS) });
-      }
-    }
-    await audit(req, { entity: 'receipt', entityId: null, action: 'bulk-upload', after: { file: req.file.originalname, created: ids.length, failed: errors.length } });
-    const data = uploadResult(rows.length, ids.length, errors, { ids });
+    const parse = (v) => receiptSchema.parse({ policyId: v.policyNumber, amount: v.amount, receiptDate: excelDate(v.receiptDate) || undefined,
+      paymentMode: v.paymentMode ? String(v.paymentMode).toLowerCase().replace(/\s+/g, '-') : undefined, referenceNo: v.referenceNo,
+      customerCode: v.customerCode, remarks: v.remarks, transactionCode: v.transactionCode });
+    const r = await batches.runBatch(rows, { fileName: req.file.originalname, parse, user: req.user });
+    await audit(req, { entity: 'receipt_batch', entityId: r.batch.id, action: 'bulk-upload', after: { file: req.file.originalname, batchNumber: r.batch.batchNumber, created: r.ids.length,
+      failed: r.errors.length, commissionTotal: r.batch.commissionTotal } });
+    const data = uploadResult(rows.length, r.ids.length, r.errors.map((e) => ({ row: e.row, message: e.issues ? issueText(e.issues, svc.RECEIPT_UPLOAD_COLUMNS) : columnMessage(e.message, svc.RECEIPT_UPLOAD_COLUMNS) })),
+      { ids: r.ids, batch: r.batch });
+    if (r.batch.commissionRows) data.message = `${data.message}; commission of ${r.commissionText} on ${r.batch.commissionRows} row(s) kept apart in batch ${r.batch.batchNumber}`;
     ok(res, data, data.message);
+  },
+});
+define({
+  method: 'GET', path: '/batches', summary: 'Receipt voucher batches (bulk uploads), newest first, with their premium and commission totals', screen: `${SCREEN} > Receipt batches`, middleware: read,
+  response: { success: true, data: [{ id: 'rvb_1', batchNumber: 'RVB-2026-00004', fileName: 'rv-2026-10-05.xlsx', rows: 240, created: 238, failed: 2, premiumTotal: 1250000, commissionTotal: 182300, commissionRows: 51 }] },
+  handler: async (_req, res) => ok(res, await batches.listBatches()),
+});
+define({
+  method: 'GET', path: '/batches/:id', summary: 'One receipt voucher batch with the commission part kept apart; format=xlsx or csv exports the commission lines for Accounting',
+  screen: `${SCREEN} > Receipt batches > Export commission`, middleware: read,
+  response: { success: true, data: { batchNumber: 'RVB-2026-00004', commissionLines: [{ row: 5, policyNumber: 'POL-2026-90004', insurer: 'Malayan Insurance Co., Inc.', amount: 4200, referenceNo: 'BDO-1', receiptNumber: 'OR-2026-00120' }] } },
+  handler: async (req, res) => {
+    const b = await batches.getBatch(req.params.id);
+    if (['xlsx', 'csv'].includes(req.query.format)) {
+      const cols = [['Row', 'row'], ['Policy No.', 'policyNumber'], ['Client', 'clientName'], ['Insurer', 'insurer'], ['Commission', 'amount'], ['Premium receipted', 'premium'],
+        ['Receipt No.', 'receiptNumber'], ['Reference', 'referenceNo'], ['Receipt Date', 'receiptDate']];
+      await sendTable(res, { header: cols.map((c) => c[0]), rows: b.commissionLines.map((l) => cols.map((c) => l[c[1]] ?? '')), fileBase: `commission-${b.batchNumber}`, format: req.query.format,
+        sheetName: b.batchNumber });
+      return;
+    }
+    ok(res, b);
   },
 });
 define({

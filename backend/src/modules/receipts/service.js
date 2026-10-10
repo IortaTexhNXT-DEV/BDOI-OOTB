@@ -26,6 +26,7 @@ export const PAYMENT_MODES = ['cash', 'check', 'bank-transfer', 'card', 'gcash',
 export const RECEIPT_UPLOAD_COLUMNS = [
   { key: 'policyNumber', header: 'Policy Number', aliases: ['policyNo', 'policy'], required: true, format: 'Policy number of an issued, broker-billed policy with an open bill', example: 'PC-MLY-2026-000101' },
   { key: 'amount', header: 'Amount', required: true, format: 'Amount received in PHP, greater than zero', example: '35946.88' },
+  { key: 'commissionAmount', header: 'Commission Amount', aliases: ['commission'], format: 'Commission part of the Amount on a combined premium-and-commission file; empty or 0 when the row is premium only', example: '' },
   { key: 'receiptDate', header: 'Receipt Date', aliases: ['date'], format: 'Date YYYY-MM-DD; today when empty (must be in an open period)', example: '2026-10-05' },
   { key: 'paymentMode', header: 'Payment Mode', format: 'The default payment mode when empty', allowed: PAYMENT_MODES, example: 'bank-transfer' },
   { key: 'referenceNo', header: 'Reference No', aliases: ['reference'], format: 'Deposit slip, cheque or transfer reference', example: 'BDO-778812' },
