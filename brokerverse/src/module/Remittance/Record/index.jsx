@@ -11,6 +11,7 @@ import DetailHeader from "../../../components/DetailHeader";
 import KeyValueGrid from "../../../components/KeyValueGrid";
 import EligibilityNote from "../../../components/EligibilityNote";
 import RowActions from "../../../components/RowActions";
+import PageActions from "../../../components/PageActions";
 import LoadingBar from "../../../components/LoadingBar";
 import { openConfirm } from "../../../components/ConfirmDialog";
 import { useStableLoad } from "../../../hooks/useStableLoad";
@@ -175,7 +176,7 @@ const RemittanceRecord = () => {
   const overflowLabel = (a) => t(`remittance.record.actions.${a.code}`, { defaultValue: a.label });
 
   const actions = (
-    <div className="rm-header-actions">
+    <PageActions className="rm-header-actions">
       {submit ? (
         <span className="rm-action-with-reason">
           <Button type="button" label={t("remittance.record.submit")} onClick={doSubmit} disabled={!submit.allowed} />
@@ -194,7 +195,7 @@ const RemittanceRecord = () => {
         </span>
       ) : null}
       {overflow.length ? <RowActions label={t("remittance.common.moreActions")} actions={overflow} labelOf={overflowLabel} onAction={onOverflow} /> : null}
-    </div>
+    </PageActions>
   );
 
   const flags = [

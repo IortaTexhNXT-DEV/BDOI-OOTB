@@ -13,6 +13,7 @@ import PageHeader from "../../../components/PageHeader";
 import StatCards from "../../../components/StatCards";
 import StatusChip from "../../../components/StatusChip";
 import RowActions from "../../../components/RowActions";
+import PageActions from "../../../components/PageActions";
 import LoadingBar from "../../../components/LoadingBar";
 import DetailHeader from "../../../components/DetailHeader";
 import DetailSection from "../../../components/DetailSection";
@@ -119,10 +120,10 @@ const RemittanceExceptions = () => {
   const overflow = [{ code: "export", label: t("remittance.exceptions.export"), allowed: true }];
 
   const headerActions = (
-    <div className="rm-header-actions">
+    <PageActions className="rm-header-actions">
       {canWrite ? null : <StatusChip label={t("remittance.common.viewOnly")} severity="secondary" />}
       <RowActions label={t("remittance.common.moreActions")} actions={overflow} onAction={exportRows} />
-    </div>
+    </PageActions>
   );
 
   const onAction = (row) => (action) => {

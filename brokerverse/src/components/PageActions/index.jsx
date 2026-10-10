@@ -8,10 +8,10 @@ import "./index.scss";
  * buttons of one height, padding and icon size on every master list, outlined for the secondary actions and filled
  * for Add, whatever the button rules of the screen around them.
  */
-const PageActions = ({ onUpload, onAdd, uploadLabel, addLabel, children }) => {
+const PageActions = ({ onUpload, onAdd, uploadLabel, addLabel, className, children }) => {
   const { t } = useTranslation();
   return (
-    <div className="bv-page-actions">
+    <div className={["bv-page-actions", className].filter(Boolean).join(" ")}>
       {children}
       {onUpload ? <Button type="button" icon="pi pi-upload" label={uploadLabel || t("common.upload", "Upload")} outlined onClick={onUpload} /> : null}
       {onAdd ? <Button type="button" icon="pi pi-plus" label={addLabel || t("common.add", "Add")} onClick={onAdd} /> : null}

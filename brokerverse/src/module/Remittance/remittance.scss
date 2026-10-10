@@ -199,11 +199,9 @@ a.rm-ref,
 
 // Approvals inbox and remittance record (RM-06)
 
-.rm-header-actions {
-  display: flex;
-  flex-wrap: wrap;
+// the page actions of a record keep a button's reason under it
+.bv-page-actions.rm-header-actions {
   align-items: flex-start;
-  gap: 8px;
 }
 
 .rm-action-with-reason {

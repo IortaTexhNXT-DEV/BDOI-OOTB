@@ -13,6 +13,7 @@ import PageHeader from "../../../components/PageHeader";
 import StatCards from "../../../components/StatCards";
 import StatusChip from "../../../components/StatusChip";
 import RowActions from "../../../components/RowActions";
+import PageActions from "../../../components/PageActions";
 import LoadingBar from "../../../components/LoadingBar";
 import DateField from "../../../components/DateField";
 import BankBatchDialog from "../../../components/BankBatchDialog";
@@ -108,16 +109,16 @@ const Payments = () => {
 
   const primaryLabel = selection.length ? t("remittance.payments.createBatch", { count: selection.length }) : t("remittance.payments.selectToBatch");
   const headerActions = readOnly ? (
-    <div className="rm-header-actions">
+    <PageActions className="rm-header-actions">
       <StatusChip label={t("remittance.common.viewOnly")} severity="secondary" />
       {overflow.length ? <RowActions label={t("remittance.common.moreActions")} actions={overflow} onAction={onOverflow} /> : null}
-    </div>
+    </PageActions>
   ) : (
-    <div className="rm-header-actions">
+    <PageActions className="rm-header-actions">
       <Button type="button" label={canBatch ? primaryLabel : t("remittance.payments.createBatchPlain")} disabled={!canBatch || !selection.length || legacy}
         onClick={() => setBatching(true)} aria-describedby={batchState && !canBatch ? "rm-batching-reason" : undefined} />
       <RowActions label={t("remittance.common.moreActions")} actions={overflow} onAction={onOverflow} />
-    </div>
+    </PageActions>
   );
 
   const noLayout = !readOnly && batchState && !batchState.allowed && batchState.code === "NO_LAYOUT";

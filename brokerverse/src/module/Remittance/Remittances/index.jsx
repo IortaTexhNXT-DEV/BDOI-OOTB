@@ -14,6 +14,7 @@ import PageHeader from "../../../components/PageHeader";
 import StatCards from "../../../components/StatCards";
 import StatusChip from "../../../components/StatusChip";
 import RowActions from "../../../components/RowActions";
+import PageActions from "../../../components/PageActions";
 import LoadingBar from "../../../components/LoadingBar";
 import { useStableLoad } from "../../../hooks/useStableLoad";
 import { canOpen, hasPermission } from "../../../utils/canOpen";
@@ -148,17 +149,17 @@ const Remittances = () => {
   };
 
   const headerActions = canWrite ? (
-    <div className="rm-header-actions">
+    <PageActions className="rm-header-actions">
       <Button type="button" label={selection.length ? t("remittance.list.submitSelected", { count: selection.length }) : t("remittance.list.selectDrafts")}
         disabled={!selection.length} onClick={() => submitRows(selection)} />
       <Button type="button" label={t("remittance.list.import")} outlined onClick={() => update({ import: "new", page: state.page })} />
       <RowActions label={t("remittance.common.moreActions")} actions={overflow} onAction={onOverflow} />
-    </div>
+    </PageActions>
   ) : (
-    <div className="rm-header-actions">
+    <PageActions className="rm-header-actions">
       <StatusChip label={t("remittance.common.viewOnly")} severity="secondary" />
       <RowActions label={t("remittance.common.moreActions")} actions={overflow} onAction={onOverflow} />
-    </div>
+    </PageActions>
   );
 
   const rowActions = (row) => (row.actions || []).filter((a) => a.code !== "open-voucher" || canOpen(a.link));

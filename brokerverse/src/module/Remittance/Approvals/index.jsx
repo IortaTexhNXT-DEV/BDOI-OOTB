@@ -12,6 +12,7 @@ import PageHeader from "../../../components/PageHeader";
 import StatCards from "../../../components/StatCards";
 import StatusChip from "../../../components/StatusChip";
 import RowActions from "../../../components/RowActions";
+import PageActions from "../../../components/PageActions";
 import LoadingBar from "../../../components/LoadingBar";
 import { openConfirm } from "../../../components/ConfirmDialog";
 import { useStableLoad } from "../../../hooks/useStableLoad";
@@ -150,10 +151,10 @@ const Approvals = () => {
   };
 
   const headerActions = (
-    <div className="rm-header-actions">
+    <PageActions className="rm-header-actions">
       {selection.length ? <Button type="button" label={t("remittance.inbox.approveSelected", { count: selection.length })} onClick={approveSelected} /> : null}
       <RowActions label={t("remittance.common.moreActions")} actions={overflow} onAction={onOverflow} />
-    </div>
+    </PageActions>
   );
 
   const rowActions = (row) => (row.actions || []).filter((a) => a.code === "view" || a.code === "remind");
