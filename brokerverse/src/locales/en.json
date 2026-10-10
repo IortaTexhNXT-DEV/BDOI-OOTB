@@ -4239,7 +4239,10 @@
     "deleteTitle": "Delete prospect",
     "deleteMessage": "The prospect is removed from the prospect list.",
     "deleteNote": "A prospect with an issued policy cannot be deleted.",
-    "deleteAction": "Delete prospect"
+    "deleteAction": "Delete prospect",
+    "uploadProspects": "Prospects",
+    "uploadTfs": "TFS accounts",
+    "bulkUploadTitle": "Bulk upload prospects"
   },
   "quotes": {
     "title": "Quotations",
@@ -6440,7 +6443,24 @@
     "createdDate": "Created Date:",
     "lastUpdated": "Last Updated:",
     "numberOfQuotes": "Number of Quotes:",
-    "history": "History"
+    "history": "History",
+    "account": "Account",
+    "customerType": "Customer Type",
+    "source": "Source",
+    "disposition": "Disposition",
+    "tfsReference": "TFS reference no.",
+    "loanId": "Loan ID",
+    "insuranceProvider": "Insurance provider",
+    "policyExpiry": "Policy expiry",
+    "vehicle": "Vehicle",
+    "plateNumber": "Plate no.",
+    "chassisNumber": "Chassis no.",
+    "productGroup": "Product group",
+    "srp": "SRP",
+    "loanStart": "Loan start",
+    "loanBooking": "Loan booking",
+    "loanMaturity": "Loan maturity",
+    "importBatch": "Upload batch"
   },
   "leadCreation": {
     "source": "Source",
@@ -6504,7 +6524,10 @@
       "chooseSource": "Choose the source",
       "product": "Product",
       "motor": "Motor",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "customerType": "Customer Type",
+      "chooseCustomerType": "Choose the customer type",
+      "loanId": "Loan ID"
     },
     "errors": {
       "required": "Enter this field",
@@ -13974,7 +13997,9 @@
         "branchCode": "Branch",
         "source": "Source",
         "leadCategory": "Category",
-        "productId": "Product"
+        "productId": "Product",
+        "insuranceProviderId": "Insurance provider",
+        "customerType": "Customer type"
       },
       "reassignTitle": "Reassign {{count}} prospect(s)",
       "to": "To account executive",
@@ -14045,7 +14070,9 @@
       "reassignTitle_one": "Reassign {{count}} prospect",
       "reassignTitle_other": "Reassign {{count}} prospects",
       "queueTitle_one": "Send {{count}} prospect to the queue",
-      "queueTitle_other": "Send {{count}} prospects to the queue"
+      "queueTitle_other": "Send {{count}} prospects to the queue",
+      "maxOpen": "Bandwidth",
+      "maxOpenHelp": "Open prospects one account executive may hold under this rule; empty: no limit"
     },
     "oc": {
       "title": "Marine Open Covers",

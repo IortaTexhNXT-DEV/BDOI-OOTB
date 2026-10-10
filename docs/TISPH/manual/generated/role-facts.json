@@ -1184,6 +1184,12 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Prospects and leads",
+     "level": "Special",
+     "meaning": "Delete a prospect that has no policy"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Quotations and placement",
      "level": "View",
      "meaning": "See quotations, requests for quotation, placement slips and comparison reports"
@@ -2036,6 +2042,12 @@
      "module": "Prospects and leads",
      "level": "Create and edit",
      "meaning": "Create and edit prospects and leads"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Prospects and leads",
+     "level": "Special",
+     "meaning": "Delete a prospect that has no policy"
     },
     {
      "area": "Sales & Marketing",
@@ -6006,6 +6018,15 @@
      "modules": []
     },
     {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Prospects",
+     "path": "/agent/leadlisting",
+     "access": "View",
+     "modules": [
+      "Prospects and leads"
+     ]
+    },
+    {
      "section": "Operations",
      "screen": "Payments",
      "path": "/agent/payments",
@@ -7438,15 +7459,6 @@
      "access": "View",
      "modules": [
       "Quotations and placement"
-     ]
-    },
-    {
-     "section": "Operations > Sales & Marketing",
-     "screen": "Lead Assignment",
-     "path": "/sales/lead-assignment",
-     "access": "View",
-     "modules": [
-      "Lead assignment"
      ]
     },
     {
@@ -10025,6 +10037,12 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Prospects and leads",
+     "level": "Special",
+     "meaning": "Delete a prospect that has no policy"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Quotations and placement",
      "level": "View",
      "meaning": "See quotations, requests for quotation, placement slips and comparison reports"
@@ -10686,6 +10704,10 @@
      "access": "View"
     },
     {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
      "role": "TIS IT AppSupport / Admin",
      "access": "View"
     },
@@ -10864,10 +10886,6 @@
     },
     {
      "role": "TIS Operations Unit Head",
-     "access": "View"
-    },
-    {
-     "role": "TIS IT AppSupport / Admin",
      "access": "View"
     },
     {
@@ -14566,6 +14584,11 @@
    "TIS Sales Officer",
    "TIS Sales Unit Head",
    "TIS Operations Unit Head",
+   "TIS General Manager"
+  ],
+  "delete:leads": [
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
    "TIS General Manager"
   ],
   "read:access-control": [

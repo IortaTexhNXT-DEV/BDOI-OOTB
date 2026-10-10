@@ -10,7 +10,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations > Sales & Marketing | Requests for Quotation | View |
 | Operations > Sales & Marketing | Quotations | View |
 | Operations > Sales & Marketing | Placement Slips | View |
-| Operations > Sales & Marketing | Lead Assignment | View |
 | Operations > Sales & Marketing | Dealer Programmes | Create and edit |
 | Operations > Sales & Marketing | Comparison Reports | View |
 | Operations | Clients | View |

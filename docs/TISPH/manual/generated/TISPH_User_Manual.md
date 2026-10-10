@@ -1162,7 +1162,7 @@ appears in My Work and you receive a notification. When no rule matches a prospe
 created it. A walk-in client or a referral you record yourself is yours.
 
 1. Choose Operations > Sales & Marketing > Prospects. To record a new prospect, select **Create Prospect** and follow
-   [Create a prospect (17.1.1)](#create-a-prospect).
+   [Create a prospect (17.1.2)](#create-a-prospect).
 2. Contact the prospect. Choose Operations > Sales & Marketing > Sales Activities and log the call, meeting, e-mail or visit with its
    outcome and, where there is one, the next step and its follow-up date. Logging the first activity marks a
    **New** prospect **Contacted**.
@@ -1311,6 +1311,7 @@ Where: the screens of your menus that show the module. A module without a screen
 |---|---|---|---|---|
 | Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects and Quick Quote |
 | Sales & Marketing | Prospects and leads | Create and edit | Create and edit prospects and leads |  |
+| Sales & Marketing | Prospects and leads | Special | Delete a prospect that has no policy |  |
 | Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quick Quote, Requests for Quotation, Quotations, Placement Slips and Comparison Reports |
 | Sales & Marketing | Quotations and placement | Create and edit | Create quotations (Quick Quote too), send requests for quotation, prepare placement slips |  |
 | Sales & Marketing | Quotations and placement | Approve | Approve a quotation created by another user |  |
@@ -1574,6 +1575,7 @@ Where: the screens of your menus that show the module. A module without a screen
 |---|---|---|---|---|
 | Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects and Quick Quote |
 | Sales & Marketing | Prospects and leads | Create and edit | Create and edit prospects and leads |  |
+| Sales & Marketing | Prospects and leads | Special | Delete a prospect that has no policy |  |
 | Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quick Quote, Requests for Quotation, Quotations, Placement Slips and Comparison Reports |
 | Sales & Marketing | Quotations and placement | Create and edit | Create quotations (Quick Quote too), send requests for quotation, prepare placement slips |  |
 | Sales & Marketing | Quotations and placement | Approve | Approve a quotation created by another user |  |
@@ -3313,6 +3315,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 |---|---|---|
 | My Work | My Work | View |
 | Dashboard | Executive Dashboard | View |
+| Operations > Sales & Marketing | Prospects | View |
 | Operations | Payments | View |
 | Accounts | Receipts | View |
 | Accounts | Collections | View |
@@ -3426,7 +3429,7 @@ Where: the screens of your menus that show the module. A module without a screen
 
 | Area | Module | Access | What it allows | Where |
 |---|---|---|---|---|
-| Sales & Marketing | Prospects and leads | View | See prospects and leads | No screen of its own |
+| Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects |
 | Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | No screen of its own |
 | Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | No screen of its own |
 | Operations | Clients | View | See clients | No screen of its own |
@@ -3754,7 +3757,6 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations > Sales & Marketing | Requests for Quotation | View |
 | Operations > Sales & Marketing | Quotations | View |
 | Operations > Sales & Marketing | Placement Slips | View |
-| Operations > Sales & Marketing | Lead Assignment | View |
 | Operations > Sales & Marketing | Dealer Programmes | Create and edit |
 | Operations > Sales & Marketing | Comparison Reports | View |
 | Operations | Clients | View |
@@ -4272,6 +4274,7 @@ Where: the screens of your menus that show the module. A module without a screen
 |---|---|---|---|---|
 | Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects and Quick Quote |
 | Sales & Marketing | Prospects and leads | Create and edit | Create and edit prospects and leads |  |
+| Sales & Marketing | Prospects and leads | Special | Delete a prospect that has no policy |  |
 | Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Quick Quote, Requests for Quotation, Quotations, Placement Slips and Comparison Reports |
 | Sales & Marketing | Quotations and placement | Create and edit | Create quotations (Quick Quote too), send requests for quotation, prepare placement slips |  |
 | Sales & Marketing | Quotations and placement | Approve | Approve a quotation created by another user |  |
@@ -4486,6 +4489,7 @@ A prospect is a person or company that TISPH quotes before it becomes a client: 
 | TIS Operations Associate | View |
 | TIS Operations Officer | View |
 | TIS Operations Unit Head | View |
+| TIS Finance & General Accounting | View |
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | Create and edit |
 
@@ -4503,6 +4507,12 @@ The list shows **Prospect ID** (LD-YYYY-NNNNN), **Name**, **Category**, **Produc
 
 The buttons above the list are **Bulk Upload** (prospects from an Excel file, validated before they are created), **Generate Report** (the list as an Excel file) and **Create Prospect**.
 
+#### Upload prospects and TFS accounts {#upload-prospects-and-tfs-accounts}
+**Bulk Upload** loads a file into **Prospects** or **TFS accounts**; **Download template** gives the columns of each. Every upload is stamped with a batch number (LIB-YYYY-NNNNN) shown on the prospects it created, and the result lists the rows created, updated and failed, with the row number and reason of each failed row. A failed row does not stop the others.
+
+- **Prospects**: the prospects of calls, e-mail, walk-ins, referrals and the other channels of the Lead Source list, in batches of a few hundred rows. A row with the **Lead Number** of a prospect already loaded (or its **Loan ID**) updates its **Status** and **Disposition** instead of creating a second prospect: the call results of a list are loaded by uploading the same file again with the new status.
+- **TFS accounts**: the account file of Toyota Financial Services. Each account becomes a prospect with **Source** TFS and **Customer Type** TFS, and keeps the TFS details: **Reference No.**, **Loan ID**, the vehicle, the **Insurance Provider**, the **Policy Expiry Date**, the loan start, booking and maturity dates, the **Product Group** and the **SRP**. There is one prospect per loan: a fleet customer with several loans has several prospects, and a Loan ID already loaded updates its prospect. An account without a policy expiry date gives no prospect, and an insurance provider that is not an insurer of the Insurance Company list is refused.
+
 ![Figure 17.1: Operations > Sales & Marketing > Prospects, with the prospects by product line and status](../images/screens-operations/prospects-list.png)
 #### Create a prospect {#create-a-prospect}
 1. Choose Operations > Sales & Marketing > Prospects and select **Create Prospect**.
@@ -4518,17 +4528,21 @@ The buttons above the list are **Bulk Upload** (prospects from an Excel file, va
 | **E-mail** | Yes | The e-mail address | Used for the quotation approval link and campaign offers |
 | **Mobile number** | Yes | For example 0917 123 4567 or +63 917 123 4567 | |
 | **Country**, **Province**, **City / Municipality**, **Barangay**, **ZIP Code**, **House / Unit No.** | Yes | The address | The city list follows the province; **Region** and **Street / Subdivision** are optional |
-| **Source** | No | Where the lead came from, for example **Walk-In**, **Referral**, **Bundling** | From [Lead sources and reason codes (20.6)](#lead-sources-and-reason-codes) |
+| **Customer Type** | No | **TFS**, **Non-TFS** or **Direct Customer** | |
+| **Loan ID** | No | The TFS loan the prospect is for | One prospect per loan |
+| **Source** | No | Where the lead came from, for example **Walk-In**, **Referral**, **E-mail**, **Customer Service**, **Dealer** | From [Lead sources and reason codes (20.6)](#lead-sources-and-reason-codes) |
 | **Product** | No | The product chosen in step 3 | **Product not yet tagged** when skipped |
 
-The prospect is created with the status **New** and the next number of the prospect series. The assignment rules of [Lead Assignment (17.6)](#lead-assignment) give it an account executive.
+Before the prospect is saved, the system looks for a client or an open prospect with the same first name, last name, mobile number and date of birth, or the same Loan ID, and shows it; you may still save. The category, customer type, status and disposition only take the values of their lists. The prospect is created with the status **New** and the next number of the prospect series. The assignment rules of [Lead Assignment (17.6)](#lead-assignment) give it an account executive.
 
 ![Figure 17.2: Create prospect: the choice between a new customer and an existing client](../images/screens-operations/prospect-create.png)
 ![Figure 17.3: The prospect form](../images/screens-operations/prospect-form.png)
 #### View, edit or delete a prospect {#view-edit-or-delete-a-prospect}
 Select a row (or the eye in **Actions**) to open the prospect. The prospect page shows the prospect's quotations with the same counters as the quotations list, **Add Quote** to quote the prospect, and **Convert** on an approved quotation. The pencil opens the prospect form for a change.
 
-A prospect is not deleted once it has a quotation or a sales activity: set it to **Lost** instead. Every change is kept in the history of the prospect.
+The **Account** section shows the customer type, the source, the disposition of the last call and, for a TFS account, the TFS reference, Loan ID, insurance provider, policy expiry, vehicle, product group, SRP, loan dates and the upload batch.
+
+Only the roles allowed to delete prospects see **Delete**, and a prospect with a policy is never deleted: set it to **Lost** instead. A **Converted** prospect keeps its status. A prospect not converted and not changed for 90 days is closed as **Lost** by the daily job. Every change is kept in the history of the prospect.
 
 ### Quick Quote {#quick-quote}
 Quick Quote prices a package product on the spot from the product's rates, without the steps of a full quotation: for example Compulsory Credit Life, Personal Accident or Parcel / Courier Insurance.
@@ -4706,14 +4720,15 @@ Lead Assignment decides who works each prospect.
 | TIS Operations Associate | View |
 | TIS Operations Officer | View |
 | TIS Operations Unit Head | View |
-| TIS IT AppSupport / Admin | View |
 | TIS General Manager | Create and edit |
 
 The screen has three tabs:
 
 - **Team View**: for each team member (filter **My team** or the whole team), the prospects **Open**, **New**, **Converted**, **Lost**, **In queue** and of the **Last 30 days**, and below the prospects of the team with their **Status**, **Line**, **Territory**, **Channel**, **Account executive** and **Assignment**.
 - **Reassignment Queue**: the prospects no rule could assign, or released by their account executive. Select a prospect and assign it to an account executive.
-- **Assignment Rules**: the rules that give a new prospect its account executive. The first active rule by **Priority** whose **Conditions** match the prospect applies; empty conditions match any prospect. **Method** is **Round robin** between the rule's **Account executives**, or a fixed account executive. **Add rule** creates a rule; the switch in **Active** turns it off.
+- **Assignment Rules**: the rules that give a new prospect its account executive. The first active rule by **Priority** whose **Conditions** match the prospect applies; empty conditions match any prospect. The conditions include the **Insurance provider** and the **Customer type** of the prospect, so the TFS accounts of each insurer go to that insurer's group of account executives. **Method** is **Round robin** between the rule's **Account executives**, **Load** (the one with the fewest open prospects) or a fixed account executive. **Bandwidth** caps the open prospects one account executive may hold under the rule; when all are full the prospect waits in the queue. **Add rule** creates a rule; the switch in **Active** turns it off.
+
+A prospect with an insurance provider is reassigned only to an account executive of that insurer's rules. A prospect still **New** three working days (72 hours, weekends and holidays not counted) after it was assigned goes to the **Reassignment Queue** and the lead assignment team is told.
 
 At TISPH the rules send the TFS referrals of each TFS office to the account executives of that territory.
 

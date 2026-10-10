@@ -9,7 +9,7 @@
   "pdf": "TISPH_User_Manual.pdf",
   "word": "TISPH_User_Manual.docx"
  },
- "sourceHash": "3b8cb4f0c324e89a9da04a608b1329ea6340ae1d6b20b9a615adb60628b93369",
+ "sourceHash": "a95fc9404d6e7e1953316c086ba4a7a86df48a2d612f620fba34a461f3b35905",
  "roles": {
   "tis-sales-associate": {
    "id": "tis-sales-associate",
@@ -1857,15 +1857,22 @@
    "chapter": "Screen reference: Operations"
   },
   {
-   "id": "create-a-prospect",
+   "id": "upload-prospects-and-tfs-accounts",
    "number": "17.1.1",
+   "title": "Upload prospects and TFS accounts",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "create-a-prospect",
+   "number": "17.1.2",
    "title": "Create a prospect",
    "level": 3,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "view-edit-or-delete-a-prospect",
-   "number": "17.1.2",
+   "number": "17.1.3",
    "title": "View, edit or delete a prospect",
    "level": 3,
    "chapter": "Screen reference: Operations"

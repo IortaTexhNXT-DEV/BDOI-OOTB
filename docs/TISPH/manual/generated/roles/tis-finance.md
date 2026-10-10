@@ -6,6 +6,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 |---|---|---|
 | My Work | My Work | View |
 | Dashboard | Executive Dashboard | View |
+| Operations > Sales & Marketing | Prospects | View |
 | Operations | Payments | View |
 | Accounts | Receipts | View |
 | Accounts | Collections | View |
@@ -120,7 +121,7 @@ Where: the screens of your menus that show the module. A module without a screen
 
 | Area | Module | Access | What it allows | Where |
 |---|---|---|---|---|
-| Sales & Marketing | Prospects and leads | View | See prospects and leads | No screen of its own |
+| Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects |
 | Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | No screen of its own |
 | Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | No screen of its own |
 | Operations | Clients | View | See clients | No screen of its own |

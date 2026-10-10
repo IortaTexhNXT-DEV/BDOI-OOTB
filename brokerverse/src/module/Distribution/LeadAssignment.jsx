@@ -12,6 +12,7 @@ import { MultiSelect } from "primereact/multiselect";
 import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
 import service from "../../services/distributionService";
+import leadService from "../../services/leadService";
 import auditService from "../../services/auditService";
 import mastersService from "../../services/mastersService";
 import addressService from "../../services/addressService";
@@ -27,8 +28,8 @@ import ReassignDialog from "./ReassignDialog";
 
 /** Line condition of a rule (and queue filter) for the prospects whose product is not yet tagged. */
 export const UNTAGGED = "NONE";
-const CONDITION_KEYS = ["lob", "productId", "channelId", "branchCode", "source", "leadCategory", "province", "city"];
-const EMPTY_RULE = { name: "", priority: 100, method: "round_robin", assignees: [], status: "active", description: "",
+const CONDITION_KEYS = ["lob", "productId", "channelId", "branchCode", "source", "leadCategory", "province", "city", "insuranceProviderId", "customerType"];
+const EMPTY_RULE = { name: "", priority: 100, method: "round_robin", assignees: [], status: "active", description: "", maxOpen: null,
   conditions: Object.fromEntries(CONDITION_KEYS.map((k) => [k, ""])) };
 
 /** Rules in the order they are checked, and the ids after moving one rule up (-1) or down (+1). */
@@ -75,6 +76,8 @@ const LeadAssignment = () => {
   const [run, setRun] = useState(null); // preview of the queue run through the rules
   // the tab shown (TabView is controlled once it has onTabChange)
   const [tab, setTab] = useState(0);
+  // insurers and customer types of the prospects (assignment by insurance provider, TIS-BRD-LEAD-06)
+  const [leadLists, setLeadLists] = useState({});
 
   const sources = useMasterOptions("lead-source", { value: (r) => r.name });
   const reasons = useMasterOptions("reason-code", { filter: (r) => r.context === "reassignment" });
@@ -126,6 +129,7 @@ const LeadAssignment = () => {
     service.assignees().then(setAssignees).catch(() => setAssignees([]));
     service.channelOptions().then(setChannels).catch(() => setChannels([]));
     if (!manage) return;
+    leadService.options().then(setLeadLists).catch(() => setLeadLists({}));
     mastersService.options("branch").then((b) => setBranches(b.map((x) => ({ value: x.code, label: `${x.label} (${x.code})` })))).catch(() => setBranches([]));
     addressService.getProvincesByCountry("PH").then((r) => setProvinces(r?.success ? r.data : [])).catch(() => setProvinces([]));
   }, [manage]);
@@ -172,7 +176,8 @@ const LeadAssignment = () => {
   };
   const saveRule = async () => {
     const conditions = Object.fromEntries(Object.entries(rule.conditions).filter(([, v]) => v));
-    const body = { name: rule.name, priority: rule.priority, method: rule.method, assignees: rule.assignees, status: rule.status, description: rule.description || null, conditions };
+    const body = { name: rule.name, priority: rule.priority, method: rule.method, assignees: rule.assignees, status: rule.status, description: rule.description || null, conditions,
+      maxOpen: rule.maxOpen || null };
     try {
       const r = rule.id ? await service.updateRule(rule.id, body) : await service.createRule(body);
       showSuccess(toast, r.message);
@@ -241,6 +246,7 @@ const LeadAssignment = () => {
     if (k === "channelId") return channels.find((c) => c.id === v)?.name || v;
     if (k === "branchCode") return branches.find((b) => b.value === v)?.label || v;
     if (k === "leadCategory") return t(`distribution.la.category.${v}`, v);
+    if (k === "insuranceProviderId") return leadLists.insurers?.find((i) => String(i.id) === String(v))?.name || v;
     return v;
   };
   const setCondition = (k, value) => setRule((r) => {
@@ -354,7 +360,7 @@ const LeadAssignment = () => {
                   <div className="dist-actions">
                     <Button icon="pi pi-arrow-up" text size="small" disabled={rowIndex === 0} tooltip={t("distribution.la.moveUp", "Check earlier")} aria-label={t("distribution.la.moveUp", "Check earlier")} onClick={() => move(r, -1)} />
                     <Button icon="pi pi-arrow-down" text size="small" disabled={rowIndex === rules.length - 1} tooltip={t("distribution.la.moveDown", "Check later")} aria-label={t("distribution.la.moveDown", "Check later")} onClick={() => move(r, 1)} />
-                    <Button icon="pi pi-pencil" text size="small" aria-label={t("distribution.common.edit", "Edit")} onClick={() => setRule({ ...EMPTY_RULE, ...r, conditions: { ...EMPTY_RULE.conditions, ...r.conditions, productId: r.conditions.productId ? String(r.conditions.productId) : "" } })} />
+                    <Button icon="pi pi-pencil" text size="small" aria-label={t("distribution.common.edit", "Edit")} onClick={() => setRule({ ...EMPTY_RULE, ...r, conditions: { ...EMPTY_RULE.conditions, ...r.conditions, productId: r.conditions.productId ? String(r.conditions.productId) : "" }, maxOpen: r.maxOpen ?? null })} />
                     <Button icon="pi pi-trash" text size="small" severity="danger" aria-label={t("distribution.common.delete", "Delete")} onClick={() => deleteRule(r)} />
                   </div>
                 )} /> : null}
@@ -406,6 +412,17 @@ const LeadAssignment = () => {
             <Field label={t("distribution.la.cond.city", "City / municipality")}>
               <Dropdown value={rule.conditions.city || null} options={withSaved(cities.map((c) => ({ value: c.name, label: c.name })), rule.conditions.city)} showClear filter
                 disabled={!rule.conditions.province} placeholder={rule.conditions.province ? "" : t("address.chooseProvinceFirst", "Choose the province first")} onChange={(e) => setCondition("city", e.value)} />
+            </Field>
+            <Field label={t("distribution.la.cond.insuranceProviderId")}>
+              <Dropdown value={rule.conditions.insuranceProviderId ? String(rule.conditions.insuranceProviderId) : null} showClear filter
+                options={(leadLists.insurers || []).map((i) => ({ value: String(i.id), label: i.name }))} onChange={(e) => setCondition("insuranceProviderId", e.value)} />
+            </Field>
+            <Field label={t("distribution.la.cond.customerType")}>
+              <Dropdown value={rule.conditions.customerType || null} showClear options={(leadLists.customerTypes || []).map((c) => ({ value: c, label: c }))}
+                onChange={(e) => setCondition("customerType", e.value)} />
+            </Field>
+            <Field label={t("distribution.la.maxOpen")} help={t("distribution.la.maxOpenHelp")}>
+              <InputNumber value={rule.maxOpen ?? null} min={0} max={100000} onValueChange={(e) => setRule({ ...rule, maxOpen: e.value ?? null })} />
             </Field>
             <Field label={t("distribution.common.description", "Description")} full>
               <InputText value={rule.description || ""} onChange={(e) => setRule({ ...rule, description: e.target.value })} />
