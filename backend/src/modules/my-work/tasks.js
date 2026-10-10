@@ -29,7 +29,7 @@ export const RELATED = {
   policy: { table: 'policies', ref: 'x.policy_number', label: 'COALESCE((SELECT c.display_name FROM clients c WHERE c.id = x.client_id), x.insured_name)', link: '/agent/policydetail/', permission: 'read:policies', scope: 'policy' },
   quote: { table: 'quotes', ref: 'x.quote_number', label: 'COALESCE((SELECT c.display_name FROM clients c WHERE c.id = x.client_id), (SELECT l.display_name FROM leads l WHERE l.id = x.lead_id))', link: '/agent/quotedetailview/', permission: 'read:quotations', scope: 'quote' },
   claim: { table: 'claims', ref: 'x.claim_number', label: '(SELECT c.display_name FROM clients c WHERE c.id = x.client_id)', link: '/agent/claimdetail/', permission: 'read:claims', scope: 'claim' },
-  renewal: { table: 'renewals', ref: 'x.renewal_number', label: '(SELECT p.policy_number FROM policies p WHERE p.id = x.policy_id)', link: '/renewal/queue', fixedLink: true, permission: 'read:renewals', scope: 'renewal' },
+  renewal: { table: 'renewals', ref: 'x.renewal_number', label: '(SELECT p.policy_number FROM policies p WHERE p.id = x.policy_id)', link: '/renewal/queue?renewal=', permission: 'read:renewals', scope: 'renewal' },
   endorsement: { table: 'endorsements', ref: 'x.endorsement_number', label: '(SELECT p.policy_number FROM policies p WHERE p.id = x.policy_id)', link: '/agent/endorsementdetailedview/', permission: 'read:endorsements', scope: 'endorsement' },
   placement: { table: 'placements', ref: 'x.placement_number', label: 'x.insured_name', link: '/placement/placement-slips/', permission: 'read:quotations', scope: 'placement' },
   broker_slip: { table: 'broker_slips', ref: 'x.slip_number', label: 'x.insured_name', link: '/placement/broker-slips/', permission: 'read:quotations', scope: 'broker_slip' },
@@ -284,7 +284,8 @@ export async function findRecords(user, { type, search }, { db = pool, recordSco
  * Create the follow-up tasks of the records (one per source record, key source_key) and close those whose record was
  * closed. Idempotent; run by the my-work-reminders job and after the actions that set a follow-up date.
  *   collection  a collection action with a promise-to-pay date (assignee: the collector of the item, else who recorded it)
- *   renewal     a renewal activity with a follow-up date (the renewal's owner, else who recorded it)
+ *   renewal     a renewal activity with a follow-up date (the renewal's owner, else who recorded it); the lock-in
+ *               review tasks of the renewal notice run (source key lock-in:<renewal>) close with their renewal
  *   claim       a claim's follow-up (due) date (the claim handler); a new date replaces the task
  */
 export async function syncAutoTasks({ db = pool } = {}) {
@@ -329,7 +330,7 @@ export async function syncAutoTasks({ db = pool } = {}) {
       (t.source = 'collection' AND (EXISTS (SELECT 1 FROM collection_items ci JOIN receivables rv ON rv.id = ci.receivable_id WHERE ci.id = t.entity_id AND (ci.closed_at IS NOT NULL OR rv.balance <= 0))
          OR t.source_key <> (SELECT 'collection_action:' || max(a2.id) FROM collection_actions a2 WHERE a2.collection_id = t.entity_id AND a2.commitment_date IS NOT NULL)))
       OR (t.source = 'renewal' AND (EXISTS (SELECT 1 FROM renewals r WHERE r.id = t.entity_id AND r.status NOT IN ('pipeline', 'notice-1', 'notice-2', 'final-notice', 'quoted', 'pending-approval', 'approved'))
-         OR t.source_key <> (SELECT 'renewal_activity:' || max(r2.id) FROM renewal_activities r2 WHERE r2.renewal_id = t.entity_id AND r2.follow_up_date IS NOT NULL)))
+         OR (t.source_key LIKE 'renewal_activity:%' AND t.source_key <> (SELECT 'renewal_activity:' || max(r2.id) FROM renewal_activities r2 WHERE r2.renewal_id = t.entity_id AND r2.follow_up_date IS NOT NULL))))
       OR (t.source = 'claim' AND EXISTS (SELECT 1 FROM claims cl WHERE cl.id = t.entity_id AND (cl.status NOT IN ('registered', 'in-review', 'approved') OR t.source_key <> 'claim:' || cl.id || ':' || COALESCE(cl.due_date::text, ''))))
     )`);
   return { created, closed: closed.rowCount };

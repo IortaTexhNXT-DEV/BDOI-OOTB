@@ -9,6 +9,8 @@ import * as svc from './service.js';
 import { syncAutoTasksQuietly } from '../my-work/tasks.js';
 import { usersWithPermission } from '../claims/util.js';
 import * as an from './analytics.js';
+import * as notices from './notices.js';
+import { sendSheet } from '../claims/docs.js';
 
 /**
  * Operations > Renewals workspace (/renewal/queue, /renewal/at-risk, /renewal/negotiations, /renewal/lapse-management,
@@ -109,6 +111,28 @@ define({
 define({
   method: 'GET', path: '/campaigns/:id', summary: 'One win-back campaign', screen: 'Operations > Renewals > Lapse Management', middleware: read, response: { success: true, data: { campaignId: 'WB-2026-00001' } },
   handler: async (req, res) => { const c = await an.getCampaign(req.params.id); if (!c) throw notFound('Campaign not found'); ok(res, c); },
+});
+define({
+  method: 'GET', path: '/lock-ins', summary: 'Lock-in and Scheme 2 accounts expiring from asOf to asOf + days (default lockin.review_days_before) with lock-in year, review date, TFS loan status and the notice treatment of their renewal (source, loanStatus, treatment, search); format=excel downloads the extract',
+  screen: 'Operations > Renewals > Lock-in Accounts', middleware: read, query: { asOf: '2026-10-10', days: 60, loanStatus: 'All', format: 'excel' },
+  response: { success: true, data: { asOf: '2026-10-10', days: 60, to: '2026-12-09', items: [{ policyNumber: 'POL-2025-00412', clientName: 'Maria Santos', sourceLabel: 'Scheme 2', year: 2, reviewDate: '2026-10-21', tfsLoanAccount: 'TFS-0012345', loanStatusLabel: 'Current', noticeTreatment: { code: 'scheme2', label: 'Suppressed: Scheme 2' } }] } },
+  handler: async (req, res) => {
+    const r = await notices.lockInAccounts(req.query);
+    if (['excel', 'xlsx'].includes(String(req.query.format || '').toLowerCase())) {
+      return sendSheet(res, { fileName: `lock-in-accounts-${r.asOf}`, sheets: [{ name: 'Lock-in accounts', columns: notices.LOCK_IN_COLUMNS_REPORT, rows: notices.lockInReportRows(r.items) }] });
+    }
+    return ok(res, r);
+  },
+});
+define({
+  method: 'PUT', path: '/lock-ins/:policyId/loan-status', summary: 'Set the TFS loan status of a lock-in account by hand; a blocking status (lockin.blocking_loan_statuses) needs a note and skips the queued renewal notices of the policy',
+  screen: 'Operations > Renewals > Lock-in Accounts > Set loan status', middleware: [...write, validate(z.object({ loanStatus: z.string().min(1).max(40), note: z.string().max(1000).optional().nullable() }))],
+  request: { loanStatus: 'legal-dispute', note: 'Case filed by TFS on 02/10/2026' }, response: { success: true, data: { before: { loanStatus: 'current' }, after: { loanStatus: 'legal-dispute' }, skippedNotices: 1 } },
+  handler: async (req, res) => {
+    const r = await notices.setLoanStatus(req.params.policyId, req.body, req.user);
+    await audit(req, { entity: 'policy', entityId: req.params.policyId, action: 'loan-status', before: r.before, after: { ...r.after, skippedNotices: r.skippedNotices } });
+    ok(res, r, 'Loan status updated');
+  },
 });
 define({
   method: 'GET', path: '/assignees', summary: 'Active users a renewal can be reassigned to (holders of write:renewals)', screen: 'Operations > Renewals > Renewal Queue > Reassign',

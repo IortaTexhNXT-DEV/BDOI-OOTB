@@ -96,6 +96,7 @@ const PERMISSION_LIST = {
   'read:renewals': ['renewals', 'view', 'See renewals'],
   'write:renewals': ['renewals', 'edit', 'Prepare renewals and renewal terms'],
   'approve:renewals': ['renewals', 'approve', 'Approve or return renewal terms of another user'],
+  'assign:renewals': ['renewals', 'special', 'Reassign a renewal to another user or mark it not for renewal'],
   'read:claims': ['claims', 'view', 'See claims'],
   'write:claims': ['claims', 'edit', 'Register and follow up claims, claim documents and repairs'],
   'approve:claims': ['claims', 'approve', 'Claim decisions: review, reject, settle, approve a settlement, close'],
