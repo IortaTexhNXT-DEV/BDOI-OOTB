@@ -59,4 +59,12 @@ describe("PageHeader", () => {
     fireEvent.click(screen.getByText("Period Management"));
     expect(screen.getByText("Periods screen")).toBeInTheDocument();
   });
+
+  it("runs the onClick of a breadcrumb item and shows the line about the record", () => {
+    const onClick = jest.fn();
+    render(<PageHeader title="CLM-0001" home={{ label: "Claims", onClick }} trail={["CLM-0001"]} meta={<span>Own damage</span>} />);
+    fireEvent.click(screen.getByText("Claims"));
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("Own damage").parentElement).toHaveClass("bv-page-header__meta");
+  });
 });

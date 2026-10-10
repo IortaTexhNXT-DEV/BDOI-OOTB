@@ -3,61 +3,6 @@
 // Operations screens (claims, client view, renewals, audit trail): page header, key facts, section cards, row actions,
 // filter bar and empty state. Colours, radius and font come from the theme tokens, so a broker's theme applies.
 
-.bv-page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
-
-  &__main {
-    flex: 1 1 24rem;
-    min-width: 0;
-  }
-
-  &__title.bv-page-header__title {
-    margin: 0 0 4px;
-    font-family: $font-heading;
-    font-size: 24px;
-    line-height: 32px;
-    font-weight: 700;
-    color: $color-heading;
-  }
-
-  &__crumbs.p-breadcrumb {
-    margin-bottom: 0 !important;
-  }
-
-  &__meta {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px 12px;
-    margin-top: 8px;
-    font-size: 14px;
-    color: $color-text-muted;
-
-    .bv-page-header__code {
-      font-weight: 600;
-      color: $color-heading;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .bv-page-header__sep {
-      color: $color-placeholder;
-    }
-  }
-
-  &__actions {
-    display: flex;
-    flex: 0 0 auto;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-}
-
 .bv-chip.p-tag {
   font-size: 12px;
   font-weight: 600;
@@ -136,18 +81,8 @@
     color: $color-text-muted;
   }
 
-  .bv-info-tip {
-    margin-left: 8px;
-    font-size: 14px;
-    color: $color-text-muted;
-    cursor: help;
-    vertical-align: middle;
-
-    &:focus-visible {
-      outline: 2px solid $brand-blue;
-      outline-offset: 2px;
-      border-radius: 50%;
-    }
+  .bv-help-tip.p-button {
+    margin-left: 4px;
   }
 
   &__actions {

@@ -13,12 +13,15 @@ const hasLabel = (item) => label(item) !== undefined && label(item) !== null && 
 
 /**
  * Breadcrumb items: the first one is the home item, the others follow it with a dot between them. The breadcrumb
- * always draws a dot after its home item, so a breadcrumb of one item hides it.
+ * always draws a dot after its home item, so a breadcrumb of one item hides it. An item with `to` opens that screen,
+ * one with `onClick` runs it.
  */
 const Crumbs = ({ items, navigate }) => {
   const model = items.map((item) => {
     const to = typeof item === "object" ? item.to : null;
-    return to && navigate ? { label: item.label, command: () => navigate(to), className: "bv-crumb-link" } : { label: label(item) };
+    const onClick = typeof item === "object" ? item.onClick : null;
+    if (to && navigate) return { label: item.label, command: () => navigate(to), className: "bv-crumb-link" };
+    return onClick ? { label: item.label, command: onClick, className: "bv-crumb-link" } : { label: label(item) };
   });
   const classes = `bv-page-header__crumbs${model.length === 1 ? " bv-page-header__crumbs--single" : ""}`;
   return <BreadCrumb home={model[0]} model={model.slice(1)} separatorIcon={<SvgDot color="currentColor" />} className={classes} />;
@@ -53,13 +56,14 @@ HelpTip.propTypes = {
 };
 
 /**
- * The header of a page: the title (with an optional back arrow and help icon), the breadcrumb under it and the page
- * actions on the right; on a narrow screen the actions wrap under the title.
+ * The header of a page: the title (with an optional back arrow and help icon), the breadcrumb under it, an optional
+ * line about the record (`meta`: its code, status chips, contact) and the page actions on the right; on a narrow screen
+ * the actions wrap under the title.
  *
  * The props of the module headers are accepted as they are, so a module header can render through this one without
  * changing its screens: `subtitle`, `intro` and `description` are the help text, and `children` are the actions.
  */
-const PageHeader = ({ title, home, section, trail = [], help, subtitle, intro, description, actions, children, onBack, className = "" }) => {
+const PageHeader = ({ title, home, section, trail = [], help, subtitle, intro, description, meta, actions, children, onBack, className = "" }) => {
   const { t } = useTranslation();
   const items = [home, section, ...trail].filter(hasLabel);
   const helpText = help ?? subtitle ?? intro ?? description;
@@ -74,13 +78,14 @@ const PageHeader = ({ title, home, section, trail = [], help, subtitle, intro, d
           {helpText ? <HelpTip text={helpText} /> : null}
         </div>
         {items.length > 0 && (linked ? <LinkedCrumbs items={items} /> : <Crumbs items={items} />)}
+        {meta ? <div className="bv-page-header__meta">{meta}</div> : null}
       </div>
       {buttons ? <div className="bv-page-header__actions">{buttons}</div> : null}
     </header>
   );
 };
 
-const crumb = PropTypes.oneOfType([PropTypes.string, PropTypes.shape({ label: PropTypes.string.isRequired, to: PropTypes.string })]);
+const crumb = PropTypes.oneOfType([PropTypes.string, PropTypes.shape({ label: PropTypes.node.isRequired, to: PropTypes.string, onClick: PropTypes.func })]);
 
 PageHeader.propTypes = {
   /** page title */
@@ -89,7 +94,7 @@ PageHeader.propTypes = {
   home: crumb,
   /** second breadcrumb item: the menu of the screen ("Period End", "Tax") */
   section: crumb,
-  /** further breadcrumb items, usually ending with the screen name; { label, to } opens that screen */
+  /** further breadcrumb items, usually ending with the screen name; { label, to } opens that screen, { label, onClick } runs onClick */
   trail: PropTypes.arrayOf(crumb),
   /** one or two short sentences about the page, behind the info icon */
   help: PropTypes.node,
@@ -99,6 +104,8 @@ PageHeader.propTypes = {
   intro: PropTypes.node,
   /** same as help */
   description: PropTypes.node,
+  /** a line under the breadcrumb about the record shown (code, status chips, contact) */
+  meta: PropTypes.node,
   /** page actions on the right (children are used when left out) */
   actions: PropTypes.node,
   children: PropTypes.node,

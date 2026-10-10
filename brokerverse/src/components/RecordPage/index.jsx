@@ -1,14 +1,12 @@
 import React, { useRef } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import { Menu } from "primereact/menu";
 import { Sidebar } from "primereact/sidebar";
-import { Tag } from "primereact/tag";
-import { Tooltip } from "primereact/tooltip";
-import SvgDot from "../../assets/icons/SvgDot";
-import { statusLabel, statusSeverity } from "../../utils/statusSeverity";
+import SharedPageHeader, { HelpTip } from "../PageHeader";
+import SharedStatusChip from "../StatusChip";
+import { statusSeverity } from "../../utils/statusSeverity";
 import "./index.scss";
 
 /**
@@ -16,31 +14,23 @@ import "./index.scss";
  * key facts, section cards, row actions and empty states, so every screen of a record reads the same way.
  */
 
-/** Status chip in the shared colour scheme (utils/statusSeverity); `label` overrides the text shown. */
-export const StatusChip = ({ status, label, severity, className }) => {
-  if (!status && !label) return null;
-  return <Tag className={`bv-chip ${className}`} value={label || statusLabel(status)} severity={severity || statusSeverity(status)} />;
-};
-StatusChip.propTypes = { status: PropTypes.string, label: PropTypes.node, severity: PropTypes.string, className: PropTypes.string };
+/**
+ * Status chip of components/StatusChip, coloured by `status` (utils/statusSeverity); `label` overrides the text shown.
+ */
+export const StatusChip = ({ status, label, severity, className }) => (
+  <SharedStatusChip code={status || null} label={label} severity={severity || statusSeverity(status)} className={`bv-chip ${className}`.trim()} />
+);
+StatusChip.propTypes = { status: PropTypes.string, label: PropTypes.string, severity: PropTypes.string, className: PropTypes.string };
 StatusChip.defaultProps = { status: "", label: null, severity: null, className: "" };
 
 /**
  * Page title with the breadcrumb (crumbs: [{ label, onClick }], the last one is the current page), an optional line
- * under the title (record code, status chips, contact) and the page actions on the right.
+ * under the title (record code, status chips, contact) and the page actions on the right: components/PageHeader with
+ * the crumbs as its breadcrumb.
  */
 export const PageHeader = ({ title, crumbs, meta, actions }) => {
-  const [home, ...rest] = crumbs;
-  const item = (c) => ({ label: c.label, ...(c.onClick ? { command: c.onClick, className: "bv-crumb-link" } : {}) });
-  return (
-    <header className="bv-page-header">
-      <div className="bv-page-header__main">
-        <h1 className="bv-page-header__title">{title}</h1>
-        {home ? <BreadCrumb className="bv-page-header__crumbs" home={item(home)} model={rest.map(item)} separatorIcon={<SvgDot color="#000" />} /> : null}
-        {meta ? <div className="bv-page-header__meta">{meta}</div> : null}
-      </div>
-      {actions ? <div className="bv-page-header__actions">{actions}</div> : null}
-    </header>
-  );
+  const [home, ...trail] = crumbs;
+  return <SharedPageHeader title={title} home={home} trail={trail} meta={meta} actions={actions} />;
 };
 PageHeader.propTypes = {
   title: PropTypes.node.isRequired,
@@ -67,34 +57,25 @@ KeyFacts.propTypes = {
 };
 KeyFacts.defaultProps = { className: "" };
 
-/** A short explanation behind an info icon next to a title (hover or keyboard focus), instead of a line of text. */
-export const InfoTip = ({ text }) => {
-  const ref = useRef(null);
+/** A card with a section heading (`hint`: its explanation, behind an info icon), actions on the heading line and the content below. */
+export const SectionCard = ({ title, hint, actions, children, className, flush }) => {
+  const { t } = useTranslation();
   return (
-    <>
-      <Tooltip target={ref} content={text} position="top" event="both" />
-      <i ref={ref} className="pi pi-info-circle bv-info-tip" tabIndex={0} role="img" aria-label={text} />
-    </>
+    <section className={`bv-section-card ${flush ? "bv-section-card--flush" : ""} ${className}`}>
+      {title || actions ? (
+        <div className="bv-section-card__head">
+          <h2 className="bv-section-card__title">
+            {title}
+            {hint && typeof hint === "string" ? <HelpTip text={hint} label={t("pageHeader.helpSection", "About this section")} /> : null}
+            {hint && typeof hint !== "string" ? <span className="bv-section-card__hint">{hint}</span> : null}
+          </h2>
+          {actions ? <div className="bv-section-card__actions">{actions}</div> : null}
+        </div>
+      ) : null}
+      <div className="bv-section-card__body">{children}</div>
+    </section>
   );
 };
-InfoTip.propTypes = { text: PropTypes.string.isRequired };
-
-/** A card with a section heading (`hint`: its explanation, behind an info icon), actions on the heading line and the content below. */
-export const SectionCard = ({ title, hint, actions, children, className, flush }) => (
-  <section className={`bv-section-card ${flush ? "bv-section-card--flush" : ""} ${className}`}>
-    {title || actions ? (
-      <div className="bv-section-card__head">
-        <h2 className="bv-section-card__title">
-          {title}
-          {hint && typeof hint === "string" ? <InfoTip text={hint} /> : null}
-          {hint && typeof hint !== "string" ? <span className="bv-section-card__hint">{hint}</span> : null}
-        </h2>
-        {actions ? <div className="bv-section-card__actions">{actions}</div> : null}
-      </div>
-    ) : null}
-    <div className="bv-section-card__body">{children}</div>
-  </section>
-);
 SectionCard.propTypes = {
   title: PropTypes.node, hint: PropTypes.node, actions: PropTypes.node, children: PropTypes.node, className: PropTypes.string, flush: PropTypes.bool,
 };

@@ -29,21 +29,12 @@
     overflow-wrap: anywhere;
   }
 
-  .bv-page-header__back.p-button,
-  .bv-help-tip.p-button {
+  .bv-page-header__back.p-button {
     flex-shrink: 0;
     width: 2rem;
     height: 2rem;
     padding: 0;
     color: $color-text-muted;
-  }
-
-  .bv-help-tip.p-button .p-button-icon {
-    font-size: 0.95rem;
-  }
-
-  .bv-help-tip.p-button:focus-visible {
-    box-shadow: $focus-ring;
   }
 
   .bv-page-header__main .bv-page-header__crumbs.p-breadcrumb {
@@ -55,6 +46,26 @@
 
   .bv-page-header__crumbs--single .p-menuitem-separator {
     display: none;
+  }
+
+  .bv-page-header__meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    margin-top: 8px;
+    font-size: 14px;
+    color: $color-text-muted;
+
+    .bv-page-header__code {
+      font-weight: 600;
+      color: $color-heading;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .bv-page-header__sep {
+      color: $color-placeholder;
+    }
   }
 
   .bv-page-header__actions {
@@ -72,6 +83,24 @@
       justify-content: flex-start;
       margin-left: 0;
     }
+  }
+}
+
+// the info icon of a page title, a section title or a dialog title
+.bv-help-tip.p-button {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  color: $color-text-muted;
+  vertical-align: middle;
+
+  .p-button-icon {
+    font-size: 0.95rem;
+  }
+
+  &:focus-visible {
+    box-shadow: $focus-ring;
   }
 }
 

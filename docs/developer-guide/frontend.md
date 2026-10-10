@@ -139,15 +139,16 @@ acceptable for data no other screen needs.
 | Error text of a failed request | `apiErrorMessage(body, status, fallback)` from `utility/apiError` in services (field messages, no "Validation failed" or field paths); the application toast cleans older text with `readableError` |
 | Percentages, rounding | `utility/numberFormat` |
 | Right-aligned numeric table columns | automatic: `utility/tableNumericAlign` marks numeric cells |
-| Status tags | `components/StatusBadge`, `utils/statusHelpers` |
+| Status tags | `components/StatusBadge`, `utils/statusHelpers`; a status chip in a list or a header: `components/StatusChip` (`StatusChip` of `components/RecordPage` passes its `status` to it) |
 | File upload | `components/S3FileUpload`, `services/s3Service` |
-| Bulk upload template | `agentModule/component/bulkUploadTemplate` |
+| Spreadsheet upload (template, validate, load, failed rows) | `components/ImportDialog` with `targets` of the API's template and upload routes (`masterTarget(type, label)` for a master) |
 | Required-field checks without Formik | `utility/requiredFields` |
 | Lists | `components/DataTable` (skeleton rows while loading, paging, numeric alignment) |
 | Detail screen loading, error and not-found states | `components/LoadState` (skeleton while loading, error with Retry, not found with Back; never a loader without an end) |
 | What the user does next on a record | `components/NextStep` (title, short text and links or buttons to the next screen; renders nothing without them). The claim screens use the action bar `ClaimActions` of `claimsModule/shared/ClaimJourneyLayout` instead |
 | Totals of a screen | `components/StatCards` (KPI cards; `bv-stat-cards--wide` for longer values) rather than totals inside the text |
-| A long explanation of a screen or field | `InfoTip` of `components/RecordPage` (info icon with a tooltip; the `help` or `subtitle` of an accounts `PageHeader` and the `hint` of a `SectionCard` use it) rather than a paragraph under the title |
+| Page title, breadcrumb and page actions | `components/PageHeader` (`home`, `section`, `trail`, `meta`, actions as children; the module headers of Period End, Tax, Incentive and Ops Accounting render through it, and `PageHeader` of `components/RecordPage` is the same header with `crumbs`) |
+| A long explanation of a screen or field | `HelpTip` of `components/PageHeader` (info icon with a tooltip; the `help` or `subtitle` of a `PageHeader`, the `hint` of a `SectionCard` and the help of the `ImportDialog` use it) rather than a paragraph under the title |
 | Record history | `components/AuditTrail/AuditTimeline` (business events of `GET /api/audit/records/:entity/:id`) on the screens that have it; in a detail pop-up, `RecordActivityLog` |
 | Philippine address | `agentModule/component/PhAddressFields` (region, province, city or municipality, barangay, ZIP code) |
 | Colours and logo | the theme tokens; the saved theme is applied at run time by `theme/runtime/themeEngine.js` and `BrandingProvider`; never hard-code a brand colour |

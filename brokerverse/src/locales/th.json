@@ -7008,6 +7008,7 @@
   },
   "pageHeader": {
     "help": "เกี่ยวกับหน้านี้",
+    "helpSection": "เกี่ยวกับส่วนนี้",
     "back": "ย้อนกลับ"
   },
   "configStatus": {

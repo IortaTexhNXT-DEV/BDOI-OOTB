@@ -13306,6 +13306,7 @@
   },
   "pageHeader": {
     "help": "About this page",
+    "helpSection": "About this section",
     "back": "Back"
   },
   "configStatus": {

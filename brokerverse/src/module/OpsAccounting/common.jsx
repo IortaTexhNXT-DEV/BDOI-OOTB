@@ -1,9 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { BreadCrumb } from "primereact/breadcrumb";
 import { Tag } from "primereact/tag";
-import SvgDot from "../../assets/icons/SvgDot";
-import { InfoTip } from "../../components/RecordPage";
+import SharedPageHeader from "../../components/PageHeader";
 import { statusSeverity } from "../../utils/statusSeverity";
 import { date, dateTime, money, showError, showSuccess } from "../PeriodEnd/common";
 import "../PeriodEnd/index.scss";
@@ -17,22 +15,13 @@ export const OpsTag = ({ status }) => {
   return <Tag className="pe-tag" value={t(`opsAcc.status.${status}`, { defaultValue: String(status).replace(/[_-]/g, " ") })} severity={statusSeverity(status)} />;
 };
 
-/** Page title with the breadcrumb (menu group > section > page) and the page actions; the page's explanation (`help`, or `subtitle`) is the tooltip of the title's info icon. */
+/**
+ * Page title with the breadcrumb (menu group > section > page) and the page actions (components/PageHeader); the page's
+ * explanation (`help`, or `subtitle`) is behind the info icon of the title.
+ */
 export const PageHeader = ({ title, group, section, subtitle, help, children }) => {
   const { t } = useTranslation();
-  const model = [section, title].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).map((label) => ({ label }));
-  return (
-    <div className="pe-header">
-      <div>
-        <h1 className="pe-title">
-          {title}
-          {help || subtitle ? <InfoTip text={help || subtitle} /> : null}
-        </h1>
-        <BreadCrumb home={{ label: group || t("opsAcc.accounts") }} model={model} separatorIcon={<SvgDot color={"#000"} />} className="pe-breadcrumb" />
-      </div>
-      <div className="pe-header-actions">{children}</div>
-    </div>
-  );
+  return <SharedPageHeader title={title} home={group || t("opsAcc.accounts")} section={section} trail={section === title ? [] : [title]} help={help || subtitle}>{children}</SharedPageHeader>;
 };
 
 /** A labelled form field (label above the input, PrimeFlex grid column), with its validation message under it. */
