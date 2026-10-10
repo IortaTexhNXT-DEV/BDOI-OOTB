@@ -465,7 +465,9 @@
         "cashier": "Cashier",
         "receiptDate": "Receipt date",
         "any": "Any"
-      }
+      },
+      "bankPayments": "Bank payments (matched by reference)",
+      "insurerDirectPayments": "Payments made to the insurer"
     },
     "addReceipts": {
       "title": "Add Receipts",
@@ -708,7 +710,12 @@
       "amount": "Amount received",
       "customer": "Customer",
       "policyNumber": "Policy number",
-      "branch": "Branch"
+      "branch": "Branch",
+      "channel": "Paid to",
+      "channels": {
+        "tis-direct": "TISPH",
+        "insurer-direct": "Insurance company"
+      }
     },
     "openEntryDialogs": {
       "matchTitle": "Match open entries",
@@ -799,7 +806,14 @@
       "receipted": "Receipted",
       "premium": "Premium",
       "commission": "Commission kept apart",
-      "exportCommission": "Export commission"
+      "exportCommission": "Export commission",
+      "kind": "Upload",
+      "kinds": {
+        "receipts": "Receipts",
+        "bank-payments": "Bank payments",
+        "insurer-direct": "Paid to the insurer"
+      },
+      "exportLines": "Export lines"
     }
   },
   "renewalWaiting": {

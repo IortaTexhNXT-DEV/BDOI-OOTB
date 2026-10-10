@@ -50,6 +50,7 @@ export function receiptRow(r, lines = []) {
     policy: r.policy_id ? { policyId: r.policy_id, id: r.policy_id, policyNumber: r.policy_number, insurer: r.insurer_name || null, status: r.policy_status || null } : null,
     receiptsList: lines.map(lineRow), createdBy: r.created_by, createdAt: r.created_at, updatedAt: r.updated_at, cancelledAt: r.cancelled_at, cancelReason: r.cancel_reason,
     collectedBy: r.collected_by_insurer_id ? { insurerId: r.collected_by_insurer_id, name: r.collected_by_name || null, reference: r.partner_reference || null } : null,
+    paymentChannel: r.payment_channel || 'tis-direct',
     proof: r.proof_key ? { key: r.proof_key, fileName: r.proof_file_name || null, attachedAt: r.proof_attached_at || null } : null,
     reversal: r.reversal_status ? { status: r.reversal_status, reasonCode: r.reversal_reason_code, reason: r.reversal_reason, requestedById: r.reversal_requested_by,
       requestedBy: r.reversal_requested_by_name || null, requestedAt: r.reversal_requested_at, decidedBy: r.reversal_decided_by_name || null, decidedAt: r.reversal_decided_at,
@@ -192,11 +193,14 @@ export async function createReceipt(db, b, user, { source = 'api' } = {}) {
     header.bank_account_code = str(b.bankAccountCode ?? b.bankAccount);
     await db.query('UPDATE receipts SET bank_account_code = $2 WHERE id = $1', [header.id, header.bank_account_code]);
   }
-  // a post-dated cheque collected by the Insurance Partner (Accounts > Post-Dated Cheques > Partner cleared)
+  // paid to the insurance company: a post-dated cheque the Insurance Partner collected (Accounts > Post-Dated Cheques >
+  // Partner cleared) or a payment made directly to the insurer (insurer-direct upload); channel insurer-direct
   if (b.collectedByInsurerId) {
     header.collected_by_insurer_id = Number(b.collectedByInsurerId);
     header.partner_reference = str(b.partnerReference);
-    await db.query('UPDATE receipts SET collected_by_insurer_id = $2, partner_reference = $3 WHERE id = $1', [header.id, header.collected_by_insurer_id, header.partner_reference]);
+    header.payment_channel = 'insurer-direct';
+    await db.query('UPDATE receipts SET collected_by_insurer_id = $2, partner_reference = $3, payment_channel = \'insurer-direct\' WHERE id = $1',
+      [header.id, header.collected_by_insurer_id, header.partner_reference]);
   }
   let n = 0;
   for (const l of lines) {
@@ -294,16 +298,20 @@ export async function listOpenReceivables(db, q = {}) {
   if (q.customerCode) { p.push(String(q.customerCode)); where.push(`(c.client_code = $${p.length} OR c.id = $${p.length})`); }
   if (q.policyNumber || q.policyId) { p.push(String(q.policyNumber || q.policyId)); where.push(`(p.policy_number = $${p.length} OR p.id = $${p.length})`); }
   // the search also finds a migrated open item by the old system's bill number (reference)
-  if (q.search) { p.push(String(q.search)); where.push(`(COALESCE(c.client_code,'') || ' ' || COALESCE(c.display_name,'') || ' ' || COALESCE(p.policy_number,'') || ' ' || COALESCE(r.bill_number,'') || ' ' || COALESCE(r.reference,'')) ILIKE '%' || $${p.length} || '%'`); }
+  // the search also finds the 10-digit payment reference and the plate or chassis number of the vehicle
+  if (q.search) { p.push(String(q.search)); where.push(`(COALESCE(c.client_code,'') || ' ' || COALESCE(c.display_name,'') || ' ' || COALESCE(p.policy_number,'') || ' ' || COALESCE(r.bill_number,'') || ' ' || COALESCE(r.reference,'')
+    || ' ' || COALESCE(p.payment_reference,'') || ' ' || COALESCE(p.doc->>'plateNumber','') || ' ' || COALESCE(p.doc->>'chassisNumber','')) ILIKE '%' || $${p.length} || '%'`); }
   if (q[SCOPE]) where.push(scopeSql(q[SCOPE], 'policy', 'p', p));
   const limit = Math.min(Math.max(Number(q.limit) || 500, 1), 2000);
-  const rows = (await db.query(`SELECT r.*, p.policy_number, c.client_code, c.display_name, c.first_name, c.last_name
+  const rows = (await db.query(`SELECT r.*, p.policy_number, p.payment_reference, p.doc->>'plateNumber' AS plate_number, p.doc->'insuranceVehicleDetails'->0 AS vehicle,
+      c.client_code, c.display_name, c.first_name, c.last_name
     FROM receivables r JOIN policies p ON p.id = r.policy_id LEFT JOIN clients c ON c.id = COALESCE(r.client_id, p.client_id)
     WHERE ${where.join(' AND ')} ORDER BY c.client_code, p.policy_number, r.due_date, r.created_at LIMIT ${limit}`, p)).rows;
   return rows.map((r) => ({
     receivableId: r.id, billNumber: r.bill_number, oldBillNumber: oldBillNumber(r), source: r.source, reference: r.reference, customerCode: r.client_code || r.client_id, clientId: r.client_id,
     customerName: r.display_name || [r.first_name, r.last_name].filter(Boolean).join(' ') || null, policyId: r.policy_id, policyNumber: r.policy_number,
     amount: Number(r.amount), paidAmount: round2(Number(r.amount) - Number(r.balance)), balance: Number(r.balance), dueDate: r.due_date,
-    status: r.status === 'partial' ? 'Partial' : 'Open', currency: r.currency,
+    status: r.status === 'partial' ? 'Partial' : 'Open', currency: r.currency, paymentReference: r.payment_reference || null,
+    vehicle: [r.vehicle?.vehicleBrand, r.vehicle?.vehicleModel, r.vehicle?.modelYear].filter(Boolean).join(' ') || null, plateNumber: r.plate_number || null,
   }));
 }

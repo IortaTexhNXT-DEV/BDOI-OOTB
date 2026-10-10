@@ -27,21 +27,23 @@ const ReceiptBatches = ({ visible, onHide }) => {
     if (visible) load();
   }, [visible]);
 
-  const exportCommission = (b) => receiptsService.downloadBatchCommission(b).catch((e) => showErrorMessage(e.message));
+  const exportBatch = (b) => receiptsService.downloadBatchCommission(b).catch((e) => showErrorMessage(e.message));
 
   return (
     <Dialog header={t("accounts.receiptBatches.title")} visible={visible} onHide={onHide} style={{ width: "64rem" }} breakpoints={{ "960px": "95vw" }}>
       <LoadState loading={!batches && !error} error={error} onRetry={load}>
         <DataTable value={batches || []} dataKey="id" size="small" paginator rows={10} emptyMessage={t("accounts.receiptBatches.empty")}>
           <Column field="batchNumber" header={t("accounts.receiptBatches.batch")} />
+          <Column header={t("accounts.receiptBatches.kind")} body={(b) => t(`accounts.receiptBatches.kinds.${b.kind}`)} />
           <Column header={t("accounts.receiptBatches.uploaded")} body={(b) => `${formatDate(b.createdAt)}${b.createdBy ? ` · ${b.createdBy}` : ""}`} />
           <Column field="fileName" header={t("accounts.receiptBatches.file")} />
           <Column header={t("accounts.receiptBatches.receipted")} body={(b) => `${b.created} / ${b.rows}`} className="text-right" headerClassName="text-right" />
           <Column header={t("accounts.receiptBatches.premium")} body={(b) => formatCurrency(b.premiumTotal)} className="text-right" headerClassName="text-right" />
           <Column header={t("accounts.receiptBatches.commission")} body={(b) => formatCurrency(b.commissionTotal)} className="text-right" headerClassName="text-right" />
-          <Column body={(b) => (b.commissionRows ? (
-            <Button label={t("accounts.receiptBatches.exportCommission")} icon="pi pi-download" text size="small" onClick={() => exportCommission(b)} />
-          ) : null)} />
+          <Column body={(b) => {
+            if (b.kind === "bank-payments") return <Button label={t("accounts.receiptBatches.exportLines")} icon="pi pi-download" text size="small" onClick={() => exportBatch(b)} />;
+            return b.commissionRows ? <Button label={t("accounts.receiptBatches.exportCommission")} icon="pi pi-download" text size="small" onClick={() => exportBatch(b)} /> : null;
+          }} />
         </DataTable>
       </LoadState>
     </Dialog>

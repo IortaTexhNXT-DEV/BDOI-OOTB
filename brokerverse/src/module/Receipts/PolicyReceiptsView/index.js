@@ -136,6 +136,7 @@ function PolicyReceipts() {
             { label: t("accounts.receiptDialogs.customerCode"), value: header.customerCode },
             { label: t("accounts.receiptDialogs.paymentMode"), value: header.paymentMode ? t(`paymentVoucher.detail.modes.${String(header.paymentMode).toLowerCase()}`, { defaultValue: statusLabel(header.paymentMode) }) : null },
             { label: t("accounts.receiptDialogs.reference"), value: header.referenceNo },
+            { label: t("accounts.receiptDialogs.channel"), value: header.paymentChannel ? t(`accounts.receiptDialogs.channels.${header.paymentChannel}`) : null },
             { label: t("accounts.receiptDialogs.amount"), value: header.amount, type: "amount", currency: header.currencyCode || undefined },
           ]}
         />

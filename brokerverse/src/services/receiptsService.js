@@ -148,7 +148,8 @@ export const receiptsService = {
 
   // Receipt voucher batches (bulk uploads) and the commission part kept apart on each
   receiptBatches: async () => (await getRequest('receipts/batches')).data?.data || [],
-  downloadBatchCommission: (batch, format = 'xlsx') => importService.downloadTemplate(`/receipts/batches/${encodeURIComponent(batch.id)}?format=${format}`, `commission-${batch.batchNumber}.${format}`),
+  downloadBatchCommission: (batch, format = 'xlsx') => importService.downloadTemplate(`/receipts/batches/${encodeURIComponent(batch.id)}?format=${format}`,
+    `${batch.kind === 'bank-payments' ? 'bank-payments' : 'commission'}-${batch.batchNumber}.${format}`),
 
   // Add payment to existing receipt
   addPaymentToReceipt: async (receiptId, paymentData) => {

@@ -28,7 +28,7 @@ export const POLICY_SQL = `SELECT p.*, c.display_name AS client_name, c.client_c
 /** Policy by id or policy number (null when not found). */
 export async function findPolicy(db, ref) {
   if (!ref) return null;
-  return (await db.query(`${POLICY_SQL} WHERE p.id = $1 OR p.policy_number = $1 LIMIT 1`, [String(ref)])).rows[0] || null;
+  return (await db.query(`${POLICY_SQL} WHERE p.id = $1 OR p.policy_number = $1 OR p.payment_reference = $1 LIMIT 1`, [String(ref)])).rows[0] || null;
 }
 export async function requirePolicy(db, ref) {
   const p = await findPolicy(db, ref);
@@ -234,7 +234,9 @@ export async function applyToReceivable(db, rcv, amount, ctx) {
   // a post-dated cheque the Insurance Partner collected (pdc.partner_collected): the money is in the partner's bank
   const partner = ctx.collectedBy || null;
   // an amount held unapplied (On Account) moves from the unapplied collections (unapplied.allocate), no new cash
-  const jv = await postEvent(ctx.unappliedId ? 'unapplied.allocate' : partner ? 'pdc.partner_collected' : 'receipt.apply', {
+  // paid to the insurance company: a forwarded post-dated cheque the partner collected, or a payment made to the insurer
+  const partnerEvent = ctx.receipt?.source === 'pdc' ? 'pdc.partner_collected' : 'receipt.insurer_direct';
+  const jv = await postEvent(ctx.unappliedId ? 'unapplied.allocate' : partner ? partnerEvent : 'receipt.apply', {
     source: ctx.receipt ? 'receipt' : 'payment', entryType: 'PAYMENT_RECEIPT', transactionCode: ctx.receipt?.receipt_number || rcv.bill_number,
     referenceType: ctx.receipt ? 'Receipt' : 'Policy', referenceId: ctx.receipt?.id || policy.id, clientId: rcv.client_id, policyId: policy.id,
     policyNumber: policy.policy_number, date: ctx.date || (await today()), insuranceCompanyId: partner?.id ?? undefined,

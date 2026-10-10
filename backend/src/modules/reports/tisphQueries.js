@@ -8,7 +8,8 @@
  *        dailyGlBalance     beginning balance and the balance at the end of each calendar day from From Date
  * CR-15  paymentSummary, dailyReversals, pdcEncoded, pdcCancelled, pdcMaturing, pdcMaturingMatrix, pdcHistory,
  *        pdcAcknowledgements
- * CR-14  netRemittanceFullyPaid, netRemittancePartiallyPaid, premiumPaymentStatus
+ * CR-14  netRemittanceFullyPaid, netRemittancePartiallyPaid, premiumPaymentStatus, invoiceTracker; the bank matching
+ *        reports insufficientPayments and overpayments
  */
 import { FS_MAP } from '../accounting/fsVersions.js';
 import { FY_START, POSTED } from './periodEndQueries.js';
@@ -137,6 +138,31 @@ const premiumPaymentStatus = `SELECT p.policy_number AS "policyNumber", p.incept
   LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id ${REMITTED}
   WHERE p.billing_mode <> 'direct' AND p.inception_date BETWEEN $1 AND $2`;
 
+// Bank payment matching (FGA-BR-03 to BR-06): insufficient payments and the overpayments held On Account
+const insufficientPayments = `SELECT l.paid_on AS "paidOn", l.reference, p.policy_number AS "policyNumber", ${CLIENT_DIMS}, ${INSURER_DIMS}, l.expected AS "expectedPremium",
+    l.amount AS paid, -l.difference AS shortfall, l.bank_account AS "bankAccount", 'Bank payment' AS channel, b.batch_number AS batch, r.receipt_number AS "receiptNumber",
+    (SELECT COALESCE(sum(x.balance), 0) FROM receivables x WHERE x.policy_id = p.id AND x.status IN ('open', 'partial')) AS "stillOwed"
+  FROM bank_payment_lines l JOIN receipt_batches b ON b.id = l.batch_id LEFT JOIN policies p ON p.id = l.policy_id LEFT JOIN clients c ON c.id = p.client_id
+  LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id LEFT JOIN receipts r ON r.id = l.receipt_id
+  WHERE l.outcome = 'underpaid' AND l.paid_on BETWEEN $1 AND $2`;
+const overpayments = `SELECT u.received_date AS "receivedDate", COALESCE(r.receipt_number, u.reference_no) AS reference, p.policy_number AS "policyNumber", ${CLIENT_DIMS}, ${INSURER_DIMS},
+    l.expected AS "expectedPremium", COALESCE(l.amount, r.amount) AS paid, u.amount AS excess, u.balance AS "heldBalance", initcap(u.status) AS status,
+    CASE WHEN l.id IS NOT NULL THEN 'Bank payment' ELSE 'Receipt' END AS channel, u.allocate_by AS "allocateBy", u.refund_reason AS "refundReason"
+  FROM unapplied_collections u LEFT JOIN receipts r ON r.id = u.receipt_id LEFT JOIN bank_payment_lines l ON l.unapplied_id = u.id
+  LEFT JOIN policies p ON p.id = u.policy_id LEFT JOIN clients c ON c.id = COALESCE(u.client_id, p.client_id) LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
+  WHERE u.kind = 'excess' AND u.status <> 'reversed' AND u.received_date BETWEEN $1 AND $2`;
+// Invoice tracker (TIS-BRD-RPT-OPS-10): the bills of the period by state and by days overdue in the buckets of
+// reports.invoice_tracker_buckets (1-15, 16-30, 31-60, 61+ for TISPH), as of To Date
+const TRACKER_BUCKET = `(SELECT CASE WHEN x.days <= 0 THEN 'Not due' ELSE COALESCE((SELECT (COALESCE(($3::int[])[i - 1], 0) + 1) || '-' || ($3::int[])[i]
+    FROM generate_subscripts($3::int[], 1) i WHERE x.days <= ($3::int[])[i] ORDER BY i LIMIT 1), (($3::int[])[array_length($3::int[], 1)] + 1) || '+') END)`;
+const invoiceTracker = `SELECT x.*, CASE WHEN x.balance <= 0 THEN 'Paid' WHEN x.balance < x.amount THEN 'Partially paid' ELSE 'Not paid' END AS "paymentState",
+    CASE WHEN x.balance <= 0 THEN 'Paid' WHEN x.days > 0 THEN 'Overdue' ELSE 'Not due' END AS status, CASE WHEN x.balance <= 0 THEN 'Paid' ELSE ${TRACKER_BUCKET} END AS "ageBucket"
+  FROM (SELECT rv.bill_number AS "billNumber", COALESCE(rv.created_at::date, rv.due_date) AS "billDate", rv.due_date AS "dueDate", p.policy_number AS "policyNumber",
+      ${CLIENT_DIMS}, ${INSURER_DIMS}, rv.amount, rv.amount - rv.balance AS paid, rv.balance, GREATEST($2::date - rv.due_date, 0) AS days
+    FROM receivables rv JOIN policies p ON p.id = rv.policy_id LEFT JOIN clients c ON c.id = COALESCE(rv.client_id, p.client_id)
+    LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
+    WHERE rv.status NOT IN ('cancelled', 'credited') AND COALESCE(rv.created_at::date, rv.due_date) BETWEEN $1 AND $2) x`;
+
 export const TISPH_QUERIES = {
   fsByVersion: {
     sql: fsRows(`(LEAST($1::date, ${YS}) - interval '1 year')::date`), filters: ['account', 'fsVersion'], defaults: FS_VERSION,
@@ -188,6 +214,22 @@ export const TISPH_QUERIES = {
   netRemittancePartiallyPaid: {
     sql: netRemittance('pos.paid > 0 AND pos.outstanding > 0 AND pos.last_paid BETWEEN $1 AND $2'), filters: ['insurer', 'client', 'product'],
     criteria: { 'Principal Insurer': { groupBy: 'insurer' }, Overall: {} }, orderBy: 'f.insurer, f."policyNumber"',
+  },
+  insufficientPayments: {
+    sql: insufficientPayments, filters: ['insurer', 'client'], criteria: { Overall: {}, 'Principal Insurer': { groupBy: 'insurer' }, 'Bank Account': { groupBy: 'bankAccount' } },
+    orderBy: 'f."paidOn", f.reference',
+  },
+  overpayments: {
+    sql: overpayments, filters: ['insurer', 'client', 'status'], criteria: { Overall: {}, Status: { groupBy: 'status' }, Channel: { groupBy: 'channel' } },
+    orderBy: 'f."receivedDate", f.reference',
+  },
+  invoiceTracker: {
+    sql: invoiceTracker, extras: [setting('reports.invoice_tracker_buckets', [15, 30, 60], 'int[]')], filters: ['insurer', 'client', 'status'],
+    criteria: { Ageing: { groupBy: 'ageBucket' }, Status: { groupBy: 'status' }, 'Payment State': { groupBy: 'paymentState' }, Overall: {} },
+    orderBy: 'f."dueDate", f."billNumber"',
+    summary: { overdue: 'count(*) FILTER (WHERE f.status = \'Overdue\')', notDue: 'count(*) FILTER (WHERE f.status = \'Not due\')',
+      partiallyPaid: 'count(*) FILTER (WHERE f."paymentState" = \'Partially paid\')', paid: 'count(*) FILTER (WHERE f."paymentState" = \'Paid\')',
+      overpayments: "(SELECT count(*) FROM unapplied_collections u WHERE u.kind = 'excess' AND u.status = 'open')" },
   },
   premiumPaymentStatus: {
     sql: premiumPaymentStatus, filters: ['insurer', 'client', 'product'],

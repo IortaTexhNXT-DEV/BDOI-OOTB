@@ -18,6 +18,7 @@ import * as billing from './billing.js';
 import * as reversal from './reversal.js';
 import * as batches from './batches.js';
 import * as unapplied from './unapplied.js';
+import * as bankPayments from './bankPayments.js';
 import { emailBill, emailReceipt } from './email.js';
 import { emailSendingStatus } from '../../lib/mailer.js';
 import { loadOpenItem, OPEN_ITEM_COLUMNS } from './opening.js';
@@ -125,11 +126,18 @@ define({
   handler: async (_req, res) => ok(res, await batches.listBatches()),
 });
 define({
-  method: 'GET', path: '/batches/:id', summary: 'One receipt voucher batch with the commission part kept apart; format=xlsx or csv exports the commission lines for Accounting',
+  method: 'GET', path: '/batches/:id', summary: 'One receipt batch: the commission part kept apart, or for a bank payment upload its lines and how each was matched; format=xlsx or csv exports them',
   screen: `${SCREEN} > Receipt batches > Export commission`, middleware: read,
   response: { success: true, data: { batchNumber: 'RVB-2026-00004', commissionLines: [{ row: 5, policyNumber: 'POL-2026-90004', insurer: 'Malayan Insurance Co., Inc.', amount: 4200, referenceNo: 'BDO-1', receiptNumber: 'OR-2026-00120' }] } },
   handler: async (req, res) => {
     const b = await batches.getBatch(req.params.id);
+    if (['xlsx', 'csv'].includes(req.query.format) && b.kind === 'bank-payments') {
+      const cols = [['Row', 'row'], ['Date', 'paidOn'], ['Reference', 'reference'], ['Amount', 'amount'], ['Outcome', 'outcome'], ['Policy No.', 'policyNumber'], ['Client', 'clientName'],
+        ['Expected', 'expected'], ['Difference', 'difference'], ['Receipt No.', 'receiptNumber'], ['Note', 'message']];
+      await sendTable(res, { header: cols.map((c) => c[0]), rows: b.lines.map((l) => cols.map((c) => l[c[1]] ?? '')), fileBase: `bank-payments-${b.batchNumber}`, format: req.query.format,
+        sheetName: b.batchNumber });
+      return;
+    }
     if (['xlsx', 'csv'].includes(req.query.format)) {
       const cols = [['Row', 'row'], ['Policy No.', 'policyNumber'], ['Client', 'clientName'], ['Insurer', 'insurer'], ['Commission', 'amount'], ['Premium receipted', 'premium'],
         ['Receipt No.', 'receiptNumber'], ['Reference', 'referenceNo'], ['Receipt Date', 'receiptDate']];
@@ -138,6 +146,51 @@ define({
       return;
     }
     ok(res, b);
+  },
+});
+const uploadRows = async (req) => {
+  if (!req.file) throw badRequest('Attach the file in the "file" field');
+  const rows = readSheet(req.file.buffer, req.file.originalname);
+  const max = Number(await getSetting('limits.bulk_upload_max_rows', 1000));
+  if (rows.length > max) throw badRequest(`The file has ${rows.length} rows; the limit is ${max}`);
+  return rows;
+};
+define({
+  method: 'GET', path: '/bank-payments/template', summary: 'Bank payments upload template (XLSX)', screen: `${SCREEN} > Bank payments > Download template`, middleware: read,
+  response: '(xlsx file)', handler: async (_req, res) => sendTemplate(res, 'bank-payments'),
+});
+define({
+  method: 'POST', path: '/bank-payments', summary: "A bank's report of payments (multipart \"file\"): each line matched by its reference to what the policy owes within bank_matching.tolerance; overpaid: the excess held On Account; underpaid: listed as insufficient; no bill found: a floating payment",
+  screen: `${SCREEN} > Bank payments`, middleware: [...write, upload.single('file')],
+  request: { file: '(xlsx) columns: Date, Reference, Amount, Bank Account, Payer, Remarks' },
+  response: { success: true, data: { message: 'Processed 4 rows: 2 matched, 1 overpaid, 1 underpaid, 0 not found, 0 failed', batch: { batchNumber: 'RVB-2026-00006', kind: 'bank-payments' } } },
+  handler: async (req, res) => {
+    const rows = await uploadRows(req);
+    const r = await bankPayments.runBankUpload(rows, { fileName: req.file.originalname, user: req.user });
+    await audit(req, { entity: 'receipt_batch', entityId: r.batch.id, action: 'bank-payments', after: { file: req.file.originalname, batchNumber: r.batch.batch_number, ...r.counts } });
+    const c = r.counts;
+    const data = uploadResult(rows.length, rows.length - c.failed, r.errors.map((e) => ({ row: e.row, message: e.issues ? issueText(e.issues, bankPayments.BANK_PAYMENT_COLUMNS) : columnMessage(e.message, bankPayments.BANK_PAYMENT_COLUMNS) })),
+      { ids: r.ids, batch: batches.batchOut(r.batch), counts: c });
+    data.message = `Processed ${rows.length} rows: ${c.matched} matched, ${c.overpaid} overpaid, ${c.underpaid} underpaid, ${c.unmatched} not found, ${c.failed} failed`;
+    ok(res, data, data.message);
+  },
+});
+define({
+  method: 'GET', path: '/insurer-direct/template', summary: 'Payments made directly to the insurer: upload template (XLSX)', screen: `${SCREEN} > Insurer-direct payments > Download template`, middleware: read,
+  response: '(xlsx file)', handler: async (_req, res) => sendTemplate(res, 'insurer-direct-payments'),
+});
+define({
+  method: 'POST', path: '/insurer-direct', summary: 'Payments the clients made directly to the insurance company (multipart "file"): each settles the policy\'s bills with a receipt of channel insurer-direct (Dr premium payable / Cr premium receivable)',
+  screen: `${SCREEN} > Insurer-direct payments`, middleware: [...write, upload.single('file')],
+  request: { file: '(xlsx) columns: Policy Number, Amount, Date Paid, Insurer Reference, Remarks' },
+  response: { success: true, data: { message: 'Processed 2 rows: 2 created, 0 failed', batch: { batchNumber: 'RVB-2026-00007', kind: 'insurer-direct' } } },
+  handler: async (req, res) => {
+    const rows = await uploadRows(req);
+    const r = await bankPayments.runInsurerDirectUpload(rows, { fileName: req.file.originalname, user: req.user });
+    await audit(req, { entity: 'receipt_batch', entityId: r.batch.id, action: 'insurer-direct', after: { file: req.file.originalname, batchNumber: r.batch.batch_number, created: r.ids.length, failed: r.errors.length } });
+    const data = uploadResult(rows.length, r.ids.length, r.errors.map((e) => ({ row: e.row, message: e.issues ? issueText(e.issues, bankPayments.INSURER_DIRECT_COLUMNS) : columnMessage(e.message, bankPayments.INSURER_DIRECT_COLUMNS) })),
+      { ids: r.ids, batch: batches.batchOut(r.batch) });
+    ok(res, data, data.message);
   },
 });
 const uacExample = { id: 'uac_1', kind: 'excess', kindText: 'Excess payment', status: 'open', amount: 1500, balance: 1500, receiptNumber: 'OR-2026-00120', clientName: 'Andrea Villanueva',

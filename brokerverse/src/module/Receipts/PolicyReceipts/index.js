@@ -965,7 +965,11 @@ const PolicyReceipts = () => {
         visible={visibleBulkUploadPopup}
         onHide={() => setVisibleBulkUploadPopup(false)}
         title={t("accounts.receipts.bulkUploadTitle")}
-        targets={[{ label: t("accounts.receipts.officialReceipts"), templatePath: "/receipts/bulk-upload/template", uploadPath: "/receipts/bulk-upload" }]}
+        targets={[
+          { label: t("accounts.receipts.officialReceipts"), templatePath: "/receipts/bulk-upload/template", uploadPath: "/receipts/bulk-upload" },
+          { label: t("accounts.receipts.bankPayments"), templatePath: "/receipts/bank-payments/template", uploadPath: "/receipts/bank-payments" },
+          { label: t("accounts.receipts.insurerDirectPayments"), templatePath: "/receipts/insurer-direct/template", uploadPath: "/receipts/insurer-direct" },
+        ]}
         onDone={handleBulkUploadSuccess}
       />
 

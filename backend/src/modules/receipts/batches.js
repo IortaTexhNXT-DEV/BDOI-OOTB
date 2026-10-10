@@ -21,7 +21,7 @@ const amountOf = (v) => {
   return round2(n);
 };
 
-const batchOut = (b) => ({ id: b.id, batchNumber: b.batch_number, fileName: b.file_name, rows: b.row_count, created: b.created_count, failed: b.failed_count,
+export const batchOut = (b) => ({ id: b.id, batchNumber: b.batch_number, kind: b.kind || 'receipts', fileName: b.file_name, rows: b.row_count, created: b.created_count, failed: b.failed_count,
   premiumTotal: Number(b.premium_total), commissionTotal: Number(b.commission_total), commissionRows: (b.commission_lines || []).length, createdBy: b.created_by_name || null,
   createdAt: b.created_at });
 
@@ -75,5 +75,6 @@ export async function getBatch(ref) {
   const b = (await query(`SELECT b.*, (SELECT display_name FROM users u WHERE u.id = b.created_by) AS created_by_name FROM receipt_batches b
     WHERE b.id = $1 OR b.batch_number = $1`, [String(ref)])).rows[0];
   if (!b) throw notFound('Receipt batch not found');
-  return { ...batchOut(b), commissionLines: b.commission_lines || [] };
+  const { bankLines } = await import('./bankPayments.js');
+  return { ...batchOut(b), commissionLines: b.commission_lines || [], lines: b.kind === 'bank-payments' ? await bankLines(b.id) : [] };
 }

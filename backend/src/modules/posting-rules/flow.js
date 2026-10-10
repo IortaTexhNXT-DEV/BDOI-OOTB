@@ -22,7 +22,7 @@ import { CHANGE_LABELS, ROLE_SECTIONS, configurationReview } from './service.js'
 /** Modules of the reference, in the order of the accounting cycle (one source for grouping and order). */
 export const AREAS = [
   { code: 'premium', name: 'Premium billing', events: ['policy.issue.broker_billed', 'policy.renewal.broker_billed', 'endorsement.additional_premium', 'endorsement.return_premium', 'policy.cancel'] },
-  { code: 'collections', name: 'Collections', events: ['receipt.apply', 'pdc.partner_collected', 'receipt.unapplied', 'unapplied.allocate', 'unapplied.refund'] },
+  { code: 'collections', name: 'Collections', events: ['receipt.apply', 'pdc.partner_collected', 'receipt.insurer_direct', 'receipt.unapplied', 'unapplied.allocate', 'unapplied.refund'] },
   { code: 'remittance', name: 'Remittance to insurers', events: ['remittance.settlement', 'remittance.adjustment', 'remittance.transfer', 'insurer_statement.adjustment', 'insurer.refund_due', 'insurer.refund_applied'] },
   { code: 'direct-bill', name: 'Direct-bill commission', events: ['directbill.commission', 'directbill.commission_return', 'commission.billing_statement', 'directbill.collection'] },
   { code: 'overrides', name: 'Overriding commission', events: ['override_commission.accrual', 'override_commission.settlement'] },
@@ -84,6 +84,8 @@ export const EVENT_FLOW = {
     approval: { text: 'None: posted when the receipt is applied' }, amounts: { amount: 'Amount of the receipt applied to the bill' } },
   'pdc.partner_collected': { when: 'The Insurance Partner advises that a forwarded post-dated cheque cleared', screen: '/accounts/post-dated-cheques', where: 'Accounts › Post-Dated Cheques',
     approval: { text: 'None: posted with the acknowledgement receipt on the collection date' }, amounts: { amount: 'Amount of the cheque collected by the Insurance Partner' } },
+  'receipt.insurer_direct': { when: 'A payment the client made directly to the insurance company is recorded (insurer-direct upload)', screen: '/accounts/receipts', where: 'Accounts › Receipts › Insurer-direct payments',
+    approval: { text: 'None: posted with the receipt on the date paid' }, amounts: { amount: 'Amount paid to the insurer' } },
   'receipt.unapplied': { when: 'A payment is above what the policy owes, or has no bill yet (floating or advance)', screen: '/accounts/unapplied-collections', where: 'Accounts › Unapplied Collections',
     approval: { text: 'None: posted when the payment is received' }, amounts: { amount: 'Amount held unapplied' } },
   'unapplied.allocate': { when: 'An unapplied collection is allocated to an open bill', screen: '/accounts/unapplied-collections', where: 'Accounts › Unapplied Collections',
