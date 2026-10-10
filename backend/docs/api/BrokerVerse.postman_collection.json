@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1236 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1237 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -11859,7 +11859,7 @@
           "response": []
         },
         {
-          "name": "Return the submitted version to its preparer as a draft, with remarks (approve:period-end)",
+          "name": "Return the submitted version to its preparer as a draft, with remarks (approve:period-end; a different user than the one who prepared, edited or submitted it)",
           "request": {
             "method": "POST",
             "header": [
@@ -11889,7 +11889,7 @@
                 }
               ]
             },
-            "description": "Return the submitted version to its preparer as a draft, with remarks (approve:period-end)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents > Document\n\nAccess: approve:period-end",
+            "description": "Return the submitted version to its preparer as a draft, with remarks (approve:period-end; a different user than the one who prepared, edited or submitted it)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents > Document\n\nAccess: approve:period-end",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"remarks\": \"Name the restore test frequency\"\n}",
@@ -11943,6 +11943,36 @@
                 }
               }
             }
+          },
+          "response": []
+        },
+        {
+          "name": "Take back the version you submitted, before it is decided: it returns to draft (write:period-end; the submitter only)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/documents/:type/draft/withdraw",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "documents",
+                ":type",
+                "draft",
+                "withdraw"
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "type (path parameter)"
+                }
+              ]
+            },
+            "description": "Take back the version you submitted, before it is decided: it returns to draft (write:period-end; the submitter only)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents > Document\n\nAccess: write:period-end"
           },
           "response": []
         },
@@ -37299,7 +37329,7 @@
           ]
         },
         {
-          "name": "Run a calculation for a period and programs (achievement from policies / quotes, payout from program tiers)",
+          "name": "Run a calculation for a month and programs: each program over its calculation period (month, quarter, half or year of its frequency) ending with that month, once per period; a run with no agent line is refused",
           "request": {
             "method": "POST",
             "header": [
@@ -37318,7 +37348,7 @@
                 "calculations"
               ]
             },
-            "description": "Run a calculation for a period and programs (achievement from policies / quotes, payout from program tiers)\n\nFront-end touchpoint: Accounts > Incentive > Calculations > New Calculation\n\nAccess: write:incentive",
+            "description": "Run a calculation for a month and programs: each program over its calculation period (month, quarter, half or year of its frequency) ending with that month, once per period; a run with no agent line is refused\n\nFront-end touchpoint: Accounts > Incentive > Calculations > New Calculation\n\nAccess: write:incentive",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"period\": \"2026-09\",\n  \"selectedPrograms\": [\n    \"INC-2026-002\"\n  ],\n  \"description\": \"September run\"\n}",
@@ -37350,7 +37380,7 @@
                     "calculations"
                   ]
                 },
-                "description": "Run a calculation for a period and programs (achievement from policies / quotes, payout from program tiers)\n\nFront-end touchpoint: Accounts > Incentive > Calculations > New Calculation\n\nAccess: write:incentive",
+                "description": "Run a calculation for a month and programs: each program over its calculation period (month, quarter, half or year of its frequency) ending with that month, once per period; a run with no agent line is refused\n\nFront-end touchpoint: Accounts > Incentive > Calculations > New Calculation\n\nAccess: write:incentive",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"period\": \"2026-09\",\n  \"selectedPrograms\": [\n    \"INC-2026-002\"\n  ],\n  \"description\": \"September run\"\n}",
@@ -37508,7 +37538,7 @@
           ]
         },
         {
-          "name": "Adjust agent lines before submission (amount and reason per line)",
+          "name": "Adjust agent lines before submission (amount per line) with a reason of the Reason Codes master (context incentive_adjustment; a note when the reason needs one). The adjusting user may not approve the batch",
           "request": {
             "method": "POST",
             "header": [
@@ -37536,10 +37566,10 @@
                 }
               ]
             },
-            "description": "Adjust agent lines before submission (amount and reason per line)\n\nFront-end touchpoint: Accounts > Incentive > Calculations > Details\n\nAccess: write:incentive",
+            "description": "Adjust agent lines before submission (amount per line) with a reason of the Reason Codes master (context incentive_adjustment; a note when the reason needs one). The adjusting user may not approve the batch\n\nFront-end touchpoint: Accounts > Incentive > Calculations > Details\n\nAccess: write:incentive",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"lines\": [\n    {\n      \"id\": 12,\n      \"adjustments\": -1000,\n      \"reason\": \"Chargeback on cancelled policy\"\n    }\n  ]\n}",
+              "raw": "{\n  \"lines\": [\n    {\n      \"id\": 12,\n      \"adjustments\": -1000\n    }\n  ],\n  \"reasonCode\": \"IAD-CLAWBACK\",\n  \"note\": \"Policy cancelled 12/09/2026\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -37577,10 +37607,10 @@
                     }
                   ]
                 },
-                "description": "Adjust agent lines before submission (amount and reason per line)\n\nFront-end touchpoint: Accounts > Incentive > Calculations > Details\n\nAccess: write:incentive",
+                "description": "Adjust agent lines before submission (amount per line) with a reason of the Reason Codes master (context incentive_adjustment; a note when the reason needs one). The adjusting user may not approve the batch\n\nFront-end touchpoint: Accounts > Incentive > Calculations > Details\n\nAccess: write:incentive",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"lines\": [\n    {\n      \"id\": 12,\n      \"adjustments\": -1000,\n      \"reason\": \"Chargeback on cancelled policy\"\n    }\n  ]\n}",
+                  "raw": "{\n  \"lines\": [\n    {\n      \"id\": 12,\n      \"adjustments\": -1000\n    }\n  ],\n  \"reasonCode\": \"IAD-CLAWBACK\",\n  \"note\": \"Policy cancelled 12/09/2026\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -37603,7 +37633,7 @@
           ]
         },
         {
-          "name": "Approve a batch with optional remarks (approve:incentive; maker-checker: not the creator or submitter); posts the accrual",
+          "name": "Approve a batch with optional remarks (approve:incentive; maker-checker: not the creator, an adjuster or the submitter); posts the accrual at the end of the incentive period when it is open",
           "request": {
             "method": "POST",
             "header": [
@@ -37631,7 +37661,7 @@
                 }
               ]
             },
-            "description": "Approve a batch with optional remarks (approve:incentive; maker-checker: not the creator or submitter); posts the accrual\n\nFront-end touchpoint: Accounts > Incentive > Approvals; Calculations > Details\n\nAccess: approve:incentive",
+            "description": "Approve a batch with optional remarks (approve:incentive; maker-checker: not the creator, an adjuster or the submitter); posts the accrual at the end of the incentive period when it is open\n\nFront-end touchpoint: Accounts > Incentive > Approvals; Calculations > Details\n\nAccess: approve:incentive",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"remarks\": \"Checked against the production report\"\n}",
@@ -37672,7 +37702,7 @@
                     }
                   ]
                 },
-                "description": "Approve a batch with optional remarks (approve:incentive; maker-checker: not the creator or submitter); posts the accrual\n\nFront-end touchpoint: Accounts > Incentive > Approvals; Calculations > Details\n\nAccess: approve:incentive",
+                "description": "Approve a batch with optional remarks (approve:incentive; maker-checker: not the creator, an adjuster or the submitter); posts the accrual at the end of the incentive period when it is open\n\nFront-end touchpoint: Accounts > Incentive > Approvals; Calculations > Details\n\nAccess: approve:incentive",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"remarks\": \"Checked against the production report\"\n}",
@@ -54451,7 +54481,7 @@
       "name": "Period End",
       "item": [
         {
-          "name": "Year-end adjustment journal in adjustment period 13 (pending; approved and posted by a second user through POST /accounting/transactions/:id/post)",
+          "name": "Year-end adjustment journal in adjustment period 13, awaiting approval (approved and posted by a second user through POST /journal-vouchers/:id/approve)",
           "request": {
             "method": "POST",
             "header": [
@@ -54470,7 +54500,7 @@
                 "adjustments"
               ]
             },
-            "description": "Year-end adjustment journal in adjustment period 13 (pending; approved and posted by a second user through POST /accounting/transactions/:id/post)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+            "description": "Year-end adjustment journal in adjustment period 13, awaiting approval (approved and posted by a second user through POST /journal-vouchers/:id/approve)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"fiscalYear\": \"FY2025\",\n  \"description\": \"Audit adjustment – accrued audit fee\",\n  \"lines\": [\n    {\n      \"accountCode\": \"4401003\",\n      \"debit\": 150000,\n      \"credit\": 0\n    },\n    {\n      \"accountCode\": \"2208001\",\n      \"debit\": 0,\n      \"credit\": 150000\n    }\n  ]\n}",
@@ -54502,7 +54532,7 @@
                     "adjustments"
                   ]
                 },
-                "description": "Year-end adjustment journal in adjustment period 13 (pending; approved and posted by a second user through POST /accounting/transactions/:id/post)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+                "description": "Year-end adjustment journal in adjustment period 13, awaiting approval (approved and posted by a second user through POST /journal-vouchers/:id/approve)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"fiscalYear\": \"FY2025\",\n  \"description\": \"Audit adjustment – accrued audit fee\",\n  \"lines\": [\n    {\n      \"accountCode\": \"4401003\",\n      \"debit\": 150000,\n      \"credit\": 0\n    },\n    {\n      \"accountCode\": \"2208001\",\n      \"debit\": 0,\n      \"credit\": 150000\n    }\n  ]\n}",
@@ -54523,7 +54553,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"jv_1\",\n    \"jvNumber\": \"JV-2026-00200\",\n    \"period\": \"2025-13\",\n    \"status\": \"pending\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"jv_1\",\n    \"jvNumber\": \"JV-2026-00200\",\n    \"period\": \"2025-13\",\n    \"status\": \"for-approval\"\n  }\n}"
             }
           ]
         },
@@ -56763,7 +56793,7 @@
           ]
         },
         {
-          "name": "Open, soft-close or close a period with a reason of the Reason Codes master (period_close to soft-close or close, period_reopen to reopen; note when the reason asks for one). Closing runs the blocking checks; reopening needs approve:period-end; locked periods cannot change",
+          "name": "Open, soft-close or close a period with a reason of the Reason Codes master (period_close to soft-close or close, period_reopen to reopen; note when the reason asks for one). Soft-closing and closing run the blocking checks, and a close needs the blocking manual items signed off on the month-end close; closing and reopening need approve:period-end; locked periods cannot change",
           "request": {
             "method": "POST",
             "header": [
@@ -56791,7 +56821,7 @@
                 }
               ]
             },
-            "description": "Open, soft-close or close a period with a reason of the Reason Codes master (period_close to soft-close or close, period_reopen to reopen; note when the reason asks for one). Closing runs the blocking checks; reopening needs approve:period-end; locked periods cannot change\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: write:period-end",
+            "description": "Open, soft-close or close a period with a reason of the Reason Codes master (period_close to soft-close or close, period_reopen to reopen; note when the reason asks for one). Soft-closing and closing run the blocking checks, and a close needs the blocking manual items signed off on the month-end close; closing and reopening need approve:period-end; locked periods cannot change\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: write:period-end",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"status\": \"soft_closed\",\n  \"reasonCode\": \"PCL-MONTHEND\",\n  \"note\": \"Insurer statements pending\"\n}",
@@ -56832,7 +56862,7 @@
                     }
                   ]
                 },
-                "description": "Open, soft-close or close a period with a reason of the Reason Codes master (period_close to soft-close or close, period_reopen to reopen; note when the reason asks for one). Closing runs the blocking checks; reopening needs approve:period-end; locked periods cannot change\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: write:period-end",
+                "description": "Open, soft-close or close a period with a reason of the Reason Codes master (period_close to soft-close or close, period_reopen to reopen; note when the reason asks for one). Soft-closing and closing run the blocking checks, and a close needs the blocking manual items signed off on the month-end close; closing and reopening need approve:period-end; locked periods cannot change\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: write:period-end",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"status\": \"soft_closed\",\n  \"reasonCode\": \"PCL-MONTHEND\",\n  \"note\": \"Insurer statements pending\"\n}",
@@ -57941,7 +57971,7 @@
           ]
         },
         {
-          "name": "Cancel a year-end close run that has not closed the year",
+          "name": "Cancel a year-end close run that has not closed the year, with a reason (Reason Codes master, context year_end_cancel)",
           "request": {
             "method": "POST",
             "header": [
@@ -57969,10 +57999,10 @@
                 }
               ]
             },
-            "description": "Cancel a year-end close run that has not closed the year\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+            "description": "Cancel a year-end close run that has not closed the year, with a reason (Reason Codes master, context year_end_cancel)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
             "body": {
               "mode": "raw",
-              "raw": "{}",
+              "raw": "{\n  \"reasonCode\": \"YEC-RERUN\",\n  \"note\": \"Started before the December close\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -58010,10 +58040,10 @@
                     }
                   ]
                 },
-                "description": "Cancel a year-end close run that has not closed the year\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
+                "description": "Cancel a year-end close run that has not closed the year, with a reason (Reason Codes master, context year_end_cancel)\n\nFront-end touchpoint: Accounts > Period End > Year-End Close\n\nAccess: write:period-end",
                 "body": {
                   "mode": "raw",
-                  "raw": "{}",
+                  "raw": "{\n  \"reasonCode\": \"YEC-RERUN\",\n  \"note\": \"Started before the December close\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"

@@ -17214,7 +17214,7 @@
     "/bir/cas/documents/{type}/draft/reject": {
       "post": {
         "operationId": "postBirCasDocumentsTypeDraftReject",
-        "summary": "Return the submitted version to its preparer as a draft, with remarks (approve:period-end)",
+        "summary": "Return the submitted version to its preparer as a draft, with remarks (approve:period-end; a different user than the one who prepared, edited or submitted it)",
         "tags": [
           "BIR Forms and Invoicing"
         ],
@@ -17335,6 +17335,49 @@
             }
           }
         }
+      }
+    },
+    "/bir/cas/documents/{type}/draft/withdraw": {
+      "post": {
+        "operationId": "postBirCasDocumentsTypeDraftWithdraw",
+        "summary": "Take back the version you submitted, before it is decided: it returns to draft (write:period-end; the submitter only)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > CAS Books and Documents > Document\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > CAS Books and Documents > Document",
+        "x-permissions": [
+          "write:period-end"
+        ]
       }
     },
     "/bir/cas/documents/{type}/versions": {
@@ -61132,7 +61175,7 @@
       },
       "post": {
         "operationId": "postIncentiveCalculations",
-        "summary": "Run a calculation for a period and programs (achievement from policies / quotes, payout from program tiers)",
+        "summary": "Run a calculation for a month and programs: each program over its calculation period (month, quarter, half or year of its frequency) ending with that month, once per period; a run with no agent line is refused",
         "tags": [
           "Incentive"
         ],
@@ -61572,7 +61615,7 @@
     "/incentive/calculations/{batchId}/adjust": {
       "post": {
         "operationId": "postIncentiveCalculationsBatchIdAdjust",
-        "summary": "Adjust agent lines before submission (amount and reason per line)",
+        "summary": "Adjust agent lines before submission (amount per line) with a reason of the Reason Codes master (context incentive_adjustment; a note when the reason needs one). The adjusting user may not approve the batch",
         "tags": [
           "Incentive"
         ],
@@ -61725,12 +61768,15 @@
                         },
                         "adjustments": {
                           "type": "integer"
-                        },
-                        "reason": {
-                          "type": "string"
                         }
                       }
                     }
+                  },
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
                   }
                 }
               },
@@ -61738,10 +61784,11 @@
                 "lines": [
                   {
                     "id": 12,
-                    "adjustments": -1000,
-                    "reason": "Chargeback on cancelled policy"
+                    "adjustments": -1000
                   }
-                ]
+                ],
+                "reasonCode": "IAD-CLAWBACK",
+                "note": "Policy cancelled 12/09/2026"
               }
             }
           }
@@ -61751,7 +61798,7 @@
     "/incentive/calculations/{batchId}/approve": {
       "post": {
         "operationId": "postIncentiveCalculationsBatchIdApprove",
-        "summary": "Approve a batch with optional remarks (approve:incentive; maker-checker: not the creator or submitter); posts the accrual",
+        "summary": "Approve a batch with optional remarks (approve:incentive; maker-checker: not the creator, an adjuster or the submitter); posts the accrual at the end of the incentive period when it is open",
         "tags": [
           "Incentive"
         ],
@@ -90549,7 +90596,7 @@
     "/period-end/adjustments": {
       "post": {
         "operationId": "postPeriodEndAdjustments",
-        "summary": "Year-end adjustment journal in adjustment period 13 (pending; approved and posted by a second user through POST /accounting/transactions/:id/post)",
+        "summary": "Year-end adjustment journal in adjustment period 13, awaiting approval (approved and posted by a second user through POST /journal-vouchers/:id/approve)",
         "tags": [
           "Period End"
         ],
@@ -90591,7 +90638,7 @@
                     "id": "jv_1",
                     "jvNumber": "JV-2026-00200",
                     "period": "2025-13",
-                    "status": "pending"
+                    "status": "for-approval"
                   }
                 }
               }
@@ -93646,7 +93693,7 @@
     "/period-end/periods/{period}/status": {
       "post": {
         "operationId": "postPeriodEndPeriodsPeriodStatus",
-        "summary": "Open, soft-close or close a period with a reason of the Reason Codes master (period_close to soft-close or close, period_reopen to reopen; note when the reason asks for one). Closing runs the blocking checks; reopening needs approve:period-end; locked periods cannot change",
+        "summary": "Open, soft-close or close a period with a reason of the Reason Codes master (period_close to soft-close or close, period_reopen to reopen; note when the reason asks for one). Soft-closing and closing run the blocking checks, and a close needs the blocking manual items signed off on the month-end close; closing and reopening need approve:period-end; locked periods cannot change",
         "tags": [
           "Period End"
         ],
@@ -95643,7 +95690,7 @@
     "/period-end/year-end/{id}/cancel": {
       "post": {
         "operationId": "postPeriodEndYearEndIdCancel",
-        "summary": "Cancel a year-end close run that has not closed the year",
+        "summary": "Cancel a year-end close run that has not closed the year, with a reason (Reason Codes master, context year_end_cancel)",
         "tags": [
           "Period End"
         ],
@@ -95728,9 +95775,19 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
               },
-              "example": {}
+              "example": {
+                "reasonCode": "YEC-RERUN",
+                "note": "Started before the December close"
+              }
             }
           }
         }
