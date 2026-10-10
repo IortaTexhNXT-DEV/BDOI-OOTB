@@ -129,7 +129,7 @@ const StatementFormats = () => {
         )}
       </Dialog>
 
-      <Dialog className="pe-dialog" header={test ? `${t("bankReconciliation.testFile")} · ${test.code}` : ""} visible={!!test} style={{ width: "min(900px, 96vw)" }} onHide={() => setTest(null)}
+      <Dialog className="pe-dialog bv-centered" header={test ? `${t("bankReconciliation.testFile")} · ${test.code}` : ""} visible={!!test} style={{ width: "min(900px, 96vw)" }} onHide={() => setTest(null)}
         footer={test ? (
           <div>
             <Button label={t("bankReconciliation.close")} outlined onClick={() => setTest(null)} />

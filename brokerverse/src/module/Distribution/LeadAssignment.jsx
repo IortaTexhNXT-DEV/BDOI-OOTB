@@ -249,7 +249,7 @@ const LeadAssignment = () => {
   const leadColumns = (list) => [
     <Column key="sel" selectionMode="multiple" headerStyle={{ width: "3rem" }} />,
     <Column key="no" field="leadNumber" header={t("distribution.la.lead", "Prospect")} body={(r) => <span>{r.leadNumber}<br /><span className="pe-muted">{r.name}</span></span>} />,
-    <Column key="status" field="status" header={t("distribution.common.status", "Status")} />,
+    <Column key="status" header={t("distribution.common.status", "Status")} body={(r) => <StatusTag status={r.status} />} />,
     <Column key="lob" header={t("distribution.la.lob", "Line")} body={(r) => (r.lob ? <span>{r.lob}{r.productName ? <><br /><span className="pe-muted">{r.productName}</span></> : null}</span>
       : <span className="pe-muted">{untaggedOption.label}</span>)} />,
     <Column key="where" header={t("distribution.la.territory", "Territory")} body={(r) => [r.city, r.province].filter(Boolean).join(", ")} />,
@@ -282,8 +282,7 @@ const LeadAssignment = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader home={t("distribution.home.operations", "Operations")} section={t("distribution.home.sales", "Sales & Marketing")} title={t("distribution.la.title", "Lead Assignment")}
-        subtitle={t("distribution.la.subtitle", "Who works each prospect: the team view by reporting line, the reassignment queue and the assignment rules.")} />
+      <PageHeader home={t("distribution.home.operations", "Operations")} section={t("distribution.home.sales", "Sales & Marketing")} title={t("distribution.la.title", "Lead Assignment")} />
       <div className="pe-card">
         <TabView activeIndex={tab} onTabChange={(e) => { setTab(e.index); setSelected([]); }}>
           <TabPanel header={t("distribution.la.team", "Team View")}>
@@ -312,8 +311,7 @@ const LeadAssignment = () => {
             </DataTable>
           </TabPanel>
           {manage ? (
-            <TabPanel header={`${t("distribution.la.queue", "Reassignment Queue")} (${queue.length})`}>
-              <p className="pe-muted mt-0">{t("distribution.la.queueHelp", "Prospects no rule could assign, whose account executive is no longer active, that were not worked in time or that were sent here by hand.")}</p>
+            <TabPanel header={t("distribution.la.queue", "Reassignment Queue")}>
               <div className="dist-toolbar">
                 <span className="p-input-icon-left">
                   <i className="pi pi-search" />

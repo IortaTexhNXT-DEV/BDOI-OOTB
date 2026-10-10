@@ -4441,16 +4441,16 @@
     "bulkUpload": "อัปโหลดหลายรายการ"
   },
   "bulkUploadQuotations": {
-    "header": "อัปโหลดใบเสนอราคาหลายรายการ",
+    "header": "อัปโหลดใบเสนอราคาจำนวนมาก",
     "instructions": "คำแนะนำ:",
-    "downloadTemplate": "ดาวน์โหลดเทมเพลต",
+    "downloadTemplate": "ดาวน์โหลดแม่แบบ",
     "instruction1": "ดาวน์โหลดไฟล์เทมเพลตตัวอย่าง",
     "instruction2": "กรอกรายละเอียดใบเสนอราคาในไฟล์ Excel",
     "instruction3": "อัปโหลดไฟล์ที่กรอกแล้ว (สูงสุด 10MB)",
     "instruction4": "รองรับเฉพาะไฟล์ .xlsx",
     "chooseFile": "เลือกไฟล์",
     "selectExcelFile": "เลือกไฟล์ Excel เพื่ออัปโหลด",
-    "maxFileSize": "ขนาดไฟล์สูงสุด: 10MB",
+    "maxFileSize": "ขนาดไฟล์สูงสุด: 10 MB",
     "processingFile": "กำลังประมวลผลไฟล์...",
     "cancel": "ยกเลิก",
     "uploading": "กำลังอัปโหลด...",
@@ -4460,13 +4460,13 @@
     "close": "ปิด",
     "invalidFile": "ไฟล์ไม่ถูกต้อง",
     "onlyExcelFiles": "กรุณาอัปโหลดเฉพาะไฟล์ Excel (.xlsx)",
-    "fileTooLarge": "ไฟล์ใหญ่เกินไป",
-    "fileSizeLessThan10MB": "ขนาดไฟล์ต้องน้อยกว่า 10MB",
-    "noFileSelected": "ไม่ได้เลือกไฟล์",
+    "fileTooLarge": "ไฟล์มีขนาดใหญ่เกินไป",
+    "fileSizeLessThan10MB": "ไฟล์ต้องมีขนาดไม่เกิน 10 MB",
+    "noFileSelected": "ยังไม่ได้เลือกไฟล์",
     "pleaseSelectFile": "กรุณาเลือกไฟล์เพื่ออัปโหลด",
-    "uploadStarted": "เริ่มอัปโหลด",
+    "uploadStarted": "เริ่มอัปโหลดแล้ว",
     "uploadStartedDetail": "เริ่มอัปโหลดใบเสนอราคาหลายรายการ กำลังประมวลผลในพื้นหลัง",
-    "uploadFailed": "อัปโหลดล้มเหลว",
+    "uploadFailed": "อัปโหลดไม่สำเร็จ",
     "uploadFailedDetail": "อัปโหลดไฟล์ใบเสนอราคาไม่สำเร็จ"
   },
   "quoteStats": {
@@ -6464,7 +6464,11 @@
       "deleteRuleAction": "Remove rule",
       "runMatched": "Matched by a rule",
       "runUnmatched": "Staying in the queue",
-      "leads": "Prospects"
+      "leads": "Prospects",
+      "reassignTitle_one": "โอนผู้มุ่งหวัง {{count}} ราย",
+      "reassignTitle_other": "โอนผู้มุ่งหวัง {{count}} ราย",
+      "queueTitle_one": "ส่งผู้มุ่งหวัง {{count}} รายเข้าคิว",
+      "queueTitle_other": "ส่งผู้มุ่งหวัง {{count}} รายเข้าคิว"
     },
     "cr": {
       "emailTitle": "E-mail comparison report",

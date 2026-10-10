@@ -2,18 +2,16 @@ import React, { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
-import { FileUpload } from "primereact/fileupload";
 import { Toast } from "primereact/toast";
 import { ProgressBar } from "primereact/progressbar";
 import quotationService from "../../../services/quotationService";
-import SvgUpload from "../../../assets/agentIcon/SvgUpload";
 import "./index.scss";
+import FileField from "../../../components/FileField";
 import { downloadBulkUploadTemplate, isSupportedUploadFile } from "../../component/bulkUploadTemplate";
 
 const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
   const { t } = useTranslation();
   const toast = useRef(null);
-  const fileUploadRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [uploadResult, setUploadResult] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -25,11 +23,11 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
       if (!isSupportedUploadFile(file)) {
         toast.current.show({
           severity: 'error',
-          summary: t('bulkUploadQuotations.invalidFile'),
-          detail: t('bulkUploadQuotations.onlyExcelFiles'),
+          summary: t("bulkUploadQuotations.invalidFile"),
+          detail: t("bulkUploadQuotations.onlyExcelFiles"),
           life: 3000
         });
-        fileUploadRef.current.clear();
+        setSelectedFile(null);
         return;
       }
 
@@ -37,11 +35,11 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
       if (file.size > 10 * 1024 * 1024) {
         toast.current.show({
           severity: 'error',
-          summary: t('bulkUploadQuotations.fileTooLarge'),
-          detail: t('bulkUploadQuotations.fileSizeLessThan10MB'),
+          summary: t("bulkUploadQuotations.fileTooLarge"),
+          detail: t("bulkUploadQuotations.fileSizeLessThan10MB"),
           life: 3000
         });
-        fileUploadRef.current.clear();
+        setSelectedFile(null);
         return;
       }
 
@@ -53,8 +51,8 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
     if (!selectedFile) {
       toast.current.show({
         severity: 'warn',
-        summary: t('bulkUploadQuotations.noFileSelected'),
-        detail: t('bulkUploadQuotations.pleaseSelectFile'),
+        summary: t("bulkUploadQuotations.noFileSelected"),
+        detail: t("bulkUploadQuotations.pleaseSelectFile"),
         life: 3000
       });
       return;
@@ -77,15 +75,12 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
         
         // Clear selected file after successful upload
         setSelectedFile(null);
-        if (fileUploadRef.current) {
-          fileUploadRef.current.clear();
-        }
         
         // Show success message
         toast.current.show({
           severity: 'success',
-          summary: t('bulkUploadQuotations.uploadStarted'),
-          detail: data.message || t('bulkUploadQuotations.uploadStartedDetail'),
+          summary: t("bulkUploadQuotations.uploadStarted"),
+          detail: data.message || t("bulkUploadQuotations.uploadStartedDetail"),
           life: 5000
         });
 
@@ -111,9 +106,6 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
       
       // Clear selected file on error
       setSelectedFile(null);
-      if (fileUploadRef.current) {
-        fileUploadRef.current.clear();
-      }
     } finally {
       setLoading(false);
     }
@@ -122,9 +114,6 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
   const handleClose = () => {
     setSelectedFile(null);
     setUploadResult(null);
-    if (fileUploadRef.current) {
-      fileUploadRef.current.clear();
-    }
     onHide();
   };
 
@@ -134,7 +123,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
     <Dialog
       visible={visible}
       onHide={handleClose}
-      header={t('bulkUploadQuotations.header')}
+      header={t("bulkUploadQuotations.header")}
       className="bulk-upload-modal"
       style={{ width: '600px' }}
       modal
@@ -144,62 +133,42 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
         
         {!uploadResult ? (
           <div className="bulk-upload-content">
-            <div className="upload-instructions">
-              <div className="instructions-header">
-                <h4>{t('bulkUploadQuotations.instructions')}</h4>
-                <Button
-                  label={t('bulkUploadQuotations.downloadTemplate')}
-                  icon="pi pi-download"
-                  className="p-button-sm p-button-text"
-                  onClick={handleDownloadTemplate}
-                />
-              </div>
-              <ul>
-                <li>{t('bulkUploadQuotations.instruction1')}</li>
-                <li>{t('bulkUploadQuotations.instruction2')}</li>
-                <li>{t('bulkUploadQuotations.instruction3')}</li>
-                <li>{t('bulkUploadQuotations.instruction4')}</li>
-              </ul>
+            <div className="upload-template">
+              <Button
+                label={t("bulkUploadQuotations.downloadTemplate")}
+                icon="pi pi-download"
+                className="p-button-sm p-button-text p-0"
+                onClick={handleDownloadTemplate}
+              />
             </div>
 
             <div className="upload-area">
-              <FileUpload
-                ref={fileUploadRef}
-                mode="basic"
-                name="file"
+              <FileField
+                id="bulk-upload-file"
                 accept=".xlsx,.csv"
-                maxFileSize={10485760}
-                customUpload
-                auto={false}
-                chooseLabel={selectedFile ? selectedFile.name : t('bulkUploadQuotations.chooseFile')}
-                onSelect={handleFileSelect}
+                value={selectedFile}
+                onChange={(file) => (file ? handleFileSelect({ files: [file] }) : setSelectedFile(null))}
                 disabled={loading}
+                hint={t("bulkUploadQuotations.maxFileSize")}
               />
-              {!selectedFile && (
-                <div className="upload-placeholder">
-                  <SvgUpload />
-                  <p>{t('bulkUploadQuotations.selectExcelFile')}</p>
-                  <span>{t('bulkUploadQuotations.maxFileSize')}</span>
-                </div>
-              )}
             </div>
 
             {loading && (
               <div className="upload-progress">
                 <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
-                <p>{t('bulkUploadQuotations.processingFile')}</p>
+                <p>{t("bulkUploadQuotations.processingFile")}</p>
               </div>
             )}
 
             <div className="bulk-upload-footer">
               <Button
-                label={t('bulkUploadQuotations.cancel')}
-                className="p-button-text"
+                label={t("bulkUploadQuotations.cancel")}
+                outlined
                 onClick={handleClose}
                 disabled={loading}
               />
               <Button
-                label={loading ? t('bulkUploadQuotations.uploading') : t('bulkUploadQuotations.upload')}
+                label={loading ? t("bulkUploadQuotations.uploading") : t("bulkUploadQuotations.upload")}
                 onClick={handleUpload}
                 disabled={!selectedFile || loading}
                 loading={loading}
@@ -209,17 +178,17 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
         ) : (
           <div className="processing-section">
             <div className="processing-header">
-              <h4>{t('bulkUploadQuotations.processing')}</h4>
+              <h4>{t("bulkUploadQuotations.processing")}</h4>
               <ProgressBar mode="indeterminate" style={{ height: '6px', marginTop: '1rem' }} />
             </div>
             
             <div className="status-message">
-              <p className="status-text">{uploadResult.message || t('bulkUploadQuotations.fileBeingProcessed')}</p>
+              <p className="status-text">{uploadResult.message || t("bulkUploadQuotations.fileBeingProcessed")}</p>
             </div>
 
             <div className="processing-actions">
               <Button
-                label={t('bulkUploadQuotations.close')}
+                label={t("bulkUploadQuotations.close")}
                 onClick={handleClose}
                 className="close-button"
               />

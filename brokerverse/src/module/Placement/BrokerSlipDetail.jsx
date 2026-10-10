@@ -319,7 +319,7 @@ const BrokerSlipDetail = () => {
         )}
       </Dialog>
 
-      <Dialog className="placement-dialog" header={t("placement.actions.addInsurer")} visible={Boolean(addInsurer)} onHide={() => setAddInsurer(null)} style={{ width: "36rem" }} breakpoints={{ "640px": "95vw" }}
+      <Dialog className="placement-dialog bv-centered" header={t("placement.actions.addInsurer")} visible={Boolean(addInsurer)} onHide={() => setAddInsurer(null)} style={{ width: "36rem" }} breakpoints={{ "640px": "95vw" }}
         footer={<><Button label={t("placement.actions.cancel")} text onClick={() => setAddInsurer(null)} /><Button label={t("placement.actions.add")} icon="pi pi-plus" disabled={!addInsurer?.insurer} loading={busy}
           onClick={async () => { const ok = await act(() => placementService.addInsurer(slip.id, addInsurer.insurer), t("placement.messages.insurerAdded")); if (ok) setAddInsurer(null); }} /></>}>
         <KeyValueGrid columns={2} className="mb-3" items={[
