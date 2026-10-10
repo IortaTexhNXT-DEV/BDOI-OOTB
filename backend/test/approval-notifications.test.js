@@ -1,6 +1,7 @@
 /**
  * Approval notifications of the maker-checker flows: on submission everyone holding the approve permission is told
- * (audience = that permission, link = the approver's screen); on approval or rejection the maker is told; with
+ * (audience = that permission, link = the approver's screen; a remittance: the eligible approvers by name, with their
+ * Authority Matrix limit); on approval or rejection the maker is told; with
  * notification.approval_requests switched off neither is created.
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
@@ -181,6 +182,31 @@ describe('insurer reconciliation', () => {
     await maker('post', `/insurer-reconciliation/statements/${st.id}/submit`).send({});
     expect((await people.mgr.api('post', `/insurer-reconciliation/statements/${st.id}/approve`).send({})).status).toBe(200);
     expect((await personal(ctx.userIds.maker, 'insurer_statement', st.id)).map((x) => x.title)).toContain('Insurer reconciliation ISR-APPR-0001 approved');
+  });
+});
+
+describe('remittance', () => {
+  it('a submitted remittance goes to its eligible approvers by name, never to a role; the maker hears of the return with a link to the record', async () => {
+    const recon = await admin('post', '/users').send({ username: 'ap.recon', password: PASSWORD, displayName: 'ap.recon', roles: ['tis-ccd-recon'], email: 'ap.recon@example.ph' });
+    expect(recon.status).toBe(201);
+    const c = await maker('post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo: 'EXT-NTF-1', premium: 9000, commission: 1000, tax: 0 }] });
+    expect(c.status, JSON.stringify(c.body)).toBe(201);
+    const remId = c.body.data.id;
+    expect((await maker('post', '/remittance/remittances/process').send({ ids: [remId] })).status).toBe(200);
+    const approval = (await query("SELECT id FROM remittance_approvals WHERE entity = 'remittance' AND entity_id = $1", [remId])).rows[0];
+    const requests = await approvalRequests('remittance', remId);
+    expect(requests.length).toBeGreaterThan(0);
+    expect(requests.every((n) => n.user_id && n.audience === null && n.link === `/finance/remittance/approvals?approval=${approval.id}`)).toBe(true);
+    const to = requests.map((n) => n.user_id);
+    expect(to).toContain(ctx.userIds.checker);
+    expect(to).not.toContain(ctx.userIds.maker);
+    expect(to).not.toContain(recon.body.data.userId);
+    expect(requests.find((n) => n.user_id === ctx.userIds.checker)).toMatchObject({ title: `Remittance ${c.body.data.remittanceNo} awaiting approval` });
+
+    expect((await checker('post', `/remittance/approvals/${approval.id}/reject`).send({ reasonCode: 'RRJ-DUPLICATE' })).status).toBe(200);
+    const [back] = await personal(ctx.userIds.maker, 'remittance', remId);
+    expect(back).toMatchObject({ title: `Insurer Remittance ${c.body.data.remittanceNo} returned`, link: `/finance/remittance/remittances/${remId}`, type: 'alert' });
+    expect(back.message).toMatch(/^Returned by .+: Duplicate$/);
   });
 });
 

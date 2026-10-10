@@ -82,13 +82,19 @@ const daysSetting = async (key, fallback) => Math.max(1, Number(await getSetting
 /** Last day of the month after a YYYY-MM period plus a number of days: the due date of the work that closes the period. */
 const afterPeriod = (period, days) => `((to_date(${period}, 'YYYY-MM') + interval '1 month')::date + ${days}::int - 1)`;
 
-/** Approval limit of the user for an Authority Matrix transaction type: SQL condition on `amountExpr`. */
-async function withinAuthority(ctx, type, amountExpr) {
-  if (!(await getSetting('access.authority_enforced', true))) return 'TRUE';
+/**
+ * Approval limit of the user for an Authority Matrix transaction type: SQL condition on `amountExpr`. `requireLimit`:
+ * a user without a limit for the type sees nothing, whatever access.authority_without_limit says (remittance approvals
+ * with remittance.require_authority_limit, as remittance/decision.js decides).
+ */
+async function withinAuthority(ctx, type, amountExpr, { requireLimit = false } = {}) {
+  const enforced = await getSetting('access.authority_enforced', true);
+  if (!enforced && !requireLimit) return 'TRUE';
   const exists = (await ctx.db.query("SELECT to_regclass('authority_limits') IS NOT NULL AS ok")).rows[0].ok;
   if (!exists) return 'TRUE';
   const a = await effectiveAuthority(ctx.db, ctx.user.id, type, ctx.today);
-  if (!a.found) return String(await getSetting('access.authority_without_limit', 'allow')) === 'refuse' ? 'FALSE' : 'TRUE';
+  if (!a.found) return requireLimit || String(await getSetting('access.authority_without_limit', 'allow')) === 'refuse' ? 'FALSE' : 'TRUE';
+  if (!enforced) return 'TRUE';
   if (a.unlimited) return 'TRUE';
   return `(COALESCE(${amountExpr}, 0) <= ${ctx.P(a.limit)})`;
 }
@@ -251,21 +257,25 @@ async function approvals(ctx) {
         FROM petty_cash_requests pc WHERE pc.status = 'submitted' AND ${notMine(ctx, 'pc.created_by')}`);
     }
   }
-  // remittance approvals are decided with approve:remittance (migration 0400); debit notes stay with write:remittance
+  // remittance approvals are decided with approve:remittance (migration 0400), by the rules of remittance/decision.js:
+  // not the submitter nor the remittance's maker, not an earlier-level approver, within the user's limit (a limit is
+  // required with remittance.require_authority_limit); debit notes stay with write:remittance
   if (ctx.can('approve:remittance')) {
-    const remit = await withinAuthority(ctx, 'remittance', 'a.amount');
-    const settle = await withinAuthority(ctx, 'remittance_settlement', 'a.amount');
+    const requireLimit = !!(await getSetting('remittance.require_authority_limit'));
+    const remit = await withinAuthority(ctx, 'remittance', 'a.amount', { requireLimit });
+    const settle = await withinAuthority(ctx, 'remittance_settlement', 'a.amount', { requireLimit });
     out.push(`SELECT ${select({ ...base, kind: "COALESCE(a.transaction_type, 'Remittance')", id: 'a.id', ref: 'a.reference_no', title: "COALESCE(a.description, a.transaction_type, 'Remittance')",
       due_date: `${localDate(ctx, "a.created_at + make_interval(hours => COALESCE(a.sla_hours, 48))")}`, status: 'a.status', priority: prio('a.priority'),
-      owner_id: 'a.delegated_to', queue: 'a.delegated_to IS NULL', link: "'/finance/remittance/approval'", amount: 'a.amount', created_at: 'a.created_at' })}
-      FROM remittance_approvals a WHERE a.status = 'Pending' AND ${notMine(ctx, 'a.initiator_id')}
+      owner_id: 'a.delegated_to', queue: 'a.delegated_to IS NULL', link: "'/finance/remittance/approvals?approval=' || a.id", amount: 'a.amount', created_at: 'a.created_at' })}
+      FROM remittance_approvals a LEFT JOIN remittances rm ON a.entity = 'remittance' AND rm.id = a.entity_id
+      WHERE a.status = 'Pending' AND ${notMine(ctx, 'a.initiator_id')} AND ${notMine(ctx, 'rm.created_by')}
         AND NOT EXISTS (SELECT 1 FROM jsonb_array_elements(COALESCE(a.history, '[]'::jsonb)) h WHERE h->>'action' = 'Approved' AND h->>'by' = ANY(${ctx.ME}::text[]))
         AND (CASE WHEN a.entity = 'remittance' THEN ${remit} ELSE ${settle} END)`);
   }
   if (ctx.can('write:remittance')) {
     if (await has('commission_debit_notes')) {
       out.push(`SELECT ${select({ ...base, kind: "'Commission debit note'", id: 'dn.id', ref: 'dn.dn_number', title: "COALESCE(ic.name, 'Commission debit note')", due_date: due('COALESCE(dn.submitted_at, dn.created_at)'),
-        status: 'dn.status', link: "'/finance/remittance/directbill'", amount: 'dn.amount', created_at: 'dn.created_at' })}
+        status: 'dn.status', link: "'/finance/remittance/billing'", amount: 'dn.amount', created_at: 'dn.created_at' })}
         FROM commission_debit_notes dn LEFT JOIN insurance_companies ic ON ic.id = dn.insurance_company_id
         WHERE dn.status = 'for-approval' AND ${notMine(ctx, 'COALESCE(dn.submitted_by, dn.created_by)')}`);
     }

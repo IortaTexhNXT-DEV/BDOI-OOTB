@@ -15,6 +15,9 @@ import { pool, withTransaction } from '../../db/pool.js';
 import { businessTimeZone } from '../../lib/dates.js';
 import { buildPdf, sendPdf } from '../documents/pdf.js';
 import { commissionDebitNoteDoc, remittanceAdviceDoc } from '../documents/templates.js';
+import { sendTable } from '../documents/tabular.js';
+import * as approvals from './approvals.js';
+import { ACTIVITY_HEADER, activityRows, remittanceActivity } from './activity.js';
 
 /** Remittance (Accounts > Remittance, 16 screens) and the Remittance Master overview. */
 const { router, define } = moduleRouter('Remittance', '/remittance');
@@ -57,10 +60,26 @@ const activity = {
 };
 define({
   method: 'GET', path: '/remittances/:id',
-  summary: 'Remittance details: insurer, policies, documents, activity log (oldest first: the remittance\'s audit rows, its approval decisions and the settlement that settled it; each entry with action label, user display name and roles, status from / to, remarks and changed fields)',
+  summary: 'Remittance details: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, and the activity log (as GET /remittances/:id/activity)',
   screen: S('Tracking > View'), middleware: read,
   response: { success: true, data: { ...rem, insurerDetails: { code: 'MALAYAN', name: 'Malayan Insurance Co., Inc.' }, policies: [{ policyNo: 'POL-2026-00001', premium: 15000, commission: 2250 }], activityLog: [activity] } },
   handler: async (req, res) => ok(res, await svc.remittanceDetails(req.params.id, { viewer: req.user })),
+});
+define({
+  method: 'GET', path: '/remittances/:id/activity',
+  summary: 'Activity log of a remittance, oldest first: its audit, the approval decisions (display name, level, limit at decision and its source, reason), the settlement, the payment voucher with its batch and cheque audit, and the e-mails sent; the same action of the same user within 2 s is one entry (format=xlsx: Download log)',
+  screen: S('Remittances > Record > Activity'), middleware: read, query: { format: 'xlsx' },
+  response: { success: true, data: [{ ...activity, actionCode: 'approve', actionLabel: 'Remittance approved', fromStatus: 'Pending Approval', toStatus: 'Approved', changes: [
+    { field: 'limitAtDecision', label: 'Limit at decision', before: null, after: 'PHP 1,000,000.00' }, { field: 'limitSource', label: 'Limit source', before: null, after: 'Role limit: TIS Finance & General Accounting' }],
+  approval: { level: 1, requiredLevels: 1, limitAtDecision: 1000000, limitSource: 'role tis-finance', limitSourceLabel: 'Role limit: TIS Finance & General Accounting', reason: null } }] },
+  handler: async (req, res) => {
+    const r = await svc.getRemittanceRow(req.params.id);
+    const entries = await remittanceActivity(r.id, { viewer: req.user });
+    if (String(req.query.format || '').toLowerCase() === 'xlsx') {
+      return sendTable(res, { header: ACTIVITY_HEADER, rows: activityRows(entries), fileBase: `activity-${r.remittance_number}`, format: 'xlsx', sheetName: 'Activity' });
+    }
+    return ok(res, entries);
+  },
 });
 define({
   method: 'GET', path: '/remittances/:id/pdf', summary: 'Printable remittance advice (agency bill for an agency bill): broker letterhead, the policies, the amount due and the signatures (PDF; download=1 for an attachment)',
@@ -98,13 +117,12 @@ define({
 for (const action of ['approve', 'reject']) {
   define({
     method: 'POST', path: `/remittances/:id/${action}`,
-    summary: `${action === 'approve' ? 'Approve' : 'Reject'} a remittance (approve:remittance; maker-checker: not the submitter; within the approver's Authority Matrix limit)`, screen: S('Approval'), middleware: approve,
-    request: action === 'approve' ? { comments: 'Verified' } : { reasonCode: 'RRJ-OTHER', note: 'Missing documents' }, response: { success: true, data: { status: action === 'approve' ? 'Approved' : 'Rejected' } },
+    summary: `${action === 'approve' ? 'Approve' : 'Reject (return to the maker, with a remittance_reject reason)'} a remittance (approve:remittance; maker-checker: not the submitter or maker; within the approver's Authority Matrix limit; version: 409 STALE when the approval moved on, 409 ALREADY_DECIDED when decided)`, screen: S('Approval'), middleware: approve,
+    request: action === 'approve' ? { comments: 'Verified', version: 1 } : { reasonCode: 'RRJ-OTHER', note: 'Missing documents', version: 1 }, response: { success: true, data: { status: action === 'approve' ? 'Approved' : 'Rejected' } },
     handler: async (req, res) => {
       const r = await svc.getRemittanceRow(req.params.id);
-      const { before, after, decision } = await svc.decideFor('remittance', r.id, action, req.body || {}, req.user);
-      await audit(req, { entity: 'remittance', entityId: r.id, action, before, after: { ...after, ...decision } });
-      ok(res, await svc.getRemittance(r.id), `Remittance ${action === 'approve' ? 'approved' : 'rejected'}`);
+      await svc.decideFor('remittance', r.id, action, req.body || {}, req.user, { req, version: req.body?.version ?? null });
+      ok(res, await svc.getRemittance(r.id), `Remittance ${action === 'approve' ? 'approved' : 'returned to the maker'}`);
     },
   });
 }
@@ -316,11 +334,38 @@ define({
 });
 
 // ---------------- approvals ----------------
+const decisionExample = { canDecide: false, blockedCode: 'SUBMITTER', blockedReason: 'You submitted this remittance. Another user with remittance authority must approve it.',
+  level: { current: 1, required: 1 }, amount: 409141.43, myLimit: null, unlimited: false, limitSource: null, limitSourceLabel: null,
+  eligibleApprovers: [{ id: 'usr_9', name: 'J. Cruz', role: 'TIS Finance & General Accounting', limit: 1000000, limitSourceLabel: 'Role limit: TIS Finance & General Accounting', coveringFor: null }] };
+const inboxRow = { id: 21, version: 1, type: 'remittance', typeLabel: 'Remittance', reference: 'REM-2026-00021', entity: 'remittance', entityId: 'rm_21', recordLink: '/finance/remittance/remittances/rm_21',
+  insurer: { id: 3, name: 'Pioneer Insurance' }, productLine: 'Motor', amount: 409141.43, submittedBy: { id: 'usr_4', name: 'M. Reyes' }, submittedAt: '2026-10-06T02:12:00.000Z',
+  status: 'Pending', statusLabel: 'Pending Approval', level: { current: 1, required: 1, label: '1 of 1' },
+  sla: { hours: 24, dueAt: '2026-10-07T02:12:00.000Z', ageHours: 6.5, overdue: false, label: 'Due in 18 h' }, decision: decisionExample,
+  nextStep: { code: 'approve', label: 'Awaiting remittance approver: J. Cruz', actor: { type: 'user', id: 'usr_9', name: 'J. Cruz' }, dueAt: '2026-10-07T02:12:00.000Z' },
+  reminder: { remindedAt: null, nextAt: null, allowed: true }, outcome: null,
+  actions: [{ code: 'view', label: 'View', allowed: true }, { code: 'approve', label: 'Approve', allowed: false, blockedCode: 'SUBMITTER' }, { code: 'remind', label: 'Remind approver', allowed: true }] };
 define({
-  method: 'GET', path: '/approvals', summary: 'Approval queue (status=Pending by default; filter transactionType, priority)', screen: S('Approval'), middleware: read,
-  query: { status: 'Pending', transactionType: 'Settlement' },
-  response: { success: true, data: [{ id: 1, priority: 'High', referenceNo: 'SET-2026-00001', transactionType: 'Settlement', initiator: 'Finance Officer', submissionDate: '2026-09-26 10:30', amount: 87500, description: 'Settlement to Malayan', slaHours: 12, currentLevel: 1 }] },
-  handler: async (req, res) => ok(res, await svc.listApprovals(req.query)),
+  method: 'GET', path: '/approvals',
+  summary: 'Approvals. With view=mine|submitted|all|decided (type=remittance|settlement|adjustment|transfer, insurerId, q, page, perPage): the inbox rows with the decision block, next step, SLA and level, server totals and the KPI figures (awaiting my decision, past SLA, submitted by me, decided by me today in the business time zone); decided covers the last 30 days. Without view: the legacy queue (status=Pending by default; filter transactionType, priority)',
+  screen: `${S('Approvals')}; ${S('Approval')}`, middleware: read,
+  query: { view: 'mine', type: 'remittance', insurerId: 3, q: 'REM-2026', page: 1, perPage: 50 },
+  response: { success: true, data: [inboxRow], total: 1, page: 1, perPage: 50, totalPages: 1, view: 'mine', totals: { count: 1, amount: 409141.43 },
+    kpis: { awaitingMine: { count: 1, amount: 409141.43 }, pastSla: { count: 0, oldestHours: 0 }, submittedByMe: { count: 0 }, decidedByMeToday: { count: 2, approved: 2, rejected: 0 } } },
+  handler: async (req, res) => {
+    if (!req.query.view) return ok(res, await svc.listApprovals(req.query));
+    const pg = paging(req.query, { page: 1, perPage: 50 });
+    const r = await approvals.approvalInbox(req.query, req.user, pg);
+    return sendList(res, r.rows, r.total, pg, { view: r.view, totals: r.totals, kpis: r.kpis });
+  },
+});
+define({
+  method: 'POST', path: '/approvals/decide',
+  summary: 'Approve or reject several approvals, each decided on its own with the version it was shown (approve:remittance); per-item results: Approved / Rejected, or the refusal code and text (ALREADY_DECIDED "Already approved by J. Cruz at 10:32", STALE, ABOVE_LIMIT ...). A rejection needs a remittance_reject reasonCode',
+  screen: S('Approvals > Approve selected'), middleware: approve,
+  request: { items: [{ id: 21, version: 1 }, { id: 22, version: 1 }], action: 'approve', note: 'Checked against the statement' },
+  response: { success: true, data: { action: 'approve', decided: 1, refused: 1, results: [{ id: 21, reference: 'REM-2026-00021', ok: true, status: 'Approved', message: 'Approved' },
+    { id: 22, ok: false, code: 'ALREADY_DECIDED', message: 'Already approved by J. Cruz at 10:32.' }] } },
+  handler: async (req, res) => ok(res, await approvals.decideMany(req.body || {}, req.user, req)),
 });
 define({
   method: 'GET', path: '/approvals/approvers', summary: 'Users who may take over a remittance approval (active, hold approve:remittance or an administrator role; not the caller), for the delegation drop-down',
@@ -333,17 +378,39 @@ define({
   response: { success: true, data: [{ referenceNo: 'TRF-2026-00001', transactionType: 'Electronic Transfer', amount: 156000, action: 'Approved', actionDate: '2026-09-20 15:30', remarks: 'Verified' }] },
   handler: async (_req, res) => ok(res, await svc.approvalHistory()),
 });
+define({
+  method: 'GET', path: '/approvals/:id',
+  summary: 'Review panel of one approval (id, or remittance:<id>): the inbox row with the decision block, the record header, totals and first 10 lines, the previous remittance of the insurer with the change in %, the checks (content unchanged since submission; accounting period open, as information), open exceptions and the latest activity',
+  screen: S('Approvals > Review'), middleware: read,
+  response: { success: true, data: { ...inboxRow, record: { id: 'rm_21', remittanceNo: 'REM-2026-00021', statusLabel: 'Pending Approval', insurer: { id: 3, name: 'Pioneer Insurance' }, version: 3 },
+    totals: { policies: 12, premium: 520000, commission: 98000, tax: 12858.57, adjustments: 0, dueToInsurer: 409141.43 },
+    lines: [{ policyNo: 'POL-2026-95021', client: 'J. Santos', premium: 64159.68, dueToInsurer: 40857.86 }], lineCount: 12,
+    previous: { id: 'rm_17', remittanceNo: 'REM-2026-00017', amount: 371210, changePercent: 10.22 },
+    checks: [{ code: 'content-unchanged', label: 'Content unchanged since submission', result: 'pass', detail: 'v3 · unchanged since submission' },
+      { code: 'period-open', label: 'Period Oct 2026 open', result: 'pass', detail: null }],
+    exceptions: { count: 0, items: [] }, activity: [activity] } },
+  handler: async (req, res) => ok(res, await approvals.approvalSummary(req.params.id, req.user)),
+});
+define({
+  method: 'POST', path: '/approvals/:id/remind',
+  summary: 'Remind the eligible approvers of a pending approval (its submitter; at most once per remittance.reminder_interval_hours, 409 REMINDED "Reminded 10:15 · next at 14:15"; 409 NO_ELIGIBLE_APPROVER)',
+  screen: S('Approvals > Remind approver'), middleware: write,
+  response: { success: true, data: { id: 21, sentTo: [{ id: 'usr_9', name: 'J. Cruz' }], remindedAt: '2026-10-06T02:15:00.000Z', nextReminderAt: '2026-10-06T06:15:00.000Z', message: 'Reminder sent to J. Cruz.' } },
+  handler: async (req, res) => {
+    const r = await approvals.remindApprovers(req.params.id, req.user, req);
+    ok(res, r, r.message);
+  },
+});
 for (const action of ['approve', 'reject', 'delegate']) {
   define({
     method: 'POST', path: `/approvals/:id/${action}`,
     summary: action === 'delegate' ? 'Hand a pending approval to another approver (approve:remittance; 409 while remittance.item_delegation_enabled is off)'
-      : `${action[0].toUpperCase()}${action.slice(1)} an approval (approve:remittance; maker-checker: the initiator cannot decide; within the approver's Authority Matrix limit)`,
+      : `${action[0].toUpperCase()}${action.slice(1)} an approval (approve:remittance; refused with errors[0].code SUBMITTER, MAKER, EARLIER_LEVEL, ABOVE_LIMIT, NO_AUTHORITY, DELEGATED_AWAY (403) or ALREADY_DECIDED, STALE (409); a rejection needs a remittance_reject reasonCode)`,
     screen: S('Approval'), middleware: approve,
-    request: action === 'delegate' ? { delegateTo: 'finance.head', comments: 'On leave' } : action === 'approve' ? { comments: 'Verified' } : { reasonCode: 'RRJ-OTHER', note: 'Missing documents' },
+    request: action === 'delegate' ? { delegateTo: 'finance.head', comments: 'On leave' } : action === 'approve' ? { comments: 'Verified', version: 1 } : { reasonCode: 'RRJ-OTHER', note: 'Missing documents', version: 1 },
     response: { success: true, data: { id: 1, status: action === 'approve' ? 'Approved' : action === 'reject' ? 'Rejected' : 'Pending' } },
     handler: async (req, res) => {
-      const { before, after, decision } = await svc.decide(req.params.id, action, req.body || {}, req.user);
-      await audit(req, { entity: 'remittance_approval', entityId: req.params.id, action, before, after: { ...after, comments: req.body?.comments, ...decision } });
+      const { after } = await svc.decide(req.params.id, action, req.body || {}, req.user, { req, version: req.body?.version ?? null });
       ok(res, after, `Approval ${action === 'delegate' ? 'delegated' : after.status === 'Pending' ? 'recorded; next level pending' : after.status.toLowerCase()}`);
     },
   });

@@ -67,9 +67,10 @@ describe('remittance activity log', () => {
     expect(new Date(created.at).getTime()).not.toBeNaN();
     expect(submitted).toMatchObject({ fromStatus: null, toStatus: 'Pending Approval', user: { displayName: 'BrokerVerse Administrator' } });
     expect(approved).toMatchObject({ action: 'approve', by: 'al.finance', notes: 'Checked against the statement', remarks: 'Checked against the statement',
-      fromStatus: 'Pending', toStatus: 'Approved', user: { displayName: 'Alma Finance', roles: ['Accounting'] } });
-    // approval snapshots carry bookkeeping fields (SLA, dates): only the level and the delegate are changes
-    expect(approved.changes.every((c) => ['currentLevel', 'delegatedTo'].includes(c.field))).toBe(true);
+      fromStatus: 'Pending Approval', toStatus: 'Approved', user: { displayName: 'Alma Finance', roles: ['Accounting'] } });
+    // a decision shows its level, the limit at decision and its source; the bookkeeping fields of the approval are not changes
+    expect(approved.changes.every((c) => ['level', 'limitAtDecision', 'limitSource'].includes(c.field))).toBe(true);
+    expect(approved.approval).toMatchObject({ limitSourceLabel: 'Role limit: Accounting' });
     expect(settled).toMatchObject({ action: 'settle', fromStatus: 'Approved', toStatus: 'Completed', user: { displayName: 'Alma Finance' } });
     expect(settled.changes[0]).toMatchObject({ label: 'Settlement', after: settlementApproval.referenceNo });
   });

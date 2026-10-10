@@ -240,7 +240,9 @@ describe('notifications reach only the roles that can act on them', () => {
     const src = (f) => fs.readFileSync(path.join(here, '../src/modules', f), 'utf8');
     expect(src('journal-vouchers/router.js')).toMatch(/audience: 'write:journal-vouchers'/);
     expect(src('payments/pettycash.js')).toMatch(/audience: 'write:disbursements'/);
-    expect(src('remittance/service.js')).toMatch(/audience: 'write:remittance'/);
+    // remittance approvals go to the eligible approvers by name (remittance/decision.js), never to a permission
+    expect(src('remittance/service.js')).toMatch(/notifyApprovers\(\{ users/);
+    expect(src('remittance/service.js')).not.toMatch(/audience: '/);
   });
 });
 

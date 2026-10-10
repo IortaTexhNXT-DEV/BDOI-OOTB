@@ -144,6 +144,26 @@ describe('open items per role and scope', () => {
     await query("DELETE FROM authority_limits WHERE remarks = 'mw-test'");
   });
 
+  it('remittance approvals open the approvals panel, never for the remittance\'s maker, and only with a remittance limit', async () => {
+    const c = await as('mw.acct1', 'post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo: 'EXT-MW-1', premium: 5000, commission: 500, tax: 0 }] });
+    expect(c.status, JSON.stringify(c.body)).toBe(201);
+    expect((await as('mw.acct2', 'post', '/remittance/remittances/process').send({ ids: [c.body.data.id] })).status).toBe(200);
+    const approval = await one("SELECT id FROM remittance_approvals WHERE entity = 'remittance' AND entity_id = $1", [c.body.data.id]);
+    const ref = c.body.data.remittanceNo;
+    expect(refs(await items('mw.acct1', 'category=approvals'))).not.toContain(ref);
+    expect(refs(await items('mw.acct2', 'category=approvals'))).not.toContain(ref);
+    const mgr = (await items('mw.acctmgr', 'category=approvals')).data.find((i) => i.ref === ref);
+    expect(mgr).toMatchObject({ queue: true, link: `/finance/remittance/approvals?approval=${approval.id}` });
+    // approve:remittance without a remittance limit: nothing to decide while remittance.require_authority_limit is on
+    expect((await ctx.api('post', '/roles').send({ code: 'mw-remit-checker', name: 'mw remit checker', permissions: ['read:profile', 'read:remittance', 'approve:remittance'] })).status).toBe(201);
+    await makeUser('mw.nolimit', ['mw-remit-checker']);
+    expect(refs(await items('mw.nolimit', 'category=approvals'))).not.toContain(ref);
+    // commission debit notes of the direct-bill insurers go to Insurer billing
+    await query(`INSERT INTO commission_debit_notes(dn_number, insurance_company_id, amount, status, created_by)
+      SELECT 'DN-MW-0001', id, 1500, 'for-approval', $1 FROM insurance_companies WHERE code = 'MALAYAN'`, [ids['mw.acct2']]);
+    expect((await items('mw.acct1', 'category=approvals')).data.find((i) => i.ref === 'DN-MW-0001')).toMatchObject({ link: '/finance/remittance/billing' });
+  });
+
   it('claims: the handler sees the claim, the claims lead sees it in the team view', async () => {
     const c1 = await items('mw.claims1', 'category=claims');
     expect(c1.data.find((i) => i.ref === 'CLM-MW-0001')).toMatchObject({ overdue: true, priority: 'high', reassign: 'claim' });

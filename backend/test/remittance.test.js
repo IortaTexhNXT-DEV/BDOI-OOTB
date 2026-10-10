@@ -74,7 +74,15 @@ describe('remittances and approvals', () => {
     expect((await ctx.api('get', `/remittance/remittances/${remId}`)).body.data.statusCode).toBe('approved');
     const hist = await ctx.api('get', '/remittance/approvals/history');
     expect(hist.body.data.some((h) => h.action === 'Approved' && h.remarks === 'Verified')).toBe(true);
-    expect((await as(fin, 'post', `/remittance/approvals/${a.id}/approve`).send({})).status).toBe(409);
+    const again = await as(fin, 'post', `/remittance/approvals/${a.id}/approve`).send({});
+    expect(again.status).toBe(409);
+    expect(again.body.errors[0].code).toBe('ALREADY_DECIDED');
+    expect(again.body.message).toMatch(/^Approved by R Finance at \d{2}:\d{2}\.$/);
+    // the record answers its version and the decision block of its approval
+    const rec = (await ctx.api('get', `/remittance/remittances/${remId}`)).body.data;
+    expect(rec.version).toBeGreaterThan(1);
+    expect(rec.decision).toMatchObject({ canDecide: false, blockedCode: 'ALREADY_DECIDED' });
+    expect(rec.nextStep).toBeNull();
     expect((await ctx.api('get', '/remittance/processing-history')).body.data[0].batchId).toBe(p.body.data.batchId);
   });
   it('settles through a settlement approved by a second user', async () => {

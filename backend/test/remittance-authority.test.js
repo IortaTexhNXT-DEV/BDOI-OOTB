@@ -174,7 +174,7 @@ describe('approve:remittance and the approval limit', () => {
     expect((await recon('get', '/remittance/approvals')).status).toBe(200);
     const self = await ctx.api('post', `/remittance/approvals/${a.id}/approve`).send({ comments: 'ok' });
     expect(self.status).toBe(403);
-    expect(self.body.message).toMatch(/Maker-checker/);
+    expect(self.body).toMatchObject({ message: 'You submitted this remittance. Another user with remittance authority must approve it.', errors: [{ code: 'SUBMITTER' }] });
     expect((await q('SELECT status FROM remittance_approvals WHERE id = $1', [a.id]))[0].status).toBe('Pending');
   });
 
@@ -201,7 +201,7 @@ describe('approve:remittance and the approval limit', () => {
     const big = await submitted('EXT-AUTH-3', 1250000);
     const above = await santos('post', `/remittance/approvals/${big.id}/approve`).send({ comments: 'ok' });
     expect(above.status).toBe(403);
-    expect(above.body.message).toMatch(/PHP 1,250,000\.00 is above your approval authority of PHP 1,000,000\.00 \(role accounting\)/);
+    expect(above.body).toMatchObject({ message: 'PHP 1,250,000.00 is above your approval limit of PHP 1,000,000.00.', errors: [{ code: 'ABOVE_LIMIT' }] });
     // a rejection is not bound by the amount, and takes a reason of the remittance_reject context
     expect((await santos('post', `/remittance/approvals/${big.id}/reject`).send({ reasonCode: 'BRJ-DUPLICATE' })).status).toBe(400);
     expect((await santos('post', `/remittance/approvals/${big.id}/reject`).send({ reasonCode: 'RRJ-OTHER' })).status).toBe(400);
