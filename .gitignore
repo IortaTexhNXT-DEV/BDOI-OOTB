@@ -8,3 +8,6 @@ __pycache__/
 
 # files written by backend tests run from the repository root (UPLOAD_DIR defaults to ./uploads)
 /uploads/
+
+# confidential client source documents: never committed
+docs/TISPH/reference/
