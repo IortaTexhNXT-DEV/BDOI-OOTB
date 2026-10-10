@@ -8655,8 +8655,7 @@
         "skip": "Not used"
       },
       "hint": "Journey for this product: request for quotation {{brokerSlip}}, placement slip {{placementSlip}}",
-      "issued": "Issued",
-      "placementRequired": "This line is placed through a placement slip; the policy is booked once the insurer has issued it"
+      "issued": "Issued"
     },
     "actions": {
       "add": "Add",

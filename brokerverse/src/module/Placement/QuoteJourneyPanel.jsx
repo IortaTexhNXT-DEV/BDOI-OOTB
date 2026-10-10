@@ -48,7 +48,6 @@ const QuoteJourneyPanel = ({ quotation, relatedPolicy, onChanged }) => {
     <div className="quote-journey-panel">
       <div className="quote-journey-head">
         <span className="journey-title">{t("placement.journey.title")}</span>
-        {journey.placementSlip === "required" && !quotation.placementId && !policyId && <span className="journey-note">{t("placement.journey.placementRequired")}</span>}
         {quotation.placementId && <Button label={t("placement.actions.openPlacement")} icon="pi pi-external-link" text size="small" onClick={() => navigate(`/placement/placement-slips/${quotation.placementId}`)} />}
         {canPlace && <Button label={t("placement.actions.createPlacement")} icon="pi pi-briefcase" size="small" onClick={place} loading={busy} />}
       </div>
