@@ -2,11 +2,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
-import { Chart } from "primereact/chart";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
+import { ChartCard, ThemedChart, tableOf } from "../../../components/Dashboard";
 import DetailSection from "../../../components/DetailSection";
 import FieldError from "../../../components/FieldError";
 import KeyValueGrid from "../../../components/KeyValueGrid";
@@ -137,17 +137,11 @@ const Statement = () => {
   const s = data && !notAgent ? data : null;
   const breakdown = s?.programBreakdown || [];
   const trend = useMemo(() => s?.monthlyTrend || [], [s]);
-  const anyEarnings = trend.some((m) => Number(m.earnings) > 0);
 
   const chartData = useMemo(() => ({
     labels: trend.map((m) => m.month),
     datasets: [{ label: t("incentive.stmt.earnings"), data: trend.map((m) => m.earnings), backgroundColor: chart.primary, borderWidth: 0, maxBarThickness: 28 }],
   }), [trend, chart.primary, t]);
-  const chartOptions = useMemo(() => chart.options({
-    maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: { y: { beginAtZero: true, ticks: { callback: (v) => formatCurrency(v) } } },
-  }), [chart]);
 
   const print = () => printView(<PrintedStatement statement={s} />, { title: `${t("incentive.stmt.printTitle")} ${s.agentCode} ${s.period}` })
     .catch((e) => showError(toast, e));
@@ -209,11 +203,9 @@ const Statement = () => {
             <Column header={t("incentive.stmt.status")} body={(r) => <StatusChip label={r.status} />} />
           </DataTable>
         </DetailSection>
-        <DetailSection title={t("incentive.stmt.trend")}>
-          {anyEarnings
-            ? <Chart type="bar" data={chartData} options={chartOptions} height="260px" />
-            : <p className="inc-empty">{t("incentive.stmt.noEarnings")}</p>}
-        </DetailSection>
+        <ChartCard title={t("incentive.stmt.trend")} table={tableOf(chartData, "currency")} exportName="incentive-earnings">
+          <ThemedChart type="bar" data={chartData} format="currency" height={260} emptyText={t("incentive.stmt.noEarnings")} />
+        </ChartCard>
       </div>
 
       <DetailSection title={t("incentive.stmt.payments")} flush>

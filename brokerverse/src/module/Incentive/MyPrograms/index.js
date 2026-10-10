@@ -2,11 +2,11 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
-import { Chart } from "primereact/chart";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Dropdown } from "primereact/dropdown";
 import { ProgressBar } from "primereact/progressbar";
+import { ChartCard, ThemedChart, tableOf } from "../../../components/Dashboard";
 import DetailDialog from "../../../components/DetailDialog";
 import DetailHeader from "../../../components/DetailHeader";
 import DetailSection from "../../../components/DetailSection";
@@ -117,19 +117,15 @@ const MyPrograms = () => {
   const running = programs.filter((p) => !p.ended).length;
   const payout = programs.reduce((s, p) => s + Number(p.potentialEarning || 0), 0);
   const average = programs.length ? programs.reduce((s, p) => s + Number(p.achievementPercent || 0), 0) / programs.length : 0;
-  const anyAchieved = programs.some((p) => Number(p.achievementPercent) > 0);
   const ready = !!data;
 
+  // achievement of each program against its target (100%): bars in the series colour, the target as a reference line
   const chartData = useMemo(() => ({
     labels: programs.map((p) => p.programName),
     datasets: [{ label: t("incentive.mine.achievement"), data: programs.map((p) => Number(p.achievementPercent || 0)), backgroundColor: chart.primary, borderWidth: 0, maxBarThickness: 24 }],
   }), [programs, chart.primary, t]);
-  const chartOptions = useMemo(() => chart.options({
-    indexAxis: "y",
-    maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: { x: { beginAtZero: true, suggestedMax: 100, ticks: { callback: (v) => `${v}%` } } },
-  }), [chart]);
+  const chartOptions = useMemo(() => ({ indexAxis: "y", scales: { x: { suggestedMax: 100 } } }), []);
+  const target = useMemo(() => [{ value: 100, label: t("incentive.mine.target") }], [t]);
 
   const agentPicker = reader && agents.data?.length && (agentId || notAgent) ? (
     <Dropdown value={agentId} options={agents.data.map((a) => ({ label: `${a.name} (${a.code})`, value: a.id }))} onChange={(e) => setAgentId(e.value)} filter
@@ -172,11 +168,10 @@ const MyPrograms = () => {
           </DataTable>
         </DetailSection>
 
-        <DetailSection title={t("incentive.mine.chartTitle")}>
-          {anyAchieved
-            ? <Chart type="bar" data={chartData} options={chartOptions} height={`${Math.max(160, programs.length * 48)}px`} />
-            : <p className="inc-empty">{t("incentive.mine.noAchievement")}</p>}
-        </DetailSection>
+        <ChartCard title={t("incentive.mine.chartTitle")} table={tableOf(chartData, "percent")} exportName="incentive-achievement">
+          <ThemedChart type="bar" data={chartData} options={chartOptions} format="percent" reference={target} height={Math.max(160, programs.length * 48)}
+            emptyText={t("incentive.mine.noAchievement")} />
+        </ChartCard>
       </div>
 
       <DetailSection title={t("incentive.mine.activityTitle")} flush>
