@@ -38,6 +38,13 @@ checks (`write:audit`, `read:roles`, `write:profile`, `read:notifications`, `wri
 A permission added by a migration needs its entry in `catalogue.js`: until then it shows under Other with its
 database description, and `test/role-permissions.test.js` fails.
 
+## Platform role and permissions
+
+The vendor role `iorta-platform-admin` and its permission `manage:feature-entitlements` (`src/lib/platform.js`,
+module features) are not the tenant's: the role is not listed on the access screens, the permission is not in the
+catalogue, a change of a role's access or the Role form that grants it is refused, and the administrator role does not
+hold it.
+
 ## Role directory
 
 `roleDirectory(db)` reads the settings that also group the roles of the user form and the Role list (migration 0362;

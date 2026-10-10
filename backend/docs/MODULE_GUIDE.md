@@ -102,6 +102,12 @@ minimal, clearly-correct front-end fix.
   show those steps. A step may read a sub-query on the record (the policy a quotation became), apply only in a state
   (`when`: a rejection kept only in the status) and carry the change it made (`after`: the status reached, the
   number created); steps taken at the same moment keep their order (created before approved).
+- Features and releases: every screen, API path, job, connector and setting belongs to a feature of
+  `src/modules/features/catalogue.js` (tier Phase 1, Phase 2, future release or platform). Register the menu entry of
+  a new screen there (`docs/developer-guide/features.md`); a function of a later release lists its API paths, jobs,
+  connectors and settings so that the gate, the scheduler and the integrations keep it out while it is off, and calls
+  `assertFeature(key, { write: true })` where a rule cannot be reached by its path. Suites that test it enable it with
+  `enableFeatures(app, [...])` (test/helpers.js).
 - Errors: throw `badRequest`, `notFound`, `conflict`, `forbidden` from `src/lib/errors.js`; the error handler turns
   them into the JSON error body with the request id.
 - Shared helpers: dates in `src/lib/dates.js` (`today`, `isoDate`, `addDays`, `businessDate`), amounts in

@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "2026.1.3",
-    "description": "BrokerVerse Platform API (1314 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1327 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -35787,6 +35787,160 @@
       ]
     },
     {
+      "name": "Features and Releases",
+      "item": [
+        {
+          "name": "Catalogue of features and releases with tier, status, requirement ids, enabled date, enabled by and release reference (read-only)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/features/catalogue",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "features",
+                "catalogue"
+              ]
+            },
+            "description": "Catalogue of features and releases with tier, status, requirement ids, enabled date, enabled by and release reference (read-only)\n\nFront-end touchpoint: Master > System Configuration > Features & Releases\n\nAccess: read:features"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/features/catalogue",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "features",
+                    "catalogue"
+                  ]
+                },
+                "description": "Catalogue of features and releases with tier, status, requirement ids, enabled date, enabled by and release reference (read-only)\n\nFront-end touchpoint: Master > System Configuration > Features & Releases\n\nAccess: read:features"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"key\": \"payables\",\n      \"name\": \"Accounts payable\",\n      \"module\": \"Accounts\",\n      \"tier\": \"PHASE_2\",\n      \"tierName\": \"Phase 2\",\n      \"requirements\": [\n        \"TIS-BRD-NIA-03\"\n      ],\n      \"dependsOn\": [\n        \"suppliers\"\n      ],\n      \"status\": \"off\",\n      \"statusName\": \"Not enabled\",\n      \"decisionPending\": false,\n      \"enabledAt\": null,\n      \"enabledBy\": null,\n      \"releaseRef\": null\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Catalogue of features and releases as Excel: the features with their status and the future releases with their description",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/features/catalogue/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "features",
+                "catalogue",
+                "export"
+              ]
+            },
+            "description": "Catalogue of features and releases as Excel: the features with their status and the future releases with their description\n\nFront-end touchpoint: Master > System Configuration > Features & Releases > Export\n\nAccess: read:features"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/features/catalogue/export",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "features",
+                    "catalogue",
+                    "export"
+                  ]
+                },
+                "description": "Catalogue of features and releases as Excel: the features with their status and the future releases with their description\n\nFront-end touchpoint: Master > System Configuration > Features & Releases > Export\n\nAccess: read:features"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
+            }
+          ]
+        },
+        {
+          "name": "Features of this environment that are not plainly on (off or read-only) with the menu entries and addresses they hide; every signed-in user (menus, route guard, sections)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/features/state",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "features",
+                "state"
+              ]
+            },
+            "description": "Features of this environment that are not plainly on (off or read-only) with the menu entries and addresses they hide; every signed-in user (menus, route guard, sections)\n\nFront-end touchpoint: Side menu; route guard\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/features/state",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "features",
+                    "state"
+                  ]
+                },
+                "description": "Features of this environment that are not plainly on (off or read-only) with the menu entries and addresses they hide; every signed-in user (menus, route guard, sections)\n\nFront-end touchpoint: Side menu; route guard\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"key\": \"payables\",\n      \"status\": \"off\",\n      \"menus\": [\n        \"Accounts > Payables > Supplier Invoices\"\n      ],\n      \"routes\": []\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Files (S3 API)",
       "item": [
         {
@@ -64712,6 +64866,621 @@
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"lines\": [\n      {\n        \"code\": \"ACCIDENT\",\n        \"name\": \"Personal Accident\",\n        \"products\": [\n          {\n            \"id\": 9,\n            \"code\": \"PA\",\n            \"name\": \"Personal Accident\",\n            \"line\": \"ACCIDENT\",\n            \"lob\": \"ACCIDENT\",\n            \"businessType\": \"package\",\n            \"customerSegment\": \"retail\"\n          }\n        ]\n      }\n    ]\n  }\n}"
             }
           ]
+        }
+      ]
+    },
+    {
+      "name": "Platform Administration",
+      "item": [
+        {
+          "name": "Platform administrator accounts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/platform/admins",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "platform",
+                "admins"
+              ]
+            },
+            "description": "Platform administrator accounts\n\nFront-end touchpoint: Master > Platform > Features & Releases > Platform administrators\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/platform/admins",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "platform",
+                    "admins"
+                  ]
+                },
+                "description": "Platform administrator accounts\n\nFront-end touchpoint: Master > Platform > Features & Releases > Platform administrators\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"usr_1\",\n      \"username\": \"platform.admin@iorta.example\",\n      \"displayName\": \"Platform Administrator\",\n      \"twoFactorEnabled\": true\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add a platform administrator (the second approver): a temporary password is returned once; the password is changed and two-factor authentication set up at the first sign-in",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/platform/admins",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "platform",
+                "admins"
+              ]
+            },
+            "description": "Add a platform administrator (the second approver): a temporary password is returned once; the password is changed and two-factor authentication set up at the first sign-in\n\nFront-end touchpoint: Master > Platform > Features & Releases > Platform administrators > Add\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"second.admin@iorta.example\",\n  \"displayName\": \"Second Administrator\",\n  \"email\": \"second.admin@iorta.example\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/platform/admins",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "platform",
+                    "admins"
+                  ]
+                },
+                "description": "Add a platform administrator (the second approver): a temporary password is returned once; the password is changed and two-factor authentication set up at the first sign-in\n\nFront-end touchpoint: Master > Platform > Features & Releases > Platform administrators > Add\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"second.admin@iorta.example\",\n  \"displayName\": \"Second Administrator\",\n  \"email\": \"second.admin@iorta.example\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"usr_2\",\n    \"username\": \"second.admin@iorta.example\",\n    \"temporaryPassword\": \"<shown once>\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Every feature with its state and what it controls (menus, API, jobs, connectors, settings, sections, documents)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/platform/features",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "platform",
+                "features"
+              ]
+            },
+            "description": "Every feature with its state and what it controls (menus, API, jobs, connectors, settings, sections, documents)\n\nFront-end touchpoint: Master > Platform > Features & Releases\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/platform/features",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "platform",
+                    "features"
+                  ]
+                },
+                "description": "Every feature with its state and what it controls (menus, API, jobs, connectors, settings, sections, documents)\n\nFront-end touchpoint: Master > Platform > Features & Releases\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"key\": \"payables\",\n      \"name\": \"Accounts payable\",\n      \"module\": \"Accounts\",\n      \"tier\": \"PHASE_2\",\n      \"tierName\": \"Phase 2\",\n      \"requirements\": [\n        \"TIS-BRD-NIA-03\"\n      ],\n      \"dependsOn\": [\n        \"suppliers\"\n      ],\n      \"status\": \"off\",\n      \"statusName\": \"Not enabled\",\n      \"decisionPending\": false,\n      \"enabledAt\": null,\n      \"enabledBy\": null,\n      \"releaseRef\": null\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Feature change requests (status pending, scheduled, applied, rejected, withdrawn), newest first",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/platform/features/changes?status=pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "platform",
+                "features",
+                "changes"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            },
+            "description": "Feature change requests (status pending, scheduled, applied, rejected, withdrawn), newest first\n\nFront-end touchpoint: Master > Platform > Features & Releases > Changes\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements"
+          },
+          "response": []
+        },
+        {
+          "name": "Request a change (maker): enable or disable features or a tier bundle, with reason, contract or change request reference and effective date (immediate or scheduled)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/platform/features/changes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "platform",
+                "features",
+                "changes"
+              ]
+            },
+            "description": "Request a change (maker): enable or disable features or a tier bundle, with reason, contract or change request reference and effective date (immediate or scheduled)\n\nFront-end touchpoint: Master > Platform > Features & Releases > Enable / Disable\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"enable\",\n  \"tier\": \"PHASE_2\",\n  \"reasonCode\": \"FTR-CONTRACT\",\n  \"releaseRef\": \"CR-2027-004\",\n  \"effective\": \"immediate\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/platform/features/changes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "platform",
+                    "features",
+                    "changes"
+                  ]
+                },
+                "description": "Request a change (maker): enable or disable features or a tier bundle, with reason, contract or change request reference and effective date (immediate or scheduled)\n\nFront-end touchpoint: Master > Platform > Features & Releases > Enable / Disable\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"action\": \"enable\",\n  \"tier\": \"PHASE_2\",\n  \"reasonCode\": \"FTR-CONTRACT\",\n  \"releaseRef\": \"CR-2027-004\",\n  \"effective\": \"immediate\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"change\": {\n      \"id\": 1,\n      \"ref\": \"FCR-00001\",\n      \"status\": \"pending\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve or reject a change (checker, never the requester); an immediate change applies at once, a scheduled one on its date",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/platform/features/changes/:id/decision",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "platform",
+                "features",
+                "changes",
+                ":id",
+                "decision"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve or reject a change (checker, never the requester); an immediate change applies at once, a scheduled one on its date\n\nFront-end touchpoint: Master > Platform > Features & Releases > Changes > Approve / Reject\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"approve\",\n  \"remarks\": \"Checked against CR-2027-004\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/platform/features/changes/:id/decision",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "platform",
+                    "features",
+                    "changes",
+                    ":id",
+                    "decision"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve or reject a change (checker, never the requester); an immediate change applies at once, a scheduled one on its date\n\nFront-end touchpoint: Master > Platform > Features & Releases > Changes > Approve / Reject\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"decision\": \"approve\",\n  \"remarks\": \"Checked against CR-2027-004\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"change\": {\n      \"id\": 1,\n      \"status\": \"applied\"\n    },\n    \"applied\": [\n      {\n        \"key\": \"payables\",\n        \"from\": \"off\",\n        \"to\": \"on\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Withdraw a change waiting for approval (requester) or cancel a scheduled change",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/platform/features/changes/:id/withdraw",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "platform",
+                "features",
+                "changes",
+                ":id",
+                "withdraw"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Withdraw a change waiting for approval (requester) or cancel a scheduled change\n\nFront-end touchpoint: Master > Platform > Features & Releases > Changes > Withdraw\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/platform/features/changes/:id/withdraw",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "platform",
+                    "features",
+                    "changes",
+                    ":id",
+                    "withdraw"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Withdraw a change waiting for approval (requester) or cancel a scheduled change\n\nFront-end touchpoint: Master > Platform > Features & Releases > Changes > Withdraw\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"status\": \"withdrawn\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Entitlements of this environment (JSON) for promotion to another environment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/platform/features/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "platform",
+                "features",
+                "export"
+              ]
+            },
+            "description": "Entitlements of this environment (JSON) for promotion to another environment\n\nFront-end touchpoint: Master > Platform > Features & Releases > Export for promotion\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/platform/features/export",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "platform",
+                    "features",
+                    "export"
+                  ]
+                },
+                "description": "Entitlements of this environment (JSON) for promotion to another environment\n\nFront-end touchpoint: Master > Platform > Features & Releases > Export for promotion\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(json file)"
+            }
+          ]
+        },
+        {
+          "name": "Impact of enabling or disabling features or a tier bundle: features with dependencies, menus, roles that gain access, jobs, connectors, settings to configure, read-only features",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/platform/features/preview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "platform",
+                "features",
+                "preview"
+              ]
+            },
+            "description": "Impact of enabling or disabling features or a tier bundle: features with dependencies, menus, roles that gain access, jobs, connectors, settings to configure, read-only features\n\nFront-end touchpoint: Master > Platform > Features & Releases > Enable / Disable\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"enable\",\n  \"tier\": \"PHASE_2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/platform/features/preview",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "platform",
+                    "features",
+                    "preview"
+                  ]
+                },
+                "description": "Impact of enabling or disabling features or a tier bundle: features with dependencies, menus, roles that gain access, jobs, connectors, settings to configure, read-only features\n\nFront-end touchpoint: Master > Platform > Features & Releases > Enable / Disable\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"action\": \"enable\",\n  \"tier\": \"PHASE_2\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"action\": \"enable\",\n    \"features\": [\n      {\n        \"key\": \"payables\",\n        \"from\": \"off\",\n        \"to\": \"on\"\n      }\n    ],\n    \"menus\": [],\n    \"roles\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Promote the entitlements exported from another environment: raises the change requests (enable, disable) that bring this environment to that state, each waiting for approval",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/platform/features/promote",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "platform",
+                "features",
+                "promote"
+              ]
+            },
+            "description": "Promote the entitlements exported from another environment: raises the change requests (enable, disable) that bring this environment to that state, each waiting for approval\n\nFront-end touchpoint: Master > Platform > Features & Releases > Promote from another environment\n\nAccess: role:iorta-platform-admin, manage:feature-entitlements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"file\": {\n    \"environment\": \"uat\",\n    \"features\": [\n      {\n        \"key\": \"payables\",\n        \"status\": \"on\"\n      }\n    ]\n  },\n  \"reason\": \"Promotion of the UAT sign-off\",\n  \"releaseRef\": \"CR-2027-004\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
         }
       ]
     },

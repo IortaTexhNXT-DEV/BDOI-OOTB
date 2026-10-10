@@ -10,6 +10,7 @@ The front end is in `brokerverse/`, the Node.js + PostgreSQL backend in `backend
 export JWT_SECRET=$(openssl rand -hex 32)
 export DATA_ENCRYPTION_KEY=$(openssl rand -hex 32)
 export PII_ENCRYPTION_KEY=$(openssl rand -hex 32)
+export ENTITLEMENT_SIGNING_KEY=$(openssl rand -hex 32)
 export ADMIN_PASSWORD='<first administrator password>'
 export DB_PASSWORD='<database password>'
 export PUBLIC_BASE_URL=https://brokerverse.example.ph      # the public HTTPS address (the web container forwards /api)
@@ -146,9 +147,17 @@ With `NODE_ENV=production` (the Docker image sets it) the API refuses to start, 
 | `JWT_SECRET` | set, at least 32 characters, not a placeholder (signs every session token and signed file link) |
 | `DATA_ENCRYPTION_KEY` | set, at least 32 characters, different from `JWT_SECRET` (encrypts two-factor secrets at rest and keys the reset-code hashes) |
 | `PII_ENCRYPTION_KEY` | set, at least 32 characters, different from `JWT_SECRET` and `DATA_ENCRYPTION_KEY` (encrypts TIN, government ID and bank account numbers at rest and keys their blind indexes) |
+| `ENTITLEMENT_SIGNING_KEY` | set, at least 32 characters, different from the three keys above (signs the feature entitlements of the environment; an entitlement without a valid signature counts as off) |
 | `CORS_ORIGINS` | set to the web application origin(s), comma separated; `*` is refused |
 | `PUBLIC_BASE_URL` | set to the public address of the API (file links are built from it); `localhost` / `127.0.0.1` are refused |
 | `ENTRA_*` | either none or all four of `ENTRA_TENANT_ID`, `ENTRA_CLIENT_ID`, `ENTRA_CLIENT_SECRET`, `ENTRA_REDIRECT_URI` (an `https://` address) |
+
+The iorta TechNXT platform administrator (Master > Platform > Features & Releases, the only role that enables Phase 2
+and future-release features) is created at a start where both `PLATFORM_ADMIN_EMAIL` (also the user name) and
+`PLATFORM_ADMIN_PASSWORD` are set; there is no default account or password. Two-factor authentication is set up at the
+first sign-in. The second platform administrator, who approves the changes of the first, is added on that screen. Keep
+`ENTITLEMENT_SIGNING_KEY` with the environment: with another key every enabled feature counts as off until the platform
+administrators enable it again.
 
 Keep `DATA_ENCRYPTION_KEY` with the database backups: without the same key, users with two-factor authentication
 cannot sign in (an administrator can turn their two-factor off under User Management and they enrol again).
