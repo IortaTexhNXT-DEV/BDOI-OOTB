@@ -274,6 +274,14 @@ export const menuList = [
             includes: ["/agent/renewal-batch"],
           },
           {
+            // Talkbot call lists of Motor renewals (TIS-BRD-LEAD-09)
+            id: 20,
+            name: "Talkbot Calls",
+            path: "/renewal/talkbot",
+            includes: ["/renewal/talkbot"],
+            permissions: ["read:talkbot-calls"],
+          },
+          {
             id: 1,
             name: "Renewal Queue",
             path: "/renewal/queue",

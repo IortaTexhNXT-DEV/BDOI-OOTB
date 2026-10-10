@@ -240,6 +240,12 @@ Object.assign(roleMenuPermissions, {
   },
 });
 
+// Talkbot Calls (Operations > Renewals, TIS-BRD-LEAD-09): opened with read:talkbot-calls (Sales and Operations personas,
+// the General Manager); IT AppSupport reads the renewal screens without it.
+const RENEWALS_WITHOUT_TALKBOT = ["Renewal Policy", "Renewal Batch", "Renewal Queue", "Retention Analytics", "At-Risk Policies", "Negotiations",
+  "Lapse Management", "Performance"].map((item) => `Renewals > ${item}`);
+roleMenuPermissions["tis-it-admin"].operations = [...roleMenuPermissions["tis-it-admin"].operations.filter((item) => item !== "Renewals"), ...RENEWALS_WITHOUT_TALKBOT];
+
 /** Roles of the signed-in user, from the login response stored by authService. */
 export const getUserRoles = () => {
   try {

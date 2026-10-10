@@ -462,6 +462,8 @@ From the client's acceptance the renewal follows the same steps as a new policy:
 
 ![Create Batch Renewal: the selection criteria](images/screens-operations/renewal-batch-create.png)
 
+With the Talkbot call lists in use, **Create Batch Renewal** also has the criteria **Talkbot outcome** and **Talkbot call list**; for a Motor product the Talkbot outcome starts at **Willing to renew**. The policy list shows each policy's **Talkbot outcome** and **Confirmed on**. In a batch, **Generate Renewal Quotes** prepares the renewal quotes of the selected policies: a Motor policy that Talkbot has not confirmed, or whose confirmation is older than the validity period, is **Skipped** with the reason, and the others are quoted. The **Quote status** of each policy (**Not quoted**, **Queued**, **Quoted**, **Skipped**, **Failed**) is shown in the batch and in its report. A single renewal from Renewal Policy is not affected.
+
 **Lapse Management** shows the policies **Lapsed**, **In grace period** and that **Can be reinstated**, with the **Premium lost or at risk**. The tab **Lapsed and grace period** lists each policy with its days lapsed or left in the grace period, the **Lapse reason** and the win-back offers made. The tab **Win-back campaigns** holds the campaigns offering lapsed clients a discount to come back, with the clients contacted and converted and the premium recovered; **New campaign** creates one.
 
 ![Operations > Renewals > Lapse Management](images/screens-operations/lapse-management.png)
@@ -472,13 +474,42 @@ From the client's acceptance the renewal follows the same steps as a new policy:
 
 ![Operations > Renewals > Performance, the KPI scorecard](images/screens-operations/renewal-performance.png)
 
+## Talkbot Calls {#talkbot-calls}
+
+Talkbot calls Motor clients a few days before their policy expires and asks whether they will renew. The call list is prepared here, loaded on the Talkbot platform, and the call results come back as a file.
+
+{{screen:/renewal/talkbot}}
+
+The list shows each **Call list** (TCL-YYYY-NNNNN), its **Talkbot task name**, the **Expiry date** of its accounts, the **Accounts**, those **Willing to renew** and those **Not called**, the **Renewal batch** made from it and the **Status**: **Draft**, **Sent to Talkbot**, **Results loaded**, **Closed** or **Cancelled**.
+
+### Prepare and send a call list {#prepare-and-send-a-call-list}
+
+1. Choose {{menu:/renewal/talkbot}} and select **New call list**.
+2. The expiry dates are proposed for the list of the day; on the last working day before a weekend or a holiday they cover the days nobody works. Choose the **Insurance Company**, **Sales person** or **Source of business** if needed, tick **Include expired policies still renewable**, or pick a list in **Re-call accounts not reached on** to call its missed and uncontacted accounts again. The dialog shows the accounts to call and those left out, with the reason (for example no mobile number, lock-in, client asked not to be called, already on another call list).
+3. Select **Create call list**. The list opens in **Draft**. **Remove** takes an account off the list with a reason; **Put back** restores it.
+4. Select **Download call list**: the Contact Import file for the Talkbot platform. Accounts no longer eligible (renewed, cancelled, already quoted) are left out of the file and shown as **Removed**.
+5. Load the file on the Talkbot platform, then select **Mark as sent** and enter the Talkbot task name.
+
+A list that will not be called is ended with **Cancel list** and a reason.
+
+### Load the results and create the renewal batch {#load-the-talkbot-results}
+
+1. Export the Call Records of the campaign from the Talkbot platform.
+2. On the call list, select **Upload results** and choose the file. A file of another Talkbot task is loaded only after you confirm. The result line gives the rows loaded and failed, with the row number and reason of each failed row.
+3. Each account gets one **Talkbot outcome** from all its calls: **Willing to renew**, **Not willing to renew**, **Already renewed**, **Call back**, **Wrong contact**, **Uncontacted**, **Missed call** or **Not called**. **Calls** shows the calls of an account. The outcome is written on the renewal timeline; a call back date becomes the follow-up date on Negotiations.
+4. **Record outcome** sets the outcome of an account by hand, with the date and a remark (for example when the client called the hotline).
+5. **Create renewal batch** puts the accounts confirmed **Willing to renew** into a renewal batch in **Draft**; open it on [Renewal Batch](#renewal-batch-lapse-management-and-the-analytics) and select **Generate Renewal Quotes**.
+6. **Close list** ends a list whose results are worked; a list is also closed 30 days after its last upload.
+
+Mobile numbers are shown masked; the full number is only in the downloaded file. The Operations team can open the call lists and create the renewal batch; Sales prepares, sends and loads them.
+
 ## Renewal Queue and At-Risk Policies {#renewal-queue-and-at-risk-policies}
 
 {{screen:/renewal/queue}}
 
 {{screen:/renewal/at-risk}}
 
-The **Renewal Queue** is the work list of open renewals. The cards count **Open renewals**, **Expiring within 30 days**, **High risk**, **In grace period** and the **Premium due for renewal**. Each row shows the policy and insured, product and insurer, **Expiry**, **Premium**, **Stage**, **Risk** and **Account executive**; filter by stage, risk level and account executive. **Refresh pipeline** adds the policies newly due; **Export** downloads the queue.
+The **Renewal Queue** is the work list of open renewals. The cards count **Open renewals**, **Expiring within 30 days**, **High risk**, **In grace period** and the **Premium due for renewal**. Each row shows the policy and insured, product and insurer, **Expiry**, **Premium**, **Stage**, **Risk** and **Account executive**; filter by stage, Talkbot outcome, risk level and account executive. The **Talkbot** column shows the latest Talkbot outcome of the policy with its call list and date, the call back date or the number of calls. **Refresh pipeline** adds the policies newly due; **Export** downloads the queue.
 
 The stages follow the renewal: **Pending**, **First Notice Sent**, **Second Notice Sent**, **Final Notice Sent**, **Quote Sent**, **Pending Approval**, **Approved**, **In Grace Period**, then **Renewed** or lapsed. The renewal notices are e-mailed to the client on the schedule of the renewals.
 

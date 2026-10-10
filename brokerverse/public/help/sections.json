@@ -9,7 +9,7 @@
   "pdf": "TISPH_User_Manual.pdf",
   "word": "TISPH_User_Manual.docx"
  },
- "sourceHash": "6f1afeaacf6392b42fdda7d742bef9d952259381aa9caeb9039d4559751b06bd",
+ "sourceHash": "3b8cb4f0c324e89a9da04a608b1329ea6340ae1d6b20b9a615adb60628b93369",
  "roles": {
   "tis-sales-associate": {
    "id": "tis-sales-associate",
@@ -2053,57 +2053,78 @@
    "chapter": "Screen reference: Operations"
   },
   {
-   "id": "renewal-queue-and-at-risk-policies",
+   "id": "talkbot-calls",
    "number": "17.18",
+   "title": "Talkbot Calls",
+   "level": 2,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "prepare-and-send-a-call-list",
+   "number": "17.18.1",
+   "title": "Prepare and send a call list",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "load-the-talkbot-results",
+   "number": "17.18.2",
+   "title": "Load the results and create the renewal batch",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "renewal-queue-and-at-risk-policies",
+   "number": "17.19",
    "title": "Renewal Queue and At-Risk Policies",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "negotiations",
-   "number": "17.19",
+   "number": "17.20",
    "title": "Negotiations",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "payments",
-   "number": "17.20",
+   "number": "17.21",
    "title": "Payments",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "ctpl-authentication",
-   "number": "17.21",
+   "number": "17.22",
    "title": "CTPL authentication",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "cover-notes-binders",
-   "number": "17.22",
+   "number": "17.23",
    "title": "Cover notes (binders)",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "cancel-a-policy-computed-return-premium",
-   "number": "17.23",
+   "number": "17.24",
    "title": "Cancel a policy: computed return premium",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "claims-awaiting-documents",
-   "number": "17.24",
+   "number": "17.25",
    "title": "Claims awaiting documents",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "motor-claim-repairs-and-letters-of-authority",
-   "number": "17.25",
+   "number": "17.26",
    "title": "Motor claim repairs and letters of authority",
    "level": 2,
    "chapter": "Screen reference: Operations"

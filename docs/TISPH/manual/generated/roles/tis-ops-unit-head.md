@@ -24,6 +24,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Claims | Approve |
 | Operations > Renewals | Renewal Policy | Approve |
 | Operations > Renewals | Renewal Batch | Create and edit |
+| Operations > Renewals | Talkbot Calls | View |
 | Operations > Renewals | Renewal Queue | Create and edit |
 | Operations > Renewals | Retention Analytics | View |
 | Operations > Renewals | At-Risk Policies | Create and edit |
@@ -87,6 +88,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
 | Operations | Renewals | Approve | Approve or return renewal terms of another user |  |
+| Operations | Talkbot call lists | View | See the Talkbot call lists and the Talkbot outcome of renewals | Talkbot Calls |
 | Operations | Claims | View | See claims | Claims, Claims Awaiting Documents and Motor Claim Repairs |
 | Operations | Claims | Create and edit | Register and follow up claims, claim documents and repairs |  |
 | Operations | Claims | Approve | Claim decisions: review, reject, settle, approve a settlement, close |  |

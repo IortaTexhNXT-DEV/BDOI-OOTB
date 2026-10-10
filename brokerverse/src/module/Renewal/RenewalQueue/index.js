@@ -18,6 +18,8 @@ import { EmptyState, FilterBar, KeyFacts, PanelSection, RowActions, SectionCard,
 import { calendarDateFormat, formatDate, toIsoDate } from "../../../utility/dateFormat";
 import { downloadCsv } from "../../../utility/csvExport";
 import { ExpiryCell, PolicyCell, RenewalHeader, RiskChip, StageChip } from "../shared";
+import { hasPermission } from "../../../utils/canOpen";
+import { TalkbotCell, TALKBOT_OUTCOMES } from "../TalkbotCalls/TalkbotCell";
 import "./index.scss";
 
 const METHODS = ["Email", "SMS", "Phone", "Letter"];
@@ -42,6 +44,9 @@ const RenewalQueue = () => {
   const [agent, setAgent] = useState("");
   const [range, setRange] = useState(null);
   const [due, setDue] = useState("");
+  // the Talkbot outcome of each renewal (filter and column) for the users who see the Talkbot call lists
+  const talkbotOn = hasPermission("read:talkbot-calls");
+  const [talkbot, setTalkbot] = useState("");
   const [panelId, setPanelId] = useState(null);
   const [reminder, setReminder] = useState(null);
 
@@ -77,11 +82,11 @@ const RenewalQueue = () => {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     const [from, to] = range || [];
-    return rows.filter((r) => (!stage || r.status === stage) && (!risk || r.retentionRisk === risk) && (!agent || r.assignedAgent === agent)
+    return rows.filter((r) => (!talkbot || (r.talkbot?.outcome || "not-called") === talkbot) && (!stage || r.status === stage) && (!risk || r.retentionRisk === risk) && (!agent || r.assignedAgent === agent)
       && (!due || (due === "soon" && r.daysToExpiry > 0 && r.daysToExpiry <= 30) || (due === "risk" && ["High", "Critical"].includes(r.retentionRisk)) || (due === "grace" && r.inGracePeriod))
       && (!from || !to || (new Date(`${r.expiryDate}T00:00:00`) >= from && new Date(`${r.expiryDate}T00:00:00`) <= to))
       && (!q || [r.policyNumber, r.insuredName, r.renewalNumber, r.product].some((v) => String(v || "").toLowerCase().includes(q))));
-  }, [rows, search, stage, risk, agent, range, due]);
+  }, [rows, search, stage, risk, agent, range, due, talkbot]);
   const selected = rows.find((r) => r.id === panelId) || null;
 
   const toggleDue = (key) => setDue(due === key ? "" : key);
@@ -175,14 +180,18 @@ const RenewalQueue = () => {
       <StatCards items={figures} />
 
       <SectionCard>
-        <FilterBar active={!!(search || stage || risk || agent || range || due)}
-          onClear={() => { setSearch(""); setStage(""); setRisk(""); setAgent(""); setRange(null); setDue(""); }}>
+        <FilterBar active={!!(search || stage || risk || agent || range || due || talkbot)}
+          onClear={() => { setSearch(""); setStage(""); setRisk(""); setAgent(""); setRange(null); setDue(""); setTalkbot(""); }}>
           <span className="p-input-icon-left bv-filter-bar__search">
             <i className="pi pi-search" />
             <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("queue.searchHint")} aria-label={t("queue.searchHint")} />
           </span>
           <Dropdown value={stage} onChange={(e) => setStage(e.value || "")} aria-label={t("queue.col.stage")}
             options={[{ label: t("queue.allStages"), value: "" }, ...stages.map((s) => ({ label: s, value: s }))]} />
+          {talkbotOn ? (
+            <Dropdown value={talkbot} onChange={(e) => setTalkbot(e.value || "")} aria-label={t("queue.col.talkbot")}
+              options={[{ label: t("queue.allTalkbot"), value: "" }, ...TALKBOT_OUTCOMES.map((o) => ({ label: t(`talkbot.outcomes.${o}`), value: o }))]} />
+          ) : null}
           <Dropdown value={risk} onChange={(e) => setRisk(e.value || "")} aria-label={t("queue.col.risk")}
             options={[{ label: t("queue.allRisks"), value: "" }, ...["Low", "Medium", "High", "Critical"].map((l) => ({ label: t(`renewalPages.risk.${l}`, l), value: l }))]} />
           <Dropdown value={agent} onChange={(e) => setAgent(e.value || "")} filter aria-label={t("queue.col.agent")}
@@ -197,6 +206,7 @@ const RenewalQueue = () => {
           <Column field="daysToExpiry" header={t("queue.col.expiry")} sortable body={(r) => <ExpiryCell date={r.expiryDate} days={r.daysToExpiry} />} />
           <Column field="currentPremium" header={t("queue.col.premium")} sortable body={(r) => formatCurrency(r.currentPremium)} className="bv-num" headerClassName="bv-num" />
           <Column field="status" header={t("queue.col.stage")} sortable body={(r) => <StageChip row={r} />} />
+          {talkbotOn ? <Column header={t("queue.col.talkbot")} body={(r) => <TalkbotCell talkbot={r.talkbot} />} /> : null}
           <Column field="retentionRisk" header={t("queue.col.risk")} sortable body={(r) => <RiskChip level={r.retentionRisk} />} />
           <Column field="assignedAgent" header={t("queue.col.agent")} sortable />
           <Column header={t("queue.col.actions")} body={actionsBody} className="bv-actions" headerClassName="bv-actions" />

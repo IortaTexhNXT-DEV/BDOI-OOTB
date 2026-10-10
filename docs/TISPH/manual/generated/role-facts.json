@@ -198,6 +198,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Talkbot Calls",
+     "path": "/renewal/talkbot",
+     "access": "Create and edit",
+     "modules": [
+      "Talkbot call lists"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Renewal Queue",
      "path": "/renewal/queue",
      "access": "Create and edit",
@@ -531,6 +540,18 @@
      "module": "Renewals",
      "level": "Create and edit",
      "meaning": "Prepare renewals and renewal terms"
+    },
+    {
+     "area": "Operations",
+     "module": "Talkbot call lists",
+     "level": "View",
+     "meaning": "See the Talkbot call lists and the Talkbot outcome of renewals"
+    },
+    {
+     "area": "Operations",
+     "module": "Talkbot call lists",
+     "level": "Create and edit",
+     "meaning": "Prepare, download and send Talkbot call lists, upload the call results and record outcomes"
     },
     {
      "area": "Operations",
@@ -908,6 +929,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Talkbot Calls",
+     "path": "/renewal/talkbot",
+     "access": "Create and edit",
+     "modules": [
+      "Talkbot call lists"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Renewal Queue",
      "path": "/renewal/queue",
      "access": "Create and edit",
@@ -1271,6 +1301,18 @@
      "module": "Renewals",
      "level": "Approve",
      "meaning": "Approve or return renewal terms of another user"
+    },
+    {
+     "area": "Operations",
+     "module": "Talkbot call lists",
+     "level": "View",
+     "meaning": "See the Talkbot call lists and the Talkbot outcome of renewals"
+    },
+    {
+     "area": "Operations",
+     "module": "Talkbot call lists",
+     "level": "Create and edit",
+     "meaning": "Prepare, download and send Talkbot call lists, upload the call results and record outcomes"
     },
     {
      "area": "Operations",
@@ -1657,6 +1699,15 @@
      "access": "Create and edit",
      "modules": [
       "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
+     "screen": "Talkbot Calls",
+     "path": "/renewal/talkbot",
+     "access": "Create and edit",
+     "modules": [
+      "Talkbot call lists"
      ]
     },
     {
@@ -2108,6 +2159,18 @@
     },
     {
      "area": "Operations",
+     "module": "Talkbot call lists",
+     "level": "View",
+     "meaning": "See the Talkbot call lists and the Talkbot outcome of renewals"
+    },
+    {
+     "area": "Operations",
+     "module": "Talkbot call lists",
+     "level": "Create and edit",
+     "meaning": "Prepare, download and send Talkbot call lists, upload the call results and record outcomes"
+    },
+    {
+     "area": "Operations",
      "module": "Claims",
      "level": "View",
      "meaning": "See claims"
@@ -2539,6 +2602,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Talkbot Calls",
+     "path": "/renewal/talkbot",
+     "access": "View",
+     "modules": [
+      "Talkbot call lists"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Renewal Queue",
      "path": "/renewal/queue",
      "access": "Create and edit",
@@ -2866,6 +2938,12 @@
      "module": "Renewals",
      "level": "Create and edit",
      "meaning": "Prepare renewals and renewal terms"
+    },
+    {
+     "area": "Operations",
+     "module": "Talkbot call lists",
+     "level": "View",
+     "meaning": "See the Talkbot call lists and the Talkbot outcome of renewals"
     },
     {
      "area": "Operations",
@@ -3271,6 +3349,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Talkbot Calls",
+     "path": "/renewal/talkbot",
+     "access": "View",
+     "modules": [
+      "Talkbot call lists"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Renewal Queue",
      "path": "/renewal/queue",
      "access": "Create and edit",
@@ -3652,6 +3739,12 @@
      "module": "Renewals",
      "level": "Create and edit",
      "meaning": "Prepare renewals and renewal terms"
+    },
+    {
+     "area": "Operations",
+     "module": "Talkbot call lists",
+     "level": "View",
+     "meaning": "See the Talkbot call lists and the Talkbot outcome of renewals"
     },
     {
      "area": "Operations",
@@ -4065,6 +4158,15 @@
      "access": "Create and edit",
      "modules": [
       "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
+     "screen": "Talkbot Calls",
+     "path": "/renewal/talkbot",
+     "access": "View",
+     "modules": [
+      "Talkbot call lists"
      ]
     },
     {
@@ -4522,6 +4624,12 @@
      "module": "Renewals",
      "level": "Approve",
      "meaning": "Approve or return renewal terms of another user"
+    },
+    {
+     "area": "Operations",
+     "module": "Talkbot call lists",
+     "level": "View",
+     "meaning": "See the Talkbot call lists and the Talkbot outcome of renewals"
     },
     {
      "area": "Operations",
@@ -8877,6 +8985,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Talkbot Calls",
+     "path": "/renewal/talkbot",
+     "access": "Create and edit",
+     "modules": [
+      "Talkbot call lists"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Renewal Queue",
      "path": "/renewal/queue",
      "access": "Create and edit",
@@ -10028,6 +10145,18 @@
     },
     {
      "area": "Operations",
+     "module": "Talkbot call lists",
+     "level": "View",
+     "meaning": "See the Talkbot call lists and the Talkbot outcome of renewals"
+    },
+    {
+     "area": "Operations",
+     "module": "Talkbot call lists",
+     "level": "Create and edit",
+     "meaning": "Prepare, download and send Talkbot call lists, upload the call results and record outcomes"
+    },
+    {
+     "area": "Operations",
      "module": "Claims",
      "level": "View",
      "meaning": "See claims"
@@ -11118,6 +11247,39 @@
     },
     {
      "role": "TIS IT AppSupport / Admin",
+     "access": "View"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "Create and edit"
+    }
+   ]
+  },
+  "/renewal/talkbot": {
+   "menu": "Operations > Renewals > Talkbot Calls",
+   "roles": [
+    {
+     "role": "TIS Sales Associate",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Sales Officer",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Unit Head",
      "access": "View"
     },
     {
@@ -14743,6 +14905,15 @@
   "read:settings": [
    "TIS IT AppSupport / Admin"
   ],
+  "read:talkbot-calls": [
+   "TIS Sales Associate",
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS Operations Associate",
+   "TIS Operations Officer",
+   "TIS Operations Unit Head",
+   "TIS General Manager"
+  ],
   "read:users": [
    "TIS IT AppSupport / Admin",
    "TIS General Manager"
@@ -14918,6 +15089,12 @@
   ],
   "write:settings": [
    "TIS IT AppSupport / Admin"
+  ],
+  "write:talkbot-calls": [
+   "TIS Sales Associate",
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS General Manager"
   ],
   "write:users": [
    "TIS IT AppSupport / Admin"

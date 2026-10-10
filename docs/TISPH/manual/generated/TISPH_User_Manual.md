@@ -518,7 +518,7 @@ Press F1, or **?** outside a text field, or choose **Help** in the account menu.
 | An error on a claim decision (**Proceed to adjuster report**, **Proceed to settlement**, **Reject claim**) | Claim decisions are made by TIS Operations Unit Head or TIS General Manager | Hand the claim to a user of that role |
 | An approval is refused for its amount | The amount is above your limit on the Authority Matrix | Ask an approver with a higher limit |
 | A cancellation or a return premium cannot be completed | Money going back to the client is completed by another user | A user who approves policy checks completes it (see [Approvals and maker-checker (2.9)](#statuses-approvals-and-maker-checker)) |
-| **Endorsement** or **Claim** is not offered on a policy | The policy's payment is **Pending** or **Reviewing**, or the policy is no longer in force | Check the policy's payment on [Payments (17.20)](#payments) |
+| **Endorsement** or **Claim** is not offered on a policy | The policy's payment is **Pending** or **Reviewing**, or the policy is no longer in force | Check the policy's payment on [Payments (17.21)](#payments) |
 
 ## The TISPH process end to end {#the-business-process-end-to-end}
 The work of Toyota Insurance Services Philippines follows one chain: a lead becomes a quotation, the quotation is
@@ -553,7 +553,7 @@ From the booking onwards both policies follow the same steps.
 | Commission | TIS Finance & General Accounting | [Commission to agents and referrers (19.5)](#commission-to-agents-and-referrers) | Commission lines **Approved**, then **Paid** |
 | Endorsement | the Sales roles, the Operations roles or TIS General Manager | [Policies (17.12)](#policies) | Policy changed; additional premium billed |
 | Claim | the Operations roles or TIS General Manager | [The claims list (17.15)](#the-claims-list) | Claim **Pending** to **Closed** |
-| Renewal | the Sales roles, the Operations roles or TIS General Manager | [Renewal Queue (17.18)](#renewal-queue-and-at-risk-policies) | Renewal quotation, then a new placement |
+| Renewal | the Sales roles, the Operations roles or TIS General Manager | [Renewal Queue (17.19)](#renewal-queue-and-at-risk-policies) | Renewal quotation, then a new placement |
 | Month-end and tax | TIS Finance & General Accounting | [Period end (18.29)](#period-end), [Tax: BIR forms and returns (18.21)](#tax-bir-forms-and-returns) | Period **Closed**; returns filed |
 
 Work that waits for you appears in [My Work (2.3)](#my-work). Each approval in the chain is made by another user than the
@@ -736,8 +736,8 @@ to the client. The placement becomes **Insurer issued (Booked)** and the quotati
 TFS-financed car, the policy shows TFS in **Mortgage**.
 
 When the client needs proof of cover before the e-policy arrives, issue a cover note on
-[Cover Notes (17.22)](#cover-notes-binders); a CTPL certificate is authenticated on
-[CTPL Authentication (17.21)](#ctpl-authentication).
+[Cover Notes (17.23)](#cover-notes-binders); a CTPL certificate is authenticated on
+[CTPL Authentication (17.22)](#ctpl-authentication).
 
 #### Billing statement {#process-billing}
 The booked policy appears on Operations > Policy with its payment status in the **Payment** column (**Pending**,
@@ -757,7 +757,7 @@ A change to a policy in force (insured details, vehicle, cover, an extension) is
 
 An endorsement that returns premium, and a cancellation, is completed by TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager, a user other than
 the one who entered it. The return premium of a cancellation is computed on
-[Cancel a policy: computed return premium (17.23)](#cancel-a-policy-computed-return-premium). Commission already paid on the
+[Cancel a policy: computed return premium (17.24)](#cancel-a-policy-computed-return-premium). Commission already paid on the
 returned premium is clawed back from the referrer.
 
 ![Figure 3.7: Operations > Policy, with the actions Claim and Endorsement of a paid policy](../images/process/policy-actions.png)
@@ -901,11 +901,11 @@ and pays.
 3. Save the claim. The claim is **Pending**. The system refuses a claim on a policy whose premium is unpaid or whose
    loss date is outside the policy period, and sends the Preliminary Loss Advice to the insurer by e-mail.
 4. Collect the claim documents of the checklist of the line; claims still missing documents are listed on
-   [Claims awaiting documents (17.24)](#claims-awaiting-documents). The claim goes **Processing** while the insurer reviews
+   [Claims awaiting documents (17.25)](#claims-awaiting-documents). The claim goes **Processing** while the insurer reviews
    it.
 5. Record the adjuster's report when it arrives.
 6. For a motor claim, follow the repair on
-   [Motor claim repairs and letters of authority (17.25)](#motor-claim-repairs-and-letters-of-authority): the shop's estimate,
+   [Motor claim repairs and letters of authority (17.26)](#motor-claim-repairs-and-letters-of-authority): the shop's estimate,
    the insurer adjuster's decision, the letter of authority to the shop and the release of the vehicle.
 7. Enter the settlement agreed by the insurer and submit it. The claim is **Pending Approval**.
 8. The approver (TIS Operations Unit Head or TIS General Manager) approves or returns the settlement; the approver must be another user than
@@ -919,7 +919,7 @@ recorded on [Claims settlements paid through the broker (18.5)](#claims-settleme
 ![Figure 3.12: Operations > Claims, with the open claims, the settlement to approve and the settled claims](../images/process/claims-list.png)
 ### Renewals {#process-renewals}
 Renewals are prepared by the Sales roles, the Operations roles or TIS General Manager; renewal terms are approved by TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager. See
-[Renewal Queue (17.18)](#renewal-queue-and-at-risk-policies).
+[Renewal Queue (17.19)](#renewal-queue-and-at-risk-policies).
 
 Policies come into the renewal pipeline 90 days before their expiry.
 
@@ -930,7 +930,7 @@ Policies come into the renewal pipeline 90 days before their expiry.
 3. Prepare the renewal terms: open the policy on [Renewal Policy (17.16)](#renewal-policy) and complete the renewal (cover,
    dates, premium). The renewal quotation is linked to the expiring policy, is valid for 30 days and is sent to the
    client: the renewal is **Quote Sent**. Price and cover discussions with the client or the insurer are followed on
-   [Negotiations (17.19)](#negotiations).
+   [Negotiations (17.20)](#negotiations).
 4. When the terms are agreed, select **Submit for approval** on Negotiations. The renewal is **Pending Approval**.
 5. The approver (TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager) approves the terms (**Approved**) or returns them (back to
    **Quote Sent**, to revise); the approver must be another user than the one who submitted them.
@@ -1033,6 +1033,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Claims | View |
 | Operations > Renewals | Renewal Policy | Create and edit |
 | Operations > Renewals | Renewal Batch | Create and edit |
+| Operations > Renewals | Talkbot Calls | Create and edit |
 | Operations > Renewals | Renewal Queue | Create and edit |
 | Operations > Renewals | Retention Analytics | View |
 | Operations > Renewals | At-Risk Policies | Create and edit |
@@ -1082,6 +1083,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Endorsements and cancellations | Create and edit | Request and process endorsements and cancellations |  |
 | Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
+| Operations | Talkbot call lists | View | See the Talkbot call lists and the Talkbot outcome of renewals | Talkbot Calls |
+| Operations | Talkbot call lists | Create and edit | Prepare, download and send Talkbot call lists, upload the call results and record outcomes |  |
 | Operations | Claims | View | See claims | Claims |
 | Operations | Fleet schedules | View | See fleet schedules and print the schedule of vehicles | Fleet Schedules |
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
@@ -1137,9 +1140,9 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Ask the panel insurers for terms on fleet and corporate risks | As needed | [Requests for Quotation (17.3)](#requests-for-quotation-broker-slips), [Comparison Reports (17.8)](#comparison-reports) |
 | Send the placement slips, record the acknowledgements and upload the e-policies | Daily | [Placement Slips (17.5)](#placement-slips) |
 | Book the policies checked against the slip | Daily | [Placement Slips (17.5)](#placement-slips) |
-| Issue cover notes and CTPL certificates while the insurer's policy is pending | As needed | [Cover Notes (17.22)](#cover-notes-binders), [CTPL Authentication (17.21)](#ctpl-authentication) |
-| Raise the endorsements and cancellations your clients ask for | As requested | [Policy (17.12)](#policies), [Policy Cancellation (17.23)](#cancel-a-policy-computed-return-premium) |
-| Send the renewal notices and prepare the renewal terms | Weekly, for policies expiring in the next 90 days | [Renewal Queue (17.18)](#renewal-queue-and-at-risk-policies), [Negotiations (17.19)](#negotiations) |
+| Issue cover notes and CTPL certificates while the insurer's policy is pending | As needed | [Cover Notes (17.23)](#cover-notes-binders), [CTPL Authentication (17.22)](#ctpl-authentication) |
+| Raise the endorsements and cancellations your clients ask for | As requested | [Policy (17.12)](#policies), [Policy Cancellation (17.24)](#cancel-a-policy-computed-return-premium) |
+| Send the renewal notices and prepare the renewal terms | Weekly, for policies expiring in the next 90 days | [Renewal Queue (17.19)](#renewal-queue-and-at-risk-policies), [Negotiations (17.20)](#negotiations) |
 | Follow up policies in their grace period and lapsed policies | Weekly | [Lapse Management (17.17)](#renewal-batch-lapse-management-and-the-analytics) |
 | Check your pipeline and your incentive progress | Weekly and at month-end | [Sales Dashboard (19.4)](#sales-dashboard), [Incentive (18.32)](#incentives) |
 
@@ -1273,6 +1276,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Claims | View |
 | Operations > Renewals | Renewal Policy | Approve |
 | Operations > Renewals | Renewal Batch | Create and edit |
+| Operations > Renewals | Talkbot Calls | Create and edit |
 | Operations > Renewals | Renewal Queue | Create and edit |
 | Operations > Renewals | Retention Analytics | View |
 | Operations > Renewals | At-Risk Policies | Create and edit |
@@ -1327,6 +1331,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
 | Operations | Renewals | Approve | Approve or return renewal terms of another user |  |
+| Operations | Talkbot call lists | View | See the Talkbot call lists and the Talkbot outcome of renewals | Talkbot Calls |
+| Operations | Talkbot call lists | Create and edit | Prepare, download and send Talkbot call lists, upload the call results and record outcomes |  |
 | Operations | Claims | View | See claims | Claims |
 | Operations | Fleet schedules | View | See fleet schedules and print the schedule of vehicles | Fleet Schedules |
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
@@ -1380,14 +1386,14 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 |---|---|---|
 | Work through your own records and the work waiting for you | Every morning and through the day | [My Work (2.3)](#my-work) |
 | Check the e-policies received against their placement slips | Daily | [Placement Slips (17.5)](#placement-slips) |
-| Approve or return the renewal terms submitted by your team | Daily | [Negotiations (17.19)](#negotiations) |
-| Complete the endorsements and cancellations that return premium, raised by other users | As notified | [Policy (17.12)](#policies), [Policy Cancellation (17.23)](#cancel-a-policy-computed-return-premium) |
+| Approve or return the renewal terms submitted by your team | Daily | [Negotiations (17.20)](#negotiations) |
+| Complete the endorsements and cancellations that return premium, raised by other users | As notified | [Policy (17.12)](#policies), [Policy Cancellation (17.24)](#cancel-a-policy-computed-return-premium) |
 | Check the team's open prospects and reassign those not worked | Daily | [Lead Assignment (17.6)](#lead-assignment) |
 | Assign the prospects waiting in the reassignment queue | Daily | [Lead Assignment (17.6)](#lead-assignment) |
 | Review the team's activities and open follow-ups | Weekly | [Sales Activities (17.10)](#sales-activities) |
 | Keep the assignment rules in line with the team and the TFS offices | When the team or the channels change | [Lead Assignment (17.6)](#lead-assignment) |
 | Prepare, schedule and send campaigns; check their results | As planned | [Campaigns (17.9)](#campaigns) |
-| Review the team's pipeline, conversion and renewals | Weekly and at month-end | [Sales Dashboard (19.4)](#sales-dashboard), [Renewal Queue (17.18)](#renewal-queue-and-at-risk-policies) |
+| Review the team's pipeline, conversion and renewals | Weekly and at month-end | [Sales Dashboard (19.4)](#sales-dashboard), [Renewal Queue (17.19)](#renewal-queue-and-at-risk-policies) |
 
 The sales work on your own accounts (prospects, quotations, placement, booking, endorsements, renewals) follows the
 procedures of the [TIS Sales Associate (4.7)](#tis-sales-associate-procedures).
@@ -1438,7 +1444,7 @@ the endorsement number, the policy and the amount.
    already paid on the returned premium is clawed back from the referrer.
 
 See [Endorsements and cancellations (3.6.3)](#process-endorsement) and
-[Cancel a policy: computed return premium (17.23)](#cancel-a-policy-computed-return-premium).
+[Cancel a policy: computed return premium (17.24)](#cancel-a-policy-computed-return-premium).
 
 #### Reassign prospects {#tis-sales-officer-reassign}
 1. Choose Operations > Sales & Marketing > Lead Assignment. The **Team View** tab lists the team members with their open, new,
@@ -1524,6 +1530,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Claims | View |
 | Operations > Renewals | Renewal Policy | Approve |
 | Operations > Renewals | Renewal Batch | Create and edit |
+| Operations > Renewals | Talkbot Calls | Create and edit |
 | Operations > Renewals | Renewal Queue | Create and edit |
 | Operations > Renewals | Retention Analytics | View |
 | Operations > Renewals | At-Risk Policies | Create and edit |
@@ -1587,6 +1594,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
 | Operations | Renewals | Approve | Approve or return renewal terms of another user |  |
+| Operations | Talkbot call lists | View | See the Talkbot call lists and the Talkbot outcome of renewals | Talkbot Calls |
+| Operations | Talkbot call lists | Create and edit | Prepare, download and send Talkbot call lists, upload the call results and record outcomes |  |
 | Operations | Claims | View | See claims | Claims |
 | Operations | Fleet schedules | View | See fleet schedules and print the schedule of vehicles | Fleet Schedules |
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
@@ -1647,9 +1656,9 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Task | When | Screen |
 |---|---|---|
 | Work through the approvals and the records waiting for you | Every morning and through the day | [My Work (2.3)](#my-work) |
-| Approve or return the renewal terms submitted by the unit | Daily | [Negotiations (17.19)](#negotiations) |
+| Approve or return the renewal terms submitted by the unit | Daily | [Negotiations (17.20)](#negotiations) |
 | Check the e-policies received against their placement slips | Daily | [Placement Slips (17.5)](#placement-slips) |
-| Follow up the renewals escalated to you | As notified | [At-Risk Policies (17.18)](#renewal-queue-and-at-risk-policies) |
+| Follow up the renewals escalated to you | As notified | [At-Risk Policies (17.19)](#renewal-queue-and-at-risk-policies) |
 | Approve or reject the supplier invoices recorded by Finance | As notified | [Payables (18.6)](#accounts-payable) |
 | Review the unit's pipeline, conversion and premium | Weekly | [Sales Dashboard (19.4)](#sales-dashboard) |
 | Review the team assignment and the reassignment queue | Weekly | [Lead Assignment (17.6)](#lead-assignment) |
@@ -1682,7 +1691,7 @@ TIS Sales Unit Head and the TIS Operations Unit Head. You receive the notificati
 2. Check the risk factors of the renewal (premium increase, claims, unpaid premium, no contact, expiry) and the
    suggested actions.
 3. Agree the next step with the account executive and record it on the renewal timeline on
-   [Negotiations (17.19)](#negotiations).
+   [Negotiations (17.20)](#negotiations).
 
 #### Run the incentive calculation {#tis-sales-unit-head-incentive-run}
 The incentive programmes give the sales force (TIS Sales Associates, Sales Officers and Sales Unit Heads) a payout by
@@ -1766,6 +1775,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Claims | Create and edit |
 | Operations > Renewals | Renewal Policy | Create and edit |
 | Operations > Renewals | Renewal Batch | Create and edit |
+| Operations > Renewals | Talkbot Calls | View |
 | Operations > Renewals | Renewal Queue | Create and edit |
 | Operations > Renewals | Retention Analytics | View |
 | Operations > Renewals | At-Risk Policies | Create and edit |
@@ -1813,6 +1823,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Endorsements and cancellations | Create and edit | Request and process endorsements and cancellations |  |
 | Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
+| Operations | Talkbot call lists | View | See the Talkbot call lists and the Talkbot outcome of renewals | Talkbot Calls |
 | Operations | Claims | View | See claims | Claims, Claims Awaiting Documents and Motor Claim Repairs |
 | Operations | Claims | Create and edit | Register and follow up claims, claim documents and repairs |  |
 | Operations | Fleet schedules | View | See fleet schedules and print the schedule of vehicles | Fleet Schedules |
@@ -1868,14 +1879,14 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Send new placement slips to the insurers and record their acknowledgements | Daily | [Placement Slips (17.5)](#placement-slips) |
 | Upload the e-policies received from the insurers | Daily, as they arrive | [Placement Slips (17.5)](#placement-slips), [Record e-Policy (17.5.1)](#record-e-policy) |
 | Book the policies checked against the slip | Daily | [Placement Slips (17.5)](#placement-slips) |
-| Issue cover notes while the insurer's policy is pending; follow up those expiring | Daily | [Cover Notes (17.22)](#cover-notes-binders) |
-| Authenticate the CTPL certificates of cover | Daily | [CTPL Authentication (17.21)](#ctpl-authentication) |
+| Issue cover notes while the insurer's policy is pending; follow up those expiring | Daily | [Cover Notes (17.23)](#cover-notes-binders) |
+| Authenticate the CTPL certificates of cover | Daily | [CTPL Authentication (17.22)](#ctpl-authentication) |
 | Register new claims and advise the insurers | Daily, as clients report losses | [Policy (17.12)](#policies), [Claims (17.15)](#the-claims-list) |
-| Collect claim documents and remind claimants | Daily | [Claims Awaiting Documents (17.24)](#claims-awaiting-documents) |
-| Record repair estimates, adjuster decisions, letters of authority and vehicle releases | Daily | [Motor Claim Repairs (17.25)](#motor-claim-repairs-and-letters-of-authority) |
-| Raise endorsements and cancellations requested by clients | As requested | [Policy (17.12)](#policies), [Policy Cancellation (17.23)](#cancel-a-policy-computed-return-premium) |
-| Check the payment status of policies before an endorsement or a claim | As needed | [Payments (17.20)](#payments) |
-| Send renewal notices and prepare the renewal quotations | Weekly, for policies expiring in the next 90 days | [Renewal Queue (17.18)](#renewal-queue-and-at-risk-policies), [Renewal Batch (17.17)](#renewal-batch-lapse-management-and-the-analytics) |
+| Collect claim documents and remind claimants | Daily | [Claims Awaiting Documents (17.25)](#claims-awaiting-documents) |
+| Record repair estimates, adjuster decisions, letters of authority and vehicle releases | Daily | [Motor Claim Repairs (17.26)](#motor-claim-repairs-and-letters-of-authority) |
+| Raise endorsements and cancellations requested by clients | As requested | [Policy (17.12)](#policies), [Policy Cancellation (17.24)](#cancel-a-policy-computed-return-premium) |
+| Check the payment status of policies before an endorsement or a claim | As needed | [Payments (17.21)](#payments) |
+| Send renewal notices and prepare the renewal quotations | Weekly, for policies expiring in the next 90 days | [Renewal Queue (17.19)](#renewal-queue-and-at-risk-policies), [Renewal Batch (17.17)](#renewal-batch-lapse-management-and-the-analytics) |
 | Follow up lapsed policies and the policies in their grace period | Weekly | [Lapse Management (17.17)](#renewal-batch-lapse-management-and-the-analytics) |
 | Maintain fleet schedules and marine open covers of corporate clients | As requested | [Fleet Schedules (17.13)](#fleet-schedules), [Marine Open Covers (17.14)](#marine-open-covers) |
 | Run the claims and renewal reports | Month-end | [All Reports (22.1)](#reports-catalogue) |
@@ -1936,7 +1947,7 @@ e-policy to the client. The placement slip becomes **Insurer issued (Booked)**. 
 
 For a CTPL cover, choose Operations > CTPL Authentication: the list shows each certificate of cover with its
 status (**Pending**, **Requested**, **Authenticated**, **Failed**). A certificate is released to the client only
-when it is **Authenticated**. See [CTPL Authentication (17.21)](#ctpl-authentication).
+when it is **Authenticated**. See [CTPL Authentication (17.22)](#ctpl-authentication).
 
 #### Raise an endorsement or a cancellation {#tis-operations-associate-endorsement}
 1. Choose Operations > Policy and find the policy by number or client.
@@ -1955,7 +1966,7 @@ endorsement**.
 
 > A cancellation, and an endorsement that returns premium, is completed by the TIS Operations Unit Head or the TIS
 > General Manager, never by you. They are notified when you send it. See
-> [Cancel a policy: computed return premium (17.23)](#cancel-a-policy-computed-return-premium).
+> [Cancel a policy: computed return premium (17.24)](#cancel-a-policy-computed-return-premium).
 
 #### Register a claim {#tis-operations-associate-register-claim}
 1. Choose Operations > Policy, select **More actions** in the row of the policy, then **Claim**. The action is not
@@ -2003,7 +2014,7 @@ Once the claim is **Processing**, you record the adjuster's name and report on t
    released to, and print the release form for the insured's signature.
 
 ![Figure 7.4: Repair file of a motor claim with Record estimate, Issue letter of authority and Release vehicle](../images/role-tis-ops-associate/motor-claim-repair-file.png)
-See [Motor claim repairs and letters of authority (17.25)](#motor-claim-repairs-and-letters-of-authority).
+See [Motor claim repairs and letters of authority (17.26)](#motor-claim-repairs-and-letters-of-authority).
 
 #### Prepare a renewal {#tis-operations-associate-renewal}
 1. Choose Operations > Renewals > Renewal Queue. The queue lists the policies due for renewal with their stage and risk.
@@ -2018,7 +2029,7 @@ See [Motor claim repairs and letters of authority (17.25)](#motor-claim-repairs-
    marks the expiring policy renewed and raises the premium to collect.
 
 If the terms are rejected, the renewal comes back to you to prepare again. Price discussions with the client are
-logged on [Negotiations (17.19)](#negotiations).
+logged on [Negotiations (17.20)](#negotiations).
 
 When the system refuses one of these actions, see [When the system refuses an action (2.13)](#when-the-system-refuses-an-action).
 
@@ -2061,6 +2072,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Claims | Create and edit |
 | Operations > Renewals | Renewal Policy | Create and edit |
 | Operations > Renewals | Renewal Batch | Create and edit |
+| Operations > Renewals | Talkbot Calls | View |
 | Operations > Renewals | Renewal Queue | Create and edit |
 | Operations > Renewals | Retention Analytics | View |
 | Operations > Renewals | At-Risk Policies | Create and edit |
@@ -2114,6 +2126,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Endorsements and cancellations | Create and edit | Request and process endorsements and cancellations |  |
 | Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
+| Operations | Talkbot call lists | View | See the Talkbot call lists and the Talkbot outcome of renewals | Talkbot Calls |
 | Operations | Claims | View | See claims | Claims, Claims Awaiting Documents and Motor Claim Repairs |
 | Operations | Claims | Create and edit | Register and follow up claims, claim documents and repairs |  |
 | Operations | Fleet schedules | View | See fleet schedules and print the schedule of vehicles | Fleet Schedules |
@@ -2169,10 +2182,10 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 |---|---|---|
 | Work through the placement slips, renewals, endorsements and claims waiting for you | Every morning and through the day | [My Work (2.3)](#my-work) |
 | Send placement slips, record acknowledgements, upload e-policies, book checked policies | Daily | [Placement Slips (17.5)](#placement-slips) |
-| Issue cover notes and authenticate CTPL certificates | Daily | [Cover Notes (17.22)](#cover-notes-binders), [CTPL Authentication (17.21)](#ctpl-authentication) |
-| Register claims, collect their documents, follow motor repairs | Daily | [Claims (17.15)](#the-claims-list), [Claims Awaiting Documents (17.24)](#claims-awaiting-documents), [Motor Claim Repairs (17.25)](#motor-claim-repairs-and-letters-of-authority) |
-| Raise endorsements and cancellations | As requested | [Policy (17.12)](#policies), [Policy Cancellation (17.23)](#cancel-a-policy-computed-return-premium) |
-| Send renewal notices and prepare renewal quotations | Weekly | [Renewal Queue (17.18)](#renewal-queue-and-at-risk-policies) |
+| Issue cover notes and authenticate CTPL certificates | Daily | [Cover Notes (17.23)](#cover-notes-binders), [CTPL Authentication (17.22)](#ctpl-authentication) |
+| Register claims, collect their documents, follow motor repairs | Daily | [Claims (17.15)](#the-claims-list), [Claims Awaiting Documents (17.25)](#claims-awaiting-documents), [Motor Claim Repairs (17.26)](#motor-claim-repairs-and-letters-of-authority) |
+| Raise endorsements and cancellations | As requested | [Policy (17.12)](#policies), [Policy Cancellation (17.24)](#cancel-a-policy-computed-return-premium) |
+| Send renewal notices and prepare renewal quotations | Weekly | [Renewal Queue (17.19)](#renewal-queue-and-at-risk-policies) |
 | Look up the journal of a booking, an endorsement or a claim settlement | When a client, an insurer or Finance asks | [Journal Voucher (18.14)](#journal-vouchers) |
 | Look up an office asset (cost, location, book value) | As needed | [Fixed Assets (18.8)](#fixed-assets-and-depreciation) |
 | Follow the work in flight and the claims position | Weekly | [Processing Dashboard (19.3)](#processing-dashboard), [Claims Dashboard (19.2)](#claims-dashboard) |
@@ -2259,6 +2272,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Claims | Approve |
 | Operations > Renewals | Renewal Policy | Approve |
 | Operations > Renewals | Renewal Batch | Create and edit |
+| Operations > Renewals | Talkbot Calls | View |
 | Operations > Renewals | Renewal Queue | Create and edit |
 | Operations > Renewals | Retention Analytics | View |
 | Operations > Renewals | At-Risk Policies | Create and edit |
@@ -2321,6 +2335,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
 | Operations | Renewals | Approve | Approve or return renewal terms of another user |  |
+| Operations | Talkbot call lists | View | See the Talkbot call lists and the Talkbot outcome of renewals | Talkbot Calls |
 | Operations | Claims | View | See claims | Claims, Claims Awaiting Documents and Motor Claim Repairs |
 | Operations | Claims | Create and edit | Register and follow up claims, claim documents and repairs |  |
 | Operations | Claims | Approve | Claim decisions: review, reject, settle, approve a settlement, close |  |
@@ -2396,11 +2411,11 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Take registered claims into processing; reject claims the insurer repudiates | Daily | [Claims (17.15)](#the-claims-list) |
 | Submit the settlements agreed by the insurers | Daily | [Assessment and settlement (17.15.3)](#assessment-and-settlement-maker) |
 | Approve the claim settlements of other users | Daily | [Approve a settlement (17.15.4)](#approve-a-settlement-checker) |
-| Complete the cancellations and return premiums raised by the team | Daily | [Policy (17.12)](#policies), [Policy Cancellation (17.23)](#cancel-a-policy-computed-return-premium) |
-| Approve or return renewal terms | Daily | [Negotiations (17.19)](#negotiations) |
+| Complete the cancellations and return premiums raised by the team | Daily | [Policy (17.12)](#policies), [Policy Cancellation (17.24)](#cancel-a-policy-computed-return-premium) |
+| Approve or return renewal terms | Daily | [Negotiations (17.20)](#negotiations) |
 | Approve quotations and decide underwriting referrals | As referred | [Quotations (17.4)](#quotations) |
 | Approve supplier invoices | As submitted | [Payables (18.6)](#accounts-payable) |
-| Review the renewals at risk and the escalations from the team | Weekly | [At-Risk Policies (17.18)](#renewal-queue-and-at-risk-policies) |
+| Review the renewals at risk and the escalations from the team | Weekly | [At-Risk Policies (17.19)](#renewal-queue-and-at-risk-policies) |
 | Review the team's workload, open claims and claims ageing | Weekly | [Processing Dashboard (19.3)](#processing-dashboard), [Claims Dashboard (19.2)](#claims-dashboard) |
 | Review the claims, renewal and production reports | Month-end | [All Reports (22.1)](#reports-catalogue) |
 
@@ -2477,7 +2492,7 @@ When a user of your team sends a cancellation, or an endorsement that returns pr
 
 You cannot complete a cancellation or return premium you raised yourself. When the Authority Matrix sets you a limit
 for return premiums, the amount must be within it. See
-[Cancel a policy: computed return premium (17.23)](#cancel-a-policy-computed-return-premium).
+[Cancel a policy: computed return premium (17.24)](#cancel-a-policy-computed-return-premium).
 
 #### Approve or reject renewal terms {#tis-operations-unit-head-renewals}
 1. Choose Operations > Renewals > Negotiations and select **Pending approval** (the arrow of a **Renewal premium** item in
@@ -2583,7 +2598,7 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Record the cheques cleared by the bank | Daily, from the bank's advice | [Post-Dated Cheques (18.4)](#post-dated-cheques) |
 | Record bounced cheques and ask the client for a replacement | As the bank returns them | [Post-Dated Cheques (18.4)](#post-dated-cheques) |
 | Return or cancel cheques no longer needed | As requested | [Post-Dated Cheques (18.4)](#post-dated-cheques) |
-| Check the payment status of a policy before answering a client | As needed | [Payments (17.20)](#payments), [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
+| Check the payment status of a policy before answering a client | As needed | [Payments (17.21)](#payments), [Receipts (18.1)](#verify-payments-and-post-official-receipts) |
 | Count the cheques in the vault against the register | Month-end | [Post-Dated Cheques (18.4)](#post-dated-cheques) |
 | Run the collection report and the statement of account | Month-end | [All Reports (22.1)](#reports-catalogue) |
 
@@ -4134,6 +4149,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Claims | Approve |
 | Operations > Renewals | Renewal Policy | Approve |
 | Operations > Renewals | Renewal Batch | Create and edit |
+| Operations > Renewals | Talkbot Calls | Create and edit |
 | Operations > Renewals | Renewal Queue | Create and edit |
 | Operations > Renewals | Retention Analytics | View |
 | Operations > Renewals | At-Risk Policies | Create and edit |
@@ -4276,6 +4292,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
 | Operations | Renewals | Create and edit | Prepare renewals and renewal terms |  |
 | Operations | Renewals | Approve | Approve or return renewal terms of another user |  |
+| Operations | Talkbot call lists | View | See the Talkbot call lists and the Talkbot outcome of renewals | Talkbot Calls |
+| Operations | Talkbot call lists | Create and edit | Prepare, download and send Talkbot call lists, upload the call results and record outcomes |  |
 | Operations | Claims | View | See claims | Claims, Claims Awaiting Documents and Motor Claim Repairs |
 | Operations | Claims | Create and edit | Register and follow up claims, claim documents and repairs |  |
 | Operations | Claims | Approve | Claim decisions: review, reject, settle, approve a settlement, close |  |
@@ -4358,7 +4376,7 @@ These are the delivered rules. The rules in force are on Master > Users and Acce
 | Approve or return claim settlements | Daily | [Approve a settlement (checker) (17.15.4)](#approve-a-settlement-checker) |
 | Decide claims: review, reject, settle, close | As needed | [Claims (17.15)](#the-claims-list) |
 | Check the e-policies received against their placement slips, when the sales and operations approvers are not available | As needed | [Placement Slips (17.5)](#placement-slips) |
-| Approve or return renewal terms and complete return premiums | As needed | [Negotiations (17.19)](#negotiations), [Policy (17.12)](#policies) |
+| Approve or return renewal terms and complete return premiums | As needed | [Negotiations (17.20)](#negotiations), [Policy (17.12)](#policies) |
 | Approve or reject supplier invoices | As notified | [Payables (18.6)](#accounts-payable) |
 | Approve or reject the remittances to the insurers, without amount limit | As notified | [Approvals (18.12.4)](#remittance-approvals) |
 | Review premium, new business, claims rate, retention and receivables | Weekly | [Dashboard (19.1)](#dashboard), [Claims Dashboard (19.2)](#claims-dashboard), [Processing Dashboard (19.3)](#processing-dashboard), [Sales Dashboard (19.4)](#sales-dashboard) |
@@ -4972,7 +4990,7 @@ On **Documents**, the claim lists the documents its cause of loss needs (from [C
 
 ![Figure 17.25: Claim, step 3: the documents the claim needs](../images/screens-operations/claim-documents-step.png)
 #### Adjuster report {#adjuster-report}
-On **Adjuster**, record the adjuster the insurer appointed (**Adjuster name**), the **Adjuster status** (assigned, report received) and upload the adjuster's report with the amount the adjuster recommends. For a motor repair, the estimates and the letter of authority are kept on [Motor claim repairs (17.25)](#motor-claim-repairs-and-letters-of-authority).
+On **Adjuster**, record the adjuster the insurer appointed (**Adjuster name**), the **Adjuster status** (assigned, report received) and upload the adjuster's report with the amount the adjuster recommends. For a motor repair, the estimates and the letter of authority are kept on [Motor claim repairs (17.26)](#motor-claim-repairs-and-letters-of-authority).
 
 #### Assessment and settlement (maker) {#assessment-and-settlement-maker}
 On **Assessment**, check the key facts of the claim and the **Assessment basis** (date reported, adjuster and adjuster status) and choose **Proceed to settlement**, or **Reject claim** with the **Reason for rejection**.
@@ -5015,7 +5033,7 @@ The cards count **Due for renewal**, **In grace period**, **Lapsed, renewable**,
 3. Check the covers (mandatory covers are always included; tick the optional ones), the sums insured and the rates, and select **Calculate**. Then **Next** to the following steps, as for a new quotation.
 4. Save the renewal quotation and send it to the client.
 
-From the client's acceptance the renewal follows the same steps as a new policy: placement slip, e-policy, check and booking. Renewal terms submitted for approval on [Negotiations (17.19)](#negotiations) are approved by TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager. A lapsed policy (**Lapsed, renewable**) can still be renewed.
+From the client's acceptance the renewal follows the same steps as a new policy: placement slip, e-policy, check and booking. Renewal terms submitted for approval on [Negotiations (17.20)](#negotiations) are approved by TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager. A lapsed policy (**Lapsed, renewable**) can still be renewed.
 
 ### Renewal Batch, Lapse Management and the analytics {#renewal-batch-lapse-management-and-the-analytics}
 **Menu:** Operations > Renewals > Renewal Batch
@@ -5073,6 +5091,8 @@ From the client's acceptance the renewal follows the same steps as a new policy:
 **Renewal Batch** prepares the renewal quotations of many policies at once. Select **Create Batch**, choose the **Selection Criteria** (**Expiry Date From**, **Expiry Date To**, **Insurance Company**, **Product Type**, **Min premium**, **Max premium**, **Client Name**, **Payment Status**) and select **Generate policy list**. Check the list and process the batch. The list of batches shows **Batch ID** (RB-YYYY-NNNNN), **Status** (**Draft**, **Partially completed**, **Completed**), **Total policies**, **Processed** and **Created on**.
 
 ![Figure 17.26: Create Batch Renewal: the selection criteria](../images/screens-operations/renewal-batch-create.png)
+With the Talkbot call lists in use, **Create Batch Renewal** also has the criteria **Talkbot outcome** and **Talkbot call list**; for a Motor product the Talkbot outcome starts at **Willing to renew**. The policy list shows each policy's **Talkbot outcome** and **Confirmed on**. In a batch, **Generate Renewal Quotes** prepares the renewal quotes of the selected policies: a Motor policy that Talkbot has not confirmed, or whose confirmation is older than the validity period, is **Skipped** with the reason, and the others are quoted. The **Quote status** of each policy (**Not quoted**, **Queued**, **Quoted**, **Skipped**, **Failed**) is shown in the batch and in its report. A single renewal from Renewal Policy is not affected.
+
 **Lapse Management** shows the policies **Lapsed**, **In grace period** and that **Can be reinstated**, with the **Premium lost or at risk**. The tab **Lapsed and grace period** lists each policy with its days lapsed or left in the grace period, the **Lapse reason** and the win-back offers made. The tab **Win-back campaigns** holds the campaigns offering lapsed clients a discount to come back, with the clients contacted and converted and the premium recovered; **New campaign** creates one.
 
 ![Figure 17.27: Operations > Renewals > Lapse Management](../images/screens-operations/lapse-management.png)
@@ -5081,6 +5101,42 @@ From the client's acceptance the renewal follows the same steps as a new policy:
 **Performance** compares the renewal results with the targets: the **KPI scorecard** shows each KPI (renewal rate, premium retention, average cycle time) with **Target**, **Achieved**, **Variance** and the status **Met** or **Below target**, also **By account executive**, **By line of business** and as a **Monthly trend**. **Export** downloads each view.
 
 ![Figure 17.28: Operations > Renewals > Performance, the KPI scorecard](../images/screens-operations/renewal-performance.png)
+### Talkbot Calls {#talkbot-calls}
+Talkbot calls Motor clients a few days before their policy expires and asks whether they will renew. The call list is prepared here, loaded on the Talkbot platform, and the call results come back as a file.
+
+**Menu:** Operations > Renewals > Talkbot Calls
+
+| Role | Access |
+|---|---|
+| TIS Sales Associate | Create and edit |
+| TIS Sales Officer | Create and edit |
+| TIS Sales Unit Head | Create and edit |
+| TIS Operations Associate | View |
+| TIS Operations Officer | View |
+| TIS Operations Unit Head | View |
+| TIS General Manager | Create and edit |
+
+The list shows each **Call list** (TCL-YYYY-NNNNN), its **Talkbot task name**, the **Expiry date** of its accounts, the **Accounts**, those **Willing to renew** and those **Not called**, the **Renewal batch** made from it and the **Status**: **Draft**, **Sent to Talkbot**, **Results loaded**, **Closed** or **Cancelled**.
+
+#### Prepare and send a call list {#prepare-and-send-a-call-list}
+1. Choose Operations > Renewals > Talkbot Calls and select **New call list**.
+2. The expiry dates are proposed for the list of the day; on the last working day before a weekend or a holiday they cover the days nobody works. Choose the **Insurance Company**, **Sales person** or **Source of business** if needed, tick **Include expired policies still renewable**, or pick a list in **Re-call accounts not reached on** to call its missed and uncontacted accounts again. The dialog shows the accounts to call and those left out, with the reason (for example no mobile number, lock-in, client asked not to be called, already on another call list).
+3. Select **Create call list**. The list opens in **Draft**. **Remove** takes an account off the list with a reason; **Put back** restores it.
+4. Select **Download call list**: the Contact Import file for the Talkbot platform. Accounts no longer eligible (renewed, cancelled, already quoted) are left out of the file and shown as **Removed**.
+5. Load the file on the Talkbot platform, then select **Mark as sent** and enter the Talkbot task name.
+
+A list that will not be called is ended with **Cancel list** and a reason.
+
+#### Load the results and create the renewal batch {#load-the-talkbot-results}
+1. Export the Call Records of the campaign from the Talkbot platform.
+2. On the call list, select **Upload results** and choose the file. A file of another Talkbot task is loaded only after you confirm. The result line gives the rows loaded and failed, with the row number and reason of each failed row.
+3. Each account gets one **Talkbot outcome** from all its calls: **Willing to renew**, **Not willing to renew**, **Already renewed**, **Call back**, **Wrong contact**, **Uncontacted**, **Missed call** or **Not called**. **Calls** shows the calls of an account. The outcome is written on the renewal timeline; a call back date becomes the follow-up date on Negotiations.
+4. **Record outcome** sets the outcome of an account by hand, with the date and a remark (for example when the client called the hotline).
+5. **Create renewal batch** puts the accounts confirmed **Willing to renew** into a renewal batch in **Draft**; open it on [Renewal Batch (17.17)](#renewal-batch-lapse-management-and-the-analytics) and select **Generate Renewal Quotes**.
+6. **Close list** ends a list whose results are worked; a list is also closed 30 days after its last upload.
+
+Mobile numbers are shown masked; the full number is only in the downloaded file. The Operations team can open the call lists and create the renewal batch; Sales prepares, sends and loads them.
+
 ### Renewal Queue and At-Risk Policies {#renewal-queue-and-at-risk-policies}
 **Menu:** Operations > Renewals > Renewal Queue
 
@@ -5108,7 +5164,7 @@ From the client's acceptance the renewal follows the same steps as a new policy:
 | TIS IT AppSupport / Admin | View |
 | TIS General Manager | Create and edit |
 
-The **Renewal Queue** is the work list of open renewals. The cards count **Open renewals**, **Expiring within 30 days**, **High risk**, **In grace period** and the **Premium due for renewal**. Each row shows the policy and insured, product and insurer, **Expiry**, **Premium**, **Stage**, **Risk** and **Account executive**; filter by stage, risk level and account executive. **Refresh pipeline** adds the policies newly due; **Export** downloads the queue.
+The **Renewal Queue** is the work list of open renewals. The cards count **Open renewals**, **Expiring within 30 days**, **High risk**, **In grace period** and the **Premium due for renewal**. Each row shows the policy and insured, product and insurer, **Expiry**, **Premium**, **Stage**, **Risk** and **Account executive**; filter by stage, Talkbot outcome, risk level and account executive. The **Talkbot** column shows the latest Talkbot outcome of the policy with its call list and date, the call back date or the number of calls. **Refresh pipeline** adds the policies newly due; **Export** downloads the queue.
 
 The stages follow the renewal: **Pending**, **First Notice Sent**, **Second Notice Sent**, **Final Notice Sent**, **Quote Sent**, **Pending Approval**, **Approved**, **In Grace Period**, then **Renewed** or lapsed. The renewal notices are e-mailed to the client on the schedule of the renewals.
 
