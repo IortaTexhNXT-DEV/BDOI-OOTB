@@ -19,8 +19,13 @@ const sum = (rows, k) => r2(rows.reduce((s, r) => s + Number(r[k] || 0), 0));
 const errorText = (e) => (e.row === null ? `${e.sheetName} (whole sheet): ${e.message}` : `${e.sheetName} row ${e.row} ${e.column || '(row)'}: ${e.message}`);
 const firstErrors = (errors, n = 5) => errors.slice(0, n).map(errorText).join('; ');
 
-/** Fill the blank migration template with the SOURCE snapshot and the SOURCE trial balance at cutover - 1. */
-function fill(book, snap, tb) {
+/**
+ * Fill the blank migration template with the SOURCE snapshot and the SOURCE trial balance at cutover - 1. The policies
+ * go on the single Policies sheet of the earlier layout (any product), which the workbench still reads: the snapshot
+ * holds the columns of that layout.
+ */
+function fill(book, snap, tb, kit) {
+  if (!book.has('Policies')) book.addSheet('Policies', kit.sheets.find((s) => s.legacyLayout).columns.map((c) => c.header));
   for (const s of ['Clients', 'Policies', 'Open Items', 'Open Claims', 'Opening Balances']) book.clear(s);
   for (const r of snap.rows.clients) book.append('Clients', r);
   for (const r of snap.rows.policies) book.append('Policies', r);
@@ -99,7 +104,8 @@ export async function step4(ctx) {
   }, { critical: true });
 
   await log.check('Blank migration template downloaded from TARGET and filled from SOURCE', async () => {
-    book = fill(await wb.template(admin, 'migration'), snap, tb);
+    const kit = (await wb.kits(admin)).kits.find((k) => k.kit === 'migration');
+    book = fill(await wb.template(admin, 'migration'), snap, tb, kit);
     save(ctx, '4_migration_workbook.xlsx', book);
     ctx.migrationBook = book;
     return ['Clients', 'Policies', 'Open Items', 'Open Claims', 'Opening Balances'].map((s) => `${s} ${book.rows(s).length}`).join(', ');
@@ -131,7 +137,7 @@ export async function step4(ctx) {
 
   await log.check('Reconciliation of the failed validation is available (dry run totals)', async () => {
     const rec = first.batch.reconciliation;
-    expect(rec?.sheets?.length === 5, 'no reconciliation on the validated batch');
+    expect(rec?.sheets?.some((s) => s.sheet === 'Policies'), 'no reconciliation on the validated batch');
     return rec.sheets.map((s) => `${s.sheet}: ${s.workbookRows} valid rows`).join(', ');
   });
 

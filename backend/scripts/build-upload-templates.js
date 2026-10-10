@@ -56,6 +56,9 @@ export const FILE_ROUTES = [
   { module: 'insurer-reconciliation', method: 'POST', path: '/statements/preview', templates: ['insurer-statement'] },
   { module: 'remittance', method: 'POST', path: '/bulk/upload', templates: ['remittance-bulk'] },
   { module: 'data-load', method: 'POST', path: '/batches', templates: ['kit:configuration', 'kit:migration'] },
+  { module: 'data-load', method: 'POST', path: '/value-maps/upload',
+    noTemplate: 'Value maps: the template is the Value Maps sheet as it is, downloaded from Data Migration & Go-Live > Templates (GET /data-load/value-maps/workbook)' },
+  { module: 'data-load', method: 'POST', path: '/document-names/check', noTemplate: 'A list of legacy document file names (.xlsx, .csv or .txt), one name per row' },
   { module: 'motor-programmes', method: 'POST', path: '/:id/sales/upload', templates: ['dealer-sales'] },
   { module: 'fleet', method: 'POST', path: '/:id/vehicles/upload', templates: ['fleet-vehicles'] },
   { module: 'claims', method: 'POST', path: '/', noTemplate: 'Claim documents and photos attached to a claim (single files)' },
@@ -136,7 +139,7 @@ export async function buildTemplates(outDir = DEFAULT_OUT) {
   for (const kit of Object.keys(KITS)) {
     const { fileName, buffer } = await kitTemplate(kit);
     fs.writeFileSync(path.join(outDir, fileName), buffer);
-    const sheets = await kitSheets(kit);
+    const sheets = (await kitSheets(kit)).filter((x) => !x.legacyLayout);
     out.push({ id: `kit:${kit}`, file: fileName, csv: null, title: KITS[kit].title, menu: 'API (go-live scripts)', screen: 'API (go-live scripts)',
       button: true, route: 'POST /api/data-load/batches (multipart field "file", field kit)', headers: sheets.map((x) => x.name), required: [] });
   }
