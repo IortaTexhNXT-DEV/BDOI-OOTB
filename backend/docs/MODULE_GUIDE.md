@@ -79,7 +79,10 @@ minimal, clearly-correct front-end fix.
 - Uploads: the template comes from the importer's own column list (`src/modules/documents/uploadTemplates.js`,
   `sendTemplate` / `sendWorkbook`: Data, Columns and Instructions sheets) on a `GET .../template` route next to the upload;
   a row-by-row upload answers `uploadResult()` ("Processed n rows: c created, f failed" and the failed rows) and names
-  the columns in its messages (`columnMessage`, `issueText`).
+  the columns in its messages (`columnMessage`, `issueText`). An upload that creates records another user approves
+  validates first and creates later: it keeps the file, its hash and one result per row under an import record, answers
+  an error report (the file's columns plus Result and Message), and refuses a file whose hash was already committed
+  (`src/modules/remittance/imports.js` is the model). Amounts typed in such a file are compared, never used.
 - Money is `numeric(14,2)`; the pool returns numbers. Dates are `date`, returned as `YYYY-MM-DD`.
 - Deletes are soft (status) unless the record is a draft.
 - No `console.log` (eslint refuses it outside scripts); use `req.log` in handlers and `logger` from

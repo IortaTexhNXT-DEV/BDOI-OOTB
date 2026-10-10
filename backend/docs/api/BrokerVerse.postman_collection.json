@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1226 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1240 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -78524,7 +78524,7 @@
           ]
         },
         {
-          "name": "Create draft remittances from the valid rows of an upload",
+          "name": "Create draft remittances from the valid rows of an upload, at the booked premium, commission and tax of the policies (the typed amounts are not used; 409 USE_IMPORT while remittance.bulk_upload_enabled is off)",
           "request": {
             "method": "POST",
             "header": [],
@@ -78547,7 +78547,7 @@
                 }
               ]
             },
-            "description": "Create draft remittances from the valid rows of an upload\n\nFront-end touchpoint: Accounts > Remittance > Bulk Processing > Process\n\nAccess: write:remittance"
+            "description": "Create draft remittances from the valid rows of an upload, at the booked premium, commission and tax of the policies (the typed amounts are not used; 409 USE_IMPORT while remittance.bulk_upload_enabled is off)\n\nFront-end touchpoint: Accounts > Remittance > Bulk Processing > Process\n\nAccess: write:remittance"
           },
           "response": [
             {
@@ -78574,7 +78574,7 @@
                     }
                   ]
                 },
-                "description": "Create draft remittances from the valid rows of an upload\n\nFront-end touchpoint: Accounts > Remittance > Bulk Processing > Process\n\nAccess: write:remittance"
+                "description": "Create draft remittances from the valid rows of an upload, at the booked premium, commission and tax of the policies (the typed amounts are not used; 409 USE_IMPORT while remittance.bulk_upload_enabled is off)\n\nFront-end touchpoint: Accounts > Remittance > Bulk Processing > Process\n\nAccess: write:remittance"
               },
               "status": "OK",
               "code": 200,
@@ -78654,7 +78654,7 @@
           ]
         },
         {
-          "name": "Upload a remittance file (multipart file + configCode); validates against the bulk-processing master",
+          "name": "Upload a remittance file (multipart file + configCode); validates against the bulk-processing master (409 USE_IMPORT while remittance.bulk_upload_enabled is off)",
           "request": {
             "method": "POST",
             "header": [
@@ -78674,7 +78674,7 @@
                 "upload"
               ]
             },
-            "description": "Upload a remittance file (multipart file + configCode); validates against the bulk-processing master\n\nFront-end touchpoint: Accounts > Remittance > Bulk Processing > Upload / Validate\n\nAccess: write:remittance",
+            "description": "Upload a remittance file (multipart file + configCode); validates against the bulk-processing master (409 USE_IMPORT while remittance.bulk_upload_enabled is off)\n\nFront-end touchpoint: Accounts > Remittance > Bulk Processing > Upload / Validate\n\nAccess: write:remittance",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"file\": \"(CSV: PolicyNo,Premium,Commission)\",\n  \"configCode\": \"BFM-001\"\n}",
@@ -78707,7 +78707,7 @@
                     "upload"
                   ]
                 },
-                "description": "Upload a remittance file (multipart file + configCode); validates against the bulk-processing master\n\nFront-end touchpoint: Accounts > Remittance > Bulk Processing > Upload / Validate\n\nAccess: write:remittance",
+                "description": "Upload a remittance file (multipart file + configCode); validates against the bulk-processing master (409 USE_IMPORT while remittance.bulk_upload_enabled is off)\n\nFront-end touchpoint: Accounts > Remittance > Bulk Processing > Upload / Validate\n\nAccess: write:remittance",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"file\": \"(CSV: PolicyNo,Premium,Commission)\",\n  \"configCode\": \"BFM-001\"\n}",
@@ -80851,6 +80851,645 @@
           ]
         },
         {
+          "name": "Import history, newest first (paging)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/imports?page=1&perPage=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "imports"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "Import history, newest first (paging)\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Import history\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/imports?page=1&perPage=50",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "imports"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "perPage",
+                      "value": "50"
+                    }
+                  ]
+                },
+                "description": "Import history, newest first (paging)\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Import history\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"imp_1\",\n      \"importNo\": \"IMP-2026-0004\",\n      \"status\": \"committed\",\n      \"statusLabel\": \"Committed\",\n      \"expired\": false,\n      \"version\": 1,\n      \"purpose\": {\n        \"code\": \"ROC-GOLIVE\",\n        \"name\": \"Go-live opening\",\n        \"note\": null,\n        \"text\": \"Go-live opening\"\n      },\n      \"file\": {\n        \"name\": \"opening.xlsx\",\n        \"size\": 18342,\n        \"sizeText\": \"18 KB\",\n        \"hash\": \"9f2c...\"\n      },\n      \"counts\": {\n        \"rows\": 52,\n        \"ready\": 46,\n        \"warnings\": 4,\n        \"errors\": 6,\n        \"held\": 0,\n        \"exceptions\": 0\n      },\n      \"uploadedBy\": {\n        \"id\": \"usr_4\",\n        \"name\": \"M. Reyes\"\n      },\n      \"uploadedAt\": \"2026-10-12T02:00:00.000Z\",\n      \"committedBy\": null,\n      \"committedAt\": null,\n      \"discardedAt\": null,\n      \"drafts\": [\n        {\n          \"id\": \"rm_31\",\n          \"remittanceNo\": \"REM-2026-00031\"\n        }\n      ],\n      \"sameFile\": null,\n      \"toCreate\": [\n        {\n          \"insurer\": {\n            \"id\": 3,\n            \"name\": \"Pioneer Insurance & Surety Corp.\"\n          },\n          \"productLine\": \"Motor\",\n          \"policies\": 46,\n          \"dueToInsurer\": 1204553.1,\n          \"varianceRows\": 4\n        }\n      ],\n      \"totals\": {\n        \"remittances\": 1,\n        \"policies\": 46,\n        \"dueToInsurer\": 1204553.1\n      },\n      \"canCommit\": true,\n      \"commitBlockedReason\": null,\n      \"canDiscard\": true\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 50,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "One import (id or IMP no.): counts, the remittances to create per insurer and product line, the drafts created, the same committed file and whether it can be committed",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/imports/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "imports",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One import (id or IMP no.): counts, the remittances to create per insurer and product line, the drafts created, the same committed file and whether it can be committed\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Import policy list > Preview\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/imports/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "imports",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One import (id or IMP no.): counts, the remittances to create per insurer and product line, the drafts created, the same committed file and whether it can be committed\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Import policy list > Preview\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"imp_1\",\n    \"importNo\": \"IMP-2026-0004\",\n    \"status\": \"validated\",\n    \"statusLabel\": \"Validated\",\n    \"expired\": false,\n    \"version\": 1,\n    \"purpose\": {\n      \"code\": \"ROC-GOLIVE\",\n      \"name\": \"Go-live opening\",\n      \"note\": null,\n      \"text\": \"Go-live opening\"\n    },\n    \"file\": {\n      \"name\": \"opening.xlsx\",\n      \"size\": 18342,\n      \"sizeText\": \"18 KB\",\n      \"hash\": \"9f2c...\"\n    },\n    \"counts\": {\n      \"rows\": 52,\n      \"ready\": 46,\n      \"warnings\": 4,\n      \"errors\": 6,\n      \"held\": 0,\n      \"exceptions\": 0\n    },\n    \"uploadedBy\": {\n      \"id\": \"usr_4\",\n      \"name\": \"M. Reyes\"\n    },\n    \"uploadedAt\": \"2026-10-12T02:00:00.000Z\",\n    \"committedBy\": null,\n    \"committedAt\": null,\n    \"discardedAt\": null,\n    \"drafts\": [],\n    \"sameFile\": null,\n    \"toCreate\": [\n      {\n        \"insurer\": {\n          \"id\": 3,\n          \"name\": \"Pioneer Insurance & Surety Corp.\"\n        },\n        \"productLine\": \"Motor\",\n        \"policies\": 46,\n        \"dueToInsurer\": 1204553.1,\n        \"varianceRows\": 4\n      }\n    ],\n    \"totals\": {\n      \"remittances\": 1,\n      \"policies\": 46,\n      \"dueToInsurer\": 1204553.1\n    },\n    \"canCommit\": true,\n    \"commitBlockedReason\": null,\n    \"canDiscard\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create the draft remittances of a validated import: one per insurer and product line of the ready rows, at the system amounts, source import with the import and the off-cycle reason; a policy remitted meanwhile is skipped. 409 SAME_FILE when the same file was committed, ALREADY_COMMITTED, DISCARDED (also 7 days after validation), STALE, NOTHING_READY",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/imports/:id/commit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "imports",
+                ":id",
+                "commit"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Create the draft remittances of a validated import: one per insurer and product line of the ready rows, at the system amounts, source import with the import and the off-cycle reason; a policy remitted meanwhile is skipped. 409 SAME_FILE when the same file was committed, ALREADY_COMMITTED, DISCARDED (also 7 days after validation), STALE, NOTHING_READY\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Import policy list > Create drafts\n\nAccess: write:remittance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"version\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/imports/:id/commit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "imports",
+                    ":id",
+                    "commit"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Create the draft remittances of a validated import: one per insurer and product line of the ready rows, at the system amounts, source import with the import and the off-cycle reason; a policy remitted meanwhile is skipped. 409 SAME_FILE when the same file was committed, ALREADY_COMMITTED, DISCARDED (also 7 days after validation), STALE, NOTHING_READY\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Import policy list > Create drafts\n\nAccess: write:remittance",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"version\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"import\": {\n      \"id\": \"imp_1\",\n      \"importNo\": \"IMP-2026-0004\",\n      \"status\": \"committed\",\n      \"statusLabel\": \"Committed\",\n      \"expired\": false,\n      \"version\": 1,\n      \"purpose\": {\n        \"code\": \"ROC-GOLIVE\",\n        \"name\": \"Go-live opening\",\n        \"note\": null,\n        \"text\": \"Go-live opening\"\n      },\n      \"file\": {\n        \"name\": \"opening.xlsx\",\n        \"size\": 18342,\n        \"sizeText\": \"18 KB\",\n        \"hash\": \"9f2c...\"\n      },\n      \"counts\": {\n        \"rows\": 52,\n        \"ready\": 46,\n        \"warnings\": 4,\n        \"errors\": 6,\n        \"held\": 0,\n        \"exceptions\": 0\n      },\n      \"uploadedBy\": {\n        \"id\": \"usr_4\",\n        \"name\": \"M. Reyes\"\n      },\n      \"uploadedAt\": \"2026-10-12T02:00:00.000Z\",\n      \"committedBy\": null,\n      \"committedAt\": null,\n      \"discardedAt\": null,\n      \"drafts\": [],\n      \"sameFile\": null,\n      \"toCreate\": [\n        {\n          \"insurer\": {\n            \"id\": 3,\n            \"name\": \"Pioneer Insurance & Surety Corp.\"\n          },\n          \"productLine\": \"Motor\",\n          \"policies\": 46,\n          \"dueToInsurer\": 1204553.1,\n          \"varianceRows\": 4\n        }\n      ],\n      \"totals\": {\n        \"remittances\": 1,\n        \"policies\": 46,\n        \"dueToInsurer\": 1204553.1\n      },\n      \"canCommit\": true,\n      \"commitBlockedReason\": null,\n      \"canDiscard\": true\n    },\n    \"drafts\": [\n      {\n        \"id\": \"rm_31\",\n        \"remittanceNo\": \"REM-2026-00031\",\n        \"policies\": 46,\n        \"dueToInsurer\": 1204553.1\n      }\n    ],\n    \"skipped\": [],\n    \"message\": \"1 draft created: REM-2026-00031 · Off-cycle · IMP-2026-0004\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Discard a validated import (nothing was created from it)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/imports/:id/discard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "imports",
+                ":id",
+                "discard"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Discard a validated import (nothing was created from it)\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Import policy list > Discard\n\nAccess: write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/imports/:id/discard",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "imports",
+                    ":id",
+                    "discard"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Discard a validated import (nothing was created from it)\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Import policy list > Discard\n\nAccess: write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"imp_1\",\n    \"importNo\": \"IMP-2026-0004\",\n    \"status\": \"discarded\",\n    \"statusLabel\": \"Discarded\",\n    \"expired\": false,\n    \"version\": 1,\n    \"purpose\": {\n      \"code\": \"ROC-GOLIVE\",\n      \"name\": \"Go-live opening\",\n      \"note\": null,\n      \"text\": \"Go-live opening\"\n    },\n    \"file\": {\n      \"name\": \"opening.xlsx\",\n      \"size\": 18342,\n      \"sizeText\": \"18 KB\",\n      \"hash\": \"9f2c...\"\n    },\n    \"counts\": {\n      \"rows\": 52,\n      \"ready\": 46,\n      \"warnings\": 4,\n      \"errors\": 6,\n      \"held\": 0,\n      \"exceptions\": 0\n    },\n    \"uploadedBy\": {\n      \"id\": \"usr_4\",\n      \"name\": \"M. Reyes\"\n    },\n    \"uploadedAt\": \"2026-10-12T02:00:00.000Z\",\n    \"committedBy\": null,\n    \"committedAt\": null,\n    \"discardedAt\": null,\n    \"drafts\": [],\n    \"sameFile\": null,\n    \"toCreate\": [\n      {\n        \"insurer\": {\n          \"id\": 3,\n          \"name\": \"Pioneer Insurance & Surety Corp.\"\n        },\n        \"productLine\": \"Motor\",\n        \"policies\": 46,\n        \"dueToInsurer\": 1204553.1,\n        \"varianceRows\": 4\n      }\n    ],\n    \"totals\": {\n      \"remittances\": 1,\n      \"policies\": 46,\n      \"dueToInsurer\": 1204553.1\n    },\n    \"canCommit\": true,\n    \"commitBlockedReason\": null,\n    \"canDiscard\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Error report of an import: the columns of the file plus Result and Message, one row per file row in file order",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/imports/:id/errors.xlsx",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "imports",
+                ":id",
+                "errors.xlsx"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Error report of an import: the columns of the file plus Result and Message, one row per file row in file order\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Import policy list > Download error report\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/imports/:id/errors.xlsx",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "imports",
+                    ":id",
+                    "errors.xlsx"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Error report of an import: the columns of the file plus Result and Message, one row per file row in file order\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Import policy list > Download error report\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
+            }
+          ]
+        },
+        {
+          "name": "Row results of an import in file order (result: a result code, ready, warnings or errors; paging): system amount, expected amount of the file, variance, message",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/imports/:id/rows?result=errors&page=1&perPage=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "imports",
+                ":id",
+                "rows"
+              ],
+              "query": [
+                {
+                  "key": "result",
+                  "value": "errors"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "50"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Row results of an import in file order (result: a result code, ready, warnings or errors; paging): system amount, expected amount of the file, variance, message\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Import policy list > Preview\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/imports/:id/rows?result=errors&page=1&perPage=50",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "imports",
+                    ":id",
+                    "rows"
+                  ],
+                  "query": [
+                    {
+                      "key": "result",
+                      "value": "errors"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "perPage",
+                      "value": "50"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Row results of an import in file order (result: a result code, ready, warnings or errors; paging): system amount, expected amount of the file, variance, message\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Import policy list > Preview\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"rowNo\": 14,\n      \"policyNo\": \"TISPH-PC-0001240\",\n      \"insurerCode\": \"PIONEER\",\n      \"insurer\": \"Pioneer Insurance & Surety Corp.\",\n      \"productLine\": \"Motor\",\n      \"result\": \"ready-variance\",\n      \"resultLabel\": \"Ready · Variance\",\n      \"kind\": \"warning\",\n      \"message\": \"File 25,871.34, system 25,817.34, difference -54.00\",\n      \"systemDue\": 25817.34,\n      \"expectedDue\": 25871.34,\n      \"variance\": -54\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 50,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Limits of an imported policy list: file size (IMPORT_MAX_MB), data rows (remittance.import_max_rows), file types and the message of the dialog",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/imports/limits",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "imports",
+                "limits"
+              ]
+            },
+            "description": "Limits of an imported policy list: file size (IMPORT_MAX_MB), data rows (remittance.import_max_rows), file types and the message of the dialog\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Import policy list\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/imports/limits",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "imports",
+                    "limits"
+                  ]
+                },
+                "description": "Limits of an imported policy list: file size (IMPORT_MAX_MB), data rows (remittance.import_max_rows), file types and the message of the dialog\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Import policy list\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"maxBytes\": 10485760,\n    \"maxMb\": 10,\n    \"maxRows\": 5000,\n    \"fileTypes\": [\n      \".xlsx\",\n      \".csv\"\n    ],\n    \"message\": \"Choose an .xlsx or .csv file of at most 10 MB.\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Remittance_Policy_List_Template.xlsx: Data (required headers dark red, 2 samples), Columns (the active insurer codes, the product lines, other accepted headers) and Instructions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/imports/template",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "imports",
+                "template"
+              ]
+            },
+            "description": "Remittance_Policy_List_Template.xlsx: Data (required headers dark red, 2 samples), Columns (the active insurer codes, the product lines, other accepted headers) and Instructions\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Import policy list > Download template; Accounts > Remittance > Setup > Templates\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/imports/template",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "imports",
+                    "template"
+                  ]
+                },
+                "description": "Remittance_Policy_List_Template.xlsx: Data (required headers dark red, 2 samples), Columns (the active insurer codes, the product lines, other accepted headers) and Instructions\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Import policy list > Download template; Accounts > Remittance > Setup > Templates\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
+            }
+          ]
+        },
+        {
+          "name": "Validate a policy list (multipart field \"file\", .xlsx or .csv of at most IMPORT_MAX_MB; purposeCode a remittance_off_cycle reason, note): keeps the file, its hash and a result per row under a new import IMP-yyyy-nnnn (validated) and creates nothing. 400 FILE_TOO_LARGE / FILE_TYPE \"Choose an .xlsx or .csv file of at most 10 MB.\", HEADER_MISSING \"Column Policy No not found.\", TOO_MANY_ROWS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/imports/validate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "imports",
+                "validate"
+              ]
+            },
+            "description": "Validate a policy list (multipart field \"file\", .xlsx or .csv of at most IMPORT_MAX_MB; purposeCode a remittance_off_cycle reason, note): keeps the file, its hash and a result per row under a new import IMP-yyyy-nnnn (validated) and creates nothing. 400 FILE_TOO_LARGE / FILE_TYPE \"Choose an .xlsx or .csv file of at most 10 MB.\", HEADER_MISSING \"Column Policy No not found.\", TOO_MANY_ROWS\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Import policy list > Validate\n\nAccess: write:remittance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"file\": \"(XLSX: Policy No, Insurer Code, Product Line, Expected Due to Insurer, Insurer Reference, Remark)\",\n  \"purposeCode\": \"ROC-GOLIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/imports/validate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "imports",
+                    "validate"
+                  ]
+                },
+                "description": "Validate a policy list (multipart field \"file\", .xlsx or .csv of at most IMPORT_MAX_MB; purposeCode a remittance_off_cycle reason, note): keeps the file, its hash and a result per row under a new import IMP-yyyy-nnnn (validated) and creates nothing. 400 FILE_TOO_LARGE / FILE_TYPE \"Choose an .xlsx or .csv file of at most 10 MB.\", HEADER_MISSING \"Column Policy No not found.\", TOO_MANY_ROWS\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Import policy list > Validate\n\nAccess: write:remittance",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"file\": \"(XLSX: Policy No, Insurer Code, Product Line, Expected Due to Insurer, Insurer Reference, Remark)\",\n  \"purposeCode\": \"ROC-GOLIVE\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"imp_1\",\n    \"importNo\": \"IMP-2026-0004\",\n    \"status\": \"validated\",\n    \"statusLabel\": \"Validated\",\n    \"expired\": false,\n    \"version\": 1,\n    \"purpose\": {\n      \"code\": \"ROC-GOLIVE\",\n      \"name\": \"Go-live opening\",\n      \"note\": null,\n      \"text\": \"Go-live opening\"\n    },\n    \"file\": {\n      \"name\": \"opening.xlsx\",\n      \"size\": 18342,\n      \"sizeText\": \"18 KB\",\n      \"hash\": \"9f2c...\"\n    },\n    \"counts\": {\n      \"rows\": 52,\n      \"ready\": 46,\n      \"warnings\": 4,\n      \"errors\": 6,\n      \"held\": 0,\n      \"exceptions\": 0\n    },\n    \"uploadedBy\": {\n      \"id\": \"usr_4\",\n      \"name\": \"M. Reyes\"\n    },\n    \"uploadedAt\": \"2026-10-12T02:00:00.000Z\",\n    \"committedBy\": null,\n    \"committedAt\": null,\n    \"discardedAt\": null,\n    \"drafts\": [],\n    \"sameFile\": null,\n    \"toCreate\": [\n      {\n        \"insurer\": {\n          \"id\": 3,\n          \"name\": \"Pioneer Insurance & Surety Corp.\"\n        },\n        \"productLine\": \"Motor\",\n        \"policies\": 46,\n        \"dueToInsurer\": 1204553.1,\n        \"varianceRows\": 4\n      }\n    ],\n    \"totals\": {\n      \"remittances\": 1,\n      \"policies\": 46,\n      \"dueToInsurer\": 1204553.1\n    },\n    \"canCommit\": true,\n    \"commitBlockedReason\": null,\n    \"canDiscard\": true\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Refunds due from insurers (return premium on premium already remitted); open credits are netted against the next premium remittance voucher to the insurer",
           "request": {
             "method": "GET",
@@ -81686,12 +82325,12 @@
           ]
         },
         {
-          "name": "Remittances / bills (kind, status label or code, insurer, from, to, search, paging)",
+          "name": "Remittances register (Remittances screen) with segment=my-work|drafts|in-approval|in-payment|all (direct-bill only; week (a Monday), insurerId, productLine, status (All), source weekly-run|run-now|import|manual, kpi to-submit|awaiting-approval|approved-not-paid|overdue, q (REM, policy or OR no.), sort (remittanceNo, dueDate, dueToInsurer, -createdAt ...), paging): rows with status label, flags, next step and actions, totals of the filtered set, the 4 KPI figures and segment counts over the filters. Without segment: the remittances / bills of earlier screens (kind, status label or code, insurer, from, to, search, paging)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/remittance/remittances?kind=direct-bill&status=Pending Approval&insurer=MALAYAN&from=2026-09-01&to=2026-09-30&page=1&perPage=20",
+              "raw": "{{baseUrl}}/remittance/remittances?segment=all&week=2026-10-05&insurerId=3&productLine=Motor&status=for-approval&source=import&q=REM-2026&page=1&perPage=50&sort=-dueDate",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -81701,24 +82340,32 @@
               ],
               "query": [
                 {
-                  "key": "kind",
-                  "value": "direct-bill"
+                  "key": "segment",
+                  "value": "all"
+                },
+                {
+                  "key": "week",
+                  "value": "2026-10-05"
+                },
+                {
+                  "key": "insurerId",
+                  "value": "3"
+                },
+                {
+                  "key": "productLine",
+                  "value": "Motor"
                 },
                 {
                   "key": "status",
-                  "value": "Pending Approval"
+                  "value": "for-approval"
                 },
                 {
-                  "key": "insurer",
-                  "value": "MALAYAN"
+                  "key": "source",
+                  "value": "import"
                 },
                 {
-                  "key": "from",
-                  "value": "2026-09-01"
-                },
-                {
-                  "key": "to",
-                  "value": "2026-09-30"
+                  "key": "q",
+                  "value": "REM-2026"
                 },
                 {
                   "key": "page",
@@ -81726,11 +82373,15 @@
                 },
                 {
                   "key": "perPage",
-                  "value": "20"
+                  "value": "50"
+                },
+                {
+                  "key": "sort",
+                  "value": "-dueDate"
                 }
               ]
             },
-            "description": "Remittances / bills (kind, status label or code, insurer, from, to, search, paging)\n\nFront-end touchpoint: Accounts > Remittance > Tracking; Accounts > Remittance > Automated Processing\n\nAccess: read:remittance, write:remittance"
+            "description": "Remittances register (Remittances screen) with segment=my-work|drafts|in-approval|in-payment|all (direct-bill only; week (a Monday), insurerId, productLine, status (All), source weekly-run|run-now|import|manual, kpi to-submit|awaiting-approval|approved-not-paid|overdue, q (REM, policy or OR no.), sort (remittanceNo, dueDate, dueToInsurer, -createdAt ...), paging): rows with status label, flags, next step and actions, totals of the filtered set, the 4 KPI figures and segment counts over the filters. Without segment: the remittances / bills of earlier screens (kind, status label or code, insurer, from, to, search, paging)\n\nFront-end touchpoint: Accounts > Remittance > Remittances; Accounts > Remittance > Tracking; Accounts > Remittance > Automated Processing\n\nAccess: read:remittance, write:remittance"
           },
           "response": [
             {
@@ -81739,7 +82390,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/remittance/remittances?kind=direct-bill&status=Pending Approval&insurer=MALAYAN&from=2026-09-01&to=2026-09-30&page=1&perPage=20",
+                  "raw": "{{baseUrl}}/remittance/remittances?segment=all&week=2026-10-05&insurerId=3&productLine=Motor&status=for-approval&source=import&q=REM-2026&page=1&perPage=50&sort=-dueDate",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -81749,24 +82400,32 @@
                   ],
                   "query": [
                     {
-                      "key": "kind",
-                      "value": "direct-bill"
+                      "key": "segment",
+                      "value": "all"
+                    },
+                    {
+                      "key": "week",
+                      "value": "2026-10-05"
+                    },
+                    {
+                      "key": "insurerId",
+                      "value": "3"
+                    },
+                    {
+                      "key": "productLine",
+                      "value": "Motor"
                     },
                     {
                       "key": "status",
-                      "value": "Pending Approval"
+                      "value": "for-approval"
                     },
                     {
-                      "key": "insurer",
-                      "value": "MALAYAN"
+                      "key": "source",
+                      "value": "import"
                     },
                     {
-                      "key": "from",
-                      "value": "2026-09-01"
-                    },
-                    {
-                      "key": "to",
-                      "value": "2026-09-30"
+                      "key": "q",
+                      "value": "REM-2026"
                     },
                     {
                       "key": "page",
@@ -81774,11 +82433,15 @@
                     },
                     {
                       "key": "perPage",
-                      "value": "20"
+                      "value": "50"
+                    },
+                    {
+                      "key": "sort",
+                      "value": "-dueDate"
                     }
                   ]
                 },
-                "description": "Remittances / bills (kind, status label or code, insurer, from, to, search, paging)\n\nFront-end touchpoint: Accounts > Remittance > Tracking; Accounts > Remittance > Automated Processing\n\nAccess: read:remittance, write:remittance"
+                "description": "Remittances register (Remittances screen) with segment=my-work|drafts|in-approval|in-payment|all (direct-bill only; week (a Monday), insurerId, productLine, status (All), source weekly-run|run-now|import|manual, kpi to-submit|awaiting-approval|approved-not-paid|overdue, q (REM, policy or OR no.), sort (remittanceNo, dueDate, dueToInsurer, -createdAt ...), paging): rows with status label, flags, next step and actions, totals of the filtered set, the 4 KPI figures and segment counts over the filters. Without segment: the remittances / bills of earlier screens (kind, status label or code, insurer, from, to, search, paging)\n\nFront-end touchpoint: Accounts > Remittance > Remittances; Accounts > Remittance > Tracking; Accounts > Remittance > Automated Processing\n\nAccess: read:remittance, write:remittance"
               },
               "status": "OK",
               "code": 200,
@@ -81790,7 +82453,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"rm_1\",\n      \"remittanceNo\": \"REM-2026-00001\",\n      \"remittanceDate\": \"2026-09-15\",\n      \"insurerCode\": \"MALAYAN\",\n      \"insurerName\": \"Malayan Insurance Co., Inc.\",\n      \"policyCount\": 3,\n      \"grossAmount\": 45000,\n      \"commission\": 6750,\n      \"tax\": 0,\n      \"netAmount\": 38250,\n      \"status\": \"Pending Approval\",\n      \"statusCode\": \"for-approval\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 20,\n  \"totalPages\": 1,\n  \"summary\": {\n    \"count\": 1,\n    \"grossAmount\": 45000,\n    \"netAmount\": 38250\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"rm_21\",\n      \"remittanceNo\": \"REM-2026-00021\",\n      \"kind\": \"direct-bill\",\n      \"status\": \"for-approval\",\n      \"statusLabel\": \"Pending Approval\",\n      \"insurer\": {\n        \"id\": 3,\n        \"code\": \"PIONEER\",\n        \"name\": \"Pioneer Insurance & Surety Corp.\",\n        \"shortName\": \"Pioneer\"\n      },\n      \"productLine\": \"Motor\",\n      \"basis\": \"net\",\n      \"basisLabel\": \"Net\",\n      \"coverageWeek\": {\n        \"from\": \"2026-10-05\",\n        \"to\": \"2026-10-09\"\n      },\n      \"source\": {\n        \"code\": \"import\",\n        \"label\": \"Import IMP-2026-0004\",\n        \"importId\": \"imp_1\",\n        \"importNo\": \"IMP-2026-0004\"\n      },\n      \"offCycleReason\": {\n        \"code\": \"ROC-GOLIVE\",\n        \"name\": \"Go-live opening\",\n        \"note\": null,\n        \"text\": \"Go-live opening\"\n      },\n      \"policyCount\": 12,\n      \"heldCount\": null,\n      \"premium\": 520000,\n      \"commission\": 98000,\n      \"tax\": 12858.57,\n      \"adjustments\": 0,\n      \"dueToInsurer\": 409141.43,\n      \"currency\": \"PHP\",\n      \"remittanceDate\": \"2026-10-12\",\n      \"dueDate\": \"2026-10-16\",\n      \"overdue\": false,\n      \"flags\": {\n        \"offCycle\": true,\n        \"offCycleReason\": \"Go-live opening\",\n        \"overdue\": false,\n        \"adviceSent\": false,\n        \"bankMatched\": false,\n        \"openExceptions\": 0\n      },\n      \"nextStep\": {\n        \"code\": \"approve\",\n        \"label\": \"Awaiting remittance approver (2)\",\n        \"actor\": {\n          \"type\": \"users\",\n          \"ids\": [\n            \"usr_9\",\n            \"usr_12\"\n          ],\n          \"name\": \"J. Cruz, A. Tan\"\n        },\n        \"dueAt\": \"2026-10-13T02:12:00.000Z\"\n      },\n      \"decision\": {\n        \"canDecide\": false,\n        \"blockedCode\": \"SUBMITTER\",\n        \"blockedReason\": \"You submitted this remittance. Another user with remittance authority must approve it.\"\n      },\n      \"approvalId\": 21,\n      \"approvalVersion\": 1,\n      \"actions\": [\n        {\n          \"code\": \"view\",\n          \"label\": \"View\",\n          \"allowed\": true,\n          \"link\": \"/finance/remittance/remittances/rm_21\"\n        },\n        {\n          \"code\": \"download-schedule-xlsx\",\n          \"label\": \"Download schedule (XLSX)\",\n          \"allowed\": true,\n          \"href\": \"/remittance/remittances/rm_21/schedule.xlsx\"\n        },\n        {\n          \"code\": \"download-schedule-pdf\",\n          \"label\": \"Download schedule (PDF)\",\n          \"allowed\": true,\n          \"href\": \"/remittance/remittances/rm_21/schedule.pdf\"\n        }\n      ],\n      \"version\": 3,\n      \"voucher\": null,\n      \"paidOn\": null,\n      \"bankReference\": null,\n      \"submittedBy\": {\n        \"id\": \"usr_4\",\n        \"name\": \"M. Reyes\"\n      },\n      \"submittedAt\": \"2026-10-12T02:12:00.000Z\",\n      \"createdBy\": {\n        \"id\": \"usr_4\",\n        \"name\": \"M. Reyes\"\n      },\n      \"createdAt\": \"2026-10-12T01:40:00.000Z\",\n      \"link\": \"/finance/remittance/remittances/rm_21\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 50,\n  \"totalPages\": 1,\n  \"segment\": \"all\",\n  \"totals\": {\n    \"count\": 1,\n    \"policies\": 12,\n    \"premium\": 520000,\n    \"commission\": 98000,\n    \"tax\": 12858.57,\n    \"dueToInsurer\": 409141.43\n  },\n  \"kpis\": {\n    \"toSubmit\": {\n      \"count\": 3,\n      \"amount\": 1234567.89\n    },\n    \"awaitingApproval\": {\n      \"count\": 1,\n      \"amount\": 409141.43\n    },\n    \"approvedNotPaid\": {\n      \"count\": 2,\n      \"amount\": 120000,\n      \"oldestDays\": 4\n    },\n    \"overdue\": {\n      \"count\": 0,\n      \"amount\": 0\n    }\n  },\n  \"segments\": {\n    \"my-work\": 3,\n    \"drafts\": 3,\n    \"in-approval\": 1,\n    \"in-payment\": 2,\n    \"all\": 9\n  }\n}"
             }
           ]
         },
@@ -81872,7 +82535,7 @@
           ]
         },
         {
-          "name": "Remittance details: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, and the activity log (as GET /remittances/:id/activity)",
+          "name": "Remittance record: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, the activity log (as GET /remittances/:id/activity) and, for a direct-bill remittance, the register row (status label, flags, source and import, off-cycle reason, coverage week, basis, actions), the lines with the expected amount and variance of an import, the payment through the settlement voucher and the downloads",
           "request": {
             "method": "GET",
             "header": [],
@@ -81894,7 +82557,7 @@
                 }
               ]
             },
-            "description": "Remittance details: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, and the activity log (as GET /remittances/:id/activity)\n\nFront-end touchpoint: Accounts > Remittance > Tracking > View\n\nAccess: read:remittance, write:remittance"
+            "description": "Remittance record: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, the activity log (as GET /remittances/:id/activity) and, for a direct-bill remittance, the register row (status label, flags, source and import, off-cycle reason, coverage week, basis, actions), the lines with the expected amount and variance of an import, the payment through the settlement voucher and the downloads\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Record; Accounts > Remittance > Tracking > View\n\nAccess: read:remittance, write:remittance"
           },
           "response": [
             {
@@ -81920,7 +82583,7 @@
                     }
                   ]
                 },
-                "description": "Remittance details: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, and the activity log (as GET /remittances/:id/activity)\n\nFront-end touchpoint: Accounts > Remittance > Tracking > View\n\nAccess: read:remittance, write:remittance"
+                "description": "Remittance record: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, the activity log (as GET /remittances/:id/activity) and, for a direct-bill remittance, the register row (status label, flags, source and import, off-cycle reason, coverage week, basis, actions), the lines with the expected amount and variance of an import, the payment through the settlement voucher and the downloads\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Record; Accounts > Remittance > Tracking > View\n\nAccess: read:remittance, write:remittance"
               },
               "status": "OK",
               "code": 200,
@@ -81932,7 +82595,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rm_1\",\n    \"remittanceNo\": \"REM-2026-00001\",\n    \"remittanceDate\": \"2026-09-15\",\n    \"insurerCode\": \"MALAYAN\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"policyCount\": 3,\n    \"grossAmount\": 45000,\n    \"commission\": 6750,\n    \"tax\": 0,\n    \"netAmount\": 38250,\n    \"status\": \"Pending Approval\",\n    \"statusCode\": \"for-approval\",\n    \"insurerDetails\": {\n      \"code\": \"MALAYAN\",\n      \"name\": \"Malayan Insurance Co., Inc.\"\n    },\n    \"policies\": [\n      {\n        \"policyNo\": \"POL-2026-00001\",\n        \"premium\": 15000,\n        \"commission\": 2250\n      }\n    ],\n    \"activityLog\": [\n      {\n        \"action\": \"submit\",\n        \"by\": \"r.finance\",\n        \"at\": \"2026-10-10T01:03:00.000Z\",\n        \"notes\": null,\n        \"id\": \"812\",\n        \"day\": \"2026-10-10\",\n        \"date\": \"10/10/2026\",\n        \"time\": \"09:03\",\n        \"atText\": \"10/10/2026 09:03\",\n        \"actionCode\": \"submit\",\n        \"actionLabel\": \"Remittance submitted\",\n        \"user\": {\n          \"username\": \"r.finance\",\n          \"displayName\": \"Rosa Finance\",\n          \"roles\": [\n            \"Finance Officer\"\n          ],\n          \"role\": \"Finance Officer\"\n        },\n        \"fromStatus\": \"Draft\",\n        \"toStatus\": \"Pending Approval\",\n        \"remarks\": null,\n        \"changes\": [\n          {\n            \"field\": \"batchId\",\n            \"label\": \"Batch ID\",\n            \"before\": null,\n            \"after\": \"BLK-2026-00001\"\n          }\n        ],\n        \"source\": {\n          \"channel\": \"screen\",\n          \"label\": \"Screen\",\n          \"name\": \"Accounts > Remittance > Tracking\"\n        }\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rm_21\",\n    \"remittanceNo\": \"REM-2026-00021\",\n    \"remittanceDate\": \"2026-10-12\",\n    \"insurerCode\": \"MALAYAN\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"policyCount\": 12,\n    \"grossAmount\": 45000,\n    \"commission\": 98000,\n    \"tax\": 12858.57,\n    \"netAmount\": 38250,\n    \"status\": \"for-approval\",\n    \"statusCode\": \"for-approval\",\n    \"kind\": \"direct-bill\",\n    \"statusLabel\": \"Pending Approval\",\n    \"insurer\": {\n      \"id\": 3,\n      \"code\": \"PIONEER\",\n      \"name\": \"Pioneer Insurance & Surety Corp.\",\n      \"shortName\": \"Pioneer\"\n    },\n    \"productLine\": \"Motor\",\n    \"basis\": \"net\",\n    \"basisLabel\": \"Net\",\n    \"coverageWeek\": {\n      \"from\": \"2026-10-05\",\n      \"to\": \"2026-10-09\"\n    },\n    \"source\": {\n      \"code\": \"import\",\n      \"label\": \"Import IMP-2026-0004\",\n      \"importId\": \"imp_1\",\n      \"importNo\": \"IMP-2026-0004\"\n    },\n    \"offCycleReason\": {\n      \"code\": \"ROC-GOLIVE\",\n      \"name\": \"Go-live opening\",\n      \"note\": null,\n      \"text\": \"Go-live opening\"\n    },\n    \"heldCount\": null,\n    \"premium\": 520000,\n    \"adjustments\": 0,\n    \"dueToInsurer\": 409141.43,\n    \"currency\": \"PHP\",\n    \"dueDate\": \"2026-10-16\",\n    \"overdue\": false,\n    \"flags\": {\n      \"offCycle\": true,\n      \"offCycleReason\": \"Go-live opening\",\n      \"overdue\": false,\n      \"adviceSent\": false,\n      \"bankMatched\": false,\n      \"openExceptions\": 0\n    },\n    \"nextStep\": {\n      \"code\": \"approve\",\n      \"label\": \"Awaiting remittance approver (2)\",\n      \"actor\": {\n        \"type\": \"users\",\n        \"ids\": [\n          \"usr_9\",\n          \"usr_12\"\n        ],\n        \"name\": \"J. Cruz, A. Tan\"\n      },\n      \"dueAt\": \"2026-10-13T02:12:00.000Z\"\n    },\n    \"decision\": {\n      \"canDecide\": false,\n      \"blockedCode\": \"SUBMITTER\",\n      \"blockedReason\": \"You submitted this remittance. Another user with remittance authority must approve it.\"\n    },\n    \"approvalId\": 21,\n    \"approvalVersion\": 1,\n    \"actions\": [\n      {\n        \"code\": \"view\",\n        \"label\": \"View\",\n        \"allowed\": true,\n        \"link\": \"/finance/remittance/remittances/rm_21\"\n      },\n      {\n        \"code\": \"download-schedule-xlsx\",\n        \"label\": \"Download schedule (XLSX)\",\n        \"allowed\": true,\n        \"href\": \"/remittance/remittances/rm_21/schedule.xlsx\"\n      },\n      {\n        \"code\": \"download-schedule-pdf\",\n        \"label\": \"Download schedule (PDF)\",\n        \"allowed\": true,\n        \"href\": \"/remittance/remittances/rm_21/schedule.pdf\"\n      }\n    ],\n    \"version\": 3,\n    \"voucher\": null,\n    \"paidOn\": null,\n    \"bankReference\": null,\n    \"submittedBy\": {\n      \"id\": \"usr_4\",\n      \"name\": \"M. Reyes\"\n    },\n    \"submittedAt\": \"2026-10-12T02:12:00.000Z\",\n    \"createdBy\": {\n      \"id\": \"usr_4\",\n      \"name\": \"M. Reyes\"\n    },\n    \"createdAt\": \"2026-10-12T01:40:00.000Z\",\n    \"link\": \"/finance/remittance/remittances/rm_21\",\n    \"insurerDetails\": {\n      \"code\": \"MALAYAN\",\n      \"name\": \"Malayan Insurance Co., Inc.\"\n    },\n    \"policies\": [\n      {\n        \"policyNo\": \"POL-2026-00001\",\n        \"premium\": 15000,\n        \"commission\": 2250\n      }\n    ],\n    \"lines\": [\n      {\n        \"id\": 1,\n        \"policyNo\": \"TISPH-PC-0001234\",\n        \"insuredName\": \"J. Santos\",\n        \"premium\": 64159.68,\n        \"commission\": 24022.5,\n        \"tax\": 0,\n        \"netAmount\": 40137.18,\n        \"expectedDue\": 40191.18,\n        \"variance\": -54,\n        \"insurerReference\": \"SOA-2026-10-001\",\n        \"remark\": null\n      }\n    ],\n    \"payment\": null,\n    \"downloads\": [\n      {\n        \"code\": \"schedule-xlsx\",\n        \"label\": \"schedule (XLSX)\",\n        \"href\": \"/remittance/remittances/rm_21/schedule.xlsx\"\n      }\n    ],\n    \"activityLog\": [\n      {\n        \"action\": \"submit\",\n        \"by\": \"r.finance\",\n        \"at\": \"2026-10-10T01:03:00.000Z\",\n        \"notes\": null,\n        \"id\": \"812\",\n        \"day\": \"2026-10-10\",\n        \"date\": \"10/10/2026\",\n        \"time\": \"09:03\",\n        \"atText\": \"10/10/2026 09:03\",\n        \"actionCode\": \"submit\",\n        \"actionLabel\": \"Remittance submitted\",\n        \"user\": {\n          \"username\": \"r.finance\",\n          \"displayName\": \"Rosa Finance\",\n          \"roles\": [\n            \"Finance Officer\"\n          ],\n          \"role\": \"Finance Officer\"\n        },\n        \"fromStatus\": \"Draft\",\n        \"toStatus\": \"Pending Approval\",\n        \"remarks\": null,\n        \"changes\": [\n          {\n            \"field\": \"batchId\",\n            \"label\": \"Batch ID\",\n            \"before\": null,\n            \"after\": \"BLK-2026-00001\"\n          }\n        ],\n        \"source\": {\n          \"channel\": \"screen\",\n          \"label\": \"Screen\",\n          \"name\": \"Accounts > Remittance > Tracking\"\n        }\n      }\n    ]\n  }\n}"
             }
           ]
         },
@@ -82012,6 +82675,85 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"action\": \"submit\",\n      \"by\": \"r.finance\",\n      \"at\": \"2026-10-10T01:03:00.000Z\",\n      \"notes\": null,\n      \"id\": \"812\",\n      \"day\": \"2026-10-10\",\n      \"date\": \"10/10/2026\",\n      \"time\": \"09:03\",\n      \"atText\": \"10/10/2026 09:03\",\n      \"actionCode\": \"approve\",\n      \"actionLabel\": \"Remittance approved\",\n      \"user\": {\n        \"username\": \"r.finance\",\n        \"displayName\": \"Rosa Finance\",\n        \"roles\": [\n          \"Finance Officer\"\n        ],\n        \"role\": \"Finance Officer\"\n      },\n      \"fromStatus\": \"Pending Approval\",\n      \"toStatus\": \"Approved\",\n      \"remarks\": null,\n      \"changes\": [\n        {\n          \"field\": \"limitAtDecision\",\n          \"label\": \"Limit at decision\",\n          \"before\": null,\n          \"after\": \"PHP 1,000,000.00\"\n        },\n        {\n          \"field\": \"limitSource\",\n          \"label\": \"Limit source\",\n          \"before\": null,\n          \"after\": \"Role limit: TIS Finance & General Accounting\"\n        }\n      ],\n      \"source\": {\n        \"channel\": \"screen\",\n        \"label\": \"Screen\",\n        \"name\": \"Accounts > Remittance > Tracking\"\n      },\n      \"approval\": {\n        \"level\": 1,\n        \"requiredLevels\": 1,\n        \"limitAtDecision\": 1000000,\n        \"limitSource\": \"role tis-finance\",\n        \"limitSourceLabel\": \"Role limit: TIS Finance & General Accounting\",\n        \"reason\": null\n      }\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Remittance advice letter (PDF, portrait): the insurer's name, address and TIN, the remittance no., coverage week, product line and basis, the payment block of the settlement voucher (voucher no., method, value date, bank reference) and the amounts (total premium, commission, VAT and EWT on commission, due to insurer, refund credits netted, amount paid); file <REM no>_Advice_<yyyymmdd>.pdf",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/remittances/:id/advice.pdf?download=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "remittances",
+                ":id",
+                "advice.pdf"
+              ],
+              "query": [
+                {
+                  "key": "download",
+                  "value": "1"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Remittance advice letter (PDF, portrait): the insurer's name, address and TIN, the remittance no., coverage week, product line and basis, the payment block of the settlement voucher (voucher no., method, value date, bank reference) and the amounts (total premium, commission, VAT and EWT on commission, due to insurer, refund credits netted, amount paid); file <REM no>_Advice_<yyyymmdd>.pdf\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Download advice; Accounts > Remittance > Remittances > Record > Documents\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/remittances/:id/advice.pdf?download=1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "remittances",
+                    ":id",
+                    "advice.pdf"
+                  ],
+                  "query": [
+                    {
+                      "key": "download",
+                      "value": "1"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Remittance advice letter (PDF, portrait): the insurer's name, address and TIN, the remittance no., coverage week, product line and basis, the payment block of the settlement voucher (voucher no., method, value date, bank reference) and the amounts (total premium, commission, VAT and EWT on commission, due to insurer, refund credits netted, amount paid); file <REM no>_Advice_<yyyymmdd>.pdf\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Download advice; Accounts > Remittance > Remittances > Record > Documents\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "application/pdf"
             }
           ]
         },
@@ -82285,6 +83027,140 @@
           ]
         },
         {
+          "name": "Remittance schedule (PDF, A4 landscape): letterhead, insurer, product line, coverage date, remittance no. and date, one row per policy (issued date, client, car model, insurer, policy no., business type, inception, sum insured, premium, commission, taxes, due to insurer), totals and the note that it is valid without signature; file <REM no>_Schedule_<yyyymmdd>.pdf",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/remittances/:id/schedule.pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "remittances",
+                ":id",
+                "schedule.pdf"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Remittance schedule (PDF, A4 landscape): letterhead, insurer, product line, coverage date, remittance no. and date, one row per policy (issued date, client, car model, insurer, policy no., business type, inception, sum insured, premium, commission, taxes, due to insurer), totals and the note that it is valid without signature; file <REM no>_Schedule_<yyyymmdd>.pdf\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Download schedule; Accounts > Remittance > Remittances > Record > Documents\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/remittances/:id/schedule.pdf",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "remittances",
+                    ":id",
+                    "schedule.pdf"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Remittance schedule (PDF, A4 landscape): letterhead, insurer, product line, coverage date, remittance no. and date, one row per policy (issued date, client, car model, insurer, policy no., business type, inception, sum insured, premium, commission, taxes, due to insurer), totals and the note that it is valid without signature; file <REM no>_Schedule_<yyyymmdd>.pdf\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Download schedule; Accounts > Remittance > Remittances > Record > Documents\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "application/pdf"
+            }
+          ]
+        },
+        {
+          "name": "Remittance schedule (XLSX): letterhead, insurer, product line, coverage date, remittance no. and date, one row per policy (issued date, client, car model, insurer, policy no., business type, inception, sum insured, premium, commission, taxes, due to insurer), totals and the note that it is valid without signature; file <REM no>_Schedule_<yyyymmdd>.xlsx",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/remittances/:id/schedule.xlsx",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "remittances",
+                ":id",
+                "schedule.xlsx"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Remittance schedule (XLSX): letterhead, insurer, product line, coverage date, remittance no. and date, one row per policy (issued date, client, car model, insurer, policy no., business type, inception, sum insured, premium, commission, taxes, due to insurer), totals and the note that it is valid without signature; file <REM no>_Schedule_<yyyymmdd>.xlsx\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Download schedule; Accounts > Remittance > Remittances > Record > Documents\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/remittances/:id/schedule.xlsx",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "remittances",
+                    ":id",
+                    "schedule.xlsx"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Remittance schedule (XLSX): letterhead, insurer, product line, coverage date, remittance no. and date, one row per policy (issued date, client, car model, insurer, policy no., business type, inception, sum insured, premium, commission, taxes, due to insurer), totals and the note that it is valid without signature; file <REM no>_Schedule_<yyyymmdd>.xlsx\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Download schedule; Accounts > Remittance > Remittances > Record > Documents\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
+            }
+          ]
+        },
+        {
           "name": "Mark an approved remittance as settled (paid to the insurer)",
           "request": {
             "method": "POST",
@@ -82380,6 +83256,85 @@
           ]
         },
         {
+          "name": "Register export (Remittances > Export XLSX): every visible and hidden column over the whole filtered set (the filters of GET /remittances), the letterhead block and the filter summary above the table",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/remittances/export.xlsx?segment=all&week=2026-10-05&insurerId=3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "remittances",
+                "export.xlsx"
+              ],
+              "query": [
+                {
+                  "key": "segment",
+                  "value": "all"
+                },
+                {
+                  "key": "week",
+                  "value": "2026-10-05"
+                },
+                {
+                  "key": "insurerId",
+                  "value": "3"
+                }
+              ]
+            },
+            "description": "Register export (Remittances > Export XLSX): every visible and hidden column over the whole filtered set (the filters of GET /remittances), the letterhead block and the filter summary above the table\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Export XLSX\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/remittances/export.xlsx?segment=all&week=2026-10-05&insurerId=3",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "remittances",
+                    "export.xlsx"
+                  ],
+                  "query": [
+                    {
+                      "key": "segment",
+                      "value": "all"
+                    },
+                    {
+                      "key": "week",
+                      "value": "2026-10-05"
+                    },
+                    {
+                      "key": "insurerId",
+                      "value": "3"
+                    }
+                  ]
+                },
+                "description": "Register export (Remittances > Export XLSX): every visible and hidden column over the whole filtered set (the filters of GET /remittances), the letterhead block and the filter summary above the table\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Export XLSX\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
+            }
+          ]
+        },
+        {
           "name": "Submit selected draft remittances for approval as one batch",
           "request": {
             "method": "POST",
@@ -82455,6 +83410,85 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"success\": true,\n    \"processedIds\": [\n      \"rm_1\"\n    ],\n    \"batchId\": \"BLK-2026-00001\",\n    \"processedAt\": \"2026-09-28T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Submit several draft or returned remittances for approval, each checked on its own with the version it was shown (write:remittance); the ready ones go as one processing batch to their eligible approvers. Per-item results: Submitted, or the reason (ALREADY_SUBMITTED \"REM-2026-00021 was submitted by J. Cruz at 10:12.\", STALE, WRONG_STATUS, INVALID \"Not submitted: ...\")",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/remittances/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "remittances",
+                "submit"
+              ]
+            },
+            "description": "Submit several draft or returned remittances for approval, each checked on its own with the version it was shown (write:remittance); the ready ones go as one processing batch to their eligible approvers. Per-item results: Submitted, or the reason (ALREADY_SUBMITTED \"REM-2026-00021 was submitted by J. Cruz at 10:12.\", STALE, WRONG_STATUS, INVALID \"Not submitted: ...\")\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Submit for approval\n\nAccess: write:remittance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"id\": \"rm_21\",\n      \"version\": 2\n    },\n    {\n      \"id\": \"rm_22\",\n      \"version\": 1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/remittances/submit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "remittances",
+                    "submit"
+                  ]
+                },
+                "description": "Submit several draft or returned remittances for approval, each checked on its own with the version it was shown (write:remittance); the ready ones go as one processing batch to their eligible approvers. Per-item results: Submitted, or the reason (ALREADY_SUBMITTED \"REM-2026-00021 was submitted by J. Cruz at 10:12.\", STALE, WRONG_STATUS, INVALID \"Not submitted: ...\")\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Submit for approval\n\nAccess: write:remittance",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"items\": [\n    {\n      \"id\": \"rm_21\",\n      \"version\": 2\n    },\n    {\n      \"id\": \"rm_22\",\n      \"version\": 1\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"submitted\": 1,\n    \"refused\": 1,\n    \"batchId\": \"BLK-2026-00007\",\n    \"results\": [\n      {\n        \"id\": \"rm_21\",\n        \"reference\": \"REM-2026-00021\",\n        \"ok\": true,\n        \"status\": \"for-approval\",\n        \"statusLabel\": \"Pending Approval\",\n        \"message\": \"Submitted\"\n      },\n      {\n        \"id\": \"rm_22\",\n        \"reference\": \"REM-2026-00022\",\n        \"ok\": false,\n        \"code\": \"INVALID\",\n        \"message\": \"Not submitted: Due to insurer must be greater than zero\"\n      }\n    ]\n  }\n}"
             }
           ]
         },
