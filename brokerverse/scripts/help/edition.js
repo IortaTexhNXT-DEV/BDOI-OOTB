@@ -27,8 +27,54 @@ const CODE_CHECKS = [
   { re: /\b[a-z][a-zA-Z]*\.[a-z]+_[a-z_]+\b/g, why: "setting key" },
 ];
 
-const list = (names) => (names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}` : names[0] || "");
+const or = (names) => (names.length > 1 ? `${names.slice(0, -1).join(", ")} or ${names[names.length - 1]}` : names[0] || "");
 const cell = (s) => String(s ?? "").replace(/\|/g, "/");
+
+/**
+ * The roles holding a permission, as a reader says them: one department whose roles all hold it is "the <department>
+ * roles"; the alternatives are joined with "or" (any one of them acts, not all).
+ */
+function holderWords(names, roles) {
+  const held = new Set(names);
+  const byDepartment = new Map();
+  for (const r of roles) byDepartment.set(r.department, [...(byDepartment.get(r.department) || []), r.name]);
+  const words = [];
+  const done = new Set();
+  for (const r of roles) {
+    if (!held.has(r.name) || done.has(r.name)) continue;
+    const department = byDepartment.get(r.department);
+    if (department.length > 1 && department.every((n) => held.has(n))) {
+      words.push(`the ${r.department} roles`);
+      department.forEach((n) => done.add(n));
+    } else {
+      words.push(r.name);
+      done.add(r.name);
+    }
+  }
+  return or(words);
+}
+
+/** Section numbers of the chapters (1, 1.1, 1.1.1, in the order of the manifest) by heading id. */
+function headingNumbers(markdown) {
+  const numbers = new Map();
+  const counters = [0, 0, 0];
+  for (const line of markdown.split("\n")) {
+    const h = line.match(HEADING);
+    if (!h) continue;
+    const level = h[1].length;
+    counters[level - 1] += 1;
+    for (let k = level; k < 3; k += 1) counters[k] = 0;
+    if (h[3]) numbers.set(h[3], counters.slice(0, level).join("."));
+  }
+  return numbers;
+}
+
+/** The rows of the document control, the same on the help page and in the Word file. */
+function controlRows(manifest, status) {
+  return [["Title", manifest.title], ["Version", manifest.version], ["Date", manifest.date], ["Status", status], ["Classification", manifest.classification],
+    ["Prepared by", manifest.prepared], ["Owner", manifest.owner], ["Reviewed by", manifest.reviewed || "Pending review"],
+    ["Approved by", manifest.approved || "Pending approval"], ["Sign-off reference", manifest.approvalRef || "-"]].filter(([, v]) => v);
+}
 
 function loadManifest(file) {
   const manifest = JSON.parse(fs.readFileSync(file, "utf8"));
@@ -103,7 +149,7 @@ function assemble(manifest, facts) {
           problems.push(`${file}: {{roles:${key}}} names a permission no role of the edition holds`);
           return "";
         }
-        return list(holders);
+        return holderWords(holders, facts.roles);
       }
       if (kind === "role-summary") {
         const r = roleBy.get(key);
@@ -117,6 +163,7 @@ function assemble(manifest, facts) {
       return all;
     });
 
+  let chapterNo = 0;
   for (const rel of manifest.chapters) {
     const abs = inside(rel);
     if (!abs || !fs.existsSync(abs)) {
@@ -124,7 +171,13 @@ function assemble(manifest, facts) {
       continue;
     }
     const raw = fs.readFileSync(abs, "utf8").replace(/\r\n/g, "\n").replace(/<!--[\s\S]*?-->\n?/g, "");
-    const text = expand(rel, raw);
+    // figures numbered by chapter: "Figure 4.2: <caption>"
+    if (/^# /m.test(raw)) chapterNo += 1;
+    let figureNo = 0;
+    const text = expand(rel, raw).replace(/^!\[([^\]]*)\]\(([^)]+)\)\s*$/gm, (m, cap, src) => {
+      figureNo += 1;
+      return `![Figure ${chapterNo}.${figureNo}: ${cap}](${src})`;
+    });
     const lines = text.split("\n");
     lines.forEach((line, n) => {
       const h = line.match(HEADING);
@@ -168,13 +221,11 @@ function effectiveStatus(manifest, { hash, drafts }) {
 
 /**
  * The source of the Word edition (docs/TISPH/tools/md2docx.py): title, document control, then the chapters one heading
- * level down, without heading ids, with the text in preparation as notes and the images by their path from the folder of the source.
+ * level down with their heading ids, the links to headings with the section number, the text in preparation as notes
+ * and the images by their path from the folder of the source.
  */
 function wordSource(manifest, { markdown }, status) {
-  const rows = [
-    ["Document", manifest.title], ["Version", manifest.version], ["Date", manifest.date], ["Status", status],
-    ["Classification", manifest.classification], ["Author", manifest.prepared], ["Owner", manifest.owner],
-  ].filter(([, v]) => v);
+  const rows = controlRows(manifest, status);
   const out = [`# ${manifest.title}`, "", "## Document Control", "", "| Item | Value |", "|---|---|", ...rows.map(([k, v]) => `| ${k} | ${cell(v)} |`), ""];
   if ((manifest.changes || []).length) {
     out.push("**Change log**", "", "| Version | Date | Author | Change |", "|---|---|---|---|",
@@ -186,12 +237,18 @@ function wordSource(manifest, { markdown }, status) {
   }
   // images by their path from the folder of the Word source, so that the committed source names no machine path
   const up = path.relative(path.dirname(path.join(manifest.dir, manifest.wordSource)), manifest.dir).split(path.sep).join("/") || ".";
+  // a link to a heading keeps its target and shows the section number, for the reader of the printed copy
+  const numbers = headingNumbers(markdown);
   const body = markdown
-    .replace(/^(#{1,3}) (.+?)(?:\s+\{#[a-z0-9-]+\})?\s*$/gm, (m, hashes, title) => `#${hashes} ${title}`)
+    .replace(/^(#{1,3}) (.+?)(\s+\{#[a-z0-9-]+\})?\s*$/gm, (m, hashes, title, id) => `#${hashes} ${title}${id || ""}`)
     .replace(/^::: draft\s*\n([\s\S]*?)\n:::\s*$/gm, (m, text) => `> In preparation. ${text.replace(/\n/g, " ").trim()}`)
-    .replace(/\[([^\]]+)\]\(#[a-z0-9-]+\)/g, "$1")
+    .replace(/\[([^\]]+)\]\(#([a-z0-9-]+)\)/g, (m, text, id) => {
+      const n = numbers.get(id);
+      if (!n) return text;
+      return `[${text} (${n.includes(".") ? n : `chapter ${n}`})](#${id})`;
+    })
     .replace(/^!\[([^\]]*)\]\((images\/[^)]+)\)\s*$/gm, (m, cap, src) => `![${cap}](${path.posix.join(up, src)})`);
   return `${out.join("\n")}\n${body}`;
 }
 
-module.exports = { loadManifest, assemble, checkText, effectiveStatus, wordSource, CODE_CHECKS };
+module.exports = { loadManifest, assemble, checkText, effectiveStatus, wordSource, controlRows, headingNumbers, CODE_CHECKS };

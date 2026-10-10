@@ -11,7 +11,7 @@ the base edition for other clients; `brokerverse/help.config.json` names the edi
 | `generated/role-facts.json`, `generated/roles/` | Per role: menus, access, approvals, limits, segregation of duties. Written by `npm run manual:role-facts` in `backend/`, never by hand |
 | `generated/TISPH_User_Manual.md` | The assembled source of the Word file, written by `npm run help:build` |
 | `images/<chapter>/` | Screenshots, taken from a local system of the TISPH build with fictional sample data |
-| `TISPH_User_Manual.docx`, `.pdf` | Word and PDF, written by `npm run help:word` with `../tools/md2docx.py` and the document template |
+| `TISPH_User_Manual.docx`, `.pdf` | Word and PDF, written by `npm run help:word` with `../tools/md2docx.py` and the document template, in the manual layout and the Toyota Insurance Services brand pack (cover, header, footer, colours and font of the pack; no template artwork) |
 
 ## Build
 
@@ -40,9 +40,20 @@ cd brokerverse && npm run help:build -- --edition base --out /tmp/base-manual   
 | `![Caption](images/<chapter>/<file>.png)` | A screenshot |
 | `[Prospects](#prospects)` | A link to a heading of the manual |
 
+## Numbers, figures and cross-references
+
+The chapters are numbered from 1 in the order of `manual.json` (the document control has no number), in the same way
+on the help page and in the Word and PDF files. Every screenshot is numbered by chapter ("Figure 4.2: <caption>") by
+the build; write the caption only. In the Word and PDF files a link to a heading is a link to that heading with its
+section number, and the screenshots carry their caption as alternative text and are listed in the list of figures.
+
+Screenshots are cropped to the area of interest: a page without the side bar and the header, a dialog without the
+greyed screen behind it.
+
 ## What stops the build
 
-- a forbidden term of `manual.json`: generic roles, withdrawn screens, product and vendor wording, AI wording;
+- a forbidden term of `manual.json`: generic roles, withdrawn screens, product and vendor wording, internal project
+  wording (version tags, set-up wording), environment names, capture test accounts, AI wording;
 - a permission code, role code or setting key in the text;
 - a heading without an id, an id used twice, a link to no heading;
 - a role without its chapter, or a chapter without the generated facts of its role;

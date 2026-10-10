@@ -28,12 +28,15 @@ const fs = require("fs");
 const path = require("path");
 const { headingIds, parseFrontMatter, render, toc } = require("./help/render");
 const { page } = require("./help/page");
-const { assemble, effectiveStatus, loadManifest, wordSource } = require("./help/edition");
+const { assemble, controlRows, effectiveStatus, loadManifest, wordSource } = require("./help/edition");
 
 const ROOT = path.resolve(__dirname, "..");
 const REPO = path.resolve(ROOT, "..");
 const CONFIG = path.join(ROOT, "help.config.json");
 const BRAND_PACKS = path.join(REPO, "backend", "assets", "brand-packs");
+// the font files of the page, served with it: the help opens where Google Fonts is blocked
+const FONT_FILES = { inter: { dir: path.join(ROOT, "node_modules", "primereact", "resources", "themes", "mira", "fonts"), family: "Inter",
+  files: { 400: "Inter-Regular.woff2", 500: "Inter-Medium.woff2", 600: "Inter-SemiBold.woff2", 700: "Inter-Bold.woff2" } } };
 
 const EDITIONS = {
   base: { manifest: null, source: path.join(REPO, "docs", "package", "source", "user-manual.md"), images: path.join(REPO, "docs", "package", "source", "manual-images"),
@@ -75,9 +78,13 @@ async function theme(packId) {
   const manifest = JSON.parse(fs.readFileSync(path.join(dir, "manifest.json"), "utf8"));
   const { FONTS, googleFontUrl } = await import(path.join(REPO, "backend", "src", "modules", "branding", "presets.js"));
   const font = FONTS[pack.theme.font];
+  const local = FONT_FILES[pack.theme.font];
+  const fonts = local && Object.values(local.files).every((f) => fs.existsSync(path.join(local.dir, f)))
+    ? { family: local.family, files: Object.entries(local.files).map(([weight, file]) => ({ weight, from: path.join(local.dir, file), to: `fonts/${file}` })) }
+    : null;
   return {
     vars: themeToCssVars(pack.theme, { fontStack: font?.stack }),
-    pack: { id: manifest.id, name: manifest.name, logo: path.join(dir, pack.assets?.logo || "logo.png"), fontUrl: googleFontUrl(pack.theme.font) },
+    pack: { id: manifest.id, name: manifest.name, logo: path.join(dir, pack.assets?.logo || "logo.png"), fonts, fontUrl: fonts ? null : googleFontUrl(pack.theme.font) },
   };
 }
 
@@ -93,7 +100,8 @@ function write(out, { html, sections, images, copies, script }) {
   }
 }
 
-const headingList = (heads) => heads.map((h) => ({ id: h.id, title: h.title, level: h.level, chapter: h.chapter ? h.chapter.title : null }));
+const headingList = (heads) => heads.map((h) => ({ id: h.id, ...(h.number ? { number: h.number } : {}), title: h.title, level: h.level,
+  chapter: h.chapter ? h.chapter.title : null }));
 
 async function buildBase(out, check) {
   const ed = EDITIONS.base;
@@ -137,10 +145,8 @@ async function buildManifest(name, out, check) {
   const docControl = [
     "# Document control {#document-control}", "",
     "| Item | Value |", "|---|---|",
-    ...[["Title", manifest.title], ["Version", manifest.version], ["Date", manifest.date], ["Status", status], ["Classification", manifest.classification],
-      ["Prepared by", manifest.prepared], ["Reviewed by", manifest.reviewed || "Pending review"], ["Approved by", manifest.approved || "Pending approval"],
-      ["Sign-off reference", manifest.approvalRef || "-"]].filter(([, v]) => v).map(([k, v]) => `| ${k} | ${v} |`),
-    "", "| Version | Date | Author | Change |", "|---|---|---|---|",
+    ...controlRows(manifest, status).map(([k, v]) => `| ${k} | ${v} |`),
+    "", "**Change log**", "", "| Version | Date | Author | Change |", "|---|---|---|---|",
     ...(manifest.changes || []).map((c) => `| ${c.version} | ${c.date} | ${c.author} | ${c.change} |`),
   ].join("\n");
   const markdown = `${docControl}\n\n${result.markdown}`;
@@ -149,6 +155,16 @@ async function buildManifest(name, out, check) {
     heads = headingIds(markdown.split("\n"));
   } catch (e) {
     problems.push(e.message);
+  }
+  if (heads) {
+    // section numbers as in the Word and PDF files: the chapters from 1, the document control without a number
+    const counters = [0, 0, 0];
+    for (const h of heads) {
+      if (h.id === "document-control" || h.chapter?.id === "document-control") continue;
+      counters[h.level - 1] += 1;
+      for (let k = h.level; k < 3; k += 1) counters[k] = 0;
+      h.number = counters.slice(0, h.level).join(".");
+    }
   }
   if (heads) {
     const ids = new Set(heads.map((h) => h.id));
@@ -173,8 +189,10 @@ async function buildManifest(name, out, check) {
     } else console.warn(`help (${name}): ${kind} not found: ${path.relative(REPO, from)} (npm run help:word)`);
   }
   if (pack) copies.push({ from: pack.logo, to: `logo${path.extname(pack.logo)}` });
+  for (const f of pack?.fonts?.files || []) copies.push({ from: f.from, to: f.to });
   const edition = { title: manifest.title, version: manifest.version, date: manifest.date, status, files, brandName: pack?.name,
-    logo: pack ? `logo${path.extname(pack.logo)}` : null, fontUrl: pack?.fontUrl };
+    logo: pack ? `logo${path.extname(pack.logo)}` : null, fontUrl: pack?.fontUrl,
+    fonts: pack?.fonts ? { family: pack.fonts.family, files: pack.fonts.files.map(({ weight, to }) => ({ weight, src: to })) } : null };
   const content = render(markdown, heads, (src) => src.split("/").map(encodeURIComponent).join("/"));
   const roles = Object.fromEntries(facts.roles.map((r) => [r.code, { id: r.chapterId, title: r.name }]));
   write(out, {

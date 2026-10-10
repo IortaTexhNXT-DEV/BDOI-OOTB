@@ -31,9 +31,27 @@ export const OUT_DIR = path.join(REPO, 'docs', 'TISPH', 'manual', 'generated');
 const CROSS_MODULE_APPROVALS = { 'write:roles': ['approve:access-control'] };
 const RANK = { view: 1, edit: 2, approve: 3 };
 const ACTION_WORDS = { block: 'Blocked', warn: 'Warning' };
+// screens that only show figures and lists: View whatever the role may change in their module
+const VIEW_ONLY_SECTIONS = new Set(['Dashboard', 'Reports']);
+const VIEW_ONLY_SCREENS = new Set(['Retention Analytics', 'Performance', 'AP Ageing', 'Supplier 2307', 'Remittance Ageing', 'Analytics', 'History',
+  'Product Analytics', 'Reconciliation Statement Report', 'Outstanding Cheques', 'Deposits in Transit', 'Unmatched Bank Lines', 'Bank Book',
+  'Accounting Query', 'All Clients Accounting', 'Financial Statements', 'My Programs', 'Statement']);
+// screens where a user decides the record of another user: the only screens that show Approve
+const DECISION_SCREENS = new Set(['Quotations', 'Placement Slips', 'Policy', 'Policy Cancellation', 'Negotiations', 'Renewal Policy', 'Claims',
+  'Supplier Invoices', 'Supplier Payments', 'Disbursement', 'Bank Payment Files', 'Journal Voucher', 'Correction JV', 'Reversal JV', 'Reconciliations',
+  'Reconciliation Workspace', 'Insurer Statements', 'Client Credit Limits', 'Premium Warranty Monitor', 'Instalment Plans', 'Approvals', 'Calculations',
+  'Month-End Close', 'Year-End Close', 'Period Management', 'Recurring Journals', 'CAS Books and Documents', 'Configuration Approvals', 'Posting Rules',
+  'Account Determination', 'Access Reviews', 'Authority Matrix', 'Delegations', 'Segregation of Duties', 'Role Permissions', 'Approval Workflow',
+  'Commission Dashboard', 'Agents/Referrer Accounts']);
+// what "Not set" on the Authority Matrix means for a transaction type
+const NOT_SET = {
+  remittance: 'Not set: the remittance approval levels apply',
+  remittance_settlement: 'Not set: the remittance approval levels apply',
+};
 
 const slug = (s) => String(s).toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 const list = (names) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} or ${names[names.length - 1]}` : names[0] || '');
+const listAnd = (names) => (names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}` : names[0] || '');
 
 /** The menu of the front end: the tree, the role grants and the side bar labels. */
 export async function loadMenu(web = WEB) {
@@ -67,10 +85,16 @@ async function effectivePermissions(db) {
   return out;
 }
 
-/** The catalogue modules of a menu entry: those whose screens name it or the nearest group above it, and those of the permissions it requires. */
+/**
+ * The catalogue modules of a menu entry: those whose screens name the entry itself (not a report or a dashboard);
+ * otherwise those that name the nearest group above it, and those of the permissions it requires.
+ */
 function screenModules(leaf, cat) {
   const byPermission = (leaf.item.permissions || []).map((code) => cat.permissions.find((p) => p.code === code)?.module).filter(Boolean);
-  const names = [leaf.item.name, ...leaf.ancestors.map((a) => a.name).reverse()];
+  // a report or a dashboard named after a module ("Claims" of Operational Reports) belongs to the group above it
+  const own = leaf.ancestors.some((a) => VIEW_ONLY_SECTIONS.has(a.name)) ? [] : cat.modules.filter((m) => m.screens.includes(leaf.item.name)).map((m) => m.code);
+  if (own.length) return own;
+  const names = leaf.ancestors.map((a) => a.name).reverse();
   for (const name of names) {
     const found = cat.modules.filter((m) => m.screens.includes(name)).map((m) => m.code);
     if (found.length) return [...new Set([...found, ...byPermission])];
@@ -79,11 +103,17 @@ function screenModules(leaf, cat) {
   return leaf.ancestors[0]?.name === 'Master' ? ['masters'] : [];
 }
 
-/** Highest level (view, edit, approve) a set of permissions gives in the modules of a screen; view when the menu alone opens it. */
-function accessLevel(modules, held, cat) {
+/**
+ * Highest level (view, edit, approve) a set of permissions gives on a screen: from the modules of the screen, View on a
+ * screen that only shows figures, Approve only where a record of another user is decided; view when the menu alone
+ * opens it.
+ */
+function accessLevel(leaf, modules, held, cat) {
+  if (VIEW_ONLY_SCREENS.has(leaf.item.name) || leaf.ancestors.some((a) => VIEW_ONLY_SECTIONS.has(a.name))) return 'view';
+  const top = DECISION_SCREENS.has(leaf.item.name) ? RANK.approve : RANK.edit;
   let best = 'view';
   for (const p of cat.permissions) {
-    if (!held.has(p.code) || !modules.includes(p.module) || !RANK[p.level]) continue;
+    if (!held.has(p.code) || !modules.includes(p.module) || !RANK[p.level] || RANK[p.level] > top) continue;
     if (RANK[p.level] > RANK[best]) best = p.level;
   }
   return best;
@@ -121,8 +151,10 @@ export async function roleFacts(db, menu) {
     const held = perms.get(role.code) || new Set();
     const own = menu.filterMenuForRoles(menu.menuList, [role.code]);
     const menus = menu.flattenLeaves(own).filter((l) => l.item.path).map((l) => {
-      const level = accessLevel(modulesOf.get(leafKey(l)) || [], held, cat);
-      return { section: l.ancestors.map((a) => menu.label(a.name)).join(' > '), screen: menu.label(l.item.name), path: l.item.path, access: LEVEL_NAMES[level] };
+      const modules = modulesOf.get(leafKey(l)) || [];
+      const level = accessLevel(l, modules, held, cat);
+      return { section: l.ancestors.map((a) => menu.label(a.name)).join(' > '), screen: menu.label(l.item.name), path: l.item.path, access: LEVEL_NAMES[level],
+        modules: modules.map((code) => moduleOf.get(code)?.name || code) };
     });
 
     const permissions = cat.permissions.filter((p) => held.has(p.code) && p.checked)
@@ -132,7 +164,7 @@ export async function roleFacts(db, menu) {
 
     const approves = [
       ...cat.permissions.filter((p) => held.has(p.code) && p.level === 'approve' && p.checked).map((p) => ({ what: p.meaning, kind: 'maker-checker' })),
-      ...(approvesByRole.get(role.code) || []).map((type) => ({ what: typeName.get(type) || type, kind: 'authority', step: AUTHORITY_STEPS[type]?.step || null,
+      ...(approvesByRole.get(role.code) || []).map((type) => ({ what: typeName.get(type) || type, kind: 'authority', type, step: AUTHORITY_STEPS[type]?.step || null,
         limit: limitOf(type, role.code) })),
     ];
 
@@ -200,20 +232,25 @@ const table = (head, rows) => [`| ${head.join(' | ')} |`, `|${head.map(() => '--
 /** The Markdown include of one role: menus, access, approvals and segregation of duties, with explicit heading ids. */
 export function roleMarkdown(role, { withoutLimit = 'allow' } = {}) {
   const id = role.chapterId;
-  const notSet = withoutLimit === 'refuse' ? 'Not set: approval refused until a limit is set' : 'Not set: no amount limit applies';
+  const notSet = (type) => (withoutLimit === 'refuse' ? 'Not set: approval refused until a limit is set' : NOT_SET[type] || 'Not set: no amount limit applies');
   const out = [];
   out.push(`## Menus available {#${id}-menus}`, '');
   out.push('The menus of this role as delivered. Access: View (open and read), Create and edit (enter and change records), Approve (decide the records of other users).', '');
   out.push(table(['Menu', 'Screen', 'Access'], role.menus.map((m) => [m.section || m.screen, m.screen, m.access])), '');
 
   out.push(`## What you can view, change and approve {#${id}-access}`, '');
+  out.push('Where: the screens of your menus that show the module. A module without a screen of its own is seen inside the screens of other modules (for example the remittance status of a policy).', '');
   const byModule = new Map();
   for (const p of role.permissions) {
     const key = `${p.area}|${p.module}`;
     if (!byModule.has(key)) byModule.set(key, { area: p.area, module: p.module, rows: [] });
     byModule.get(key).rows.push(p);
   }
-  out.push(table(['Area', 'Module', 'Access', 'What it allows'], [...byModule.values()].flatMap((m) => m.rows.map((p) => [m.area, m.module, p.level, p.meaning]))), '');
+  const where = (module) => {
+    const screens = [...new Set(role.menus.filter((m) => (m.modules || []).includes(module)).map((m) => m.screen))];
+    return screens.length ? listAnd(screens) : 'No screen of its own';
+  };
+  out.push(table(['Area', 'Module', 'Access', 'What it allows', 'Where'], [...byModule.values()].flatMap((m) => m.rows.map((p, i) => [m.area, m.module, p.level, p.meaning, i ? '' : where(m.module)]))), '');
 
   out.push(`## Approvals {#${id}-approvals}`, '');
   const approves = role.approves.filter((a) => a.kind === 'maker-checker');
@@ -222,7 +259,7 @@ export function roleMarkdown(role, { withoutLimit = 'allow' } = {}) {
   if (approves.length) out.push('This role approves the work of other users:', '', ...approves.map((a) => `- ${a.what}`), '');
   if (authority.length) {
     out.push('Approval limits of this role on the Authority Matrix:', '');
-    out.push(table(['Transaction', 'Approval step', 'Limit of the role'], authority.map((a) => [a.what, a.step || '', a.limit === 'Not set' ? notSet : a.limit])), '');
+    out.push(table(['Transaction', 'Approval step', 'Limit of the role'], authority.map((a) => [a.what, a.step || '', a.limit === 'Not set' ? notSet(a.type) : a.limit])), '');
   }
   const received = role.approvedBy.filter((a) => a.approvers.length);
   if (received.length) {

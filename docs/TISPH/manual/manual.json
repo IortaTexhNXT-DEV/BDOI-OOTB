@@ -189,6 +189,43 @@
    "pattern": "artificial intelligence|language model|machine learning|\\bassistant\\b",
    "caseSensitive": false,
    "why": "no AI wording"
+  },
+  {
+   "term": "BrokerVerse",
+   "why": "product name (the TISPH edition names no product)"
+  },
+  {
+   "pattern": "\\bRBAC\\b",
+   "why": "internal project wording"
+  },
+  {
+   "pattern": "\\bv\\d+(?:\\.\\d+)*\\b",
+   "why": "internal version tag"
+  },
+  {
+   "pattern": "\\bseed(?:s|ed|ing)?\\b",
+   "caseSensitive": false,
+   "why": "technical wording (set-up or sample data)"
+  },
+  {
+   "term": "comsub",
+   "why": "internal term: write referrer commission (Comsub is only the screen label)"
+  },
+  {
+   "term": "GENERIC",
+   "why": "technical label"
+  },
+  {
+   "pattern": "\\b(?:UAT|SIT)\\b",
+   "why": "environment-specific content (cut-over plan)"
+  },
+  {
+   "pattern": "\\bManual (?:Sales|Operations|CCD|Finance|IT|General)\\b",
+   "why": "capture test account"
+  },
+  {
+   "pattern": "\\bmanual\\.[a-z]",
+   "why": "capture test account"
   }
  ]
 }

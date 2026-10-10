@@ -34,12 +34,18 @@ h1:target,h2:target,h3:target{background:var(--bv-primary-050);box-shadow:0 0 0 
 th{background:var(--bv-table-header-bg);color:var(--bv-table-header-text);text-align:left;padding:8px 10px;font-weight:700;border-bottom:1px solid var(--bv-table-header-rule)}
 td{border-bottom:1px solid #e4e4e4;padding:8px 10px;vertical-align:top}
 tr:nth-child(even) td{background:var(--bv-table-stripe)}code{font-size:13px;background:var(--bv-page-bg);padding:1px 5px;border-radius:4px}
-figure{margin:16px 0}figure img{max-width:100%;height:auto;border:1px solid #e4e4e4;border-radius:var(--bv-radius-sm)}figcaption{font-size:13px;color:#656565;margin-top:4px}
+main .num{font-weight:700;margin-right:4px}figure{margin:16px 0}figure img{max-width:100%;height:auto;border:1px solid #e4e4e4;border-radius:var(--bv-radius-sm)}figcaption{font-size:13px;color:#656565;margin-top:4px}
 aside.note{background:var(--bv-primary-050);border-left:3px solid var(--bv-marker);padding:10px 14px;border-radius:0 var(--bv-radius-sm) var(--bv-radius-sm) 0;margin:12px 0}
 aside.draft{background:var(--bv-page-bg);border:1px dashed #b0b0b0;padding:10px 14px;border-radius:var(--bv-radius-sm);margin:12px 0;color:#656565}
 @media (max-width:900px){.layout{grid-template-columns:1fr;padding:16px}nav.toc{position:static;max-height:none}main{padding:8px 16px 24px}header{padding:10px 16px}}
 @media print{header,nav.toc{display:none}.layout{display:block;padding:0}main{border:0}}
 `;
+
+/** @font-face rules of the font files served with the page ({ family, files: [{ weight, src }] }). */
+function fontFaces(fonts) {
+  if (!fonts) return "";
+  return fonts.files.map((f) => `@font-face{font-family:"${fonts.family}";font-style:normal;font-weight:${f.weight};font-display:swap;src:url("${f.src}") format("woff2")}`).join("");
+}
 
 /** The style sheet of a theme: the custom properties of the screens, then the rules of the page. */
 function styleSheet(vars) {
@@ -48,7 +54,7 @@ function styleSheet(vars) {
 }
 
 /**
- * The page. `edition`: { title, version, date, status, logo, files: { pdf, word }, fontUrl }; `vars`: the theme's
+ * The page. `edition`: { title, version, date, status, logo, files: { pdf, word }, fontUrl or fonts }; `vars`: the theme's
  * custom properties; `toc` and `content`: HTML from render.js.
  */
 function page({ edition, vars, toc, content }) {
@@ -63,7 +69,7 @@ function page({ edition, vars, toc, content }) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(edition.title)}</title>
-${edition.fontUrl ? `<link rel="stylesheet" href="${escapeHtml(edition.fontUrl)}">\n` : ""}<style>${styleSheet(vars)}</style>
+${edition.fontUrl ? `<link rel="stylesheet" href="${escapeHtml(edition.fontUrl)}">\n` : ""}<style>${fontFaces(edition.fonts)}${styleSheet(vars)}</style>
 </head>
 <body>
 <header>

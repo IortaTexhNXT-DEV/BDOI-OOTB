@@ -13,7 +13,7 @@ Run it isolated, because the template is untrusted input:
         [--title "Cover title"] [--version "0.9 Draft"] [--date "10 October 2026"] \
         [--subtitle "Toyota Insurance Services Philippines"] [--prepared-by "iorta TechNXT"] \
         [--glossary-from other.md ...] [--toc-levels 2] [--signoff-title "Document Sign-Off"] \
-        [--chapter-breaks] [--no-pdf-pass]
+        [--chapter-breaks] [--no-pdf-pass] [--manual] [--brand-pack DIR] [--keywords "..."]
 
 Without --no-pdf-pass the script converts the result to PDF with LibreOffice
 (soffice) to read the page of every heading, then writes those page numbers
@@ -21,7 +21,20 @@ into the table of contents. Word refreshes the TOC field when the file opens
 (updateFields is set in settings.xml).
 
 An image on a line of its own (![Caption](path), the path absolute or relative to
-the source) is placed at the width of the text with its caption.
+the source) is placed with its caption, at most at the width of the text, and kept on the
+page of its caption. The caption is its alternative text.
+
+A heading may carry an id ("## Prospects {#prospects}"); a link to it ([Prospects](#prospects))
+becomes a link to the heading in Word and in the PDF.
+
+--manual lays out a user manual: the document control as an item and value table with
+the change log, the glossary kept as the last chapter (no acronyms section), no pending
+items, the front and back sections without numbers, and a list of figures when the
+captions are numbered ("Figure 2.3: ...").
+
+--brand-pack DIR uses a client brand pack (theme.json and logo of DIR) instead of the
+template's artwork: a cover with the client's logo, a header with the logo, a footer
+with the title, version, classification and page, and the pack's colours and font.
 
 Mermaid diagrams are rendered to PNG when a mermaid build and Playwright are
 available (see find_mermaid); otherwise each diagram is converted into a table
@@ -70,6 +83,9 @@ NUM_COLOR = '003399'
 BRAND_BLUE = '1D74BA'
 BORDER_COLOR = '808080'
 HEADER_FILL = 'E8F0F8'
+LINK_COLOR = BRAND_BLUE
+QUOTE_COLOR = BRAND_BLUE
+CAPTION_COLOR = HEAD_COLOR
 CODE_FILL = 'F3F5F8'
 TABLE_SZ = 16          # half-points: 8 pt, as the template tables
 
@@ -308,6 +324,8 @@ def inline_tokens(text, fmt=frozenset()):
             sub = inline_tokens(m.group('lt'), fmt)
             if re.match(r'https?://', url):
                 sub = [(t, f | {'link:' + url}) for t, f in sub]
+            elif re.match(r'#[a-z0-9][a-z0-9-]*$', url):
+                sub = [(t, f | {'anchor:' + url[1:]}) for t, f in sub]
             out.extend(sub)
         elif m.group('br'):
             out.append(('\n', fmt))
@@ -346,9 +364,9 @@ def rpr(fmt, size=None, color=None, bold=False, italic=False, font=None):
         parts.append('<w:b/><w:bCs/>')
     if italic or 'i' in fmt:
         parts.append('<w:i/><w:iCs/>')
-    link = any(x.startswith('link:') for x in fmt)
+    link = any(x.startswith(('link:', 'anchor:')) for x in fmt)
     if link:
-        parts.append(f'<w:color w:val="{BRAND_BLUE}"/><w:u w:val="single"/>')
+        parts.append(f'<w:color w:val="{LINK_COLOR}"/><w:u w:val="single"/>')
     elif code:
         parts.append('<w:color w:val="1F3B57"/>')
     elif color:
@@ -375,10 +393,22 @@ def runs_xml(ctx, text, size=None, color=None, bold=False, italic=False, base_fm
             if piece:
                 xml += f'<w:r>{rp}<w:t xml:space="preserve">{xesc(piece)}</w:t></w:r>'
         url = next((x[5:] for x in f if x.startswith('link:')), None)
+        anchor = next((x[7:] for x in f if x.startswith('anchor:')), None)
         if url:
             xml = f'<w:hyperlink r:id="{ctx.link_rid(url)}" w:history="1">{xml}</w:hyperlink>'
+        elif anchor:
+            xml = f'<w:hyperlink w:anchor="{bookmark_of(anchor)}" w:history="1">{xml}</w:hyperlink>'
         out.append(xml)
     return ''.join(out)
+
+
+def bookmark_of(hid):
+    """Word bookmark name of a heading id: letters, digits and underscores, at most 40 characters."""
+    import hashlib
+    return 'h_' + re.sub(r'[^A-Za-z0-9]', '_', hid)[:28] + '_' + hashlib.md5(hid.encode()).hexdigest()[:6]
+
+
+HEAD_ID_RE = re.compile(r'\s*\{#([a-z0-9][a-z0-9-]*)\}\s*$')
 
 
 def p_xml(inner, style=None, ppr=''):
@@ -519,7 +549,7 @@ def setup_styles(doc, toc_levels):
                      f'</w:rPr></w:style>')
     if get('Hyperlink') is None:
         st.append(el(f'<w:style {NSDECL} w:type="character" w:styleId="Hyperlink"><w:name w:val="Hyperlink"/>'
-                     f'<w:rPr><w:color w:val="{BRAND_BLUE}"/><w:u w:val="single"/></w:rPr></w:style>'))
+                     f'<w:rPr><w:color w:val="{LINK_COLOR}"/><w:u w:val="single"/></w:rPr></w:style>'))
     if get('Caption') is None:
         st.append(el(f'<w:style {NSDECL} w:type="paragraph" w:styleId="Caption"><w:name w:val="caption"/>'
                      f'<w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/>'
@@ -1350,6 +1380,8 @@ class Builder:
         self.items = []          # list of (xml element or marker)
         self.diagram_count = 0
         self.diagram_mode = []
+        self.figures = []        # (bookmark, "Figure n.k", caption) of the numbered captions
+        self.brand = args.brand
 
     # -------------------------------------------------- helpers
     def add(self, xml_or_el):
@@ -1362,9 +1394,13 @@ class Builder:
         self.add(p_xml(runs_xml(self.ctx, text, size=size, italic=italic), style, ppr + jc))
 
     def heading(self, level, text, numbered, front=False, page_break=False):
+        m = HEAD_ID_RE.search(text)
+        hid = m.group(1) if m else None
+        if m:
+            text = text[:m.start()]
         h = Heading(level, plain(text), numbered, front)
         self.ctx.bm_id += 1
-        h.bookmark = f'_Toc{self.ctx.bm_id + 300000000}'
+        h.bookmark = bookmark_of(hid) if hid else f'_Toc{self.ctx.bm_id + 300000000}'
         h.bm_id = self.ctx.bm_id
         self.headings.append(h)
         if front:
@@ -1429,7 +1465,7 @@ class Builder:
             for qb in b['blocks']:
                 if qb['t'] == 'para':
                     self.add(p_xml(runs_xml(self.ctx, qb['text'], italic=True), None,
-                                   f'<w:pBdr><w:left w:val="single" w:sz="18" w:space="8" w:color="{BRAND_BLUE}"/></w:pBdr>'
+                                   f'<w:pBdr><w:left w:val="single" w:sz="18" w:space="8" w:color="{QUOTE_COLOR}"/></w:pBdr>'
                                    '<w:ind w:left="300" w:right="300"/><w:spacing w:before="80" w:after="120"/>'))
                 else:
                     self.render_block(qb, list_level, list_num)
@@ -1440,9 +1476,9 @@ class Builder:
             if not os.path.exists(src):
                 warn(f'image not found: {b["src"]}')
                 return
-            self.picture(src)
+            self.picture(src, plain(b['alt']))
             if b['alt']:
-                self.add(p_xml(runs_xml(self.ctx, b['alt'], size=18, italic=True), 'Caption', ''))
+                self.caption(b['alt'])
 
     def render_list(self, b, level):
         if b['ordered']:
@@ -1504,20 +1540,51 @@ class Builder:
         self.add(p_xml(runs_xml(self.ctx, cap, size=18, bold=True, color=HEAD_COLOR), 'Caption', ''))
         self.render_blocks(blocks)
 
-    def picture(self, path):
+    def caption(self, text):
+        """The caption under a picture; a numbered one ("Figure 2.3: ...") is listed in the list of figures."""
+        m = re.match(r'^(Figure \d+(?:\.\d+)*):\s*(.*)$', plain(text))
+        if not m:
+            self.add(p_xml(runs_xml(self.ctx, text, size=18, italic=True, color=CAPTION_COLOR), 'Caption', ''))
+            return
+        self.ctx.bm_id += 1
+        name = f'_Fig{self.ctx.bm_id}'
+        self.figures.append((name, m.group(1), m.group(2)))
+        runs = (runs_xml(self.ctx, m.group(1) + ': ', size=18, bold=True, color=CAPTION_COLOR)
+                + runs_xml(self.ctx, m.group(2), size=18, color=CAPTION_COLOR))
+        self.add(f'<w:p {NSDECL}><w:pPr><w:pStyle w:val="Caption"/><w:spacing w:before="60" w:after="200"/></w:pPr>'
+                 f'<w:bookmarkStart w:id="{self.ctx.bm_id}" w:name="{name}"/>{runs}<w:bookmarkEnd w:id="{self.ctx.bm_id}"/></w:p>')
+
+    def picture(self, path, alt=''):
+        """A picture at about 120 dpi, never wider than the text, kept with its caption. Screenshots wider than
+        1200 pixels are scaled down and every picture is stored with a palette of 256 colours when that is smaller."""
         from docx.shared import Twips
-        p = self.doc.add_paragraph()
-        run = p.add_run()
         from PIL import Image
         with Image.open(path) as im:
+            im.load()
             w, h = im.size
+            src = path
+            if path.lower().endswith('.png'):
+                img = im.convert('RGB')
+                if w > 1200:
+                    img = img.resize((1200, round(h * 1200 / w)), Image.LANCZOS)
+                small = os.path.join(self.args.tmpdir, f'img{len(self.items)}_{os.path.basename(path)}')
+                img.quantize(colors=256, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).save(small, optimize=True)
+                if os.path.getsize(small) < os.path.getsize(path):
+                    src = small
         max_w = TEXT_W_PORTRAIT
         max_h = 11000
-        width = min(max_w, int(w / 2 * 15))
+        width = min(max_w, int(w * 12))
         if width * h / w > max_h:
             width = int(max_h * w / h)
-        run.add_picture(path, width=Twips(width))
+        p = self.doc.add_paragraph()
+        run = p.add_run()
+        run.add_picture(src, width=Twips(width))
+        for pr in run._r.iter(qn('wp:docPr')):
+            pr.set('descr', alt)
+            pr.set('name', f'Picture {pr.get("id")}')
         p.paragraph_format.alignment = 1
+        p.paragraph_format.keep_with_next = True
+        p.paragraph_format.space_after = 0
         e = p._p
         e.getparent().remove(e)
         self.items.append(e)
@@ -1611,13 +1678,18 @@ class Builder:
         rest = []
         for h, blocks in sections:
             ht = plain(h['text']).lower()
+            if a.manual:
+                rest.append((h, blocks))
+                continue
             if ('glossary' in ht or 'acronym' in ht) and any(b['t'] == 'table' for b in blocks):
                 tb = [b for b in blocks if b['t'] == 'table'][0]
                 gloss_rows = [[r[0], r[1]] for r in tb['rows']]
                 continue
             rest.append((h, blocks))
         sections = rest
-        if gloss_rows is None:
+        if a.manual:
+            self.acronym_source = 'glossary chapter'
+        elif gloss_rows is None:
             dictionary = dict(COMMON_ACRONYMS)
             dictionary.update(harvest_glossaries(a.glossary_from or []))
             for kv_ in a.acronym:
@@ -1647,15 +1719,19 @@ class Builder:
         self.body_num = self.num.new_num(body_abs, start=self.first_number if self.first_number != 1 else None)
 
         # ---- front matter
-        self.heading(1, 'Document Control', False, front=True, page_break=True)
-        self.document_control_table(dc)
-        has_terms = any(not re.fullmatch(r'[A-Z0-9/&\- ]+s?|[A-Z][a-z][A-Z]\w*', plain(r[0]).strip()) for r in gloss_rows)
-        self.heading(1, 'Acronyms and Glossary' if has_terms else 'Acronyms', False, front=True)
-        if gloss_rows:
-            self.table(['Acronym / Symbol' if not has_terms else 'Acronym / Term', 'Definition / Meaning'],
-                       gloss_rows, widths=[30, 70], landscape=False, first_bold=True)
+        if a.manual:
+            self.heading(1, 'Document Control', False, page_break=True)
+            self.manual_control(dc)
         else:
-            self.body_para('No acronyms are used in this document.')
+            self.heading(1, 'Document Control', False, front=True, page_break=True)
+            self.document_control_table(dc)
+            has_terms = any(not re.fullmatch(r'[A-Z0-9/&\- ]+s?|[A-Z][a-z][A-Z]\w*', plain(r[0]).strip()) for r in gloss_rows)
+            self.heading(1, 'Acronyms and Glossary' if has_terms else 'Acronyms', False, front=True)
+            if gloss_rows:
+                self.table(['Acronym / Symbol' if not has_terms else 'Acronym / Term', 'Definition / Meaning'],
+                           gloss_rows, widths=[30, 70], landscape=False, first_bold=True)
+            else:
+                self.body_para('No acronyms are used in this document.')
         # ---- content
         first = True
         if intro:
@@ -1675,11 +1751,11 @@ class Builder:
                     pending_done = True
                     continue
             self.render_blocks(blocks)
-        if not pending_done:
+        if not pending_done and not a.manual:
             self.heading(1, 'Pending Items', not self.source_numbered or self.auto_numbering)
             self.pending_table([['-', 'No pending items are recorded in this version.', '-', '-']])
         # ---- sign-off
-        self.heading(1, a.signoff_title, not self.source_numbered or self.auto_numbering)
+        self.heading(1, a.signoff_title, not a.manual and (not self.source_numbered or self.auto_numbering), page_break=a.manual)
         self.signoff(dc)
         self.assemble()
         return self
@@ -1738,6 +1814,17 @@ class Builder:
             self.table(dc['reviewers']['header'], dc['reviewers']['rows'])
         for cur, b in dc['other']:
             self.render_block(b)
+
+    def manual_control(self, dc):
+        """Document control of a manual: the items as written in the source, then the change log."""
+        if dc['kv_block']:
+            self.table(['Item', 'Value'], [[plain(r[0]), r[1]] for r in dc['kv_block']['rows']], widths=[26, 74], landscape=False,
+                       first_bold=True)
+        if dc['changes']:
+            self.small_heading('Change log')
+            self.table(['Version', 'Date', 'Author', 'Change'],
+                       [[plain(c.get('version', '')), plain(c.get('date', '')), plain(c.get('author', '')), c.get('change', '')]
+                        for c in dc['changes']], widths=[12, 20, 20, 48], landscape=False)
 
     def pending_table(self, rows):
         self.table(['Serial Number', 'Description', 'Owner', 'Status'], rows, widths=[1250, 5000, 1300, 1477],
@@ -1824,12 +1911,37 @@ class Builder:
         for c in children:
             if c is not sect and c not in cover and c is not toc_head and c is not back:
                 body.remove(c)
-        self.fix_cover(cover)
+        if self.brand:
+            # the client's cover, header and footer instead of the template's artwork
+            for c in cover + [back]:
+                body.remove(c)
+            back = None
+            for e in self.brand_cover():
+                toc_head.addprevious(e)
+            self.brand_header_footer(sect)
+            for r in toc_head.iter(qn('w:color')):
+                r.set(qn('w:val'), HEAD_COLOR)
+        else:
+            self.fix_cover(cover)
         # TOC
         anchor = toc_head
         for e in self.toc_elements():
             anchor.addnext(e)
             anchor = e
+        if self.figures and self.args.manual:
+            lof = copy.deepcopy(toc_head)
+            ts = list(lof.iter(qn('w:t')))
+            for t in ts:
+                t.text = ''
+            if ts:
+                ts[-1].text = 'LIST OF FIGURES'
+            ppr = lof.find(qn('w:pPr'))
+            ppr.insert(1, el(f'<w:pageBreakBefore {NSDECL}/>'))
+            anchor.addnext(lof)
+            anchor = lof
+            for e in self.lof_elements():
+                anchor.addnext(e)
+                anchor = e
         first_sect = copy.deepcopy(sect)
         first_sect.append(el(f'<w:titlePg {NSDECL}/>'))
         # schema order: titlePg after docGrid is invalid; place it before textDirection/docGrid
@@ -1869,6 +1981,9 @@ class Builder:
             p.find(qn('w:pPr')).append(sp)
             anchor.addnext(p)
         # back cover on its own page
+        if back is None:
+            self.drop_unused_images()
+            return
         ppr = back.find(qn('w:pPr'))
         if ppr is None:
             ppr = el(f'<w:pPr {NSDECL}/>')
@@ -1917,9 +2032,12 @@ class Builder:
         pg.set(qn('w:h'), str(PORTRAIT['w']))
         pg.set(qn('w:orient'), 'landscape')
         mar = s.find(qn('w:pgMar'))
-        # the footer band is scaled up for the wider page: keep text clear of it
-        mar.set(qn('w:bottom'), str(int(mar.get(qn('w:bottom'))) + 420))
-        rid = self.landscape_footer()
+        if self.brand:
+            rid = self._brand_land_rid
+        else:
+            # the footer band is scaled up for the wider page: keep text clear of it
+            mar.set(qn('w:bottom'), str(int(mar.get(qn('w:bottom'))) + 420))
+            rid = self.landscape_footer()
         for fr in s.findall(qn('w:footerReference')):
             if fr.get(qn('w:type')) == 'default':
                 fr.set(qn('r:id'), rid)
@@ -1994,6 +2112,126 @@ class Builder:
         end = el(f'<w:p {NSDECL}><w:pPr><w:pStyle w:val="TOC1"/></w:pPr><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p>')
         out.append(end)
         return out
+
+    def lof_elements(self):
+        out = []
+        for name, label, text in self.figures:
+            page = str(self.page_map.get(name, ''))
+            out.append(el(f'<w:p {NSDECL}><w:pPr><w:pStyle w:val="TOC2"/><w:ind w:left="0" w:hanging="0"/></w:pPr>'
+                          f'<w:hyperlink w:anchor="{name}" w:history="1">'
+                          f'<w:r><w:rPr><w:noProof/></w:rPr><w:t xml:space="preserve">{xesc(label)}  {xesc(text)}</w:t></w:r>'
+                          f'<w:r><w:rPr><w:noProof/></w:rPr><w:tab/></w:r><w:r><w:rPr><w:noProof/></w:rPr><w:t>{page}</w:t></w:r>'
+                          f'</w:hyperlink></w:p>'))
+        return out
+
+    # -------------------------------------------------- client brand
+    def brand_picture(self, path, width_twips):
+        from docx.shared import Twips
+        p = self.doc.add_paragraph()
+        p.add_run().add_picture(path, width=Twips(width_twips))
+        e = p._p
+        e.getparent().remove(e)
+        for pr in e.iter(qn('wp:docPr')):
+            pr.set('descr', self.brand['name'])
+        return e
+
+    def brand_cover(self):
+        b = self.brand
+        a = self.args
+        grey = '555555'
+        out = [el(p_xml('', None, '<w:spacing w:before="1800" w:after="0"/>'))]
+        logo = self.brand_picture(b['logo'], 4300)
+        logo.insert(0, el(f'<w:pPr {NSDECL}><w:spacing w:before="0" w:after="600"/></w:pPr>'))
+        out.append(logo)
+        out.append(el(p_xml('', None, f'<w:pBdr><w:bottom w:val="single" w:sz="24" w:space="1" w:color="{b["accent"]}"/></w:pBdr>'
+                                      '<w:spacing w:before="0" w:after="480"/>')))
+        out.append(el(p_xml(runs_xml(self.ctx, self.title, size=56, bold=True, color=HEAD_COLOR), None,
+                            '<w:spacing w:before="0" w:after="360" w:line="240" w:lineRule="auto"/>')))
+        status = 'Draft' if 'draft' in self.version.lower() else ''
+        version = re.sub(r'\s*draft\s*$', '', self.version, flags=re.I)
+        rows = [('Version', version), ('Date', self.date), ('Status', status or 'Approved')]
+        if a.classification:
+            rows.append(('Classification', a.classification))
+        for k, v in rows:
+            out.append(el(p_xml(runs_xml(self.ctx, f'{k}: ', size=24, color=grey) + runs_xml(self.ctx, v, size=24, bold=True, color=HEAD_COLOR),
+                                None, '<w:spacing w:before="0" w:after="80"/>')))
+        out.append(el(f'<w:p {NSDECL}><w:r><w:br w:type="page"/></w:r></w:p>'))
+        return out
+
+    def brand_header_footer(self, sect):
+        """Header with the client's logo and the status, footer with the title, version, classification and page."""
+        from docx.parts.hdrftr import FooterPart, HeaderPart
+        b = self.brand
+        dpart = self.doc.part
+        grey = '555555'
+        rp = (f'<w:rPr><w:rFonts w:ascii="{FONT}" w:hAnsi="{FONT}" w:cs="{FONT}"/><w:color w:val="{grey}"/>'
+              f'<w:sz w:val="15"/><w:szCs w:val="15"/></w:rPr>')
+        draft = 'draft' in self.version.lower()
+
+        def field(code):
+            return (f'<w:r>{rp}<w:fldChar w:fldCharType="begin"/></w:r><w:r>{rp}<w:instrText xml:space="preserve"> {code} </w:instrText></w:r>'
+                    f'<w:r>{rp}<w:fldChar w:fldCharType="separate"/></w:r><w:r>{rp}<w:t>1</w:t></w:r><w:r>{rp}<w:fldChar w:fldCharType="end"/></w:r>')
+
+        def footer_xml(right):
+            text = ' · '.join(x for x in (self.title, f'Version {self.version}', self.args.classification) if x)
+            return (f'<w:ftr {NSDECL}><w:p><w:pPr><w:pBdr><w:top w:val="single" w:sz="8" w:space="6" w:color="{b["accent"]}"/></w:pBdr>'
+                    f'<w:tabs><w:tab w:val="right" w:pos="{right}"/></w:tabs><w:spacing w:before="0" w:after="0"/></w:pPr>'
+                    f'<w:r>{rp}<w:t xml:space="preserve">{xesc(text)}</w:t></w:r><w:r>{rp}<w:tab/></w:r>'
+                    f'<w:r>{rp}<w:t xml:space="preserve">Page </w:t></w:r>{field("PAGE")}'
+                    f'<w:r>{rp}<w:t xml:space="preserve"> of </w:t></w:r>{field("NUMPAGES")}</w:p></w:ftr>')
+
+        # the default footer of the template becomes the client's footer
+        for fr in sect.findall(qn('w:footerReference')):
+            if fr.get(qn('w:type')) == 'default':
+                part = dpart.related_parts[fr.get(qn('r:id'))]
+                new = el(footer_xml(TEXT_W_PORTRAIT))
+                root = part.element
+                for c in list(root):
+                    root.remove(c)
+                for c in list(new):
+                    root.append(c)
+                for rid in [r.rId for r in part.rels.values()]:
+                    part.drop_rel(rid)
+        land = FooterPart(PackURI('/word/footer_landscape.xml'),
+                          'application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml',
+                          el(footer_xml(TEXT_W_LANDSCAPE)), dpart.package)
+        self._brand_land_rid = dpart.relate_to(land, RT.FOOTER)
+        # header: the logo, and Draft while the document is a draft
+        hdr = HeaderPart(PackURI('/word/header_brand.xml'), 'application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml',
+                         el(f'<w:hdr {NSDECL}/>'), dpart.package)
+        from docx.shared import Twips
+        img_rid, _image = hdr.get_or_add_image(b['logo'])
+        cx = 1500 * 635
+        with open(b['logo'], 'rb') as f:
+            from PIL import Image
+            with Image.open(f) as im:
+                iw, ih = im.size
+        cy = int(cx * ih / iw)
+        pic = (f'<w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="{cx}" cy="{cy}"/>'
+               f'<wp:docPr id="9001" name="Logo" descr="{xesc(b["name"])}"/><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">'
+               f'<pic:pic><pic:nvPicPr><pic:cNvPr id="0" name="logo.png"/><pic:cNvPicPr/></pic:nvPicPr>'
+               f'<pic:blipFill><a:blip r:embed="{img_rid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>'
+               f'<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="{cx}" cy="{cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>'
+               f'</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing>')
+        status = f'<w:r>{rp}<w:tab/></w:r><w:r>{rp.replace(grey, b["accent"])}<w:t>DRAFT</w:t></w:r>' if draft else ''
+        hdr.element.append(el(f'<w:p {NSDECL}><w:pPr><w:tabs><w:tab w:val="right" w:pos="{TEXT_W_PORTRAIT}"/></w:tabs>'
+                              f'<w:spacing w:before="0" w:after="0"/></w:pPr><w:r>{pic}</w:r>{status}</w:p>'))
+        hrid = dpart.relate_to(hdr, RT.HEADER)
+        for hr in sect.findall(qn('w:headerReference')):
+            if hr.get(qn('w:type')) == 'default':
+                sect.remove(hr)
+        sect.insert(0, el(f'<w:headerReference {NSDECL} w:type="default" r:id="{hrid}"/>'))
+        mar = sect.find(qn('w:pgMar'))
+        mar.set(qn('w:header'), '567')
+        mar.set(qn('w:footer'), '567')
+
+    def drop_unused_images(self):
+        """Remove the template's artwork that no element refers to any more."""
+        dpart = self.doc.part
+        xml = self.doc.element.xml
+        for rid, rel in list(dpart.rels.items()):
+            if rel.reltype == RT.IMAGE and f'"{rid}"' not in xml:
+                dpart.drop_rel(rid)
 
     def heading_numbers(self):
         res = {}
@@ -2129,7 +2367,14 @@ class Builder:
         else:
             s.append(uf)
         # page number in the footers
-        self.footer_page_numbers()
+        if self.brand:
+            rebrand(doc.styles.element)
+            for ppr in doc.styles.element.xpath('w:style[@w:styleId="Heading1"]/w:pPr'):
+                ppr.append(el(f'<w:pBdr {NSDECL}><w:bottom w:val="single" w:sz="8" w:space="4" w:color="{self.brand["accent"]}"/></w:pBdr>'))
+            rebrand(doc.element.body)
+            rebrand(doc.part.numbering_part.element)
+        else:
+            self.footer_page_numbers()
         normalise(doc.element.body)
         normalise(doc.styles.element)
         cp = doc.core_properties
@@ -2137,7 +2382,7 @@ class Builder:
         cp.last_modified_by = self.args.prepared_by
         cp.title = self.title
         cp.subject = self.args.subtitle
-        cp.keywords = 'TISPH; BrokerVerse'
+        cp.keywords = self.args.keywords
         cp.comments = ''
         cp.category = ''
         cp.revision = 1
@@ -2183,11 +2428,63 @@ class Builder:
                 data = zin.read(item.filename)
                 if item.filename == 'docProps/app.xml':
                     t = data.decode('utf-8')
-                    t = re.sub(r'<Company>[^<]*</Company>|<Company/>', '<Company>iorta TechNXT</Company>', t)
+                    company = xesc(self.args.company or self.args.prepared_by)
+                    t = re.sub(r'<Company>[^<]*</Company>|<Company/>', f'<Company>{company}</Company>', t)
                     t = re.sub(r'<TotalTime>\d+</TotalTime>', '<TotalTime>0</TotalTime>', t)
                     data = t.encode('utf-8')
                 zout.writestr(item, data)
         os.replace(tmp, out)
+
+
+# ============================================================ client brand
+TEMPLATE_COLOURS = {'0F4761', '365F91', '003399', '1D74BA', '071B2C', '0000FF', '1F3864', '2F5496', '1F3B57'}
+
+
+def apply_brand(pack_dir):
+    """Colours and font of a brand pack (theme.json): returns name, logo and accent for the cover, header and footer."""
+    global FONT, BODY_COLOR, HEAD_COLOR, NUM_COLOR, BRAND_BLUE, HEADER_FILL, LINK_COLOR, QUOTE_COLOR, CAPTION_COLOR, CODE_FILL
+    with open(os.path.join(pack_dir, 'theme.json'), encoding='utf-8') as f:
+        pack = json.load(f)
+    theme = pack['theme']
+    colours = theme.get('colors', {})
+    docs = theme.get('documents', {})
+    hexval = lambda v, d: (v or d).lstrip('#').upper()
+    FONT = {'inter': 'Inter', 'nunito': 'Nunito', 'roboto': 'Roboto', 'open-sans': 'Open Sans'}.get(theme.get('font'), FONT)
+    BODY_COLOR = '3A3A3A'
+    HEAD_COLOR = hexval(docs.get('headingColor') or colours.get('headingText'), '1A1A1A')
+    NUM_COLOR = HEAD_COLOR
+    BRAND_BLUE = HEAD_COLOR
+    HEADER_FILL = hexval(colours.get('tableHeaderBg'), 'EEEEEE')
+    LINK_COLOR = hexval(colours.get('link'), HEAD_COLOR)
+    QUOTE_COLOR = hexval(docs.get('accentColor') or colours.get('accent'), HEAD_COLOR)
+    CAPTION_COLOR = '555555'
+    CODE_FILL = 'F2F2F2'
+    logo = os.path.join(pack_dir, (pack.get('assets') or {}).get('documentLogo') or 'logo.png')
+    return {'name': pack.get('systemName') or pack.get('name'), 'logo': logo,
+            'accent': hexval(docs.get('accentColor') or colours.get('accent'), HEAD_COLOR)}
+
+
+def rebrand(root):
+    """The template's blue and fonts in styles and text: the brand's heading colour and font."""
+    tc = [qn('w:themeColor'), qn('w:themeShade'), qn('w:themeTint')]
+    for e in root.iter(qn('w:color')):
+        if (e.get(qn('w:val')) or '').upper() in TEMPLATE_COLOURS:
+            e.set(qn('w:val'), HEAD_COLOR)
+            for a in tc:
+                e.attrib.pop(a, None)
+        elif e.get(qn('w:themeColor')):
+            for a in tc:
+                e.attrib.pop(a, None)
+            if not e.get(qn('w:val')) or e.get(qn('w:val')) == 'auto':
+                e.set(qn('w:val'), BODY_COLOR)
+    for e in root.iter(qn('w:shd')):
+        if (e.get(qn('w:fill')) or '').upper() in TEMPLATE_COLOURS | {'E8F0F8'}:
+            e.set(qn('w:fill'), HEADER_FILL)
+    for e in root.iter(qn('w:rFonts')):
+        for a in ('asciiTheme', 'hAnsiTheme', 'cstheme', 'eastAsiaTheme'):
+            e.attrib.pop(qn('w:' + a), None)
+        for a in ('ascii', 'hAnsi', 'cs'):
+            e.set(qn('w:' + a), MONO if e.get(qn('w:' + a)) == MONO else FONT)
 
 
 # ============================================================ schema order
@@ -2223,8 +2520,14 @@ def normalise(root):
 
 
 # ============================================================ PDF pass
+# screenshots at 150 dpi in JPEG quality 80: a readable print at a size that can be sent by e-mail
+PDF_EXPORT = ('pdf:writer_pdf_Export:{"ReduceImageResolution":{"type":"boolean","value":"true"},'
+              '"MaxImageResolution":{"type":"long","value":"150"},"UseLosslessCompression":{"type":"boolean","value":"false"},'
+              '"Quality":{"type":"long","value":"80"},"UseTaggedPDF":{"type":"boolean","value":"true"}}')
+
+
 def pdf_pages(docx_path, tmpdir):
-    r = subprocess.run(['soffice', '--headless', '--convert-to', 'pdf', '--outdir', tmpdir, docx_path],
+    r = subprocess.run(['soffice', '--headless', '--convert-to', PDF_EXPORT, '--outdir', tmpdir, docx_path],
                        capture_output=True, text=True, timeout=900)
     pdf = os.path.join(tmpdir, os.path.splitext(os.path.basename(docx_path))[0] + '.pdf')
     if not os.path.isfile(pdf):
@@ -2272,6 +2575,15 @@ def heading_pages(builder, pages):
             continue
         cur = found
         res[h.bookmark] = found + 1
+    cur = toc_end + 1
+    for name, label, text in builder.figures:
+        key = norm(f'{label} {text}')[:40]
+        found = next((k for k in range(cur, len(npages)) if key in npages[k]), None)
+        if found is None:
+            warn(f'page of figure not found: {label}')
+            continue
+        cur = found
+        res[name] = found + 1
     return res
 
 
@@ -2294,7 +2606,13 @@ def main():
     ap.add_argument('--no-pdf-pass', action='store_true')
     ap.add_argument('--keep-pdf', help='write the final PDF here')
     ap.add_argument('--report', help='write a JSON report here')
+    ap.add_argument('--manual', action='store_true', help='user manual layout (see above)')
+    ap.add_argument('--brand-pack', help='folder of a client brand pack (theme.json, logo)')
+    ap.add_argument('--classification', default='', help='printed on the cover and in the footer of a branded document')
+    ap.add_argument('--keywords', default='TISPH', help='keywords of the document properties')
+    ap.add_argument('--company', help='company of the document properties (default: --prepared-by)')
     args = ap.parse_args()
+    args.brand = apply_brand(args.brand_pack) if args.brand_pack else None
     args.source_dir = os.path.dirname(os.path.abspath(args.source))
     if args.date:
         args.date = parse_date(args.date) or args.date

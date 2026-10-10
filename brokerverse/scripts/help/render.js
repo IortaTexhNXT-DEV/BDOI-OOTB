@@ -113,7 +113,8 @@ function render(body, heads, image) {
       const h = heads[hi++];
       if (h.level === 1 && hi > 1) html.push("</section>");
       if (h.level === 1) html.push(`<section class="chapter" aria-labelledby="${h.id}">`);
-      html.push(`<h${h.level} id="${h.id}"><a class="anchor" href="#${h.id}" aria-hidden="true">#</a>${inline(h.title)}</h${h.level}>`);
+      const number = h.number ? `<span class="num">${h.number}</span> ` : "";
+      html.push(`<h${h.level} id="${h.id}"><a class="anchor" href="#${h.id}" aria-hidden="true">#</a>${number}${inline(h.title)}</h${h.level}>`);
       i++;
       continue;
     }
@@ -187,12 +188,13 @@ function toc(heads) {
   const out = [];
   let open = false;
   for (const h of heads) {
+    const title = `${h.number ? `${h.number} ` : ""}${escapeHtml(h.title)}`;
     if (h.level === 1) {
       if (open) out.push("</ul></li>");
-      out.push(`<li><a href="#${h.id}">${escapeHtml(h.title)}</a><ul>`);
+      out.push(`<li><a href="#${h.id}">${title}</a><ul>`);
       open = true;
     } else if (h.level === 2) {
-      out.push(`<li><a href="#${h.id}">${escapeHtml(h.title)}</a></li>`);
+      out.push(`<li><a href="#${h.id}">${title}</a></li>`);
     }
   }
   if (open) out.push("</ul></li>");
