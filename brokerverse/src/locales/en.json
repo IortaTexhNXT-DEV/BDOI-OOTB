@@ -400,8 +400,8 @@
     "accountNumberRequired": "Account number is required",
     "paymentTypeRequired": "Payment type is required",
     "addJournalVoucher": "Add Journal Voucher",
-    "correctionsJV": "Corrections JV",
-    "correctionsJVDetails": "Corrections JV Details",
+    "correctionsJV": "Correction JV",
+    "correctionsJVDetails": "Correction JV details",
     "receipts": {
       "title": "Receipts",
       "bulkPrint": "Bulk Print",
@@ -738,7 +738,8 @@
       "totalCredit": "Total credit",
       "new": "New correction",
       "newReversal": "New reversal",
-      "print": "Print {{number}}"
+      "print": "Print {{number}}",
+      "difference": "Difference"
     },
     "appliedPolicies": "Policies paid by this receipt"
   },
@@ -3040,7 +3041,12 @@
     "deleteMessage": "The notification below is removed from your list.",
     "deleteAction": "Delete notification",
     "notification": "Notification",
-    "received": "Received"
+    "received": "Received",
+    "priority": {
+      "high": "High priority",
+      "low": "Low priority",
+      "urgent": "Urgent"
+    }
   },
   "dashboard": {
     "Motor": "Motor",
@@ -7368,8 +7374,8 @@
     "effectiveTo": "Effective to",
     "tiers": "Tiers",
     "tierNo": "Tier",
-    "fromValue": "From",
-    "toValue": "To",
+    "fromValue": "From (included)",
+    "toValue": "To (not included)",
     "openEnded": "and above",
     "ratePct": "Rate on production",
     "addTier": "Add tier",
@@ -7527,7 +7533,9 @@
     "claimsFromSystem": "Claims recorded in the system",
     "recordAmended": "Record amended return",
     "paymentChannelPlaceholder": "e.g. eFPS, eBIRForms, LANDBANK Link.BizPortal",
-    "vatRegistered": "VAT registered"
+    "vatRegistered": "VAT registered",
+    "computeTitle": "Compute {{period}} · {{agreement}}",
+    "nothingToCompute": "No production in this period"
   },
   "placement": {
     "status": {

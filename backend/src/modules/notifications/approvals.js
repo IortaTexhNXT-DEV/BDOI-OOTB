@@ -9,6 +9,7 @@
  * fails the transaction that asked for it.
  */
 import { logger } from '../../lib/logger.js';
+import { one } from '../../db/pool.js';
 import { approvalNotificationsOn, notify } from './service.js';
 
 export { approvalNotificationsOn };
@@ -30,8 +31,10 @@ async function safely(title, fn) {
  */
 export function notifyApprovers({ audience = null, users = null, document, number, by, detail = null, title = null, message = null, link = null, entity = null, entityId = null }) {
   const t = title || `${document} ${number} awaiting approval`;
-  const n = { type: 'approval', title: t, message: message || `${by} submitted ${number}${detail ? ` (${detail})` : ''}`, link, entity, entityId };
   return safely(t, async () => {
+    // the maker by the name people know them by (callers pass the login name)
+    const who = (by && (await one('SELECT display_name FROM users WHERE username = $1 OR id = $1', [String(by)]).catch(() => null))?.display_name) || by;
+    const n = { type: 'approval', title: t, message: message || `${who} submitted ${number}${detail ? ` (${detail})` : ''}`, link, entity, entityId };
     if (!users) return notify({ ...n, audience });
     for (const userId of users) await notify({ ...n, userId });
     return null;

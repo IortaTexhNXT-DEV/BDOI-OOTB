@@ -198,14 +198,12 @@ const TableData = ({ newDataTable, editID }) => {
     <div className="corrections__table__container">
       <DataTable
         value={correctionJVList}
-        paginator
+        paginator={(correctionJVList || []).length > 20}
         rows={20}
         rowsPerPageOptions={[20, 50, 100]}
         currentPageReportTemplate="{first} - {last} of {totalRecords}"
         paginatorTemplate={template2}
         className="corrections__table__main"
-        scrollable={true}
-        scrollHeight="40vh"
       >
         <Column
           field="mainAccount"

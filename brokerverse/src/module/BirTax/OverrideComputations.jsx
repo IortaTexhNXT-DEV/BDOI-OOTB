@@ -22,7 +22,7 @@ import { RecordActivityLog } from "../../components/ActivityLog";
 import { calendarDateFormat, toIsoDate } from "../../utility/dateFormat";
 import { BirTag, Kpis, PageHeader, YearPicker, date, money, showError, showSuccess } from "./common";
 
-const pct = (v) => (v === null || v === undefined ? "-" : `${Number(v).toLocaleString("en-PH", { maximumFractionDigits: 2 })}%`);
+const pct = (v) => (v === null || v === undefined ? "—" : `${Number(v).toLocaleString("en-PH", { maximumFractionDigits: 2 })}%`);
 
 /** One computation: figures, per line production, settlements, its activity and the actions of its status. */
 const ComputationDetail = ({ comp, onHide, onChanged, toast }) => {
@@ -257,8 +257,18 @@ const OverrideComputations = () => {
         </DataTable>
       </div>
       {compute && (
-        <Dialog className="pe-dialog bv-centered" visible header={`${t("birTax.compute")} ${compute.period.label}`} style={{ width: "min(760px, 95vw)" }} onHide={() => setCompute(null)}
-          footer={<div><Button label={t("periodEnd.cancel")} text onClick={() => setCompute(null)} /><Button label={t("birTax.compute")} icon="pi pi-calculator" onClick={doCompute} /></div>}>
+        <Dialog className="pe-dialog bv-centered" visible
+          header={t("birTax.computeTitle", { period: compute.period.label, agreement: ag ? `${ag.agreementCode} · ${ag.insurerName}` : "" })}
+          style={{ width: "min(760px, 95vw)" }} onHide={() => setCompute(null)}
+          footer={(
+            <div>
+              {compute.preview && !Number(compute.preview.production) && !Number(compute.preview.policies)
+                ? <span className="pe-muted mr-3">{t("birTax.nothingToCompute")}</span> : null}
+              <Button label={t("periodEnd.cancel")} outlined onClick={() => setCompute(null)} />
+              <Button label={t("birTax.compute")} icon="pi pi-calculator" onClick={doCompute}
+                disabled={!compute.preview || (!Number(compute.preview.production) && !Number(compute.preview.policies))} />
+            </div>
+          )}>
           {compute.preview && (
             <>
               <DetailSection title={t("birTax.previewFigures")}>

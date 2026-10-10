@@ -321,8 +321,8 @@
     "accountNumberRequired": "กรุณากรอกหมายเลขบัญชี",
     "paymentTypeRequired": "กรุณาเลือกประเภทการชำระเงิน",
     "addJournalVoucher": "เพิ่มใบสำคัญ Journal",
-    "correctionsJV": "Corrections JV",
-    "correctionsJVDetails": "รายละเอียด Corrections JV",
+    "correctionsJV": "ปรับปรุงรายการบัญชี (Correction JV)",
+    "correctionsJVDetails": "รายละเอียด Correction JV",
     "receipts": {
       "title": "ใบเสร็จ",
       "bulkPrint": "พิมพ์แบบกลุ่ม",
@@ -649,7 +649,8 @@
       "totalCredit": "Total credit",
       "new": "New correction",
       "newReversal": "New reversal",
-      "print": "Print {{number}}"
+      "print": "Print {{number}}",
+      "difference": "ผลต่าง"
     },
     "appliedPolicies": "กรมธรรม์ที่ชำระด้วยใบเสร็จนี้"
   },
@@ -2559,7 +2560,12 @@
     "deleteMessage": "การแจ้งเตือนด้านล่างจะถูกลบออกจากรายการของคุณ",
     "deleteAction": "ลบการแจ้งเตือน",
     "notification": "การแจ้งเตือน",
-    "received": "ได้รับเมื่อ"
+    "received": "ได้รับเมื่อ",
+    "priority": {
+      "high": "สำคัญสูง",
+      "low": "สำคัญต่ำ",
+      "urgent": "ด่วน"
+    }
   },
   "dashboard": {
     "goodDay": "สวัสดีครับ/ค่ะ!",
@@ -6847,7 +6853,11 @@
     "recordAmended": "บันทึกแบบแก้ไขเพิ่มเติม",
     "paymentChannelPlaceholder": "เช่น eFPS, eBIRForms, LANDBANK Link.BizPortal",
     "vatRegistered": "จดทะเบียนภาษีมูลค่าเพิ่ม",
-    "percentageTaxHelp": "แบบแสดงรายการภาษีธุรกิจเฉพาะรายไตรมาส (BIR Form 2551Q): ยอดขายรวมรายเดือนจากบัญชีรายได้ตามอัตราที่กำหนด"
+    "percentageTaxHelp": "แบบแสดงรายการภาษีธุรกิจเฉพาะรายไตรมาส (BIR Form 2551Q): ยอดขายรวมรายเดือนจากบัญชีรายได้ตามอัตราที่กำหนด",
+    "fromValue": "ตั้งแต่ (รวม)",
+    "toValue": "ถึง (ไม่รวม)",
+    "computeTitle": "คำนวณ {{period}} · {{agreement}}",
+    "nothingToCompute": "ไม่มียอดผลงานในงวดนี้"
   },
   "commissionLine": {
     "statuses": {
