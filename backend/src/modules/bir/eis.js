@@ -188,7 +188,7 @@ export async function releaseStaleSending(cfg, db = pool) {
  */
 export async function processOutbox({ limit = 50, ids = null, providers = PROVIDERS } = {}) {
   const cfg = await eisConfig();
-  if (!cfg.enabled) return { skipped: 'the EIS connector is switched off (eis.enabled)' };
+  if (!cfg.enabled) return { skipped: 'the e-invoicing connection is switched off' };
   const released = await releaseStaleSending(cfg);
   const due = (await pool.query(`SELECT * FROM eis_submissions WHERE status IN ('queued', 'failed') AND attempts < $1 AND next_attempt_at <= now()
     AND ($3::text[] IS NULL OR id = ANY($3)) ORDER BY created_at LIMIT $2`, [cfg.maxAttempts, limit, ids])).rows;
@@ -252,11 +252,27 @@ export async function exportPayloads(db, { ids = null } = {}) {
   return { generatedAt: new Date().toISOString(), count: rows.length, invoices: rows.map((r) => ({ submissionId: r.id, kind: r.kind, payloadHash: r.payload_hash, signature: r.signature, payload: r.payload })) };
 }
 
-/** Connector status for the screen: settings (never the secret values), whether the variables are set, counts. */
+/**
+ * What the connection still needs, as codes for the screen: accreditationId (always), and in live mode endpoint (an
+ * https address), credentials (the client id and secret variables set) and signingKey. State: off when the connection
+ * is switched off, incomplete when something is missing, otherwise ready.
+ */
+export function connectionSetup(cfg, { credentialsPresent, signingKeyPresent }) {
+  const missing = [];
+  if (!cfg.accreditationId) missing.push('accreditationId');
+  if (cfg.mode === 'live') {
+    if (!/^https:\/\//.test(cfg.endpoint || '')) missing.push('endpoint');
+    if (!credentialsPresent) missing.push('credentials');
+    if (!signingKeyPresent) missing.push('signingKey');
+  }
+  return { state: !cfg.enabled ? 'off' : missing.length ? 'incomplete' : 'ready', missing };
+}
+
+/** Connector status for the screen: settings (never the secret values), whether the variables are set, setup, counts. */
 export async function eisStatus(db, env = process.env) {
   const cfg = await eisConfig();
   const counts = Object.fromEntries((await db.query('SELECT status, count(*)::int AS n FROM eis_submissions GROUP BY status')).rows.map((r) => [r.status, r.n]));
-  return { ...cfg, credentialsPresent: !!(env[cfg.clientIdEnv] && env[cfg.clientSecretEnv]), signingKeyPresent: !!env[cfg.signingKeyEnv], counts,
-    remainingWithBir: ['EIS enrolment and certification of the broker (sandbox tests with the BIR)', 'Final e-invoice field list and the signing method / certificate issued at certification',
-      'Production endpoint and client credentials', 'Acceptance of the system as an EIS-capable CAS (Permit to Use / acknowledgement)'] };
+  const lastSentAt = (await db.query('SELECT max(submitted_at) AS at FROM eis_submissions')).rows[0].at;
+  const present = { credentialsPresent: !!(env[cfg.clientIdEnv] && env[cfg.clientSecretEnv]), signingKeyPresent: !!env[cfg.signingKeyEnv] };
+  return { ...cfg, ...present, counts, lastSentAt, setup: connectionSetup(cfg, present) };
 }

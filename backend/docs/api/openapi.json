@@ -17860,6 +17860,174 @@
         }
       }
     },
+    "/bir/dat-files": {
+      "get": {
+        "operationId": "getBirDatFiles",
+        "summary": "Register of the generated DAT files, newest first (filter year, type); without the file content",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > BIR DAT Files\n\nAccess: read:period-end",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 2026
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "form": {},
+                          "year": {
+                            "type": "integer"
+                          },
+                          "quarter": {
+                            "type": "integer"
+                          },
+                          "periodKey": {
+                            "type": "string"
+                          },
+                          "fileName": {
+                            "type": "string"
+                          },
+                          "records": {
+                            "type": "integer"
+                          },
+                          "rows": {
+                            "type": "integer"
+                          },
+                          "totals": {
+                            "type": "object",
+                            "properties": {
+                              "incomePayment": {
+                                "type": "number"
+                              },
+                              "taxWithheld": {
+                                "type": "number"
+                              }
+                            }
+                          },
+                          "valid": {
+                            "type": "boolean"
+                          },
+                          "checks": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "code": {
+                                  "type": "string"
+                                },
+                                "report": {
+                                  "type": "integer"
+                                },
+                                "file": {
+                                  "type": "integer"
+                                },
+                                "difference": {
+                                  "type": "integer"
+                                },
+                                "agrees": {
+                                  "type": "boolean"
+                                }
+                              }
+                            }
+                          },
+                          "errors": {
+                            "type": "array",
+                            "items": {}
+                          },
+                          "generatedBy": {
+                            "type": "string"
+                          },
+                          "generatedByName": {
+                            "type": "string"
+                          },
+                          "generatedAt": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "bdf_1a2b",
+                      "type": "qap",
+                      "form": null,
+                      "year": 2026,
+                      "quarter": 3,
+                      "periodKey": "2026-Q3",
+                      "fileName": "12345678900000920261601EQ.DAT",
+                      "records": 4,
+                      "rows": 2,
+                      "totals": {
+                        "incomePayment": 35000.5,
+                        "taxWithheld": 3000.05
+                      },
+                      "valid": true,
+                      "checks": [
+                        {
+                          "code": "records",
+                          "report": 2,
+                          "file": 2,
+                          "difference": 0,
+                          "agrees": true
+                        }
+                      ],
+                      "errors": [],
+                      "generatedBy": "u_17",
+                      "generatedByName": "Maria Santos",
+                      "generatedAt": "2026-10-05T02:15:00.000Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > BIR DAT Files",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
     "/bir/dat-files/{type}": {
       "get": {
         "operationId": "getBirDatFilesType",
@@ -18004,6 +18172,415 @@
               "type": "integer"
             },
             "example": 3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > BIR DAT Files > Download",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/dat-files/{type}/generate": {
+      "post": {
+        "operationId": "postBirDatFilesTypeGenerate",
+        "summary": "Generate a DAT file (QAP, SAWT, SLSP per quarter; 1604-E per year), validate it against its report (detail records, control totals, fields per record) and keep it in the register",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > BIR DAT Files > Generate file\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "form": {},
+                        "year": {
+                          "type": "integer"
+                        },
+                        "quarter": {
+                          "type": "integer"
+                        },
+                        "periodKey": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        },
+                        "records": {
+                          "type": "integer"
+                        },
+                        "rows": {
+                          "type": "integer"
+                        },
+                        "totals": {
+                          "type": "object",
+                          "properties": {
+                            "incomePayment": {
+                              "type": "number"
+                            },
+                            "taxWithheld": {
+                              "type": "number"
+                            }
+                          }
+                        },
+                        "valid": {
+                          "type": "boolean"
+                        },
+                        "checks": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "report": {
+                                "type": "integer"
+                              },
+                              "file": {
+                                "type": "integer"
+                              },
+                              "difference": {
+                                "type": "integer"
+                              },
+                              "agrees": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "generatedBy": {
+                          "type": "string"
+                        },
+                        "generatedByName": {
+                          "type": "string"
+                        },
+                        "generatedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "bdf_1a2b",
+                    "type": "qap",
+                    "form": null,
+                    "year": 2026,
+                    "quarter": 3,
+                    "periodKey": "2026-Q3",
+                    "fileName": "12345678900000920261601EQ.DAT",
+                    "records": 4,
+                    "rows": 2,
+                    "totals": {
+                      "incomePayment": 35000.5,
+                      "taxWithheld": 3000.05
+                    },
+                    "valid": true,
+                    "checks": [
+                      {
+                        "code": "records",
+                        "report": 2,
+                        "file": 2,
+                        "difference": 0,
+                        "agrees": true
+                      }
+                    ],
+                    "errors": [],
+                    "generatedBy": "u_17",
+                    "generatedByName": "Maria Santos",
+                    "generatedAt": "2026-10-05T02:15:00.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > BIR DAT Files > Generate file",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "year": {
+                    "type": "integer"
+                  },
+                  "quarter": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "year": 2026,
+                "quarter": 3
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bir/dat-files/generated/{id}": {
+      "get": {
+        "operationId": "getBirDatFilesGeneratedId",
+        "summary": "A generated DAT file with its validation, content and record layout",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > BIR DAT Files\n\nAccess: read:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "form": {},
+                        "year": {
+                          "type": "integer"
+                        },
+                        "quarter": {
+                          "type": "integer"
+                        },
+                        "periodKey": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        },
+                        "records": {
+                          "type": "integer"
+                        },
+                        "rows": {
+                          "type": "integer"
+                        },
+                        "totals": {
+                          "type": "object",
+                          "properties": {
+                            "incomePayment": {
+                              "type": "number"
+                            },
+                            "taxWithheld": {
+                              "type": "number"
+                            }
+                          }
+                        },
+                        "valid": {
+                          "type": "boolean"
+                        },
+                        "checks": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "report": {
+                                "type": "integer"
+                              },
+                              "file": {
+                                "type": "integer"
+                              },
+                              "difference": {
+                                "type": "integer"
+                              },
+                              "agrees": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "generatedBy": {
+                          "type": "string"
+                        },
+                        "generatedByName": {
+                          "type": "string"
+                        },
+                        "generatedAt": {
+                          "type": "string"
+                        },
+                        "content": {
+                          "type": "string"
+                        },
+                        "layout": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "records": {
+                              "type": "array",
+                              "items": {}
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "bdf_1a2b",
+                    "type": "qap",
+                    "form": null,
+                    "year": 2026,
+                    "quarter": 3,
+                    "periodKey": "2026-Q3",
+                    "fileName": "12345678900000920261601EQ.DAT",
+                    "records": 4,
+                    "rows": 2,
+                    "totals": {
+                      "incomePayment": 35000.5,
+                      "taxWithheld": 3000.05
+                    },
+                    "valid": true,
+                    "checks": [
+                      {
+                        "code": "records",
+                        "report": 2,
+                        "file": 2,
+                        "difference": 0,
+                        "agrees": true
+                      }
+                    ],
+                    "errors": [],
+                    "generatedBy": "u_17",
+                    "generatedByName": "Maria Santos",
+                    "generatedAt": "2026-10-05T02:15:00.000Z",
+                    "content": "HQAP,H1601EQ,...",
+                    "layout": {
+                      "name": "{TIN}{BRANCH}{MMYYYY}1601EQ.DAT",
+                      "records": []
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > BIR DAT Files",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/dat-files/generated/{id}/download": {
+      "get": {
+        "operationId": "getBirDatFilesGeneratedIdDownload",
+        "summary": "Download a generated DAT file exactly as it was generated",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > BIR DAT Files > Download\n\nAccess: read:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -18204,7 +18781,7 @@
     "/bir/eis/status": {
       "get": {
         "operationId": "getBirEisStatus",
-        "summary": "EIS connector status: switched on, mode, endpoint, whether the credential variables are set (never their values), outbox counts, what remains with the BIR",
+        "summary": "EIS connection status: switched on, mode, endpoint, whether the credential variables are set (never their values), outbox counts, last sent, setup (state off, incomplete or ready; missing: accreditationId, endpoint, credentials, signingKey)",
         "tags": [
           "BIR Forms and Invoicing"
         ],
@@ -18215,7 +18792,71 @@
             "description": "Success",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "mode": {
+                          "type": "string"
+                        },
+                        "counts": {
+                          "type": "object",
+                          "properties": {
+                            "accepted": {
+                              "type": "integer"
+                            },
+                            "failed": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "lastSentAt": {
+                          "type": "string"
+                        },
+                        "setup": {
+                          "type": "object",
+                          "properties": {
+                            "state": {
+                              "type": "string"
+                            },
+                            "missing": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "enabled": false,
+                    "mode": "test",
+                    "counts": {
+                      "accepted": 3,
+                      "failed": 1
+                    },
+                    "lastSentAt": "2026-10-04T03:00:00.000Z",
+                    "setup": {
+                      "state": "off",
+                      "missing": [
+                        "accreditationId"
+                      ]
+                    }
+                  }
+                }
               }
             }
           },
@@ -18949,11 +19590,11 @@
     "/bir/invoices/{id}/cancel": {
       "post": {
         "operationId": "postBirInvoicesIdCancel",
-        "summary": "Cancel a sales invoice with a reason (kept with its number; a manual invoice's journal is reversed; the EIS is told)",
+        "summary": "Cancel a sales invoice with a reason of the Reason Codes master (context sales_invoice_cancel) and a note when the reason needs one; kept with its number, a manual invoice's journal is reversed, the EIS is told",
         "tags": [
           "BIR Forms and Invoicing"
         ],
-        "description": "Front-end touchpoint: Accounts > Tax > Sales Invoices\n\nAccess: write:period-end",
+        "description": "Front-end touchpoint: Accounts > Tax > Sales Invoices > Cancel invoice\n\nAccess: write:period-end",
         "parameters": [
           {
             "name": "id",
@@ -18983,7 +19624,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Accounts > Tax > Sales Invoices",
+        "x-screen": "Accounts > Tax > Sales Invoices > Cancel invoice",
         "x-permissions": [
           "write:period-end"
         ],
@@ -18994,13 +19635,13 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "reason": {
+                  "reasonCode": {
                     "type": "string"
                   }
                 }
               },
               "example": {
-                "reason": "Wrong buyer"
+                "reasonCode": "SIC-WRONGBUYER"
               }
             }
           }
@@ -19170,11 +19811,11 @@
     "/bir/invoices/payments/{paymentId}/cancel": {
       "post": {
         "operationId": "postBirInvoicesPaymentsPaymentIdCancel",
-        "summary": "Cancel a payment acknowledgement (journal reversed, invoice balance restored)",
+        "summary": "Cancel a payment acknowledgement with a reason of the Reason Codes master (context invoice_payment_cancel); journal reversed, invoice balance restored",
         "tags": [
           "BIR Forms and Invoicing"
         ],
-        "description": "Front-end touchpoint: Accounts > Tax > Sales Invoices > Payment\n\nAccess: write:period-end",
+        "description": "Front-end touchpoint: Accounts > Tax > Sales Invoices > Cancel payment\n\nAccess: write:period-end",
         "parameters": [
           {
             "name": "paymentId",
@@ -19204,7 +19845,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Accounts > Tax > Sales Invoices > Payment",
+        "x-screen": "Accounts > Tax > Sales Invoices > Cancel payment",
         "x-permissions": [
           "write:period-end"
         ],
@@ -19215,13 +19856,13 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "reason": {
+                  "reasonCode": {
                     "type": "string"
                   }
                 }
               },
               "example": {
-                "reason": "Cheque returned"
+                "reasonCode": "IPC-RETURNED"
               }
             }
           }
@@ -19274,7 +19915,7 @@
     "/bir/invoices/seller": {
       "get": {
         "operationId": "getBirInvoicesSeller",
-        "summary": "Seller details printed on the invoices (Company master and invoice.* settings: TIN with branch, ATP / CAS permit, serial range)",
+        "summary": "Seller details printed on the invoices (Company master and invoice.* settings: TIN with branch, ATP / CAS permit, serial range) and whether invoicing is set up (setup.state ready or incomplete, setup.missing: tin, address, permit, permitDate, serialRange)",
         "tags": [
           "BIR Forms and Invoicing"
         ],
@@ -19285,7 +19926,64 @@
             "description": "Success",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "registeredName": {
+                          "type": "string"
+                        },
+                        "tinFormatted": {
+                          "type": "string"
+                        },
+                        "vatRegistered": {
+                          "type": "boolean"
+                        },
+                        "serialFrom": {
+                          "type": "integer"
+                        },
+                        "serialTo": {
+                          "type": "integer"
+                        },
+                        "setup": {
+                          "type": "object",
+                          "properties": {
+                            "state": {
+                              "type": "string"
+                            },
+                            "missing": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "registeredName": "Toyota Insurance Services Philippines Corporation",
+                    "tinFormatted": "685-442-861-00000",
+                    "vatRegistered": true,
+                    "serialFrom": 1,
+                    "serialTo": 9999999999,
+                    "setup": {
+                      "state": "incomplete",
+                      "missing": [
+                        "permit"
+                      ]
+                    }
+                  }
+                }
               }
             }
           },

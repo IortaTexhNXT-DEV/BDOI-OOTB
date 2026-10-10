@@ -25,6 +25,7 @@ import * as eis from './eis.js';
 import * as cas from './cas.js';
 import * as casDocs from './casDocuments.js';
 import { returnPdf, returnXlsx } from './output.js';
+import { requiredReason } from '../ops-masters/records.js';
 
 const { router, define } = moduleRouter('BIR Forms and Invoicing', '/bir');
 const read = [requireAuth, requirePermission('read:period-end')];
@@ -118,6 +119,38 @@ define({
 const datQ = z.object({ year: z.coerce.number().int().min(2000).max(2100), quarter: z.coerce.number().int().min(1).max(4).optional(), form: z.string().regex(/^[0-9A-Z]{4,8}$/i).optional(), amended: z.enum(['true', 'false']).optional() });
 const datParam = z.object({ type: z.enum(dat.DAT_TYPES) });
 const needQuarter = (req) => { if (req.params.type !== '1604e' && !req.query.quarter) throw badRequest('quarter is required'); };
+const datExample = { id: 'bdf_1a2b', type: 'qap', form: null, year: 2026, quarter: 3, periodKey: '2026-Q3', fileName: '12345678900000920261601EQ.DAT', records: 4, rows: 2,
+  totals: { incomePayment: 35000.5, taxWithheld: 3000.05 }, valid: true, checks: [{ code: 'records', report: 2, file: 2, difference: 0, agrees: true }], errors: [],
+  generatedBy: 'u_17', generatedByName: 'Maria Santos', generatedAt: '2026-10-05T02:15:00.000Z' };
+define({
+  method: 'GET', path: '/dat-files', summary: 'Register of the generated DAT files, newest first (filter year, type); without the file content', screen: 'Accounts > Tax > BIR DAT Files',
+  middleware: [...read, validate(z.object({ year: z.coerce.number().int().min(2000).max(2100).optional(), type: z.enum(dat.DAT_TYPES).optional() }), 'query')], query: { year: 2026 },
+  response: { success: true, data: [datExample] }, handler: async (req, res) => ok(res, await dat.listDatFiles(pool, req.query)),
+});
+define({
+  method: 'POST', path: '/dat-files/:type/generate', summary: 'Generate a DAT file (QAP, SAWT, SLSP per quarter; 1604-E per year), validate it against its report (detail records, control totals, fields per record) and keep it in the register',
+  screen: 'Accounts > Tax > BIR DAT Files > Generate file', middleware: [...write, validate(datParam, 'params'), validate(datQ.omit({ amended: true }).extend({ amended: z.boolean().optional() }))],
+  request: { year: 2026, quarter: 3 }, response: { success: true, data: datExample },
+  handler: async (req, res) => {
+    if (req.params.type !== '1604e' && !req.body.quarter) throw badRequest('quarter is required');
+    const f = await dat.generateDat(pool, req.params.type, req.body, req.user);
+    await audit(req, { entity: 'bir_dat_file', entityId: f.id, action: 'generate', after: { type: f.type, period: f.periodKey, fileName: f.fileName, records: f.records, totals: f.totals, valid: f.valid } });
+    created(res, f);
+  },
+});
+define({
+  method: 'GET', path: '/dat-files/generated/:id', summary: 'A generated DAT file with its validation, content and record layout', screen: 'Accounts > Tax > BIR DAT Files',
+  middleware: read, response: { success: true, data: { ...datExample, content: 'HQAP,H1601EQ,...', layout: { name: '{TIN}{BRANCH}{MMYYYY}1601EQ.DAT', records: [] } } },
+  handler: async (req, res) => ok(res, await dat.getDatFile(pool, req.params.id)),
+});
+define({
+  method: 'GET', path: '/dat-files/generated/:id/download', summary: 'Download a generated DAT file exactly as it was generated', screen: 'Accounts > Tax > BIR DAT Files > Download', middleware: read,
+  handler: async (req, res) => {
+    const f = await dat.getDatFile(pool, req.params.id);
+    await audit(req, { entity: 'bir_dat_file', entityId: f.id, action: 'download', after: { fileName: f.fileName, records: f.records } });
+    sendFile(res, Buffer.from(f.content, 'latin1'), f.fileName, 'text/plain; charset=us-ascii');
+  },
+});
 define({
   method: 'GET', path: '/dat-files/layout', summary: 'Record layouts and version of the BIR DAT files the system produces', screen: 'Accounts > Tax > BIR DAT Files', middleware: read,
   response: { success: true, data: { version: dat.DAT_LAYOUT.version } }, handler: async (_req, res) => ok(res, dat.DAT_LAYOUT),
@@ -150,14 +183,21 @@ const invoiceSchema = z.object({
   lines: z.array(lineSchema).max(50).optional(), incomeAccount: z.string().max(20).optional(), ewtRate: z.coerce.number().min(0).max(50).optional(),
   paymentTerms: z.string().max(100).optional(), remarks: z.string().max(500).optional(), reference: z.string().max(60).optional(),
 });
+const reasonBody = z.object({ reasonCode: z.string().trim().min(1).max(60), note: z.string().trim().max(1000).optional() });
 const invoiceExample = { id: 'sin_1a2b', invoiceNumber: 'SI-0000000001', invoiceDate: '2026-10-04', buyerName: 'Malayan Insurance Co., Inc.', vatableSales: 10000, vatAmount: 1200, totalAmount: 11200, status: 'issued' };
 define({
   method: 'GET', path: '/invoices', summary: 'Sales invoices (filter from, to, status, sourceType, search)', screen: 'Accounts > Tax > Sales Invoices', middleware: read, query: { from: '2026-10-01', to: '2026-10-31' },
   response: { success: true, data: [invoiceExample] }, handler: async (req, res) => ok(res, await inv.listInvoices(pool, req.query)),
 });
 define({
-  method: 'GET', path: '/invoices/seller', summary: 'Seller details printed on the invoices (Company master and invoice.* settings: TIN with branch, ATP / CAS permit, serial range)', screen: 'Accounts > Tax > Sales Invoices',
-  middleware: read, handler: async (_req, res) => ok(res, await inv.sellerSnapshot()),
+  method: 'GET', path: '/invoices/seller', summary: 'Seller details printed on the invoices (Company master and invoice.* settings: TIN with branch, ATP / CAS permit, serial range) and whether invoicing is set up (setup.state ready or incomplete, setup.missing: tin, address, permit, permitDate, serialRange)',
+  screen: 'Accounts > Tax > Sales Invoices', middleware: read,
+  response: { success: true, data: { registeredName: 'Toyota Insurance Services Philippines Corporation', tinFormatted: '685-442-861-00000', vatRegistered: true, serialFrom: 1, serialTo: 9999999999,
+    setup: { state: 'incomplete', missing: ['permit'] } } },
+  handler: async (_req, res) => {
+    const seller = await inv.sellerSnapshot();
+    ok(res, { ...seller, setup: inv.invoicingSetup(seller) });
+  },
 });
 define({
   method: 'GET', path: '/invoices/candidates', summary: 'Approved commission debit notes or overriding commission computations not yet invoiced', screen: 'Accounts > Tax > Sales Invoices > New',
@@ -179,11 +219,14 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/invoices/:id/cancel', summary: 'Cancel a sales invoice with a reason (kept with its number; a manual invoice\'s journal is reversed; the EIS is told)', screen: 'Accounts > Tax > Sales Invoices',
-  middleware: [...write, validate(z.object({ reason: z.string().min(3).max(300) }))], request: { reason: 'Wrong buyer' },
+  method: 'POST', path: '/invoices/:id/cancel', summary: 'Cancel a sales invoice with a reason of the Reason Codes master (context sales_invoice_cancel) and a note when the reason needs one; kept with its number, a manual invoice\'s journal is reversed, the EIS is told',
+  screen: 'Accounts > Tax > Sales Invoices > Cancel invoice', middleware: [...write, validate(reasonBody)], request: { reasonCode: 'SIC-WRONGBUYER' },
   handler: async (req, res) => {
-    const i = await tx((db) => inv.cancelInvoice(db, req.params.id, req.body.reason, req.user));
-    await audit(req, { entity: 'sales_invoice', entityId: i.invoiceNumber, action: 'cancel', after: { reason: req.body.reason } });
+    const i = await tx(async (db) => {
+      const reason = await requiredReason(db, 'sales_invoice_cancel', req.body);
+      return inv.cancelInvoice(db, req.params.id, reason.text, req.user, { reasonCode: reason.code });
+    });
+    await audit(req, { entity: 'sales_invoice', entityId: i.invoiceNumber, action: 'cancel', after: { reasonCode: i.cancelReasonCode, reason: i.cancelReason } });
     ok(res, i);
   },
 });
@@ -207,11 +250,14 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/invoices/payments/:paymentId/cancel', summary: 'Cancel a payment acknowledgement (journal reversed, invoice balance restored)', screen: 'Accounts > Tax > Sales Invoices > Payment',
-  middleware: [...write, validate(z.object({ reason: z.string().min(3).max(300) }))], request: { reason: 'Cheque returned' },
+  method: 'POST', path: '/invoices/payments/:paymentId/cancel', summary: 'Cancel a payment acknowledgement with a reason of the Reason Codes master (context invoice_payment_cancel); journal reversed, invoice balance restored',
+  screen: 'Accounts > Tax > Sales Invoices > Cancel payment', middleware: [...write, validate(reasonBody)], request: { reasonCode: 'IPC-RETURNED' },
   handler: async (req, res) => {
-    const p = await tx((db) => inv.cancelPayment(db, req.params.paymentId, req.body.reason, req.user));
-    await audit(req, { entity: 'sales_invoice_payment', entityId: p.ackNumber, action: 'cancel', after: { reason: req.body.reason } });
+    const p = await tx(async (db) => {
+      const reason = await requiredReason(db, 'invoice_payment_cancel', req.body);
+      return inv.cancelPayment(db, req.params.paymentId, reason.text, req.user, { reasonCode: reason.code });
+    });
+    await audit(req, { entity: 'sales_invoice_payment', entityId: p.ackNumber, action: 'cancel', after: { reasonCode: p.cancelReasonCode, reason: p.cancelReason } });
     ok(res, p);
   },
 });
@@ -229,8 +275,10 @@ define({
 // ---------------------------------------------------------------- EIS outbox
 
 define({
-  method: 'GET', path: '/eis/status', summary: 'EIS connector status: switched on, mode, endpoint, whether the credential variables are set (never their values), outbox counts, what remains with the BIR',
-  screen: 'Accounts > Tax > E-Invoicing (EIS)', middleware: read, handler: async (_req, res) => ok(res, await eis.eisStatus(pool)),
+  method: 'GET', path: '/eis/status', summary: 'EIS connection status: switched on, mode, endpoint, whether the credential variables are set (never their values), outbox counts, last sent, setup (state off, incomplete or ready; missing: accreditationId, endpoint, credentials, signingKey)',
+  screen: 'Accounts > Tax > E-Invoicing (EIS)', middleware: read,
+  response: { success: true, data: { enabled: false, mode: 'test', counts: { accepted: 3, failed: 1 }, lastSentAt: '2026-10-04T03:00:00.000Z', setup: { state: 'off', missing: ['accreditationId'] } } },
+  handler: async (_req, res) => ok(res, await eis.eisStatus(pool)),
 });
 define({
   method: 'GET', path: '/eis/submissions', summary: 'EIS outbox (filter status, search)', screen: 'Accounts > Tax > E-Invoicing (EIS)', middleware: read, query: { status: 'failed' },
