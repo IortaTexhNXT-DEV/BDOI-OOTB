@@ -469,7 +469,9 @@
         "cashier": "Cashier",
         "receiptDate": "Receipt date",
         "any": "Any"
-      }
+      },
+      "bankPayments": "Bank payments (matched by reference)",
+      "insurerDirectPayments": "Payments made to the insurer"
     },
     "addReceipts": {
       "title": "Add Receipts",
@@ -712,7 +714,12 @@
       "amount": "Amount received",
       "customer": "Customer",
       "policyNumber": "Policy number",
-      "branch": "Branch"
+      "branch": "Branch",
+      "channel": "Paid to",
+      "channels": {
+        "tis-direct": "TISPH",
+        "insurer-direct": "Insurance company"
+      }
     },
     "openEntryDialogs": {
       "matchTitle": "Match open entries",
@@ -757,7 +764,61 @@
       "print": "Print {{number}}",
       "difference": "Difference"
     },
-    "appliedPolicies": "Policies paid by this receipt"
+    "appliedPolicies": "Policies paid by this receipt",
+    "receiptProof": {
+      "title": "Proof of payment",
+      "file": "Proof",
+      "open": "Open",
+      "attach": "Attach proof",
+      "replace": "Replace proof",
+      "attached": "Proof of payment attached",
+      "collectedBy": "Collected by",
+      "partnerReference": "Partner reference"
+    },
+    "receiptReversal": {
+      "title": "Reversal",
+      "reverse": "Reverse receipt",
+      "confirmTitle": "Reverse receipt {{number}}?",
+      "confirmMessage": "The receipt is cancelled, its payment journals reversed and the bills it paid opened again.",
+      "sendForApproval": "Send for approval",
+      "keep": "Keep receipt",
+      "reason": "Reason for the reversal",
+      "status": "Status",
+      "statuses": {
+        "pending": "Waiting for approval",
+        "approved": "Approved",
+        "returned": "Returned"
+      },
+      "requestedBy": "Requested by",
+      "requestedAt": "Requested on",
+      "decidedBy": "Decided by",
+      "decidedAt": "Decided on",
+      "returnReason": "Reason returned",
+      "approve": "Approve reversal",
+      "return": "Return",
+      "approveTitle": "Approve the reversal of {{number}}?",
+      "returnTitle": "Return the reversal of {{number}}?",
+      "returnReasonLabel": "Reason for returning"
+    },
+    "receiptBatches": {
+      "open": "Receipt batches",
+      "title": "Receipt voucher batches",
+      "empty": "No receipts uploaded yet.",
+      "batch": "Batch",
+      "uploaded": "Uploaded",
+      "file": "File",
+      "receipted": "Receipted",
+      "premium": "Premium",
+      "commission": "Commission kept apart",
+      "exportCommission": "Export commission",
+      "kind": "Upload",
+      "kinds": {
+        "receipts": "Receipts",
+        "bank-payments": "Bank payments",
+        "insurer-direct": "Paid to the insurer"
+      },
+      "exportLines": "Export lines"
+    }
   },
   "renewalWaiting": {
     "clients": "Clients",
@@ -1749,7 +1810,9 @@
         "actions": "Actions",
         "frequency": "Frequency",
         "timeZone": "Time zone",
-        "schedule": "Schedule"
+        "schedule": "Schedule",
+        "eligibility": "Eligibility",
+        "proofRequired": "Proof of payment required"
       },
       "actions": {
         "view": "View",
@@ -1798,9 +1861,15 @@
         "save": "Save schedule",
         "create": "Create schedule",
         "required": "Enter the name",
-        "monday": "The next run of a weekly schedule is a Monday"
+        "monday": "The next run of a weekly schedule is a Monday",
+        "eligibility": "Eligibility",
+        "proofRequired": "Proof of payment required"
       },
-      "nextRunAt": "Next {{at}}"
+      "nextRunAt": "Next {{at}}",
+      "eligibilities": {
+        "Fully paid in the window": "Fully paid in the window",
+        "Incepted up to the cut-off": "Incepted up to the cut-off"
+      }
     },
     "runHistory": {
       "title": "Run history · {{code}}",
@@ -2396,6 +2465,7 @@
       "tabs": {
         "raise": "Raise debit note",
         "notes": "Debit notes",
+        "run": "Billing run",
         "mode": "Billing mode"
       },
       "actionsHeader": "Actions",
@@ -2476,6 +2546,65 @@
         "balance": "Balance",
         "due": "Due",
         "status": "Status"
+      },
+      "run": {
+        "nextDates": "Next billing dates",
+        "lastRun": "Last run",
+        "billingDate": "Billing date",
+        "runNow": "Run billing",
+        "empty": "No billing runs yet.",
+        "trigger": "Run by",
+        "job": "Scheduled job",
+        "user": "User",
+        "statements": "Statements",
+        "message": "Result",
+        "results": {
+          "running": "Running",
+          "success": "Done",
+          "nothing": "Nothing to bill",
+          "failed": "Failed"
+        }
+      },
+      "export": {
+        "xlsx": "Export Excel",
+        "csv": "Export CSV"
+      },
+      "overdue": "Overdue"
+    },
+    "held": {
+      "title": "Held policies",
+      "help": "Part-paid and instalment policies are not remitted until fully paid. A policy is released when its last payment is collected and goes on the next weekly run with its full premium.",
+      "kpis": {
+        "held": "Policies held",
+        "released": "Policies released"
+      },
+      "views": {
+        "held": "Held",
+        "released": "Released"
+      },
+      "empty": {
+        "held": "No policy is held",
+        "released": "No policy was released"
+      },
+      "insurer": "Insurer",
+      "search": "Policy or client",
+      "bouncedCount": "{{count}} bounced",
+      "bouncedCount_one": "{{count}} bounced",
+      "bouncedCount_other": "{{count}} bounced",
+      "columns": {
+        "policy": "Policy",
+        "client": "Client",
+        "insurer": "Insurer",
+        "productLine": "Product line",
+        "plan": "Plan",
+        "premium": "Total premium",
+        "paidToDate": "Paid to date",
+        "balance": "Balance",
+        "nextDue": "Next due",
+        "heldSince": "Held since",
+        "bounced": "Bounced cheques",
+        "releasedOn": "Fully paid on",
+        "releaseReceipt": "Clearing receipt"
       }
     }
   },
@@ -12942,8 +13071,10 @@
     "gross": "Gross remittance (billing statement)",
     "document": {
       "direct": "Commission debit note",
-      "gross": "Billing statement"
-    }
+      "gross": "Billing statement",
+      "net": "Billing statement"
+    },
+    "net": "Net remittance (billing statement)"
   },
   "opsAcc": {
     "accounts": "Accounts",
@@ -12993,7 +13124,7 @@
       "expired": "Expired",
       "cancelled": "Cancelled",
       "all": "All",
-      "on-hand": "On hand",
+      "on-hand": "Received at TIS",
       "open": "Open",
       "deposited": "Deposited",
       "cleared": "Cleared",
@@ -13026,7 +13157,10 @@
       "disposed": "Disposed",
       "accepted": "Accepted",
       "sent": "Sent",
-      "bound": "Bound"
+      "bound": "Bound",
+      "forwarded": "Forwarded",
+      "warehoused": "Warehoused",
+      "cancellation-pending": "Cancellation pending"
     },
     "masters": {
       "add": "Add",
@@ -13208,7 +13342,7 @@
       "bounced": "Bounced",
       "depositDue": "Deposit due",
       "depositDueHelp": "Cheques on hand dated within {{days}} day(s): {{total}}.",
-      "searchHint": "PDC, cheque, client, policy or bill",
+      "searchHint": "PDC, set, cheque, client, policy or bill",
       "number": "PDC no.",
       "bill": "Bill / policy",
       "bank": "Drawee bank",
@@ -13233,7 +13367,7 @@
       "replaceTitle": "Replace {{number}}",
       "replaced": "Replacement cheque {{number}} registered",
       "return": "Return",
-      "returnReason": "Why is the cheque returned to the client?",
+      "returnReason": "Reason",
       "returnDone": "Cheque returned",
       "cancelReason": "Why is the registration cancelled?",
       "cancelDone": "Cheque registration cancelled",
@@ -13243,7 +13377,195 @@
       "chequesCount": "{{count}} cheques",
       "chequesCount_one": "{{count}} cheque",
       "chequesCount_other": "{{count}} cheques",
-      "registerReplacement": "Register replacement"
+      "registerReplacement": "Register replacement",
+      "help": "Post-dated cheques from receipt to collection: encoded in sets against the instalment plan, forwarded to the Insurance Partner or deposited by TISPH, aged until the partner's advice, and cancelled with a second user's approval.",
+      "encode": "Encode PDCs",
+      "saveSet": "Save set",
+      "setSaved": "Set {{set}} saved with {{count}} cheques, {{amount}}",
+      "forward": "Forward to Insurance Partner",
+      "forwardHint": "Tick cheques received at TIS, payable to one Insurance Partner",
+      "forwardedDone": "{{count}} cheques forwarded to {{partner}} on transmittal {{transmittal}}",
+      "warehousedDone": "{{count}} cheques of transmittal {{transmittal}} are warehoused with {{partner}}",
+      "clearedByPartner": "Cheque {{number}} cleared; AR {{ar}} raised",
+      "clearedManyByPartner": "{{count}} cheques cleared; one AR raised for each",
+      "bouncedByPartner": "Cheque {{number}} marked bounced",
+      "cancelledDone": "Cheque {{number}} cancelled",
+      "returnedDone": "Cheque {{number}} returned to the client",
+      "savedDone": "Cheque {{number}} saved",
+      "cancelRequested": "Cancellation of cheque {{number}} sent for approval",
+      "pullOutRequestedDone": "Cancellation approved. Pull-out requested from {{partner}}",
+      "requestReturned": "Cancellation of cheque {{number}} returned to the requester",
+      "accountNumber": "Account no.",
+      "actionsFor": "Actions for {{number}}",
+      "ageing": "Ageing",
+      "approveCancellation": "Approve cancellation",
+      "approveTitle": "Approve the cancellation of {{number}}",
+      "approvedBy": "Approved by",
+      "ar": "AR",
+      "atTis": "At TIS",
+      "awaiting": "Awaiting confirmation",
+      "bankCheque": "Bank / cheque no.",
+      "billBalance": "Bill balance",
+      "billLabel": "Bill",
+      "bounceReasonRequired": "Choose the reason given",
+      "bouncedOn": "Bounced on",
+      "branch": "Branch",
+      "brstn": "BRSTN",
+      "cancelMessage": "The cheque is cancelled once another user approves the request.",
+      "cancelTitle": "Request cancellation of {{number}}",
+      "cancellationSection": "Cancellation",
+      "cancelledBy": "Cancelled by",
+      "cancelledOn": "Cancelled on",
+      "chequeFrom": "Cheque date from",
+      "chequeTo": "Cheque date to",
+      "chequeSection": "Cheque",
+      "chequeTitle": "Cheque {{number}}",
+      "cheques": "Cheques",
+      "chequesForwarded": "Cheques forwarded",
+      "chooseBank": "Row {{n}}: choose the drawee bank",
+      "clientPolicy": "Client / policy",
+      "collectedOn": "Collection date",
+      "copyDown": "Copy bank details down",
+      "courierReference": "Courier reference",
+      "createdBy": "Forwarded by",
+      "current": "Current",
+      "custody": "Custody",
+      "depositAccount": "Collection account",
+      "dueDate": "Due date",
+      "dueThisWeek": "Due this week",
+      "endOfTerm": "End of term",
+      "followUpReason": "Follow-up",
+      "forwardedOn": "Forwarded on",
+      "history": "History",
+      "inst": "Inst.",
+      "instOf": "{{n}} of {{m}}",
+      "insurancePartner": "Insurance Partner",
+      "keepOneRow": "Keep at least one cheque in the set",
+      "nothingToEncode": "Every instalment of this bill is paid or already covered by a cheque.",
+      "ofSet": "Set {{set}}",
+      "over": "Over {{days}}",
+      "partnerBounceReason": "Reason given by the Insurance Partner",
+      "partnerReference": "Partner reference",
+      "partnerReferenceRequired": "Enter the Insurance Partner's reference",
+      "payee": "Payee",
+      "pullOut": "Pull-out",
+      "pullOutNote": "The cheque is with {{partner}}: once approved, a pull-out goes on the next transmittal to the partner.",
+      "pullOutRequested": "Requested from the Insurance Partner",
+      "pullOutTransmittal": "Pull-out on transmittal",
+      "pullOutsOnTransmittal": "Pull-outs requested from this partner",
+      "receivedBy": "Received by",
+      "receivedByRequired": "Enter who received the cheques at the Insurance Partner",
+      "receivedDate": "Received date",
+      "receivedOn": "Received on",
+      "removeRow": "Remove row {{n}}",
+      "replacedBy": "Replaced by",
+      "replacementFollows": "Replacement follows",
+      "replaces": "Replaces",
+      "requestedBy": "Requested by",
+      "returnRemark": "Why is the request returned?",
+      "returnRequest": "Return request",
+      "returnRequestTitle": "Return the cancellation request of {{number}}",
+      "returnedOn": "Returned on",
+      "returnedTo": "Returned to",
+      "sendForApproval": "Send for approval",
+      "sentBy": "Sent by",
+      "setSection": "Set {{set}}",
+      "transmittal": "Transmittal",
+      "transmittalSection": "Transmittal",
+      "transmittalTitle": "Transmittal {{number}}",
+      "vaultFolder": "Vault folder",
+      "warehousedOn": "Warehoused on",
+      "withPartners": "With partners",
+      "payees": {
+        "insurance-partner": "Insurance Partner",
+        "tisph": "TISPH"
+      },
+      "sentByOptions": {
+        "courier": "Courier",
+        "messenger": "Messenger",
+        "hand-carry": "Hand carry"
+      },
+      "replacement": {
+        "cheque": "Cheque replacement",
+        "cash": "Cash",
+        "none": "None"
+      },
+      "transmittalStatus": {
+        "sent": "Sent",
+        "partly-received": "Partly received",
+        "received": "Received"
+      },
+      "tabs": {
+        "open": "All open",
+        "at-tis": "At TIS",
+        "with-partners": "With partners",
+        "awaiting": "Awaiting confirmation",
+        "follow-up": "Follow-up",
+        "bounced": "Bounced",
+        "cancellation-pending": "Cancellation pending",
+        "deposit-due": "Deposit due",
+        "closed": "Closed",
+        "transmittals": "Transmittals"
+      },
+      "menu": {
+        "view": "View",
+        "edit": "Edit",
+        "partner-received": "Partner received",
+        "partner-cleared": "Partner cleared",
+        "partner-bounced": "Partner bounced",
+        "deposit": "Deposit",
+        "clear": "Cleared",
+        "bounce": "Bounced",
+        "request-cancellation": "Request cancellation",
+        "approve-cancellation": "Approve cancellation",
+        "return-cancellation": "Return request",
+        "partner-returned": "Partner returned",
+        "replace": "Replace",
+        "return": "Return to client"
+      },
+      "actions": {
+        "forward": {
+          "title": "Forward to Insurance Partner",
+          "confirm": "Forward"
+        },
+        "partner-received": {
+          "title": "Partner received {{transmittal}}",
+          "confirm": "Record receipt"
+        },
+        "partner-cleared": {
+          "title": "Partner cleared",
+          "confirm": "Record collection"
+        },
+        "partner-bounced": {
+          "title": "Partner bounced {{number}}",
+          "confirm": "Mark as bounced"
+        },
+        "bounce": {
+          "title": "Bounced cheque {{number}}",
+          "confirm": "Mark as bounced"
+        },
+        "deposit": {
+          "title": "Deposit {{number}}",
+          "confirm": "Deposit cheque"
+        },
+        "partner-returned": {
+          "title": "Partner returned {{number}}",
+          "confirm": "Record return"
+        },
+        "return": {
+          "title": "Return {{number}} to the client",
+          "confirm": "Return cheque"
+        },
+        "replace": {
+          "title": "Replace {{number}}",
+          "confirm": "Encode replacement"
+        },
+        "edit": {
+          "title": "Edit {{number}}",
+          "confirm": "Save"
+        }
+      },
+      "printAcknowledgement": "Print acknowledgement"
     },
     "claimPay": {
       "title": "Claims Settlements",
@@ -14997,6 +15319,11 @@
       "delegation_end": "Delegation ended early",
       "sod_exception": "Segregation of duties exception",
       "access_review": "Access review removal",
+      "pdc_cancel": "Post-dated cheque cancellation",
+      "pdc_bounce": "Bounced post-dated cheque",
+      "receipt_reversal": "Reversal of a receipt",
+      "receipt_reversal_reject": "Return of a receipt reversal",
+      "unapplied_refund": "Refund of an unapplied collection",
       "feature_change": "Feature change (platform)",
       "feature_reject": "Feature change rejected (platform)"
     }
@@ -15719,6 +16046,150 @@
     "balanceLcAmt": "Balance LC Amt",
     "adjustmentAmt": "Adjustment Amt",
     "total": "Total"
+  },
+  "fsVersions": {
+    "title": "Financial Statement Versions",
+    "help": "Each version lists the lines of the statements with the GL accounts each line carries. The financial statement reports group the ledger by the lines of the version chosen.",
+    "add": "Add version",
+    "code": "Code",
+    "name": "Name",
+    "purpose": "Purpose",
+    "scope": "Statements",
+    "lines": "Lines",
+    "status": "Status",
+    "details": "Version {{code}}",
+    "lineSection": "Lines",
+    "addLine": "Add line",
+    "save": "Save",
+    "removeLine": "Remove line {{line}}",
+    "lineNo": "Line",
+    "statement": "Statement",
+    "section": "Section",
+    "caption": "FS line",
+    "glFrom": "GL from",
+    "glTo": "GL to",
+    "normalBalance": "Shown as",
+    "accounts": "Accounts",
+    "unmapped": "Accounts not in this version ({{count}})",
+    "allMapped": "Every account is on a line of this version.",
+    "accountCode": "GL account",
+    "accountName": "Account name",
+    "accountType": "Type",
+    "copyFrom": "Copy the lines of",
+    "cancel": "Cancel",
+    "create": "Add",
+    "saved": "Version {{code}} saved",
+    "added": "Version {{code}} added",
+    "fixErrors": "Correct the lines marked before you save.",
+    "statements": {
+      "bs": "Balance sheet",
+      "is": "Income statement"
+    },
+    "balances": {
+      "debit": "Debit balance",
+      "credit": "Credit balance"
+    },
+    "scopes": {
+      "full": "Balance sheet and income statement",
+      "income": "Income statement only"
+    },
+    "statuses": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "types": {
+      "asset": "Asset",
+      "liability": "Liability",
+      "equity": "Equity",
+      "income": "Income",
+      "expense": "Expense"
+    },
+    "errors": {
+      "lineNo": "Enter a whole number from 1",
+      "lineNoTwice": "This line number is used twice",
+      "incomeOnly": "This version has income statement lines only",
+      "required": "Required",
+      "glCode": "Enter an account code or its first digits",
+      "glOrder": "GL to must not come before GL from",
+      "noLines": "Add at least one line"
+    }
+  },
+  "unapplied": {
+    "title": "Unapplied Collections",
+    "help": "Money received that no bill takes yet: a payment above what the policy owes, a bank credit not yet identified, or a payment before the bill. Allocate each to open bills by its date, or refund it.",
+    "record": "Record payment",
+    "kpis": {
+      "open": "Open items",
+      "amount": "Open amount",
+      "overdue": "Past the allocation date"
+    },
+    "allStatuses": "All statuses",
+    "allKinds": "All kinds",
+    "search": "Client, policy, receipt or reference",
+    "empty": "Nothing to allocate.",
+    "received": "Received",
+    "kind": "Kind",
+    "reference": "Receipt / reference",
+    "client": "Client",
+    "policy": "Policy",
+    "amount": "Amount",
+    "balance": "To allocate",
+    "allocateBy": "Allocate by",
+    "overdue": "Overdue",
+    "status": "Status",
+    "actionsFor": "Actions for {{reference}}",
+    "viewTitle": "Unapplied collection",
+    "details": "Details",
+    "refundReason": "Reason",
+    "remarks": "Remarks",
+    "allocations": "Allocations",
+    "noAllocations": "Not allocated yet.",
+    "bill": "Bill",
+    "allocatedOn": "Allocated on",
+    "allocatedBy": "Allocated by",
+    "activity": "Activity",
+    "allocateTitle": "Allocate {{amount}}",
+    "allocTotal": "Allocating {{total}}",
+    "cancel": "Cancel",
+    "allocate": "Allocate",
+    "searchBills": "Client, policy or bill number",
+    "find": "Find bills",
+    "noBills": "No open bill found.",
+    "dueDate": "Due",
+    "billBalance": "Bill balance",
+    "allocateAmount": "Allocate",
+    "allocateAmountFor": "Amount to allocate to {{bill}}",
+    "save": "Save",
+    "clientCode": "Client code",
+    "payer": "Paid by",
+    "refund": "Refund",
+    "refundTitle": "Refund {{amount}} to the client?",
+    "refundMessage": "The amount is set up as a refund payable to the client and paid by disbursement.",
+    "reverse": "Reverse",
+    "reverseTitle": "Reverse this payment?",
+    "reverseMessage": "The payment and its journal are reversed. Use this only for a payment recorded in error.",
+    "reverseReason": "Reason for the reversal",
+    "kinds": {
+      "excess": "Excess payment",
+      "floating": "Floating payment",
+      "advance": "Advance payment"
+    },
+    "statuses": {
+      "open": "Open",
+      "allocated": "Allocated",
+      "refunded": "Refunded",
+      "reversed": "Reversed"
+    },
+    "menu": {
+      "view": "View",
+      "allocate": "Allocate",
+      "refund": "Refund",
+      "reverse": "Reverse"
+    },
+    "problems": {
+      "aboveBill": "An amount is above what the bill has left to pay",
+      "aboveBalance": "The amounts are above what is left to allocate"
+    }
   },
   "features": {
     "title": "Features & Releases",

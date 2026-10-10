@@ -33,6 +33,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Claims Awaiting Documents | Create and edit |
 | Operations | Motor Claim Repairs | Create and edit |
 | Accounts | Receipts | View |
+| Accounts | Unapplied Collections | View |
 | Accounts | Collections | View |
 | Accounts > Credit Control | Instalment Plans | View |
 | Accounts > Credit Control | Premium Warranty Monitor | View |
@@ -47,6 +48,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Remittance | Insurer payments | View |
 | Accounts > Remittance | Reconciliation | View |
 | Accounts > Remittance | Exceptions | View |
+| Accounts > Remittance | Held policies | View |
 | Accounts > Remittance | Insurer billing | View |
 | Accounts > Remittance | Settlement | View |
 | Accounts | Journal Voucher | View |
@@ -144,14 +146,16 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
 | Operations | Marine open covers | View | See open covers, certificates and declarations; print certificates | Marine Open Covers |
 | Operations | Marine open covers | Create and edit | Set up open covers, issue certificates, submit and bill declarations |  |
-| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts and Post-Dated Cheques |
+| Accounts | Receipts | View | See receipts | Receipts and Unapplied Collections |
+| Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections, Instalment Plans, Premium Warranty Monitor and Remittance Ageing |
 | Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement, Bank Payment Files and Insurer payments |
 | Accounts | Payables | View | See suppliers, supplier invoices and payments, AP ageing | Suppliers and Supplier 2307 |
 | Accounts | Payables | Approve | Approve supplier invoices (not the preparer) |  |
 | Accounts | Fixed assets | View | See the fixed asset register and depreciation | No screen of its own |
 | Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher, SAP GL Export, Correction JV and Reversal JV |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Insurer billing and Settlement |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Held policies, Insurer billing and Settlement |
+| Accounts | Remittance and insurer reconciliation | Approve | Approve or reject an insurer billing statement raised or submitted by another user |  |
 | Accounts | Remittance and insurer reconciliation | Approve | Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter) |  |
 | Accounts | Bank reconciliation | View | See bank reconciliations | Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines and Bank Book |
 | Accounts | Period end and tax | View | See period status, the close checklist and BIR tax | BIR Form 2307, Sales Invoices, CAS Books and Documents, Period Management, Month-End Close, Year-End Close and Financial Statements |
@@ -175,6 +179,7 @@ Where: the screens of your menus that show the module. A module without a screen
 This role approves the work of other users:
 
 - Claim decisions: review, reject, settle, approve a settlement, close
+- Approve or reject an insurer billing statement raised or submitted by another user
 - Approve supplier invoices (not the preparer)
 - Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user
 - Approve a quotation created by another user

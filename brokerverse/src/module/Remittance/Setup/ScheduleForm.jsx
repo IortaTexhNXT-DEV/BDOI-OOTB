@@ -15,16 +15,20 @@ export const WEEKLY_WINDOW = "Previous Monday to Friday";
 export const CUT_OFF_WINDOW = "Cut-off days";
 const FREQUENCIES = ["Weekly", "Monthly"];
 const GROUP_BY = ["Insurer", "Insurer and product line"];
+export const INCEPTED = "Incepted up to the cut-off";
+export const FULLY_PAID = "Fully paid in the window";
 // the run times offered: every quarter of an hour
 const RUN_TIMES = Array.from({ length: 96 }, (_, i) => `${String(Math.floor(i / 4)).padStart(2, "0")}:${String((i % 4) * 15).padStart(2, "0")}`);
 const CUT_OFF_DAYS = Array.from({ length: 31 }, (_, i) => i);
 
-const EMPTY = { name: "", allInsurers: true, insurers: [], frequency: "Weekly", nextRun: "", runTime: "06:15", paymentWindow: WEEKLY_WINDOW, cutOffDays: 0, groupBy: "Insurer and product line" };
+const EMPTY = { name: "", allInsurers: true, insurers: [], frequency: "Weekly", nextRun: "", runTime: "06:15", paymentWindow: WEEKLY_WINDOW, cutOffDays: 0, groupBy: "Insurer and product line",
+  eligibility: FULLY_PAID, proofRequired: true };
 
 /** The schedule's fields as the form edits them. */
 export const formOf = (s) => (s ? {
   name: s.name || "", allInsurers: !!s.allInsurers, insurers: s.insurers || [], frequency: s.frequency || "Weekly", nextRun: s.nextRun || "", runTime: s.runTime || "06:15",
-  paymentWindow: s.paymentWindow || CUT_OFF_WINDOW, cutOffDays: s.cutOffDays ?? 0, groupBy: s.groupBy || GROUP_BY[0],
+  paymentWindow: s.paymentWindow || CUT_OFF_WINDOW, cutOffDays: s.cutOffDays ?? 0, groupBy: s.groupBy || GROUP_BY[0], eligibility: s.eligibility || INCEPTED,
+  proofRequired: s.proofRequired !== false,
 } : { ...EMPTY });
 
 /**
@@ -43,6 +47,7 @@ export const formProblems = (f, t) => {
 const payloadOf = (f) => ({
   name: f.name.trim(), kind: "Remittance run", allInsurers: f.allInsurers, insurers: f.allInsurers ? [] : f.insurers, frequency: f.frequency, nextRun: f.nextRun || null,
   runTime: f.runTime, paymentWindow: f.paymentWindow, cutOffDays: f.paymentWindow === CUT_OFF_WINDOW ? f.cutOffDays : 0, groupBy: f.groupBy,
+  eligibility: f.eligibility, proofRequired: f.eligibility === FULLY_PAID ? !!f.proofRequired : false,
 });
 
 /**
@@ -151,6 +156,16 @@ const ScheduleForm = ({ visible, onHide, schedule, insurers, onSaved }) => {
         {field("groupBy", t("remittance.schedules.form.groupBy"), (
           <Dropdown inputId="rm-sch-groupBy" value={form.groupBy} options={options(GROUP_BY, "groupByOptions")} onChange={(e) => set({ groupBy: e.value })} className="w-full" />
         ))}
+        {field("eligibility", t("remittance.schedules.form.eligibility"), (
+          <Dropdown inputId="rm-sch-eligibility" value={form.eligibility} options={options([FULLY_PAID, INCEPTED], "eligibilities")} onChange={(e) => set({ eligibility: e.value })}
+            className={`w-full${invalid("eligibility")}`} />
+        ))}
+        {form.eligibility === FULLY_PAID ? (
+          <div className="flex align-items-center gap-2 mt-2">
+            <Checkbox inputId="rm-sch-proof" checked={!!form.proofRequired} onChange={(e) => set({ proofRequired: e.checked })} />
+            <label htmlFor="rm-sch-proof">{t("remittance.schedules.form.proofRequired")}</label>
+          </div>
+        ) : null}
         {error ? <p className="rm-form__error" role="alert">{error}</p> : null}
       </div>
     </Dialog>

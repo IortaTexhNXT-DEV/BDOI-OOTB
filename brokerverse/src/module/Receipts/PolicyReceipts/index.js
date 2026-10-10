@@ -32,6 +32,7 @@ import { Toast } from "primereact/toast";
 import { Tag } from "primereact/tag";
 import clientService from "../../../services/clientService";
 import ImportDialog from "../../../components/ImportDialog";
+import ReceiptBatches from "./ReceiptBatches";
 import { printPdf } from "../../../components/Print";
 import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
 import logger from "../../../utility/logger";
@@ -569,6 +570,7 @@ const PolicyReceipts = () => {
   // Real buttons (keyboard focus, Enter / Space) for the header actions; rendered for desktop and mobile layouts.
   // Recording and uploading receipts are for the collection users (write:receipts); the others only read them.
   const canRecord = hasPermission("write:receipts");
+  const [batchesOpen, setBatchesOpen] = useState(false);
   const headerActions = (
     <>
       <div className="filter_bulk_button_container">
@@ -581,6 +583,11 @@ const PolicyReceipts = () => {
           <div className="filter_bulk_button_container">
             <Button type="button" className="bulk_button_container" outlined onClick={handleBulkUploadModal}>
               <span className="addtext">{t("accounts.receipts.bulkUpload")}</span>
+            </Button>
+          </div>
+          <div className="filter_bulk_button_container">
+            <Button type="button" className="bulk_button_container" outlined onClick={() => setBatchesOpen(true)}>
+              <span className="addtext">{t("accounts.receiptBatches.open")}</span>
             </Button>
           </div>
           <div className="filterbutton_container">
@@ -958,10 +965,15 @@ const PolicyReceipts = () => {
         visible={visibleBulkUploadPopup}
         onHide={() => setVisibleBulkUploadPopup(false)}
         title={t("accounts.receipts.bulkUploadTitle")}
-        targets={[{ label: t("accounts.receipts.officialReceipts"), templatePath: "/receipts/bulk-upload/template", uploadPath: "/receipts/bulk-upload" }]}
+        targets={[
+          { label: t("accounts.receipts.officialReceipts"), templatePath: "/receipts/bulk-upload/template", uploadPath: "/receipts/bulk-upload" },
+          { label: t("accounts.receipts.bankPayments"), templatePath: "/receipts/bank-payments/template", uploadPath: "/receipts/bank-payments" },
+          { label: t("accounts.receipts.insurerDirectPayments"), templatePath: "/receipts/insurer-direct/template", uploadPath: "/receipts/insurer-direct" },
+        ]}
         onDone={handleBulkUploadSuccess}
       />
 
+      <ReceiptBatches visible={batchesOpen} onHide={() => setBatchesOpen(false)} />
       <Toast ref={toast} />
     </div>
   );

@@ -102,7 +102,7 @@ describe('clients', () => {
     const codes = await finance('get', '/customers/codes');
     expect(codes.body.data.length).toBeGreaterThanOrEqual(10);
     // Cash Control picks the customer codes of a bulk print without reading the client register
-    const ccd = await persona('c.ccd', ['tis-ccd-pdu']);
+    const ccd = await persona('c.ccd', ['tis-ccd-bp']);
     expect((await ccd('get', '/clients')).status).toBe(403);
     const ccdCodes = await ccd('get', '/customers/codes');
     expect(ccdCodes.status).toBe(200);

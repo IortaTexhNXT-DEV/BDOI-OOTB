@@ -180,6 +180,16 @@ export const CATALOGUE = {
   'direct_bill_client_payments.proof_file_name': 'fileName',
   'direct_bill_client_payments.remarks': 'freeText',
   'payment_links.payer_name': 'partyName',
+  'receipts.proof_file_name': 'fileName',
+  'receipt_batches.file_name': 'fileName',
+  'pdc_sets.remarks': 'freeText',
+  'pdc_transmittals.remarks': 'freeText',
+  'post_dated_cheques.account_number': 'bankAccount',
+  'post_dated_cheques.cancel_remarks': 'freeText',
+  'unapplied_collections.payer_name': 'partyName',
+  'unapplied_collections.remarks': 'freeText',
+  'bank_payment_lines.bank_account': 'bankAccount',
+  'bank_payment_lines.payer': 'partyName',
   'payment_links.payer_email': 'email',
   'payment_links.payer_mobile': 'phone',
   'payment_links.token': 'secret',
@@ -392,6 +402,8 @@ export const TABLE_ACTIONS = {
  * "table.*" keeps every column of a table (configuration and master tables without personal data).
  */
 export const ALLOW_LIST = {
+  'pdc_sets.payee': 'payee code of the cheques (insurance-partner or tisph), not a person',
+  'post_dated_cheques.payee': 'payee code of the cheque (insurance-partner or tisph), not a person',
   // people tables: what testing needs and is not personal once names, contacts and identifiers are masked
   'users.username': 'sign-in name kept so testers can sign in with the roles of production (owners, approvers, scoping)',
   'users.password_hash': 'replaced by the masking step itself (every password reset, or sign-in disabled except the named administrator)',

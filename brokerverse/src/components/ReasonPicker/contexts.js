@@ -8,7 +8,8 @@ export const REASON_CONTEXTS = [
   "sales_invoice_cancel", "invoice_payment_cancel", "access_change", "delegation", "delegation_end", "sod_exception", "access_review",
   "remittance_reject", "remittance_withdraw", "remittance_cancel", "remittance_revoke", "remittance_off_cycle", "remittance_line_exclude",
   "exception_escalate", "exception_resolve", "exception_reopen", "reconciliation_difference", "reconciliation_unmatch", "confirmation_difference",
-  "payment_duplicate_override", "billing_reject", "billing_cancel", "feature_change", "feature_reject",
+  "payment_duplicate_override", "billing_reject", "billing_cancel", "pdc_cancel", "pdc_bounce", "receipt_reversal", "receipt_reversal_reject", "unapplied_refund",
+  "feature_change", "feature_reject",
 ];
 
 const words = (code) => {

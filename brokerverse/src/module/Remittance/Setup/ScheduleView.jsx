@@ -20,6 +20,8 @@ export const scheduleFacts = (s, t) => [
   { label: t("remittance.schedules.columns.window"), value: s.paymentWindow === "Cut-off days"
     ? t("remittance.schedules.cutOff", { count: s.cutOffDays ?? 0 }) : t(`remittance.schedules.windows.${s.paymentWindow}`, { defaultValue: s.paymentWindow }) },
   { label: t("remittance.schedules.columns.groupBy"), value: t(`remittance.schedules.groupByOptions.${s.groupBy}`, { defaultValue: s.groupBy }) },
+  { label: t("remittance.schedules.columns.eligibility"), value: t(`remittance.schedules.eligibilities.${s.eligibility}`, { defaultValue: s.eligibility }) },
+  { label: t("remittance.schedules.columns.proofRequired"), value: s.eligibility === "Fully paid in the window" ? s.proofRequired : null, type: "boolean" },
   { label: t("remittance.schedules.columns.runs"), value: s.runs },
   { label: t("remittance.schedules.columns.nextRun"), value: s.nextRunText || null },
   { label: t("remittance.schedules.columns.lastRun"), value: s.lastRun?.text || null },

@@ -17,12 +17,14 @@ posting goes through, the client ledger, entry matching and the trial balance. T
 | `lib/coinsurance.js` | Splits amounts between co-insurers by share (the rounding remainder goes to the lead). |
 | `lib/http.js` | Small request and response helpers used by the finance modules (list envelope, `NO_DATA_FOUND`). |
 | `lib/files.js` | Stores generated finance files (CSV) in the uploads area. |
+| `fsVersions.js` | Financial statement versions (TIS01 local FS, TIS02 balance sheet and income statement, TIS03 budget): their lines with GL ranges (account-code prefixes, the first line by number takes an account), the accounts no line takes, and `FS_MAP`, the SQL the FS reports group by. |
 
 ## Main tables
 
 `gl_accounts` (chart of accounts), `journal_vouchers` and `journal_lines` (journals; `journal_lines.cost_centre`), `accounting_periods`,
 `entry_matches` (matched receivable and payment lines), `posting_rules` and `posting_rule_lines` (maintained by the
-posting-rules module), `opening_balances` (written by the year-end close).
+posting-rules module), `opening_balances` (written by the year-end close), `fs_versions` and `fs_version_lines`
+(Master > Finance > Financial Statement Versions; Finance edits them with `write:journal-vouchers`, migration 0527).
 
 A database trigger on `journal_vouchers` checks the balance and the period again when a journal becomes `posted`, so a
 wrong journal is refused even if it bypasses `createJournal`.
@@ -76,6 +78,9 @@ the responsible person from the active users (`optionsFrom: "user"`, migration 0
 - `accounting.account.<role>`: the GL account of each account role (cash in bank, premium receivable, due to
   insurer, commission income ...). Edited on Master > Finance > Account Determination.
 - `accounting.payable_account_by_payee`, `accounting.cash_account_by_payment_mode`: account maps.
+- `accounting.operations_cutoff_day` (26), `accounting.operations_cutoff_events`: a premium booking dated on or after the
+  cut-off day books into the next period (`cutoffPeriod` in `period-end/posting.js`; the journal's period is what the
+  posting checks and the DB trigger read). `accounting.default_fs_version` (TIS01): the version of the FS reports.
 - `accounting.auto_post_system_entries` (ledger-wide: system journals saved pending, posted by any user),
   `accounting.parked_events` (per event: parked for approval by another user), `accounting.split_premium_taxes`.
   A premium tax role mapped to the premium payable account (TISPH: all on 210245) is taken back with the premium on

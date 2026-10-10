@@ -849,15 +849,34 @@ async function logExecution({ created, configCode, started, triggeredBy, extra =
 }
 
 /**
- * A draft direct-bill remittance of an insurer's eligible policies (inception up to `to`); null when there is none.
- * `data` is kept on the remittance (the run that created it: source, run, window, off-cycle reason).
+ * The draft direct-bill remittances of an insurer's policies ready to remit (eligibility.js: incepted up to `to`, or
+ * fully paid in the window from `from` to `to` with the catch-up), one per product line when the schedule groups by
+ * insurer and product line on the fully paid basis. `data` is kept on each remittance (the run that created it: source,
+ * run, window, off-cycle reason, product line). Returns { remittances, held, exceptions }: the policies held part-paid
+ * and those held back for a missing proof of payment (an exception is opened for each).
  */
-async function draftForInsurer({ insurerId, to, dueDate, configCode, period, data }, user) {
-  const pols = await eligiblePolicies({ insurerId, to, kind: 'direct-bill' });
-  if (!pols.length) return null;
-  const lines = await buildLines(pols.map((p) => ({ policyId: p.id })), insurerId);
-  const id = await withTransaction((c) => insertRemittance(c, { kind: 'direct-bill', insurerId, period, dueDate, lines, configCode, userId: user?.id || null, data }));
-  return getRemittance(id);
+async function draftForInsurer({ insurerId, to, from = null, basis = null, groupBy = null, dueDate, configCode, period, data }, user) {
+  const { sortForRun, lineOf, raiseProofExceptions } = await import('./eligibility.js');
+  const b = basis || { fullyPaid: false };
+  const sorted = await sortForRun(await eligiblePolicies({ insurerId, to: b.fullyPaid ? null : to, kind: 'direct-bill' }), { from: from || to, to }, b);
+  if (sorted.exceptions.length) {
+    const ins = await one('SELECT id, name FROM insurance_companies WHERE id = $1', [insurerId]);
+    const { createException } = await import('./items.js');
+    await raiseProofExceptions(sorted.exceptions, ins, createException, user || { id: null });
+  }
+  const groups = new Map();
+  for (const p of sorted.ready) {
+    const key = b.fullyPaid && groupBy === 'Insurer and product line' ? lineOf(p) : '';
+    groups.set(key, [...(groups.get(key) || []), p]);
+  }
+  const remittances = [];
+  for (const [line, pols] of groups) {
+    const lines = await buildLines(pols.map((p) => ({ policyId: p.id })), insurerId);
+    const id = await withTransaction((c) => insertRemittance(c, { kind: 'direct-bill', insurerId, period, dueDate, lines, configCode, userId: user?.id || null,
+      data: { ...(data || {}), ...(line ? { productLine: line } : {}), ...(b.fullyPaid ? { eligibility: b.eligibility } : {}) } }));
+    remittances.push(await getRemittance(id));
+  }
+  return { remittances, held: sorted.held, exceptions: sorted.exceptions };
 }
 
 /** Create draft remittances for every ready candidate (optionally limited to candidate ids) and log the execution. */
@@ -868,7 +887,7 @@ export async function executeAutomated(b, user, triggeredBy = 'manual') {
   const created = [];
   for (const cnd of cands) {
     const r = await draftForInsurer({ insurerId: cnd.insurerId, dueDate: cnd.dueDate, configCode: cnd.scheduleCode, period: new Date().toISOString().slice(0, 7) }, user);
-    if (r) created.push(r);
+    created.push(...r.remittances);
   }
   const out = await logExecution({ created, configCode: b.configCode, started, triggeredBy }, user);
   for (const code of [...new Set(cands.map((c) => c.scheduleCode))]) {
@@ -879,23 +898,28 @@ export async function executeAutomated(b, user, triggeredBy = 'manual') {
 }
 
 /**
- * Remit what a remittance schedule names: one draft remittance per insurer, of the policies incepted up to the cut-off
- * date (`to`), due after the insurer's remittance terms. Unknown or inactive insurer codes are skipped and reported.
+ * Remit what a remittance schedule names: the draft remittances of each insurer (draftForInsurer: incepted up to the
+ * cut-off date `to`, or fully paid from `from` to `to` on the schedule's basis), due after the insurer's remittance
+ * terms. Unknown or inactive insurer codes are skipped and reported; held policies and exceptions are counted.
  */
-export async function executeForInsurers({ insurerCodes, to, scheduleCode, runDate, data }, user, triggeredBy = 'manual') {
+export async function executeForInsurers({ insurerCodes, to, from = null, basis = null, groupBy = null, scheduleCode, runDate, data }, user, triggeredBy = 'manual') {
   const started = Date.now();
   const date = runDate || (await businessToday());
   const created = [];
   const skipped = [];
+  let held = 0;
+  let exceptions = 0;
   for (const code of insurerCodes || []) {
     const ins = await one('SELECT * FROM insurance_companies WHERE (lower(code) = lower($1) OR id::text = $1) AND status = $2', [String(code), 'active']);
     if (!ins) { skipped.push({ insurerCode: code, reason: 'Insurer not found or not active' }); continue; }
-    const r = await draftForInsurer({ insurerId: ins.id, to, dueDate: await defaultDueDate(date, ins.id), configCode: scheduleCode, period: date.slice(0, 7), data }, user);
-    if (r) created.push(r);
-    else skipped.push({ insurerCode: ins.code, reason: 'Nothing to remit up to the cut-off date' });
+    const r = await draftForInsurer({ insurerId: ins.id, to, from, basis, groupBy, dueDate: await defaultDueDate(date, ins.id), configCode: scheduleCode, period: date.slice(0, 7), data }, user);
+    created.push(...r.remittances);
+    held += r.held.length;
+    exceptions += r.exceptions.length;
+    if (!r.remittances.length) skipped.push({ insurerCode: ins.code, reason: 'Nothing to remit up to the cut-off date' });
   }
   const out = await logExecution({ created, configCode: scheduleCode, started, triggeredBy, extra: { cutOffDate: to || null } }, user);
-  return { ...out, skipped };
+  return { ...out, skipped, held, exceptions };
 }
 
 export async function executionHistory() {

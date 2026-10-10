@@ -18,6 +18,8 @@ const TIS_ROLES = ['tis-sales-associate', 'tis-sales-officer', 'tis-sales-unit-h
   'tis-ccd-pdc', 'tis-ccd-bp', 'tis-ccd-recon', 'tis-finance', 'tis-it-admin', 'tis-general-manager', 'tis-superid'];
 const MIGRATION = fs.readFileSync(new URL('../src/db/migrations/0348_tisph_roles.sql', import.meta.url), 'utf8');
 const REMITTANCE_MIGRATION = fs.readFileSync(new URL('../src/db/migrations/0400_remittance_approval_authority.sql', import.meta.url), 'utf8');
+// 0531 narrows the receipting rights 0348 gave the Cash Control personas: it follows 0348 whenever 0348 runs
+const RECEIPTING_MIGRATION = fs.readFileSync(new URL('../src/db/migrations/0531_tisph_receipting_grants.sql', import.meta.url), 'utf8');
 
 let ctx;
 const as = {};
@@ -189,14 +191,16 @@ describe('migrations 0348 and 0400 on a database in use', () => {
     await q("DELETE FROM permissions WHERE code IN ('approve:quotations', 'approve:policies', 'approve:renewals', 'approve:claims', 'approve:remittance')");
     await q("DELETE FROM schema_migrations WHERE name IN ('0348_tisph_roles.sql', '0400_remittance_approval_authority.sql', '0550_feature_entitlements.sql')");
     // later migrations that grant to the holders of a module permission (0387: approve:incentive, 0500: assign:renewals)
-    // or to the TISPH roles (0502: claim settlement cash, 0504: claim processing) run again after it
-    await q("DELETE FROM schema_migrations WHERE name IN ('0387_incentive_approval.sql', '0500_renewal_controls.sql', '0502_claim_controls.sql', '0504_claim_processing.sql')");
+    // or to the TISPH roles (0502: claim settlement cash, 0504: claim processing, 0520: the post-dated cheque log,
+    // 0522: the insurer billing approval, 0524: the receipt reversal, 0531: the receipting grants) run again after it
+    await q("DELETE FROM schema_migrations WHERE name IN ('0387_incentive_approval.sql', '0500_renewal_controls.sql', '0502_claim_controls.sql', '0504_claim_processing.sql', '0520_pdc_lifecycle.sql', '0522_insurer_billing_run.sql', '0524_receipt_reversal.sql', '0531_tisph_receipting_grants.sql')");
     await migrate({ log: () => {} });
     const migrated = await grants();
     for (const code of [...TIS_ROLES, 'sales', 'processing', 'operations', 'claims', 'accounting', 'system-admin']) expect(migrated[code], code).toEqual(seeded[code]);
     expect((await q("SELECT inherits FROM roles WHERE code = 'tis-superid'"))[0].inherits).toEqual(['system-admin']);
     await pool.query(MIGRATION);
     await pool.query(REMITTANCE_MIGRATION);
+    await pool.query(RECEIPTING_MIGRATION);
     expect(await grants()).toEqual(migrated);
   });
 });

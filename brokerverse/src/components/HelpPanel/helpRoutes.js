@@ -60,6 +60,7 @@ export const HELP_ROUTES = [
   ["/agent/payments", "payments"],
   // accounts
   ["/accounts/receipts", "verify-payments-and-post-official-receipts"],
+  ["/accounts/unapplied-collections", "unapplied-collections"],
   ["/agent/collections", "collections"],
   ["/accounts/credit-control", "credit-control"],
   // operations and accounting: cover notes, cancellation, claims documents and repairs, cheques, claims cash, payables, assets
@@ -77,6 +78,7 @@ export const HELP_ROUTES = [
   ["/accounts/payables/2307", "bir-form-2307-for-suppliers"],
   ["/accounts/fixed-assets/disposals", "asset-disposal", "screens-accounts"],
   ["/master/insurance/", "operational-masters"],
+  ["/master/finance/fs-versions", "financial-statement-versions"],
   ["/master/finance/asset-classes", "operational-masters"],
   ["/master/finance/cost-centres", "operational-masters"],
   ["/accounts/paymentvoucher", "disbursement-payment-vouchers-and-cheques"],

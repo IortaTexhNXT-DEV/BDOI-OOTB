@@ -26,6 +26,7 @@ export const PAYMENT_MODES = ['cash', 'check', 'bank-transfer', 'card', 'gcash',
 export const RECEIPT_UPLOAD_COLUMNS = [
   { key: 'policyNumber', header: 'Policy Number', aliases: ['policyNo', 'policy'], required: true, format: 'Policy number of an issued, broker-billed policy with an open bill', example: 'PC-MLY-2026-000101' },
   { key: 'amount', header: 'Amount', required: true, format: 'Amount received in PHP, greater than zero', example: '35946.88' },
+  { key: 'commissionAmount', header: 'Commission Amount', aliases: ['commission'], format: 'Commission part of the Amount on a combined premium-and-commission file; empty or 0 when the row is premium only', example: '' },
   { key: 'receiptDate', header: 'Receipt Date', aliases: ['date'], format: 'Date YYYY-MM-DD; today when empty (must be in an open period)', example: '2026-10-05' },
   { key: 'paymentMode', header: 'Payment Mode', format: 'The default payment mode when empty', allowed: PAYMENT_MODES, example: 'bank-transfer' },
   { key: 'referenceNo', header: 'Reference No', aliases: ['reference'], format: 'Deposit slip, cheque or transfer reference', example: 'BDO-778812' },
@@ -48,10 +49,19 @@ export function receiptRow(r, lines = []) {
     receivableId: r.receivable_id, clientId: r.client_id, clientEmail: r.client_email || null, externalRef: r.external_ref,
     policy: r.policy_id ? { policyId: r.policy_id, id: r.policy_id, policyNumber: r.policy_number, insurer: r.insurer_name || null, status: r.policy_status || null } : null,
     receiptsList: lines.map(lineRow), createdBy: r.created_by, createdAt: r.created_at, updatedAt: r.updated_at, cancelledAt: r.cancelled_at, cancelReason: r.cancel_reason,
+    collectedBy: r.collected_by_insurer_id ? { insurerId: r.collected_by_insurer_id, name: r.collected_by_name || null, reference: r.partner_reference || null } : null,
+    paymentChannel: r.payment_channel || 'tis-direct',
+    proof: r.proof_key ? { key: r.proof_key, fileName: r.proof_file_name || null, attachedAt: r.proof_attached_at || null } : null,
+    reversal: r.reversal_status ? { status: r.reversal_status, reasonCode: r.reversal_reason_code, reason: r.reversal_reason, requestedById: r.reversal_requested_by,
+      requestedBy: r.reversal_requested_by_name || null, requestedAt: r.reversal_requested_at, decidedBy: r.reversal_decided_by_name || null, decidedAt: r.reversal_decided_at,
+      returnReason: r.reversal_return_reason } : null,
   };
 }
 
-const HEADER_SQL = `SELECT r.*, p.status AS policy_status, ic.name AS insurer_name, cl.email AS client_email FROM receipts r LEFT JOIN policies p ON p.id = r.policy_id
+const HEADER_SQL = `SELECT r.*, p.status AS policy_status, ic.name AS insurer_name, cl.email AS client_email,
+    (SELECT x.name FROM insurance_companies x WHERE x.id = r.collected_by_insurer_id) AS collected_by_name,
+    (SELECT u.display_name FROM users u WHERE u.id = r.reversal_requested_by) AS reversal_requested_by_name,
+    (SELECT u.display_name FROM users u WHERE u.id = r.reversal_decided_by) AS reversal_decided_by_name FROM receipts r LEFT JOIN policies p ON p.id = r.policy_id
   LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id LEFT JOIN clients cl ON cl.id = r.client_id`;
 const linesOf = async (db, ids) => {
   if (!ids.length) return new Map();
@@ -114,8 +124,10 @@ async function processLine(db, receipt, line, user, receivableId = null) {
     if (delta === 0) return;
     if (!line.policy_id) throw badRequest(`Line ${line.line_no}: policy ${line.policy_number || ''} not found`);
     const policy = await requirePolicy(db, line.policy_id);
+    const collectedBy = receipt.collected_by_insurer_id
+      ? (await db.query('SELECT id, name FROM insurance_companies WHERE id = $1', [receipt.collected_by_insurer_id])).rows[0] || null : null;
     await applyToPolicy(db, { policy, amount: delta, billAmount: Number(line.lc_amount), breakdown: breakdownOf(line), source, receipt, lineId: line.id, receivableId,
-      paymentMode: receipt.payment_mode, referenceNo: receipt.reference_no, date: receipt.received_date, user });
+      paymentMode: receipt.payment_mode, referenceNo: receipt.reference_no, date: receipt.received_date, user, collectedBy });
     await db.query('UPDATE receipt_lines SET applied_amount = paid, updated_at = now() WHERE id = $1', [line.id]);
   } else if (line.policy_id && Number(line.lc_amount) > 0) {
     const policy = await requirePolicy(db, line.policy_id);
@@ -181,6 +193,15 @@ export async function createReceipt(db, b, user, { source = 'api' } = {}) {
     header.bank_account_code = str(b.bankAccountCode ?? b.bankAccount);
     await db.query('UPDATE receipts SET bank_account_code = $2 WHERE id = $1', [header.id, header.bank_account_code]);
   }
+  // paid to the insurance company: a post-dated cheque the Insurance Partner collected (Accounts > Post-Dated Cheques >
+  // Partner cleared) or a payment made directly to the insurer (insurer-direct upload); channel insurer-direct
+  if (b.collectedByInsurerId) {
+    header.collected_by_insurer_id = Number(b.collectedByInsurerId);
+    header.partner_reference = str(b.partnerReference);
+    header.payment_channel = 'insurer-direct';
+    await db.query('UPDATE receipts SET collected_by_insurer_id = $2, partner_reference = $3, payment_channel = \'insurer-direct\' WHERE id = $1',
+      [header.id, header.collected_by_insurer_id, header.partner_reference]);
+  }
   let n = 0;
   for (const l of lines) {
     n += 1;
@@ -243,12 +264,25 @@ export async function addPayment(db, id, b, user) {
   return updateReceipt(db, r.id, { receiptsList: list, paymentMode: b.paymentMode, referenceNo: b.referenceNo }, user);
 }
 
+/** Attach the proof of payment of a receipt (b: { proofKey, proofFileName }); a cancelled receipt takes none. */
+export async function attachProof(db, id, b, user) {
+  const r = (await db.query('SELECT * FROM receipts WHERE id = $1 OR receipt_number = $1 FOR UPDATE', [id])).rows[0];
+  if (!r) throw notFound('Receipt not found');
+  if (r.receipt_status === 'Cancelled') throw conflict('Receipt is cancelled');
+  const before = await getReceipt(db, r.id);
+  await db.query('UPDATE receipts SET proof_key = $2, proof_file_name = $3, proof_attached_by = $4, proof_attached_at = now(), updated_at = now() WHERE id = $1',
+    [r.id, str(b.proofKey), str(b.proofFileName), user?.id ?? null]);
+  return { before, after: await getReceipt(db, r.id) };
+}
+
 export async function cancelReceipt(db, id, reason, user) {
   const r = (await db.query('SELECT * FROM receipts WHERE id = $1 OR receipt_number = $1 FOR UPDATE', [id])).rows[0];
   if (!r) throw notFound('Receipt not found');
   if (r.receipt_status === 'Cancelled') throw conflict('Receipt is already cancelled');
   const before = await getReceipt(db, r.id);
   await reverseReceiptApplications(db, r, user);
+  const { reverseHoldsOfReceipt } = await import('./unapplied.js');
+  await reverseHoldsOfReceipt(db, r.id, user);
   await db.query('UPDATE receipt_lines SET applied_amount = 0, updated_at = now() WHERE receipt_id = $1', [r.id]);
   await db.query(`UPDATE receipts SET receipt_status = 'Cancelled', status = 'cancelled', cancelled_by = $2, cancelled_at = now(), cancel_reason = $3, updated_at = now() WHERE id = $1`, [r.id, user.id, reason || null]);
   return { before, after: await getReceipt(db, r.id) };
@@ -264,16 +298,20 @@ export async function listOpenReceivables(db, q = {}) {
   if (q.customerCode) { p.push(String(q.customerCode)); where.push(`(c.client_code = $${p.length} OR c.id = $${p.length})`); }
   if (q.policyNumber || q.policyId) { p.push(String(q.policyNumber || q.policyId)); where.push(`(p.policy_number = $${p.length} OR p.id = $${p.length})`); }
   // the search also finds a migrated open item by the old system's bill number (reference)
-  if (q.search) { p.push(String(q.search)); where.push(`(COALESCE(c.client_code,'') || ' ' || COALESCE(c.display_name,'') || ' ' || COALESCE(p.policy_number,'') || ' ' || COALESCE(r.bill_number,'') || ' ' || COALESCE(r.reference,'')) ILIKE '%' || $${p.length} || '%'`); }
+  // the search also finds the 10-digit payment reference and the plate or chassis number of the vehicle
+  if (q.search) { p.push(String(q.search)); where.push(`(COALESCE(c.client_code,'') || ' ' || COALESCE(c.display_name,'') || ' ' || COALESCE(p.policy_number,'') || ' ' || COALESCE(r.bill_number,'') || ' ' || COALESCE(r.reference,'')
+    || ' ' || COALESCE(p.payment_reference,'') || ' ' || COALESCE(p.doc->>'plateNumber','') || ' ' || COALESCE(p.doc->>'chassisNumber','')) ILIKE '%' || $${p.length} || '%'`); }
   if (q[SCOPE]) where.push(scopeSql(q[SCOPE], 'policy', 'p', p));
   const limit = Math.min(Math.max(Number(q.limit) || 500, 1), 2000);
-  const rows = (await db.query(`SELECT r.*, p.policy_number, c.client_code, c.display_name, c.first_name, c.last_name
+  const rows = (await db.query(`SELECT r.*, p.policy_number, p.payment_reference, p.doc->>'plateNumber' AS plate_number, p.doc->'insuranceVehicleDetails'->0 AS vehicle,
+      c.client_code, c.display_name, c.first_name, c.last_name
     FROM receivables r JOIN policies p ON p.id = r.policy_id LEFT JOIN clients c ON c.id = COALESCE(r.client_id, p.client_id)
     WHERE ${where.join(' AND ')} ORDER BY c.client_code, p.policy_number, r.due_date, r.created_at LIMIT ${limit}`, p)).rows;
   return rows.map((r) => ({
     receivableId: r.id, billNumber: r.bill_number, oldBillNumber: oldBillNumber(r), source: r.source, reference: r.reference, customerCode: r.client_code || r.client_id, clientId: r.client_id,
     customerName: r.display_name || [r.first_name, r.last_name].filter(Boolean).join(' ') || null, policyId: r.policy_id, policyNumber: r.policy_number,
     amount: Number(r.amount), paidAmount: round2(Number(r.amount) - Number(r.balance)), balance: Number(r.balance), dueDate: r.due_date,
-    status: r.status === 'partial' ? 'Partial' : 'Open', currency: r.currency,
+    status: r.status === 'partial' ? 'Partial' : 'Open', currency: r.currency, paymentReference: r.payment_reference || null,
+    vehicle: [r.vehicle?.vehicleBrand, r.vehicle?.vehicleModel, r.vehicle?.modelYear].filter(Boolean).join(' ') || null, plateNumber: r.plate_number || null,
   }));
 }

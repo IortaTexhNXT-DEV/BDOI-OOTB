@@ -359,6 +359,14 @@ export const menuList = [
         permissions: ["read:receipts"],
       },
   {
+        // money received that no bill takes yet: excess On Account, floating and advance payments
+        id: 44,
+        name: "Unapplied Collections",
+        path: "/accounts/unapplied-collections",
+        includes: ["/accounts/unapplied-collections"],
+        permissions: ["read:receipts"],
+      },
+  {
         id: 12,
         name: "Collections",
         path: "/agent/collections",
@@ -381,7 +389,7 @@ export const menuList = [
         name: "Post-Dated Cheques",
         path: "/accounts/post-dated-cheques",
         includes: ["/accounts/post-dated-cheques"],
-        permissions: ["read:receipts"],
+        permissions: ["read:pdc"],
       },
   {
         id: 41,
@@ -474,6 +482,13 @@ export const menuList = [
             name: "Exceptions",
             path: "/finance/remittance/exceptions",
             includes: ["/finance/remittance/exceptions"],
+            permissions: ["read:remittance"],
+          },
+          {
+            id: 9,
+            name: "Held policies",
+            path: "/finance/remittance/held",
+            includes: ["/finance/remittance/held"],
             permissions: ["read:remittance"],
           },
           {
@@ -1178,6 +1193,14 @@ export const menuList = [
             name: "Accounting Flow",
             path: "/master/finance/accounting-flow",
             includes: ["/master/finance/accounting-flow"],
+          },
+          {
+            // statement lines and their GL ranges, used by the FS reports (read:journal-vouchers; Finance edits)
+            id: 46,
+            name: "Financial Statement Versions",
+            path: "/master/finance/fs-versions",
+            includes: ["/master/finance/fs-versions"],
+            permissions: ["read:journal-vouchers"],
           },
           {
             // packaged products: bundles sold under one master policy, and each insurer's rates for comparisons

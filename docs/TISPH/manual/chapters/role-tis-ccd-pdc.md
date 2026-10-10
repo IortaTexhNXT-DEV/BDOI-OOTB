@@ -1,8 +1,6 @@
 <!--
 Owner: see WRITER_GUIDE.md. Generated facts come from generated/roles/tis-ccd-pdc.md (npm run manual:role-facts in backend/);
-never edit them here. Written from the local TISPH build as manual.ccd-pdc.
-Screens to refresh (pop-up redesign in another stream, described as on this build): ccd-pdc-ccd-ada-cheques (the
-dialogs of Post-Dated Cheques), ccd-pdc-ccd-ada-auto-debit (Record payment confirmation).
+never edit them here. Written from the local TISPH build.
 -->
 # CCD-PDC / CCD-ADA {#ccd-pdc-ccd-ada}
 
@@ -10,11 +8,12 @@ dialogs of Post-Dated Cheques), ccd-pdc-ccd-ada-auto-debit (Record payment confi
 
 {{role-summary:tis-ccd-pdc}}
 
-CCD-PDC / CCD-ADA collects the premiums paid by post-dated cheque and by auto-debit arrangement. On the post-dated
-cheque register you work like CCD-PDU (Post-Dated Cheques): you register, deposit, clear, replace and return cheques.
-For a client who pays by authority to debit, you record each debit made by the bank as an official receipt with the
-receipt mode **Authority to Debit**. You also read the collections, the bank reconciliation and the insurer statements
-to answer clients and follow the cheques and debits you posted until the bank statement shows them.
+CCD-PDC / CCD-ADA collects the premiums paid by post-dated cheque and by auto-debit arrangement. On Post-Dated Cheques
+you work like CCD-PDU (Post-Dated Cheques): you encode, forward, deposit and follow cheques, and you approve the
+cancellations CCD-PDU asks for. For a client who pays by authority to debit, you pass the bank's debit advice to
+CCD-BP / QRPh (Receipting), who issues the official receipt; you read the receipts, the collections, the bank
+reconciliation and the insurer statements to answer clients and follow the cheques and debits until the bank statement
+shows them.
 
 You work with CCD-PDU (Post-Dated Cheques) on the cheque register, with CCD-BP / QRPh (Receipting) for the other
 collections and with CCD-Recon (Reconciliation and Reversals), who matches your receipts with the bank statement and
@@ -26,10 +25,11 @@ handles returned debits.
 
 | Task | When | Screen |
 |---|---|---|
-| Read the morning notification of the cheques due for deposit | Every morning | [Notifications](#notifications) |
-| Register post-dated cheques and deposit those due | Daily | [Post-Dated Cheques](#post-dated-cheques) |
-| Record the cleared and bounced cheques | Daily, from the bank's advice | [Post-Dated Cheques](#post-dated-cheques) |
-| Receipt the auto-debits made by the bank | On each debit date, from the bank's debit advice | [Receipts](#verify-payments-and-post-official-receipts) |
+| Read the morning notifications of the cheques due for deposit and to follow up | Every morning | [Notifications](#notifications) |
+| Encode and forward post-dated cheques and deposit those due | Daily | [Post-Dated Cheques](#post-dated-cheques) |
+| Record the partners' advices and the cleared and bounced cheques | Daily | [Post-Dated Cheques](#post-dated-cheques) |
+| Approve or return the cancellations asked by CCD-PDU | Daily, from My Work | [Post-Dated Cheques](#post-dated-cheques) |
+| Check the auto-debits receipted from the bank's debit advice | On each debit date | [Receipts](#verify-payments-and-post-official-receipts) |
 | Check the premiums still open and their ageing | Daily | [Collections](#collections) |
 | Check that your deposits and debits appear on the bank statement | Daily | [Bank Reconciliation](#bank-reconciliation) |
 | Look up an insurer statement when the insurer asks about a payment | As needed | [Insurer Statements](#insurer-statement-reconciliation) |
@@ -39,42 +39,25 @@ handles returned debits.
 
 ### Post-dated cheques {#ccd-pdc-ccd-ada-cheques}
 
-You register, deposit and follow the post-dated cheques on {{menu:/accounts/post-dated-cheques}} exactly as
-CCD-PDU (Post-Dated Cheques) does:
+You encode, forward, deposit and follow the post-dated cheques on {{menu:/accounts/post-dated-cheques}} as CCD-PDU
+(Post-Dated Cheques) does:
 
-- [Register a post-dated cheque](#ccd-pdu-post-dated-cheques-encode)
-- [Deposit a cheque on its date](#ccd-pdu-post-dated-cheques-deposit): the deposit issues the official receipt
-- [Record the bank's answer: cleared or bounced](#ccd-pdu-post-dated-cheques-clear): a bounced cheque cancels its
-  receipt and opens the bill again
-- [Replace, return or cancel a cheque](#ccd-pdu-post-dated-cheques-replace)
+- [Encode the cheques of a client](#ccd-pdu-post-dated-cheques-encode)
+- [Forward cheques to the Insurance Partner](#ccd-pdu-post-dated-cheques-forward)
+- [Record the partner's advice: cleared or bounced](#ccd-pdu-post-dated-cheques-clear)
+- [Deposit a cheque payable to TISPH](#ccd-pdu-post-dated-cheques-deposit)
+- [Cancel, replace or return a cheque](#ccd-pdu-post-dated-cheques-replace)
 
-### Receipt an auto-debit {#ccd-pdc-ccd-ada-auto-debit}
+You also decide the cancellations: on **Cancellation pending** (or from My Work) open the cheque and select **Approve
+cancellation**, or **Return request** with a remark. You never decide a cancellation you asked for. A cheque at TIS is
+then **Cancelled**; one the Insurance Partner holds is pulled out on the next transmittal.
 
-When the bank has debited the client's account under the client's authority to debit:
+### Auto-debits {#ccd-pdc-ccd-ada-auto-debit}
 
-1. Choose {{menu:/accounts/receipts}} and select **Receipt**. **Add Receipts** opens with today's date as **Receipt
-   Date**; change it to the debit date if needed.
-2. Keep **Receipt Type** at **Payment**. Select the **Branch Code** and the **Department Code**.
-3. In **Customer Code**, select the client. The list shows the clients with an open premium and the amount open.
-   **Customer Name** is filled in.
-4. In **Policy Number**, select the policy debited. Keep **Currency Code** at **PHP** and **Transaction Code** at
-   **OR – Official Receipt**.
-5. In **Receipt Mode**, select **Authority to Debit**. In **Reference No. (Optional)**, type the bank's debit
-   reference.
-6. Under **Open bills for policy**, select the bill debited. In **Amount received**, type the amount debited, or
-   select **Pay full balance**.
-7. Select **Record payment**, check the client, the bill, the amount and the **Balance after payment**, and select
-   **Record** with the amount.
-
-The system issues the official receipt number, posts the payment to the bank account and reduces the bill. The
-amount cannot be more than the bill balance; a partial debit leaves the rest open. Back on **Receipts**, print the
-receipt or e-mail it to the client from the confirmation.
-
-![Accounts > Receipts > Add Receipts with the receipt mode Authority to Debit and the bank's debit reference](images/role-tis-ccd-pdc/authority-to-debit-receipt.png)
-
-If the bank reports that a debit failed after you receipted it, tell CCD-Recon (Reconciliation and Reversals), who
-handles the reversals of Cash Control: you do not reverse the receipt yourself. See
-[Reverse a returned cheque](#ccd-recon-reconciliation-and-reversals-returned-cheque).
+Pass the bank's debit advice to CCD-BP / QRPh (Receipting), who issues the official receipt with the receipt mode
+**Authority to Debit** (see [Issue an official receipt](#ccd-bp-qrph-receipting-official-receipt)). Check the receipt on
+{{menu:/accounts/receipts}}. If the bank reports that a debit failed after it was receipted, tell CCD-Recon
+(Reconciliation and Reversals), who reverses the receipt (see [Reverse a receipt](#reverse-a-receipt)).
 
 ### Follow the open premiums {#ccd-pdc-ccd-ada-collections}
 

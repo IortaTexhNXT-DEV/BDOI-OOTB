@@ -1,6 +1,7 @@
 /**
  * Premium warranty monitor. A broker-billed policy must be paid within the premium payment warranty of its insurer
- * (insurance_companies.premium_warranty_days, else collections.default_credit_days) from inception. The deadline moves
+ * (insurance_companies.premium_warranty_days, else collections.corporate_credit_days for a corporate client, else
+ * collections.default_credit_days) from inception. The deadline moves
  * with an approved extension. What must be paid by then is the policy's open premium; on an instalment plan, only the
  * instalments already due.
  *
@@ -23,8 +24,10 @@ const daysBetween = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 86400
 /** Open broker-billed policies with their warranty deadline and premium due (all, or the given policy ids). */
 async function policiesWithPremiumDue(db, policyIds = null) {
   const defaultDays = Number(await getSetting('collections.default_credit_days', 30)) || 0;
+  const corporate = await getSetting('collections.corporate_credit_days', null);
+  const corporateDays = corporate === null || corporate === '' || !Number.isFinite(Number(corporate)) ? null : Number(corporate);
   const rows = (await db.query(`SELECT p.id, p.policy_number, p.inception_date, p.client_id, p.owner_user_id, p.insurance_company_id, c.display_name AS client_name, c.email AS client_email,
-      ic.name AS insurer_name, COALESCE(ic.premium_warranty_days, $1::int) AS warranty_days,
+      ic.name AS insurer_name, COALESCE(ic.premium_warranty_days, CASE WHEN c.client_type = 'corporate' THEN $3::int END, $1::int) AS warranty_days,
       (SELECT max(requested_deadline) FROM premium_warranty_extensions x WHERE x.policy_id = p.id AND x.status = 'approved') AS extended_to,
       (SELECT json_build_object('id', x.id, 'requestedDeadline', x.requested_deadline, 'reason', x.reason, 'requestedBy', x.requested_by) FROM premium_warranty_extensions x
         WHERE x.policy_id = p.id AND x.status = 'pending') AS pending_extension,
@@ -34,7 +37,7 @@ async function policiesWithPremiumDue(db, policyIds = null) {
     FROM policies p LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
     WHERE p.billing_mode <> 'direct' AND p.status IN ('issued', 'active', 'renewed') AND p.inception_date IS NOT NULL
       AND EXISTS (SELECT 1 FROM receivables r WHERE r.policy_id = p.id AND r.status IN ('open', 'partial') AND r.balance > 0)
-      AND ($2::text[] IS NULL OR p.id = ANY($2))`, [defaultDays, policyIds])).rows;
+      AND ($2::text[] IS NULL OR p.id = ANY($2))`, [defaultDays, policyIds, corporateDays])).rows;
   if (!rows.length) return [];
   const bills = (await db.query(`SELECT r.id, r.policy_id, r.amount, r.balance, r.due_date, r.parent_receivable_id, pl.id AS plan_id FROM receivables r
     LEFT JOIN premium_instalment_plans pl ON pl.receivable_id = r.id AND pl.status = 'active'

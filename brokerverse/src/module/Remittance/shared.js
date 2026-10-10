@@ -14,6 +14,7 @@ export const REMITTANCE_ROUTES = {
   reconciliation: "/finance/remittance/reconciliation/insurer-statements",
   statement: (statementId) => `/finance/remittance/reconciliation/statements/${encodeURIComponent(statementId)}`,
   exceptions: "/finance/remittance/exceptions",
+  held: "/finance/remittance/held",
   billing: "/finance/remittance/billing",
   setup: (tab = "schedules") => `/finance/remittance/setup/${tab}`,
 };

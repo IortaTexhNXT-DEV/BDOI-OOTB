@@ -13,6 +13,7 @@ its own permission and optional role list in `report_definitions`.
 | `service.js` | Access check (`canAccess`), catalogue, runs, file generation, download tokens, schedules, `scheduledReport` job handler. |
 | `engine.js` | Reads the screen parameters (`FromDate`, `ReportCriteria`, `Agent` ... and their aliases), builds the SQL around the base query, applies filters, paging, totals and groups. |
 | `queries.js` | The base queries, keyed by `query_name`. Also merges `periodEndQueries.js` (ledger statements and BIR working papers; the balance sheet and the year-to-date columns of the income statement read the fiscal year's opening balances, as the trial balance does) and `bankRecQueries.js`. |
+| `tisphQueries.js` | The TISPH layouts (seed `95_tisph_reports.sql`): CR-16 Financial Statement by Version and Daily GL Balance (grouped by the lines of a financial statement version, the `fsVersion` filter defaulting to `accounting.default_fs_version`, lines with nothing to show left out with `having`); CR-15 Payment Summary, Daily Reversals and the PDC reports; CR-14 Net Remittance fully and partially paid, Premium Report by payment status, Invoice Tracker, Statement of Account per Insurance Partner, Reconciliation Schedule, Insufficient Payments and Overpayments. |
 
 ## Main tables
 
@@ -26,7 +27,9 @@ permission, `query_name`), `report_schedules`, `generated_reports` (files produc
 2. `engine.normalizeParams` reads the dates and filters (missing From Date: `reports.default_range_days` back).
 3. `engine.buildSql` wraps the base query: `SELECT * FROM (<base>) t WHERE <filters>`. The base query receives
    `$1` from date, `$2` to date, then the `extras` (settings or today's business date) as `$3`, `$4` ...
-4. Columns whose name starts with `_` are only for filtering and never returned. Numeric columns in
+4. A query's `defaults` give a filter its setting when the screen leaves it empty; `having` (on the measures as
+   `h."<name>"`) leaves out aggregated rows, such as zero lines.
+5. Columns whose name starts with `_` are only for filtering and never returned. Numeric columns in
    `default_columns` are totalled. A column with `"pdf": false` is left out of the PDF (kept in Excel and CSV), for
    wide reports whose detail columns would not fit a printed page; an empty PDF listing says so under its header.
 

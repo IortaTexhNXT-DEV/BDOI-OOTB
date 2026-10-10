@@ -26,12 +26,15 @@ Remittance Master). Permissions: `read:remittance`, `write:remittance` (prepare,
 | `payments.js` | Insurer payments: the read model of the insurer vouchers with their batch or cheque, the payment record, the batching state, the audited reveal of the account number; the legacy transfers (TRF-), read-only. |
 | `runs.js` | Remittance schedules and their runs: the Setup > Schedules table and the automation state, MSG-RMT-007, the preview, Run now, one run per window, the run history, the job (`runDueSchedules`). |
 | `summary.js` | `GET /remittance/summary`: the counts of the menu entries per user, the run strip and the landing page. |
+| `eligibility.js` | Which policies a run remits: `inception` (Release 1, by inception date) or `fully-paid` (paid in full within the window, each receipt with its proof of payment when the schedule asks for it); payment positions of policies and the exceptions of a missing proof. |
+| `holds.js` | Instalment hold: part-paid policies on an instalment plan kept out of the fully paid remittance until paid (`remittance_holds`), the daily job and the Held policies list. |
+| `billing.js` | Insurer billing run: the billing dates (15th and 26th moved off non-working days), the billing statements drafted per insurer, product line and basis from the remittances approved before the billing date, the runs and the job. |
 
 ## Main tables
 
 `remittances`, `remittance_lines`, `remittance_items`, `remittance_approvals`, `remittance_imports`, `remittance_import_rows`, `remittance_runs`,
 `remittance_allocations`, `commission_debit_notes`, `commission_debit_note_lines`, `commission_debit_note_collections`,
-`direct_bill_items`, `direct_bill_client_payments`, `insurer_refund_credits`. Payment to the insurer is a payment voucher in the disbursements
+`direct_bill_items`, `direct_bill_client_payments`, `insurer_refund_credits`, `remittance_holds`, `insurer_billing_runs`. Payment to the insurer is a payment voucher in the disbursements
 module (`disbursements`, `invoice_lists`).
 
 ## Main flows
@@ -70,6 +73,25 @@ recorded payment, or is paid in full. `GET /direct-bill` and `GET /direct-bill/:
 decision notice link to `/finance/remittance/billing?note=<id>`. Reject and cancel take a reason of the `billing_reject`
 / `billing_cancel` context (`{ reasonCode, note }`, validated with the Reason Codes master; its text is kept as the
 rejection reason or remarks); the free-text `reason` of earlier screens is still accepted.
+
+Eligibility (`eligibility.js`, migration 0521): a remittance schedule says which policies a run takes. `inception`
+(Release 1, `remittance.default_eligibility`) takes the policies incepting in the window; `fully-paid` (the TIS weekly
+schedule) takes those paid in full in the window, and, with "Proof of payment required", only when each receipt
+applied carries its proof (`receipts.proof_key`, attached on the receipt); a policy without it is an exception of type
+EXC-PROOF. Runs on the fully paid basis group the policies per product line. A part-paid policy on an instalment plan
+is held (`remittance.instalment_hold`, job `remittance-hold-check`) and listed on Accounts > Remittance > Held policies
+until its last instalment is paid; `remittance.catch_up_days` lets a run take a policy paid in full after its window.
+
+Insurer billing run (`billing.js`, migration 0522): on the billing days (`insurer_billing.run_days`, 15 and 26, moved
+to the previous working day by `insurer_billing.non_working_day` and the Holiday master) the job `insurer-billing-run`,
+or Finance with Run billing for a billing date, drafts one billing statement per insurer, product line and basis from
+the remittance lines approved before the billing date and not yet billed (`remittance_lines.billing_note_id`): net
+basis (commission kept from the remittance) and the unbilled gross-remittance commission. Gross Amount = commission +
+VAT, EWT = commission x EWT rate, Net Amount Payable = Gross - EWT, due `insurer_billing.due_days` after the billing
+date. A statement is approved by a holder of `approve:insurer-billing` who did not raise or submit it, and only when
+the insurer has a TIN (`NO_TIN`); a net statement is then settled by retention (status `settled`, balance 0). A
+cancelled or rejected statement releases its lines for the next run. `GET /direct-bill/:id/export?format=xlsx|csv`
+writes the statement with its schedule.
 
 Approval: every work item that needs approval opens a row in `remittance_approvals`. Approval limits are the
 Authority Matrix's (Master > User Management > Authority Matrix): transaction type `remittance` for remittances and
