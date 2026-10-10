@@ -20,6 +20,7 @@ import { notifyDecision } from '../notifications/approvals.js';
 import { enqueue, kick, registerJobType } from '../renewals/queue.js';
 import * as svc from './service.js';
 import { undoBatch } from './undo.js';
+import { afterBatchChange } from './reconciliation.js';
 
 export const QUEUE = 'data-load';
 export const JOB_TYPES = { validate: 'data-load.validate', load: 'data-load.load', undo: 'data-load.undo' };
@@ -104,6 +105,7 @@ async function loadJob(payload, _ctx, job) {
     await audit(by, { entity: 'data_load_batch', entityId: r.batch.id, action: 'load', after: { loadNumber: r.batch.loadNumber, kit: r.batch.kit, loadedCounts: r.batch.loadedCounts,
       validRowsOnly: r.batch.validRowsOnly, loadMs: r.batch.loadMs } });
     await tell(r.batch, r.batch.submittedById || r.batch.createdById, payload.user.id, 'loaded', true, `${counts.created} created, ${counts.updated} updated`);
+    await afterBatchChange(r.batch, payload.user);
     return { batchId: r.batch.id, status: r.batch.status, ...counts };
   } catch (e) {
     const b = await svc.getBatch(payload.batchId);
@@ -117,6 +119,7 @@ async function undoJob(payload, _ctx, job) {
   try {
     const r = await undoBatch(payload.batchId, payload.user, { jobId: job.id, ...reporters('undo', payload.batchId, job.id) });
     await tell(r.batch, r.batch.undoRequestedById, payload.user.id, 'undone', true, `${r.removed} record(s) removed, ${r.restored} restored`);
+    await afterBatchChange(r.batch, payload.user);
     return { batchId: r.batch.id, status: r.batch.status, removed: r.removed, restored: r.restored };
   } catch (e) {
     const b = await svc.getBatch(payload.batchId);

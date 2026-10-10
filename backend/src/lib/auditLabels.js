@@ -57,6 +57,7 @@ export const ENTITY_LABELS = {
   master_type: 'Master type', document: 'Document', database: 'Database', item: 'Item', task: 'Task',
   cas_document: 'CAS document', cas_book_print: 'Book print', opening_balances: 'Opening balance',
   go_live_lock: 'Go-live lock', golive_setting: 'Go-live setting', post_dated_cheque: 'Post-dated cheque',
+  migration_reconciliation: 'Migration reconciliation', sap_opening_file: 'SAP opening file',
 };
 
 /** "master:insurance-company" -> "Insurance company" (or the master type label when given). */
@@ -83,6 +84,8 @@ const ACTION_VERBS = {
   validate: 'validated', load: 'loaded', expire: 'expired', interrupted: 'interrupted, nothing saved', 'undo-request': 'undo requested', 'undo-approve': 'undo approved',
   'undo-reject': 'undo rejected', 'undo-withdraw': 'undo request withdrawn', 'download-file': 'uploaded file downloaded', 'export-current-data': 'current data exported',
   relock: 'unlock ended, imports closed again', 'refused-locked': 'import refused (go-live locked)', 'cutover-date': 'cutover date changed',
+  recompute: 'recomputed', 'legacy-update': 'legacy figures changed', tolerance: 'tolerance set', explain: 'difference explained', accept: 'difference accepted',
+  sign: 'signed', supersede: 'superseded by a later load', download: 'downloaded',
 };
 
 /** Sign-in events read as what the user did. */

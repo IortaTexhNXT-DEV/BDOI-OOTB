@@ -16,6 +16,8 @@ import * as golive from './golive.js';
 import * as cmp from './comparisons.js';
 import * as maps from './maps.js';
 import * as naming from './naming.js';
+import { afterBatchChange } from './reconciliation.js';
+import { defineReconciliationRoutes } from './reconciliationRoutes.js';
 
 /**
  * Data Migration & Go-Live: the configuration and migration workbooks (the go-live scripts, npm run rehearsal:golive
@@ -23,7 +25,7 @@ import * as naming from './naming.js';
  * the whole kit or some of its objects; upload (validated as a dry run in a job, nothing saved: each row New, Changed,
  * Unchanged, Duplicate or Error), review the rows, resolve the duplicates, download the rows in error, submit, approval
  * by a second user (the load runs as a job), history, undo of a migration load (approved, a job) and the reconciliation
- * of a migration load; the cutover date and the two-person go-live lock with its scoped, time-boxed unlock; the value
+ * of the migration loads of a run (lines, tie-outs, differences, sign-off, report; reconciliationRoutes.js); the cutover date and the two-person go-live lock with its scoped, time-boxed unlock; the value
  * maps of the legacy code tables; the document file naming check; the environment comparison (an export of another
  * environment compared with this one, or two exports with each other: never loads). Administrators and the roles
  * granted read:data-load / write:data-load / approve:data-load (migrations 0244, 0247 and 0440); the downloads and the
@@ -35,6 +37,7 @@ const WORKSPACE = 'Master > System Configuration > Data Migration & Go-Live';
 const canRead = [requireAuth, requirePermission('read:data-load', 'write:data-load')];
 const canWrite = [requireAuth, requirePermission('write:data-load')];
 const canApprove = [requireAuth, requirePermission('approve:data-load')];
+const canWriteOrApprove = [requireAuth, requirePermission('write:data-load', 'approve:data-load')];
 const XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
 const sendXlsx = (res, fileName, buffer) => {
@@ -378,6 +381,7 @@ define({
   handler: async (req, res) => {
     const validRowsOnly = flag(req.body?.validRowsOnly);
     const r = await svc.loadDirect(req.params.id, req.user, { validRowsOnly, req });
+    await afterBatchChange(r.batch, req.user);
     await audit(req, { entity: 'data_load_batch', entityId: r.batch.id, action: 'load', after: { loadNumber: r.batch.loadNumber, kit: r.batch.kit, loadedCounts: r.batch.loadedCounts, validRowsOnly,
       newUsers: r.temporaryPasswords.map((u) => u.username) } });
     const counts = Object.values(r.batch.loadedCounts || {}).reduce((a, c) => ({ created: a.created + (c.created || 0), updated: a.updated + (c.updated || 0) }), { created: 0, updated: 0 });
@@ -512,6 +516,8 @@ define({
     ok(res, r, `${r.actionLabel} withdrawn`);
   },
 });
+
+defineReconciliationRoutes(define, { canRead, canWrite, canApprove, canWriteOrApprove, WORKSPACE, sendXlsx });
 
 export default router;
 export const mount = '/data-load';
