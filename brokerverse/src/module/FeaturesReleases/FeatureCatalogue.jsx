@@ -46,7 +46,7 @@ const FeatureCatalogue = () => {
     }
   };
 
-  const tierOptions = [{ label: t("features.allTiers"), value: null }, ...TIERS.map((code) => ({ label: t(`features.tiers.${code}`), value: code }))];
+  const tierOptions = TIERS.map((code) => ({ label: t(`features.tiers.${code}`), value: code }));
   const name = (r) => (
     <span className="fr-name">
       <Button type="button" link label={r.name} className="fr-link" onClick={() => setOpen(r)} />
@@ -67,7 +67,8 @@ const FeatureCatalogue = () => {
               <i className="pi pi-search" />
               <InputText value={search} placeholder={t("features.search")} aria-label={t("features.search")} onChange={(e) => setSearch(e.target.value)} />
             </span>
-            <Dropdown value={tier} options={tierOptions} onChange={(e) => setTier(e.value)} className="bv-list-filter" aria-label={t("features.columns.tier")} />
+            <Dropdown value={tier} options={tierOptions} onChange={(e) => setTier(e.value ?? null)} placeholder={t("features.allTiers")} showClear className="bv-list-filter"
+              aria-label={t("features.columns.tier")} />
           </div>
           <div className="bv-loading-host">
             <LoadingBar active={refreshing} />

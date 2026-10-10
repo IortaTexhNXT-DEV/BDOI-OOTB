@@ -156,7 +156,7 @@ const PlatformFeatures = () => {
   const onChangeAction = (action, row) => (action.code === "withdraw" ? withdraw(row) : decide(row, action.code));
 
   const switchable = selected.filter((r) => !r.alwaysOn);
-  const tierOptions = [{ label: t("features.allTiers"), value: null }, ...TIERS.map((code) => ({ label: t(`features.tiers.${code}`), value: code }))];
+  const tierOptions = TIERS.map((code) => ({ label: t(`features.tiers.${code}`), value: code }));
   const headerActions = (
     <>
       <Button type="button" icon="pi pi-download" label={t("features.promote.export")} outlined onClick={() => featuresService.exportState().catch((e) => notifyResult("error", e.message))} />
@@ -178,7 +178,8 @@ const PlatformFeatures = () => {
               <i className="pi pi-search" />
               <InputText value={search} placeholder={t("features.search")} aria-label={t("features.search")} onChange={(e) => setSearch(e.target.value)} />
             </span>
-            <Dropdown value={tier} options={tierOptions} onChange={(e) => setTier(e.value)} className="bv-list-filter" aria-label={t("features.columns.tier")} />
+            <Dropdown value={tier} options={tierOptions} onChange={(e) => setTier(e.value ?? null)} placeholder={t("features.allTiers")} showClear className="bv-list-filter"
+              aria-label={t("features.columns.tier")} />
             <span className="fr-toolbar-actions">
               <Button type="button" label={t("features.enableSelected", { count: switchable.length })} disabled={!switchable.length}
                 onClick={() => open("enable", { features: switchable.map((r) => r.key) })} data-testid="enable-selected" />

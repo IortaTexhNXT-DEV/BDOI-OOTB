@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, enableFeatures } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { today } from '../src/lib/dates.js';
 
@@ -27,6 +27,8 @@ async function draftQuote(email = 'resp.customer@example.ph') {
 
 beforeAll(async () => {
   ctx = await setup();
+  // the online approval of a quotation by the client is a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['quote-online-approval']);
   sales = await persona('cr.sales', ['sales']);
   claims = await persona('cr.claims', ['claims']);
 });

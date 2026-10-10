@@ -170,7 +170,9 @@ const STATUS_NAME = { [ON]: 'Enabled', [READ_ONLY]: 'Read-only', [OFF]: 'Not ena
 export async function catalogueView({ full = false } = {}) {
   const state = await featureState();
   const names = new Map((await many('SELECT id, display_name FROM users WHERE id IN (SELECT approved_by FROM feature_entitlements)')).map((u) => [u.id, u.display_name]));
-  return FEATURES.map((f) => {
+  // Phase 1, platform, Phase 2, future releases; the catalogue order inside a tier
+  const ordered = [...FEATURES].sort((a, b) => TIERS[a.tier].order - TIERS[b.tier].order);
+  return ordered.map((f) => {
     const status = state.status(f.key);
     const entry = state.rows.get(f.key);
     const row = entry?.row;

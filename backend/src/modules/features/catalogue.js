@@ -391,13 +391,10 @@ export const FEATURES = Object.freeze([
     requirements: ['TIS-BRD-COMM-01', 'TIS-BRD-COMM-03', 'TIS-BRD-COMM-04', 'TIS-BRD-RPT-OPS-05', 'TIS-BRD-RPT-OPS-06', 'TIS-BRD-RPT-OPS-08', 'TIS-BRD-RPT-OPS-09',
       'PBSM-M15-REMIT-WEEKLY', 'FR-RMT-001'],
     menus: ['Accounts > Remittance > Remittances', 'Accounts > Remittance > Approvals', 'Accounts > Remittance > Insurer payments', 'Accounts > Remittance > Reconciliation',
-      'Accounts > Remittance > Exceptions', 'Accounts > Remittance > Insurer billing', 'Accounts > Remittance > Setup', 'Accounts > Remittance > Settlement'],
+      'Accounts > Remittance > Exceptions', 'Accounts > Remittance > Insurer billing', 'Accounts > Remittance > Setup', 'Accounts > Remittance > Settlement',
+      // the earlier address of the insurer statements, opened as Remittance > Reconciliation (not a menu of the TISPH roles)
+      'Accounts > Insurer Reconciliation > Insurer Statements'],
     jobs: ['remittance-schedules'],
-  }),
-  feature({
-    key: 'insurer-statements', name: 'Insurer statement reconciliation (generic)', module: 'Accounts', tier: FUT,
-    description: 'Generic insurer statement screen; TISPH reconciles insurer statements under Remittance > Reconciliation',
-    menus: ['Accounts > Insurer Reconciliation > Insurer Statements'],
   }),
   feature({
     key: 'general-ledger', name: 'Journals and general ledger', module: 'Accounts', tier: P1,

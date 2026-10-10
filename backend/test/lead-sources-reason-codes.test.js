@@ -39,7 +39,7 @@ describe('masters', () => {
     const reasons = await q(`SELECT data->>'context' AS context, count(*)::int AS n FROM master_records WHERE type_code = 'reason-code'
       AND data->>'context' NOT IN ('period_close', 'period_reopen', 'year_end_reverse', 'year_end_cancel', 'cas_print_void', 'cas_document_change', 'incentive_batch_reject',
       'incentive_adjustment', 'sales_invoice_cancel', 'invoice_payment_cancel', 'access_change', 'delegation', 'delegation_end', 'sod_exception', 'access_review')
-      AND data->>'context' !~ '^(remittance|exception|reconciliation|confirmation|payment|billing)_' GROUP BY 1 ORDER BY 1`);
+      AND data->>'context' !~ '^(remittance|exception|reconciliation|confirmation|payment|billing|feature)_' GROUP BY 1 ORDER BY 1`);
     expect(reasons).toEqual([{ context: 'adjustment', n: 1 }, { context: 'decline', n: 10 }, { context: 'lapse', n: 6 }, { context: 'non-materialise', n: 1 },
       { context: 'reassignment', n: 8 }, { context: 'refund', n: 1 }, { context: 'repudiation', n: 13 }]);
     const type = (await q("SELECT fields FROM master_types WHERE code = 'reason-code'"))[0];
