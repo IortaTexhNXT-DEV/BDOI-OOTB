@@ -158,6 +158,10 @@ const COMMON = {
 
 /** Labels of one record type (override COMMON). */
 const BY_ENTITY = {
+  supplier_invoice: {
+    supplierInvoiceNo: 'Supplier invoice no.', voucherNumber: 'Voucher number', ewtCode: 'EWT code', ewtRate: 'EWT rate', ewtAmount: 'EWT',
+    inputVat: 'Input VAT', payableAmount: 'Payable to supplier',
+  },
   claim: {
     claimStatus: 'Claim status', insuranceCompanyClaimNumber: 'Insurer claim number', insurerClaimNumber: 'Insurer claim number',
     dateOfIncident: 'Date of loss', timeOfIncident: 'Time of loss', addressOfIncident: 'Place of loss', cityOfIncident: 'City / municipality of loss',

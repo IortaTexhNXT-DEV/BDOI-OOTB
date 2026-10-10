@@ -202,7 +202,9 @@ const isInternalId = (v) => typeof v === 'number' || (typeof v === 'string' && (
 /** The order of the facts of a created record: its number, the parties, status and type, dates, amounts, then the rest. */
 const factRank = (path) => {
   const k = norm(leaf(path));
-  if (/(number|no|code)$/.test(k)) return 0;
+  // the record's own number or code first; a code that classifies it (EWT code, transaction code) reads with the types
+  if (/(number|no)$/.test(k) || k === 'code') return 0;
+  if (/code$/.test(k)) return 3;
   if (/name$/.test(k) || /^(client|insurer|insured|supplier|product)/.test(k)) return 1;
   if (STATUS.test(k)) return 2;
   if (ENUM.test(k)) return 3;

@@ -161,7 +161,6 @@ const SupplierInvoices = () => {
                 { label: t("opsAcc.ap.vat"), value: view.inputVat, type: "amount" },
                 { label: t("opsAcc.ap.gross"), value: view.grossAmount, type: "amount" },
                 { label: view.ewtCode ? `${t("opsAcc.ap.ewt")} (${view.ewtCode} ${view.ewtRate}%)` : t("opsAcc.ap.ewt"), value: view.ewtAmount, type: "amount" },
-                { label: t("opsAcc.ap.payable"), value: view.payableAmount, type: "amount" },
                 { label: t("opsAcc.confirmations.journal"), value: view.journalNumber },
                 { label: t("opsAcc.confirmations.preparedBy"), value: view.createdBy },
                 { label: t("opsAcc.confirmations.approvedBy"), value: view.approvedBy },

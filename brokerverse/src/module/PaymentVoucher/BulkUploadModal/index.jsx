@@ -1,11 +1,10 @@
 import { useState, useRef } from "react";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
-import { FileUpload } from "primereact/fileupload";
 import { Toast } from "primereact/toast";
 import { ProgressBar } from "primereact/progressbar";
 import { disbursementsService } from "../../../services/disbursementsService";
-import SvgUpload from "../../../assets/agentIcon/SvgUpload";
+import FileField from "../../../components/FileField";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { downloadBulkUploadTemplate } from "../../../agentModule/component/bulkUploadTemplate";
@@ -14,7 +13,6 @@ import "./index.scss";
 const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
   const { t } = useTranslation();
   const toast = useRef(null);
-  const fileUploadRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadResult, setUploadResult] = useState(null);
@@ -49,11 +47,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
         // Store the upload result to show processing status
         setUploadResult(data);
         
-        // Clear selected file after successful upload
         setSelectedFile(null);
-        if (fileUploadRef.current) {
-          fileUploadRef.current.clear();
-        }
         
         // Show success message
         toast.current.show({
@@ -83,11 +77,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
         life: 3000
       });
       
-      // Clear selected file on error
       setSelectedFile(null);
-      if (fileUploadRef.current) {
-        fileUploadRef.current.clear();
-      }
     } finally {
       setLoading(false);
     }
@@ -96,9 +86,6 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
   const handleClose = () => {
     setSelectedFile(null);
     setUploadResult(null);
-    if (fileUploadRef.current) {
-      fileUploadRef.current.clear();
-    }
     onHide();
   };
 
@@ -106,7 +93,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
     <Dialog
       visible={visible}
       onHide={handleClose}
-      header="Bulk Upload Disbursements"
+      header={t("paymentVoucher.bulkUploadTitle")}
       className="bulk-upload-modal"
       style={{ width: '600px' }}
       modal
@@ -116,44 +103,24 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
         
         {!uploadResult ? (
           <div className="bulk-upload-content">
-            <div className="upload-instructions">
-              <div className="instructions-header">
-                <h4>{t("paymentVoucher.instructions")}</h4>
-                <Button
-                  label={t("paymentVoucher.downloadTemplate")}
-                  icon="pi pi-download"
-                  className="p-button-sm p-button-text"
-                  onClick={handleDownloadTemplate}
-                />
-              </div>
-              <ul>
-                <li>{t("paymentVoucher.instruction1")}</li>
-                <li>{t("paymentVoucher.instruction2")}</li>
-                <li>{t("paymentVoucher.instruction3")}</li>
-                <li>{t("paymentVoucher.instruction4")}</li>
-              </ul>
+            <div className="upload-template">
+              <Button
+                label={t("paymentVoucher.downloadTemplate")}
+                icon="pi pi-download"
+                className="p-button-sm p-button-text p-0"
+                onClick={handleDownloadTemplate}
+              />
             </div>
 
             <div className="upload-area">
-              <FileUpload
-                ref={fileUploadRef}
-                mode="basic"
-                name="file"
+              <FileField
+                id="pv-bulk-upload-file"
                 accept=".xlsx,.csv"
-                maxFileSize={10485760}
-                customUpload
-                auto={false}
-                chooseLabel={selectedFile ? selectedFile.name : t("paymentVoucher.chooseFile")}
-                onSelect={handleFileSelect}
+                value={selectedFile}
+                onChange={(file) => (file ? handleFileSelect({ files: [file] }) : setSelectedFile(null))}
                 disabled={loading}
+                hint={t("paymentVoucher.maxFileSize10MB")}
               />
-              {!selectedFile && (
-                <div className="upload-placeholder">
-                  <SvgUpload />
-                  <p>{t("paymentVoucher.selectExcelToUpload")}</p>
-                  <span>{t("paymentVoucher.maxFileSize10MB")}</span>
-                </div>
-              )}
             </div>
 
             {loading && (
@@ -166,7 +133,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
             <div className="bulk-upload-footer">
               <Button
                 label={t("common.cancel")}
-                className="p-button-text"
+                outlined
                 onClick={handleClose}
                 disabled={loading}
               />

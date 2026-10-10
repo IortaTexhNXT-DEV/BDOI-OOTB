@@ -184,6 +184,8 @@ const LineDetailDrawer = ({
                   outlined
                   disabled={
                     actionLoading || ratePct === null || ratePct === undefined
+                    // nothing to apply until the rate differs from the line's own
+                    || (Number(rateFixed || 0) === Number(line.comsubFixed || 0) && Number(ratePct) === Number(line.comsubPct))
                   }
                   onClick={applyRateOverride}
                 />

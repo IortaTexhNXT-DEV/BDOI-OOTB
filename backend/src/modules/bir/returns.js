@@ -316,7 +316,7 @@ async function compute2551Q(db, p) {
   const penalties = prior ? Number(prior.penalties) : 0;
   return {
     header: headerOf(id, [['Year ended', `12/${p.year}`], ['Quarter', `Q${p.quarter}`], ['Due date', await dueText(quarterlyDueDate(p))],
-      ['VAT registered', id.vatRegistered ? 'Yes (percentage tax not normally due: check with the tax adviser)' : 'No']]),
+      ['VAT registered', id.vatRegistered ? 'Yes' : 'No']]),
     items: [
       { no: '13', label: `${atc} gross sales / receipts`, taxBase: gross, rate, amount: tax, schedule: true },
       { no: '14', label: 'Total tax due', amount: tax },

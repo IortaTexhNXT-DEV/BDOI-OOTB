@@ -23,7 +23,7 @@ const queryOf = (params) => new URLSearchParams(Object.entries(params).filter(([
 const FilingDialog = ({ ret, filing, amended, onHide, onSaved, toast }) => {
   const { t } = useTranslation();
   const [v, setV] = useState(() => ({
-    dateFiled: toDate(filing?.dateFiled) || new Date(), filingReference: filing?.filingReference || "", amountPaid: filing ? filing.amountPaid : Math.max(ret.taxDue, 0),
+    dateFiled: toDate(filing?.dateFiled) || new Date(), filingReference: filing?.filingReference || "", amountPaid: filing ? filing.amountPaid : Math.max(Number(ret.taxDue) || 0, 0),
     penalties: filing?.penalties || 0, paymentDate: toDate(filing?.paymentDate), paymentReference: filing?.paymentReference || "", paymentChannel: filing?.paymentChannel || "",
     remarks: filing?.remarks || "",
   }));
@@ -41,17 +41,22 @@ const FilingDialog = ({ ret, filing, amended, onHide, onSaved, toast }) => {
     }
   };
   return (
-    <Dialog className="pe-dialog" visible header={`${amended ? t("birTax.amendedFiling") : t("birTax.recordFiling")}: ${ret.form} ${ret.period.label}`} style={{ width: "min(720px, 95vw)" }} onHide={onHide}
-      footer={<div><Button label={t("periodEnd.cancel")} text onClick={onHide} /><Button label={t("periodEnd.save")} icon="pi pi-save" onClick={save} disabled={!v.dateFiled} /></div>}>
+    <Dialog className="pe-dialog bv-centered" visible header={`${amended ? t("birTax.amendedFiling") : t("birTax.recordFiling")}: ${ret.form} ${ret.period.label}`} style={{ width: "min(640px, 95vw)" }} onHide={onHide}
+      footer={<div><Button label={t("periodEnd.cancel")} outlined onClick={onHide} /><Button label={amended ? t("birTax.recordAmended") : t("birTax.recordFiling")} icon="pi pi-check" onClick={save} disabled={!v.dateFiled} /></div>}>
+      <KeyValueGrid columns={3} className="mb-3" items={[
+        { label: t("birTax.form"), value: ret.form },
+        { label: t("birTax.period"), value: ret.period.label },
+        { label: t("birTax.taxDue"), value: ret.taxDue, type: "amount" },
+      ]} />
       <div className="grid">
-        <div className="col-12 md:col-4"><label>{t("birTax.dateFiled")} *</label><Calendar value={v.dateFiled} onChange={(e) => set({ dateFiled: e.value })} dateFormat={calendarDateFormat()} showIcon className="w-full" /></div>
-        <div className="col-12 md:col-8"><label>{t("birTax.filingReference")}</label><InputText value={v.filingReference} onChange={(e) => set({ filingReference: e.target.value })} className="w-full" /></div>
-        <div className="col-12 md:col-4"><label>{t("birTax.amountPaid")} *</label><InputNumber value={v.amountPaid} onValueChange={(e) => set({ amountPaid: e.value })} minFractionDigits={2} maxFractionDigits={2} className="w-full" /></div>
-        <div className="col-12 md:col-4"><label>{t("birTax.penalties")}</label><InputNumber value={v.penalties} onValueChange={(e) => set({ penalties: e.value })} minFractionDigits={2} maxFractionDigits={2} className="w-full" /></div>
-        <div className="col-12 md:col-4"><label>{t("birTax.paymentDate")}</label><Calendar value={v.paymentDate} onChange={(e) => set({ paymentDate: e.value })} dateFormat={calendarDateFormat()} showIcon showButtonBar className="w-full" /></div>
-        <div className="col-12 md:col-6"><label>{t("birTax.paymentReference")}</label><InputText value={v.paymentReference} onChange={(e) => set({ paymentReference: e.target.value })} className="w-full" /></div>
-        <div className="col-12 md:col-6"><label>{t("birTax.paymentChannel")}</label><InputText value={v.paymentChannel} placeholder="eFPS, eBIRForms, LANDBANK Link.BizPortal" onChange={(e) => set({ paymentChannel: e.target.value })} className="w-full" /></div>
-        <div className="col-12"><label>{t("periodEnd.remarks")}</label><InputTextarea value={v.remarks} rows={2} onChange={(e) => set({ remarks: e.target.value })} className="w-full" /></div>
+        <div className="col-12 md:col-6"><label htmlFor="bir-filed">{t("birTax.dateFiled")} *</label><Calendar inputId="bir-filed" value={v.dateFiled} onChange={(e) => set({ dateFiled: e.value })} dateFormat={calendarDateFormat()} showIcon className="w-full" /></div>
+        <div className="col-12 md:col-6"><label htmlFor="bir-ref">{t("birTax.filingReference")}</label><InputText id="bir-ref" value={v.filingReference} onChange={(e) => set({ filingReference: e.target.value })} className="w-full" /></div>
+        <div className="col-12 md:col-6"><label htmlFor="bir-paid">{t("birTax.amountPaid")} *</label><InputNumber inputId="bir-paid" value={v.amountPaid} onValueChange={(e) => set({ amountPaid: e.value })} minFractionDigits={2} maxFractionDigits={2} className="w-full" /></div>
+        <div className="col-12 md:col-6"><label htmlFor="bir-pen">{t("birTax.penalties")}</label><InputNumber inputId="bir-pen" value={v.penalties} onValueChange={(e) => set({ penalties: e.value })} minFractionDigits={2} maxFractionDigits={2} className="w-full" /></div>
+        <div className="col-12 md:col-6"><label htmlFor="bir-paydate">{t("birTax.paymentDate")}</label><Calendar inputId="bir-paydate" value={v.paymentDate} onChange={(e) => set({ paymentDate: e.value })} dateFormat={calendarDateFormat()} showIcon showButtonBar className="w-full" /></div>
+        <div className="col-12 md:col-6"><label htmlFor="bir-payref">{t("birTax.paymentReference")}</label><InputText id="bir-payref" value={v.paymentReference} onChange={(e) => set({ paymentReference: e.target.value })} className="w-full" /></div>
+        <div className="col-12"><label htmlFor="bir-channel">{t("birTax.paymentChannel")}</label><InputText id="bir-channel" value={v.paymentChannel} placeholder={t("birTax.paymentChannelPlaceholder")} onChange={(e) => set({ paymentChannel: e.target.value })} className="w-full" /></div>
+        <div className="col-12"><label htmlFor="bir-remarks">{t("periodEnd.remarks")}</label><InputTextarea id="bir-remarks" value={v.remarks} rows={2} onChange={(e) => set({ remarks: e.target.value })} className="w-full" /></div>
       </div>
     </Dialog>
   );

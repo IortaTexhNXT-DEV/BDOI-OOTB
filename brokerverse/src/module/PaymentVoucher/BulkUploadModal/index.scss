@@ -84,10 +84,18 @@
     }
   }
 
+  .upload-template {
+    margin-bottom: 0.75rem;
+  }
+
+  // the actions sit under a divider like the footer of every other dialog
   .bulk-upload-footer {
     display: flex;
     gap: 0.5rem;
     justify-content: flex-end;
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-border);
   }
 }
 

@@ -120,7 +120,7 @@ const MessageTemplates = () => {
         </TabView>
       </div>
 
-      <Dialog className="pe-dialog" header={editing ? (editing.isNew ? t("integrations.newTemplate") : v.code) : ""} visible={!!editing} style={{ width: "min(860px, 96vw)" }} onHide={() => setEditing(null)}
+      <Dialog className="pe-dialog" header={editing ? (editing.isNew ? t("integrations.newTemplate") : t("integrations.editTemplate", { name: v.name || v.code })) : ""} visible={!!editing} style={{ width: "min(860px, 96vw)" }} onHide={() => setEditing(null)}
         footer={<div><Button label={t("integrations.cancel")} text onClick={() => setEditing(null)} /><Button label={t("integrations.save")} icon="pi pi-save" onClick={save} disabled={!v?.code || !v?.name || !v?.body} /></div>}>
         {editing && (
           <div className="grid">

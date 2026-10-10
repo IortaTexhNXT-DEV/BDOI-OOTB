@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
-import { Message } from "primereact/message";
 import { Toast } from "primereact/toast";
 import birTaxService from "../../services/birTaxService";
 import ReturnView from "./ReturnView";
@@ -45,13 +44,12 @@ const SingleReturn = ({ form }) => {
         {!annual && <QuarterPicker value={quarter} onChange={setQuarter} />}
         {annual && <Button icon="pi pi-download" outlined label={t("birTax.datFile")} onClick={datDownload} />}
       </PageHeader>
-      {!annual && vatRegistered && <Message severity="info" className="w-full mb-2" text={t("birTax.vatRegisteredNote")} />}
       {ret && (
         <Kpis items={annual
           ? [{ label: t("birTax.payees"), value: s3?.rows.length || 0 }, { label: t("birTax.incomePayments"), value: money(s3?.totals.incomePayment || 0) },
             { label: t("birTax.taxWithheld"), value: money(s3?.totals.taxWithheld || 0) }]
           : [{ label: t("birTax.grossSales"), value: money(ret.schedules[0].totals.grossSales) }, { label: t("birTax.rate"), value: `${ret.rate}%` },
-            { label: t("birTax.taxDue"), value: money(ret.taxDue) }]} />
+            { label: t("birTax.taxDue"), value: money(ret.taxDue) }, { label: t("birTax.vatRegistered"), value: vatRegistered ? t("common.yes") : t("common.no") }]} />
       )}
       <ReturnView ret={ret} toast={toast} onChanged={load} />
     </div>
