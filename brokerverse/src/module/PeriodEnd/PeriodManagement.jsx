@@ -8,7 +8,7 @@ import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import periodEndService from "../../services/periodEndService";
-import { PageHeader, StatusTag, date, dateTime, money, showError, showSuccess } from "./common";
+import { PageHeader, StatusTag, date, dateTime, money, showError, showSuccess, yearLabel } from "./common";
 import { hasPermission } from "../../utils/canOpen";
 import { useStableLoad } from "../../hooks/useStableLoad";
 import LoadingBar from "../../components/LoadingBar";
@@ -130,7 +130,7 @@ const PeriodManagement = () => {
     <div className="pe-page">
       <Toast ref={toast} />
       <PageHeader title={t("periodEnd.periodManagement")} trail={[t("periodEnd.periodManagement")]} help={t("periodManagement.help")}>
-        <Dropdown value={selected} options={(years || []).map((y) => ({ label: `${y.code} (${t(`periodEnd.status.${y.status}`)})`, value: y.code }))}
+        <Dropdown value={selected} options={(years || []).map((y) => ({ label: yearLabel(t, y), value: y.code }))}
           onChange={(e) => setSelected(e.value)} style={{ minWidth: 220 }} aria-label={t("periodEnd.fiscalYear")} />
         {canWrite && next && <Button type="button" icon="pi pi-plus" label={t("periodEnd.nextFiscalYear")} onClick={() => setCreating(next)} />}
         {canWrite && (

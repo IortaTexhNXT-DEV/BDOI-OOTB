@@ -6344,24 +6344,17 @@
       "cancel": "ยกเลิกรอบการปิด"
     },
     "dialog": {
-      "closeMessage": "ผ่านรายการปิดบัญชีในงวด {{period}} ลงวันที่ {{date}} และยกยอดคงเหลือไปยัง {{fiscalYear}}",
-      "reverseMessage": "ยกเลิกการปิดปี {{fiscalYear}} ตามเหตุผลของคำขอ",
-      "withdrawMessage": "ถอนคำขอยกเลิกการปิดปี {{fiscalYear}} ยังคงปิดอยู่",
-      "cancelMessage": "ยกเลิกรอบการปิด {{runNumber}}",
       "closeTitle": "ปิดปีบัญชี {{fiscalYear}}",
-      "closeConsequence": "งวดบัญชีของ {{fiscalYear}} จะถูกล็อก และไม่สามารถผ่านรายการได้จนกว่าจะยกเลิกการปิดปี",
       "requestTitle": "ขอยกเลิกการปิดปี {{fiscalYear}}",
-      "requestConsequence": "ผู้จัดการฝ่ายบัญชีคนอื่นเป็นผู้อนุมัติการยกเลิก",
       "reverseTitle": "ยกเลิกการปิดปี {{fiscalYear}}",
-      "reverseConsequence": "รายการปิดบัญชีจะถูกกลับรายการ ยอดยกมาของ {{fiscalYear}} จะถูกลบ และงวดบัญชีจะถูกปลดล็อก",
       "withdrawTitle": "ถอนคำขอยกเลิกการปิดปี",
       "keepRequest": "เก็บคำขอไว้",
       "cancelTitle": "ยกเลิกรอบการปิด {{runNumber}}",
-      "cancelConsequence": "{{fiscalYear}} จะกลับเป็นสถานะเปิด",
       "keepRun": "เก็บรอบการปิดไว้",
       "adjustmentTitle": "รายการปรับปรุง {{fiscalYear}}",
-      "adjustmentConsequence": "ผ่านรายการในงวดปรับปรุงหลังจากผู้ใช้คนที่สองอนุมัติ",
-      "submitAdjustment": "ส่งเพื่ออนุมัติ"
+      "submitAdjustment": "ส่งเพื่ออนุมัติ",
+      "startTitle": "เริ่มการปิดบัญชีสิ้นปี {{fiscalYear}}",
+      "prerequisitesFailed": "เงื่อนไขเบื้องต้นที่ไม่ผ่าน"
     },
     "toast": {
       "checked": "ตรวจสอบแล้ว",
@@ -6419,7 +6412,8 @@
       "incentive_batch_reject": "การปฏิเสธชุดคำนวณค่าตอบแทนจูงใจ",
       "sales_invoice_cancel": "การยกเลิกใบกำกับภาษีขาย",
       "invoice_payment_cancel": "การยกเลิกการรับชำระตามใบกำกับภาษี",
-      "incentive_adjustment": "การปรับปรุงรายการค่าตอบแทนจูงใจ"
+      "incentive_adjustment": "การปรับปรุงรายการค่าตอบแทนจูงใจ",
+      "year_end_cancel": "การยกเลิกรายการปิดบัญชีสิ้นปี"
     }
   },
   "birTax": {

@@ -56,6 +56,9 @@ describe('starting a year-end close', () => {
     run = started.body.data;
     expect(run).toMatchObject({ fiscalYear: 'FY2025', status: 'draft', preparedBy: ids['ye.mgr1'], preparedByName: 'Manager ye.mgr1' });
     expect(run.checks.find((c) => c.code === 'periods_closed').status).toBe('failed');
+    // a run is cancelled with a reason of the year_end_cancel context only
+    expect((await mgr1('post', `/period-end/year-end/${run.id}/cancel`).send({})).status).toBe(400);
+    expect((await mgr1('post', `/period-end/year-end/${run.id}/cancel`).send({ reasonCode: 'YER-AUDITADJ' })).status).toBe(400);
 
     const years = (await maker('get', '/period-end/year-end')).body.data;
     expect(years.find((y) => y.code === 'FY2025')).toMatchObject({ status: 'closing', runs: [expect.objectContaining({ id: run.id, status: 'draft' })] });

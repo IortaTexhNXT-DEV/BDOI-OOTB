@@ -426,12 +426,14 @@ yeAction('/year-end/:id/reverse-request/withdraw', 'Withdraw a reversal request 
   (db, req) => ye.withdrawReversal(db, req.params.id, req.user), 'reverse-withdraw', [requireAuth, requirePermission('write:period-end', APPROVE)]);
 yeAction('/year-end/:id/reverse', 'Approve the requested reversal and reverse the close (approve:period-end; maker-checker: not the requester): closing entries reversed, opening balances removed, periods unlocked',
   remarks, (db, req) => ye.reverseYearEnd(db, req.params.id, req.user, req.body), 'reverse', approve, { remarks: 'Reversal agreed with the external auditor' });
-yeAction('/year-end/:id/cancel', 'Cancel a year-end close run that has not closed the year', z.object({}).passthrough(), (db, req) => ye.cancelYearEnd(db, req.params.id, req.user), 'cancel');
+yeAction('/year-end/:id/cancel', 'Cancel a year-end close run that has not closed the year, with a reason (Reason Codes master, context year_end_cancel)',
+  z.object({ reasonCode: z.string().trim().min(1).max(60), note: z.string().trim().max(1000).optional() }), (db, req) => ye.cancelYearEnd(db, req.params.id, req.user, req.body), 'cancel', write,
+  { reasonCode: 'YEC-RERUN', note: 'Started before the December close' });
 define({
-  method: 'POST', path: '/adjustments', summary: 'Year-end adjustment journal in adjustment period 13 (pending; approved and posted by a second user through POST /accounting/transactions/:id/post)',
+  method: 'POST', path: '/adjustments', summary: 'Year-end adjustment journal in adjustment period 13, awaiting approval (approved and posted by a second user through POST /journal-vouchers/:id/approve)',
   screen: `${S} > Year-End Close`, middleware: [...write, validate(z.object({ fiscalYear: z.string(), description: z.string().min(2).max(500), lines: z.array(lineSchema).min(2) }))],
   request: { fiscalYear: 'FY2025', description: 'Audit adjustment – accrued audit fee', lines: [{ accountCode: '4401003', debit: 150000, credit: 0 }, { accountCode: '2208001', debit: 0, credit: 150000 }] },
-  response: { success: true, data: { id: 'jv_1', jvNumber: 'JV-2026-00200', period: '2025-13', status: 'pending' } },
+  response: { success: true, data: { id: 'jv_1', jvNumber: 'JV-2026-00200', period: '2025-13', status: 'for-approval' } },
   handler: async (req, res) => {
     const enabled = await getSetting('accounting.adjustment_period_enabled', true);
     const jv = await tx((db) => ye.createAdjustment(db, req.body, req.user, enabled));

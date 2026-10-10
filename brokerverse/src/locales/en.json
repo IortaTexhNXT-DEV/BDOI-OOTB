@@ -7047,24 +7047,17 @@
       "cancel": "Run cancelled"
     },
     "dialog": {
-      "closeMessage": "The closing entries are posted in {{period}}, dated {{date}}, and the balances are carried into {{fiscalYear}}.",
-      "reverseMessage": "The close of {{fiscalYear}} is reversed with the reason of the request.",
-      "withdrawMessage": "The reversal request is withdrawn; {{fiscalYear}} stays closed.",
-      "cancelMessage": "Run {{runNumber}} is cancelled.",
       "closeTitle": "Close fiscal year {{fiscalYear}}",
-      "closeConsequence": "The periods of {{fiscalYear}} are locked; no journal can be posted in them until the close is reversed.",
       "requestTitle": "Request reversal of the {{fiscalYear}} close",
-      "requestConsequence": "Another Accounting Manager approves the reversal.",
       "reverseTitle": "Reverse the {{fiscalYear}} close",
-      "reverseConsequence": "The closing entries are reversed, the opening balances of {{fiscalYear}} removed and the periods unlocked.",
       "withdrawTitle": "Withdraw reversal request",
       "keepRequest": "Keep request",
       "cancelTitle": "Cancel run {{runNumber}}",
-      "cancelConsequence": "{{fiscalYear}} returns to Open.",
       "keepRun": "Keep run",
       "adjustmentTitle": "Adjustment journal {{fiscalYear}}",
-      "adjustmentConsequence": "Posted in the adjustment period after approval by a second user.",
-      "submitAdjustment": "Submit for approval"
+      "submitAdjustment": "Submit for approval",
+      "startTitle": "Start year-end close of {{fiscalYear}}",
+      "prerequisitesFailed": "Prerequisites failed"
     },
     "toast": {
       "checked": "Checks run",
@@ -7582,7 +7575,8 @@
       "incentive_batch_reject": "Incentive batch rejection",
       "sales_invoice_cancel": "Sales invoice cancellation",
       "invoice_payment_cancel": "Invoice payment cancellation",
-      "incentive_adjustment": "Incentive line adjustment"
+      "incentive_adjustment": "Incentive line adjustment",
+      "year_end_cancel": "Year-end close run cancellation"
     }
   },
   "birTax": {

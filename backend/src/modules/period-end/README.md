@@ -76,6 +76,7 @@ then to Retained Earnings), writes the balance-sheet balances of the year end to
 is posted), locks the year and creates the next one. The overview previews the closing entries and the opening
 balances before the close from the same balances. A reversal is requested (`write:period-end`) with a reason of the
 Reason Codes master (context `year_end_reverse`) and approved by another user with `approve:period-end`, or withdrawn;
+a run that has not closed the year is cancelled with a reason of the context `year_end_cancel`;
 it is possible until the first period of the next year is closed. Every action is kept in `year_end_run_history`.
 
 ## Key settings
