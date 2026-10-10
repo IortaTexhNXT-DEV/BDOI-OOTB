@@ -188,7 +188,7 @@ const TIS_OPERATIONS = {
   master: ["Insurance Management > Distribution Channels", "Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops"],
 };
 // Operations officers and unit heads work the rates-missing and confirmation exceptions and read insurer billing
-const TIS_OPS_REMITTANCE = REMITTANCE("Exceptions", "Insurer billing");
+const TIS_OPS_REMITTANCE = REMITTANCE("Exceptions", "Held policies", "Insurer billing");
 Object.assign(roleMenuPermissions, {
   "tis-sales-associate": TIS_SALES,
   "tis-sales-officer": TIS_SALES,
@@ -200,10 +200,11 @@ Object.assign(roleMenuPermissions, {
   // Cash Control: the remittance reconciliation and the exceptions it works (no proof of payment); Recon also decides
   // insurer statements (approve:insurer-reconciliation) and reads payments and billing. The claim settlement funds an
   // insurer remits are banked by Cash Control (write:receipts).
-  "tis-ccd-pdc": TIS_CCD(["Post-Dated Cheques", "Receipts", "Collections", "Bank Reconciliation", ...REMITTANCE("Remittances", "Reconciliation", "Exceptions")]),
-  "tis-ccd-bp": TIS_CCD(["Receipts", "Collections", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation", ...REMITTANCE("Remittances", "Reconciliation", "Exceptions")]),
+  "tis-ccd-pdc": TIS_CCD(["Post-Dated Cheques", "Receipts", "Collections", "Bank Reconciliation", ...REMITTANCE("Remittances", "Reconciliation", "Exceptions", "Held policies")]),
+  "tis-ccd-bp": TIS_CCD(["Receipts", "Collections", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation",
+    ...REMITTANCE("Remittances", "Reconciliation", "Exceptions", "Held policies")]),
   "tis-ccd-recon": TIS_CCD(["Receipts", "Collections", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation", "Open Entry Matching", "Open Entry Unmatching",
-    "Disbursement", ...REMITTANCE("Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Insurer billing")]),
+    "Disbursement", ...REMITTANCE("Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Held policies", "Insurer billing")]),
   // Finance & General Accounting: the Accounting menus, plus the audit trail and the schedules (interface monitor)
   "tis-finance": {
     ...roleMenuPermissions.accounting,
@@ -233,7 +234,7 @@ Object.assign(roleMenuPermissions, {
     operations: [...OPERATIONS_ALL, "Claim Documents", "Motor Claim Repairs"],
     // Remittance without Setup; Approvals to decide what approve:remittance gives it
     accounts: [...withoutInsurerRec(roleMenuPermissions.accounting.accounts).filter((item) => item !== "Remittance"),
-      ...REMITTANCE("Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Insurer billing", "Settlement")],
+      ...REMITTANCE("Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Held policies", "Insurer billing", "Settlement")],
     commission: roleMenuPermissions.accounting.commission,
     reports: ["All Reports", "Operational Reports", "Financial Reports"],
     master: ["User Management > User", "User Management > Role", "User Management > User Access Matrix", "User Management > Role Permissions",

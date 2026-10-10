@@ -19,6 +19,7 @@ import { showErrorMessage } from "../../../utility/toastUtils";
 import DetailHeader from "../../../components/DetailHeader";
 import { statusLabel } from "../../../utils/statusSeverity";
 import { formatCurrency } from "../../../utility/currencyConverter";
+import ReceiptProof from "./ReceiptProof";
 
 // the amounts of the applied policies as the header shows the receipt amount; the foreign amount has no home symbol
 const amountBody = (field, foreign = false) => (row) => {
@@ -298,6 +299,9 @@ function PolicyReceipts() {
           }}
         />
       </div>
+      {currentReceiptId && header ? (
+        <ReceiptProof receiptId={currentReceiptId} proof={header.proof} collectedBy={header.collectedBy} cancelled={receiptStatus === "Cancelled"} />
+      ) : null}
       {currentReceiptId ? (
         <DetailSection title={t("accounts.receiptDialogs.activity")} className="mt-4">
           <RecordActivityLog entity="receipt" recordId={currentReceiptId} />

@@ -103,26 +103,26 @@ describe("TISPH roles (RBAC v4): menus", () => {
   });
 
   describe("Accounts > Remittance (spec §1.1 to §1.3)", () => {
-    const ALL = ["Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Insurer billing", "Setup", "Settlement"];
+    const ALL = ["Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Held policies", "Insurer billing", "Setup", "Settlement"];
     const remittanceOf = (role) => {
       const accounts = filterMenuForRoles(menuList, [role]).find((m) => m.name === "Accounts");
       return accounts?.submenu.find((s) => s.name === "Remittance")?.submenu.map((i) => i.name) || [];
     };
     const sees = (role) => (path) => isPathAllowed(path, menuList, [role]);
 
-    it("Finance sees the seven entries plus Settlement; IT reads them all", () => {
+    it("Finance sees the eight entries plus Settlement; IT reads them all", () => {
       expect(remittanceOf("tis-finance")).toEqual(ALL);
       expect(remittanceOf("tis-it-admin")).toEqual(ALL);
     });
 
     it("gives each persona the entries of its grants", () => {
       expect(remittanceOf("tis-general-manager")).toEqual(ALL.filter((e) => e !== "Setup"));
-      expect(remittanceOf("tis-ccd-recon")).toEqual(["Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Insurer billing"]);
-      expect(remittanceOf("tis-ccd-bp")).toEqual(["Remittances", "Reconciliation", "Exceptions"]);
-      expect(remittanceOf("tis-ccd-pdc")).toEqual(["Remittances", "Reconciliation", "Exceptions"]);
+      expect(remittanceOf("tis-ccd-recon")).toEqual(["Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Held policies", "Insurer billing"]);
+      expect(remittanceOf("tis-ccd-bp")).toEqual(["Remittances", "Reconciliation", "Exceptions", "Held policies"]);
+      expect(remittanceOf("tis-ccd-pdc")).toEqual(["Remittances", "Reconciliation", "Exceptions", "Held policies"]);
       expect(remittanceOf("tis-ops-associate")).toEqual(["Remittances"]);
-      expect(remittanceOf("tis-ops-officer")).toEqual(["Remittances", "Exceptions", "Insurer billing"]);
-      expect(remittanceOf("tis-ops-unit-head")).toEqual(["Remittances", "Exceptions", "Insurer billing"]);
+      expect(remittanceOf("tis-ops-officer")).toEqual(["Remittances", "Exceptions", "Held policies", "Insurer billing"]);
+      expect(remittanceOf("tis-ops-unit-head")).toEqual(["Remittances", "Exceptions", "Held policies", "Insurer billing"]);
       expect(remittanceOf("tis-ccd-pdu")).toEqual([]);
       expect(remittanceOf("tis-sales-officer")).toEqual([]);
       expect(sees("tis-general-manager")("/finance/remittance/setup/schedules")).toBe(false);

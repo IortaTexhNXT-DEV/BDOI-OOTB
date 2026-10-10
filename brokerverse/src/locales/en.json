@@ -753,7 +753,17 @@
       "print": "Print {{number}}",
       "difference": "Difference"
     },
-    "appliedPolicies": "Policies paid by this receipt"
+    "appliedPolicies": "Policies paid by this receipt",
+    "receiptProof": {
+      "title": "Proof of payment",
+      "file": "Proof",
+      "open": "Open",
+      "attach": "Attach proof",
+      "replace": "Replace proof",
+      "attached": "Proof of payment attached",
+      "collectedBy": "Collected by",
+      "partnerReference": "Partner reference"
+    }
   },
   "renewalWaiting": {
     "clients": "Clients",
@@ -1745,7 +1755,9 @@
         "actions": "Actions",
         "frequency": "Frequency",
         "timeZone": "Time zone",
-        "schedule": "Schedule"
+        "schedule": "Schedule",
+        "eligibility": "Eligibility",
+        "proofRequired": "Proof of payment required"
       },
       "actions": {
         "view": "View",
@@ -1794,9 +1806,15 @@
         "save": "Save schedule",
         "create": "Create schedule",
         "required": "Enter the name",
-        "monday": "The next run of a weekly schedule is a Monday"
+        "monday": "The next run of a weekly schedule is a Monday",
+        "eligibility": "Eligibility",
+        "proofRequired": "Proof of payment required"
       },
-      "nextRunAt": "Next {{at}}"
+      "nextRunAt": "Next {{at}}",
+      "eligibilities": {
+        "Fully paid in the window": "Fully paid in the window",
+        "Incepted up to the cut-off": "Incepted up to the cut-off"
+      }
     },
     "runHistory": {
       "title": "Run history · {{code}}",
@@ -2472,6 +2490,42 @@
         "balance": "Balance",
         "due": "Due",
         "status": "Status"
+      }
+    },
+    "held": {
+      "title": "Held policies",
+      "help": "Part-paid and instalment policies are not remitted until fully paid. A policy is released when its last payment is collected and goes on the next weekly run with its full premium.",
+      "kpis": {
+        "held": "Policies held",
+        "released": "Policies released"
+      },
+      "views": {
+        "held": "Held",
+        "released": "Released"
+      },
+      "empty": {
+        "held": "No policy is held",
+        "released": "No policy was released"
+      },
+      "insurer": "Insurer",
+      "search": "Policy or client",
+      "bouncedCount": "{{count}} bounced",
+      "bouncedCount_one": "{{count}} bounced",
+      "bouncedCount_other": "{{count}} bounced",
+      "columns": {
+        "policy": "Policy",
+        "client": "Client",
+        "insurer": "Insurer",
+        "productLine": "Product line",
+        "plan": "Plan",
+        "premium": "Total premium",
+        "paidToDate": "Paid to date",
+        "balance": "Balance",
+        "nextDue": "Next due",
+        "heldSince": "Held since",
+        "bounced": "Bounced cheques",
+        "releasedOn": "Fully paid on",
+        "releaseReceipt": "Clearing receipt"
       }
     }
   },

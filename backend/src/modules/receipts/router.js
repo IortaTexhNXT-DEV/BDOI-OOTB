@@ -197,6 +197,17 @@ define({
 });
 
 define({
+  method: 'POST', path: '/:id/proof', summary: 'Attach the proof of payment of a receipt (deposit slip, transfer confirmation, cheque copy: an uploaded file key and its name); a remittance run on the fully paid basis needs it',
+  screen: `${SCREEN} > View > Proof of payment`, middleware: [...write, ownRecord('receipt'), validate(z.object({ proofKey: z.string().min(1).max(500), proofFileName: z.string().max(255).optional().nullable() }))],
+  request: { proofKey: '/api/s3/object/receipts/deposit-slip-0091.pdf', proofFileName: 'deposit-slip-0091.pdf' }, response: { success: true, data: { ...example, proof: { fileName: 'deposit-slip-0091.pdf' } } },
+  handler: async (req, res) => {
+    const r = await withTransaction((db) => svc.attachProof(db, req.params.id, req.body, req.user));
+    await audit(req, { entity: 'receipt', entityId: r.after.receiptId, action: 'attach-proof', before: { proof: r.before.proof?.fileName || null }, after: { proof: r.after.proof?.fileName || null } });
+    ok(res, r.after, 'Proof of payment attached');
+  },
+});
+
+define({
   method: 'POST', path: '/:id/email', summary: 'E-mail the official receipt to the client with its PDF attached (to: default the client\'s e-mail address; cc; note); 400 without an address',
   screen: `${SCREEN} > View > E-mail receipt`, middleware: [...write, ownRecord('receipt'), validate(emailSchema)], request: { to: 'maria.santos@example.ph', cc: 'accounts@example.ph', note: 'Thank you for your prompt payment.' },
   response: { success: true, message: 'E-mail to maria.santos@example.ph queued', data: emailExample },

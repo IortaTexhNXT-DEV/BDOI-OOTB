@@ -21,6 +21,7 @@ import * as register from './register.js';
 import * as documents from './documents.js';
 import * as imports from './imports.js';
 import * as runs from './runs.js';
+import { listHeld } from './holds.js';
 import * as payments from './payments.js';
 import { remittanceSummary } from './summary.js';
 import { requiredReason } from '../ops-masters/records.js';
@@ -832,6 +833,14 @@ const scheduleExample = { id: 7, code: 'TIS-WEEKLY', name: 'Weekly remittance', 
     { code: 'pause', label: 'Pause', allowed: true }] };
 const scheduleBody = { name: 'Weekly remittance', kind: 'Remittance run', allInsurers: true, frequency: 'Weekly', paymentWindow: 'Previous Monday to Friday', groupBy: 'Insurer and product line',
   runTime: '06:15', nextRun: '2026-10-19' };
+define({
+  method: 'GET', path: '/held', summary: 'Held policies (instalment hold): part-paid policies not remitted until fully paid, with the plan, premium, paid to date, balance, next due date and bounced cheques (status held | released, insurerId, q)',
+  screen: S('Held policies'), middleware: read, query: { status: 'held' },
+  response: { success: true, data: { asOf: '2026-10-19', totals: { count: 1, premium: 25817.34, paidToDate: 12908.68, balance: 12908.66 },
+    rows: [{ policyNumber: 'POL-2026-95034', clientName: 'R. Santos', insurerName: 'Malayan Insurance Co., Inc.', plan: '4 instalments', premium: 25817.34, paidToDate: 12908.68,
+      balance: 12908.66, nextDue: '2026-11-03', heldSince: '2026-10-12', status: 'held' }] } },
+  handler: async (req, res) => ok(res, await listHeld(req.query)),
+});
 define({
   method: 'GET', path: '/schedules',
   summary: 'Remittance schedules (Setup > Schedules): the automation state (jobEnabled, checked daily at, time zone, last check and its status; the cron and the job link for administrators only) and per schedule its kind, the insurers it covers, frequency, payment window, grouping, runs ("Mondays 06:15"), next run (none while paused), last run (time, result, counts, message, trigger), status and the row menu of the caller (actions: View; Edit, Preview run, Run now (disabled with the reason while paused or once the window has run) and Pause / Resume with write:remittance); scheduledJobs, upcomingEvents and job for the Scheduling screen of earlier releases',

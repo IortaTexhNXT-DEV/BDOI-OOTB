@@ -28,6 +28,7 @@ import * as masters from '../masters/service.js';
 import { requiredReason } from '../ops-masters/records.js';
 import { buildLines, eligiblePolicies, executeAutomated, executeForInsurers } from './service.js';
 import { SCHEDULE_JOB, afterRun, assertScheduleInsurers, cutOffDate, insurerCodes, nextRunOf, scheduleDay } from './items.js';
+import { ELIGIBILITY, basisOf, lineOf, sortForRun } from './eligibility.js';
 
 export const WEEKLY_WINDOW = 'Previous Monday to Friday';
 export const CUT_OFF_WINDOW = 'Cut-off days';
@@ -143,6 +144,7 @@ async function scheduleActions(s, user, { asOf, fmt }) {
 
 async function scheduleOut(s, { last, asOf, fmt, user }) {
   const insurers = await coveredInsurers(s);
+  const basis = await basisOf(s);
   const active = s.status === 'Active';
   const next = active ? nextRunOf(s, asOf) : null;
   const run = last ? runOut(last, fmt) : null;
@@ -155,6 +157,7 @@ async function scheduleOut(s, { last, asOf, fmt, user }) {
     runs: runsLabel(s), nextRun: next, nextRunText: nextRunText(s, next, fmt),
     lastRun: run ? { id: run.id, at: run.startedAt, text: run.startedText, result: run.result.code, resultLabel: run.result.label, counts: run.counts, message: run.message, trigger: run.trigger }
       : null,
+    eligibility: basis.eligibility, proofRequired: basis.proofRequired,
     status: active ? 'Active' : 'Paused', isActive: active, timeZone: s.timezone || null,
     actions: await scheduleActions(s, user, { asOf, fmt }),
   };
@@ -201,6 +204,7 @@ export function assertScheduleFields(s) {
   if (s.kind && !KINDS.includes(s.kind)) errors.push({ path: 'kind', message: `Kind must be one of: ${KINDS.join(', ')}` });
   if (s.paymentWindow && ![WEEKLY_WINDOW, CUT_OFF_WINDOW].includes(s.paymentWindow)) errors.push({ path: 'paymentWindow', message: `Payment window must be ${WEEKLY_WINDOW} or ${CUT_OFF_WINDOW}` });
   if (s.groupBy && !GROUP_BY.includes(s.groupBy)) errors.push({ path: 'groupBy', message: `Group remittances by must be one of: ${GROUP_BY.join(', ')}` });
+  if (s.eligibility && !ELIGIBILITY.includes(s.eligibility)) errors.push({ path: 'eligibility', message: `Eligibility must be one of: ${ELIGIBILITY.join(', ')}` });
   if (s.runTime && !/^([01]\d|2[0-3]):[0-5]\d$/.test(String(s.runTime))) errors.push({ path: 'runTime', message: 'Run time is a time of day such as 06:15' });
   if (s.paymentWindow === WEEKLY_WINDOW && s.frequency !== 'Weekly') errors.push({ path: 'frequency', code: 'MSG-RMT-007', message: MSG_RMT_007 });
   else if (s.paymentWindow === WEEKLY_WINDOW && scheduleDay(s.nextRun) && weekday(scheduleDay(s.nextRun)) !== 1) {
@@ -255,36 +259,44 @@ export async function previewRun(id, { asOf = null } = {}) {
   const fmt = await printFormat();
   const runDate = asOf || (await businessToday());
   const w = windowOf(s, runDate);
+  const basis = await basisOf(s);
   const done = await doneRun(s.code, w);
   const rows = [];
   const covered = await coveredInsurers(s);
   let catchUpFrom = null;
+  let held = 0;
+  let exceptions = 0;
   for (const ins of covered) {
-    const pols = await eligiblePolicies({ insurerId: ins.id, to: w.to, kind: 'direct-bill' });
+    const sorted = await sortForRun(await eligiblePolicies({ insurerId: ins.id, to: basis.fullyPaid ? null : w.to, kind: 'direct-bill' }), w, basis);
+    held += sorted.held.length;
+    exceptions += sorted.exceptions.length;
+    const pols = sorted.ready;
     if (!pols.length) continue;
     for (const p of pols) {
-      const day = isoDate(p.inception_date);
+      const day = basis.fullyPaid ? p.position.fullyPaidOn : isoDate(p.inception_date);
       if (day && day < w.from && (!catchUpFrom || day < catchUpFrom)) catchUpFrom = day;
     }
-    const lines = pols.length ? await buildLines(pols.map((p) => ({ policyId: p.id })), ins.id) : [];
-    const lineSet = [...new Set(pols.map((p) => p.product_line).filter(Boolean))].map((l) => l.charAt(0).toUpperCase() + l.slice(1));
+    const lines = await buildLines(pols.map((p) => ({ policyId: p.id })), ins.id);
+    const lineSet = [...new Set(pols.map(lineOf))];
+    const drafts = basis.fullyPaid && s.groupBy === 'Insurer and product line' ? lineSet.length : 1;
     rows.push({ insurer: { id: ins.id, code: ins.code, name: ins.name }, productLine: lineSet.join(', ') || null, basis: pols.some((p) => p.gross_billed) ? 'Gross' : 'Net',
-      ready: pols.length, held: 0, exceptions: 0, dueToInsurer: round2(lines.reduce((sum, l) => sum + l.net, 0)),
-      result: { code: 'draft', label: 'Draft will be created' } });
+      ready: pols.length, held: sorted.held.length, exceptions: sorted.exceptions.length, drafts, dueToInsurer: round2(lines.reduce((sum, l) => sum + l.net, 0)),
+      result: { code: 'draft', label: drafts > 1 ? `${drafts} drafts will be created` : 'Draft will be created' } });
   }
-  const drafts = rows.length;
+  const drafts = rows.reduce((n, r) => n + r.drafts, 0);
   return {
-    schedule: { id: s.id, code: s.code, name: s.name }, runDate,
+    schedule: { id: s.id, code: s.code, name: s.name, eligibility: basis.eligibility, proofRequired: basis.proofRequired }, runDate,
     window: { from: w.from, to: w.to, catchUpFrom, text: windowText({ ...w, catchUpFrom }, fmt) },
     windowDone: done ? { done: true, runId: done.id, at: new Date(done.started_at).toISOString(), message: await windowDoneText(s, done, runDate, fmt) } : { done: false },
     paused: s.status !== 'Active', rows,
-    totals: { insurers: covered.length, nothingToRemit: covered.length - rows.length, drafts, ready: rows.reduce((n, r) => n + r.ready, 0), held: 0, exceptions: 0, dueToInsurer: round2(rows.reduce((n, r) => n + r.dueToInsurer, 0)) },
+    totals: { insurers: covered.length, nothingToRemit: covered.length - rows.length, drafts, ready: rows.reduce((n, r) => n + r.ready, 0), held, exceptions,
+      dueToInsurer: round2(rows.reduce((n, r) => n + r.dueToInsurer, 0)) },
     verb: `Create ${drafts} draft remittance${drafts === 1 ? '' : 's'}`,
   };
 }
 
-/** MSG-RMT-008: "Weekly run done: 3 remittance(s) created, 0 policies held, 0 exceptions." */
-const runMessage = (s, n) => `${s.frequency === 'Weekly' ? 'Weekly run' : 'Run'} done: ${n} remittance(s) created, 0 policies held, 0 exceptions.`;
+/** MSG-RMT-008: "Weekly run done: 3 remittance(s) created, 2 policies held, 1 exceptions." */
+const runMessage = (s, n, held = 0, exceptions = 0) => `${s.frequency === 'Weekly' ? 'Weekly run' : 'Run'} done: ${n} remittance(s) created, ${held} policies held, ${exceptions} exceptions.`;
 
 /**
  * Run schedule `id` on `asOf` (default the business date): `trigger` job or user (Run now, with `reason` of the
@@ -319,7 +331,8 @@ export async function runSchedule(id, user, { asOf = null, trigger = 'user', rea
   try {
     const insurers = s.allInsurers ? (await coveredInsurers(s)).map((i) => i.code) : insurerCodes(s);
     if (insurers.length) {
-      execution = await executeForInsurers({ insurerCodes: insurers, to: w.to, scheduleCode: s.code, runDate, data }, user, by);
+      execution = await executeForInsurers({ insurerCodes: insurers, to: w.to, from: w.from, basis: await basisOf(s), groupBy: s.groupBy || null, scheduleCode: s.code, runDate, data },
+        user, by);
     } else {
       const configCode = (Array.isArray(s.linkedProcesses) ? s.linkedProcesses : []).find((x) => /^ARM-/.test(String(x))) || null;
       if (!configCode) throw badRequest(`Schedule ${s.code} names no insurers and no automated remittance configuration; choose the insurers to remit`);
@@ -331,10 +344,12 @@ export async function runSchedule(id, user, { asOf = null, trigger = 'user', rea
   }
   const created = execution.remittances;
   const policies = created.reduce((n, r) => n + (Number(r.policyCount) || 0), 0);
-  const message = runMessage(s, created.length);
-  await query(`UPDATE remittance_runs SET result = $2, message = $3, scanned = $4, ready = $4, created = $5, created_remittance_ids = $6, due_to_insurer = $7, execution_ref = $8,
-    finished_at = now() WHERE id = $1`, [runId, created.length ? 'success' : 'nothing', message, policies, created.length, JSON.stringify(created.map((r) => r.id)),
-    round2(created.reduce((n, r) => n + Number(r.netAmount || 0), 0)), execution.executionId]);
+  const held = execution.held || 0;
+  const exceptions = execution.exceptions || 0;
+  const message = runMessage(s, created.length, held, exceptions);
+  await query(`UPDATE remittance_runs SET result = $2, message = $3, scanned = $4, ready = $5, created = $6, created_remittance_ids = $7, due_to_insurer = $8, execution_ref = $9,
+    held = $10, exceptions = $11, finished_at = now() WHERE id = $1`, [runId, created.length ? 'success' : 'nothing', message, policies + held + exceptions, policies, created.length,
+    JSON.stringify(created.map((r) => r.id)), round2(created.reduce((n, r) => n + Number(r.netAmount || 0), 0)), execution.executionId, held, exceptions]);
   await query('UPDATE remittance_items SET data = data || $2 WHERE reference_no = $1', [execution.executionId, JSON.stringify({ scheduleId: String(s.id), scheduleCode: s.code, runId })]);
   const next = afterRun(s, runDate);
   await query(`UPDATE master_records SET data = data || jsonb_build_object('lastRun', $2::text) || CASE WHEN $4::text IS NULL THEN '{}'::jsonb ELSE jsonb_build_object('nextRun', $4::text) END,

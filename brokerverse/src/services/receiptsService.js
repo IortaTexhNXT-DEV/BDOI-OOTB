@@ -130,6 +130,9 @@ export const receiptsService = {
     }
   },
 
+  // Proof of payment of a receipt (an uploaded file): a remittance run on the fully paid basis needs it
+  attachProof: async (receiptId, proof) => (await postRequest(`receipts/${encodeURIComponent(receiptId)}/proof`, proof)).data?.data,
+
   // Add payment to existing receipt
   addPaymentToReceipt: async (receiptId, paymentData) => {
     try {

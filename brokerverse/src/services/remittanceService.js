@@ -47,6 +47,8 @@ const id = (v) => encodeURIComponent(v);
 export const remittanceService = {
   // remittances
   getRemittance: (remId) => get(`${R}/remittances/${id(remId)}`),
+  // policies held part-paid on the fully paid basis (instalment hold)
+  heldPolicies: (params) => apiRequest("GET", `${R}/held`, { params }).then((r) => r.data),
 
   // direct bill: the client pays the insurer; the broker bills its commission with a commission debit note
   directBillSummary: () => get(`${R}/direct-bill/summary`),

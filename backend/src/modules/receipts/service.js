@@ -49,6 +49,7 @@ export function receiptRow(r, lines = []) {
     policy: r.policy_id ? { policyId: r.policy_id, id: r.policy_id, policyNumber: r.policy_number, insurer: r.insurer_name || null, status: r.policy_status || null } : null,
     receiptsList: lines.map(lineRow), createdBy: r.created_by, createdAt: r.created_at, updatedAt: r.updated_at, cancelledAt: r.cancelled_at, cancelReason: r.cancel_reason,
     collectedBy: r.collected_by_insurer_id ? { insurerId: r.collected_by_insurer_id, name: r.collected_by_name || null, reference: r.partner_reference || null } : null,
+    proof: r.proof_key ? { key: r.proof_key, fileName: r.proof_file_name || null, attachedAt: r.proof_attached_at || null } : null,
   };
 }
 
@@ -251,6 +252,17 @@ export async function addPayment(db, id, b, user) {
   const list = [...cur.map((l) => ({ receiptListId: l.id })), { policies: b.policies || r.policy_number, policyId: b.policyId || r.policy_id, lcAmount: b.lcAmount ?? amount,
     netPremium: b.netPremium ?? amount, paid: amount, unPaid: b.unPaid ?? 0, status: 'Paid' }];
   return updateReceipt(db, r.id, { receiptsList: list, paymentMode: b.paymentMode, referenceNo: b.referenceNo }, user);
+}
+
+/** Attach the proof of payment of a receipt (b: { proofKey, proofFileName }); a cancelled receipt takes none. */
+export async function attachProof(db, id, b, user) {
+  const r = (await db.query('SELECT * FROM receipts WHERE id = $1 OR receipt_number = $1 FOR UPDATE', [id])).rows[0];
+  if (!r) throw notFound('Receipt not found');
+  if (r.receipt_status === 'Cancelled') throw conflict('Receipt is cancelled');
+  const before = await getReceipt(db, r.id);
+  await db.query('UPDATE receipts SET proof_key = $2, proof_file_name = $3, proof_attached_by = $4, proof_attached_at = now(), updated_at = now() WHERE id = $1',
+    [r.id, str(b.proofKey), str(b.proofFileName), user?.id ?? null]);
+  return { before, after: await getReceipt(db, r.id) };
 }
 
 export async function cancelReceipt(db, id, reason, user) {

@@ -163,7 +163,7 @@ export const getReceiptsListByIdMiddleware = createAsyncThunk(
           receiptDate: response.data.receiptDate, payerName: response.data.name, customerCode: response.data.customerCode,
           paymentMode: response.data.paymentMode, referenceNo: response.data.referenceNo, amount: response.data.amount,
           currencyCode: response.data.currencyCode, transactionNumber: response.data.transactionNumber, policyNumber: response.data.policyNumber,
-          cancelReason: response.data.cancelReason,
+          cancelReason: response.data.cancelReason, proof: response.data.proof || null, collectedBy: response.data.collectedBy || null,
         },
         receiptDetailList: transformedData,
         paymentDetails: {

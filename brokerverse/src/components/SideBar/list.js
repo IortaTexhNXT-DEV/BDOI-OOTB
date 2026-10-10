@@ -470,6 +470,13 @@ export const menuList = [
             permissions: ["read:remittance"],
           },
           {
+            id: 9,
+            name: "Held policies",
+            path: "/finance/remittance/held",
+            includes: ["/finance/remittance/held"],
+            permissions: ["read:remittance"],
+          },
+          {
             id: 6,
             name: "Insurer billing",
             path: "/finance/remittance/billing",

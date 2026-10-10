@@ -112,6 +112,11 @@ export async function remittanceSchedules() {
   if (!(await tableExists('remittances'))) return { skipped: 'remittances table missing' };
   return (await import('../modules/remittance/runs.js')).runDueSchedules();
 }
+/** Instalment hold check: record the part-paid policies held from remittance and release those now fully paid (remittance/holds.js). */
+export async function remittanceHoldCheck() {
+  if (!(await tableExists('remittance_holds'))) return { skipped: 'remittance_holds table missing' };
+  return (await import('../modules/remittance/holds.js')).holdCheckJob();
+}
 
 /**
  * Integrations (Master > System Configuration > Integrations): send the integration messages that are due and retry
