@@ -17,9 +17,7 @@ import LoadingBar from "../../../components/LoadingBar";
 import DetailHeader from "../../../components/DetailHeader";
 import DetailSection from "../../../components/DetailSection";
 import KeyValueGrid from "../../../components/KeyValueGrid";
-import ConfirmDialog from "../../../components/ConfirmDialog/ConfirmDialog";
-import { openConfirm } from "../../../components/ConfirmDialog";
-import ReasonDialog from "../../../components/ReasonDialog";
+import ConfirmDialog, { openConfirm } from "../../../components/ConfirmDialog";
 import { useStableLoad } from "../../../hooks/useStableLoad";
 import { hasPermission } from "../../../utils/canOpen";
 import remittanceService from "../../../services/remittanceService";
@@ -230,8 +228,8 @@ const RemittanceExceptions = () => {
         ) : null}
       </Sidebar>
 
-      <ReasonDialog visible={!!escalating} onHide={(r) => { const row = escalating; setEscalating(null); if (r?.confirmed) done(t("remittance.exceptions.escalated", { reference: row.exceptionId })); }}
-        context="exception_escalate" severity="warning" title={t("remittance.exceptions.escalateTitle", { reference: escalating?.exceptionId || "" })}
+      <ConfirmDialog visible={!!escalating} onHide={(r) => { const row = escalating; setEscalating(null); if (r?.confirmed) done(t("remittance.exceptions.escalated", { reference: row.exceptionId })); }}
+        reason={{ context: "exception_escalate" }} severity="warning" title={t("remittance.exceptions.escalateTitle", { reference: escalating?.exceptionId || "" })}
         facts={escalating ? [{ label: t("remittance.exceptions.fields.type"), value: escalating.type }, { label: t("remittance.exceptions.fields.amount"), value: money(escalating.amount) }] : []}
         confirmLabel={t("remittance.exceptions.actions.escalate")} onConfirm={(reason) => remittanceService.escalateException(escalating.id, reason)} />
 

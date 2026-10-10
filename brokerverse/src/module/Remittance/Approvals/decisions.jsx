@@ -1,15 +1,14 @@
 /**
  * The decisions on a remittance approval, shared by the Approvals review panel and the remittance record page: the
  * texts of "Can I decide?" and of the authority chips, Approve (a confirmation with the R1 text: settlement and payment
- * follow in Disbursement) and Reject (a ReasonDialog of the remittance_reject context). Both send the version shown;
+ * follow in Disbursement) and Reject (a ConfirmDialog with a reason of the remittance_reject context). Both send the version shown;
  * a 409 (decided by someone else meanwhile, or changed) is not an error of the dialog: it closes and the screen shows
  * the server's sentence ("Approved by J. Cruz at 10:32.") and reloads.
  */
 import React, { useRef } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import ReasonDialog from "../../../components/ReasonDialog";
-import { openConfirm } from "../../../components/ConfirmDialog";
+import ConfirmDialog, { openConfirm } from "../../../components/ConfirmDialog";
 import { remittanceService } from "../../../services/remittanceService";
 import { formatDate, money } from "../shared";
 
@@ -91,10 +90,10 @@ export const RejectDialog = ({ approval, onHide }) => {
     }
   };
   return (
-    <ReasonDialog visible={!!approval} context="remittance_reject" severity="danger" title={t("remittance.decision.rejectTitle", { reference: a.reference || "" })}
+    <ConfirmDialog visible={!!approval} reason={{ context: "remittance_reject", label: t("remittance.decision.reason") }} severity="danger" title={t("remittance.decision.rejectTitle", { reference: a.reference || "" })}
       facts={[{ label: t("remittance.decision.reference"), value: a.reference }, { label: t("remittance.decision.amount"), value: money(a.amount) }]}
       note={t("remittance.decision.rejectNote", { reference: a.reference || "", amount: money(a.amount), maker: a.makerName || t("remittance.decision.theMaker") })}
-      reasonLabel={t("remittance.decision.reason")} confirmLabel={t("remittance.decision.rejectVerb")} onConfirm={reject}
+      confirmLabel={t("remittance.decision.rejectVerb")} onConfirm={reject}
       onHide={({ confirmed }) => onHide(race.current ? { race: race.current } : { done: !!confirmed })} />
   );
 };

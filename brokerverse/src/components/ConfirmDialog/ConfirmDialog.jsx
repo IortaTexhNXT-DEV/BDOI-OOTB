@@ -14,8 +14,16 @@
  *
  * From an event handler, without state of its own: `await openConfirm({ ...the same props })` (./openConfirm).
  *
- * `children` are fields of the screen's own under the facts (components/ReasonDialog puts its ReasonPicker there);
- * `beforeConfirm()` returning false stops the confirmation, the fields then show what is missing themselves.
+ * A decision that needs a coded reason passes `reason` ({ context, label, initial }) instead of `input`: a ReasonPicker
+ * of that context of the Reason Codes master under the facts. The reason is required, the note too when the chosen
+ * reason asks for one, and the action receives { reasonCode, note }.
+ *
+ *   <ConfirmDialog visible={open} onHide={close} reason={{ context: "remittance_cancel" }} severity="danger" title={title}
+ *     facts={[{ label: refLabel, value: r.remittanceNo }]} confirmLabel={cancelDraftLabel}
+ *     onConfirm={(reason) => service.cancel(r.id, reason)} />
+ *
+ * `children` are fields of the screen's own under the facts; `beforeConfirm()` returning false stops the confirmation,
+ * the fields then show what is missing themselves.
  */
 import React, { useEffect, useId, useRef, useState } from "react";
 import PropTypes from "prop-types";
@@ -31,6 +39,7 @@ import { readableError } from "../../utility/apiError";
 import { toDate, toIsoDate } from "../../utility/dateFormat";
 import { numberLocale } from "../../utility/currencyConverter";
 import { formatValue, NUMERIC_TYPES } from "../KeyValueGrid/formatValue";
+import ReasonPicker, { reasonPayload, reasonProblem } from "../ReasonPicker";
 import "./confirmDialog.scss";
 
 const ICONS = { neutral: "pi pi-info-circle", warning: "pi pi-exclamation-triangle", danger: "pi pi-exclamation-circle" };
@@ -51,7 +60,7 @@ const outputValue = (input, value) => {
 };
 
 const ConfirmDialog = ({
-  visible, onHide, title, severity, icon, message, facts, note, input, confirmLabel, confirmIcon, cancelLabel, onConfirm, onCancel, className, children, beforeConfirm,
+  visible, onHide, title, severity, icon, message, facts, note, input, confirmLabel, confirmIcon, cancelLabel, onConfirm, onCancel, className, children, beforeConfirm, reason,
 }) => {
   const { t } = useTranslation();
   const fieldId = useId();
@@ -59,12 +68,16 @@ const ConfirmDialog = ({
   const [error, setError] = useState(null);
   const [fieldError, setFieldError] = useState(null);
   const [value, setValue] = useState(() => initialValue(input));
+  const [coded, setCoded] = useState(() => reason?.initial || null);
+  const [reasonTried, setReasonTried] = useState(false);
   const dialogRef = useRef(null);
   const acceptRef = useRef(null);
   const fieldRef = useRef(null);
   const busyRef = useRef(false);
   const inputRef = useRef(input);
   inputRef.current = input;
+  const reasonRef = useRef(reason);
+  reasonRef.current = reason;
 
   useEffect(() => {
     if (!visible) return;
@@ -73,6 +86,8 @@ const ConfirmDialog = ({
     setError(null);
     setFieldError(null);
     setValue(initialValue(inputRef.current));
+    setCoded(reasonRef.current?.initial || null);
+    setReasonTried(false);
   }, [visible]);
 
   const problemOf = (v) => {
@@ -87,8 +102,12 @@ const ConfirmDialog = ({
   const confirm = async () => {
     if (busyRef.current) return;
     if (beforeConfirm && beforeConfirm() === false) return;
-    const result = input ? outputValue(input, value) : undefined;
-    if (input) {
+    if (reason) {
+      setReasonTried(true);
+      if (reasonProblem(coded)) return;
+    }
+    const result = reason ? reasonPayload(coded) : input ? outputValue(input, value) : undefined;
+    if (input && !reason) {
       const problem = input.type === "date" && value && !result ? t("confirmDialog.invalidDate") : problemOf(result);
       if (problem) {
         setFieldError(problem);
@@ -224,7 +243,7 @@ const ConfirmDialog = ({
             </tbody>
           </table>
         ) : null}
-        {input ? (
+        {input && !reason ? (
           <div className="bv-confirm__field" ref={fieldRef}>
             <label htmlFor={fieldId}>
               {input.label}
@@ -234,6 +253,7 @@ const ConfirmDialog = ({
             {fieldError ? <small id={`${fieldId}-error`} className="bv-confirm__field-error" role="alert">{fieldError}</small> : null}
           </div>
         ) : null}
+        {reason ? <ReasonPicker context={reason.context} value={coded} onChange={setCoded} label={reason.label} showErrors={reasonTried} className="bv-confirm__reason" /> : null}
         {children}
         {note ? <p className="bv-confirm__note">{note}</p> : null}
         {error ? (
@@ -307,6 +327,16 @@ ConfirmDialog.propTypes = {
   children: PropTypes.node,
   /** checked first when the user confirms; false keeps the dialog open without running the action */
   beforeConfirm: PropTypes.func,
+  /**
+   * a coded reason of the decision, in place of `input`: the context(s) of the Reason Codes master, the label of the
+   * field and a reason chosen beforehand ({ reasonCode, reasonLabel, note, noteRequired }); onConfirm receives
+   * { reasonCode, note }
+   */
+  reason: PropTypes.shape({
+    context: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]).isRequired,
+    label: PropTypes.string,
+    initial: PropTypes.shape({ reasonCode: PropTypes.string, reasonLabel: PropTypes.string, note: PropTypes.string, noteRequired: PropTypes.bool }),
+  }),
 };
 
 ConfirmDialog.defaultProps = {
@@ -325,6 +355,7 @@ ConfirmDialog.defaultProps = {
   className: null,
   children: null,
   beforeConfirm: null,
+  reason: null,
 };
 
 export default ConfirmDialog;

@@ -1,7 +1,7 @@
 import React from "react";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import "../../i18n";
-import ReasonDialog from "./index";
+import ConfirmDialog from "./ConfirmDialog";
 import opsAccountingService from "../../services/opsAccountingService";
 import { setDateFormat } from "../../utility/dateFormat";
 
@@ -18,7 +18,7 @@ const pick = async (option) => {
 };
 
 const open = (props = {}) => render(
-  <ReasonDialog visible onHide={props.onHide || jest.fn()} context="remittance_cancel" severity="danger" title="Cancel REM-2026-00021?"
+  <ConfirmDialog visible onHide={props.onHide || jest.fn()} reason={{ context: "remittance_cancel" }} severity="danger" title="Cancel REM-2026-00021?"
     facts={[{ label: "Remittance", value: "REM-2026-00021" }, { label: "Due to insurer", value: 409141.43, type: "amount" }]}
     note="12 policies go back to the next run." confirmLabel="Cancel draft" onConfirm={props.onConfirm || jest.fn()} />
 );
@@ -28,7 +28,7 @@ beforeEach(() => {
   opsAccountingService.masterRecords.mockResolvedValue({ rows: REASONS });
 });
 
-describe("ReasonDialog", () => {
+describe("ConfirmDialog with a coded reason", () => {
   it("shows the verb, the facts, the consequence and the reason of the context", async () => {
     open();
     const d = within(screen.getByRole("dialog"));
@@ -53,7 +53,7 @@ describe("ReasonDialog", () => {
     fireEvent.change(screen.getByLabelText(/Note/), { target: { value: "Raised twice by the run" } });
     fireEvent.click(screen.getByRole("button", { name: "Cancel draft" }));
     await waitFor(() => expect(onConfirm).toHaveBeenCalledWith({ reasonCode: "RCN-OTHER", note: "Raised twice by the run" }));
-    await waitFor(() => expect(onHide).toHaveBeenCalledWith({ confirmed: true, value: undefined }));
+    await waitFor(() => expect(onHide).toHaveBeenCalledWith({ confirmed: true, value: { reasonCode: "RCN-OTHER", note: "Raised twice by the run" } }));
   });
 
   it("stays open with the server's message when the decision is refused", async () => {

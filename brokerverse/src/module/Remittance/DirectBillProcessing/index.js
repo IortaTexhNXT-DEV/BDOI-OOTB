@@ -12,7 +12,6 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { TabMenu } from "primereact/tabmenu";
 import { MultiSelect } from "primereact/multiselect";
-import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import { Message } from "primereact/message";
@@ -22,8 +21,7 @@ import StatCards from "../../../components/StatCards";
 import StatusChip from "../../../components/StatusChip";
 import RowActions from "../../../components/RowActions";
 import EligibilityNote from "../../../components/EligibilityNote";
-import ReasonDialog from "../../../components/ReasonDialog";
-import { openConfirm } from "../../../components/ConfirmDialog";
+import ConfirmDialog, { openConfirm } from "../../../components/ConfirmDialog";
 import { printPdf } from "../../../components/Print";
 import remittanceService, { masterService } from "../../../services/remittanceService";
 import reportsService from "../../../services/reportsService";
@@ -323,7 +321,7 @@ const DirectBillProcessing = () => {
   const money = (field) => (row) => formatCurrency(row[field]);
   const clientPaymentBody = (row) => (
     <div className="flex align-items-center gap-1">
-      <Tag value={row.clientPaymentStatus || "Unpaid"} severity={PAYMENT_SEVERITY[row.clientPaymentStatus] || "danger"} />
+      <StatusChip label={row.clientPaymentStatus || "Unpaid"} severity={PAYMENT_SEVERITY[row.clientPaymentStatus] || "danger"} />
       <Button type="button" link size="small" className="rm-link" label={t("remittance.billing.clientPayment")} onClick={() => setPaymentPolicy({ policyId: row.policyId, policyNo: row.policyNo })} />
     </div>
   );
@@ -331,7 +329,7 @@ const DirectBillProcessing = () => {
     if (items.length) await loadItems();
     if (viewNote) setViewNote(await remittanceService.getDebitNote(viewNote.id));
   };
-  const statusTag = (row) => <Tag value={row.status} severity={statusSeverity(row.statusCode === "collected" ? "completed" : row.statusCode)} />;
+  const statusTag = (row) => <StatusChip label={row.status} severity={statusSeverity(row.statusCode === "collected" ? "completed" : row.statusCode)} />;
 
   const onNoteAction = (row) => (action) => {
     if (action.code === "view") openView(row);
@@ -574,7 +572,7 @@ const DirectBillProcessing = () => {
               <Column field="ewtAmount" header="EWT (2307)" body={money("ewtAmount")} className="text-right" />
               <Column field="appliedAmount" header="Applied" body={money("appliedAmount")} className="text-right" />
               <Column field="journalNumber" header="Journal" />
-              <Column field="status" header="Status" body={(r) => <Tag value={r.status} severity={r.status === "posted" ? "success" : "secondary"} />} />
+              <Column field="status" header="Status" body={(r) => <StatusChip label={r.status} severity={r.status === "posted" ? "success" : "secondary"} />} />
               <Column body={(r) => (r.status === "posted" ? <Button type="button" link size="small" className="rm-link" label={t("remittance.billing.reverse")} onClick={() => reverseCollection(viewNote, r)} /> : null)} />
             </DataTable>
             <div className="action-buttons mt-3 flex flex-wrap align-items-center gap-2">
@@ -594,7 +592,7 @@ const DirectBillProcessing = () => {
 
       <ClientPaymentDialog policy={paymentPolicy} paymentModes={paymentModes} toast={toast} onClose={() => setPaymentPolicy(null)} onChanged={reloadAfterPayment} />
 
-      <ReasonDialog visible={!!decision} onHide={afterReason} context={decision?.action === "cancel" ? "billing_cancel" : "billing_reject"} severity="danger"
+      <ConfirmDialog visible={!!decision} onHide={afterReason} reason={{ context: decision?.action === "cancel" ? "billing_cancel" : "billing_reject" }} severity="danger"
         title={decision ? t(`remittance.billing.${decision.action}Title`, { reference: decision.note.dnNumber }) : ""} facts={decision ? noteFacts(decision.note) : []}
         note={t("remittance.billing.releaseNote")} confirmLabel={decision ? t(`remittance.billing.actions.${decision.action}`) : ""}
         onConfirm={(reason) => (decision.action === "reject" ? remittanceService.rejectDebitNote(decision.note.id, reason) : remittanceService.cancelDebitNote(decision.note.id, reason))} />

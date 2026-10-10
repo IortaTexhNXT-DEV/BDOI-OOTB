@@ -9,7 +9,7 @@ import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
-import { Tag } from "primereact/tag";
+import StatusChip from "../../../components/StatusChip";
 import S3FileUpload from "../../../components/S3FileUpload";
 import remittanceService from "../../../services/remittanceService";
 import { openConfirm } from "../../../components/ConfirmDialog";
@@ -81,7 +81,7 @@ const ClientPaymentDialog = ({ policy, paymentModes, toast, onClose, onChanged }
           <p className="rm-strip__facts mt-0">
             {t("remittance.billing.clientPaymentFacts", { premium: money(data.premium), paid: money(data.paid), balance: money(data.balance) })}
           </p>
-          <div className="mb-3">Status: <Tag value={data.statusLabel} severity={PAYMENT_SEVERITY[data.statusLabel]} /></div>
+          <div className="mb-3">Status: <StatusChip label={data.statusLabel} severity={PAYMENT_SEVERITY[data.statusLabel]} /></div>
           <DataTable value={data.items} size="small" stripedRows emptyMessage="No payment recorded yet" className="mb-3">
             <Column field="paymentDate" header="Paid on" body={dateBody("paymentDate")} />
             <Column field="insurerReference" header="Insurer OR / reference" />
@@ -89,7 +89,7 @@ const ClientPaymentDialog = ({ policy, paymentModes, toast, onClose, onChanged }
             <Column field="amount" header="Amount" body={(r) => money(r.amount)} className="text-right" />
             <Column header="Proof" body={(r) => (r.proofKey ? <a href={r.proofKey} target="_blank" rel="noopener noreferrer">{r.proofFileName || "View"}</a> : "-")} />
             <Column field="createdBy" header="Recorded by" />
-            <Column field="status" header="Status" body={(r) => <Tag value={r.status} severity={r.status === "recorded" ? "success" : "secondary"} />} />
+            <Column field="status" header="Status" body={(r) => <StatusChip label={r.status} severity={r.status === "recorded" ? "success" : "secondary"} />} />
             <Column body={(r) => (r.status === "recorded" ? <Button type="button" link size="small" className="rm-link" label={t("remittance.billing.void")} onClick={() => voidPayment(r)} /> : null)} />
           </DataTable>
           <div className="grid">
