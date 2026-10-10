@@ -63,7 +63,6 @@ DOCUMENTS = [
     ('contracts/uat-golive-acceptance.md', CONTRACTS, 'iNXT_BrokerVerse_UAT_and_Go_Live_Acceptance_Certificates', None),
     ('contracts/hypercare-exit-handover.md', CONTRACTS, 'iNXT_BrokerVerse_Hypercare_Exit_and_Handover_Certificate', None),
     # 04 Onboarding and go-live
-    ('discovery-workbook-guide.md', ONBOARDING, 'BrokerVerse_Discovery_Workbook_Guide', None),
     ('data-migration-and-cutover.md', ONBOARDING, 'BrokerVerse_Data_Migration_and_Cutover_Plan', None),
     ('environment-strategy-and-production-rollout.md', ONBOARDING, 'BrokerVerse_Environment_Strategy_and_Production_Rollout', None),
     ('privacy-impact-assessment-templates.md', ONBOARDING, 'BrokerVerse_Privacy_Impact_Assessment_and_Records_of_Processing_Templates', None),
@@ -76,10 +75,7 @@ DOCUMENTS = [
     ('reports-book.md', DELIVERY, 'BrokerVerse_Reports_Book', None),
     ('communication-templates.md', DELIVERY, 'BrokerVerse_Communication_Templates_and_Touchpoints', None),
     ('schedules-and-batch-jobs.md', DELIVERY, 'BrokerVerse_Schedules_and_Batch_Jobs', None),
-    ('test-summary.md', DELIVERY, 'BrokerVerse_Test_Summary_Report', None),
     ('ph-regulatory-compliance-matrix.md', DELIVERY, 'BrokerVerse_Philippine_Regulatory_Compliance_Matrix', None),
-    ('test-strategy.md', DELIVERY, 'BrokerVerse_Test_Strategy', None),
-    ('test-plan.md', DELIVERY, 'BrokerVerse_Test_Plan', None),
     ('brd.md', DELIVERY, 'BrokerVerse_Business_Requirements_Document', 'brd_pfd_widths.py'),
     ('process-flows.md', DELIVERY, 'BrokerVerse_Process_Flow_Document', 'brd_pfd_widths.py'),
     ('dependency-map.md', DELIVERY, 'BrokerVerse_Dependency_Map_and_Critical_Path', None),

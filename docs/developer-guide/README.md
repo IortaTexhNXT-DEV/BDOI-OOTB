@@ -26,8 +26,7 @@ defects in production.
 | `deploy/RELEASE_PIPELINE.md` | Build once, promote through Dev, SIT, UAT, Pre-Prod and Production with approvals; migrations policy; rollback; hotfix. |
 | `docs/onboarding/` | Go-live workbench, smoke test and transaction reset, client data masking, branding and e-signatures. |
 | `deploy/README.md` | What to check before a site goes live. |
-| `docs/review/CODE_REVIEW.md` | Code reviews: what was found, fixed and left open. |
-| `docs/e2e/` | End-to-end test runs on the screens and their defect register. |
+| `docs/e2e/` | UAT scenario run, go-live rehearsal, document and report sweep, role walk, and the end-to-end test tooling. The earlier generic code reviews, end-to-end reports and defect register are in `docs/archive/2026-10-10/`. |
 | `docs/package/` | The documentation pack: sales, commercials, contracts, onboarding, delivery (including the user manual), support, technical and management documents. See `docs/package/README.md`. |
 | `docs/architecture/`, `docs/manual/`, `docs/decks/` | Architecture description, user manual screenshots and their capture tools, role presentations. |
 | `backend/docs/api/` | Generated API list: OpenAPI, Postman collection, the API touchpoint workbook (screen to API). |
