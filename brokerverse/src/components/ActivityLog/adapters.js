@@ -7,7 +7,7 @@
 import i18n from "../../i18n";
 import { formatDate } from "../../utility/dateFormat";
 import { statusLabel } from "../../utils/statusSeverity";
-import { humanize } from "./actions";
+import { actionKey, humanize } from "./actions";
 
 const field = (key) => i18n.t(`activityLog.fields.${key}`);
 const roleOf = (roles) => (Array.isArray(roles) ? roles.filter(Boolean).join(", ") : roles || null);
@@ -41,11 +41,24 @@ const splitStatus = (changes, key = "key") => {
 const CREATION = /^(create|bulk-create|create-from-.*)$/;
 const blank = (v) => v === null || v === undefined || v === "";
 
+// prints of the same document by the same person on the same day, one after another, read as one entry with how many
+// times and between which times, so they do not bury the business events
+const collapsePrints = (entries) => entries.reduce((out, e) => {
+  const last = out[out.length - 1];
+  const same = last && actionKey(e.actionCode) === "print" && actionKey(last.actionCode) === "print" && last.actionLabel === e.actionLabel
+    && last.day === e.day && (last.user?.displayName || null) === (e.user?.displayName || null) && !e.changes.length && !last.changes.length;
+  if (!same) return [...out, e];
+  const times = [...(last.printTimes || [last.time]), e.time].filter(Boolean).sort();
+  out[out.length - 1] = { ...last, printTimes: times,
+    remarks: i18n.t("activityLog.printedTimes", { count: times.length, first: times[0], last: times[times.length - 1] }) };
+  return out;
+}, []);
+
 /**
  * GET /audit/records/:entity/:id (components/AuditTrail, the history of policies, quotations, journals, receipts ...).
  * A creation lists no field changes: every field went from nothing to the value the record itself shows.
  */
-export const fromAuditEvents = (events = []) =>
+export const fromAuditEvents = (events = []) => collapsePrints(
   events.map((e, i) => {
     const { status, rest } = splitStatus(e.changes);
     const created = CREATION.test(String(e.action || "")) && rest.every((c) => blank(c.from));
@@ -61,7 +74,7 @@ export const fromAuditEvents = (events = []) =>
       user: userOf(e.user?.displayName, e.user?.username, e.user?.roles), fromStatus: status?.from, toStatus: status?.to, remarks: e.note,
       changes: changes.map((c) => ({ field: c.key, label: c.label, before: c.from, after: c.to, masked: !!c.masked })), source: e.source,
     }, i);
-  });
+  }));
 
 /** The activityLog of GET /remittance/remittances/:id (entries of this release, or { action, by, at, notes } of earlier ones). */
 export const fromRemittanceActivity = (rows = []) =>

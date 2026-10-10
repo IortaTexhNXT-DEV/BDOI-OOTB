@@ -52,6 +52,15 @@ describe("activity log adapters", () => {
     expect(p.changes[0]).toMatchObject({ label: "Version", after: "2" });
   });
 
+  it("reads prints of the same document by the same person on one day as one entry", () => {
+    const print = (id, time) => ({ id, at: `2026-10-10T01:${time.slice(3)}:00Z`, day: "2026-10-10", date: "10/10/2026", time, action: "print", title: "Fleet schedule printed",
+      user: { displayName: "Ana Ops", roles: ["Operations"] }, changes: [] });
+    const entries = fromAuditEvents([print(3, "09:23"), print(2, "09:15"), print(1, "09:10"),
+      { id: 0, at: "2026-10-10T00:00:00Z", day: "2026-10-10", time: "08:00", action: "create", title: "Fleet schedule created", user: { displayName: "Ana Ops" }, changes: [] }]);
+    expect(entries.map((e) => e.actionLabel)).toEqual(["Fleet schedule printed", "Fleet schedule created"]);
+    expect(entries[0]).toMatchObject({ id: 3, remarks: "Printed 3 times between 09:10 and 09:23" });
+  });
+
   it("reads status histories with their labels and source, the system for a job", () => {
     const [h] = fromStatusHistory([{ from: "open", to: "soft-closed", remarks: "August", changedBy: "system", changedAt: "2026-09-05T02:00:00Z", source: "close-run" }],
       { statusLabels: { "soft-closed": "Soft closed" } });

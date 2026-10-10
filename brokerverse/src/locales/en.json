@@ -14626,7 +14626,7 @@
     },
     "sources": {
       "screen": "Screen",
-      "api": "API",
+      "api": "Integration",
       "job": "Scheduled job",
       "manual": "Manual",
       "closeRun": "Month-end close",
@@ -14634,7 +14634,8 @@
       "yearEndReversal": "Year-end close reversed",
       "scheduled": "Scheduled run",
       "manualRun": "Run now (manual)"
-    }
+    },
+    "printedTimes": "Printed {{count}} times between {{first}} and {{last}}"
   },
   "print": {
     "failed": "The document could not be printed.",

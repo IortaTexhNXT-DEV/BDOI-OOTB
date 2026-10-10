@@ -269,7 +269,7 @@ export function diffFields(entity, before, after, ctx) {
 export function sourceOf(row) {
   const s = row.source && typeof row.source === 'object' ? row.source : null;
   if (s?.channel === 'screen') return { channel: 'screen', label: 'Screen', name: s.name ? String(s.name).replace(/\s*>?\s*\(any [^)]*\)/i, '') : null };
-  if (s?.channel === 'api') return { channel: 'api', label: 'API', name: s.name || null };
+  if (s?.channel === 'api') return { channel: 'api', label: 'Integration', name: s.name || null };
   if (s?.channel === 'job') return { channel: 'job', label: 'System job', name: s.name || null };
   // a step read from the record's own columns: who did it is not always kept, which does not make it a job
   if (s?.channel === 'record') return { channel: 'application', label: 'Application', name: null };

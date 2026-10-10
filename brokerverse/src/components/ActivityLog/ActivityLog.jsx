@@ -76,9 +76,10 @@ Value.defaultProps = { value: null, masked: false };
 
 // an action taken on the application's own screens is the usual case and is not labelled; the menu path of the
 // screen repeats the action already named in the title, so only another channel (job, API, upload, portal) is shown
-const sourceText = (source) => {
+const sourceText = (source, t) => {
   if (!source || source.channel === "application") return null;
   if (source.channel === "screen") return source.name ? null : source.label || null;
+  if (source.channel === "api") return t("activityLog.sources.api");
   return source.label || null;
 };
 
@@ -88,7 +89,7 @@ const ActivityEntry = ({ entry, expanded }) => {
   const [open, setOpen] = useState(expanded);
   const who = entry.user?.displayName || entry.user?.username || t("activityLog.system");
   const role = entry.user?.role || (Array.isArray(entry.user?.roles) ? entry.user.roles.join(", ") : null);
-  const source = sourceText(entry.source);
+  const source = sourceText(entry.source, t);
   const changes = entry.changes || [];
   const { fromStatus: from, toStatus: to } = entry;
   return (

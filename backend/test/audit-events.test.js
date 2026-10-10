@@ -112,7 +112,7 @@ describe('audit grouping, user and source', () => {
   it('names the source and the user of an event', () => {
     expect(sourceOf({ source: { channel: 'screen', name: 'Operations > Claims > Request approval' } })).toEqual({ channel: 'screen', label: 'Screen', name: 'Operations > Claims > Request approval' });
     expect(sourceOf({ source: { channel: 'screen', name: 'Master > (any master screen)' } }).name).toBe('Master');
-    expect(sourceOf({ source: { channel: 'api', name: 'PUT /claims/:id' } }).label).toBe('API');
+    expect(sourceOf({ source: { channel: 'api', name: 'PUT /claims/:id' } }).label).toBe('Integration');
     expect(sourceOf({ user_id: null, username: null, action: 'run' })).toMatchObject({ channel: 'job', label: 'System job' });
     expect(sourceOf({ user_id: null, username: 'customer:a@b.ph', action: 'respond' }).label).toBe('Customer portal');
     expect(userOf({ user_id: 'usr_1', username: 'j.claims', display_name: 'Jasmine Cruz', role_names: ['Claims Officer'] }))
@@ -149,7 +149,7 @@ describe('audit trail API', () => {
     expect(r.status).toBe(200);
     expect(r.body.data.length).toBeGreaterThanOrEqual(2);
     const [update, create] = r.body.data;
-    expect(update).toMatchObject({ entity: 'client', entityLabel: 'Client', title: 'Client updated', source: { channel: 'api', label: 'API' } });
+    expect(update).toMatchObject({ entity: 'client', entityLabel: 'Client', title: 'Client updated', source: { channel: 'api', label: 'Integration' } });
     expect(update.user).toMatchObject({ username: 'BrokerVerse' });
     expect(update.user.roles.length).toBeGreaterThan(0);
     expect(update.date).toMatch(/^\d{2}\/\d{2}\/\d{4}$/);
