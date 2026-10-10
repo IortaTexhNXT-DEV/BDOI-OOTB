@@ -204,9 +204,7 @@ const AddDisbursement = () => {
         <Card className="mt-3">
           <div className="grid mt-1">
             <div className="col-12 md:col-6 lg:col-3 xl:col-3 input__view">
-              <LabelWrapper className="calenderlable__container">
-                Date
-              </LabelWrapper>
+              <LabelWrapper label={t("pettyCash.date")} className="calenderlable__container" />
               <Calendar
                 classNames="calender__container"
                 showIcon

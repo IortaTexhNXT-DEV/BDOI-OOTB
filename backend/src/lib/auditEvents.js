@@ -337,13 +337,15 @@ export const RECORD_NUMBERS = {
   client: ['clients', "display_name || COALESCE(' (' || client_code || ')', '')"], lead: ['leads', 'COALESCE(lead_number, display_name)'],
   endorsement: ['endorsements', 'endorsement_number'], receipt: ['receipts', 'receipt_number'], renewal: ['renewals', 'renewal_number'],
   journal_voucher: ['journal_vouchers', 'jv_number'], user: ['users', "display_name || ' (' || username || ')'"],
-  session: ['users', 'username'],
+  session: ['users', 'username'], disbursement: ['disbursements', 'voucher_number'], petty_cash_request: ['petty_cash_requests', 'request_number'],
+  petty_cash_fund: ['petty_cash_funds', 'code'],
 };
 /** Columns holding the number a user types to find a record (entity number filter). */
 export const RECORD_KEYS = {
   policy: ['policies', 'policy_number'], quotation: ['quotes', 'quote_number'], claim: ['claims', 'claim_number'], client: ['clients', 'client_code'],
   lead: ['leads', 'lead_number'], endorsement: ['endorsements', 'endorsement_number'], receipt: ['receipts', 'receipt_number'],
   renewal: ['renewals', 'renewal_number'], journal_voucher: ['journal_vouchers', 'jv_number'], user: ['users', 'username'],
+  disbursement: ['disbursements', 'voucher_number'], petty_cash_request: ['petty_cash_requests', 'request_number'], petty_cash_fund: ['petty_cash_funds', 'code'],
 };
 
 /** "entity|id" -> record number / name for a list of audit rows; master records use their code / name. */

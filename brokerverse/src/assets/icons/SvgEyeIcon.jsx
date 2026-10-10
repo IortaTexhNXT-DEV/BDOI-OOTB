@@ -8,14 +8,14 @@ const SvgEyeIcon = (props) => (
     {...props}
   >
     <path
-      stroke="#6C737F"
+      stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}
       d="M12.5 10a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"
     />
     <path
-      stroke="#6C737F"
+      stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}

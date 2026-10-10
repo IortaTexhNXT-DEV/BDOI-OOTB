@@ -1,19 +1,19 @@
 .container__Journal__Voture {
   // @layer primereact {
   //     .p-card {
-  //       background: #ffffff;
-  //       color: #4b5563;
+  //       background: var(--color-surface);
+  //       color: var(--color-heading);
   //       box-shadow: none !important;
   //       border-radius: 6px !important;
-  //       fill: #fff !important;
+  //       fill: var(--color-surface) !important;
   //       stroke-width: 1px !important;
-  //       stroke: #fff !important;
+  //       stroke: var(--color-surface) !important;
   //       filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
   //     }
   //   }
 
   .add__icon__title__Journal__Voture {
-    color: #111927;
+    color: var(--color-heading);
     font-size: 30px;
     font-weight: 600;
     font-family: "Nunito", Arial, sans-serif;
@@ -24,7 +24,7 @@
     // flex-direction: row-reverse;
     // gap:10px;
     height: 46px;
-    border-color: #d1d5db;
+    border-color: var(--color-border);
     // width: 85%;
     // margin-left: 8px;
     font-family: "Nunito", Arial, sans-serif;
@@ -32,7 +32,7 @@
     // padding: 10px;
     font-weight: 500;
     width: 100%;
-    color: #0072d8;
+    color: var(--bv-primary);
     margin: 0px !important;
   }
 
@@ -40,12 +40,12 @@
     border: none;
     padding: 0;
     font-family: "Nunito", Arial, sans-serif;
-    color: #111927;
+    color: var(--color-heading);
     font-size: 16px !important;
     font-weight: 600;
   }
   .p-dropdown .p-dropdown-label.p-placeholder {
-    color: #0072d8;
+    color: var(--bv-primary);
     text-align: center;
     font-family: "Nunito", Arial, sans-serif;
     font-size: 16px;
@@ -56,7 +56,7 @@
     // flex-direction: row-reverse;
     // gap:10px;
     height: 46px;
-    border-color: #d1d5db;
+    border-color: var(--color-border);
     // width: 85%;
     // margin-left: 8px;
     font-family: "Nunito", Arial, sans-serif;
@@ -64,14 +64,14 @@
     // padding: 10px;
     font-weight: 500;
     width: 100%;
-    color: #0072d8;
+    color: var(--bv-primary);
     border-radius: 10px;
     margin: 0px !important;
     border-radius: 10px;
   }
 
   .p-breadcrumb .p-breadcrumb-list li:last-child .p-menuitem-text {
-    color: #b1b1b1;
+    color: var(--color-placeholder);
   }
 
   .item__color__Journal__Voture {
@@ -100,11 +100,11 @@
       display: flex;
       justify-content: space-evenly;
       align-items: center;
-      background-color: #0072d8;
+      background-color: var(--bv-primary);
       height: 45px;
       // width: 140px;
       border-radius: 6px;
-      color: #fff;
+      color: var(--color-surface);
       font-family: "Nunito", Arial, sans-serif;
       padding: 0 20px;
       cursor: pointer;
@@ -117,7 +117,7 @@
       }
 
       .add__text__Journal__Voture {
-        color: #fff !important;
+        color: var(--color-surface) !important;
         font-size: 18px;
         font-weight: 500;
         background-color: transparent;
@@ -130,19 +130,19 @@
   .sub__container__Journal__Voture {
     // box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
     // border-radius: 10px;
-    background: #ffffff;
-    color: #4b5563;
+    background: var(--color-surface);
+    color: var(--color-heading);
     box-shadow: none !important;
     border-radius: 6px !important;
-    // fill: #fff !important;
+    // fill: var(--color-surface) !important;
     // stroke-width: 1px !important;
-    // stroke: #fff !important;
+    // stroke: var(--color-surface) !important;
     filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
     .sort__filter__view__Journal__Voture {
       display: flex;
       justify-content: space-evenly;
       align-items: center;
-      border: 0.5px solid #d1d5db !important;
+      border: 0.5px solid var(--color-border) !important;
       border-radius: 10px !important;
       position: relative;
       width: 100% !important;
@@ -152,11 +152,11 @@
       border-radius: 10px;
 
       font-family: "Nunito", Arial, sans-serif;
-      border: 1px solid #d1d5db;
+      border: 1px solid var(--color-border);
       height: 46px;
     }
     .searchinput_left::placeholder {
-      color: #4b5563;
+      color: var(--color-heading);
       font-size: 16px;
       font-weight: 400;
     }
@@ -166,7 +166,7 @@
       font-size: 14px;
       font-weight: 500;
       text-align: left;
-      color: #0072d8;
+      color: var(--bv-primary);
       cursor: pointer;
     }
 
@@ -179,7 +179,7 @@
     }
 
     .table__view__Journal__Voture {
-      color: #000;
+      color: var(--color-heading);
       font-size: 14px;
       font-weight: 600;
     }
@@ -205,11 +205,11 @@
     line-height: 24px;
     letter-spacing: 0em;
     text-align: left;
-    color: #000;
+    color: var(--color-heading);
   }
 
   .addbutton_container__Journal__Voture {
-    background-color: #0072d8;
+    background-color: var(--bv-primary);
     border-radius: 6px;
     width: 100px !important;
     height: 38px;
@@ -217,7 +217,7 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    color: #fff;
+    color: var(--color-surface);
   }
 
   .filterbutton_container__Journal__Voture {
@@ -254,7 +254,7 @@
     display: flex;
     // justify-content: center;
     align-items: center;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--color-border);
     border-radius: 10px;
     height: 45px;
   }
@@ -268,7 +268,7 @@
     outline: 0 none;
     outline-offset: 0;
     box-shadow: 0 0 0 0.2rem transparent;
-    border-color: #d1d5db;
+    border-color: var(--color-border);
   }
 
   .p-inputtext::placeholder {
@@ -276,7 +276,7 @@
     font-size: 14px;
     font-weight: 400;
     text-align: left;
-    color: #b1b1b1;
+    color: var(--color-placeholder);
     margin-left: 10px;
   }
 
@@ -285,7 +285,7 @@
     font-size: 14px;
     font-weight: 400;
     text-align: left;
-    color: #b1b1b1;
+    color: var(--color-placeholder);
     margin-left: 10px;
   }
 
@@ -293,26 +293,26 @@
     flex-direction: row-reverse;
     // gap:10px;
     height: 46px;
-    border-color: #d1d5db;
+    border-color: var(--color-border);
     width: 85%;
     margin-left: 8px;
   }
 
   .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider {
-    background: #e2f6ef;
-    border: 1px solid #48c99e;
+    background: var(--color-success);
+    border: 1px solid var(--color-success);
   }
 
   .p-inputswitch:not(.p-disabled):hover .p-inputswitch-slider {
-    background: #e2f6ef;
+    background: var(--color-success);
   }
 
   .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider:before {
-    background: #48c99e;
+    background: var(--color-success);
   }
 
   .p-inputswitch .p-inputswitch-slider:before {
-    background: #f36156;
+    background: var(--color-danger);
     width: 1.25rem;
     height: 1.25rem;
     left: 0.25rem;
@@ -322,24 +322,24 @@
   }
 
   .p-inputswitch:not(.p-disabled):hover .p-inputswitch-slider {
-    /* background: #b7bcc5; */
+    /* background: var(--color-placeholder); */
   }
 
   // .container__sub__account__master .p-inputswitch:not(.p-disabled):hover .p-inputswitch-slider {
-  //     background: #F2DEDC;
-  //     border: 1px solid #F36156 !important;
+  //     background: var(--color-danger);
+  //     border: 1px solid var(--color-danger) !important;
   // }
   .container__sub__account__master
     .p-inputswitch:not(.p-disabled):hover
     .p-inputswitch-slider {
-    background: #e2f6ef;
-    border: 1px solid #f36156 !important;
+    background: var(--color-success);
+    border: 1px solid var(--color-danger) !important;
   }
 
   .pagedropdown_container {
     margin-right: 30%;
     border-style: hidden;
-    background-color: #fafafa;
+    background-color: var(--color-surface-muted);
   }
 
   .header_search_container__Journal__Voture {
@@ -361,7 +361,7 @@
   .p-paginator .p-paginator-last {
     background-color: transparent;
     border: 0 none;
-    color: #2e2e2e;
+    color: var(--color-heading);
     min-width: 0.5rem;
     height: 3rem;
     margin: 0.143rem;

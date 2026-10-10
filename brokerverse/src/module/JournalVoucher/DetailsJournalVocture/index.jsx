@@ -212,8 +212,8 @@ const DetailsJournalVocture = () => {
             { label: t("accounts.journalVoucherDetails.totalCredit"), value: voucher?.totalCredit, type: "amount" },
           ]}
           actions={(
-            <>
-              <Button label={t("accounts.journalVoucherDetails.print")} icon="pi pi-print" outlined onClick={print} data-testid="print-jv" />
+            // one action row at the right in every status: the decision (with its maker-checker reason) and Print last
+            <div className="bv-jv-actions">
               {voucher?.status === AWAITING_APPROVAL && (
                 <ApprovalActions
                   initiator={{ id: voucher.createdBy }}
@@ -223,7 +223,8 @@ const DetailsJournalVocture = () => {
                   onReject={() => decide("reject")}
                 />
               )}
-            </>
+              <Button label={t("accounts.journalVoucherDetails.print")} icon="pi pi-print" outlined onClick={print} data-testid="print-jv" />
+            </div>
           )}
         />
       </div>

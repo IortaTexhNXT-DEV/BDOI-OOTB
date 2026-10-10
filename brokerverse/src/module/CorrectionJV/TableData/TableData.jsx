@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -10,7 +11,6 @@ import "../EditData/index.scss";
 import { useFormik } from "formik";
 import DropDowns from "../../../components/DropDowns";
 import InputField from "../../../components/InputField";
-import SvgDropdown from "../../../assets/icons/SvgDropdown";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getPatchCorrectionJVEdit,
@@ -28,6 +28,7 @@ const ENTRY_TYPES = [
 ];
 
 const TableData = ({ newDataTable, editID }) => {
+  const { t } = useTranslation();
   const { correctionJVList, getCorrectionJVEdit } = useSelector(
     ({ correctionJVMainReducers }) => {
       return {
@@ -52,7 +53,7 @@ const TableData = ({ newDataTable, editID }) => {
         <div className="table__selector">
           <React.Fragment>
             <span style={{ color: "var(--text-color)", userSelect: "none" }}>
-              Row count :{" "}
+              {t("correctionJv.rowCount")}{" "}
             </span>
             <Dropdown
               value={options.value}
@@ -69,9 +70,8 @@ const TableData = ({ newDataTable, editID }) => {
   const renderEditButton = (rowData) => {
     return (
       <div className="action__icon">
-        <div onClick={() => handleEdit(rowData)} className="action__button">
-          <SvgEditIcon />
-        </div>
+        <Button type="button" icon={<SvgEditIcon />} text className="action__button" onClick={() => handleEdit(rowData)}
+          aria-label={t("correctionJv.editLine")} tooltip={t("correctionJv.editLine")} tooltipOptions={{ position: "top" }} />
       </div>
     );
   };
@@ -86,13 +86,14 @@ const TableData = ({ newDataTable, editID }) => {
     departmentCodesData,
     currencyCodesData,
   } = useJvMasterData();
+  // each option shows its code with its description, so the line names its account without extra read-only fields
   const toOptions = (rows) =>
-    rows.map((row) => ({ label: row.description, value: row.code }));
+    rows.map((row) => ({ label: row.description ? `${row.code} · ${row.description}` : row.code, value: row.code }));
   const mainAccountC = toOptions(mainAccountsData);
   const branchCodeData = toOptions(branchCodesData);
   const deptData = toOptions(departmentCodesData);
   const currencyCodeData = toOptions(currencyCodesData);
-  const entryT = ENTRY_TYPES;
+  const entryT = ENTRY_TYPES.map((e) => ({ ...e, label: t(`correctionJv.entry.${e.value}`) }));
   const describe = (rows, code) =>
     rows.find((row) => row.code === code)?.description || "";
 
@@ -100,33 +101,33 @@ const TableData = ({ newDataTable, editID }) => {
     const errors = {};
 
     if (!values.mainAccount) {
-      errors.mainAccount = "This field is required";
+      errors.mainAccount = t("correctionJv.required");
     }
 
     if (!values.entryType) {
-      errors.entryType = "This field is required";
+      errors.entryType = t("correctionJv.required");
     }
     const hasSubAccounts = subAccountsData.some(
       (sub) => sub.mainAccount === values.mainAccount
     );
     if (hasSubAccounts && !values.subAccount) {
-      errors.subAccount = "This field is required";
+      errors.subAccount = t("correctionJv.required");
     }
 
     if (!values.branchCode) {
-      errors.branchCode = "This field is required";
+      errors.branchCode = t("correctionJv.required");
     }
 
     if (!values.departmentCode) {
-      errors.departmentCode = "This field is required";
+      errors.departmentCode = t("correctionJv.required");
     }
 
     if (!values.currencyCode) {
-      errors.currencyCode = "This field is required";
+      errors.currencyCode = t("correctionJv.required");
     }
 
     if (!values.foreignAmount) {
-      errors.foreignAmount = "This field  is required";
+      errors.foreignAmount = t("correctionJv.required");
     }
 
     return errors;
@@ -157,6 +158,7 @@ const TableData = ({ newDataTable, editID }) => {
       currencyCode: "",
       currencyDescription: "",
       foreignAmount: "",
+      remarks: "",
     },
     validate: customValidation,
     onSubmit: (values) => {
@@ -169,6 +171,12 @@ const TableData = ({ newDataTable, editID }) => {
   const subAccountData = toOptions(
     subAccountsData.filter((sub) => sub.mainAccount === formik.values.mainAccount)
   );
+
+  const editingRow = getCorrectionJVEdit || null;
+  const editingIndex = (correctionJVList || []).findIndex((r) => r.id === editingRow?.id);
+  const editingTitle = editingRow
+    ? t("correctionJv.editLineTitle", { line: editingIndex + 1, account: [editingRow.mainAccount, describe(mainAccountsData, editingRow.mainAccount)].filter(Boolean).join(" · ") })
+    : t("correctionJv.editLine");
 
   const setFormikValues = () => {
     const row = getCorrectionJVEdit || {};
@@ -187,6 +195,7 @@ const TableData = ({ newDataTable, editID }) => {
       currencyCode: row.currencyCode || "",
       currencyDescription: row.currencyDescription || "",
       foreignAmount: row.foreignAmount || "",
+      remarks: row.remarks || "",
     });
   };
 
@@ -207,27 +216,27 @@ const TableData = ({ newDataTable, editID }) => {
       >
         <Column
           field="mainAccount"
-          header="Main A/c"
+          header={t("correctionJv.mainAccount")}
           className="fieldvalue_container"
         ></Column>
         <Column
           field="subAccount"
-          header="Sub A/c"
+          header={t("correctionJv.subAccount")}
           className="fieldvalue_container"
         ></Column>
         <Column
           field="remarks"
-          header="Remarks"
+          header={t("correctionJv.remarks")}
           className="fieldvalue_container"
         ></Column>
         <Column
           field="currencyCode"
-          header="Currency"
+          header={t("correctionJv.currency")}
           className="fieldvalue_container"
         ></Column>
         <Column
           field="foreignAmount"
-          header="Foreign Amount"
+          header={t("correctionJv.foreignAmount")}
           className="fieldvalue_container"
           body={(r) => (foreignShown(r) ? formatValue(r.foreignAmount, { type: "amount", currency: r.currencyCode || undefined }) : EMPTY_VALUE)}
           bodyClassName="bv-num"
@@ -235,7 +244,7 @@ const TableData = ({ newDataTable, editID }) => {
         ></Column>
         <Column
           field="localAmount"
-          header="Local Amount"
+          header={t("correctionJv.localAmount")}
           className="fieldvalue_container"
           body={(r) => formatValue(r.localAmount === "" ? null : r.localAmount, { type: "amount" })}
           bodyClassName="bv-num"
@@ -243,285 +252,87 @@ const TableData = ({ newDataTable, editID }) => {
         ></Column>
         <Column
           field="entryType"
-          header="Entry"
+          header={t("correctionJv.entryType")}
+          body={(r) => (r.entryType ? t(`correctionJv.entry.${r.entryType}`, { defaultValue: r.entryType }) : EMPTY_VALUE)}
           className="fieldvalue_container"
         ></Column>
         <Column
           field="id"
           body={renderEditButton}
-          header="Edit"
+          header={t("correctionJv.edit")}
           className="fieldvalue_container last__div__table"
           headerStyle={headerStyle}
         ></Column>
       </DataTable>
       <Dialog
-        header="Edit Data"
+        header={editingTitle}
         visible={visible}
-        className="corrections__jv__Edit__modal__container master__flow__common__dialog__container"
+        className="bv-centered corrections__jv__edit__line"
+        style={{ width: "min(760px, 96vw)" }}
+        breakpoints={{ "640px": "calc(100vw - 32px)" }}
         onHide={() => setVisible(false)}
-        dismissableMask={true}
-        style={{ boxShadow: "none" }} 
+        draggable={false}
+        resizable={false}
+        footer={(
+          <>
+            <Button type="button" label={t("correctionJv.cancel")} text onClick={() => setVisible(false)} />
+            <Button type="button" label={t("correctionJv.updateLine")} icon="pi pi-check" onClick={formik.handleSubmit} />
+          </>
+        )}
       >
-        <div className="form__container">
-          <div className="grid m-0">
-            <div className="col-12 md:col-3 lg:col-3 xl:col-3">
+        <div className="grid corrections__jv__edit__form">
+          {[
+            ["mainAccount", mainAccountC, t("correctionJv.mainAccount")],
+            ["entryType", entryT, t("correctionJv.entryType")],
+            ["subAccount", subAccountData, t("correctionJv.subAccount")],
+            ["branchCode", branchCodeData, t("correctionJv.branch")],
+            ["departmentCode", deptData, t("correctionJv.department")],
+            ["currencyCode", currencyCodeData, t("correctionJv.currency")],
+          ].map(([field, options, label]) => (
+            <div className="col-12 md:col-6" key={field}>
               <DropDowns
                 className="input__field__corrections"
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-                placeholder="Select "
                 classNames="select__label__corrections"
-                optionLabel="value"
-                label="Main Account"
-                value={formik.values.mainAccount}
-                onChange={(e) => formik.setFieldValue("mainAccount", e.value)}
-                options={mainAccountC}
+                label={label}
+                required={field !== "subAccount" || subAccountData.length > 0}
+                value={formik.values[field]}
+                onChange={(e) => formik.setFieldValue(field, e.value)}
+                options={options}
+                optionLabel="label"
+                placeholder={t("correctionJv.select")}
+                filter={options.length > 8}
               />
-              {formik.touched.mainAccount && formik.errors.mainAccount && (
-                <div
-                  style={{ fontSize: 12, color: "var(--color-danger)" }}
-                  className="formik__errror__JV"
-                >
-                  {formik.errors.mainAccount}
-                </div>
-              )}
+              {formik.touched[field] && formik.errors[field] && <small className="bv-field-error">{formik.errors[field]}</small>}
             </div>
-            <div className="col-12 md:col-6 lg:col-6 xl:col-6">
-              <InputField
-                classNames="input__field__corrections__inactive"
-                disabled={true}
-                className="input__label__corrections"
-                label="Main Account Description"
-                value={describe(mainAccountsData, formik.values.mainAccount)}
-              />
-            </div>
-
-            <div className="col-12 md:col-3 lg:col-3 xl:col-3">
-              <DropDowns
-                className="input__field__corrections"
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-                placeholder="Select "
-                classNames="select__label__corrections"
-                optionLabel="value"
-                label="Entry Type"
-                value={formik.values.entryType}
-                onChange={(e) => formik.setFieldValue("entryType", e.value)}
-                options={entryT}
-              />
-              {formik.touched.entryType && formik.errors.entryType && (
-                <div
-                  style={{ fontSize: 12, color: "var(--color-danger)" }}
-                  className="formik__errror__JV"
-                >
-                  {formik.errors.entryType}
-                </div>
-              )}
-            </div>
+          ))}
+          <div className="col-12 md:col-6">
+            <InputField
+              classNames="input__field__corrections"
+              className="select__label__corrections"
+              label={t("correctionJv.amountIn", { currency: formik.values.currencyCode || "" })}
+              required
+              value={formik.values.foreignAmount}
+              onChange={(e) => formik.setFieldValue("foreignAmount", e.target.value)}
+            />
+            {formik.touched.foreignAmount && formik.errors.foreignAmount && <small className="bv-field-error">{formik.errors.foreignAmount}</small>}
           </div>
-          <div
-            className="grid m-0 p-0 add__journal__vocture__add__JV"
-            style={{ alignItems: "center" }}
-          >
-            <div className="col-12 md:col-3 lg:col-3 xl:col-3">
-              <DropDowns
-                className="input__field__corrections"
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-                classNames="select__label__corrections"
-                optionLabel="value"
-                label="Sub Account"
-                value={formik.values.subAccount}
-                onChange={(e) => formik.setFieldValue("subAccount", e.value)}
-                options={subAccountData}
-                placeholder="Select "
-              />
-              {formik.touched.subAccount && formik.errors.subAccount && (
-                <div
-                  style={{ fontSize: 12, color: "var(--color-danger)" }}
-                  className="formik__errror__JV"
-                >
-                  {formik.errors.subAccount}
-                </div>
-              )}
-            </div>
-            <div className="col-12 md:col-6 lg:col-6 xl:col-6 ">
-              <InputField
-                classNames="input__field__corrections__inactive"
-                disabled={true}
-                className="input__label__corrections"
-                label="Sub Account Description"
-                value={describe(subAccountsData, formik.values.subAccount)}
-              />
-            </div>
+          <div className="col-12 md:col-6">
+            <InputField
+              classNames="input__field__corrections__inactive"
+              className="select__label__corrections"
+              label={t("correctionJv.localAmount")}
+              disabled
+              value={formatValue(editingRow?.localAmount === "" ? null : editingRow?.localAmount, { type: "amount" })}
+            />
           </div>
-          <div
-            className="grid m-0 p-0 add__journal__vocture__add__JV"
-            style={{ alignItems: "center" }}
-          >
-            <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
-              <DropDowns
-                className="input__field__corrections"
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-                classNames="select__label__corrections"
-                optionLabel="value"
-                label="Branch Code"
-                value={formik.values.branchCode}
-                onChange={(e) => formik.setFieldValue("branchCode", e.value)}
-                options={branchCodeData}
-                placeholder="Select "
-              />
-              {formik.touched.branchCode && formik.errors.branchCode && (
-                <div
-                  style={{ fontSize: 12, color: "var(--color-danger)" }}
-                  className="formik__errror__JV"
-                >
-                  {formik.errors.branchCode}
-                </div>
-              )}
-            </div>
-            <div className="col-12 md:col-6 lg:col-6 xl:col-6">
-              <InputField
-                classNames="input__field__corrections__inactive"
-                disabled={true}
-                className="input__label__corrections"
-                label="Branch Code Description"
-                value={describe(branchCodesData, formik.values.branchCode)}
-              />
-              {formik.touched.branchCodeDescription &&
-                formik.errors.branchCodeDescription && (
-                  <div
-                    style={{ fontSize: 12, color: "var(--color-danger)" }}
-                    className="formik__errror__JV"
-                  >
-                    {formik.errors.branchCodeDescription}
-                  </div>
-                )}
-            </div>
-          </div>
-          <div
-            className="grid m-0 p-0 add__journal__vocture__add__JV"
-            style={{ alignItems: "center" }}
-          >
-            <div className="col-12 md:col-3 lg:col-3 xl:col-3">
-              <DropDowns
-                className="input__field__corrections"
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-                classNames="select__label__corrections"
-                optionLabel="value"
-                label="Department Code"
-                value={formik.values.departmentCode}
-                onChange={(e) =>
-                  formik.setFieldValue("departmentCode", e.value)
-                }
-                options={deptData}
-                placeholder="Select "
-              />
-              {formik.touched.departmentCode &&
-                formik.errors.departmentCode && (
-                  <div
-                    style={{ fontSize: 12, color: "var(--color-danger)" }}
-                    className="formik__errror__JV"
-                  >
-                    {formik.errors.departmentCode}
-                  </div>
-                )}
-            </div>
-            <div className="col-12 md:col-6 lg:col-6 xl:col-6">
-              <InputField
-                classNames="input__field__corrections__inactive"
-                disabled={true}
-                className="input__label__corrections"
-                label="Department Description"
-                value={describe(departmentCodesData, formik.values.departmentCode)}
-              />
-              {formik.touched.departmentDescription &&
-                formik.errors.departmentDescription && (
-                  <div
-                    style={{ fontSize: 12, color: "var(--color-danger)" }}
-                    className="formik__errror__JV"
-                  >
-                    {formik.errors.departmentDescription}
-                  </div>
-                )}
-            </div>
-          </div>
-          <div
-            className="grid m-0 p-0 add__journal__vocture__add__JV"
-            style={{ alignItems: "center" }}
-          >
-            <div className="col-12 md:col-3 lg:col-3 xl:col-3">
-              <DropDowns
-                className="input__field__corrections"
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-                classNames="select__label__corrections"
-                optionLabel="value"
-                label="Currency Code"
-                value={formik.values.currencyCode}
-                onChange={(e) => formik.setFieldValue("currencyCode", e.value)}
-                options={currencyCodeData}
-                placeholder="Select "
-              />
-              {formik.touched.currencyCode && formik.errors.currencyCode && (
-                <div
-                  style={{ fontSize: 12, color: "var(--color-danger)" }}
-                  className="formik__errror__JV"
-                >
-                  {formik.errors.currencyCode}
-                </div>
-              )}
-            </div>
-            <div className="col-12 md:col-6 lg:col-6 xl:col-6">
-              <InputField
-                classNames="input__field__corrections__inactive"
-                disabled={true}
-                className="input__label__corrections"
-                label="Currency Description"
-                value={describe(currencyCodesData, formik.values.currencyCode)}
-              />
-              {formik.touched.currencyDescription &&
-                formik.errors.currencyDescription && (
-                  <div
-                    style={{ fontSize: 12, color: "var(--color-danger)" }}
-                    className="formik__errror__JV"
-                  >
-                    {formik.errors.currencyDescription}
-                  </div>
-                )}
-            </div>
-            <div className="col-12 md:col-3 lg:col-3 xl:col-3">
-              <InputField
-                classNames="input__field__corrections"
-                className="select__label__corrections"
-                label="Foreign Amount"
-                value={formik.values.foreignAmount}
-                onChange={(e) =>
-                  formik.setFieldValue("foreignAmount", e.target.value)
-                }
-                placeholder="Enter"
-              />
-              {formik.touched.foreignAmount && formik.errors.foreignAmount && (
-                <div
-                  style={{ fontSize: 12, color: "var(--color-danger)" }}
-                  className="formik__errror__JV"
-                >
-                  {formik.errors.foreignAmount}
-                </div>
-              )}
-            </div>
-
-            <div
-              className="col-12 save__popup__correction"
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                alignItems: "flex-end",
-              }}
-            >
-              <Button
-                label="Update"
-                className="correction__btn__corrections"
-                disabled={!formik.isValid}
-                onClick={formik.handleSubmit}
-              />
-            </div>
+          <div className="col-12">
+            <InputField
+              classNames="input__field__corrections"
+              className="select__label__corrections"
+              label={t("correctionJv.remarks")}
+              value={formik.values.remarks}
+              onChange={(e) => formik.setFieldValue("remarks", e.target.value)}
+            />
           </div>
         </div>
       </Dialog>

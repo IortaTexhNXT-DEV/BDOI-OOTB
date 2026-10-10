@@ -186,6 +186,11 @@ describe('2551Q percentage tax working paper (13.04)', () => {
     expect((await file('get', `/bir/returns/2551Q/xlsx?year=${q.year}&quarter=${q.quarter}`)).body.subarray(0, 2).toString()).toBe('PK');
     await setSetting('bir.percentage_tax_rate', 3);
     await setSetting('direct_bill.broker_vat_registered', true);
+    // a VAT-registered broker files no percentage tax: the working paper keeps the sales with no tax due
+    const vat = (await maker('get', `/bir/returns/2551Q?year=${q.year}&quarter=${q.quarter}`)).body.data;
+    expect(vat).toMatchObject({ applicable: false, taxDue: 0 });
+    expect(vat.schedules[0].totals.grossSales).toBeCloseTo(gross, 2);
+    expect((await maker('post', '/bir/returns/2551Q/filings').send({ year: q.year, quarter: q.quarter, dateFiled: vat.period.to, amountPaid: 0 })).status).toBe(409);
   });
 });
 

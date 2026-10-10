@@ -55,7 +55,6 @@ const UploadJournalVouchers = ({ visible, onHide, onUploaded }) => {
           <Button label={t("jvTools.upload")} icon="pi pi-upload" loading={busy} disabled={!file || !!result} onClick={upload} />
         </div>
       )}>
-      <p>{t("jvTools.uploadIntro")}</p>
       <div className="flex flex-wrap gap-2 align-items-center mb-3">
         <Button label={t("jvTools.downloadTemplate")} icon="pi pi-download" outlined onClick={template} />
         <input ref={input} type="file" accept=".xlsx,.csv" style={{ display: "none" }} aria-label={t("jvTools.chooseFile")}

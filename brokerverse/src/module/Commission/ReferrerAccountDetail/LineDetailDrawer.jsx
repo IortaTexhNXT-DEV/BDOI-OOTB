@@ -20,6 +20,11 @@ const ACTIONS = {
   reverse: { call: CommissionService.reverseLine, when: ["Accrued", "Eligible", "Approved"], danger: true },
 };
 
+const chargesOf = (line) => {
+  const value = Math.round((Number(line.grossPremium || 0) - Number(line.discountAmount || 0) - Number(line.netPremium || 0)) * 100) / 100;
+  return value > 0 ? value : 0;
+};
+
 const LineDetailDrawer = ({
   visible,
   onHide,
@@ -62,6 +67,7 @@ const LineDetailDrawer = ({
     }
   };
 
+  // a reversal (a clawback once paid) is recorded with its reason
   const confirmAction = async (name) => {
     const action = ACTIONS[name];
     const ok = await openConfirm({
@@ -75,9 +81,12 @@ const LineDetailDrawer = ({
         { label: t("commissionLine.wht"), value: line.wht, type: "amount" },
         { label: t("commissionLine.netPayable"), value: line.net, type: "amount", emphasis: true },
       ],
+      input: name === "reverse" ? { type: "textarea", label: t("commissionLine.reverseReason"), required: true, minLength: 3, maxLength: 500 } : undefined,
       confirmLabel: t(`commissionLine.confirm.${name}`),
     });
-    if (ok) runLineAction(action.call);
+    if (!ok) return;
+    // with a field the answer is the reason typed in
+    runLineAction(action.call, name === "reverse" ? [referrerId, line.id, ok] : undefined);
   };
 
   const applyRateOverride = async () => {
@@ -102,6 +111,8 @@ const LineDetailDrawer = ({
   const rows = [
     { key: "gross", label: t("commissionLine.grossPremium"), value: line.grossPremium },
     { key: "discount", label: t("commissionLine.discount", { label: line.discountLabel }), value: -Number(line.discountAmount || 0), muted: true },
+    // the premium taxes and charges taken out of the gross, so gross less discount less charges is the net premium
+    { key: "charges", label: t("commissionLine.taxesAndCharges"), value: -chargesOf(line), muted: true, hidden: !chargesOf(line) },
     { key: "net", label: t("commissionLine.netPremium"), value: line.netPremium, strong: true },
     { key: "brokerage", label: t("commissionLine.brokerage", { pct: line.brokeragePct }), value: line.brokerageAmount },
     { key: "comsub", label: t("commissionLine.comsubFormula", { fixed: formatAmount(line.comsubFixed), pct: line.comsubPct }), value: line.comsub },
@@ -141,7 +152,7 @@ const LineDetailDrawer = ({
         <DetailSection title={t("commissionLine.calculation")}>
           <table className="calc-table">
             <tbody>
-              {rows.map((r) => (
+              {rows.filter((r) => !r.hidden).map((r) => (
                 <tr key={r.key} className={[r.muted && "muted", r.strong && "strong", r.rule && "rule"].filter(Boolean).join(" ") || undefined}>
                   <th scope="row">{r.label}</th>
                   <td>{formatAmount(r.value)}</td>

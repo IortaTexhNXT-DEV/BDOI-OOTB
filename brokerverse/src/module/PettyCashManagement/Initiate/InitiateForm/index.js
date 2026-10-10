@@ -11,8 +11,10 @@ import InputField from "../../../../components/InputField";
 import DropDowns from "../../../../components/DropDowns";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { Button } from "primereact/button";
+import { openConfirm } from "../../../../components/ConfirmDialog";
 import CustomToast from "../../../../components/Toast";
 import usePettyCashOptions, { describe } from "../../usePettyCashOptions";
+import { optionCode } from "../../pettyCashFormat";
 import {
   postInitiateMiddleware,
 } from "../store/pettyCashInitiateMiddleware";
@@ -75,20 +77,37 @@ const InitiateForm = () => {
     }
 
     if (!values.MainAccountCode) {
-      errors.MainAccountCode = t("pettyCash.currencyRequired");
+      errors.MainAccountCode = t("pettyCash.mainAccountCodeRequired");
     }
 
     return errors;
   };
 
 
+  // the new fund is confirmed with its figures, then waits for another user to approve (establish) it
   const handleSubmit = async (value) => {
-    const result = await dispatch(postInitiateMiddleware(value));
-    if (postInitiateMiddleware.rejected.match(result)) {
-      toastRef.current.showToast({ severity: "error", detail: result.payload });
-      return;
-    }
-    showSuccessMessage(t("pettyCash.initiatedSuccessfully"));
+    let failed = null;
+    const answer = await openConfirm({
+      title: t("pettyCash.fundApproval.submitTitle"),
+      facts: [
+        { label: t("pettyCash.pettyCashCode"), value: optionCode(value.PettyCashCodes) || t("pettyCash.fundApproval.nextCode") },
+        { label: t("pettyCash.pettyCashDescription"), value: value.PettyCashdescription },
+        { label: t("pettyCash.bankCode"), value: optionCode(value.BankCode) },
+        { label: t("pettyCash.mainAccountCode"), value: optionCode(value.MainAccountCode) },
+        { label: t("pettyCash.maxLimit"), value: value.MaxLimit, type: "amount" },
+        { label: t("pettyCash.pettyCashSize"), value: value.PettyCashSize, type: "amount", emphasis: true },
+      ],
+      confirmLabel: t("pettyCash.fundApproval.submit"),
+      onConfirm: async () => {
+        const result = await dispatch(postInitiateMiddleware(value));
+        if (postInitiateMiddleware.rejected.match(result)) {
+          failed = result.payload;
+          throw new Error(result.payload);
+        }
+      },
+    });
+    if (answer === false || answer === null || answer === undefined || failed) return;
+    showSuccessMessage(t("pettyCash.fundApproval.submitted"));
     navigate("/accounts/pettycash/pettycashcodeinitiate");
   };
   const items = [
@@ -149,7 +168,7 @@ const InitiateForm = () => {
               model={items}
               home={Initiate}
               className="breadCrums"
-              separatorIcon={<SvgDot color={"#000"} />}
+              separatorIcon={<SvgDot color="currentColor" />}
             />
           </div>
         </div>
@@ -157,8 +176,8 @@ const InitiateForm = () => {
 
       <Card className="mt-4">
 
-        <div class="grid" style={{ flexDirection: "row-reverse" }}>
-          <div class="col-12 md:col-6 lg:col-3">
+        <div className="grid">
+          <div className="col-12 md:col-4">
             <InputField
               disabled={true}
               classNames="field__container"
@@ -170,21 +189,19 @@ const InitiateForm = () => {
               onChange={formik.handleChange("TransactionNumber")}
             />
           </div>
-          <div class="col-12 md:col-6 lg:col-3">
+          <div className="col-12 md:col-4">
             <InputField
               classNames="input__filed"
               label={t("pettyCash.transactionCode")}
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--color-heading)"}
               textSize={"16"}
               textWeight={500}
             />
 
           </div>
-          <div className="calender__container col-12 md:col-3 lg-col-3 ">
-            <LabelWrapper className="calenderlable__container">
-              {t("pettyCash.transactionDate")}
-            </LabelWrapper>
+          <div className="calender__container col-12 md:col-4">
+            <LabelWrapper label={t("pettyCash.transactionDate")} className="calenderlable__container" />
             <Calendar
               showIcon
               placeholder={t("pettyCash.select")}
@@ -207,7 +224,7 @@ const InitiateForm = () => {
               classNames="input__filed"
               label={t("pettyCash.pettyCashCode")}
               placeholder={t("pettyCash.pettyCashCodeAuto")}
-              textColor={"#111927"}
+              textColor={"var(--color-heading)"}
               textSize={"16"}
               textWeight={500}
               length={30}
@@ -220,7 +237,7 @@ const InitiateForm = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.pettyCashDescription")}
-              textColor={"#111927"}
+              textColor={"var(--color-heading)"}
               textSize={"16"}
               textWeight={500}
               value={formik.values.PettyCashdescription}
@@ -233,7 +250,7 @@ const InitiateForm = () => {
               label={t("pettyCash.pettyCashSize")}
               required
               type="number"
-              textColor={"#111927"}
+              textColor={"var(--color-heading)"}
               textSize={"16"}
               textWeight={500}
               value={formik.values.PettyCashSize}
@@ -250,10 +267,10 @@ const InitiateForm = () => {
               className="input__filed"
               label={t("pettyCash.bankCode")}
               placeholder={t("pettyCash.select")}
-              textColor={"#111927"}
+              textColor={"var(--color-heading)"}
               textSize={"16"}
               textWeight={500}
-              dropdownIcon={<SvgDropdown color={"#000"} />}
+              dropdownIcon={<SvgDropdown color="currentColor" />}
               value={formik.values.BankCode}
               options={banks}
               onChange={(e) => {
@@ -272,10 +289,10 @@ const InitiateForm = () => {
               className="input__filed"
               label={t("pettyCash.bankAccountCode")}
               placeholder={t("pettyCash.select")}
-              textColor={"#111927"}
+              textColor={"var(--color-heading)"}
               textSize={"16"}
               textWeight={500}
-              dropdownIcon={<SvgDropdown color={"#000"} />}
+              dropdownIcon={<SvgDropdown color="currentColor" />}
               value={formik.values.BankAccountCode}
               options={bankAccounts.filter(
                 (account) => account.bankCode === formik.values.BankCode?.code
@@ -294,10 +311,10 @@ const InitiateForm = () => {
               className="input__filed"
               label={t("pettyCash.mainAccountCode")}
               placeholder={t("pettyCash.select")}
-              textColor={"#111927"}
+              textColor={"var(--color-heading)"}
               textSize={"16"}
               textWeight={500}
-              dropdownIcon={<SvgDropdown color={"#000"} />}
+              dropdownIcon={<SvgDropdown color="currentColor" />}
               value={formik.values.MainAccountCode}
               options={mainAccounts}
               onChange={(e) => {
@@ -313,10 +330,10 @@ const InitiateForm = () => {
               className="input__filed"
               label={t("pettyCash.subAccountCode")}
               placeholder={t("pettyCash.select")}
-              textColor={"#111927"}
+              textColor={"var(--color-heading)"}
               textSize={"16"}
               textWeight={500}
-              dropdownIcon={<SvgDropdown color={"#000"} />}
+              dropdownIcon={<SvgDropdown color="currentColor" />}
               value={formik.values.SubAccountCode}
               options={subAccounts.filter(
                 (account) => account.parentCode === formik.values.MainAccountCode?.code
@@ -337,10 +354,10 @@ const InitiateForm = () => {
               className="input__filed"
               label={t("pettyCash.currency")}
               placeholder={t("pettyCash.select")}
-              textColor={"#111927"}
+              textColor={"var(--color-heading)"}
               textSize={"16"}
               textWeight={500}
-              dropdownIcon={<SvgDropdown color={"#000"} />}
+              dropdownIcon={<SvgDropdown color="currentColor" />}
               value={formik.values.Currency}
               options={currencies}
               onChange={(e) => {
@@ -358,7 +375,7 @@ const InitiateForm = () => {
               classNames="input__filed"
               label={t("pettyCash.currencyDescription")}
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--color-heading)"}
               textSize={"16"}
               textWeight={500}
               value={formik.values.Currencydescription}
@@ -376,10 +393,10 @@ const InitiateForm = () => {
               className="input__filed"
               label={t("pettyCash.branchCode")}
               placeholder={t("pettyCash.select")}
-              textColor={"#111927"}
+              textColor={"var(--color-heading)"}
               textSize={"16"}
               textWeight={500}
-              dropdownIcon={<SvgDropdown color={"#000"} />}
+              dropdownIcon={<SvgDropdown color="currentColor" />}
               value={formik.values.BranchCode}
               options={branches}
               onChange={(e) => {
@@ -397,7 +414,7 @@ const InitiateForm = () => {
               classNames="input__filed"
               label={t("pettyCash.branchDescription")}
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--color-heading)"}
               textSize={"16"}
               textWeight={500}
               value={formik.values.Branchdescription}
@@ -415,10 +432,10 @@ const InitiateForm = () => {
               className="input__filed"
               label={t("pettyCash.departmentCode")}
               placeholder={t("pettyCash.select")}
-              textColor={"#111927"}
+              textColor={"var(--color-heading)"}
               textSize={"16"}
               textWeight={500}
-              dropdownIcon={<SvgDropdown color={"#000"} />}
+              dropdownIcon={<SvgDropdown color="currentColor" />}
               value={formik.values.DepartmentCode}
               options={departments}
               onChange={(e) => {
@@ -438,7 +455,7 @@ const InitiateForm = () => {
               classNames="input__filed"
               label={t("pettyCash.departmentDescription")}
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--color-heading)"}
               textSize={"16"}
               textWeight={500}
               value={formik.values.Departmentdescription}
@@ -456,7 +473,7 @@ const InitiateForm = () => {
               classNames="input__filed"
               label={t("pettyCash.availableCash")}
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--color-heading)"}
               textSize={"16"}
               textWeight={500}
               value={formik.values.AvailableCash}
@@ -471,7 +488,7 @@ const InitiateForm = () => {
               classNames="input__filed"
               label={t("pettyCash.maxLimit")}
               type="number"
-              textColor={"#111927"}
+              textColor={"var(--color-heading)"}
               textSize={"16"}
               textWeight={500}
               value={formik.values.MaxLimit}
@@ -487,7 +504,7 @@ const InitiateForm = () => {
               classNames="input__filed"
               label={t("pettyCash.minimumCashbox")}
               type="number"
-              textColor={"#111927"}
+              textColor={"var(--color-heading)"}
               textSize={"16"}
               textWeight={500}
               value={formik.values.MinimumCashbox}
@@ -504,7 +521,7 @@ const InitiateForm = () => {
         <div className="col-12 md:col-12 lg:col-12">
           <div className="btn__container">
             <Button
-              label={t("pettyCash.approve")}
+              label={t("pettyCash.fundApproval.submit")}
               className="add__btn"
               onClick={() => {
                 formik.handleSubmit();

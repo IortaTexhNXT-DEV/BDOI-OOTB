@@ -101,9 +101,11 @@ const ReturnView = ({ ret, onChanged, toast }) => {
           <div className="pe-muted">{ret.period.label} ({date(ret.period.from)} to {date(ret.period.to)}) · {t("birTax.formVersion")} {ret.formVersion}</div>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Button icon="pi pi-print" outlined label={t("birTax.print")} onClick={print} />
+          {/* a return that does not apply (2551Q of a VAT-registered broker) is not printed or filed */}
+          {ret.applicable === false && <BirTag status="not-applicable" />}
+          {ret.applicable !== false && <Button icon="pi pi-print" outlined label={t("birTax.print")} onClick={print} />}
           <Button icon="pi pi-file-excel" outlined label={t("birTax.excel")} onClick={() => run(() => birTaxService.returnXlsx(ret.form, params))} />
-          {!ret.filing && <Button icon="pi pi-check-square" label={t("birTax.recordFiling")} onClick={() => setDialog({ amended: false })} />}
+          {!ret.filing && ret.applicable !== false && <Button icon="pi pi-check-square" label={t("birTax.recordFiling")} onClick={() => setDialog({ amended: false })} />}
           {ret.filing && <Button icon="pi pi-pencil" outlined label={t("birTax.editFiling")} onClick={() => setDialog({ amended: false, filing: ret.filing })} />}
           {ret.filing && <Button icon="pi pi-copy" outlined label={t("birTax.amendedFiling")} onClick={() => setDialog({ amended: true })} />}
         </div>

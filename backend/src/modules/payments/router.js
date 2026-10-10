@@ -105,7 +105,7 @@ for (const [kind, [label, row]] of Object.entries(KINDS)) {
     handler: async (req, res) => ok(res, await pc.getOne(pool, kind, req.params.id)),
   });
   pcr.define({
-    method: 'POST', path: `/${kind}`, summary: `Create a petty cash ${kind.slice(0, -1)}${kind === 'requests' ? '' : ' (posts its journal)'}`, screen: `${S} > ${label} > Add`,
+    method: 'POST', path: `/${kind}`, summary: `Create a petty cash ${kind.slice(0, -1)}${{ requests: '', funds: ' (waits for approval by another user, then posts its journal)' }[kind] ?? ' (posts its journal)'}`, screen: `${S} > ${label} > Add`,
     middleware: [...pcWrite, validate(SCHEMAS[kind])], request: EXAMPLES[kind], response: { success: true, data: EXAMPLES[kind] },
     handler: async (req, res) => {
       const r = await withTransaction((db) => CREATE[kind](db, req.body, req.user));
@@ -135,6 +135,18 @@ pcr.define({
     ok(res, r);
   },
 });
+for (const action of ['approve', 'reject']) {
+  pcr.define({
+    method: 'POST', path: `/funds/:id/${action}`, summary: `${action === 'approve' ? 'Approve (establish: posts its journal)' : 'Reject'} a fund waiting for approval (approver must differ from its initiator)`,
+    screen: `${S} > Initiate`, middleware: [...pcWrite, validate(action === 'reject' ? z.object({ reason: z.string().min(3) }) : z.object({}).passthrough())],
+    request: action === 'reject' ? { reason: 'Fund size not agreed' } : {}, response: { success: true, data: { ...EXAMPLES.funds, status: action === 'approve' ? 'active' : 'rejected' } },
+    handler: async (req, res) => {
+      const f = await withTransaction((db) => pc.decideFund(db, req.params.id, action, req.user, req.body.reason));
+      await audit(req, { entity: 'petty_cash_fund', entityId: f.id, action, after: { status: f.status, reason: req.body.reason } });
+      ok(res, pc.fundRow(f), action === 'approve' ? 'Petty cash fund established' : 'Petty cash fund rejected');
+    },
+  });
+}
 for (const action of ['submit', 'approve', 'reject']) {
   pcr.define({
     method: 'POST', path: `/requests/:id/${action}`, summary: action === 'submit' ? 'Submit a request for approval' : `${action === 'approve' ? 'Approve' : 'Reject'} a submitted request (approver must differ from requester)`,

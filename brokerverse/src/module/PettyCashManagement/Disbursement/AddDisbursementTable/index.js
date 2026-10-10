@@ -133,7 +133,7 @@ const AddDisbursementTable = () => {
     fontWeight: 500,
     // padding: "18px 8px",
     // paddingTop:4,
-    color: "#000",
+    color: "var(--color-heading)",
     border: " none",
     display: "flex",
     // paddingBottom:"28px",
@@ -146,7 +146,7 @@ const AddDisbursementTable = () => {
     fontFamily: "Nunito, Arial, sans-serif",
     fontWeight: 500,
     padding: 8,
-    color: "#000",
+    color: "var(--color-heading)",
     border: "none",
     textAlign: "center",
     paddingLeft: 0,
@@ -310,7 +310,7 @@ if(formAction === "Edit" ){
               model={items}
               home={Initiate}
               className="breadCrums"
-              separatorIcon={<SvgDot color={"#000"} />}
+              separatorIcon={<SvgDot color="currentColor" />}
             />
           </div>
         </div>
@@ -323,7 +323,7 @@ if(formAction === "Edit" ){
 
               <Button
                 label="Add"
-                icon={<SvgAdd color={"#fff"} />}
+                icon={<SvgAdd color="currentColor" />}
                 className="add__btn"
                 onClick={() => {
                   handleView();
@@ -426,7 +426,7 @@ if(formAction === "Edit" ){
             classNames="input__filed"
             label="Total"
             disabled={true}
-            textColor={"#111927"}
+            textColor={"var(--color-heading)"}
             textSize={"16"}
             textWeight={500}
             value={totalNetAmount}
@@ -453,7 +453,7 @@ if(formAction === "Edit" ){
         style={{ width: "40vw" }}
         onHide={() => handlehide()}
         headerStyle={{
-          color: "#343434",
+          color: "var(--color-heading)",
           fontFamily: "Nunito, Arial, sans-serif",
           fontSize: "24px",
           fontWeight: "600",
@@ -468,10 +468,10 @@ if(formAction === "Edit" ){
                 className="input__filed"
                 label="Requested By"
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--color-heading)"}
                 textSize={"16"}
                 textWeight={500}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
+                dropdownIcon={<SvgDropdown color="currentColor" />}
                 options={formAction === "Edit" ? RequestNumberOptionData : item
                 }
                 value={formik.values.RequestNumber}
@@ -490,10 +490,10 @@ if(formAction === "Edit" ){
                 className="input__filed"
                 label="Expense Code"
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--color-heading)"}
                 textSize={"16"}
                 textWeight={500}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
+                dropdownIcon={<SvgDropdown color="currentColor" />}
                 options={
                   formAction === "Edit" ? ExpenseCodeOptionData : item1}
                   value={formik.values.ExpenseCode}
@@ -511,10 +511,10 @@ if(formAction === "Edit" ){
                 className="input__filed"
                 label="Sub Account"
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--color-heading)"}
                 textSize={"16"}
                 textWeight={500}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
+                dropdownIcon={<SvgDropdown color="currentColor" />}
                 options={formAction === "Edit" ? SubAcOptionData : item2}
                 value={formik.values.SubAc}
                 onChange={(e) => {
@@ -530,7 +530,7 @@ if(formAction === "Edit" ){
               <InputField
                 classNames="input__filed"
                 label="Purpose"
-                textColor={"#111927"}
+                textColor={"var(--color-heading)"}
                 textSize={"16"}
                 textWeight={500}
                 onChange={formik.handleChange("Purpose")}
@@ -544,7 +544,7 @@ if(formAction === "Edit" ){
                 classNames="input__filed"
                 label="Remarks"
                 placeholder="Enter"
-                textColor={"#111927"}
+                textColor={"var(--color-heading)"}
                 textSize={"16"}
                 textWeight={500}
                 onChange={formik.handleChange("Remarks")}
@@ -556,7 +556,7 @@ if(formAction === "Edit" ){
                 classNames="input__filed"
                 label="VAT"
                 placeholder="Enter"
-                textColor={"#111927"}
+                textColor={"var(--color-heading)"}
                 textSize={"16"}
                 textWeight={500}
                 onChange={formik.handleChange("VAT")}
@@ -568,7 +568,7 @@ if(formAction === "Edit" ){
                 classNames="input__filed"
                 label="WHT"
                 placeholder="Enter"
-                textColor={"#111927"}
+                textColor={"var(--color-heading)"}
                 textSize={"16"}
                 textWeight={500}
                 onChange={formik.handleChange("WHT")}
@@ -579,7 +579,7 @@ if(formAction === "Edit" ){
               <InputField
                 classNames="input__filed"
                 label="Amount"
-                textColor={"#111927"}
+                textColor={"var(--color-heading)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.Amount}
@@ -593,7 +593,7 @@ if(formAction === "Edit" ){
                 classNames="input__filed"
                 label="Net Amount"
                 disabled={true}
-                textColor={"#111927"}
+                textColor={"var(--color-heading)"}
                 textSize={"16"}
                 textWeight={500}
                 onChange={formik.handleChange("NetAmount")}
@@ -622,7 +622,7 @@ if(formAction === "Edit" ){
         onHide={() => setaddVisible(false)}
 
         headerStyle={{
-          color: "#343434",
+          color: "var(--color-heading)",
           fontFamily: "Nunito, Arial, sans-serif",
           fontSize: "24px",
           fontWeight: "600",
@@ -637,10 +637,10 @@ if(formAction === "Edit" ){
                 className="input__filed"
                 label="Requested By"
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--color-heading)"}
                 textSize={"16"}
                 textWeight={500}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
+                dropdownIcon={<SvgDropdown color="currentColor" />}
                 options={formAction === "Edit" ? RequestNumberOptionData : item
                 }
                 value={formik.values.RequestNumber}
@@ -659,10 +659,10 @@ if(formAction === "Edit" ){
                 className="input__filed"
                 label="Expense Code"
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--color-heading)"}
                 textSize={"16"}
                 textWeight={500}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
+                dropdownIcon={<SvgDropdown color="currentColor" />}
                 value={formAction === "Add" ? formik.values.ExpenseCode : formAction === "Edit" && formik.values.ExpenseCode}
                 options={
                   formAction === "Edit" ? ExpenseCodeOptionData : item1}
@@ -680,10 +680,10 @@ if(formAction === "Edit" ){
                 className="input__filed"
                 label="Sub Account"
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--color-heading)"}
                 textSize={"16"}
                 textWeight={500}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
+                dropdownIcon={<SvgDropdown color="currentColor" />}
                 value={formAction === "Add" ? formik.values.SubAc : formAction === "Edit" && formik.values.SubAc}
                 options={formAction === "Edit" ? SubAcOptionData : item2}
                 onChange={(e) => {
@@ -699,7 +699,7 @@ if(formAction === "Edit" ){
               <InputField
                 classNames="input__filed"
                 label="Purpose"
-                textColor={"#111927"}
+                textColor={"var(--color-heading)"}
                 textSize={"16"}
                 textWeight={500}
                 onChange={formik.handleChange("Purpose")}
@@ -712,7 +712,7 @@ if(formAction === "Edit" ){
                 classNames="input__filed"
                 label="Remarks"
                 placeholder="Enter"
-                textColor={"#111927"}
+                textColor={"var(--color-heading)"}
                 textSize={"16"}
                 textWeight={500}
                 onChange={formik.handleChange("Remarks")}
@@ -723,7 +723,7 @@ if(formAction === "Edit" ){
                 classNames="input__filed"
                 label="VAT"
                 placeholder="Enter"
-                textColor={"#111927"}
+                textColor={"var(--color-heading)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formAction === "Add" ? formik.values.VAT : formAction === "Edit" && formik.values.VAT}
@@ -735,7 +735,7 @@ if(formAction === "Edit" ){
                 classNames="input__filed"
                 label="WHT"
                 placeholder="Enter"
-                textColor={"#111927"}
+                textColor={"var(--color-heading)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formAction === "Add" ? formik.values.WHT : formAction === "Edit" && formik.values.WHT}
@@ -746,7 +746,7 @@ if(formAction === "Edit" ){
               <InputField
                 classNames="input__filed"
                 label="Amount"
-                textColor={"#111927"}
+                textColor={"var(--color-heading)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.Amount}
@@ -760,7 +760,7 @@ if(formAction === "Edit" ){
                 classNames="input__filed"
                 label="Net Amount"
                 disabled={true}
-                textColor={"#111927"}
+                textColor={"var(--color-heading)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formAction === "Add" ? "" : formAction === "Edit" && formik.values.NetAmount}

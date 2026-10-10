@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { useFormik } from "formik";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -30,6 +31,7 @@ const initialValue = {
 };
 
 const AddReceipts = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const items = [
@@ -56,24 +58,24 @@ const AddReceipts = () => {
     const errors = {};
 
     if (!values.Requester) {
-      errors.Requester = "Receipt Number is required";
+      errors.Requester = t("pettyCash.requesterRequired");
     }
 
     if (!values.BankCode) {
-      errors.BankCode = "Bank Code is required";
+      errors.BankCode = t("pettyCash.bankCodeRequired");
     }
 
     if (!values.SubAccountCode) {
-      errors.SubAccountCode = "Sub Account Code is required";
+      errors.SubAccountCode = t("pettyCash.subAccountCodeRequired");
     }
     if (!values.TransactionCode) {
-      errors.TransactionCode = "Transaction Code is required";
+      errors.TransactionCode = t("pettyCash.transactionCodeRequired");
     }
     if (!values.BranchCode) {
-      errors.BranchCode = "Branch Code is required";
+      errors.BranchCode = t("pettyCash.branchCodeRequired");
     }
     if (!values.DepartmentCode) {
-      errors.DepartmentCode = "Currency is required";
+      errors.DepartmentCode = t("pettyCash.departmentCodeRequired");
     }
 
     return errors;
@@ -125,7 +127,7 @@ const AddReceipts = () => {
             <div className="col-12 md:col-3 lg-col-3 input__view">
               <InputField
                 classNames="input__filed"
-                label="Receipt Number"
+                label={t("pettyCash.receiptNumber")}
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
@@ -140,8 +142,8 @@ const AddReceipts = () => {
             <div className="col-12 md:col-3 lg-col-3 input__view">
               <DropDowns
                 className="input__filed"
-                label="Requester"
-                placeholder="Select"
+                label={t("pettyCash.requester")} required
+                placeholder={t("pettyCash.select")}
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
@@ -162,8 +164,8 @@ const AddReceipts = () => {
             <div className="col-12 md:col-3 lg-col-3 input__view">
               <DropDowns
                 className="input__filed"
-                label="Bank Code"
-                placeholder="Select"
+                label={t("pettyCash.bankCode")} required
+                placeholder={t("pettyCash.select")}
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
@@ -183,7 +185,7 @@ const AddReceipts = () => {
             <div className="col-12 md:col-6 lg-col-6 input__view">
               <InputField
                 classNames="input__filed"
-                label="Bank Account Name"
+                label={t("pettyCash.bankAccountName")}
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
@@ -201,8 +203,8 @@ const AddReceipts = () => {
             <div className="col-12 md:col-3 lg-col-3 input__view">
               <DropDowns
                 className="input__filed"
-                label="Sub Account Code"
-                placeholder="Select"
+                label={t("pettyCash.subAccountCode")} required
+                placeholder={t("pettyCash.select")}
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
@@ -224,7 +226,7 @@ const AddReceipts = () => {
             <div className="col-12 md:col-6 lg-col-6 input__view">
               <InputField
                 classNames="input__filed"
-                label="Sub Account Description"
+                label={t("pettyCash.subAccountDescription")}
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
@@ -242,8 +244,8 @@ const AddReceipts = () => {
             <div className="col-12 md:col-3 lg-col-3 input__view">
               <DropDowns
                 className="input__filed"
-                label="Transaction Code"
-                placeholder="Select"
+                label={t("pettyCash.transactionCode")} required
+                placeholder={t("pettyCash.select")}
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
@@ -266,7 +268,7 @@ const AddReceipts = () => {
             <div className="col-12 md:col-6 lg-col-6 input__view">
               <InputField
                 classNames="input__filed"
-                label="Transaction Description"
+                label={t("pettyCash.transactionDescription")}
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
@@ -284,8 +286,8 @@ const AddReceipts = () => {
             <div className="col-12 md:col-3 lg-col-3 input__view">
               <DropDowns
                 className="input__filed"
-                label="Branch Code"
-                placeholder="Select"
+                label={t("pettyCash.branchCode")} required
+                placeholder={t("pettyCash.select")}
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
@@ -305,7 +307,7 @@ const AddReceipts = () => {
             <div className="col-12 md:col-6 lg-col-6 input__view">
               <InputField
                 classNames="input__filed"
-                label="Branch Description"
+                label={t("pettyCash.branchDescription")}
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
@@ -323,8 +325,8 @@ const AddReceipts = () => {
             <div className="col-12 md:col-3 lg-col-3 input__view">
               <DropDowns
                 className="input__filed"
-                label="Department Code"
-                placeholder="Select"
+                label={t("pettyCash.departmentCode")} required
+                placeholder={t("pettyCash.select")}
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
@@ -346,7 +348,7 @@ const AddReceipts = () => {
             <div className="col-12 md:col-6 lg-col-6 input__view">
               <InputField
                 classNames="input__filed"
-                label="Department Description"
+                label={t("pettyCash.departmentDescription")}
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
@@ -13,6 +14,7 @@ import { Calendar } from "primereact/calendar";
 import usePettyCashOptions, { describe } from "../../usePettyCashOptions";
 import { calendarDateFormat } from "../../../../utility/dateFormat";
 const ReplenishtDetailView = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const { ViewReplenish, AddReplenishTable } = useSelector(
@@ -71,7 +73,7 @@ const ReplenishtDetailView = () => {
           <div className="col-12 md:col-3 lg:col-3 input__view">
             <InputField
               classNames="input__filed"
-              label="Date"
+              label={t("pettyCash.date")}
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -82,7 +84,7 @@ const ReplenishtDetailView = () => {
           <div className="col-12 md:col-6 lg:col-3 input__view">
             <InputField
               classNames="input__filed"
-              label="Transaction Code"
+              label={t("pettyCash.transactionCode")}
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -93,7 +95,7 @@ const ReplenishtDetailView = () => {
           <div className="col-12 md:col-3 lg:col-3 input__view">
             <InputField
               classNames="input__filed"
-              label="Transaction Number"
+              label={t("pettyCash.transactionNumber")}
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -106,7 +108,7 @@ const ReplenishtDetailView = () => {
           <div className="col-12 md:col-3 lg:col-3 input__view">
             <InputField
               classNames="input__filed"
-              label="Petty cash Code"
+              label={t("pettyCash.pettyCashCode")}
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -117,7 +119,7 @@ const ReplenishtDetailView = () => {
           <div className="col-12 md:col-6 lg:col-6 input__view">
             <InputField
               classNames="input__filed"
-              label="Petty cash Description"
+              label={t("pettyCash.pettyCashDescription")}
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -130,7 +132,7 @@ const ReplenishtDetailView = () => {
           <div className="col-12 md:col-3 lg:col-3 input__view">
             <InputField
               classNames="input__filed"
-              label="Bank Code"
+              label={t("pettyCash.bankCode")}
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -141,7 +143,7 @@ const ReplenishtDetailView = () => {
           <div className="col-12 md:col-6 lg:col-6 input__view">
             <InputField
               classNames="input__filed"
-              label="Bank Account Name"
+              label={t("pettyCash.bankAccountName")}
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -154,7 +156,7 @@ const ReplenishtDetailView = () => {
           <div className="col-12 md:col-3 lg:col-3 input__view">
             <InputField
               classNames="input__filed"
-              label="Sub Account Code"
+              label={t("pettyCash.subAccountCode")}
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -165,7 +167,7 @@ const ReplenishtDetailView = () => {
           <div className="col-12 md:col-6 lg:col-6 input__view">
             <InputField
               classNames="input__filed"
-              label="Sub Account Description"
+              label={t("pettyCash.subAccountDescription")}
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -176,26 +178,22 @@ const ReplenishtDetailView = () => {
         </div>
         <div className="grid mt-1">
           <div className="calender__container col-12 md:col-3 lg:col-3 ">
-            <LabelWrapper className="calenderlable__container">
-              Disbursement From date
-            </LabelWrapper>
+            <LabelWrapper label={t("pettyCash.disbursementFromDate")} className="calenderlable__container" />
             <Calendar
               disabled={true}
               showIcon
-              placeholder="Select"
+              placeholder={t("pettyCash.select")}
               className="calendar_container"
               value={ViewReplenish.dateValue ? new Date(ViewReplenish.dateValue) : null}
               dateFormat={calendarDateFormat()}
             />
           </div>
           <div className="calender__container col-12 md:col-3 lg:col-3 ">
-            <LabelWrapper className="calenderlable__container">
-              Disbursement To date
-            </LabelWrapper>
+            <LabelWrapper label={t("pettyCash.disbursementToDate")} className="calenderlable__container" />
             <Calendar
               disabled={true}
               showIcon
-              placeholder="Select"
+              placeholder={t("pettyCash.select")}
               className="calendar_container"
               value={ViewReplenish.dateValue ? new Date(ViewReplenish.dateValue) : null}
               dateFormat={calendarDateFormat()}

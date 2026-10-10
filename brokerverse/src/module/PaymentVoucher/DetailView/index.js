@@ -24,6 +24,7 @@ import DetailHeader from "../../../components/DetailHeader";
 import DetailSection from "../../../components/DetailSection";
 import KeyValueGrid from "../../../components/KeyValueGrid";
 import StatusChip from "../../../components/StatusChip";
+import { useMakerChecker } from "../../../components/ApprovalActions";
 import { RecordActivityLog } from "../../../components/ActivityLog";
 import { printPdf } from "../../../components/Print";
 import { statusLabel } from "../../../utils/statusSeverity";
@@ -290,6 +291,13 @@ function Detailview() {
         status: i.status,
       }));
   }, [disbursementDetails]);
+  // what a line's net leaves out besides withholding tax (commission kept, charges, offsets): its own column, so the
+  // gross, the deductions and the net of each line add up
+  const lineDeduction = (l) => {
+    const rest = Math.round((Number(l.gross || 0) - Number(l.wht || 0) - Number(l.net || 0)) * 100) / 100;
+    return rest > 0 ? rest : 0;
+  };
+  const linesHaveDeductions = paymentLines.some((l) => lineDeduction(l) > 0);
   const paymentModeText = (mode) => (mode ? t(`paymentVoucher.detail.modes.${String(mode).toLowerCase()}`, { defaultValue: statusLabel(mode) }) : null);
   // gross less withholding tax that the net does not explain (bank charges, offsets)
   const otherDeductions = useMemo(() => {
@@ -301,6 +309,8 @@ function Detailview() {
     return rest > 0 ? rest : 0;
   }, [disbursementDetails]);
   const money = (v) => (v === null || v === undefined || v === "" ? "" : formatCurrency(v));
+  const voucherChecker = useMakerChecker({ id: disbursementDetails?.createdBy });
+  const chequeChecker = useMakerChecker({ id: selectedProducts?.rawData?.createdBy });
 
   const hasPendingItems = useMemo(() => {
     return processedChequeBookData.some((item) => item.status === "Pending");
@@ -651,6 +661,9 @@ function Detailview() {
               <Column field="description" header={t("paymentVoucher.description", "Description")} headerStyle={headerStyle} className="fieldvalue_container" />
               <Column field="gross" header={t("paymentVoucher.grossAmount", "Gross Amount")} body={(r) => money(r.gross)} headerStyle={headerStyle} className="fieldvalue_container" />
               <Column field="wht" header={t("paymentVoucher.whtAmount", "Withholding Tax")} body={(r) => money(r.wht)} headerStyle={headerStyle} className="fieldvalue_container" />
+              {linesHaveDeductions && (
+                <Column header={t("paymentVoucher.detail.otherDeductions")} body={(r) => money(lineDeduction(r))} headerStyle={headerStyle} className="fieldvalue_container" />
+              )}
               <Column field="net" header={t("paymentVoucher.netAmount", "Net Amount")} body={(r) => money(r.net)} headerStyle={headerStyle} className="fieldvalue_container" />
               <Column field="status" header={t("paymentVoucher.status")} body={(r) => <StatusChip code={String(r.status || "").toLowerCase()} label={statusLabel(r.status)} />} headerStyle={headerStyle} className="fieldvalue_container" />
             </DataTable>
@@ -660,7 +673,22 @@ function Detailview() {
 
       <DetailSection title={t("paymentVoucher.chequeBookDetails")} className="pv-detail__section"
         actions={(
-          <Button type="button" icon="pi pi-print" outlined size="small" label={t("paymentVoucher.detail.printVoucher")} onClick={printVoucher} disabled={!disbursementDetails?.disbursementId} />
+          <>
+            {/* the cheque actions act on the cheque picked in the list; the maker of the voucher or cheque cannot approve it */}
+            {hasPendingItems && (
+              <Button type="button" icon="pi pi-check" size="small" label={t("paymentVoucher.detail.approveCheque")} onClick={handleApprove}
+                disabled={!selectedProducts || selectedProducts.status !== "Pending" || chequeChecker.blocked || voucherChecker.blocked}
+                tooltip={voucherChecker.reason || chequeChecker.reason || (!selectedProducts || selectedProducts.status !== "Pending" ? t("paymentVoucher.detail.selectPendingCheque") : undefined)}
+                tooltipOptions={{ showOnDisabled: true, position: "top" }} />
+            )}
+            {hasApprovedItems && (
+              <Button type="button" icon="pi pi-print" size="small" outlined label={t("paymentVoucher.detail.printCheque")} onClick={handlePrint}
+                disabled={!selectedProducts || selectedProducts.status !== "Approved"}
+                tooltip={!selectedProducts || selectedProducts.status !== "Approved" ? t("paymentVoucher.detail.selectApprovedCheque") : undefined}
+                tooltipOptions={{ showOnDisabled: true, position: "top" }} />
+            )}
+            <Button type="button" icon="pi pi-print" outlined size="small" label={t("paymentVoucher.detail.printVoucher")} onClick={printVoucher} disabled={!disbursementDetails?.disbursementId} />
+          </>
         )}>
       <div>
         <DataTable
@@ -691,7 +719,7 @@ function Detailview() {
               setSelectedProducts(null);
             }
           }}
-          selectionMode={hasPendingItems || hasApprovedItems ? "checkbox" : undefined}
+          selectionMode={hasPendingItems || hasApprovedItems ? "radiobutton" : undefined}
           dataKey="id"
         >
           {(hasPendingItems || hasApprovedItems) && (
@@ -756,31 +784,6 @@ function Detailview() {
         </DataTable>
       </div>
       </DetailSection>
-
-      {(hasPendingItems || hasApprovedItems) && (
-        <div className="next_container">
-          {hasApprovedItems && (
-            <Button
-              className="submit_button p-0 mr-2"
-              label={t("paymentVoucher.print")}
-              onClick={handlePrint}
-              disabled={!selectedProducts || selectedProducts.status !== "Approved"}
-              tooltip={!selectedProducts || selectedProducts.status !== "Approved" ? t("paymentVoucher.detail.selectApprovedCheque") : undefined}
-              tooltipOptions={{ showOnDisabled: true, position: "top" }}
-            />
-          )}
-          {hasPendingItems && (
-            <Button
-              className="submit_button p-0"
-              label={t("paymentVoucher.approve")}
-              onClick={handleApprove}
-              disabled={
-                !selectedProducts || selectedProducts.status !== "Pending"
-              }
-            />
-          )}
-        </div>
-      )}
 
       {disbursementDetails?.disbursementId && (
         <DetailSection title={t("paymentVoucher.confirm.activity")}>

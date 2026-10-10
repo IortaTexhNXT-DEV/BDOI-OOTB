@@ -92,13 +92,13 @@ describe('commission', () => {
   });
 
   it('WHT toggle recomputes open lines; reversal after payment is a clawback; single-line pay', async () => {
-    const w = await ctx.as('maker')('post', '/commission/referrer-accounts/ref-mreyes/wht').send({ whtApplicable: false });
+    const w = await ctx.as('maker')('post', '/commission/referrer-accounts/ref-mreyes/wht').send({ whtApplicable: false, reason: 'Certificate of exemption received' });
     expect(w.status).toBe(200);
     const open = [...w.body.data.currentCycle.lines, ...w.body.data.futureCycles.lines].filter((l) => l.status !== 'Paid');
     expect(open.every((l) => l.wht === 0)).toBe(true);
     const a = (await ctx.as('maker')('get', `/commission/referrer-accounts/${ref}`)).body.data;
     const paid = a.past.lines.find((l) => l.status === 'Paid');
-    const rev = await ctx.as('checker')('post', `/commission/referrer-accounts/${ref}/lines/${paid.id}/reverse`);
+    const rev = await ctx.as('checker')('post', `/commission/referrer-accounts/${ref}/lines/${paid.id}/reverse`).send({ reason: 'Policy cancelled from inception' });
     expect(rev.status).toBe(200);
     expect(rev.body.data.line.status).toBe('Reversed');
     expect(rev.body.data.line.clawback).toBe(true);

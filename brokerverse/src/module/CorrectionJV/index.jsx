@@ -8,7 +8,6 @@ import { Button } from "primereact/button";
 import SvgDropdown from "../../assets/icons/SvgDropdown";
 import TableData from "./TableData/TableData";
 import { useFormik } from "formik";
-import ModalData from "./EditData/ModalData";
 import CustomToast from "../../components/Toast";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -116,7 +115,6 @@ const CorrectionJV = () => {
     setEditID(id);
     setVisible(true);
   };
-  const handleUpdate = () => {};
 
   const handleApproval = async () => {
     const ok = await openConfirm({
@@ -326,13 +324,6 @@ const CorrectionJV = () => {
                 correctionJVList={correctionJVList}
               />
             </div>
-            <ModalData
-              visible={visible}
-              setVisible={setVisible}
-              handleUpdate={handleUpdate}
-              setEditID={setEditID}
-              correctionJVList={correctionJVList}
-            />
           </div>
 
           <div className="grid m-0">
