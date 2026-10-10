@@ -7,7 +7,8 @@ import { Column } from "primereact/column";
 import { Checkbox } from "primereact/checkbox";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
-import { Dialog } from "primereact/dialog";
+import DetailDialog from "../../../components/DetailDialog";
+import KeyValueGrid from "../../../components/KeyValueGrid";
 import { Menu } from "primereact/menu";
 import { Calendar } from "primereact/calendar";
 import { InputNumber } from "primereact/inputnumber";
@@ -112,7 +113,7 @@ const PolicyTable = ({ filterExpiredOnly = false, setDisplayDialog, displayDialo
   };
   const startEndorsement = (p) => {
     const lob = lobOf(p);
-    setDisplayDialog({ display: true, policyId: policyIdOf(p), lob, productType: lob });
+    setDisplayDialog({ display: true, policyId: policyIdOf(p), lob, productType: lob, policyNumber: p?.policyNumber, insuredName: p?.insuredName });
   };
   const inForce = (p) => {
     const status = String(p?.status || "").toLowerCase();
@@ -215,19 +216,28 @@ const PolicyTable = ({ filterExpiredOnly = false, setDisplayDialog, displayDialo
         <Column header={t("policyTable.actions")} body={actions} className="bv-actions" headerClassName="bv-actions" frozen alignFrozen="right" />
       </DataTable>
 
-      <Dialog visible={!!displayDialog?.display} header={t("policyDetail.endorsement")} style={{ width: "550px" }} modal onHide={hideDialog} className="agent__flow__common__dialog__container">
-        <div className="p-fluid">
+      <DetailDialog visible={!!displayDialog?.display} onHide={hideDialog} size="md"
+        header={displayDialog?.policyNumber ? `${t("policyDetail.endorsement")} · ${displayDialog.policyNumber}` : t("policyDetail.endorsement")}
+        footer={(
+          <>
+            <Button label={t("policyTable.cancel")} text onClick={hideDialog} />
+            <Button label={t("policyTable.startEndorsement")} icon="pi pi-arrow-right" iconPos="right" onClick={proceed} disabled={!selectedTypes().length} />
+          </>
+        )}>
+        <KeyValueGrid columns={2} className="mb-3" items={[
+          { label: t("policyTable.policyNumber"), value: displayDialog?.policyNumber },
+          { label: t("policyTable.insured"), value: displayDialog?.insuredName },
+        ]} />
+        <fieldset className="endorsement-types">
+          <legend>{t("policyTable.endorsementTypes")}</legend>
           {endorsementCategories.map((category) => (
-            <div key={category.key} className="p-field-checkbox m-3 pop__data__selection__container">
+            <div key={category.key} className="endorsement-types__option">
               <Checkbox inputId={category.key} name="category" value={category} onChange={toggleCategory} checked={selectedCategories.some((item) => item.key === category.key)} />
-              <label htmlFor={category.key} className="ml-3">{category.translationKey ? t(category.translationKey) : category.name}</label>
+              <label htmlFor={category.key}>{category.translationKey ? t(category.translationKey) : category.name}</label>
             </div>
           ))}
-          <div className="mt-5">
-            <Button label={t("policyTable.proceed")} onClick={proceed} disabled={!selectedTypes().length} />
-          </div>
-        </div>
-      </Dialog>
+        </fieldset>
+      </DetailDialog>
     </div>
   );
 };

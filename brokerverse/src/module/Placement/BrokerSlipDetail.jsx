@@ -19,7 +19,10 @@ import s3Service from "../../services/s3Service";
 import { useEmailSending, withQueuedNotice } from "../../utility/emailNotice";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import { calendarDateFormat } from "../../utility/dateFormat";
-import { Field, JourneyTimeline, PageHeader, StatusTag, formatDate, round2, usePlacementOptions } from "./shared";
+import { openConfirm } from "../../components/ConfirmDialog";
+import { RecordActivityLog } from "../../components/ActivityLog";
+import { printPdf } from "../../components/Print";
+import { Field, JourneyTimeline, PageHeader, StatusTag, formatDate, riskLabel, round2, usePlacementOptions } from "./shared";
 import { isoDate, fromIso } from "./dates";
 import canOpen from "../../utils/canOpen";
 import "./index.scss";
@@ -41,7 +44,6 @@ const BrokerSlipDetail = () => {
   const [tab, setTab] = useState(0);
   const [offerForm, setOfferForm] = useState(null);
   const [addInsurer, setAddInsurer] = useState(null);
-  const [closing, setClosing] = useState(null);
   const [selected, setSelected] = useState([]);
   const [leadOfferId, setLeadOfferId] = useState(null);
   const [shares, setShares] = useState({});
@@ -89,6 +91,30 @@ const BrokerSlipDetail = () => {
     { key: "policy", done: Boolean(slip.policyId), reference: slip.policyNumber, id: slip.policyId, mode: "required" },
   ];
   const canSelect = ["submitted", "responses-in"].includes(slip.status);
+  const printSlip = (insurerId) => printPdf(`/broker-slips/${encodeURIComponent(slip.id)}/documents/broker-slip${insurerId ? `?insurerId=${encodeURIComponent(insurerId)}` : ""}`,
+    { fileName: `${slip.slipNumber}.pdf` }).catch((e) => notify("error", e.message));
+  // cancelled: the request is withdrawn; closed: the market answered but the client did not take it up
+  const endSlip = async (status) => {
+    const cancelling = status === "cancelled";
+    const done = await openConfirm({
+      title: t(cancelling ? "placement.brokerSlip.cancelTitle" : "placement.brokerSlip.closeTitleShort"),
+      severity: cancelling ? "danger" : "neutral",
+      message: t(cancelling ? "placement.brokerSlip.cancelMessage" : "placement.brokerSlip.closeMessage"),
+      facts: [
+        { label: t("placement.brokerSlip.title"), value: slip.slipNumber },
+        { label: t("placement.fields.customer"), value: slip.insuredName || slip.customerName },
+        { label: t("placement.fields.product"), value: slip.productType },
+        { label: t("placement.brokerSlip.offers"), value: offered.length, type: "number" },
+      ],
+      input: { type: "textarea", label: t("placement.fields.reason"), required: cancelling },
+      confirmLabel: t(cancelling ? "placement.actions.cancelSlip" : "placement.actions.closeSlip"),
+      cancelLabel: t("placement.actions.back"),
+      onConfirm: (reason) => (cancelling ? placementService.cancelSlip(slip.id, reason) : placementService.closeSlip(slip.id, reason)),
+    });
+    if (done === null) return;
+    notify("success", t("placement.messages.slipClosed"));
+    await load();
+  };
 
   const saveOffer = async () => {
     const f = offerForm;
@@ -139,7 +165,7 @@ const BrokerSlipDetail = () => {
       <td className="actions-cell">
         {canSelect && <Button label={o.status === "pending" ? t("placement.actions.recordResponse") : t("placement.actions.edit")} size="small" text icon="pi pi-pencil"
           onClick={() => setOfferForm({ ...o, status: o.status === "pending" ? "offered" : o.status, validityDate: fromIso(o.validityDate) })} />}
-        <Button icon="pi pi-file-pdf" text rounded size="small" onClick={() => placementService.openSlipPdf(slip.id, o.insuranceCompanyId).catch((e) => notify("error", e.message))} aria-label={t("placement.actions.slipPdf")} tooltip={t("placement.actions.slipPdf")} />
+        <Button icon="pi pi-print" text rounded size="small" onClick={() => printSlip(o.insuranceCompanyId)} aria-label={t("placement.actions.printSlip")} tooltip={t("placement.actions.printSlip")} />
       </td>
     </tr>
   );
@@ -149,7 +175,7 @@ const BrokerSlipDetail = () => {
       <Toast ref={toast} />
       <PageHeader title={`${t("placement.brokerSlip.title")} ${slip.slipNumber}`} subtitle={`${slip.insuredName || slip.customerName} - ${slip.productType || ""}`} onBack={() => navigate("/placement/broker-slips")}>
         <StatusTag status={slip.status} />
-        <Button label={t("placement.actions.slipPdf")} icon="pi pi-file-pdf" severity="secondary" outlined onClick={() => placementService.openSlipPdf(slip.id).catch((e) => notify("error", e.message))} className="ml-2" />
+        <Button label={t("placement.actions.printSlip")} icon="pi pi-print" severity="secondary" outlined onClick={() => printSlip()} className="ml-2" />
         {!["draft", "cancelled"].includes(slip.status) && canOpen("/sales/comparison-reports") && (
           <Button label={t("distribution.cr.clientReport", "Client comparison report")} icon="pi pi-star" severity="secondary" outlined className="ml-2"
             disabled={offered.length < 2} tooltip={offered.length < 2 ? t("distribution.cr.notYet", { count: offered.length }) : undefined}
@@ -158,7 +184,8 @@ const BrokerSlipDetail = () => {
         )}
         {OPEN.includes(slip.status) && <Button label={t("placement.actions.addInsurer")} icon="pi pi-plus" severity="secondary" outlined onClick={() => setAddInsurer({ insurer: null })} className="ml-2" />}
         {slip.status === "draft" && <Button label={t("placement.actions.submitToMarket")} icon="pi pi-send" onClick={() => act(() => placementService.submitSlip(slip.id), (r) => withQueuedNotice(t("placement.messages.submitted", { count: r.sent?.length || 0 }), emailSending))} loading={busy} className="ml-2" />}
-        {OPEN.includes(slip.status) && <Button label={t("placement.actions.more")} icon="pi pi-times" severity="danger" text onClick={() => setClosing({ status: "cancelled", reason: "" })} className="ml-2" />}
+        {OPEN.includes(slip.status) && <Button label={t("placement.actions.closeSlip")} icon="pi pi-lock" severity="secondary" text onClick={() => endSlip("closed")} className="ml-2" />}
+        {OPEN.includes(slip.status) && <Button label={t("placement.actions.cancelSlip")} icon="pi pi-times" severity="danger" text onClick={() => endSlip("cancelled")} className="ml-2" />}
       </PageHeader>
 
       <div className="placement-card"><JourneyTimeline steps={steps} /></div>
@@ -180,7 +207,7 @@ const BrokerSlipDetail = () => {
 
       <div className="placement-card">
             <TabView activeIndex={tab} onTabChange={(e) => setTab(e.index)}>
-              <TabPanel header={t("placement.brokerSlip.tabResponses", { count: slip.offers.length })}>
+              <TabPanel header={t("placement.brokerSlip.tabResponsesTitle")}>
                 <div className="table-scroll">
                   <table className="participant-table readonly offers">
                     <thead><tr>
@@ -242,13 +269,16 @@ const BrokerSlipDetail = () => {
               </TabPanel>
               <TabPanel header={t("placement.brokerSlip.tabRisk")}>
                 <div className="field-grid">
-                  {Object.entries(slip.riskDetails || {}).map(([k, v]) => <Field key={k} label={k.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/^./, (c) => c.toUpperCase())}>{String(v)}</Field>)}
+                  {Object.entries(slip.riskDetails || {}).map(([k, v]) => <Field key={k} label={riskLabel(t, k)}>{String(v)}</Field>)}
                   {slip.doc?.insuranceVehicleDetails?.[0] && ["vehicleBrand", "vehicleModel", "modelYear"].map((k) => <Field key={k} label={t(`placement.vehicle.${k}`)}>{slip.doc.insuranceVehicleDetails[0][k]}</Field>)}
                 </div>
                 <table className="participant-table readonly mt-3">
                   <thead><tr><th>{t("placement.fields.cover")}</th><th className="num">{t("placement.fields.sumInsured")}</th><th>{t("placement.fields.deductible")}</th></tr></thead>
                   <tbody>{(slip.requestedCovers || []).map((c, i) => <tr key={i}><td>{c.cover}</td><td className="num">{c.sumInsured == null ? "-" : formatCurrency(c.sumInsured)}</td><td>{c.deductible || "-"}</td></tr>)}</tbody>
                 </table>
+              </TabPanel>
+              <TabPanel header={t("placement.sections.history")}>
+                <RecordActivityLog entity="broker_slip" recordId={slip.id} />
               </TabPanel>
             </TabView>
       </div>
@@ -295,18 +325,6 @@ const BrokerSlipDetail = () => {
           onChange={(e) => setAddInsurer({ insurer: e.value })} filter className="w-full" placeholder={t("placement.participants.chooseInsurer")} />
       </Dialog>
 
-      <Dialog className="placement-dialog" header={t("placement.brokerSlip.closeTitle")} visible={Boolean(closing)} onHide={() => setClosing(null)} style={{ width: "32rem" }}
-        footer={<><Button label={t("placement.actions.back")} text onClick={() => setClosing(null)} />
-          <Button label={t(closing?.status === "closed" ? "placement.actions.closeSlip" : "placement.actions.cancelSlip")} severity="danger" loading={busy}
-            onClick={async () => { const ok = await act(() => (closing.status === "closed" ? placementService.closeSlip(slip.id, closing.reason) : placementService.cancelSlip(slip.id, closing.reason)), t("placement.messages.slipClosed")); if (ok) setClosing(null); }} /></>}>
-        {closing && (
-          <>
-            <SelectButton value={closing.status} options={[{ label: t("placement.actions.cancelSlip"), value: "cancelled" }, { label: t("placement.actions.closeSlip"), value: "closed" }]} onChange={(e) => e.value && setClosing({ ...closing, status: e.value })} className="mb-3" />
-            <label>{t("placement.fields.reason")}</label>
-            <InputTextarea value={closing.reason} onChange={(e) => setClosing({ ...closing, reason: e.target.value })} rows={3} className="w-full" />
-          </>
-        )}
-      </Dialog>
     </div>
   );
 };

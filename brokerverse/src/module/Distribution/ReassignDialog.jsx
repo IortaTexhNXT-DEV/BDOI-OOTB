@@ -2,13 +2,14 @@ import React, { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Message } from "primereact/message";
 import service from "../../services/distributionService";
 import systemSettingsService from "../../services/systemSettingsService";
 import useMasterOptions from "../../agentModule/component/useMasterOptions";
+import DetailDialog from "../../components/DetailDialog";
+import KeyValueGrid from "../../components/KeyValueGrid";
 import { Field } from "./common";
 
 /** leads.reassignment_reason_required (System Settings, group leads); on until read. */
@@ -111,19 +112,20 @@ const ReassignDialog = ({ leads, mode = "reassign", onHide, onDone, onError }) =
   const names = (leads || []).slice(0, 5).map((l) => `${l.leadNumber} ${l.name || ""}`.trim()).join(", ");
 
   return (
-    <Dialog className="pe-dialog" header={title} visible={visible} style={{ width: "min(560px, 96vw)" }} onHide={onHide}
+    <DetailDialog header={title} visible={visible} size="md" onHide={onHide}
       footer={(
-        <div>
+        <>
           <Button label={t("distribution.common.cancel", "Cancel")} text onClick={onHide} />
           <Button label={mode === "queue" ? t("distribution.la.toQueue", "Send to queue") : t("distribution.la.reassign", "Reassign")}
             icon={mode === "queue" ? "pi pi-inbox" : "pi pi-check"} onClick={save} disabled={Boolean(problem)} loading={saving} />
-        </div>
+        </>
       )}>
       {visible && (
         <div className="dist-grid">
-          <p className="pe-muted m-0 dist-field--full">
-            {names}{leads.length > 5 ? ` ${t("distribution.la.andMore", "and {{count}} more", { count: leads.length - 5 })}` : ""}
-          </p>
+          <KeyValueGrid columns={2} className="dist-field--full" items={[{
+            label: t("distribution.la.leads", "Prospects"), span: "full",
+            value: `${names}${leads.length > 5 ? ` ${t("distribution.la.andMore", "and {{count}} more", { count: leads.length - 5 })}` : ""}`,
+          }]} />
           {mode === "reassign" && (
             <Field label={`${t("distribution.la.to", "To account executive")} *`} full htmlFor="la-reassign-to"
               help={groups.length > 1 || assignees.some((a) => a.suggested) ? t("distribution.la.suggestedHelp", "The account executives of the assignment rule for these prospects come first") : null}>
@@ -145,7 +147,7 @@ const ReassignDialog = ({ leads, mode = "reassign", onHide, onDone, onError }) =
           {problem && <small className="pe-muted dist-field--full">{problem}</small>}
         </div>
       )}
-    </Dialog>
+    </DetailDialog>
   );
 };
 

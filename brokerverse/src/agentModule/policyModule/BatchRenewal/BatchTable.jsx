@@ -19,8 +19,14 @@ import { Toast } from "primereact/toast";
 import { useDispatch } from "react-redux";
 import BatchRenewalService from "../../../services/batchRenewalService";
 import { useNavigate } from "react-router-dom";
-import { confirmAction, notifyError, notifySuccess, notifyWarn } from "../../../utility/dialogs";
-import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
+import { notifyError, notifySuccess, notifyWarn } from "../../../utility/dialogs";
+import { openConfirm } from "../../../components/ConfirmDialog";
+import DetailDialog from "../../../components/DetailDialog";
+import DetailHeader from "../../../components/DetailHeader";
+import DetailSection from "../../../components/DetailSection";
+import KeyValueGrid from "../../../components/KeyValueGrid";
+import StatusChip from "../../../components/StatusChip";
+import { calendarDateFormat, formatDate as formatAppDate, formatInstant, toIsoDate } from "../../../utility/dateFormat";
 import { currencySymbol } from "../../../utility/currencyConverter";
 import logger from "../../../utility/logger";
 
@@ -133,7 +139,7 @@ export default function BatchTable() {
 
   const generateBatchRenewal = async () => {
     if (selectedPolicies.length === 0) {
-      notifyWarn("Please select at least one policy for batch renewal.");
+      notifyWarn(t("batchRenewal.selectOnePolicy"));
       return;
     }
 
@@ -151,15 +157,13 @@ export default function BatchTable() {
 
       const response = await BatchRenewalService.createBatch(batchData);
       if (response.success) {
-        notifySuccess(
-          `Batch renewal created successfully! Batch ID: ${response.data.batchId}`
-        );
+        notifySuccess(t("batchRenewal.created", { id: response.data.batchId }));
         setShowBatchModal(false);
         setSelectedPolicies([]);
         fetchBatches(); // Refresh the batches list
       }
     } catch (error) {
-      notifyError("Failed to create batch renewal. Please try again.");
+      notifyError(error?.message || t("batchRenewal.createFailed"));
     }
   };
 
@@ -200,22 +204,12 @@ export default function BatchTable() {
   const getStatusLabel = (batch) => {
     const { status, processedCount, totalPolicies } = batch;
 
-    // For Processing status, just show "Processing" (don't show counts while actively sending)
-    if (status === "Processing") {
-      return "Processing";
-    }
-
-    // For Completed status, show if it was partial completion
+    // a completed batch that did not send every notice says how many it sent
     if (status === "Completed" && processedCount < totalPolicies) {
-      return `Partially Completed (${processedCount}/${totalPolicies})`;
+      return t("batchRenewal.partiallyCompleted", { processed: processedCount, total: totalPolicies });
     }
 
-    // For Completed status with full completion
-    if (status === "Completed" && processedCount >= totalPolicies) {
-      return "Completed";
-    }
-
-    return status;
+    return t(`batchRenewal.batchStatus.${status}`, status);
   };
 
   const getNoticeStatusSeverity = (status) => {
@@ -233,10 +227,51 @@ export default function BatchTable() {
     }
   };
 
+  // the list rows carry the counts only: the batch is shown at once and its policies follow
   const handleViewBatchDetails = (batch) => {
-    setSelectedBatch(batch);
+    setSelectedBatch({ ...batch, policies: batch.policies || [] });
     setShowBatchDetailsModal(true);
+    fetchBatchDetails(batch.batchId);
+    if (!renewalOptions.insurers.length && !renewalOptions.products.length) {
+      BatchRenewalService.getRenewalOptions()
+        .then((o) => setRenewalOptions((prev) => ({ ...prev, ...o })))
+        .catch((error) => logger.error("Renewal options not loaded:", error));
+    }
   };
+
+  const deleteBatch = async (batch) => {
+    const deleted = await openConfirm({
+      title: t("batchRenewal.deleteTitle"),
+      severity: "danger",
+      message: t("batchRenewal.deleteMessage"),
+      facts: [
+        { label: t("batchRenewal.batchId"), value: batch.batchId },
+        { label: t("batchRenewal.status"), value: getStatusLabel(batch) },
+        { label: t("batchRenewal.totalPolicies"), value: batch.totalPolicies, type: "number" },
+        { label: t("batchRenewal.createdDate"), value: batch.createdAt, type: "date" },
+      ],
+      note: t("batchRenewal.deleteNote"),
+      confirmLabel: t("batchRenewal.deleteAction"),
+      onConfirm: () => BatchRenewalService.deleteBatch(batch.batchId),
+    });
+    if (!deleted) return;
+    notifySuccess(t("batchRenewal.deleted", { id: batch.batchId }));
+    fetchBatches();
+  };
+
+  const nameOf = (options, value) => (value ? options.find((o) => o.value === String(value))?.label || value : t("batchRenewal.all"));
+  const criteriaItems = (c = {}) => [
+    { label: t("batchRenewal.expiryDateFrom"), value: c.expiryFrom || c.expiryDateFrom, type: "date" },
+    { label: t("batchRenewal.expiryDateTo"), value: c.expiryTo || c.expiryDateTo, type: "date" },
+    { label: t("batchRenewal.insuranceCompany"), value: c.insuranceCompanyName || nameOf(insuranceCompanyOptions, c.insurerId) },
+    { label: t("batchRenewal.productType"), value: c.productName || nameOf(productTypeOptions, c.productId) },
+    { label: t("batchRenewal.minimumPremium"), value: c.premiumMin, type: "amount" },
+    { label: t("batchRenewal.maximumPremium"), value: c.premiumMax, type: "amount" },
+    { label: t("batchRenewal.clientName"), value: c.clientName },
+    { label: t("batchRenewal.paymentStatus"), value: c.paymentStatus ? t(`batchRenewal.payment${c.paymentStatus}`, c.paymentStatus) : null },
+  ];
+  const noticeLabel = (status) => t(`batchRenewal.notice.${status}`, status);
+  const noticeCount = (status) => (selectedBatch?.policies || []).filter((p) => p.noticeStatus === status).length;
 
   const formatDate = (dateString) => {
     return formatAppDate(dateString);
@@ -257,8 +292,8 @@ export default function BatchTable() {
 
           toast.current.show({
             severity: "success",
-            summary: "Notices Sent",
-            detail: `Sent ${job.progress.succeeded} of ${job.progress.total} renewal notices successfully.`,
+            summary: t("batchRenewal.toast.noticesSent"),
+            detail: t("batchRenewal.toast.noticesSentDetail", { count: job.progress.succeeded, total: job.progress.total }),
             life: 5000,
           });
 
@@ -272,8 +307,8 @@ export default function BatchTable() {
 
           toast.current.show({
             severity: "error",
-            summary: "Sending Failed",
-            detail: "Failed to send renewal notices. Please try again.",
+            summary: t("batchRenewal.toast.sendingFailed"),
+            detail: t("batchRenewal.toast.sendingFailedDetail"),
             life: 5000,
           });
         }
@@ -292,8 +327,8 @@ export default function BatchTable() {
 
         toast.current.show({
           severity: "info",
-          summary: "Processing Complete",
-          detail: "Renewal notices processed. Refreshing batch details...",
+          summary: t("batchRenewal.toast.processingComplete"),
+          detail: t("batchRenewal.toast.processingCompleteDetail"),
           life: 3000,
         });
 
@@ -322,8 +357,8 @@ export default function BatchTable() {
     if (selectedCount === 0) {
       toast.current.show({
         severity: "warn",
-        summary: "No Policies Selected",
-        detail: "Please select at least one policy to send renewal notices.",
+        summary: t("batchRenewal.toast.noPoliciesSelected"),
+        detail: t("batchRenewal.toast.noPoliciesSelectedDetail"),
         life: 4000,
       });
       return;
@@ -352,8 +387,8 @@ export default function BatchTable() {
 
         toast.current.show({
           severity: "info",
-          summary: "Queued for Processing",
-          detail: `${selectedCount} renewal notices queued. Processing in background...`,
+          summary: t("batchRenewal.toast.queued"),
+          detail: t("batchRenewal.toast.queuedDetail", { count: selectedCount }),
           life: 4000,
         });
 
@@ -368,8 +403,8 @@ export default function BatchTable() {
         setSendingNotices(false);
         toast.current.show({
           severity: "error",
-          summary: "Queue Failed",
-          detail: response.message || "Failed to queue renewal notices.",
+          summary: t("batchRenewal.toast.queueFailed"),
+          detail: response.message || t("batchRenewal.toast.queueFailedDetail"),
           life: 5000,
         });
       }
@@ -377,8 +412,8 @@ export default function BatchTable() {
       setSendingNotices(false);
       toast.current.show({
         severity: "error",
-        summary: "Error",
-        detail: "An error occurred while sending notices. Please try again.",
+        summary: t("common.error"),
+        detail: error?.message || t("batchRenewal.toast.sendingFailedDetail"),
         life: 5000,
       });
     }
@@ -394,8 +429,8 @@ export default function BatchTable() {
     if (failedCount === 0) {
       toast.current.show({
         severity: "info",
-        summary: "No Failed Notices",
-        detail: "There are no failed notices to retry.",
+        summary: t("batchRenewal.toast.noFailedNotices"),
+        detail: t("batchRenewal.toast.noFailedNoticesDetail"),
         life: 4000,
       });
       return;
@@ -415,8 +450,8 @@ export default function BatchTable() {
 
         toast.current.show({
           severity: "info",
-          summary: "Retrying Failed Notices",
-          detail: `Retrying ${failedCount} failed notices...`,
+          summary: t("batchRenewal.toast.retrying"),
+          detail: t("batchRenewal.toast.retryingDetail", { count: failedCount }),
           life: 4000,
         });
 
@@ -431,8 +466,8 @@ export default function BatchTable() {
         setSendingNotices(false);
         toast.current.show({
           severity: "error",
-          summary: "Retry Failed",
-          detail: response.message || "Failed to retry notices.",
+          summary: t("batchRenewal.toast.retryFailed"),
+          detail: response.message || t("batchRenewal.toast.retryFailedDetail"),
           life: 5000,
         });
       }
@@ -440,8 +475,8 @@ export default function BatchTable() {
       setSendingNotices(false);
       toast.current.show({
         severity: "error",
-        summary: "Error",
-        detail: "An error occurred while retrying. Please try again.",
+        summary: t("common.error"),
+        detail: error?.message || t("batchRenewal.toast.retryFailedDetail"),
         life: 5000,
       });
     }
@@ -451,8 +486,8 @@ export default function BatchTable() {
     if (!selectedBatch?.batchId) {
       toast.current.show({
         severity: "error",
-        summary: "Error",
-        detail: "No batch selected.",
+        summary: t("common.error"),
+        detail: t("batchRenewal.toast.noBatch"),
         life: 3000,
       });
       return;
@@ -461,8 +496,8 @@ export default function BatchTable() {
     try {
       toast.current.show({
         severity: "info",
-        summary: "Generating Report",
-        detail: "Please wait while the report is being generated...",
+        summary: t("batchRenewal.toast.generatingReport"),
+        detail: t("batchRenewal.toast.generatingReportDetail"),
         life: 3000,
       });
 
@@ -487,12 +522,12 @@ export default function BatchTable() {
 
       toast.current.show({
         severity: "success",
-        summary: "Report Generated",
-        detail: "Batch report downloaded successfully.",
+        summary: t("batchRenewal.toast.reportDownloaded"),
+        detail: t("batchRenewal.toast.reportDownloadedDetail"),
         life: 3000,
       });
     } catch (error) {
-      let errorMessage = "Failed to generate report. Please try again.";
+      let errorMessage = t("batchRenewal.toast.reportFailed");
 
       // Handle error response - check if it's a blob (error response from server)
       if (error.response?.data instanceof Blob) {
@@ -509,7 +544,7 @@ export default function BatchTable() {
 
       toast.current.show({
         severity: "error",
-        summary: "Error",
+        summary: t("common.error"),
         detail: errorMessage,
         life: 5000,
       });
@@ -548,17 +583,17 @@ export default function BatchTable() {
             rows={20}
             rowsPerPageOptions={[20, 50, 100]}
             className="p-datatable-sm"
-            emptyMessage="No batches found"
+            emptyMessage={t("batchRenewal.noBatches")}
           >
             <Column
               field="batchId"
-              header="Batch ID"
+              header={t("batchRenewal.batchId")}
               sortable
               style={{ minWidth: "150px" }}
             />
             <Column
               field="status"
-              header="Status"
+              header={t("batchRenewal.status")}
               sortable
               body={(rowData) => (
                 <Tag
@@ -570,7 +605,7 @@ export default function BatchTable() {
             />
             <Column
               field="totalPolicies"
-              header="Total Policies"
+              header={t("batchRenewal.totalPolicies")}
               sortable
               body={(rowData) => (
                 <div className="text-center">
@@ -580,44 +615,36 @@ export default function BatchTable() {
             />
             <Column
               field="processedCount"
-              header="Processed"
+              header={t("batchRenewal.processed")}
               sortable
               body={(rowData) => (
                 <div className="bv-meter">
                   <ProgressBar value={percentOf(rowData.processedCount, rowData.totalPolicies)} showValue={false} />
-                  <span className="bv-meter__value">{`${rowData.processedCount} of ${rowData.totalPolicies}`}</span>
+                  <span className="bv-meter__value">{t("batchRenewal.countOf", { count: rowData.processedCount, total: rowData.totalPolicies })}</span>
                 </div>
               )}
             />
             <Column
               field="createdAt"
-              header="Created Date"
+              header={t("batchRenewal.createdDate")}
               sortable
               body={(rowData) => formatDate(rowData.createdAt)}
             />
             <Column
-              header="Actions"
+              header={t("batchRenewal.actions")}
               body={(rowData) => (
                 <div className="flex gap-2">
                   <Button
                     icon="pi pi-eye"
                     className="p-button-outlined p-button-sm"
-                    tooltip="View Details"
-                    onClick={() => handleViewBatchDetails(rowData)} aria-label="View Details"
+                    tooltip={t("batchRenewal.viewDetails")}
+                    onClick={() => handleViewBatchDetails(rowData)} aria-label={t("batchRenewal.viewDetails")}
                   />
                   <Button
                     icon="pi pi-trash"
                     className="p-button-outlined p-button-sm p-button-danger"
-                    tooltip="Delete Batch"
-                    onClick={async () => {
-                      if (
-                        await confirmAction(
-                          "Are you sure you want to delete this batch?"
-                        )
-                      ) {
-                        // Implement delete functionality
-                      }
-                    }} aria-label="Delete Batch"
+                    tooltip={t("batchRenewal.deleteTitle")}
+                    onClick={() => deleteBatch(rowData)} aria-label={t("batchRenewal.deleteTitle")}
                   />
                 </div>
               )}
@@ -627,9 +654,9 @@ export default function BatchTable() {
       ) : (
         <Card>
           <div className="text-center p-4">
-            <i className="pi pi-info-circle text-2xl text-blue-500 mb-3"></i>
+            <i className="pi pi-info-circle text-2xl text-primary mb-3"></i>
             <h4>{t("batchRenewal.noBatchRenewals")}</h4>
-            <p className="text-gray-600">
+            <p className="text-color-secondary">
               {t("batchRenewal.noBatchMessage")}
             </p>
           </div>
@@ -659,7 +686,7 @@ export default function BatchTable() {
                   onChange={(e) =>
                     handleCriteriaChange("expiryFrom", e.value)
                   }
-                  placeholder="Select Date"
+                  placeholder={t("batchRenewal.selectDate")}
                   style={{ width: "100%" }}
                   dateFormat={calendarDateFormat()}
                   showIcon
@@ -675,7 +702,7 @@ export default function BatchTable() {
                     handleCriteriaChange("expiryTo", e.value)
                   }
                   minDate={batchCriteria.expiryFrom || undefined}
-                  placeholder="Select Date"
+                  placeholder={t("batchRenewal.selectDate")}
                   style={{ width: "100%" }}
                   dateFormat={calendarDateFormat()}
                   showIcon
@@ -685,7 +712,7 @@ export default function BatchTable() {
               {/* Insurance Company */}
               <div className="col-12 md:col-6 lg:col-3">
                 <label className="block mb-2 font-medium">
-                  Insurance Company
+                  {t("batchRenewal.insuranceCompany")}
                 </label>
                 <Dropdown
                   value={batchCriteria.insurerId}
@@ -694,7 +721,7 @@ export default function BatchTable() {
                   }
                   filter
                   options={insuranceCompanyOptions}
-                  placeholder="Select Company"
+                  placeholder={t("batchRenewal.selectCompany")}
                   style={{ width: "100%" }}
                 />
               </div>
@@ -707,7 +734,7 @@ export default function BatchTable() {
                   onChange={(e) => handleCriteriaChange("productId", e.value)}
                   filter
                   options={productTypeOptions}
-                  placeholder="Select Product"
+                  placeholder={t("batchRenewal.selectProduct")}
                   style={{ width: "100%" }}
                 />
               </div>
@@ -715,7 +742,7 @@ export default function BatchTable() {
               {/* Premium Min */}
               <div className="col-12 md:col-6 lg:col-3">
                 <label className="block mb-2 font-medium">
-                  Min Premium ({currencySymbol()})
+                  {t("batchRenewal.minPremiumIn", { currency: currencySymbol() })}
                 </label>
                 <InputNumber
                   value={batchCriteria.premiumMin}
@@ -733,7 +760,7 @@ export default function BatchTable() {
               {/* Premium Max */}
               <div className="col-12 md:col-6 lg:col-3">
                 <label className="block mb-2 font-medium">
-                  Max Premium ({currencySymbol()})
+                  {t("batchRenewal.maxPremiumIn", { currency: currencySymbol() })}
                 </label>
                 <InputNumber
                   value={batchCriteria.premiumMax}
@@ -756,7 +783,7 @@ export default function BatchTable() {
                   onChange={(e) =>
                     handleCriteriaChange("clientName", e.target.value)
                   }
-                  placeholder="Enter client name"
+                  placeholder={t("batchRenewal.enterClientName")}
                   style={{ width: "100%" }}
                 />
               </div>
@@ -770,7 +797,7 @@ export default function BatchTable() {
                     handleCriteriaChange("paymentStatus", e.value)
                   }
                   options={paymentStatusOptions}
-                  placeholder="Select Status"
+                  placeholder={t("batchRenewal.selectStatus")}
                   style={{ width: "100%" }}
                 />
               </div>
@@ -779,7 +806,7 @@ export default function BatchTable() {
             {/* Action Buttons */}
             <div className="flex justify-content-end gap-2 mt-3">
               <Button
-                label="Clear"
+                label={t("batchRenewal.clear")}
                 icon="pi pi-times"
                 onClick={clearCriteria}
                 className="p-button-outlined"
@@ -811,7 +838,7 @@ export default function BatchTable() {
                   rows={20}
                   rowsPerPageOptions={[20, 50, 100]}
                   className="p-datatable-sm"
-                  emptyMessage="No policies found"
+                  emptyMessage={t("batchRenewal.noPolicies")}
                 >
                   <Column
                     field="isSelected"
@@ -864,19 +891,19 @@ export default function BatchTable() {
                   />
                   <Column
                     field="policyNumber"
-                    header="Policy Number"
+                    header={t("batchRenewal.policyNumber")}
                     sortable
                   />
                   <Column field="clientName" header={t("batchRenewal.clientName")} sortable />
                   <Column field="product" header={t("batchRenewal.productType")} sortable />
                   <Column
                     field="insuranceCompanyName"
-                    header="Insurance Company"
+                    header={t("batchRenewal.insuranceCompany")}
                     sortable
                   />
                   <Column
                     field="grossPremium"
-                    header="Premium"
+                    header={t("batchRenewal.premium")}
                     sortable
                     body={(rowData) => formatCurrency(rowData.grossPremium)}
                   />
@@ -911,234 +938,102 @@ export default function BatchTable() {
       </Dialog>
 
       {/* Batch Details Modal */}
-      <Dialog
-        header={`Batch Details - ${selectedBatch?.batchId}`}
+      <DetailDialog
+        header={t("batchRenewal.batchDetails")}
         visible={showBatchDetailsModal}
-        style={{ width: "90vw", maxWidth: "1200px" }}
+        size="xl"
         onHide={() => setShowBatchDetailsModal(false)}
         maximizable
+        footer={selectedBatch ? (
+          <>
+            <Button type="button" label={t("batchRenewal.close")} text onClick={() => setShowBatchDetailsModal(false)} />
+            {noticeCount("Failed") > 0 && (
+              <Button
+                label={t("batchRenewal.retryFailed")}
+                icon="pi pi-refresh"
+                onClick={retryFailedNotices}
+                outlined
+                disabled={sendingNotices}
+                loading={sendingNotices}
+              />
+            )}
+            <Button
+              label={t("batchRenewal.sendNotices")}
+              icon="pi pi-envelope"
+              onClick={sendRenewalNotice}
+              disabled={
+                sendingNotices ||
+                (selectedBatch.policies || []).filter(
+                  (p) => p.isSelected && p.noticeStatus === "NotSent"
+                ).length === 0
+              }
+              loading={sendingNotices}
+            />
+          </>
+        ) : null}
       >
         {selectedBatch && (
-          <div className="grid">
-            {/* Batch Information */}
-            <div className="col-12">
-              <h4 className="mb-3">{t("batchRenewal.selectedCriteria")}</h4>
-              <div className="grid">
-                {/* Expiry Date From */}
-                <div className="col-12 md:col-6 lg:col-3">
-                  <label className="block mb-2 font-medium">
-                    {t("batchRenewal.expiryDateFrom")}
-                  </label>
-                  <Calendar
-                    value={selectedBatch.criteriaOption?.expiryDateFrom}
-                    placeholder="Select Date"
-                    style={{ width: "100%" }}
-                    dateFormat={calendarDateFormat()}
-                    showIcon
-                  />
-                </div>
+          <>
+            <DetailHeader
+              title={selectedBatch.batchId}
+              status={{ code: selectedBatch.status, label: getStatusLabel(selectedBatch) }}
+              meta={[
+                { label: t("batchRenewal.totalPolicies"), value: selectedBatch.totalPolicies, type: "number" },
+                { label: t("batchRenewal.notice.NotSent"), value: selectedBatch.notSentCount ?? noticeCount("NotSent"), type: "number" },
+                { label: t("batchRenewal.notice.Queued"), value: selectedBatch.queuedCount ?? noticeCount("Queued"), type: "number" },
+                { label: t("batchRenewal.notice.Sent"), value: selectedBatch.sentCount ?? noticeCount("Sent"), type: "number" },
+                { label: t("batchRenewal.notice.Failed"), value: selectedBatch.failedCount ?? noticeCount("Failed"), type: "number" },
+                { label: t("batchRenewal.createdDate"), value: selectedBatch.createdAt, type: "datetime" },
+                { label: t("batchRenewal.createdBy"), value: selectedBatch.createdBy, hidden: !selectedBatch.createdBy },
+              ]}
+              actions={
+                <Button
+                  label={t("batchRenewal.generateReport")}
+                  icon="pi pi-file-excel"
+                  onClick={generateReport}
+                  outlined
+                />
+              }
+            />
 
-                {/* Expiry Date To */}
-                <div className="col-12 md:col-6 lg:col-3">
-                  <label className="block mb-2 font-medium">
-                    {t("batchRenewal.expiryDateTo")}
-                  </label>
-                  <Calendar
-                    value={selectedBatch.criteriaOption?.expiryDateTo}
-                    placeholder="Select Date"
-                    style={{ width: "100%" }}
-                    dateFormat={calendarDateFormat()}
-                    showIcon
-                  />
-                </div>
+            <DetailSection title={t("batchRenewal.selectedCriteria")}>
+              <KeyValueGrid columns={4} items={criteriaItems(selectedBatch.criteriaOption)} />
+            </DetailSection>
 
-                {/* Insurance Company */}
-                <div className="col-12 md:col-6 lg:col-3">
-                  <label className="block mb-2 font-medium">
-                    Insurance Company
-                  </label>
-                  <Dropdown
-                    value={selectedBatch.criteriaOption?.insuranceCompanyName}
-                    options={insuranceCompanyOptions}
-                    placeholder="Select Company"
-                    style={{ width: "100%" }}
-                  />
-                </div>
-
-                {/* Product Type */}
-                <div className="col-12 md:col-6 lg:col-3">
-                  <label className="block mb-2 font-medium">{t("batchRenewal.productType")}</label>
-                  <Dropdown
-                    value={batchCriteria.product}
-                    onChange={(e) => handleCriteriaChange("product", e.value)}
-                    options={productTypeOptions}
-                    placeholder="Select Product"
-                    style={{ width: "100%" }}
-                  />
-                </div>
-
-                {/* Premium Min */}
-                <div className="col-12 md:col-6 lg:col-3">
-                  <label className="block mb-2 font-medium">
-                    Min Premium ({currencySymbol()})
-                  </label>
-                  <InputNumber
-                    value={selectedBatch.criteriaOption?.premiumMin}
-                    placeholder="0.00"
-                    mode="decimal"
-                    minFractionDigits={2}
-                    maxFractionDigits={2}
-                    style={{ width: "100%" }}
-                  />
-                </div>
-
-                {/* Premium Max */}
-                <div className="col-12 md:col-6 lg:col-3">
-                  <label className="block mb-2 font-medium">
-                    Max Premium ({currencySymbol()})
-                  </label>
-                  <InputNumber
-                    value={selectedBatch.criteriaOption?.premiumMax}
-                    placeholder="0.00"
-                    mode="decimal"
-                    minFractionDigits={2}
-                    maxFractionDigits={2}
-                    style={{ width: "100%" }}
-                  />
-                </div>
-
-                {/* Client Name */}
-                <div className="col-12 md:col-6 lg:col-3">
-                  <label className="block mb-2 font-medium">{t("batchRenewal.clientName")}</label>
-                  <InputText
-                    value={selectedBatch.criteriaOption?.clientName}
-                    placeholder="Enter client name"
-                    style={{ width: "100%" }}
-                  />
-                </div>
-
-                {/* Payment Status */}
-                <div className="col-12 md:col-6 lg:col-3">
-                  <label className="block mb-2 font-medium">
-                    Payment Status
-                  </label>
-                  <Dropdown
-                    value={selectedBatch.criteriaOption?.paymentStatus}
-                    options={paymentStatusOptions}
-                    placeholder="Select Status"
-                    style={{ width: "100%" }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <Divider />
-
-            {/* Queue Progress */}
             {queueProgress && sendingNotices && (
-              <div className="col-12">
-                <Card className="mb-3 bg-blue-50">
-                  <div className="flex align-items-center justify-content-between mb-2">
-                    <h5 className="m-0">
-                      <i className="pi pi-spin pi-spinner mr-2"></i>
-                      Processing Renewal Notices
-                    </h5>
-                    <Tag
-                      value={queueProgress.status.charAt(0).toUpperCase() + queueProgress.status.slice(1)}
-                      severity={
-                        queueProgress.status === "processing"
-                          ? "warning"
-                          : "info"
-                      }
-                    />
-                  </div>
-                  <div className="grid mt-3">
-                    <div className="col-3">
-                      <div className="text-sm text-gray-600">Total</div>
-                      <div className="text-2xl font-bold">
-                        {queueProgress.progress.total}
-                      </div>
-                    </div>
-                    <div className="col-3">
-                      <div className="text-sm text-gray-600">{t("batchRenewal.processed")}</div>
-                      <div className="text-2xl font-bold text-blue-600">
-                        {queueProgress.progress.processed}
-                      </div>
-                    </div>
-                    <div className="col-3">
-                      <div className="text-sm text-gray-600">{t("batchRenewal.succeeded")}</div>
-                      <div className="text-2xl font-bold text-green-600">
-                        {queueProgress.progress.succeeded}
-                      </div>
-                    </div>
-                    <div className="col-3">
-                      <div className="text-sm text-gray-600">{t("batchRenewal.failed")}</div>
-                      <div className="text-2xl font-bold text-red-600">
-                        {queueProgress.progress.failed}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bv-meter mt-3">
-                    <ProgressBar value={percentOf(queueProgress.progress.processed, queueProgress.progress.total)} showValue={false} />
-                    <span className="bv-meter__value">{`${queueProgress.progress.processed} of ${queueProgress.progress.total}`}</span>
-                  </div>
-                </Card>
-              </div>
+              <DetailSection
+                title={t("batchRenewal.sendingNotices")}
+                actions={<StatusChip code={queueProgress.status} />}
+              >
+                <KeyValueGrid
+                  columns={4}
+                  items={[
+                    { label: t("batchRenewal.total"), value: queueProgress.progress.total, type: "number" },
+                    { label: t("batchRenewal.processed"), value: queueProgress.progress.processed, type: "number" },
+                    { label: t("batchRenewal.succeeded"), value: queueProgress.progress.succeeded, type: "number" },
+                    { label: t("batchRenewal.failed"), value: queueProgress.progress.failed, type: "number" },
+                  ]}
+                />
+                <div className="bv-meter mt-3">
+                  <ProgressBar value={percentOf(queueProgress.progress.processed, queueProgress.progress.total)} showValue={false} />
+                  <span className="bv-meter__value">{t("batchRenewal.countOf", { count: queueProgress.progress.processed, total: queueProgress.progress.total })}</span>
+                </div>
+              </DetailSection>
             )}
 
-            {/* Policies List */}
-            <div className="col-12">
-              <div className="flex justify-content-between align-items-center mb-3">
-                <h4 className="m-0">{t("batchRenewal.policiesInBatch")}</h4>
-                <div className="flex gap-2">
-                  <Button
-                    label="Generate Report"
-                    icon="pi pi-file-excel"
-                    onClick={generateReport}
-                    className="p-button-outlined"
-                    tooltip="Download batch report as Excel"
-                  />
-                  <Tag
-                    value={`NotSent: ${
-                      selectedBatch.policies.filter(
-                        (p) => p.noticeStatus === "NotSent"
-                      ).length
-                    }`}
-                    severity="secondary"
-                  />
-                  <Tag
-                    value={`Queued: ${
-                      selectedBatch.policies.filter(
-                        (p) => p.noticeStatus === "Queued"
-                      ).length
-                    }`}
-                    severity="warning"
-                  />
-                  <Tag
-                    value={`Sent: ${
-                      selectedBatch.policies.filter(
-                        (p) => p.noticeStatus === "Sent"
-                      ).length
-                    }`}
-                    severity="success"
-                  />
-                  <Tag
-                    value={`Failed: ${
-                      selectedBatch.policies.filter(
-                        (p) => p.noticeStatus === "Failed"
-                      ).length
-                    }`}
-                    severity="danger"
-                  />
-                </div>
-              </div>
+            <DetailSection
+              title={t("batchRenewal.policiesInBatch")}
+              actions={<span className="text-color-secondary text-sm">{t("batchRenewal.selectedCount", { count: (selectedBatch.policies || []).filter((p) => p.isSelected).length })}</span>}
+              flush
+            >
               <DataTable
-                value={selectedBatch.policies}
+                value={selectedBatch.policies || []}
+                dataKey="policyId"
                 paginator
                 rows={20}
                 rowsPerPageOptions={[20, 50, 100]}
                 className="p-datatable-sm"
-                emptyMessage="No policies found"
+                emptyMessage={t("batchRenewal.noPolicies")}
               >
                 <Column
                   field="isSelected"
@@ -1207,90 +1102,58 @@ export default function BatchTable() {
                 />
                 <Column
                   field="policy.policyNumber"
-                  header="Policy ID"
+                  header={t("batchRenewal.policyNumber")}
                   body={(rowData) => (
-                    <p
-                      style={{ cursor: "pointer ", color: "blue" }}
-                      onClick={() => {
-                        navigate(`/agent/policydetail/${rowData.policyId}`);
-                      }}
-                    >
-                      {rowData.policy.policyNumber}
-                    </p>
+                    <Button
+                      label={rowData.policy?.policyNumber}
+                      link
+                      className="p-0"
+                      onClick={() => navigate(`/agent/policydetail/${rowData.policyId}`)}
+                    />
                   )}
                   sortable
                 />
-
+                <Column field="policy.clientName" header={t("batchRenewal.clientName")} sortable />
                 <Column
                   field="policy.insuranceCompanyName"
-                  header="Insurance Company"
+                  header={t("batchRenewal.insuranceCompany")}
                   sortable
                 />
-
+                <Column
+                  field="policy.expiryDate"
+                  header={t("batchRenewal.expiryDate")}
+                  sortable
+                  body={(rowData) => formatDate(rowData.policy?.expiryDate)}
+                />
                 <Column
                   field="noticeStatus"
-                  header="Notice Status"
+                  header={t("batchRenewal.noticeStatus")}
                   sortable
                   body={(rowData) => (
-                    <Tag
-                      value={rowData.noticeStatus}
+                    <StatusChip
+                      code={rowData.noticeStatus}
+                      label={noticeLabel(rowData.noticeStatus)}
                       severity={getNoticeStatusSeverity(rowData.noticeStatus)}
                     />
                   )}
                 />
                 <Column
                   field="noticeSentAt"
-                  header="Notice Sent At"
+                  header={t("batchRenewal.noticeSentAt")}
                   sortable
-                  body={(rowData) =>
-                    rowData.noticeSentAt
-                      ? formatDate(rowData.noticeSentAt)
-                      : "-"
-                  }
+                  body={(rowData) => formatInstant(rowData.noticeSentAt)}
                 />
                 <Column
                   field="createdAt"
-                  header="Added Date"
+                  header={t("batchRenewal.addedDate")}
                   sortable
                   body={(rowData) => formatDate(rowData.createdAt)}
                 />
               </DataTable>
-              <div className="flex justify-content-between align-items-center mt-3">
-                <div className="text-sm text-gray-600">
-                  {selectedBatch.policies.filter((p) => p.isSelected).length}{" "}
-                  policies selected
-                </div>
-                <div className="flex gap-2">
-                  {selectedBatch.policies.filter(
-                    (p) => p.noticeStatus === "Failed"
-                  ).length > 0 && (
-                    <Button
-                      label="Retry Failed"
-                      icon="pi pi-refresh"
-                      onClick={retryFailedNotices}
-                      className="p-button-outlined p-button-warning"
-                      disabled={sendingNotices}
-                      loading={sendingNotices}
-                    />
-                  )}
-                  <Button
-                    label="Send Renewal Notices"
-                    icon="pi pi-envelope"
-                    onClick={sendRenewalNotice}
-                                        disabled={
-                      sendingNotices ||
-                      selectedBatch.policies.filter(
-                        (p) => p.isSelected && p.noticeStatus === "NotSent"
-                      ).length === 0
-                    }
-                    loading={sendingNotices}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+            </DetailSection>
+          </>
         )}
-      </Dialog>
+      </DetailDialog>
     </div>
   );
 }

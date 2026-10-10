@@ -274,7 +274,7 @@ const UploadVehiclePhotos = () => {
               onUploadError={(error) => logger.error('Left photo upload error:', error)}
             />
             {vehiclePhotos.leftSide && (
-              <div className="text-sm text-green-600 mt-2">
+              <div className="text-sm upload-done mt-2">
                 <i className="pi pi-check-circle mr-1" aria-hidden="true" />{t("agent.photoUploadedSuccessfully")}
               </div>
             )}
@@ -293,7 +293,7 @@ const UploadVehiclePhotos = () => {
               onUploadError={(error) => logger.error('Right photo upload error:', error)}
             />
             {vehiclePhotos.rightSide && (
-              <div className="text-sm text-green-600 mt-2">
+              <div className="text-sm upload-done mt-2">
                 <i className="pi pi-check-circle mr-1" aria-hidden="true" />Photo uploaded successfully
               </div>
             )}
@@ -312,7 +312,7 @@ const UploadVehiclePhotos = () => {
               onUploadError={(error) => logger.error('Front photo upload error:', error)}
             />
             {vehiclePhotos.front && (
-              <div className="text-sm text-green-600 mt-2">
+              <div className="text-sm upload-done mt-2">
                 <i className="pi pi-check-circle mr-1" aria-hidden="true" />{t("agent.photoUploadedSuccessfully")}
               </div>
             )}
@@ -331,7 +331,7 @@ const UploadVehiclePhotos = () => {
               onUploadError={(error) => logger.error('Rear photo upload error:', error)}
             />
             {vehiclePhotos.rear && (
-              <div className="text-sm text-green-600 mt-2">
+              <div className="text-sm upload-done mt-2">
                 <i className="pi pi-check-circle mr-1" aria-hidden="true" />{t("agent.photoUploadedSuccessfully")}
               </div>
             )}
@@ -350,7 +350,7 @@ const UploadVehiclePhotos = () => {
               onUploadError={(error) => logger.error('Interior photo upload error:', error)}
             />
             {vehiclePhotos.interior && (
-              <div className="text-sm text-green-600 mt-2">
+              <div className="text-sm upload-done mt-2">
                 <i className="pi pi-check-circle mr-1" aria-hidden="true" />{t("agent.photoUploadedSuccessfully")}
               </div>
             )}

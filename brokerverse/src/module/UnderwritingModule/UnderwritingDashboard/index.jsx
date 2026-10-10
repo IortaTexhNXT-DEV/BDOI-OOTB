@@ -16,6 +16,8 @@ import { useNavigate } from "react-router-dom";
 import dashboardService from "../../../services/dashboardService";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import { useChartTheme } from "../../../theme/chartTheme";
+import StatusChip from "../../../components/StatusChip";
+import { statusLabel } from "../../../utils/statusSeverity";
 import "./index.scss";
 
 const OPEN_TASK_LIMIT = 5;
@@ -149,49 +151,21 @@ const UnderwritingDashboard = () => {
 
   const openCase = (rowData) => navigate(`/agent/quotedetailview/${rowData.quotationId}`);
 
-  const statusBodyTemplate = (rowData) => {
-    const getSeverity = (status) => {
-      switch (status) {
-        case "Approved":
-        case "CustomerAccepted":
-          return "success";
-        case "SubmittedToInsurer":
-          return "warning";
-        case "PendingCustomer":
-          return "info";
-        case "Rejected":
-          return "danger";
-        default:
-          return null;
-      }
-    };
-    return (
-      <Tag value={rowData.status} severity={getSeverity(rowData.status)} />
-    );
-  };
+  const statusBodyTemplate = (rowData) => (
+    <StatusChip code={rowData.status} label={t(`underwritingDashboard.statusValue.${rowData.status}`, { defaultValue: statusLabel(rowData.status) })} />
+  );
 
-  const priorityBodyTemplate = (rowData) => {
-    const getPrioritySeverity = (priority) => {
-      switch (priority) {
-        case "high":
-          return "danger";
-        case "medium":
-          return "warning";
-        case "low":
-          return "success";
-        default:
-          return "secondary";
-      }
-    };
-    return <Tag value={String(rowData.priority || "-")} severity={getPrioritySeverity(rowData.priority)} />;
-  };
+  const PRIORITY_SEVERITY = { high: "danger", medium: "warning", low: "success" };
+  const priorityBodyTemplate = (rowData) => (rowData.priority
+    ? <Tag value={t(`underwritingDashboard.priorityValue.${rowData.priority}`, { defaultValue: statusLabel(rowData.priority) })} severity={PRIORITY_SEVERITY[rowData.priority] || "secondary"} />
+    : "-");
 
   const riskScoreBodyTemplate = (rowData) => {
     if (rowData.riskScore === undefined || rowData.riskScore === null) return "-";
     return (
       <div className="bv-meter">
         <ProgressBar value={rowData.riskScore} showValue={false} />
-        <span className="bv-meter__value">{`${rowData.riskScore} of 100`}</span>
+        <span className="bv-meter__value">{t("underwritingDashboard.riskScoreOf", { score: rowData.riskScore })}</span>
       </div>
     );
   };

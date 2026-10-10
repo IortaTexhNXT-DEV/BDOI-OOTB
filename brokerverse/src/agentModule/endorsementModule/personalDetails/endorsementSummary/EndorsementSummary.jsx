@@ -19,12 +19,13 @@ import ShareOption from "../../../quoteModule/quoteDetailView/Modal/ShareOption"
 import { formatDate } from "@fullcalendar/core/index.js";
 import axios from "axios";
 import { validateAccountingEquation } from "../../../../utility/accountingValidation";
-import { isFireLob, isOtherLob } from "../../constants/endorsementCategories";
+import { FIRE_CATEGORIES, MOTOR_CATEGORIES, isFireLob, isOtherLob } from "../../constants/endorsementCategories";
 
 import { numberLocale } from "../../../../utility/currencyConverter";
 import useTaxRates from "../../../quoteModule/utils/useTaxRates";
 import { getTaxRates } from "../../../quoteModule/utils/premiumCalculations";
-import { confirmAction, notifyError } from "../../../../utility/dialogs";
+import { notifyError } from "../../../../utility/dialogs";
+import { openConfirm } from "../../../../components/ConfirmDialog";
 import logger from "../../../../utility/logger";
 const EndorsementSummary = ({ action }) => {
   const { t } = useTranslation();
@@ -260,103 +261,81 @@ const EndorsementSummary = ({ action }) => {
     navigate(-1);
   };
 
-  // Send quote for customer approval
+  // Send the endorsement (or the policy cancellation) to the insurance company, once confirmed with its key facts
   const handleSendForApproval = async () => {
-    setIsSending(true);
     if (!state?.endorsementId) {
       notifyError(t("endorsementSummary.endorsementIdNotFound"));
-      setIsSending(false);
       return;
     }
 
-    if (!(await confirmAction(t("endorsementSummary.confirmSendToInsurance")))) {
-      setIsSending(false);
-      return;
-    }
+    // a cancellation: by status, endorsement type or the isCancelPolicy flag
+    const endorsementStatus = state?.endorsementData?.status;
+    const ids = Array.isArray(endorsementTypeIds)
+      ? endorsementTypeIds
+      : [endorsementTypeIds];
+    const isCancellation =
+      endorsementStatus === "InitiateCancel" ||
+      endorsementStatus === "Cancelled" ||
+      ids.includes(5) ||
+      ids.includes("fire_cancel") ||
+      state?.endorsementData?.isCancelPolicy === true;
+    const typeNames = ids
+      .map((id) => [...MOTOR_CATEGORIES, ...FIRE_CATEGORIES].find((c) => String(c.typeId) === String(id)))
+      .filter(Boolean)
+      .map((c) => t(c.translationKey, c.name));
 
-    try {
-      // Check if this is a cancellation endorsement
-      // Check multiple conditions: status, endorsementTypeIds, or isCancelPolicy flag
-      const endorsementStatus = state?.endorsementData?.status;
-      const endorsementTypeIds =
-        state?.endorsementData?.summary?.endorsementTypeIds ||
-        state?.endorsementData?.endorsementTypeIds ||
-        [];
-      const ids = Array.isArray(endorsementTypeIds)
-        ? endorsementTypeIds
-        : [endorsementTypeIds];
-      const isCancellation =
-        endorsementStatus === "InitiateCancel" ||
-        endorsementStatus === "Cancelled" ||
-        ids.includes(5) ||
-        ids.includes("fire_cancel") ||
-        state?.endorsementData?.isCancelPolicy === true;
-
-      const URL = isCancellation
-        ? `${BASE_URL}/endorsements/initiate-cancel-policy/${state?.endorsementId}`
-        : `${BASE_URL}/endorsements/send-endorsement-to-customer/${state?.endorsementId}`;
-      
-      const response = await axios.post(
-        URL,
+    let updatedEndorsementData = state?.endorsementData;
+    const sent = await openConfirm({
+      title: t("endorsementSummary.sendTitle"),
+      message: isCancellation ? t("endorsementSummary.sendCancellationMessage") : t("endorsementSummary.sendMessage"),
+      facts: [
+        { label: t("endorsementSummary.endorsementNo"), value: state?.endorsementData?.endorsementNumber || state?.endorsementId },
+        { label: t("endorsementSummary.policyNo"), value: state?.endorsementData?.policyNumber },
+        { label: t("endorsementSummary.insuranceCompany"), value: quotationData?.participantDetails?.[0]?.insuranceCompanyName || quotationData?.participantDetails?.[0]?.participantName },
+        { label: t("endorsementSummary.endorsementType"), value: typeNames.join(", ") },
         {
-          sentBy: "agent",
+          label: premiumDelta > 0 ? t("endorsementSummary.additionalPremium") : premiumDelta < 0 ? t("endorsementSummary.returnPremium") : t("endorsementSummary.premiumChange"),
+          value: premiumDelta === null ? null : Math.abs(premiumDelta),
+          type: "amount",
+          emphasis: true,
+          hidden: premiumDelta === null,
         },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            ...authService.getAuthHeader(),
-          },
+      ],
+      confirmLabel: t("endorsementSummary.sendToInsurer"),
+      onConfirm: async () => {
+        const URL = isCancellation
+          ? `${BASE_URL}/endorsements/initiate-cancel-policy/${state?.endorsementId}`
+          : `${BASE_URL}/endorsements/send-endorsement-to-customer/${state?.endorsementId}`;
+        let response;
+        try {
+          response = await axios.post(
+            URL,
+            { sentBy: "agent" },
+            { headers: { "Content-Type": "application/json", ...authService.getAuthHeader() } }
+          );
+        } catch (error) {
+          throw new Error(error?.response?.data?.message || t("endorsementSummary.errorSending"));
         }
-      );
+        if (!response.data.success) throw new Error(response.data.message || t("endorsementSummary.failedToSend"));
+        updatedEndorsementData = response.data.endorsement || state?.endorsementData;
+      },
+    });
+    if (!sent) return;
 
-      if (response.data.success) {
-        // Update endorsementData if returned from backend
-        const updatedEndorsementData = response.data.endorsement || state?.endorsementData;
-        
-        setTimeout(() => {
-          navigate(`/agent/endorsement/paymenterror/${state?.endorsementId}`, {
-            state: {
-              endorsementId: state?.endorsementId,
-              policyId: state?.policyId,
-              clientId: state?.clientId,
-              clientNumber: state?.clientNumber,
-              clientName: state?.clientName,
-              endorsementData: updatedEndorsementData,
-            },
-          });
-        }, 2000);
-        setIsSending(false);
-      } else {
-        setIsSending(false);
-        notifyError(t("endorsementSummary.failedToSend"));
-      }
-    } catch (error) {
+    setIsSending(true);
+    setTimeout(() => {
       setIsSending(false);
-      notifyError(t("endorsementSummary.errorSending"));
-    } finally {
-      setIsSending(false);
-    }
-
-    // try {
-    //   const response = await fetch(
-    //     {
-    //       method: "POST",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //     }
-    //   );
-
-    //   if (result.success) {
-    //     // Refresh quotation data
-    //     const refreshed = await dispatch(
-    //     );
-    //     if (refreshed.type.endsWith("/fulfilled")) {
-    //     }
-    //   } else {
-    //   }
-    // } catch (error) {
-    // }
+      navigate(`/agent/endorsement/paymenterror/${state?.endorsementId}`, {
+        state: {
+          endorsementId: state?.endorsementId,
+          policyId: state?.policyId,
+          clientId: state?.clientId,
+          clientNumber: state?.clientNumber,
+          clientName: state?.clientName,
+          endorsementData: updatedEndorsementData,
+        },
+      });
+    }, 2000);
   };
 
   // Show loading state

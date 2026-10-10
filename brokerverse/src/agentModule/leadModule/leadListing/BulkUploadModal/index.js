@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { FileUpload } from "primereact/fileupload";
@@ -10,6 +11,7 @@ import "./index.scss";
 import { downloadBulkUploadTemplate, isSupportedUploadFile } from "../../../component/bulkUploadTemplate";
 
 const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
+  const { t } = useTranslation();
   const toast = useRef(null);
   const fileUploadRef = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -23,8 +25,8 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
       if (!isSupportedUploadFile(file)) {
         toast.current.show({
           severity: 'error',
-          summary: 'Invalid File',
-          detail: 'Please upload an Excel (.xlsx) or CSV (.csv) file',
+          summary: t('bulkUploadLeads.invalidFile'),
+          detail: t('bulkUploadLeads.onlyExcelFiles'),
           life: 3000
         });
         fileUploadRef.current.clear();
@@ -35,8 +37,8 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
       if (file.size > 10 * 1024 * 1024) {
         toast.current.show({
           severity: 'error',
-          summary: 'File Too Large',
-          detail: 'File size must be less than 10MB',
+          summary: t('bulkUploadLeads.fileTooLarge'),
+          detail: t('bulkUploadLeads.fileSizeLessThan10MB'),
           life: 3000
         });
         fileUploadRef.current.clear();
@@ -51,8 +53,8 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
     if (!selectedFile) {
       toast.current.show({
         severity: 'warn',
-        summary: 'No File Selected',
-        detail: 'Please select a file to upload',
+        summary: t('bulkUploadLeads.noFileSelected'),
+        detail: t('bulkUploadLeads.pleaseSelectFile'),
         life: 3000
       });
       return;
@@ -82,8 +84,8 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
         // Show success message
         toast.current.show({
           severity: 'success',
-          summary: 'Upload Started',
-          detail: data.message || 'Lead bulk upload started. Processing in background.',
+          summary: t('bulkUploadLeads.uploadStarted'),
+          detail: data.message || t('bulkUploadLeads.uploadStartedDetail'),
           life: 5000
         });
 
@@ -102,8 +104,8 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
     } catch (error) {
       toast.current.show({
         severity: 'error',
-        summary: 'Upload Failed',
-        detail: error.message || 'Failed to upload leads file',
+        summary: t('bulkUploadLeads.uploadFailed'),
+        detail: error.message || t('bulkUploadLeads.uploadFailedDetail'),
         life: 3000
       });
       
@@ -132,7 +134,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
     <Dialog
       visible={visible}
       onHide={handleClose}
-      header="Bulk upload prospects"
+      header={t("bulkUploadLeads.header")}
       className="bulk-upload-modal"
       style={{ width: '600px' }}
       modal
@@ -144,19 +146,19 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
           <div className="bulk-upload-content">
             <div className="upload-instructions">
               <div className="instructions-header">
-                <h4>Instructions:</h4>
+                <h4>{t("bulkUploadLeads.instructions")}</h4>
                 <Button
-                  label="Download Template"
+                  label={t("bulkUploadLeads.downloadTemplate")}
                   icon="pi pi-download"
                   className="p-button-sm p-button-text"
                   onClick={handleDownloadTemplate}
                 />
               </div>
               <ul>
-                <li>Download the sample template file</li>
-                <li>Fill in the lead details in the Excel file</li>
-                <li>Upload the completed file (max 10MB)</li>
-                <li>Only .xlsx or .csv files are supported</li>
+                <li>{t("bulkUploadLeads.instruction1")}</li>
+                <li>{t("bulkUploadLeads.instruction2")}</li>
+                <li>{t("bulkUploadLeads.instruction3")}</li>
+                <li>{t("bulkUploadLeads.instruction4")}</li>
               </ul>
             </div>
 
@@ -169,15 +171,15 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
                 maxFileSize={10485760}
                 customUpload
                 auto={false}
-                chooseLabel={selectedFile ? selectedFile.name : "Choose File"}
+                chooseLabel={selectedFile ? selectedFile.name : t("bulkUploadLeads.chooseFile")}
                 onSelect={handleFileSelect}
                 disabled={loading}
               />
               {!selectedFile && (
                 <div className="upload-placeholder">
                   <SvgUpload />
-                  <p>Select Excel file to upload</p>
-                  <span>Maximum file size: 10MB</span>
+                  <p>{t("bulkUploadLeads.selectExcelFile")}</p>
+                  <span>{t("bulkUploadLeads.maxFileSize")}</span>
                 </div>
               )}
             </div>
@@ -185,19 +187,19 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
             {loading && (
               <div className="upload-progress">
                 <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
-                <p>Processing your file...</p>
+                <p>{t("bulkUploadLeads.processingFile")}</p>
               </div>
             )}
 
             <div className="bulk-upload-footer">
               <Button
-                label="Cancel"
+                label={t("bulkUploadLeads.cancel")}
                 className="p-button-text"
                 onClick={handleClose}
                 disabled={loading}
               />
               <Button
-                label={loading ? "Uploading..." : "Upload"}
+                label={t("bulkUploadLeads.upload")}
                 onClick={handleUpload}
                 disabled={!selectedFile || loading}
                 loading={loading}
@@ -207,20 +209,19 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
         ) : (
           <div className="processing-section">
             <div className="processing-header">
-              <h4>Processing...</h4>
+              <h4>{t("bulkUploadLeads.processing")}</h4>
               <ProgressBar mode="indeterminate" style={{ height: '6px', marginTop: '1rem' }} />
             </div>
             
             <div className="status-message">
-              <p className="status-text">{uploadResult.message || 'Your file is being processed. Leads will be created shortly.'}</p>
+              <p className="status-text">{uploadResult.message || t('bulkUploadLeads.fileBeingProcessed')}</p>
             </div>
 
             <div className="processing-actions">
               <Button
-                label="Close"
+                label={t("bulkUploadLeads.close")}
                 onClick={handleClose}
                 className="close-button"
-                severity="success"
               />
             </div>
           </div>

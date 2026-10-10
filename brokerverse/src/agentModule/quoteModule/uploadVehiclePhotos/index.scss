@@ -1,3 +1,5 @@
+@import "../../../theme/bdoi/tokens";
+
 .upload__vehicle__container {
   .p-card {
     background: #ffffff;
@@ -178,4 +180,8 @@
       color: #ffffff;
     }
   }
+}
+
+.upload__vehicle__container .upload-done {
+  color: $color-success;
 }

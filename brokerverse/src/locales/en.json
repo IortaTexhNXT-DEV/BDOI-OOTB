@@ -2766,7 +2766,9 @@
       "Commercial": "Commercial",
       "PUV": "Public utility vehicle (PUV)",
       "TNVS": "TNVS (ride-hailing)"
-    }
+    },
+    "removeCoInsurerMessage": "The insurer is removed from the co-insurance participants of this quotation.",
+    "uploaded": "Uploaded"
   },
   "commission": {
     "addCommissions": "Add Commissions",
@@ -2944,7 +2946,9 @@
     "searchBy": "Search by",
     "search": "Search",
     "totalPremium": "Total Premium",
-    "endorsementNumber": "Endorsement Number"
+    "endorsementNumber": "Endorsement Number",
+    "participantRequired": "Select the participant.",
+    "shareRange": "Enter a share between 0 and 100."
   },
   "messages": {
     "success": "Operation completed successfully",
@@ -3103,7 +3107,11 @@
     "delete": "Delete",
     "allCountries": "All countries",
     "allProvinces": "All provinces",
-    "allCities": "All cities"
+    "allCities": "All cities",
+    "deleteTitle": "Delete prospect",
+    "deleteMessage": "The prospect is removed from the prospect list.",
+    "deleteNote": "A prospect with an issued policy cannot be deleted.",
+    "deleteAction": "Delete prospect"
   },
   "quotes": {
     "title": "Quotations",
@@ -3616,7 +3624,10 @@
     "valueAddedTaxRate": "Value Added Tax ({{rate}})",
     "localGovernmentTaxRate": "Local Government Tax ({{rate}})",
     "directBill": "Direct bill",
-    "directBillDescription": "The client pays the premium directly to the insurer. No premium payment is collected by the broker; the broker bills the insurer for its commission."
+    "directBillDescription": "The client pays the premium directly to the insurer. No premium payment is collected by the broker; the broker bills the insurer for its commission.",
+    "print": "Print",
+    "close": "Close",
+    "download": "Download"
   },
   "uploadPolicy": {
     "title": "Prospects",
@@ -4266,7 +4277,84 @@
     "listFailed": "The policy list could not be generated",
     "noRenewablePolicies": "No renewable policy matches these criteria. Widen the expiry dates or clear a filter.",
     "expiryDate": "Expiry date",
-    "renewalState": "Renewal state"
+    "renewalState": "Renewal state",
+    "deleteTitle": "Delete renewal batch",
+    "deleteMessage": "The batch and its policy list are deleted. The policies stay due for renewal.",
+    "deleteNote": "A batch that has sent or queued notices cannot be deleted; cancel it instead.",
+    "deleteAction": "Delete batch",
+    "deleted": "Renewal batch {{id}} deleted",
+    "batchId": "Batch ID",
+    "status": "Status",
+    "totalPolicies": "Total policies",
+    "createdDate": "Created on",
+    "createdBy": "Created by",
+    "actions": "Actions",
+    "viewDetails": "View details",
+    "noBatches": "No batches found",
+    "countOf": "{{count}} of {{total}}",
+    "partiallyCompleted": "Partially completed ({{processed}}/{{total}})",
+    "batchStatus": {
+      "Draft": "Draft",
+      "Scheduled": "Scheduled",
+      "Processing": "Processing",
+      "Completed": "Completed",
+      "Cancelled": "Cancelled"
+    },
+    "minimumPremium": "Minimum premium",
+    "maximumPremium": "Maximum premium",
+    "minPremiumIn": "Min premium ({{currency}})",
+    "maxPremiumIn": "Max premium ({{currency}})",
+    "notice": {
+      "NotSent": "Not sent",
+      "Queued": "Queued",
+      "Sent": "Sent",
+      "Failed": "Failed"
+    },
+    "batchDetails": "Renewal batch",
+    "close": "Close",
+    "retryFailed": "Retry failed notices",
+    "sendNotices": "Send renewal notices",
+    "generateReport": "Download report",
+    "sendingNotices": "Sending renewal notices",
+    "selectedCount": "{{count}} selected",
+    "noPolicies": "No policies found",
+    "policyNumber": "Policy number",
+    "noticeStatus": "Notice status",
+    "noticeSentAt": "Notice sent",
+    "addedDate": "Added on",
+    "premium": "Premium",
+    "enterClientName": "Enter client name",
+    "selectStatus": "Select status",
+    "clear": "Clear",
+    "selectOnePolicy": "Select at least one policy for the batch.",
+    "created": "Renewal batch {{id}} created",
+    "createFailed": "The renewal batch could not be created.",
+    "toast": {
+      "noticesSent": "Notices sent",
+      "noticesSentDetail": "{{count}} of {{total}} renewal notices sent.",
+      "sendingFailed": "Sending failed",
+      "sendingFailedDetail": "The renewal notices could not be sent. Try again.",
+      "processingComplete": "Processing complete",
+      "processingCompleteDetail": "The renewal notices were processed.",
+      "noPoliciesSelected": "No policies selected",
+      "noPoliciesSelectedDetail": "Select at least one policy to send renewal notices.",
+      "queued": "Notices queued",
+      "queuedDetail": "{{count}} renewal notices queued.",
+      "queueFailed": "Notices not queued",
+      "queueFailedDetail": "The renewal notices could not be queued.",
+      "noFailedNotices": "No failed notices",
+      "noFailedNoticesDetail": "There are no failed notices to retry.",
+      "retrying": "Retrying failed notices",
+      "retryingDetail": "Retrying {{count}} failed notices.",
+      "retryFailed": "Retry failed",
+      "retryFailedDetail": "The failed notices could not be retried.",
+      "noBatch": "No batch selected.",
+      "generatingReport": "Preparing report",
+      "generatingReportDetail": "The batch report is being prepared.",
+      "reportFailed": "The report could not be prepared. Try again.",
+      "reportDownloaded": "Report downloaded",
+      "reportDownloadedDetail": "The batch report was downloaded."
+    }
   },
   "shareOption": {
     "email": "Email",
@@ -4303,7 +4391,27 @@
     "emailContentHtml": "Email content (HTML)",
     "suggestedContentEditHint": "You can edit the subject and content before sending.",
     "usingSuggestedContent": "Using the suggested content",
-    "sentToRecipient": "Quote sent to {{to}}"
+    "sentToRecipient": "Quote sent to {{to}}",
+    "title": "Share quotation",
+    "emailTitle": "E-mail quotation",
+    "print": "Print",
+    "quotationMissing": "The quotation is not saved yet; its document cannot be prepared.",
+    "quoteMissing": "The quotation is not loaded.",
+    "downloadFailed": "The quotation document could not be prepared.",
+    "emailRequired": "Enter the e-mail address.",
+    "emailInvalid": "Enter a valid e-mail address.",
+    "sendFailed": "The e-mail could not be sent.",
+    "recipientEmail": "Recipient e-mail",
+    "customMessage": "Message",
+    "quotationNumber": "Quotation",
+    "product": "Product",
+    "insuranceCompany": "Insurance company",
+    "totalPremium": "Total premium",
+    "totalSumInsured": "Total sum insured",
+    "sendEmail": "Send e-mail",
+    "whatsAppTitle": "Insurance quotation {{number}}",
+    "whatsAppFireTitle": "Fire and Allied Perils quotation {{number}}",
+    "whatsAppContact": "Contact your account executive for the full details."
   },
   "fireLead": {
     "selectCategory": "Select Category",
@@ -4704,7 +4812,25 @@
     "localGovtTax": "Local Gov’t Tax",
     "invalidContact": "Enter a valid mobile number",
     "invalidZip": "ZIP code is 4 digits",
-    "print": "Print endorsement"
+    "print": "Print endorsement",
+    "effectiveDate": "Effective date",
+    "history": "History",
+    "endorsementTypeLabel": "Endorsement type",
+    "premiumEffectLabel": "Premium effect",
+    "premiumEffect": {
+      "additional": "Additional premium due from the client",
+      "return": "Return premium, refunded by accounting",
+      "none": "No premium change"
+    },
+    "cancellationReasonLabel": "Cancellation reason",
+    "remarksLabel": "Remarks",
+    "status": {
+      "Draft": "Draft",
+      "Submitted": "Submitted",
+      "InitiateCancel": "Cancellation initiated",
+      "Completed": "Completed",
+      "Cancelled": "Cancelled"
+    }
   },
   "endorsementSummary": {
     "leads": "Prospects",
@@ -4757,7 +4883,14 @@
     "sendToInsuranceCompany": "Send to Insurance Company",
     "additionalPremium": "Additional premium",
     "returnPremium": "Return premium",
-    "premiumChange": "Premium change"
+    "premiumChange": "Premium change",
+    "sendTitle": "Send endorsement to insurer",
+    "sendMessage": "The endorsement is sent to the insurance company for processing.",
+    "sendCancellationMessage": "The policy cancellation is sent to the insurance company for processing.",
+    "endorsementNo": "Endorsement no.",
+    "policyNo": "Policy no.",
+    "endorsementType": "Endorsement type",
+    "sendToInsurer": "Send to insurer"
   },
   "coverageDetailsReview": {
     "pageTitle": "Coverage Details Review",
@@ -4845,7 +4978,12 @@
     "viewDocument": "View Document",
     "billingMode": "Billing",
     "brokerBilled": "Broker billed: the client pays the premium to the broker, who remits it to the insurer net of commission",
-    "directBilled": "Direct bill: the client pays the premium to the insurer; the broker raises a commission debit note to the insurer"
+    "directBilled": "Direct bill: the client pays the premium to the insurer; the broker raises a commission debit note to the insurer",
+    "cancel": "Cancel",
+    "createPlacementSlip": "Create placement slip",
+    "issuePolicy": "Issue policy",
+    "quotation": "Quotation",
+    "insurer": "Insurer"
   },
   "coverageDetailsCard": {
     "renewalDetails": "Renewal Details",
@@ -4943,7 +5081,11 @@
     "afterDays": "{{count}} days",
     "leadName": "Prospect Name",
     "unknownLead": "Unknown Prospect",
-    "editQuotation": "Edit Quotation"
+    "editQuotation": "Edit Quotation",
+    "convertTitle": "Convert quotation to policy",
+    "convertMessage": "A policy is started from this quotation; its customer details are entered next.",
+    "insurer": "Insurer",
+    "product": "Product"
   },
   "quotationPage": {
     "title": "Quotation",
@@ -5205,7 +5347,8 @@
     "taxInfoNumber": "Tax Information Number:",
     "createdDate": "Created Date:",
     "lastUpdated": "Last Updated:",
-    "numberOfQuotes": "Number of Quotes:"
+    "numberOfQuotes": "Number of Quotes:",
+    "history": "History"
   },
   "leadCreation": {
     "source": "Source",
@@ -5749,7 +5892,21 @@
     "yesterday": "Yesterday",
     "today": "Today",
     "hoursAgo": "hours ago",
-    "justNow": "Just now"
+    "justNow": "Just now",
+    "statusValue": {
+      "Draft": "Draft",
+      "PendingCustomer": "Pending customer",
+      "CustomerAccepted": "Customer accepted",
+      "SubmittedToInsurer": "Submitted to insurer",
+      "Approved": "Approved",
+      "Rejected": "Rejected"
+    },
+    "priorityValue": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "riskScoreOf": "{{score}} of 100"
   },
   "policyTable": {
     "search": "Search",
@@ -5784,7 +5941,11 @@
     "actions": "Actions",
     "proceed": "Proceed",
     "grossPremiumHeader": "Gross Premium",
-    "status": "Status"
+    "status": "Status",
+    "cancel": "Cancel",
+    "insured": "Insured",
+    "startEndorsement": "Start endorsement",
+    "endorsementTypes": "Endorsement types"
   },
   "collectionsList": {
     "view": "View",
@@ -7071,7 +7232,8 @@
       "acknowledge": "Record acknowledgement",
       "uploadEpolicy": "Upload e-policy",
       "checkAgainstSlip": "Check against slip",
-      "book": "Book (Insurer issued)"
+      "book": "Book (Insurer issued)",
+      "printSlip": "Print slip"
     },
     "brokerSlip": {
       "title": "Request for Quotation (Broker Slip)",
@@ -7084,7 +7246,13 @@
       "tabResponses": "Market responses ({{count}})",
       "tabCompare": "Compare offers",
       "tabRisk": "Risk and covers",
-      "closeTitle": "Cancel or close the broker slip"
+      "closeTitle": "Cancel or close the broker slip",
+      "tabResponsesTitle": "Market responses",
+      "cancelTitle": "Cancel request for quotation",
+      "cancelMessage": "The request is withdrawn from the insurers. No quotation slip can be prepared from it.",
+      "closeTitleShort": "Close request for quotation",
+      "closeMessage": "The request is closed as not taken up. The insurers' offers stay on record.",
+      "offers": "Offers received"
     },
     "placementSlip": {
       "title": "Placement Slip",
@@ -7112,7 +7280,8 @@
       "premium": "Premium",
       "summary": "Summary",
       "terms": "Period and premium",
-      "epolicy": "e-Policy"
+      "epolicy": "e-Policy",
+      "history": "History"
     },
     "fields": {
       "slipNumber": "Slip No.",
@@ -7256,7 +7425,10 @@
       "valuePlaceholder": "Value"
     },
     "decline": {
-      "title": "{{insurer}} declined"
+      "title": "{{insurer}} declined",
+      "message": "The insurer's decline is recorded on the slip. Its share has to be placed with another insurer.",
+      "insurer": "Insurer",
+      "share": "Share"
     },
     "validation": {
       "title": "Check the form",
@@ -7298,7 +7470,8 @@
     "acknowledge": {
       "title": "Insurer acknowledgement",
       "note": "Record that the insurer confirmed receipt of the firm order.",
-      "reference": "Insurer acknowledgement reference"
+      "reference": "Insurer acknowledgement reference",
+      "insurers": "Insurers"
     },
     "epolicy": {
       "title": "e-Policy received - {{number}}",
@@ -7383,17 +7556,22 @@
       "confirm": "Confirm check",
       "acceptDifferences": "Accept differences",
       "returnToInsurer": "Return to insurer",
-      "decidedBy": "Checked by"
+      "decidedBy": "Checked by",
+      "differences": "Differences"
     },
     "book": {
       "title": "Book the policy (Insurer issued)",
       "note": "The insurer issued e-policy {{number}} and it was checked against the slip. Booking creates the policy, the bill or direct-bill commission, the journal and the commission, ends the cover notes and e-mails the policy schedule to the client.",
-      "verifyNote": "The ID details below come from the client and the quotation. Check them before booking."
+      "verifyNote": "The ID details below come from the client and the quotation. Check them before booking.",
+      "consequence": "Booking creates the policy, the bill or direct-bill commission, the journal and the commission, ends the cover notes and e-mails the policy schedule to the client."
     },
     "recordEpolicy": {
       "title": "Record e-Policy",
       "subtitle": "Placement slips sent to the insurer and waiting for the e-policy. Select one to record the e-policy the insurer sent.",
       "empty": "No placement slip is waiting for an e-policy"
+    },
+    "cancel": {
+      "message": "The placement slip is cancelled. The insurers are not told automatically."
     }
   },
   "postingRules": {
@@ -8467,7 +8645,10 @@
       "deductibleAmount": "Deductible amount",
       "effectiveFrom": "Effective from",
       "effectiveTo": "Effective to",
-      "benefitsHelp": "One benefit per line; shown to the client on the comparison"
+      "benefitsHelp": "One benefit per line; shown to the client on the comparison",
+      "deleteTitle": "Delete rate table",
+      "deleteMessage": "New quotations no longer use this rate. Quotations already priced keep their premium.",
+      "deleted": "Rate table deleted"
     },
     "taxes": {
       "saved": "Saved",
@@ -8514,7 +8695,13 @@
       "result": "Breakdown",
       "flatAmount": "Flat amount (PHP)",
       "fractionRule": "Part of a unit counts as a full unit",
-      "minimumAmount": "Minimum amount (PHP)"
+      "minimumAmount": "Minimum amount (PHP)",
+      "deleteLguTitle": "Delete local tax rate",
+      "deleteLguMessage": "The local government tax of the city or municipality is no longer charged on new premiums.",
+      "lguDeleted": "Local tax rate deleted",
+      "deleteRuleTitle": "Delete tax rule",
+      "deleteRuleMessage": "The tax is no longer charged on new premiums. Premiums already computed keep their taxes.",
+      "ruleDeleted": "Tax rule deleted"
     },
     "bundles": {
       "propertyAuto": "Fire service tax applies",
@@ -8547,7 +8734,9 @@
       "benefits": "Benefits",
       "addSection": "Add section",
       "removeSection": "Remove",
-      "insurersHelp": "Insurers that can carry this section; the first one is proposed"
+      "insurersHelp": "Insurers that can carry this section; the first one is proposed",
+      "deleteTitle": "Delete bundle",
+      "deleteMessage": "The bundle is deleted. A bundle with quotations is switched off instead."
     },
     "gateways": {
       "saved": "{{name}} saved",
@@ -9039,7 +9228,16 @@
     "remarks": "Remarks",
     "approved": "Referral approved",
     "declined": "Referral declined: the quotation is rejected",
-    "loadings": "Loadings added by the acceptance rules"
+    "loadings": "Loadings added by the acceptance rules",
+    "statusLabel": "Status",
+    "requestedAt": "Referred on",
+    "authority": "Approval by",
+    "sumInsured": "Sum insured",
+    "decidedByLabel": "Decided by",
+    "decidedAt": "Decided on",
+    "reasons": "Referral reasons",
+    "quotation": "Quotation",
+    "cancel": "Cancel"
   },
   "myWork": {
     "loadFailed": "My Work could not be loaded",
@@ -10455,7 +10653,14 @@
         "both": "Clients and prospects",
         "client": "Clients",
         "lead": "Prospects"
-      }
+      },
+      "sendTitle": "Send campaign",
+      "sendMessage": "The e-mails are queued to the outbox for every recipient who agreed to receive offers.",
+      "sendAction": "Send campaign",
+      "cancelMessage": "The campaign is not sent. A cancelled campaign cannot be scheduled again.",
+      "sentAt": "Sent",
+      "conversionWindow": "Conversion window (days)",
+      "summary": "Summary"
     },
     "home": {
       "operations": "Operations",
@@ -10478,7 +10683,9 @@
       "yes": "Yes",
       "search": "Search",
       "delete": "Delete",
-      "back": "Back"
+      "back": "Back",
+      "history": "History",
+      "close": "Close"
     },
     "cr": {
       "clientReport": "Client comparison report",
@@ -10518,7 +10725,18 @@
       "needsOffers": "{{number}} has {{count}} insurer offer(s); a comparison needs at least two",
       "needsQuotes": "Choose at least two quotations",
       "searchQuotes": "Quotation number or customer",
-      "notYet": "A comparison report needs at least two insurer offers ({{count}} so far)"
+      "notYet": "A comparison report needs at least two insurer offers ({{count}} so far)",
+      "emailTitle": "E-mail comparison report",
+      "emailMessage": "The client report (PDF) is sent from the outbox.",
+      "emailAddress": "E-mail address",
+      "emailOnFile": "The client's e-mail on file",
+      "emailInvalid": "Enter a valid e-mail address.",
+      "emailAction": "Send e-mail",
+      "chosenTitle": "Record the client's choice",
+      "chosenMessage": "The report is closed with this option and can no longer be changed.",
+      "chosenAction": "Record choice",
+      "createdBy": "Prepared by",
+      "createdAt": "Prepared on"
     },
     "fl": {
       "sumInsured": "Sum insured",
@@ -10577,7 +10795,19 @@
         "vehicleType": "Vehicle class (CTPL tariff)",
         "usage": "Usage",
         "mortgagee": "Mortgagee"
-      }
+      },
+      "item": "Item",
+      "removeVehicleTitle": "Remove vehicle",
+      "removeVehicleMessage": "The vehicle is removed from the draft schedule.",
+      "removeVehicleAction": "Remove vehicle",
+      "printSchedule": "Print schedule",
+      "issueTitle": "Issue fleet policy",
+      "issueMessage": "One policy is issued for the vehicles on the schedule.",
+      "issueNote": "The total premium is billed to the client.",
+      "endorseDeleteAction": "Delete vehicle",
+      "returnHelp": "The return premium is the vehicle's annual premium for the days left in the period",
+      "deleteReasonLabel": "Reason",
+      "deleteReasonHint": "Vehicle sold, total loss ..."
     },
     "mp": {
       "freeYear": "First year free, paid by the {{payer}}",
@@ -10693,7 +10923,10 @@
         "financing_bank": "Financing bank",
         "bank_branch": "Bank branch",
         "affinity_partner": "Affinity partner"
-      }
+      },
+      "deleteTitle": "Remove distribution channel",
+      "deleteMessage": "The channel is removed. A channel with prospects or policies is made inactive instead.",
+      "deleteAction": "Remove channel"
     },
     "la": {
       "open": "open",
@@ -10807,7 +11040,13 @@
         "round_robin": "Each account executive in turn",
         "load": "The account executive with the fewest open prospects",
         "fixed": "Always the first account executive"
-      }
+      },
+      "deleteRuleTitle": "Remove assignment rule",
+      "deleteRuleMessage": "New prospects are no longer assigned by this rule. Prospects already assigned keep their account executive.",
+      "deleteRuleAction": "Remove rule",
+      "runMatched": "Matched by a rule",
+      "runUnmatched": "Staying in the queue",
+      "leads": "Prospects"
     },
     "oc": {
       "title": "Marine Open Covers",
@@ -10882,7 +11121,22 @@
         "billOfLading": "Bill of lading / airway bill",
         "consignee": "Consignee",
         "packing": "Packing"
-      }
+      },
+      "activateTitle": "Activate open cover",
+      "activateMessage": "The open policy is issued. Premium is billed on the declarations.",
+      "activateAction": "Activate open cover",
+      "cancelTitle": "Cancel open cover",
+      "cancelMessage": "No certificate can be issued on the cover after it is cancelled.",
+      "reason": "Reason",
+      "cancelCertMessage": "The certificate is cancelled and left out of the declaration of its period.",
+      "newDeclarationMessage": "The shipments of the period are attached to the declaration and priced with the premium taxes.",
+      "openDeclaration": "Open declaration",
+      "deleteDeclarationTitle": "Delete declaration",
+      "deleteDeclarationMessage": "The draft declaration is deleted. Its shipments stay on the cover for a new declaration of the period.",
+      "premium": "Premium",
+      "vat": "VAT",
+      "dst": "Documentary stamp tax",
+      "lgt": "Local government tax"
     },
     "rb": {
       "deleteConfirm": "Delete the saved report {{name}}?",
@@ -10943,7 +11197,9 @@
         "lt": "less than",
         "lte": "up to / at most",
         "between": "between"
-      }
+      },
+      "deleteTitle": "Delete saved report",
+      "deleteMessage": "The saved report is deleted for everyone it is shared with. Files already exported are kept."
     },
     "status": {
       "active": "Active",
@@ -11383,5 +11639,65 @@
     "printFailed": "Could not print the receipt",
     "acknowledgementReceipt": "Acknowledgement receipt",
     "officialReceipt": "Official receipt"
+  },
+  "paymentOptions": {
+    "shareTitle": "Share payment link"
+  },
+  "bulkUploadLeads": {
+    "invalidFile": "Invalid file",
+    "onlyExcelFiles": "Upload an Excel (.xlsx) or CSV (.csv) file.",
+    "fileTooLarge": "File too large",
+    "fileSizeLessThan10MB": "The file must be smaller than 10 MB.",
+    "noFileSelected": "No file selected",
+    "pleaseSelectFile": "Select the file to upload.",
+    "uploadStarted": "Upload started",
+    "uploadFailed": "Upload failed",
+    "instructions": "Instructions",
+    "downloadTemplate": "Download template",
+    "instruction1": "Download the template file",
+    "instruction3": "Upload the completed file (10 MB at most)",
+    "instruction4": "Only .xlsx and .csv files are accepted",
+    "chooseFile": "Choose file",
+    "selectExcelFile": "Select the Excel or CSV file to upload",
+    "maxFileSize": "Maximum file size: 10 MB",
+    "processingFile": "Processing the file...",
+    "cancel": "Cancel",
+    "upload": "Upload",
+    "processing": "Processing",
+    "close": "Close",
+    "uploadStartedDetail": "The prospect upload has started and runs in the background.",
+    "uploadFailedDetail": "The prospect file could not be uploaded.",
+    "header": "Bulk upload prospects",
+    "instruction2": "Enter the prospects in the file",
+    "fileBeingProcessed": "The file is being processed. The prospects are created as each row is read."
+  },
+  "bulkUploadPolicies": {
+    "invalidFile": "Invalid file",
+    "onlyExcelFiles": "Upload an Excel (.xlsx) or CSV (.csv) file.",
+    "fileTooLarge": "File too large",
+    "fileSizeLessThan10MB": "The file must be smaller than 10 MB.",
+    "noFileSelected": "No file selected",
+    "pleaseSelectFile": "Select the file to upload.",
+    "uploadStarted": "Upload started",
+    "uploadFailed": "Upload failed",
+    "instructions": "Instructions",
+    "downloadTemplate": "Download template",
+    "instruction1": "Download the template file",
+    "instruction3": "Upload the completed file (10 MB at most)",
+    "instruction4": "Only .xlsx and .csv files are accepted",
+    "chooseFile": "Choose file",
+    "selectExcelFile": "Select the Excel or CSV file to upload",
+    "maxFileSize": "Maximum file size: 10 MB",
+    "processingFile": "Processing the file...",
+    "cancel": "Cancel",
+    "upload": "Upload",
+    "processing": "Processing",
+    "close": "Close",
+    "uploadStartedDetail": "The policy upload has started and runs in the background.",
+    "uploadFailedDetail": "The policy file could not be uploaded.",
+    "header": "Bulk upload policies",
+    "instruction2": "Enter the policies in the file",
+    "fileBeingProcessed": "The file is being processed. The policies are created as each row is read.",
+    "goLive": "Existing policies (go-live): in-force policies of the old system, created without a bill, journal or commission. Their unpaid premiums are loaded with Import open items (Accounts > Collections)."
   }
 }

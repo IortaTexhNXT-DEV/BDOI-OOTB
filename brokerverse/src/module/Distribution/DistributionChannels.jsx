@@ -13,7 +13,7 @@ import service from "../../services/distributionService";
 import mastersService from "../../services/mastersService";
 import CommissionService from "../../services/commissionService";
 import { hasPermission } from "../../utils/canOpen";
-import { confirmAction } from "../../utility/dialogs";
+import { openConfirm } from "../../components/ConfirmDialog";
 import { Field, PageHeader, StatusTag, money, showError, showSuccess } from "./common";
 
 export const CHANNEL_TYPES = ["dealer_group", "dealer_branch", "financing_bank", "bank_branch", "affinity_partner"];
@@ -75,13 +75,24 @@ const DistributionChannels = () => {
     }
   };
   const remove = async (row) => {
-    if (!(await confirmAction(t("distribution.ch.confirmDelete", "Remove the channel {{name}}? A channel with business is made inactive instead.", { name: row.name }), { danger: true }))) return;
-    try {
-      showSuccess(toast, (await service.deleteChannel(row.id)).message);
-      load();
-    } catch (e) {
-      showError(toast, e);
-    }
+    let result = null;
+    const done = await openConfirm({
+      title: t("distribution.ch.deleteTitle", "Remove distribution channel"),
+      severity: "danger",
+      message: t("distribution.ch.deleteMessage", "The channel is removed. A channel with prospects or policies is made inactive instead."),
+      facts: [
+        { label: t("distribution.common.code", "Code"), value: row.code },
+        { label: t("distribution.common.name", "Name"), value: row.name },
+        { label: t("distribution.ch.typeLabel", "Channel type"), value: t(`distribution.ch.type.${row.channelType}`, row.channelType) },
+        { label: t("distribution.ch.leads", "Prospects"), value: row.leads, type: "number" },
+        { label: t("distribution.ch.policies", "Policies"), value: row.policies, type: "number" },
+      ],
+      confirmLabel: t("distribution.ch.deleteAction", "Remove channel"),
+      onConfirm: async () => { result = await service.deleteChannel(row.id); },
+    });
+    if (!done) return;
+    showSuccess(toast, result?.message);
+    load();
   };
 
   return (

@@ -2290,7 +2290,9 @@
     "completedQuote": "ใบเสนอราคาเสร็จสิ้น",
     "claimRequestRejected": "คำขอเคลมนี้ถูกปฏิเสธแล้ว",
     "claimRejectedViewInfo": "คุณยังสามารถดูข้อมูลทั้งหมดเพื่ออ้างอิงได้",
-    "detail": "รายละเอียด"
+    "detail": "รายละเอียด",
+    "removeCoInsurerMessage": "The insurer is removed from the co-insurance participants of this quotation.",
+    "uploaded": "Uploaded"
   },
   "commission": {
     "addCommissions": "เพิ่มคอมมิชชั่น",
@@ -2480,7 +2482,9 @@
     "searchBy": "ค้นหาตาม",
     "search": "ค้นหา",
     "totalPremium": "เบี้ยประกันรวม",
-    "endorsementNumber": "เลขการอนุมัติ"
+    "endorsementNumber": "เลขการอนุมัติ",
+    "participantRequired": "Select the participant.",
+    "shareRange": "Enter a share between 0 and 100."
   },
   "messages": {
     "success": "ดำเนินการสำเร็จ",
@@ -2621,7 +2625,11 @@
     "unexpectedError": "เกิดข้อผิดพลาดที่ไม่คาดคิด",
     "selectReportCategory": "เลือกหมวดหมู่รายงาน",
     "selectCategoryPlaceholder": "เลือกหมวดหมู่",
-    "reportCategoryHelp": "เลือกหมวดหมู่เพื่อกรองรายงาน หรือปล่อยเป็น \"ทุกหมวดหมู่\" สำหรับรายงานทั้งหมด"
+    "reportCategoryHelp": "เลือกหมวดหมู่เพื่อกรองรายงาน หรือปล่อยเป็น \"ทุกหมวดหมู่\" สำหรับรายงานทั้งหมด",
+    "deleteTitle": "Delete prospect",
+    "deleteMessage": "The prospect is removed from the prospect list.",
+    "deleteNote": "A prospect with an issued policy cannot be deleted.",
+    "deleteAction": "Delete prospect"
   },
   "quotes": {
     "title": "ใบเสนอราคา",
@@ -3075,7 +3083,10 @@
     "availableOnRequest": "มีให้ตามคำขอ",
     "relatedRecords": "บันทึกที่เกี่ยวข้อง",
     "documentPreview": "แสดงตัวอย่างเอกสาร",
-    "noDocumentToPreview": "ไม่มีเอกสารให้แสดงตัวอย่าง"
+    "noDocumentToPreview": "ไม่มีเอกสารให้แสดงตัวอย่าง",
+    "print": "Print",
+    "close": "Close",
+    "download": "Download"
   },
   "uploadPolicy": {
     "title": "ลีด",
@@ -3479,7 +3490,84 @@
     "selectCompany": "เลือกบริษัท",
     "selectProduct": "เลือกผลิตภัณฑ์",
     "insuranceCompany": "บริษัทประกัน",
-    "minPremium": "เบี้ยขั้นต่ำ (₱)"
+    "minPremium": "เบี้ยขั้นต่ำ (₱)",
+    "deleteTitle": "Delete renewal batch",
+    "deleteMessage": "The batch and its policy list are deleted. The policies stay due for renewal.",
+    "deleteNote": "A batch that has sent or queued notices cannot be deleted; cancel it instead.",
+    "deleteAction": "Delete batch",
+    "deleted": "Renewal batch {{id}} deleted",
+    "batchId": "Batch ID",
+    "status": "Status",
+    "totalPolicies": "Total policies",
+    "createdDate": "Created on",
+    "createdBy": "Created by",
+    "actions": "Actions",
+    "viewDetails": "View details",
+    "noBatches": "No batches found",
+    "countOf": "{{count}} of {{total}}",
+    "partiallyCompleted": "Partially completed ({{processed}}/{{total}})",
+    "batchStatus": {
+      "Draft": "Draft",
+      "Scheduled": "Scheduled",
+      "Processing": "Processing",
+      "Completed": "Completed",
+      "Cancelled": "Cancelled"
+    },
+    "minimumPremium": "Minimum premium",
+    "maximumPremium": "Maximum premium",
+    "minPremiumIn": "Min premium ({{currency}})",
+    "maxPremiumIn": "Max premium ({{currency}})",
+    "notice": {
+      "NotSent": "Not sent",
+      "Queued": "Queued",
+      "Sent": "Sent",
+      "Failed": "Failed"
+    },
+    "batchDetails": "Renewal batch",
+    "close": "Close",
+    "retryFailed": "Retry failed notices",
+    "sendNotices": "Send renewal notices",
+    "generateReport": "Download report",
+    "sendingNotices": "Sending renewal notices",
+    "selectedCount": "{{count}} selected",
+    "noPolicies": "No policies found",
+    "policyNumber": "Policy number",
+    "noticeStatus": "Notice status",
+    "noticeSentAt": "Notice sent",
+    "addedDate": "Added on",
+    "premium": "Premium",
+    "enterClientName": "Enter client name",
+    "selectStatus": "Select status",
+    "clear": "Clear",
+    "selectOnePolicy": "Select at least one policy for the batch.",
+    "created": "Renewal batch {{id}} created",
+    "createFailed": "The renewal batch could not be created.",
+    "toast": {
+      "noticesSent": "Notices sent",
+      "noticesSentDetail": "{{count}} of {{total}} renewal notices sent.",
+      "sendingFailed": "Sending failed",
+      "sendingFailedDetail": "The renewal notices could not be sent. Try again.",
+      "processingComplete": "Processing complete",
+      "processingCompleteDetail": "The renewal notices were processed.",
+      "noPoliciesSelected": "No policies selected",
+      "noPoliciesSelectedDetail": "Select at least one policy to send renewal notices.",
+      "queued": "Notices queued",
+      "queuedDetail": "{{count}} renewal notices queued.",
+      "queueFailed": "Notices not queued",
+      "queueFailedDetail": "The renewal notices could not be queued.",
+      "noFailedNotices": "No failed notices",
+      "noFailedNoticesDetail": "There are no failed notices to retry.",
+      "retrying": "Retrying failed notices",
+      "retryingDetail": "Retrying {{count}} failed notices.",
+      "retryFailed": "Retry failed",
+      "retryFailedDetail": "The failed notices could not be retried.",
+      "noBatch": "No batch selected.",
+      "generatingReport": "Preparing report",
+      "generatingReportDetail": "The batch report is being prepared.",
+      "reportFailed": "The report could not be prepared. Try again.",
+      "reportDownloaded": "Report downloaded",
+      "reportDownloadedDetail": "The batch report was downloaded."
+    }
   },
   "shareOption": {
     "email": "อีเมล",
@@ -3514,7 +3602,27 @@
     "emailContentHtml": "เนื้อหาอีเมล (HTML)",
     "suggestedContentEditHint": "คุณแก้ไขหัวเรื่องและเนื้อหาได้ก่อนส่ง",
     "usingSuggestedContent": "ใช้เนื้อหาที่แนะนำ",
-    "sentToRecipient": "Quote sent to {{to}}"
+    "sentToRecipient": "Quote sent to {{to}}",
+    "title": "Share quotation",
+    "emailTitle": "E-mail quotation",
+    "print": "Print",
+    "quotationMissing": "The quotation is not saved yet; its document cannot be prepared.",
+    "quoteMissing": "The quotation is not loaded.",
+    "downloadFailed": "The quotation document could not be prepared.",
+    "emailRequired": "Enter the e-mail address.",
+    "emailInvalid": "Enter a valid e-mail address.",
+    "sendFailed": "The e-mail could not be sent.",
+    "recipientEmail": "Recipient e-mail",
+    "customMessage": "Message",
+    "quotationNumber": "Quotation",
+    "product": "Product",
+    "insuranceCompany": "Insurance company",
+    "totalPremium": "Total premium",
+    "totalSumInsured": "Total sum insured",
+    "sendEmail": "Send e-mail",
+    "whatsAppTitle": "Insurance quotation {{number}}",
+    "whatsAppFireTitle": "Fire and Allied Perils quotation {{number}}",
+    "whatsAppContact": "Contact your account executive for the full details."
   },
   "fireLead": {
     "selectCategory": "เลือกหมวดหมู่",
@@ -3846,7 +3954,25 @@
       "invoiceListCreationFailed": "สร้างรายการบัญชีแล้ว แต่การสร้างรายการใบแจ้งหนี้ล้มเหลว",
       "refundProcessedSuccess": "ประมวลผลการคืนเงินสำเร็จ!"
     },
-    "paymentApprovalTitle": "การอนุมัติการชำระเงิน (Endorsement)"
+    "paymentApprovalTitle": "การอนุมัติการชำระเงิน (Endorsement)",
+    "effectiveDate": "Effective date",
+    "history": "History",
+    "endorsementTypeLabel": "Endorsement type",
+    "premiumEffectLabel": "Premium effect",
+    "premiumEffect": {
+      "additional": "Additional premium due from the client",
+      "return": "Return premium, refunded by accounting",
+      "none": "No premium change"
+    },
+    "cancellationReasonLabel": "Cancellation reason",
+    "remarksLabel": "Remarks",
+    "status": {
+      "Draft": "Draft",
+      "Submitted": "Submitted",
+      "InitiateCancel": "Cancellation initiated",
+      "Completed": "Completed",
+      "Cancelled": "Cancelled"
+    }
   },
   "endorsementSummary": {
     "leads": "ลีด",
@@ -3896,7 +4022,14 @@
     "others": "อื่นๆ",
     "discount": "ส่วนลด",
     "grossPremium": "เบี้ยรวม",
-    "sendToInsuranceCompany": "ส่งไปบริษัทประกัน"
+    "sendToInsuranceCompany": "ส่งไปบริษัทประกัน",
+    "sendTitle": "Send endorsement to insurer",
+    "sendMessage": "The endorsement is sent to the insurance company for processing.",
+    "sendCancellationMessage": "The policy cancellation is sent to the insurance company for processing.",
+    "endorsementNo": "Endorsement no.",
+    "policyNo": "Policy no.",
+    "endorsementType": "Endorsement type",
+    "sendToInsurer": "Send to insurer"
   },
   "coverageDetailsReview": {
     "pageTitle": "ตรวจสอบรายละเอียดความคุ้มครอง",
@@ -3981,7 +4114,12 @@
     "aircon": "แอร์",
     "stereo": "สเตอริโอ",
     "magWheels": "แม็กวีล",
-    "viewDocument": "ดูเอกสาร"
+    "viewDocument": "ดูเอกสาร",
+    "cancel": "Cancel",
+    "createPlacementSlip": "Create placement slip",
+    "issuePolicy": "Issue policy",
+    "quotation": "Quotation",
+    "insurer": "Insurer"
   },
   "coverageDetailsCard": {
     "renewalDetails": "รายละเอียดการต่ออายุ",
@@ -4071,7 +4209,11 @@
     "afterDays": "{{count}} วัน",
     "leadName": "ชื่อลีด",
     "unknownLead": "ไม่ทราบลีด",
-    "editQuotation": "แก้ไขใบเสนอราคา"
+    "editQuotation": "แก้ไขใบเสนอราคา",
+    "convertTitle": "Convert quotation to policy",
+    "convertMessage": "A policy is started from this quotation; its customer details are entered next.",
+    "insurer": "Insurer",
+    "product": "Product"
   },
   "quotationPage": {
     "title": "ใบเสนอราคา",
@@ -4322,7 +4464,8 @@
     "taxInfoNumber": "เลขประจำตัวผู้เสียภาษี:",
     "createdDate": "วันที่สร้าง:",
     "lastUpdated": "อัปเดตล่าสุด:",
-    "numberOfQuotes": "จำนวนใบเสนอราคา:"
+    "numberOfQuotes": "จำนวนใบเสนอราคา:",
+    "history": "History"
   },
   "leadCreation": {
     "source": "แหล่งที่มา",
@@ -4827,7 +4970,21 @@
     "yesterday": "เมื่อวาน",
     "today": "วันนี้",
     "hoursAgo": "ชั่วโมงที่แล้ว",
-    "justNow": "เมื่อสักครู่"
+    "justNow": "เมื่อสักครู่",
+    "statusValue": {
+      "Draft": "Draft",
+      "PendingCustomer": "Pending customer",
+      "CustomerAccepted": "Customer accepted",
+      "SubmittedToInsurer": "Submitted to insurer",
+      "Approved": "Approved",
+      "Rejected": "Rejected"
+    },
+    "priorityValue": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "riskScoreOf": "{{score}} of 100"
   },
   "policyTable": {
     "search": "ค้นหา",
@@ -4860,7 +5017,11 @@
     "productDescription": "รายละเอียดผลิตภัณฑ์",
     "payment": "การชำระเงิน",
     "actions": "การดำเนินการ",
-    "proceed": "ดำเนินการต่อ"
+    "proceed": "ดำเนินการต่อ",
+    "cancel": "Cancel",
+    "insured": "Insured",
+    "startEndorsement": "Start endorsement",
+    "endorsementTypes": "Endorsement types"
   },
   "collectionsList": {
     "view": "ดู",
@@ -5210,7 +5371,13 @@
       "listSubtitle": "Non-package risks presented to several insurers: their offers and the comparison that leads to the Quotation Slip.",
       "new": "New Request for Quotation",
       "newTitle": "New Request for Quotation (Broker Slip)",
-      "newSubtitle": "Choose or add the prospect, describe the risk and choose the insurers to approach; each receives a request for quotation."
+      "newSubtitle": "Choose or add the prospect, describe the risk and choose the insurers to approach; each receives a request for quotation.",
+      "tabResponsesTitle": "Market responses",
+      "cancelTitle": "Cancel request for quotation",
+      "cancelMessage": "The request is withdrawn from the insurers. No quotation slip can be prepared from it.",
+      "closeTitleShort": "Close request for quotation",
+      "closeMessage": "The request is closed as not taken up. The insurers' offers stay on record.",
+      "offers": "Offers received"
     },
     "customer": {
       "lead": "Prospect",
@@ -5243,7 +5410,8 @@
       "acknowledge": "บันทึกการรับทราบ",
       "uploadEpolicy": "อัปโหลดกรมธรรม์อิเล็กทรอนิกส์",
       "checkAgainstSlip": "ตรวจสอบกับใบจัดวาง",
-      "book": "บันทึกกรมธรรม์ (บริษัทประกันออกแล้ว)"
+      "book": "บันทึกกรมธรรม์ (บริษัทประกันออกแล้ว)",
+      "printSlip": "Print slip"
     },
     "messages": {
       "acknowledged": "บันทึกการรับทราบของบริษัทประกันแล้ว",
@@ -5254,7 +5422,8 @@
     "acknowledge": {
       "title": "การรับทราบของบริษัทประกัน",
       "note": "บันทึกว่าบริษัทประกันยืนยันการรับคำสั่งจัดวางประกันแล้ว",
-      "reference": "เลขอ้างอิงการรับทราบของบริษัทประกัน"
+      "reference": "เลขอ้างอิงการรับทราบของบริษัทประกัน",
+      "insurers": "Insurers"
     },
     "epolicy": {
       "title": "ได้รับกรมธรรม์อิเล็กทรอนิกส์ - {{number}}",
@@ -5339,12 +5508,14 @@
       "confirm": "ยืนยันการตรวจสอบ",
       "acceptDifferences": "ยอมรับผลต่าง",
       "returnToInsurer": "ส่งคืนบริษัทประกัน",
-      "decidedBy": "ตรวจสอบโดย"
+      "decidedBy": "ตรวจสอบโดย",
+      "differences": "Differences"
     },
     "book": {
       "title": "บันทึกกรมธรรม์ (บริษัทประกันออกแล้ว)",
       "note": "บริษัทประกันออกกรมธรรม์อิเล็กทรอนิกส์ {{number}} และตรวจสอบกับใบจัดวางแล้ว การบันทึกจะสร้างกรมธรรม์ ใบแจ้งหนี้หรือค่าคอมมิชชั่นแบบเรียกเก็บตรง รายการบัญชี และค่าคอมมิชชั่น สิ้นสุดใบรับรองความคุ้มครองชั่วคราว และส่งตารางกรมธรรม์ทางอีเมลถึงลูกค้า",
-      "verifyNote": "ข้อมูลบัตรประจำตัวด้านล่างมาจากข้อมูลลูกค้าและใบเสนอราคา กรุณาตรวจสอบก่อนบันทึก"
+      "verifyNote": "ข้อมูลบัตรประจำตัวด้านล่างมาจากข้อมูลลูกค้าและใบเสนอราคา กรุณาตรวจสอบก่อนบันทึก",
+      "consequence": "Booking creates the policy, the bill or direct-bill commission, the journal and the commission, ends the cover notes and e-mails the policy schedule to the client."
     },
     "recordEpolicy": {
       "title": "บันทึกกรมธรรม์อิเล็กทรอนิกส์",
@@ -5361,10 +5532,19 @@
       "placementFile": "ไฟล์ใบจัดวาง"
     },
     "sections": {
-      "epolicy": "กรมธรรม์อิเล็กทรอนิกส์"
+      "epolicy": "กรมธรรม์อิเล็กทรอนิกส์",
+      "history": "History"
     },
     "validation": {
       "ltoDocument": "แนบเอกสาร LTO หรือใบเสร็จรับเงิน"
+    },
+    "decline": {
+      "message": "The insurer's decline is recorded on the slip. Its share has to be placed with another insurer.",
+      "insurer": "Insurer",
+      "share": "Share"
+    },
+    "cancel": {
+      "message": "The placement slip is cancelled. The insurers are not told automatically."
     }
   },
   "salesMarketing": {
@@ -5821,5 +6001,171 @@
     "revokeTitle": "เพิกถอนลายเซ็นเวอร์ชันนี้",
     "revokeMessage": "ลายเซ็นเวอร์ชันด้านล่างจะถูกเพิกถอนและไม่ถูกพิมพ์อีก",
     "revokeNote": "เอกสารที่พิมพ์ไปแล้วยังคงมีลายเซ็นเดิม"
+  },
+  "distribution": {
+    "common": {
+      "history": "History",
+      "close": "Close"
+    },
+    "fl": {
+      "item": "Item",
+      "removeVehicleTitle": "Remove vehicle",
+      "removeVehicleMessage": "The vehicle is removed from the draft schedule.",
+      "removeVehicleAction": "Remove vehicle",
+      "printSchedule": "Print schedule",
+      "issueTitle": "Issue fleet policy",
+      "issueMessage": "One policy is issued for the vehicles on the schedule.",
+      "issueNote": "The total premium is billed to the client.",
+      "endorseDeleteAction": "Delete vehicle",
+      "returnHelp": "The return premium is the vehicle's annual premium for the days left in the period",
+      "deleteReasonLabel": "Reason",
+      "deleteReasonHint": "Vehicle sold, total loss ..."
+    },
+    "oc": {
+      "activateTitle": "Activate open cover",
+      "activateMessage": "The open policy is issued. Premium is billed on the declarations.",
+      "activateAction": "Activate open cover",
+      "cancelTitle": "Cancel open cover",
+      "cancelMessage": "No certificate can be issued on the cover after it is cancelled.",
+      "reason": "Reason",
+      "cancelCertMessage": "The certificate is cancelled and left out of the declaration of its period.",
+      "newDeclarationMessage": "The shipments of the period are attached to the declaration and priced with the premium taxes.",
+      "openDeclaration": "Open declaration",
+      "deleteDeclarationTitle": "Delete declaration",
+      "deleteDeclarationMessage": "The draft declaration is deleted. Its shipments stay on the cover for a new declaration of the period.",
+      "premium": "Premium",
+      "vat": "VAT",
+      "dst": "Documentary stamp tax",
+      "lgt": "Local government tax"
+    },
+    "cp": {
+      "sendTitle": "Send campaign",
+      "sendMessage": "The e-mails are queued to the outbox for every recipient who agreed to receive offers.",
+      "sendAction": "Send campaign",
+      "cancelMessage": "The campaign is not sent. A cancelled campaign cannot be scheduled again.",
+      "sentAt": "Sent",
+      "conversionWindow": "Conversion window (days)",
+      "summary": "Summary"
+    },
+    "ch": {
+      "deleteTitle": "Remove distribution channel",
+      "deleteMessage": "The channel is removed. A channel with prospects or policies is made inactive instead.",
+      "deleteAction": "Remove channel"
+    },
+    "rb": {
+      "deleteTitle": "Delete saved report",
+      "deleteMessage": "The saved report is deleted for everyone it is shared with. Files already exported are kept."
+    },
+    "la": {
+      "deleteRuleTitle": "Remove assignment rule",
+      "deleteRuleMessage": "New prospects are no longer assigned by this rule. Prospects already assigned keep their account executive.",
+      "deleteRuleAction": "Remove rule",
+      "runMatched": "Matched by a rule",
+      "runUnmatched": "Staying in the queue",
+      "leads": "Prospects"
+    },
+    "cr": {
+      "emailTitle": "E-mail comparison report",
+      "emailMessage": "The client report (PDF) is sent from the outbox.",
+      "emailAddress": "E-mail address",
+      "emailOnFile": "The client's e-mail on file",
+      "emailInvalid": "Enter a valid e-mail address.",
+      "emailAction": "Send e-mail",
+      "chosenTitle": "Record the client's choice",
+      "chosenMessage": "The report is closed with this option and can no longer be changed.",
+      "chosenAction": "Record choice",
+      "createdBy": "Prepared by",
+      "createdAt": "Prepared on"
+    }
+  },
+  "packagedProducts": {
+    "bundles": {
+      "deleteTitle": "Delete bundle",
+      "deleteMessage": "The bundle is deleted. A bundle with quotations is switched off instead."
+    },
+    "rates": {
+      "deleteTitle": "Delete rate table",
+      "deleteMessage": "New quotations no longer use this rate. Quotations already priced keep their premium.",
+      "deleted": "Rate table deleted"
+    },
+    "taxes": {
+      "deleteLguTitle": "Delete local tax rate",
+      "deleteLguMessage": "The local government tax of the city or municipality is no longer charged on new premiums.",
+      "lguDeleted": "Local tax rate deleted",
+      "deleteRuleTitle": "Delete tax rule",
+      "deleteRuleMessage": "The tax is no longer charged on new premiums. Premiums already computed keep their taxes.",
+      "ruleDeleted": "Tax rule deleted"
+    }
+  },
+  "underwritingReferral": {
+    "statusLabel": "Status",
+    "requestedAt": "Referred on",
+    "authority": "Approval by",
+    "sumInsured": "Sum insured",
+    "decidedByLabel": "Decided by",
+    "decidedAt": "Decided on",
+    "reasons": "Referral reasons",
+    "quotation": "Quotation",
+    "cancel": "Cancel"
+  },
+  "paymentOptions": {
+    "shareTitle": "Share payment link"
+  },
+  "bulkUploadLeads": {
+    "invalidFile": "Invalid file",
+    "onlyExcelFiles": "Upload an Excel (.xlsx) or CSV (.csv) file.",
+    "fileTooLarge": "File too large",
+    "fileSizeLessThan10MB": "The file must be smaller than 10 MB.",
+    "noFileSelected": "No file selected",
+    "pleaseSelectFile": "Select the file to upload.",
+    "uploadStarted": "Upload started",
+    "uploadFailed": "Upload failed",
+    "instructions": "Instructions",
+    "downloadTemplate": "Download template",
+    "instruction1": "Download the template file",
+    "instruction3": "Upload the completed file (10 MB at most)",
+    "instruction4": "Only .xlsx and .csv files are accepted",
+    "chooseFile": "Choose file",
+    "selectExcelFile": "Select the Excel or CSV file to upload",
+    "maxFileSize": "Maximum file size: 10 MB",
+    "processingFile": "Processing the file...",
+    "cancel": "Cancel",
+    "upload": "Upload",
+    "processing": "Processing",
+    "close": "Close",
+    "uploadStartedDetail": "The prospect upload has started and runs in the background.",
+    "uploadFailedDetail": "The prospect file could not be uploaded.",
+    "header": "Bulk upload prospects",
+    "instruction2": "Enter the prospects in the file",
+    "fileBeingProcessed": "The file is being processed. The prospects are created as each row is read."
+  },
+  "bulkUploadPolicies": {
+    "invalidFile": "Invalid file",
+    "onlyExcelFiles": "Upload an Excel (.xlsx) or CSV (.csv) file.",
+    "fileTooLarge": "File too large",
+    "fileSizeLessThan10MB": "The file must be smaller than 10 MB.",
+    "noFileSelected": "No file selected",
+    "pleaseSelectFile": "Select the file to upload.",
+    "uploadStarted": "Upload started",
+    "uploadFailed": "Upload failed",
+    "instructions": "Instructions",
+    "downloadTemplate": "Download template",
+    "instruction1": "Download the template file",
+    "instruction3": "Upload the completed file (10 MB at most)",
+    "instruction4": "Only .xlsx and .csv files are accepted",
+    "chooseFile": "Choose file",
+    "selectExcelFile": "Select the Excel or CSV file to upload",
+    "maxFileSize": "Maximum file size: 10 MB",
+    "processingFile": "Processing the file...",
+    "cancel": "Cancel",
+    "upload": "Upload",
+    "processing": "Processing",
+    "close": "Close",
+    "uploadStartedDetail": "The policy upload has started and runs in the background.",
+    "uploadFailedDetail": "The policy file could not be uploaded.",
+    "header": "Bulk upload policies",
+    "instruction2": "Enter the policies in the file",
+    "fileBeingProcessed": "The file is being processed. The policies are created as each row is read.",
+    "goLive": "Existing policies (go-live): in-force policies of the old system, created without a bill, journal or commission. Their unpaid premiums are loaded with Import open items (Accounts > Collections)."
   }
 }

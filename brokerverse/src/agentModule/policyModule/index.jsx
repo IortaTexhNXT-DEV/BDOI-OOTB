@@ -46,21 +46,11 @@ const ClientListingCard = () => {
   const dropdownOptions = [
     {
       label: (
-        <div
-          style={{ display: "flex", alignItems: "center", gap: "10px" }}
-        >
+        <div className="policy-lob-option">
           <div>
             <SvgMotor />
           </div>
-          <div
-            style={{
-              fontFamily: "Nunito, Arial, sans-serif",
-              fontWeight: 400,
-              fontSize: "16px",
-              color: "#111927",
-              width: "100%",
-            }}
-          >
+          <div className="policy-lob-option__label">
             {t("policyList.motorPolicy")}
           </div>
         </div>
@@ -69,21 +59,11 @@ const ClientListingCard = () => {
     },
     {
       label: (
-        <div
-          style={{ display: "flex", alignItems: "center", gap: "10px" }}
-        >
+        <div className="policy-lob-option">
           <div>
             <SvgFire />
           </div>
-          <div
-            style={{
-              fontFamily: "Nunito, Arial, sans-serif",
-              fontWeight: 400,
-              fontSize: "16px",
-              color: "#111927",
-              width: "100%",
-            }}
-          >
+          <div className="policy-lob-option__label">
             {t("policyList.fireAndAlliedPerils")}
           </div>
         </div>

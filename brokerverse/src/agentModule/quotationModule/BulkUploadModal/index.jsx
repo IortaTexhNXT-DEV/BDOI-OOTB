@@ -222,7 +222,6 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
                 label={t('bulkUploadQuotations.close')}
                 onClick={handleClose}
                 className="close-button"
-                severity="success"
               />
             </div>
           </div>

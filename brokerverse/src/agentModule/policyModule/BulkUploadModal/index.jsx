@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { FileUpload } from "primereact/fileupload";
@@ -11,6 +12,7 @@ import "./index.scss";
 import { downloadBulkUploadTemplate, isSupportedUploadFile } from "../../component/bulkUploadTemplate";
 
 const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
+  const { t } = useTranslation();
   const toast = useRef(null);
   const fileUploadRef = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -25,8 +27,8 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
       if (!isSupportedUploadFile(file)) {
         toast.current.show({
           severity: 'error',
-          summary: 'Invalid File',
-          detail: 'Please upload an Excel (.xlsx) or CSV (.csv) file',
+          summary: t('bulkUploadPolicies.invalidFile'),
+          detail: t('bulkUploadPolicies.onlyExcelFiles'),
           life: 3000
         });
         fileUploadRef.current.clear();
@@ -37,8 +39,8 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
       if (file.size > 10 * 1024 * 1024) {
         toast.current.show({
           severity: 'error',
-          summary: 'File Too Large',
-          detail: 'File size must be less than 10MB',
+          summary: t('bulkUploadPolicies.fileTooLarge'),
+          detail: t('bulkUploadPolicies.fileSizeLessThan10MB'),
           life: 3000
         });
         fileUploadRef.current.clear();
@@ -53,8 +55,8 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
     if (!selectedFile) {
       toast.current.show({
         severity: 'warn',
-        summary: 'No File Selected',
-        detail: 'Please select a file to upload',
+        summary: t('bulkUploadPolicies.noFileSelected'),
+        detail: t('bulkUploadPolicies.pleaseSelectFile'),
         life: 3000
       });
       return;
@@ -84,8 +86,8 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
         // Show success message
         toast.current.show({
           severity: 'success',
-          summary: 'Upload Started',
-          detail: data.message || 'Policy bulk upload started. Processing in background.',
+          summary: t('bulkUploadPolicies.uploadStarted'),
+          detail: data.message || t('bulkUploadPolicies.uploadStartedDetail'),
           life: 5000
         });
 
@@ -104,8 +106,8 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
     } catch (error) {
       toast.current.show({
         severity: 'error',
-        summary: 'Upload Failed',
-        detail: error.message || 'Failed to upload policies file',
+        summary: t('bulkUploadPolicies.uploadFailed'),
+        detail: error.message || t('bulkUploadPolicies.uploadFailedDetail'),
         life: 3000
       });
       
@@ -134,7 +136,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
     <Dialog
       visible={visible}
       onHide={handleClose}
-      header="Bulk Upload Policies"
+      header={t("bulkUploadPolicies.header")}
       className="bulk-upload-modal"
       style={{ width: '600px' }}
       modal
@@ -146,27 +148,26 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
           <div className="bulk-upload-content">
             <div className="upload-instructions">
               <div className="instructions-header">
-                <h4>Instructions:</h4>
+                <h4>{t("bulkUploadPolicies.instructions")}</h4>
                 <Button
-                  label="Download Template"
+                  label={t("bulkUploadPolicies.downloadTemplate")}
                   icon="pi pi-download"
                   className="p-button-sm p-button-text"
                   onClick={handleDownloadTemplate}
                 />
               </div>
               <ul>
-                <li>Download the sample template file</li>
-                <li>Fill in the policy details in the Excel file</li>
-                <li>Upload the completed file (max 10MB)</li>
-                <li>Only .xlsx or .csv files are supported</li>
+                <li>{t("bulkUploadPolicies.instruction1")}</li>
+                <li>{t("bulkUploadPolicies.instruction2")}</li>
+                <li>{t("bulkUploadPolicies.instruction3")}</li>
+                <li>{t("bulkUploadPolicies.instruction4")}</li>
               </ul>
             </div>
 
             <div className="flex align-items-start gap-2 mb-3">
               <Checkbox inputId="policy-go-live" checked={goLive} onChange={(e) => setGoLive(e.checked)} disabled={loading} />
               <label htmlFor="policy-go-live">
-                Existing policies (go-live): create in-force policies of the old system without a bill, journal or commission.
-                Load their unpaid premiums with Import open items (Accounts &gt; Collections).
+                {t("bulkUploadPolicies.goLive")}
               </label>
             </div>
 
@@ -179,15 +180,15 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
                 maxFileSize={10485760}
                 customUpload
                 auto={false}
-                chooseLabel={selectedFile ? selectedFile.name : "Choose File"}
+                chooseLabel={selectedFile ? selectedFile.name : t("bulkUploadPolicies.chooseFile")}
                 onSelect={handleFileSelect}
                 disabled={loading}
               />
               {!selectedFile && (
                 <div className="upload-placeholder">
                   <SvgUpload />
-                  <p>Select Excel file to upload</p>
-                  <span>Maximum file size: 10MB</span>
+                  <p>{t("bulkUploadPolicies.selectExcelFile")}</p>
+                  <span>{t("bulkUploadPolicies.maxFileSize")}</span>
                 </div>
               )}
             </div>
@@ -195,19 +196,19 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
             {loading && (
               <div className="upload-progress">
                 <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
-                <p>Processing your file...</p>
+                <p>{t("bulkUploadPolicies.processingFile")}</p>
               </div>
             )}
 
             <div className="bulk-upload-footer">
               <Button
-                label="Cancel"
+                label={t("bulkUploadPolicies.cancel")}
                 className="p-button-text"
                 onClick={handleClose}
                 disabled={loading}
               />
               <Button
-                label={loading ? "Uploading..." : "Upload"}
+                label={t("bulkUploadPolicies.upload")}
                 onClick={handleUpload}
                 disabled={!selectedFile || loading}
                 loading={loading}
@@ -217,20 +218,19 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
         ) : (
           <div className="processing-section">
             <div className="processing-header">
-              <h4>Processing...</h4>
+              <h4>{t("bulkUploadPolicies.processing")}</h4>
               <ProgressBar mode="indeterminate" style={{ height: '6px', marginTop: '1rem' }} />
             </div>
             
             <div className="status-message">
-              <p className="status-text">{uploadResult.message || 'Your file is being processed. Policies will be created shortly.'}</p>
+              <p className="status-text">{uploadResult.message || t('bulkUploadPolicies.fileBeingProcessed')}</p>
             </div>
 
             <div className="processing-actions">
               <Button
-                label="Close"
+                label={t("bulkUploadPolicies.close")}
                 onClick={handleClose}
                 className="close-button"
-                severity="success"
               />
             </div>
           </div>
