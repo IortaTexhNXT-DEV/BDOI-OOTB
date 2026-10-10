@@ -31,6 +31,7 @@ by TIS Finance & General Accounting and TIS IT AppSupport / Admin. You never dec
 | Approve or return claim settlements | Daily | [Approve a settlement (checker)](#approve-a-settlement-checker) |
 | Decide claims: review, reject, settle, close | As needed | [Claims](#the-claims-list) |
 | Check the e-policies received against their placement slips, when the sales and operations approvers are not available | As needed | [Placement Slips](#placement-slips) |
+| Approve or return promotions and discount caps; approve the quotation discounts above the other approvers' limits | As submitted | [Promotions](#promotions), [Promotion of a motor quotation](#quotation-promotion) |
 | Approve or return renewal terms and complete return premiums | As needed | [Negotiations](#negotiations), [Policy](#policies) |
 | Approve or reject supplier invoices | As notified | [Payables](#accounts-payable) |
 | Approve or reject the remittances to the insurers, without amount limit | As notified | [Approvals](#remittance-approvals) |

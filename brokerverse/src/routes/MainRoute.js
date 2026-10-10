@@ -77,6 +77,7 @@ import ConfigurationPage from "../module/Administration/Configuration";
 import SchedulesPage from "../module/Administration/Schedules";
 import DocumentNumberingPage from "../module/Administration/DocumentNumbering";
 import CommissionRateMatrix from "../module/FinanceMastersModule/CommissionRateMatrix";
+import DiscountCaps from "../module/FinanceMastersModule/DiscountCaps";
 import AuditTrailPage from "../module/Administration/AuditTrail";
 import EmailOutboxPage from "../module/Administration/EmailOutbox";
 import CompanyMasters from "../module/GeneralMasters/OrganizationMasters/CompanyMaster";
@@ -358,6 +359,7 @@ import ProductRecommendation from "../agentModule/quoteModule/productRecommendat
 import LeadAssignment from "../module/Distribution/LeadAssignment";
 import DistributionChannels from "../module/Distribution/DistributionChannels";
 import DealerProgrammes from "../module/Distribution/DealerProgrammes";
+import Promotions from "../module/Distribution/Promotions";
 import FleetSchedules from "../module/Distribution/FleetSchedules";
 import OpenCovers from "../module/Distribution/OpenCovers";
 import ComparisonReports from "../module/Distribution/ComparisonReports";
@@ -897,6 +899,7 @@ const Maincomponent = () => {
           <Route path="master/configuration/schedules" element={<SchedulesPage />} />
           <Route path="master/configuration/document-numbering" element={<DocumentNumberingPage />} />
           <Route path="master/finance/commission-rate-matrix" element={<CommissionRateMatrix />} />
+          <Route path="master/finance/discount-caps" element={<DiscountCaps />} />
           <Route path="master/configuration/audit-trail" element={<AuditTrailPage />} />
           <Route path="master/configuration/email-outbox" element={<EmailOutboxPage />} />
           <Route path="master/finance/company" element={<CompanyMaster />} />
@@ -1769,6 +1772,7 @@ const Maincomponent = () => {
           {/* Distribution, motor programmes and products */}
           <Route path="/sales/lead-assignment" element={<LeadAssignment />} />
           <Route path="/sales/dealer-programmes" element={<DealerProgrammes />} />
+          <Route path="/sales/promotions" element={<Promotions />} />
           <Route path="/sales/comparison-reports" element={<ComparisonReports />} />
           <Route path="/sales/campaigns" element={<Campaigns />} />
           <Route path="/master/insurance/channels" element={<DistributionChannels />} />

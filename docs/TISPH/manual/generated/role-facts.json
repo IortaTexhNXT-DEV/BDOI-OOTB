@@ -115,6 +115,15 @@
      ]
     },
     {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Promotions",
+     "path": "/sales/promotions",
+     "access": "View",
+     "modules": [
+      "Promotions"
+     ]
+    },
+    {
      "section": "Operations",
      "screen": "Clients",
      "path": "/agent/clientlisting",
@@ -449,6 +458,12 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "View",
+     "meaning": "See promotions, their vehicle lines, rates and versions"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Marketing campaigns",
      "level": "View",
      "meaning": "See campaigns, segments, templates and results"
@@ -596,6 +611,12 @@
      "module": "Distribution channels",
      "level": "View",
      "meaning": "See dealers, financing banks, affinity partners and their production"
+    },
+    {
+     "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "View",
+     "meaning": "See the discount caps per product and channel type"
     },
     {
      "area": "Master data and configuration",
@@ -803,6 +824,15 @@
      "access": "View",
      "modules": [
       "Dealer programmes"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Promotions",
+     "path": "/sales/promotions",
+     "access": "View",
+     "modules": [
+      "Promotions"
      ]
     },
     {
@@ -1140,6 +1170,12 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
+     "meaning": "Lower the Own Damage rate of a promotion on a quotation down to its minimum, with a reason"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Lead assignment",
      "level": "View",
      "meaning": "See assignment rules, the reassignment queue and every team's prospects"
@@ -1155,6 +1191,12 @@
      "module": "Dealer programmes",
      "level": "View",
      "meaning": "See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "View",
+     "meaning": "See promotions, their vehicle lines, rates and versions"
     },
     {
      "area": "Sales & Marketing",
@@ -1323,6 +1365,12 @@
      "module": "Distribution channels",
      "level": "View",
      "meaning": "See dealers, financing banks, affinity partners and their production"
+    },
+    {
+     "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "View",
+     "meaning": "See the discount caps per product and channel type"
     },
     {
      "area": "Master data and configuration",
@@ -1543,6 +1591,15 @@
      "access": "View",
      "modules": [
       "Dealer programmes"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Promotions",
+     "path": "/sales/promotions",
+     "access": "View",
+     "modules": [
+      "Promotions"
      ]
     },
     {
@@ -1904,6 +1961,15 @@
      ]
     },
     {
+     "section": "Master > Finance",
+     "screen": "Discount Caps",
+     "path": "/master/finance/discount-caps",
+     "access": "View",
+     "modules": [
+      "Discount caps"
+     ]
+    },
+    {
      "section": "Product Configurator",
      "screen": "Dashboard",
      "path": "/product-configurator/dashboard",
@@ -1961,6 +2027,12 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
+     "meaning": "Lower the Own Damage rate of a promotion on a quotation down to its minimum, with a reason"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Lead assignment",
      "level": "View",
      "meaning": "See assignment rules, the reassignment queue and every team's prospects"
@@ -1976,6 +2048,18 @@
      "module": "Dealer programmes",
      "level": "View",
      "meaning": "See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "View",
+     "meaning": "See promotions, their vehicle lines, rates and versions"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "Approve",
+     "meaning": "Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)"
     },
     {
      "area": "Sales & Marketing",
@@ -2177,6 +2261,18 @@
     },
     {
      "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "View",
+     "meaning": "See the discount caps per product and channel type"
+    },
+    {
+     "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "Approve",
+     "meaning": "Approve or return discount caps (not the requester)"
+    },
+    {
+     "area": "Master data and configuration",
      "module": "Schedules",
      "level": "View",
      "meaning": "See scheduled jobs and their runs"
@@ -2202,6 +2298,10 @@
    ],
    "approves": [
     {
+     "what": "Approve or return discount caps (not the requester)",
+     "kind": "maker-checker"
+    },
+    {
      "what": "Approve or reject an incentive calculation batch submitted by another user",
      "kind": "maker-checker"
     },
@@ -2211,6 +2311,10 @@
     },
     {
      "what": "Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user",
+     "kind": "maker-checker"
+    },
+    {
+     "what": "Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)",
      "kind": "maker-checker"
     },
     {
@@ -2417,6 +2521,15 @@
      "access": "View",
      "modules": [
       "Dealer programmes"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Promotions",
+     "path": "/sales/promotions",
+     "access": "View",
+     "modules": [
+      "Promotions"
      ]
     },
     {
@@ -2715,6 +2828,15 @@
      ]
     },
     {
+     "section": "Master > Finance",
+     "screen": "Discount Caps",
+     "path": "/master/finance/discount-caps",
+     "access": "View",
+     "modules": [
+      "Discount caps"
+     ]
+    },
+    {
      "section": "Product Configurator",
      "screen": "Dashboard",
      "path": "/product-configurator/dashboard",
@@ -2763,6 +2885,12 @@
      "module": "Dealer programmes",
      "level": "View",
      "meaning": "See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "View",
+     "meaning": "See promotions, their vehicle lines, rates and versions"
     },
     {
      "area": "Sales & Marketing",
@@ -2901,6 +3029,12 @@
      "module": "Distribution channels",
      "level": "View",
      "meaning": "See dealers, financing banks, affinity partners and their production"
+    },
+    {
+     "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "View",
+     "meaning": "See the discount caps per product and channel type"
     },
     {
      "area": "Master data and configuration",
@@ -3139,6 +3273,15 @@
      "access": "View",
      "modules": [
       "Dealer programmes"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Promotions",
+     "path": "/sales/promotions",
+     "access": "Create and edit",
+     "modules": [
+      "Promotions"
      ]
     },
     {
@@ -3491,6 +3634,15 @@
      ]
     },
     {
+     "section": "Master > Finance",
+     "screen": "Discount Caps",
+     "path": "/master/finance/discount-caps",
+     "access": "Create and edit",
+     "modules": [
+      "Discount caps"
+     ]
+    },
+    {
      "section": "Product Configurator",
      "screen": "Dashboard",
      "path": "/product-configurator/dashboard",
@@ -3539,6 +3691,18 @@
      "module": "Dealer programmes",
      "level": "View",
      "meaning": "See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "View",
+     "meaning": "See promotions, their vehicle lines, rates and versions"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "Create and edit",
+     "meaning": "Add, amend and submit promotions"
     },
     {
      "area": "Sales & Marketing",
@@ -3692,6 +3856,18 @@
     },
     {
      "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "View",
+     "meaning": "See the discount caps per product and channel type"
+    },
+    {
+     "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "Create and edit",
+     "meaning": "Propose and replace discount caps"
+    },
+    {
+     "area": "Master data and configuration",
      "module": "Schedules",
      "level": "View",
      "meaning": "See scheduled jobs and their runs"
@@ -3727,12 +3903,30 @@
      "kind": "maker-checker"
     },
     {
+     "work": "Discount caps",
+     "approval": "Approve or return discount caps (not the requester)",
+     "approvers": [
+      "TIS Sales Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
      "work": "Policies",
      "approval": "Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user",
      "approvers": [
       "TIS Sales Officer",
       "TIS Sales Unit Head",
       "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
+     "work": "Promotions",
+     "approval": "Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)",
+     "approvers": [
+      "TIS Sales Unit Head",
       "TIS General Manager"
      ],
      "kind": "maker-checker"
@@ -3927,6 +4121,15 @@
      "access": "View",
      "modules": [
       "Dealer programmes"
+     ]
+    },
+    {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Promotions",
+     "path": "/sales/promotions",
+     "access": "Create and edit",
+     "modules": [
+      "Promotions"
      ]
     },
     {
@@ -4333,6 +4536,15 @@
      ]
     },
     {
+     "section": "Master > Finance",
+     "screen": "Discount Caps",
+     "path": "/master/finance/discount-caps",
+     "access": "Create and edit",
+     "modules": [
+      "Discount caps"
+     ]
+    },
+    {
      "section": "Product Configurator",
      "screen": "Dashboard",
      "path": "/product-configurator/dashboard",
@@ -4393,6 +4605,18 @@
      "module": "Dealer programmes",
      "level": "View",
      "meaning": "See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "View",
+     "meaning": "See promotions, their vehicle lines, rates and versions"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "Create and edit",
+     "meaning": "Add, amend and submit promotions"
     },
     {
      "area": "Sales & Marketing",
@@ -4582,6 +4806,18 @@
     },
     {
      "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "View",
+     "meaning": "See the discount caps per product and channel type"
+    },
+    {
+     "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "Create and edit",
+     "meaning": "Propose and replace discount caps"
+    },
+    {
+     "area": "Master data and configuration",
      "module": "Schedules",
      "level": "View",
      "meaning": "See scheduled jobs and their runs"
@@ -4638,7 +4874,7 @@
      "kind": "authority",
      "type": "underwriting_referral",
      "step": "Operations > Sales & Marketing > Quotations > Underwriting referral",
-     "limit": "Not set"
+     "limit": "PHP 10,000,000.00"
     }
    ],
    "approvedBy": [
@@ -4652,12 +4888,30 @@
      "kind": "maker-checker"
     },
     {
+     "work": "Discount caps",
+     "approval": "Approve or return discount caps (not the requester)",
+     "approvers": [
+      "TIS Sales Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
      "work": "Policies",
      "approval": "Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user",
      "approvers": [
       "TIS Sales Officer",
       "TIS Sales Unit Head",
       "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "maker-checker"
+    },
+    {
+     "work": "Promotions",
+     "approval": "Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)",
+     "approvers": [
+      "TIS Sales Unit Head",
       "TIS General Manager"
      ],
      "kind": "maker-checker"
@@ -6694,6 +6948,15 @@
     },
     {
      "section": "Master > Finance",
+     "screen": "Discount Caps",
+     "path": "/master/finance/discount-caps",
+     "access": "View",
+     "modules": [
+      "Discount caps"
+     ]
+    },
+    {
+     "section": "Master > Finance",
      "screen": "Taxation",
      "path": "/master/finance/taxation",
      "access": "View",
@@ -6801,6 +7064,12 @@
      "module": "Dealer programmes",
      "level": "View",
      "meaning": "See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "View",
+     "meaning": "See promotions, their vehicle lines, rates and versions"
     },
     {
      "area": "Operations",
@@ -6999,6 +7268,12 @@
      "module": "Distribution channels",
      "level": "View",
      "meaning": "See dealers, financing banks, affinity partners and their production"
+    },
+    {
+     "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "View",
+     "meaning": "See the discount caps per product and channel type"
     },
     {
      "area": "Master data and configuration",
@@ -8734,6 +9009,15 @@
      ]
     },
     {
+     "section": "Operations > Sales & Marketing",
+     "screen": "Promotions",
+     "path": "/sales/promotions",
+     "access": "View",
+     "modules": [
+      "Promotions"
+     ]
+    },
+    {
      "section": "Operations",
      "screen": "Clients",
      "path": "/agent/clientlisting",
@@ -9787,6 +10071,15 @@
      ]
     },
     {
+     "section": "Master > Finance",
+     "screen": "Discount Caps",
+     "path": "/master/finance/discount-caps",
+     "access": "View",
+     "modules": [
+      "Discount caps"
+     ]
+    },
+    {
      "section": "Master > System",
      "screen": "Audit Trail",
      "path": "/master/configuration/audit-trail",
@@ -9853,6 +10146,12 @@
     },
     {
      "area": "Sales & Marketing",
+     "module": "Quotations and placement",
+     "level": "Special",
+     "meaning": "Lower the Own Damage rate of a promotion on a quotation down to its minimum, with a reason"
+    },
+    {
+     "area": "Sales & Marketing",
      "module": "Lead assignment",
      "level": "View",
      "meaning": "See assignment rules, the reassignment queue and every team's prospects"
@@ -9868,6 +10167,18 @@
      "module": "Dealer programmes",
      "level": "View",
      "meaning": "See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "View",
+     "meaning": "See promotions, their vehicle lines, rates and versions"
+    },
+    {
+     "area": "Sales & Marketing",
+     "module": "Promotions",
+     "level": "Approve",
+     "meaning": "Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)"
     },
     {
      "area": "Sales & Marketing",
@@ -10099,6 +10410,18 @@
     },
     {
      "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "View",
+     "meaning": "See the discount caps per product and channel type"
+    },
+    {
+     "area": "Master data and configuration",
+     "module": "Discount caps",
+     "level": "Approve",
+     "meaning": "Approve or return discount caps (not the requester)"
+    },
+    {
+     "area": "Master data and configuration",
      "module": "Schedules",
      "level": "View",
      "meaning": "See scheduled jobs and their runs"
@@ -10146,11 +10469,19 @@
      "kind": "maker-checker"
     },
     {
+     "what": "Approve or return discount caps (not the requester)",
+     "kind": "maker-checker"
+    },
+    {
      "what": "Approve supplier invoices (not the preparer)",
      "kind": "maker-checker"
     },
     {
      "what": "Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user",
+     "kind": "maker-checker"
+    },
+    {
+     "what": "Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)",
      "kind": "maker-checker"
     },
     {
@@ -10740,6 +11071,39 @@
     },
     {
      "role": "TIS IT AppSupport / Admin",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "View"
+    }
+   ]
+  },
+  "/sales/promotions": {
+   "menu": "Operations > Sales & Marketing > Promotions",
+   "roles": [
+    {
+     "role": "TIS Sales Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Operations Unit Head",
      "access": "Create and edit"
     },
     {
@@ -13877,6 +14241,35 @@
     }
    ]
   },
+  "/master/finance/discount-caps": {
+   "menu": "Master > Finance > Discount Caps",
+   "roles": [
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "View"
+    }
+   ]
+  },
   "/master/finance/transactioncode": {
    "menu": "Master > Finance > Transaction Code",
    "roles": [
@@ -14248,6 +14641,10 @@
   "approve:credit-control": [
    "TIS Finance & General Accounting"
   ],
+  "approve:discount-caps": [
+   "TIS Sales Unit Head",
+   "TIS General Manager"
+  ],
   "approve:incentive": [
    "TIS Sales Unit Head"
   ],
@@ -14271,6 +14668,10 @@
   ],
   "approve:posting-rules": [
    "TIS Finance & General Accounting"
+  ],
+  "approve:promotions": [
+   "TIS Sales Unit Head",
+   "TIS General Manager"
   ],
   "approve:quotations": [
    "TIS Sales Officer",
@@ -14381,6 +14782,16 @@
    "CCD-Recon (Reconciliation and Reversals)",
    "TIS Finance & General Accounting",
    "TIS IT AppSupport / Admin",
+   "TIS General Manager"
+  ],
+  "read:discount-caps": [
+   "TIS Sales Associate",
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS Operations Associate",
+   "TIS Operations Officer",
+   "TIS Operations Unit Head",
+   "TIS Finance & General Accounting",
    "TIS General Manager"
   ],
   "read:endorsements": [
@@ -14542,6 +14953,16 @@
    "TIS IT AppSupport / Admin",
    "TIS General Manager"
   ],
+  "read:promotions": [
+   "TIS Sales Associate",
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS Operations Associate",
+   "TIS Operations Officer",
+   "TIS Operations Unit Head",
+   "TIS Finance & General Accounting",
+   "TIS General Manager"
+  ],
   "read:quotations": [
    "TIS Sales Associate",
    "TIS Sales Officer",
@@ -14683,6 +15104,10 @@
   "write:disbursements": [
    "TIS Finance & General Accounting"
   ],
+  "write:discount-caps": [
+   "TIS Operations Officer",
+   "TIS Operations Unit Head"
+  ],
   "write:endorsements": [
    "TIS Sales Associate",
    "TIS Sales Officer",
@@ -14762,6 +15187,15 @@
   ],
   "write:products": [
    "TIS IT AppSupport / Admin"
+  ],
+  "write:promotion-rates": [
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS General Manager"
+  ],
+  "write:promotions": [
+   "TIS Operations Officer",
+   "TIS Operations Unit Head"
   ],
   "write:quotations": [
    "TIS Sales Associate",

@@ -169,3 +169,41 @@ FROM (VALUES
 ) AS v(type, role, amount)
 WHERE EXISTS (SELECT 1 FROM roles r WHERE r.code = v.role)
   AND NOT EXISTS (SELECT 1 FROM authority_limits l WHERE l.transaction_type = v.type AND l.role_code = v.role);
+
+-- ---------------------------------------------------------------- promotions and discount caps (PROD-15)
+-- Reason contexts (migration 0485): promotion_return (return a submitted promotion), promotion_status (suspend, resume,
+-- withdraw), discount_cap_return (return a proposed discount cap).
+UPDATE master_types t SET fields = (
+  SELECT jsonb_agg(CASE WHEN f->>'name' = 'context'
+    THEN jsonb_set(f, '{options}', (f->'options') || (
+      SELECT COALESCE(jsonb_agg(c ORDER BY n), '[]'::jsonb)
+      FROM unnest(ARRAY['promotion_return', 'promotion_status', 'discount_cap_return']) WITH ORDINALITY AS a(c, n)
+      WHERE NOT (f->'options' ? c)))
+    ELSE f END ORDER BY i)
+  FROM jsonb_array_elements(t.fields) WITH ORDINALITY AS x(f, i))
+WHERE t.code = 'reason-code' AND EXISTS (
+  SELECT 1 FROM jsonb_array_elements(t.fields) f, unnest(ARRAY['promotion_return', 'promotion_status', 'discount_cap_return']) c
+  WHERE f->>'name' = 'context' AND NOT (f->'options' ? c));
+
+INSERT INTO master_records(type_code, code, name, data, status, created_by)
+SELECT 'reason-code', v.code, v.name, jsonb_build_object('code', v.code, 'name', v.name, 'context', v.context, 'requiresNote', v.note, 'sortOrder', v.sort), 'active', 'seed'
+FROM (VALUES ('PRMR-RATES', 'Rates not agreed with the insurer', 'promotion_return', false, 2200),
+             ('PRMR-PERIOD', 'Period or quota to be corrected', 'promotion_return', false, 2210),
+             ('PRMR-VARIANTS', 'Vehicle variants to be corrected', 'promotion_return', false, 2220),
+             ('PRMR-OTHER', 'Other', 'promotion_return', true, 2290),
+             ('PRMS-INSURER', 'Rate under renegotiation with the insurer', 'promotion_status', false, 2300),
+             ('PRMS-STOCK', 'Vehicle stock or campaign ended', 'promotion_status', false, 2310),
+             ('PRMS-RESUME', 'Terms confirmed, promotion resumed', 'promotion_status', false, 2320),
+             ('PRMS-OTHER', 'Other', 'promotion_status', true, 2390),
+             ('DCR-VALUES', 'Discount range not agreed with TIS Sales', 'discount_cap_return', false, 2400),
+             ('DCR-DATES', 'Effective dates to be corrected', 'discount_cap_return', false, 2410),
+             ('DCR-OTHER', 'Other', 'discount_cap_return', true, 2490)
+) AS v(code, name, context, note, sort)
+WHERE NOT EXISTS (SELECT 1 FROM master_records m WHERE m.type_code = 'reason-code' AND m.code = v.code);
+
+-- Proposed discount caps of the Motor product per channel type (FR-PRM-010 R3, to be confirmed by TIS Sales; change
+-- them on Master > Finance > Discount Caps). Only where the product and channel type have no cap yet.
+INSERT INTO discount_caps(product_id, channel_type, min_pct, max_pct, lowest_od, effective_from, status, remarks, created_by, decided_at, decision_note)
+SELECT p.id, v.type, v.min, v.max, v.lowest, DATE '2026-01-01', 'approved', 'Proposed TISPH cap, to be confirmed', 'seed', now(), 'TISPH proposal'
+FROM products p, (VALUES ('financing_bank', 0, 25, 1.40), ('dealer', 0, 20, 1.50), ('direct', 0, 25, 1.40), ('agent', 0, 15, 1.60)) AS v(type, min, max, lowest)
+WHERE p.code = 'MOTOR' AND NOT EXISTS (SELECT 1 FROM discount_caps c WHERE c.product_id = p.id AND c.channel_type = v.type);

@@ -27,6 +27,7 @@ and pays them. You never decide a record you entered yourself.
 | Work through the approvals and the records waiting for you | Every morning and through the day | [My Work](#my-work) |
 | Approve or return the renewal terms submitted by the unit | Daily | [Negotiations](#negotiations) |
 | Check the e-policies received against their placement slips | Daily | [Placement Slips](#placement-slips) |
+| Approve or return promotions and discount caps; suspend, resume or withdraw a promotion | As submitted | [Promotions](#promotions), [Discount Caps](#discount-caps) |
 | Follow up the renewals escalated to you | As notified | [At-Risk Policies](#renewal-queue-and-at-risk-policies) |
 | Approve or reject the supplier invoices recorded by Finance | As notified | [Payables](#accounts-payable) |
 | Review the unit's pipeline, conversion and premium | Weekly | [Sales Dashboard](#sales-dashboard) |

@@ -16,6 +16,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations > Sales & Marketing | Comparison Reports | Create and edit |
 | Operations > Sales & Marketing | Placement Slips | Approve |
 | Operations > Sales & Marketing | Dealer & Bank Programmes | View |
+| Operations > Sales & Marketing | Promotions | Create and edit |
 | Operations | Clients | View |
 | Operations | Policy | Approve |
 | Operations | Fleet Schedules | Create and edit |
@@ -61,6 +62,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Insurance | Claim Document Checklist | View |
 | Master > Insurance | Repair Shops | View |
 | Master > Insurance | Distribution Channels | View |
+| Master > Finance | Discount Caps | Create and edit |
 | Product Configurator | Dashboard | View |
 | Product Configurator | Product Templates | View |
 
@@ -77,6 +79,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Sales & Marketing | Quotations and placement | Special | Extend the validity of a quotation once, within the longest validity |  |
 | Sales & Marketing | Lead assignment | View | See assignment rules, the reassignment queue and every team's prospects | Lead Assignment |
 | Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | Dealer & Bank Programmes |
+| Sales & Marketing | Promotions | View | See promotions, their vehicle lines, rates and versions | Promotions |
+| Sales & Marketing | Promotions | Create and edit | Add, amend and submit promotions |  |
 | Sales & Marketing | Sales activities | View | See activity timelines and the activity report | Sales Activities |
 | Operations | Clients | View | See clients | Clients |
 | Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policy, Payments, CTPL Authentication and Cover Notes |
@@ -108,6 +112,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | Claim Document Checklist and Repair Shops |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
+| Master data and configuration | Discount caps | View | See the discount caps per product and channel type | Discount Caps |
+| Master data and configuration | Discount caps | Create and edit | Propose and replace discount caps |  |
 | Master data and configuration | Schedules | View | See scheduled jobs and their runs | No screen of its own |
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
 | Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
@@ -128,14 +134,16 @@ Approval limits of this role on the Authority Matrix:
 | Transaction | Approval step | Limit of the role |
 |---|---|---|
 | Claim settlement approval | Operations > Claims > Settlement approval | Not set: no amount limit applies |
-| Underwriting referral approval | Operations > Sales & Marketing > Quotations > Underwriting referral | Not set: no amount limit applies |
+| Underwriting referral approval | Operations > Sales & Marketing > Quotations > Underwriting referral | PHP 10,000,000.00 |
 
 Who approves the work of this role:
 
 | Work | Approval | Approved by |
 |---|---|---|
 | Claims | Claim decisions: review, reject, settle, approve a settlement, close | TIS Operations Unit Head or TIS General Manager |
+| Discount caps | Approve or return discount caps (not the requester) | TIS Sales Unit Head or TIS General Manager |
 | Policies | Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
+| Promotions | Approve or return promotions; suspend, resume and withdraw them (never one you made or changed) | TIS Sales Unit Head or TIS General Manager |
 | Quotations and placement | Approve a quotation created by another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Renewals | Approve or return renewal terms of another user | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 | Operations > Claims > Settlement approval | Claim settlement approval within the approver's limit | TIS Operations Unit Head or TIS General Manager |

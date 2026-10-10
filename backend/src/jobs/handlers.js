@@ -35,6 +35,7 @@ export async function policyExpiry() {
 }
 /** Quotations: the day after the validity ends (quote-expiry) and the reminder before it (quote-expiry-reminder). */
 export { quoteExpiry, quoteExpiryReminders } from '../modules/quotations/validity.js';
+export { promotionStatus } from '../modules/promotions/service.js';
 export async function receivableAgeing() {
   if (!(await tableExists('receivables'))) return { skipped: 'receivables table missing' };
   const buckets = (await getSetting('limits.receivable_ageing_buckets', [30, 60, 90, 120])) || [30, 60, 90, 120];

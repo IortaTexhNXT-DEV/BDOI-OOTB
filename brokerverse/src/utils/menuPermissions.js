@@ -36,8 +36,9 @@ const OPERATIONS_PROCESSING = [
   "Sales & Marketing > Request for Quotation",
   "Sales & Marketing > Quotations",
   "Sales & Marketing > Placement Slips",
-  // brand-new vehicle programmes (write:motor-programmes) and client comparison reports from the insurers' offers
+  // brand-new vehicle programmes (write:motor-programmes), promotions (write:promotions) and client comparison reports
   "Sales & Marketing > Dealer Programmes",
+  "Sales & Marketing > Promotions",
   "Sales & Marketing > Comparison Reports",
   // the sales activity timelines and report (read:sales-activities)
   "Sales & Marketing > Sales Activities",
@@ -78,7 +79,8 @@ export const roleMenuPermissions = {
     "my work": true,
     operations: OPERATIONS_PROCESSING,
     reports: ["All Reports", "Operational Reports", "Report Builder"],
-    master: ["Insurance Management > Distribution Channels"],
+    // distribution channels; the discount caps the promotions are checked against (write:discount-caps)
+    master: ["Insurance Management > Distribution Channels", "Finance > Discount Caps"],
   },
   // Operations (Client Servicing): client servicing, endorsement requests, renewals, My Work, documents
   operations: {
@@ -145,6 +147,8 @@ export const roleMenuPermissions = {
       "Finance > Account Determination", "Finance > Posting Rules", "Finance > Configuration Approvals", "Finance > Accounting Flow", "Finance > Insurer Statement Formats",
       // premium taxes (write:premium-charges) and the payment links collected through the gateways
       "Finance > Premium Taxes & LGU Rates", "Finance > Payment Gateways",
+      // discount caps of the promotions (read:discount-caps; the Accounting Manager approves them)
+      "Finance > Discount Caps",
       // bank payment file layouts and payee bank accounts (write:disbursements)
       "Finance > Bank File Layouts",
       // asset classes of the fixed asset register (write:fixed-assets)
@@ -172,7 +176,7 @@ const TIS_CCD = (accounts) => ({ "my work": true, operations: ["Payments"], acco
 const INCENTIVE_SELF_SERVICE = ["Incentive > My Programs", "Incentive > Statement"];
 // Sales & Marketing item by item, in the order of the TISPH journey (components/SideBar/list.js)
 const SALES_MARKETING = ["Prospects", "Lead Assignment", "Sales Activities", "Quotations", "Request for Quotation", "Comparison Reports", "Placement Slips",
-  "Dealer Programmes", "Quick Quote", "Campaigns"];
+  "Dealer Programmes", "Promotions", "Quick Quote", "Campaigns"];
 // entries that map to no TISPH requirement (BRD, FRS, MOM): no TISPH persona is given them. Quick Quote: the BRD raises a
 // quotation per product from the Quotations screen; Campaigns: no requirement. Removing an entry here gives it back.
 const TIS_HIDDEN_SALES = ["Quick Quote", "Campaigns"];
@@ -187,14 +191,17 @@ const TIS_OPERATIONS = {
   operations: [...operationsWithout(), ...salesMarketingWithout(), "Claim Documents", "Motor Claim Repairs"],
   accounts: ["Receipts", "Collections", ...REMITTANCE("Remittances")],
   reports: ["All Reports", "Operational Reports", "Report Builder"],
-  master: ["Insurance Management > Distribution Channels", "Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops"],
+  master: ["Insurance Management > Distribution Channels", "Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops",
+    // the discount caps of the promotions: proposed by Operations Officers and the Unit Head (write:discount-caps)
+    "Finance > Discount Caps"],
 };
 // Operations officers and unit heads work the rates-missing and confirmation exceptions and read insurer billing
 const TIS_OPS_REMITTANCE = REMITTANCE("Exceptions", "Insurer billing");
 Object.assign(roleMenuPermissions, {
   "tis-sales-associate": TIS_SALES,
   "tis-sales-officer": TIS_SALES,
-  "tis-sales-unit-head": { ...TIS_SALES, accounts: [...TIS_SALES.accounts, "Disbursement", "Payables", "Incentive"] },
+  // the Sales Unit Head approves promotions and discount caps (approve:promotions, approve:discount-caps)
+  "tis-sales-unit-head": { ...TIS_SALES, accounts: [...TIS_SALES.accounts, "Disbursement", "Payables", "Incentive"], master: [...TIS_SALES.master, "Finance > Discount Caps"] },
   "tis-ops-associate": TIS_OPERATIONS,
   "tis-ops-officer": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, ...TIS_OPS_REMITTANCE, "Journal Voucher", "Fixed Assets"] },
   "tis-ops-unit-head": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, ...TIS_OPS_REMITTANCE, "Journal Voucher", "Fixed Assets", "Disbursement", "Payables"] },
@@ -216,9 +223,9 @@ Object.assign(roleMenuPermissions, {
   "tis-it-admin": {
     dashboard: ["Executive Dashboard"],
     "my work": true,
-    // reads the business registers; not the quick quote (write:quotations), campaigns, sales activities, fleet schedules
-    // and open covers (read:campaigns, read:sales-activities, read:fleet, read:marine)
-    operations: [...operationsWithout("Fleet Schedules", "Marine Open Covers"), ...salesMarketingWithout("Sales Activities")],
+    // reads the business registers; not the quick quote (write:quotations), campaigns, sales activities, promotions, fleet
+    // schedules and open covers (read:campaigns, read:sales-activities, read:promotions, read:fleet, read:marine)
+    operations: [...operationsWithout("Fleet Schedules", "Marine Open Covers"), ...salesMarketingWithout("Sales Activities", "Promotions")],
     accounts: ["Receipts", "Collections", "Post-Dated Cheques", "Disbursement", "Journal Voucher", "Payables", "Fixed Assets", "Remittance"],
     commission: ["Commission Dashboard"],
     reports: ["All Reports", "Operational Reports", "Financial Reports"],
@@ -239,7 +246,9 @@ Object.assign(roleMenuPermissions, {
     commission: roleMenuPermissions.accounting.commission,
     reports: ["All Reports", "Operational Reports", "Financial Reports"],
     master: ["User Management > User", "User Management > Role", "User Management > User Access Matrix", "User Management > Role Permissions",
-      "User Management > Authority Matrix", "User Management > Segregation of Duties", "System Configuration > Audit Trail", "Insurance Management > Distribution Channels"],
+      "User Management > Authority Matrix", "User Management > Segregation of Duties", "System Configuration > Audit Trail", "Insurance Management > Distribution Channels",
+      // approves promotions and discount caps
+      "Finance > Discount Caps"],
   },
 });
 

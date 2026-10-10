@@ -17,6 +17,7 @@ import { nextDocumentNumber } from '../../lib/numbering.js';
 import { companyName } from '../../lib/letterhead.js';
 import { isoDate, postingDate } from '../../lib/dates.js';
 import { resolveTypes, prorataTerm, assertSendable, assertBookable } from './workflow.js';
+import { returnPromotionUnit } from '../promotions/quote.js';
 
 export function toEndorsement(r) {
   if (!r) return null;
@@ -336,6 +337,8 @@ async function applyToPolicy(db, e, completion, userId) {
   if (ch.policyExtension && completion.expiryDate) cols.expiry_date = completion.expiryDate;
   // a partial cancellation returns the premium of the part cancelled and leaves the policy in force
   if (e.is_cancel && !['PARTIAL', 'PRO_RATA_PARTIAL'].includes(String(e.cancellation_type || '').toUpperCase())) cols.status = 'cancelled';
+  // a policy cancelled from inception gives its promotion unit back (PROD-15 FR-PRM-033)
+  if (cols.status === 'cancelled' && isoDate(e.effective_date) <= isoDate(p.inception_date)) await returnPromotionUnit(db, p.id);
   doc.endorsements = [...(doc.endorsements || []), { endorsementId: e.id, endorsementNumber: e.endorsement_number, completedAt: new Date().toISOString() }];
   const data = { ...cols, doc: JSON.stringify(doc), updated_by: userId, updated_at: new Date() };
   const keys = Object.keys(data);

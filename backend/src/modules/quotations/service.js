@@ -30,6 +30,7 @@ import { assertNotDeclined, assertFactsCaptured, referralFor, assertReferralClea
 import { assertAuthority } from '../access-control/service.js';
 import { decisionReason } from '../ops-masters/records.js';
 import { creditLifeTerms, withReduction } from './creditLife.js';
+import { applyPromotion, countPromotionUnit, DISCOUNT_RULE, withDiscountReferral } from '../promotions/quote.js';
 import { validityDays, assertCurrent, validityOf, endOfBusinessDay, isIssued, openPlacement, keepVersion, nextVersionCols } from './validity.js';
 
 export async function getQuoteRow(id, db = null) {
@@ -123,10 +124,12 @@ export async function createQuote(body, userId, db = null) {
     if (productId && !raw.lob) raw.lob = await resolveLob({ productId, productType: body.productType }, c);
     const { parts, icId, doc } = await quoteParticipants(c, raw, body.participants, null);
     const cl = await applyCreditLife(c, { productId, productType: body.productType }, doc, await partyOf(c, leadId, body.clientId), null);
-    const b = await premiumBreakdown(doc, { insurerId: icId });
+    const promo = await applyPromotion(c, { request: raw.promotion, doc, productId, productType: body.productType, icId, leadId, userId, orderDiscount: num(doc.discount) },
+      (d) => premiumBreakdown(d, { insurerId: icId }));
+    const b = promo ? promo.b : await premiumBreakdown(doc, { insurerId: icId });
     await assertFactsCaptured(b.underwriting);
     assertNotDeclined(b.underwriting, 'The quotation');
-    const referral = withReduction(referralFor(b.underwriting), cl?.reduction, null, cl?.names);
+    const referral = withDiscountReferral(withReduction(referralFor(b.underwriting), cl?.reduction, null, cl?.names), promo?.authority, null);
     if (referral) doc.underwritingReferral = referral;
     const number = await nextDocumentNumber('quote', { db: c, unique: { table: 'quotes', column: 'quote_number' } });
     // valid through valid_until: the product's quotation validity (Product Master), else limits.quote_validity_days
@@ -191,10 +194,16 @@ export async function updateQuote(id, body, userId) {
     const { parts, icId, doc } = await quoteParticipants(c, merged, body.participants, before.insurance_company_id);
     const cl = await applyCreditLife(c, { productId: before.product_id, productType: body.productType || before.product_type }, doc,
       await partyOf(c, body.leadRefId || before.lead_id, before.client_id), before.id);
-    const b = await premiumBreakdown(doc, { insurerId: icId });
+    const previous = before.doc?.promotion?.promotionId ? before.doc.promotion : null;
+    const orderDiscount = body.discount !== undefined ? num(body.discount) : previous ? num(previous.orderDiscount) : num(doc.discount);
+    const asked = Object.prototype.hasOwnProperty.call(body, 'promotion');
+    const promo = await applyPromotion(c, { request: asked ? body.promotion : previous, requested: asked, previous, doc, productId: before.product_id,
+      productType: body.productType || before.product_type, icId, leadId: body.leadRefId || before.lead_id, userId, orderDiscount }, (d) => premiumBreakdown(d, { insurerId: icId }));
+    const b = promo ? promo.b : await premiumBreakdown(doc, { insurerId: icId });
     await assertFactsCaptured(b.underwriting);
     assertNotDeclined(b.underwriting, 'The quotation');
-    const referral = withReduction(referralFor(b.underwriting, before.doc?.underwritingReferral || null), cl?.reduction, before.doc?.underwritingReferral || null, cl?.names);
+    const prior = before.doc?.underwritingReferral || null;
+    const referral = withDiscountReferral(withReduction(referralFor(b.underwriting, prior), cl?.reduction, prior, cl?.names), promo?.authority, prior);
     if (referral) doc.underwritingReferral = referral; else delete doc.underwritingReferral;
     const data = { ...premiumCols(b), insurance_company_id: icId, lob: b.lob, product_type: body.productType || before.product_type,
       doc: JSON.stringify({ ...withServerCovers(doc, b), premiumBreakdown: b }), updated_by: userId, updated_at: new Date(), ...(newVersion ? nextVersionCols(before) : {}) };
@@ -461,6 +470,7 @@ export async function convertToPolicy(id, body, user) {
       billingMode: expiring?.billing_mode || null, participants: await participantInputs('quote', q.id, db),
       taxes: round2(num(q.vat) + num(q.dst) + num(q.lgt) + num(q.fst)),
     }, extra, user.id);
+    await countPromotionUnit(db, q, extra, issued.policyId);
     if (renewalOf) await linkRenewal(db, { q, renewalOf, expiring, policyId: issued.policyId, user });
     await db.query("UPDATE quotes SET status = 'converted', policy_id = $2, client_id = $3, updated_by = $4, updated_at = now() WHERE id = $1", [q.id, issued.policyId, clientId, user.id]);
     return { ...issued, clientId };
@@ -660,7 +670,12 @@ export async function decideReferral(id, { decision, remarks = null, insurerRefe
   if (await getSetting('workflow.quote_maker_checker', true) && [q.created_by, q.agent_user_id].includes(user.id)) {
     throw forbidden('Maker-checker: the user who raised the quotation cannot decide its underwriting referral');
   }
-  if (decision === 'approve') await withTransaction((db) => assertAuthority(db, user, 'underwriting_referral', Number(q.sum_insured) || 0));
+  if (decision === 'approve') {
+    await withTransaction(async (db) => {
+      await assertAuthority(db, user, 'underwriting_referral', Number(q.sum_insured) || 0);
+      if ((ref.ruleCodes || []).includes(DISCOUNT_RULE)) await assertAuthority(db, user, 'quotation_discount', num(ref.discountPct));
+    });
+  }
   const next = { ...ref, status: decision === 'approve' ? 'approved' : 'declined', decidedBy: user.username, decidedById: user.id, decidedAt: new Date().toISOString(),
     remarks: remarks || null, insurerReference: insurerReference || null };
   await query(`UPDATE quotes SET doc = jsonb_set(doc, '{underwritingReferral}', $2::jsonb), updated_by = $3, updated_at = now()${decision === 'decline' ? ", status = 'rejected'" : ''} WHERE id = $1`,

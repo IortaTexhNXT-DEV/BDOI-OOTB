@@ -139,6 +139,18 @@ Credit Life new business (the complimentary cover of a TFS motor loan) takes no 
 
 The quotation is refused for a corporate account, a borrower aged 65 or over, more than 6 TFS accounts, a pending balance, an agent or referrer, or a loan account that already has an open quotation. A sum insured below PHP 1,000,000.00 is referred: it is sent to the client only once {{roles:approve:quotations}} other than the raiser approves it in **Underwriting referral**. The quotation page shows the Credit Life terms in **Credit Life**.
 
+### Promotion of a motor quotation {#quotation-promotion}
+
+A promotion gives a brand-new vehicle the reduced rates agreed with the insurers (see [Promotions](#promotions)). The quotation must be **Comprehensive**, the **Vehicle condition** **Brand New**, the model year not older than the year before the policy year, and the vehicle, insurer and channel (dealer, financing bank, affinity partner, agent or referrer, direct) must be those of the promotion.
+
+1. Open the motor quotation and select **Find promotion** in **Promotion**. The promotions open to the vehicle are listed with their rates; when none is open the reason is shown.
+2. Select **Apply**. The quotation is priced again at the promotion rates. **Promotion** shows the **Gross premium at the standard rates**, the **Promotion discount** in PHP and percent, the **Total discount**, the **Discount cap** and the **Promo excess**.
+3. To use the standard rates again select **Remove promotion**.
+
+The discount (promotion and order summary discount together) must stay within the [discount cap](#discount-caps) of the product and channel; an order summary discount is refused when the promotion is not combinable with one. A discount above the maker's **Quotation discount** limit (Authority Matrix) is referred: a user whose limit covers it approves it in **Underwriting referral**. {{roles:write:promotion-rates}} may lower the **Own Damage rate** to the minimum of the promotion with **Change promo rate** and a reason.
+
+A quotation keeps its promotion until its validity ends, even when the promotion is suspended or ends; when the promotion has a new version the quotation is priced at the new rates the next time it is changed. On conversion to a policy one unit of the promotion's quota is counted; a chassis number already on an earlier policy is refused. The policy shows the promotion it was issued with; a cancellation from inception gives the unit back.
+
 ### Create a motor quotation {#create-a-motor-quotation}
 
 A motor quotation is made for a prospect and has four steps: **Policy details**, **Coverage**, **Accessories** and **Summary**. Nothing is saved until the last step, so you can move with **Back** and **Next**.
@@ -278,6 +290,35 @@ The **Programmes** tab lists **Code**, **Name**, **Dealer**, **Financing bank**,
 The **Dealer Sales Upload** tab takes the dealer's sales file: choose the programme, download the **Template** if needed and select **Upload sales**. Each upload is a batch (DSB-YYYY-NNNNN) with its **Created** and **Failed** rows and its status (**Completed** or **Partial**). See [Dealer programme policies](#process-dealer-programme).
 
 ![Add programme: the terms of a dealer programme](images/screens-operations/dealer-programme-add.png)
+
+## Promotions {#promotions}
+
+Choose Operations > Sales & Marketing > Promotions. A promotion offers reduced rates, or a gross premium discount, on brand-new vehicles of selected variants for a period.
+
+{{screen:/sales/promotions}}
+
+The list shows **Code**, **Name**, **Products**, **Insurers**, **Channel types**, **Period**, **Variants**, **Version**, **Units / quota** and **Status** (**Draft**, **Pending approval**, **Scheduled**, **Active**, **Suspended**, **Expired**, **Withdrawn**). Filter it by status, or search by code or name; **View** opens a promotion.
+
+**Add promotion** ({{roles:write:promotions}}) opens the form:
+
+| Tab | Field | What to enter | Rule |
+|---|---|---|---|
+| General | **Code**, **Name** | For example PRM-FORTUNER26 | Capital letters, digits and hyphens, 3 to 20 characters, unique; the code cannot change after the first save |
+| General | **Period from**, **Period to** | The days the promotion is offered | At most 12 months; it cannot start before today when submitted |
+| General | **Promo benefit** | **Promo rate** (reduced Own Damage and Acts of Nature rates) or **Gross premium discount %** | Cannot change on a new version |
+| General | **Unit quota**, **Lock-in (years)** | The vehicles that may be insured with it; the years its rate is kept on renewal | Quota a whole number of 1 or more; lock-in 1 to 3 years |
+| General | **Promo excess** | The Own Damage and Theft deductible per product while the promotion applies | |
+| Applicability | **Products**, **Insurers**, **Channel types** | Where the promotion is offered | Motor products only; each product and channel type needs an approved [discount cap](#discount-caps) |
+| Applicability | **Can be combined with a Dealer Programme**, **with an Order Summary discount** | | Both off by default |
+| Vehicle variants & rates | **Vehicle**, **Year model from / to**, **Insurer** (empty: every insurer of the promotion), **Promo OD %**, **Min OD %**, **Promo AON %**, **Remit OD %**, **Remit AON %** (or **Discount %**) | One line per variant | Rates above 0 and at most 100 with up to 4 decimals; a remitting rate not above the promo rate; Min OD % not above Promo OD %; no two lines for the same variant, year models and insurer |
+
+**Save draft** keeps the promotion as **Draft**, version 1. The promotion page shows each line with its **Rate discount** (against the standard rates of 2% Own Damage and 0.5% Acts of Nature) and its **Cap check** for each product and channel type: **Within cap**, **Above max**, **Below min**, **Below lowest OD rate** or **No cap**.
+
+- **Submit for approval** checks every field, line and cap; a line outside its cap blocks it. **Recall** brings a submitted promotion back to draft.
+- {{roles:approve:promotions}} other than the maker selects **Approve** (the promotion becomes **Scheduled**, or **Active** from its first day) or **Return** with a reason. The approvals are listed in **My Work**.
+- **Suspend**, **Resume** and **Withdraw** (with a reason) stop or restart the offer; quotations already priced keep the promotion until their validity ends.
+- **Amend** creates the next version in draft; the version in force stays offered until the new one is approved, then it is **Superseded**.
+- Every night the job **Promotion status** activates the promotions whose period starts and expires those whose period has ended; a promotion whose quota is used up expires.
 
 ## Clients {#clients}
 

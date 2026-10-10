@@ -232,6 +232,14 @@ The Commission Rate Matrix sets the broker's commission rate that applies to a p
 
 ![Master > Finance > Commission Rate Matrix](images/screens-master/commission-rate-matrix.png)
 
+## Discount Caps {#discount-caps}
+
+{{screen:/master/finance/discount-caps}}
+
+A discount cap gives, for a product sold through a channel type (**Financing bank**, **Dealer**, **Affinity partner**, **Agent / referrer**, **Direct**), the **Min discount %** and **Max discount %** of a quotation (promotion and order summary discount together, of the premium without CTPL) and the **Lowest OD rate %**. The list shows the caps with their **Effective from**, **Effective to**, **Status** and **Proposed by**.
+
+**Add cap** ({{roles:write:discount-caps}}) proposes a cap; **Replace** proposes a new cap for the same product and channel type from a later date. The cap is live once {{roles:approve:discount-caps}} other than the proposer approves it (**Approve**, or **Return** with a reason); a replaced cap ends the day before the new one starts. Two approved caps of a product and channel type cannot cover the same day, and a cap cannot start before today. When a new cap would leave lines of an active promotion outside it, the lines are named.
+
 ## Accounting masters {#finance-masters-kept-by-accounting}
 
 {{screen:/master/finance/taxation}}

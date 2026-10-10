@@ -26,6 +26,7 @@ system refuses it and another approver decides it.
 |---|---|---|
 | Work through your own records and the work waiting for you | Every morning and through the day | [My Work](#my-work) |
 | Check the e-policies received against their placement slips | Daily | [Placement Slips](#placement-slips) |
+| Apply a promotion to a brand-new vehicle's quotation; lower its Own Damage rate to the minimum with a reason | As needed | [Promotion of a motor quotation](#quotation-promotion) |
 | Approve or return the renewal terms submitted by your team | Daily | [Negotiations](#negotiations) |
 | Complete the endorsements and cancellations that return premium, raised by other users | As notified | [Policy](#policies), [Policy Cancellation](#cancel-a-policy-computed-return-premium) |
 | Check the team's open prospects and reassign those not worked | Daily | [Lead Assignment](#lead-assignment) |

@@ -103,6 +103,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Finance | Accounting Flow | View |
 | Master > Finance | Premium Taxes & LGU Rates | View |
 | Master > Finance | Payment Gateways | View |
+| Master > Finance | Discount Caps | View |
 | Master > Finance | Taxation | View |
 | Master > Finance | Close Checklist | View |
 | Master > Finance | Asset Classes | View |
@@ -123,6 +124,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Sales & Marketing | Prospects and leads | View | See prospects and leads | No screen of its own |
 | Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | No screen of its own |
 | Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | No screen of its own |
+| Sales & Marketing | Promotions | View | See promotions, their vehicle lines, rates and versions | No screen of its own |
 | Operations | Clients | View | See clients | No screen of its own |
 | Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Payments |
 | Operations | Endorsements and cancellations | View | See endorsements and cancellations | No screen of its own |
@@ -156,6 +158,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Product Configurator | Products | View | See products and product templates | No screen of its own |
 | Master data and configuration | Reference masters | View | See reference masters | Accounting Flow, Payment Gateways, Taxation, Close Checklist, Asset Classes, Cost Centres, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats and Bank File Layouts |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | No screen of its own |
+| Master data and configuration | Discount caps | View | See the discount caps per product and channel type | Discount Caps |
 | Master data and configuration | Posting rules and account determination | Create and edit | Propose changes to posting rules and account determination | Account Determination, Posting Rules and Configuration Approvals |
 | Master data and configuration | Posting rules and account determination | Approve | Approve changes to posting rules and account determination (not the requester) |  |
 | Master data and configuration | Schedules | View | See scheduled jobs and their runs | Schedules |

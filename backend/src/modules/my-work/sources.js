@@ -327,6 +327,28 @@ async function approvals(ctx) {
       status: 'st.status', link: "'/accounts/insurer-reconciliation/statements/' || st.id", amount: 'st.total_paid', created_at: 'st.created_at' })}
       FROM insurer_statements st LEFT JOIN insurance_companies ic ON ic.id = st.insurance_company_id WHERE st.status = 'submitted' AND ${notMine(ctx, 'st.submitted_by')}`);
   }
+  // endorsements sent for approval and corrections of issued policies (ENDT-02, ISSUE-04): approve:policies, never the raiser
+  if (ctx.can('approve:policies') && await has('policy_corrections')) {
+    out.push(`SELECT ${select({ ...base, kind: "'Endorsement'", id: 'e.id', ref: 'e.endorsement_number', title: "p.policy_number || COALESCE(' - ' || e.endorsement_type, '')", client_name: CLIENT('c'),
+      due_date: due('COALESCE(e.submitted_at, e.created_at)'), status: 'e.status', link: "'/agent/endorsementdetailedview/' || e.id", amount: 'e.premium_delta', created_at: 'e.created_at' })}
+      FROM endorsements e JOIN policies p ON p.id = e.policy_id LEFT JOIN clients c ON c.id = COALESCE(e.client_id, p.client_id)
+      WHERE e.status = 'for-approval' AND ${notMine(ctx, 'e.created_by')}`);
+    out.push(`SELECT ${select({ ...base, kind: "'Policy correction'", id: "'pcr-' || pc.id", ref: 'p.policy_number', title: 'pc.reason', client_name: CLIENT('c'),
+      due_date: due('pc.requested_at'), status: 'pc.status', link: "'/agent/policydetail/' || p.id", created_at: 'pc.requested_at' })}
+      FROM policy_corrections pc JOIN policies p ON p.id = pc.policy_id LEFT JOIN clients c ON c.id = p.client_id
+      WHERE pc.status = 'pending' AND ${notMine(ctx, 'pc.requested_by')}`);
+  }
+  // promotions and discount caps (PROD-15): decided by the holders of the approve permission, never by their maker
+  if (ctx.can('approve:promotions') && await has('promotions')) {
+    out.push(`SELECT ${select({ ...base, kind: "'Promotion'", id: 'pm.id', ref: "pm.code || ' v' || pm.version", title: 'pm.name', due_date: due('COALESCE(pm.submitted_at, pm.created_at)'),
+      status: 'pm.status', link: "'/sales/promotions'", created_at: 'pm.created_at' })}
+      FROM promotions pm WHERE pm.status = 'pending-approval' AND ${notMine(ctx, 'pm.created_by')} AND ${notMine(ctx, 'pm.updated_by')} AND ${notMine(ctx, 'pm.submitted_by')}`);
+  }
+  if (ctx.can('approve:discount-caps') && await has('discount_caps')) {
+    out.push(`SELECT ${select({ ...base, kind: "'Discount cap'", id: "'dc-' || dc.id", ref: "'DC-' || dc.id", title: "pr.name || ' - ' || replace(initcap(replace(dc.channel_type, '_', ' ')), 'Agent', 'Agent / referrer')",
+      due_date: due('dc.created_at'), status: 'dc.status', link: "'/master/finance/discount-caps'", created_at: 'dc.created_at' })}
+      FROM discount_caps dc JOIN products pr ON pr.id = dc.product_id WHERE dc.status = 'pending' AND ${notMine(ctx, 'dc.created_by')}`);
+  }
   if (ctx.can('approve:credit-control') && await has('premium_warranty_extensions')) {
     out.push(`SELECT ${select({ ...base, kind: "'Warranty extension'", id: 'wx.id', ref: 'p.policy_number', title: "'Extend to ' || to_char(wx.requested_deadline, 'DD Mon YYYY')", client_name: CLIENT('c'),
       due_date: 'LEAST(wx.current_deadline, ' + due('wx.requested_at') + ')', status: 'wx.status', link: "'/accounts/credit-control/warranty'", created_at: 'wx.requested_at' })}

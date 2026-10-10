@@ -15,6 +15,7 @@ the client for approval, approved on maker-checker and converted to a policy thr
 | `validity.js` | The validity cycle and the versions (TIS-BRD-QUOT-04): validity days per product, extension, expiry reminder and spoil jobs, read-only versions. |
 | `premium.js`, `motorTariff.js` | Premium breakdown (covers, taxes, commission) and the motor tariff of the Product Configurator. |
 | `creditLife.js` | Credit Life quotation rules (TIS-BRD-QUOT-06, PJRN-03): eligibility, the fixed rate, the reduced sum insured referral. |
+| `../promotions/quote.js` | The promotion of a motor quotation (TIS-BRD-PROD-15): see `../promotions/README.md`. |
 | `customerResponses.js` | The client's answer received outside the approval link. |
 | `shape.js` | Row to API object (`toQuote`) and the fields never stored in the quotation document. |
 
@@ -50,3 +51,9 @@ account. Priced at `ratePerThousand` per 1,000 of the sum insured (default `defa
 the rule `CL_SI_REDUCTION` to the underwriting referral for `siReductionRoles`, so sending, approval and conversion wait
 for its approval (maker-checker). CL-COMP (new business) skips the quotation step of its placement journey: a quotation
 for it is refused and the screens open the direct placement.
+
+## Promotion
+
+`createQuote` and `updateQuote` apply `body.promotion` (or, on a change without it, the promotion the quotation was
+priced with) through `applyPromotion` before pricing; the discount authority referral is merged into
+`doc.underwritingReferral` (`withDiscountReferral`). `convertToPolicy` counts the promotion unit (`countPromotionUnit`).

@@ -15,6 +15,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations > Sales & Marketing | Comparison Reports | Create and edit |
 | Operations > Sales & Marketing | Placement Slips | Create and edit |
 | Operations > Sales & Marketing | Dealer & Bank Programmes | View |
+| Operations > Sales & Marketing | Promotions | View |
 | Operations | Clients | Create and edit |
 | Operations | Policy | Create and edit |
 | Operations | Fleet Schedules | Create and edit |
@@ -61,6 +62,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Sales & Marketing | Quotations and placement | Create and edit | Create quotations (Quick Quote too), send requests for quotation, prepare placement slips |  |
 | Sales & Marketing | Lead assignment | View | See assignment rules, the reassignment queue and every team's prospects | Lead Assignment |
 | Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | Dealer & Bank Programmes |
+| Sales & Marketing | Promotions | View | See promotions, their vehicle lines, rates and versions | Promotions |
 | Sales & Marketing | Marketing campaigns | View | See campaigns, segments, templates and results | No screen of its own |
 | Sales & Marketing | Sales activities | View | See activity timelines and the activity report | Sales Activities |
 | Sales & Marketing | Sales activities | Create and edit | Log, change and cancel calls, meetings, e-mails and visits |  |
@@ -86,6 +88,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
+| Master data and configuration | Discount caps | View | See the discount caps per product and channel type | No screen of its own |
 | Master data and configuration | Schedules | View | See scheduled jobs and their runs | No screen of its own |
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
 | Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |

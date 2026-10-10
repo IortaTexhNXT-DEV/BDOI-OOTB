@@ -106,7 +106,8 @@ export const menuList = [
           },
           // TISPH journey: leads (prospects, their assignment and the account executives' activities; the SALES stream's
           // lead entries such as call lists go after Lead Assignment) -> quotation (requests for quotation and the
-          // client comparison of the PA market, PJRN-05) -> placement with the insurer -> dealer and bank programmes.
+          // client comparison of the PA market, PJRN-05) -> placement with the insurer -> dealer and bank programmes ->
+          // promotions (PROD-15).
           // Quick Quote and Campaigns map to no TISPH requirement: no TISPH role is given them (utils/menuPermissions.js).
           {
             id: 36,
@@ -165,6 +166,14 @@ export const menuList = [
             path: "/sales/dealer-programmes",
             includes: ["/sales/dealer-programmes"],
             permissions: ["read:motor-programmes"],
+          },
+          {
+            // promotional rates on brand-new vehicles (PROD-15), after the dealer and bank programmes they may combine with
+            id: 52,
+            name: "Promotions",
+            path: "/sales/promotions",
+            includes: ["/sales/promotions"],
+            permissions: ["read:promotions"],
           },
           {
             id: 31,
@@ -1201,6 +1210,13 @@ export const menuList = [
             name: "Commission Rate Matrix",
             path: "/master/finance/commission-rate-matrix",
             includes: ["/master/finance/commission-rate-matrix"],
+          },
+          {
+            // minimum and maximum discount and the lowest Own Damage rate per product and channel type (PROD-15)
+            id: 53,
+            name: "Discount Caps",
+            path: "/master/finance/discount-caps",
+            includes: ["/master/finance/discount-caps"],
           },
           {
             id: 13,

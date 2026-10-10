@@ -17,6 +17,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations > Sales & Marketing | Comparison Reports | Create and edit |
 | Operations > Sales & Marketing | Placement Slips | Approve |
 | Operations > Sales & Marketing | Dealer & Bank Programmes | View |
+| Operations > Sales & Marketing | Promotions | View |
 | Operations | Clients | Create and edit |
 | Operations | Policy | Approve |
 | Operations | Fleet Schedules | Create and edit |
@@ -135,6 +136,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Users and Access | Role Permissions | View |
 | Master > Users and Access | Authority Matrix | View |
 | Master > Users and Access | Segregation of Duties | View |
+| Master > Finance | Discount Caps | View |
 | Master > System | Audit Trail | View |
 | Product Configurator | Dashboard | View |
 | Product Configurator | Product Templates | View |
@@ -151,9 +153,12 @@ Where: the screens of your menus that show the module. A module without a screen
 | Sales & Marketing | Quotations and placement | Create and edit | Create quotations (Quick Quote too), send requests for quotation, prepare placement slips |  |
 | Sales & Marketing | Quotations and placement | Approve | Approve a quotation created by another user |  |
 | Sales & Marketing | Quotations and placement | Special | Extend the validity of a quotation once, within the longest validity |  |
+| Sales & Marketing | Quotations and placement | Special | Lower the Own Damage rate of a promotion on a quotation down to its minimum, with a reason |  |
 | Sales & Marketing | Lead assignment | View | See assignment rules, the reassignment queue and every team's prospects | Lead Assignment |
 | Sales & Marketing | Lead assignment | Create and edit | Maintain assignment rules and reassign prospects |  |
 | Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | Dealer & Bank Programmes |
+| Sales & Marketing | Promotions | View | See promotions, their vehicle lines, rates and versions | Promotions |
+| Sales & Marketing | Promotions | Approve | Approve or return promotions; suspend, resume and withdraw them (never one you made or changed) |  |
 | Sales & Marketing | Marketing campaigns | View | See campaigns, segments, templates and results | No screen of its own |
 | Sales & Marketing | Marketing campaigns | Create and edit | Prepare and send campaigns; maintain segments and templates |  |
 | Sales & Marketing | Sales activities | View | See activity timelines and the activity report | Sales Activities |
@@ -192,6 +197,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
+| Master data and configuration | Discount caps | View | See the discount caps per product and channel type | Discount Caps |
+| Master data and configuration | Discount caps | Approve | Approve or return discount caps (not the requester) |  |
 | Master data and configuration | Schedules | View | See scheduled jobs and their runs | No screen of its own |
 | Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
 | Master data and configuration | Audit trail | View | See the audit trail | Audit Trail |
@@ -205,8 +212,10 @@ Where: the screens of your menus that show the module. A module without a screen
 This role approves the work of other users:
 
 - Claim decisions: review, reject, settle, approve a settlement, close
+- Approve or return discount caps (not the requester)
 - Approve supplier invoices (not the preparer)
 - Decide the check of a placement against the slip, and complete the cancellations and return premiums of another user
+- Approve or return promotions; suspend, resume and withdraw them (never one you made or changed)
 - Approve a quotation created by another user
 - Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter)
 - Approve or return renewal terms of another user
