@@ -128,13 +128,13 @@ export function staticUploads() {
       notes: ['Each row issues an official receipt, applies it to the oldest open bills of the policy and posts the collection journal. The receipt date must fall in an open accounting period.'],
     },
     {
-      id: 'bank-payments', file: 'Bank_Payments_Upload_Template.xlsx', title: 'Bank payments upload', menu: 'Accounts > Receipts > Bank payments', route: 'POST /api/receipts/bank-payments (multipart field "file")',
+      id: 'bank-payments', file: 'Bank_Payments_Upload_Template.xlsx', title: 'Bank payments upload', menu: 'Accounts > Receipts > Bulk Upload > Bank payments (matched by reference)', route: 'POST /api/receipts/bank-payments (multipart field "file")',
       columns: BANK_PAYMENT_COLUMNS, maxRows: BULK_ROWS,
       samples: [{ paidOn: '2026-10-05', reference: '1000000016', amount: '35946.88', bankAccount: 'ACC-MBT-001', payer: 'Andrea Villanueva', remarks: '' }],
       notes: ['Each line is matched by its reference to what the policy owes. Within the tolerance it is receipted in full; above it the excess is held On Account; below it the receipt pays part and the line is an insufficient payment; with no policy found it is held as a floating payment to allocate on Accounts > Unapplied Collections.'],
     },
     {
-      id: 'insurer-direct-payments', file: 'Insurer_Direct_Payments_Template.xlsx', title: 'Payments made directly to the insurer', menu: 'Accounts > Receipts > Insurer-direct payments',
+      id: 'insurer-direct-payments', file: 'Insurer_Direct_Payments_Template.xlsx', title: 'Payments made directly to the insurer', menu: 'Accounts > Receipts > Bulk Upload > Payments made to the insurer',
       route: 'POST /api/receipts/insurer-direct (multipart field "file")', columns: INSURER_DIRECT_COLUMNS, maxRows: BULK_ROWS,
       samples: [{ policyNumber: 'PC-MLY-2026-000101', amount: '35946.88', paidOn: '2026-10-05', insurerReference: 'MIC-OR-004512', remarks: '' }],
       notes: ["Each row settles the policy's bills with a receipt marked paid to the insurance company: the premium payable to the insurer is reduced instead of the cash. The amount cannot be more than the policy owes."],

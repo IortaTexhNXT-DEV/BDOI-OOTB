@@ -156,12 +156,12 @@ const uploadRows = async (req) => {
   return rows;
 };
 define({
-  method: 'GET', path: '/bank-payments/template', summary: 'Bank payments upload template (XLSX)', screen: `${SCREEN} > Bank payments > Download template`, middleware: read,
+  method: 'GET', path: '/bank-payments/template', summary: 'Bank payments upload template (XLSX)', screen: `${SCREEN} > Bulk Upload > Bank payments (matched by reference) > Download template`, middleware: read,
   response: '(xlsx file)', handler: async (_req, res) => sendTemplate(res, 'bank-payments'),
 });
 define({
   method: 'POST', path: '/bank-payments', summary: "A bank's report of payments (multipart \"file\"): each line matched by its reference to what the policy owes within bank_matching.tolerance; overpaid: the excess held On Account; underpaid: listed as insufficient; no bill found: a floating payment",
-  screen: `${SCREEN} > Bank payments`, middleware: [...write, upload.single('file')],
+  screen: `${SCREEN} > Bulk Upload > Bank payments (matched by reference)`, middleware: [...write, upload.single('file')],
   request: { file: '(xlsx) columns: Date, Reference, Amount, Bank Account, Payer, Remarks' },
   response: { success: true, data: { message: 'Processed 4 rows: 2 matched, 1 overpaid, 1 underpaid, 0 not found, 0 failed', batch: { batchNumber: 'RVB-2026-00006', kind: 'bank-payments' } } },
   handler: async (req, res) => {
@@ -176,12 +176,12 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/insurer-direct/template', summary: 'Payments made directly to the insurer: upload template (XLSX)', screen: `${SCREEN} > Insurer-direct payments > Download template`, middleware: read,
+  method: 'GET', path: '/insurer-direct/template', summary: 'Payments made directly to the insurer: upload template (XLSX)', screen: `${SCREEN} > Bulk Upload > Payments made to the insurer > Download template`, middleware: read,
   response: '(xlsx file)', handler: async (_req, res) => sendTemplate(res, 'insurer-direct-payments'),
 });
 define({
   method: 'POST', path: '/insurer-direct', summary: 'Payments the clients made directly to the insurance company (multipart "file"): each settles the policy\'s bills with a receipt of channel insurer-direct (Dr premium payable / Cr premium receivable)',
-  screen: `${SCREEN} > Insurer-direct payments`, middleware: [...write, upload.single('file')],
+  screen: `${SCREEN} > Bulk Upload > Payments made to the insurer`, middleware: [...write, upload.single('file')],
   request: { file: '(xlsx) columns: Policy Number, Amount, Date Paid, Insurer Reference, Remarks' },
   response: { success: true, data: { message: 'Processed 2 rows: 2 created, 0 failed', batch: { batchNumber: 'RVB-2026-00007', kind: 'insurer-direct' } } },
   handler: async (req, res) => {

@@ -84,7 +84,7 @@ export const EVENT_FLOW = {
     approval: { text: 'None: posted when the receipt is applied' }, amounts: { amount: 'Amount of the receipt applied to the bill' } },
   'pdc.partner_collected': { when: 'The Insurance Partner advises that a forwarded post-dated cheque cleared', screen: '/accounts/post-dated-cheques', where: 'Accounts › Post-Dated Cheques',
     approval: { text: 'None: posted with the acknowledgement receipt on the collection date' }, amounts: { amount: 'Amount of the cheque collected by the Insurance Partner' } },
-  'receipt.insurer_direct': { when: 'A payment the client made directly to the insurance company is recorded (insurer-direct upload)', screen: '/accounts/receipts', where: 'Accounts › Receipts › Insurer-direct payments',
+  'receipt.insurer_direct': { when: 'A payment the client made directly to the insurance company is recorded (insurer-direct upload)', screen: '/accounts/receipts', where: 'Accounts › Receipts › Bulk Upload › Payments made to the insurer',
     approval: { text: 'None: posted with the receipt on the date paid' }, amounts: { amount: 'Amount paid to the insurer' } },
   'receipt.unapplied': { when: 'A payment is above what the policy owes, or has no bill yet (floating or advance)', screen: '/accounts/unapplied-collections', where: 'Accounts › Unapplied Collections',
     approval: { text: 'None: posted when the payment is received' }, amounts: { amount: 'Amount held unapplied' } },
