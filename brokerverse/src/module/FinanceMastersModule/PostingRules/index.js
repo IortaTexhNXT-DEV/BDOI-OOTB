@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
@@ -44,6 +45,8 @@ const PostingRules = () => {
   const [coInsurance, setCoInsurance] = useState(false);
   const [history, setHistory] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [params] = useSearchParams();
+  const linked = useRef(params.get("event"));
 
   const fail = (e) => toast.current?.show({ severity: "error", summary: t("postingRules.error"), detail: e.message, life: 8000 });
 
@@ -84,6 +87,15 @@ const PostingRules = () => {
     setCoInsurance(false);
     if (ev) loadVersions(ev);
   };
+
+  // opened from Accounting Flow (Open the rule, ?event=<code>): that event is selected once the events are loaded
+  useEffect(() => {
+    const ev = linked.current ? events.find((e) => e.eventCode === linked.current) : null;
+    if (!ev) return;
+    linked.current = null;
+    choose(ev);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [events]);
 
   const rule = versions.find((v) => v.id === versionId) || null;
   const modules = useMemo(() => [...new Set(events.map((e) => e.module))].sort().map((m) => ({ label: m, value: m })), [events]);
