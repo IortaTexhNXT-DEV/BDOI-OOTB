@@ -10,6 +10,8 @@ export const unauthorized = (m = 'Unauthorized') => new HttpError(401, m);
 export const forbidden = (m = 'Forbidden') => new HttpError(403, m);
 export const notFound = (m = 'Not found') => new HttpError(404, m);
 export const conflict = (m = 'Conflict') => new HttpError(409, m);
+/** A 403 with a machine-readable reason in the body (`code`), e.g. FEATURE_NOT_ENABLED for a function outside the edition. */
+export const refused = (code, m, details) => Object.assign(new HttpError(403, m, details), { reason: code });
 
 /** Readable message of one schema issue: a missing field reads "<field> is required" rather than zod's bare "Required". */
 const issueMessage = (i) => {
@@ -34,6 +36,7 @@ export function errorHandler(err, req, res, _next) {
   const body = { success: false, message: clientError ? message : 'Internal server error; quote the request id when reporting it' };
   if (err.name === 'ZodError') body.errors = err.issues?.map((i) => ({ path: i.path.join('.'), message: issueMessage(i) }));
   if (clientError && err.details) body.errors = err.details;
+  if (clientError && err instanceof HttpError && err.reason) body.code = err.reason;
   if (req.id) body.requestId = req.id;
   if (!clientError) req.log?.error({ err, requestId: req.id }, 'unhandled error');
   if (res.headersSent) return;

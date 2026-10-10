@@ -9,6 +9,8 @@ import crypto from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { pool, query } from './pool.js';
 import { encryptSecret, isEncrypted } from '../lib/secrets.js';
+import { assertPasswordAllowed, recordHistory } from '../lib/password.js';
+import { PLATFORM_PERMISSIONS, PLATFORM_ROLE, isPlatformPermission } from '../lib/platform.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
@@ -127,10 +129,10 @@ Object.assign(ROLE_PERMS, {
     'remittance:approve'],
   'tis-it-admin': ['profile', 'notifications', 'reports:read', ...TIS_BUSINESS_READS, 'collections:read', 'receipts:read', 'remittance:read', 'commission:read', 'incentive:read',
     ...TIS_ACCOUNTING_READS, 'masters', 'channels', 'products', 'motor-programmes', 'premium-charges:write', 'users', 'roles', 'access-control', 'access-control:approve', 'settings',
-    'integrations', 'schedules', 'audit:read'],
+    'integrations', 'schedules', 'audit:read', 'features:read'],
   'tis-general-manager': [...TIS_COMMON, ...TIS_FRONT_READS, ...TIS_MAKER, ...TIS_FRONT_APPROVALS, 'leads', 'clients', 'claims', 'claims:approve', 'sales-activities',
     'lead-assignment', 'campaigns', ...TIS_ACCOUNTING_READS, 'payables:approve', 'bank-reconciliation:read', 'period-end:read', 'audit:read', 'users:read',
-    'roles:read', 'access-control:read', 'remittance:approve'],
+    'roles:read', 'access-control:read', 'remittance:approve', 'features:read'],
 });
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'], 'tis-superid': ['system-admin'] };
@@ -158,6 +160,34 @@ export function seedFiles({ sample = true } = {}) {
   return files.sort((a, b) => (a.base === b.base ? (a.kind === 'reference' ? -1 : 1) : a.base < b.base ? -1 : 1));
 }
 
+/**
+ * The iorta TechNXT platform administrator (lib/platform.js), only from the environment: PLATFORM_ADMIN_EMAIL (also the
+ * user name) and PLATFORM_ADMIN_PASSWORD. Without both, no account is created; there is no default password. The account
+ * sets up two-factor authentication at the first sign-in. An existing account keeps its password; the second platform
+ * administrator (the approver) is added by the first on Master > Platform > Features & Releases.
+ */
+export async function seedPlatformAdmin({ log = console.log, warn = log, source = process.env } = {}) {
+  const email = String(source.PLATFORM_ADMIN_EMAIL || '').trim().toLowerCase();
+  const password = String(source.PLATFORM_ADMIN_PASSWORD || '');
+  if (!email && !password) return null;
+  if (!email || !password) {
+    warn('WARNING: PLATFORM_ADMIN_EMAIL and PLATFORM_ADMIN_PASSWORD are both needed; no platform administrator was created');
+    return null;
+  }
+  const existing = await query('SELECT id FROM users WHERE lower(username) = $1', [email]);
+  let id = existing.rows[0]?.id;
+  if (!id) {
+    await assertPasswordAllowed(password);
+    const hash = await bcrypt.hash(password, 10);
+    id = (await query(`INSERT INTO users(username, password_hash, display_name, first_name, last_name, email, status, created_by, must_change_password)
+      VALUES ($1,$2,'iorta TechNXT Platform Administrator','iorta TechNXT','Platform Administrator',$1,'active','seed',false) RETURNING id`, [email, hash])).rows[0].id;
+    await recordHistory(id, hash);
+    log(`platform administrator ${email} created`);
+  }
+  await query('INSERT INTO user_roles(user_id, role_id) SELECT $1, id FROM roles WHERE code = $2 ON CONFLICT DO NOTHING', [id, PLATFORM_ROLE]);
+  return id;
+}
+
 /** Applies the seed. `log` receives the progress lines and `warn` the warnings (a line starting with WARNING:; default `log`). */
 export async function seed({ log = console.log, warn = log, sampleData } = {}) {
   for (const [code, name, description, isSystem] of ROLES) {
@@ -174,7 +204,10 @@ export async function seed({ log = console.log, warn = log, sampleData } = {}) {
   const grant = async (role, codes) => {
     for (const c of codes) if (permIds[c]) await query('INSERT INTO role_permissions(role_id, permission_id) VALUES ($1,$2) ON CONFLICT DO NOTHING', [roleIds[role], permIds[c]]);
   };
-  await grant('system-admin', Object.keys(permIds));
+  // the administrator of the tenant holds every permission but the platform ones (lib/platform.js)
+  await grant('system-admin', Object.keys(permIds).filter((c) => !isPlatformPermission(c)));
+  await query(`DELETE FROM role_permissions rp USING permissions p, roles r WHERE rp.permission_id = p.id AND rp.role_id = r.id
+    AND p.code = ANY($1) AND r.code <> $2`, [PLATFORM_PERMISSIONS, PLATFORM_ROLE]);
   for (const [role, codes] of Object.entries(ROLE_PERMISSIONS)) await grant(role, codes);
   for (const [role, inherits] of Object.entries(ROLE_INHERITS)) await query('UPDATE roles SET inherits = $2 WHERE code = $1', [role, inherits]);
   // First administrator. The password comes from ADMIN_PASSWORD; without it a random one is generated and shown once.
@@ -193,6 +226,7 @@ export async function seed({ log = console.log, warn = log, sampleData } = {}) {
     await query(`INSERT INTO app_settings(key, value, "group", label, type, editable) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (key) DO NOTHING`,
       [s.key, JSON.stringify(s.value), s.group, s.label, s.type || 'string', s.editable !== false]);
   }
+  await seedPlatformAdmin({ log, warn });
   // Two-factor secrets stored before encryption at rest (DATA_ENCRYPTION_KEY) was introduced are encrypted now.
   const plain = await query(`SELECT id, totp_secret, totp_pending_secret FROM users
     WHERE (totp_secret IS NOT NULL AND totp_secret NOT LIKE 'enc:%') OR (totp_pending_secret IS NOT NULL AND totp_pending_secret NOT LIKE 'enc:%')`);

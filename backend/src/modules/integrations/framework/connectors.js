@@ -9,6 +9,7 @@
 import { query } from '../../../db/pool.js';
 import { badRequest, notFound } from '../../../lib/errors.js';
 import { adapterOf } from './registry.js';
+import { assertFeature, connectorAllowed, featureOfConnector } from '../../features/service.js';
 
 const run = (db) => db || { query };
 const ENV_NAME = /^[A-Z][A-Z0-9_]{1,63}$/;
@@ -58,7 +59,10 @@ export async function connectorRow(code, db = null) {
 }
 
 export async function listConnectors({ kind } = {}) {
-  const rows = (await query(`SELECT * FROM integration_connectors WHERE ($1::text IS NULL OR kind = $1) ORDER BY sort_order, code`, [kind || null])).rows;
+  // connectors of features this environment does not run (modules/features) are not part of its integrations
+  const all = (await query(`SELECT * FROM integration_connectors WHERE ($1::text IS NULL OR kind = $1) ORDER BY sort_order, code`, [kind || null])).rows;
+  const allowed = await Promise.all(all.map((c) => connectorAllowed(c.code)));
+  const rows = all.filter((_c, i) => allowed[i]);
   const counts = (await query(`SELECT connector_code,
       count(*) FILTER (WHERE status IN ('queued', 'retry', 'processing'))::int AS queued,
       count(*) FILTER (WHERE status = 'failed')::int AS failed,
@@ -74,6 +78,7 @@ const COLUMNS = { name: 'name', enabled: 'enabled', mode: 'mode', endpoint: 'end
 /** Change a connector's settings. Going live, or enabling a live connector, is refused while something is missing. */
 export async function updateConnector(code, b, user) {
   const c = await connectorRow(code);
+  if (featureOfConnector(c.code)) await assertFeature(featureOfConnector(c.code), { write: true });
   const before = toConnector(c);
   if (b.credentialEnv) {
     const bad = Object.entries(b.credentialEnv).filter(([, v]) => v && !ENV_NAME.test(String(v)));

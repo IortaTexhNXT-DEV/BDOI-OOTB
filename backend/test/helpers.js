@@ -231,3 +231,47 @@ export async function delegateAuthority(ctx, body) {
   const { rows: [delegation] } = await query('SELECT id FROM user_delegations WHERE change_id = $1', [d.body.data.change.id]);
   return { id: Number(delegation.id), dateTo: addDays(day, 30) };
 }
+
+/**
+ * Two iorta TechNXT platform administrators signed in with their second factor (maker and checker of the feature
+ * changes, modules/features), as api(method, path) functions. Created once per app (the accounts come from the same
+ * seed function PLATFORM_ADMIN_EMAIL / PLATFORM_ADMIN_PASSWORD use).
+ */
+const platformSessions = new WeakMap();
+export const PLATFORM_ADMINS = [['platform.maker@iorta.test', 'Platform#Maker2026'], ['platform.checker@iorta.test', 'Platform#Checker2026']];
+export async function platformAdmins(app) {
+  if (platformSessions.has(app)) return platformSessions.get(app);
+  const { query } = await import('../src/db/pool.js');
+  const { seedPlatformAdmin } = await import('../src/db/seed.js');
+  const { encryptSecret } = await import('../src/lib/secrets.js');
+  const { generateSecret, totp } = await import('../src/lib/totp.js');
+  const sessions = [];
+  for (const [email, password] of PLATFORM_ADMINS) {
+    const id = await seedPlatformAdmin({ log: () => {}, source: { PLATFORM_ADMIN_EMAIL: email, PLATFORM_ADMIN_PASSWORD: password } });
+    const secret = generateSecret();
+    await query('UPDATE users SET totp_secret = $2, totp_enabled = true, totp_enabled_at = now(), totp_last_step = NULL WHERE id = $1', [id, encryptSecret(secret)]);
+    const first = await request(app).post('/api/auth/login').send({ username: email, password });
+    const done = await request(app).post('/api/auth/login/2fa').send({ challengeToken: first.body.challengeToken, code: totp(secret) });
+    if (!done.body.accessToken) throw new Error(`platform administrator ${email}: ${done.status} ${JSON.stringify(done.body)}`);
+    const token = done.body.accessToken;
+    sessions.push({ id, email, token, api: (m, p) => request(app)[m](`/api${p}`).set('Authorization', `Bearer ${token}`) });
+  }
+  const out = { maker: sessions[0], checker: sessions[1] };
+  platformSessions.set(app, out);
+  return out;
+}
+
+/**
+ * Enable Phase 2 or future-release features for a suite that tests them: requested by one platform administrator,
+ * approved by the other, through the API. `what`: feature keys, or { tier: 'PHASE_2' | 'FUTURE' }.
+ */
+export async function enableFeatures(app, what) {
+  const { maker, checker } = await platformAdmins(app);
+  const body = Array.isArray(what) ? { features: what } : what;
+  const r = await maker.api('post', '/platform/features/changes').send({ action: 'enable', ...body, reasonCode: 'FTR-CONTRACT', releaseRef: 'TEST-SUITE', effective: 'immediate' });
+  if (r.status === 400 && /Nothing to change/.test(r.body.message)) return null;
+  if (r.status !== 201) throw new Error(`enable features: ${r.status} ${JSON.stringify(r.body)}`);
+  const d = await checker.api('post', `/platform/features/changes/${r.body.data.change.id}/decision`).send({ decision: 'approve' });
+  if (d.status !== 200) throw new Error(`approve features: ${d.status} ${JSON.stringify(d.body)}`);
+  return d.body.data;
+}

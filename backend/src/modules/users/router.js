@@ -14,6 +14,7 @@ import { assertPasswordAllowed, passwordPolicy, recordHistory, savePassword } fr
 import { temporaryPassword as temporaryPasswordFor } from '../../lib/secrets.js';
 import { loginHistory } from '../../lib/loginHistory.js';
 import { assertSod } from '../access-control/service.js';
+import { PLATFORM_ROLE, assertCanChangeAccount, assertNoPlatformGrant, assertNoPlatformRole, isPlatformAdmin, isPlatformPermission } from '../../lib/platform.js';
 
 const { router, define } = moduleRouter('User Management', '/users');
 const admin = [requireAuth, requirePermission('write:users')];
@@ -50,6 +51,7 @@ async function resolveStaffFields(b, before = null) {
   if (errors.length) throw badRequest('Validation failed', errors);
 }
 async function assertCanAssign(req, targetUserId, codes) {
+  assertNoPlatformRole(codes);
   if (!isAdmin(req.user) && (codes || []).length) {
     const admin = await adminEquivalentRoles();
     if (codes.some((c) => admin.includes(c))) throw forbidden('Only a System Administrator can grant the System Administrator role or a role that includes it');
@@ -64,11 +66,13 @@ async function assertCanManage(req, targetId) {
   const target = await loadUser('u.id = $1', [targetId]);
   if (!target) throw notFound('User not found');
   if (target.id === req.user.id) throw forbidden('You cannot change your own access; use Change password in your profile');
+  assertCanChangeAccount(req.user, target.roles);
   if (!isAdmin(req.user) && hasAdminRole(target.roles)) throw forbidden('Only a System Administrator can change a System Administrator account');
   return target;
 }
 /** Roles: only a System Administrator changes the administrator role or a role they hold themselves (no self-escalation). */
 async function assertCanEditRole(req, role) {
+  if (role.code === PLATFORM_ROLE) throw forbidden('The iorta TechNXT platform administrator role is not changed from User Management');
   if (isAdmin(req.user)) return;
   if (ADMIN_ROLES.includes(role.code)) throw forbidden('Only a System Administrator can change the System Administrator role');
   if ((await adminEquivalentRoles()).includes(role.code)) throw forbidden('Only a System Administrator can change a role that includes the System Administrator role');
@@ -231,6 +235,7 @@ define({
   handler: async (req, res) => {
     const before = await loadUser('u.id = $1', [req.params.id]);
     if (!before) throw notFound('User not found');
+    assertCanChangeAccount(req.user, before.roles);
     const b = req.body;
     if (b.roles) {
       // Saving one's own profile with the same roles is fine; changing them is not.
@@ -323,7 +328,7 @@ rolesRouter.define({
   response: { success: true, data: [{ id: 9, code: 'tis-sales-associate', name: 'TIS Sales Associate', permissions: ['read:leads'], users: 3, department: 'Sales',
     summary: 'Leads, clients, quotations, placements, policies, endorsements and renewals; no approvals', groupOrder: 0, platform: false,
     modifiedBy: 'BrokerVerse Administrator', modifiedAt: '2026-10-09T08:00:00.000Z' }] },
-  handler: async (_req, res) => {
+  handler: async (req, res) => {
     // the last change is the last audit entry of the role (the roles of the seed and the migrations have none)
     const [rows, { place, platform }] = await Promise.all([many(`SELECT r.id, r.code, r.name, r.description, r.is_system AS "isSystem", r.status, r.inherits AS "includesRoles",
         r.created_at AS "createdAt", COALESCE(last.at, r.updated_at) AS "modifiedAt", COALESCE(u.display_name, last.username) AS "modifiedBy",
@@ -333,14 +338,15 @@ rolesRouter.define({
       LEFT JOIN LATERAL (SELECT a.user_id, a.username, a.at FROM audit_log a WHERE a.entity = 'role' AND a.entity_id = r.id::text ORDER BY a.id DESC LIMIT 1) last ON true
       LEFT JOIN users u ON u.id = last.user_id
       ORDER BY r.id`), roleGroups()]);
-    ok(res, rows.map((r) => ({ ...r, department: place.get(r.code)?.department || null, summary: place.get(r.code)?.summary || null,
+    // the vendor role is not part of the tenant's roles (lib/platform.js)
+    ok(res, rows.filter((r) => r.code !== PLATFORM_ROLE || isPlatformAdmin(req.user)).map((r) => ({ ...r, department: place.get(r.code)?.department || null, summary: place.get(r.code)?.summary || null,
       groupOrder: place.get(r.code)?.order ?? null, platform: platform.has(r.code) })));
   },
 });
 rolesRouter.define({
   method: 'GET', path: '/permissions', summary: 'All permission codes grouped by module', screen: 'Master > User Management > Role > Add', middleware: [requireAuth],
   response: { success: true, data: [{ code: 'read:leads', module: 'leads', description: 'View leads' }] },
-  handler: async (_req, res) => ok(res, await many('SELECT code, module, description FROM permissions ORDER BY module, code')),
+  handler: async (_req, res) => ok(res, (await many('SELECT code, module, description FROM permissions ORDER BY module, code')).filter((p) => !isPlatformPermission(p.code))),
 });
 const roleSchema = z.object({ code: z.string().min(2).regex(/^[a-z0-9-]+$/), name: z.string().min(1), description: z.string().optional(), permissions: z.array(z.string()).default([]), status: z.enum(['active', 'inactive']).optional() });
 async function setPerms(client, roleId, codes) {
@@ -352,6 +358,7 @@ rolesRouter.define({
   request: { code: 'branch-manager', name: 'Branch Manager', permissions: ['read:leads', 'read:policies', 'read:reports'] }, response: { success: true, data: { id: 9, code: 'branch-manager' } },
   handler: async (req, res) => {
     const b = req.body;
+    assertNoPlatformGrant(b.permissions);
     if (await one('SELECT 1 FROM roles WHERE code = $1', [b.code])) throw conflict('Role code already exists');
     const id = await withTransaction(async (c) => {
       const r = await c.query('INSERT INTO roles(code, name, description, status) VALUES ($1,$2,$3,$4) RETURNING id', [b.code, b.name, b.description || null, b.status || 'active']);
@@ -371,6 +378,7 @@ rolesRouter.define({
     if (!role) throw notFound('Role not found');
     await assertCanEditRole(req, role);
     const b = req.body;
+    assertNoPlatformGrant(b.permissions);
     // a change of access goes through the approval of another administrator (Role Permissions); Basic access stays
     const review = !!b.permissions && await changeApproval();
     const change = await withTransaction(async (c) => {

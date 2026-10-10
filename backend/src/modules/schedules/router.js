@@ -7,6 +7,7 @@ import { many, one, query } from '../../db/pool.js';
 import { ok } from '../../lib/respond.js';
 import { audit } from '../../lib/audit.js';
 import { nextRunOf, runJob, schedulerTimeZone, startScheduler } from '../../jobs/scheduler.js';
+import { assertFeature, featureOfJob, featureState } from '../features/service.js';
 
 const { router, define } = moduleRouter('Schedules', '/schedules');
 const canWrite = [requireAuth, requirePermission('write:schedules')];
@@ -19,7 +20,10 @@ define({
   response: { success: true, timeZone: 'Asia/Manila', data: [{ code: 'renewal-notices', cron: '0 6 * * *', enabled: true, lastStatus: 'success', timeZone: 'Asia/Manila', nextRunAt: '2026-01-02T22:00:00.000Z' }] },
   handler: async (_req, res) => {
     const timeZone = await schedulerTimeZone();
-    ok(res, (await many('SELECT * FROM scheduled_jobs ORDER BY id')).map((j) => row(j, timeZone)), 'OK', { timeZone });
+    // the jobs of features this environment does not run are not part of its schedules
+    const state = await featureState();
+    const inEdition = (j) => !featureOfJob(j.code) || state.status(featureOfJob(j.code)) === 'on';
+    ok(res, (await many('SELECT * FROM scheduled_jobs ORDER BY id')).filter(inEdition).map((j) => row(j, timeZone)), 'OK', { timeZone });
   },
 });
 define({
@@ -40,6 +44,7 @@ define({
   request: { cron: '0 7 * * *', enabled: true }, response: { success: true },
   handler: async (req, res) => {
     const b = req.body;
+    if (featureOfJob(req.params.code)) await assertFeature(featureOfJob(req.params.code), { write: true });
     // an invalid expression would be saved and the job would silently drop out of the timetable
     if (b.cron !== undefined && !cron.validate(String(b.cron).trim())) {
       throw badRequest('Validation failed', [{ path: 'cron', message: `"${b.cron}" is not a valid schedule (five fields: minute hour day month weekday, e.g. 0 6 * * *)` }]);
@@ -57,6 +62,7 @@ define({
   handler: async (req, res) => {
     const job = await one('SELECT * FROM scheduled_jobs WHERE code = $1', [req.params.code]);
     if (!job) throw notFound('Job not found');
+    if (featureOfJob(job.code)) await assertFeature(featureOfJob(job.code), { write: true });
     const result = await runJob(job, req.user.username);
     await audit(req, { entity: 'scheduled_job', entityId: job.code, action: 'run', after: result });
     ok(res, result, `Job ${result.status}`);

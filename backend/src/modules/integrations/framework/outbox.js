@@ -19,6 +19,7 @@ import { logger } from '../../../lib/logger.js';
 import { adapterOf, messageTypeOf } from './registry.js';
 import { connectorRow, credentialsOf, liveBlockers } from './connectors.js';
 import { fakeAdapter } from '../adapters/fake.js';
+import { connectorAllowed } from '../../features/service.js';
 
 const run = (db) => db || { query };
 export const OUTBOX_STATUSES = ['queued', 'processing', 'retry', 'sent', 'failed', 'cancelled', 'skipped'];
@@ -66,8 +67,9 @@ async function recordAttempt(db, msg, { attempt, mode, ok, httpStatus = null, du
 async function dispatchOne(row, { fetchImpl } = {}) {
   const connector = await connectorRow(row.connector_code);
   const type = messageTypeOf(row.message_type);
-  if (!connector.enabled) {
-    // a switched-off connector holds its messages: nothing is attempted and the attempt count is kept
+  if (!connector.enabled || !(await connectorAllowed(connector.code))) {
+    // a switched-off connector (or one of a feature that is not enabled) holds its messages: nothing is attempted and
+    // the attempt count is kept
     await query(`UPDATE integration_outbox SET status = 'queued', locked_at = NULL, last_error = $2, next_attempt_at = now() + make_interval(secs => $3), updated_at = now() WHERE id = $1`,
       [row.id, `Connector ${connector.code} is switched off; the message waits until it is enabled`, Number(connector.retry_base_seconds) || 60]);
     return one('SELECT * FROM integration_outbox WHERE id = $1', [row.id]);
