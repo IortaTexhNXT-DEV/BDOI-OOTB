@@ -186,13 +186,15 @@ export async function decisionBlock(a, user, ctx) {
 
 /**
  * The next step of a pending approval: who it waits on ("Awaiting remittance approver: J. Cruz, A. Tan", or "No
- * eligible approver") and when it is due (submission + SLA hours). null once decided.
+ * eligible approver") and when it is due (submission + SLA hours). null once decided. `compact` (a register row):
+ * "Awaiting J. Cruz" for one approver, "Awaiting remittance approver (2)" for several.
  */
-export function nextStepFor(a, eligible) {
+export function nextStepFor(a, eligible, { compact = false } = {}) {
   if (a.status !== 'Pending') return null;
   const dueAt = new Date(new Date(a.created_at).getTime() + Number(a.sla_hours || 0) * 3600000).toISOString();
   if (!eligible.length) return { code: 'approve', label: 'No eligible approver', actor: null, dueAt };
   const names = eligible.map((u) => u.name).join(', ');
-  return { code: 'approve', label: a.delegated_to ? `Awaiting ${names}` : `Awaiting remittance approver: ${names}`,
+  const several = compact && eligible.length > 1 && !a.delegated_to;
+  return { code: 'approve', label: a.delegated_to || (compact && !several) ? `Awaiting ${names}` : several ? `Awaiting remittance approver (${eligible.length})` : `Awaiting remittance approver: ${names}`,
     actor: eligible.length === 1 ? { type: 'user', id: eligible[0].id, name: eligible[0].name } : { type: 'users', ids: eligible.map((u) => u.id), name: names }, dueAt };
 }

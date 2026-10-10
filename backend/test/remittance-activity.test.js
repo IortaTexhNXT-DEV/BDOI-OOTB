@@ -67,7 +67,7 @@ describe('the decision under the remittance', () => {
     expect((await people.cruz('post', `/remittance/approvals/${a.id}/reject`).send({ reasonCode: 'RRJ-OTHER', note: 'OD rate of POL-1' })).status).toBe(200);
     const log = await activity('maker', a.remittanceId);
     const returned = log.find((e) => e.actionCode === 'reject');
-    expect(returned).toMatchObject({ actionLabel: 'Remittance returned to the maker', toStatus: 'Rejected', remarks: 'Other: OD rate of POL-1',
+    expect(returned).toMatchObject({ actionLabel: 'Remittance returned to the maker', toStatus: 'Returned', remarks: 'Other: OD rate of POL-1',
       approval: { reason: 'Other: OD rate of POL-1', limitAtDecision: 1000000 } });
     expect(JSON.stringify(log.map(({ approval, ...e }) => ({ ...e, approval: { ...approval, limitSource: undefined } })))).not.toMatch(RAW);
   });

@@ -40,7 +40,7 @@ export const ENTITY_LABELS = {
   journal_voucher: 'Journal voucher', journal: 'Journal', placement: 'Placement slip', broker_slip: 'Broker slip', insurer_statement: 'Insurer statement',
   disbursement: 'Disbursement', collection: 'Collection', commission_referrer: 'Referrer', commission_debit_note: 'Commission debit note',
   commission_line: 'Commission line', commission_rate: 'Commission rate', remittance: 'Remittance', remittance_item: 'Remittance item',
-  remittance_batch: 'Remittance batch', remittance_statement: 'Remittance statement', data_subject_request: 'Data subject request',
+  remittance_batch: 'Remittance batch', remittance_import: 'Remittance import', remittance_statement: 'Remittance statement', data_subject_request: 'Data subject request',
   privacy_consent: 'Privacy consent', 'system-settings': 'System setting', settings: 'Configuration', risk_mapping: 'Risk mapping',
   product_template: 'Product template', checkbook: 'Checkbook', authority_limit: 'Authority limit', report_schedule: 'Report schedule',
   premium_warranty_extension: 'Premium warranty extension', petty_cash_request: 'Petty cash request', petty_cash_fund: 'Petty cash fund',

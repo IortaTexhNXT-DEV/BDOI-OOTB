@@ -22,6 +22,7 @@ import { activityEntries } from '../../lib/auditEvents.js';
 import { APPROVAL_SELECT, approvalLink, decide, refusal, remittanceLink, statusLabels } from './service.js';
 import { approversFor, decisionBlock, decisionContext, limitSourceLabel, nextStepFor, roleNames, whenText } from './decision.js';
 import { remittanceActivity } from './activity.js';
+import { SOURCES } from './register.js';
 
 export const VIEWS = ['mine', 'submitted', 'all', 'decided'];
 const TYPES = { remittance: 'Remittance', settlement: 'Settlement', adjustment: 'Adjustment', transfer: 'Electronic transfer' };
@@ -159,6 +160,16 @@ export async function approvalInbox(qs, user, pg, { now = new Date() } = {}) {
   return { view, rows, total, totals: { count: total, amount }, kpis: summary };
 }
 
+/** Source and off-cycle reason of a remittance (remittances.data until the Phase 2 columns): an import or Run now is off-cycle. */
+export function offCycleOf(r) {
+  const d = r.data || {};
+  const source = d.source || (r.config_code ? 'weekly-run' : 'manual');
+  const offCycle = ['import', 'run-now'].includes(source);
+  return { source: { code: source, label: source === 'import' && d.importNo ? `Import ${d.importNo}` : SOURCES[source] || source,
+    importId: d.importId || null, importNo: d.importNo || null },
+  offCycle, offCycleReason: offCycle ? d.offCycleReason?.text || d.offCycleReason?.name || null : null };
+}
+
 /** Header, totals and the first lines of a remittance under approval, with the previous remittance of its insurer. */
 async function remittanceSummary(a, labels) {
   const r = await one(`SELECT r.*, i.name AS insurer_name, (SELECT display_name FROM users u WHERE u.id = r.created_by) AS created_by_name,
@@ -173,7 +184,8 @@ async function remittanceSummary(a, labels) {
   return {
     record: { id: r.id, remittanceNo: r.remittance_number, statusCode: r.status, statusLabel: labels[r.status] || r.status, insurer: { id: r.insurance_company_id, name: r.insurer_name },
       productLine: [...new Set(lines.map((l) => l.product).filter(Boolean))].join(', ') || null, period: r.period, remittanceDate: r.remittance_date, dueDate: r.due_date,
-      preparedBy: r.created_by_name || 'System', submittedBy: r.submitted_by_name || null, submittedAt: r.submitted_at ? new Date(r.submitted_at).toISOString() : null, version: r.version, link: remittanceLink(r.id) },
+      preparedBy: r.created_by_name || 'System', submittedBy: r.submitted_by_name || null, submittedAt: r.submitted_at ? new Date(r.submitted_at).toISOString() : null, version: r.version, link: remittanceLink(r.id),
+      ...offCycleOf(r) },
     totals: { policies: r.policy_count, premium: round2(r.gross_premium), commission: round2(r.commission), tax: round2(r.tax), adjustments: round2(r.adjustments), dueToInsurer: round2(net) },
     lines: lines.map((l) => ({ policyNo: l.policy_number, client: l.insured_name, product: l.product, premium: round2(l.premium), commission: round2(l.commission), tax: round2(l.tax), dueToInsurer: round2(l.net) })),
     lineCount: r.policy_count,

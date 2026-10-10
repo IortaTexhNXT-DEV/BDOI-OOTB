@@ -391,8 +391,11 @@ export async function commissionDebitNoteDoc(dn, lines) {
  * Remittance advice to an insurer (Accounts > Remittance > Tracking > Print), or the agency bill of an agent: the
  * remittance, the policies it pays with premium, commission, tax and net amount, the amount due and the signatures.
  * `rem` and `lines` are the API shapes (remittance/service.js#remittanceDetails and its policies).
+ * With `advice` (remittance/documents.js#adviceData) it is the advice letter sent with the schedule: addressee,
+ * reference block, payment block and the amounts paid, portrait, without the policy list (the schedule is attached).
  */
-export async function remittanceAdviceDoc(rem, lines) {
+export async function remittanceAdviceDoc(rem, lines, advice = null) {
+  if (advice) return remittanceAdviceLetter(rem, advice);
   const agency = rem.kind === 'agency-bill';
   const title = agency ? await getSetting('remittance.agency_bill_title', 'Agency Bill') : await getSetting('remittance.advice_title', 'Remittance Advice');
   const h = await header(title || (agency ? 'Agency Bill' : 'Remittance Advice'), rem.remittanceNo);
@@ -420,6 +423,31 @@ export async function remittanceAdviceDoc(rem, lines) {
       { heading: `Amount due (${currency})`, table: { columns: ['Item', { label: 'Amount', type: 'money' }], widths: [375, 140], rows: totals } },
       ...(present(rem.remarks) ? [{ heading: 'Remarks', text: rem.remarks }] : []),
       sig.section,
+    ] };
+}
+
+/** The advice letter of remittanceAdviceDoc (Accounts > Remittance > Remittances > Download advice). */
+async function remittanceAdviceLetter(rem, a) {
+  const title = (await getSetting('remittance.advice_title', 'Remittance Advice')) || 'Remittance Advice';
+  const h = await header(title, rem.remittanceNo);
+  const f = formatters(h);
+  const currency = rem.currency || h.format?.currency || 'PHP';
+  const lh = h.letterhead || {};
+  const amount = (v) => (v === null || v === undefined ? '-' : money(v));
+  const contact = [lh.email, lh.phone].filter(present).join(' · ');
+  return { ...h, orientation: 'portrait',
+    meta: kv([['Date', f.date(a.date)], ['To', a.insurer.name], ['Address', a.insurer.address], ['TIN', a.insurer.tin]]),
+    sections: [
+      { heading: 'Reference', rows: kv([['Remittance no.', rem.remittanceNo], ['Coverage week', a.coverage ? `${f.date(a.coverage.from)} to ${f.date(a.coverage.to)}` : ''],
+        ['Product line', a.productLine], ['Basis', a.basis]]) },
+      { heading: 'Payment', rows: kv([['Voucher no.', a.payment?.voucherNo], ['Method', paymentModeLabel(a.payment?.method)], ['Value date', f.date(a.payment?.valueDate)],
+        ['Bank reference', a.payment?.bankReference]]) },
+      { heading: `Amounts (${currency})`, table: { columns: ['Item', { label: 'Amount', type: 'money' }], widths: [375, 140], rows: [
+        ['Total premium', amount(a.amounts.premium)], ['Commission', amount(a.amounts.commission)], ['VAT on commission', amount(a.amounts.commissionVat)],
+        ['EWT on commission', amount(a.amounts.commissionEwt)], ['Due to insurer', amount(a.amounts.dueToInsurer)], ['Refund credits netted', amount(a.amounts.refundCredits)],
+        ['Amount paid', amount(a.amounts.amountPaid)]] } },
+      { text: 'Schedule attached.' },
+      ...(contact ? [{ note: `${lh.name ? `${lh.name} Finance` : 'Finance'}: ${contact}` }] : []),
     ] };
 }
 

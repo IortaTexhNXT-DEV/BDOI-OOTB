@@ -71,7 +71,7 @@ describe('remittance activity log', () => {
     // a decision shows its level, the limit at decision and its source; the bookkeeping fields of the approval are not changes
     expect(approved.changes.every((c) => ['level', 'limitAtDecision', 'limitSource'].includes(c.field))).toBe(true);
     expect(approved.approval).toMatchObject({ limitSourceLabel: 'Role limit: Accounting' });
-    expect(settled).toMatchObject({ action: 'settle', fromStatus: 'Approved', toStatus: 'Completed', user: { displayName: 'Alma Finance' } });
+    expect(settled).toMatchObject({ action: 'settle', fromStatus: 'Approved', toStatus: 'Settled (voucher raised)', user: { displayName: 'Alma Finance' } });
     expect(settled.changes[0]).toMatchObject({ label: 'Settlement', after: settlementApproval.referenceNo });
   });
 

@@ -24,6 +24,7 @@ import { COLUMN_KEYS } from '../bank-reconciliation/statements.js';
 import { COLUMN_KEYS as INSURER_COLUMN_KEYS } from '../insurer-reconciliation/statements.js';
 import { DEALER_SALE_COLUMNS } from '../motor-programmes/service.js';
 import { FLEET_VEHICLE_COLUMNS } from '../fleet/service.js';
+import { IMPORT_COLUMNS as REMITTANCE_IMPORT_COLUMNS, PRODUCT_LINES } from '../remittance/imports.js';
 
 const XLSX_OR_CSV = 'XLSX (the first sheet, Data, is read) or CSV saved as UTF-8. The first row must be the column headers.';
 const IMPORT_ROWS = 'Up to 20,000 data rows per file (IMPORT_MAX_ROWS) and 10 MB (IMPORT_MAX_MB).';
@@ -346,6 +347,35 @@ export function remittanceUpload(maps, configCode) {
     onError: 'Validation lists every row error (policy not found, premium not positive, commission above premium, duplicate policy). Process then creates draft remittances from the valid rows only.',
     samples: [Object.fromEntries(columns.map((c) => [c.key, c.example]))],
     notes: ['The columns come from the Bulk Processing master (Master > Finance > Remittance Master > Bulk Processing). Change the field mappings there and regenerate this template if your file differs.'],
+  };
+}
+
+/**
+ * Import policy list of Accounts > Remittance > Remittances (remittance/imports.js): the policies to remit off-cycle.
+ * The Columns sheet lists the active insurer codes (`insurerCodes`) and the product lines as allowed values.
+ */
+export function remittancePolicyList({ insurerCodes = [], maxRows = 5000, maxMb = 10 } = {}) {
+  const allowed = { insurerCode: insurerCodes, productLine: PRODUCT_LINES };
+  const code = insurerCodes[0] || 'PIONEER';
+  const columns = REMITTANCE_IMPORT_COLUMNS.map((c) => ({ ...c, allowed: allowed[c.key] }));
+  return {
+    id: 'remittance-policy-list', file: 'Remittance_Policy_List_Template.xlsx', title: 'Remittance policy list',
+    menu: 'Accounts > Remittance > Remittances > Import policy list', route: 'POST /api/remittance/imports/validate (multipart field "file" and field purposeCode, a reason of the remittance_off_cycle context; optional note)',
+    columns, maxRows: `Up to ${Number(maxRows).toLocaleString('en-US')} data rows per file (remittance.import_max_rows) and ${maxMb} MB (IMPORT_MAX_MB).`,
+    fileTypes: '.xlsx (the first sheet, Data, is read) or .csv saved as UTF-8. The first row must be the column headers.',
+    onError: 'Validate checks every row and shows its result (Ready, Ready · Variance, Already on REM, Not found, Not issued, Insurer differs, Product line differs, Direct bill, Duplicate in file); nothing is created. Create then makes draft remittances from the ready rows only. The error report lists every row of the file with its Result and Message.',
+    samples: [
+      { policyNo: 'TISPH-PC-0001234', insurerCode: code, productLine: 'Motor', expectedDue: '25817.34', insurerReference: 'SOA-2026-10-001', remark: 'Go-live opening' },
+      { policyNo: 'TISPH-PC-0001235', insurerCode: code, productLine: 'Motor', expectedDue: '', insurerReference: '', remark: '' },
+    ],
+    notes: [
+      '1. Use this file for go-live opening remittances, catch-up or an insurer\'s list. The weekly run needs no file.',
+      '2. Fill the Data sheet, one policy per row. Do not change the headers.',
+      '3. Amounts are computed by BrokerVerse from the collections. Expected Due to Insurer is only compared.',
+      '4. Policies not fully paid are listed as Held. Fully paid policies without proof of payment are listed as Exception. Neither is remitted.',
+      `5. Limits: .xlsx or .csv; at most ${maxMb} MB (IMPORT_MAX_MB) and ${Number(maxRows).toLocaleString('en-US')} rows.`,
+      '6. The drafts still need Submit for approval and approval by another user.',
+    ],
   };
 }
 

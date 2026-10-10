@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { setup, loginAs } from './helpers.js';
 import { pool } from '../src/db/pool.js';
+import { clearSettingsCache } from '../src/lib/settings.js';
 
 let ctx;
 let fin;
@@ -26,7 +27,8 @@ describe('remittances and approvals', () => {
     expect(r.body.total).toBeGreaterThanOrEqual(10);
     expect(r.body.summary.count).toBe(r.body.total);
     const labels = new Set((await ctx.api('get', '/remittance/remittances?perPage=100')).body.data.map((x) => x.status));
-    expect([...labels]).toEqual(expect.arrayContaining(['Draft', 'Approved', 'Completed']));
+    // TISPH names (seed 90): a settled remittance has its voucher raised
+    expect([...labels]).toEqual(expect.arrayContaining(['Draft', 'Approved', 'Settled (voucher raised)']));
     const pend = await ctx.api('get', '/remittance/remittances?status=Pending%20Approval');
     expect(pend.body.data.every((x) => x.statusCode === 'for-approval')).toBe(true);
     const d = await ctx.api('get', `/remittance/remittances/${r.body.data[0].id}`);
@@ -82,7 +84,7 @@ describe('remittances and approvals', () => {
     const rec = (await ctx.api('get', `/remittance/remittances/${remId}`)).body.data;
     expect(rec.version).toBeGreaterThan(1);
     expect(rec.decision).toMatchObject({ canDecide: false, blockedCode: 'ALREADY_DECIDED' });
-    expect(rec.nextStep).toBeNull();
+    expect(rec.nextStep).toMatchObject({ code: 'settle', label: 'Include in a settlement' });
     expect((await ctx.api('get', '/remittance/processing-history')).body.data[0].batchId).toBe(p.body.data.batchId);
   });
   it('settles through a settlement approved by a second user', async () => {
@@ -100,7 +102,7 @@ describe('remittances and approvals', () => {
     expect(sub.body.data.status).toBe('Pending Approval');
     const ap = await as(fin, 'post', `/remittance/approvals/${(await ctx.api('get', '/remittance/approvals?transactionType=Settlement')).body.data[0].id}/approve`).send({ comments: 'Paid' });
     expect(ap.body.data.status).toBe('Approved');
-    expect((await ctx.api('get', `/remittance/remittances/${remId}`)).body.data.status).toBe('Completed');
+    expect((await ctx.api('get', `/remittance/remittances/${remId}`)).body.data).toMatchObject({ status: 'Settled (voucher raised)', statusCode: 'settled' });
   });
 });
 
@@ -238,9 +240,21 @@ describe('work items', () => {
     expect(e.status).toBe(200);
     expect((await ctx.api('get', '/remittance/automated/history')).body.data.length).toBeGreaterThanOrEqual(3);
   });
-  it('bulk upload validates rows against the configuration and processes valid ones', async () => {
+  it('bulk upload is closed for TISPH: Import policy list replaces it', async () => {
+    const r = await ctx.api('post', '/remittance/bulk/upload').field('configCode', 'BFM-001').attach('file', Buffer.from('PolicyNo,Premium\nX,1\n'), 'x.csv');
+    expect(r.status).toBe(409);
+    expect(r.body.errors[0]).toMatchObject({ code: 'USE_IMPORT', link: '/finance/remittance/remittances?import=new' });
+    expect((await ctx.api('post', '/remittance/bulk/rmi_x/process')).status).toBe(409);
+    expect((await ctx.api('get', '/remittance/bulk/template')).status).toBe(409);
+    expect((await ctx.api('get', '/remittance/bulk')).status).toBe(200);
+    expect((await pool.query("SELECT status FROM master_records WHERE type_code = 'remittance-bulk-processing' AND code = 'BFM-002'")).rows).toEqual([]);
+  });
+  it('bulk upload validates rows against the configuration and processes valid ones at the booked amounts', async () => {
+    await pool.query("UPDATE app_settings SET value = 'true' WHERE key = 'remittance.bulk_upload_enabled'");
+    clearSettingsCache();
     const [pol] = await policyFor('MAAGAP');
     await pool.query('DELETE FROM remittance_lines WHERE policy_id = $1', [pol.id]);
+    const booked = (await pool.query('SELECT premium_total, commission_amount FROM policies WHERE id = $1', [pol.id])).rows[0];
     const csv = `PolicyNo,Premium,Commission,InsuredName\n${pol.policy_number},10000,1500,Test\nNOPE-1,500,10,X\n,abc,1,Y\n`;
     const u = await ctx.api('post', '/remittance/bulk/upload').field('configCode', 'BFM-001').attach('file', Buffer.from(csv), { filename: 'sept.csv', contentType: 'text/csv' });
     expect(u.status).toBe(201);
@@ -249,6 +263,10 @@ describe('work items', () => {
     const p = await ctx.api('post', `/remittance/bulk/${u.body.data.id}/process`);
     expect(p.body.data.remittances).toHaveLength(1);
     expect(p.body.data.upload.status).toBe('Processed');
+    // the typed premium and commission are not used
+    const [line] = (await pool.query('SELECT premium, commission FROM remittance_lines WHERE remittance_id = $1', [p.body.data.remittances[0].id])).rows;
+    expect(line.premium).toBe(Number(booked.premium_total));
+    expect(line.premium).not.toBe(10000);
     expect((await ctx.api('post', '/remittance/bulk/upload').attach('file', Buffer.from('A,B\n1,2\n'), 'x.csv')).status).toBe(400);
   });
   it('bank reconciliation: auto-match, manual partial match with exception, unmatch', async () => {

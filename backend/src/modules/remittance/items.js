@@ -3,7 +3,7 @@
  * schedules, bulk uploads, bank reconciliation, analytics, history and the master overview.
  */
 import { many, one, query, withTransaction } from '../../db/pool.js';
-import { badRequest, conflict, notFound } from '../../lib/errors.js';
+import { HttpError, badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { renderTemplate } from '../documents/common.js';
 import { addCalendarMonths, addDays, businessTimeZone, today } from '../../lib/dates.js';
@@ -456,6 +456,17 @@ export async function runDueSchedules({ asOf = null } = {}) {
 
 // ---------------- bulk processing ----------------
 
+/**
+ * The bulk upload of earlier releases is open only while remittance.bulk_upload_enabled is on (TISPH: off). Off-cycle
+ * remittances then come from Import policy list (imports.js), whose amounts are always the system ones.
+ */
+export async function assertBulkUpload() {
+  if ((await getSetting('remittance.bulk_upload_enabled')) === false) {
+    const message = 'Bulk processing is replaced by Import policy list on Remittances.';
+    throw new HttpError(409, message, [{ path: 'bulk', code: 'USE_IMPORT', message, link: '/finance/remittance/remittances?import=new' }]);
+  }
+}
+
 function parseCsv(text, delimiter = ',') {
   const rows = [];
   let row = [];
@@ -552,7 +563,8 @@ export async function processBulk(id, user) {
     const avail = new Set((await eligiblePolicies({ insurerId, policyIds: lines.map((l) => l.policyId) })).map((p) => p.id));
     const use = lines.filter((l) => avail.has(l.policyId));
     if (!use.length) continue;
-    created.push(await createRemittance({ kind: 'direct-bill', insurerId, lines: use.map((l) => ({ policyId: l.policyId, premium: l.premium, commission: l.commission, tax: l.tax })), remarks: `Bulk upload ${x.reference_no}` }, user));
+    // the file selects the policies; premium, commission and tax are the booked ones (the typed amounts are not used)
+    created.push(await createRemittance({ kind: 'direct-bill', insurerId, lines: use.map((l) => ({ policyId: l.policyId })), remarks: `Bulk upload ${x.reference_no}` }, user));
   }
   await query('UPDATE remittance_items SET status = $2, data = data || $3, updated_by = $4, updated_at = now() WHERE id = $1',
     [x.id, created.length ? 'Processed' : 'Failed', JSON.stringify({ remittanceIds: created.map((r) => r.id), processedAt: new Date().toISOString() }), user.id]);

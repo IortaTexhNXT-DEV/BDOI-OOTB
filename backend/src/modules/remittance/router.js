@@ -18,6 +18,9 @@ import { commissionDebitNoteDoc, remittanceAdviceDoc } from '../documents/templa
 import { sendTable } from '../documents/tabular.js';
 import * as approvals from './approvals.js';
 import { ACTIVITY_HEADER, activityRows, remittanceActivity } from './activity.js';
+import * as register from './register.js';
+import * as documents from './documents.js';
+import * as imports from './imports.js';
 
 /** Remittance (Accounts > Remittance, 16 screens) and the Remittance Master overview. */
 const { router, define } = moduleRouter('Remittance', '/remittance');
@@ -27,7 +30,14 @@ const write = canWrite('remittance');
 const approve = [requireAuth, requirePermission('approve:remittance')];
 const upload = importUpload();
 const singleFile = (req, res, next) => upload.single('file')(req, res, (e) => next(e ? badRequest(e.message) : undefined));
+// the bulk upload of earlier releases, while remittance.bulk_upload_enabled is on (409 with a pointer to Import policy list)
+const bulkOpen = (req, res, next) => items.assertBulkUpload().then(() => next(), next);
 const S = (name) => `Accounts > Remittance > ${name}`;
+const sendXlsx = (res, { buffer, fileName }) => {
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+  res.send(buffer);
+};
 const rem = { id: 'rm_1', remittanceNo: 'REM-2026-00001', remittanceDate: '2026-09-15', insurerCode: 'MALAYAN', insurerName: 'Malayan Insurance Co., Inc.', policyCount: 3, grossAmount: 45000, commission: 6750, tax: 0, netAmount: 38250, status: 'Pending Approval', statusCode: 'for-approval' };
 const listOf = async (req, res, kind, mapper) => {
   const pg = paging(req.query, { page: 1, perPage: 50 });
@@ -42,14 +52,54 @@ const logged = (entity, action, fn) => async (req) => {
 };
 
 // ---------------- remittances (tracking, direct / agency bills) ----------------
+const regRow = { id: 'rm_21', remittanceNo: 'REM-2026-00021', kind: 'direct-bill', status: 'for-approval', statusLabel: 'Pending Approval',
+  insurer: { id: 3, code: 'PIONEER', name: 'Pioneer Insurance & Surety Corp.', shortName: 'Pioneer' }, productLine: 'Motor', basis: 'net', basisLabel: 'Net',
+  coverageWeek: { from: '2026-10-05', to: '2026-10-09' }, source: { code: 'import', label: 'Import IMP-2026-0004', importId: 'imp_1', importNo: 'IMP-2026-0004' },
+  offCycleReason: { code: 'ROC-GOLIVE', name: 'Go-live opening', note: null, text: 'Go-live opening' }, policyCount: 12, heldCount: null, premium: 520000, commission: 98000, tax: 12858.57,
+  adjustments: 0, dueToInsurer: 409141.43, currency: 'PHP', remittanceDate: '2026-10-12', dueDate: '2026-10-16', overdue: false,
+  flags: { offCycle: true, offCycleReason: 'Go-live opening', overdue: false, adviceSent: false, bankMatched: false, openExceptions: 0 },
+  nextStep: { code: 'approve', label: 'Awaiting remittance approver (2)', actor: { type: 'users', ids: ['usr_9', 'usr_12'], name: 'J. Cruz, A. Tan' }, dueAt: '2026-10-13T02:12:00.000Z' },
+  decision: { canDecide: false, blockedCode: 'SUBMITTER', blockedReason: 'You submitted this remittance. Another user with remittance authority must approve it.' }, approvalId: 21, approvalVersion: 1,
+  actions: [{ code: 'view', label: 'View', allowed: true, link: '/finance/remittance/remittances/rm_21' },
+    { code: 'download-schedule-xlsx', label: 'Download schedule (XLSX)', allowed: true, href: '/remittance/remittances/rm_21/schedule.xlsx' },
+    { code: 'download-schedule-pdf', label: 'Download schedule (PDF)', allowed: true, href: '/remittance/remittances/rm_21/schedule.pdf' }],
+  version: 3, voucher: null, paidOn: null, bankReference: null, submittedBy: { id: 'usr_4', name: 'M. Reyes' }, submittedAt: '2026-10-12T02:12:00.000Z',
+  createdBy: { id: 'usr_4', name: 'M. Reyes' }, createdAt: '2026-10-12T01:40:00.000Z', link: '/finance/remittance/remittances/rm_21' };
 define({
-  method: 'GET', path: '/remittances', summary: 'Remittances / bills (kind, status label or code, insurer, from, to, search, paging)', screen: `${S('Tracking')}; ${S('Automated Processing')}`,
-  middleware: read, query: { kind: 'direct-bill', status: 'Pending Approval', insurer: 'MALAYAN', from: '2026-09-01', to: '2026-09-30', page: 1, perPage: 20 },
-  response: { success: true, data: [rem], total: 1, page: 1, perPage: 20, totalPages: 1, summary: { count: 1, grossAmount: 45000, netAmount: 38250 } },
+  method: 'GET', path: '/remittances',
+  summary: 'Remittances register (Remittances screen) with segment=my-work|drafts|in-approval|in-payment|all (direct-bill only; week (a Monday), insurerId, productLine, status (All), source weekly-run|run-now|import|manual, kpi to-submit|awaiting-approval|approved-not-paid|overdue, q (REM, policy or OR no.), sort (remittanceNo, dueDate, dueToInsurer, -createdAt ...), paging): rows with status label, flags, next step and actions, totals of the filtered set, the 4 KPI figures and segment counts over the filters. Without segment: the remittances / bills of earlier screens (kind, status label or code, insurer, from, to, search, paging)',
+  screen: `${S('Remittances')}; ${S('Tracking')}; ${S('Automated Processing')}`,
+  middleware: read, query: { segment: 'all', week: '2026-10-05', insurerId: 3, productLine: 'Motor', status: 'for-approval', source: 'import', q: 'REM-2026', page: 1, perPage: 50, sort: '-dueDate' },
+  response: { success: true, data: [regRow], total: 1, page: 1, perPage: 50, totalPages: 1, segment: 'all',
+    totals: { count: 1, policies: 12, premium: 520000, commission: 98000, tax: 12858.57, dueToInsurer: 409141.43 },
+    kpis: { toSubmit: { count: 3, amount: 1234567.89 }, awaitingApproval: { count: 1, amount: 409141.43 }, approvedNotPaid: { count: 2, amount: 120000, oldestDays: 4 }, overdue: { count: 0, amount: 0 } },
+    segments: { 'my-work': 3, drafts: 3, 'in-approval': 1, 'in-payment': 2, all: 9 } },
   handler: async (req, res) => {
     const pg = paging(req.query, { page: 1, perPage: 50 });
+    if (req.query.segment) {
+      const r = await register.registerList(req.query, req.user, pg);
+      return sendList(res, r.rows, r.total, pg, { segment: r.segment, totals: r.totals, kpis: r.kpis, segments: r.segments });
+    }
     const { rows, total, summary } = await svc.listRemittances(req.query, pg);
-    sendList(res, rows, total, pg, { summary });
+    return sendList(res, rows, total, pg, { summary });
+  },
+});
+define({
+  method: 'GET', path: '/remittances/export.xlsx',
+  summary: 'Register export (Remittances > Export XLSX): every visible and hidden column over the whole filtered set (the filters of GET /remittances), the letterhead block and the filter summary above the table',
+  screen: S('Remittances > Export XLSX'), middleware: read, query: { segment: 'all', week: '2026-10-05', insurerId: 3 }, response: '(xlsx file)',
+  handler: async (req, res) => sendXlsx(res, await documents.registerXlsx({ ...req.query, segment: req.query.segment || 'all' }, req.user)),
+});
+define({
+  method: 'POST', path: '/remittances/submit',
+  summary: 'Submit several draft or returned remittances for approval, each checked on its own with the version it was shown (write:remittance); the ready ones go as one processing batch to their eligible approvers. Per-item results: Submitted, or the reason (ALREADY_SUBMITTED "REM-2026-00021 was submitted by J. Cruz at 10:12.", STALE, WRONG_STATUS, INVALID "Not submitted: ...")',
+  screen: S('Remittances > Submit for approval'), middleware: write,
+  request: { items: [{ id: 'rm_21', version: 2 }, { id: 'rm_22', version: 1 }] },
+  response: { success: true, data: { submitted: 1, refused: 1, batchId: 'BLK-2026-00007', results: [{ id: 'rm_21', reference: 'REM-2026-00021', ok: true, status: 'for-approval', statusLabel: 'Pending Approval', message: 'Submitted' },
+    { id: 'rm_22', reference: 'REM-2026-00022', ok: false, code: 'INVALID', message: 'Not submitted: Due to insurer must be greater than zero' }] } },
+  handler: async (req, res) => {
+    const r = await register.submitMany(req.body || {}, req.user, req);
+    ok(res, r, `${r.submitted} remittance(s) submitted for approval`);
   },
 });
 const activity = {
@@ -60,10 +110,13 @@ const activity = {
 };
 define({
   method: 'GET', path: '/remittances/:id',
-  summary: 'Remittance details: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, and the activity log (as GET /remittances/:id/activity)',
-  screen: S('Tracking > View'), middleware: read,
-  response: { success: true, data: { ...rem, insurerDetails: { code: 'MALAYAN', name: 'Malayan Insurance Co., Inc.' }, policies: [{ policyNo: 'POL-2026-00001', premium: 15000, commission: 2250 }], activityLog: [activity] } },
-  handler: async (req, res) => ok(res, await svc.remittanceDetails(req.params.id, { viewer: req.user })),
+  summary: 'Remittance record: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, the activity log (as GET /remittances/:id/activity) and, for a direct-bill remittance, the register row (status label, flags, source and import, off-cycle reason, coverage week, basis, actions), the lines with the expected amount and variance of an import, the payment through the settlement voucher and the downloads',
+  screen: `${S('Remittances > Record')}; ${S('Tracking > View')}`, middleware: read,
+  response: { success: true, data: { ...rem, ...regRow, statusCode: 'for-approval', insurerDetails: { code: 'MALAYAN', name: 'Malayan Insurance Co., Inc.' },
+    policies: [{ policyNo: 'POL-2026-00001', premium: 15000, commission: 2250 }],
+    lines: [{ id: 1, policyNo: 'TISPH-PC-0001234', insuredName: 'J. Santos', premium: 64159.68, commission: 24022.5, tax: 0, netAmount: 40137.18, expectedDue: 40191.18, variance: -54, insurerReference: 'SOA-2026-10-001', remark: null }],
+    payment: null, downloads: [{ code: 'schedule-xlsx', label: 'schedule (XLSX)', href: '/remittance/remittances/rm_21/schedule.xlsx' }], activityLog: [activity] } },
+  handler: async (req, res) => ok(res, await register.remittanceRecord(req.params.id, req.user)),
 });
 define({
   method: 'GET', path: '/remittances/:id/activity',
@@ -87,6 +140,29 @@ define({
   handler: async (req, res) => {
     const r = await svc.remittanceDetails(req.params.id, { viewer: req.user });
     sendPdf(res, buildPdf(await remittanceAdviceDoc(r, r.policies)), `remittance-${r.remittanceNo}.pdf`, req.query.download ? 'attachment' : 'inline');
+  },
+});
+for (const [ext, doc] of [['xlsx', 'XLSX'], ['pdf', 'PDF']]) {
+  define({
+    method: 'GET', path: `/remittances/:id/schedule.${ext}`,
+    summary: `Remittance schedule (${doc}${ext === 'pdf' ? ', A4 landscape' : ''}): letterhead, insurer, product line, coverage date, remittance no. and date, one row per policy (issued date, client, car model, insurer, policy no., business type, inception, sum insured, premium, commission, taxes, due to insurer), totals and the note that it is valid without signature; file <REM no>_Schedule_<yyyymmdd>.${ext}`,
+    screen: `${S('Remittances > Download schedule')}; ${S('Remittances > Record > Documents')}`, middleware: read, response: ext === 'pdf' ? 'application/pdf' : '(xlsx file)',
+    handler: async (req, res) => {
+      if (ext === 'pdf') {
+        const { buffer, fileName } = await documents.schedulePdf(req.params.id, req.user);
+        return sendPdf(res, buffer, fileName, 'attachment');
+      }
+      return sendXlsx(res, await documents.scheduleXlsx(req.params.id, req.user));
+    },
+  });
+}
+define({
+  method: 'GET', path: '/remittances/:id/advice.pdf',
+  summary: 'Remittance advice letter (PDF, portrait): the insurer\'s name, address and TIN, the remittance no., coverage week, product line and basis, the payment block of the settlement voucher (voucher no., method, value date, bank reference) and the amounts (total premium, commission, VAT and EWT on commission, due to insurer, refund credits netted, amount paid); file <REM no>_Advice_<yyyymmdd>.pdf',
+  screen: `${S('Remittances > Download advice')}; ${S('Remittances > Record > Documents')}`, middleware: read, query: { download: 1 }, response: 'application/pdf',
+  handler: async (req, res) => {
+    const { buffer, fileName } = await documents.advicePdf(req.params.id, req.user);
+    sendPdf(res, buffer, fileName, req.query.download === '0' ? 'inline' : 'attachment');
   },
 });
 define({
@@ -655,6 +731,80 @@ define({
   handler: async (req, res) => ok(res, await logged('remittance_schedule', 'run', (r) => items.runSchedule(r.params.id, r.user))(req, res), 'Schedule executed'),
 });
 
+// ---------------- import policy list ----------------
+const impExample = { id: 'imp_1', importNo: 'IMP-2026-0004', status: 'validated', statusLabel: 'Validated', expired: false, version: 1,
+  purpose: { code: 'ROC-GOLIVE', name: 'Go-live opening', note: null, text: 'Go-live opening' }, file: { name: 'opening.xlsx', size: 18342, sizeText: '18 KB', hash: '9f2c...' },
+  counts: { rows: 52, ready: 46, warnings: 4, errors: 6, held: 0, exceptions: 0 }, uploadedBy: { id: 'usr_4', name: 'M. Reyes' }, uploadedAt: '2026-10-12T02:00:00.000Z',
+  committedBy: null, committedAt: null, discardedAt: null, drafts: [], sameFile: null,
+  toCreate: [{ insurer: { id: 3, name: 'Pioneer Insurance & Surety Corp.' }, productLine: 'Motor', policies: 46, dueToInsurer: 1204553.1, varianceRows: 4 }],
+  totals: { remittances: 1, policies: 46, dueToInsurer: 1204553.1 }, canCommit: true, commitBlockedReason: null, canDiscard: true };
+define({
+  method: 'GET', path: '/imports/template', summary: 'Remittance_Policy_List_Template.xlsx: Data (required headers dark red, 2 samples), Columns (the active insurer codes, the product lines, other accepted headers) and Instructions',
+  screen: `${S('Remittances > Import policy list > Download template')}; ${S('Setup > Templates')}`, middleware: read, response: '(xlsx file)',
+  handler: async (_req, res) => sendWorkbook(res, await documents.policyListTemplate()),
+});
+define({
+  method: 'GET', path: '/imports/limits', summary: 'Limits of an imported policy list: file size (IMPORT_MAX_MB), data rows (remittance.import_max_rows), file types and the message of the dialog',
+  screen: S('Remittances > Import policy list'), middleware: read,
+  response: { success: true, data: { maxBytes: 10485760, maxMb: 10, maxRows: 5000, fileTypes: ['.xlsx', '.csv'], message: 'Choose an .xlsx or .csv file of at most 10 MB.' } },
+  handler: async (_req, res) => ok(res, await imports.importLimits()),
+});
+define({
+  method: 'POST', path: '/imports/validate',
+  summary: 'Validate a policy list (multipart field "file", .xlsx or .csv of at most IMPORT_MAX_MB; purposeCode a remittance_off_cycle reason, note): keeps the file, its hash and a result per row under a new import IMP-yyyy-nnnn (validated) and creates nothing. 400 FILE_TOO_LARGE / FILE_TYPE "Choose an .xlsx or .csv file of at most 10 MB.", HEADER_MISSING "Column Policy No not found.", TOO_MANY_ROWS',
+  screen: S('Remittances > Import policy list > Validate'),
+  middleware: [...write, (req, res, next) => upload.single('file')(req, res, (e) => next(e ? imports.uploadError(e) : undefined))],
+  request: { file: '(XLSX: Policy No, Insurer Code, Product Line, Expected Due to Insurer, Insurer Reference, Remark)', purposeCode: 'ROC-GOLIVE' },
+  response: { success: true, data: impExample },
+  handler: async (req, res) => created(res, await imports.validateImport(req.file, req.body || {}, req.user, req), 'File validated'),
+});
+define({
+  method: 'GET', path: '/imports', summary: 'Import history, newest first (paging)', screen: S('Remittances > Import history'), middleware: read, query: { page: 1, perPage: 50 },
+  response: { success: true, data: [{ ...impExample, status: 'committed', statusLabel: 'Committed', drafts: [{ id: 'rm_31', remittanceNo: 'REM-2026-00031' }] }], total: 1, page: 1, perPage: 50, totalPages: 1 },
+  handler: async (req, res) => {
+    const pg = paging(req.query, { page: 1, perPage: 50 });
+    const r = await imports.listImports(req.query, pg);
+    sendList(res, r.rows, r.total, pg);
+  },
+});
+define({
+  method: 'GET', path: '/imports/:id', summary: 'One import (id or IMP no.): counts, the remittances to create per insurer and product line, the drafts created, the same committed file and whether it can be committed',
+  screen: S('Remittances > Import policy list > Preview'), middleware: read, response: { success: true, data: impExample },
+  handler: async (req, res) => ok(res, await imports.getImport(req.params.id)),
+});
+define({
+  method: 'GET', path: '/imports/:id/rows', summary: 'Row results of an import in file order (result: a result code, ready, warnings or errors; paging): system amount, expected amount of the file, variance, message',
+  screen: S('Remittances > Import policy list > Preview'), middleware: read, query: { result: 'errors', page: 1, perPage: 50 },
+  response: { success: true, data: [{ rowNo: 14, policyNo: 'TISPH-PC-0001240', insurerCode: 'PIONEER', insurer: 'Pioneer Insurance & Surety Corp.', productLine: 'Motor', result: 'ready-variance',
+    resultLabel: 'Ready · Variance', kind: 'warning', message: 'File 25,871.34, system 25,817.34, difference -54.00', systemDue: 25817.34, expectedDue: 25871.34, variance: -54 }], total: 1, page: 1, perPage: 50, totalPages: 1 },
+  handler: async (req, res) => {
+    const pg = paging(req.query, { page: 1, perPage: 50 });
+    const r = await imports.importRows(req.params.id, req.query, pg);
+    sendList(res, r.rows, r.total, pg);
+  },
+});
+define({
+  method: 'GET', path: '/imports/:id/errors.xlsx', summary: 'Error report of an import: the columns of the file plus Result and Message, one row per file row in file order',
+  screen: S('Remittances > Import policy list > Download error report'), middleware: read, response: '(xlsx file)',
+  handler: async (req, res) => sendXlsx(res, await imports.errorReport(req.params.id)),
+});
+define({
+  method: 'POST', path: '/imports/:id/commit',
+  summary: 'Create the draft remittances of a validated import: one per insurer and product line of the ready rows, at the system amounts, source import with the import and the off-cycle reason; a policy remitted meanwhile is skipped. 409 SAME_FILE when the same file was committed, ALREADY_COMMITTED, DISCARDED (also 7 days after validation), STALE, NOTHING_READY',
+  screen: S('Remittances > Import policy list > Create drafts'), middleware: write, request: { version: 1 },
+  response: { success: true, data: { import: { ...impExample, status: 'committed', statusLabel: 'Committed' }, drafts: [{ id: 'rm_31', remittanceNo: 'REM-2026-00031', policies: 46, dueToInsurer: 1204553.1 }],
+    skipped: [], message: '1 draft created: REM-2026-00031 · Off-cycle · IMP-2026-0004' } },
+  handler: async (req, res) => {
+    const r = await imports.commitImport(req.params.id, req.body || {}, req.user, req);
+    ok(res, r, r.message);
+  },
+});
+define({
+  method: 'POST', path: '/imports/:id/discard', summary: 'Discard a validated import (nothing was created from it)', screen: S('Remittances > Import policy list > Discard'), middleware: write,
+  response: { success: true, data: { ...impExample, status: 'discarded', statusLabel: 'Discarded' } },
+  handler: async (req, res) => ok(res, await imports.discardImport(req.params.id, req.user, req), 'Import discarded'),
+});
+
 // ---------------- bulk processing ----------------
 define({
   method: 'GET', path: '/bulk', summary: 'Bulk uploads (processing history)', screen: S('Bulk Processing'), middleware: read,
@@ -663,14 +813,14 @@ define({
 });
 define({
   method: 'GET', path: '/bulk/template', summary: 'Remittance bulk upload template of a bulk-processing configuration (configCode; default: the first active one): the columns of its field mappings (XLSX: Data, Columns and Instructions sheets)',
-  screen: S('Bulk Processing > Upload File > Download template'), middleware: read, query: { configCode: 'ARM-001' }, response: '(xlsx file)',
+  screen: S('Bulk Processing > Upload File > Download template'), middleware: [...read, bulkOpen], query: { configCode: 'ARM-001' }, response: '(xlsx file)',
   handler: async (req, res) => {
     const { cfg, maps } = await items.bulkConfig(req.query.configCode || null);
     sendWorkbook(res, remittanceUpload(maps, cfg.code));
   },
 });
 define({
-  method: 'POST', path: '/bulk/upload', summary: 'Upload a remittance file (multipart file + configCode); validates against the bulk-processing master', screen: S('Bulk Processing > Upload / Validate'), middleware: [...write, singleFile],
+  method: 'POST', path: '/bulk/upload', summary: 'Upload a remittance file (multipart file + configCode); validates against the bulk-processing master (409 USE_IMPORT while remittance.bulk_upload_enabled is off)', screen: S('Bulk Processing > Upload / Validate'), middleware: [...write, bulkOpen, singleFile],
   request: { file: '(CSV: PolicyNo,Premium,Commission)', configCode: 'BFM-001' }, response: { success: true, data: { totalRecords: 2, successCount: 1, errorCount: 1, errors: [{ row: 3, field: 'policy_number', message: 'Policy not found' }], status: 'Validated' } },
   handler: async (req, res) => {
     const u = await items.uploadBulk(req.file, req.body || {}, req.user);
@@ -679,7 +829,7 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/bulk/:id/process', summary: 'Create draft remittances from the valid rows of an upload', screen: S('Bulk Processing > Process'), middleware: write,
+  method: 'POST', path: '/bulk/:id/process', summary: 'Create draft remittances from the valid rows of an upload, at the booked premium, commission and tax of the policies (the typed amounts are not used; 409 USE_IMPORT while remittance.bulk_upload_enabled is off)', screen: S('Bulk Processing > Process'), middleware: [...write, bulkOpen],
   response: { success: true, data: { upload: { status: 'Processed' }, remittances: [rem] } },
   handler: async (req, res) => ok(res, await logged('remittance_item', 'bulk-process', (r) => items.processBulk(r.params.id, r.user))(req, res), 'Upload processed'),
 });

@@ -41,6 +41,25 @@ describe('remittance advice (Accounts > Remittance > Tracking > Print)', () => {
   });
 });
 
+describe('remittance advice letter (Remittances > Download advice)', () => {
+  it('prints the portrait letter beside the print of earlier releases; before payment the amount paid is empty', async () => {
+    const c = await ctx.api('post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', period: '2026-10', lines: [{ policyNo: 'EXT-ADV-2', premium: 15000, commission: 2250, tax: 0 }] });
+    const { id, remittanceNo } = c.body.data;
+    const r = await binary(ctx.api('get', `/remittance/remittances/${id}/advice.pdf`));
+    expect(r.status).toBe(200);
+    expect(r.headers['content-disposition']).toMatch(new RegExp(`^attachment; filename="${remittanceNo}_Advice_\\d{8}\\.pdf"`));
+    const text = r.body.toString('latin1');
+    for (const s of ['Insurer Remittance Advice', `No. ${remittanceNo}`, 'Malayan Insurance Co., Inc.', 'Reference', 'Total premium', 'Due to insurer', '12,750.00', 'Amount paid', 'Schedule attached.']) {
+      expect(text).toContain(`(${s}`);
+    }
+    // the letter has no policy list and no payment block before a voucher is raised
+    expect(text).not.toContain('(EXT-ADV-2');
+    expect(text).not.toContain('(Voucher no.');
+    expect((await binary(ctx.api('get', `/remittance/remittances/${id}/advice.pdf?download=0`))).headers['content-disposition']).toMatch(/^inline/);
+    expect((await as(sales, 'get', `/remittance/remittances/${id}/advice.pdf`)).status).toBe(403);
+  });
+});
+
 describe('letterhead for pages printed from the browser', () => {
   it('returns the company, the document colours and the logo as a data URL to any signed-in user', async () => {
     const r = await as(sales, 'get', '/document-templates/letterhead');

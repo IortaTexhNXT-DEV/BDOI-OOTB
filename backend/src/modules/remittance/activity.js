@@ -9,7 +9,8 @@
  *   - the approval of the settlement that settled it;
  *   - the payment voucher that settlement raised, and the audit of that voucher, of its bank payment batches and of
  *     its cheques;
- *   - the e-mails sent about the remittance.
+ *   - the e-mails sent about the remittance;
+ *   - its creation from an imported policy list ("Imported from IMP-2026-0004", with the off-cycle reason).
  * The same action by the same user within 2 seconds is one entry (a decision is audited twice). Reason codes, role
  * codes and limit sources never reach an entry raw.
  */
@@ -165,6 +166,10 @@ export async function remittanceActivity(remittanceId, { viewer = null } = {}) {
         changes: [{ field: 'settlementNo', label: 'Settlement', before: null, after: r.after_data.referenceNo }] };
     } else if (isDecision(r)) {
       entry = { ...e, ...decisionFields(historyOf(decisions, r), r, ctx, names, labels) };
+    } else if (r.entity === 'remittance' && r.action === 'import') {
+      entry = { ...e, actionLabel: `Imported from ${r.after_data?.importNo || 'a policy list'}`, fromStatus: null, toStatus: labels.draft || 'Draft',
+        remarks: r.after_data?.offCycleReason ? `Off-cycle: ${r.after_data.offCycleReason}` : e.remarks,
+        changes: [{ field: 'importNo', label: 'Import', before: null, after: r.after_data?.importNo || null }] };
     } else if (r.entity === 'remittance_approval') {
       entry = { ...e, changes: approvalChanges(r.before_data, r.after_data) };
     } else {

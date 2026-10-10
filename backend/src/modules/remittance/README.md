@@ -17,10 +17,16 @@ Remittance Master). Permissions: `read:remittance`, `write:remittance` (prepare,
 | `basis.js` | Remittance basis of broker-billed premium (net or gross) by insurer and product (`remittance.basis_rules`, `remittance.default_basis`). |
 | `clientPayments.js` | Direct bill: the client's payment to the insurer (date, amount, insurer OR / reference, proof), the payment status of a policy and the check before a debit note is approved. |
 | `insurerCredits.js` | Refunds due from insurers after a return premium on premium already remitted; netted against the next remittance voucher. |
+| `decision.js` | Who may decide an approval and why not (`decisionFor`), the eligible approvers and the next step of a pending approval. |
+| `approvals.js` | The Approvals inbox, the review panel, bulk decisions and the reminder of the approvers. |
+| `activity.js` | The activity log of a remittance. |
+| `register.js` | The Remittances register (segments, filters, flags, next step, actions, totals and KPI figures of the filtered set), the record's data, the submission of several drafts and the register export rows. |
+| `documents.js` | The remittance schedule (XLSX, PDF), the advice letter (PDF), the register workbook and the Import policy list template. |
+| `imports.js` | Import policy list: validation of a file with a result per row, commit into off-cycle drafts, error report, discard. |
 
 ## Main tables
 
-`remittances`, `remittance_lines`, `remittance_items`, `remittance_approvals`,
+`remittances`, `remittance_lines`, `remittance_items`, `remittance_approvals`, `remittance_imports`, `remittance_import_rows`,
 `remittance_allocations`, `commission_debit_notes`, `commission_debit_note_lines`, `commission_debit_note_collections`,
 `direct_bill_items`, `direct_bill_client_payments`, `insurer_refund_credits`. Payment to the insurer is a payment voucher in the disbursements
 module (`disbursements`, `invoice_lists`).
@@ -110,6 +116,56 @@ it (`format=xlsx`: Download log), and GET `/remittance/remittances/:id` returns 
 remittance advice on the broker letterhead (`documents/templates.js#remittanceAdviceDoc`, signature slots of document
 type `remittance-advice`); an agency bill prints with its own title.
 
+Remittances register (`register.js`): `GET /remittances?segment=my-work|drafts|in-approval|in-payment|all` lists
+direct-bill remittances only (agency bills never appear), filtered by coverage week (a Monday; the week of
+`data.windowFrom`, else of the remittance date), insurer, product line, source (`data.source`: weekly-run, run-now,
+import; a schedule run without one is weekly-run, anything else manual), status (segment All), a KPI card (`kpi`) and
+`q` (REM, policy or OR number), paged and sorted on the server. Segments use today's statuses: My work and Drafts are
+draft and rejected (labelled Returned for TISPH), In approval is for-approval, In payment approved and settled; My work
+is empty for a user without `write:remittance`. Each row carries the status code and label, the flags (off-cycle with
+the reason of `data.offCycleReason`, overdue: due date passed and not settled with a paid voucher, open exceptions), the
+next step (a pending one: "Awaiting J. Cruz" or "Awaiting remittance approver (2)", from `decision.js`; a draft "Submit
+for approval"; a returned one "Correct and resubmit" with the reason; an approved one "Include in a settlement"; a
+settled one the voucher's step in Disbursement) and `actions[]`: view, submit (draft or returned, `write:remittance`;
+disabled with the reason when the guards of `validateRemittances` fail), the schedule downloads (not cancelled), the
+advice (settled) and open voucher (`read:disbursements`). Approve and reject are never row actions; they are the
+decision block's. The answer carries `totals` of the filtered set, the four KPI figures (to submit, awaiting approval,
+approved not paid with the oldest days, overdue) and the segment counts over the filters, all in SQL. Without
+`segment` the route answers the list of the earlier screens. `GET /remittances/:id` adds to the details the register
+row, the lines with the values of an import, the payment through the settlement voucher (voucher, method, value date,
+bank reference, settlement) and the downloads; its `status` stays the label of the earlier screens (`statusCode`,
+`statusLabel` are the contract). `POST /remittances/submit {items:[{id,version}]}` checks each draft on its own (version,
+status, guards) and submits the ready ones as one processing batch; the result per item is "Submitted" or the reason
+(`ALREADY_SUBMITTED` "REM-2026-00021 was submitted by J. Cruz at 10:12.", `STALE`, `WRONG_STATUS`, `INVALID`).
+`GET /remittances/export.xlsx` writes every column of the filtered set under the letterhead and the filter summary.
+
+Documents (`documents.js`), named `<Ref>_<Document>_<yyyymmdd>.<ext>`: `GET /remittances/:id/schedule.xlsx` and
+`schedule.pdf` (A4 landscape; company, "Remittance Schedule", insurer, product line, coverage date, REM no and date,
+one row per policy with the columns today's lines hold, totals and the note that it is valid without signature; the per-peril premium,
+remitting and commission columns of the FRS layout come with the Phase 2 line data) and `advice.pdf` (portrait letter:
+insurer's name, address and TIN; REM no, coverage week, product line, basis; voucher no, method, value date and bank
+reference of the settlement voucher; total premium, commission, VAT and EWT on commission from the voucher's payables,
+due to insurer, refund credits netted on the voucher, amount paid). `GET /remittances/:id/pdf` of Tracking stays.
+
+Import policy list (`imports.js`, migration 0402): the file selects policies and BrokerVerse computes every amount.
+`GET /imports/template` (Data, Columns with the active insurer codes and the product lines, Instructions), `GET
+/imports/limits` (IMPORT_MAX_MB, `remittance.import_max_rows`), `POST /imports/validate` (multipart file and
+`purposeCode`, a `remittance_off_cycle` reason): a file above the limit or of another type is refused with "Choose an
+.xlsx or .csv file of at most 10 MB.", a missing column with "Column Policy No not found."; otherwise the file, its
+SHA-256 hash and one result per row are kept under IMP-yyyy-nnnn (validated) and nothing is created. Row results:
+Ready, Ready · Variance (Expected Due to Insurer differs from the system amount by more than PHP 1.00), Already on REM,
+Not found, Not issued, Insurer differs, Product line differs, Direct bill, Duplicate in file. `GET /imports`, `GET
+/imports/:id` (counts, the remittances to create per insurer and product line, the same committed file), `GET
+/imports/:id/rows?result=`, `GET /imports/:id/errors.xlsx` (the file's columns plus Result and Message, one row per
+file row), `POST /imports/:id/commit {version}`: one draft per insurer and product line from the ready rows, at the
+system amounts (`buildLines`), with `data.source` import, `importId`, `importNo` and `offCycleReason`; each line keeps
+`expected_due`, `variance` (system minus expected), `insurer_reference` and `remark`; a policy remitted since the
+validation is skipped ("Skipped: already on REM-..."); the draft's activity log reads "Imported from IMP-...". A file
+whose hash was committed before is refused (409 `SAME_FILE`), and a validated import not committed within 7 days counts
+as discarded. `POST /imports/:id/discard`. The bulk upload of earlier releases (`/bulk/template`, `/bulk/upload`,
+`/bulk/:id/process`) answers 409 `USE_IMPORT` while `remittance.bulk_upload_enabled` is off (TISPH), and creates its
+drafts at the booked amounts of the policies, never at typed ones.
+
 Schedules: Accounts > Remittance > Scheduling (remittance-schedule master) says what to remit: insurers, cut-off days
 before the run date, frequency and next run date. The schedules have no timer of their own: the job
 `remittance-schedules` of Master > Schedules (handler `remittanceSchedules`, daily, disabled until switched on) runs the
@@ -119,8 +175,9 @@ active schedules whose next run date has come, in the business time zone, and mo
 
 `remittance.approval_levels` (fallback only), `remittance.require_authority_limit` (default false, TISPH true),
 `remittance.item_delegation_enabled` (default true, TISPH false), `remittance.reminder_interval_hours` (4),
+`remittance.import_max_rows` (5000), `remittance.bulk_upload_enabled` (default true, TISPH false),
 `remittance.priority_thresholds`, `remittance.priority_sla_hours`,
-`remittance.default_due_days` (due date of a new remittance when the insurer has no `remittance_terms_days`), `remittance.transfer_methods`, `remittance.status_labels`,
+`remittance.default_due_days` (due date of a new remittance when the insurer has no `remittance_terms_days`), `remittance.transfer_methods`, `remittance.status_labels` (TISPH: rejected "Returned", settled "Settled (voucher raised)"),
 `remittance.advice_title` / `remittance.agency_bill_title` (titles of the printed remittance advice and agency bill),
 `remittance.default_basis`, `remittance.basis_rules` (`[{ "insurer": "MALAYAN", "product": "MOTOR", "basis": "gross" }]`; the most
 specific matching rule wins), `remittance.bill_email_subject` / `_body`, `remittance.statement_email_subject` / `_body`,
@@ -153,3 +210,8 @@ before approval).
   amount (other than its submitter and maker). Add or raise a limit in the Authority Matrix, or record a delegation.
 - A decision is refused `STALE` (409): the approval was decided at another level or delegated since the screen loaded
   it. Reload and decide again.
+- An import cannot be created: "This file was imported on ... as IMP-..." means the same file (same hash) was
+  committed before; its drafts are listed on that import. "No row is ready to remit." means every row has an error:
+  download the error report. A validated import older than 7 days is discarded: validate the file again.
+- Bulk Processing answers "Bulk processing is replaced by Import policy list on Remittances." while
+  `remittance.bulk_upload_enabled` is off (TISPH).

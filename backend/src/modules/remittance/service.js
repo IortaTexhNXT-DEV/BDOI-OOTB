@@ -134,9 +134,10 @@ export async function listRemittances(qs, pg) {
   return { total, rows: rows.map((r) => remittanceOut(r, labels)), summary: { count: summary.n, grossAmount: round2(summary.gross), netAmount: round2(summary.net) } };
 }
 
-const lineOut = (l) => ({
+export const lineOut = (l) => ({
   id: l.id, policyId: l.policy_id, policyNo: l.policy_number, insuredName: l.insured_name, product: l.product, effectiveDate: l.effective_date,
   premium: l.premium, commission: l.commission, tax: l.tax, netAmount: l.net, commissionRate: l.premium ? round2((l.commission / l.premium) * 100) : 0, status: l.status,
+  expectedDue: l.expected_due ?? null, variance: l.variance ?? null, insurerReference: l.insurer_reference ?? null, remark: l.remark ?? null,
 });
 
 /**
@@ -222,7 +223,7 @@ async function withShares(rows, insurerId) {
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
 /** Lines from explicit input rows or from policies (a co-insured policy: the insurer's share); returns normalised lines. */
-async function buildLines(lines, insurerId = null) {
+export async function buildLines(lines, insurerId = null) {
   const out = [];
   for (const l of lines || []) {
     let pol = null;
@@ -245,27 +246,35 @@ async function buildLines(lines, insurerId = null) {
   return out;
 }
 
-async function insertRemittance(c, { kind, insurerId, period, dueDate, lines, billNumber, agency, previousBalance = 0, configCode, deliveryMethod, remarks, date, userId }) {
+/**
+ * Insert a draft remittance and its lines in transaction `c`; returns its id. `data` is kept on the remittance (source,
+ * import and off-cycle reason of an imported one); a line may carry the expected amount of an imported file and its
+ * variance, the insurer's reference and a remark.
+ */
+export async function insertRemittance(c, { kind, insurerId, period, dueDate, lines, billNumber, agency, previousBalance = 0, configCode, deliveryMethod, remarks, date, userId, data = {} }) {
   const gross = round2(lines.reduce((s, l) => s + l.premium, 0));
   const comm = round2(lines.reduce((s, l) => s + l.commission, 0));
   const tax = round2(lines.reduce((s, l) => s + l.tax, 0));
   const number = await nextDocumentNumber('remittance');
   const currency = await baseCurrency();
   const r = await c.query(`INSERT INTO remittances(remittance_number, insurance_company_id, kind, period, gross_premium, commission, tax, net_due, status, remarks, created_by,
-      remittance_date, due_date, policy_count, currency, bill_number, agent_user_id, agency_code, agency_name, previous_balance, config_code, delivery_method, updated_by)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'draft',$9,$10, COALESCE($11::date, $22::date), $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $10) RETURNING id`,
+      remittance_date, due_date, policy_count, currency, bill_number, agent_user_id, agency_code, agency_name, previous_balance, config_code, delivery_method, updated_by, data)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'draft',$9,$10, COALESCE($11::date, $22::date), $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $10, $23) RETURNING id`,
   [number, insurerId || null, kind, period || null, gross, comm, tax, round2(gross - comm - tax), remarks || null, userId, date || null, dueDate || null, lines.length, currency,
-    billNumber || null, agency?.userId || null, agency?.code || null, agency?.name || null, previousBalance, configCode || null, JSON.stringify(deliveryMethod || []), await businessToday()]);
+    billNumber || null, agency?.userId || null, agency?.code || null, agency?.name || null, previousBalance, configCode || null, JSON.stringify(deliveryMethod || []), await businessToday(),
+    JSON.stringify(data || {})]);
   const id = r.rows[0].id;
   for (const l of lines) {
-    await c.query(`INSERT INTO remittance_lines(remittance_id, policy_id, premium, commission, net, policy_number, insured_name, product, tax, effective_date, insurance_company_id, share_percent)
-                   VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`, [id, l.policyId, l.premium, l.commission, l.net, l.policyNo, l.insuredName, l.product, l.tax, l.effectiveDate, l.insurerId || null, l.sharePercent || null]);
+    await c.query(`INSERT INTO remittance_lines(remittance_id, policy_id, premium, commission, net, policy_number, insured_name, product, tax, effective_date, insurance_company_id, share_percent,
+                     expected_due, variance, insurer_reference, remark)
+                   VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`, [id, l.policyId, l.premium, l.commission, l.net, l.policyNo, l.insuredName, l.product, l.tax, l.effectiveDate,
+      l.insurerId || null, l.sharePercent || null, l.expectedDue ?? null, l.variance ?? null, l.insurerReference || null, l.remark || null]);
   }
   return id;
 }
 
 /** Due date of a remittance: the insurer's remittance terms (remittance_terms_days), else remittance.default_due_days. */
-async function defaultDueDate(from, insurerId = null) {
+export async function defaultDueDate(from, insurerId = null) {
   const days = insurerId ? (await resolveCreditTerms(insurerId)).remittanceTermsDays : (Number(await getSetting('remittance.default_due_days', 30)) || 30);
   const d = new Date(`${isoDate(from) || (await businessToday())}T00:00:00Z`);
   d.setUTCDate(d.getUTCDate() + days);
