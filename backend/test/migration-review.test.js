@@ -18,7 +18,7 @@ import { writeXlsx } from '../src/lib/xlsx.js';
 import { readWorkbook, readZip } from '../src/modules/documents/xlsx.js';
 import { addDays, today } from '../src/lib/dates.js';
 import { renewalPrefill } from '../src/modules/renewals/service.js';
-import { loginAs } from './helpers.js';
+import { loginAs, goLiveSetup, validatedBatch } from './helpers.js';
 
 let app;
 let api;
@@ -40,7 +40,7 @@ function book(sheets, kit = 'migration') {
     }),
   });
 }
-const upload = (wb, kit = 'migration') => api('post', '/data-load/batches').field('kit', kit).attach('file', wb, `${kit}.xlsx`);
+const upload = (wb, kit = 'migration') => validatedBatch(api, api('post', '/data-load/batches').field('kit', kit).attach('file', wb, `${kit}.xlsx`));
 const load = (id) => api('post', `/data-load/batches/${id}/load`).send({});
 const rowsOf = async (id, q = '') => (await api('get', `/data-load/batches/${id}/rows?perPage=500${q}`)).body.data;
 
@@ -60,7 +60,7 @@ beforeAll(async () => {
   const d = new Date(`${now.slice(0, 7)}-01T00:00:00Z`);
   d.setUTCMonth(d.getUTCMonth() + 1);
   cutover = d.toISOString().slice(0, 10);
-  expect((await api('put', '/settings').send({ settings: { 'golive.cutover_date': cutover } })).status).toBe(200);
+  await goLiveSetup(api, cutover);
   clearSettingsCache();
 });
 afterAll(async () => {
@@ -107,7 +107,7 @@ describe('product-wise templates', () => {
       rows: s.name === 'Control' ? s.rows.slice(1).map((x) => (x[0] === 'Layout version' ? [x[0], version ?? x[1]] : x)) : [s.rows[1], ['RV-LAYOUT-1', 'corporate', '', '', 'Layout Corp.']],
     })) });
     expect((await upload(rebuilt('0000000000000000'))).body.message).toMatch(/layout of this file is not the current layout/);
-    expect((await upload(rebuilt())).status).toBe(201);
+    expect((await upload(rebuilt())).status).toBe(202);
   });
 
   it('still reads the single Policies sheet of the earlier layout, with a warning', async () => {
@@ -149,7 +149,7 @@ describe('result of each row', () => {
     ] }));
     const b = r.body.data.batch;
     expect(b).toMatchObject({ rowsNew: 1, rowsChanged: 1, rowsUnchanged: 1, rowsDuplicate: 1, rowsError: 1 });
-    expect(r.body.message).toBe('Validated: 1 row(s) with errors, 1 duplicate(s) to resolve');
+    expect(b.status).toBe('failed');
     const rows = await rowsOf(b.id);
     const of = (code) => rows.find((x) => x.values.clientCode === code);
     expect(of('RV-C-1')).toMatchObject({ result: 'changed', changes: [{ column: 'email', header: 'Email', old: 'rv-c-1@example.ph', new: 'rosa.new@example.ph' }] });
@@ -250,7 +250,7 @@ describe('same file and value maps', () => {
     const l = await load(r.body.data.batch.id);
     expect(l.status).toBe(409);
     expect(l.body.message).toMatch(/Value maps changed since the validation/);
-    const v = await api('post', `/data-load/batches/${r.body.data.batch.id}/validate`);
+    const v = await validatedBatch(api, api('post', `/data-load/batches/${r.body.data.batch.id}/validate`));
     expect((await load(v.body.data.batch.id)).status).toBe(200);
   });
 });

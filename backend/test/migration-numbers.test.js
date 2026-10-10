@@ -16,6 +16,7 @@ import { addDays, today } from '../src/lib/dates.js';
 import { cocClash, cocCollisions, collidingNumber, collidingNumbers, seriesClash, seriesShapes } from '../src/modules/data-load/numbering.js';
 import { registerForPolicy } from '../src/modules/integrations/ctpl.js';
 import { findPolicy } from '../src/modules/receipts/receivables.js';
+import { goLiveSetup, validatedBatch } from './helpers.js';
 
 let api;
 let kits;
@@ -32,7 +33,7 @@ function book(kit, sheets) {
     }),
   });
 }
-const upload = (kit, wb) => api('post', '/data-load/batches').field('kit', kit).attach('file', wb, `${kit}.xlsx`);
+const upload = (kit, wb) => validatedBatch(api, api('post', '/data-load/batches').field('kit', kit).attach('file', wb, `${kit}.xlsx`));
 const load = (id) => api('post', `/data-load/batches/${id}/load`).send({});
 const pattern = (code, p) => query('UPDATE document_numbering SET pattern = $2 WHERE code = $1', [code, p]);
 
@@ -49,7 +50,7 @@ beforeAll(async () => {
   cutover = d.toISOString().slice(0, 10);
   year = Number(cutover.slice(0, 4));
   next = year + 1;
-  expect((await api('put', '/settings').send({ settings: { 'golive.cutover_date': cutover } })).status).toBe(200);
+  await goLiveSetup(api, cutover);
   clearSettingsCache();
   await query("INSERT INTO branches(code, name, status) VALUES ('CEB', 'Cebu', 'active'), ('OLD', 'Closed branch', 'inactive') ON CONFLICT DO NOTHING");
 });
@@ -196,7 +197,7 @@ describe('policy number of another insurer', () => {
     const rows = (await api('get', `/data-load/batches/${id}/rows`)).body.data;
     expect(rows[0]).toMatchObject({ result: 'duplicate', duplicates: [expect.objectContaining({ rule: 'policy-number', insurerCode: 'FPG', number: 'SHARED-001' })] });
     expect(rows[0].errors).toEqual([expect.objectContaining({ message: expect.stringMatching(/load it with the insurer suffix \(SHARED-001\/MALAYAN\)/) })]);
-    const res = await api('post', `/data-load/batches/${id}/resolutions`).send({ rule: 'policy-number', resolution: 'insurer-suffix', reason: 'Two insurers use the same number' });
+    const res = await validatedBatch(api, api('post', `/data-load/batches/${id}/resolutions`).send({ rule: 'policy-number', resolution: 'insurer-suffix', reason: 'Two insurers use the same number' }));
     expect(res.body.data.batch).toMatchObject({ rowsDuplicate: 0, rowsNew: 1 });
     expect((await load(id)).status).toBe(200);
     const p = await one("SELECT p.policy_number, p.legacy_number, p.origin FROM policies p WHERE p.policy_number = 'SHARED-001/MALAYAN'");

@@ -100,7 +100,7 @@ describe('opening balances: validate before loading', () => {
   const count = async () => (await query('SELECT count(*)::int AS n FROM opening_balances')).rows[0].n;
 
   it('reports the totals of a balanced file without loading it', async () => {
-    const r = await send(maker, 'validate', GOOD);
+    const r = await send(ctx.api, 'validate', GOOD);
     expect(r.status, JSON.stringify(r.body)).toBe(200);
     expect(r.body.data).toMatchObject({ valid: true, fiscalYear: 'FY2030', goLiveDate: '2030-01-01', asAt: '2029-12-31', rows: 4, accounts: 3,
       totalDebit: 1000000, totalCredit: 1000000, difference: 0, errors: [], previous: null, ignored: [{ row: 5, accountCode: '1101001' }] });
@@ -108,7 +108,7 @@ describe('opening balances: validate before loading', () => {
   });
 
   it('lists every error with its row and column, and an unbalanced file with its difference', async () => {
-    const bad = (await send(maker, 'validate', [['9999999', '', '100', ''], ['2201001', '', '50', '50'], ['2201001', '', 'abc', ''], ['5101001', '', '', '10']])).body.data;
+    const bad = (await send(ctx.api, 'validate', [['9999999', '', '100', ''], ['2201001', '', '50', '50'], ['2201001', '', 'abc', ''], ['5101001', '', '', '10']])).body.data;
     expect(bad.valid).toBe(false);
     expect(bad.errors).toEqual(expect.arrayContaining([
       { row: 2, column: 'Account Code', message: 'Account 9999999 is not in the chart of accounts' },
@@ -116,37 +116,40 @@ describe('opening balances: validate before loading', () => {
       { row: 4, column: 'Debit', message: 'Debit must be a number' },
       { row: 4, column: 'Account Code', message: 'Account 2201001 appears more than once' },
     ]));
-    const unbalanced = (await send(maker, 'validate', [['1102001', '', '100', ''], ['5101001', '', '', '90']])).body.data;
+    const unbalanced = (await send(ctx.api, 'validate', [['1102001', '', '100', ''], ['5101001', '', '', '90']])).body.data;
     expect(unbalanced).toMatchObject({ valid: false, totalDebit: 100, totalCredit: 90, difference: 10 });
     expect(unbalanced.errors).toEqual([{ row: null, column: null, message: 'Debits ₱100.00 and credits ₱90.00 do not balance (difference ₱10.00)' }]);
     // the difference of the rows read is listed beside the row errors
-    const both = (await send(maker, 'validate', [['1102001', '', '100', ''], ['5101001', '', '', '90'], ['5101002', '', '-5', '']])).body.data;
+    const both = (await send(ctx.api, 'validate', [['1102001', '', '100', ''], ['5101001', '', '', '90'], ['5101002', '', '-5', '']])).body.data;
     expect(both.errors).toEqual(expect.arrayContaining([{ row: 4, column: 'Debit', message: 'Debit cannot be negative' },
       { row: null, column: null, message: expect.stringMatching(/do not balance/) }]));
-    expect((await send(maker, 'validate', GOOD, '')).status).toBe(400);
+    expect((await send(ctx.api, 'validate', GOOD, '')).status).toBe(400);
     expect(await count()).toBe(0);
   });
 
   it('names the earlier load that a load for the same date replaces, and a load for another date as an error', async () => {
-    const load = await send(maker, 'import', GOOD);
+    const load = await send(ctx.api, 'import', GOOD);
     expect(load.status, JSON.stringify(load.body)).toBe(200);
-    const again = (await send(maker, 'validate', GOOD)).body.data;
+    const again = (await send(ctx.api, 'validate', GOOD)).body.data;
     expect(again.valid).toBe(true);
-    expect(again.previous).toMatchObject({ goLiveDate: '2030-01-01', accounts: 3, loadedBy: 'maker user' });
+    expect(again.previous).toMatchObject({ goLiveDate: '2030-01-01', accounts: 3, loadedBy: 'BrokerVerse Administrator' });
     expect(again.previous.loadedAt).toBeTruthy();
-    const other = (await send(maker, 'validate', GOOD, '2030-02-01')).body.data;
+    const other = (await send(ctx.api, 'validate', GOOD, '2030-02-01')).body.data;
     expect(other.valid).toBe(false);
     expect(other.errors[0]).toMatchObject({ row: null, column: 'Go-live date' });
     expect(other.errors[0].message).toMatch(/loaded for go-live date 2030-01-01/);
   });
 
   it('keeps the error rows of the import in the format of the go-live workbench, with row and column', async () => {
-    const r = await send(maker, 'import', [['9999999', '', '100', ''], ['5101001', '', '', '100']]);
+    const r = await send(ctx.api, 'import', [['9999999', '', '100', ''], ['5101001', '', '', '100']]);
     expect(r.status).toBe(400);
     expect(r.body.errors[0]).toEqual({ path: 'row 2', row: 2, column: 'Account Code', message: 'Row 2: Account 9999999 is not in the chart of accounts' });
   });
 
-  it('is refused without write:period-end', async () => {
+  it('is refused without write:period-end, and without write:data-load (a go-live import of the Data Migration & Go-Live workspace)', async () => {
     expect((await send(ctx.as('agent'), 'validate', GOOD)).status).toBe(403);
+    const r = await send(maker, 'validate', GOOD);
+    expect(r.status).toBe(403);
+    expect(r.body.message).toBe('Requires permission: write:data-load');
   });
 });

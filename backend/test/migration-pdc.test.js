@@ -13,6 +13,7 @@ import { one, pool, query } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { writeXlsx } from '../src/lib/xlsx.js';
 import { addDays, today } from '../src/lib/dates.js';
+import { goLiveSetup, validatedBatch } from './helpers.js';
 
 let api;
 let kits;
@@ -28,7 +29,7 @@ function book(sheets) {
     }),
   });
 }
-const upload = (wb) => api('post', '/data-load/batches').field('kit', 'migration').attach('file', wb, 'migration.xlsx');
+const upload = (wb) => validatedBatch(api, api('post', '/data-load/batches').field('kit', 'migration').attach('file', wb, 'migration.xlsx'));
 const load = (id) => api('post', `/data-load/batches/${id}/load`).send({});
 const cheque = (number, extra = {}) => ({ 'Drawee Bank': 'PNB', 'Cheque Number': number, 'Cheque Date': day, Amount: '6000.00', 'Policy Number': 'PD-P-1', 'Bill Reference': 'PD-DN-1',
   'Received Date': addDays(cutover, -3), 'Storage Location': 'Head Office vault', ...extra });
@@ -44,7 +45,7 @@ beforeAll(async () => {
   // cutover on the first day of this month: the cheques fall due today and are deposited today
   day = await today();
   cutover = `${day.slice(0, 7)}-01`;
-  expect((await api('put', '/settings').send({ settings: { 'golive.cutover_date': cutover } })).status).toBe(200);
+  await goLiveSetup(api, cutover);
   clearSettingsCache();
   await query(`INSERT INTO master_records(type_code, code, name, data, status, created_by)
     SELECT 'bank-account', 'ACC-MIG-001', 'Operating Account', jsonb_build_object('accountCode', 'ACC-MIG-001', 'glAccount',

@@ -77,17 +77,17 @@ describe('transaction reset', () => {
     expect(await count('app_settings', "key = 'golive.locked' AND value = 'false'::jsonb")).toBe(1);
     const leads = await count('leads');
     expect(leads).toBeGreaterThan(0);
-    // the administrator switches the lock on and off in Master > Configuration (PUT /settings)
-    const lock = (on) => ctx.api('put', '/settings').send({ settings: { 'golive.locked': on } });
-    expect((await lock(true)).status).toBe(200);
+    // two users lock go-live on Data Migration & Go-Live > Go-Live (test/migration-lock.test.js); the settings screen cannot
+    expect((await ctx.api('put', '/settings').send({ settings: { 'golive.locked': true } })).status).toBe(400);
+    await setLock(true);
     try {
       const err = await withClient((c) => resetTransactions(c, { execute: true }).catch((e) => e));
       expect(err).toBeInstanceOf(ResetRefused);
       expect(err.code).toBe('GOLIVE_LOCKED');
-      expect(err.message).toContain('Master > Configuration > Go-live');
+      expect(err.message).toContain('database administrator');
       expect(await count('leads')).toBe(leads);
     } finally {
-      expect((await lock(false)).status).toBe(200);
+      await setLock(false);
     }
   });
 

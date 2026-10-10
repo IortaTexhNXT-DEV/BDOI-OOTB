@@ -18,6 +18,7 @@ import { clearSettingsCache } from '../src/lib/settings.js';
 import { writeXlsx } from '../src/lib/xlsx.js';
 import { addDays, today } from '../src/lib/dates.js';
 import { kpiOriginWhere, originOf, originParam, originWhere, withoutOriginFields } from '../src/lib/origin.js';
+import { goLiveSetup, validatedBatch } from './helpers.js';
 
 const MIGRATION_0440 = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../src/db/migrations/0440_migration_origin.sql');
 
@@ -51,7 +52,7 @@ beforeAll(async () => {
   const d = new Date(`${now.slice(0, 7)}-01T00:00:00Z`);
   d.setUTCMonth(d.getUTCMonth() + 1);
   cutover = d.toISOString().slice(0, 10);
-  expect((await api('put', '/settings').send({ settings: { 'golive.cutover_date': cutover } })).status).toBe(200);
+  await goLiveSetup(api, cutover);
   clearSettingsCache();
 });
 afterAll(async () => {
@@ -90,8 +91,8 @@ describe('migration load', () => {
       'Open Claims': [{ 'Claim Number': 'LEG-CLM-1', 'Policy Number': 'PC-MLY-2026-000101', 'Loss Date': addDays(issue, 10), 'Outstanding Estimate': '45000' }],
       'Opening Balances': [{ 'Account Code': '1202001', Debit: '10000' }, { 'Account Code': '2201001', Credit: '10000' }],
     });
-    const r = await api('post', '/data-load/batches').field('kit', 'migration').field('legacySystem', 'TISPH Excel').attach('file', wb, 'migration.xlsx');
-    expect(r.status).toBe(201);
+    const r = await validatedBatch(api, api('post', '/data-load/batches').field('kit', 'migration').field('legacySystem', 'TISPH Excel').attach('file', wb, 'migration.xlsx'));
+    expect(r.status).toBe(202);
     expect(r.body.data.errors).toEqual([]);
     batch = r.body.data.batch;
     expect(batch).toMatchObject({ loadNumber: `MIG-${String(batch.id).padStart(6, '0')}`, legacySystem: 'TISPH Excel' });

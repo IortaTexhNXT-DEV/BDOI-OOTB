@@ -19,6 +19,7 @@ import { writeXlsx } from '../src/lib/xlsx.js';
 import { readWorkbook } from '../src/modules/documents/xlsx.js';
 import { addDays, today } from '../src/lib/dates.js';
 import { normaliseCompany, normaliseInsurer, normalisePersonName } from '../src/modules/data-load/duplicates.js';
+import { goLiveSetup, validatedBatch } from './helpers.js';
 
 let api;
 let kits;
@@ -39,10 +40,10 @@ function book(sheets, kit = 'migration') {
     }),
   });
 }
-const upload = (wb, kit = 'migration') => api('post', '/data-load/batches').field('kit', kit).attach('file', wb, `${kit}.xlsx`);
+const upload = (wb, kit = 'migration') => validatedBatch(api, api('post', '/data-load/batches').field('kit', kit).attach('file', wb, `${kit}.xlsx`));
 const load = (id) => api('post', `/data-load/batches/${id}/load`).send({});
 const rowsOf = async (id) => (await api('get', `/data-load/batches/${id}/rows?perPage=500`)).body.data;
-const resolve = (id, body) => api('post', `/data-load/batches/${id}/resolutions`).send(body);
+const resolve = (id, body) => validatedBatch(api, api('post', `/data-load/batches/${id}/resolutions`).send(body));
 /** Matches of each row of a batch: { key: [rule:kind] }. */
 const matches = async (id) => Object.fromEntries((await rowsOf(id)).map((r) => [r.key, r.duplicates.map((m) => `${m.rule}:${m.kind}`)]));
 
@@ -62,7 +63,7 @@ beforeAll(async () => {
   const d = new Date(`${now.slice(0, 7)}-01T00:00:00Z`);
   d.setUTCMonth(d.getUTCMonth() + 1);
   cutover = d.toISOString().slice(0, 10);
-  expect((await api('put', '/settings').send({ settings: { 'golive.cutover_date': cutover } })).status).toBe(200);
+  await goLiveSetup(api, cutover);
   clearSettingsCache();
   // records entered in BrokerVerse before the migration
   await query(`INSERT INTO clients(client_code, client_type, first_name, last_name, display_name, tin, birth_date) VALUES
@@ -164,7 +165,7 @@ describe('policy rules', () => {
     expect(row).toMatchObject({ result: 'duplicate', duplicates: [expect.objectContaining({ rule: 'insurer-variant', kind: 'stored', number: 'MALAYAN' })] });
     expect((await load(id)).status).toBe(409);
     const res = await resolve(id, { rule: 'insurer-variant', resolution: 'use-existing', reason: 'Legacy spelling of Malayan' });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(202);
     expect(res.body.data).toMatchObject({ resolved: 1, maps: 1 });
     expect(await one("SELECT target_code, legacy_value FROM migration_value_maps WHERE object = 'insurer'")).toEqual({ target_code: 'MALAYAN', legacy_value: 'Malayan Ins. Co., Inc.' });
     // the spelling now resolves to the insurer: the row is no longer a duplicate and creates its policy with MALAYAN,
@@ -213,11 +214,11 @@ describe('resolutions', () => {
     const r = await upload(book({ Clients: [person('DP-L1', { TIN: '777-000-111-000' })] }));
     const id = r.body.data.batch.id;
     await query("INSERT INTO clients(client_code, client_type, company_name, display_name, tin) VALUES ('BV-LAPSE', 'corporate', 'Lapse Co.', 'Lapse Co.', '777-000-111-000')");
-    const v = await api('post', `/data-load/batches/${id}/validate`);
+    const v = await validatedBatch(api, api('post', `/data-load/batches/${id}/validate`));
     expect(v.body.data.batch.rowsDuplicate).toBe(1);
     await resolve(id, { rule: 'tin', resolution: 'load-as-new', reason: 'Different persons' });
     await query("DELETE FROM clients WHERE client_code = 'BV-LAPSE'");
-    await api('post', `/data-load/batches/${id}/validate`);
+    await validatedBatch(api, api('post', `/data-load/batches/${id}/validate`));
     expect(await one('SELECT resolution, resolved_by FROM data_load_rows WHERE batch_id = $1', [id])).toEqual({ resolution: null, resolved_by: null });
   });
 

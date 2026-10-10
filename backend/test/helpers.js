@@ -189,3 +189,42 @@ export async function withOwnDamageOnly(policyId, sumInsured, ratePercent) {
   }
   return { net, gross };
 }
+/**
+ * Data Migration & Go-Live: validation, load and undo of a batch run as jobs. settledBatch waits until the job of a batch
+ * has ended (its status is no longer validating, running or undoing) and returns GET /data-load/batches/:id.
+ */
+export async function settledBatch(api, id, { timeout = 60000 } = {}) {
+  const end = Date.now() + timeout;
+  for (;;) {
+    const r = await api('get', `/data-load/batches/${id}`);
+    const status = r.body.data?.batch?.status;
+    if (!['validating', 'running', 'undoing'].includes(status)) return r;
+    if (Date.now() > end) throw new Error(`batch ${id} is still ${status}`);
+    await new Promise((resolve) => { setTimeout(resolve, 50); });
+  }
+}
+/**
+ * An upload, a validation or a resolution answered 202: waits for the validation job. The result carries the batch and
+ * its errors in data, as the response of the request did when the validation ran in it; any other response is returned
+ * as it is.
+ */
+export async function validatedBatch(api, response) {
+  const res = await response;
+  if (res.status !== 202) return res;
+  const r = await settledBatch(api, res.body.data.batch.id);
+  return { status: res.status, body: { ...res.body, data: { ...res.body.data, batch: r.body.data.batch, errors: r.body.data.errors } } };
+}
+/**
+ * The cutover date set on the Go-Live tab, and (approval: false) loads run at once by POST /data-load/batches/:id/load
+ * without a second user, as in a rehearsal environment. test/migration-approval.test.js covers the approval.
+ */
+export async function goLiveSetup(api, cutover, { approval = false } = {}) {
+  const { query } = await import('../src/db/pool.js');
+  const { clearSettingsCache } = await import('../src/lib/settings.js');
+  if (cutover) {
+    const r = await api('put', '/data-load/golive/cutover-date').send({ cutoverDate: cutover });
+    if (r.status !== 200) throw new Error(`cutover date: ${r.status} ${JSON.stringify(r.body)}`);
+  }
+  await query('UPDATE app_settings SET value = $1::jsonb WHERE key = \'migration.load_approval_required\'', [JSON.stringify(approval)]);
+  clearSettingsCache();
+}

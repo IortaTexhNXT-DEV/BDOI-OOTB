@@ -104,7 +104,7 @@ describe('compare an export with this environment', () => {
     expect(audit.after_data.verdict).toBe('mirrored');
     const got = (await api('get', `/data-load/compare/${c.id}`)).body.data;
     expect(got.verdictText).toBe('Mirrored');
-    expect(got.rules.map((x) => x.id)).toEqual(expect.arrayContaining(['cutover-date', 'urls-hosts', 'email-sender', 'payment-gateway-mode', 'numbering-counters']));
+    expect(got.rules.map((x) => x.id)).toEqual(expect.arrayContaining(['urls-hosts', 'email-sender', 'payment-gateway-mode', 'numbering-counters']));
     expect((await rowsOf(c.id)).total).toBe(0);
     expect((await rowsOf(c.id, '?status=identical&sheet=users')).data[0].key).toBe('BrokerVerse');
   });
@@ -146,7 +146,6 @@ describe('compare an export with this environment', () => {
 
   it('environment-specific fields are listed apart, not as differences; numbering counters with the toggle', async () => {
     const file = edit(current, (b) => {
-      b.set('Settings', (row) => row['Setting Key'] === 'golive.cutover_date', 'Value', '2026-12-01');
       b.set('Settings', (row) => row['Setting Key'] === 'general.frontend_url', 'Value', 'https://uat.broker.example');
       b.set('Settings', (row) => row['Setting Key'] === 'notification.from_address', 'Value', 'BrokerVerse UAT <uat@broker.example>');
       b.set('Settings', (row) => row['Setting Key'] === 'policy.payment_gateway_url', 'Value', 'https://sandbox.gateway.example');
@@ -155,10 +154,11 @@ describe('compare an export with this environment', () => {
     const c = (await compare(file)).body.data;
     expect(c.verdict).toBe('mirrored');
     expect(c.totals.different).toBe(0);
-    expect(c.totals.environmentSpecific).toBe(5);
+    expect(c.totals.environmentSpecific).toBe(4);
     const env = (await api('get', `/data-load/compare/${c.id}`)).body.data.environmentSpecific;
     const byKey = Object.fromEntries(env.map((e) => [e.key, e]));
-    expect(byKey['golive.cutover_date']).toMatchObject({ sheetName: 'Settings', header: 'Value', file: '2026-12-01', here: '', rule: 'cutover-date' });
+    // the cutover date is not in the workbook: each environment sets its own on Data Migration & Go-Live > Go-Live
+    expect(byKey['golive.cutover_date']).toBeUndefined();
     expect(byKey['general.frontend_url']).toMatchObject({ file: 'https://uat.broker.example', rule: 'urls-hosts' });
     expect(byKey['notification.from_address'].rule).toBe('email-sender');
     expect(byKey['policy.payment_gateway_url'].rule).toBe('urls-hosts');
@@ -167,7 +167,7 @@ describe('compare an export with this environment', () => {
     // "include numbering counters": the next number is a difference
     const withCounters = (await compare(file, { includeNumbering: true })).body.data;
     expect(withCounters.verdict).toBe('differences');
-    expect(withCounters.totals).toMatchObject({ different: 1, environmentSpecific: 4 });
+    expect(withCounters.totals).toMatchObject({ different: 1, environmentSpecific: 3 });
     const d = (await rowsOf(withCounters.id)).data[0];
     expect(d).toMatchObject({ sheetName: 'Numbering', key: 'policy' });
     expect(d.differences).toEqual([expect.objectContaining({ header: 'Next Number', file: '4321' })]);
@@ -216,7 +216,7 @@ describe('comparison workbook', () => {
     const file = edit(current, (b) => {
       b.set('Write-off Reasons', () => true, 'Reason', 'Changed in UAT');
       b.append('Write-off Reasons', { 'Reason Code': 'ZZ-UAT', Reason: 'Only in UAT', 'GL Account': '6999001', Status: 'Active' });
-      b.set('Settings', (row) => row['Setting Key'] === 'golive.cutover_date', 'Value', '2026-12-01');
+      b.set('Settings', (row) => row['Setting Key'] === 'general.frontend_url', 'Value', 'https://uat.broker.example');
     });
     const c = (await compare(file)).body.data;
     const res = await bin(api('get', `/data-load/compare/${c.id}/workbook`));
@@ -237,7 +237,7 @@ describe('comparison workbook', () => {
     expect(wo[1].at(-1)).toMatch(/^Different: Reason: File "Changed in UAT" \/ This environment "/);
     expect(wo.find((r) => r[0] === 'ZZ-UAT').at(-1)).toBe('Only in File');
     expect(wo.filter((r) => r.at(-1) === 'Identical').length).toBe(3);
-    expect(book.find((s) => s.name === 'Environment-specific').rows[1].slice(0, 5)).toEqual(['Settings', 'golive.cutover_date', 'Value', '2026-12-01', '']);
+    expect(book.find((s) => s.name === 'Environment-specific').rows[1].slice(0, 4)).toEqual(['Settings', 'general.frontend_url', 'Value', 'https://uat.broker.example']);
     // styles: navy header (8), frozen first row; changed cell (14), only-in-file row (12)
     const zip = readZip(res.body);
     const sheetXml = zip.get(`xl/worksheets/sheet${names.indexOf('Write-off Reasons') + 1}.xml`);

@@ -13,6 +13,7 @@ import { clearSettingsCache } from '../src/lib/settings.js';
 import { writeXlsx } from '../src/lib/xlsx.js';
 import { addDays, today } from '../src/lib/dates.js';
 import { centavos, pesoSum } from '../src/modules/data-load/common.js';
+import { goLiveSetup, validatedBatch } from './helpers.js';
 
 let api;
 let kits;
@@ -27,7 +28,7 @@ function book(sheets) {
     }),
   });
 }
-const upload = (wb) => api('post', '/data-load/batches').field('kit', 'migration').attach('file', wb, 'migration.xlsx');
+const upload = (wb) => validatedBatch(api, api('post', '/data-load/batches').field('kit', 'migration').attach('file', wb, 'migration.xlsx'));
 const policy = (number, gross, extra = {}) => ({ 'Policy Number': number, 'Client Code': 'AM-C-1', Insurer: 'MALAYAN', Product: 'PARCEL', 'Inception Date': addDays(cutover, -30),
   'Expiry Date': addDays(cutover, 335), 'Issue Date': addDays(cutover, -31), 'Gross Premium': gross, ...extra });
 
@@ -53,7 +54,7 @@ beforeAll(async () => {
   const d = new Date(`${now.slice(0, 7)}-01T00:00:00Z`);
   d.setUTCMonth(d.getUTCMonth() + 1);
   cutover = d.toISOString().slice(0, 10);
-  expect((await api('put', '/settings').send({ settings: { 'golive.cutover_date': cutover } })).status).toBe(200);
+  await goLiveSetup(api, cutover);
   clearSettingsCache();
 });
 afterAll(async () => {

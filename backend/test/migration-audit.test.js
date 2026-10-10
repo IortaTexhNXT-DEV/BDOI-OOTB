@@ -14,6 +14,7 @@ import { writeXlsx } from '../src/lib/xlsx.js';
 import { addDays, today } from '../src/lib/dates.js';
 import { actionTitle } from '../src/lib/auditLabels.js';
 import { sourceOf } from '../src/lib/auditEvents.js';
+import { goLiveSetup, validatedBatch } from './helpers.js';
 
 let api;
 let kits;
@@ -29,7 +30,7 @@ function book(sheets) {
     }),
   });
 }
-const upload = (wb) => api('post', '/data-load/batches').field('kit', 'migration').attach('file', wb, 'migration.xlsx');
+const upload = (wb) => validatedBatch(api, api('post', '/data-load/batches').field('kit', 'migration').attach('file', wb, 'migration.xlsx'));
 const entries = async (action) => (await query("SELECT * FROM audit_log WHERE action = $1 ORDER BY entity, entity_id", [action])).rows;
 const client = (email) => ({ 'Client Code': 'AUD-C-1', 'Client Type': 'individual', 'First Name': 'Rosa', 'Last Name': 'Diaz', Email: email, TIN: '123-456-789-000' });
 const workbook = (email, ob = '10000') => book({
@@ -53,7 +54,7 @@ beforeAll(async () => {
   d.setUTCMonth(d.getUTCMonth() + 1);
   cutover = d.toISOString().slice(0, 10);
   issue = addDays(cutover, -40);
-  expect((await api('put', '/settings').send({ settings: { 'golive.cutover_date': cutover } })).status).toBe(200);
+  await goLiveSetup(api, cutover);
   clearSettingsCache();
 });
 afterAll(async () => {
