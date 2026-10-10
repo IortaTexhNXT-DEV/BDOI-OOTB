@@ -2,10 +2,12 @@
  * TISPH configuration (seeds 80_tisph_configuration.sql and 81_tisph_finance.sql): a new database carries the company,
  * fiscal year, departments, insurer panel, policy types, claim checklist and causes of loss, cancellation reasons and
  * payment modes of the Pre-BSM workbook, and the chart of accounts, account determination and tax codes of the Finance
- * & General Accounting workbook. Seeding again changes nothing and keeps administrator changes. On a database already
+ * & General Accounting workbook, and leaves inactive the reference records TISPH does not use (93_tisph_master_data.sql).
+ * Seeding again changes nothing and keeps administrator changes. On a database already
  * in use, the document logo of a brand pack in force moves to TISPH and a January fiscal calendar is rebuilt on April
  * while nothing has been closed in it.
  */
+import fs from 'node:fs';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { setup } from './helpers.js';
 import { pool, withTransaction } from '../src/db/pool.js';
@@ -122,6 +124,30 @@ describe('TISPH configuration of a new database', () => {
   });
 });
 
+describe('TISPH master data', () => {
+  const statuses = async (sql) => Object.fromEntries((await q(sql)).map((r) => [r.code, r.status]));
+
+  it('leaves inactive the starter records TISPH does not use, and keeps a record an administrator activates again', async () => {
+    expect(await statuses("SELECT code, status FROM insurance_companies WHERE code IN ('MAPFRE', 'FPG', 'MERCANTILE', 'AXA')"))
+      .toEqual({ MAPFRE: 'inactive', FPG: 'inactive', MERCANTILE: 'inactive', AXA: 'active' });
+    expect(await statuses('SELECT code, status FROM currencies')).toEqual({ PHP: 'active', USD: 'inactive', EUR: 'inactive', SGD: 'inactive', JPY: 'inactive' });
+    // the nationality masters name Singapore, Malaysia and the United States
+    expect(await statuses("SELECT code, status FROM countries WHERE code IN ('PH', 'SG', 'MY', 'TH', 'US')"))
+      .toEqual({ PH: 'active', SG: 'active', MY: 'active', TH: 'inactive', US: 'active' });
+    expect(await statuses("SELECT code, status FROM master_records WHERE type_code = 'company'")).toEqual({ ITX: 'inactive', TISPH: 'active' });
+    expect(await q('SELECT code FROM bank_file_layouts WHERE active ORDER BY code')).toEqual([{ code: 'MBT-BULK' }]);
+    expect((await q("SELECT data FROM master_records WHERE type_code = 'line-of-business' AND code = 'MARINE'"))[0].data.LOBDescription).toBe('Parcel / Courier');
+
+    await q("UPDATE currencies SET status = 'active', updated_by = 'it.admin' WHERE code = 'USD'");
+    await q("UPDATE insurance_companies SET status = 'active', updated_by = 'it.admin' WHERE code = 'FPG'");
+    await seed({ log: () => {} });
+    expect((await q("SELECT status FROM currencies WHERE code = 'USD'"))[0].status).toBe('active');
+    expect((await q("SELECT status FROM insurance_companies WHERE code = 'FPG'"))[0].status).toBe('active');
+    await q("UPDATE currencies SET status = 'inactive', updated_by = NULL WHERE code = 'USD'");
+    await q("UPDATE insurance_companies SET status = 'inactive', updated_by = NULL WHERE code = 'FPG'");
+  });
+});
+
 describe('TISPH configuration of a database already in use', () => {
   const company = async (code) => (await q("SELECT id, data FROM master_records WHERE type_code = 'company' AND code = $1", [code]))[0];
   const startMonths = async () => (await q('SELECT DISTINCT extract(month FROM start_date)::int AS m FROM fiscal_years')).map((r) => r.m);
@@ -136,8 +162,9 @@ describe('TISPH configuration of a database already in use', () => {
   };
 
   it('moves the document logo of the brand pack enabled on the earlier letterhead company to TISPH', async () => {
-    // as before the TISPH seeds: the out-of-the-box company is the letterhead and BRAND_PACK puts its logo on it
-    await q("UPDATE master_records SET data = data || jsonb_build_object('IsPrimary', code = 'ITX') WHERE type_code = 'company' AND code IN ('ITX', 'TISPH')");
+    // as before the TISPH seeds: the out-of-the-box company is the active letterhead and BRAND_PACK puts its logo on it
+    await q(`UPDATE master_records SET data = data || jsonb_build_object('IsPrimary', code = 'ITX'), status = 'active'
+      WHERE type_code = 'company' AND code IN ('ITX', 'TISPH')`);
     const ownLogo = (await company('ITX')).data.Logo;
     expect(await enforceDeploymentPack('toyota-insurance-services')).toMatchObject({ status: 'enabled' });
     const packLogo = (await company('ITX')).data.Logo;
@@ -157,6 +184,20 @@ describe('TISPH configuration of a database already in use', () => {
     expect((await ctx.api('post', '/branding/packs/reset-default').send({})).status).toBe(200);
     expect((await company('TISPH')).data.Logo).toBeUndefined();
     expect((await company('ITX')).data.Logo).toBe(ownLogo);
+  });
+
+  it('sets the platform roles inactive that no user holds, no active role includes and no administrator changed', async () => {
+    const platform = ['system-admin', 'sales', 'processing', 'operations', 'claims', 'accounting', 'accounting-manager'];
+    expect((await ctx.api('post', '/users').send({ username: 'tc.claims', password: 'Welcome@123', displayName: 'TC Claims', roles: ['claims'] })).status).toBe(201);
+    const [role] = await q("SELECT id, name FROM roles WHERE code = 'operations'");
+    expect((await ctx.api('put', `/roles/${role.id}`).send({ name: role.name })).status).toBe(200);
+    await q(fs.readFileSync(new URL('../src/db/migrations/0540_tisph_platform_roles_inactive.sql', import.meta.url), 'utf8'));
+    const status = Object.fromEntries((await q('SELECT code, status FROM roles WHERE code = ANY($1)', [platform])).map((r) => [r.code, r.status]));
+    // the administrator holds and SUPERID includes the System Administrator; users hold Claims and, in the sample data,
+    // Sales & Marketing and Accounting; Operations was changed
+    expect(status).toEqual({ 'system-admin': 'active', sales: 'active', processing: 'inactive', operations: 'active', claims: 'active',
+      accounting: 'active', 'accounting-manager': 'inactive' });
+    await q("UPDATE roles SET status = 'active' WHERE code = ANY($1)", [platform]);
   });
 
   it('rebuilds a January fiscal calendar on April while no period has been closed; a soft close stays', async () => {

@@ -460,8 +460,9 @@ Press F1, or **?** outside a text field, or choose **Help** in the account menu.
   **Support contacts not set up. Contact TIS IT AppSupport / Admin.**;
 - **Keyboard shortcuts**: F1 or ? opens the panel, / goes to the menu search, the arrows and Enter open a menu search
   result, Esc closes the panel or clears the search;
-- **About Toyota Insurance Services**: the version, environment and build date of the system and the version of this
-  manual.
+- **About Toyota Insurance Services**: the version of the system, the environment, the build and release date, the
+  version of this manual, and who approved the requirements and the release of this version. TIS IT AppSupport / Admin
+  keeps these on {{menu:/master/configuration/settings}} (Release).
 
 ## When the system refuses an action {#when-the-system-refuses-an-action}
 

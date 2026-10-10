@@ -109,7 +109,7 @@ ones where they are used). The important ones:
 | `DATABASE_URL` | PostgreSQL connection. |
 | `JWT_SECRET`, `DATA_ENCRYPTION_KEY` | Token signing and encryption at rest (two-factor secrets). Required in production. |
 | `PII_ENCRYPTION_KEY`, `PII_ENCRYPTION_KEY_PREVIOUS` (package B) | Encryption of TIN, government ID and bank account numbers; the previous key only during a rotation (`npm run pii:rotate`). Required in production, at least 32 characters, different from the other two keys. |
-| `APP_ENVIRONMENT` | Environment of the deployment (dev, sit, uat, preprod, production). |
+| `APP_ENVIRONMENT` | Environment of the deployment (dev, sit, uat, preprod, production). Shown in Help > About in place of the setting `release.environment_label` (Master > Configuration > Release). |
 | Connector credential variables | Named in each integration connector (`credential_env`); never stored in the database. |
 | `CORS_ORIGINS`, `PUBLIC_BASE_URL` | The web address. Required in production; file links are built from `PUBLIC_BASE_URL`. |
 | `ADMIN_PASSWORD` | Password of the first administrator, used only when the seed creates it. |

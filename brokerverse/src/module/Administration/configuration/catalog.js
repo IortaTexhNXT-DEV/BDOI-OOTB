@@ -11,8 +11,8 @@ export const AREAS = [
     id: "company",
     title: "Company & Branding",
     icon: "pi pi-building",
-    summary: "Time zone, date format, display currency, default language, the look of printed documents and the support contacts shown in Help. The application name, logo and colours come from the brand pack of the deployment; the company's legal identity is in the Company master.",
-    groups: ["general", "branding", "currency", "documents", "system", "golive", "support"],
+    summary: "Time zone, date format, display currency, default language, the look of printed documents, the support contacts and the release shown in Help. The application name, logo and colours come from the brand pack of the deployment; the company's legal identity is in the Company master.",
+    groups: ["general", "branding", "currency", "documents", "system", "golive", "support", "release"],
     links: [
       { label: "Documents and Reports Layout", path: "/master/configuration/documents-layout" },
       { label: "E-mail Layout", path: "/master/configuration/email-layout" },
@@ -131,7 +131,7 @@ export const AREAS = [
 export const HIDDEN_GROUPS = ["numbering"];
 
 export const GROUP_TITLES = {
-  general: "General", branding: "Branding", currency: "Currency", documents: "Printed documents", system: "System", support: "Support and help",
+  general: "General", branding: "Branding", currency: "Currency", documents: "Printed documents", system: "System", support: "Support and help", release: "Release",
   leads: "Prospects", quotations: "Quotations", quote: "Motor quotations", broker_slips: "Requests for quotation", placement: "Placement",
   product: "Products", packages: "Packaged products", premium: "Premium", motor: "Motor pricing",
   policies: "Policies", policy: "Policy issuance and KYC", endorsements: "Endorsements", renewals: "Renewals",

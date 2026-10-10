@@ -1,7 +1,8 @@
 {
  "edition": "tisph",
  "title": "Toyota Insurance Services Philippines – User Manual",
- "version": "1.0",
+ "version": "1.3",
+ "versionLabel": "PH Version",
  "date": "10 October 2026",
  "status": "Draft",
  "brandPack": "toyota-insurance-services",
@@ -9,7 +10,7 @@
   "pdf": "TISPH_User_Manual.pdf",
   "word": "TISPH_User_Manual.docx"
  },
- "sourceHash": "9f095a041c08d1a8d8f4cbb2b987951c75a760e234c0a6c10296a554794237c3",
+ "sourceHash": "b490ec9ed9e0f18950a3cfdd0a2b3760249d8566e7c6525645b2b0c696fb3aeb",
  "roles": {
   "tis-sales-associate": {
    "id": "tis-sales-associate",

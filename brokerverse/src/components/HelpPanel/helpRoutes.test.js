@@ -64,14 +64,13 @@ describe("support contacts", () => {
       screen: "Claims",
       url: "https://bv.example.ph/agent/claim",
       user: { username: "carlo.estrada", displayName: "Carlo Estrada", roles: ["claims"] },
-      version: "Web 0.1.0 · API 1.0.0",
-      environment: "uat",
+      facts: [{ label: "Version", value: "PH-WEB-2026.1.3 · PH-API-2026.1.3" }, { label: "Environment", value: "UAT" }],
       at: "2026-10-04T08:00:00.000Z",
     });
     expect(text).toContain("Screen: Claims");
     expect(text).toContain("User: carlo.estrada (Carlo Estrada)");
-    expect(text).toContain("Version: Web 0.1.0 · API 1.0.0");
-    expect(text).toContain("Environment: uat");
+    expect(text).toContain("Version: PH-WEB-2026.1.3 · PH-API-2026.1.3");
+    expect(text).toContain("Environment: UAT");
     expect(text).toContain("Time: 2026-10-04T08:00:00.000Z");
   });
 });

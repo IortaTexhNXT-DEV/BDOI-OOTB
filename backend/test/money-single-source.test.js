@@ -13,7 +13,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { setup } from './helpers.js';
+import { setup, withStarterMasters } from './helpers.js';
 import { pool, query, one } from '../src/db/pool.js';
 import { clearSettingsCache, setSetting } from '../src/lib/settings.js';
 import { baseCurrency, currencyChoices, exchangeRateOn, rateToBase } from '../src/lib/currency.js';
@@ -30,7 +30,10 @@ const migration = (name) => fs.readFileSync(path.join(here, '..', 'src', 'db', '
 const settingValue = async (key) => (await one('SELECT value FROM app_settings WHERE key = $1', [key]))?.value;
 
 let ctx;
-beforeAll(async () => { ctx = await setup(); });
+beforeAll(async () => {
+  ctx = await setup();
+  await withStarterMasters();
+});
 afterAll(async () => { await pool.end(); });
 
 const currencyId = async (code) => (await one('SELECT id FROM currencies WHERE code = $1', [code])).id;

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, withStarterMasters } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 
 let ctx;
@@ -10,6 +10,7 @@ const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR
 
 beforeAll(async () => {
   ctx = await setup();
+  await withStarterMasters();
   await ctx.api('post', '/users').send({ username: 'ss.claims', password: 'Welcome@123', displayName: 'SS Claims', roles: ['claims'] });
   claimsToken = await loginAs(ctx.app, 'ss.claims', 'Welcome@123');
 });

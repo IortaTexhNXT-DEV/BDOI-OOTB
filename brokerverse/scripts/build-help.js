@@ -2,9 +2,9 @@
  * Builds the in-app help from the user manual of one edition:
  *
  *   public/help/user-manual.html   the manual as one HTML page in the colours and font of the edition's brand
- *   public/help/sections.json      the edition (title, version, date, status, files, brand pack, the chapter of each
- *                                  role) and the headings (id, title, level, chapter): the Help panel links a screen
- *                                  to one and a user to the chapter of his or her role
+ *   public/help/sections.json      the edition (title, version and its label, date, status, files, brand pack, the
+ *                                  chapter of each role) and the headings (id, title, level, chapter): the Help panel
+ *                                  links a screen to one and a user to the chapter of his or her role
  *   public/help/manual.js          the contents list script of the page
  *   public/help/images/            the screenshots the manual shows
  *   public/help/<pdf>, <docx>      the manual as PDF and Word: the product PDF is copied in; the files of a client
@@ -201,14 +201,14 @@ async function buildManifest(name, out, check) {
   }
   if (pack) copies.push({ from: pack.logo, to: `logo${path.extname(pack.logo)}` });
   for (const f of pack?.fonts?.files || []) copies.push({ from: f.from, to: f.to });
-  const edition = { title: manifest.title, version: manifest.version, date: manifest.date, status, files, brandName: pack?.name,
+  const edition = { title: manifest.title, version: manifest.version, versionLabel: manifest.versionLabel, date: manifest.date, status, files, brandName: pack?.name,
     logo: pack ? `logo${path.extname(pack.logo)}` : null, fontUrl: pack?.fontUrl,
     fonts: pack?.fonts ? { family: pack.fonts.family, files: pack.fonts.files.map(({ weight, to }) => ({ weight, src: to })) } : null };
   const content = render(markdown, heads, (src) => src.split("/").map(encodeURIComponent).join("/"));
   const roles = Object.fromEntries(facts.roles.map((r) => [r.code, { id: r.chapterId, title: r.name }]));
   write(out, {
     html: page({ edition, vars, toc: toc(heads), content }),
-    sections: { edition: manifest.id, title: manifest.title, version: manifest.version, date: manifest.date, status, brandPack: pack?.id || null,
+    sections: { edition: manifest.id, title: manifest.title, version: manifest.version, versionLabel: manifest.versionLabel || null, date: manifest.date, status, brandPack: pack?.id || null,
       files: { pdf: files.pdf || null, word: files.word || null }, sourceHash: result.hash, roles, sections: headingList(heads) },
     images: result.images, copies, keep, script: path.join(__dirname, "help", "manual.js"),
   });
