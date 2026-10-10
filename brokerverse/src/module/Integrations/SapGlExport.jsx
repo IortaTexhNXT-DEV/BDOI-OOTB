@@ -11,6 +11,8 @@ import { Toast } from "primereact/toast";
 import service from "../../services/integrationsService";
 import { useServerList } from "../../hooks/useServerList";
 import { PageHeader, date, dateTime, isoDay, money, showError, showSuccess } from "./common";
+import { openConfirm } from "../../components/ConfirmDialog";
+import { calendarDateFormat, formatDate } from "../../utility/dateFormat";
 
 const STATUSES = ["done", "empty", "failed", "running"];
 const SEVERITY = { done: "success", empty: "secondary", failed: "danger", running: "info" };
@@ -31,17 +33,36 @@ const SapGlExport = () => {
   const list = useServerList(fetchPage, { key: "sap-gl-runs" });
   useEffect(() => { service.sapGlSettings().then(setSettings).catch(() => setSettings(null)); }, []);
   const run = async () => {
+    const iso = isoDay(day);
+    const earlier = (list.rows || []).filter((r) => r.exportDate === iso && r.status !== "failed");
+    let out = null;
     setBusy(true);
-    try {
-      const r = await service.runSapGl(isoDay(day));
-      showSuccess(toast, r.message);
-      list.reload();
-    } catch (e) {
-      showError(toast, e);
-    } finally {
-      setBusy(false);
-    }
+    const done = await openConfirm({
+      title: t(earlier.length ? "sapGl.confirm.regenerateTitle" : "sapGl.confirm.runTitle"),
+      severity: earlier.length ? "warning" : "neutral",
+      message: t(earlier.length ? "sapGl.confirm.regenerateMessage" : "sapGl.confirm.runMessage"),
+      facts: [
+        { label: t("sapGl.exportDate"), value: iso, type: "date" },
+        { label: t("sapGl.folder"), value: settings?.exportDir || settings?.folder, hidden: !settings },
+        { label: t("sapGl.cutOff"), value: settings?.cutOff, hidden: !settings },
+        { label: t("sapGl.previousRuns"), value: earlier.length, type: "number", decimals: 0, hidden: !earlier.length },
+        { label: t("sapGl.lastJournals"), value: earlier[0] ? `${earlier[0].journalCount} / ${earlier[0].lineCount}` : null, hidden: !earlier.length },
+        { label: t("sapGl.lastDebit"), value: earlier[0]?.totalDebit, type: "amount", hidden: !earlier.length },
+        { label: t("sapGl.lastCredit"), value: earlier[0]?.totalCredit, type: "amount", hidden: !earlier.length },
+      ],
+      confirmLabel: t(earlier.length ? "sapGl.confirm.regenerateAction" : "sapGl.confirm.runAction"),
+      onConfirm: async () => {
+        out = await service.runSapGl(iso);
+      },
+    });
+    setBusy(false);
+    if (!done) return;
+    const r = out?.data || out || {};
+    showSuccess(toast, r.status === "empty" ? t("sapGl.nothingPosted", { date: formatDate(iso) }) : t("sapGl.written", { date: formatDate(iso), n: r.runNo }));
+    list.reload();
   };
+  // a setting named in a warning ("(sap_gl.account_pattern)") is configuration detail, not something to act on here
+  const warningText = (w) => String(w).replace(/\s*\([a-z_]+(\.[a-z_]+)+\)/g, "");
   const download = (r, kind) => {
     const f = r.files.find((x) => x.kind === kind);
     service.downloadSapGlFile(r.id, kind, f?.fileName).catch((e) => showError(toast, e));
@@ -49,8 +70,8 @@ const SapGlExport = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader home={t("sidebar.Accounts")} section={t("sidebar.Accounts")} title={t("sapGl.title")} subtitle={t("sapGl.intro")}>
-        <Calendar value={day} onChange={(e) => setDay(e.value)} dateFormat="yy-mm-dd" maxDate={new Date()} aria-label={t("sapGl.exportDate")} />
+      <PageHeader home={t("sidebar.Accounts")} title={t("sapGl.title")} subtitle={t("sapGl.intro")}>
+        <Calendar value={day} onChange={(e) => setDay(e.value)} dateFormat={calendarDateFormat()} maxDate={new Date()} aria-label={t("sapGl.exportDate")} />
         <Button icon="pi pi-play" label={t("sapGl.runNow")} loading={busy} disabled={!day} onClick={run} />
       </PageHeader>
       {settings && (
@@ -70,7 +91,7 @@ const SapGlExport = () => {
           <Column header={t("sapGl.debit")} body={(r) => money(r.totalDebit)} className="bv-num" headerClassName="bv-num" />
           <Column header={t("sapGl.credit")} body={(r) => money(r.totalCredit)} className="bv-num" headerClassName="bv-num" />
           <Column header={t("sapGl.trigger")} body={(r) => <div><div>{t(`sapGl.triggers.${r.trigger}`)}</div><div className="pe-muted">{r.createdBy || ""}</div></div>} />
-          <Column header={t("sapGl.notes")} body={(r) => (r.error || (r.warnings || []).join("; ") || "-")} />
+          <Column header={t("sapGl.notes")} body={(r) => (r.error || (r.warnings || []).map(warningText).join("; ") || "-")} />
           <Column header={t("sapGl.files")} body={(r) => (r.files.length ? (
             <div className="flex gap-1">
               {r.files.map((f) => (

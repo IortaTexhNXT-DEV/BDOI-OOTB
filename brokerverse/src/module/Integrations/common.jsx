@@ -30,7 +30,7 @@ export const PageHeader = ({ home, section, title, subtitle, children }) => (
   <div className="pe-header">
     <div>
       <h1 className="pe-title">{title}</h1>
-      <BreadCrumb home={{ label: home }} model={[{ label: section }, { label: title }]} separatorIcon={<SvgDot color={"#000"} />} className="pe-breadcrumb" />
+      <BreadCrumb home={{ label: home }} model={[section ? { label: section } : null, { label: title }].filter(Boolean)} separatorIcon={<SvgDot color={"#000"} />} className="pe-breadcrumb" />
       {subtitle && <p className="pe-subtitle">{subtitle}</p>}
     </div>
     <div className="pe-header-actions">{children}</div>

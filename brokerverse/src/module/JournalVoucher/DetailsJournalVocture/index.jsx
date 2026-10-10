@@ -63,7 +63,7 @@ const DetailsJournalVocture = () => {
   const home = { label: t("accounts.journalVoucherDetails.account") };
 
   const [first, setFirst] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
   const isInitialMount = useRef(true);
 
@@ -207,7 +207,6 @@ const DetailsJournalVocture = () => {
           subtitle={voucher?.description}
           status={voucher?.status ? { code: voucher.status, label: statusLabel(voucher.status) } : null}
           meta={[
-            { label: t("accounts.journalVoucherDetails.transactionCode"), value: voucher?.transactionCode },
             { label: t("accounts.journalVoucherDetails.date"), value: voucher?.date, type: "date" },
             { label: t("accounts.journalVoucherDetails.totalDebit"), value: voucher?.totalDebit, type: "amount" },
             { label: t("accounts.journalVoucherDetails.totalCredit"), value: voucher?.totalCredit, type: "amount" },
@@ -238,8 +237,9 @@ const DetailsJournalVocture = () => {
       <div className="col-12">
         <DetailSection title={t("accounts.journalVoucherDetails.confirm.details")}>
           <KeyValueGrid
-            columns={4}
+            columns={3}
             items={[
+              { label: t("accounts.journalVoucherDetails.transactionCode"), value: voucher?.transactionCode },
               { label: t("accounts.journalVoucherDetails.confirm.kind"), value: kind ? t(`accounts.journalVoucherDetails.kinds.${kind}`, { defaultValue: kind }) : null },
               { label: t("accounts.journalVoucherDetails.confirm.source"), value: voucher?.source ? t(`accounts.journalVoucherDetails.sources.${voucher.source}`, { defaultValue: voucher.source }) : null },
               { label: t("accounts.journalVoucherDetails.confirm.createdAt"), value: voucher?.createdAt, type: "datetime" },

@@ -1,195 +1,82 @@
+import React from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
+import { Column } from "primereact/column";
+import { DataTable } from "primereact/datatable";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { useNavigate } from "react-router";
 import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
-import DropDowns from "../../../../components/DropDowns";
-import SvgDropdown from "../../../../assets/icons/SvgDropdown";
-import InputField from "../../../../components/InputField";
-import { Card } from "primereact/card";
-import DisbursementDetailviewTable from "./DisbursementDetailviewTable";
 import { useSelector } from "react-redux";
+import DetailHeader from "../../../../components/DetailHeader";
+import DetailSection from "../../../../components/DetailSection";
+import KeyValueGrid, { formatValue } from "../../../../components/KeyValueGrid";
+import { statusLabel } from "../../../../utils/statusSeverity";
 
+/** A posted petty cash disbursement, read only: its facts, the accounts it posted to and the request line it paid. */
 const DisbursementDetailview = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { getViewDisbursment } = useSelector(
-    ({ pettyCashDisbursementReducers }) => {
-      return {
-        loading: pettyCashDisbursementReducers?.loading,
-        ViewDisbursment: pettyCashDisbursementReducers?.ViewDisbursment,
-        getViewDisbursment: pettyCashDisbursementReducers?.getViewDisbursment
-      };
-    }
-  );
+  const { view, lines } = useSelector(({ pettyCashDisbursementReducers }) => ({
+    view: pettyCashDisbursementReducers?.getViewDisbursment || {},
+    lines: pettyCashDisbursementReducers?.AddDisbursmentTable || [],
+  }));
 
   const items = [
-    {
-      label: t("pettyCash.pettyCashLabel"),
-      command: () => navigate("/accounts/pettycash/disbursement"),
-    },
-    {
-      label: t("pettyCash.disbursementDetailView"),
-      to: "/accounts/pettycash/disbursementdetailview",
-    },
+    { label: t("pettyCash.pettyCashLabel"), command: () => navigate("/accounts/pettycash/disbursement") },
+    { label: t("pettyCash.disbursementDetailView"), to: "/accounts/pettycash/disbursementdetailview" },
   ];
-  const Initiate = { label: t("pettyCash.accounts") };
-
-  const handleBack = () => {
-    navigate("/accounts/pettycash/disbursement");
-  };
-
-
-
-
+  const home = { label: t("pettyCash.accounts") };
+  const line = lines[0] || {};
+  const amount = (v) => formatValue(v === "" ? null : v, { type: "amount" });
 
   return (
     <div className="add__disbursement__view__container">
-      <div className="grid  m-0">
-        <div className="col-12 md:col-6 lg:col-6">
-          <div
-            className="pettycash__title"
-            onClick={() => {
-              handleBack();
-            }}
-          >
+      <div className="grid m-0">
+        <div className="col-12">
+          <button type="button" className="pettycash__title" onClick={() => navigate("/accounts/pettycash/disbursement")}>
             <SvgBackArrow />
             {t("pettyCash.disbursementDetailView")}
-          </div>
+          </button>
           <div className="mt-3">
-            <BreadCrumb
-              model={items}
-              home={Initiate}
-              className="breadCrums"
-              separatorIcon={<SvgDot color={"#000"} />}
-            />
+            <BreadCrumb model={items} home={home} className="breadCrums" separatorIcon={<SvgDot color="currentColor" />} />
           </div>
         </div>
       </div>
-      <Card className="mt-3">
-        <div className="grid mt-1">
-          <div className="col-12 md:col-6 lg:col-3 xl:col-3 input__view">
-            <InputField
-              classNames="input__filed"
-              label={t("pettyCash.date")}
-              textColor={"#111927"}
-              textSize={"16"}
-              textWeight={500}
-              value={getViewDisbursment?.Date}
-            />
-          </div>
-          <div className="col-12 md:col-6 lg:col-3 xl:col-3 input__view">
-            <InputField
-              classNames="input__filed"
-              label={t("pettyCash.transactionNumber")}
-              textColor={"#111927"}
-              textSize={"16"}
-              textWeight={500}
-              value={getViewDisbursment?.TransactionNumber}
-            />
-          </div>
 
-          <div className="col-12 md:col-3 lg:col-3 input__view">
-            <DropDowns
-              className="input__filed"
-              label={t("pettyCash.pettyCashCodeRequired")}
-              placeholder="Select"
-              textColor={"#111927"}
-              textSize={"16"}
-              textWeight={500}
-              dropdownIcon={<SvgDropdown color={"#000"} />}
-              value={getViewDisbursment?.PettyCashCode}
-              options={[{label:getViewDisbursment?.PettyCashCode,value:getViewDisbursment?.PettyCashCode}]}
-                optionLabel="label"
-            />
-          </div>
-          <div className="col-12 md:col-3 lg:col-3 input__view">
-            <DropDowns
-              className="input__filed"
-              label={t("pettyCash.criteria")}
-              placeholder="Select"
-              textColor={"#111927"}
-              textSize={"16"}
-              textWeight={500}
-              dropdownIcon={<SvgDropdown color={"#000"} />}
-              value={getViewDisbursment?.Criteria}
-              options={[{label:getViewDisbursment?.Criteria,value:getViewDisbursment?.Criteria}]}
-                optionLabel="label"
-            />
-          </div>
-          <div className="col-12 md:col-3 lg:col-3 input__view">
-            <DropDowns
-              className="input__filed"
-              label={t("pettyCash.vatMainAccount")}
-              placeholder="Select"
-              textColor={"#111927"}
-              textSize={"16"}
-              textWeight={500}
-              dropdownIcon={<SvgDropdown color={"#000"} />}
-              value={getViewDisbursment?.VATMainAccount}
-              options={[{label:getViewDisbursment?.VATMainAccount,value:getViewDisbursment?.VATMainAccount}]}
-                optionLabel="label"
-            />
-          </div>
-          <div className="col-12 md:col-3 lg:col-3 input__view">
-            <DropDowns
-              className="input__filed"
-              label="VAT Sub Account"
-              placeholder="Select"
-              textColor={"#111927"}
-              textSize={"16"}
-              textWeight={500}
-              dropdownIcon={<SvgDropdown color={"#000"} />}
-              value={getViewDisbursment?.VATSubAccount}
-              options={[{label:getViewDisbursment?.VATSubAccount,value:getViewDisbursment?.VATSubAccount}]}
-                optionLabel="label"
-            />
-          </div>
-          <div className="col-12 md:col-3 lg:col-3 input__view">
-            <DropDowns
-              className="input__filed"
-              label={t("pettyCash.whtMainAccount")}
-              placeholder="Select"
-              textColor={"#111927"}
-              textSize={"16"}
-              textWeight={500}
-              dropdownIcon={<SvgDropdown color={"#000"} />}
-              value={getViewDisbursment?.WHTMainAccount}
-              options={[{label:getViewDisbursment?.WHTMainAccount,value:getViewDisbursment?.WHTMainAccount}]}
-                optionLabel="label"
-            />
-          </div>
-          <div className="col-12 md:col-3 lg:col-3 input__view">
-            <DropDowns
-              className="input__filed"
-              label="WHT Sub Account"
-              placeholder="Select"
-              textColor={"#111927"}
-              textSize={"16"}
-              textWeight={500}
-              dropdownIcon={<SvgDropdown color={"#000"} />}
-              value={getViewDisbursment?.WHTSubAccount}
-              options={[{label:getViewDisbursment?.WHTSubAccount,value:getViewDisbursment?.WHTSubAccount}]}
-                optionLabel="label"
-            />
-          </div>
-          <div className="col-12 md:col-6 lg:col-6 input__view">
-            <InputField
-              classNames="input__filed"
-              label={t("pettyCash.remarks")}
-              placeholder={t("pettyCash.enterRemarks")}
-              textColor={"#111927"}
-              textSize={"16"}
-              textWeight={500}
-              value={getViewDisbursment?.Remarks}
-            />
-          </div>
-        </div>
-      </Card>
-      <Card className="mt-3">
-        <DisbursementDetailviewTable />
-      </Card>
+      <DetailHeader
+        title={view.TransactionNumber || ""}
+        subtitle={view.Remarks}
+        status={view.status ? { code: String(view.status).toLowerCase(), label: statusLabel(view.status) } : null}
+        meta={[
+          { label: t("pettyCash.date"), value: view.Date },
+          { label: t("pettyCash.pettyCashCode"), value: view.PettyCashCode },
+          { label: t("pettyCash.requestNumber"), value: line.RequestNumber },
+          { label: t("pettyCash.view.netAmount"), value: line.NetAmount, type: "amount" },
+        ]}
+      />
+
+      <DetailSection title={t("pettyCash.view.posting")}>
+        <KeyValueGrid columns={4} items={[
+          { label: t("pettyCash.transactionCode"), value: view.TransactionCode },
+          { label: t("pettyCash.view.criteria"), value: view.Criteria },
+          { label: t("pettyCash.view.expenseAccount"), value: line.ExpenseCode },
+          { label: t("pettyCash.vatMainAccount"), value: view.VATMainAccount },
+          { label: t("pettyCash.whtMainAccount"), value: view.WHTMainAccount },
+        ]} />
+      </DetailSection>
+
+      <DetailSection title={t("pettyCash.view.lines")} flush>
+        <DataTable value={lines} dataKey="id" size="small" emptyMessage={t("pettyCash.view.noLines")}>
+          <Column field="RequestNumber" header={t("pettyCash.requestNumber")} />
+          <Column field="ExpenseCode" header={t("pettyCash.view.expenseAccount")} />
+          <Column field="Remarks" header={t("pettyCash.remarks")} />
+          <Column header={t("pettyCash.amount")} body={(r) => amount(r.Amount)} bodyClassName="bv-num" headerClassName="bv-num" />
+          <Column header={t("pettyCash.view.vat")} body={(r) => amount(r.VAT)} bodyClassName="bv-num" headerClassName="bv-num" />
+          <Column header={t("pettyCash.view.wht")} body={(r) => amount(r.WHT)} bodyClassName="bv-num" headerClassName="bv-num" />
+          <Column header={t("pettyCash.view.netAmount")} body={(r) => amount(r.NetAmount)} bodyClassName="bv-num" headerClassName="bv-num" />
+        </DataTable>
+      </DetailSection>
     </div>
   );
 };

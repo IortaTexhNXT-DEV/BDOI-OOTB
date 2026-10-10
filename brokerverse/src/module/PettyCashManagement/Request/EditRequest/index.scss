@@ -148,3 +148,16 @@
     }
   }
   
+// the request opened to view: header, lines and approval as stacked cards
+.requestedit___view {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .pettycash__title {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    text-align: left;
+  }
+}

@@ -452,7 +452,8 @@
       "recordedPartial": "{{amount}} received against bill {{bill}}; {{balance}} remains to be paid.",
       "printReceipt": "Print receipt",
       "recordAnother": "Record another",
-      "dismiss": "Dismiss"
+      "dismiss": "Dismiss",
+      "requiredTitle": "Required fields"
     },
     "addReceipts": {
       "title": "Add Receipts",
@@ -620,13 +621,13 @@
     "journalVoucherDetails": {
       "title": "Journal Voucher Details",
       "journalVoucher": "Journal Voucher",
-      "account": "Account",
+      "account": "Accounts",
       "transactionCode": "Transaction Code",
       "transactionDescription": "Transaction Description",
       "transactionNumber": "Transaction Number",
       "date": "Date",
       "totalCredit": "Total credit",
-      "totalDebit": "Total Debit",
+      "totalDebit": "Total debit",
       "net": "Net",
       "enter": "Enter",
       "mainAccountRequired": "Main Account is required",
@@ -929,6 +930,22 @@
       "payout": "Record payout",
       "commissionLines": "Commission lines",
       "activity": "Activity"
+    },
+    "detail": {
+      "policyNumber": "Policy number",
+      "insurer": "Insurer",
+      "remarks": "Payment notes",
+      "otherDeductions": "Other deductions",
+      "printVoucher": "Print voucher",
+      "selectApprovedCheque": "Select an approved cheque to print it",
+      "modes": {
+        "check": "Cheque",
+        "cheque": "Cheque",
+        "cash": "Cash",
+        "bank-transfer": "Bank transfer",
+        "bank_transfer": "Bank transfer",
+        "online": "Online transfer"
+      }
     }
   },
   "renewal": {
@@ -1359,6 +1376,21 @@
       "wht": "Withholding tax",
       "netAmount": "Net amount",
       "recordDisbursements": "Record disbursements"
+    },
+    "view": {
+      "netAmount": "Net amount",
+      "posting": "Accounts",
+      "criteria": "Criteria",
+      "expenseAccount": "Expense account",
+      "lines": "Request paid",
+      "noLines": "No request line",
+      "vat": "VAT",
+      "wht": "WHT",
+      "pettyCashFund": "Petty cash fund",
+      "narration": "Narration",
+      "purpose": "Purpose",
+      "fund": "Fund",
+      "accounts": "Bank and accounts"
     }
   },
   "employeeBenefit": {
@@ -6795,12 +6827,12 @@
       "depreciation": "(e) Depreciation"
     },
     "stepHelp": {
-      "accruals": "Accrual templates for the period, reversed on day 1 of the next period.",
-      "recurring": "Recurring templates due up to the period end.",
-      "deferral": "Unearned commission for cover after the period end (when accounting.defer_commission is on).",
-      "fx": "Foreign-currency balances at the month-end rate of the Exchange Rate master.",
-      "checks": "Automatic checks of the close checklist.",
-      "depreciation": "Straight-line depreciation of the fixed asset register for the period (once per asset and period)."
+      "accruals": "Accruals of the period, reversed on day 1 of the next period",
+      "recurring": "Recurring journals due up to the period end",
+      "deferral": "Unearned commission for cover after the period end",
+      "fx": "Foreign-currency balances at the month-end rate",
+      "checks": "Automatic checks of the close checklist",
+      "depreciation": "Depreciation of the fixed asset register for the period"
     },
     "entryStep": {
       "accrual": "Accrual",
@@ -7047,7 +7079,9 @@
       "issueAll_other": "Issue {{count}} certificates",
       "quarter": "Quarter",
       "certificates": "Certificates to issue"
-    }
+    },
+    "nothingDue": "No recurring journal is due today",
+    "notDueYet": "Not due yet"
   },
   "birTax": {
     "withholdingReturns": "Withholding Returns",
@@ -7407,7 +7441,10 @@
       "invoiceOverrideTitle": "Issue sales invoice for {{number}}",
       "invoiceOverrideMessage": "A sales invoice with the next serial number is issued to the insurer for the receivable.",
       "invoiceOverride": "Issue invoice"
-    }
+    },
+    "vatAmount": "VAT",
+    "previewFigures": "Figures of the period",
+    "claimsFromSystem": "Claims recorded in the system"
   },
   "placement": {
     "status": {
@@ -10438,7 +10475,7 @@
     "notes": "Warnings",
     "files": "Files",
     "noRuns": "No SAP GL file written yet",
-    "settingsLine": "Folder {{folder}} · cut-off {{cutOff}} · {{format}} layout (Master > Configuration, group integrations)",
+    "settingsLine": "Folder {{folder}} · cut-off {{cutOff}} · {{format}} layout",
     "statuses": {
       "done": "Written",
       "empty": "Nothing posted",
@@ -10448,6 +10485,22 @@
     "triggers": {
       "schedule": "Schedule",
       "manual": "Run now"
+    },
+    "folder": "Folder",
+    "cutOff": "Cut-off",
+    "previousRuns": "Runs already written for the day",
+    "lastJournals": "Journals / lines (last run)",
+    "lastDebit": "Debit (last run)",
+    "lastCredit": "Credit (last run)",
+    "written": "SAP GL files of {{date}} written (run {{n}})",
+    "nothingPosted": "Nothing was posted on {{date}}; no file written",
+    "confirm": {
+      "runTitle": "Write the SAP GL files",
+      "runMessage": "The header and line files of the entries posted on this day are written to the SAP pick-up folder.",
+      "runAction": "Write files",
+      "regenerateTitle": "Re-generate the SAP GL files",
+      "regenerateMessage": "The files of this day are written again as a new run; SAP picks up the new files.",
+      "regenerateAction": "Re-generate files"
     }
   },
   "directBillBasis": {

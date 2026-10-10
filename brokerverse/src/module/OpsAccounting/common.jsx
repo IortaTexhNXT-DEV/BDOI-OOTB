@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Tag } from "primereact/tag";
 import SvgDot from "../../assets/icons/SvgDot";
-import { statusSeverity } from "../../utils/statusSeverity";
+import { statusLabel, statusSeverity } from "../../utils/statusSeverity";
 import { date, dateTime, money, showError, showSuccess } from "../PeriodEnd/common";
 import "../PeriodEnd/index.scss";
 
@@ -13,7 +13,8 @@ export { date, dateTime, money, showError, showSuccess };
 export const OpsTag = ({ status }) => {
   const { t } = useTranslation();
   if (!status) return null;
-  return <Tag className="pe-tag" value={t(`opsAcc.status.${status}`, { defaultValue: String(status).replace(/[_-]/g, " ") })} severity={statusSeverity(status)} />;
+  // the label as translated, in sentence case like the status of the detail views (no capitalised words)
+  return <Tag className="pe-tag pe-tag--label" value={t(`opsAcc.status.${status}`, { defaultValue: statusLabel(status) })} severity={statusSeverity(status)} />;
 };
 
 /** Page title with the breadcrumb (menu group > section > page) and the page actions. */
