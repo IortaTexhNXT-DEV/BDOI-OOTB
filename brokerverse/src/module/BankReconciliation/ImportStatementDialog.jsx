@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
@@ -10,6 +10,7 @@ import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import bankReconciliationService from "../../services/bankReconciliationService";
 import { Amount, BrTag, date, money } from "./common";
+import FileField from "../../components/FileField";
 
 /**
  * Statement import: bank account (given), statement format, file, optional statement no. and opening / closing balance;
@@ -18,7 +19,6 @@ import { Amount, BrTag, date, money } from "./common";
  */
 const ImportStatementDialog = ({ visible, onHide, account, formats, onImported }) => {
   const { t } = useTranslation();
-  const fileRef = useRef(null);
   const [file, setFile] = useState(null);
   const [format, setFormat] = useState(null);
   const [statementRef, setStatementRef] = useState("");
@@ -33,7 +33,6 @@ const ImportStatementDialog = ({ visible, onHide, account, formats, onImported }
     if (!visible) return;
     setFile(null); setPreview(null); setError(null); setStatementRef(""); setOpening(null); setClosing(null); setSkipDuplicates(false);
     setFormat(account?.statementFormat || "GENERIC");
-    if (fileRef.current) fileRef.current.value = "";
   }, [visible, account]);
 
   const fields = () => ({ bankAccount: account?.code, format, statementRef, openingBalance: opening ?? undefined, closingBalance: closing ?? undefined, skipDuplicates: skipDuplicates ? "true" : undefined });
@@ -71,8 +70,7 @@ const ImportStatementDialog = ({ visible, onHide, account, formats, onImported }
         </div>
         <div className="col-12 md:col-4">
           <label htmlFor="br-imp-file">{t("bankReconciliation.file")} *</label>
-          <input id="br-imp-file" ref={fileRef} type="file" accept=".csv,.xlsx" className="p-inputtext w-full"
-            onChange={(e) => { setFile(e.target.files?.[0] || null); setPreview(null); }} />
+          <FileField id="br-imp-file" accept=".csv,.xlsx" value={file} onChange={(f) => { setFile(f); setPreview(null); }} />
         </div>
         <div className="col-12 md:col-4">
           <label htmlFor="br-imp-ref">{t("bankReconciliation.statementRef")}</label>

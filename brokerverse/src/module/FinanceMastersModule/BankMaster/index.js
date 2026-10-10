@@ -30,6 +30,7 @@ import MenuData from "./MenuData";
 import MasterStatusToggle from "../../GeneralMasters/common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
 import ImportDialog, { masterTarget } from "../../../components/ImportDialog";
+import mastersService from "../../../services/mastersService";
 
 const UPLOAD_TARGETS = [masterTarget("bank", "Banks"), masterTarget("bank-account", "Bank accounts")];
 
@@ -84,7 +85,15 @@ const BankMaster = () => {
     fillBankForm(rowData);
   };
 
-  const handleView = (rowData) => setViewing(rowData);
+  const [viewingAccounts, setViewingAccounts] = useState([]);
+  const handleView = (rowData) => {
+    setViewing(rowData);
+    setViewingAccounts([]);
+    // the company accounts held at this bank
+    mastersService.list("bank-account")
+      .then((rows) => setViewingAccounts((rows || []).filter((a) => a.bankCode === rowData.bankCode)))
+      .catch(() => setViewingAccounts([]));
+  };
 
   const { bankList, BankSearchList } = useSelector(({ bankMasterReducer }) => {
     return {
@@ -528,22 +537,26 @@ const BankMaster = () => {
               { label: t("financeMasters.ifscCode"), value: viewing.ifscCode },
             ]}
           />
-          <DetailSection title={t("financeMasters.address")}>
+          <DetailSection title={t("financeMasters.bankFacts")}>
             <KeyValueGrid columns={3} items={[
-              { label: t("financeMasters.addressLine1"), value: viewing.AddressLine1 },
-              { label: t("financeMasters.addressLine2"), value: viewing.AddressLine2 },
-              { label: t("financeMasters.addressLine3"), value: viewing.AddressLine3 },
-              { label: t("generalMasters.city"), value: viewing.City },
-              { label: t("financeMasters.state"), value: viewing.state },
-              { label: t("generalMasters.country"), value: viewing.Country },
+              { label: t("financeMasters.bankCategory"), value: viewing.category, hidden: !viewing.category },
+              { label: t("financeMasters.address"), value: [viewing.AddressLine1, viewing.AddressLine2, viewing.AddressLine3, viewing.City, viewing.state, viewing.Country].filter(Boolean).join(", "), span: 2 },
+              { label: t("financeMasters.phoneNumber"), value: viewing.mobile, hidden: !viewing.mobile },
+              { label: t("financeMasters.fax"), value: viewing.Fax, hidden: !viewing.Fax },
+              { label: t("financeMasters.emailId"), value: viewing.email, hidden: !viewing.email },
             ]} />
           </DetailSection>
-          <DetailSection title={t("financeMasters.contact")}>
-            <KeyValueGrid columns={3} items={[
-              { label: t("financeMasters.phoneNumber"), value: viewing.mobile },
-              { label: t("financeMasters.fax"), value: viewing.Fax },
-              { label: t("financeMasters.emailId"), value: viewing.email },
-            ]} />
+          <DetailSection title={t("financeMasters.bankAccountsOf", { count: viewingAccounts.length })}>
+            {viewingAccounts.length ? (
+              <DataTable value={viewingAccounts} dataKey="id" size="small">
+                <Column field="accountCode" header={t("financeMasters.accountCode")} />
+                <Column field="accountName" header={t("financeMasters.accountName")} />
+                <Column field="accountNumber" header={t("financeMasters.accountNumber")} />
+                <Column field="accountType" header={t("financeMasters.accountType")} />
+                <Column field="currency" header={t("financeMasters.currency")} />
+                <Column field="status" header={t("financeMasters.status")} />
+              </DataTable>
+            ) : <p className="m-0">{t("financeMasters.noBankAccounts")}</p>}
           </DetailSection>
         </DetailDialog>
       ) : null}

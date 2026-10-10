@@ -17,6 +17,7 @@ import { openConfirm } from "../../../components/ConfirmDialog";
 import { ActivityLog, fromPostingRuleHistory } from "../../../components/ActivityLog";
 import postingRulesService from "../../../services/postingRulesService";
 import DateField from "../../../components/DateField";
+import { formatDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const money = (n) => Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -194,7 +195,7 @@ const PostingRules = () => {
     return <InputText value={l.account} onChange={(e) => setLine(i, { account: e.target.value })} placeholder={(selected?.contextAccounts || []).join(", ") || "account key"} className="w-full" />;
   };
 
-  const versionOptions = versions.map((v) => ({ label: `v${v.version} · ${v.effectiveFrom}${v.approvalStatus && v.approvalStatus !== "approved" ? ` (${t(`postingRules.approval.${v.approvalStatus}`)})` : v.active ? "" : ` (${t("postingRules.inactive")})`}${v.id === selected?.activeRuleId ? ` · ${t("postingRules.inForce")}` : ""}`, value: v.id }));
+  const versionOptions = versions.map((v) => ({ label: `v${v.version} · ${formatDate(v.effectiveFrom)}${v.approvalStatus && v.approvalStatus !== "approved" ? ` (${t(`postingRules.approval.${v.approvalStatus}`)})` : v.active ? "" : ` (${t("postingRules.inactive")})`}${v.id === selected?.activeRuleId ? ` · ${t("postingRules.inForce")}` : ""}`, value: v.id }));
 
   return (
     <div className="posting-rules">
@@ -257,7 +258,7 @@ const PostingRules = () => {
               {!edit && rule && (
                 <>
                   <div className="text-sm text-600 mb-2">
-                    {t("postingRules.narration")}: <code>{rule.narration || "—"}</code> · {t("postingRules.branch")}: {t(`postingRules.branchSource.${rule.branchSource}`)} · {t("postingRules.effectiveFrom")}: {rule.effectiveFrom}
+                    {t("postingRules.narration")}: <code>{rule.narration || "—"}</code> · {t("postingRules.branch")}: {t(`postingRules.branchSource.${rule.branchSource}`)} · {t("postingRules.effectiveFrom")}: {formatDate(rule.effectiveFrom)}
                     {rule.changeNote ? ` · ${rule.changeNote}` : ""}
                   </div>
                   <DataTable value={rule.lines} size="small" dataKey="lineNo" className="posting-rules__lines">
@@ -266,7 +267,7 @@ const PostingRules = () => {
                     <Column header={t("postingRules.account")} body={accountLabel} />
                     <Column field="amountKey" header={t("postingRules.amount")} style={{ width: "9rem" }} />
                     <Column header={t("postingRules.perParticipant")} style={{ width: "6rem" }} body={(l) => (l.perParticipant ? <i className="pi pi-users" /> : null)} />
-                    <Column field="narration" header={t("postingRules.lineNarration")} />
+                    <Column field="narration" header={t("postingRules.lineNarration")} bodyClassName="posting-rules__narration" />
                   </DataTable>
                   <div className="flex gap-2 mt-3 flex-wrap align-items-center">
                     <Button label={t("postingRules.simulate")} icon="pi pi-play" className="p-button-outlined" onClick={() => runSimulation(null)} />

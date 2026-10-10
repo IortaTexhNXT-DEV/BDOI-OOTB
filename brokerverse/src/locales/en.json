@@ -2269,7 +2269,13 @@
     "configurationSettings": "Configuration (remittance settings)",
     "address": "Address",
     "contact": "Contact",
-    "accountCategoryDetail": "Account category"
+    "accountCategoryDetail": "Account category",
+    "bankFacts": "Bank",
+    "bankCategory": "Category",
+    "accountCode": "Account code",
+    "bankAccountsOf_one": "Company account at this bank ({{count}})",
+    "bankAccountsOf_other": "Company accounts at this bank ({{count}})",
+    "noBankAccounts": "No company account is held at this bank."
   },
   "automatedRemittance": {
     "pageTitle": "Automated Remittance Master",
@@ -6273,7 +6279,11 @@
   "detailView": {
     "close": "Close",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "createdBy": "Created by",
+    "createdOn": "Created on",
+    "updatedOn": "Last changed",
+    "activity": "Activity"
   },
   "makerChecker": {
     "ownRecord": "You initiated this record. A different user must approve or reject it.",
@@ -6369,7 +6379,9 @@
       "manual": "Manual",
       "closeRun": "Month-end close",
       "yearEnd": "Year-end close",
-      "yearEndReversal": "Year-end close reversed"
+      "yearEndReversal": "Year-end close reversed",
+      "scheduled": "Scheduled run",
+      "manualRun": "Run now (manual)"
     }
   },
   "print": {
@@ -6612,7 +6624,9 @@
         "product": "Product"
       },
       "configurationNote": "Document number prefixes and formats are maintained on Master > Document Numbering.",
-      "openScreen": "Open Document Numbering"
+      "openScreen": "Open Document Numbering",
+      "issuedCount": "Numbers issued",
+      "lowestNext": "Lowest next number"
     },
     "commissionRates": {
       "title": "Commission Rate Matrix",
@@ -7742,7 +7756,7 @@
       "insurerPolicyNumber": "Insurer policy number",
       "brokerPolicyNumber": "BrokerVerse policy number",
       "brokerPolicyNumberPlaceholder": "Blank: numbered at booking",
-      "participantName": "Participant name (insured on the policy)",
+      "participantName": "Insured name",
       "sumInsured": "Sum insured",
       "netPremium": "Net premium",
       "grossPremium": "Gross premium",
@@ -8302,7 +8316,10 @@
         "cancelCheque": "The payment journal is reversed and the payable is re-opened.",
         "flag": "The line becomes a reconciling item on the bank side. No journal is posted."
       }
-    }
+    },
+    "close": "Close",
+    "readFile": "Read file",
+    "statementFile": "Statement file"
   },
   "followUps": {
     "adviceReference": "Remittance advice / reference",
@@ -8390,7 +8407,7 @@
       "type": "Type"
     },
     "history": {
-      "title": "History {{name}}",
+      "title": "History: {{name}}",
       "empty": "No changes recorded",
       "when": "When",
       "user": "User",
@@ -12013,7 +12030,8 @@
       "thursday": "Thursday",
       "friday": "Friday",
       "saturday": "Saturday"
-    }
+    },
+    "outputCount": "{{count}} {{what}}"
   },
   "configuration": {
     "leaveTitle": "Leave without saving",
@@ -12190,5 +12208,11 @@
       "eligible_one": "Mark {{count}} line eligible",
       "eligible_other": "Mark {{count}} lines eligible"
     }
+  },
+  "fileField": {
+    "choose": "Choose file",
+    "clear": "Remove file",
+    "none": "No file chosen",
+    "accepted": "{{types}} file"
   }
 }

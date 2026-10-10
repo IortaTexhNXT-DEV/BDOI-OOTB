@@ -149,3 +149,9 @@
 .config-approvals__detail {
   padding: 0.75rem 0.5rem;
 }
+
+// line narrations are templates ("Premium due to {insurer}"): wrapped in their column, not cut at the panel edge
+.posting-rules__lines .posting-rules__narration {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

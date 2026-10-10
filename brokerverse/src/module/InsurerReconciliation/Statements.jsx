@@ -12,6 +12,7 @@ import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
 import service from "../../services/insurerReconciliationService";
 import { IrTag, PageHeader, date, insurerOptions, money, showError, showSuccess } from "./common";
+import FileField from "../../components/FileField";
 
 const STATUSES = ["draft", "submitted", "approved", "cancelled"];
 const iso = (d) => (d ? new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10) : "");
@@ -138,7 +139,7 @@ const Statements = () => {
               <Dropdown value={form.formatCode} options={formats.map((f) => ({ label: `${f.code} - ${f.name}`, value: f.code }))} showClear placeholder={t("insurerRec.formatDefault")}
                 onChange={(e) => setForm({ ...form, formatCode: e.value })} className="w-full" /></div>
             <div className="col-12 md:col-6"><label>{t("insurerRec.file")} *</label>
-              <input type="file" accept=".csv,.xlsx" className="p-inputtext w-full" onChange={(e) => { setForm({ ...form, file: e.target.files?.[0] || null }); setPreview(null); }} /></div>
+              <FileField accept=".csv,.xlsx" value={form.file || null} onChange={(f) => { setForm({ ...form, file: f }); setPreview(null); }} /></div>
             {preview && (
               <div className="col-12">
                 <div className="flex flex-wrap gap-4 mb-2">

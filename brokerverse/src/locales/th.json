@@ -1839,7 +1839,13 @@
     "accountCategoryNameHeader": "ชื่อหมวดบัญชี",
     "address": "ที่อยู่",
     "contact": "ข้อมูลติดต่อ",
-    "accountCategoryDetail": "หมวดบัญชี"
+    "accountCategoryDetail": "หมวดบัญชี",
+    "bankFacts": "ธนาคาร",
+    "bankCategory": "ประเภท",
+    "accountCode": "รหัสบัญชี",
+    "bankAccountsOf_one": "บัญชีของบริษัทที่ธนาคารนี้ ({{count}})",
+    "bankAccountsOf_other": "บัญชีของบริษัทที่ธนาคารนี้ ({{count}})",
+    "noBankAccounts": "ไม่มีบัญชีของบริษัทที่ธนาคารนี้"
   },
   "automatedRemittance": {
     "pageTitle": "หลักการโอนเงินอัตโนมัติ",
@@ -5281,7 +5287,11 @@
   "detailView": {
     "close": "ปิด",
     "yes": "ใช่",
-    "no": "ไม่ใช่"
+    "no": "ไม่ใช่",
+    "createdBy": "สร้างโดย",
+    "createdOn": "สร้างเมื่อ",
+    "updatedOn": "แก้ไขล่าสุด",
+    "activity": "กิจกรรม"
   },
   "makerChecker": {
     "ownRecord": "คุณเป็นผู้สร้างรายการนี้ ผู้ใช้อื่นต้องเป็นผู้อนุมัติหรือปฏิเสธ",
@@ -5377,7 +5387,9 @@
       "manual": "ดำเนินการเอง",
       "closeRun": "ปิดงวดสิ้นเดือน",
       "yearEnd": "ปิดบัญชีสิ้นปี",
-      "yearEndReversal": "ยกเลิกการปิดบัญชีสิ้นปี"
+      "yearEndReversal": "ยกเลิกการปิดบัญชีสิ้นปี",
+      "scheduled": "รันตามกำหนดเวลา",
+      "manualRun": "รันทันที (ด้วยตนเอง)"
     }
   },
   "print": {
@@ -5614,7 +5626,7 @@
       "insurerPolicyNumber": "เลขที่กรมธรรม์ของบริษัทประกัน",
       "brokerPolicyNumber": "เลขที่กรมธรรม์ BrokerVerse",
       "brokerPolicyNumberPlaceholder": "เว้นว่าง: ระบบออกเลขเมื่อบันทึก",
-      "participantName": "ชื่อผู้เอาประกันตามกรมธรรม์",
+      "participantName": "ชื่อผู้เอาประกัน",
       "sumInsured": "ทุนประกัน",
       "netPremium": "เบี้ยประกันสุทธิ",
       "grossPremium": "เบี้ยประกันรวม",
@@ -5871,6 +5883,11 @@
       "deleteTitle": "ลบอัตราค่านายหน้า",
       "deleteAction": "ลบอัตรา",
       "deleteMessage": "อัตราค่านายหน้าด้านล่างจะถูกลบ"
+    },
+    "documentNumbering": {
+      "period": "งวด",
+      "issuedCount": "จำนวนเลขที่ออกแล้ว",
+      "lowestNext": "เลขถัดไปต่ำสุด"
     }
   },
   "postingRules": {
@@ -6050,6 +6067,10 @@
       "retireNote": "จะไม่ถูกใช้กับธุรกิจใหม่ กรมธรรม์ที่ออกแล้วยังคงใช้แม่แบบนี้",
       "retireAction": "เลิกใช้แม่แบบ",
       "activateTemplateAction": "เปิดใช้งานแม่แบบ"
+    },
+    "history": {
+      "title": "ประวัติ: {{name}}",
+      "empty": "ไม่มีการเปลี่ยนแปลงที่บันทึกไว้"
     }
   },
   "productRiskMapping": {
@@ -6194,7 +6215,8 @@
       "thursday": "พฤหัสบดี",
       "friday": "ศุกร์",
       "saturday": "เสาร์"
-    }
+    },
+    "outputCount": "{{what}} {{count}}"
   },
   "configuration": {
     "leaveTitle": "ออกโดยไม่บันทึก",
@@ -6500,7 +6522,10 @@
         "cancelCheque": "รายการจ่ายเงินจะถูกกลับรายการและเจ้าหนี้จะถูกเปิดใหม่",
         "flag": "บรรทัดนี้จะเป็นรายการกระทบยอดฝั่งธนาคาร โดยไม่มีการบันทึกบัญชี"
       }
-    }
+    },
+    "close": "ปิด",
+    "readFile": "อ่านไฟล์",
+    "statementFile": "ไฟล์รายการเดินบัญชี"
   },
   "periodEnd": {
     "runActivity": "Run activity",
@@ -6669,5 +6694,11 @@
       "eligible_one": "Mark {{count}} line eligible",
       "eligible_other": "Mark {{count}} lines eligible"
     }
+  },
+  "fileField": {
+    "choose": "เลือกไฟล์",
+    "clear": "นำไฟล์ออก",
+    "none": "ยังไม่ได้เลือกไฟล์",
+    "accepted": "ไฟล์ {{types}}"
   }
 }
