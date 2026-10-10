@@ -17,11 +17,21 @@ const open = () => render(
   </MemoryRouter>
 );
 
+afterEach(() => localStorage.clear());
+
 describe("Remittance landing", () => {
   it("opens the page the summary names for the user", async () => {
+    localStorage.setItem("USER_ROLES", JSON.stringify(["tis-finance"]));
     remittanceService.summary.mockResolvedValue({ counts: { approvals: 2 }, landing: { code: "approvals", link: "/finance/remittance/approvals" } });
     open();
     expect(await screen.findByText("Approvals page")).toBeInTheDocument();
+  });
+
+  it("gives way to My work when the user's menu does not reach the page named", async () => {
+    localStorage.setItem("USER_ROLES", JSON.stringify(["tis-ops-associate"]));
+    remittanceService.summary.mockResolvedValue({ counts: { exceptions: 1 }, landing: { code: "exceptions", link: "/finance/remittance/exceptions" } });
+    open();
+    expect(await screen.findByText("Remittances page")).toBeInTheDocument();
   });
 
   it("offers Try again when the summary cannot be read", async () => {
