@@ -52,8 +52,8 @@ const production = `SELECT p.id AS _id, p.policy_number AS "policyNumber", COALE
   WHERE p.inception_date BETWEEN $1 AND $2`;
 
 const claims = `SELECT cl.claim_number AS "claimNumber", p.policy_number AS "policyNumber", ${POLICY_DIMS},
-    cl.loss_date AS "lossDate", cl.reported_date AS "reportedDate", cl.loss_type AS "lossType", cl.status,
-    cl.estimate_amount AS "estimateAmount", cl.approved_amount AS "approvedAmount", cl.settled_amount AS "settledAmount",
+    cl.loss_date AS "lossDate", cl.reported_date AS "reportedDate", cl.loss_type AS "lossType", cl.claim_type AS "claimType", cl.lob, cl.status,
+    cl.estimate_amount AS "estimateAmount", cl.approved_amount AS "approvedAmount", cl.settled_amount AS "settledAmount", cl.settled_at::date AS "settledDate",
     (COALESCE(cl.settled_at::date, $7::date) - cl.reported_date) AS "ageDays",
     rpt_age_bucket(COALESCE(cl.settled_at::date, $7::date) - cl.reported_date, $3::int[]) AS "ageBucket"
   FROM claims cl JOIN policies p ON p.id = cl.policy_id ${POLICY_JOINS}
@@ -240,6 +240,7 @@ export const QUERIES = {
     criteria: {
       All: {}, Open: { where: 't.status = ANY($4::text[])' }, Settled: { where: 't.status = ANY($5::text[])' },
       Rejected: { where: 't.status = ANY($6::text[])' }, Aging: { where: 't.status = ANY($4::text[])', groupBy: 'ageBucket' },
+      Partial: { where: 't.status = \'partially-settled\'' }, Cancelled: { where: 't.status = \'cancelled\'' }, 'Claim Type': { groupBy: 'claimType' },
     },
     orderBy: 'f."reportedDate", f."claimNumber"',
   },

@@ -86,6 +86,29 @@ UPDATE app_settings SET value = value || '{"partially-settled": "Partially Settl
  WHERE key = 'claims.status_labels' AND NOT (value ? 'partially-settled');
 UPDATE app_settings SET value = value || '["partially-settled"]'::jsonb, updated_at = now()
  WHERE key = 'claims.open_statuses' AND jsonb_typeof(value) = 'array' AND NOT (value ? 'partially-settled');
+UPDATE app_settings SET value = value || '["partially-settled"]'::jsonb, updated_at = now()
+ WHERE key = 'reports.claim_open_statuses' AND jsonb_typeof(value) = 'array' AND NOT (value ? 'partially-settled');
+
+-- Claims Position report: Partial and Cancelled criteria and grouping by claim type; the insurer, product, agent,
+-- branch and client filters open; claim type, line and settlement date columns. Once, while the catalogue row still
+-- carries the original criteria.
+UPDATE report_definitions
+   SET parameters = jsonb_set(parameters, '{properties}', (parameters->'properties')
+         || jsonb_build_object('ReportCriteria', (parameters #> '{properties,ReportCriteria}')
+              || '{"enum": ["All", "Open", "Partial", "Settled", "Rejected", "Cancelled", "Aging", "Claim Type"]}'::jsonb)
+         || jsonb_build_object('Agent', (parameters #> '{properties,Agent}') - 'x-disabled')
+         || jsonb_build_object('Company', (parameters #> '{properties,Company}') - 'x-disabled')
+         || jsonb_build_object('Branch', (parameters #> '{properties,Branch}') - 'x-disabled')
+         || jsonb_build_object('Client', (parameters #> '{properties,Client}') - 'x-disabled')
+         || jsonb_build_object('Product', (parameters #> '{properties,Product}') - 'x-disabled')),
+       default_columns = (SELECT jsonb_agg(col ORDER BY ord) FROM (
+           SELECT c AS col, i * 10 AS ord FROM jsonb_array_elements(default_columns) WITH ORDINALITY AS e(c, i)
+           UNION ALL SELECT '{"key":"claimType","label":"Claim Type","type":"text"}'::jsonb, 85
+           UNION ALL SELECT '{"key":"lob","label":"Line","type":"text"}'::jsonb, 86
+           UNION ALL SELECT '{"key":"settledDate","label":"Settled On","type":"date"}'::jsonb, 135) x),
+       updated_at = now(),
+       description = 'Claims reported in the period with estimate, approved and settled amounts, age and ageing bucket. Criteria: All, Open, Partial, Settled, Rejected, Cancelled, Aging (open claims by ageing bucket), Claim Type.'
+ WHERE code = 'claims-position' AND NOT (parameters #> '{properties,ReportCriteria,enum}') ? 'Partial';
 
 -- ---------------------------------------------------------------- TISPH claims
 -- New claims go to the Operations Associates and Officers (fewest open claims first); the follow-up days of an unsettled

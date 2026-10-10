@@ -175,6 +175,21 @@ describe('running reports', () => {
     expect(aging.data.groups[0]).toMatchObject({ count: 1, estimateAmount: 5000 });
     const ca = await run('claims-ageing', { ...Y });
     expect(ca.data.rows[0]).toMatchObject({ claims: 1, estimateAmount: 5000 });
+    expect((await run('claims-position', { ...Y, ReportCriteria: 'Partial' })).total).toBe(0);
+    expect((await run('claims-position', { ...Y, ReportCriteria: 'Cancelled' })).total).toBe(0);
+    const before = (await one(`SELECT status FROM claims WHERE claim_number = 'RPT-CLM-1'`)).status;
+    try {
+      await pool.query(`UPDATE claims SET status = 'partially-settled' WHERE claim_number = 'RPT-CLM-1'`);
+      const partial = await run('claims-position', { ...Y, ReportCriteria: 'Partial' });
+      expect(partial.data.rows.map((r) => r.claimNumber)).toEqual(['RPT-CLM-1']);
+      expect(partial.data.rows[0]).toHaveProperty('claimType');
+      // a partly settled claim is still open
+      expect((await run('claims-position', { ...Y, ReportCriteria: 'Open' })).total).toBe(1);
+    } finally {
+      await pool.query(`UPDATE claims SET status = $1 WHERE claim_number = 'RPT-CLM-1'`, [before]);
+    }
+    const byType = await run('claims-position', { ...Y, ReportCriteria: 'Claim Type' });
+    expect(byType.data.groupBy).toBe('claimType');
   });
   it('renewal retention, commission statement and remittance summary', async () => {
     const r = await run('renewal-retention', { ...Y });
