@@ -60,6 +60,9 @@ export const PrintedStatement = ({ statement: s }) => {
           </tr>
         </thead>
         <tbody>
+          {!s.programBreakdown.length ? (
+            <tr><td colSpan={7}>{t("incentive.stmt.noPrograms")}</td></tr>
+          ) : null}
           {s.programBreakdown.map((r) => (
             <tr key={`${r.program}-${r.status}`}>
               <td>{r.program}</td>

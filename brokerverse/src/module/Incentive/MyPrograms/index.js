@@ -153,9 +153,8 @@ const MyPrograms = () => {
           <LoadingBar active={refreshing} />
           <DataTable value={programs} dataKey="programId" loading={loading} size="small" className="inc-table" emptyMessage={t("incentive.mine.noPrograms")}
             onRowClick={(e) => setSelected(e.data)} rowClassName={() => "inc-row-link"}>
-            <Column header={t("incentive.mine.program")} style={{ minWidth: "16rem" }} body={(p) => <span>{p.programName}<span className="inc-muted"> {p.programCode}</span></span>} />
+            <Column header={t("incentive.mine.program")} style={{ minWidth: "12rem" }} body={(p) => <div>{p.programName}<div className="inc-muted">{p.programCode}</div></div>} />
             <Column header={t("incentive.mine.period")} bodyClassName="inc-nowrap" body={(p) => `${formatDate(p.periodFrom)} - ${formatDate(p.periodTo)}`} />
-            <Column header={t("incentive.mine.daysLeft")} body={daysLeft} className="inc-num" headerClassName="inc-num" />
             <Column header={t("incentive.mine.target")} body={(p) => formatMeasure(p.target, p.metric)} className="inc-num" headerClassName="inc-num" />
             <Column header={t("incentive.mine.achieved")} body={(p) => formatMeasure(p.achieved, p.metric)} className="inc-num" headerClassName="inc-num" />
             <Column header={t("incentive.mine.achievement")} body={(p) => (
