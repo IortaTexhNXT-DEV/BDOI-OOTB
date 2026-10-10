@@ -18,7 +18,6 @@ import { straightLine, depreciationStep } from '../src/modules/fixed-assets/serv
 import { ensureCalendar, getPeriod } from '../src/modules/period-end/fiscal.js';
 import { coverNoteExpiry } from '../src/modules/cover-notes/jobs.js';
 import { pdcDepositDue } from '../src/modules/pdc/jobs.js';
-import { clearSettingsCache } from '../src/lib/settings.js';
 import { claimDocumentReminders } from '../src/modules/claim-documents/jobs.js';
 
 let ctx; let admin; let manager; let asOf;

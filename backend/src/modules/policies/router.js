@@ -20,7 +20,6 @@ import { ownRecord, withScope } from '../../lib/scope.js';
 import * as svc from './service.js';
 import * as corrections from './corrections.js';
 import { policyVersions } from '../endorsements/workflow.js';
-import { getSetting } from '../../lib/settings.js';
 import { hasPermission } from '../../lib/auth.js';
 
 const { router, define } = moduleRouter('Policies', '/policies');
