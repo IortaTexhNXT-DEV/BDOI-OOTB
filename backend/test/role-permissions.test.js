@@ -42,7 +42,7 @@ const overview = async (who = 'ra.it') => {
 beforeAll(async () => {
   ctx = await setup();
   for (const [u, roles] of [['ra.it', ['tis-it-admin']], ['ra.it2', ['tis-it-admin']], ['ra.fin', ['tis-finance']], ['ra.gm', ['tis-general-manager']],
-    ['ra.mgr', ['accounting-manager']], ['ra.pdu', ['tis-ccd-pdu', 'tis-finance']]]) await persona(u, roles);
+    ['ra.mgr', ['accounting-manager']], ['ra.pdu', ['tis-ccd-bp', 'tis-finance']]]) await persona(u, roles);
 });
 afterAll(async () => { await pool.end(); });
 
@@ -230,7 +230,7 @@ describe('segregation of duties on access', () => {
     const byCode = Object.fromEntries(check.body.data.warnings.map((w) => [w.code, w]));
     // Finance prepares payments to insurers: issuing policies as well breaks the rule for the role itself
     expect(byCode['SOD-ACC-PLACE-PAY']).toMatchObject({ scope: 'role', action: 'warn', sideA: ['write:policies'] });
-    // the user who also issues receipts (CCD-PDU) would combine receipting and selling
+    // the user who also issues receipts (CCD-BP) would combine receipting and selling
     expect(byCode['SOD-ACC-RCPT-SELL']).toMatchObject({ scope: 'users', users: ['ra.pdu'], more: 0 });
     expect(check.body.data).toMatchObject({ blocked: false, added: ['Operations › Policies › Create and edit'], affected: { users: 2, throughUsers: 0, throughRoles: [] } });
     const r = await submit('ra.it', 'tis-finance', { grant: ['write:policies'] });
@@ -277,7 +277,7 @@ describe('segregation of duties on access', () => {
 describe('the Role form', () => {
   it('sends a new permission list for approval while the approval is on, keeping Basic access', async () => {
     const before = await own('tis-ccd-pdc');
-    const r = await as['ra.it']('put', '/roles/tis-ccd-pdc').send({ name: 'CCD-PDC / CCD-ADA', permissions: ['read:receipts', 'write:receipts'] });
+    const r = await as['ra.it']('put', '/roles/tis-ccd-pdc').send({ name: 'CCD-PDC / CCD-ADA', permissions: ['read:receipts', 'read:pdc'] });
     expect(r.status, JSON.stringify(r.body)).toBe(200);
     expect(r.body.message).toMatch(/waits for approval \(request CFG-\d+\)/);
     expect(r.body.data.change).toMatchObject({ changeNote: 'Changed on the Role form', payload: { grant: [] } });

@@ -30,7 +30,7 @@ const can = (perms) => (p) => perms.includes(p);
 
 describe("post-dated cheque log", () => {
   beforeEach(() => {
-    localStorage.setItem("USER_PERMISSIONS", JSON.stringify(["read:pdc", "write:pdc", "write:receipts"]));
+    localStorage.setItem("USER_PERMISSIONS", JSON.stringify(["read:pdc", "write:pdc"]));
     localStorage.setItem("USER_ROLES", JSON.stringify(["tis-ccd-pdu"]));
     service.banks.mockResolvedValue([{ label: "BPI", value: "2" }]);
     service.insurers.mockResolvedValue([{ label: "Standard Insurance Co., Inc.", value: 3 }]);
@@ -41,9 +41,9 @@ describe("post-dated cheque log", () => {
   it("offers each action by status, payee and permission; the requester never decides the cancellation", () => {
     const codes = (c, perms, me = "usr_1") => chequeActions(c, { can: can(perms), me }).map((a) => a.code);
     expect(codes(cheque(), ["write:pdc"])).toEqual(["view", "edit", "request-cancellation", "return"]);
-    expect(codes(cheque({ payee: "tisph" }), ["write:pdc", "write:receipts"])).toContain("deposit");
-    expect(codes(cheque({ status: "warehoused", custody: "partner" }), ["write:pdc", "write:receipts"])).toEqual(["view", "partner-cleared", "partner-bounced", "request-cancellation"]);
-    expect(codes(cheque({ status: "warehoused" }), ["write:pdc"])).not.toContain("partner-cleared");
+    expect(codes(cheque({ payee: "tisph" }), ["write:pdc"])).toContain("deposit");
+    expect(codes(cheque({ status: "warehoused", custody: "partner" }), ["write:pdc"])).toEqual(["view", "partner-cleared", "partner-bounced", "request-cancellation"]);
+    expect(codes(cheque({ status: "warehoused" }), ["read:pdc"])).toEqual(["view"]);
     expect(codes(cheque({ status: "cleared", receiptNumber: "OR-1" }), ["write:pdc"])).toEqual(["view", "partner-bounced"]);
     const pending = cheque({ status: "cancellation-pending", cancellation: { requestedById: "usr_1", approvedAt: null } });
     expect(codes(pending, ["approve:pdc"], "usr_1")).toEqual(["view"]);

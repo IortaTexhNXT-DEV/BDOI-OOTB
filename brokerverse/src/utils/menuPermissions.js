@@ -199,7 +199,8 @@ Object.assign(roleMenuPermissions, {
   "tis-ops-associate": TIS_OPERATIONS,
   "tis-ops-officer": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, ...TIS_OPS_REMITTANCE, "Journal Voucher", "Fixed Assets"] },
   "tis-ops-unit-head": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, ...TIS_OPS_REMITTANCE, "Journal Voucher", "Fixed Assets", "Disbursement", "Payables"] },
-  "tis-ccd-pdu": TIS_CCD(["Post-Dated Cheques", "Receipts"]),
+  // Receipting (RBAC v4): CCD-PDU has no access to the receipts
+  "tis-ccd-pdu": TIS_CCD(["Post-Dated Cheques"]),
   // Cash Control: the remittance reconciliation and the exceptions it works (no proof of payment); BP and Recon keep the
   // instalment plans and the follow-ups of Credit Control (write:collections); Recon also decides
   // insurer statements (approve:insurer-reconciliation) and reads payments and billing. The claim settlement funds an
@@ -207,7 +208,7 @@ Object.assign(roleMenuPermissions, {
   "tis-ccd-pdc": TIS_CCD(["Post-Dated Cheques", "Receipts", "Collections", "Bank Reconciliation", ...REMITTANCE("Remittances", "Reconciliation", "Exceptions", "Held policies")]),
   "tis-ccd-bp": TIS_CCD(["Receipts", "Unapplied Collections", "Collections", "Credit Control", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation",
     ...REMITTANCE("Remittances", "Reconciliation", "Exceptions", "Held policies")]),
-  "tis-ccd-recon": TIS_CCD(["Receipts", "Unapplied Collections", "Collections", "Credit Control", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation", "Open Entry Matching", "Open Entry Unmatching",
+  "tis-ccd-recon": TIS_CCD(["Receipts", "Unapplied Collections", "Collections", "Credit Control", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation",
     "Disbursement", ...REMITTANCE("Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Held policies", "Insurer billing")]),
   // Finance & General Accounting: the Accounting menus, plus the audit trail and the schedules (interface monitor)
   "tis-finance": {

@@ -125,11 +125,12 @@ Object.assign(ROLE_PERMS, {
   'tis-ops-officer': [...TIS_OPS, 'journal-vouchers:read', 'fixed-assets:read'],
   'tis-ops-unit-head': [...TIS_OPS, ...TIS_FRONT_APPROVALS, 'claims:approve', ...TIS_ACCOUNTING_READS, 'payables:approve'],
   // PDC Management (RBAC v4): CCD-PDU CRU, CCD-PDC CRUD and the checker of cancellations, every other persona reads
-  'tis-ccd-pdu': [...TIS_CCD, 'pdc'],
-  'tis-ccd-pdc': [...TIS_CCD, 'collections:read', 'remittance:read', 'bank-reconciliation:read', 'pdc', 'pdc:approve'],
+  // Receipting (RBAC v4): CCD-BP issues the receipts, CCD-PDC and CCD-Recon read them, CCD-PDU has no access
+  'tis-ccd-pdu': [...TIS_COMMON, 'pdc'],
+  'tis-ccd-pdc': [...TIS_COMMON, 'receipts:read', 'collections:read', 'remittance:read', 'bank-reconciliation:read', 'pdc', 'pdc:approve'],
   'tis-ccd-bp': [...TIS_CCD, 'collections', 'remittance:read', 'bank-reconciliation:read'],
   // insurer statement reconciliation is prepared under write:remittance (see the role guide)
-  'tis-ccd-recon': [...TIS_CCD, 'collections', 'remittance', 'insurer-reconciliation:approve', 'bank-reconciliation', 'disbursements:read'],
+  'tis-ccd-recon': [...TIS_COMMON, 'receipts:read', 'collections', 'remittance', 'insurer-reconciliation:approve', 'bank-reconciliation', 'disbursements:read'],
   // commission and remittance runs: Finance (the v4 matrix gives that screen no maker; see the role guide)
   'tis-finance': [...TIS_COMMON, ...TIS_BUSINESS_READS, 'collections:read', 'receipts:read', 'incentive:read', 'products:read', 'channels:read', 'motor-programmes:read',
     'integrations:read', 'schedules:read', 'audit:read', 'pii:view', 'commission', 'remittance', 'disbursements', 'journal-vouchers', 'payables', 'payables:approve', 'fixed-assets',

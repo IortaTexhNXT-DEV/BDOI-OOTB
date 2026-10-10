@@ -202,7 +202,7 @@ const PostDatedCheques = () => {
         <PageActions onAdd={write ? () => setEncoding(true) : undefined} addLabel={t("opsAcc.pdc.encode")}>
           <Button icon="pi pi-download" label={t("opsAcc.export")} outlined
             onClick={() => service.downloadPdcs({ tab: LIST_TABS.includes(tab) ? tab : "open", ...filters }).catch((e) => showError(toast, e))} />
-          {write && clearable(selected) && hasPermission("write:receipts") ? (
+          {write && clearable(selected) ? (
             <Button icon="pi pi-check-circle" label={t("opsAcc.pdc.menu.partner-cleared")} outlined onClick={() => setAction({ kind: "partner-cleared", cheques: selected })} />
           ) : null}
           {write ? (

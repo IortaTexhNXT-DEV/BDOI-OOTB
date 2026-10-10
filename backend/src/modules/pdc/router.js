@@ -2,8 +2,8 @@
  * Post-dated cheque log (Accounts > Post-Dated Cheques, TIS-BRD-COLL-05): encode sets against the instalment plan,
  * forward to the Insurance Partner with a transmittal, the partner's receipt and maturity advices, cancellation with a
  * second user's approval, replacement and return; deposit, cleared and bounced for cheques payable to TISPH.
- * read:pdc to view, write:pdc to act, approve:pdc to decide a cancellation; Partner cleared also needs write:receipts
- * (it raises the acknowledgement receipt).
+ * read:pdc to view, write:pdc to act (the deposit and the partner's clearing also raise the acknowledgement receipt of
+ * the cheque), approve:pdc to decide a cancellation.
  */
 import { moduleRouter } from '../../lib/registry.js';
 import { requireAuth, requirePermission } from '../../lib/auth.js';
@@ -193,7 +193,7 @@ define({
 });
 define({
   method: 'POST', path: '/:id/deposit', summary: 'Deposit a cheque payable to TISPH on or after its date to the collection account (pdc.default_deposit_account): the receipt is created and posted (receipt.apply)',
-  screen: `${S} > Deposit`, middleware: [...write, requirePermission('write:receipts'), validate(z.object({ depositAccount: z.string().max(60).optional(), depositDate: date.optional() }))],
+  screen: `${S} > Deposit`, middleware: [...write, validate(z.object({ depositAccount: z.string().max(60).optional(), depositDate: date.optional() }))],
   request: { depositDate: '2026-11-15' }, response: { success: true, data: { pdc: { ...example, status: 'deposited', receiptNumber: 'OR-2026-00112' }, receiptNumber: 'OR-2026-00112' } },
   handler: async (req, res) => {
     const before = await svc.getPdc(pool, req.params.id);
@@ -226,7 +226,7 @@ define({
 });
 define({
   method: 'POST', path: '/:id/partner-cleared', summary: 'Partner cleared: the Insurance Partner collected the cheque; the cheque is Cleared and its acknowledgement receipt raised on the collection date (pdc.partner_collected)',
-  screen: `${S} > Partner cleared`, middleware: [...write, requirePermission('write:receipts'), validate(z.object({ collectedOn: date.optional(), partnerReference: z.string().max(60),
+  screen: `${S} > Partner cleared`, middleware: [...write, validate(z.object({ collectedOn: date.optional(), partnerReference: z.string().max(60),
     remarks: z.string().max(500).optional().nullable() }))],
   request: { collectedOn: '2026-10-16', partnerReference: '7781204' },
   response: { success: true, data: { pdc: { ...example, status: 'cleared', receiptNumber: 'OR-2026-00213' }, receiptNumber: 'OR-2026-00213' }, message: 'Cheque PDC-2026-00121 cleared; AR OR-2026-00213 raised' },

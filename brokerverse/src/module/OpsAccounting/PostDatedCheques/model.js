@@ -23,9 +23,9 @@ export const chequeActions = (c, { can = hasPermission, me = currentUser() } = {
   const liveAr = !!c.receiptNumber && !c.receiptCancelled;
   if (write && c.status === "on-hand") out.push({ code: "edit", allowed: true });
   if (write && partner && c.status === "forwarded" && c.transmittalId) out.push({ code: "partner-received", allowed: true });
-  if (write && can("write:receipts") && partner && ["forwarded", "warehoused"].includes(c.status)) out.push({ code: "partner-cleared", allowed: true });
+  if (write && partner && ["forwarded", "warehoused"].includes(c.status)) out.push({ code: "partner-cleared", allowed: true });
   if (write && partner && ["forwarded", "warehoused", "cleared"].includes(c.status)) out.push({ code: "partner-bounced", allowed: true });
-  if (write && can("write:receipts") && !partner && c.status === "on-hand") out.push({ code: "deposit", allowed: true });
+  if (write && !partner && c.status === "on-hand") out.push({ code: "deposit", allowed: true });
   if (write && !partner && c.status === "deposited") out.push({ code: "clear", allowed: true });
   if (write && !partner && ["deposited", "cleared"].includes(c.status)) out.push({ code: "bounce", allowed: true });
   if (write && ["on-hand", "forwarded", "warehoused", "bounced"].includes(c.status) && !liveAr) out.push({ code: "request-cancellation", allowed: true });
