@@ -289,7 +289,7 @@ export async function reassign(leadIds, toUserId, { reasonCode = null, reason = 
  * account executive of an active rule for that insurer (the insurer group); prospects without one go to anyone.
  */
 async function assertInsurerGroup(db, leads, to) {
-  if ((await getSetting('leads.reassign_within_insurer', false)) !== true) return;
+  if ((await getSetting('leads.reassign_within_insurer')) !== true) return;
   for (const insurerId of [...new Set(leads.map((l) => l.insurance_provider_id).filter(Boolean))]) {
     const group = (await db.query(`SELECT r.assignees, ic.name FROM lead_assignment_rules r JOIN insurance_companies ic ON ic.id::text = r.conditions->>'insuranceProviderId'
       WHERE r.status = 'active' AND r.conditions->>'insuranceProviderId' = $1`, [String(insurerId)])).rows;
@@ -426,9 +426,9 @@ export async function teamView(user, { managerId = null, memberId = null, status
  * days on working time). now: the time of the run (job runs pass their parameters).
  */
 export async function leadAssignmentSla({ now = new Date() } = {}) {
-  const hours = Number(await getSetting('leads.assignment_sla_hours', 48));
+  const hours = Number(await getSetting('leads.assignment_sla_hours'));
   if (!(hours > 0)) return { skipped: 'leads.assignment_sla_hours is 0' };
-  const workingTime = (await getSetting('leads.sla_working_time', false)) === true;
+  const workingTime = (await getSetting('leads.sla_working_time')) === true;
   let stale = await many(`SELECT * FROM leads WHERE deleted_at IS NULL AND assignment_status = 'assigned' AND status IN ('New', 'new')
     AND COALESCE(assigned_at, created_at) < $2::timestamptz - make_interval(hours => $1)`, [hours, now]);
   if (workingTime) {
@@ -473,7 +473,7 @@ export async function assigneeOptions({ leadIds = [] } = {}) {
  * leads.retention_days is closed as Lost (its history stays); 0 = never. Returns { closed }.
  */
 export async function leadRetention() {
-  const days = Number(await getSetting('leads.retention_days', 0)) || 0;
+  const days = Number(await getSetting('leads.retention_days')) || 0;
   if (!(days > 0)) return { skipped: 'leads.retention_days is 0' };
   const rows = await many(`UPDATE leads SET status = 'Lost', disposition = COALESCE(disposition, 'Not Interested'), updated_at = now()
     WHERE deleted_at IS NULL AND NOT (status = ANY($2)) AND COALESCE(updated_at, created_at) < now() - make_interval(days => $1) RETURNING id, lead_number`, [days, CLOSED]);

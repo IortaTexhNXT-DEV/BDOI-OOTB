@@ -273,7 +273,7 @@ export async function possibleDuplicates(q = {}) {
   const name = (String(q.companyName ?? '').trim() || [q.firstName, q.lastName].map((x) => String(x ?? '').trim()).filter(Boolean).join(' ')).toLowerCase() || null;
   const dob = isoDate(q.DOB) || null;
   const loanId = String(q.loanId ?? '').trim() || null;
-  const fourKey = (await getSetting('leads.duplicate_rule', 'any')) === 'four-key';
+  const fourKey = (await getSetting('leads.duplicate_rule')) === 'four-key';
   if (!email && !mobile && !name && !loanId) return [];
   if (fourKey && !loanId && !(name && mobile)) return [];
   // placeholders: the values each rule compares, numbered in the order given

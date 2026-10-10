@@ -374,6 +374,9 @@ export async function downloadList(listId, userId) {
   const l = await loadList(listId);
   if (!['draft', 'sent'].includes(l.status)) throw conflict(`Call list ${l.list_number} is ${LIST_STATUS[l.status]}; it can no longer be downloaded`);
   const s = await talkbotSettings();
+  // The Contact Import file is written as xlsx; another file type set in talkbot.export_format is refused, not ignored
+  const format = String((await getSetting('talkbot.export_format')) ?? 'xlsx').toLowerCase();
+  if (format !== 'xlsx') throw badRequest('The call list is written as an Excel workbook (xlsx) only. Ask the administrator to set the file type of the Contact Import file to xlsx.');
   const lines = await many(`${LINE_SELECT} WHERE l.list_id = $1 AND l.line_status = 'active' ORDER BY l.expiry_date, p.policy_number`, [l.id]);
   const facts = new Map((await policyFacts(lines.map((x) => x.policy_id))).map((p) => [p.id, p]));
   const { all } = await renewablePolicies({ expiryFrom: '1900-01-01', expiryTo: '2999-12-31', renewableOnly: 'true' }, { limit: 100000, offset: 0 });

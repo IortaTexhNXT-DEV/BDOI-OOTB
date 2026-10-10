@@ -185,6 +185,8 @@ describe('migrations 0348 and 0400 on a database in use', () => {
     await q("DELETE FROM schema_migrations WHERE name IN ('0348_tisph_roles.sql', '0400_remittance_approval_authority.sql')");
     // later migrations that grant to the holders of a module permission (0387: approve:incentive) run again after it
     await q("DELETE FROM schema_migrations WHERE name = '0387_incentive_approval.sql'");
+    // the Talkbot call lists and the prospect delete permission (0460, 0461) grant to the TISPH roles by code
+    await q("DELETE FROM schema_migrations WHERE name IN ('0460_talkbot_calls.sql', '0461_lead_tfs_accounts.sql')");
     await migrate({ log: () => {} });
     const migrated = await grants();
     for (const code of [...TIS_ROLES, 'sales', 'processing', 'operations', 'claims', 'accounting', 'system-admin']) expect(migrated[code], code).toEqual(seeded[code]);

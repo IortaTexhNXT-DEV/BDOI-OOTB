@@ -123,7 +123,9 @@ describe('settlement to money out', () => {
   it('an approved settlement raises the insurer payment voucher for the collected premium', async () => {
     const { rows: [pol] } = await pool.query(`SELECT p.id, p.policy_number FROM receipt_applications a JOIN receivables r ON r.id = a.receivable_id JOIN policies p ON p.id = r.policy_id
       JOIN insurance_companies i ON i.id = p.insurance_company_id WHERE a.status = 'applied' AND a.remitted_invoice_id IS NULL AND i.code = 'STANDARD'
-        AND NOT EXISTS (SELECT 1 FROM remittance_lines rl JOIN remittances rr ON rr.id = rl.remittance_id WHERE rl.policy_id = p.id AND rr.status = 'settled') LIMIT 1`);
+        AND p.status IN ('issued', 'active', 'renewed')
+        AND NOT EXISTS (SELECT 1 FROM remittance_lines rl JOIN remittances rr ON rr.id = rl.remittance_id WHERE rl.policy_id = p.id AND rr.status = 'settled')
+      ORDER BY p.policy_number LIMIT 1`);
     expect(pol).toBeTruthy();
     // a policy is on one remittance at a time: the sample remittance holding it is cancelled, so it is ready to remit
     await pool.query(`UPDATE remittances SET status = 'cancelled' WHERE status <> 'cancelled' AND id IN (SELECT remittance_id FROM remittance_lines WHERE policy_id = $1)`, [pol.id]);
