@@ -1,6 +1,7 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
 import { apiErrorMessage } from "../utility/apiError";
+import importService from "./importService";
 
 const toQuery = (params = {}) => {
   const entries = Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== "");
@@ -10,7 +11,11 @@ const toQuery = (params = {}) => {
   return `?${search.toString()}`;
 };
 
-/** Calls the API and returns the full JSON envelope ({ success, data, total, ... }); throws the server message on error. */
+/**
+ * Calls the API and returns the full JSON envelope ({ success, data, total, ... }); throws the server message on error,
+ * with the HTTP status, the code of the first error (MSG-RMT-007, WINDOW_DONE ...) and the field errors
+ * ([{ path, code, message }]) on the error object.
+ */
 export const apiRequest = async (method, path, { body, params, form } = {}) => {
   const headers = { ...authService.getAuthHeader() };
   if (!form) headers["Content-Type"] = "application/json";
@@ -20,7 +25,13 @@ export const apiRequest = async (method, path, { body, params, form } = {}) => {
     body: form || (body === undefined ? undefined : JSON.stringify(body)),
   });
   const json = await response.json().catch(() => null);
-  if (!response.ok || json?.success === false) throw new Error(apiErrorMessage(json, response.status));
+  if (!response.ok || json?.success === false) {
+    const error = new Error(apiErrorMessage(json, response.status));
+    error.status = response.status;
+    error.errors = Array.isArray(json?.errors) ? json.errors : [];
+    error.code = error.errors.find((e) => e?.code)?.code || null;
+    throw error;
+  }
   return json;
 };
 
@@ -142,7 +153,12 @@ export const remittanceService = {
   createSchedule: (payload) => post(`${R}/schedules`, payload),
   updateSchedule: (scheduleId, payload) => put(`${R}/schedules/${id(scheduleId)}`, payload),
   setScheduleStatus: (scheduleId, status) => patch(`${R}/schedules/${id(scheduleId)}/status`, { status }),
-  runSchedule: (scheduleId) => post(`${R}/schedules/${id(scheduleId)}/run`),
+  // Run now: an off-cycle run with a remittance_off_cycle reason ({ reasonCode, note }); the envelope carries MSG-RMT-008
+  runSchedule: (scheduleId, reason) => apiRequest("POST", `${R}/schedules/${id(scheduleId)}/run`, { body: reason || {} }),
+  getSchedule: (scheduleId) => get(`${R}/schedules/${id(scheduleId)}`),
+  scheduleRuns: (scheduleId, params) => apiRequest("GET", `${R}/schedules/${id(scheduleId)}/runs`, { params }),
+  scheduleActivity: (scheduleId) => get(`${R}/schedules/${id(scheduleId)}/activity`),
+  previewRun: (scheduleId) => post(`${R}/schedules/${id(scheduleId)}/preview`),
 
   // bulk processing
   listBulk: () => get(`${R}/bulk`),
@@ -166,6 +182,43 @@ export const remittanceService = {
   history: (params) => apiRequest("GET", `${R}/history`, { params }),
   auditTrail: (referenceNo) => get(`${R}/history/audit`, { referenceNo }),
   systemLogs: () => get(`${R}/history/system-logs`),
+
+  // Accounts > Remittance (R1): the landing and menu counts, the register, approvals, insurer payments and imports
+  summary: () => get(`${R}/summary`),
+  /** Downloads a file of the API (XLSX, PDF) with the session token. */
+  download: (path, fallbackName) => importService.downloadTemplate(path, fallbackName),
+  listRegister: (params) => apiRequest("GET", `${R}/remittances`, { params }),
+  exportRegisterPath: (params = {}) => `${R}/remittances/export.xlsx${toQuery(params)}`,
+  // items: [{ id, version }]; per-item results
+  submitRemittances: (items) => post(`${R}/remittances/submit`, { items }),
+  remittanceActivity: (remId) => get(`${R}/remittances/${id(remId)}/activity`),
+  remittanceActivityPath: (remId) => `${R}/remittances/${id(remId)}/activity?format=xlsx`,
+  schedulePath: (remId, ext = "xlsx") => `${R}/remittances/${id(remId)}/schedule.${ext}`,
+  advicePath: (remId) => `${R}/remittances/${id(remId)}/advice.pdf`,
+  approvalInbox: (params) => apiRequest("GET", `${R}/approvals`, { params: { view: "mine", ...params } }),
+  getApproval: (approvalId) => get(`${R}/approvals/${id(approvalId)}`),
+  // { items: [{ id, version }], action: approve | reject, reasonCode, note }; per-item results
+  decideApprovals: (payload) => post(`${R}/approvals/decide`, payload),
+  approveApproval: (approvalId, { version, comments } = {}) => post(`${R}/approvals/${id(approvalId)}/approve`, { version, comments }),
+  // reason: { reasonCode, note } of the remittance_reject context, with the version shown
+  rejectApproval: (approvalId, reason, version) => post(`${R}/approvals/${id(approvalId)}/reject`, { ...reason, version }),
+  remindApprovers: (approvalId) => apiRequest("POST", `${R}/approvals/${id(approvalId)}/remind`, { body: {} }),
+  listPayments: (params) => apiRequest("GET", `${R}/payments`, { params }),
+  getPayment: (voucherId) => get(`${R}/payments/${id(voucherId)}`),
+  revealPaymentAccount: (voucherId) => get(`${R}/payments/${id(voucherId)}/account`),
+  legacyTransfers: (params) => apiRequest("GET", `${R}/transfers`, { params: { legacy: 1, ...params } }),
+  getTransfer: (transferId) => get(`${R}/transfers/${id(transferId)}`),
+  importTemplatePath: `${R}/imports/template`,
+  importValidatePath: `${R}/imports/validate`,
+  importLimits: () => get(`${R}/imports/limits`),
+  listImports: (params) => apiRequest("GET", `${R}/imports`, { params }),
+  getImport: (importId) => get(`${R}/imports/${id(importId)}`),
+  importRows: (importId, params) => apiRequest("GET", `${R}/imports/${id(importId)}/rows`, { params }),
+  importErrorsPath: (importId) => `${R}/imports/${id(importId)}/errors.xlsx`,
+  commitImport: (importId, version) => apiRequest("POST", `${R}/imports/${id(importId)}/commit`, { body: { version } }),
+  discardImport: (importId) => post(`${R}/imports/${id(importId)}/discard`),
+  myExceptions: (params) => apiRequest("GET", `${R}/exceptions`, { params: { assignedTo: "me", ...params } }),
+  myDebitNotes: (params) => apiRequest("GET", `${R}/direct-bill`, { params: { attention: "mine", ...params } }),
 
   // Remittance Master (configuration records live in /masters/<type>)
   masterOverview: (params) => get(`${R}/masters`, params),
