@@ -53024,7 +53024,7 @@
     "/motor-programmes/{id}/premium-preview": {
       "get": {
         "operationId": "getMotorProgrammesIdPremiumPreview",
-        "summary": "Premium of a car under the programme and who pays what (invoicePrice, vehicleType), nothing saved",
+        "summary": "Premium of a car under the programme, priced as the upload's quotation, line by line with who pays what (invoicePrice, vehicleType, lguCode, financed), nothing saved",
         "tags": [
           "Dealer programmes"
         ],
@@ -53045,7 +53045,7 @@
             "schema": {
               "type": "integer"
             },
-            "example": 1015000
+            "example": 1000000
           },
           {
             "name": "vehicleType",
@@ -53054,7 +53054,16 @@
             "schema": {
               "type": "string"
             },
-            "example": "private_cars"
+            "example": "light_medium_trucks"
+          },
+          {
+            "name": "lguCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "MKT"
           }
         ],
         "responses": {
@@ -53074,20 +53083,83 @@
                         "netPremium": {
                           "type": "integer"
                         },
-                        "grossPremium": {
+                        "taxes": {
                           "type": "number"
                         },
                         "ctplPremium": {
+                          "type": "number"
+                        },
+                        "grossPremium": {
+                          "type": "number"
+                        },
+                        "commissionAmount": {
                           "type": "integer"
                         },
                         "buyer": {
-                          "type": "integer"
-                        },
-                        "payer": {
                           "type": "number"
                         },
-                        "payerType": {
-                          "type": "string"
+                        "payer": {
+                          "type": "integer"
+                        },
+                        "payerType": {},
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "base": {
+                                "type": "integer"
+                              },
+                              "rate": {
+                                "type": "number"
+                              },
+                              "amount": {
+                                "type": "integer"
+                              },
+                              "payer": {
+                                "type": "integer"
+                              },
+                              "buyer": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "basis": {
+                          "type": "object",
+                          "properties": {
+                            "programmeCode": {
+                              "type": "string"
+                            },
+                            "sumInsured": {
+                              "type": "integer"
+                            },
+                            "ownDamageRate": {
+                              "type": "number"
+                            },
+                            "actsOfNatureRate": {
+                              "type": "number"
+                            },
+                            "vehicleType": {
+                              "type": "string"
+                            },
+                            "ctplTermYears": {
+                              "type": "integer"
+                            },
+                            "lgu": {},
+                            "lgtRate": {
+                              "type": "number"
+                            }
+                          }
                         }
                       }
                     }
@@ -53096,12 +53168,46 @@
                 "example": {
                   "success": true,
                   "data": {
-                    "netPremium": 20300,
-                    "grossPremium": 25780.5,
-                    "ctplPremium": 1720,
-                    "buyer": 0,
-                    "payer": 25780.5,
-                    "payerType": "dealer"
+                    "netPremium": 19500,
+                    "taxes": 4923.75,
+                    "ctplPremium": 660.4,
+                    "grossPremium": 25084.15,
+                    "commissionAmount": 2925,
+                    "buyer": 25084.15,
+                    "payer": 0,
+                    "payerType": null,
+                    "lines": [
+                      {
+                        "code": "lossAndDamageCoveragePremium",
+                        "kind": "cover",
+                        "name": "Own Damage / Theft",
+                        "base": 1000000,
+                        "rate": 1.15,
+                        "amount": 11500,
+                        "payer": 0,
+                        "buyer": 11500
+                      },
+                      {
+                        "code": "DST",
+                        "kind": "tax",
+                        "name": "Documentary Stamp Tax",
+                        "base": 19500,
+                        "rate": 12.5,
+                        "amount": 2437.5,
+                        "payer": 0,
+                        "buyer": 2437.5
+                      }
+                    ],
+                    "basis": {
+                      "programmeCode": "TCB-TFS-2026",
+                      "sumInsured": 1000000,
+                      "ownDamageRate": 1.15,
+                      "actsOfNatureRate": 0.5,
+                      "vehicleType": "light_medium_trucks",
+                      "ctplTermYears": 1,
+                      "lgu": null,
+                      "lgtRate": 0.75
+                    }
                   }
                 }
               }
@@ -53367,6 +53473,111 @@
           }
         },
         "x-screen": "Operations > Sales & Marketing > Dealer Programmes > Dealer Sales Upload > Bank Letters",
+        "x-permissions": [
+          "read:motor-programmes",
+          "write:motor-programmes"
+        ]
+      }
+    },
+    "/motor-programmes/preview-options": {
+      "get": {
+        "operationId": "getMotorProgrammesPreviewOptions",
+        "summary": "Choices of the premium preview: vehicle classes of the motor tariff (with their CTPL) and the LGUs with a tax rate",
+        "tags": [
+          "Dealer programmes"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Dealer Programmes > Programme > Preview\n\nAccess: read:motor-programmes, write:motor-programmes",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "vehicleTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "value": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "ctplPremium": {
+                                "type": "number"
+                              },
+                              "ctplPremium3Year": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        },
+                        "lgus": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "province": {
+                                "type": "string"
+                              },
+                              "rate": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "vehicleTypes": [
+                      {
+                        "value": "private_cars",
+                        "label": "Private cars",
+                        "ctplPremium": 610.4,
+                        "ctplPremium3Year": 1660.4
+                      }
+                    ],
+                    "lgus": [
+                      {
+                        "code": "MKT",
+                        "name": "Makati",
+                        "province": "Metro Manila",
+                        "rate": 0.2
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Dealer Programmes > Programme > Preview",
         "x-permissions": [
           "read:motor-programmes",
           "write:motor-programmes"

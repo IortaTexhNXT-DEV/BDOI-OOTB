@@ -2829,7 +2829,15 @@ Choose Operations > Sales & Marketing > Dealer Programmes. A programme holds the
 3. Under **Rates**, enter the **Own damage rate %**, **Acts of nature rate %**, **Excess bodily injury** and **Property damage** limits, the **Default vehicle class** and whether **CTPL** is included and for how many years (three years for a new car registered with the LTO).
 4. Under **Who pays**, tick **Free first year** when the first-year premium is paid by the dealer or the bank, or set the **Subsidy paid by** (dealer or bank), the **Subsidy** kind (percent of premium, fixed amount, full premium) and the **Subsidy value**. The buyer pays the rest.
 5. Choose what **Upload creates**: **Quotation to follow up** (draft quotations the account executive completes with the buyer) or **Policy issued** (the policy is issued and billed straight away).
-6. Enter **Effective from** and **Effective to** and select **Save**. **Premium preview** shows the premium of a sample vehicle with the programme's rates.
+6. Enter **Effective from** and **Effective to** and select **Save**.
+
+The **Default vehicle class** is chosen from the Insurance Commission classes of the motor tariff; a 3-year CTPL can be chosen only for a class whose tariff has a 3-year amount (private cars).
+
+### Premium preview
+
+The calculator icon of a programme opens **Premium preview**. It prices a car exactly as the quotation an upload creates: enter the **Invoice price** (the sum insured of the brand-new car), and optionally another **Vehicle class** (its CTPL tariff), the **Location (LGT)** (the LGU rate; the standard LGT rate otherwise) and, for a bank subsidy, whether the car is **Financed** by the bank. Select **Compute premium** or press Enter.
+
+The table lists each line: Own Damage / Theft, Acts of Nature, Excess Bodily Injury and Property Damage, the **Net premium**, VAT, DST and LGT, and CTPL for the programme's term, each with what the dealer or bank pays and what the buyer pays, and the totals of each payer. The line under the table gives the basis: sum insured, rates, vehicle class, LGT rate and programme.
 
 ### Upload the dealer's sales
 
@@ -2837,7 +2845,7 @@ Choose Operations > Sales & Marketing > Dealer Programmes. A programme holds the
 2. On the programme, select **Upload sales** and choose the file. The system checks every row (required fields, the vehicle class, a chassis number not already uploaded) and creates, for each valid row, the prospect (channel: the dealer branch), the quotation priced with the motor tariff and, in issue mode Policy issued, the client and the policy with the financing bank as mortgagee.
 3. The result lists the rows **Created** and **Failed** with the reason of each failure. Correct the failed rows and upload them again.
 
-The premium is billed to who pays: the dealer or the bank for its subsidy, the buyer for the rest, each through its own bill with its booking journal. The commission of the policy is split in proportion.
+The premium is billed to who pays: the dealer or the bank for its subsidy, the buyer for the rest, each through its own bill with its booking journal. The commission of the policy is split in proportion. A bank pays its subsidy only for the cars it finances: a cash sale (no financing bank, no loan) under a bank-subsidised programme is billed to the buyer. LGT is computed at the rate of the buyer's city when the city has an LGU tax rate (Master > Premium Taxes & LGU Rates), else at the standard LGT rate.
 
 ### Bank endorsement letter
 

@@ -8,7 +8,6 @@ import { emailSendingStatus } from '../../lib/mailer.js';
 import { uploadFile, parseUploadedRows } from '../documents/tabular.js';
 import { sendTemplate } from '../documents/uploadTemplates.js';
 import { buildPdf, buildPdfBatch, sendPdf } from '../documents/pdf.js';
-import { premiumBreakdown } from '../quotations/premium.js';
 import * as svc from './service.js';
 import { bankLetterSpec, batchLetterSpecs } from './letters.js';
 
@@ -35,6 +34,11 @@ define({
   method: 'GET', path: '/', summary: 'Brand-new vehicle programmes (filter status, search) with sales and policies counts', screen: SCREEN, middleware: canRead,
   query: { status: 'active' }, response: { success: true, data: [example] },
   handler: async (req, res) => res.json({ success: true, data: await svc.listProgrammes(req.query) }),
+});
+define({
+  method: 'GET', path: '/preview-options', summary: 'Choices of the premium preview: vehicle classes of the motor tariff (with their CTPL) and the LGUs with a tax rate', screen: `${SCREEN} > Programme > Preview`,
+  middleware: canRead, response: { success: true, data: { vehicleTypes: [{ value: 'private_cars', label: 'Private cars', ctplPremium: 610.4, ctplPremium3Year: 1660.4 }], lgus: [{ code: 'MKT', name: 'Makati', province: 'Metro Manila', rate: 0.2 }] } },
+  handler: async (_req, res) => res.json({ success: true, data: await svc.previewOptions() }),
 });
 define({
   method: 'GET', path: '/upload-template', summary: 'Dealer Sales upload template (XLSX)', screen: `${SCREEN} > Dealer Sales Upload > Template`, middleware: canRead, response: 'binary file',
@@ -87,20 +91,23 @@ define({
   method: 'GET', path: '/:id', summary: 'One programme (id or code)', screen: `${SCREEN} > Programme`, middleware: canRead, response: { success: true, data: example },
   handler: async (req, res) => res.json({ success: true, data: await svc.getProgramme(req.params.id) }),
 });
+const previewQuery = z.object({
+  invoicePrice: z.coerce.number().gt(0, 'invoicePrice must be greater than zero').max(999999999999.99), vehicleType: z.string().trim().max(60).optional(),
+  lguCode: z.string().trim().max(20).optional(), financed: z.enum(['true', 'false']).optional(),
+});
+const previewExample = { netPremium: 19500, taxes: 4923.75, ctplPremium: 660.4, grossPremium: 25084.15, commissionAmount: 2925, buyer: 25084.15, payer: 0, payerType: null,
+  lines: [{ code: 'lossAndDamageCoveragePremium', kind: 'cover', name: 'Own Damage / Theft', base: 1000000, rate: 1.15, amount: 11500, payer: 0, buyer: 11500 },
+    { code: 'DST', kind: 'tax', name: 'Documentary Stamp Tax', base: 19500, rate: 12.5, amount: 2437.5, payer: 0, buyer: 2437.5 }],
+  basis: { programmeCode: 'TCB-TFS-2026', sumInsured: 1000000, ownDamageRate: 1.15, actsOfNatureRate: 0.5, vehicleType: 'light_medium_trucks', ctplTermYears: 1, lgu: null, lgtRate: 0.75 } };
 define({
-  method: 'GET', path: '/:id/premium-preview', summary: 'Premium of a car under the programme and who pays what (invoicePrice, vehicleType), nothing saved', screen: `${SCREEN} > Programme > Preview`,
-  middleware: canRead, query: { invoicePrice: 1015000, vehicleType: 'private_cars' },
-  response: { success: true, data: { netPremium: 20300, grossPremium: 25780.5, ctplPremium: 1720, buyer: 0, payer: 25780.5, payerType: 'dealer' } },
+  method: 'GET', path: '/:id/premium-preview', screen: `${SCREEN} > Programme > Preview`,
+  summary: 'Premium of a car under the programme, priced as the upload\'s quotation, line by line with who pays what (invoicePrice, vehicleType, lguCode, financed), nothing saved',
+  middleware: [...canRead, validate(previewQuery, 'query')], query: { invoicePrice: 1000000, vehicleType: 'light_medium_trucks', lguCode: 'MKT' },
+  response: { success: true, data: previewExample },
   handler: async (req, res) => {
-    const p = await svc.getProgrammeRow(req.params.id);
-    const price = Number(req.query.invoicePrice);
-    if (!(price > 0)) throw badRequest('Validation failed', [{ path: 'invoicePrice', message: 'invoicePrice must be greater than zero' }]);
-    const b = await premiumBreakdown({ lob: 'MOTOR', productType: 'Motor', productId: p.product_id || undefined, vehicleType: req.query.vehicleType || p.vehicle_type, includeCTPL: p.include_ctpl,
-      ctplTermYears: p.ctpl_term_years, lossAndDamageCoverage: price, lossAndDamageCoverageRate: Number(p.own_damage_rate), actsOfNatureRate: Number(p.acts_of_nature_rate),
-      bodilyInjury: Number(p.bodily_injury) || undefined, propertyDamage: Number(p.property_damage) || undefined, totalSumInsured: price }, { insurerId: p.insurance_company_id });
-    const shares = svc.premiumShares(p, b.grossPremium);
-    res.json({ success: true, data: { netPremium: b.netPremium, taxes: Number((b.valueAddedTax + b.documentaryStampTax + b.localGovernmentTax + b.accountPremiumOthers).toFixed(2)),
-      ctplPremium: b.ctplCoveragePremium, grossPremium: b.grossPremium, commissionAmount: b.commissionAmount, ...shares } });
+    const q = req.query;
+    res.json({ success: true, data: await svc.previewPremium(req.params.id, { invoicePrice: q.invoicePrice, vehicleType: q.vehicleType || null, lguCode: q.lguCode || null,
+      financed: q.financed === undefined ? null : q.financed === 'true' }) });
   },
 });
 define({

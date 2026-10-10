@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1279 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1280 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -30648,12 +30648,12 @@
           ]
         },
         {
-          "name": "Premium of a car under the programme and who pays what (invoicePrice, vehicleType), nothing saved",
+          "name": "Premium of a car under the programme, priced as the upload's quotation, line by line with who pays what (invoicePrice, vehicleType, lguCode, financed), nothing saved",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/motor-programmes/:id/premium-preview?invoicePrice=1015000&vehicleType=private_cars",
+              "raw": "{{baseUrl}}/motor-programmes/:id/premium-preview?invoicePrice=1000000&vehicleType=light_medium_trucks&lguCode=MKT",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -30665,11 +30665,15 @@
               "query": [
                 {
                   "key": "invoicePrice",
-                  "value": "1015000"
+                  "value": "1000000"
                 },
                 {
                   "key": "vehicleType",
-                  "value": "private_cars"
+                  "value": "light_medium_trucks"
+                },
+                {
+                  "key": "lguCode",
+                  "value": "MKT"
                 }
               ],
               "variable": [
@@ -30680,7 +30684,7 @@
                 }
               ]
             },
-            "description": "Premium of a car under the programme and who pays what (invoicePrice, vehicleType), nothing saved\n\nFront-end touchpoint: Operations > Sales & Marketing > Dealer Programmes > Programme > Preview\n\nAccess: read:motor-programmes, write:motor-programmes"
+            "description": "Premium of a car under the programme, priced as the upload's quotation, line by line with who pays what (invoicePrice, vehicleType, lguCode, financed), nothing saved\n\nFront-end touchpoint: Operations > Sales & Marketing > Dealer Programmes > Programme > Preview\n\nAccess: read:motor-programmes, write:motor-programmes"
           },
           "response": [
             {
@@ -30689,7 +30693,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/motor-programmes/:id/premium-preview?invoicePrice=1015000&vehicleType=private_cars",
+                  "raw": "{{baseUrl}}/motor-programmes/:id/premium-preview?invoicePrice=1000000&vehicleType=light_medium_trucks&lguCode=MKT",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -30701,11 +30705,15 @@
                   "query": [
                     {
                       "key": "invoicePrice",
-                      "value": "1015000"
+                      "value": "1000000"
                     },
                     {
                       "key": "vehicleType",
-                      "value": "private_cars"
+                      "value": "light_medium_trucks"
+                    },
+                    {
+                      "key": "lguCode",
+                      "value": "MKT"
                     }
                   ],
                   "variable": [
@@ -30716,7 +30724,7 @@
                     }
                   ]
                 },
-                "description": "Premium of a car under the programme and who pays what (invoicePrice, vehicleType), nothing saved\n\nFront-end touchpoint: Operations > Sales & Marketing > Dealer Programmes > Programme > Preview\n\nAccess: read:motor-programmes, write:motor-programmes"
+                "description": "Premium of a car under the programme, priced as the upload's quotation, line by line with who pays what (invoicePrice, vehicleType, lguCode, financed), nothing saved\n\nFront-end touchpoint: Operations > Sales & Marketing > Dealer Programmes > Programme > Preview\n\nAccess: read:motor-programmes, write:motor-programmes"
               },
               "status": "OK",
               "code": 200,
@@ -30728,7 +30736,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"netPremium\": 20300,\n    \"grossPremium\": 25780.5,\n    \"ctplPremium\": 1720,\n    \"buyer\": 0,\n    \"payer\": 25780.5,\n    \"payerType\": \"dealer\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"netPremium\": 19500,\n    \"taxes\": 4923.75,\n    \"ctplPremium\": 660.4,\n    \"grossPremium\": 25084.15,\n    \"commissionAmount\": 2925,\n    \"buyer\": 25084.15,\n    \"payer\": 0,\n    \"payerType\": null,\n    \"lines\": [\n      {\n        \"code\": \"lossAndDamageCoveragePremium\",\n        \"kind\": \"cover\",\n        \"name\": \"Own Damage / Theft\",\n        \"base\": 1000000,\n        \"rate\": 1.15,\n        \"amount\": 11500,\n        \"payer\": 0,\n        \"buyer\": 11500\n      },\n      {\n        \"code\": \"DST\",\n        \"kind\": \"tax\",\n        \"name\": \"Documentary Stamp Tax\",\n        \"base\": 19500,\n        \"rate\": 12.5,\n        \"amount\": 2437.5,\n        \"payer\": 0,\n        \"buyer\": 2437.5\n      }\n    ],\n    \"basis\": {\n      \"programmeCode\": \"TCB-TFS-2026\",\n      \"sumInsured\": 1000000,\n      \"ownDamageRate\": 1.15,\n      \"actsOfNatureRate\": 0.5,\n      \"vehicleType\": \"light_medium_trucks\",\n      \"ctplTermYears\": 1,\n      \"lgu\": null,\n      \"lgtRate\": 0.75\n    }\n  }\n}"
             }
           ]
         },
@@ -30952,6 +30960,55 @@
               ],
               "cookie": [],
               "body": "application/pdf"
+            }
+          ]
+        },
+        {
+          "name": "Choices of the premium preview: vehicle classes of the motor tariff (with their CTPL) and the LGUs with a tax rate",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/motor-programmes/preview-options",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "motor-programmes",
+                "preview-options"
+              ]
+            },
+            "description": "Choices of the premium preview: vehicle classes of the motor tariff (with their CTPL) and the LGUs with a tax rate\n\nFront-end touchpoint: Operations > Sales & Marketing > Dealer Programmes > Programme > Preview\n\nAccess: read:motor-programmes, write:motor-programmes"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/motor-programmes/preview-options",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "motor-programmes",
+                    "preview-options"
+                  ]
+                },
+                "description": "Choices of the premium preview: vehicle classes of the motor tariff (with their CTPL) and the LGUs with a tax rate\n\nFront-end touchpoint: Operations > Sales & Marketing > Dealer Programmes > Programme > Preview\n\nAccess: read:motor-programmes, write:motor-programmes"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"vehicleTypes\": [\n      {\n        \"value\": \"private_cars\",\n        \"label\": \"Private cars\",\n        \"ctplPremium\": 610.4,\n        \"ctplPremium3Year\": 1660.4\n      }\n    ],\n    \"lgus\": [\n      {\n        \"code\": \"MKT\",\n        \"name\": \"Makati\",\n        \"province\": \"Metro Manila\",\n        \"rate\": 0.2\n      }\n    ]\n  }\n}"
             }
           ]
         },
