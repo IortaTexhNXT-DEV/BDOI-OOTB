@@ -1,5 +1,6 @@
 /**
- * Marine cargo open covers (Operations > Marine Open Covers).
+ * Open covers (Operations > Marine Open Covers): parcel and courier for TISPH; marine cargo is a future-release
+ * feature (modules/features, marine-cargo).
  *
  * Contract: a client's open cover with an insurer for a period, the goods and voyages it covers, a rate and a limit per
  * conveyance (any one sending), the mark-up on invoice value and a minimum premium per certificate. Activating the
@@ -13,13 +14,14 @@
  * (premium receivable, booking journal, collection item); collection and remittance to the insurer follow as for any bill.
  */
 import { many, one, query, withTransaction } from '../../db/pool.js';
-import { badRequest, conflict, notFound } from '../../lib/errors.js';
+import { badRequest, conflict, notFound, refused } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { isoDate, addDays } from '../../lib/dates.js';
 import { num, round2 } from '../documents/common.js';
 import { issuePolicy, createReceivable } from '../policies/service.js';
 import { quotationCharges } from '../premium-charges/service.js';
+import { isFeatureOn } from '../features/service.js';
 
 export const coverOut = (r) => r && ({
   id: r.id, coverNumber: r.cover_number, clientId: r.client_id, clientName: r.client_name ?? null, clientCode: r.client_code ?? null,
@@ -46,6 +48,7 @@ export const declarationOut = (d) => ({
 });
 
 const SELECT = `SELECT o.*, c.display_name AS client_name, c.client_code, ic.name AS insurer_name, p.policy_number,
+  (SELECT pr.name FROM products pr WHERE pr.id = o.product_id) AS product_name,
   (SELECT count(*)::int FROM open_cover_certificates x WHERE x.open_cover_id = o.id AND x.status <> 'cancelled') AS certificate_count,
   (SELECT COALESCE(sum(x.insured_value), 0) FROM open_cover_certificates x WHERE x.open_cover_id = o.id AND x.status <> 'cancelled') AS declared_insured,
   (SELECT COALESCE(sum(d.gross_premium), 0) FROM open_cover_declarations d WHERE d.open_cover_id = o.id AND d.status = 'billed') AS billed_premium
@@ -97,7 +100,12 @@ export async function createCover(b, userId) {
   const to = isoDate(b.periodTo);
   if (!from || !to || to <= from) throw badRequest('Validation failed', [{ path: 'periodTo', message: 'The period must end after it starts' }]);
   const rates = await validRates(b.rates);
-  const productId = b.productId || (await one("SELECT id FROM products WHERE upper(code) = 'MARINE' LIMIT 1"))?.id || null;
+  // marine cargo is a future-release feature (modules/features): the open covers of TISPH are parcel and courier
+  const cargo = await isFeatureOn('marine-cargo');
+  const productId = b.productId || (await one('SELECT id FROM products WHERE upper(code) = $1 LIMIT 1', [cargo ? 'MARINE' : 'PARCEL']))?.id || null;
+  if (!cargo && b.productId && (await one('SELECT upper(code) AS code FROM products WHERE id = $1', [b.productId]))?.code === 'MARINE') {
+    throw refused('FEATURE_NOT_ENABLED', 'Marine cargo open covers are not available in this edition');
+  }
   const number = await nextDocumentNumber('open_cover', { unique: { table: 'open_covers', column: 'cover_number' } });
   const r = await one(`INSERT INTO open_covers(cover_number, client_id, insurance_company_id, product_id, insurer_reference, period_from, period_to, goods_description, voyage_scope,
       clauses, currency, rates, markup_percent, minimum_premium, estimated_annual_value, declaration_frequency, commission_rate, owner_user_id, created_by, updated_by)
@@ -138,7 +146,7 @@ export async function activateCover(id, user) {
     const issued = await issuePolicy(db, {
       clientId: c.client_id, productId: c.product_id, insuranceCompanyId: c.insurance_company_id, ownerUserId: c.owner_user_id || user.id, agentUserId: c.owner_user_id || user.id,
       sumInsured: num(c.estimated_annual_value), netPremium: 0, grossPremium: 0, commissionAmount: 0, commissionRate: c.commission_rate == null ? null : Number(c.commission_rate),
-      currency: c.currency, insuredName: c.client_name, productType: 'Marine Cargo', lob: 'MARINE', billLater: true,
+      currency: c.currency, insuredName: c.client_name, productType: c.product_name || 'Marine Cargo', lob: 'MARINE', billLater: true,
       doc: { source: 'open-cover', openCoverId: c.id, coverNumber: c.cover_number, isOpenCover: true, insurerReference: c.insurer_reference,
         riskDetails: { goods: c.goods_description, voyages: c.voyage_scope, conveyances: (c.rates || []).map((r) => `${r.conveyance} ${r.ratePercent}% up to ${r.limit}`).join('; ') } },
     }, { inception: c.period_from, expiry: c.period_to }, user.id);

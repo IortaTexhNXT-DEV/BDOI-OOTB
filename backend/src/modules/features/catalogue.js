@@ -243,9 +243,9 @@ export const FEATURES = Object.freeze([
   }),
   feature({
     key: 'marine-cargo', name: 'Marine cargo open covers', module: 'Operations', tier: FUT,
-    description: 'Marine cargo as an open cover type beside parcel and courier',
+    description: 'Marine cargo as an open cover product beside parcel and courier',
     dependsOn: ['open-covers'],
-    sections: ['Marine Open Covers: marine cargo type'],
+    sections: ['Marine Open Covers: open covers on the marine cargo product (parcel and courier otherwise)'],
   }),
   feature({
     key: 'claims', name: 'Claims', module: 'Operations', tier: P1,

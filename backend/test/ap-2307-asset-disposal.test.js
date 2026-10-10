@@ -11,6 +11,7 @@ import { one, pool, query } from '../src/db/pool.js';
 import { today } from '../src/lib/dates.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { alphalistRows } from '../src/modules/bir/common.js';
+import { enableFeatures } from './helpers.js';
 
 let ctx; let maker; let asOf; let year; let quarter; let month;
 const jvLines = (jvId) => query('SELECT account_code, debit, credit FROM journal_lines WHERE jv_id = $1 ORDER BY line_no', [jvId]).then((r) => r.rows.map((l) => ({ a: l.account_code, d: Number(l.debit), c: Number(l.credit) })));
@@ -18,6 +19,8 @@ const binary = (r) => r.buffer(true).parse((res, cb) => { const d = []; res.on('
 
 beforeAll(async () => {
   ctx = await setupFinance();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['payables', 'fixed-assets', 'bir-returns']);
   maker = ctx.as('maker');
   // supplier invoices post when submitted (no second approver), so the figures are in the books at once
   await query("UPDATE app_settings SET value = 'false' WHERE key = 'payables.maker_checker'");

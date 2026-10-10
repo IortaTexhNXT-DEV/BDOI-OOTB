@@ -7,7 +7,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs, withProducts } from './helpers.js';
+import { setup, loginAs, withProducts, enableFeatures } from './helpers.js';
 import { pool, withTransaction } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { splitParticipants } from '../src/modules/placement/participants.js';
@@ -68,6 +68,8 @@ const sumOf = (rows, k) => Math.round(rows.reduce((s, r) => s + Number(r[k]), 0)
 
 beforeAll(async () => {
   ctx = await setup();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['coinsurance', 'rfq-multi-insurer']);
   await withProducts();
   sales = await persona('p.sales', ['sales']);
   uw = await persona('p.uw', ['processing']);

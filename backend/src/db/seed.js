@@ -37,6 +37,8 @@ export const ROLES = [
   ['tis-it-admin', 'TIS IT AppSupport / Admin', 'RBAC v4 IT AppSupport/Admin: users, roles, access control, settings, reference masters, product configurator, schedules and interfaces; reads business data, enters no business transactions', false],
   ['tis-general-manager', 'TIS General Manager', 'RBAC v4 TIS General Manager: front office (leads to claims) with every approval of the front office and supplier invoices; reads accounting, administration and the audit trail', false],
   ['tis-superid', 'SUPERID (UAT only)', 'RBAC v4 SUPERID for user acceptance testing: includes the System Administrator. Set the role Inactive before go-live', false],
+  // the vendor role that enables the releases of the platform (migration 0550, lib/platform.js); no business access
+  ['iorta-platform-admin', 'iorta TechNXT Platform Administrator', 'Vendor role: enables and disables the releases of the platform (Phase 2, future releases); no business access', true],
 ];
 /** Role codes of earlier releases (renamed or merged by migration 0140_broker_roles.sql); a fresh seed never creates them. */
 export const RETIRED_ROLES = ['it-admin', 'ba', 'user-access-admin', 'underwriting', 'customer-services', 'finance', 'finance-manager', 'agent'];

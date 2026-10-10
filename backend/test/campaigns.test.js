@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, enableFeatures } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { campaignDispatch } from '../src/modules/campaigns/service.js';
 
@@ -15,6 +15,8 @@ async function persona(username, roles) {
 
 beforeAll(async () => {
   ctx = await setup();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['campaigns']);
   sales = await persona('cp.sales', ['sales']);
   claims = await persona('cp.claims', ['claims']);
   // marketing consents: cl_sls_01, 02, 05, 08 granted; a refusal and a withdrawn consent too

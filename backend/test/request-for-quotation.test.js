@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, enableFeatures } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 
 let ctx;
@@ -9,6 +9,8 @@ const q = (sql, params) => pool.query(sql, params).then((r) => r.rows);
 
 beforeAll(async () => {
   ctx = await setup();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['rfq-multi-insurer']);
   await ctx.api('post', '/users').send({ username: 'rfq.sales', password: 'Welcome@123', displayName: 'rfq.sales', email: 'rfq.sales@example.ph', roles: ['sales'] });
   const token = await loginAs(ctx.app, 'rfq.sales', 'Welcome@123');
   sales = (m, p) => request(ctx.app)[m](`/api${p}`).set('Authorization', `Bearer ${token}`);

@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, enableFeatures } from './helpers.js';
 import { pool, query, one } from '../src/db/pool.js';
 import { notify } from '../src/modules/notifications/service.js';
 import { nextRunOf } from '../src/modules/remittance/items.js';
@@ -27,6 +27,8 @@ async function makeUser(username, roles) {
 
 beforeAll(async () => {
   ctx = await setup();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['win-back']);
   // Account Executives restricted to their own book (security.scoped_roles = sales): the producers of this walk.
   expect((await ctx.api('put', '/settings').send({ settings: { 'security.scoped_roles': ['sales'] } })).status).toBe(200);
   await makeUser('pw.agent', ['sales']);
