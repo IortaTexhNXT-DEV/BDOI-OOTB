@@ -27,13 +27,13 @@ handles returned debits.
 | Task | When | Screen |
 |---|---|---|
 | Read the morning notification of the cheques due for deposit | Every morning | [Notifications](#notifications) |
-| Register post-dated cheques and deposit those due | Daily | [Post-dated cheques](#post-dated-cheques) |
-| Record the cleared and bounced cheques | Daily, from the bank's advice | [Post-dated cheques](#post-dated-cheques) |
+| Register post-dated cheques and deposit those due | Daily | [Post-Dated Cheques](#post-dated-cheques) |
+| Record the cleared and bounced cheques | Daily, from the bank's advice | [Post-Dated Cheques](#post-dated-cheques) |
 | Receipt the auto-debits made by the bank | On each debit date, from the bank's debit advice | [Receipts](#verify-payments-and-post-official-receipts) |
 | Check the premiums still open and their ageing | Daily | [Collections](#collections) |
-| Check that your deposits and debits appear on the bank statement | Daily | [Bank reconciliation](#bank-reconciliation) |
-| Look up an insurer statement when the insurer asks about a payment | As needed | [Insurer statement reconciliation](#insurer-statement-reconciliation) |
-| Run the collection report, the statement of account and the deposits in transit | Month-end | [All Reports](#reports-catalogue), [Bank reconciliation](#bank-reconciliation) |
+| Check that your deposits and debits appear on the bank statement | Daily | [Bank Reconciliation](#bank-reconciliation) |
+| Look up an insurer statement when the insurer asks about a payment | As needed | [Insurer Statements](#insurer-statement-reconciliation) |
+| Run the collection report, the statement of account and the deposits in transit | Month-end | [All Reports](#reports-catalogue), [Bank Reconciliation](#bank-reconciliation) |
 
 ## Procedures {#ccd-pdc-ccd-ada-procedures}
 

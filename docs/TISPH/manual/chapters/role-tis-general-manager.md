@@ -27,10 +27,10 @@ by TIS Finance & General Accounting and TIS IT AppSupport / Admin. You never dec
 |---|---|---|
 | Decide the approvals waiting for you (claim settlements and the other queues) | Every morning and through the day | [My Work](#my-work) |
 | Approve or return claim settlements | Daily | [Approve a settlement (checker)](#approve-a-settlement-checker) |
-| Decide claims: review, reject, settle, close | As needed | [The claims list](#the-claims-list) |
+| Decide claims: review, reject, settle, close | As needed | [Claims](#the-claims-list) |
 | Check the e-policies received against their placement slips, when the sales and operations approvers are not available | As needed | [Placement Slips](#placement-slips) |
-| Approve or return renewal terms and complete return premiums | As needed | [Negotiations](#negotiations), [Policies](#policies) |
-| Approve or reject supplier invoices | As notified | [Accounts payable](#accounts-payable) |
+| Approve or return renewal terms and complete return premiums | As needed | [Negotiations](#negotiations), [Policy](#policies) |
+| Approve or reject supplier invoices | As notified | [Payables](#accounts-payable) |
 | Review premium, new business, claims rate, retention and receivables | Weekly | [Dashboard](#dashboard), [Claims Dashboard](#claims-dashboard), [Processing Dashboard](#processing-dashboard), [Sales Dashboard](#sales-dashboard) |
 | Review the month's financial reports after the month-end close | Monthly | [All Reports](#reports-catalogue) |
 | Review who has access to what and the open segregation-of-duties conflicts | Quarterly, and before an audit | [User Access Matrix](#user-access-matrix), [Segregation of Duties](#segregation-of-duties) |

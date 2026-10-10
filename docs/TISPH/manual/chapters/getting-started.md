@@ -223,8 +223,9 @@ To change them:
 | Enter a valid date of birth in the past. | The date of birth is in the future or not a date. |
 | A Philippine ZIP code has 4 digits. | The ZIP code does not have 4 digits. |
 
-Your **Display name** is the name shown at the top right, on approvals and in the audit trail. To change your e-mail
-address, ask IT AppSupport.
+Your **Display name** is the name shown at the top right, in My Work and on the audit trail. The activity log of some
+records (for example the timeline of a renewal) shows your user ID instead. To change your e-mail address, ask IT
+AppSupport.
 
 **Change password** (users who sign in with a password): type **Current password**, then **New password** and
 **Confirm new password**, and select **Change password**. The system shows **Password changed. Your other sessions
@@ -282,9 +283,10 @@ overdue or lost.
 - **Save**, or the action named on the button (for example **Create Placement Slip**), stores the record. **Cancel**
   or the X closes the form without saving. Nothing is stored until you save.
 - After a save the system shows a confirmation at the top right and, for most records, the number it issued.
-- An action that cannot be undone (deleting, cancelling, posting, approving) asks for confirmation first. The
-  question names the action, and the button repeats the verb, for example **Delete task**. A decline, return or
-  reversal asks for the reason, chosen from a list.
+- Deleting a record or a task asks for confirmation first: the question names the action, and the button repeats
+  the verb, for example **Delete task**. A decline, return or reversal asks for the reason, chosen from a list.
+- Other decisions take effect as soon as you select them, without a question: for example **Approve** on a renewal of
+  Negotiations or **Approve settlement** on a claim. Check the record before you select the decision.
 
 ## Uploads and templates {#uploads-and-templates}
 
@@ -322,10 +324,12 @@ approves and who approves your work.
 | Quotation | {{roles:approve:quotations}} |
 | Check of a placement against the slip | {{roles:approve:policies}} |
 | Endorsement with return premium, and policy cancellation | {{roles:approve:policies}} |
+| Quotation referred by an acceptance rule of the product (underwriting referral) | TIS Operations Unit Head |
 | Renewal terms | {{roles:approve:renewals}} |
 | Claim decisions and settlement | {{roles:approve:claims}} |
 | Supplier invoice | {{roles:approve:payables}} |
 | Journal voucher, payment voucher and cheque | Another TIS Finance & General Accounting user |
+| Remittance to an insurer, and its settlement, adjustment or electronic transfer | {{roles:write:remittance}}, another user than the one who prepared it |
 | Bank reconciliation | {{roles:approve:bank-reconciliation}} |
 | Insurer statement reconciliation | {{roles:approve:insurer-reconciliation}} |
 | Credit control decisions | {{roles:approve:credit-control}} |
@@ -334,8 +338,13 @@ approves and who approves your work.
 | Posting rules and account determination | {{roles:approve:posting-rules}} |
 | Role access changes and authority limits | {{roles:approve:access-control}} |
 
-Remittances to insurers are approved in levels by amount: up to PHP 100,000.00 at the first level, up to
-PHP 1,000,000.00 at the second level, and above that at the third level, each level by a different user.
+**Approval limits.** The [Authority Matrix](#authority-matrix) sets the largest amount each role may approve per
+transaction. As delivered it holds no limit, which the role chapters show as "Not set":
+
+- a claim settlement is approved by the approver whatever its amount;
+- a remittance to an insurer follows the remittance approval levels instead: one approval up to PHP 100,000.00, two
+  approvals up to PHP 1,000,000.00 and three approvals above that, each by a different user. As soon as TISPH enters
+  remittance limits on the Authority Matrix, one approval by a user whose limit covers the amount is enough.
 
 To approve:
 
@@ -349,8 +358,8 @@ To approve:
 
 On top of maker-checker:
 
-- the [Authority Matrix](#authority-matrix) sets the largest amount each role may approve per transaction; an
-  approval above the limit is refused;
+- once a limit is set on the [Authority Matrix](#authority-matrix), an approval above the approver's limit is
+  refused;
 - the [Segregation of Duties](#segregation-of-duties) rules warn or block when one person is given roles that should
   stay apart;
 - a [Delegation](#delegations) lends your approval limit to the person who covers for you during an absence, for the
@@ -386,7 +395,7 @@ changed** (**Field**, **Before**, **After**). Search the events, filter by **Use
 ## Personal data masking {#personal-data-masking}
 
 Personal identifiers of clients and prospects are protected under Republic Act No. 10173. On every screen, export and
-report, the system shows them in full only to the roles that need them: {{roles:view:pii}}.
+report, the system shows them in full only to a user of one of the roles that need them: {{roles:view:pii}}.
 
 For the other roles the identifiers are masked:
 
@@ -408,8 +417,22 @@ Press F1, or **?** outside a text field, or choose **Help** in the account menu.
 - **Help for this screen**: the section of this manual for the screen you are on (**Open this section**);
 - **Download user manual (PDF)**, **Download user manual (Word)** and **Browse the whole user manual**;
 - **Your role**: your role and **Open my role chapter**;
-- **Contact support**: the support contacts of Toyota Insurance Services Philippines;
+- **Contact support**: the support e-mail address, telephone number, hours and portal that TIS IT AppSupport / Admin
+  sets up on {{menu:/master/configuration/settings}}. Until they are set up, the panel says
+  **Support contacts not set up. Contact TIS IT AppSupport / Admin.**;
 - **Keyboard shortcuts**: F1 or ? opens the panel, / goes to the menu search, the arrows and Enter open a menu search
   result, Esc closes the panel or clears the search;
 - **About Toyota Insurance Services**: the version, environment and build date of the system and the version of this
   manual.
+
+## When the system refuses an action {#when-the-system-refuses-an-action}
+
+| Message or situation | Reason | What to do |
+|---|---|---|
+| **Not authorised**: Your role does not give access to this screen | The link (for example from a notification or My Work) leads to a screen that is not in the menus of your role | Ask a user of the role that works on the record; see the chapter of your role for your menus |
+| A decision button (for example **Confirm check**, **Approve**) is greyed out, or the system says the approver must be different | You entered the record: the decision is made by another user (maker-checker) | Ask a user of the approving role named in your role chapter |
+| An error on a claim decision (**Proceed to adjuster report**, **Proceed to settlement**, **Reject claim**) | Claim decisions are made by {{roles:approve:claims}} | Hand the claim to a user of that role |
+| An approval is refused for its amount | The amount is above your limit on the Authority Matrix | Ask an approver with a higher limit |
+| A cancellation or a return premium cannot be completed | Money going back to the client is completed by another user | A user who approves policy checks completes it (see [Approvals and maker-checker](#statuses-approvals-and-maker-checker)) |
+| **Endorsement** or **Claim** is not offered on a policy | The policy's payment is **Pending** or **Reviewing**, or the policy is no longer in force | Check the policy's payment on [Payments](#payments) |
+

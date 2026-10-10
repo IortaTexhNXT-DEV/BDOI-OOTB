@@ -60,7 +60,7 @@ The list shows every referrer with **TYPE** (Agent, Sub-agent, External), **LEVE
 
 {{screen:/commission/referrer-accounts}}
 
-The commission paid by TIS to an agent, sub-agent or external referrer (for example a dealer) on a policy it brought in is computed when the policy is booked, from the commission details of the quotation. Each commission line goes through four statuses:
+The commission paid by TISPH to an agent, sub-agent or external referrer (for example a dealer) on a policy it brought in is computed when the policy is booked, from the commission details of the quotation. Each commission line goes through four statuses:
 
 | Status | Meaning | What the system does |
 |---|---|---|
@@ -92,7 +92,7 @@ A new referrer is added with its type, level, tax details and bank account; the 
 
 {{screen:/commission/insurer-overrides/computations}}
 
-Some insurers pay TIS a commission on top of the policy commission: an overriding commission on the production volume, a profit commission on the loss ratio, or a contingent commission on growth.
+Some insurers pay TISPH a commission on top of the policy commission: an overriding commission on the production volume, a profit commission on the loss ratio, or a contingent commission on growth.
 
 **Commission > Insurer Overrides > Agreements** holds the agreement with each insurer: **Agreement code**, **Name**, **Insurer**, **Type** (**Overriding**, **Profit**, contingent), **Basis** (**Production volume**, **Loss ratio**, growth), **Period** (**Quarterly**, **Annual**), the lines of business, the **Tiers** (for example 0 to 40% loss ratio: 5%) and **Effective from**. **New agreement** adds one; the pencil changes it.
 

@@ -17,9 +17,14 @@ paid over the counter, by bank transfer, through bills payment and by QRPh. You 
 client's bill, print or e-mail the receipt, follow up the overdue premiums and record the claim settlement funds that
 insurers pay to the broker. You also handle post-dated cheques on the same register as CCD-PDU (Post-Dated Cheques).
 
-You do not reverse receipts: a receipt issued in error or a returned payment is reversed by CCD-Recon (Reconciliation
-and Reversals). Premium warranty extensions and client credit limits are approved by TIS Finance & General
-Accounting.
+The acknowledgement receipt (AR) is not issued on your screens: the system issues it when an account executive
+records a client's payment on the policy. You then confirm that payment against the bank, and the confirmation issues
+the official receipt.
+
+On Collections you record the follow-ups, the promises to pay and the receipts of the premiums. You do not cancel,
+reverse or adjust receipts and collections: the Receipts screen has no cancel action, and a returned payment or a
+receipt issued in error is handled by CCD-Recon (Reconciliation and Reversals).
+Premium warranty extensions and client credit limits are approved by TIS Finance & General Accounting.
 
 {{include:generated/roles/tis-ccd-bp.md}}
 
@@ -33,8 +38,8 @@ Accounting.
 | Print or e-mail the receipts to the clients | Daily | [Receipts](#verify-payments-and-post-official-receipts) |
 | Follow up overdue premiums, record notes and promises to pay | Daily | [Collections](#collections) |
 | Send payment reminders to the clients when needed (each morning the system also e-mails the clients whose premiums fall due) | As needed | [Collections](#collections) |
-| Register and deposit post-dated cheques | Daily | [Post-dated cheques](#post-dated-cheques) |
-| Record claim settlement funds received from insurers | As insurers pay | [Claims settlements](#claims-settlements-paid-through-the-broker) |
+| Register and deposit post-dated cheques | Daily | [Post-Dated Cheques](#post-dated-cheques) |
+| Record claim settlement funds received from insurers | As insurers pay | [Claims Settlements](#claims-settlements-paid-through-the-broker) |
 | Print the receipts of a client for a period | As requested | [Receipts](#verify-payments-and-post-official-receipts) |
 | Run the collection report and the statement of account | Month-end | [All Reports](#reports-catalogue) |
 
@@ -45,11 +50,13 @@ Accounting.
 1. Choose {{menu:/accounts/receipts}}. **Receipts history** lists the receipts issued, the latest first.
 2. Select **Receipt**. **Add Receipts** opens with today's date as **Receipt Date** and the **Receipt Number**
    generated on saving.
-3. Keep **Receipt Type** at **Payment**. Select the **Branch Code** and the **Department Code**.
+3. Keep **Receipt Type** at **Payment**. In **Branch Code** choose your branch (**Head Office**) and in
+   **Department Code** choose **Cash Control**.
 4. In **Customer Code**, select the client. The list shows each client with an open premium and the amount open;
    type part of the code or name to find it. **Customer Name** is filled in.
 5. In **Policy Number**, select the policy paid. Keep **Currency Code** at **PHP** and **Transaction Code** at
-   **OR – Official Receipt**.
+   **OR – Official Receipt**. The other code of the list, **CM – Credit Memo**, records a credit to the client's
+   account that is not money received; use it only when TIS Finance & General Accounting asks for it.
 6. In **Receipt Mode**, select how the client paid: **Dollar/Peso** (cash), **Cheque**, **Managers Check/Demand
    Draft**, **Direct Credit/Transfer to Account**, **Telegraphic Transfer**, **Online Banking** or **Credit
    Ticket-Inter Office**. A cheque asks for the cheque number and date; for the other modes type the bank or
@@ -66,7 +73,7 @@ receivable) and reduces the bill. When the bill is fully paid, the policy's paym
 | Field | Required | What to enter | Rule |
 |---|---|---|---|
 | **Receipt Date** | Yes | The date the payment was received | Must be in an open accounting period |
-| **Branch Code**, **Department Code** | Yes | Your branch and Cash Control | |
+| **Branch Code**, **Department Code** | Yes | **Head Office** and **Cash Control** | |
 | **Customer Code** | Yes | The client paying | Only clients with an open premium are listed |
 | **Policy Number** | Yes | The policy paid | Only policies with an open bill are listed |
 | **Receipt Mode** | Yes | How the client paid | A cheque or manager's check needs the cheque number |
@@ -111,6 +118,11 @@ and upload them again; the rows already receipted must not be uploaded twice.
   receipts are printed one per page in one PDF.
 
 ![Accounts > Receipts, the receipts history with Bulk Print, Bulk Upload and Receipt](images/role-tis-ccd-bp/receipts-list.png)
+
+In the list, **Status** is **Converted** for a receipt whose lines are all paid and posted (the usual status of an
+issued receipt), **Draft** for a receipt with a line not yet paid and **Cancelled** for a cancelled receipt.
+**Transaction Code** is **OR** for a receipt issued on Add Receipts or by Bulk Upload, and **PAYMENT** for a receipt
+issued when a payment recorded on the policy (with its acknowledgement receipt) was confirmed.
 
 ### Follow up an overdue premium {#ccd-bp-qrph-receipting-follow-up}
 

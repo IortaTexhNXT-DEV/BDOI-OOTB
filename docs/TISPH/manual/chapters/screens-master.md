@@ -174,7 +174,7 @@ Confirm at least every quarter that each active user still needs his or her acce
 
 The list shows **Review**, **Scope**, **Due**, **Progress**, **Removals**, **Status**, **Started by** and **Signed off by**. **Export to Excel** downloads a review as audit evidence.
 
-## Posting configuration: Configuration Approvals, Posting Rules, Account Determination {#posting-configuration-configuration-approvals-posting-rules-account-determination}
+## Posting configuration {#posting-configuration-configuration-approvals-posting-rules-account-determination}
 
 {{screen:/master/finance/account-determination}}
 
@@ -244,7 +244,7 @@ The Commission Rate Matrix sets the broker's commission rate that applies to a p
 | **Close Checklist** | The items of the month-end close: **Order**, **Code**, **Item**, **Type** (**Automatic** or manual), **Severity** (blocking or warning). For example no unposted journals in the period, trial balance balanced, suspense account cleared, no unapplied receipts. |
 | **Bank Statement Formats** | How each bank's statement file is read: columns, date format, debit and credit or signed amounts (for example the BDO and BPI exports). |
 | **Bank Transaction Types** | The bank lines with no book entry (bank charges, interest income, final tax on interest): direction, the account they post to, whether they need approval and the description pattern that recognises them on the statement. |
-| **Insurer Statement Formats** | How each insurer's statement file is read; the generic format applies to any insurer without its own. |
+| **Insurer Statement Formats** | How each insurer's statement file is read; the standard format applies to any insurer without its own. |
 
 ## Operational masters {#operational-masters}
 

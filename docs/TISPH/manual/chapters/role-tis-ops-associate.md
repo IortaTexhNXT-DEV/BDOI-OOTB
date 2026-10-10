@@ -103,7 +103,7 @@ e-policy to the client. The placement slip becomes **Insurer issued (Booked)**. 
 
 For a CTPL cover, choose {{menu:/operations/ctpl-authentication}}: the list shows each certificate of cover with its
 status (**Pending**, **Requested**, **Authenticated**, **Failed**). A certificate is released to the client only
-when it is **Authenticated**. See [CTPL authentication](#ctpl-authentication).
+when it is **Authenticated**. See [CTPL Authentication](#ctpl-authentication).
 
 ### Raise an endorsement or a cancellation {#tis-operations-associate-endorsement}
 
@@ -196,11 +196,4 @@ See [Motor claim repairs and letters of authority](#motor-claim-repairs-and-lett
 If the terms are rejected, the renewal comes back to you to prepare again. Price discussions with the client are
 logged on [Negotiations](#negotiations).
 
-## When the system refuses an action {#tis-operations-associate-refusals}
-
-| Message or situation | Reason | What to do |
-|---|---|---|
-| In **Check against slip**, **Confirm check** and **Return to insurer** are greyed out | The check is made by another user than the one who uploaded the e-policy, holding the right to decide it | Ask the TIS Operations Unit Head |
-| Error on **Proceed to adjuster report**, **Proceed to settlement** or **Reject claim** | Claim decisions are made by the TIS Operations Unit Head or the TIS General Manager | Hand the claim to your unit head |
-| A cancellation or return premium cannot be completed | Money going back is completed by another user | The TIS Operations Unit Head completes it |
-| **Endorsement** or **Claim** is not offered on a policy | The policy's payment is **Pending** or **Reviewing**, or the policy is no longer in force | Check the policy on [Payments](#payments) |
+When the system refuses one of these actions, see [When the system refuses an action](#when-the-system-refuses-an-action).

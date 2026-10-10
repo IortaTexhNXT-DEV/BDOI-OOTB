@@ -14,13 +14,15 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 
 ## What you can view, change and approve {#ccd-pdu-post-dated-cheques-access}
 
-| Area | Module | Access | What it allows |
-|---|---|---|---|
-| Accounts | Receipts | View | See receipts and post-dated cheques |
-| Accounts | Receipts | Create and edit | Issue official receipts, post cash, verify payments, handle post-dated cheques |
-| Reports | Reports | View | Run and download reports |
-| Master data and configuration | Reference masters | View | See reference masters |
-| Basic and special access | Basic access | View | Own profile and the look-up lists of every form |
+Where: the screens of your menus that show the module. A module without a screen of its own is seen inside the screens of other modules (for example the remittance status of a policy).
+
+| Area | Module | Access | What it allows | Where |
+|---|---|---|---|---|
+| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts and Post-Dated Cheques |
+| Accounts | Receipts | Create and edit | Issue official receipts, post cash, verify payments, handle post-dated cheques |  |
+| Reports | Reports | View | Run and download reports | SOA/Premium Receivable and Collection Report |
+| Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
+| Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
 
 ## Approvals {#ccd-pdu-post-dated-cheques-approvals}
 

@@ -12,8 +12,10 @@ Screens to refresh (pop-up redesign in another stream, described as on this buil
 {{role-summary:tis-ccd-pdu}}
 
 CCD-PDU keeps the register of post-dated cheques that clients hand to Toyota Insurance Services Philippines for their
-premiums. You encode each cheque against the client's bill or policy, record where it is kept, deposit it on or after
-its date, record whether the bank cleared or returned it, and replace, return or cancel cheques when the client asks.
+premiums. You register each cheque against the client's bill or policy when you receive it, record where it is
+kept, deposit it on or after its date, record whether the bank cleared or returned it, and replace, return or cancel
+cheques when the client asks. The cheque is acknowledged by its registration: the **On Hand** status and the PDC
+number on the register are the record that Cash Control holds the cheque.
 Depositing a cheque is what issues the official receipt: nothing is posted while a cheque is on hand.
 
 You work with CCD-PDC / CCD-ADA, who handles post-dated cheques and auto-debit arrangements on the same register, with
@@ -28,13 +30,13 @@ payment status.
 | Task | When | Screen |
 |---|---|---|
 | Read the morning notification of the cheques due for deposit | Every morning | [Notifications](#notifications) |
-| Register the post-dated cheques received from clients | Daily, as cheques arrive | [Post-dated cheques](#post-dated-cheques) |
-| Deposit the cheques dated today or earlier | Daily | [Post-dated cheques](#post-dated-cheques) |
-| Record the cheques cleared by the bank | Daily, from the bank's advice | [Post-dated cheques](#post-dated-cheques) |
-| Record bounced cheques and ask the client for a replacement | As the bank returns them | [Post-dated cheques](#post-dated-cheques) |
-| Return or cancel cheques no longer needed | As requested | [Post-dated cheques](#post-dated-cheques) |
+| Register the post-dated cheques received from clients | Daily, as cheques arrive | [Post-Dated Cheques](#post-dated-cheques) |
+| Deposit the cheques dated today or earlier | Daily | [Post-Dated Cheques](#post-dated-cheques) |
+| Record the cheques cleared by the bank | Daily, from the bank's advice | [Post-Dated Cheques](#post-dated-cheques) |
+| Record bounced cheques and ask the client for a replacement | As the bank returns them | [Post-Dated Cheques](#post-dated-cheques) |
+| Return or cancel cheques no longer needed | As requested | [Post-Dated Cheques](#post-dated-cheques) |
 | Check the payment status of a policy before answering a client | As needed | [Payments](#payments), [Receipts](#verify-payments-and-post-official-receipts) |
-| Count the cheques in the vault against the register | Month-end | [Post-dated cheques](#post-dated-cheques) |
+| Count the cheques in the vault against the register | Month-end | [Post-Dated Cheques](#post-dated-cheques) |
 | Run the collection report and the statement of account | Month-end | [All Reports](#reports-catalogue) |
 
 ## Procedures {#ccd-pdu-post-dated-cheques-procedures}
@@ -43,8 +45,9 @@ payment status.
 
 1. Choose {{menu:/accounts/post-dated-cheques}}. The cards show the cheques **On hand**, the cheques **Due for
    deposit** and the number **Bounced**.
-2. On the **Register cheque** tab, select the status in the first list (**On hand** is shown first; **All** shows
-   every cheque) and type a PDC number, cheque number, client, policy or bill in the search box.
+2. On the **Cheque register** tab (the list of cheques, not the **Register cheque** button), select the status in
+   the first list (**On hand** is shown first; **All** shows every cheque) and type a PDC number, cheque number,
+   client, policy or bill in the search box.
 3. Select **Export to Excel** to download the register with the status selected.
 
 The **Deposit due** tab lists the cheques on hand dated within the next three days, with their total. Each morning
@@ -59,7 +62,8 @@ the system sends a notification of these cheques to the Cash Control users.
 3. In **Reference**, type the bill number (for example INV-2026-95007) or the policy number.
 4. In **Drawee bank**, select the client's bank. If the bank is not in the list, type it in **Drawee bank (if not in
    the list)**.
-5. Type the **Cheque no.**, the **Cheque date** and the **Amount**.
+5. Type the **Cheque no.** and the **Amount**. Pick the **Cheque date** from the calendar of the field: a date typed
+   in the field is not taken.
 6. In **Kept in**, type where the cheque is filed, for example "Finance vault, drawer 2". Add **Remarks** if needed.
 7. Select **Save**. The system gives the cheque its PDC number (PDC-2026-00004) with the status **On Hand**.
 
@@ -69,7 +73,7 @@ the system sends a notification of these cheques to the Cash Control users.
 | **Reference** | Yes | The bill or policy number | The bill must have an open balance |
 | **Drawee bank** | Yes, one of the two | The client's bank | Type it in **Drawee bank (if not in the list)** when it is not listed |
 | **Cheque no.** | Yes | The number printed on the cheque | |
-| **Cheque date** | Yes | The date on the cheque, DD/MM/YYYY | The cheque cannot be deposited before this date |
+| **Cheque date** | Yes | The date on the cheque, picked from the calendar | The cheque cannot be deposited before this date |
 | **Amount** | Yes | The amount of the cheque | Not more than the bill balance left after the cheques already on hand for it |
 | **Kept in** | No | Vault, drawer or folder | Printed on the register and the export |
 

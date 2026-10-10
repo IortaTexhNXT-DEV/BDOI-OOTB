@@ -135,52 +135,54 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Product Configurator | Document Manager | Create and edit |
 | Product Configurator | Market Mapping | Create and edit |
 | Product Configurator | Risk Mapping | Create and edit |
-| Product Configurator | Product Analytics | Create and edit |
+| Product Configurator | Product Analytics | View |
 
 ## What you can view, change and approve {#tis-it-appsupport-admin-access}
 
-| Area | Module | Access | What it allows |
-|---|---|---|---|
-| Sales & Marketing | Prospects and leads | View | See prospects and leads |
-| Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports |
-| Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters |
-| Sales & Marketing | Dealer programmes | Create and edit | Maintain programmes and upload dealer vehicle sales |
-| Operations | Clients | View | See clients |
-| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication |
-| Operations | Endorsements and cancellations | View | See endorsements and cancellations |
-| Operations | Renewals | View | See renewals |
-| Operations | Claims | View | See claims |
-| Accounts | Receipts | View | See receipts and post-dated cheques |
-| Accounts | Collections and credit control | View | See collections, instalment plans and credit limits |
-| Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files |
-| Accounts | Payables | View | See suppliers, supplier invoices and payments, AP ageing |
-| Accounts | Fixed assets | View | See the fixed asset register and depreciation |
-| Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements |
-| Accounts | Incentives | View | See incentive programmes, calculations and statements |
-| Commission | Commission | View | See commission, referrer accounts and insurer overrides |
-| Reports | Reports | View | Run and download reports |
-| Product Configurator | Products | View | See products and product templates |
-| Product Configurator | Products | Create and edit | Configure products, covers, rating and rules |
-| Master data and configuration | Reference masters | View | See reference masters |
-| Master data and configuration | Reference masters | Create and edit | Maintain reference masters |
-| Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production |
-| Master data and configuration | Distribution channels | Create and edit | Maintain distribution channels |
-| Master data and configuration | Premium taxes and LGU rates | Create and edit | Maintain premium taxes and charges and the LGU tax rates |
-| Master data and configuration | System settings | View | See system settings |
-| Master data and configuration | System settings | Create and edit | Change system settings |
-| Master data and configuration | Schedules | View | See scheduled jobs and their runs |
-| Master data and configuration | Schedules | Create and edit | Run, switch on or off and reschedule jobs |
-| Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox |
-| Master data and configuration | Integrations | Create and edit | Configure connectors and message templates; resend or cancel messages |
-| Master data and configuration | Audit trail | View | See the audit trail |
-| Users and access | Users | View | See users and their sign-in history |
-| Users and access | Users | Create and edit | Create users, change their roles, reset passwords, lock and unlock |
-| Users and access | Roles | Create and edit | Create roles and request changes to their access |
-| Users and access | Access control | View | See access matrices, role permissions, authority limits, delegations, segregation of duties and access reviews |
-| Users and access | Access control | Create and edit | Propose authority limits, record delegations, maintain segregation of duties, run access reviews |
-| Users and access | Access control | Approve | Approve role access changes and authority limits of another administrator |
-| Basic and special access | Basic access | View | Own profile and the look-up lists of every form |
+Where: the screens of your menus that show the module. A module without a screen of its own is seen inside the screens of other modules (for example the remittance status of a policy).
+
+| Area | Module | Access | What it allows | Where |
+|---|---|---|---|---|
+| Sales & Marketing | Prospects and leads | View | See prospects and leads | Prospects |
+| Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | Requests for Quotation, Quotations, Placement Slips and Comparison Reports |
+| Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | Dealer Programmes |
+| Sales & Marketing | Dealer programmes | Create and edit | Maintain programmes and upload dealer vehicle sales |  |
+| Operations | Clients | View | See clients | Clients |
+| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Policy, Payments, CTPL Authentication and Cover Notes |
+| Operations | Endorsements and cancellations | View | See endorsements and cancellations | Policy Cancellation |
+| Operations | Renewals | View | See renewals | Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management and Performance |
+| Operations | Claims | View | See claims | Claims |
+| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts and Post-Dated Cheques |
+| Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
+| Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement |
+| Accounts | Payables | View | See suppliers, supplier invoices and payments, AP ageing | Supplier Invoices, Supplier Payments, AP Ageing, Suppliers and Supplier 2307 |
+| Accounts | Fixed assets | View | See the fixed asset register and depreciation | Asset Register, Depreciation Run and Disposals |
+| Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Automated Processing, Tracking, Statements, Settlement, Reconciliation, Bulk Processing, Scheduling, Electronic Transfer, Approval Workflow, Exception Management, Agency Bill Processing, Direct Bill Processing, Adjustments, History and Analytics |
+| Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
+| Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status, Co-insurance Register and Due to Insurers |
+| Product Configurator | Products | View | See products and product templates | Dashboard, Product Templates, Coverage Builder, Rating Engine, Acceptance Rules, Document Manager, Market Mapping, Risk Mapping and Product Analytics |
+| Product Configurator | Products | Create and edit | Configure products, covers, rating and rules |  |
+| Master data and configuration | Reference masters | View | See reference masters | Company, Branch, Sales Activity Types, Sales Activity Outcomes, Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Claim Document Checklist, Repair Shops, Lead Sources, Reason Codes, Country, Province, City / Municipality, Hierarchy, Designation, Package Bundles, Insurer Rate Tables, Commission Rate Matrix, Transaction Code, Currency, Exchange Rate, Bank, E-mail Layout, Documents and Reports Layout, Document Signatures, Document Numbering and E-mail Outbox |
+| Master data and configuration | Reference masters | Create and edit | Maintain reference masters |  |
+| Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
+| Master data and configuration | Distribution channels | Create and edit | Maintain distribution channels |  |
+| Master data and configuration | Premium taxes and LGU rates | Create and edit | Maintain premium taxes and charges and the LGU tax rates | Premium Taxes & LGU Rates |
+| Master data and configuration | System settings | View | See system settings | Configuration |
+| Master data and configuration | System settings | Create and edit | Change system settings |  |
+| Master data and configuration | Schedules | View | See scheduled jobs and their runs | Schedules |
+| Master data and configuration | Schedules | Create and edit | Run, switch on or off and reschedule jobs |  |
+| Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | Integrations, Message Templates and Insurer Integration |
+| Master data and configuration | Integrations | Create and edit | Configure connectors and message templates; resend or cancel messages |  |
+| Master data and configuration | Audit trail | View | See the audit trail | Audit Trail |
+| Users and access | Users | View | See users and their sign-in history | User and User Access Matrix |
+| Users and access | Users | Create and edit | Create users, change their roles, reset passwords, lock and unlock |  |
+| Users and access | Roles | Create and edit | Create roles and request changes to their access | Role and Role Permissions |
+| Users and access | Access control | View | See access matrices, role permissions, authority limits, delegations, segregation of duties and access reviews | Authority Matrix, Delegations, Segregation of Duties and Access Reviews |
+| Users and access | Access control | Create and edit | Propose authority limits, record delegations, maintain segregation of duties, run access reviews |  |
+| Users and access | Access control | Approve | Approve role access changes and authority limits of another administrator |  |
+| Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
 
 ## Approvals {#tis-it-appsupport-admin-approvals}
 

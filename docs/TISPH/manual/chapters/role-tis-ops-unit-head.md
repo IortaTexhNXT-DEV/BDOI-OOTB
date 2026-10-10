@@ -33,10 +33,10 @@ quotations and renewals, and with the TIS General Manager.
 | Take registered claims into processing; reject claims the insurer repudiates | Daily | [Claims](#the-claims-list) |
 | Submit the settlements agreed by the insurers | Daily | [Assessment and settlement](#assessment-and-settlement-maker) |
 | Approve the claim settlements of other users | Daily | [Approve a settlement](#approve-a-settlement-checker) |
-| Complete the cancellations and return premiums raised by the team | Daily | [Policy](#policies), [Cancel a policy](#cancel-a-policy-computed-return-premium) |
+| Complete the cancellations and return premiums raised by the team | Daily | [Policy](#policies), [Policy Cancellation](#cancel-a-policy-computed-return-premium) |
 | Approve or return renewal terms | Daily | [Negotiations](#negotiations) |
 | Approve quotations and decide underwriting referrals | As referred | [Quotations](#quotations) |
-| Approve supplier invoices | As submitted | [Accounts payable](#accounts-payable) |
+| Approve supplier invoices | As submitted | [Payables](#accounts-payable) |
 | Review the renewals at risk and the escalations from the team | Weekly | [At-Risk Policies](#renewal-queue-and-at-risk-policies) |
 | Review the team's workload, open claims and claims ageing | Weekly | [Processing Dashboard](#processing-dashboard), [Claims Dashboard](#claims-dashboard) |
 | Review the claims, renewal and production reports | Month-end | [All Reports](#reports-catalogue) |
@@ -50,7 +50,9 @@ For the operations work you do yourself, follow the procedures of the
 
 1. Choose **My Work** and select **Approvals**. The list shows the claim settlements and renewal terms waiting for
    your decision, with the amount and the due date. Records you submitted yourself are not listed.
-2. Select the arrow at the end of a row to open the record where you decide it.
+2. Select the arrow at the end of a row. A claim settlement opens on the claim, ready to decide. A renewal opens the
+   **Negotiations** list without a selection: select the renewal there by its number (RN-YYYY-NNNNN), shown in the
+   row of My Work.
 3. For the e-policies to check, the cancellations to complete and the claims to take into processing, select
    **Everyone**, then **Placement slips**, **Endorsements** or **Claims**.
 
@@ -100,11 +102,12 @@ decision right: the TIS General Manager, or another TIS Operations Unit Head use
    **Continue: Approval**.
 2. On **Settlement approval**, check the **Settlement to approve**: date reported, adjuster, adjuster status,
    **Settlement type** and **Settlement amount**.
-3. Select **Approve settlement**, or **Return for correction** to send it back to **Processing**.
+3. Select **Approve settlement**, or **Return for correction** to send it back to **Processing**. The decision takes
+   effect at once, without a confirmation.
 
 On approval the claim is settled at once and the user who submitted it is notified. You cannot approve a settlement
 you submitted. When the Authority Matrix sets you a limit for claim settlements, the amount must be within it. When the
-settlement is paid through TIS, the funds from the insurer and the payment to the claimant are recorded by Cash
+settlement is paid through TISPH, the funds from the insurer and the payment to the claimant are recorded by Cash
 Control and Finance on [Claims settlements paid through the broker](#claims-settlements-paid-through-the-broker).
 
 ![Settlement approval of a motor claim with Return for correction and Approve settlement](images/role-tis-ops-unit-head/settlement-approval.png)
@@ -125,11 +128,11 @@ for return premiums, the amount must be within it. See
 
 ### Approve or reject renewal terms {#tis-operations-unit-head-renewals}
 
-1. In **My Work**, open the **Renewal premium** item, or choose {{menu:/renewal/negotiations}} and select **Pending
-   approval**.
-2. Select the renewal. The side panel shows the **Renewal terms** (product, insurer, expiry, current and proposed
+1. Choose {{menu:/renewal/negotiations}} and select **Pending approval** (the arrow of a **Renewal premium** item in
+   My Work opens the same list).
+2. Select the renewal by its number. The side panel shows the **Renewal terms** (product, insurer, expiry, current and proposed
    premium, the premium change) and the timeline of notices and negotiations.
-3. Select **Approve**, or **Reject** with a note.
+3. Select **Approve**, or **Reject** with a note. The decision takes effect at once, without a confirmation.
 
 An approved renewal is completed by the team on the Renewal Queue. You cannot approve terms you submitted yourself.
 A renewal escalated from {{menu:/renewal/at-risk}} is notified to the manager of the renewal's owner or, when the

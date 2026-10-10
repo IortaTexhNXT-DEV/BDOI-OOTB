@@ -17,7 +17,11 @@ claims, the renewals and the month-end close.
 | One chapter per role | The thirteen roles of TISPH by department: Sales, Operations, Cash Control, Finance and Accounting, IT and Management. Each chapter lists the menus of the role, what it can view, change and approve, who approves its work, its segregation-of-duties rules, its tasks and its procedures. |
 | Screen reference | Every screen of the TISPH menus, in menu order, with the roles that open it. |
 | Reports | The report menus and the Report Builder. |
-| Glossary | The insurance, accounting and system terms used on the screens. |
+| Glossary | The insurance, accounting and system terms and the abbreviations used on the screens and in this manual. |
+
+The chapters and their sections are numbered in the same way on the help page and in the Word and PDF files. A
+reference to another section gives its number in the Word and PDF files, for example "see Menu search (2.2.1)", and
+the screenshots are numbered by chapter (Figure 4.2).
 
 Read Getting started and The TISPH process end to end first, then the chapter of your role. In the system, open
 Help (F1) on any screen: **Open this section** opens the section of that screen, and **Open my role chapter** opens the
@@ -33,6 +37,8 @@ Master > Users and Access > User Access Matrix.
 |---|---|
 | Operations > Sales & Marketing > Prospects | A menu path: open each item in the side bar in turn. |
 | **Create Prospect** | A button, tab, field or status, written exactly as it appears on the screen. |
+| Choose | Opening a menu path ("Choose Operations > Policy"), or taking a value from a list or a calendar ("choose the **Due date**"). |
+| Select | Clicking a button, tab, link, icon, check box or row ("Select **Save**"). |
 | PHP 1,250,000.00 | Amounts in Philippine pesos. The screens show the peso sign, for example ₱1,250,000.00. |
 | 03/10/2026 | The screens show dates as DD/MM/YYYY, in Manila time. |
 | Maker and checker | The maker enters a record; a different user, the checker, approves it. |

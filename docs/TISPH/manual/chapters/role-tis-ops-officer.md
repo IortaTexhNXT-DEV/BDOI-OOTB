@@ -33,7 +33,7 @@ General Accounting, who owns the journals.
 | Raise endorsements and cancellations | As requested | [Policy](#policies), [Policy Cancellation](#cancel-a-policy-computed-return-premium) |
 | Send renewal notices and prepare renewal quotations | Weekly | [Renewal Queue](#renewal-queue-and-at-risk-policies) |
 | Look up the journal of a booking, an endorsement or a claim settlement | When a client, an insurer or Finance asks | [Journal Voucher](#journal-vouchers) |
-| Look up an office asset (cost, location, book value) | As needed | [Fixed assets and depreciation](#fixed-assets-and-depreciation) |
+| Look up an office asset (cost, location, book value) | As needed | [Fixed Assets](#fixed-assets-and-depreciation) |
 | Follow the work in flight and the claims position | Weekly | [Processing Dashboard](#processing-dashboard), [Claims Dashboard](#claims-dashboard) |
 | Run the production, claims and renewal reports | Month-end | [All Reports](#reports-catalogue) |
 

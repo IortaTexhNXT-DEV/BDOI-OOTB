@@ -27,18 +27,18 @@ approve nothing: every decision on your work is made by another user.
 | Task | When | Screen |
 |---|---|---|
 | Work through your prospects, quotations, placement slips and renewals | Every morning and through the day | [My Work](#my-work) |
-| Contact the new prospects assigned to you and log each call, meeting, e-mail or visit | Daily | [Prospects](#prospects), [Sales activities](#sales-activities) |
+| Contact the new prospects assigned to you and log each call, meeting, e-mail or visit | Daily | [Prospects](#prospects), [Sales Activities](#sales-activities) |
 | Record walk-in clients and referrals as prospects | As they come in | [Prospects](#prospects) |
 | Prepare motor and package quotations and send them to the client | Daily | [Quotations](#quotations), [Quick Quote](#quick-quote) |
 | Record the client's answer to a quotation | As the client answers | [Quotations](#quotations) |
 | Ask the panel insurers for terms on fleet and corporate risks | As needed | [Requests for Quotation](#requests-for-quotation-broker-slips), [Comparison Reports](#comparison-reports) |
 | Send the placement slips, record the acknowledgements and upload the e-policies | Daily | [Placement Slips](#placement-slips) |
 | Book the policies checked against the slip | Daily | [Placement Slips](#placement-slips) |
-| Issue cover notes and CTPL certificates while the insurer's policy is pending | As needed | [Cover notes (binders)](#cover-notes-binders), [CTPL authentication](#ctpl-authentication) |
-| Raise the endorsements and cancellations your clients ask for | As requested | [Policies](#policies), [Policy Cancellation](#cancel-a-policy-computed-return-premium) |
+| Issue cover notes and CTPL certificates while the insurer's policy is pending | As needed | [Cover Notes](#cover-notes-binders), [CTPL Authentication](#ctpl-authentication) |
+| Raise the endorsements and cancellations your clients ask for | As requested | [Policy](#policies), [Policy Cancellation](#cancel-a-policy-computed-return-premium) |
 | Send the renewal notices and prepare the renewal terms | Weekly, for policies expiring in the next 90 days | [Renewal Queue](#renewal-queue-and-at-risk-policies), [Negotiations](#negotiations) |
 | Follow up policies in their grace period and lapsed policies | Weekly | [Lapse Management](#renewal-batch-lapse-management-and-the-analytics) |
-| Check your pipeline and your incentive progress | Weekly and at month-end | [Sales Dashboard](#sales-dashboard), [Incentives](#incentives) |
+| Check your pipeline and your incentive progress | Weekly and at month-end | [Sales Dashboard](#sales-dashboard), [Incentive](#incentives) |
 
 ## Procedures {#tis-sales-associate-procedures}
 
@@ -76,7 +76,7 @@ Open follow-ups are counted on the Sales Activities screen; follow them up on th
    product priced from its rates in one screen. See [Create a motor quotation](#create-a-motor-quotation) for the
    fields of a motor quotation.
 2. Save the quotation. It is **Draft**.
-3. Open the quotation (eye icon) and select **Send for Customer Approval**. The status becomes **Pending Customer**
+3. Open the quotation (**View Details**, the eye icon) and select **Send for Customer Approval**. The status becomes **Pending Customer**
    and the client receives the quotation by e-mail with its approval link.
 4. When the client answers by phone, e-mail or in person, open the quotation and select **Record customer response**.
    On acceptance the status becomes **Customer Accepted** and the system raises the placement slip at once

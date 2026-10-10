@@ -12,11 +12,11 @@ Each section names the menu of the screen and the roles that open it, with their
 
 ## Verify payments and post official receipts {#verify-payments-and-post-official-receipts}
 
-When Operations or Sales record a client payment, the policy payment status becomes Reviewing and Accounting receives the notification to verify it. Open the notification, check the payment against the bank statement and confirm it (the official receipt is posted) or reject it with a reason. Accounting users can also record a payment and issue the receipt directly from the policy.
+When Operations or Sales record a client payment on the policy, the system issues the acknowledgement receipt (AR), the policy payment status becomes **Reviewing** and Cash Control receives the notification to verify it. Open the notification, check the payment against the bank statement and confirm it (the official receipt is posted, with the transaction code **PAYMENT**) or reject it with a reason.
 
 {{screen:/accounts/receipts}}
 
-The list (**Receipts history**) shows **Receipt Number** (OR-YYYY-NNNNN), **Transaction Code**, **Transaction Number** (RT-YYYY-NNNNN), **Policy Number**, **Name**, **Customer Code**, **Date**, **Amount**, **Paid**, **UnPaid**, **Status**, **Payments** and **Action**. **Search by** chooses the column searched. The buttons are **Bulk Print** (receipts of a period as one PDF), **Bulk Upload** (bills payment and QRPh settlement files: each row pays a policy; the file is validated before anything is posted) and **Receipt**.
+The list (**Receipts history**) shows **Receipt Number** (OR-YYYY-NNNNN), **Transaction Code**, **Transaction Number** (RT-YYYY-NNNNN), **Policy Number**, **Name**, **Customer Code**, **Date**, **Amount**, **Paid**, **UnPaid**, **Status**, **Payments** and **Action**. **Status** is **Converted** when every line of the receipt is paid and posted (the usual status of an issued receipt), **Draft** while a line is not yet paid, and **Cancelled** after a cancellation. **Transaction Code** is **OR** for a receipt issued on Add Receipts or by Bulk Upload, **PAYMENT** for a receipt issued on the confirmation of a payment recorded on the policy, and **CM** for a credit memo. **Search by** chooses the column searched. The buttons are **Bulk Print** (receipts of a period as one PDF), **Bulk Upload** (bills payment and QRPh settlement files: each row pays a policy; the file is validated before anything is posted) and **Receipt**.
 
 ![Accounts > Receipts](images/screens-accounts/receipts-list.png)
 
@@ -27,11 +27,11 @@ To issue an official receipt, select **Receipt**:
 | **Receipt Date** | Yes | Today's date is proposed | Must fall in an open period |
 | **Receipt Number** | | Issued by the system on save | From the official receipt series |
 | **Receipt Type** | Yes | **Payment** | |
-| **Branch Code**, **Department Code** | No | The branch and department of the receipt | |
+| **Branch Code**, **Department Code** | No | The branch (**Head Office**) and the department (**Cash Control**) of the receipt | |
 | **Customer Code** | Yes | The client | **Customer Name** is filled in |
 | **Policy Number** | Yes | The policy paid | Only the client's policies with an open bill |
 | **Currency Code** | Yes | **PHP** | |
-| **Transaction Code** | Yes | **OR – Official Receipt** | |
+| **Transaction Code** | Yes | **OR – Official Receipt** | **CM – Credit Memo** only when TIS Finance & General Accounting asks for it |
 | **Receipt Mode** | Yes | **Dollar/Peso** (cash), **Cheque**, **Managers Check/Demand Draft**, **Direct Credit/Transfer to Account**, **Telegraphic Transfer**, **Authority to Debit**, **Online Banking** or **Credit Ticket-Inter Office** | A cheque asks for the cheque details; the mode gives the bank account debited |
 | **Remarks** | No | | |
 
@@ -76,7 +76,7 @@ Accounts > Post-Dated Cheques is the register of cheques received from clients b
 
 {{screen:/accounts/post-dated-cheques}}
 
-The cards show the cheques **On hand**, **Due for deposit** and **Bounced**. The tabs **Register cheque** and **Deposit due** (cheques due within three days) list **PDC no.** (PDC-YYYY-NNNNN), **Client**, **Bill / policy**, **Drawee bank**, **Cheque no.**, **Cheque date**, **Amount**, **Kept in**, **Status** and **Receipt**. **Export to Excel** downloads the list.
+The cards show the cheques **On hand**, **Due for deposit** and **Bounced**. The tabs **Cheque register** and **Deposit due** (cheques due within three days) list **PDC no.** (PDC-YYYY-NNNNN), **Client**, **Bill / policy**, **Drawee bank**, **Cheque no.**, **Cheque date**, **Amount**, **Kept in**, **Status** and **Receipt**. **Export to Excel** downloads the list.
 
 To register a cheque, select **Register cheque**:
 
@@ -84,9 +84,9 @@ To register a cheque, select **Register cheque**:
 |---|---|---|
 | **Against** | Yes | **Bill number** (or the policy) |
 | **Reference** | Yes | The bill or policy number |
-| **Drawee bank** | No | From the bank list, or **Drawee bank (if not in the list)** |
+| **Drawee bank** | Yes | From the bank list, or **Drawee bank (if not in the list)** |
 | **Cheque no.** | Yes | |
-| **Cheque date** | Yes | The date on the cheque |
+| **Cheque date** | Yes | The date on the cheque, picked from the calendar |
 | **Amount** | Yes | |
 | **Kept in** | No | Where the cheque is kept, for example "Finance vault, drawer 2" |
 | **Remarks** | No | |
@@ -108,7 +108,7 @@ A cheque that bounces is recorded as bounced with the reason: its receipt is can
 
 {{screen:/accounts/claims-settlements}}
 
-When an insurer pays a claim settlement to TIS for the claimant, the money is received and paid out here. The cards show the amounts **To receive from insurers**, **Held for claimants** and **Payable to claimants**. Each row shows **Claim**, **Policy**, **Claimant**, **Insurer**, **Settlement**, **Received**, **Paid**, **Payable to claimants** and **Status**; the filter shows the **Outstanding** settlements or all.
+When an insurer pays a claim settlement to TISPH for the claimant, the money is received and paid out here. The cards show the amounts **To receive from insurers**, **Held for claimants** and **Payable to claimants**. Each row shows **Claim**, **Policy**, **Claimant**, **Insurer**, **Settlement**, **Received**, **Paid**, **Payable to claimants** and **Status**; the filter shows the **Outstanding** settlements or all.
 
 1. When the claim settlement is approved (see [Approve a settlement (checker)](#approve-a-settlement-checker)), it appears here as to be received.
 2. When the insurer pays, open the claim and record the funds received and the bank account they were paid into. The money is held for the claimant.
@@ -222,11 +222,10 @@ Bank Payment Files pays approved payment vouchers through the bank's upload file
 
 The batch is approved by another user, the file is downloaded for the bank portal, and the bank's result file is loaded back: each payment it confirms is posted and its voucher becomes **Paid**; a rejected payment returns to the vouchers waiting for payment.
 
-![New batch of a bank payment file](images/screens-accounts/bank-payment-batch.png)
 
 ## Remittance to insurers {#remittance-to-insurers}
 
-For broker-billed policies Accounting remits the collected premium, net of the broker's commission, to each insurer by its share.
+For broker-billed policies TISPH remits the collected premium, net of the broker's commission, to each insurer by its share. The remittances are prepared and approved by {{roles:write:remittance}}.
 
 {{screen:/finance/remittance/automated/execute}}
 
@@ -258,7 +257,7 @@ For broker-billed policies Accounting remits the collected premium, net of the b
 
 {{screen:/finance/remittance/analytics}}
 
-The remittance screens are prepared by {{roles:write:remittance}}. A remittance (REM-YYYY-NNNNN) groups the collected premiums of one insurer; it is **Draft** until submitted, **Pending Approval** until a user other than the preparer approves it within his or her limit, then **Approved**, and **Completed** once paid.
+A remittance (REM-YYYY-NNNNN) groups the collected premiums of one insurer; it is **Draft** until submitted, **Pending Approval** until the approvals it needs are given by users other than the preparer (see [Approvals and maker-checker](#statuses-approvals-and-maker-checker)), then **Approved**, and **Completed** once paid.
 
 | Screen | What it is for |
 |---|---|
@@ -286,7 +285,7 @@ See [Remittance to the insurers](#process-remittance) for the order of the steps
 
 {{screen:/finance/remittance/directbill}}
 
-For a direct-bill policy the client pays the insurer, and TIS bills the insurer for its commission with a debit note. The cards show the **Unbilled commission**, **Billed, outstanding**, **Overdue** and **Receivable from insurers**. The screen has three tabs:
+For a direct-bill policy the client pays the insurer, and TISPH bills the insurer for its commission with a debit note. The cards show the **Unbilled commission**, **Billed, outstanding**, **Overdue** and **Receivable from insurers**. The screen has three tabs:
 
 1. **Raise Debit Note**: choose the **Insurer** (required), the issue dates (**Issued from**, **Issued to**), **Commission of** and the **Line of business**, and select **Load policies**. Tick the policies to bill: each shows the gross premium, rate, commission, VAT, **Total Due** and EWT. Raise the debit note.
 2. **Debit Notes**: the debit notes issued, with their balance; record the insurer's payment against them.
@@ -410,11 +409,11 @@ The five reports (**Reconciliation Statement Report**, **Outstanding Cheques**, 
 
 {{screen:/accounts/insurer-reconciliation/statements}}
 
-An insurer's statement (for example a premium remittance confirmation) is matched with what TIS recorded. The list shows **Number**, **Insurer**, **Statement type**, **Insurer reference**, **Period**, **Lines**, **Matched**, **Gross premium**, **Commission** and **Status**.
+An insurer's statement (for example a premium remittance confirmation) is matched with what TISPH recorded. The list shows **Number**, **Insurer**, **Statement type**, **Insurer reference**, **Period**, **Lines**, **Matched**, **Gross premium**, **Commission** and **Status**.
 
 1. Select **Import statement**.
-2. Choose the **Insurer** and the **Statement type** (required), the **Period from** and **Period to** (required), the **Insurer reference**, the **Tolerance (PHP)** and the **Statement format** (the insurer's own format, else the generic one).
-3. Choose the **File (CSV or XLSX)**. **Download template** gives the generic layout.
+2. Choose the **Insurer** and the **Statement type** (required), the **Period from** and **Period to** (required), the **Insurer reference**, the **Tolerance (PHP)** and the **Statement format** (the insurer's own format, else the standard one).
+3. Choose the **File (CSV or XLSX)**. **Download template** gives the standard layout.
 4. Select **Preview** to check the lines read, then **Import and match**.
 
 Each statement line is matched with the policy, premium and commission recorded; differences within the tolerance match. Open the statement to resolve the lines that differ. The statement is approved by {{roles:approve:insurer-reconciliation}}.
@@ -435,15 +434,15 @@ Each statement line is matched with the policy, premium and commission recorded;
 
 {{screen:/accounts/tax/reports/bir-slsp-purchases}}
 
-**BIR Form 2307** has two tabs: **Issued by us** (the certificates TIS issues for the tax it withheld from payees: referrers, suppliers) and **Received** (the certificates received from insurers and clients for the tax they withheld from TIS). Choose the year and the quarter; each row is a payee with its TIN, ATC, income payments and tax withheld. Print a certificate from its row.
+**BIR Form 2307** has two tabs: **Issued by us** (the certificates TISPH issues for the tax it withheld from payees: referrers, suppliers) and **Received** (the certificates received from insurers and clients for the tax they withheld from TISPH). Choose the year and the quarter; each row is a payee with its TIN, ATC, income payments and tax withheld. Print a certificate from its row.
 
 The BIR reports are run like any report (criteria, **From Date**, **To Date**, file format, **Preview** or **Generate**):
 
 | Report | Contents |
 |---|---|
 | **VAT Summary** | Output VAT on the broker's sales and input VAT on purchases, by month |
-| **SAWT** | Summary alphalist of the tax withheld from TIS by its customers (for the income tax return) |
-| **QAP** | Quarterly alphalist of payees: the tax TIS withheld (with the 1601-EQ) |
+| **SAWT** | Summary alphalist of the tax withheld from TISPH by its customers (for the income tax return) |
+| **QAP** | Quarterly alphalist of payees: the tax TISPH withheld (with the 1601-EQ) |
 | **SLSP Sales** | Summary list of sales, by customer (filter by principal insurer) |
 | **SLSP Purchases** | Summary list of purchases, by supplier |
 
@@ -464,7 +463,7 @@ The screen lists the withholding returns of the year: BIR Form 0619-E for the fi
 
 {{screen:/accounts/tax/alphalist-1604e}}
 
-Choose the year. The screen shows the BIR Form 1604-E: the background information of TIS (TIN, registered name and address), the remittances of each month from the filing records, and the alphalist of payees with the income payments and tax withheld. The cards show the **Payees**, the **Income payments** and the **Tax withheld**. **Print** and **Excel** give the form; **DAT file** opens [BIR DAT files](#bir-dat-files); **Record filing** records the filing as for the other returns.
+Choose the year. The screen shows the BIR Form 1604-E: the background information of TISPH (TIN, registered name and address), the remittances of each month from the filing records, and the alphalist of payees with the income payments and tax withheld. The cards show the **Payees**, the **Income payments** and the **Tax withheld**. **Print** and **Excel** give the form; **DAT file** opens [BIR DAT files](#bir-dat-files); **Record filing** records the filing as for the other returns.
 
 ## Percentage tax 2551Q (non-VAT broker or agent) {#percentage-tax-2551q-non-vat-broker-or-agent}
 

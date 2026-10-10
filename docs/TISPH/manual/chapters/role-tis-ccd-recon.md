@@ -16,7 +16,8 @@ CCD-Recon (Reconciliation and Reversals) checks every day that the collections p
 bank. You import the bank statements, match them with the receipts and payments in the books, post the bank items not
 yet booked, reverse the receipts of cheques returned by the bank and prepare the monthly bank reconciliation. You also
 reconcile the insurers' statements of account with the remittances and approve the insurer statement reconciliations
-prepared by another user.
+prepared by another user. With TIS Finance & General Accounting you prepare the remittances to the insurers and
+approve those prepared by the other user.
 
 You work with CCD-BP / QRPh (Receipting), CCD-PDU (Post-Dated Cheques) and CCD-PDC / CCD-ADA, whose receipts you
 match and reverse; the receipting roles do not reverse their own receipts. TIS Finance & General Accounting approves
@@ -29,17 +30,18 @@ your bank reconciliations and the bank adjustments that need approval.
 | Task | When | Screen |
 |---|---|---|
 | Work through the follow-ups and approvals waiting for you | Every morning | [My Work](#my-work) |
-| Import the bank statement of each bank account | Daily | [Bank reconciliation](#bank-reconciliation) |
-| Match the statement lines with the receipts and payments | Daily | [Bank reconciliation](#bank-reconciliation) |
-| Post bank charges, interest and direct credits not yet booked | Daily | [Bank reconciliation](#bank-reconciliation) |
-| Reverse the receipts of cheques returned by the bank | As the bank returns them | [Bank reconciliation](#bank-reconciliation), [Post-dated cheques](#post-dated-cheques) |
+| Import the bank statement of each bank account | Daily | [Bank Reconciliation](#bank-reconciliation) |
+| Match the statement lines with the receipts and payments | Daily | [Bank Reconciliation](#bank-reconciliation) |
+| Post bank charges, interest and direct credits not yet booked | Daily | [Bank Reconciliation](#bank-reconciliation) |
+| Reverse the receipts of cheques returned by the bank | As the bank returns them | [Bank Reconciliation](#bank-reconciliation), [Post-Dated Cheques](#post-dated-cheques) |
 | Follow up overdue premiums and promises to pay | Daily | [Collections](#collections) |
-| Record claim settlement funds received from insurers | As insurers pay | [Claims settlements](#claims-settlements-paid-through-the-broker) |
-| Cancel stale cheques not presented within the stale period | Month-end | [Bank reconciliation](#bank-reconciliation) |
-| Prepare the bank reconciliation of each account for TIS Finance & General Accounting | Month-end | [Bank reconciliation](#bank-reconciliation) |
-| Import and reconcile the insurers' statements of account | Monthly, as statements arrive | [Insurer statement reconciliation](#insurer-statement-reconciliation) |
-| Approve the insurer statement reconciliations prepared by another user | As submitted | [Insurer statement reconciliation](#insurer-statement-reconciliation) |
-| Run the bank book, deposits in transit, outstanding cheques and reconciliation statement | Month-end | [Bank reconciliation](#bank-reconciliation), [All Reports](#reports-catalogue) |
+| Record claim settlement funds received from insurers | As insurers pay | [Claims Settlements](#claims-settlements-paid-through-the-broker) |
+| Cancel stale cheques not presented within the stale period | Month-end | [Bank Reconciliation](#bank-reconciliation) |
+| Prepare the bank reconciliation of each account for TIS Finance & General Accounting | Month-end | [Bank Reconciliation](#bank-reconciliation) |
+| Import and reconcile the insurers' statements of account | Monthly, as statements arrive | [Insurer Statements](#insurer-statement-reconciliation) |
+| Approve the insurer statement reconciliations prepared by another user | As submitted | [Insurer Statements](#insurer-statement-reconciliation) |
+| Prepare the remittances to the insurers, and approve those prepared by another user | As scheduled per insurer | [Remittance](#remittance-to-insurers) |
+| Run the bank book, deposits in transit, outstanding cheques and reconciliation statement | Month-end | [Bank Reconciliation](#bank-reconciliation), [All Reports](#reports-catalogue) |
 
 ## Procedures {#ccd-recon-reconciliation-and-reversals-procedures}
 
@@ -51,18 +53,18 @@ your bank reconciliations and the bank adjustments that need approval.
    "Confirm the payment promised". Work them as in
    [Follow up an overdue premium](#ccd-bp-qrph-receipting-follow-up).
 3. Under **Approvals**, select the arrow of an insurer statement reconciliation to open it and decide it.
-
-**Approvals** also lists the remittances to insurers and their adjustments waiting for approval ("Approve or
-reject"), because the Authority Matrix names your role as a remittance approver (see Approvals above). See
-[Remittance to insurers](#remittance-to-insurers).
+4. **Approvals** also lists the remittances to insurers, their electronic transfers and their adjustments waiting for
+   approval (**Approve or reject**). The arrow opens {{menu:/finance/remittance/approval}}: follow
+   [Approve a remittance](#ccd-recon-reconciliation-and-reversals-remittance-approve). A remittance you prepared
+   yourself is approved by another user.
 
 ![My Work of CCD-Recon (Reconciliation and Reversals): collection follow-ups and approvals](images/role-tis-ccd-recon/my-work.png)
 
 ### Import a bank statement {#ccd-recon-reconciliation-and-reversals-import}
 
 1. Choose {{menu:/accounts/bank-reconciliation}}. Select the **Bank account** and the **Period**.
-2. Select **Import statement**. The **Statement format** of the bank is proposed; select **Download template (GENERIC
-   format)** if the bank's export cannot be read.
+2. Select **Import statement**. The **Statement format** of the bank is proposed; select **Download template** for
+   the standard layout if the bank's export cannot be read.
 3. Attach the **Statement file (CSV / XLSX)**. Type the **Bank statement no.**, and the **Opening balance** and
    **Closing balance** if they are not in the file. Keep **Leave out lines already on file** ticked.
 4. Select **Preview**. Check the lines, the credits and debits, and that opening balance plus credits less debits
@@ -176,6 +178,28 @@ approver.
 
 You cannot approve a reconciliation you submitted yourself: another CCD-Recon (Reconciliation and Reversals) user
 approves it. See [Insurer statement reconciliation](#insurer-statement-reconciliation).
+
+### Prepare a remittance to an insurer {#ccd-recon-reconciliation-and-reversals-remittance}
+
+1. Choose {{menu:/finance/remittance/tracking/status}} and open the remittance of the insurer (**Draft**), prepared
+   by the remittance schedule or from an uploaded list (see [Remittance to the insurers](#process-remittance)).
+2. Check its policies, the gross premium, the commission and the net amount against the collections.
+3. Select **Process**. The remittance is submitted for approval and the other approvers are notified.
+
+You cannot approve a remittance you prepared: another CCD-Recon (Reconciliation and Reversals) or TIS Finance &
+General Accounting user approves it.
+
+### Approve a remittance {#ccd-recon-reconciliation-and-reversals-remittance-approve}
+
+1. Choose {{menu:/finance/remittance/approval}}, or select the arrow of the remittance under **Approvals** in My
+   Work. **Pending approvals** lists the remittances, electronic transfers and adjustments waiting, with the amount,
+   the user who initiated them, the **SLA** and the approval **Level**.
+2. Select **View** in the row to check the record.
+3. Select **Approve**, or **Reject** with the reason. A remittance that needs more than one approval (see
+   [Approvals and maker-checker](#statuses-approvals-and-maker-checker)) goes to the next level, decided by another
+   user.
+
+![Accounts > Remittance > Approval Workflow of CCD-Recon (Reconciliation and Reversals): a transfer, a remittance and an adjustment waiting](images/role-tis-ccd-recon/remittance-approval.png)
 
 ### Collections, receipts and claim settlement funds {#ccd-recon-reconciliation-and-reversals-other}
 

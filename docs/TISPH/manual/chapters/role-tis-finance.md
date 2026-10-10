@@ -19,7 +19,7 @@ returns; once a year you close the fiscal year.
 
 You are also the checker of the accounting: you approve the cheques, the journal vouchers, the supplier invoices, the
 bank reconciliations, the month-end close and the changes to the posting rules of another user. Because the user who
-enters a record never approves it, TIS needs at least two users with this role. You work with Cash Control, who
+enters a record never approves it, TISPH needs at least two users with this role. You work with Cash Control, who
 collect the premiums and reconcile the payments, with the TIS Operations roles, whose bookings, endorsements and claims
 create the journals, and with the TIS General Manager and the unit heads, who also approve supplier invoices.
 
@@ -30,20 +30,20 @@ create the journals, and with the TIS General Manager and the unit heads, who al
 | Task | When | Screen |
 |---|---|---|
 | Decide the cheques, journal vouchers, remittances, petty cash requests and other approvals waiting for you | Every morning and through the day | [My Work](#my-work) |
-| Check the SAP GL file of the previous day; re-generate a day when needed | Every morning | [SAP GL export](#sap-gl-export) |
-| Prepare payment vouchers; issue the cheque or the bank transfer | Daily | [Disbursement](#disbursement-payment-vouchers-and-cheques), [Bank payment files](#bank-payment-files) |
-| Enter supplier invoices and pay suppliers; issue BIR Form 2307 | As invoices arrive; on the payment run | [Accounts payable](#accounts-payable), [BIR Form 2307 for suppliers](#bir-form-2307-for-suppliers) |
-| Enter, correct or reverse journal vouchers | As needed | [Journal vouchers](#journal-vouchers) |
-| Prepare the remittances to the insurers and decide those of another user | On each remittance schedule | [Remittance to insurers](#remittance-to-insurers) |
-| Approve the eligible commission lines and pay the agents and referrers | On each payout | [Commission to agents and referrers](#commission-to-agents-and-referrers) |
-| Keep the petty cash funds and replenish them | Daily; when a fund runs low | [Petty cash](#petty-cash) |
-| Reconcile each bank account; approve the reconciliations of another user | Month-end | [Bank reconciliation](#bank-reconciliation) |
-| Reconcile the insurers' statements | Month-end | [Insurer statement reconciliation](#insurer-statement-reconciliation) |
-| Post the monthly depreciation | Month-end | [Fixed assets and depreciation](#fixed-assets-and-depreciation) |
-| Run the month-end close and approve the close of another user | Month-end | [Period end](#period-end) |
-| Prepare and file the BIR returns | Monthly, quarterly and yearly (see [BIR returns](#process-bir)) | [Tax: BIR forms and returns](#tax-bir-forms-and-returns) |
+| Check the SAP GL file of the previous day; re-generate a day when needed | Every morning | [SAP GL Export](#sap-gl-export) |
+| Prepare payment vouchers; issue the cheque or the bank transfer | Daily | [Disbursement](#disbursement-payment-vouchers-and-cheques), [Bank Payment Files](#bank-payment-files) |
+| Enter supplier invoices and pay suppliers; issue BIR Form 2307 | As invoices arrive; on the payment run | [Payables](#accounts-payable), [BIR Form 2307 for suppliers](#bir-form-2307-for-suppliers) |
+| Enter, correct or reverse journal vouchers | As needed | [Journal Voucher](#journal-vouchers) |
+| Prepare the remittances to the insurers and decide those of another user | On each remittance schedule | [Remittance](#remittance-to-insurers) |
+| Approve the eligible commission lines and pay the agents and referrers | On each payout | [Agents/Referrer Accounts](#commission-to-agents-and-referrers) |
+| Keep the petty cash funds and replenish them | Daily; when a fund runs low | [Petty Cash](#petty-cash) |
+| Reconcile each bank account; approve the reconciliations of another user | Month-end | [Bank Reconciliation](#bank-reconciliation) |
+| Reconcile the insurers' statements | Month-end | [Insurer Statements](#insurer-statement-reconciliation) |
+| Post the monthly depreciation | Month-end | [Fixed Assets](#fixed-assets-and-depreciation) |
+| Run the month-end close and approve the close of another user | Month-end | [Period End](#period-end) |
+| Prepare and file the BIR returns | Monthly, quarterly and yearly (see [BIR returns](#process-bir)) | [Tax](#tax-bir-forms-and-returns) |
 | Approve changes to the posting rules and account determination | When another user proposes one | [Posting configuration](#posting-configuration-configuration-approvals-posting-rules-account-determination) |
-| Close the fiscal year (April to March) | Once a year, after period 12 | [Year-end close](#year-end-close-preparer) |
+| Close the fiscal year (April to March) | Once a year, after period 12 | [Year-End Close](#year-end-close-preparer) |
 | Run the financial reports | Month-end and on request | [All Reports](#reports-catalogue) |
 
 ## Procedures {#tis-finance-and-general-accounting-procedures}

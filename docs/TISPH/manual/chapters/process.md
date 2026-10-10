@@ -16,8 +16,8 @@ The chapter follows two policies through the chain:
 
 - **A motor policy financed by Toyota Financial Services (TFS).** TFS refers the buyer of a financed Toyota. The
   account executive quotes the car, the client accepts, the placement slip goes to the panel insurer, the insurer's
-  e-policy is checked and booked with TFS as mortgagee, and the client pays TIS.
-- **A dealer programme policy.** A Toyota dealer sells brand-new cars under a programme agreed with TIS (and, for
+  e-policy is checked and booked with TFS as mortgagee, and the client pays TISPH.
+- **A dealer programme policy.** A Toyota dealer sells brand-new cars under a programme agreed with TISPH (and, for
   financed cars, with TFS). The dealer's sales file creates the prospects and quotations, or issues the policies at
   once, with the free or subsidised first-year premium billed to the dealer or the bank.
 
@@ -88,8 +88,8 @@ is free or subsidised and who pays it, and what the dealer's sales upload create
 
 ![Operations > Sales & Marketing > Dealer Programmes, with the programmes of three Toyota dealers](images/process/dealer-programmes.png)
 
-The programmes are set up, and the dealers' sales files uploaded, by {{roles:write:motor-programmes}}. Every sales
-and operations role can open the programmes and print the bank endorsement letters.
+As delivered, the programmes are set up, and the dealers' sales files uploaded, by {{roles:write:motor-programmes}}.
+Every sales and operations role can open the programmes and print the bank endorsement letters.
 
 To upload a dealer's sales:
 
@@ -132,7 +132,7 @@ quotation; a request for quotation to several insurers is optional.
    passenger personal accident per seat, and CTPL at the tariff amount for 1 or 3 years. DST, VAT and LGT are added
    to give the gross premium.
 5. Save the quotation. It is created as **Draft**.
-6. Open the quotation (**View details**) and select **Send for Customer Approval**. The status becomes
+6. Open the quotation (**View Details**, the eye icon) and select **Send for Customer Approval**. The status becomes
    **Pending Customer**.
 
 For a package product, [Quick Quote](#quick-quote) prices the quotation from the product's rates in one screen.
@@ -143,7 +143,7 @@ For a package product, [Quick Quote](#quick-quote) prices the quotation from the
 
 The client accepts the quotation through the approval link, or you record the answer:
 
-1. Open the quotation from {{menu:/agent/Quotation}} (**View details**).
+1. Open the quotation from {{menu:/agent/Quotation}} (**View Details**, the eye icon).
 2. Select **Copy approval link** to send the link to the client again, or **Record customer response** when the client
    answered by phone, e-mail or in person.
 3. Record the acceptance. The status becomes **Customer Accepted**.
@@ -179,7 +179,7 @@ decided by {{roles:approve:policies}}, never by the user who recorded the e-poli
 
 <!-- Screens to refresh: the Check against slip dialog is being redesigned in another stream. -->
 
-The placement slip is a firm order to the insurer. TIS never issues the cover itself: a policy exists only once the
+The placement slip is a firm order to the insurer. TISPH never issues the cover itself: a policy exists only once the
 insurer's e-policy has been received, checked against the slip and booked.
 
 ![Operations > Sales & Marketing > Placement Slips, with the count of placements at each step](images/process/placement-slips-list.png)
@@ -242,8 +242,8 @@ to the client. The placement becomes **Insurer issued (Booked)** and the quotati
 TFS-financed car, the policy shows TFS in **Mortgage**.
 
 When the client needs proof of cover before the e-policy arrives, issue a cover note on
-[Cover notes (binders)](#cover-notes-binders); a CTPL certificate is authenticated on
-[CTPL authentication](#ctpl-authentication).
+[Cover Notes](#cover-notes-binders); a CTPL certificate is authenticated on
+[CTPL Authentication](#ctpl-authentication).
 
 ### Billing statement {#process-billing}
 
@@ -272,17 +272,17 @@ returned premium is clawed back from the referrer.
 
 ## Collection by Cash Control {#process-collection}
 
-Receipts are issued and collections posted by {{roles:write:receipts}}. Post-dated cheques are handled on
-[Post-Dated Cheques](#post-dated-cheques). See [Receipts](#verify-payments-and-post-official-receipts).
-
-Cash Control (CCD) collects the premium of every bill. The work is split between the four Cash Control roles:
+Cash Control (CCD) collects the premium of every bill. The work is split between the four Cash Control roles; each
+role works only on its own part:
 
 | Collection | Role | Screen |
 |---|---|---|
 | Over-the-counter payments, bank transfers, bills payment and QRPh | [CCD-BP / QRPh (Receipting)](#ccd-bp-qrph-receipting) | [Receipts](#verify-payments-and-post-official-receipts) |
 | Post-dated cheques | [CCD-PDU (Post-Dated Cheques)](#ccd-pdu-post-dated-cheques), [CCD-PDC / CCD-ADA](#ccd-pdc-ccd-ada) | [Post-dated cheques](#post-dated-cheques) |
 | Auto-debit arrangements | [CCD-PDC / CCD-ADA](#ccd-pdc-ccd-ada) | [Receipts](#verify-payments-and-post-official-receipts) |
-| Daily reconciliation, reversals and adjustments | [CCD-Recon (Reconciliation and Reversals)](#ccd-recon-reconciliation-and-reversals) | [Bank reconciliation](#bank-reconciliation) |
+| Daily reconciliation, reversals and adjustments | [CCD-Recon (Reconciliation and Reversals)](#ccd-recon-reconciliation-and-reversals) | [Bank reconciliation](#bank-reconciliation), [Receipts](#verify-payments-and-post-official-receipts) |
+
+The roles that issue receipts do not cancel or reverse them: see [Reconciliation and reversals](#process-reversals).
 
 ### Official receipt for a payment {#process-official-receipt}
 
@@ -310,8 +310,8 @@ Collections received in a file (bills payment and QRPh settlement reports) are r
 A client who pays by post-dated cheques hands them to Cash Control. Nothing is posted until a cheque is deposited.
 
 1. Choose {{menu:/accounts/post-dated-cheques}}.
-2. Select **Register cheque** and enter the bill or policy, the drawee bank, the cheque number, the cheque date, the
-   amount and where the cheque is kept. The cheque is **On Hand**.
+2. Select **Register cheque** and enter the bill or policy, the drawee bank, the cheque number, the cheque date
+   (picked from the calendar), the amount and where the cheque is kept. The cheque is **On Hand**.
 3. Cheques due within three days appear under **Deposit due**. On or after the cheque date, select **Deposit** and
    the bank account. The system creates and posts the official receipt.
 4. When the bank clears the cheque, record it as cleared.
@@ -325,23 +325,27 @@ A client who pays by post-dated cheques hands them to Cash Control. Nothing is p
 ### Reconciliation and reversals {#process-reversals}
 
 Each day the bank statements are matched by {{roles:write:bank-reconciliation}} with the receipts on
-[Bank reconciliation](#bank-reconciliation), and the reconciliation is approved by {{roles:approve:bank-reconciliation}}. A
-receipt issued in error is cancelled from the receipt, with a reason: the payment journals are reversed and the bill
-is open again. At TISPH reversals and adjustments are the work of CCD-Recon (Reconciliation and Reversals), not of
-the user who issued the receipt.
+[Bank reconciliation](#bank-reconciliation), and the reconciliation is approved by {{roles:approve:bank-reconciliation}}.
+
+Receipts are never cancelled on the Receipts screen, which has no cancel action. The receipt of a cheque that the
+bank returns is cancelled by CCD-Recon (Reconciliation and Reversals): on the Reconciliation Workspace (adjustment
+**RCHQ – Returned cheque**) or, for a post-dated cheque, by recording the bounce on Post-Dated Cheques. The payment
+journals are reversed and the bill is open again. Any other receipt issued in error is reported to CCD-Recon, who
+corrects it with TIS Finance & General Accounting. The user who issued a receipt never reverses it; the
+segregation-of-duties rule **Receipting and reversals** warns when one person holds both roles.
 
 Premium warranty extensions, instalment plans and client credit limits are handled on
 [Credit control](#credit-control) and approved by {{roles:approve:credit-control}}.
 
 ## Remittance to the insurers {#process-remittance}
 
-Remittances to the insurers are prepared by {{roles:write:remittance}}. See
-[Remittance to insurers](#remittance-to-insurers).
+Remittances to the insurers are prepared by {{roles:write:remittance}}, and approved by another user of these roles.
+See [Remittance to insurers](#remittance-to-insurers).
 
 <!-- Screens to refresh: the remittance screens are being redesigned in another stream; this section describes the
 screens of this build. -->
 
-TIS collects the premium from the client and remits it to the insurer net of its commission: the remittance pays
+TISPH collects the premium from the client and remits it to the insurer net of its commission: the remittance pays
 the premium collected, less the commission and the output VAT on it, plus the withholding tax the insurer deducts
 from the commission. For an insurer and product remitted gross, the whole premium is remitted and the commission is
 billed to the insurer separately on Direct Bill Processing.
@@ -352,34 +356,34 @@ billed to the insurer separately on Direct Bill Processing.
 2. Choose {{menu:/finance/remittance/tracking/status}}, open the remittance (**Draft**) and check its policies and
    amounts.
 3. Select **Process**. The remittance is submitted for approval.
-4. The approver decides on {{menu:/finance/remittance/approval}}. The approval limits are those of the
-   [Authority Matrix](#authority-matrix); the approver must be another user than the maker.
+4. The approver decides on {{menu:/finance/remittance/approval}}; the approver must be another user than the maker.
+   A remittance needs one, two or three approvals according to its amount (see
+   [Approvals and maker-checker](#statuses-approvals-and-maker-checker)).
 5. The approved remittance raises the insurer payment voucher on
    [Disbursement](#disbursement-payment-vouchers-and-cheques). The cheque approval posts the payment journal; a
    transfer is sent through [Bank payment files](#bank-payment-files).
-6. The remittance advice is printed from Tracking (print icon) on the TIS letterhead and sent to the insurer.
-
-Remittances are approved by {{roles:write:remittance}} within their Authority Matrix limit, never by the user who
-prepared them.
+6. The remittance advice is printed from Tracking (print icon) on the TISPH letterhead and sent to the insurer.
 
 ![Accounts > Remittance > Tracking, with the remittances per insurer](images/process/remittance-tracking.png)
 
-Each month the insurers' statements are matched with TIS's records on
+Each month the insurers' statements are matched with TISPH's records on
 [Insurer statement reconciliation](#insurer-statement-reconciliation); the reconciliation and its adjustments are
 approved by {{roles:approve:insurer-reconciliation}}.
 
 ## Commission and incentives {#process-commission}
 
-Commission is processed by {{roles:write:commission}}; incentive calculations by {{roles:write:incentive}} and approved by
-{{roles:approve:incentive}}. See [Commission to agents and referrers](#commission-to-agents-and-referrers) and
+Commission is processed by {{roles:write:commission}}. The telesales incentive is calculated by a
+{{roles:write:incentive}} user and approved by another user of that role: the user who runs a calculation never
+approves it. See [Commission to agents and referrers](#commission-to-agents-and-referrers) and
 [Incentives](#incentives).
 
-TIS earns its brokerage commission from the insurer: it is kept when the premium is remitted net, or billed to the
+TISPH earns its brokerage commission from the insurer: it is kept when the premium is remitted net, or billed to the
 insurer for gross and direct-bill business. Overriding, profit and contingent commission agreed with an insurer is
 computed on [Overriding, profit and contingent commission from insurers](#overriding-profit-and-contingent-commission-from-insurers).
 
-TIS shares part of the commission (comsub) with the agents, sub-agents and dealers who referred the business. Each
-policy's comsub lines move through four statuses:
+TISPH shares part of the commission with the agents, sub-agents and dealers who referred the business: the referrer
+commission (shown as **Comsub** on the screens). The referrer commission lines of each policy move through four
+statuses:
 
 | Status | When |
 |---|---|
@@ -396,19 +400,17 @@ To pay a referrer:
    [Disbursement](#disbursement-payment-vouchers-and-cheques), with the withholding tax of the referrer (5% for an
    individual, 10% for a company in the delivered setup).
 
-When premium is returned (an endorsement or a cancellation), the comsub of a paid line is clawed back from the
-referrer.
+When premium is returned (an endorsement or a cancellation), the referrer commission of a paid line is clawed back
+from the referrer.
 
 ![Commission > Agents/Referrer Accounts, with the net payable of each referrer](images/process/referrer-accounts.png)
-
-The telesales incentive is calculated on Accounts > Incentive by {{roles:write:incentive}}.
 
 ## Claims {#process-claims}
 
 Claims are registered and followed up by {{roles:write:claims}}. Claim decisions and settlement approvals are made by
 {{roles:approve:claims}}. See [Claims](#the-claims-list).
 
-TIS registers the client's claim, advises the insurer and follows the claim up to the settlement; the insurer decides
+TISPH registers the client's claim, advises the insurer and follows the claim up to the settlement; the insurer decides
 and pays.
 
 1. Choose {{menu:/agent/policy}}, select **More actions** on the policy, then **Claim**. The action is not available
@@ -425,12 +427,12 @@ and pays.
    [Motor claim repairs and letters of authority](#motor-claim-repairs-and-letters-of-authority): the shop's estimate,
    the insurer adjuster's decision, the letter of authority to the shop and the release of the vehicle.
 7. Enter the settlement agreed by the insurer and submit it. The claim is **Pending Approval**.
-8. The approver ({{roles:approve:claims}}) approves or returns the settlement, within the approver's limit of the Authority Matrix; the
-   approver must be another user than the one who submitted it. The approved claim is **Settled**.
+8. The approver ({{roles:approve:claims}}) approves or returns the settlement; the approver must be another user than
+   the one who submitted it. As delivered, the approval also releases the settlement: the claim is **Settled** at once.
 9. Close the claim when the claimant has been paid. A claim the insurer repudiates is **Rejected**, with a reason, and
    then closed.
 
-When the settlement is paid through TIS, the funds received from the insurer and the payment to the claimant are
+When the settlement is paid through TISPH, the funds received from the insurer and the payment to the claimant are
 recorded on [Claims settlements paid through the broker](#claims-settlements-paid-through-the-broker).
 
 ![Operations > Claims, with the open claims, the settlement to approve and the settled claims](images/process/claims-list.png)
@@ -447,14 +449,15 @@ Policies come into the renewal pipeline 90 days before their expiry.
 2. Send the renewal notices in order (**First Notice Sent**, **Second Notice Sent**, **Final Notice Sent**), one by one
    or for many policies at once with [Renewal Batch](#renewal-batch-lapse-management-and-the-analytics).
 3. Prepare the renewal terms: open the policy on [Renewal Policy](#renewal-policy) and complete the renewal (cover,
-   dates, premium). The renewal quotation is linked to the expiring policy and is valid for 30 days.
-4. The approver ({{roles:approve:renewals}}) approves or returns the renewal terms; the approver must be another user than the one
-   who prepared them.
-5. Send the renewal quotation to the client (**Quote Sent**). Price and cover discussions with the client or the
-   insurer are followed on [Negotiations](#negotiations).
-6. When the client accepts, the renewal follows the placement chain like a new policy: placement slip, insurer's
-   e-policy, check against the slip and booking. The booked policy is **Renewed** and its bill is collected by Cash
-   Control.
+   dates, premium). The renewal quotation is linked to the expiring policy, is valid for 30 days and is sent to the
+   client: the renewal is **Quote Sent**. Price and cover discussions with the client or the insurer are followed on
+   [Negotiations](#negotiations).
+4. When the terms are agreed, select **Submit for approval** on Negotiations. The renewal is **Pending Approval**.
+5. The approver ({{roles:approve:renewals}}) approves the terms (**Approved**) or returns them (back to
+   **Quote Sent**, to revise); the approver must be another user than the one who submitted them.
+6. With the terms approved and accepted by the client, the renewal is completed like a new policy: placement slip,
+   insurer's e-policy, check against the slip and booking. The booked policy is **Renewed** and its bill is collected
+   by Cash Control.
 
 A policy not renewed by its expiry stays **In Grace Period** for 30 days and is then **Lapsed**; a lapsed policy can
 still be renewed within 90 days on [Lapse Management](#renewal-batch-lapse-management-and-the-analytics).

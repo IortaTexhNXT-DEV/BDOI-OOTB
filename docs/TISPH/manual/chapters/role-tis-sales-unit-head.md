@@ -28,13 +28,13 @@ and pays them. You never decide a record you entered yourself.
 | Approve or return the renewal terms submitted by the unit | Daily | [Negotiations](#negotiations) |
 | Check the e-policies received against their placement slips | Daily | [Placement Slips](#placement-slips) |
 | Follow up the renewals escalated to you | As notified | [At-Risk Policies](#renewal-queue-and-at-risk-policies) |
-| Approve or reject the supplier invoices recorded by Finance | As notified | [Accounts payable](#accounts-payable) |
+| Approve or reject the supplier invoices recorded by Finance | As notified | [Payables](#accounts-payable) |
 | Review the unit's pipeline, conversion and premium | Weekly | [Sales Dashboard](#sales-dashboard) |
 | Review the team assignment and the reassignment queue | Weekly | [Lead Assignment](#lead-assignment) |
-| Run the incentive calculation of the month and submit it | Month-end, after the month's policies are booked | [Incentives](#incentives) |
-| Approve or reject the incentive calculation submitted by another user | Month-end | [Incentives](#incentives) |
-| Mark the approved incentives as paid | When paid | [Incentives](#incentives) |
-| Run the incentive and production reports | Month-end | [Incentives](#incentives), [All Reports](#reports-catalogue) |
+| Run the incentive calculation of the month and submit it | Month-end, after the month's policies are booked | [Incentive](#incentives) |
+| Approve or reject the incentive calculation submitted by another user | Month-end | [Incentive](#incentives) |
+| Mark the approved incentives as paid | When paid | [Incentive](#incentives) |
+| Run the incentive and production reports | Month-end | [Incentive](#incentives), [All Reports](#reports-catalogue) |
 
 The sales work, lead assignment, campaigns, the check of the e-policies and the approval of renewal terms follow the
 procedures of the [TIS Sales Associate](#tis-sales-associate-procedures) and the
@@ -81,6 +81,8 @@ a quarterly program is run in the last month of its quarter.
    adjustment takes a reason of the reason list and a note, and the user who adjusted it is kept.
 4. Select **Submit for approval**. The batch is **Pending Approval**.
 
+![Accounts > Incentive > Calculations, the monthly batches with their payout, the user who calculated them and their status](images/role-tis-sales-unit-head/incentive-calculations.png)
+
 ### Approve an incentive calculation {#tis-sales-unit-head-incentive-approval}
 
 <!-- Screens to refresh: the calculation batch pop-up is being redesigned in another stream. -->
@@ -103,7 +105,6 @@ batch on Calculations and select **Mark as paid**, which posts the payment.
 Each account executive follows their own progress on {{menu:/incentive/my-programs}} and their earnings and payments
 on {{menu:/incentive/statement}}.
 
-![Accounts > Incentive > My Programs, the programs running in the current period with the target, achievement and estimated payout](images/role-tis-sales-unit-head/incentive-my-programs.png)
 
 ### Approve a supplier invoice {#tis-sales-unit-head-supplier-invoice}
 

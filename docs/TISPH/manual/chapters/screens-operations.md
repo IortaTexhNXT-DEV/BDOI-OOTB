@@ -11,7 +11,7 @@ Each section names the menu of the screen and the roles that open it, with their
 
 ## Prospects {#prospects}
 
-A prospect is a person or company that TIS quotes before it becomes a client: a buyer referred by Toyota Financial Services (TFS), a dealer sale, a walk-in client or a referral.
+A prospect is a person or company that TISPH quotes before it becomes a client: a buyer referred by Toyota Financial Services (TFS), a dealer sale, a walk-in client or a referral.
 
 {{screen:/agent/leadlisting}}
 
@@ -371,7 +371,7 @@ The open cover page has the tabs **Contract**, **Certificates** (one per shipmen
 
 ## The claims list {#the-claims-list}
 
-TIS registers the client's claim, advises the insurer, collects the documents and follows the claim to its settlement. The insurer decides and pays.
+TISPH registers the client's claim, advises the insurer, collects the documents and follows the claim to its settlement. The insurer decides and pays.
 
 {{screen:/agent/claim}}
 
@@ -382,8 +382,8 @@ The cards count **Open claims**, **Settlement to approve**, **Approved, to be pa
 | **Pending** | Registered, documents being collected |
 | **Processing** | Advised to the insurer, under review or with the adjuster |
 | **Pending Approval** | The settlement waits for the checker |
-| **Approved** | The settlement is approved, to be paid |
-| **Settled** | Paid |
+| **Approved** | The settlement is approved and not yet released (only when the release on approval is switched off) |
+| **Settled** | The settlement is approved and released |
 | **Rejected** | Declined by the insurer, with a reason |
 
 A claim follows nine steps, shown at the top of the claim: **Notification**, **Insurer advice**, **Documents**, **Review**, **Adjuster**, **Assessment**, **Settlement**, **Approval** and **Payment**. The **Next step** bar at the bottom names what is to be done and leads to it.
@@ -425,7 +425,7 @@ The settlement is approved by {{roles:approve:claims}}, never by the user who su
 2. On **Approval**, check the settlement against the adjuster's report and the documents.
 3. Approve it, or return it with a reason.
 
-On approval the claim is **Approved**. When the insurer pays through TIS, the settlement is received and paid out on [Claims settlements paid through the broker](#claims-settlements-paid-through-the-broker); the **Payment** step records the payment and the claim becomes **Settled**.
+As delivered, the approval also releases the settlement: the claim is **Settled** at once, without the status **Approved** in between. When the insurer pays through TISPH, the settlement is received from the insurer and paid out to the claimant on [Claims settlements paid through the broker](#claims-settlements-paid-through-the-broker), and the **Payment** step shows that payment.
 
 ### Claim details, documents and audit trail {#claim-details-documents-and-audit-trail}
 
@@ -510,7 +510,7 @@ Every CTPL certificate of cover (COC) must be authenticated with the IC-accredit
 
 {{screen:/operations/ctpl-authentication}}
 
-The cards count the covers **Pending**, **Requested**, **Authenticated** and **Failed**. The tab **CTPL covers** lists **Policy**, **Insurer**, **COC number**, **Vehicle**, **Status**, **Authentication code**, **LTO**, **Last error** and **Registered**; **Not yet authenticated only** narrows the list. The tab **COC series** holds the COC numbers issued to TIS by each insurer.
+The cards count the covers **Pending**, **Requested**, **Authenticated** and **Failed**. The tab **CTPL covers** lists **Policy**, **Insurer**, **COC number**, **Vehicle**, **Status**, **Authentication code**, **LTO**, **Last error** and **Registered**; **Not yet authenticated only** narrows the list. The tab **COC series** holds the COC numbers issued to TISPH by each insurer.
 
 A CTPL cover is registered when its policy is booked: the COC number is taken from the insurer's series and the vehicle identifiers from the policy. To add a cover by hand:
 

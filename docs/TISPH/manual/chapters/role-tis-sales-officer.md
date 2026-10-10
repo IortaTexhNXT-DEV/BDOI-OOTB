@@ -28,10 +28,10 @@ system refuses it and another approver decides it.
 | Work through your own records and the work waiting for you | Every morning and through the day | [My Work](#my-work) |
 | Check the e-policies received against their placement slips | Daily | [Placement Slips](#placement-slips) |
 | Approve or return the renewal terms submitted by your team | Daily | [Negotiations](#negotiations) |
-| Complete the endorsements and cancellations that return premium, raised by other users | As notified | [Policies](#policies), [Policy Cancellation](#cancel-a-policy-computed-return-premium) |
+| Complete the endorsements and cancellations that return premium, raised by other users | As notified | [Policy](#policies), [Policy Cancellation](#cancel-a-policy-computed-return-premium) |
 | Check the team's open prospects and reassign those not worked | Daily | [Lead Assignment](#lead-assignment) |
 | Assign the prospects waiting in the reassignment queue | Daily | [Lead Assignment](#lead-assignment) |
-| Review the team's activities and open follow-ups | Weekly | [Sales activities](#sales-activities) |
+| Review the team's activities and open follow-ups | Weekly | [Sales Activities](#sales-activities) |
 | Keep the assignment rules in line with the team and the TFS offices | When the team or the channels change | [Lead Assignment](#lead-assignment) |
 | Prepare, schedule and send campaigns; check their results | As planned | [Campaigns](#campaigns) |
 | Review the team's pipeline, conversion and renewals | Weekly and at month-end | [Sales Dashboard](#sales-dashboard), [Renewal Queue](#renewal-queue-and-at-risk-policies) |

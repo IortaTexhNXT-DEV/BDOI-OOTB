@@ -2,8 +2,8 @@
 Owner: see WRITER_GUIDE.md. Generated facts come from generated/roles/tis-it-admin.md (npm run manual:role-facts in backend/);
 never edit them here. Written from the local TISPH build as manual.it-admin.
 Screens to refresh: none of this chapter's own.
-The user acceptance testing role of the role seed is not a TISPH role: it is only named here in general words
-(section tis-it-appsupport-admin-test-role), never by its name, which the build refuses.
+The user acceptance testing role is not a TISPH role and is not described: its clean-up before go-live belongs to the
+cut-over plan.
 -->
 # TIS IT AppSupport / Admin {#tis-it-appsupport-admin}
 
@@ -17,8 +17,10 @@ the segregation-of-duties rules, and run the quarterly access reviews. You also 
 products, covers, vehicles, branches, banks), the products of the Product Configurator, the document layouts and
 numbering, the scheduled jobs and the interfaces (SMS, e-mail, CTPL authentication, insurers, banks).
 
-You read the business data to answer support questions, but you enter no business or accounting transaction. Every
-change of access you make waits for another user of this role: TIS needs at least two users with this role. You work
+You read the business data to answer support questions. As delivered, the role also sets up the dealer programmes
+and uploads the dealers' sales files (see [Dealer programme policies](#process-dealer-programme)); apart from these,
+you enter no business or accounting transaction. Every
+change of access you make waits for another user of this role: TISPH needs at least two users with this role. You work
 with the department heads, who ask for the access of their staff, with TIS Finance & General Accounting, who approves
 the changes to the posting rules, and with the TIS General Manager, who decides the approval limits.
 
@@ -28,16 +30,17 @@ the changes to the posting rules, and with the TIS General Manager, who decides 
 
 | Task | When | Screen |
 |---|---|---|
-| Decide the changes of access of the other administrator waiting for you | Every morning and through the day | [My Work](#my-work), [Roles and role permissions](#roles-and-role-permissions) |
+| Decide the changes of access of the other administrator waiting for you | Every morning and through the day | [My Work](#my-work), [Role Permissions](#roles-and-role-permissions) |
 | Check the scheduled jobs: last run, last status, failures | Every morning | [Schedules](#schedules) |
 | Check the messages waiting or failed: e-mails, SMS, insurer and bank interfaces | Every morning | [E-mail Outbox](#e-mail-outbox), [Integrations](#integrations) |
-| Create accounts for new staff; deactivate leavers | On the request of the department head; on the last working day | [Users](#users) |
-| Unlock an account, reset a password, turn off two-step verification after a lost phone | On the user's request | [Users](#users) |
-| Change the access of a role | On an approved access request | [Roles and role permissions](#roles-and-role-permissions) |
+| Create accounts for new staff; deactivate leavers | On the request of the department head; on the last working day | [User](#users) |
+| Unlock an account, reset a password, turn off two-step verification after a lost phone | On the user's request | [User](#users) |
+| Change the access of a role | On an approved access request | [Role Permissions](#roles-and-role-permissions) |
 | Record the approval limits decided by Management | When Management changes them | [Authority Matrix](#authority-matrix) |
 | Record the cover for an approver who is away | Before the leave | [Delegations](#delegations) |
 | Follow the segregation-of-duties conflicts and their exceptions | Weekly | [Segregation of Duties](#segregation-of-duties), [User Access Matrix](#user-access-matrix) |
 | Review the access of every user | At least every quarter | [Access Reviews](#access-reviews) |
+| Set up the dealer programmes and upload the dealers' sales files | When a programme is agreed; as the dealers send their files | [Dealer Programmes](#dealer-programmes) |
 | Maintain the reference masters | On the request of the business | [Masters that work the same way](#masters-that-work-the-same-way) |
 | Configure products, covers, rating and acceptance rules | On the request of the business | [Product Templates](#product-templates) |
 | Maintain the document layouts, signatures and numbering | On the request of the business | [Documents and Reports Layout](#documents-and-reports-layout), [Document Numbering](#document-numbering) |
@@ -179,8 +182,7 @@ General Accounting; a change you propose to the accounting accounts waits for th
 3. Select **Activate** and confirm with **Activate template**. The template applies to new quotations; quotations
    already issued are not changed. **Deactivate** stops its use for new quotations.
 
-Test a change on a quotation in UAT before it is made in Production. See [Product Templates](#product-templates) and
-the other sections of the Product Configurator.
+See [Product Templates](#product-templates) and the other sections of the Product Configurator.
 
 ### Watch the scheduled jobs {#tis-it-appsupport-admin-schedules}
 
@@ -206,17 +208,3 @@ accrual auto-reversal, period auto soft-close, SAP GL export). See [Schedules](#
    error.
 
 See [Integrations](#integrations), [E-mail Outbox](#e-mail-outbox) and [Insurer integration](#insurer-integration).
-
-### The user acceptance testing role {#tis-it-appsupport-admin-test-role}
-
-The role list of the UAT system also shows a role marked "(UAT only)". It is not a TISPH role: it exists only for the
-user acceptance tests, includes the built-in administrator and therefore holds every permission. Its holders break
-every segregation-of-duties rule and are listed as conflicts.
-
-Before go-live:
-
-1. On {{menu:/master/generals/usermanagement/user}}, remove this role from every user, or deactivate the test accounts
-   that hold it.
-2. Have the built-in administrator set the role **Inactive** on {{menu:/master/generals/usermanagement/role}}: a role
-   that includes the built-in administrator cannot be given, changed or deactivated by TIS IT AppSupport / Admin.
-3. Check on {{menu:/master/generals/usermanagement/access-matrix}} that no active user holds it.

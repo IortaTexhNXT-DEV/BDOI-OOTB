@@ -8,18 +8,18 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Dashboard | Executive Dashboard | View |
 | Operations | Payments | View |
 | Accounts | Receipts | View |
-| Accounts | Collections | Approve |
+| Accounts | Collections | View |
 | Accounts > Credit Control | Instalment Plans | Approve |
 | Accounts > Credit Control | Premium Warranty Monitor | Approve |
 | Accounts > Credit Control | Client Credit Limits | Approve |
-| Accounts > Credit Control | Remittance Ageing | Approve |
+| Accounts > Credit Control | Remittance Ageing | View |
 | Accounts | Post-Dated Cheques | View |
 | Accounts | Claims Settlements | View |
 | Accounts > Payables | Supplier Invoices | Approve |
 | Accounts > Payables | Supplier Payments | Approve |
-| Accounts > Payables | AP Ageing | Approve |
-| Accounts > Payables | Suppliers | Approve |
-| Accounts > Payables | Supplier 2307 | Approve |
+| Accounts > Payables | AP Ageing | View |
+| Accounts > Payables | Suppliers | Create and edit |
+| Accounts > Payables | Supplier 2307 | View |
 | Accounts > Fixed Assets | Asset Register | Create and edit |
 | Accounts > Fixed Assets | Depreciation Run | Create and edit |
 | Accounts > Fixed Assets | Disposals | Create and edit |
@@ -39,8 +39,8 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Remittance | Direct Bill Processing | Create and edit |
 | Accounts > Remittance | Adjustments | Create and edit |
 | Accounts > Remittance | Notifications | Create and edit |
-| Accounts > Remittance | History | Create and edit |
-| Accounts > Remittance | Analytics | Create and edit |
+| Accounts > Remittance | History | View |
+| Accounts > Remittance | Analytics | View |
 | Accounts | Journal Voucher | Create and edit |
 | Accounts | SAP GL Export | Create and edit |
 | Accounts | Correction JV | Create and edit |
@@ -56,30 +56,30 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Petty Cash | Replenish | Create and edit |
 | Accounts > Bank Reconciliation | Reconciliation Workspace | Approve |
 | Accounts > Bank Reconciliation | Reconciliations | Approve |
-| Accounts > Bank Reconciliation | Reconciliation Statement Report | Approve |
-| Accounts > Bank Reconciliation | Outstanding Cheques | Approve |
-| Accounts > Bank Reconciliation | Deposits in Transit | Approve |
-| Accounts > Bank Reconciliation | Unmatched Bank Lines | Approve |
-| Accounts > Bank Reconciliation | Bank Book | Approve |
+| Accounts > Bank Reconciliation | Reconciliation Statement Report | View |
+| Accounts > Bank Reconciliation | Outstanding Cheques | View |
+| Accounts > Bank Reconciliation | Deposits in Transit | View |
+| Accounts > Bank Reconciliation | Unmatched Bank Lines | View |
+| Accounts > Bank Reconciliation | Bank Book | View |
 | Accounts > Insurer Reconciliation | Insurer Statements | Create and edit |
-| Accounts > Tax | BIR Form 2307 | Approve |
-| Accounts > Tax | VAT Summary | Approve |
-| Accounts > Tax | SAWT | Approve |
-| Accounts > Tax | QAP | Approve |
-| Accounts > Tax | SLSP Sales | Approve |
-| Accounts > Tax | SLSP Purchases | Approve |
-| Accounts > Tax | Withholding Returns | Approve |
-| Accounts > Tax | Annual Alphalist 1604-E | Approve |
-| Accounts > Tax | Percentage Tax 2551Q | Approve |
-| Accounts > Tax | BIR DAT Files | Approve |
-| Accounts > Tax | Sales Invoices | Approve |
-| Accounts > Tax | E-Invoicing (EIS) | Approve |
+| Accounts > Tax | BIR Form 2307 | Create and edit |
+| Accounts > Tax | VAT Summary | Create and edit |
+| Accounts > Tax | SAWT | Create and edit |
+| Accounts > Tax | QAP | Create and edit |
+| Accounts > Tax | SLSP Sales | Create and edit |
+| Accounts > Tax | SLSP Purchases | Create and edit |
+| Accounts > Tax | Withholding Returns | Create and edit |
+| Accounts > Tax | Annual Alphalist 1604-E | Create and edit |
+| Accounts > Tax | Percentage Tax 2551Q | Create and edit |
+| Accounts > Tax | BIR DAT Files | Create and edit |
+| Accounts > Tax | Sales Invoices | Create and edit |
+| Accounts > Tax | E-Invoicing (EIS) | Create and edit |
 | Accounts > Tax | CAS Books and Documents | Approve |
 | Accounts > Period End | Period Management | Approve |
 | Accounts > Period End | Month-End Close | Approve |
 | Accounts > Period End | Year-End Close | Approve |
 | Accounts > Period End | Recurring Journals | Approve |
-| Accounts > Period End | Financial Statements | Approve |
+| Accounts > Period End | Financial Statements | View |
 | Accounts > Incentive | My Programs | View |
 | Accounts > Incentive | Calculations | View |
 | Accounts > Incentive | Approvals | View |
@@ -90,11 +90,11 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Commission > Insurer Overrides | Agreements | Create and edit |
 | Commission > Insurer Overrides | Computations | Create and edit |
 | Reports | All Reports | View |
-| Reports > Operational Reports | Remittance | Create and edit |
+| Reports > Operational Reports | Remittance | View |
 | Reports > Operational Reports | Broker Commission | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
 | Reports > Financial Reports | Collection Report | View |
-| Reports > Financial Reports | Payables | Approve |
+| Reports > Financial Reports | Payables | View |
 | Reports > Financial Reports | Journal | View |
 | Reports > Financial Reports | Trial Balance | View |
 | Reports > Financial Reports | Income Statement | View |
@@ -125,50 +125,52 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 
 ## What you can view, change and approve {#tis-finance-and-general-accounting-access}
 
-| Area | Module | Access | What it allows |
-|---|---|---|---|
-| Sales & Marketing | Prospects and leads | View | See prospects and leads |
-| Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports |
-| Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters |
-| Operations | Clients | View | See clients |
-| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication |
-| Operations | Endorsements and cancellations | View | See endorsements and cancellations |
-| Operations | Renewals | View | See renewals |
-| Operations | Claims | View | See claims |
-| Accounts | Receipts | View | See receipts and post-dated cheques |
-| Accounts | Collections and credit control | View | See collections, instalment plans and credit limits |
-| Accounts | Collections and credit control | Approve | Approve premium warranty extensions and client credit limits (not the requester) |
-| Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files |
-| Accounts | Disbursements and petty cash | Create and edit | Prepare payment vouchers, petty cash and bank payment files |
-| Accounts | Payables | View | See suppliers, supplier invoices and payments, AP ageing |
-| Accounts | Payables | Create and edit | Enter supplier invoices and payments; maintain suppliers |
-| Accounts | Payables | Approve | Approve supplier invoices (not the preparer) |
-| Accounts | Fixed assets | View | See the fixed asset register and depreciation |
-| Accounts | Fixed assets | Create and edit | Register assets and run the monthly depreciation |
-| Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export |
-| Accounts | Journal vouchers | Create and edit | Enter, correct and reverse journal vouchers; run the SAP GL export |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements |
-| Accounts | Remittance and insurer reconciliation | Create and edit | Prepare remittances and insurer statement reconciliations |
-| Accounts | Bank reconciliation | View | See bank reconciliations |
-| Accounts | Bank reconciliation | Create and edit | Prepare bank reconciliations |
-| Accounts | Bank reconciliation | Approve | Approve and reopen bank reconciliations (not the preparer) |
-| Accounts | Period end and tax | View | See period status, the close checklist and BIR tax |
-| Accounts | Period end and tax | Create and edit | Run the month-end and year-end steps and BIR tax returns |
-| Accounts | Period end and tax | Approve | Approve the close, post into soft-closed periods, reopen periods, reverse a year-end close |
-| Accounts | Incentives | View | See incentive programmes, calculations and statements |
-| Commission | Commission | View | See commission, referrer accounts and insurer overrides |
-| Commission | Commission | Create and edit | Process commission and insurer overrides |
-| Reports | Reports | View | Run and download reports |
-| Product Configurator | Products | View | See products and product templates |
-| Master data and configuration | Reference masters | View | See reference masters |
-| Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production |
-| Master data and configuration | Posting rules and account determination | Create and edit | Propose changes to posting rules and account determination |
-| Master data and configuration | Posting rules and account determination | Approve | Approve changes to posting rules and account determination (not the requester) |
-| Master data and configuration | Schedules | View | See scheduled jobs and their runs |
-| Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox |
-| Master data and configuration | Audit trail | View | See the audit trail |
-| Basic and special access | Basic access | View | Own profile and the look-up lists of every form |
-| Basic and special access | Full personal data | Special | See TIN, government ID numbers, mobile, e-mail, bank account and birth date unmasked on screens and exports |
+Where: the screens of your menus that show the module. A module without a screen of its own is seen inside the screens of other modules (for example the remittance status of a policy).
+
+| Area | Module | Access | What it allows | Where |
+|---|---|---|---|---|
+| Sales & Marketing | Prospects and leads | View | See prospects and leads | No screen of its own |
+| Sales & Marketing | Quotations and placement | View | See quotations, requests for quotation, placement slips and comparison reports | No screen of its own |
+| Sales & Marketing | Dealer programmes | View | See brand-new vehicle programmes and dealer sales uploads; print bank endorsement letters | No screen of its own |
+| Operations | Clients | View | See clients | No screen of its own |
+| Operations | Policies | View | See policies, cover notes, payments and CTPL authentication | Payments |
+| Operations | Endorsements and cancellations | View | See endorsements and cancellations | No screen of its own |
+| Operations | Renewals | View | See renewals | No screen of its own |
+| Operations | Claims | View | See claims | No screen of its own |
+| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts, Post-Dated Cheques and Claims Settlements |
+| Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections, Instalment Plans, Premium Warranty Monitor, Client Credit Limits and Remittance Ageing |
+| Accounts | Collections and credit control | Approve | Approve premium warranty extensions and client credit limits (not the requester) |  |
+| Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement, Bank Payment Files, Initiate, Request and Replenish |
+| Accounts | Disbursements and petty cash | Create and edit | Prepare payment vouchers, petty cash and bank payment files |  |
+| Accounts | Payables | View | See suppliers, supplier invoices and payments, AP ageing | Supplier Invoices, Supplier Payments, AP Ageing, Suppliers and Supplier 2307 |
+| Accounts | Payables | Create and edit | Enter supplier invoices and payments; maintain suppliers |  |
+| Accounts | Payables | Approve | Approve supplier invoices (not the preparer) |  |
+| Accounts | Fixed assets | View | See the fixed asset register and depreciation | Asset Register, Depreciation Run and Disposals |
+| Accounts | Fixed assets | Create and edit | Register assets and run the monthly depreciation |  |
+| Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher, SAP GL Export, Correction JV and Reversal JV |
+| Accounts | Journal vouchers | Create and edit | Enter, correct and reverse journal vouchers; run the SAP GL export |  |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Automated Processing, Tracking, Statements, Settlement, Reconciliation, Bulk Processing, Scheduling, Electronic Transfer, Approval Workflow, Exception Management, Agency Bill Processing, Direct Bill Processing, Adjustments, History, Analytics and Insurer Statements |
+| Accounts | Remittance and insurer reconciliation | Create and edit | Prepare remittances and insurer statement reconciliations |  |
+| Accounts | Bank reconciliation | View | See bank reconciliations | Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines and Bank Book |
+| Accounts | Bank reconciliation | Create and edit | Prepare bank reconciliations |  |
+| Accounts | Bank reconciliation | Approve | Approve and reopen bank reconciliations (not the preparer) |  |
+| Accounts | Period end and tax | View | See period status, the close checklist and BIR tax | BIR Form 2307, VAT Summary, SAWT, QAP, SLSP Sales, SLSP Purchases, Withholding Returns, Annual Alphalist 1604-E, Percentage Tax 2551Q, BIR DAT Files, Sales Invoices, E-Invoicing (EIS), CAS Books and Documents, Period Management, Month-End Close, Year-End Close, Recurring Journals and Financial Statements |
+| Accounts | Period end and tax | Create and edit | Run the month-end and year-end steps and BIR tax returns |  |
+| Accounts | Period end and tax | Approve | Approve the close, post into soft-closed periods, reopen periods, reverse a year-end close |  |
+| Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs, Calculations, Approvals, Statement and Reports |
+| Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard, Agents/Referrer Accounts, Agreements and Computations |
+| Commission | Commission | Create and edit | Process commission and insurer overrides |  |
+| Reports | Reports | View | Run and download reports | Remittance, Broker Commission, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status, Co-insurance Register, Due to Insurers and Report Builder |
+| Product Configurator | Products | View | See products and product templates | No screen of its own |
+| Master data and configuration | Reference masters | View | See reference masters | Accounting Flow, Payment Gateways, Taxation, Close Checklist, Asset Classes, Cost Centres, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats and Bank File Layouts |
+| Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | No screen of its own |
+| Master data and configuration | Posting rules and account determination | Create and edit | Propose changes to posting rules and account determination | Account Determination, Posting Rules and Configuration Approvals |
+| Master data and configuration | Posting rules and account determination | Approve | Approve changes to posting rules and account determination (not the requester) |  |
+| Master data and configuration | Schedules | View | See scheduled jobs and their runs | Schedules |
+| Master data and configuration | Integrations | View | See connectors and the integration outbox and inbox | No screen of its own |
+| Master data and configuration | Audit trail | View | See the audit trail | Audit Trail |
+| Basic and special access | Basic access | View | Own profile and the look-up lists of every form | No screen of its own |
+| Basic and special access | Full personal data | Special | See TIN, government ID numbers, mobile, e-mail, bank account and birth date unmasked on screens and exports | No screen of its own |
 
 ## Approvals {#tis-finance-and-general-accounting-approvals}
 
@@ -186,8 +188,8 @@ Approval limits of this role on the Authority Matrix:
 |---|---|---|
 | Payment voucher and cheque release | Accounts > Disbursements > Cheque approval, and bank payment batch approval | Not set: no amount limit applies |
 | Journal voucher approval | Accounts > Journal Vouchers > Approve | Not set: no amount limit applies |
-| Remittance approval | Accounts > Remittance > Approval | Not set: no amount limit applies |
-| Remittance settlement, adjustment and transfer | Accounts > Remittance > Approval (settlement, adjustment, transfer) | Not set: no amount limit applies |
+| Remittance approval | Accounts > Remittance > Approval Workflow | Not set: the remittance approval levels apply |
+| Remittance settlement, adjustment and transfer | Accounts > Remittance > Approval Workflow (settlement, adjustment, transfer) | Not set: the remittance approval levels apply |
 
 Who approves the work of this role:
 
@@ -200,8 +202,8 @@ Who approves the work of this role:
 | Remittance and insurer reconciliation | Approve insurer statement reconciliations and post their adjustments (not the preparer) | CCD-Recon (Reconciliation and Reversals) |
 | Accounts > Disbursements > Cheque approval, and bank payment batch approval | Payment voucher and cheque release within the approver's limit | TIS Finance & General Accounting |
 | Accounts > Journal Vouchers > Approve | Journal voucher approval within the approver's limit | TIS Finance & General Accounting |
-| Accounts > Remittance > Approval | Remittance approval within the approver's limit | CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting |
-| Accounts > Remittance > Approval (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting |
+| Accounts > Remittance > Approval Workflow | Remittance approval within the approver's limit | CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting |
+| Accounts > Remittance > Approval Workflow (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting |
 
 The user who enters a record never approves it: the approval is always another user's.
 
