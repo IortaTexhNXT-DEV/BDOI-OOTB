@@ -40,6 +40,11 @@ minimal, clearly-correct front-end fix.
   `test/role-permissions.test.js` fails while a code of the database has none. On a database in use, the access of a
   role is changed on Role Permissions as a change another administrator approves (`access.change_approval`); a
   migration that grants a permission for a release grants it directly, as `0348_tisph_roles.sql` does.
+- Approval limits: an approval step that checks the Authority Matrix calls `assertAuthority(db, user, type, amount)`
+  from `src/modules/access-control/service.js` and registers its type in `AUTHORITY_STEPS`
+  (`src/modules/access-control/authority.js`) with the screen and the permissions of the step; the matrix shows which
+  roles can approve it from there, and `test/authority-matrix.test.js` fails while a checked type is missing. Limits are
+  changed on the Authority Matrix (one change approved by another administrator, also for an uploaded workbook).
 - Coded reasons: a decision that records a reason (claim repudiation, renewal lapse, quotation declined or dropped)
   takes an optional `reasonCode` of the reason-code master besides the free-text reason; resolve it with
   `decisionReason(db, contexts, { reasonCode, reason })` from `src/modules/ops-masters/records.js`, which checks the

@@ -501,7 +501,16 @@ The matrix lists every user with roles, branch, status, last sign-in, two-step v
 
 ### Authority Matrix
 
-The Authority Matrix holds the approval limits per role and transaction type: amounts in PHP, discounts in percent of premium (for example a quotation discount of 10% for Sales & Marketing, policy issuance up to PHP 1,000,000.00). A role with **Not set** is not restricted by the matrix for that transaction type. **Limit for one person** sets a personal limit for one user. A change applies once a second administrator approves it.
+The Authority Matrix holds the largest amount (in PHP) or percent of premium each role may approve per transaction. It has four tabs:
+
+- **Limits**: the transactions down (each with the approval step that checks it under the info icon) and the roles across, grouped by department (Sales, Operations, Cash Control, Finance and Accounting, IT, Management). By default it shows the TISPH roles that can approve the transactions an approval step checks; **Include base platform roles**, **Include transactions not checked yet**, the department filter and **All roles** show the others. A cell shows the limit (for example PHP 1,000,000.00 or 10%), **No limit**, **Not set**, or a dash when the role cannot reach that approval step, with a **Pending** or **From** date chip when a change waits for approval or is scheduled. The chip on the right says what **Not set** means today (by default the approval is not restricted); the count beside it shows only the approver cells still without a limit.
+- **Pending approval**: the changes waiting for approval with their lines. Another administrator who may approve access changes approves or rejects them (with the reason); the proposer may withdraw them.
+- **Personal limits**: limits of one person for a transaction. A personal limit replaces the limits of the person's roles. **Add personal limit** opens the same panel with the person and the transaction.
+- **History**: every limit with its dates, authority reference, proposer and approver.
+
+Select a cell to open the **Approval limit** panel: the limit in effect, then the new limit (percent from 0 to 100, or an amount in PHP) with **No limit** beside it, **Effective from** (today or later; the current limit stays in effect until the day before), the **Authority reference** and **Reference date** (for example the board resolution number and date) and optional remarks. **Submit for approval** sends the change to another administrator; **Remove limit** sends its removal. Nothing changes until it is approved.
+
+**Upload** takes many limits at once: download the template (the matrix as it is, with drop-down lists and the rules on the Instructions sheet), change the Limit, No limit, Effective from, Authority reference and Reference date columns, and upload it. The whole file is checked first; with any error nothing is saved and each error names the row and the column. Rows equal to the matrix are left unchanged, and a limit is not removed by emptying its row. Review the changes and select **Submit for approval**: they go to another administrator as one change. **Download** gives the matrix and its change history in Excel for audit.
 
 ![Master > Users and Access > Authority Matrix](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-authority.png)
 
