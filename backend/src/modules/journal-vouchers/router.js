@@ -36,9 +36,9 @@ async function askApproval(jv, req) {
 }
 
 define({
-  method: 'GET', path: '/history', summary: 'Journal voucher register (manual, correction and reversal JVs; all=true for system journals too; parked=true for the system journals parked for approval)',
+  method: 'GET', path: '/history', summary: 'Journal voucher register (manual, correction and reversal JVs; all=true for system journals too; parked=true for the system journals parked for approval; origin issued / migrated); each voucher carries its origin block',
   screen: SCREEN, middleware: read,
-  query: { page: 1, pageSize: 20, transactionCode: 'JV01', transactionNumber: 'JV-2026', status: 'posted', parked: false },
+  query: { page: 1, pageSize: 20, transactionCode: 'JV01', transactionNumber: 'JV-2026', status: 'posted', parked: false, origin: 'issued' },
   response: { success: true, data: [header], pagination: { currentPage: 1, pageSize: 20, totalRecords: 1, totalPages: 1 } },
   handler: async (req, res) => { const pg = pageParams(req.query, 20); const r = await svc.history(pool, req.query, pg); sendList(res, r.rows, r.total, pg); },
 });

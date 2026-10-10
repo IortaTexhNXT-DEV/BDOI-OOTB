@@ -13,11 +13,13 @@ import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { writeParticipants, legacyParticipantDetails, leadOf, participantsOf } from '../placement/participants.js';
 import { isoDate, postingDate, today } from '../../lib/dates.js';
+import { ORIGIN_FIELDS, legacySystemName, originColumns, originOf, originWhere, withoutOriginFields } from '../../lib/origin.js';
 
 /** Policy fields stored in columns; everything else the screens send (vehicle ids, photos, mortgagee ...) lives in `doc`. */
 const RESERVED = ['policyId', 'id', 'client', 'lead', 'quotation', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy', 'success', 'message', 'data',
   'status', 'paymentStatus', 'paymentMethod', 'policyNumber', 'inception', 'inceptionDate', 'expiry', 'expiryDate', 'issuedDate', 'insuredName',
-  'clientId', 'quoteRefId', 'leadId', 'grossPremium', 'netPremium', 'sumInsured', 'totalSumInsured', 'billNumber', 'additionalPolicyData', 'billingMode', 'isDirectBilled'];
+  'clientId', 'quoteRefId', 'leadId', 'grossPremium', 'netPremium', 'sumInsured', 'totalSumInsured', 'billNumber', 'additionalPolicyData', 'billingMode', 'isDirectBilled',
+  ...ORIGIN_FIELDS];
 const docOf = (body) => Object.fromEntries(Object.entries(body || {}).filter(([k]) => !RESERVED.includes(k)));
 
 /** LOB for rows created without one (e.g. seeded or imported policies): from the product master line. */
@@ -47,11 +49,12 @@ export function toPolicy(r) {
     renewedFrom: r.renewed_from, renewedTo: r.renewed_to, client, lead: r.lead_row ? toLead(r.lead_row) : null, quotation: quote,
     fireRiskDetails: doc.fireRiskDetails || quote?.fireRiskDetails, firePremiumDetails: doc.firePremiumDetails || quote?.firePremiumDetails,
     createdBy: r.created_by_name || r.created_by, updatedBy: r.updated_by, createdAt: r.created_at, updatedAt: r.updated_at,
+    origin: originOf(r),
   };
 }
 
 export const POLICY_SELECT = `SELECT p.*, ic.name AS insurer_name, pr.name AS product_name, pr.line AS product_line, row_to_json(c.*) AS client_row, row_to_json(l.*) AS lead_row,
-  row_to_json(q.*) AS quote_row, (SELECT u.display_name FROM users u WHERE u.id = p.created_by) AS created_by_name
+  row_to_json(q.*) AS quote_row, (SELECT u.display_name FROM users u WHERE u.id = p.created_by) AS created_by_name, ${originColumns('p')}
   FROM policies p LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN leads l ON l.id = p.lead_id LEFT JOIN quotes q ON q.id = p.quote_id
   LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id LEFT JOIN products pr ON pr.id = p.product_id`;
 
@@ -115,6 +118,8 @@ function listWhere(q) {
   if (q.leadId) add('p.lead_id = ?', q.leadId);
   // source: go-live-migration (in-force policies of the old system, go-live data workbench), bulk-upload ...
   if (q.source) add("COALESCE(p.doc->>'source', '') = ?", String(q.source));
+  const origin = originWhere('p', q.origin, params);
+  if (origin) where.push(origin);
   if (q.productType) add("(COALESCE(p.product_type, pr.name) ILIKE '%' || ? || '%' OR COALESCE(p.lob, upper(pr.line)) = upper(?))", q.productType);
   if (q.lob) add('COALESCE(p.lob, upper(pr.line)) = ?', lobOf(q.lob));
   if (q.status) add('p.status = ?', policyStatusIn(q.status) || q.status);
@@ -183,10 +188,11 @@ async function assertUniqueNumber(db, number, id) {
 export async function updatePolicy(id, body, userId) {
   return withTransaction(async (db) => {
     const before = await getPolicyRow(id, db);
-    const cols = await columnsFrom(db, body);
+    const input = withoutOriginFields(body, before);
+    const cols = await columnsFrom(db, input);
     if (cols.policy_number) await assertUniqueNumber(db, cols.policy_number, before.id);
     if (cols.payment_status === 'Completed' && before.payment_status !== 'Completed') cols.paid_at = new Date();
-    const data = { ...cols, doc: JSON.stringify({ ...(before.doc || {}), ...docOf(body) }), updated_by: userId, updated_at: new Date() };
+    const data = { ...cols, doc: JSON.stringify({ ...(before.doc || {}), ...docOf(input) }), updated_by: userId, updated_at: new Date() };
     const keys = Object.keys(data);
     await db.query(`UPDATE policies SET ${keys.map((k, i) => `${k} = $${i + 2}`).join(', ')} WHERE id = $1`, [before.id, ...Object.values(data)]);
     return { before, after: await getPolicyRow(before.id, db) };
@@ -350,6 +356,11 @@ export async function issuePolicy(db, src, body, userId) {
   // (src.billLater, marine module) is billed on its declarations instead.
   if (src.migration || src.billLater) {
     await db.query('UPDATE policies SET details = details || $2::jsonb WHERE id = $1', [policyId, JSON.stringify(details)]);
+    // a migrated policy keeps its legacy number as its policy number and is marked as such (lib/origin.js)
+    if (src.migration) {
+      await db.query(`UPDATE policies SET origin = 'migrated', legacy_system = $2, legacy_number = $3, migrated_at = now(), migrated_by = $4, load_batch_id = $5 WHERE id = $1`,
+        [policyId, src.legacySystem || await legacySystemName(), src.legacyNumber || number, src.migratedBy || userId, src.loadBatchId ?? null]);
+    }
     return { policyId, receivable: null, commission: null };
   }
   // A renewal term is billed as a renewal (RENEWAL booking entry) with the commission priced on the renewal quotation.
@@ -420,10 +431,12 @@ export async function importPolicy(db, p, userId, { migration = false } = {}) {
   const firstName = p.firstName || (p.companyName ? null : first);
   const lastName = p.lastName || (p.companyName ? null : rest.join(' ') || null);
   const code = await nextDocumentNumber('client', { db, unique: { table: 'clients', column: 'client_code' } });
+  // the insured of a migrated policy is a migrated client (no legacy client code: the client number is BrokerVerse's)
   const cl = await db.query(`INSERT INTO clients(client_code, first_name, last_name, company_name, display_name, email, phone, source, created_by, owner_user_id,
-      client_type, lead_category) VALUES ($1,$2,$3,$4,$5,$6,$7,'bulk-upload',$8,$8,$9,$10) RETURNING id`,
+      client_type, lead_category, origin, legacy_system, migrated_at, migrated_by) VALUES ($1,$2,$3,$4,$5,$6,$7,'bulk-upload',$8,$8,$9,$10,$11,$12,$13,$14) RETURNING id`,
   [code, firstName, lastName, p.companyName || null, p.insuredName || [firstName, lastName].filter(Boolean).join(' ') || p.companyName, p.emailId || null,
-    p.contactNumber || null, userId, p.companyName ? 'corporate' : 'individual', p.companyName ? 'Corporate' : 'Retail']);
+    p.contactNumber || null, userId, p.companyName ? 'corporate' : 'individual', p.companyName ? 'Corporate' : 'Retail',
+    migration ? 'migrated' : 'issued', migration ? await legacySystemName() : null, migration ? new Date() : null, migration ? userId : null]);
   const rate = icId ? Number((await db.query('SELECT commission_rate FROM insurance_companies WHERE id = $1', [icId])).rows[0]?.commission_rate || 0)
     : Number(await getSetting('commission.default_rate', 0.15));
   return issuePolicy(db, {

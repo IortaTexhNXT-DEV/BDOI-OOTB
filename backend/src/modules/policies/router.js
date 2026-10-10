@@ -26,9 +26,9 @@ const out = svc.toPolicy;
 const example = { policyId: 'pol_1', policyNumber: 'POL-2026-00001', clientId: 'cl_1', insuredName: 'Juan Dela Cruz', status: 'Active', paymentStatus: 'Pending', inception: '2026-10-01', expiry: '2027-10-01', grossPremium: 23171.25, billNumber: 'INV-2026-00001', quoteRefId: 'qt_1' };
 
 define({
-  method: 'GET', path: '/', summary: 'List policies (mine=true for own book; agents always get their own; paymentStatus, quoteRefId, clientId, productType, lob, status, insurer, client name, issued / expiry ranges, premium range, search; paging)',
+  method: 'GET', path: '/', summary: 'List policies (mine=true for own book; agents always get their own; paymentStatus, quoteRefId, clientId, productType, lob, status, insurer, client name, issued / expiry ranges, premium range, origin issued / migrated, search; paging); each policy carries its origin block',
   screen: `${SCREEN} / Renewal Policy / Client view`, middleware: canRead,
-  query: { page: 1, pageSize: 10, mine: true, paymentStatus: 'Pending', clientId: 'cl_1', expiryDateFrom: '2026-10-01T00:00:00.000Z', query: 'POL-2026', source: 'go-live-migration' },
+  query: { page: 1, pageSize: 10, mine: true, paymentStatus: 'Pending', clientId: 'cl_1', expiryDateFrom: '2026-10-01T00:00:00.000Z', query: 'POL-2026', source: 'go-live-migration', origin: 'migrated' },
   response: { success: true, data: [example], total: 1, page: 1, pageSize: 10, totalPages: 1 },
   handler: async (req, res) => {
     const pg = paging(req.query);

@@ -26,6 +26,7 @@ import { formatDate } from '../../lib/pdf/format.js';
 import { daysBetween, parseJsonField, round2, storeUpload, toBool, toNum, today, unprocessable, usersWithPermission } from './util.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { businessDate, postingDate } from '../../lib/dates.js';
+import { originColumns, originOf, originWhere, withoutOriginFields } from '../../lib/origin.js';
 
 /** When a settlement is settled: its settlement date (not after today), else now. */
 const settledAt = async (settlement) => (settlement?.settlementDate ? postingDate(settlement.settlementDate) : new Date());
@@ -61,7 +62,8 @@ const BASE = `SELECT c.*, p.policy_number, p.inception_date, p.expiry_date, p.su
   pr.name AS product_name, pr.line AS product_line, hu.display_name AS handler_name, cl.client_code,
   (SELECT l.lead_number FROM leads l WHERE l.id = COALESCE(c.lead_id, p.lead_id)) AS lead_number,
   (SELECT q.quote_number FROM quotes q WHERE q.id = COALESCE(c.quote_id, p.quote_id)) AS quote_number,
-  (SELECT u.display_name FROM users u WHERE u.id = c.created_by OR u.username = c.created_by ORDER BY (u.id = c.created_by) DESC LIMIT 1) AS reported_by_name
+  (SELECT u.display_name FROM users u WHERE u.id = c.created_by OR u.username = c.created_by ORDER BY (u.id = c.created_by) DESC LIMIT 1) AS reported_by_name,
+  ${originColumns('c')}, p.origin AS policy_origin, p.legacy_number AS policy_legacy_number
   FROM claims c JOIN policies p ON p.id = c.policy_id
   LEFT JOIN clients cl ON cl.id = COALESCE(c.client_id, p.client_id)
   LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
@@ -124,6 +126,8 @@ export function toApi(r, labels, todayStr, open) {
     },
     lead: null, quotation: null,
     createdBy: r.created_by, createdAt: r.created_at, updatedAt: r.updated_at,
+    // a claim registered in BrokerVerse on a migrated policy is flagged with the policy's origin and legacy number
+    origin: originOf(r), policyOrigin: r.policy_origin || 'issued', policyLegacyNumber: r.policy_origin === 'migrated' ? r.policy_legacy_number : null,
   };
 }
 
@@ -238,6 +242,8 @@ export async function listClaims(q, pg) {
   if (q.policyId) add('(c.policy_id = ? OR p.policy_number = ?)', q.policyId, q.policyId);
   if (q.lob) add('upper(c.lob) = upper(?)', q.lob);
   if (q.handlerUserId) add('c.handler_user_id = ?', q.handlerUserId);
+  const origin = originWhere('c', q.origin, params);
+  if (origin) where.push(origin);
   if (q.dateFrom || q.startDate) add('c.reported_date >= ?::date', q.dateFrom || q.startDate);
   if (q.dateTo || q.endDate) add('c.reported_date <= ?::date', q.dateTo || q.endDate);
   const search = q.search || q.q;
@@ -408,6 +414,7 @@ const EDITABLE = {
 /** Update claim details / adjuster report (PUT /claims/:id). Allowed while registered or in review. */
 export async function updateClaim(id, input, user, files) {
   const before = await loadRow(id);
+  withoutOriginFields(input, before);
   if (!['registered', 'in-review'].includes(before.status)) throw conflict(`Claim is ${before.status}; it can no longer be edited`);
   const sets = [];
   const params = [];

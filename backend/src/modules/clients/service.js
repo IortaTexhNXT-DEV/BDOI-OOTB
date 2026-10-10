@@ -5,6 +5,7 @@ import { assertBirthDate } from '../../lib/birthDate.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { isoDate, today } from '../../lib/dates.js';
 import { fillRegion } from '../../lib/address.js';
+import { ORIGIN_FIELDS, originColumns, originOf, originWhere, withoutOriginFields } from '../../lib/origin.js';
 import { refreshKycStatus, saveOwner, saveSignatory } from './kyc.js';
 
 const FIELD_MAP = {
@@ -19,14 +20,14 @@ const FIELD_MAP = {
   businessNature: 'business_nature', incorporationCountry: 'incorporation_country', isPep: 'is_pep', pepDetails: 'pep_details', expectedLines: 'expected_lines',
   expectedPaymentMode: 'expected_payment_mode', expectedAnnualPremium: 'expected_annual_premium', onboardedVia: 'onboarded_via',
 };
-const KNOWN = new Set([...Object.keys(FIELD_MAP), 'DOB', 'email', 'phone', 'clientId', 'id', 'generatedClientId', 'policies', 'createdAt', 'updatedAt', 'leadId',
+const KNOWN = new Set([...Object.keys(FIELD_MAP), ...ORIGIN_FIELDS, 'DOB', 'email', 'phone', 'clientId', 'id', 'generatedClientId', 'policies', 'createdAt', 'updatedAt', 'leadId',
   // derived or set by the onboarding route, never stored from a request body
   'kycStatus', 'riskRating', 'riskScore', 'kycNextReviewOn', 'onboardedAt', 'signatories', 'beneficialOwners']);
 
 export function toClient(r, policies = null) {
   if (!r) return null;
   return {
-    ...(r.extra || {}),
+    ...Object.fromEntries(Object.entries(r.extra || {}).filter(([k]) => !ORIGIN_FIELDS.includes(k))),
     id: r.id, clientId: r.id, generatedClientId: r.client_code, clientCode: r.client_code, clientType: r.client_type,
     firstName: r.first_name, lastName: r.last_name, preferredName: r.preferred_name, companyName: r.company_name,
     displayName: r.display_name, fullName: r.display_name, taxNumber: r.tin, emailId: r.email, email: r.email,
@@ -44,6 +45,7 @@ export function toClient(r, policies = null) {
     incorporationCountry: r.incorporation_country ?? null, isPep: !!r.is_pep, pepDetails: r.pep_details ?? null, expectedLines: r.expected_lines || [],
     expectedPaymentMode: r.expected_payment_mode ?? null, expectedAnnualPremium: r.expected_annual_premium === null || r.expected_annual_premium === undefined ? null : Number(r.expected_annual_premium),
     kycStatus: r.kyc_status ?? null, onboardedVia: r.onboarded_via ?? null, onboardedAt: r.onboarded_at ?? null,
+    origin: originOf(r),
   };
 }
 
@@ -52,7 +54,7 @@ const POLICIES_JSON = `COALESCE((SELECT json_agg(json_build_object('policyId', p
   FROM policies p WHERE p.client_id = c.id), '[]') AS policies`;
 
 export async function getClient(id) {
-  const r = await one(`SELECT c.*, ${POLICIES_JSON} FROM clients c WHERE c.id = $1 OR c.client_code = $1`, [id]);
+  const r = await one(`SELECT c.*, ${POLICIES_JSON}, ${originColumns('c')} FROM clients c WHERE c.id = $1 OR c.client_code = $1`, [id]);
   if (!r) throw notFound('Client not found');
   return r;
 }
@@ -102,10 +104,12 @@ export async function listClients(q, pg) {
   if (q.status) add('c.status = ?', q.status);
   // individual / corporate by the client type (a company may still carry the Retail lead category of its prospect)
   if (q.clientType) add("lower(c.client_type) = lower(?)", String(q.clientType));
+  const origin = originWhere('c', q.origin, params);
+  if (origin) where.push(origin);
   if (q[SCOPE]) where.push(scopeSql(q[SCOPE], 'client', 'c', params));
   const w = where.join(' AND ');
   const total = (await one(`SELECT count(*)::int AS n FROM clients c WHERE ${w}`, params)).n;
-  const rows = await many(`SELECT c.*, ${POLICIES_JSON} FROM clients c WHERE ${w} ORDER BY c.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+  const rows = await many(`SELECT c.*, ${POLICIES_JSON}, ${originColumns('c')} FROM clients c WHERE ${w} ORDER BY c.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
     [...params, pg.limit, pg.offset]);
   return { total, rows };
 }
@@ -151,7 +155,7 @@ export async function createClientInTx(db, body, userId) {
 
 export async function updateClient(id, body, userId) {
   const before = await getClient(id);
-  const { cols, extra } = columnsFrom(body);
+  const { cols, extra } = columnsFrom(withoutOriginFields(body, before));
   await assertBirthDate(cols.birth_date);
   await fillRegion(cols);
   const next = { ...before, ...cols };

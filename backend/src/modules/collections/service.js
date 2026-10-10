@@ -14,6 +14,7 @@ import { ensureBooked, findPolicy } from '../receipts/receivables.js';
 import { allocate, isCoInsured, policyParticipants } from '../accounting/lib/coinsurance.js';
 import { companyName } from '../../lib/letterhead.js';
 import { oldBillNumber } from '../receipts/opening.js';
+import { originColumns, originOf, originParam } from '../../lib/origin.js';
 
 async function thresholds() {
   const buckets = (await getSetting('limits.receivable_ageing_buckets', [30, 60, 90, 120])) || [30, 60, 90];
@@ -25,6 +26,7 @@ async function thresholds() {
 /** Base query; $1..$7 = b1, b2, b3, l1, l2, window, today (business date in general.timezone, not the DB current_date). */
 const BASE = `SELECT * FROM (SELECT ci.*, r.bill_number, r.amount, r.balance, r.due_date, r.status AS receivable_status, r.net_premium, r.vat, r.dst, r.lgt, r.other_charges,
     r.discount, r.source AS receivable_source, r.reference AS receivable_reference, r.currency, GREATEST($7::date - r.due_date, 0) AS dpd,
+    r.origin, r.legacy_system, r.legacy_number, r.migrated_at, r.load_batch_id, ${originColumns('r')}, p.origin AS policy_origin, p.legacy_number AS policy_legacy_number,
     p.policy_number, p.status AS policy_status, p.inception_date, p.expiry_date, p.owner_user_id, c.client_code, c.first_name, c.last_name, c.display_name, c.email, c.phone,
     ic.name AS insurer_name, pr.name AS product_name,
     (SELECT count(*)::int FROM risk_participants rp WHERE rp.entity_type = 'policy' AND rp.entity_id = p.id AND rp.status = 'active') AS participant_count,
@@ -58,6 +60,7 @@ export const itemRow = (x) => ({
   dueDate: x.due_date, daysPastDue: x.dpd, days: x.dpd, overdueLevel: x.overdue_level, collectionStatus: x.collection_status, commitmentDate: x.commitment_date,
   commitmentReason: x.commitment_reason, escalatedAt: x.escalated_at, lastFollowUpAt: x.last_follow_up_at, lastReminderAt: x.last_reminder_at, currency: x.currency,
   isCoInsurancePolicy: x.participant_count > 1, coInsuranceCollectionRows: [],
+  origin: originOf(x), policyOrigin: x.policy_origin || 'issued', policyLegacyNumber: x.policy_origin === 'migrated' ? x.policy_legacy_number : null,
 });
 
 /**
@@ -87,6 +90,7 @@ function filters(q) {
   if (q.overdueLevel) add('overdue_level = ?::int', Number(q.overdueLevel));
   if (q.clientId) add('(client_id = ? OR client_code = ?)', q.clientId);
   if (q.policyId) add('(policy_id = ? OR policy_number = ?)', q.policyId);
+  if (originParam(q.origin)) add('origin = ?', originParam(q.origin));
   if (q.search) add('(COALESCE(display_name,\'\') || \' \' || COALESCE(policy_number,\'\') || \' \' || COALESCE(client_code,\'\') || \' \' || COALESCE(bill_number,\'\')) ILIKE \'%\' || ? || \'%\'', q.search);
   return { where: where.length ? `WHERE ${where.join(' AND ')}` : '', params: p };
 }

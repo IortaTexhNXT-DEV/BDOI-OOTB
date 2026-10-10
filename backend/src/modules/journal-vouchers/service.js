@@ -12,12 +12,14 @@ import { MANUAL_SOURCES, assertPeriodOpen, createJournal, postJournal, reverseJo
 import { assertCostCentres } from '../accounting/lib/costCentre.js';
 import { assertChecker, isoDate, num, round2, today } from '../accounting/lib/http.js';
 import { assertAuthority } from '../access-control/service.js';
+import { originColumns, originOf, originParam } from '../../lib/origin.js';
 
 export const headerRow = (j) => ({
   id: j.id, journalVoucherId: j.id, transactionCode: j.transaction_code, transactionNumber: j.jv_number, transactionDescription: j.description, description: j.description,
   date: j.jv_date, voucherDate: j.jv_date, totalDebit: Number(j.total_debit), totalCredit: Number(j.total_credit), status: j.status, kind: j.kind, source: j.source,
   requiresApproval: j.requires_approval, createdBy: j.created_by, createdAt: j.created_at, approvedBy: j.approved_by, approvedAt: j.approved_at, postedAt: j.posted_at,
   rejectedBy: j.rejected_by, rejectionReason: j.rejection_reason, reversalOf: j.reversal_of, correctionOf: j.correction_of, reversedBy: j.reversed_by_jv,
+  origin: originOf(j),
 });
 export const lineRow = (l, j) => ({
   ...headerRow(j), id: String(l.id), lineId: String(l.id), lineNo: l.line_no, accountCode: l.account_code, accountName: l.account_name,
@@ -29,7 +31,7 @@ export const lineRow = (l, j) => ({
 });
 
 export async function getJv(db, ref, lock = false) {
-  const j = (await db.query(`SELECT * FROM journal_vouchers WHERE id = $1 OR jv_number = $1${lock ? ' FOR UPDATE' : ''}`, [String(ref)])).rows[0];
+  const j = (await db.query(`SELECT j.*, ${originColumns('j')} FROM journal_vouchers j WHERE j.id = $1 OR j.jv_number = $1${lock ? ' FOR UPDATE' : ''}`, [String(ref)])).rows[0];
   if (!j) throw notFound('Journal voucher not found');
   return j;
 }
@@ -49,11 +51,12 @@ export async function history(db, q, pg) {
   if (q.transactionNumber) add('jv_number ILIKE \'%\' || ? || \'%\'', q.transactionNumber);
   if (q.status) add('status = ?', q.status);
   if (q.kind) add('kind = ?', q.kind);
+  if (originParam(q.origin)) add('origin = ?', originParam(q.origin));
   if (q.fromDate) add('jv_date >= ?::date', isoDate(q.fromDate));
   if (q.toDate) add('jv_date <= ?::date', isoDate(q.toDate));
   const w = where.length ? `WHERE ${where.join(' AND ')}` : '';
   const total = (await db.query(`SELECT count(*)::int AS n FROM journal_vouchers ${w}`, p)).rows[0].n;
-  const rows = (await db.query(`SELECT * FROM journal_vouchers ${w} ORDER BY jv_date DESC, created_at DESC LIMIT $${p.length + 1} OFFSET $${p.length + 2}`, [...p, pg.limit, pg.offset])).rows;
+  const rows = (await db.query(`SELECT j.*, ${originColumns('j')} FROM journal_vouchers j ${w} ORDER BY jv_date DESC, created_at DESC LIMIT $${p.length + 1} OFFSET $${p.length + 2}`, [...p, pg.limit, pg.offset])).rows;
   return { rows: rows.map(headerRow), total };
 }
 
