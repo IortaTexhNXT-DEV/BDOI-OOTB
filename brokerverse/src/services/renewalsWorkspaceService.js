@@ -84,6 +84,22 @@ const renewalsWorkspaceService = {
   reinstate: (id, note) => call("POST", `${id}/reinstate`, { note }),
   winBack: (id, payload) => call("POST", `${id}/win-back`, payload),
   escalate: (id, note) => call("POST", `${id}/escalate`, { note }),
+  /** Users a renewal can be reassigned to ([{ id, name }]). */
+  getAssignees: () => call("GET", "assignees"),
+  reassign: (id, toUserId, reason) => call("POST", `${id}/reassign`, { toUserId, ...reason }),
+  notForRenewal: (id, reason) => call("POST", `${id}/not-for-renewal`, reason),
+  /** Lock-in and Scheme 2 accounts of the review window ({ asOf, days, to, items, sources, loanStatuses, treatments }). */
+  getLockIns: (params = {}) => call("GET", `lock-ins${queryString(params)}`),
+  /** The lock-in accounts extract as an Excel workbook (Blob). */
+  async lockInsWorkbook(params = {}) {
+    const response = await fetch(`${BASE_URL}/renewals/lock-ins${queryString({ ...params, format: "excel" })}`, { headers: authService.getAuthHeader() });
+    if (!response.ok) {
+      const json = await response.json().catch(() => ({}));
+      throw new Error(apiErrorMessage(json, response.status));
+    }
+    return response.blob();
+  },
+  setLoanStatus: (policyId, loanStatus, note) => call("PUT", `lock-ins/${encodeURIComponent(policyId)}/loan-status`, { loanStatus, note }),
 
   getAtRisk: () => call("GET", "at-risk"),
   async getNegotiations() {

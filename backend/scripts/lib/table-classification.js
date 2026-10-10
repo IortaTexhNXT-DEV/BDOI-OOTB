@@ -64,6 +64,8 @@ export const TRANSACTION_TABLES = [
   // operations and accounting (migrations 0290 to 0297): cover notes, post-dated cheques, claim document checklist and
   // reminders, motor claim repairs, accounts payable, fixed assets and their depreciation (masters are generic types)
   'cover_notes', 'post_dated_cheques', 'pdc_sets', 'pdc_transmittals', 'remittance_holds', 'claim_document_items', 'claim_document_reminders', 'claim_repair_estimates', 'claim_loas', 'claim_vehicle_releases',
+  // claim settlements (partial and final) and the claim communication log; the lock-in of a policy term (migrations 0501, 0503)
+  'claim_settlements', 'claim_communications', 'policy_lock_ins',
   'supplier_invoices', 'supplier_invoice_lines', 'supplier_payments', 'supplier_payment_allocations', 'fixed_assets', 'fixed_asset_depreciation',
   // distribution and products: lead assignments, channel billing accounts, dealer sales, fleet schedules, marine open
   // covers, comparison reports, marketing campaigns (assignment rules, channels, programmes, segments, templates and

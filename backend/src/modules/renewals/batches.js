@@ -6,19 +6,22 @@ import { round2 } from '../claims/util.js';
 import { enqueue, registerJobType } from './queue.js';
 import { ensureRenewal, generateQuote, renewablePolicies, sendNotice } from './service.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
+import { LOCK_IN_COLUMNS, gateContext, gatedPolicies, treatmentOf } from './noticeGate.js';
 
 export const QUEUE = 'renewal-notices';
 export const JOB_TYPE = 'renewal-batch-notices';
 export const QUOTE_JOB_TYPE = 'renewal-batch-quotes';
 
-const POLICY_COLS = `bp.*, p.policy_number, p.expiry_date, p.premium_total, p.status AS policy_status, cl.display_name AS client_name, cl.email AS client_email,
-  ic.name AS insurer_name, pr.name AS product_name,
+const POLICY_COLS = `bp.*, p.policy_number, p.expiry_date, p.premium_total, p.status AS policy_status, p.lob, p.product_type, cl.display_name AS client_name, cl.email AS client_email,
+  ic.name AS insurer_name, pr.name AS product_name, pr.line AS product_line, ${LOCK_IN_COLUMNS},
   (SELECT COALESCE(sum(rv.balance), 0) FROM receivables rv WHERE rv.policy_id = p.id AND rv.balance > 0 AND rv.status NOT IN ('paid','written-off'))::numeric AS unpaid`;
 const POLICY_FROM = `FROM renewal_batch_policies bp JOIN policies p ON p.id = bp.policy_id LEFT JOIN clients cl ON cl.id = p.client_id
-  LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id LEFT JOIN products pr ON pr.id = p.product_id`;
+  LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id LEFT JOIN products pr ON pr.id = p.product_id
+  LEFT JOIN policy_lock_ins lk ON lk.policy_id = p.id`;
 
-const policyApi = (r) => ({
+const policyApi = (r, gate) => ({
   id: r.id, policyId: r.policy_id, renewalId: r.renewal_id, isSelected: r.is_selected, noticeStatus: r.notice_status, noticeSentAt: r.notice_sent_at,
+  noticeTreatment: gate ? treatmentOf(r, gate) : null,
   error: r.error, attempts: r.attempts, createdAt: r.created_at,
   quoteStatus: r.quote_status, quoteNumber: r.quote_number, quotedPremium: r.quoted_premium, quotedAt: r.quoted_at,
   policy: {
@@ -30,13 +33,14 @@ const policyApi = (r) => ({
 const batchApi = (b) => ({
   id: b.id, batchId: b.batch_number, batchNumber: b.batch_number, status: b.status, criteriaOption: b.criteria || {},
   totalPolicies: b.total_policies ?? 0, processedCount: b.sent_count ?? 0, sentCount: b.sent_count ?? 0, failedCount: b.failed_count ?? 0,
-  queuedCount: b.queued_count ?? 0, notSentCount: b.not_sent_count ?? 0, quotedCount: b.quoted_count ?? 0, selectedCount: b.selected_count ?? 0, createdBy: b.created_by, createdAt: b.created_at, updatedAt: b.updated_at, completedAt: b.completed_at,
+  queuedCount: b.queued_count ?? 0, notSentCount: b.not_sent_count ?? 0, skippedCount: b.skipped_count ?? 0, quotedCount: b.quoted_count ?? 0, selectedCount: b.selected_count ?? 0, createdBy: b.created_by, createdAt: b.created_at, updatedAt: b.updated_at, completedAt: b.completed_at,
 });
 const COUNTS = `(SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id)::int AS total_policies,
   (SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id AND x.notice_status = 'Sent')::int AS sent_count,
   (SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id AND x.notice_status = 'Failed')::int AS failed_count,
   (SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id AND x.notice_status = 'Queued')::int AS queued_count,
   (SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id AND x.notice_status = 'NotSent')::int AS not_sent_count,
+  (SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id AND x.notice_status = 'Skipped')::int AS skipped_count,
   (SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id AND x.quote_status = 'Quoted')::int AS quoted_count,
   (SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id AND x.is_selected)::int AS selected_count`;
 
@@ -103,7 +107,8 @@ export async function listBatches(q, pg) {
 export async function getBatch(id) {
   const b = await loadBatch(id);
   const policies = await many(`SELECT ${POLICY_COLS} ${POLICY_FROM} WHERE bp.batch_id = $1 ORDER BY p.expiry_date, p.policy_number`, [b.id]);
-  return { ...batchApi(b), policies: policies.map(policyApi) };
+  const gate = await gateContext();
+  return { ...batchApi(b), policies: policies.map((x) => policyApi(x, gate)) };
 }
 
 export async function batchPolicies(id, q, pg) {
@@ -114,7 +119,8 @@ export async function batchPolicies(id, q, pg) {
   if (q.isSelected !== undefined) { params.push(String(q.isSelected) === 'true'); w += ` AND bp.is_selected = $${params.length}`; }
   const total = (await one(`SELECT count(*)::int AS n FROM renewal_batch_policies bp WHERE ${w}`, params)).n;
   const rows = await many(`SELECT ${POLICY_COLS} ${POLICY_FROM} WHERE ${w} ORDER BY p.expiry_date, p.policy_number LIMIT $${params.length + 1} OFFSET $${params.length + 2}`, [...params, pg.limit, pg.offset]);
-  return { total, items: rows.map(policyApi) };
+  const gate = await gateContext();
+  return { total, items: rows.map((x) => policyApi(x, gate)) };
 }
 
 export async function updateBatch(id, input) {
@@ -141,16 +147,30 @@ export async function setSelection(id, policyRef, isSelected) {
   return (await getBatch(b.id)).policies.find((p) => p.id === r.id);
 }
 
-/** Queue notices for the selected policies (NotSent only); processed by the renewal-batch-notices job. */
+/**
+ * Queue notices for the selected policies (NotSent only); processed by the renewal-batch-notices job. A policy whose
+ * notices are suppressed or held (notice gate) is not queued: its line is Skipped with the reason (FR-LCK-012).
+ */
 export async function queueNotices(id, policyRefs, user) {
   const b = await loadBatch(id);
   if (b.status === 'Cancelled') throw conflict('Batch is cancelled');
   const refs = (policyRefs || []).map(String);
   if (!refs.length) throw badRequest('Select at least one policy to send renewal notices');
-  const rows = await many(`UPDATE renewal_batch_policies bp SET is_selected = true, notice_status = 'Queued', error = NULL FROM policies p
-    WHERE bp.batch_id = $1 AND p.id = bp.policy_id AND (p.id = ANY($2) OR p.policy_number = ANY($2) OR bp.id::text = ANY($2)) AND bp.notice_status = 'NotSent' RETURNING bp.id`, [b.id, refs]);
-  if (!rows.length) throw conflict('None of the selected policies is waiting for a notice');
-  return startJob(b, rows.map((r) => r.id), user);
+  const lines = await many(`SELECT bp.id, bp.policy_id FROM renewal_batch_policies bp JOIN policies p ON p.id = bp.policy_id
+    WHERE bp.batch_id = $1 AND (p.id = ANY($2) OR p.policy_number = ANY($2) OR bp.id::text = ANY($2)) AND bp.notice_status = 'NotSent'`, [b.id, refs]);
+  if (!lines.length) throw conflict('None of the selected policies is waiting for a notice');
+  const gated = await gatedPolicies(lines.map((l) => l.policy_id));
+  for (const l of lines.filter((x) => gated.has(x.policy_id))) {
+    const t = gated.get(l.policy_id);
+    await query('UPDATE renewal_batch_policies SET is_selected = true, notice_status = \'Skipped\', error = $2 WHERE id = $1', [l.id, `${t.label}: ${t.reason}`]);
+  }
+  const queued = lines.filter((x) => !gated.has(x.policy_id)).map((x) => x.id);
+  if (!queued.length) {
+    await settleBatch(b.id);
+    return { jobId: null, queued: 0, skipped: lines.length, batchId: b.batch_number };
+  }
+  await query('UPDATE renewal_batch_policies SET is_selected = true, notice_status = \'Queued\', error = NULL WHERE id = ANY($1)', [queued]);
+  return { ...(await startJob(b, queued, user)), skipped: lines.length - queued.length };
 }
 
 export async function retryFailed(id, user) {
@@ -186,6 +206,13 @@ export async function runBatchNoticesJob(payload, { progress }) {
   for (const itemId of itemIds) {
     const item = await one('SELECT * FROM renewal_batch_policies WHERE id = $1', [itemId]);
     if (item && item.notice_status === 'Queued') {
+      // the gate is asked again just before sending: a loan status set since queueing skips the line (FR-LCK-022)
+      const gated = (await gatedPolicies([item.policy_id])).get(item.policy_id);
+      if (gated) {
+        await query('UPDATE renewal_batch_policies SET notice_status = \'Skipped\', error = $2 WHERE id = $1', [itemId, `${gated.label}: ${gated.reason}`]);
+        await progress({ processed: succeeded + failed, succeeded, failed });
+        continue;
+      }
       try {
         const { id: renewalId } = await ensureRenewal(item.policy_id, user);
         await sendNotice(renewalId, user, { batchId, method: 'Email' });
@@ -241,7 +268,7 @@ registerJobType(QUOTE_JOB_TYPE, runBatchQuotesJob);
 export async function noticeStatus(id) {
   const b = await loadBatch(id);
   return { batchId: b.batch_number, status: b.status, total: b.total_policies, NotSent: b.not_sent_count, Queued: b.queued_count, Sent: b.sent_count, Failed: b.failed_count,
-    notSent: b.not_sent_count, queued: b.queued_count, sent: b.sent_count, failed: b.failed_count, quoted: b.quoted_count };
+    Skipped: b.skipped_count, notSent: b.not_sent_count, queued: b.queued_count, sent: b.sent_count, failed: b.failed_count, skipped: b.skipped_count, quoted: b.quoted_count };
 }
 
 export async function statistics(id) {

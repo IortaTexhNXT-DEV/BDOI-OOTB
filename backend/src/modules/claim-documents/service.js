@@ -19,6 +19,7 @@ import { notify } from '../notifications/service.js';
 import { emailTemplate, renderTemplate } from '../documents/common.js';
 import { activeRecords } from '../ops-masters/records.js';
 import { scopeSql } from '../../lib/scope.js';
+import { DEFAULT_FORMAT, formatDate } from '../../lib/pdf/format.js';
 
 const esc = (v) => String(v).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 const matches = (rule, value) => !rule || rule === '*' || String(rule).trim().toLowerCase() === String(value || '').trim().toLowerCase();
@@ -162,15 +163,36 @@ export async function remind(db, ref, b = {}, user = null, { automatic = false }
 export async function submitToInsurer(db, ref, b, user) {
   const list = await checklist(db, ref);
   if (list.submittedToInsurerAt) throw conflict(`Claim ${list.claimNumber} was already submitted to the insurer`);
-  if (['rejected', 'closed'].includes(list.status)) throw conflict(`Claim ${list.claimNumber} is ${list.status}`);
+  if (['rejected', 'closed', 'cancelled'].includes(list.status)) throw conflict(`Claim ${list.claimNumber} is ${list.status}`);
   const missing = list.items.filter((i) => i.required && i.status === 'pending');
   if (list.requireComplete && missing.length) {
     throw conflict(`Claim ${list.claimNumber} cannot be submitted to the insurer: required documents missing (${missing.map((m) => m.documentName).join('; ')})`);
   }
   await db.query('UPDATE claims SET submitted_to_insurer_at = now(), submitted_to_insurer_by = $2, updated_at = now() WHERE id = $1', [list.claimId, user?.username ?? user?.id ?? null]);
+  const mail = await mailInsurer(db, list, b);
   await db.query('INSERT INTO claim_history(claim_id, by_user, status, note) VALUES ($1,$2,$3,$4)', [list.claimId, user?.username ?? null, list.status,
-    `Claim file submitted to the insurer${b.reference ? ` (${b.reference})` : ''}${missing.length ? `; ${missing.length} required document(s) to follow` : ''}${b.note ? `: ${b.note}` : ''}`]);
-  return checklist(db, list.claimId);
+    `Claim file submitted to the insurer${b.reference ? ` (${b.reference})` : ''}${mail ? ` by e-mail to ${mail.to}` : ''}${missing.length ? `; ${missing.length} required document(s) to follow` : ''}${b.note ? `: ${b.note}` : ''}`]);
+  return { ...(await checklist(db, list.claimId)), insurerEmail: mail };
+}
+
+/**
+ * The claim file to the insurer's claims address (FGA CM-03): policy reference, insured, date of loss and the documents
+ * submitted (received or waived), template claim_insurer_submission. Null when no address is known.
+ */
+async function mailInsurer(db, list, b) {
+  const c = (await db.query(`SELECT c.loss_date, ic.name AS insurer_name, ic.contact_email FROM claims c JOIN policies p ON p.id = c.policy_id
+    LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id WHERE c.id = $1`, [list.claimId])).rows[0];
+  const to = b.to || c?.contact_email || await getSetting('claims.pla_default_recipient', null);
+  if (!to) return null;
+  const t = await emailTemplate('claim_insurer_submission');
+  const TOKEN = 'DOCUMENTLISTTOKEN';
+  const v = { insurerName: c?.insurer_name || '', insuredName: list.claimantName || '', policyNumber: list.policyNumber, claimNumber: list.claimNumber,
+    lossDate: c?.loss_date ? formatDate(c.loss_date, { ...DEFAULT_FORMAT, dateFormat: (await getSetting('general.date_format', DEFAULT_FORMAT.dateFormat)) || DEFAULT_FORMAT.dateFormat }) : '',
+    note: b.note || '', companyName: await companyName(), documentList: TOKEN };
+  const items = list.items.filter((i) => i.status !== 'pending').map((i) => `<li>${esc(i.documentName)}${i.status === 'waived' ? ' (waived)' : ''}</li>`).join('') || '<li>-</li>';
+  const emailId = await queueEmail({ db, to, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v).replace(TOKEN, items),
+    template: 'claim_insurer_submission', entity: 'claim', entityId: list.claimId });
+  return { to, emailId, documents: list.items.filter((i) => i.status !== 'pending').map((i) => i.documentName) };
 }
 
 /** Daily job: remind claimants of open claims with required documents missing, every claims.document_reminder_days days. */

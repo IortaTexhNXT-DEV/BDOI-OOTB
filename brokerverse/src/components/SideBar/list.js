@@ -292,6 +292,13 @@ export const menuList = [
             includes: ["/renewal/at-risk"],
           },
           {
+            id: 7,
+            name: "Lock-in Accounts",
+            path: "/renewal/lock-in-accounts",
+            includes: ["/renewal/lock-in-accounts"],
+            permissions: ["read:renewals"],
+          },
+          {
             id: 4,
             name: "Negotiations",
             path: "/renewal/negotiations",

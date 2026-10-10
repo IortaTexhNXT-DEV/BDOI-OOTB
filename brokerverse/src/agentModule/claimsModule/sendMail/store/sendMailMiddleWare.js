@@ -108,6 +108,9 @@ export const postSendData = createAsyncThunk(
           claimThirdPartyData.estimatedClaimAmount || null,
         insuranceCompanyClaimNumber:
           claimThirdPartyData.insuranceCompanyClaimNumber || "",
+        fnolSource: claimThirdPartyData.fnolSource || "",
+        lossExtent: claimThirdPartyData.lossExtent || "",
+        confirmDuplicate: payload.confirmDuplicate ? "true" : "",
         isCoInsurance: Boolean(claimDetailsData.isCoInsurance),
         leadRefId: claimThirdPartyData.leadRefId || null,
         quoteRefId: claimThirdPartyData.quoteRefId || null,

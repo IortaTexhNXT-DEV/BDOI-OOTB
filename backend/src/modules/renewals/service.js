@@ -8,19 +8,23 @@ import { getSetting } from '../../lib/settings.js';
 import { formatMoney } from '../../lib/money.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
-import { decisionReason } from '../ops-masters/records.js';
+import { decisionReason, requiredReason } from '../ops-masters/records.js';
 import { notify } from '../notifications/service.js';
 import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { lobOf, num } from '../documents/common.js';
 import { renderTemplate } from '../claims/docs.js';
 import { quotationCharges } from '../premium-charges/service.js';
-import { daysBetween, round2, today, unprocessable, usersWithRole } from '../claims/util.js';
+import { assertApprovalLimit, daysBetween, round2, shownDate, today, unprocessable, usersWithRole } from '../claims/util.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { companyName } from '../../lib/letterhead.js';
 import { addDays, businessDate } from '../../lib/dates.js';
+import { workingDaysBetween } from '../../lib/workingCalendar.js';
+import { LOCK_IN_COLUMNS, assertNoticeAllowed, gateContext, lockInTerm, treatmentOf } from './noticeGate.js';
 
 export const OPEN = ['pipeline', 'notice-1', 'notice-2', 'final-notice', 'quoted', 'pending-approval', 'approved'];
+/** Closed renewals: renewed, lapsed, and not for renewal (a disposition of the renewal owner's unit). */
+export const CLOSED = ['renewed', 'lapsed', 'not-renewed'];
 const NOTICE_STATUS = ['notice-1', 'notice-2', 'final-notice'];
 const addYears = (d, n) => { const x = new Date(`${d}T00:00:00Z`); x.setUTCFullYear(x.getUTCFullYear() + n); return x.toISOString().slice(0, 10); };
 
@@ -37,8 +41,9 @@ export const BASE = `SELECT r.*, p.policy_number, p.inception_date, p.expiry_dat
      UNION ALL SELECT pp.renewed_from, ch.d + 1 FROM policies pp JOIN ch ON pp.id = ch.pid WHERE pp.renewed_from IS NOT NULL AND ch.d < 50)
    SELECT count(*) FROM ch)::int AS loyalty_years,
   (SELECT su.display_name FROM users su WHERE su.id = r.submitted_by) AS submitted_by_name,
-  (SELECT au.display_name FROM users au WHERE au.id = r.approved_by) AS approved_by_name
+  (SELECT au.display_name FROM users au WHERE au.id = r.approved_by) AS approved_by_name, ${LOCK_IN_COLUMNS}
   FROM renewals r JOIN policies p ON p.id = r.policy_id
+  LEFT JOIN policy_lock_ins lk ON lk.policy_id = p.id
   LEFT JOIN clients cl ON cl.id = COALESCE(r.client_id, p.client_id)
   LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
   LEFT JOIN products pr ON pr.id = p.product_id
@@ -55,6 +60,7 @@ export async function readContext() {
     weights: (await getSetting('renewals.risk_weights', {})) || {}, bands: (await getSetting('renewals.risk_bands', { Low: 0 })) || { Low: 0 },
     stages: (await getSetting('renewals.notice_stages', [])) || [],
     thresholds: { ...RISK_THRESHOLDS, ...((await getSetting('renewals.risk_thresholds', {})) || {}) },
+    gate: await gateContext(),
   };
 }
 
@@ -144,8 +150,9 @@ export function toApi(r, ctx) {
     loyaltyYears: r.loyalty_years, coverageDetails: r.coverage_details || {}, accessories: r.accessories, orderSummary: r.order_summary,
     policyLimits: r.policy_limits, premiumBreakdown: r.premium_breakdown, effectiveDate: r.effective_date, newExpiryDate: r.expiry_date,
     newPolicyId: r.new_policy_id, submittedBy: r.submitted_by_name, submittedAt: r.submitted_at, approvedBy: r.approved_by_name,
-    approvedAt: r.approved_at, approvalNote: r.approval_note, lapseReason: r.lapse_reason, lapseReasonCode: r.lapse_reason_code ?? null, lapsedAt: r.lapsed_at, renewedAt: r.renewed_at,
+    approvedAt: r.approved_at, approvalNote: r.approval_note, disposition: r.disposition || null, lapseReason: r.lapse_reason, lapseReasonCode: r.lapse_reason_code ?? null, lapsedAt: r.lapsed_at, renewedAt: r.renewed_at,
     remarks: r.remarks, createdAt: r.created_at, updatedAt: r.updated_at,
+    noticeTreatment: ctx.gate ? treatmentOf(r, ctx.gate) : null, lockIn: ctx.gate ? lockInTerm(r, ctx.gate) : null,
     policy: {
       id: r.policy_id, policyId: r.policy_id, policyNumber: r.policy_number, clientId: r.client_id || r.policy_client_id,
       insuredName: r.client_name, clientName: r.client_name, insuranceCompanyName: r.insurer_name, productType: r.product_name,
@@ -166,12 +173,15 @@ export async function getRenewal(id, { withDetail = true } = {}) {
   const r = toApi(await loadRow(id), ctx);
   if (!withDetail) return r;
   r.quotes = (await many('SELECT * FROM renewal_quotes WHERE renewal_id = $1 ORDER BY created_at DESC', [r.id])).map(quoteApi);
-  r.notices = await many(`SELECT stage, notice_type AS "noticeType", method, recipient, status, error, sent_by AS "sentBy", sent_at AS "sentAt", batch_id AS "batchId"
-    FROM renewal_notices WHERE renewal_id = $1 ORDER BY stage`, [r.id]);
-  r.activities = (await many('SELECT * FROM renewal_activities WHERE renewal_id = $1 ORDER BY at, id', [r.id])).map(activityApi);
+  r.notices = await many(`SELECT n.stage, n.notice_type AS "noticeType", n.method, n.recipient, n.status, n.error, COALESCE(u.display_name, n.sent_by) AS "sentBy",
+      n.sent_at AS "sentAt", n.batch_id AS "batchId"
+    FROM renewal_notices n LEFT JOIN users u ON u.username = n.sent_by WHERE n.renewal_id = $1 ORDER BY n.stage`, [r.id]);
+  r.activities = (await many(`${ACTIVITY_SQL} WHERE a.renewal_id = $1 ORDER BY a.at, a.id`, [r.id])).map(activityApi);
   return r;
 }
-export const activityApi = (a) => ({ id: a.id, date: a.at, at: a.at, type: a.activity_type, method: a.method, description: a.description, outcome: a.outcome, nextAction: a.next_action, followUpDate: a.follow_up_date, by: a.by_user, ...(a.details || {}) });
+/** Renewal activities with the name of the user who recorded them (by_user holds the username). */
+export const ACTIVITY_SQL = 'SELECT a.*, u.display_name AS by_name FROM renewal_activities a LEFT JOIN users u ON u.username = a.by_user';
+export const activityApi = (a) => ({ id: a.id, date: a.at, at: a.at, type: a.activity_type, method: a.method, description: a.description, outcome: a.outcome, nextAction: a.next_action, followUpDate: a.follow_up_date, by: a.by_name || a.by_user, ...(a.details || {}) });
 
 /** List for GET /policy-renewals and the workspace queue: filters clientId, policyId, status, risk, agent, search, from/to, open. */
 export async function listRenewals(q, pg) {
@@ -226,6 +236,10 @@ export function policyRenewalState(p, ctx) {
       message: `Policy ${p.policy_number} was already renewed${p.new_policy_number ? ` as policy ${p.new_policy_number}` : ''}` };
   }
   if (p.status === 'cancelled') return { ...base, state: 'cancelled', label: 'Cancelled', message: `Policy ${p.policy_number} is cancelled` };
+  if (p.not_renewed_id && !p.open_renewal_id) {
+    return { ...base, state: 'not-renewed', label: 'Not for renewal', renewalId: p.not_renewed_id, renewalNumber: p.not_renewed_number,
+      message: `Policy ${p.policy_number} was marked not for renewal (renewal ${p.not_renewed_number}); reinstate that renewal to renew it` };
+  }
   const renewalType = days >= 0 ? 'regular' : -days <= ctx.grace ? 'grace' : 'lapsed';
   if (p.open_renewal_id) {
     return { ...base, state: 'in-progress', label: 'Renewal in progress', canRenew: true, renewalType, renewalId: p.open_renewal_id,
@@ -245,12 +259,13 @@ export function policyRenewalState(p, ctx) {
 /** Return the open renewal of a policy, creating it (status pipeline) when there is none and the policy is renewable. */
 export async function ensureRenewal(policyRef, user) {
   const policy = await resolvePolicy(policyRef);
-  const existing = await one(`SELECT id FROM renewals WHERE policy_id = $1 AND status <> ALL($2) ORDER BY created_at DESC LIMIT 1`, [policy.id, ['renewed', 'lapsed']]);
+  const existing = await one(`SELECT id FROM renewals WHERE policy_id = $1 AND status <> ALL($2) ORDER BY created_at DESC LIMIT 1`, [policy.id, CLOSED]);
   if (existing) return { id: existing.id, created: false, policy };
   const ctx = await readContext();
   const next = policy.renewed_to ? await one('SELECT policy_number FROM policies WHERE id = $1', [policy.renewed_to]) : null;
-  const st = policyRenewalState({ ...policy, new_policy_number: next?.policy_number }, ctx);
-  if (st.state === 'renewed' || st.state === 'cancelled') throw conflict(st.message);
+  const declined = await one("SELECT id, renewal_number FROM renewals WHERE policy_id = $1 AND status = 'not-renewed' ORDER BY created_at DESC LIMIT 1", [policy.id]);
+  const st = policyRenewalState({ ...policy, new_policy_number: next?.policy_number, not_renewed_id: declined?.id, not_renewed_number: declined?.renewal_number }, ctx);
+  if (['renewed', 'cancelled', 'not-renewed'].includes(st.state)) throw conflict(st.message);
   if (!st.canRenew) throw unprocessable(st.message);
   // a lapsed renewal is not backdated: the new term starts on the renewal date
   const effective = st.renewalType === 'lapsed' ? ctx.todayStr : null;
@@ -263,7 +278,7 @@ export async function ensureRenewal(policyRef, user) {
     return { id: r.id, created: true, policy };
   } catch (e) {
     if (e.code === '23505') {
-      const again = await one('SELECT id FROM renewals WHERE policy_id = $1 AND status <> ALL($2) LIMIT 1', [policy.id, ['renewed', 'lapsed']]);
+      const again = await one('SELECT id FROM renewals WHERE policy_id = $1 AND status <> ALL($2) LIMIT 1', [policy.id, CLOSED]);
       if (again) return { id: again.id, created: false, policy };
     }
     throw e;
@@ -271,7 +286,8 @@ export async function ensureRenewal(policyRef, user) {
 }
 
 const UNPAID_SQL = "(SELECT COALESCE(sum(rv.balance), 0) FROM receivables rv WHERE rv.policy_id = p.id AND rv.balance > 0 AND rv.status NOT IN ('paid','written-off'))";
-const OPEN_RENEWAL = (col) => `(SELECT r.${col} FROM renewals r WHERE r.policy_id = p.id AND r.status <> ALL('{renewed,lapsed}') ORDER BY r.created_at DESC LIMIT 1)`;
+const NOT_RENEWED = (col) => `(SELECT r.${col} FROM renewals r WHERE r.policy_id = p.id AND r.status = 'not-renewed' ORDER BY r.created_at DESC LIMIT 1)`;
+const OPEN_RENEWAL = (col) => `(SELECT r.${col} FROM renewals r WHERE r.policy_id = p.id AND r.status <> ALL('{renewed,lapsed,not-renewed}') ORDER BY r.created_at DESC LIMIT 1)`;
 
 /**
  * Policies for the Renewal Policy list and the renewal batch, each with its renewal state. Filters: expiryFrom / expiryTo
@@ -302,7 +318,8 @@ export async function renewablePolicies(q = {}, pg = { limit: 500, offset: 0 }) 
   if (q[SCOPE]) where.push(scopeSql(q[SCOPE], 'policy', 'p', params));
   const rows = await many(`SELECT p.*, cl.display_name AS client_name, cl.client_code, ic.name AS insurer_name, pr.name AS product_name, pr.line AS product_line,
       ou.display_name AS sales_name, ${UNPAID_SQL}::numeric AS unpaid, np.policy_number AS new_policy_number,
-      ${OPEN_RENEWAL('id')} AS open_renewal_id, ${OPEN_RENEWAL('renewal_number')} AS open_renewal_number
+      ${OPEN_RENEWAL('id')} AS open_renewal_id, ${OPEN_RENEWAL('renewal_number')} AS open_renewal_number,
+      ${NOT_RENEWED('id')} AS not_renewed_id, ${NOT_RENEWED('renewal_number')} AS not_renewed_number
     FROM policies p LEFT JOIN clients cl ON cl.id = p.client_id LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
     LEFT JOIN products pr ON pr.id = p.product_id LEFT JOIN users ou ON ou.id = p.owner_user_id LEFT JOIN policies np ON np.id = p.renewed_to
     WHERE ${where.join(' AND ')} ORDER BY p.expiry_date, p.policy_number`, params);
@@ -338,12 +355,67 @@ export async function renewalOptions() {
   };
 }
 
+/** The terms submitted for approval are the terms the approver decides: they cannot change until the approver returns them. */
+export function assertTermsOpen(r) {
+  if (r.status === 'pending-approval') {
+    throw conflict(`Renewal ${r.renewal_number} is awaiting approval; its terms cannot change until the approver returns it`);
+  }
+}
+
+/**
+ * Continuity of cover (renewals.term_continuity): a regular or grace-period renewal term starts the day after the
+ * expiring term ends; a lapsed renewal is not backdated (it starts on or after the renewal date). The term ends after it
+ * starts. Throws 422 with the field errors.
+ */
+export async function termDateErrors(r, effective, expiry) {
+  const errors = [];
+  const start = effective || r.effective_date || null;
+  if (effective && await getSetting('renewals.term_continuity', true)) {
+    const lapsed = (r.renewal_type || 'regular') === 'lapsed';
+    const due = addDays(r.policy_expiry ?? r.expiry_date, 1);
+    if (!lapsed && effective !== due) {
+      errors.push({ path: 'effectiveDate', message: `The renewal term starts on ${await shownDate(due)}, the day after the expiring term ends` });
+    } else if (lapsed && effective < await today()) {
+      errors.push({ path: 'effectiveDate', message: 'A lapsed renewal starts on the renewal date or later; it cannot be backdated' });
+    }
+  }
+  if (start && expiry && expiry <= start) errors.push({ path: 'expiryDate', message: 'The renewal term must end after it starts' });
+  return errors;
+}
+async function assertTermDates(r, effective, expiry) {
+  const errors = await termDateErrors(r, effective, expiry);
+  if (errors.length) throw unprocessable(errors.length === 1 ? errors[0].message : 'Check the highlighted fields', errors);
+}
+
+/**
+ * The quote the renewal premium comes from: the renewal quotation of the wizard (premium_breakdown.quoteId) or the
+ * latest re-rated quote. { number, validUntil } or null.
+ */
+export async function currentQuote(r) {
+  const qid = r.premium_breakdown?.quoteId;
+  if (qid) {
+    const q = await one('SELECT quote_number, valid_until FROM quotes WHERE id = $1', [qid]);
+    if (q) return { number: q.quote_number, validUntil: q.valid_until };
+  }
+  const rq = await one("SELECT quote_number, valid_until FROM renewal_quotes WHERE renewal_id = $1 AND status IN ('generated', 'accepted') ORDER BY created_at DESC LIMIT 1", [r.id]);
+  return rq ? { number: rq.quote_number, validUntil: rq.valid_until } : null;
+}
+/** An expired renewal quote is not submitted or completed: a fresh quote is prepared first (quote validity). */
+async function assertQuoteValid(r) {
+  const q = await currentQuote(r);
+  if (q?.validUntil && q.validUntil < await today()) {
+    throw unprocessable(`Renewal quote ${q.number} expired on ${await shownDate(q.validUntil)}; prepare a fresh quote before going on`);
+  }
+}
+
 const CAPTURE = { coverageDetails: 'coverage_details', accessories: 'accessories', orderSummary: 'order_summary', policyLimits: 'policy_limits', premiumBreakdown: 'premium_breakdown' };
 
 /** Save the renewal quote wizard data (coverage, accessories, order summary, dates). */
 export async function captureRenewal(id, input) {
   const before = await loadRow(id);
   if (!OPEN.includes(before.status)) throw conflict(`Renewal is ${before.status}; it can no longer be changed`);
+  assertTermsOpen(before);
+  await assertTermDates(before, await businessDate(input.effectiveDate), await businessDate(input.expiryDate));
   const sets = [];
   const params = [before.id];
   const set = (col, v) => { params.push(v); sets.push(`${col} = $${params.length}`); };
@@ -433,15 +505,17 @@ async function noticeVars(r, noticeLabel) {
 }
 
 /** Send the next renewal notice (first, second, final in order). Throws 409/422 when out of order or undeliverable. */
-export async function sendNotice(id, user, { stage, method = 'Email', batchId = null } = {}) {
+export async function sendNotice(id, user, { stage, method = 'Email', batchId = null, catchUp = false } = {}) {
   const r = await loadRow(id);
   if (!OPEN.includes(r.status)) throw conflict(`Renewal is ${r.status}; notices can no longer be sent`);
+  await assertNoticeAllowed(r);
   const stages = (await getSetting('renewals.notice_stages', [])) || [];
   const next = r.notice_stage + 1;
   const target = stages.find((s) => s.stage === (stage ? Number(stage) : next));
   if (!target) throw conflict(r.notice_stage >= stages.length ? 'All renewal notices have already been sent' : `Unknown notice stage ${stage}`);
   if (target.stage < next) throw conflict(`${target.label} has already been sent`);
-  if (target.stage > next && await getSetting('renewals.enforce_notice_order', true)) {
+  // the job catching up on marks it missed sends the latest notice due (catchUp), not each earlier one in turn
+  if (target.stage > next && !catchUp && await getSetting('renewals.enforce_notice_order', true)) {
     throw conflict(`${stages.find((s) => s.stage === next)?.label || 'The previous notice'} must be sent before the ${target.label}`);
   }
   if (method === 'Email' && !r.client_email) throw unprocessable(`Client ${r.client_name || ''} has no e-mail address`.trim());
@@ -461,7 +535,8 @@ export async function sendNotice(id, user, { stage, method = 'Email', batchId = 
       [r.id, target.stage, target.code, method, method === 'Email' ? r.client_email : r.client_phone, emailId, batchId, user?.username ?? null]);
     await activity(db, r.id, user, { type: target.label, method, description: `${target.label} sent${method === 'Email' ? ` to ${r.client_email}` : ''}` });
   });
-  if (r.policy_owner) await notify({ userId: r.policy_owner, type: 'reminder', title: `${target.label}: ${r.policy_number}`, message: `${target.label} sent for policy ${r.policy_number} expiring ${r.policy_expiry}`, link: '/renewal/queue', entity: 'renewal', entityId: r.id });
+  const owner = r.owner_user_id || r.policy_owner;
+  if (owner) await notify({ userId: owner, type: 'reminder', title: `${target.label}: ${r.policy_number}`, message: `${target.label} sent for policy ${r.policy_number} expiring ${await shownDate(r.policy_expiry)}`, link: `/renewal/queue?renewal=${r.id}`, entity: 'renewal', entityId: r.id });
   return { before: r, notice: { stage: target.stage, noticeType: target.code, label: target.label, method, emailId }, renewal: await getRenewal(r.id) };
 }
 
@@ -470,6 +545,7 @@ export async function sendReminder(id, user, { method = 'Email', note }) {
   const r = await loadRow(id);
   if (!OPEN.includes(r.status)) throw conflict(`Renewal is ${r.status}`);
   if (method === 'Email') {
+    await assertNoticeAllowed(r);
     if (!r.client_email) throw unprocessable('Client has no e-mail address');
     const vars = await noticeVars(r, 'Renewal Reminder');
     await queueEmail({ to: r.client_email, subject: renderTemplate(await getSetting('renewals.notice_subject'), vars, { html: false }), html: renderTemplate(await getSetting('renewals.notice_template'), vars), template: 'renewal-reminder', entity: 'renewal', entityId: r.id });
@@ -487,7 +563,7 @@ export async function addActivity(id, user, input) {
     await db.query('UPDATE renewals SET contact_attempts = contact_attempts + 1, last_contact_at = now(), updated_at = now() WHERE id = $1', [r.id]);
     return activity(db, r.id, user, { type: input.type, method: input.method, description: input.description, outcome: input.outcome, nextAction: input.nextAction, followUpDate: input.followUpDate ? await businessDate(input.followUpDate) : null, details: input.details || {} });
   });
-  return activityApi(a);
+  return activityApi(await one(`${ACTIVITY_SQL} WHERE a.id = $1`, [a.id]));
 }
 
 /**
@@ -507,7 +583,7 @@ export async function escalate(id, user, { note } = {}) {
   const a = await activity(null, r.id, user, { type: 'Escalation', description, details: { escalatedTo: to.map((u) => u.id) } });
   for (const u of to) {
     await notify({ userId: u.id, type: 'info', priority: 'high', title: `Renewal ${r.renewal_number} escalated`,
-      message: `${user.username} escalated the renewal of policy ${r.policy_number} (${r.client_name || 'client'}): ${description}`, link: '/renewal/at-risk', entity: 'renewal', entityId: r.id });
+      message: `${user.username} escalated the renewal of policy ${r.policy_number} (${r.client_name || 'client'}): ${description}`, link: `/renewal/at-risk?renewal=${r.id}`, entity: 'renewal', entityId: r.id });
   }
   return { renewal: await getRenewal(r.id, { withDetail: false }), data: { activity: activityApi(a), escalatedTo: to.map((u) => ({ id: u.id, name: u.display_name })) },
     audit: { escalatedTo: to.map((u) => u.id), note: note || null } };
@@ -518,13 +594,14 @@ export async function submitForApproval(id, user, note) {
   const r = await loadRow(id);
   if (r.status !== 'quoted') throw conflict(`Only a quoted renewal can be submitted for approval (current: ${r.status})`);
   if (r.premium_new == null) throw unprocessable('Generate or capture the renewal premium first');
+  await assertQuoteValid(r);
   await query(`UPDATE renewals SET status = 'pending-approval', submitted_by = $2, submitted_at = now(), approval_note = $3, updated_at = now() WHERE id = $1`, [r.id, user.id, note || null]);
   await activity(null, r.id, user, { type: 'Submitted for Approval', description: note || `Renewal premium ${r.premium_new} submitted for approval` });
   const roles = (await getSetting('renewals.approver_roles', ['processing'])) || [];
   const approvers = new Set();
   for (const role of roles) for (const u of await usersWithRole(role)) if (u.id !== user.id) approvers.add(u.id);
   await notifyApprovers({ users: [...approvers], document: 'Renewal', number: r.renewal_number, by: user.username, detail: `policy ${r.policy_number}, ${await formatMoney(r.premium_new)}`,
-    link: '/renewal/negotiations', entity: 'renewal', entityId: r.id });
+    link: `/renewal/negotiations?renewal=${r.id}`, entity: 'renewal', entityId: r.id });
   return { before: r, renewal: await getRenewal(r.id) };
 }
 
@@ -534,12 +611,13 @@ export async function decide(id, user, { decision, note }) {
   if (r.status !== 'pending-approval') throw conflict('Renewal is not awaiting approval');
   if (r.submitted_by === user.id) throw forbidden('Maker-checker: the renewal must be approved by a different user');
   const approve = decision === 'approve';
+  if (approve) await assertApprovalLimit(user, 'renewal_terms', Number(r.premium_new ?? 0), { requireLimit: !!(await getSetting('renewals.require_authority_limit')) });
   await query(`UPDATE renewals SET status = $2, approved_by = $3, approved_at = CASE WHEN $4 THEN now() END, approval_note = $5, updated_at = now() WHERE id = $1`,
     [r.id, approve ? 'approved' : 'quoted', approve ? user.id : null, approve, note || null]);
   await activity(null, r.id, user, { type: approve ? 'Approved' : 'Returned', description: note || (approve ? 'Renewal terms approved' : 'Renewal terms returned for revision') });
   const target = r.submitted_by || r.policy_owner;
   await notifyDecision({ userId: target, decidedBy: user.id, document: 'Renewal', number: r.renewal_number, approved: approve, status: approve ? 'approved' : 'returned', by: user.username,
-    reason: note || null, link: '/renewal/queue', entity: 'renewal', entityId: r.id });
+    reason: note || null, link: `/renewal/queue?renewal=${r.id}`, entity: 'renewal', entityId: r.id });
   return { before: r, renewal: await getRenewal(r.id) };
 }
 
@@ -549,10 +627,16 @@ export async function completeRenewal(id, user, input = {}) {
   const makerChecker = await getSetting('renewals.maker_checker', true);
   const allowed = makerChecker ? ['approved'] : ['quoted', 'approved'];
   if (!allowed.includes(r.status)) throw conflict(makerChecker ? `Renewal must be approved before it is completed (current: ${r.status})` : `Renewal must be quoted before it is completed (current: ${r.status})`);
-  const premium = round2(input.premium ?? r.premium_new ?? r.premium_old ?? r.premium_total);
+  // the new term is booked at the approved terms: a different premium needs a new quote and a new approval
+  const premium = round2(r.premium_new ?? r.premium_old ?? r.premium_total);
+  if (input.premium !== undefined && input.premium !== null && Math.abs(round2(input.premium) - premium) >= 0.005) {
+    throw conflict(`The renewal is completed at its approved premium of ${await formatMoney(premium)}; change the terms and have them approved again`);
+  }
+  if (r.status === 'approved' || r.status === 'quoted') await assertQuoteValid(r);
   const inception = (await businessDate(input.inceptionDate)) || r.effective_date || addDays(r.policy_expiry, 1);
   const expiry = (await businessDate(input.expiryDate)) || r.expiry_date || addDays(addYears(inception, 1), -1);
   if (expiry <= inception) throw badRequest('expiryDate must be after inceptionDate');
+  if (input.inceptionDate) await assertTermDates(r, inception, expiry);
   const commission = r.premium_total > 0 ? round2((r.commission_amount / r.premium_total) * premium) : 0;
   const issuedOn = (await businessDate(input.issuedDate)) || (await today());
   const result = await withTransaction(async (db) => {
@@ -587,6 +671,10 @@ export async function completeRenewal(id, user, input = {}) {
       { sumInsured: r.sum_insured, premium: net, taxes: round2(premium - net), premiumTotal: premium, commissionAmount: commission },
       { fallbackInsurerId: r.insurance_company_id, userId: user?.id || null, keepReferences: false });
     await db.query('UPDATE policies SET status = \'renewed\', renewed_to = $2, updated_at = now() WHERE id = $1', [r.policy_id, newPolicy.id]);
+    // the lock-in of the expiring term continues on the renewal term (FR-LCK-003)
+    await db.query(`INSERT INTO policy_lock_ins(policy_id, source, reference, start_date, years, end_date, tfs_loan_account, loan_status, loan_status_at, loan_status_by, loan_status_note, status, created_by)
+      SELECT $2, source, reference, start_date, years, end_date, tfs_loan_account, loan_status, loan_status_at, loan_status_by, loan_status_note, status, $3
+        FROM policy_lock_ins WHERE policy_id = $1 ON CONFLICT (policy_id) DO NOTHING`, [r.policy_id, newPolicy.id, user?.username ?? null]);
     await db.query(`UPDATE renewals SET status = 'renewed', new_policy_id = $2, premium_new = $3, renewed_at = now(), updated_at = now() WHERE id = $1`, [r.id, newPolicy.id, premium]);
     await db.query('UPDATE renewal_quotes SET status = \'accepted\' WHERE renewal_id = $1 AND status = \'generated\'', [r.id]);
     await activity(db, r.id, user, { type: 'Renewed', description: `Renewed as policy ${newPolicy.policy_number} (${inception} to ${expiry})` });
@@ -616,17 +704,73 @@ export async function lapseRenewal(id, user, reason, reasonCode = null) {
   await query(`UPDATE renewals SET status = 'lapsed', lapse_reason = $2, lapse_reason_code = $3, lapsed_at = now(), updated_at = now() WHERE id = $1`, [r.id, why.text, why.code]);
   await query('UPDATE policies SET status = \'expired\', updated_at = now() WHERE id = $1 AND expiry_date < $2::date AND status IN (\'active\', \'issued\')', [r.policy_id, await today()]);
   await activity(null, r.id, user, { type: 'Lapsed', description: why.text });
-  if (r.policy_owner) await notify({ userId: r.policy_owner, type: 'alert', title: `Policy lapsed: ${r.policy_number}`, message: why.text, link: '/renewal/lapse-management', entity: 'renewal', entityId: r.id });
+  if (r.policy_owner) await notify({ userId: r.policy_owner, type: 'alert', title: `Policy lapsed: ${r.policy_number}`, message: why.text, link: `/renewal/lapse-management?renewal=${r.id}`, entity: 'renewal', entityId: r.id });
   return { before: r, renewal: await getRenewal(r.id) };
+}
+
+/**
+ * Reinstatement window of a lapsed renewal: renewals.reinstatement_days counted from the business date of the lapse in
+ * calendar days, or in working days of the working calendar (renewals.reinstatement_day_basis working).
+ * { days, basis, lapseDate, elapsed, eligible }.
+ */
+export async function reinstatementWindow(lapsedAt, todayStr = null) {
+  const days = Number(await getSetting('renewals.reinstatement_days', 90));
+  const basis = (await getSetting('renewals.reinstatement_day_basis', 'calendar')) === 'working' ? 'working' : 'calendar';
+  const now = todayStr || await today();
+  const lapseDate = lapsedAt ? await businessDate(lapsedAt) : now;
+  const elapsed = basis === 'working' ? await workingDaysBetween(lapseDate, now) : Math.max(0, daysBetween(lapseDate, now));
+  return { days, basis, lapseDate, elapsed, eligible: elapsed <= days };
+}
+
+/**
+ * Reassign an open renewal to another user (the renewal owner who works it): a reason from the Reason Codes master
+ * (context renewal_reassign) and the remark are kept on the timeline; the new owner is notified.
+ */
+export async function reassignRenewal(id, user, { toUserId, reasonCode, note }) {
+  const r = await loadRow(id);
+  if (!OPEN.includes(r.status)) throw conflict(`Renewal is ${r.status}; it can no longer be reassigned`);
+  const to = await one("SELECT id, display_name FROM users WHERE id = $1 AND status = 'active'", [String(toUserId || '')]);
+  if (!to) throw badRequest('Validation failed', [{ path: 'toUserId', message: 'Choose an active user to take over the renewal' }]);
+  const from = r.owner_user_id || r.policy_owner;
+  if (from === to.id) throw conflict(`Renewal ${r.renewal_number} is already assigned to ${to.display_name}`);
+  const why = await requiredReason({ query }, 'renewal_reassign', { reasonCode, note });
+  await withTransaction(async (db) => {
+    await db.query('UPDATE renewals SET owner_user_id = $2, updated_at = now() WHERE id = $1', [r.id, to.id]);
+    await activity(db, r.id, user, { type: 'Reassigned', description: `Reassigned from ${r.agent_name || 'no owner'} to ${to.display_name}: ${why.text}`,
+      details: { fromUserId: from || null, toUserId: to.id, reasonCode: why.code } });
+  });
+  await notify({ userId: to.id, type: 'task', title: `Renewal ${r.renewal_number} assigned to you`, message: `Renewal of policy ${r.policy_number} (${r.client_name || 'client'}): ${why.text}`,
+    link: `/renewal/queue?renewal=${r.id}`, entity: 'renewal', entityId: r.id });
+  return { before: r, renewal: await getRenewal(r.id), audit: { ownerFrom: from || null, ownerTo: to.id, reasonCode: why.code, reason: why.text } };
+}
+
+/**
+ * Not for renewal: the renewal will not be offered (reason from the Reason Codes master, context non_renewal, and the
+ * remark). The renewal closes as Not for renewal (distinct from a lapse); an expired policy is marked expired. It can
+ * be reinstated within the reinstatement window.
+ */
+export async function markNotForRenewal(id, user, { reasonCode, note }) {
+  const r = await loadRow(id);
+  if (!OPEN.includes(r.status)) throw conflict(`Renewal is ${r.status}; it cannot be marked not for renewal`);
+  const why = await requiredReason({ query }, 'non_renewal', { reasonCode, note });
+  await withTransaction(async (db) => {
+    await db.query(`UPDATE renewals SET status = 'not-renewed', disposition = 'not-for-renewal', lapse_reason = $2, lapse_reason_code = $3, lapsed_at = now(), updated_at = now()
+      WHERE id = $1`, [r.id, why.text, why.code]);
+    await db.query('UPDATE policies SET status = \'expired\', updated_at = now() WHERE id = $1 AND expiry_date < $2::date AND status IN (\'active\', \'issued\')', [r.policy_id, await today()]);
+    await activity(db, r.id, user, { type: 'Not for Renewal', description: why.text, details: { reasonCode: why.code } });
+  });
+  if (r.policy_owner) await notify({ userId: r.policy_owner, type: 'info', title: `Not for renewal: ${r.policy_number}`, message: why.text, link: `/renewal/queue?renewal=${r.id}`, entity: 'renewal', entityId: r.id });
+  return { before: r, renewal: await getRenewal(r.id), audit: { status: 'not-renewed', reasonCode: why.code, reason: why.text } };
 }
 
 export async function reinstateRenewal(id, user, note) {
   const r = await loadRow(id);
-  if (r.status !== 'lapsed') throw conflict('Only a lapsed renewal can be reinstated');
-  const days = Number(await getSetting('renewals.reinstatement_days', 90));
-  if (r.lapsed_at && (Date.now() - new Date(r.lapsed_at).getTime()) / 86400000 > days) throw unprocessable(`Reinstatement window of ${days} days has passed`);
+  if (!['lapsed', 'not-renewed'].includes(r.status)) throw conflict('Only a lapsed renewal or one marked not for renewal can be reinstated');
+  const window = await reinstatementWindow(r.lapsed_at);
+  if (!window.eligible) throw unprocessable(`Reinstatement window of ${window.days} ${window.basis === 'working' ? 'working days' : 'days'} has passed`);
   try {
-    await query(`UPDATE renewals SET status = CASE WHEN premium_new IS NULL THEN 'pipeline' ELSE 'quoted' END, lapse_reason = NULL, lapse_reason_code = NULL, lapsed_at = NULL, updated_at = now() WHERE id = $1`, [r.id]);
+    await query(`UPDATE renewals SET status = CASE WHEN premium_new IS NULL THEN 'pipeline' ELSE 'quoted' END, lapse_reason = NULL, lapse_reason_code = NULL, lapsed_at = NULL,
+      disposition = NULL, updated_at = now() WHERE id = $1`, [r.id]);
   } catch (e) {
     if (e.code === '23505') throw conflict('The policy already has an open renewal');
     throw e;
@@ -693,9 +837,10 @@ async function expiringPolicy(ref) {
  */
 export async function renewalPrefill(policyRef) {
   const p = await expiringPolicy(policyRef);
-  const open = await one('SELECT * FROM renewals WHERE policy_id = $1 AND status <> ALL($2) ORDER BY created_at DESC LIMIT 1', [p.id, ['renewed', 'lapsed']]);
+  const open = await one('SELECT * FROM renewals WHERE policy_id = $1 AND status <> ALL($2) ORDER BY created_at DESC LIMIT 1', [p.id, CLOSED]);
   const ctx = await readContext();
-  const eligibility = policyRenewalState({ ...p, open_renewal_id: open?.id, open_renewal_number: open?.renewal_number }, ctx);
+  const declined = open ? null : await one("SELECT id, renewal_number FROM renewals WHERE policy_id = $1 AND status = 'not-renewed' ORDER BY created_at DESC LIMIT 1", [p.id]);
+  const eligibility = policyRenewalState({ ...p, open_renewal_id: open?.id, open_renewal_number: open?.renewal_number, not_renewed_id: declined?.id, not_renewed_number: declined?.renewal_number }, ctx);
   const lob = lineOf(p);
   const isMotor = lob === 'MOTOR';
   const source = { ...(p.quote_doc || {}), ...(p.doc || {}) };
@@ -799,6 +944,10 @@ export async function validateRenewal(policyRef, input = {}, { full = false } = 
   }
   const o = input.orderSummary;
   if (o && num(o.discount) < 0) add('orderSummary.discount', 'The discount cannot be negative');
+  if (input.effectiveDate || input.expiryDate) {
+    const term = { renewal_type: pre.eligibility.renewalType, policy_expiry: pre.expiryDate };
+    for (const e of await termDateErrors(term, await businessDate(input.effectiveDate), await businessDate(input.expiryDate))) add(e.path, e.message);
+  }
   if (full && !errors.length) {
     const { premiumBreakdown } = await import('../quotations/premium.js');
     const policy = await resolvePolicy(pre.policyId);
@@ -815,7 +964,7 @@ export async function validateRenewal(policyRef, input = {}, { full = false } = 
 export async function assertRenewalValid(policyRef, input, opts) {
   const v = await validateRenewal(policyRef, input, opts);
   // a renewed or cancelled policy is a state conflict, not a data problem on the step
-  if (['renewed', 'cancelled'].includes(v.eligibility?.state)) throw conflict(v.eligibility.message);
+  if (['renewed', 'cancelled', 'not-renewed'].includes(v.eligibility?.state)) throw conflict(v.eligibility.message);
   if (!v.valid) throw unprocessable(v.errors.length === 1 ? v.errors[0].message : 'Check the highlighted fields', v.errors);
   return v;
 }
@@ -831,6 +980,7 @@ export async function createRenewalQuote(policyRef, input, user) {
   const policy = await resolvePolicy(policyRef);
   await assertRenewalValid(policy.id, input, { full: true });
   const { id: renewalId } = await ensureRenewal(policy.id, user);
+  assertTermsOpen(await loadRow(renewalId));
   const capture = {};
   for (const k of ['coverageDetails', 'accessories', 'orderSummary', 'effectiveDate', 'expiryDate', 'remarks']) if (input[k] !== undefined) capture[k] = input[k];
   if (Object.keys(capture).length) await captureRenewal(renewalId, capture);

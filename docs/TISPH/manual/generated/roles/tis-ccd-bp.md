@@ -7,18 +7,12 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | My Work | My Work | View |
 | Operations | Payments | View |
 | Accounts | Receipts | Create and edit |
-| Accounts | Unapplied Collections | Create and edit |
 | Accounts | Collections | Create and edit |
-| Accounts > Credit Control | Instalment Plans | Create and edit |
-| Accounts > Credit Control | Premium Warranty Monitor | Create and edit |
-| Accounts > Credit Control | Client Credit Limits | Create and edit |
-| Accounts > Credit Control | Remittance Ageing | View |
-| Accounts | Post-Dated Cheques | View |
+| Accounts | Post-Dated Cheques | Create and edit |
 | Accounts | Claims Settlements | Create and edit |
 | Accounts > Remittance | Remittances | View |
 | Accounts > Remittance | Reconciliation | View |
 | Accounts > Remittance | Exceptions | View |
-| Accounts > Remittance | Held policies | View |
 | Accounts > Bank Reconciliation | Reconciliation Workspace | View |
 | Accounts > Bank Reconciliation | Reconciliations | View |
 | Accounts > Bank Reconciliation | Reconciliation Statement Report | View |
@@ -36,12 +30,12 @@ Where: the screens of your menus that show the module. A module without a screen
 
 | Area | Module | Access | What it allows | Where |
 |---|---|---|---|---|
-| Accounts | Receipts | View | See receipts | Receipts, Unapplied Collections and Claims Settlements |
-| Accounts | Receipts | Create and edit | Issue official receipts, post cash, verify payments |  |
-| Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
-| Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections, Instalment Plans, Premium Warranty Monitor, Client Credit Limits and Remittance Ageing |
+| Operations | Claims | Special | Record claim settlement funds received from an insurer | No screen of its own |
+| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts, Post-Dated Cheques and Claims Settlements |
+| Accounts | Receipts | Create and edit | Issue official receipts, post cash, verify payments, handle post-dated cheques |  |
+| Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
 | Accounts | Collections and credit control | Create and edit | Record collections and adjustments |  |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Reconciliation, Exceptions and Held policies |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Reconciliation and Exceptions |
 | Accounts | Bank reconciliation | View | See bank reconciliations | Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines and Bank Book |
 | Reports | Reports | View | Run and download reports | SOA/Premium Receivable and Collection Report |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
@@ -56,7 +50,6 @@ Who approves the work of this role:
 | Work | Approval | Approved by |
 |---|---|---|
 | Collections and credit control | Approve premium warranty extensions and client credit limits (not the requester) | TIS Finance & General Accounting |
-| Receipts | Approve or return the reversal of a receipt requested by another user | CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting |
 | Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 

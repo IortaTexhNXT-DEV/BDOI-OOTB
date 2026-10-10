@@ -63,7 +63,7 @@ export const SAMPLE_MASTERS = [
   { table: 'master_records', label: 'demo master records', where: "created_by = 'seed' AND type_code IN ('company','bank-account','employee','petty-cash','exchange-rate','commission')" },
   { table: 'master_records', label: 'sample repair shops and suppliers', where: "created_by = 'seed' AND type_code IN ('repair-shop','supplier')" },
 ];
-export const SAMPLE_USERS = ['agent.jdelacruz', 'agent.msantos', 'agent.preyes', 'agent.agarcia', 'agent.jmartinez', 'fin.approver'];
+export const SAMPLE_USERS = ['agent.jdelacruz', 'agent.msantos', 'agent.preyes', 'agent.agarcia', 'agent.jmartinez', 'fin.approver', 'ops.cmendoza', 'ops.jramos'];
 export const ADMIN_USERNAME = 'BrokerVerse';
 
 const ident = (t) => `"${t.replace(/"/g, '""')}"`;

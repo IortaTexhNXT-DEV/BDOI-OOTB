@@ -225,6 +225,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Lock-in Accounts",
+     "path": "/renewal/lock-in-accounts",
+     "access": "Create and edit",
+     "modules": [
+      "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "Create and edit",
@@ -302,15 +311,6 @@
      "access": "View",
      "modules": [
       "Collections and credit control"
-     ]
-    },
-    {
-     "section": "Accounts",
-     "screen": "Post-Dated Cheques",
-     "path": "/accounts/post-dated-cheques",
-     "access": "View",
-     "modules": [
-      "Post-dated cheques"
      ]
     },
     {
@@ -575,13 +575,7 @@
      "area": "Accounts",
      "module": "Receipts",
      "level": "View",
-     "meaning": "See receipts"
-    },
-    {
-     "area": "Accounts",
-     "module": "Post-dated cheques",
-     "level": "View",
-     "meaning": "See the post-dated cheque log, its sets, transmittals and cheque history"
+     "meaning": "See receipts and post-dated cheques"
     },
     {
      "area": "Accounts",
@@ -950,6 +944,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Lock-in Accounts",
+     "path": "/renewal/lock-in-accounts",
+     "access": "Create and edit",
+     "modules": [
+      "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "Approve",
@@ -1027,15 +1030,6 @@
      "access": "View",
      "modules": [
       "Collections and credit control"
-     ]
-    },
-    {
-     "section": "Accounts",
-     "screen": "Post-Dated Cheques",
-     "path": "/accounts/post-dated-cheques",
-     "access": "View",
-     "modules": [
-      "Post-dated cheques"
      ]
     },
     {
@@ -1298,6 +1292,12 @@
     },
     {
      "area": "Operations",
+     "module": "Renewals",
+     "level": "Special",
+     "meaning": "Reassign a renewal to another user or mark it not for renewal"
+    },
+    {
+     "area": "Operations",
      "module": "Claims",
      "level": "View",
      "meaning": "See claims"
@@ -1330,13 +1330,7 @@
      "area": "Accounts",
      "module": "Receipts",
      "level": "View",
-     "meaning": "See receipts"
-    },
-    {
-     "area": "Accounts",
-     "module": "Post-dated cheques",
-     "level": "View",
-     "meaning": "See the post-dated cheque log, its sets, transmittals and cheque history"
+     "meaning": "See receipts and post-dated cheques"
     },
     {
      "area": "Accounts",
@@ -1718,6 +1712,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Lock-in Accounts",
+     "path": "/renewal/lock-in-accounts",
+     "access": "Create and edit",
+     "modules": [
+      "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "Approve",
@@ -1795,15 +1798,6 @@
      "access": "View",
      "modules": [
       "Collections and credit control"
-     ]
-    },
-    {
-     "section": "Accounts",
-     "screen": "Post-Dated Cheques",
-     "path": "/accounts/post-dated-cheques",
-     "access": "View",
-     "modules": [
-      "Post-dated cheques"
      ]
     },
     {
@@ -2147,6 +2141,12 @@
     },
     {
      "area": "Operations",
+     "module": "Renewals",
+     "level": "Special",
+     "meaning": "Reassign a renewal to another user or mark it not for renewal"
+    },
+    {
+     "area": "Operations",
      "module": "Claims",
      "level": "View",
      "meaning": "See claims"
@@ -2179,13 +2179,7 @@
      "area": "Accounts",
      "module": "Receipts",
      "level": "View",
-     "meaning": "See receipts"
-    },
-    {
-     "area": "Accounts",
-     "module": "Post-dated cheques",
-     "level": "View",
-     "meaning": "See the post-dated cheque log, its sets, transmittals and cheque history"
+     "meaning": "See receipts and post-dated cheques"
     },
     {
      "area": "Accounts",
@@ -2611,6 +2605,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Lock-in Accounts",
+     "path": "/renewal/lock-in-accounts",
+     "access": "Create and edit",
+     "modules": [
+      "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "Create and edit",
@@ -2706,15 +2709,6 @@
      "access": "View",
      "modules": [
       "Collections and credit control"
-     ]
-    },
-    {
-     "section": "Accounts",
-     "screen": "Post-Dated Cheques",
-     "path": "/accounts/post-dated-cheques",
-     "access": "View",
-     "modules": [
-      "Post-dated cheques"
      ]
     },
     {
@@ -2931,6 +2925,12 @@
      "area": "Operations",
      "module": "Claims",
      "level": "Create and edit",
+     "meaning": "Move a claim to review and submit its settlement, partial or final, for approval"
+    },
+    {
+     "area": "Operations",
+     "module": "Claims",
+     "level": "Create and edit",
      "meaning": "Register and follow up claims, claim documents and repairs"
     },
     {
@@ -2961,13 +2961,7 @@
      "area": "Accounts",
      "module": "Receipts",
      "level": "View",
-     "meaning": "See receipts"
-    },
-    {
-     "area": "Accounts",
-     "module": "Post-dated cheques",
-     "level": "View",
-     "meaning": "See the post-dated cheque log, its sets, transmittals and cheque history"
+     "meaning": "See receipts and post-dated cheques"
     },
     {
      "area": "Accounts",
@@ -3358,6 +3352,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Lock-in Accounts",
+     "path": "/renewal/lock-in-accounts",
+     "access": "Create and edit",
+     "modules": [
+      "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "Create and edit",
@@ -3456,15 +3459,6 @@
      ]
     },
     {
-     "section": "Accounts",
-     "screen": "Post-Dated Cheques",
-     "path": "/accounts/post-dated-cheques",
-     "access": "View",
-     "modules": [
-      "Post-dated cheques"
-     ]
-    },
-    {
      "section": "Accounts > Fixed Assets",
      "screen": "Asset Register",
      "path": "/accounts/fixed-assets/register",
@@ -3504,15 +3498,6 @@
      "section": "Accounts > Remittance",
      "screen": "Exceptions",
      "path": "/finance/remittance/exceptions",
-     "access": "View",
-     "modules": [
-      "Remittance and insurer reconciliation"
-     ]
-    },
-    {
-     "section": "Accounts > Remittance",
-     "screen": "Held policies",
-     "path": "/finance/remittance/held",
      "access": "View",
      "modules": [
       "Remittance and insurer reconciliation"
@@ -3741,6 +3726,12 @@
      "area": "Operations",
      "module": "Claims",
      "level": "Create and edit",
+     "meaning": "Move a claim to review and submit its settlement, partial or final, for approval"
+    },
+    {
+     "area": "Operations",
+     "module": "Claims",
+     "level": "Create and edit",
      "meaning": "Register and follow up claims, claim documents and repairs"
     },
     {
@@ -3771,13 +3762,7 @@
      "area": "Accounts",
      "module": "Receipts",
      "level": "View",
-     "meaning": "See receipts"
-    },
-    {
-     "area": "Accounts",
-     "module": "Post-dated cheques",
-     "level": "View",
-     "meaning": "See the post-dated cheque log, its sets, transmittals and cheque history"
+     "meaning": "See receipts and post-dated cheques"
     },
     {
      "area": "Accounts",
@@ -4180,6 +4165,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Lock-in Accounts",
+     "path": "/renewal/lock-in-accounts",
+     "access": "Create and edit",
+     "modules": [
+      "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "Approve",
@@ -4278,15 +4272,6 @@
      ]
     },
     {
-     "section": "Accounts",
-     "screen": "Post-Dated Cheques",
-     "path": "/accounts/post-dated-cheques",
-     "access": "View",
-     "modules": [
-      "Post-dated cheques"
-     ]
-    },
-    {
      "section": "Accounts > Payables",
      "screen": "Supplier Invoices",
      "path": "/accounts/payables/invoices",
@@ -4380,15 +4365,6 @@
      "section": "Accounts > Remittance",
      "screen": "Exceptions",
      "path": "/finance/remittance/exceptions",
-     "access": "View",
-     "modules": [
-      "Remittance and insurer reconciliation"
-     ]
-    },
-    {
-     "section": "Accounts > Remittance",
-     "screen": "Held policies",
-     "path": "/finance/remittance/held",
      "access": "View",
      "modules": [
       "Remittance and insurer reconciliation"
@@ -4627,9 +4603,21 @@
     },
     {
      "area": "Operations",
+     "module": "Renewals",
+     "level": "Special",
+     "meaning": "Reassign a renewal to another user or mark it not for renewal"
+    },
+    {
+     "area": "Operations",
      "module": "Claims",
      "level": "View",
      "meaning": "See claims"
+    },
+    {
+     "area": "Operations",
+     "module": "Claims",
+     "level": "Create and edit",
+     "meaning": "Move a claim to review and submit its settlement, partial or final, for approval"
     },
     {
      "area": "Operations",
@@ -4671,13 +4659,7 @@
      "area": "Accounts",
      "module": "Receipts",
      "level": "View",
-     "meaning": "See receipts"
-    },
-    {
-     "area": "Accounts",
-     "module": "Post-dated cheques",
-     "level": "View",
-     "meaning": "See the post-dated cheque log, its sets, transmittals and cheque history"
+     "meaning": "See receipts and post-dated cheques"
     },
     {
      "area": "Accounts",
@@ -4808,7 +4790,7 @@
      "kind": "authority",
      "type": "claim_settlement",
      "step": "Operations > Claims > Settlement approval",
-     "limit": "Not set"
+     "limit": "PHP 500,000.00"
     },
     {
      "what": "Underwriting referral approval",
@@ -4949,11 +4931,20 @@
     },
     {
      "section": "Accounts",
+     "screen": "Receipts",
+     "path": "/accounts/receipts",
+     "access": "Create and edit",
+     "modules": [
+      "Receipts"
+     ]
+    },
+    {
+     "section": "Accounts",
      "screen": "Post-Dated Cheques",
      "path": "/accounts/post-dated-cheques",
      "access": "Create and edit",
      "modules": [
-      "Post-dated cheques"
+      "Receipts"
      ]
     },
     {
@@ -4985,15 +4976,15 @@
    "permissions": [
     {
      "area": "Accounts",
-     "module": "Post-dated cheques",
+     "module": "Receipts",
      "level": "View",
-     "meaning": "See the post-dated cheque log, its sets, transmittals and cheque history"
+     "meaning": "See receipts and post-dated cheques"
     },
     {
      "area": "Accounts",
-     "module": "Post-dated cheques",
+     "module": "Receipts",
      "level": "Create and edit",
-     "meaning": "Encode cheque sets, forward them to the Insurance Partner, record partner advices, request cancellations, replace and return cheques"
+     "meaning": "Issue official receipts, post cash, verify payments, handle post-dated cheques"
     },
     {
      "area": "Reports",
@@ -5017,14 +5008,6 @@
    "approves": [],
    "approvedBy": [
     {
-     "work": "Post-dated cheques",
-     "approval": "Approve or return the cancellation of a post-dated cheque requested by another user",
-     "approvers": [
-      "CCD-PDC / CCD-ADA"
-     ],
-     "kind": "maker-checker"
-    },
-    {
      "work": "Accounts > Remittance > Approvals",
      "approval": "Remittance approval within the approver's limit",
      "approvers": [
@@ -5043,7 +5026,20 @@
      "kind": "authority"
     }
    ],
-   "sod": []
+   "sod": [
+    {
+     "rule": "Administration and transactions",
+     "conflict": "Receipts (create and edit) with Users (create and edit), Roles (create and edit), Access control (create and edit) held by the same person",
+     "action": "Warning",
+     "reason": "The person who administers users and access should not enter business or accounting transactions"
+    },
+    {
+     "rule": "Receipting and selling",
+     "conflict": "Receipts (create and edit) with Quotations and placement (create and edit), Policies (create and edit) held by the same person",
+     "action": "Warning",
+     "reason": "The person who issues receipts and posts cash should not also sell or issue the policies paid for"
+    }
+   ]
   },
   {
    "code": "tis-ccd-pdc",
@@ -5072,7 +5068,7 @@
      "section": "Accounts",
      "screen": "Receipts",
      "path": "/accounts/receipts",
-     "access": "View",
+     "access": "Create and edit",
      "modules": [
       "Receipts"
      ]
@@ -5092,7 +5088,7 @@
      "path": "/accounts/post-dated-cheques",
      "access": "Create and edit",
      "modules": [
-      "Post-dated cheques"
+      "Receipts"
      ]
     },
     {
@@ -5117,15 +5113,6 @@
      "section": "Accounts > Remittance",
      "screen": "Exceptions",
      "path": "/finance/remittance/exceptions",
-     "access": "View",
-     "modules": [
-      "Remittance and insurer reconciliation"
-     ]
-    },
-    {
-     "section": "Accounts > Remittance",
-     "screen": "Held policies",
-     "path": "/finance/remittance/held",
      "access": "View",
      "modules": [
       "Remittance and insurer reconciliation"
@@ -5225,25 +5212,13 @@
      "area": "Accounts",
      "module": "Receipts",
      "level": "View",
-     "meaning": "See receipts"
+     "meaning": "See receipts and post-dated cheques"
     },
     {
      "area": "Accounts",
-     "module": "Post-dated cheques",
-     "level": "View",
-     "meaning": "See the post-dated cheque log, its sets, transmittals and cheque history"
-    },
-    {
-     "area": "Accounts",
-     "module": "Post-dated cheques",
+     "module": "Receipts",
      "level": "Create and edit",
-     "meaning": "Encode cheque sets, forward them to the Insurance Partner, record partner advices, request cancellations, replace and return cheques"
-    },
-    {
-     "area": "Accounts",
-     "module": "Post-dated cheques",
-     "level": "Approve",
-     "meaning": "Approve or return the cancellation of a post-dated cheque requested by another user"
+     "meaning": "Issue official receipts, post cash, verify payments, handle post-dated cheques"
     },
     {
      "area": "Accounts",
@@ -5282,21 +5257,8 @@
      "meaning": "Own profile and the look-up lists of every form"
     }
    ],
-   "approves": [
-    {
-     "what": "Approve or return the cancellation of a post-dated cheque requested by another user",
-     "kind": "maker-checker"
-    }
-   ],
+   "approves": [],
    "approvedBy": [
-    {
-     "work": "Post-dated cheques",
-     "approval": "Approve or return the cancellation of a post-dated cheque requested by another user",
-     "approvers": [
-      "CCD-PDC / CCD-ADA"
-     ],
-     "kind": "maker-checker"
-    },
     {
      "work": "Accounts > Remittance > Approvals",
      "approval": "Remittance approval within the approver's limit",
@@ -5316,7 +5278,20 @@
      "kind": "authority"
     }
    ],
-   "sod": []
+   "sod": [
+    {
+     "rule": "Administration and transactions",
+     "conflict": "Receipts (create and edit) with Users (create and edit), Roles (create and edit), Access control (create and edit) held by the same person",
+     "action": "Warning",
+     "reason": "The person who administers users and access should not enter business or accounting transactions"
+    },
+    {
+     "rule": "Receipting and selling",
+     "conflict": "Receipts (create and edit) with Quotations and placement (create and edit), Policies (create and edit) held by the same person",
+     "action": "Warning",
+     "reason": "The person who issues receipts and posts cash should not also sell or issue the policies paid for"
+    }
+   ]
   },
   {
    "code": "tis-ccd-bp",
@@ -5352,15 +5327,6 @@
     },
     {
      "section": "Accounts",
-     "screen": "Unapplied Collections",
-     "path": "/accounts/unapplied-collections",
-     "access": "Create and edit",
-     "modules": [
-      "Receipts"
-     ]
-    },
-    {
-     "section": "Accounts",
      "screen": "Collections",
      "path": "/agent/collections",
      "access": "Create and edit",
@@ -5369,48 +5335,12 @@
      ]
     },
     {
-     "section": "Accounts > Credit Control",
-     "screen": "Instalment Plans",
-     "path": "/accounts/credit-control/instalments",
-     "access": "Create and edit",
-     "modules": [
-      "Collections and credit control"
-     ]
-    },
-    {
-     "section": "Accounts > Credit Control",
-     "screen": "Premium Warranty Monitor",
-     "path": "/accounts/credit-control/warranty",
-     "access": "Create and edit",
-     "modules": [
-      "Collections and credit control"
-     ]
-    },
-    {
-     "section": "Accounts > Credit Control",
-     "screen": "Client Credit Limits",
-     "path": "/accounts/credit-control/limits",
-     "access": "Create and edit",
-     "modules": [
-      "Collections and credit control"
-     ]
-    },
-    {
-     "section": "Accounts > Credit Control",
-     "screen": "Remittance Ageing",
-     "path": "/accounts/credit-control/remittance-ageing",
-     "access": "View",
-     "modules": [
-      "Collections and credit control"
-     ]
-    },
-    {
      "section": "Accounts",
      "screen": "Post-Dated Cheques",
      "path": "/accounts/post-dated-cheques",
-     "access": "View",
+     "access": "Create and edit",
      "modules": [
-      "Post-dated cheques"
+      "Receipts"
      ]
     },
     {
@@ -5450,15 +5380,6 @@
      ]
     },
     {
-     "section": "Accounts > Remittance",
-     "screen": "Held policies",
-     "path": "/finance/remittance/held",
-     "access": "View",
-     "modules": [
-      "Remittance and insurer reconciliation"
-     ]
-    },
-    {
      "section": "Accounts > Bank Reconciliation",
      "screen": "Reconciliation Workspace",
      "path": "/accounts/bank-reconciliation",
@@ -5549,22 +5470,22 @@
    ],
    "permissions": [
     {
+     "area": "Operations",
+     "module": "Claims",
+     "level": "Special",
+     "meaning": "Record claim settlement funds received from an insurer"
+    },
+    {
      "area": "Accounts",
      "module": "Receipts",
      "level": "View",
-     "meaning": "See receipts"
+     "meaning": "See receipts and post-dated cheques"
     },
     {
      "area": "Accounts",
      "module": "Receipts",
      "level": "Create and edit",
-     "meaning": "Issue official receipts, post cash, verify payments"
-    },
-    {
-     "area": "Accounts",
-     "module": "Post-dated cheques",
-     "level": "View",
-     "meaning": "See the post-dated cheque log, its sets, transmittals and cheque history"
+     "meaning": "Issue official receipts, post cash, verify payments, handle post-dated cheques"
     },
     {
      "area": "Accounts",
@@ -5615,15 +5536,6 @@
      "work": "Collections and credit control",
      "approval": "Approve premium warranty extensions and client credit limits (not the requester)",
      "approvers": [
-      "TIS Finance & General Accounting"
-     ],
-     "kind": "maker-checker"
-    },
-    {
-     "work": "Receipts",
-     "approval": "Approve or return the reversal of a receipt requested by another user",
-     "approvers": [
-      "CCD-Recon (Reconciliation and Reversals)",
       "TIS Finance & General Accounting"
      ],
      "kind": "maker-checker"
@@ -5702,15 +5614,6 @@
     },
     {
      "section": "Accounts",
-     "screen": "Unapplied Collections",
-     "path": "/accounts/unapplied-collections",
-     "access": "Create and edit",
-     "modules": [
-      "Receipts"
-     ]
-    },
-    {
-     "section": "Accounts",
      "screen": "Collections",
      "path": "/agent/collections",
      "access": "Create and edit",
@@ -5719,48 +5622,12 @@
      ]
     },
     {
-     "section": "Accounts > Credit Control",
-     "screen": "Instalment Plans",
-     "path": "/accounts/credit-control/instalments",
-     "access": "Create and edit",
-     "modules": [
-      "Collections and credit control"
-     ]
-    },
-    {
-     "section": "Accounts > Credit Control",
-     "screen": "Premium Warranty Monitor",
-     "path": "/accounts/credit-control/warranty",
-     "access": "Create and edit",
-     "modules": [
-      "Collections and credit control"
-     ]
-    },
-    {
-     "section": "Accounts > Credit Control",
-     "screen": "Client Credit Limits",
-     "path": "/accounts/credit-control/limits",
-     "access": "Create and edit",
-     "modules": [
-      "Collections and credit control"
-     ]
-    },
-    {
-     "section": "Accounts > Credit Control",
-     "screen": "Remittance Ageing",
-     "path": "/accounts/credit-control/remittance-ageing",
-     "access": "View",
-     "modules": [
-      "Collections and credit control"
-     ]
-    },
-    {
      "section": "Accounts",
      "screen": "Post-Dated Cheques",
      "path": "/accounts/post-dated-cheques",
-     "access": "View",
+     "access": "Create and edit",
      "modules": [
-      "Post-dated cheques"
+      "Receipts"
      ]
     },
     {
@@ -5829,21 +5696,26 @@
     },
     {
      "section": "Accounts > Remittance",
-     "screen": "Held policies",
-     "path": "/finance/remittance/held",
-     "access": "Create and edit",
-     "modules": [
-      "Remittance and insurer reconciliation"
-     ]
-    },
-    {
-     "section": "Accounts > Remittance",
      "screen": "Insurer billing",
      "path": "/finance/remittance/billing",
      "access": "Create and edit",
      "modules": [
       "Remittance and insurer reconciliation"
      ]
+    },
+    {
+     "section": "Accounts",
+     "screen": "Open Entry Matching",
+     "path": "/accounts/open-entry-matching",
+     "access": "View",
+     "modules": []
+    },
+    {
+     "section": "Accounts",
+     "screen": "Open Entry Unmatching",
+     "path": "/accounts/open-entry-unmatching",
+     "access": "View",
+     "modules": []
     },
     {
      "section": "Accounts > Bank Reconciliation",
@@ -5936,28 +5808,28 @@
    ],
    "permissions": [
     {
+     "area": "Operations",
+     "module": "Claims",
+     "level": "Special",
+     "meaning": "Reverse claim settlement funds or a payment to the claimant recorded in error"
+    },
+    {
+     "area": "Operations",
+     "module": "Claims",
+     "level": "Special",
+     "meaning": "Record claim settlement funds received from an insurer"
+    },
+    {
      "area": "Accounts",
      "module": "Receipts",
      "level": "View",
-     "meaning": "See receipts"
+     "meaning": "See receipts and post-dated cheques"
     },
     {
      "area": "Accounts",
      "module": "Receipts",
      "level": "Create and edit",
-     "meaning": "Reverse a receipt with a reason; the reversal waits for a checker when required"
-    },
-    {
-     "area": "Accounts",
-     "module": "Receipts",
-     "level": "Approve",
-     "meaning": "Approve or return the reversal of a receipt requested by another user"
-    },
-    {
-     "area": "Accounts",
-     "module": "Post-dated cheques",
-     "level": "View",
-     "meaning": "See the post-dated cheque log, its sets, transmittals and cheque history"
+     "meaning": "Issue official receipts, post cash, verify payments, handle post-dated cheques"
     },
     {
      "area": "Accounts",
@@ -6030,22 +5902,9 @@
     {
      "what": "Approve insurer statement reconciliations and post their adjustments (not the preparer)",
      "kind": "maker-checker"
-    },
-    {
-     "what": "Approve or return the reversal of a receipt requested by another user",
-     "kind": "maker-checker"
     }
    ],
    "approvedBy": [
-    {
-     "work": "Receipts",
-     "approval": "Approve or return the reversal of a receipt requested by another user",
-     "approvers": [
-      "CCD-Recon (Reconciliation and Reversals)",
-      "TIS Finance & General Accounting"
-     ],
-     "kind": "maker-checker"
-    },
     {
      "work": "Bank reconciliation",
      "approval": "Approve and reopen bank reconciliations (not the preparer)",
@@ -6059,15 +5918,6 @@
      "approval": "Approve premium warranty extensions and client credit limits (not the requester)",
      "approvers": [
       "TIS Finance & General Accounting"
-     ],
-     "kind": "maker-checker"
-    },
-    {
-     "work": "Remittance and insurer reconciliation",
-     "approval": "Approve or reject an insurer billing statement raised or submitted by another user",
-     "approvers": [
-      "TIS Finance & General Accounting",
-      "TIS General Manager"
      ],
      "kind": "maker-checker"
     },
@@ -6110,7 +5960,7 @@
    "sod": [
     {
      "rule": "Administration and transactions",
-     "conflict": "Collections and credit control (create and edit), Remittance and insurer reconciliation (create and edit) with Users (create and edit), Roles (create and edit), Access control (create and edit) held by the same person",
+     "conflict": "Receipts (create and edit), Collections and credit control (create and edit), Remittance and insurer reconciliation (create and edit) with Users (create and edit), Roles (create and edit), Access control (create and edit) held by the same person",
      "action": "Warning",
      "reason": "The person who administers users and access should not enter business or accounting transactions"
     },
@@ -6119,6 +5969,12 @@
      "conflict": "Remittance and insurer reconciliation (create and edit) with Quotations and placement (create and edit), Policies (create and edit) held by the same person",
      "action": "Warning",
      "reason": "The person who places business with an insurer should not also prepare the payments to insurers"
+    },
+    {
+     "rule": "Receipting and selling",
+     "conflict": "Receipts (create and edit) with Quotations and placement (create and edit), Policies (create and edit) held by the same person",
+     "action": "Warning",
+     "reason": "The person who issues receipts and posts cash should not also sell or issue the policies paid for"
     },
     {
      "rule": "Receipting and reversals",
@@ -6162,15 +6018,6 @@
      "section": "Accounts",
      "screen": "Receipts",
      "path": "/accounts/receipts",
-     "access": "View",
-     "modules": [
-      "Receipts"
-     ]
-    },
-    {
-     "section": "Accounts",
-     "screen": "Unapplied Collections",
-     "path": "/accounts/unapplied-collections",
      "access": "View",
      "modules": [
       "Receipts"
@@ -6227,7 +6074,7 @@
      "path": "/accounts/post-dated-cheques",
      "access": "View",
      "modules": [
-      "Post-dated cheques"
+      "Receipts"
      ]
     },
     {
@@ -6370,15 +6217,6 @@
      "section": "Accounts > Remittance",
      "screen": "Exceptions",
      "path": "/finance/remittance/exceptions",
-     "access": "Create and edit",
-     "modules": [
-      "Remittance and insurer reconciliation"
-     ]
-    },
-    {
-     "section": "Accounts > Remittance",
-     "screen": "Held policies",
-     "path": "/finance/remittance/held",
      "access": "Create and edit",
      "modules": [
       "Remittance and insurer reconciliation"
@@ -7015,15 +6853,6 @@
     },
     {
      "section": "Master > Finance",
-     "screen": "Financial Statement Versions",
-     "path": "/master/finance/fs-versions",
-     "access": "Create and edit",
-     "modules": [
-      "Journal vouchers"
-     ]
-    },
-    {
-     "section": "Master > Finance",
      "screen": "Premium Taxes & LGU Rates",
      "path": "/master/finance/premium-taxes",
      "access": "View",
@@ -7181,22 +7010,16 @@
      "meaning": "See claims"
     },
     {
-     "area": "Accounts",
-     "module": "Receipts",
-     "level": "View",
-     "meaning": "See receipts"
+     "area": "Operations",
+     "module": "Claims",
+     "level": "Special",
+     "meaning": "Reverse claim settlement funds or a payment to the claimant recorded in error"
     },
     {
      "area": "Accounts",
      "module": "Receipts",
-     "level": "Approve",
-     "meaning": "Approve or return the reversal of a receipt requested by another user"
-    },
-    {
-     "area": "Accounts",
-     "module": "Post-dated cheques",
      "level": "View",
-     "meaning": "See the post-dated cheque log, its sets, transmittals and cheque history"
+     "meaning": "See receipts and post-dated cheques"
     },
     {
      "area": "Accounts",
@@ -7275,12 +7098,6 @@
      "module": "Remittance and insurer reconciliation",
      "level": "Create and edit",
      "meaning": "Prepare remittances and insurer statement reconciliations"
-    },
-    {
-     "area": "Accounts",
-     "module": "Remittance and insurer reconciliation",
-     "level": "Approve",
-     "meaning": "Approve or reject an insurer billing statement raised or submitted by another user"
     },
     {
      "area": "Accounts",
@@ -7419,10 +7236,6 @@
      "kind": "maker-checker"
     },
     {
-     "what": "Approve or reject an insurer billing statement raised or submitted by another user",
-     "kind": "maker-checker"
-    },
-    {
      "what": "Approve supplier invoices (not the preparer)",
      "kind": "maker-checker"
     },
@@ -7432,10 +7245,6 @@
     },
     {
      "what": "Approve changes to posting rules and account determination (not the requester)",
-     "kind": "maker-checker"
-    },
-    {
-     "what": "Approve or return the reversal of a receipt requested by another user",
      "kind": "maker-checker"
     },
     {
@@ -7504,15 +7313,6 @@
      "approval": "Approve changes to posting rules and account determination (not the requester)",
      "approvers": [
       "TIS Finance & General Accounting"
-     ],
-     "kind": "maker-checker"
-    },
-    {
-     "work": "Remittance and insurer reconciliation",
-     "approval": "Approve or reject an insurer billing statement raised or submitted by another user",
-     "approvers": [
-      "TIS Finance & General Accounting",
-      "TIS General Manager"
      ],
      "kind": "maker-checker"
     },
@@ -7747,6 +7547,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Lock-in Accounts",
+     "path": "/renewal/lock-in-accounts",
+     "access": "View",
+     "modules": [
+      "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "View",
@@ -7832,7 +7641,7 @@
      "path": "/accounts/post-dated-cheques",
      "access": "View",
      "modules": [
-      "Post-dated cheques"
+      "Receipts"
      ]
     },
     {
@@ -7957,15 +7766,6 @@
      "section": "Accounts > Remittance",
      "screen": "Exceptions",
      "path": "/finance/remittance/exceptions",
-     "access": "View",
-     "modules": [
-      "Remittance and insurer reconciliation"
-     ]
-    },
-    {
-     "section": "Accounts > Remittance",
-     "screen": "Held policies",
-     "path": "/finance/remittance/held",
      "access": "View",
      "modules": [
       "Remittance and insurer reconciliation"
@@ -8776,13 +8576,7 @@
      "area": "Accounts",
      "module": "Receipts",
      "level": "View",
-     "meaning": "See receipts"
-    },
-    {
-     "area": "Accounts",
-     "module": "Post-dated cheques",
-     "level": "View",
-     "meaning": "See the post-dated cheque log, its sets, transmittals and cheque history"
+     "meaning": "See receipts and post-dated cheques"
     },
     {
      "area": "Accounts",
@@ -9233,6 +9027,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Lock-in Accounts",
+     "path": "/renewal/lock-in-accounts",
+     "access": "Create and edit",
+     "modules": [
+      "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "Approve",
@@ -9323,15 +9126,6 @@
     },
     {
      "section": "Accounts",
-     "screen": "Unapplied Collections",
-     "path": "/accounts/unapplied-collections",
-     "access": "View",
-     "modules": [
-      "Receipts"
-     ]
-    },
-    {
-     "section": "Accounts",
      "screen": "Collections",
      "path": "/agent/collections",
      "access": "View",
@@ -9381,7 +9175,7 @@
      "path": "/accounts/post-dated-cheques",
      "access": "View",
      "modules": [
-      "Post-dated cheques"
+      "Receipts"
      ]
     },
     {
@@ -9524,15 +9318,6 @@
      "section": "Accounts > Remittance",
      "screen": "Exceptions",
      "path": "/finance/remittance/exceptions",
-     "access": "View",
-     "modules": [
-      "Remittance and insurer reconciliation"
-     ]
-    },
-    {
-     "section": "Accounts > Remittance",
-     "screen": "Held policies",
-     "path": "/finance/remittance/held",
      "access": "View",
      "modules": [
       "Remittance and insurer reconciliation"
@@ -10375,6 +10160,12 @@
     },
     {
      "area": "Operations",
+     "module": "Renewals",
+     "level": "Special",
+     "meaning": "Reassign a renewal to another user or mark it not for renewal"
+    },
+    {
+     "area": "Operations",
      "module": "Claims",
      "level": "View",
      "meaning": "See claims"
@@ -10419,13 +10210,7 @@
      "area": "Accounts",
      "module": "Receipts",
      "level": "View",
-     "meaning": "See receipts"
-    },
-    {
-     "area": "Accounts",
-     "module": "Post-dated cheques",
-     "level": "View",
-     "meaning": "See the post-dated cheque log, its sets, transmittals and cheque history"
+     "meaning": "See receipts and post-dated cheques"
     },
     {
      "area": "Accounts",
@@ -10468,12 +10253,6 @@
      "module": "Remittance and insurer reconciliation",
      "level": "View",
      "meaning": "See remittances to insurers and insurer statements"
-    },
-    {
-     "area": "Accounts",
-     "module": "Remittance and insurer reconciliation",
-     "level": "Approve",
-     "meaning": "Approve or reject an insurer billing statement raised or submitted by another user"
     },
     {
      "area": "Accounts",
@@ -10578,10 +10357,6 @@
      "kind": "maker-checker"
     },
     {
-     "what": "Approve or reject an insurer billing statement raised or submitted by another user",
-     "kind": "maker-checker"
-    },
-    {
      "what": "Approve supplier invoices (not the preparer)",
      "kind": "maker-checker"
     },
@@ -10606,7 +10381,7 @@
      "kind": "authority",
      "type": "claim_settlement",
      "step": "Operations > Claims > Settlement approval",
-     "limit": "Not set"
+     "limit": "No limit"
     },
     {
      "what": "Remittance approval",
@@ -11600,6 +11375,43 @@
     }
    ]
   },
+  "/renewal/lock-in-accounts": {
+   "menu": "Operations > Renewals > Lock-in Accounts",
+   "roles": [
+    {
+     "role": "TIS Sales Associate",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Sales Officer",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "View"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "Create and edit"
+    }
+   ]
+  },
   "/renewal/negotiations": {
    "menu": "Operations > Renewals > Negotiations",
    "roles": [
@@ -11949,8 +11761,12 @@
      "access": "View"
     },
     {
+     "role": "CCD-PDU (Post-Dated Cheques)",
+     "access": "Create and edit"
+    },
+    {
      "role": "CCD-PDC / CCD-ADA",
-     "access": "View"
+     "access": "Create and edit"
     },
     {
      "role": "CCD-BP / QRPh (Receipting)",
@@ -11966,27 +11782,6 @@
     },
     {
      "role": "TIS IT AppSupport / Admin",
-     "access": "View"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
-  "/accounts/unapplied-collections": {
-   "menu": "Accounts > Unapplied Collections",
-   "roles": [
-    {
-     "role": "CCD-BP / QRPh (Receipting)",
-     "access": "Create and edit"
-    },
-    {
-     "role": "CCD-Recon (Reconciliation and Reversals)",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Finance & General Accounting",
      "access": "View"
     },
     {
@@ -12052,14 +11847,6 @@
    "menu": "Accounts > Credit Control > Instalment Plans",
    "roles": [
     {
-     "role": "CCD-BP / QRPh (Receipting)",
-     "access": "Create and edit"
-    },
-    {
-     "role": "CCD-Recon (Reconciliation and Reversals)",
-     "access": "Create and edit"
-    },
-    {
      "role": "TIS Finance & General Accounting",
      "access": "Approve"
     },
@@ -12072,14 +11859,6 @@
   "/accounts/credit-control/warranty": {
    "menu": "Accounts > Credit Control > Premium Warranty Monitor",
    "roles": [
-    {
-     "role": "CCD-BP / QRPh (Receipting)",
-     "access": "Create and edit"
-    },
-    {
-     "role": "CCD-Recon (Reconciliation and Reversals)",
-     "access": "Create and edit"
-    },
     {
      "role": "TIS Finance & General Accounting",
      "access": "Approve"
@@ -12094,14 +11873,6 @@
    "menu": "Accounts > Credit Control > Client Credit Limits",
    "roles": [
     {
-     "role": "CCD-BP / QRPh (Receipting)",
-     "access": "Create and edit"
-    },
-    {
-     "role": "CCD-Recon (Reconciliation and Reversals)",
-     "access": "Create and edit"
-    },
-    {
      "role": "TIS Finance & General Accounting",
      "access": "Approve"
     },
@@ -12114,14 +11885,6 @@
   "/accounts/credit-control/remittance-ageing": {
    "menu": "Accounts > Credit Control > Remittance Ageing",
    "roles": [
-    {
-     "role": "CCD-BP / QRPh (Receipting)",
-     "access": "View"
-    },
-    {
-     "role": "CCD-Recon (Reconciliation and Reversals)",
-     "access": "View"
-    },
     {
      "role": "TIS Finance & General Accounting",
      "access": "View"
@@ -12136,30 +11899,6 @@
    "menu": "Accounts > Post-Dated Cheques",
    "roles": [
     {
-     "role": "TIS Sales Associate",
-     "access": "View"
-    },
-    {
-     "role": "TIS Sales Officer",
-     "access": "View"
-    },
-    {
-     "role": "TIS Sales Unit Head",
-     "access": "View"
-    },
-    {
-     "role": "TIS Operations Associate",
-     "access": "View"
-    },
-    {
-     "role": "TIS Operations Officer",
-     "access": "View"
-    },
-    {
-     "role": "TIS Operations Unit Head",
-     "access": "View"
-    },
-    {
      "role": "CCD-PDU (Post-Dated Cheques)",
      "access": "Create and edit"
     },
@@ -12169,11 +11908,11 @@
     },
     {
      "role": "CCD-BP / QRPh (Receipting)",
-     "access": "View"
+     "access": "Create and edit"
     },
     {
      "role": "CCD-Recon (Reconciliation and Reversals)",
-     "access": "View"
+     "access": "Create and edit"
     },
     {
      "role": "TIS Finance & General Accounting",
@@ -12601,43 +12340,6 @@
     }
    ]
   },
-  "/finance/remittance/held": {
-   "menu": "Accounts > Remittance > Held policies",
-   "roles": [
-    {
-     "role": "TIS Operations Officer",
-     "access": "View"
-    },
-    {
-     "role": "TIS Operations Unit Head",
-     "access": "View"
-    },
-    {
-     "role": "CCD-PDC / CCD-ADA",
-     "access": "View"
-    },
-    {
-     "role": "CCD-BP / QRPh (Receipting)",
-     "access": "View"
-    },
-    {
-     "role": "CCD-Recon (Reconciliation and Reversals)",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Create and edit"
-    },
-    {
-     "role": "TIS IT AppSupport / Admin",
-     "access": "View"
-    },
-    {
-     "role": "TIS General Manager",
-     "access": "View"
-    }
-   ]
-  },
   "/finance/remittance/billing": {
    "menu": "Accounts > Remittance > Insurer billing",
    "roles": [
@@ -12765,6 +12467,10 @@
    "menu": "Accounts > Open Entry Matching",
    "roles": [
     {
+     "role": "CCD-Recon (Reconciliation and Reversals)",
+     "access": "View"
+    },
+    {
      "role": "TIS Finance & General Accounting",
      "access": "View"
     },
@@ -12777,6 +12483,10 @@
   "/accounts/open-entry-unmatching": {
    "menu": "Accounts > Open Entry Unmatching",
    "roles": [
+    {
+     "role": "CCD-Recon (Reconciliation and Reversals)",
+     "access": "View"
+    },
     {
      "role": "TIS Finance & General Accounting",
      "access": "View"
@@ -14411,15 +14121,6 @@
     }
    ]
   },
-  "/master/finance/fs-versions": {
-   "menu": "Master > Finance > Financial Statement Versions",
-   "roles": [
-    {
-     "role": "TIS Finance & General Accounting",
-     "access": "Create and edit"
-    }
-   ]
-  },
   "/master/finance/package-bundles": {
    "menu": "Master > Finance > Package Bundles",
    "roles": [
@@ -14843,10 +14544,6 @@
   "approve:incentive": [
    "TIS Sales Unit Head"
   ],
-  "approve:insurer-billing": [
-   "TIS Finance & General Accounting",
-   "TIS General Manager"
-  ],
   "approve:insurer-reconciliation": [
    "CCD-Recon (Reconciliation and Reversals)"
   ],
@@ -14855,9 +14552,6 @@
    "TIS Operations Unit Head",
    "TIS Finance & General Accounting",
    "TIS General Manager"
-  ],
-  "approve:pdc": [
-   "CCD-PDC / CCD-ADA"
   ],
   "approve:period-end": [
    "TIS Finance & General Accounting"
@@ -14877,10 +14571,6 @@
    "TIS Operations Unit Head",
    "TIS General Manager"
   ],
-  "approve:receipt-reversal": [
-   "CCD-Recon (Reconciliation and Reversals)",
-   "TIS Finance & General Accounting"
-  ],
   "approve:remittance": [
    "TIS Finance & General Accounting",
    "TIS General Manager"
@@ -14890,6 +14580,17 @@
    "TIS Sales Unit Head",
    "TIS Operations Unit Head",
    "TIS General Manager"
+  ],
+  "assign:renewals": [
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS Operations Unit Head",
+   "TIS General Manager"
+  ],
+  "process:claims": [
+   "TIS Operations Associate",
+   "TIS Operations Officer",
+   "TIS Operations Unit Head"
   ],
   "read:access-control": [
    "TIS IT AppSupport / Admin",
@@ -15098,21 +14799,6 @@
    "TIS IT AppSupport / Admin",
    "TIS General Manager"
   ],
-  "read:pdc": [
-   "TIS Sales Associate",
-   "TIS Sales Officer",
-   "TIS Sales Unit Head",
-   "TIS Operations Associate",
-   "TIS Operations Officer",
-   "TIS Operations Unit Head",
-   "CCD-PDU (Post-Dated Cheques)",
-   "CCD-PDC / CCD-ADA",
-   "CCD-BP / QRPh (Receipting)",
-   "CCD-Recon (Reconciliation and Reversals)",
-   "TIS Finance & General Accounting",
-   "TIS IT AppSupport / Admin",
-   "TIS General Manager"
-  ],
   "read:period-end": [
    "TIS Finance & General Accounting",
    "TIS General Manager"
@@ -15172,6 +14858,7 @@
    "TIS Operations Associate",
    "TIS Operations Officer",
    "TIS Operations Unit Head",
+   "CCD-PDU (Post-Dated Cheques)",
    "CCD-PDC / CCD-ADA",
    "CCD-BP / QRPh (Receipting)",
    "CCD-Recon (Reconciliation and Reversals)",
@@ -15246,8 +14933,9 @@
    "TIS IT AppSupport / Admin",
    "TIS General Manager"
   ],
-  "reverse:receipts": [
-   "CCD-Recon (Reconciliation and Reversals)"
+  "reverse:claim-cash": [
+   "CCD-Recon (Reconciliation and Reversals)",
+   "TIS Finance & General Accounting"
   ],
   "view:pii": [
    "TIS Sales Associate",
@@ -15273,6 +14961,10 @@
   ],
   "write:channels": [
    "TIS IT AppSupport / Admin"
+  ],
+  "write:claim-funds": [
+   "CCD-BP / QRPh (Receipting)",
+   "CCD-Recon (Reconciliation and Reversals)"
   ],
   "write:claims": [
    "TIS Operations Associate",
@@ -15356,10 +15048,6 @@
   "write:payables": [
    "TIS Finance & General Accounting"
   ],
-  "write:pdc": [
-   "CCD-PDU (Post-Dated Cheques)",
-   "CCD-PDC / CCD-ADA"
-  ],
   "write:period-end": [
    "TIS Finance & General Accounting"
   ],
@@ -15391,7 +15079,10 @@
    "TIS General Manager"
   ],
   "write:receipts": [
-   "CCD-BP / QRPh (Receipting)"
+   "CCD-PDU (Post-Dated Cheques)",
+   "CCD-PDC / CCD-ADA",
+   "CCD-BP / QRPh (Receipting)",
+   "CCD-Recon (Reconciliation and Reversals)"
   ],
   "write:remittance": [
    "CCD-Recon (Reconciliation and Reversals)",

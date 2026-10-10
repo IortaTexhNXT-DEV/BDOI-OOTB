@@ -58,7 +58,7 @@ export async function getClient(id) {
 }
 
 /** Claim statuses of a claim still being worked (not settled, closed or rejected). */
-const OPEN_CLAIMS = ['registered', 'in-review', 'pending-approval', 'approved'];
+const OPEN_CLAIMS = ['registered', 'in-review', 'pending-approval', 'approved', 'partially-settled'];
 
 /**
  * Figures of the client view (Operations > Clients > client): policies in force and their premium, open claims, open
@@ -74,8 +74,8 @@ export async function clientSummary(id) {
       (SELECT count(*) FROM policies p WHERE p.client_id = $1)::int AS policies,
       (SELECT count(*) FROM claims cl WHERE cl.client_id = $1 AND cl.status = ANY($3))::int AS open_claims,
       (SELECT count(*) FROM claims cl WHERE cl.client_id = $1)::int AS claims,
-      (SELECT count(*) FROM renewals rn JOIN policies p ON p.id = rn.policy_id WHERE COALESCE(rn.client_id, p.client_id) = $1 AND rn.status <> ALL('{renewed,lapsed}'))::int AS open_renewals,
-      (SELECT min(p.expiry_date) FROM renewals rn JOIN policies p ON p.id = rn.policy_id WHERE COALESCE(rn.client_id, p.client_id) = $1 AND rn.status <> ALL('{renewed,lapsed}')) AS next_expiry,
+      (SELECT count(*) FROM renewals rn JOIN policies p ON p.id = rn.policy_id WHERE COALESCE(rn.client_id, p.client_id) = $1 AND rn.status <> ALL('{renewed,lapsed,not-renewed}'))::int AS open_renewals,
+      (SELECT min(p.expiry_date) FROM renewals rn JOIN policies p ON p.id = rn.policy_id WHERE COALESCE(rn.client_id, p.client_id) = $1 AND rn.status <> ALL('{renewed,lapsed,not-renewed}')) AS next_expiry,
       (SELECT count(*) FROM renewals rn JOIN policies p ON p.id = rn.policy_id WHERE COALESCE(rn.client_id, p.client_id) = $1)::int AS renewals,
       (SELECT COALESCE(sum(rv.balance), 0) FROM receivables rv WHERE rv.client_id = $1 AND rv.balance > 0 AND rv.status NOT IN ('paid', 'written-off'))::numeric AS outstanding,
       (SELECT count(*) FROM receivables rv WHERE rv.client_id = $1 AND rv.balance > 0 AND rv.status NOT IN ('paid', 'written-off') AND rv.due_date < $2::date)::int AS overdue_bills,

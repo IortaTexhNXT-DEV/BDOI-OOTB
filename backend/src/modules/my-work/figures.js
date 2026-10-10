@@ -79,7 +79,7 @@ const FIGURES = {
     const p = [c.today];
     const claim = scopeSql(c.recordScope, 'claim', 'cl', p);
     const open = await c.figure(`SELECT count(*)::int AS n, COALESCE(avg($1::date - cl.reported_date), 0) AS days FROM claims cl
-      WHERE ${claim} AND cl.status IN ('registered', 'in-review', 'approved', 'pending-approval')`, p);
+      WHERE ${claim} AND cl.status IN ('registered', 'in-review', 'approved', 'pending-approval', 'partially-settled')`, p);
     const month = await c.figure(`SELECT count(*)::int AS n FROM claims cl WHERE ${claim} AND cl.reported_date >= date_trunc('month', $1::date)::date`, p);
     return [
       { key: 'claimsOpen', label: 'Open claims', value: num(open.n), format: 'count' },

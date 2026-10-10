@@ -160,7 +160,7 @@ async function renewals(ctx) {
     next_action: `CASE WHEN r.status = 'pipeline' THEN 'Prepare the renewal terms' WHEN r.status = 'quoted' THEN 'Submit the renewal for approval'
       WHEN r.status = 'pending-approval' THEN 'Awaiting approval' WHEN r.status = 'approved' THEN 'Complete the renewal' ELSE 'Follow up the client' END`,
     owner_id: 'COALESCE(r.owner_user_id, p.owner_user_id)',
-    link: "CASE WHEN r.status IN ('quoted', 'pending-approval', 'approved') THEN '/renewal/negotiations' ELSE '/renewal/queue' END",
+    link: "CASE WHEN r.status IN ('quoted', 'pending-approval', 'approved') THEN '/renewal/negotiations?renewal=' ELSE '/renewal/queue?renewal=' END || r.id",
     amount: 'COALESCE(r.premium_new, r.premium_old)', created_at: 'r.created_at',
   })} FROM renewals r JOIN policies p ON p.id = r.policy_id LEFT JOIN clients c ON c.id = COALESCE(r.client_id, p.client_id)
   WHERE r.status = ANY(${open}::text[]) AND ${rec(ctx, 'renewal', 'r')}`;
@@ -236,11 +236,11 @@ function claims(ctx) {
     id: 'cl.id', ref: 'cl.claim_number', title: "COALESCE(p.policy_number, '') || COALESCE(' - ' || cl.loss_type, '')", client_name: CLIENT('c'),
     due_date: 'cl.due_date', status: 'cl.status', priority: prio('cl.priority'),
     next_action: `CASE cl.status WHEN 'registered' THEN 'Review the claim and notify the insurer' WHEN 'in-review' THEN 'Follow up the insurer and adjuster'
-      WHEN 'approved' THEN 'Record the settlement' ELSE 'Awaiting settlement approval' END`,
+      WHEN 'approved' THEN 'Record the settlement' WHEN 'partially-settled' THEN 'Complete the settlement' ELSE 'Awaiting settlement approval' END`,
     owner_id: 'cl.handler_user_id', queue, link: "'/agent/claimdetail/' || cl.id", amount: 'COALESCE(cl.approved_amount, cl.estimate_amount)', created_at: 'cl.created_at',
     reassign: "CASE WHEN cl.status IN ('registered', 'in-review') THEN 'claim' END",
   })} FROM claims cl LEFT JOIN policies p ON p.id = cl.policy_id LEFT JOIN clients c ON c.id = COALESCE(cl.client_id, p.client_id)
-  WHERE cl.status IN ('registered', 'in-review', 'approved', 'pending-approval') AND ${rec(ctx, 'claim', 'cl')}`;
+  WHERE cl.status IN ('registered', 'in-review', 'approved', 'pending-approval', 'partially-settled') AND ${rec(ctx, 'claim', 'cl')}`;
 }
 
 /** Approval queues (maker-checker) the user can decide. */
@@ -380,7 +380,7 @@ async function approvals(ctx) {
   if (ctx.can('approve:renewals') && (isAdmin(ctx.user) || ctx.roles.some((r) => renewalApprovers.includes(r)))) {
     out.push(`SELECT ${select({ ...base, kind: "'Renewal premium'", id: 'ra.id', ref: 'ra.renewal_number', title: 'p.policy_number', client_name: CLIENT('c'),
       due_date: `LEAST(COALESCE(ra.due_date, p.expiry_date), ${due('COALESCE(ra.submitted_at, ra.updated_at)')})`, status: 'ra.status', priority: prio('ra.priority'),
-      link: "'/renewal/negotiations'", amount: 'ra.premium_new', created_at: 'ra.created_at' })}
+      link: "'/renewal/negotiations?renewal=' || ra.id", amount: 'ra.premium_new', created_at: 'ra.created_at' })}
       FROM renewals ra JOIN policies p ON p.id = ra.policy_id LEFT JOIN clients c ON c.id = COALESCE(ra.client_id, p.client_id)
       WHERE ra.status = 'pending-approval' AND ${notMine(ctx, 'ra.submitted_by')} AND ${rec(ctx, 'renewal', 'ra')}`);
   }

@@ -7,13 +7,8 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | My Work | My Work | View |
 | Operations | Payments | View |
 | Accounts | Receipts | Create and edit |
-| Accounts | Unapplied Collections | Create and edit |
 | Accounts | Collections | Create and edit |
-| Accounts > Credit Control | Instalment Plans | Create and edit |
-| Accounts > Credit Control | Premium Warranty Monitor | Create and edit |
-| Accounts > Credit Control | Client Credit Limits | Create and edit |
-| Accounts > Credit Control | Remittance Ageing | View |
-| Accounts | Post-Dated Cheques | View |
+| Accounts | Post-Dated Cheques | Create and edit |
 | Accounts | Claims Settlements | Create and edit |
 | Accounts | Disbursement | View |
 | Accounts > Remittance | Remittances | Create and edit |
@@ -21,8 +16,9 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Remittance | Insurer payments | Create and edit |
 | Accounts > Remittance | Reconciliation | Create and edit |
 | Accounts > Remittance | Exceptions | Create and edit |
-| Accounts > Remittance | Held policies | Create and edit |
 | Accounts > Remittance | Insurer billing | Create and edit |
+| Accounts | Open Entry Matching | View |
+| Accounts | Open Entry Unmatching | View |
 | Accounts > Bank Reconciliation | Reconciliation Workspace | Create and edit |
 | Accounts > Bank Reconciliation | Reconciliations | Create and edit |
 | Accounts > Bank Reconciliation | Reconciliation Statement Report | View |
@@ -40,14 +36,14 @@ Where: the screens of your menus that show the module. A module without a screen
 
 | Area | Module | Access | What it allows | Where |
 |---|---|---|---|---|
-| Accounts | Receipts | View | See receipts | Receipts, Unapplied Collections and Claims Settlements |
-| Accounts | Receipts | Create and edit | Reverse a receipt with a reason; the reversal waits for a checker when required |  |
-| Accounts | Receipts | Approve | Approve or return the reversal of a receipt requested by another user |  |
-| Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
-| Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections, Instalment Plans, Premium Warranty Monitor, Client Credit Limits and Remittance Ageing |
+| Operations | Claims | Special | Reverse claim settlement funds or a payment to the claimant recorded in error | No screen of its own |
+| Operations | Claims | Special | Record claim settlement funds received from an insurer |  |
+| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts, Post-Dated Cheques and Claims Settlements |
+| Accounts | Receipts | Create and edit | Issue official receipts, post cash, verify payments, handle post-dated cheques |  |
+| Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
 | Accounts | Collections and credit control | Create and edit | Record collections and adjustments |  |
 | Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement and Insurer payments |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Held policies and Insurer billing |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions and Insurer billing |
 | Accounts | Remittance and insurer reconciliation | Create and edit | Prepare remittances and insurer statement reconciliations |  |
 | Accounts | Remittance and insurer reconciliation | Approve | Approve insurer statement reconciliations and post their adjustments (not the preparer) |  |
 | Accounts | Bank reconciliation | View | See bank reconciliations | Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines and Bank Book |
@@ -61,16 +57,13 @@ Where: the screens of your menus that show the module. A module without a screen
 This role approves the work of other users:
 
 - Approve insurer statement reconciliations and post their adjustments (not the preparer)
-- Approve or return the reversal of a receipt requested by another user
 
 Who approves the work of this role:
 
 | Work | Approval | Approved by |
 |---|---|---|
-| Receipts | Approve or return the reversal of a receipt requested by another user | CCD-Recon (Reconciliation and Reversals) or TIS Finance & General Accounting |
 | Bank reconciliation | Approve and reopen bank reconciliations (not the preparer) | TIS Finance & General Accounting |
 | Collections and credit control | Approve premium warranty extensions and client credit limits (not the requester) | TIS Finance & General Accounting |
-| Remittance and insurer reconciliation | Approve or reject an insurer billing statement raised or submitted by another user | TIS Finance & General Accounting or TIS General Manager |
 | Remittance and insurer reconciliation | Approve insurer statement reconciliations and post their adjustments (not the preparer) | CCD-Recon (Reconciliation and Reversals) |
 | Remittance and insurer reconciliation | Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter) | TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
@@ -82,8 +75,9 @@ The user who enters a record never approves it: the approval is always another u
 
 | Rule | Conflict | When given together | Reason |
 |---|---|---|---|
-| Administration and transactions | Collections and credit control (create and edit), Remittance and insurer reconciliation (create and edit) with Users (create and edit), Roles (create and edit), Access control (create and edit) held by the same person | Warning | The person who administers users and access should not enter business or accounting transactions |
+| Administration and transactions | Receipts (create and edit), Collections and credit control (create and edit), Remittance and insurer reconciliation (create and edit) with Users (create and edit), Roles (create and edit), Access control (create and edit) held by the same person | Warning | The person who administers users and access should not enter business or accounting transactions |
 | Placing and paying insurers | Remittance and insurer reconciliation (create and edit) with Quotations and placement (create and edit), Policies (create and edit) held by the same person | Warning | The person who places business with an insurer should not also prepare the payments to insurers |
+| Receipting and selling | Receipts (create and edit) with Quotations and placement (create and edit), Policies (create and edit) held by the same person | Warning | The person who issues receipts and posts cash should not also sell or issue the policies paid for |
 | Receipting and reversals | CCD-Recon (Reconciliation and Reversals) and CCD-BP / QRPh (Receipting) held by the same person | Warning | CCD-BP issues the receipts and has no reversal rights; reversals and adjustments sit with CCD-Recon |
 
 These are the delivered rules. The rules in force are on Master > Users and Access > Segregation of Duties.
