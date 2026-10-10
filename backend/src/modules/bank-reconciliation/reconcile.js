@@ -11,8 +11,7 @@
  * date. Balance per books: GL balance of the cash account (pe_balance_before, which honours year-end opening balances).
  */
 import { getSetting } from '../../lib/settings.js';
-import { printFormat } from '../../lib/pdf/index.js';
-import { formatDateTime } from '../../lib/pdf/format.js';
+import { formatDate, formatDateTime, printFormat } from '../../lib/pdf/index.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { hasPermission } from '../../lib/auth.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
@@ -213,17 +212,19 @@ export async function cancelRec(db, id, user, { remarks = null } = {}) {
 // ---------- printable statement ----------
 const money = (v) => Number(v || 0);
 const txt = (v) => String(v ?? '').replace(/[\u2013\u2014]/g, '-');
-const itemTable = (list, kind) => ({
+const itemTable = (list, kind, day = (v) => v) => ({
   columns: kind === 'book' ? ['Date', 'Journal', 'Document', 'Cheque / Ref.', 'Payee / Payer', 'Amount'] : ['Date', 'Statement', 'Description', 'Reference', 'Amount'],
   widths: kind === 'book' ? [55, 72, 140, 68, 110, 70] : [55, 80, 200, 110, 70],
   rows: list.map((x) => (kind === 'book'
-    ? [x.date, x.journalNumber, txt(`${x.documentType || ''} ${x.documentNumber || ''}`.trim()), txt(x.chequeNumber || x.reference || ''), txt(x.party || x.description || ''), Math.abs(money(x.amount))]
-    : [x.date || x.clearedDate, x.statementNumber || x.matchId || '', txt(x.description || x.remarks || ''), txt(x.reference || ''), Math.abs(money(x.amount ?? x.difference))])),
+    ? [day(x.date), x.journalNumber, txt(`${x.documentType || ''} ${x.documentNumber || ''}`.trim()), txt(x.chequeNumber || x.reference || ''), txt(x.party || x.description || ''), Math.abs(money(x.amount))]
+    : [day(x.date || x.clearedDate), x.statementNumber || x.matchId || '', txt(x.description || x.remarks || ''), txt(x.reference || ''), Math.abs(money(x.amount ?? x.difference))])),
 });
 
 /** Document spec (documents/pdf.js buildPdf) of the Bank Reconciliation Statement. */
-export async function statementPdfSpec(rec, company) {
+export async function statementPdfSpec(rec) {
   const s = rec.statement;
+  const fmt = await printFormat();
+  const day = (v) => (v ? formatDate(v, fmt) : '');
   const fig = (label, v, sign = 1) => [label, sign * money(v)];
   const block = (rows) => ({ columns: ['', 'PHP'], widths: [415, 100], rows });
   const sections = [
@@ -237,19 +238,17 @@ export async function statementPdfSpec(rec, company) {
   ];
   const detail = [['Deposits in transit', s.items?.depositsInTransit, 'book'], ['Outstanding cheques', s.items?.outstandingCheques, 'book'], ['Bank credits not yet booked', s.items?.unbookedCredits, 'bank'],
     ['Bank charges not yet booked', s.items?.unbookedDebits, 'bank'], ['Bank errors', s.items?.bankErrors, 'bank'], ['Book errors', s.items?.bookErrors, 'bank']];
-  for (const [heading, list, kind] of detail) if (list?.length) sections.push({ heading: `${heading} (${list.length})`, table: itemTable(list, kind) });
-  const fmt = await printFormat();
+  for (const [heading, list, kind] of detail) if (list?.length) sections.push({ heading: `${heading} (${list.length})`, table: itemTable(list, kind, day) });
   const at = (v) => (v ? formatDateTime(v, fmt) : '-');
   sections.push({ heading: 'Sign-off', rows: [['Prepared by', txt(rec.preparedByName || '-')], ['Prepared at', at(rec.preparedAt)], ['Approved by', txt(rec.approvedByName || '-')], ['Approved at', at(rec.approvedAt)]] });
   return {
     title: 'Bank Reconciliation Statement',
-    subtitle: txt(`${company.name || ''}${company.name ? '  -  ' : ''}${rec.recNumber}`),
+    // the letterhead names the company; the subtitle names the reconciliation
+    subtitle: txt(rec.recNumber),
     meta: [['Bank account', s.bankAccount], ['Account name', txt(s.bankAccountName || '-')], ['Bank', txt(s.bankName || '-')], ['Account number', s.accountNumber || '-'],
-      ['GL account', txt(`${s.glAccountCode} ${s.glAccountName || ''}`.trim())], ['Period', rec.period], ['As of', s.asOf],
+      ['GL account', txt(`${s.glAccountCode} ${s.glAccountName || ''}`.trim())], ['Period', String(rec.period || '').split('-').reverse().join('/')], ['As of', day(s.asOf)],
       ['Bank statement', txt(s.statement ? `${s.statement.statementNumber}${s.statement.statementRef ? ` (${s.statement.statementRef})` : ''}` : '-')]],
     sections,
-    // the generated date and user are printed by the layout in the business time zone
-    footer: txt(company.system || company.name || ''),
   };
 }
 

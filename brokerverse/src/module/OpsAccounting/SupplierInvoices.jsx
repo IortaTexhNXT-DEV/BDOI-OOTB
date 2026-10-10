@@ -134,18 +134,18 @@ const SupplierInvoices = () => {
             {["draft", "rejected", "for-approval", "approved"].includes(view.status) && (
               <Button label={t("opsAcc.confirmations.invoice.cancel")} text severity="danger" onClick={() => decide("cancel")} />
             )}
-            <Button label={t("detailView.close")} outlined onClick={() => setView(null)} />
             <Button label={t("opsAcc.print")} icon="pi pi-print" outlined onClick={() => print(view)} />
             {["draft", "rejected"].includes(view.status) && <Button label={t("opsAcc.confirmations.invoice.submit")} icon="pi pi-send" onClick={() => decide("submit")} />}
-            {view.status === "for-approval" && (
-              <ApprovalActions initiator={{ id: view.createdById }} approveLabel={t("opsAcc.confirmations.invoice.approve")} rejectLabel={t("opsAcc.confirmations.invoice.reject")}
-                onApprove={() => decide("approve")} onReject={() => decide("reject")} />
-            )}
+            <Button label={t("detailView.close")} outlined onClick={() => setView(null)} />
           </>
         )}>
         {view && (
           <>
             <DetailHeader title={view.voucherNumber} subtitle={view.supplierName} status={{ code: view.status, label: t(`opsAcc.status.${view.status}`, { defaultValue: view.status }) }}
+              actions={view.status === "for-approval" ? (
+                <ApprovalActions initiator={{ id: view.createdById }} approveLabel={t("opsAcc.confirmations.invoice.approve")} rejectLabel={t("opsAcc.confirmations.invoice.reject")}
+                  onApprove={() => decide("approve")} onReject={() => decide("reject")} />
+              ) : null}
               meta={[
                 { label: t("opsAcc.ap.supplierInvoice"), value: view.supplierInvoiceNo },
                 { label: t("opsAcc.ap.invoiceDate"), value: view.invoiceDate, type: "date" },

@@ -76,3 +76,16 @@
 
   }
   
+// the fund opened to view: header and sections as stacked cards
+.pettycash__details {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .pettycash__title {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    text-align: left;
+  }
+}

@@ -5,6 +5,7 @@ import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import { useTranslation } from "react-i18next";
+import { EMPTY_VALUE, formatValue } from "../../../../components/KeyValueGrid";
 const ViewDataTabel = ({
   journalVoucherPostTabelData,
   pagination,
@@ -80,15 +81,13 @@ const ViewDataTabel = ({
         className="table__view__Journal__Voture"
         paginator
         paginatorLeft
-        rows={rowsPerPage || 10}
+        rows={rowsPerPage || 20}
         first={first || 0}
         totalRecords={pagination?.total || 0}
         rowsPerPageOptions={[20, 50, 100]}
         currentPageReportTemplate="{first} - {last} of {totalRecords}"
         paginatorTemplate={template2}
         emptyMessage={isEmpty ? emptyTableIcon : null}
-        scrollable={true}
-        scrollHeight="40vh"
         onPage={onPageChange}
         loading={loading}
         lazy
@@ -127,7 +126,7 @@ const ViewDataTabel = ({
           header="Foreign Amount"
           className="fieldvalue_container"
           headerStyle={headerStyle}
-          body={(rowData) => rowData.foreignAmount || "0.00"}
+          body={(rowData) => (Number(rowData.foreignAmount) ? formatValue(rowData.foreignAmount, { type: "amount", currency: rowData.Currency || undefined }) : EMPTY_VALUE)}
         ></Column>
 
         <Column
@@ -135,7 +134,9 @@ const ViewDataTabel = ({
           header="Local Amount"
           className="fieldvalue_container"
           headerStyle={headerStyle}
-          body={(rowData) => rowData.localAmount || "0.00"}
+          body={(rowData) => formatValue(rowData.localAmount === "" ? null : rowData.localAmount, { type: "amount" })}
+          bodyClassName="bv-num"
+          headerClassName="bv-num"
         ></Column>
         <Column
           field="costCentre"

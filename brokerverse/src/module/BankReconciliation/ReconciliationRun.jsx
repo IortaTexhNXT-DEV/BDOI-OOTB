@@ -114,7 +114,6 @@ const ReconciliationRun = () => {
         { label: t("bankReconciliation.adjustedBookBalance"), value: s.adjustedBookBalance, type: "amount" },
         { label: t("bankReconciliation.difference"), value: s.difference, type: "amount", emphasis: true },
       ],
-      note: t(`bankReconciliation.confirmations.notes.${name}`),
       input: { type: "textarea", label: t("bankReconciliation.remarks"), required: !!action.required, maxLength: 1000 },
       confirmLabel: t(`bankReconciliation.confirmations.${name}`),
       cancelLabel: name === "cancel" ? t("bankReconciliation.confirmations.keep") : undefined,

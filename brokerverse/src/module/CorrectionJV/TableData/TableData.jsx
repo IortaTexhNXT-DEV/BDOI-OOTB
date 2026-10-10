@@ -17,6 +17,10 @@ import {
   patchCorrectionJVEdit,
 } from "../store/correctionJVMiddleWare";
 import useJvMasterData from "../../JournalVoucher/useJvMasterData";
+import { EMPTY_VALUE, formatValue } from "../../../components/KeyValueGrid";
+
+// a line in the local currency carries the same figure as its foreign amount: only a converted line shows one
+const foreignShown = (r) => Number(r.foreignAmount) && Number(r.foreignAmount) !== Number(r.localAmount);
 
 const ENTRY_TYPES = [
   { label: "Debit", value: "Debit" },
@@ -227,11 +231,17 @@ const TableData = ({ newDataTable, editID }) => {
           field="foreignAmount"
           header="Foreign Amount"
           className="fieldvalue_container"
+          body={(r) => (foreignShown(r) ? formatValue(r.foreignAmount, { type: "amount", currency: r.currencyCode || undefined }) : EMPTY_VALUE)}
+          bodyClassName="bv-num"
+          headerClassName="bv-num"
         ></Column>
         <Column
           field="localAmount"
           header="Local Amount"
           className="fieldvalue_container"
+          body={(r) => formatValue(r.localAmount === "" ? null : r.localAmount, { type: "amount" })}
+          bodyClassName="bv-num"
+          headerClassName="bv-num"
         ></Column>
         <Column
           field="entryType"

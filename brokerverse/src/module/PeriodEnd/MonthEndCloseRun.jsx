@@ -164,7 +164,7 @@ const MonthEndCloseRun = () => {
       <div className="pe-kpis">
         <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.runStatus")}</div><div className="pe-kpi-value"><StatusTag status={run.status} /></div></div>
         <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.periodStatus")}</div><div className="pe-kpi-value"><StatusTag status={run.periodInfo?.status} /></div></div>
-        <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.preparedBy")}</div><div className="pe-kpi-value" style={{ fontSize: "1rem" }}>{run.preparedByName || "-"}</div><div className="pe-muted">{dateTime(run.preparedAt)}</div></div>
+        <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.preparedBy")}</div><div className="pe-kpi-value" style={{ fontSize: "1rem" }}>{run.preparedByName || "-"}</div><div className="pe-muted">{dateTime(run.preparedAt || run.openedAt)}</div></div>
         <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.submittedBy")}</div><div className="pe-kpi-value" style={{ fontSize: "1rem" }}>{run.submittedByName || "-"}</div><div className="pe-muted">{run.targetStatus ? t(`periodEnd.status.${run.targetStatus}`) : ""}</div></div>
         <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.approvedBy")}</div><div className="pe-kpi-value" style={{ fontSize: "1rem" }}>{run.approvedByName || "-"}</div><div className="pe-muted">{dateTime(run.approvedAt)}</div></div>
         <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.executions")}</div><div className="pe-kpi-value">{run.executionCount}</div></div>

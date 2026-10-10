@@ -408,21 +408,7 @@ function BranchAdding() {
       <BreadCrumb model={items} home={home} className="breadcrumbs_container" separatorIcon={<SvgDot color={"#000"} />} />
       <Card>
         <div className="grid">
-          <div className="sm-col-12  md:col-3 lg-col-4 col-offset-9">
-            <LabelWrapper className="calenderlable__container">{t("accounts.addReceipts.receiptDate")}</LabelWrapper>
-            <Calendar
-              classNames="calender__container"
-              showIcon
-              value={values.receiptDate}
-              onChange={(e) => setFieldValue("receiptDate", e.target.value)}
-              dateFormat={calendarDateFormat()}
-              disabled={true}
-            />
-            {errorText(touchedError("receiptDate"))}
-          </div>
-        </div>
-        <div className="grid">
-          <div className="sm-col-12 col-12 md:col-3 lg-col-4">
+          <div className="col-12 md:col-4">
             <InputField
               value={values.receiptNumber}
               classNames="field__container"
@@ -431,7 +417,20 @@ function BranchAdding() {
               disabled={true}
             />
           </div>
-          <div className="sm-col-12  md:col-3 lg-col-4">
+          <div className="col-12 md:col-4">
+            <LabelWrapper label={t("accounts.addReceipts.receiptDate")}>
+              <Calendar
+                showIcon
+                className="w-full"
+                value={values.receiptDate}
+                onChange={(e) => setFieldValue("receiptDate", e.target.value)}
+                dateFormat={calendarDateFormat()}
+                disabled={true}
+              />
+            </LabelWrapper>
+            {errorText(touchedError("receiptDate"))}
+          </div>
+          <div className="col-12 md:col-4">
             <DropDowns
               value={values.receiptType}
               onChange={(e) => setFieldValue("receiptType", e.value)}
@@ -445,7 +444,9 @@ function BranchAdding() {
             />
             {errorText(touchedError("receiptType"))}
           </div>
-          <div className="sm-col-12  md:col-3 lg-col-4">
+        </div>
+        <div className="grid">
+          <div className="col-12 md:col-4">
             <DropDowns
               value={values.branchCode}
               onChange={(e) => setFieldValue("branchCode", e.value)}
@@ -459,7 +460,7 @@ function BranchAdding() {
             />
             {errorText(touchedError("branchCode"))}
           </div>
-          <div className="sm-col-12  md:col-3 lg-col-4">
+          <div className="col-12 md:col-4">
             <DropDowns
               value={values.departmentCode}
               onChange={(e) => setFieldValue("departmentCode", e.value)}
@@ -584,14 +585,15 @@ function BranchAdding() {
               {selectedBill && chequeMissing && errorText(t("accounts.addReceipts.validationChequeNumberRequired"))}
             </div>
             <div className="col-12 md:col-4">
-              <LabelWrapper className="calenderlable__container">{t("accounts.addReceipts.chequeDate")}</LabelWrapper>
-              <Calendar
-                classNames="calender__container"
-                showIcon
-                value={values.chequeDate}
-                onChange={(e) => setFieldValue("chequeDate", e.target.value)}
-                dateFormat={calendarDateFormat()}
-              />
+              <LabelWrapper label={t("accounts.addReceipts.chequeDate")}>
+                <Calendar
+                  showIcon
+                  className="w-full"
+                  value={values.chequeDate}
+                  onChange={(e) => setFieldValue("chequeDate", e.target.value)}
+                  dateFormat={calendarDateFormat()}
+                />
+              </LabelWrapper>
             </div>
           </div>
         )}

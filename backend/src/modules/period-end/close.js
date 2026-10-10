@@ -24,7 +24,9 @@ const ACTIVE = ['draft', 'in-progress', 'blocked', 'ready', 'pending-approval', 
 
 const runRow = (r, users = new Map()) => r && ({
   id: r.id, runNumber: r.run_number, period: r.period, fiscalYear: r.fiscal_year, status: r.status, targetStatus: r.target_status, steps: r.steps,
-  executionCount: r.execution_count, preparedBy: r.prepared_by, preparedByName: users.get(r.prepared_by) || null, preparedAt: r.prepared_at,
+  executionCount: r.execution_count, preparedBy: r.prepared_by, preparedAt: r.prepared_at,
+  // until its steps are run, the run is prepared by the user who opened it
+  preparedByName: users.get(r.prepared_by || r.created_by) || null, openedBy: r.created_by, openedAt: r.created_at,
   submittedBy: r.submitted_by, submittedByName: users.get(r.submitted_by) || null, submittedAt: r.submitted_at,
   approvedBy: r.approved_by, approvedByName: users.get(r.approved_by) || null, approvedAt: r.approved_at,
   rejectedBy: r.rejected_by, rejectedAt: r.rejected_at, rejectionReason: r.rejection_reason, remarks: r.remarks, createdAt: r.created_at, updatedAt: r.updated_at,
@@ -55,7 +57,7 @@ export async function listRuns(db, q = {}) {
     FROM period_close_runs r JOIN accounting_periods p ON p.period = r.period
     WHERE ($1::text IS NULL OR r.period = $1) AND ($2::text IS NULL OR r.status = $2) AND ($3::text IS NULL OR r.fiscal_year = $3)
     ORDER BY r.period DESC, r.created_at DESC LIMIT 200`, [q.period || null, q.status || null, q.fiscalYear || null])).rows;
-  const users = await userNames(db, rows.flatMap((r) => [r.prepared_by, r.submitted_by, r.approved_by]));
+  const users = await userNames(db, rows.flatMap((r) => [r.prepared_by, r.created_by, r.submitted_by, r.approved_by]));
   return rows.map((r) => ({ ...runRow(r, users), periodStatus: r.period_status, failedChecks: r.failed, warnings: r.warnings, journalCount: r.journals }));
 }
 
@@ -90,7 +92,7 @@ export async function getRun(db, id) {
   const undo = new Map((await db.query('SELECT id, jv_number FROM journal_vouchers WHERE id = ANY($1)', [undoIds])).rows.map((j) => [j.id, j.jv_number]));
   const period = (await db.query('SELECT * FROM accounting_periods WHERE period = $1', [r.period])).rows[0];
   const history = (await db.query('SELECT * FROM period_status_history WHERE period = $1 ORDER BY changed_at DESC LIMIT 50', [r.period])).rows;
-  const users = await userNames(db, [r.prepared_by, r.submitted_by, r.approved_by, r.rejected_by, ...checks.map((c) => c.signed_by), ...history.map((h) => h.changed_by)]);
+  const users = await userNames(db, [r.prepared_by, r.created_by, r.submitted_by, r.approved_by, r.rejected_by, ...checks.map((c) => c.signed_by), ...history.map((h) => h.changed_by)]);
   return {
     ...runRow(r, users), period: r.period, periodInfo: periodRow(period),
     checks: checks.map((c) => checkRow(c, users)),

@@ -367,7 +367,8 @@
       "noReceiptsFound": "ไม่พบใบเสร็จที่ตรงกับตัวกรองที่กำหนด",
       "receiptsExportedSuccessfully": "ส่งออกใบเสร็จสำเร็จ",
       "success": "สำเร็จ",
-      "error": "ข้อผิดพลาด"
+      "error": "ข้อผิดพลาด",
+      "requiredTitle": "ข้อมูลที่ต้องระบุ"
     },
     "addReceipts": {
       "title": "เพิ่มใบเสร็จ",
@@ -538,8 +539,8 @@
       "transactionDescription": "คำอธิบายธุรกรรม",
       "transactionNumber": "หมายเลขธุรกรรม",
       "date": "วันที่",
-      "totalCredit": "เครดิตรวม",
-      "totalDebit": "เดบิตรวม",
+      "totalCredit": "รวมเครดิต",
+      "totalDebit": "รวมเดบิต",
       "net": "สุทธิ",
       "enter": "กรอก",
       "mainAccountRequired": "กรุณาเลือกบัญชีหลัก",
@@ -598,7 +599,12 @@
       "print": "พิมพ์",
       "approvedDone": "อนุมัติใบเสร็จแล้ว",
       "printedDone": "พิมพ์ใบเสร็จแล้ว",
-      "activity": "กิจกรรม"
+      "activity": "กิจกรรม",
+      "receiptDate": "วันที่ใบเสร็จ",
+      "customerCode": "รหัสลูกค้า",
+      "paymentMode": "วิธีการชำระ",
+      "reference": "เลขที่อ้างอิง",
+      "amount": "จำนวนเงินที่รับ"
     },
     "openEntryDialogs": {
       "matchTitle": "จับคู่รายการค้าง",
@@ -823,6 +829,22 @@
       "payout": "Record payout",
       "commissionLines": "Commission lines",
       "activity": "Activity"
+    },
+    "detail": {
+      "policyNumber": "เลขที่กรมธรรม์",
+      "insurer": "บริษัทประกันภัย",
+      "remarks": "หมายเหตุการจ่าย",
+      "otherDeductions": "รายการหักอื่น",
+      "printVoucher": "พิมพ์ใบสำคัญจ่าย",
+      "selectApprovedCheque": "เลือกเช็คที่อนุมัติแล้วเพื่อพิมพ์",
+      "modes": {
+        "check": "เช็ค",
+        "cheque": "เช็ค",
+        "cash": "เงินสด",
+        "bank-transfer": "โอนเงินผ่านธนาคาร",
+        "bank_transfer": "โอนเงินผ่านธนาคาร",
+        "online": "โอนเงินออนไลน์"
+      }
     }
   },
   "renewal": {
@@ -1090,7 +1112,21 @@
     "select": "เลือก",
     "add": "เพิ่ม",
     "edit": "แก้ไข",
-    "view": "ดู",
+    "view": {
+      "netAmount": "ยอดสุทธิ",
+      "posting": "บัญชี",
+      "criteria": "เกณฑ์",
+      "expenseAccount": "บัญชีค่าใช้จ่าย",
+      "lines": "คำขอที่จ่าย",
+      "noLines": "ไม่มีรายการคำขอ",
+      "vat": "ภาษีมูลค่าเพิ่ม",
+      "wht": "ภาษีหัก ณ ที่จ่าย",
+      "pettyCashFund": "กองทุนเงินสดย่อย",
+      "narration": "คำอธิบาย",
+      "purpose": "วัตถุประสงค์",
+      "fund": "กองทุน",
+      "accounts": "ธนาคารและบัญชี"
+    },
     "delete": "ลบ",
     "search": "ค้นหา",
     "clear": "ล้าง",
@@ -5637,7 +5673,32 @@
     "leadInsurer": "บริษัทประกันหลัก",
     "coInsurer": "บริษัทประกันร่วม",
     "total": "รวม",
-    "outstandingNote": "* จำนวนค้างชำระที่แสดงด้านบนคือยอดรวมของทุกบริษัทประกัน"
+    "outstandingNote": "* จำนวนค้างชำระที่แสดงด้านบนคือยอดรวมของทุกบริษัทประกัน",
+    "followUp": {
+      "titles": {
+        "Email": "ส่งอีเมลแจ้งเตือนการชำระเงิน",
+        "Call": "บันทึกการโทร",
+        "Note": "เพิ่มบันทึก",
+        "Commitment": "กำหนดวันที่ลูกค้ารับว่าจะชำระ"
+      },
+      "to": "ถึง",
+      "subject": "หัวเรื่อง",
+      "message": "ข้อความ",
+      "callOutcome": "ผลการโทร",
+      "callNotes": "บันทึกการโทร",
+      "note": "บันทึก",
+      "commitmentDate": "วันที่รับว่าจะชำระ",
+      "delayReason": "เหตุผลที่ล่าช้า",
+      "saveFailed": "ไม่สามารถบันทึกการติดตามได้",
+      "outcomes": {
+        "Answered": "รับสาย: รับว่าจะชำระ",
+        "NoAnswer": "ไม่รับสาย",
+        "WrongNumber": "หมายเลขไม่ถูกต้อง",
+        "CallbackRequested": "ขอให้โทรกลับ"
+      },
+      "emailSubject": "เบี้ยประกันถึงกำหนดชำระ: กรมธรรม์ {{policy}}",
+      "emailBody": "เรียน {{name}}\n\nเบี้ยประกันจำนวน {{amount}} ของกรมธรรม์ {{policy}} ถึงกำหนดชำระเมื่อวันที่ {{dueDate}} กรุณาชำระเงินโดยเร็วเพื่อให้ความคุ้มครองต่อเนื่อง\n\nหากท่านชำระแล้ว โปรดละเว้นการแจ้งเตือนนี้\n\nขอบคุณ"
+    }
   },
   "agingReport": {
     "backToCollections": "กลับไปที่ Collections",
@@ -5876,7 +5937,18 @@
     "remindersFailed": "ไม่สามารถส่งการแจ้งเตือนการชำระเงินได้",
     "remindersSentTitle": "ส่งการแจ้งเตือนแล้ว",
     "remindersSent": "ส่งการแจ้งเตือนการชำระเงินแล้ว",
-    "importOpenItems": "นำเข้ารายการค้างชำระ"
+    "importOpenItems": "นำเข้ารายการค้างชำระ",
+    "openItems": "รายการค้างชำระ",
+    "importOpenItemsTitle": "นำเข้ารายการค้างชำระ (เริ่มใช้งานระบบ)",
+    "importOpenItemsNote": "ใบแจ้งเบี้ยที่ยังไม่ชำระจากระบบเดิม นำเข้าตามกรมธรรม์ที่มีในระบบแล้ว ไม่มีการบันทึกบัญชี เนื่องจากยอดยกมาในบัญชีแยกประเภทรวมไว้แล้ว รายการที่นำเข้าแล้วสำหรับวันเริ่มใช้งานเดียวกันจะถูกข้าม",
+    "remindersScope_one": "จะส่งอีเมลแจ้งเตือนการชำระเงินสำหรับเบี้ยที่ถึงกำหนดหรือเกินกำหนด {{count}} รายการ",
+    "remindersScope_other": "จะส่งอีเมลแจ้งเตือนการชำระเงินสำหรับเบี้ยที่ถึงกำหนดหรือเกินกำหนด {{count}} รายการ",
+    "remindClients": "ลูกค้า",
+    "remindItems": "รายการเบี้ย",
+    "remindOutstanding": "ยอดค้างชำระรวม",
+    "remindLevel": "{{level}}",
+    "remindNoEmail": "ลูกค้าที่ไม่มีอีเมล (ไม่ได้ส่ง)",
+    "noneToRemind": "ขณะนี้ไม่มีเบี้ยที่ถึงกำหนดหรือเกินกำหนดที่ต้องแจ้งเตือน"
   },
   "documentLayouts": {
     "master": "มาสเตอร์",
@@ -6191,7 +6263,7 @@
     "notes": "คำเตือน",
     "files": "ไฟล์",
     "noRuns": "ยังไม่มีไฟล์บัญชีแยกประเภทสำหรับ SAP",
-    "settingsLine": "โฟลเดอร์ {{folder}} · เวลาตัดยอด {{cutOff}} · รูปแบบ {{format}} (Master > Configuration กลุ่ม integrations)",
+    "settingsLine": "โฟลเดอร์ {{folder}} · เวลาตัดยอด {{cutOff}} · รูปแบบ {{format}}",
     "statuses": {
       "done": "เขียนไฟล์แล้ว",
       "empty": "ไม่มีรายการ",
@@ -6201,6 +6273,22 @@
     "triggers": {
       "schedule": "ตามกำหนดเวลา",
       "manual": "สั่งทำทันที"
+    },
+    "folder": "โฟลเดอร์",
+    "cutOff": "เวลาตัดยอด",
+    "previousRuns": "จำนวนครั้งที่เขียนไฟล์แล้วของวันนั้น",
+    "lastJournals": "รายการบัญชี / บรรทัด (ครั้งล่าสุด)",
+    "lastDebit": "เดบิต (ครั้งล่าสุด)",
+    "lastCredit": "เครดิต (ครั้งล่าสุด)",
+    "written": "เขียนไฟล์ SAP GL ของวันที่ {{date}} แล้ว (ครั้งที่ {{n}})",
+    "nothingPosted": "ไม่มีรายการบันทึกบัญชีในวันที่ {{date}} จึงไม่ได้เขียนไฟล์",
+    "confirm": {
+      "runTitle": "เขียนไฟล์ SAP GL",
+      "runMessage": "ไฟล์ส่วนหัวและไฟล์รายการของรายการที่บันทึกในวันนี้จะถูกเขียนไปยังโฟลเดอร์รับไฟล์ของ SAP",
+      "runAction": "เขียนไฟล์",
+      "regenerateTitle": "สร้างไฟล์ SAP GL ใหม่",
+      "regenerateMessage": "ไฟล์ของวันนี้จะถูกเขียนใหม่เป็นอีกครั้งหนึ่ง และ SAP จะรับไฟล์ใหม่",
+      "regenerateAction": "สร้างไฟล์ใหม่"
     }
   },
   "directBillBasis": {
@@ -7142,7 +7230,9 @@
       "invoiceOverrideTitle": "Issue sales invoice for {{number}}",
       "invoiceOverrideMessage": "A sales invoice with the next serial number is issued to the insurer for the receivable.",
       "invoiceOverride": "Issue invoice"
-    }
+    },
+    "previewFigures": "ตัวเลขของงวด",
+    "claimsFromSystem": "ค่าสินไหมที่บันทึกในระบบ"
   },
   "importDialog": {
     "about": "เกี่ยวกับการอัปโหลดนี้",
@@ -7846,8 +7936,21 @@
       "removeInstalment": "ลบงวด",
       "acknowledgeTitle": "รับทราบรายการเกินวงเงินเครดิต",
       "acknowledgeMessage": "กรมธรรม์ที่ออกเกินวงเงินเครดิตของ {{client}} จะถูกบันทึกว่ารับทราบแล้ว",
-      "acknowledgeException": "รับทราบรายการ"
-    }
+      "acknowledgeException": "รับทราบรายการ",
+      "reminderPlaceholder": "เว้นว่างเพื่อส่งข้อความแจ้งเตือนมาตรฐาน"
+    },
+    "actionType": {
+      "collection-email": "ส่งอีเมลติดตามหนี้",
+      "collection-reminder": "ส่งอีเมลแจ้งเตือนการชำระเงิน",
+      "collection-call": "โทรติดตามหนี้",
+      "collection-note": "บันทึกการติดตามหนี้",
+      "collection-commitment": "ลูกค้ารับว่าจะชำระ"
+    },
+    "currentLimit": "วงเงินปัจจุบัน",
+    "lastChanged": "แก้ไขล่าสุด",
+    "newLimit": "วงเงินใหม่",
+    "limitHistory": "ประวัติการเปลี่ยนวงเงิน",
+    "noLimitChanges": "ยังไม่เคยเปลี่ยนวงเงิน"
   },
   "insurerRec": {
     "confirmations": {
@@ -7892,7 +7995,12 @@
     },
     "close": "ปิด",
     "readFile": "อ่านไฟล์",
-    "statementFile": "ไฟล์รายการเดินบัญชี"
+    "statementFile": "ไฟล์รายการเดินบัญชี",
+    "autoMatchTitle": "จับคู่รายการเดินบัญชีอัตโนมัติ",
+    "autoMatchMessage": "กฎการจับคู่จะจับคู่รายการธนาคารที่ยังไม่จับคู่กับรายการในบัญชี และบันทึกการจับคู่",
+    "autoMatched_one": "พบการจับคู่ {{count}} รายการ",
+    "autoMatched_other": "พบการจับคู่ {{count}} รายการ",
+    "autoMatched": "พบการจับคู่ {{count}} รายการ"
   },
   "periodEnd": {
     "runActivity": "Run activity",
@@ -7942,7 +8050,17 @@
       "issueAll_other": "Issue {{count}} certificates",
       "quarter": "Quarter",
       "certificates": "Certificates to issue"
-    }
+    },
+    "stepHelp": {
+      "accruals": "รายการค้างของงวด กลับรายการในวันที่ 1 ของงวดถัดไป",
+      "recurring": "รายการบัญชีประจำที่ถึงกำหนดจนถึงสิ้นงวด",
+      "deferral": "ค่าคอมมิชชันรอตัดบัญชีสำหรับความคุ้มครองหลังสิ้นงวด",
+      "fx": "ยอดคงเหลือสกุลเงินต่างประเทศตามอัตราสิ้นเดือน",
+      "checks": "การตรวจสอบอัตโนมัติของรายการตรวจสอบการปิดงวด",
+      "depreciation": "ค่าเสื่อมราคาของทะเบียนสินทรัพย์ถาวรสำหรับงวด"
+    },
+    "nothingDue": "ไม่มีรายการบัญชีประจำที่ถึงกำหนดวันนี้",
+    "notDueYet": "ยังไม่ถึงกำหนด"
   },
   "commissionLine": {
     "statuses": {

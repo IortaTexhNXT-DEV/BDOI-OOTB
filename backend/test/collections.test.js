@@ -72,11 +72,19 @@ describe('collections', () => {
     expect(sm.percentages).toHaveProperty('over90');
     const ds = await ctx.api('get', '/collections/dashboard-stats');
     expect(ds.body.data.overdueCount).toBeGreaterThan(0);
+    // the confirmation states the scope before anything is sent
+    const p1 = (await ctx.as('maker')('get', '/collections/send-due-date-reminders/preview')).body.data;
+    expect(p1.items).toBeGreaterThan(0);
+    expect(p1.clients).toBeGreaterThan(0);
+    expect(p1.totalOutstanding).toBeGreaterThan(0);
+    expect(p1.byLevel.reduce((n, l) => n + l.count, 0)).toBe(p1.items);
     const r1 = await ctx.as('maker')('post', '/collections/send-due-date-reminders');
     expect(r1.status).toBe(200);
     expect(r1.body.data.emails).toBeGreaterThan(0);
+    expect(r1.body.data.candidates).toBe(p1.items);
     const r2 = await ctx.as('maker')('post', '/collections/send-due-date-reminders');
     expect(r2.body.data.candidates).toBe(0);
+    expect((await ctx.as('maker')('get', '/collections/send-due-date-reminders/preview')).body.data.items).toBe(0);
     const n = (await query('SELECT count(*)::int AS n FROM notifications WHERE entity = \'collection\'')).rows[0].n;
     expect(n).toBeGreaterThan(0);
   });

@@ -416,7 +416,7 @@ const PolicyReceipts = () => {
     if (!code || !dateFrom || !dateTo) {
       toast.current?.show({
         severity: "warn",
-        summary: t("common.error"),
+        summary: t("accounts.receipts.requiredTitle"),
         detail: t("accounts.receipts.fillRequiredFields"),
         life: 3000,
       });
@@ -930,7 +930,7 @@ const PolicyReceipts = () => {
                 optionLabel="name"
                 optionValue="code"
                 placeholder={t("accounts.receipts.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
+                dropdownIcon={<SvgDropdown color="currentColor" />}
               />
             </div>
             <div className="col-12 md:col-6 lg:col-6">
@@ -943,7 +943,7 @@ const PolicyReceipts = () => {
                 optionLabel="name"
                 optionValue="code"
                 placeholder={t("accounts.receipts.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
+                dropdownIcon={<SvgDropdown color="currentColor" />}
               />
             </div>
           </div>
@@ -960,7 +960,7 @@ const PolicyReceipts = () => {
                 optionLabel="name"
                 optionValue="code"
                 placeholder={t("accounts.receipts.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
+                dropdownIcon={<SvgDropdown color="currentColor" />}
               />
             </div>
             <div className="col-12 md:col-6 lg:col-6">
@@ -973,7 +973,7 @@ const PolicyReceipts = () => {
                 optionLabel="name"
                 optionValue="code"
                 placeholder={t("accounts.receipts.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
+                dropdownIcon={<SvgDropdown color="currentColor" />}
               />
             </div>
           </div>
@@ -985,12 +985,13 @@ const PolicyReceipts = () => {
                 value={code}
                 onChange={(e) => setCode(e.value)}
                 className="dropdown__container"
+                required
                 label={t("accounts.receipts.customerCodeFrom")}
                 options={getCustomerCodeOptions()}
                 optionLabel="name"
                 optionValue="code"
                 placeholder={clientsLoading ? t("common.loading") : t("accounts.receipts.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
+                dropdownIcon={<SvgDropdown color="currentColor" />}
                 disabled={clientsLoading}
               />
             </div>
@@ -1004,7 +1005,7 @@ const PolicyReceipts = () => {
                 optionLabel="name"
                 optionValue="code"
                 placeholder={clientsLoading ? t("common.loading") : t("accounts.receipts.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
+                dropdownIcon={<SvgDropdown color="currentColor" />}
                 disabled={clientsLoading}
               />
             </div>
@@ -1022,7 +1023,7 @@ const PolicyReceipts = () => {
                 optionLabel="name"
                 optionValue="code"
                 placeholder={t("accounts.receipts.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
+                dropdownIcon={<SvgDropdown color="currentColor" />}
               />
             </div>
             <div className="col-12 md:col-6 lg:col-6">
@@ -1035,7 +1036,7 @@ const PolicyReceipts = () => {
                 optionLabel="name"
                 optionValue="code"
                 placeholder={t("accounts.receipts.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
+                dropdownIcon={<SvgDropdown color="currentColor" />}
               />
             </div>
           </div>
@@ -1043,32 +1044,30 @@ const PolicyReceipts = () => {
           {/* Date From and Date To */}
           <div className="grid">
             <div className="col-12 md:col-6 lg:col-6">
-              <LabelWrapper className="calenderlable__container">
-                {t("accounts.receipts.dateFrom")}
+              <LabelWrapper label={t("accounts.receipts.dateFrom")} required>
+                <Calendar
+                  showIcon
+                  className="w-full"
+                  value={dateFrom}
+                  onChange={(e) => {
+                    setDateFrom(e.target.value);
+                  }}
+                  dateFormat={calendarDateFormat()}
+                />
               </LabelWrapper>
-              <Calendar
-                classNames="calender__container"
-                showIcon
-                value={dateFrom}
-                onChange={(e) => {
-                  setDateFrom(e.target.value);
-                }}
-                dateFormat={calendarDateFormat()}
-              />
             </div>
             <div className="col-12 md:col-6 lg:col-6">
-              <LabelWrapper className="calenderlable__container">
-                {t("accounts.receipts.dateTo")}
+              <LabelWrapper label={t("accounts.receipts.dateTo")} required>
+                <Calendar
+                  showIcon
+                  className="w-full"
+                  value={dateTo}
+                  onChange={(e) => {
+                    setDateTo(e.target.value);
+                  }}
+                  dateFormat={calendarDateFormat()}
+                />
               </LabelWrapper>
-              <Calendar
-                classNames="calender__container"
-                showIcon
-                value={dateTo}
-                onChange={(e) => {
-                  setDateTo(e.target.value);
-                }}
-                dateFormat={calendarDateFormat()}
-              />
             </div>
           </div>
 
