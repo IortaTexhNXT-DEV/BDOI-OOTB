@@ -344,8 +344,10 @@
     "webApp": "Web",
     "api": "API",
     "environment": "Environment",
-    "buildDate": "Build date",
-    "manual": "User manual",
+    "buildDate": "Build & Release Date",
+    "manual": "User Manual",
+    "requirementsApproval": "Requirements Approval",
+    "versionApproval": "Version Release Approval",
     "vendor": "iNXT BrokerVerse by iorta TechNXT"
   },
   "validation": {
