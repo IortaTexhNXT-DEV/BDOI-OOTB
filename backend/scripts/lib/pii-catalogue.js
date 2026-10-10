@@ -280,6 +280,9 @@ export const CATALOGUE = {
   'generated_reports.params': 'json',
   'data_load_rows.data': 'json',
   'data_load_rows.errors': 'json',
+  'data_load_rows.before': 'json',
+  // the reason given with a value map (Data Migration & Go-Live, migration 0441)
+  'migration_value_maps.note': 'freeText',
   'job_queue.payload': 'json',
   'job_queue.result': 'json',
   'job_runs.output': 'json',
