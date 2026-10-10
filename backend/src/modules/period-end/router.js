@@ -18,7 +18,7 @@ import * as fiscal from './fiscal.js';
 import * as close from './close.js';
 import * as ye from './yearend.js';
 import * as tax from './tax.js';
-import { AUTO_CHECKS, blockingChecks, blockingFailures, checklistItems, runChecks } from './checks.js';
+import { AUTO_CHECKS, blockingChecks, checklistItems, closeBlockers, manualSignOffs, runChecks } from './checks.js';
 import { generateDue, rjRow, saveRecurring } from './journals.js';
 import { importOpeningBalances, listOpeningBalances, OPENING_BALANCE_COLUMNS, validateOpeningBalances } from './opening.js';
 import { mapColumns, parseUploadedRows, uploadFile } from '../documents/tabular.js';
@@ -149,23 +149,23 @@ define({
     const p = await fiscal.getPeriod(pool, req.params.period);
     const problem = await fiscal.transitionProblem(pool, p, to, req.user);
     const context = fiscal.reasonContextOf(p.status, to);
-    const checks = !problem && context === 'period_close' ? await blockingChecks(pool, p) : [];
-    const failed = checks.some((c) => c.status === 'failed');
+    const checks = !problem && context === 'period_close' ? [...await blockingChecks(pool, p), ...(to === 'closed' ? await manualSignOffs(pool, p) : [])] : [];
+    const failed = checks.some((c) => c.status === 'failed' || (c.itemType === 'manual' && c.status === 'pending'));
     ok(res, {
       period: p.period, fiscalYear: p.fiscal_year, from: p.status, to, reasonContext: context, allowed: !problem && !failed,
       reason: problem ? problem.code : (failed ? 'checks' : null), message: problem ? problem.message : null,
-      checks: checks.map((c) => ({ code: c.code, label: c.label, severity: c.severity, status: c.status, count: c.count ?? 0, amount: c.amount ?? null })),
+      checks: checks.map((c) => ({ code: c.code, label: c.label, itemType: c.itemType, severity: c.severity, status: c.status, count: c.count ?? 0, amount: c.amount ?? null })),
     });
   },
 });
 define({
-  method: 'POST', path: '/periods/:period/status', summary: 'Open, soft-close or close a period with a reason of the Reason Codes master (period_close to soft-close or close, period_reopen to reopen; note when the reason asks for one). Closing runs the blocking checks; reopening needs approve:period-end; locked periods cannot change',
+  method: 'POST', path: '/periods/:period/status', summary: 'Open, soft-close or close a period with a reason of the Reason Codes master (period_close to soft-close or close, period_reopen to reopen; note when the reason asks for one). Soft-closing and closing run the blocking checks, and a close needs the blocking manual items signed off on the month-end close; closing and reopening need approve:period-end; locked periods cannot change',
   screen: `${S} > Period Management`, middleware: [...write, validate(statusSchema)],
   request: { status: 'soft_closed', reasonCode: 'PCL-MONTHEND', note: 'Insurer statements pending' }, response: { success: true, data: { period: '2026-08', status: 'soft_closed' } },
   handler: async (req, res) => {
     const before = (await pool.query('SELECT * FROM accounting_periods WHERE period = $1', [req.params.period])).rows[0];
     const { row: p, reason } = await tx((db) => fiscal.changePeriodStatus(db, req.params.period, req.body.status,
-      { reasonCode: req.body.reasonCode, note: req.body.note, user: req.user, runBlockingChecks: blockingFailures }));
+      { reasonCode: req.body.reasonCode, note: req.body.note, user: req.user, runBlockingChecks: closeBlockers }));
     await audit(req, { entity: 'accounting_period', entityId: req.params.period, action: `status:${req.body.status}`, before: before && fiscal.periodRow(before),
       after: { ...fiscal.periodRow(p), reasonCode: reason.code, note: reason.note } });
     ok(res, fiscal.periodRow(p), `Period ${req.params.period} is ${req.body.status.replace('_', '-')}`);

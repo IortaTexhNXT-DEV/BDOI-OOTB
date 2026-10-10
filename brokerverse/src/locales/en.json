@@ -7492,7 +7492,8 @@
       "unchanged": "The period already has this status.",
       "year-closed": "The fiscal year is closed.",
       "year-end-closed": "The fiscal year is closed by a year-end close run.",
-      "adjustment-disabled": "The adjustment period is switched off."
+      "adjustment-disabled": "The adjustment period is switched off.",
+      "approval": "Closed through the Month-End Close, approved by a second user."
     },
     "done": "Period {{period}}: {{status}}",
     "system": "System",
@@ -7513,7 +7514,6 @@
     },
     "createYear": "Create fiscal year",
     "createYearTitle": "Create fiscal year {{code}}",
-    "createYearMessage": "Fiscal year {{code}} is added with its periods, all open.",
     "createYearPeriods": "12 months and adjustment period 13",
     "yearCreated": "Fiscal year {{code}} created",
     "opening": {

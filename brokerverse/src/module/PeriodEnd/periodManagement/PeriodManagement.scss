@@ -2,9 +2,23 @@
 
 .pm-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 4px;
+  white-space: nowrap;
+}
+
+// the actions keep one line: the column takes the width of its buttons
+.pm-actions-cell {
+  width: 1%;
+  white-space: nowrap;
+}
+
+// fiscal year, year status and the four status counts on one row
+@media (min-width: 1100px) {
+  .pe-kpis.pm-kpis {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
 }
 
 .pm-last-change {

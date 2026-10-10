@@ -33,12 +33,15 @@ Finance > Tax Codes). Permissions: `read:period-end` to view, `write:period-end`
 ## Main flows
 
 Period status (Period Management): the side panel first calls `GET /periods/:period/status-preview?status=` (read
-only): whether the user may make the move (`reason`: `permission`, `locked`, `year-closed`, `year-end-closed`,
-`adjustment-disabled`, `checks`) and the results of the blocking auto items of the Close Checklist. The change itself,
+only): whether the user may make the move (`reason`: `permission`, `approval`, `locked`, `year-closed`, `year-end-closed`,
+`adjustment-disabled`, `checks`) and the results of the blocking auto items of the Close Checklist; for a close also the
+blocking manual items, signed off on the latest month-end close run of the period or still `pending`. The change itself,
 `POST /periods/:period/status { status, reasonCode, note }`, needs a reason of the Reason Codes master: context
 `period_close` to soft-close or close, `period_reopen` to reopen (the note when the reason asks for one). The code is
 kept in `period_status_history.reason_code`, the reason's name and the note in `remarks`, both in the audit entry.
-Reopening needs `approve:period-end`; the server runs the blocking checks again before a close. A period is locked only
+Closing and reopening need `approve:period-end` (the maker submits the month-end close for approval instead); the
+server runs the blocking checks again before a soft-close or close, and refuses a close while a blocking manual item is
+not signed off. A period is locked only
 by the year-end close. `GET /fiscal-years/:code` gives each period its latest change (`lastChange`: who, when, reason)
 and the moves the user may make (`actions`).
 
@@ -64,7 +67,7 @@ fiscal year (year-end carry-forward or go-live load) like the trial balance. An 
 
 Year-end close (Accounts > Period End > Year-End Close, `GET /period-end/year-end/overview` feeds the screen): start a
 run for the fiscal year (the pre-checks run at once), resolve the failed checks, post the adjustments of period 13
-(approved by a second user), then a user with `approve:period-end` other than the one who started the run closes the
+(created `for-approval` and approved on the journal voucher by a second user), then a user with `approve:period-end` other than the one who started the run closes the
 year (`finance.maker_checker_enabled`). Pre-checks: the twelve periods closed (or soft-closed when
 `accounting.year_end_accepts_soft_closed` is on), no unposted journal dated in the year outside period 13, the suspense
 account nil, the trial balance balanced, the closing accounts configured, the previous year closed; then period 13 open

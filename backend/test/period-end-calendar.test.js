@@ -7,6 +7,7 @@ import { setupFinance } from './accounting.fixtures.js';
 import { pool, query, withTransaction } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { cancelJournal } from '../src/modules/accounting/lib/ledger.js';
+import { withoutManualSignOffs } from './helpers.js';
 
 let ctx;
 beforeAll(async () => {
@@ -49,6 +50,7 @@ describe('fiscal year starting in April', () => {
     await ctx.as('maker')('post', `/period-end/close-runs/${run.id}/checks/bank_reconciliation_signoff/sign`).send({});
     const sub = await ctx.as('maker')('post', `/period-end/close-runs/${run.id}/submit`).send({ target: 'closed' });
     expect(sub.body.data.status).toBe('closed');
+    await withoutManualSignOffs();
     for (const p of ['2025-05', '2025-06', '2025-07', '2025-08', '2025-09', '2025-10', '2025-11', '2025-12', '2026-01', '2026-02', '2026-03']) {
       const r = await ctx.api('post', `/period-end/periods/${p}/status`).send({ status: 'closed', reasonCode: 'PCL-OTHER', note: 'FY2026 close' });
       expect(r.status, `${p} ${r.body.message}`).toBe(200);

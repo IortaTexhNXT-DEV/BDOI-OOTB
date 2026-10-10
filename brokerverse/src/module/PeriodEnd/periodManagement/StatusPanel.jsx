@@ -18,7 +18,9 @@ import { date, money } from "../common";
 /** The status move of each action of the panel. */
 export const ACTION_STATUS = { softClose: "soft_closed", close: "closed", reopen: "open" };
 
-const CHECK_SEVERITY = { passed: "success", failed: "danger", warning: "warning", "not-applicable": "secondary" };
+const CHECK_SEVERITY = { passed: "success", failed: "danger", warning: "warning", "not-applicable": "secondary", "signed-off": "success", pending: "danger" };
+/** A check that stops the move: a failed automatic check, or a blocking manual item not signed off on the month-end close. */
+const blocks = (c) => c.status === "failed" || (c.itemType === "manual" && c.status === "pending");
 
 /** Screen that clears a failed check (shown when the user's menu reaches it). */
 export const RESOLVE_PATHS = {
@@ -106,7 +108,7 @@ const StatusPanel = ({ request, onHide, onDone }) => {
   );
 
   return (
-    <Dialog className="pe-dialog pm-panel" visible onHide={onHide} footer={footer} style={{ width: "min(560px, 96vw)" }} draggable={false}
+    <Dialog className="pe-dialog pm-panel" visible onHide={onHide} footer={footer} style={{ width: "min(680px, 96vw)" }} draggable={false}
       header={t("periodManagement.panelTitle", { action: actionLabel, period: period.period })}>
       <KeyValueGrid columns={2} items={[
         { label: t("periodEnd.period"), value: period.isAdjustment ? `${period.period} (${t("periodEnd.adjustment")})` : period.period },
@@ -126,12 +128,12 @@ const StatusPanel = ({ request, onHide, onDone }) => {
             <div className="pm-panel__skeleton">{[0, 1, 2].map((i) => <Skeleton key={i} height="1.75rem" />)}</div>
           ) : (
             <DataTable value={checks} dataKey="code" size="small" emptyMessage={notAllowed || t("periodManagement.noBlockingChecks")}>
-              <Column field="label" header={t("periodManagement.check")} />
+              <Column field="label" header={t("periodManagement.check")} style={{ minWidth: "16rem" }} />
               <Column header={t("periodEnd.result")} style={{ width: "8rem" }}
                 body={(c) => <StatusChip code={c.status} label={t(`periodEnd.status.${c.status}`)} severity={CHECK_SEVERITY[c.status] || "secondary"} />} />
               <Column header={t("periodManagement.countOrAmount")} className="bv-num" headerClassName="bv-num" style={{ width: "9rem" }}
                 body={(c) => (c.status === "failed" ? (c.amount !== null && c.amount !== undefined ? money(c.amount) : c.count) : "—")} />
-              <Column style={{ width: "6rem" }} body={(c) => (c.status === "failed" && canOpen(resolvePath(c.code)) ? (
+              <Column style={{ width: "6rem" }} body={(c) => (blocks(c) && canOpen(resolvePath(c.code)) ? (
                 <Button type="button" label={t("periodManagement.resolve")} link size="small" className="pm-panel__resolve" onClick={() => navigate(resolvePath(c.code))} />
               ) : null)} />
             </DataTable>
