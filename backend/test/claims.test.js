@@ -87,6 +87,8 @@ describe('claims', () => {
     const outside = await register('c.maker', { ...base, dateOfIncident: daysAgo(150) }, false);
     expect(outside.status).toBe(422);
     expect(outside.body.errors[0].code).toBe('LOSS_OUTSIDE_PERIOD');
+    // the reference rule blocks a claim on unpaid premium (TISPH registers it and shows the outstanding premium, seed 92)
+    await ctx.api('put', '/settings').send({ settings: { 'claims.block_unpaid_premium': true } });
     const unpaid = await register('c.maker', { ...base, policyNumber: 'POL-T-0002', policyRefId: 'POLICY-001', dateOfIncident: daysAgo(2) }, false);
     expect(unpaid.status).toBe(422);
     expect(unpaid.body.errors[0].code).toBe('UNPAID_PREMIUM');
@@ -133,7 +135,8 @@ describe('claims', () => {
     expect((await as('c.maker', 'put', `/claims/updatestatus/${claim.id}`).send({ claimStatus: 'Approved' })).status).toBe(409);
   });
   it('rejects a claim and returns the field-level audit trail', async () => {
-    const c2 = (await register('c.maker', { ...base, estimatedClaimAmount: 5000 }, false)).body.data;
+    // the same loss date as the first claim of the policy: registered once the user confirms it is another loss
+    const c2 = (await register('c.maker', { ...base, estimatedClaimAmount: 5000, confirmDuplicate: true }, false)).body.data;
     const rj = await as('c.maker', 'put', `/claims/rejectclaim/${c2.id}`).send({ reason: 'Excluded peril' });
     expect(rj.body.data.status).toBe('Rejected');
     expect(rj.body.data.rejectedReason).toBe('Excluded peril');
@@ -178,7 +181,7 @@ describe('claims', () => {
     expect(cfg.body.data.lobFields.MOTOR).toEqual(['driver', 'vehicle']);
     expect(cfg.body.data.lossCauses.FIRE).toContain('Fire');
     expect(cfg.body.data.statusLabels['in-review']).toBe('Processing');
-    const c3 = (await register('c.maker', { ...base, lob: 'MARINE', claimType: '', estimatedClaimAmount: 1000 }, false)).body.data;
+    const c3 = (await register('c.maker', { ...base, lob: 'MARINE', claimType: '', estimatedClaimAmount: 1000, confirmDuplicate: true }, false)).body.data;
     expect(c3.claimType).toBe('Marine');
     await as('c.maker', 'put', `/claims/updatestatus/${c3.id}`).send({ claimStatus: 'Processing' });
     const bad = await as('c.maker', 'put', `/claims/settle/${c3.id}`).field('settlementType', 'Barter').field('settlementAmount', '500');

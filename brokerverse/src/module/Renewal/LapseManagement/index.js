@@ -22,7 +22,7 @@ import { EmptyState, FilterBar, KeyFacts, PanelSection, RowActions, SectionCard,
 import { calendarDateFormat, formatDate, toIsoDate } from "../../../utility/dateFormat";
 import { downloadCsv } from "../../../utility/csvExport";
 import { formatPercent } from "../../../utility/numberFormat";
-import { PolicyCell, RenewalHeader } from "../shared";
+import { PolicyCell, RenewalHeader, useRenewalParam } from "../shared";
 import "./index.scss";
 
 const GRACE = "grace";
@@ -98,6 +98,8 @@ const LapseManagement = () => {
       && (!q || [r.policyNumber, r.insuredName].some((v) => String(v || "").toLowerCase().includes(q))));
   }, [rows, search, state, reason]);
   const selected = rows.find((r) => r.id === panelId) || null;
+  const openRow = useCallback((row) => setPanelId(row.id), []);
+  useRenewalParam(rows, openRow);
 
   const figures = [
     { key: "lapsed", label: t("lapse.figures.lapsed"), value: rows.filter((r) => r.state === LAPSED).length, onClick: () => setState(state === LAPSED ? "" : LAPSED), active: state === LAPSED },
@@ -197,7 +199,7 @@ const LapseManagement = () => {
       { header: t("lapse.policy"), field: "policyNumber" },
       { header: t("lapse.col.insured"), field: "insuredName" },
       { header: t("lapse.col.product"), field: "product" },
-      { header: t("lapse.col.status"), field: (r) => (r.state === GRACE ? t("lapse.status.grace") : t("lapse.status.lapsed")) },
+      { header: t("lapse.col.status"), field: (r) => (r.state === GRACE ? t("lapse.status.grace") : r.disposition === "not-for-renewal" ? t("lapse.status.notForRenewal") : t("lapse.status.lapsed")) },
       { header: t("lapse.graceEnd"), field: (r) => formatDate(r.graceEnd, { empty: "" }) },
       { header: t("lapse.lapseDate"), field: (r) => formatDate(r.lapseDate, { empty: "" }) },
       { header: t("lapse.col.days"), field: (r) => (r.state === LAPSED ? r.daysLapsed || 0 : "") },
@@ -210,9 +212,11 @@ const LapseManagement = () => {
   };
 
   // ---------------------------------------------------------------- columns
-  const statusBody = (r) => (r.state === GRACE
-    ? <StatusChip label={t("lapse.status.grace")} severity="warning" />
-    : <StatusChip label={t("lapse.status.lapsed")} severity="danger" />);
+  const statusBody = (r) => {
+    if (r.state === GRACE) return <StatusChip label={t("lapse.status.grace")} severity="warning" />;
+    if (r.disposition === "not-for-renewal") return <StatusChip label={t("lapse.status.notForRenewal")} severity="danger" />;
+    return <StatusChip label={t("lapse.status.lapsed")} severity="danger" />;
+  };
   const daysBody = (r) => {
     if (r.state === GRACE) {
       const left = Math.max(0, Math.round((new Date(`${r.graceEnd}T00:00:00`) - new Date(toIsoDate(new Date()))) / 86400000));

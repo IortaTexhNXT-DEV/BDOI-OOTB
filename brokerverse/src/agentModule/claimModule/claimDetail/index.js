@@ -12,7 +12,14 @@ import ClaimDocumentChecklist, { useClaimChecklist } from "../../claimsModule/sh
 import FormErrorSummary from "../../claimsModule/shared/FormErrorSummary";
 import useClaimsConfig from "../../claimsModule/shared/useClaimsConfig";
 import { CONTINUE_ROUTE, claimLobOf, lobUses, stepForStatus } from "../../claimsModule/shared/claimJourney";
-import { formatDate } from "../../../utility/dateFormat";
+import { formatDate, toIsoDate } from "../../../utility/dateFormat";
+import { hasPermission } from "../../../utils/canOpen";
+import { StatusChip } from "../../../components/RecordPage";
+import { openConfirm } from "../../../components/ConfirmDialog";
+import claimHandlingService from "../../../services/claimHandlingService";
+import InsurerAdvice from "./InsurerAdvice";
+import ClaimCommunications from "./ClaimCommunications";
+import ClaimSettlements from "./ClaimSettlements";
 import "./index.scss";
 
 /** Label / value list of a claim section; empty values show a dash. */
@@ -29,9 +36,10 @@ const Facts = ({ rows }) => (
 
 /**
  * Operations > Claims > claim: the whole claim on one page, under the claim header, the journey steps and the key
- * facts: the loss, the policy and insured, the driver and the third party (motor), the adjuster, the settlement, each
- * co-insurer's share and the claim's documents, with the next step at the foot. Sections that do not apply to the
- * claim's line of business (claims.lob_fields) are left out.
+ * facts: the loss, the policy and insured, the driver and the third party (motor), the adjuster, the insurer's advice,
+ * the settlements, each co-insurer's share, the communication log and the claim's documents, with the next step at the
+ * foot. Sections that do not apply to the claim's line of business (claims.lob_fields) are left out. A claim registered
+ * in error is cancelled with a coded reason (approve:claims); the death on a death claim is verified (write:claims).
  */
 const ClaimDetail = () => {
   const { t } = useTranslation();
@@ -59,7 +67,7 @@ const ClaimDetail = () => {
   const step = claim ? stepForStatus(claim.lifecycleStatus, claim) : "notification";
   const next = claim ? CONTINUE_ROUTE[step] : null;
   const docs = useClaimChecklist(claim?.id);
-  const notify = (severity, detail) => toast.current?.show({ severity, summary: t("claimDocs.title"), detail, life: severity === "error" ? 6000 : 3000 });
+  const notify = (severity, detail) => toast.current?.show({ severity, summary: claim?.claimNumber || t("claimDocs.title"), detail, life: severity === "error" ? 6000 : 3000 });
   const missing = docs.list?.summary?.missingRequired || 0;
   const remind = async () => {
     try {
@@ -70,8 +78,33 @@ const ClaimDetail = () => {
       notify("error", e.message);
     }
   };
-  const terminal = claim && ["settled", "closed", "rejected"].includes(claim.lifecycleStatus);
-  const paid = claim && ["settled", "closed", "approved"].includes(claim.lifecycleStatus);
+  const terminal = claim && ["settled", "closed", "rejected", "cancelled"].includes(claim.lifecycleStatus);
+  const canWrite = hasPermission("write:claims");
+  const canDecide = hasPermission("approve:claims");
+  const reload = () => dispatch(getClaimDetails(claim.id));
+  const cancelClaim = () => openConfirm({
+    title: t("claimHandling.cancelClaim"), severity: "danger", message: t("claimHandling.cancelMessage"),
+    facts: [{ label: t("claimJourney.claimNumber"), value: claim.claimNumber }, { label: t("claimJourney.policyNumber"), value: claim.policyNumber },
+      { label: t("claimJourney.dateOfLoss"), value: claim.dateOfIncident, type: "date" }],
+    reason: { context: "claim_cancel" }, confirmLabel: t("claimHandling.cancelConfirm"),
+    onConfirm: async (reason) => {
+      await claimHandlingService.cancel(claim.id, reason);
+      notify("success", t("claimHandling.cancelled"));
+      reload();
+    },
+  });
+  const verifyDeath = () => openConfirm({
+    title: t("claimHandling.verifyDeath"), message: t("claimHandling.verifyMessage"),
+    facts: [{ label: t("claimJourney.claimNumber"), value: claim.claimNumber }, { label: t("claimJourney.dateOfLoss"), value: claim.dateOfIncident, type: "date" }],
+    input: { type: "date", label: t("claimHandling.verifiedOn"), required: true, defaultValue: toIsoDate(new Date()), maxDate: new Date() },
+    confirmLabel: t("claimHandling.verifyConfirm"),
+    onConfirm: async (on) => {
+      await claimHandlingService.verifyDeath(claim.id, on);
+      notify("success", t("claimHandling.deathVerified"));
+      reload();
+    },
+  });
+  const paid = claim && ["settled", "closed", "approved", "partially-settled"].includes(claim.lifecycleStatus);
   let nextText = null;
   let tone = "info";
   if (claim && step === "documents" && docs.list) {
@@ -97,6 +130,12 @@ const ClaimDetail = () => {
       actions={claim ? (
         <>
           <Button type="button" icon="pi pi-history" outlined label={t("claimFlow.history")} onClick={() => navigate(`/agent/claimaudittrail/${claim.id}`)} />
+          {canWrite && claim.isDeathClaim && !claim.deathVerifiedOn && !terminal ? (
+            <Button type="button" icon="pi pi-verified" outlined label={t("claimHandling.verifyDeath")} onClick={verifyDeath} />
+          ) : null}
+          {canDecide && ["registered", "in-review"].includes(claim.lifecycleStatus) ? (
+            <Button type="button" icon="pi pi-ban" outlined severity="danger" label={t("claimHandling.cancelClaim")} onClick={cancelClaim} />
+          ) : null}
         </>
       ) : null}
     >
@@ -113,6 +152,11 @@ const ClaimDetail = () => {
                 [t("claimJourney.causeOfLoss"), claim.typeOfIncident],
                 [t("claimFlow.placeOfLoss"), address(claim.addressOfIncident, claim.cityOfIncident, claim.provinceOfIncident)],
                 [t("claimJourney.dateReported"), claim.reportedDate ? formatDate(claim.reportedDate) : null],
+                [t("claimHandling.source"), claim.fnolSource],
+                claim.lateIntimation ? [t("claimHandling.intimation"), <StatusChip key="late" label={t("claimHandling.late")} severity="warning" />] : null,
+                claim.lossExtent ? [t("claimHandling.lossExtent"), t(`claimHandling.extent.${claim.lossExtent}`)] : null,
+                claim.isDeathClaim ? [t("claimHandling.deathVerified"), claim.deathVerifiedOn ? formatDate(claim.deathVerifiedOn) : t("claimHandling.notVerified")] : null,
+                [t("claimHandling.followUpDue"), claim.claimDueDate ? formatDate(claim.claimDueDate) : null],
                 [t("claimFlow.priority"), claim.claimPriority],
                 [t("claimJourney.estimatedAmount"), claim.estimatedClaimAmount ? formatCurrency(claim.estimatedClaimAmount) : null],
                 [t("claimFlow.handler"), claim.handlerName],
@@ -171,9 +215,22 @@ const ClaimDetail = () => {
                 [t("claimJourney.settleDate"), claim.settlementDate ? formatDate(claim.settlementDate) : null],
                 [t("claimFlow.approvedBy"), claim.settlementApprovedBy],
                 claim.rejectedReason ? [t("claimJourney.rejectReason"), claim.rejectedReason] : null,
+                claim.cancelledReason ? [t("claimHandling.cancelReason"), claim.cancelledReason] : null,
               ]} />
             </ClaimSection>
           </div>
+          <div className="col-12 lg:col-6">
+            <ClaimSection title={t("claimInsurer.title")}>
+              <InsurerAdvice claim={claim} statuses={config.insurerAdviceStatuses || []} canEdit={canWrite && !terminal} onSaved={reload} notify={notify} />
+            </ClaimSection>
+          </div>
+          {claim.settlements?.length ? (
+            <div className="col-12">
+              <ClaimSection title={t("claimSettlements.title")}>
+                <ClaimSettlements settlements={claim.settlements} />
+              </ClaimSection>
+            </div>
+          ) : null}
           {insurers.length > 1 ? (
             <div className="col-12">
               <ClaimSection title={t("claimJourney.coInsurance")}>
@@ -205,6 +262,11 @@ const ClaimDetail = () => {
               </ClaimSection>
             </div>
           ) : null}
+          <div className="col-12">
+            <ClaimSection title={t("claimComms.title")}>
+              <ClaimCommunications claimId={claim.id} parties={config.communicationParties || []} methods={config.communicationMethods} canEdit={canWrite && !terminal} notify={notify} />
+            </ClaimSection>
+          </div>
           {docs.list ? (
             <div className="col-12">
               <ClaimSection title={t("claimDocs.title")}>
@@ -215,7 +277,7 @@ const ClaimDetail = () => {
           <div className="col-12">
             <p className="claim-detail__record">
               {t("claimFlow.recordLine", {
-                created: formatDate(claim.createdAt, { withTime: true }), by: claim.createdBy || "—", updated: formatDate(claim.updatedAt, { withTime: true }),
+                created: formatDate(claim.createdAt, { withTime: true }), by: claim.reportedByName || "—", updated: formatDate(claim.updatedAt, { withTime: true }),
               })}
             </p>
           </div>

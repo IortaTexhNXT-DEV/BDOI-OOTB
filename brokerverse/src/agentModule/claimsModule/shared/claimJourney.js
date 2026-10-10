@@ -31,9 +31,12 @@ export const stepForStatus = (status, claim = null) => {
     case "pending-approval":
     case "approved":
       return "approval";
+    case "partially-settled":
+      return "settlement";
     case "settled":
     case "closed":
     case "rejected":
+    case "cancelled":
       return "payment";
     default:
       return "notification";
@@ -46,6 +49,7 @@ export const CONTINUE_ROUTE = {
   review: (id) => `/agent/claimrequest/requestapproval/${id}`,
   adjuster: (id) => `/agent/claimrequest/adjustersubmission/${id}`,
   approval: (id) => `/agent/claimrequest/settlementapproval/${id}`,
+  settlement: (id) => `/agent/claimrequest/settlementdetails/${id}`,
 };
 
 /** Statuses in which the claim details and the adjuster report can still be changed (server: updateClaim). */

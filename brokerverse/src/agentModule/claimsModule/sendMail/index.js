@@ -14,6 +14,9 @@ import { useFormik } from "formik";
 import { postSendData } from "./store/sendMailMiddleWare";
 import { setPolicyHolderData } from "../claimDetails/store/claimDetailsReducers";
 import logger from "../../../utility/logger";
+import { openConfirm } from "../../../components/ConfirmDialog";
+import claimHandlingService from "../../../services/claimHandlingService";
+import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 
 const SendMail = () => {
   const { t } = useTranslation();
@@ -35,12 +38,14 @@ const SendMail = () => {
   );
 
   // Get claim details data to access policy number
-  const { claimDetailsViewData } = useSelector(
+  const { claimDetailsViewData, claimThirdParty } = useSelector(
     ({ claimDetailsMainReducers }) => ({
       claimDetailsViewData:
         claimDetailsMainReducers?.claimDetailsViewData || {},
+      claimThirdParty: claimDetailsMainReducers?.claimThirdParty || {},
     })
   );
+  const { formatCurrency } = useFormatCurrency();
 
   // Get dispatch for Redux actions
   const dispatch = useDispatch();
@@ -67,9 +72,43 @@ const SendMail = () => {
     write: t("claimFlow.adviceBody", { insured: policyHolderName, policy: policyNumber }),
     file: null,
   };
-  const handleSubmit = async (values) => {
+  // outstanding premium, claims ratio, late intimation and claims of the same date of loss, confirmed before registering
+  const confirmRegistration = async () => {
+    const { policyRefId, dateOfIncident } = claimThirdParty;
+    if (!policyRefId || !dateOfIncident) return { go: true };
+    let check;
     try {
-      const result = await dispatch(postSendData(formik.values));
+      check = await claimHandlingService.registrationCheck(policyRefId, dateOfIncident);
+    } catch (e) {
+      logger.warn("Registration check not available:", e);
+      return { go: true };
+    }
+    const duplicates = check.duplicates || [];
+    const late = !!check.intimation?.late;
+    const owing = Number(check.outstandingPremium) > 0;
+    if (!duplicates.length && !late && !owing) return { go: true };
+    const facts = [
+      { label: t("claimHandling.check.outstandingPremium"), value: formatCurrency(check.outstandingPremium || 0) },
+      { label: t("claimHandling.check.claimsRatio"), value: check.claimsRatio?.ratio === null || check.claimsRatio?.ratio === undefined ? "—" : `${check.claimsRatio.ratio}%` },
+      { label: t("claimHandling.check.intimation"), value: check.intimation ? t("claimHandling.check.days", { count: check.intimation.days }) : "—" },
+      ...duplicates.map((d) => ({ label: t("claimHandling.check.sameDate"), value: `${d.claimNumber} · ${d.statusLabel || d.status}` })),
+    ];
+    const notes = [
+      duplicates.length ? t("claimHandling.check.duplicateNote") : null,
+      late ? t("claimHandling.check.lateNote", { limit: check.intimation.limit }) : null,
+      owing ? t("claimHandling.check.owingNote") : null,
+    ].filter(Boolean).join(" ");
+    const go = await openConfirm({
+      title: t("claimHandling.check.title"), severity: "warning", message: t("claimHandling.check.message"), facts, note: notes,
+      confirmLabel: t("claimFlow.registerAndSend"),
+    });
+    return { go, confirmDuplicate: duplicates.length > 0 };
+  };
+  const handleSubmit = async () => {
+    try {
+      const { go, confirmDuplicate } = await confirmRegistration();
+      if (!go) return;
+      const result = await dispatch(postSendData({ ...formik.values, confirmDuplicate }));
 
       if (result.type === "sendmail/POST_SENT_MAIL_DATA/fulfilled") {
         // Success - navigate to next page with claim data

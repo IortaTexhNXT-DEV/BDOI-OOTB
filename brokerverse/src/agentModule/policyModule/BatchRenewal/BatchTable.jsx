@@ -222,6 +222,8 @@ export default function BatchTable() {
         return "success";
       case "Failed":
         return "danger";
+      case "Skipped":
+        return "warning";
       default:
         return "secondary";
     }
@@ -383,13 +385,22 @@ export default function BatchTable() {
 
       if (response.success) {
         const jobId = response.data.jobId;
+        const skipped = response.data.skipped || 0;
+        // suppressed or held policies (lock-in, Scheme 2, loan status) are skipped with their reason, not queued
+        if (!jobId) {
+          setSendingNotices(false);
+          toast.current.show({ severity: "warn", summary: t("batchRenewal.toast.allSkipped"), detail: t("batchRenewal.toast.skippedDetail", { count: skipped }), life: 6000 });
+          fetchBatchDetails(selectedBatch.batchId);
+          return;
+        }
         setQueueJobId(jobId);
 
         toast.current.show({
-          severity: "info",
+          severity: skipped ? "warn" : "info",
           summary: t("batchRenewal.toast.queued"),
-          detail: t("batchRenewal.toast.queuedDetail", { count: selectedCount }),
-          life: 4000,
+          detail: skipped ? `${t("batchRenewal.toast.queuedDetail", { count: response.data.queued })} ${t("batchRenewal.toast.skippedDetail", { count: skipped })}`
+            : t("batchRenewal.toast.queuedDetail", { count: selectedCount }),
+          life: skipped ? 6000 : 4000,
         });
 
         if (pollingInterval.current) {
@@ -983,6 +994,7 @@ export default function BatchTable() {
                 { label: t("batchRenewal.notice.Queued"), value: selectedBatch.queuedCount ?? noticeCount("Queued"), type: "number" },
                 { label: t("batchRenewal.notice.Sent"), value: selectedBatch.sentCount ?? noticeCount("Sent"), type: "number" },
                 { label: t("batchRenewal.notice.Failed"), value: selectedBatch.failedCount ?? noticeCount("Failed"), type: "number" },
+                { label: t("batchRenewal.notice.Skipped"), value: selectedBatch.skippedCount ?? noticeCount("Skipped"), type: "number", hidden: !(selectedBatch.skippedCount ?? noticeCount("Skipped")) },
                 { label: t("batchRenewal.createdDate"), value: selectedBatch.createdAt, type: "datetime" },
                 { label: t("batchRenewal.createdBy"), value: selectedBatch.createdBy, hidden: !selectedBatch.createdBy },
               ]}
@@ -1130,11 +1142,17 @@ export default function BatchTable() {
                   header={t("batchRenewal.noticeStatus")}
                   sortable
                   body={(rowData) => (
-                    <StatusChip
-                      code={rowData.noticeStatus}
-                      label={noticeLabel(rowData.noticeStatus)}
-                      severity={getNoticeStatusSeverity(rowData.noticeStatus)}
-                    />
+                    <span className="bv-cell-stack" title={rowData.noticeStatus === "Skipped" ? rowData.error || undefined : undefined}>
+                      <StatusChip
+                        code={rowData.noticeStatus}
+                        label={noticeLabel(rowData.noticeStatus)}
+                        severity={getNoticeStatusSeverity(rowData.noticeStatus)}
+                      />
+                      {rowData.noticeStatus === "NotSent" && rowData.noticeTreatment && rowData.noticeTreatment.code !== "send" ? (
+                        <small className="bv-text-alert">{rowData.noticeTreatment.label}</small>
+                      ) : null}
+                      {rowData.noticeStatus === "Skipped" && rowData.error ? <small>{rowData.error}</small> : null}
+                    </span>
                   )}
                 />
                 <Column

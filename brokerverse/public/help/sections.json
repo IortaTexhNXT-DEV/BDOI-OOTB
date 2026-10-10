@@ -10,7 +10,7 @@
   "pdf": "TISPH_User_Manual.pdf",
   "word": "TISPH_User_Manual.docx"
  },
- "sourceHash": "ecafa69e66a1bf04ad5dc7473ad902ca0e56f3314e4cc78afd7f17f56246cb0e",
+ "sourceHash": "9974278a23b2af5333de1061fb1e7a99da6f10b0d7b4ffaa5d8656ae3d0180bf",
  "roles": {
   "tis-sales-associate": {
    "id": "tis-sales-associate",
@@ -2047,6 +2047,27 @@
    "chapter": "Screen reference: Operations"
   },
   {
+   "id": "insurer-advice-and-communications",
+   "number": "17.14.6",
+   "title": "Insurer advice and communications",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "cancel-a-claim-or-verify-a-death",
+   "number": "17.14.7",
+   "title": "Cancel a claim or verify a death",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "reverse-a-settlement-movement",
+   "number": "17.14.8",
+   "title": "Reverse a settlement movement",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
    "id": "renewal-policy",
    "number": "17.15",
    "title": "Renewal Policy",
@@ -2075,50 +2096,57 @@
    "chapter": "Screen reference: Operations"
   },
   {
-   "id": "negotiations",
+   "id": "lock-in-accounts",
    "number": "17.18",
+   "title": "Lock-in Accounts",
+   "level": 2,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "negotiations",
+   "number": "17.19",
    "title": "Negotiations",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "payments",
-   "number": "17.19",
+   "number": "17.20",
    "title": "Payments",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "ctpl-authentication",
-   "number": "17.20",
+   "number": "17.21",
    "title": "CTPL authentication",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "cover-notes-binders",
-   "number": "17.21",
+   "number": "17.22",
    "title": "Cover notes (binders)",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "cancel-a-policy-computed-return-premium",
-   "number": "17.22",
+   "number": "17.23",
    "title": "Cancel a policy: computed return premium",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "claims-awaiting-documents",
-   "number": "17.23",
+   "number": "17.24",
    "title": "Claims awaiting documents",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "motor-claim-repairs-and-letters-of-authority",
-   "number": "17.24",
+   "number": "17.25",
    "title": "Motor claim repairs and letters of authority",
    "level": 2,
    "chapter": "Screen reference: Operations"

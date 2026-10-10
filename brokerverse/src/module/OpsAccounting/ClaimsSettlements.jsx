@@ -12,13 +12,18 @@ import { Toast } from "primereact/toast";
 import service from "../../services/opsAccountingService";
 import StatCards from "../../components/StatCards";
 import { Field, OpsTag, PageHeader, date, isoOf, money, numericColumn, showError, showSuccess } from "./common";
+import { StatusChip } from "../../components/RecordPage";
+import { openConfirm } from "../../components/ConfirmDialog";
+import claimHandlingService from "../../services/claimHandlingService";
+import { hasPermission } from "../../utils/canOpen";
 
 const STAGES = ["outstanding", "awaiting-funds", "to-pay", "completed", "all"];
 
 /**
- * Accounts > Claims Settlements: claims settled through the broker, worked by Accounting. Funds received from each
- * insurer (Dr bank / Cr claims receivable) and the payment to the claimant (Dr claims payable / Cr bank) with its claim
- * payment voucher, and the release form the claimant signs.
+ * Accounts > Claims Settlements: claims settled through the broker. Funds received from each insurer (Dr bank / Cr
+ * claims receivable; write:claim-funds) and the payment to the claimant (Dr claims payable / Cr bank; write:disbursements,
+ * out of the funds received when claims.pay_claimant_from_funds is on) with its claim payment voucher, the reversal of a
+ * movement recorded in error (reverse:claim-cash, another user, coded reason) and the release form the claimant signs.
  */
 const ClaimsSettlements = () => {
   const { t } = useTranslation();
@@ -63,6 +68,19 @@ const ClaimsSettlements = () => {
     }
   };
   const firstOwed = open?.insurers.find((i) => i.outstanding > 0);
+  const payable = open ? open.payableNow ?? open.payableToClaimant : 0;
+  const reverse = (m) => openConfirm({
+    title: t("claimCash.reverse"), severity: "danger", message: t("claimCash.reverseMessage"),
+    facts: [{ label: t("opsAcc.claimPay.movement"), value: t(`opsAcc.claimPay.kind.${m.kind}`) }, { label: t("opsAcc.amount"), value: m.amount, type: "amount" },
+      { label: t("opsAcc.journal"), value: m.journalNumber || "-" }, { label: t("claimCash.recordedBy"), value: m.createdBy || "-" }],
+    reason: { context: "claim_cash_reversal" }, confirmLabel: t("claimCash.reverseConfirm"),
+    onConfirm: async (reason) => {
+      const r = await claimHandlingService.reverseMovement(open.claimId, m.id, reason);
+      showSuccess(toast, t("claimCash.reversedDone", { journal: r.journalNumber || "-" }));
+      setOpen(r.position);
+      load();
+    },
+  });
 
   return (
     <div className="pe-page">
@@ -95,12 +113,13 @@ const ClaimsSettlements = () => {
         {open && (
           <>
             <div className="flex gap-2 mb-3">
-              <Button label={t("opsAcc.claimPay.fundsReceived")} icon="pi pi-download" disabled={!open.canRecord || !firstOwed}
+              <Button label={t("opsAcc.claimPay.fundsReceived")} icon="pi pi-download" disabled={!open.canRecord || !firstOwed || !hasPermission("write:claim-funds")}
                 onClick={() => setEntry({ kind: "funds", amount: firstOwed?.outstanding, insurerId: firstOwed?.insurerId, bankAccount: open.bankAccounts[0]?.code, date: new Date(), reference: "" })} />
-              <Button label={t("opsAcc.claimPay.payClaimant")} icon="pi pi-upload" outlined disabled={!open.canRecord || open.payableToClaimant <= 0}
-                onClick={() => setEntry({ kind: "pay", amount: open.payableToClaimant, bankAccount: open.bankAccounts[0]?.code, date: new Date(), reference: "", paymentMode: "check", payee: open.claimant })} />
+              <Button label={t("opsAcc.claimPay.payClaimant")} icon="pi pi-upload" outlined disabled={!open.canRecord || payable <= 0 || !hasPermission("write:disbursements")}
+                onClick={() => setEntry({ kind: "pay", amount: payable, bankAccount: open.bankAccounts[0]?.code, date: new Date(), reference: "", paymentMode: "check", payee: open.claimant })} />
               <Button label={t("opsAcc.claimPay.releaseForm")} icon="pi pi-print" outlined onClick={() => service.claimReleaseForm(open.claimId).catch((e) => showError(toast, e))} />
             </div>
+            {open.payFromFunds && open.payableToClaimant > 0 ? <p className="mb-2">{t("claimCash.payableNow", { amount: money(Math.max(0, payable)) })}</p> : null}
             <DataTable value={open.insurers} dataKey="insurerId" size="small" className="mb-3">
               <Column field="insurer" header={t("opsAcc.insurer")} />
               <Column header={t("opsAcc.claimPay.share")} body={(r) => `${r.share}%`} {...numericColumn} />
@@ -116,8 +135,17 @@ const ClaimsSettlements = () => {
               <Column field="reference" header={t("opsAcc.reference")} />
               <Column field="journalNumber" header={t("opsAcc.journal")} />
               <Column header={t("opsAcc.amount")} body={(r) => money(r.amount)} {...numericColumn} />
-              <Column body={(r) => (r.kind === "paid-to-claimant" ? <Button icon="pi pi-print" text size="small" aria-label={t("opsAcc.print")} tooltip={t("opsAcc.claimPay.printVoucher")}
-                onClick={() => service.claimVoucher(r.id).catch((e) => showError(toast, e))} /> : null)} />
+              <Column header={t("claimCash.status")} body={(r) => (r.reversed
+                ? <span title={[r.reversedBy, r.reversalReason].filter(Boolean).join(" · ")}><StatusChip label={t("claimCash.reversedChip")} severity="secondary" /></span>
+                : <StatusChip label={t("claimCash.recorded")} severity="success" />)} />
+              <Column body={(r) => (
+                <span className="flex gap-1">
+                  {r.kind === "paid-to-claimant" ? <Button icon="pi pi-print" text size="small" aria-label={t("opsAcc.print")} tooltip={t("opsAcc.claimPay.printVoucher")}
+                    onClick={() => service.claimVoucher(r.id).catch((e) => showError(toast, e))} /> : null}
+                  {hasPermission("reverse:claim-cash") && !r.reversed ? <Button icon="pi pi-undo" text size="small" severity="danger" aria-label={t("claimCash.reverse")} tooltip={t("claimCash.reverse")}
+                    onClick={() => reverse(r)} /> : null}
+                </span>
+              )} />
             </DataTable>
           </>
         )}

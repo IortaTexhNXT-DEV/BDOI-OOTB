@@ -16,7 +16,7 @@ import { EmptyState, FilterBar, KeyFacts, PanelSection, RowActions, SectionCard,
 import RecordTaskDialog from "../../../components/RecordPage/RecordTaskDialog";
 import { formatDate, toIsoDate } from "../../../utility/dateFormat";
 import { downloadCsv } from "../../../utility/csvExport";
-import { ExpiryCell, PolicyCell, RenewalHeader, RiskChip } from "../shared";
+import { ExpiryCell, PolicyCell, RenewalHeader, RiskChip, useRenewalParam } from "../shared";
 import "./index.scss";
 
 const PRIORITY_OF = { Critical: "urgent", High: "high", Medium: "normal" };
@@ -84,6 +84,7 @@ const AtRiskAnalysis = () => {
       showError(e);
     }
   };
+  useRenewalParam(rows, open);
 
   const agents = useMemo(() => [...new Set(rows.map((r) => r.assignedAgent).filter(Boolean))].sort(), [rows]);
   const levels = useMemo(() => [...new Set(rows.map((r) => r.riskCategory))], [rows]);

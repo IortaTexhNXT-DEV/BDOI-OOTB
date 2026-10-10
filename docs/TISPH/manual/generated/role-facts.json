@@ -215,6 +215,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Lock-in Accounts",
+     "path": "/renewal/lock-in-accounts",
+     "access": "Create and edit",
+     "modules": [
+      "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "Create and edit",
@@ -960,6 +969,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Lock-in Accounts",
+     "path": "/renewal/lock-in-accounts",
+     "access": "Create and edit",
+     "modules": [
+      "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "Approve",
@@ -1314,6 +1332,12 @@
      "module": "Renewals",
      "level": "Approve",
      "meaning": "Approve or return renewal terms of another user"
+    },
+    {
+     "area": "Operations",
+     "module": "Renewals",
+     "level": "Special",
+     "meaning": "Reassign a renewal to another user or mark it not for renewal"
     },
     {
      "area": "Operations",
@@ -1781,6 +1805,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Lock-in Accounts",
+     "path": "/renewal/lock-in-accounts",
+     "access": "Create and edit",
+     "modules": [
+      "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "Approve",
@@ -2231,6 +2264,12 @@
      "module": "Renewals",
      "level": "Approve",
      "meaning": "Approve or return renewal terms of another user"
+    },
+    {
+     "area": "Operations",
+     "module": "Renewals",
+     "level": "Special",
+     "meaning": "Reassign a renewal to another user or mark it not for renewal"
     },
     {
      "area": "Operations",
@@ -2765,6 +2804,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Lock-in Accounts",
+     "path": "/renewal/lock-in-accounts",
+     "access": "Create and edit",
+     "modules": [
+      "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "Create and edit",
@@ -3086,6 +3134,12 @@
      "module": "Claims",
      "level": "View",
      "meaning": "See claims"
+    },
+    {
+     "area": "Operations",
+     "module": "Claims",
+     "level": "Create and edit",
+     "meaning": "Move a claim to review and submit its settlement, partial or final, for approval"
     },
     {
      "area": "Operations",
@@ -3550,6 +3604,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Lock-in Accounts",
+     "path": "/renewal/lock-in-accounts",
+     "access": "Create and edit",
+     "modules": [
+      "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "Create and edit",
@@ -3931,6 +3994,12 @@
      "module": "Claims",
      "level": "View",
      "meaning": "See claims"
+    },
+    {
+     "area": "Operations",
+     "module": "Claims",
+     "level": "Create and edit",
+     "meaning": "Move a claim to review and submit its settlement, partial or final, for approval"
     },
     {
      "area": "Operations",
@@ -4431,6 +4500,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Lock-in Accounts",
+     "path": "/renewal/lock-in-accounts",
+     "access": "Create and edit",
+     "modules": [
+      "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "Approve",
@@ -4887,9 +4965,21 @@
     },
     {
      "area": "Operations",
+     "module": "Renewals",
+     "level": "Special",
+     "meaning": "Reassign a renewal to another user or mark it not for renewal"
+    },
+    {
+     "area": "Operations",
      "module": "Claims",
      "level": "View",
      "meaning": "See claims"
+    },
+    {
+     "area": "Operations",
+     "module": "Claims",
+     "level": "Create and edit",
+     "meaning": "Move a claim to review and submit its settlement, partial or final, for approval"
     },
     {
      "area": "Operations",
@@ -5074,7 +5164,7 @@
      "kind": "authority",
      "type": "claim_settlement",
      "step": "Operations > Claims > Settlement approval",
-     "limit": "Not set"
+     "limit": "PHP 500,000.00"
     },
     {
      "what": "Underwriting referral approval",
@@ -5870,6 +5960,12 @@
    ],
    "permissions": [
     {
+     "area": "Operations",
+     "module": "Claims",
+     "level": "Special",
+     "meaning": "Record claim settlement funds received from an insurer"
+    },
+    {
      "area": "Accounts",
      "module": "Receipts",
      "level": "View",
@@ -6223,6 +6319,18 @@
     }
    ],
    "permissions": [
+    {
+     "area": "Operations",
+     "module": "Claims",
+     "level": "Special",
+     "meaning": "Reverse claim settlement funds or a payment to the claimant recorded in error"
+    },
+    {
+     "area": "Operations",
+     "module": "Claims",
+     "level": "Special",
+     "meaning": "Record claim settlement funds received from an insurer"
+    },
     {
      "area": "Accounts",
      "module": "Receipts",
@@ -7451,6 +7559,12 @@
      "meaning": "See claims"
     },
     {
+     "area": "Operations",
+     "module": "Claims",
+     "level": "Special",
+     "meaning": "Reverse claim settlement funds or a payment to the claimant recorded in error"
+    },
+    {
      "area": "Accounts",
      "module": "Receipts",
      "level": "View",
@@ -8003,6 +8117,15 @@
      "section": "Operations > Renewals",
      "screen": "At-Risk Policies",
      "path": "/renewal/at-risk",
+     "access": "View",
+     "modules": [
+      "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
+     "screen": "Lock-in Accounts",
+     "path": "/renewal/lock-in-accounts",
      "access": "View",
      "modules": [
       "Renewals"
@@ -9502,6 +9625,15 @@
     },
     {
      "section": "Operations > Renewals",
+     "screen": "Lock-in Accounts",
+     "path": "/renewal/lock-in-accounts",
+     "access": "Create and edit",
+     "modules": [
+      "Renewals"
+     ]
+    },
+    {
+     "section": "Operations > Renewals",
      "screen": "Negotiations",
      "path": "/renewal/negotiations",
      "access": "Approve",
@@ -10659,6 +10791,12 @@
     },
     {
      "area": "Operations",
+     "module": "Renewals",
+     "level": "Special",
+     "meaning": "Reassign a renewal to another user or mark it not for renewal"
+    },
+    {
+     "area": "Operations",
      "module": "Claims",
      "level": "View",
      "meaning": "See claims"
@@ -10894,7 +11032,7 @@
      "kind": "authority",
      "type": "claim_settlement",
      "step": "Operations > Claims > Settlement approval",
-     "limit": "Not set"
+     "limit": "No limit"
     },
     {
      "what": "Remittance approval",
@@ -11886,6 +12024,43 @@
   },
   "/renewal/at-risk": {
    "menu": "Operations > Renewals > At-Risk Policies",
+   "roles": [
+    {
+     "role": "TIS Sales Associate",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Sales Officer",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "Create and edit"
+    },
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "View"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "Create and edit"
+    }
+   ]
+  },
+  "/renewal/lock-in-accounts": {
+   "menu": "Operations > Renewals > Lock-in Accounts",
    "roles": [
     {
      "role": "TIS Sales Associate",
@@ -15136,11 +15311,22 @@
    "TIS Operations Unit Head",
    "TIS General Manager"
   ],
+  "assign:renewals": [
+   "TIS Sales Officer",
+   "TIS Sales Unit Head",
+   "TIS Operations Unit Head",
+   "TIS General Manager"
+  ],
   "extend:quotations": [
    "TIS Sales Officer",
    "TIS Sales Unit Head",
    "TIS Operations Unit Head",
    "TIS General Manager"
+  ],
+  "process:claims": [
+   "TIS Operations Associate",
+   "TIS Operations Officer",
+   "TIS Operations Unit Head"
   ],
   "read:access-control": [
    "TIS IT AppSupport / Admin",
@@ -15503,6 +15689,10 @@
    "TIS IT AppSupport / Admin",
    "TIS General Manager"
   ],
+  "reverse:claim-cash": [
+   "CCD-Recon (Reconciliation and Reversals)",
+   "TIS Finance & General Accounting"
+  ],
   "view:pii": [
    "TIS Sales Associate",
    "TIS Sales Officer",
@@ -15527,6 +15717,10 @@
   ],
   "write:channels": [
    "TIS IT AppSupport / Admin"
+  ],
+  "write:claim-funds": [
+   "CCD-BP / QRPh (Receipting)",
+   "CCD-Recon (Reconciliation and Reversals)"
   ],
   "write:claims": [
    "TIS Operations Associate",

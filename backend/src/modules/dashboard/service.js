@@ -62,7 +62,7 @@ export async function executive(period = 'month', compare = 'previous') {
       COALESCE(sum(premium_total) FILTER (WHERE renewed_from IS NULL AND ${prev}), 0) AS new_business_prev,
       COALESCE(sum(premium_total), 0) AS premium_all
     FROM policies`, [range.from, range.next, cmp.from, range.timeZone, range.to, cmp.to]);
-  const claims = await one(`SELECT count(*)::int AS total, count(*) FILTER (WHERE status NOT IN ('settled','closed','rejected'))::int AS open,
+  const claims = await one(`SELECT count(*)::int AS total, count(*) FILTER (WHERE status NOT IN ('settled','closed','rejected','cancelled'))::int AS open,
       COALESCE(sum(COALESCE(settled_amount, approved_amount, 0)), 0) AS incurred, COALESCE(sum(estimate_amount), 0) AS reserved FROM claims`);
   const ret = await one(`SELECT count(*) FILTER (WHERE status = 'renewed')::int AS renewed, count(*) FILTER (WHERE status IN ('renewed','lapsed'))::int AS closed FROM renewals`);
   const targets = await getSetting('dashboard.targets', {});

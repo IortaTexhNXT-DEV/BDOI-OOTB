@@ -26,7 +26,10 @@ const amountOf = (value) => {
 };
 const round2 = (value) => Math.round((value || 0) * 100) / 100;
 
-/** Settlement: type (settlement types master), amount and dates, with each co-insurer's share of the amount. */
+/**
+ * Settlement: partial (the claim stays open, to be completed later) or final, type (settlement types master), amount and
+ * dates, with each co-insurer's share of the amount; a partially settled claim shows what is settled so far.
+ */
 const SettlementDetails = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -50,7 +53,8 @@ const SettlementDetails = () => {
     });
   }, [claimId]);
 
-  const editable = !claim || EDITABLE_STATUSES.includes(claim.lifecycleStatus);
+  const editable = !claim || [...EDITABLE_STATUSES, "partially-settled"].includes(claim.lifecycleStatus);
+  const kindOptions = [{ label: t("claimSettlements.kinds.final"), value: "final" }, { label: t("claimSettlements.kinds.partial"), value: "partial" }];
   const typeOptions = (config.settlementTypes || []).map((x) => ({ label: x.label || x.value, value: x.value }));
   const labels = {
     settlementType: t("claimJourney.settlementType"),
@@ -60,7 +64,7 @@ const SettlementDetails = () => {
   };
 
   const formik = useFormik({
-    initialValues: { settlementType: "", settlementAmount: "", settlementIssueDate: toIsoDate(new Date()), settlementDate: toIsoDate(new Date()), settlementDocument: null },
+    initialValues: { settlementKind: "final", settlementType: "", settlementAmount: "", settlementIssueDate: toIsoDate(new Date()), settlementDate: toIsoDate(new Date()), settlementDocument: null },
     validate: (v) => {
       const e = {};
       const required = t("claimJourney.required");
@@ -153,8 +157,20 @@ const SettlementDetails = () => {
       {loadError && <FormErrorSummary serverError={loadError} />}
       {claim && (
         <>
-          <ClaimSection title={t("claimJourney.settlementSection")}>
+          <ClaimSection title={t("claimJourney.settlementSection")}
+            hint={Number(claim.settledAmount) > 0 && claim.lifecycleStatus === "partially-settled" ? t("claimSettlements.settledSoFar", { amount: formatCurrency(claim.settledAmount) }) : null}>
             <div className="grid">
+              <div className={FIELD_COL}>
+                <DropdownField
+                  label={req(t("claimSettlements.kind"))}
+                  value={formik.values.settlementKind}
+                  onChange={(e) => formik.setFieldValue("settlementKind", e.value)}
+                  options={kindOptions}
+                  optionLabel="label"
+                  optionValue="value"
+                  disabled={!editable}
+                />
+              </div>
               <div className={FIELD_COL}>
                 <DropdownField
                   label={req(labels.settlementType)}

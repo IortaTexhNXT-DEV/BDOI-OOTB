@@ -15,6 +15,9 @@ import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import { hasPermission } from "../../../utils/canOpen";
 import DateField from "../../../components/DateField";
+import { RowActions, StatusChip } from "../../../components/RecordPage";
+import { openConfirm } from "../../../components/ConfirmDialog";
+import claimHandlingService from "../../../services/claimHandlingService";
 
 const PAYMENT_MODES = [
   { label: "Cheque", value: "check" },
@@ -24,8 +27,10 @@ const PAYMENT_MODES = [
 
 /**
  * Cash of a settlement paid through the broker: the figures (settlement, received from the insurers, paid to and still
- * payable to the claimant), the money received from each insurer and the payment to the claimant. Only shown for such
- * settlements; the buttons follow the finance permissions the API checks. `onPosition` receives the cash position.
+ * payable to the claimant), the money received from each insurer and the payment to the claimant (only from the funds
+ * received when claims.pay_claimant_from_funds is on), and the reversal of a movement recorded in error (another user,
+ * with a coded reason). Only shown for such settlements; the buttons follow the permissions the API checks.
+ * `onPosition` receives the cash position.
  */
 const SettlementCash = ({ claimId, onPosition }) => {
   const { t } = useTranslation();
@@ -49,7 +54,7 @@ const SettlementCash = ({ claimId, onPosition }) => {
     const due = pos.insurers.find((i) => i.outstanding > 0);
     setDialog(kind === "funds-received"
       ? { kind, amount: due?.outstanding || 0, insurerId: due?.insurerId ?? null, bankAccount: bankOptions[0]?.value || "", reference: "", date: "" }
-      : { kind, amount: pos.payableToClaimant, bankAccount: bankOptions[0]?.value || "", paymentMode: "check", payee: pos.claimant || "", reference: "", date: "" });
+      : { kind, amount: pos.payableNow ?? pos.payableToClaimant, bankAccount: bankOptions[0]?.value || "", paymentMode: "check", payee: pos.claimant || "", reference: "", date: "" });
   };
   const save = async () => {
     setSaving(true);
@@ -75,8 +80,21 @@ const SettlementCash = ({ claimId, onPosition }) => {
     </div>
   );
   const outstanding = pos.insurers.reduce((s, i) => s + i.outstanding, 0);
-  const canReceive = pos.canRecord && outstanding > 0 && hasPermission("write:receipts");
-  const canPay = pos.canRecord && pos.payableToClaimant > 0 && hasPermission("write:disbursements");
+  const canReceive = pos.canRecord && outstanding > 0 && hasPermission("write:claim-funds");
+  const canPay = pos.canRecord && (pos.payableNow ?? pos.payableToClaimant) > 0 && hasPermission("write:disbursements");
+  const canReverse = hasPermission("reverse:claim-cash");
+  const reverse = (m) => openConfirm({
+    title: t("claimCash.reverse"), severity: "danger", message: t("claimCash.reverseMessage"),
+    facts: [{ label: t("followUps.movement", "Movement"), value: m.kind === "funds-received" ? t("followUps.fundsReceived", "Funds received") : t("followUps.paidToClaimant", "Paid to claimant") },
+      { label: t("followUps.amount", "Amount"), value: m.amount, type: "amount" }, { label: t("followUps.journal", "Journal"), value: m.journalNumber || "-" },
+      { label: t("claimCash.recordedBy"), value: m.createdBy || "-" }],
+    reason: { context: "claim_cash_reversal" }, confirmLabel: t("claimCash.reverseConfirm"),
+    onConfirm: async (reason) => {
+      const r = await claimHandlingService.reverseMovement(claimId, m.id, reason);
+      setPos(r.position);
+      toast.current?.show({ severity: "success", summary: t("claimCash.reversed"), detail: r.journalNumber || "" });
+    },
+  });
 
   return (
     <section className="claim-journey__section">
@@ -89,6 +107,9 @@ const SettlementCash = ({ claimId, onPosition }) => {
         </div>
       </div>
       {!pos.canRecord && <small className="block mt-2">{t("followUps.settlementNotBooked", "Cash can be recorded once the settlement through the broker is booked.")}</small>}
+      {pos.canRecord && pos.payFromFunds && pos.payableToClaimant > 0 ? (
+        <small className="block mt-2">{t("claimCash.payableNow", { amount: formatCurrency(Math.max(0, pos.payableNow)) })}</small>
+      ) : null}
       <StatCards className="mt-3" items={[
         { key: "settlement", label: t("claimFlow.cash.settlement"), value: formatCurrency(pos.settlementAmount) },
         { key: "received", label: t("claimFlow.cash.received"), value: formatCurrency(pos.insurers.reduce((sum, i) => sum + i.received, 0)) },
@@ -109,6 +130,13 @@ const SettlementCash = ({ claimId, onPosition }) => {
           <Column field="bankAccount" header={t("followUps.bankAccount", "Bank account")} />
           <Column field="reference" header={t("followUps.reference", "Reference")} />
           <Column field="journalNumber" header={t("followUps.journal", "Journal")} />
+          <Column header={t("claimCash.status")} body={(m) => (m.reversed
+            ? <span className="bv-cell-stack"><StatusChip label={t("claimCash.reversedChip")} severity="secondary" /><small>{[m.reversedBy, m.reversalReason].filter(Boolean).join(" · ")}</small></span>
+            : <StatusChip label={t("claimCash.recorded")} severity="success" />)} />
+          {canReverse ? (
+            <Column header={t("claimCash.actions")} className="bv-actions" headerClassName="bv-actions"
+              body={(m) => <RowActions actions={[{ icon: "pi pi-undo", label: t("claimCash.reverse"), onClick: () => reverse(m), disabled: m.reversed }]} />} />
+          ) : null}
         </DataTable>
       )}
       <Dialog visible={!!dialog} onHide={() => setDialog(null)} style={{ width: "min(480px, 95vw)" }}

@@ -253,6 +253,7 @@ class ClaimsService {
         settlementData.settlementIssueDate
       );
       formData.append("settlementDate", settlementData.settlementDate);
+      if (settlementData.settlementKind) formData.append("settlementKind", settlementData.settlementKind);
 
       // Add document if provided
       if (settlementData.settlementDocument) {
@@ -502,6 +503,9 @@ class ClaimsService {
           "insuranceCompanyClaimNumber",
           claimData.insuranceCompanyClaimNumber
         );
+      if (claimData.fnolSource) formData.append("fnolSource", claimData.fnolSource);
+      if (claimData.lossExtent) formData.append("lossExtent", claimData.lossExtent);
+      if (claimData.confirmDuplicate) formData.append("confirmDuplicate", claimData.confirmDuplicate);
       // Add required reference IDs
       formData.append("leadRefId", claimData.leadRefId || "LEAD-001");
       formData.append("quoteRefId", claimData.quoteRefId || "QUOTE-001");

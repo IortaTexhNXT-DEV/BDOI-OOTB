@@ -17,15 +17,19 @@ import StatCards from "../../../components/StatCards";
 import { EmptyState, FilterBar, KeyFacts, PanelSection, RowActions, SectionCard, SidePanel } from "../../../components/RecordPage";
 import { calendarDateFormat, formatDate, toIsoDate } from "../../../utility/dateFormat";
 import { downloadCsv } from "../../../utility/csvExport";
-import { ExpiryCell, PolicyCell, RenewalHeader, RiskChip, StageChip } from "../shared";
+import { hasPermission } from "../../../utils/canOpen";
+import BvConfirmDialog from "../../../components/ConfirmDialog";
+import { ExpiryCell, NoticeChip, PolicyCell, RenewalHeader, RiskChip, StageChip, useRenewalParam } from "../shared";
 import "./index.scss";
 
 const METHODS = ["Email", "SMS", "Phone", "Letter"];
 
 /**
- * Operations > Renewals > Renewal Queue: open renewals with their expiry, premium, stage, retention risk and contacts so
- * far. Row actions follow the stage: prepare the renewal quote, send the next notice, record a reminder, complete an
- * approved renewal; the detail opens on the right.
+ * Operations > Renewals > Renewal Queue: open renewals with their expiry, premium, stage, retention risk, notice
+ * treatment and contacts so far. Row actions follow the stage: prepare the renewal quote, send the next notice, record a
+ * reminder, complete an approved renewal; the renewal owner's unit (assign:renewals) reassigns a renewal or marks it not
+ * for renewal with a coded reason. The detail opens on the right, also for the renewal named in the address
+ * (?renewal=<id>, from My Work and the notifications).
  */
 const RenewalQueue = () => {
   const { t } = useTranslation();
@@ -44,6 +48,12 @@ const RenewalQueue = () => {
   const [due, setDue] = useState("");
   const [panelId, setPanelId] = useState(null);
   const [reminder, setReminder] = useState(null);
+  const [focus, setFocus] = useState(null);
+  const [dispose, setDispose] = useState(null);
+  const [assignees, setAssignees] = useState([]);
+  const [assignee, setAssignee] = useState(null);
+  const [assigneeTried, setAssigneeTried] = useState(false);
+  const canAssign = hasPermission("assign:renewals");
 
   const showError = useCallback((e) => toast.current?.show({ severity: "error", summary: t("common.error", "Error"), detail: e?.message || String(e), life: 5000 }), [t]);
   const done = (summary, detail) => toast.current?.show({ severity: "success", summary, detail, life: 3000 });
@@ -82,7 +92,14 @@ const RenewalQueue = () => {
       && (!from || !to || (new Date(`${r.expiryDate}T00:00:00`) >= from && new Date(`${r.expiryDate}T00:00:00`) <= to))
       && (!q || [r.policyNumber, r.insuredName, r.renewalNumber, r.product].some((v) => String(v || "").toLowerCase().includes(q))));
   }, [rows, search, stage, risk, agent, range, due]);
-  const selected = rows.find((r) => r.id === panelId) || null;
+  const selected = rows.find((r) => r.id === panelId) || (focus?.id === panelId ? focus : null);
+  const openRow = useCallback((row) => setPanelId(row.id), []);
+  const asked = useRenewalParam(rows, openRow);
+  // a renewal named in the address that is not on the queue (closed, or filtered out) is read on its own
+  useEffect(() => {
+    if (!asked || loading || !rows.length || rows.some((r) => [r.id, r.renewalNumber].includes(asked))) return;
+    renewalsWorkspaceService.getRenewal(asked).then((r) => { setFocus(r); setPanelId(r.id); }).catch(showError);
+  }, [asked, loading, rows, showError]);
 
   const toggleDue = (key) => setDue(due === key ? "" : key);
   const figures = [
@@ -144,12 +161,41 @@ const RenewalQueue = () => {
     done(t("renewal.exportStarted"), t("renewal.rowsExported", { count: filtered.length }));
   };
 
+  const startDispose = async (kind, row) => {
+    setAssignee(null);
+    setAssigneeTried(false);
+    setDispose({ kind, row });
+    if (kind === "reassign" && !assignees.length) {
+      try {
+        setAssignees(await renewalsWorkspaceService.getAssignees());
+      } catch (e) {
+        showError(e);
+      }
+    }
+  };
+  const confirmDispose = async (reason) => {
+    const { kind, row } = dispose;
+    if (kind === "reassign") {
+      await renewalsWorkspaceService.reassign(row.id, assignee, reason);
+      done(t("renewalDisposition.reassigned"), `${row.policyNumber} · ${assignees.find((u) => u.id === assignee)?.name || ""}`);
+    } else {
+      await renewalsWorkspaceService.notForRenewal(row.id, reason);
+      done(t("renewalDisposition.markedNotForRenewal"), row.policyNumber);
+      setPanelId(null);
+    }
+    load();
+  };
+
   const canQuote = (r) => r.isOpen && r.statusCode !== "pending-approval";
+  const withheld = (r) => r.noticeTreatment && r.noticeTreatment.code !== "send";
   const menuOf = (r) => [
-    { label: r.nextNotice ? t("queue.sendNotice", { notice: r.nextNotice.label }) : t("queue.allNoticesSent"), icon: "pi pi-envelope", command: () => sendNotice(r), disabled: !r.nextNotice },
+    { label: withheld(r) ? t("renewalNotices.withheld") : r.nextNotice ? t("queue.sendNotice", { notice: r.nextNotice.label }) : t("queue.allNoticesSent"),
+      icon: "pi pi-envelope", command: () => sendNotice(r), disabled: !r.nextNotice || withheld(r) },
     { label: t("queue.recordReminder"), icon: "pi pi-phone", command: () => setReminder({ row: r, method: "Email", note: "" }) },
     { label: t("queue.complete"), icon: "pi pi-check-circle", command: () => complete(r), hidden: r.statusCode !== "approved" },
     { label: t("queue.openPolicy"), icon: "pi pi-file", command: () => navigate(`/agent/policydetail/${r.policyId}`), hidden: !r.policyId },
+    { label: t("renewalDisposition.reassign"), icon: "pi pi-user-edit", command: () => startDispose("reassign", r), hidden: !canAssign || !r.isOpen },
+    { label: t("renewalDisposition.notForRenewal"), icon: "pi pi-ban", command: () => startDispose("not-for-renewal", r), hidden: !canAssign || !r.isOpen },
   ];
   const actionsBody = (r) => (
     <RowActions
@@ -196,7 +242,9 @@ const RenewalQueue = () => {
           <Column field="product" header={t("queue.col.product")} sortable body={(r) => <span className="bv-cell-stack"><span>{r.product}</span><small>{r.insurer}</small></span>} />
           <Column field="daysToExpiry" header={t("queue.col.expiry")} sortable body={(r) => <ExpiryCell date={r.expiryDate} days={r.daysToExpiry} />} />
           <Column field="currentPremium" header={t("queue.col.premium")} sortable body={(r) => formatCurrency(r.currentPremium)} className="bv-num" headerClassName="bv-num" />
-          <Column field="status" header={t("queue.col.stage")} sortable body={(r) => <StageChip row={r} />} />
+          <Column field="status" header={t("queue.col.stage")} sortable body={(r) => (
+            <span className="bv-cell-stack"><StageChip row={r} /><NoticeChip treatment={r.noticeTreatment} /></span>
+          )} />
           <Column field="retentionRisk" header={t("queue.col.risk")} sortable body={(r) => <RiskChip level={r.retentionRisk} />} />
           <Column field="assignedAgent" header={t("queue.col.agent")} sortable />
           <Column header={t("queue.col.actions")} body={actionsBody} className="bv-actions" headerClassName="bv-actions" />
@@ -232,6 +280,19 @@ const RenewalQueue = () => {
                 { key: "claims", label: t("queue.claims"), value: selected.claimsHistory ? `${selected.claimsHistory.totalClaims} · ${formatCurrency(selected.claimsHistory.claimsAmount)}` : null },
               ]} />
             </PanelSection>
+            {selected.lockIn || withheld(selected) ? (
+              <PanelSection title={t("renewalNotices.lockInSection")}>
+                <KeyFacts className="bv-key-facts--plain" items={[
+                  { key: "treatment", label: t("renewalNotices.treatmentLabel"), value: withheld(selected) ? <NoticeChip treatment={selected.noticeTreatment} /> : t("renewalNotices.treatment.send") },
+                  { key: "reason", label: t("renewalNotices.reason"), value: withheld(selected) ? selected.noticeTreatment.reason : null },
+                  { key: "source", label: t("renewalNotices.source"), value: selected.lockIn?.sourceLabel },
+                  { key: "year", label: t("renewalNotices.year"), value: selected.lockIn?.year },
+                  { key: "end", label: t("renewalNotices.lockInEnd"), value: selected.lockIn?.endDate ? formatDate(selected.lockIn.endDate) : null },
+                  { key: "review", label: t("renewalNotices.reviewDate"), value: selected.lockIn?.reviewDate ? formatDate(selected.lockIn.reviewDate) : null },
+                  { key: "loan", label: t("renewalNotices.loanStatus"), value: selected.lockIn?.loanStatusLabel },
+                ]} />
+              </PanelSection>
+            ) : null}
             <PanelSection title={t("queue.contact")}>
               <KeyFacts className="bv-key-facts--plain" items={[
                 { key: "mobile", label: t("queue.mobile"), value: selected.insuredContact?.mobile },
@@ -246,6 +307,29 @@ const RenewalQueue = () => {
           </>
         ) : null}
       </SidePanel>
+
+      <BvConfirmDialog visible={!!dispose} onHide={() => setDispose(null)} severity={dispose?.kind === "reassign" ? "neutral" : "danger"}
+        title={dispose?.kind === "reassign" ? t("renewalDisposition.reassign") : t("renewalDisposition.notForRenewal")}
+        message={dispose?.kind === "reassign" ? t("renewalDisposition.reassignMessage") : t("renewalDisposition.notForRenewalMessage")}
+        facts={dispose ? [
+          { label: t("queue.col.policy"), value: dispose.row.policyNumber },
+          { label: t("queue.col.insured"), value: dispose.row.insuredName },
+          { label: t("queue.col.agent"), value: dispose.row.assignedAgent || "-" },
+          { label: t("queue.col.expiry"), value: dispose.row.expiryDate, type: "date" },
+        ] : []}
+        reason={{ context: dispose?.kind === "reassign" ? "renewal_reassign" : "non_renewal" }}
+        beforeConfirm={() => { setAssigneeTried(true); return dispose?.kind !== "reassign" || !!assignee; }}
+        confirmLabel={dispose?.kind === "reassign" ? t("renewalDisposition.reassignConfirm") : t("renewalDisposition.notForRenewalConfirm")}
+        onConfirm={confirmDispose}>
+        {dispose?.kind === "reassign" ? (
+          <div className="bv-confirm__field">
+            <label htmlFor="rq-assignee">{t("renewalDisposition.newOwner")}</label>
+            <Dropdown inputId="rq-assignee" value={assignee} onChange={(e) => setAssignee(e.value)} filter className={assigneeTried && !assignee ? "w-full p-invalid" : "w-full"}
+              options={assignees.filter((u) => u.name !== dispose.row.assignedAgent).map((u) => ({ label: u.name, value: u.id }))} placeholder={t("renewalDisposition.chooseOwner")} />
+            {assigneeTried && !assignee ? <small className="bv-confirm__field-error" role="alert">{t("renewalDisposition.ownerRequired")}</small> : null}
+          </div>
+        ) : null}
+      </BvConfirmDialog>
 
       <Dialog header={t("queue.recordReminder")} visible={!!reminder} onHide={() => setReminder(null)} style={{ width: "32rem" }} breakpoints={{ "768px": "95vw" }}
         footer={(
