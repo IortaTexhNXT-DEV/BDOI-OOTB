@@ -54,8 +54,9 @@ export const TRANSACTION_TABLES = [
   'work_tasks',
   // integrations: CTPL authentication of each cover, bank payment batches and their lines
   'ctpl_authentications', 'bank_payment_batches', 'bank_payment_batch_lines',
-  // BIR forms and invoicing: return filing records, sales invoices and their payments, EIS outbox, loose-leaf book prints
-  'bir_return_filings', 'sales_invoices', 'sales_invoice_lines', 'sales_invoice_payments', 'eis_submissions', 'cas_book_prints',
+  // BIR forms and invoicing: return filing records, generated DAT files, sales invoices and their payments, EIS outbox,
+  // loose-leaf book prints
+  'bir_return_filings', 'bir_dat_files', 'sales_invoices', 'sales_invoice_lines', 'sales_invoice_payments', 'eis_submissions', 'cas_book_prints',
   // overriding commission from insurers: computations and settlements (the agreements are configuration)
   'override_computations', 'override_settlements',
   // due diligence of the clients: signatories, beneficial owners, KYC documents
