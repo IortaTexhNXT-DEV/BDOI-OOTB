@@ -13430,7 +13430,6 @@
       "journal": "Journal",
       "preparedBy": "Prepared by",
       "approvedBy": "Approved by",
-      "approvedAt": "Approved on",
       "rejectedBecause": "Rejected: {{reason}}",
       "cancelledBecause": "Cancelled: {{reason}}",
       "keepDisposal": "Keep disposal",
