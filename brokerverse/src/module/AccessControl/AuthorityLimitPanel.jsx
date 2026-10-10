@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { AutoComplete } from "primereact/autocomplete";
 import { Button } from "primereact/button";
@@ -50,7 +50,7 @@ const InEffect = ({ cell, measure, withoutLimit }) => {
       <div className="am-panel__state">
         <span className="am-notset">{k("notSet", "Not set")}</span>
         <span className="rp-muted">{withoutLimit === "refuse" ? k("authority.notSetRefuse", "Approvals of this role are refused")
-          : k("authority.notSetAllow", "Approvals of this role are not restricted by an amount")}</span>
+          : k("authority.notSetAllow", "Approvals of this role are not restricted by a limit")}</span>
       </div>
     );
   }
@@ -103,8 +103,12 @@ PendingBlock.propTypes = { pending: PropTypes.object.isRequired, measure: PropTy
  * target: { row (transaction type of the matrix), role } for a cell, { person: { userId, userName }, row } for a
  * personal limit, or { person: null } to add a personal limit.
  */
-const AuthorityLimitPanel = ({ target, data, technical, onHide, onDone }) => {
+const AuthorityLimitPanel = ({ target: opened, data, technical, onHide, onDone }) => {
   const k = useLabels();
+  // The panel keeps its last target while the dialog closes, so the content stays whole until it is gone.
+  const last = useRef(null);
+  if (opened) last.current = opened;
+  const target = opened || last.current;
   const problemText = useProblemText();
   const today = data?.asOf;
   const types = useMemo(() => (data?.rows || []).filter((r) => r.checked || target?.row?.code === r.code), [data, target]);
@@ -125,12 +129,12 @@ const AuthorityLimitPanel = ({ target, data, technical, onHide, onDone }) => {
   }, [target, row, form, data]);
 
   useEffect(() => {
-    if (!target) return;
-    setForm(formFor({ transactionType: target.row?.code || null, roleCode: target.role?.code || null, userId: target.person?.userId || null,
-      cell: target.role ? target.row.cells[target.role.code] : target.cell, today }));
-    setPerson(target.person ? { userId: target.person.userId, name: target.person.userName } : null);
+    if (!opened) return;
+    setForm(formFor({ transactionType: opened.row?.code || null, roleCode: opened.role?.code || null, userId: opened.person?.userId || null,
+      cell: opened.role ? opened.row.cells[opened.role.code] : opened.cell, today }));
+    setPerson(opened.person ? { userId: opened.person.userId, name: opened.person.userName } : null);
     setTried(false);
-  }, [target, today]);
+  }, [opened, today]);
 
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
   const problems = form ? formProblems(form, { measure, referenceRequired: data?.referenceRequired, today }) : {};
@@ -187,7 +191,7 @@ const AuthorityLimitPanel = ({ target, data, technical, onHide, onDone }) => {
   ) : <Button label={k("authority.close", "Close")} text onClick={onHide} />;
 
   return (
-    <Dialog visible={!!target} onHide={onHide} modal className="am-panel" style={{ width: "32rem" }} footer={footer}
+    <Dialog visible={!!opened} onHide={onHide} modal className="am-panel" style={{ width: "32rem" }} footer={footer}
       header={(
         <div className="am-panel__title">
           <span>{personal ? k("authority.personalLimit", "Personal approval limit") : k("authority.panelTitle", "Approval limit")}</span>
@@ -215,7 +219,7 @@ const AuthorityLimitPanel = ({ target, data, technical, onHide, onDone }) => {
             </div>
           ) : null}
 
-          {row && (target.role || form.userId) ? (
+          {row && (target?.role || form.userId) ? (
             <section className="am-panel__section">
               <h3>{k("authority.inEffect", "In effect")}</h3>
               <InEffect cell={cell} measure={measure} withoutLimit={data.withoutLimit} />
@@ -239,7 +243,7 @@ const AuthorityLimitPanel = ({ target, data, technical, onHide, onDone }) => {
                 <div className="am-limit-row">
                   {measure === "percent" ? (
                     <InputNumber inputId="am-limit" value={form.unlimited ? null : form.maxAmount} onValueChange={(e) => set({ maxAmount: e.value })} disabled={form.unlimited}
-                      min={0} max={100} maxFractionDigits={2} suffix="%" placeholder={form.unlimited ? k("noLimit", "No limit") : undefined}
+                      min={0} maxFractionDigits={2} suffix="%" placeholder={form.unlimited ? k("noLimit", "No limit") : undefined}
                       className={show("maxAmount") ? "p-invalid" : ""} />
                   ) : (
                     <InputNumber inputId="am-limit" value={form.unlimited ? null : form.maxAmount} onValueChange={(e) => set({ maxAmount: e.value })} disabled={form.unlimited}
