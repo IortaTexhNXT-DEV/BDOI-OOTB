@@ -11,6 +11,7 @@ import DetailDialog from "../../../components/DetailDialog";
 import DetailSection from "../../../components/DetailSection";
 import KeyValueGrid from "../../../components/KeyValueGrid";
 import StatusChip from "../../../components/StatusChip";
+import ApprovalActions from "../../../components/ApprovalActions";
 import "./UnderwritingReferralPanel.scss";
 
 /** Roles of the signed-in user (stored at sign-in). */
@@ -81,10 +82,8 @@ const UnderwritingReferralPanel = ({ quotation, onDecided }) => {
   return (
     <DetailSection className="uw-referral" title={t("underwritingReferral.title")}
       actions={referral?.status === "pending" && mayDecide(referral) ? (
-        <>
-          <Button label={t("underwritingReferral.decline")} icon="pi pi-times" severity="danger" outlined size="small" onClick={() => open("decline")} />
-          <Button label={t("underwritingReferral.approve")} icon="pi pi-check" size="small" onClick={() => open("approve")} />
-        </>
+        <ApprovalActions initiator={{ id: quotation.createdById }} size="small" rejectLabel={t("underwritingReferral.decline")} approveLabel={t("underwritingReferral.approve")}
+          onReject={() => open("decline")} onApprove={() => open("approve")} />
       ) : null}>
       <KeyValueGrid columns={4} items={[
         { label: t("underwritingReferral.statusLabel"), value: referral ? <StatusChip code={referral.status} label={t(`underwritingReferral.status.${referral.status}`)} /> : null, hidden: !referral },

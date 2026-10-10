@@ -617,8 +617,8 @@ export async function quoteById(id) {
 
 /**
  * Decide the underwriting referral of a quotation (acceptance rule with action Refer, or an Auto-Accept rule not met):
- * a user with one of the rules' authority roles and enough Underwriting referral authority for the sum insured
- * (authority matrix) approves it, or declines it (the quotation is then rejected). The insurer's underwriter
+ * a user with one of the rules' authority roles, other than the user who raised the quotation (maker-checker,
+ * workflow.quote_maker_checker), and enough Underwriting referral authority for the sum insured (authority matrix) approves it, or declines it (the quotation is then rejected). The insurer's underwriter
  * reference can be recorded with the decision.
  */
 export async function decideReferral(id, { decision, remarks = null, insurerReference = null }, user) {
@@ -628,6 +628,10 @@ export async function decideReferral(id, { decision, remarks = null, insurerRefe
   if (!['approve', 'decline'].includes(decision)) throw badRequest('decision must be approve or decline');
   if (decision === 'decline' && !String(remarks || '').trim()) throw badRequest('Give the reason for declining the referral');
   assertMayDecide(user, ref);
+  // maker-checker (NFR 5.2): the user who raised the quotation never decides its referral
+  if (await getSetting('workflow.quote_maker_checker', true) && [q.created_by, q.agent_user_id].includes(user.id)) {
+    throw forbidden('Maker-checker: the user who raised the quotation cannot decide its underwriting referral');
+  }
   if (decision === 'approve') await withTransaction((db) => assertAuthority(db, user, 'underwriting_referral', Number(q.sum_insured) || 0));
   const next = { ...ref, status: decision === 'approve' ? 'approved' : 'declined', decidedBy: user.username, decidedById: user.id, decidedAt: new Date().toISOString(),
     remarks: remarks || null, insurerReference: insurerReference || null };

@@ -126,6 +126,15 @@ describe('acceptance rules on a quotation', () => {
     expect(audit).toHaveLength(1);
   });
 
+  it('the Operations Unit Head who raised a referred quotation cannot decide its referral (maker-checker)', async () => {
+    const own = await proc('post', '/quotations').send(motor({}, { modelYear: String(year - 17) }));
+    expect(own.body.underwritingReferral.status).toBe('pending');
+    const self = await proc('post', `/quotations/${own.body.quotationId}/underwriting-referral`).send({ decision: 'approve', remarks: 'Own quotation' });
+    expect(self.status).toBe(403);
+    expect(self.body.message).toBe('Maker-checker: the user who raised the quotation cannot decide its underwriting referral');
+    expect((await q('SELECT doc->\'underwritingReferral\'->>\'status\' AS s FROM quotes WHERE id = $1', [own.body.quotationId]))[0].s).toBe('pending');
+  });
+
   it('a declined referral rejects the quotation', async () => {
     const r = await sales('post', '/quotations').send(motor({}, { modelYear: String(year - 20) }));
     const d = await proc('post', `/quotations/${r.body.quotationId}/underwriting-referral`).send({ decision: 'decline' });

@@ -9,7 +9,7 @@ export const RESERVED = ['id', 'quotationId', 'quotationNumber', 'generatedQuota
   // underwriting referral state is set by the acceptance rules and the referral decision only
   'underwritingReferral',
   // validity and versions are kept in their own columns (validity.js); changeReason goes with the version it closes
-  'version', 'issuedOn', 'validity', 'extensionCount', 'extendedAt', 'extendedBy', 'extensionRemarks', 'readOnly', 'changeReason'];
+  'version', 'issuedOn', 'validity', 'createdById', 'extensionCount', 'extendedAt', 'extendedBy', 'extensionRemarks', 'readOnly', 'changeReason'];
 
 export const stripReserved = (body) => Object.fromEntries(Object.entries(body || {}).filter(([k]) => !RESERVED.includes(k)));
 
@@ -57,7 +57,7 @@ export function toQuote(r) {
     submittedToInsurerAt: r.submitted_to_insurer_at, approvedBy: r.approved_by, approvedAt: r.approved_at,
     lead: leadSummary(r.lead_row) || doc.lead || null,
     insured: insuredOf(r, doc.lead),
-    createdBy: r.created_by_name || r.created_by, updatedBy: r.updated_by, createdAt: r.created_at, updatedAt: r.updated_at,
+    createdBy: r.created_by_name || r.created_by, createdById: r.created_by || null, updatedBy: r.updated_by, createdAt: r.created_at, updatedAt: r.updated_at,
   };
 }
 

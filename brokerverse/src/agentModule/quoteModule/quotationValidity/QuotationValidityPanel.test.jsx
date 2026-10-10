@@ -38,7 +38,7 @@ describe("quotation validity and versions", () => {
     expect(screen.getByText("30 days left")).toBeInTheDocument();
     expect(screen.getByText("09/11/2026")).toBeInTheDocument();
     expect(await screen.findByText("v2 (current)")).toBeInTheDocument();
-    const row = screen.getByText("v1").closest("tr");
+    const row = screen.getAllByRole("row").find((r) => within(r).queryByText("v1"));
     expect(within(row).getByText("Maria Santos")).toBeInTheDocument();
     fireEvent.click(within(row).getByRole("button", { name: "View" }));
     expect(await screen.findByText("Quotation QT-2026-00031 version 1")).toBeInTheDocument();
