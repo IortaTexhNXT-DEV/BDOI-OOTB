@@ -9,16 +9,6 @@ export const useLabels = () => {
   return useCallback((key, fallback, values) => t(`accessControl.${key}`, { defaultValue: fallback, ...(values || {}) }), [t]);
 };
 
-export const formatPeso = (v) =>
-  v === null || v === undefined ? "" : `PHP ${Number(v).toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-/** A limit as shown in the matrix: "No limit", "PHP 1,000,000.00" or "15%". */
-export const limitText = (measure, value, unlimited, noLimit) => {
-  if (unlimited) return noLimit;
-  if (value === null || value === undefined) return "";
-  return measure === "percent" ? `${Number(value)}%` : formatPeso(value);
-};
-
 /** Dates and date-times in the configured format (System Settings general.date_format), like every other screen. */
 export const shortDate = (d) => formatDate(d, { empty: "" });
 export const dateTime = (d) => formatDate(d, { withTime: true, empty: "" });

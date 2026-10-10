@@ -4,8 +4,8 @@ import { apiErrorMessage } from "../utility/apiError";
 
 /**
  * Access control API (/access-control): user access matrix, role permissions and the changes of a role's access
- * waiting for approval, authority matrix and its limits, delegations, segregation-of-duties rules, access reviews and
- * ending a user's sessions.
+ * waiting for approval, authority matrix (limits, their changes, upload and exports), delegations,
+ * segregation-of-duties rules, access reviews and ending a user's sessions.
  */
 const queryString = (params = {}) => {
   const entries = Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== "");
@@ -55,10 +55,18 @@ const accessControlService = {
 
   transactionTypes: () => request("GET", "/transaction-types").then((r) => r.data),
   authorityMatrix: () => request("GET", "/authority-matrix").then((r) => r.data),
+  downloadAuthorityMatrix: () => download("/authority-matrix?format=xlsx", "authority-matrix.xlsx"),
   limits: (params) => request("GET", `/authority-limits${queryString(params)}`).then((r) => r.data),
-  proposeLimit: (body) => request("POST", "/authority-limits", body),
+  downloadLimitHistory: () => download("/authority-limits?status=all&format=xlsx", "authority-limit-history.xlsx"),
+  proposeAuthorityChange: (body) => request("POST", "/authority-changes", body),
   decideLimit: (id, decision, note) => request("POST", `/authority-limits/${id}/decision`, { decision, note }),
   withdrawLimit: (id) => request("DELETE", `/authority-limits/${id}`),
+  /** Upload target of the shared import dialog: the template carries the screen's filters. */
+  authorityUploadTarget: (label, { base, unchecked, all } = {}) => ({
+    label,
+    templatePath: `/access-control/authority-matrix/template${queryString({ base: base ? 1 : undefined, unchecked: unchecked ? 1 : undefined, all: all ? 1 : undefined })}`,
+    uploadPath: "/access-control/authority-matrix/uploads",
+  }),
 
   delegations: (params) => request("GET", `/delegations${queryString(params)}`).then((r) => r.data),
   createDelegation: (body) => request("POST", "/delegations", body),
