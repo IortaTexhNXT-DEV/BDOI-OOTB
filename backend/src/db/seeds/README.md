@@ -78,6 +78,7 @@ A sample row that the purge script must remove needs a key listed in `scripts/pu
 | `91_access_reasons.sql` | reference | the contexts of the access decisions on the Reason Code master (delegation, end of a delegation, segregation-of-duties exception, access review removal) and their reasons, each with an Other that needs a note; Rule no longer needed for a change of a segregation-of-duties rule |
 | `91_data_load_reasons.sql` | reference | the context data_load_reject on the Reason Code master and its reasons (wrong file, control totals differ, duplicates not resolved, not authorised, other): the reason of a rejected data load (Data Migration & Go-Live > Loads) |
 | `91_accounting_reference.sql` | reference | the setting `accounting.provisional_accounts` (accounts the Accounting Flow shows as Mapping pending until Finance confirms them), TISPH: the placeholder 210245 Accounts Payable - Insurance Company |
+| `92_go_live_workspace.sql` | reference | Data Migration & Go-Live templates: the runbook copied into each run's cutover checklist (PC-1 to PC-8, CO-1 to CO-10, GL-1, HC-1, HC-2 with owner, timetable slot, duration, evidence and dependencies) and the Go / No-Go criteria G1 to G11 (G2 to G5 never waived) |
 
 ### Sample files (TISPH sample business)
 

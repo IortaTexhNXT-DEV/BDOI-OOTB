@@ -103,6 +103,14 @@ export const SYSTEM_RESET_ACTIONS = {
   migration_recon_lines: 'keep',
   migration_recon_differences: 'keep',
   migration_recon_signoffs: 'keep',
+  // mock runs and the production run: checklist, defects, Go / No-Go decisions with their criteria and votes, evidence files
+  migration_runs: 'keep',
+  migration_run_steps: 'keep',
+  migration_run_defects: 'keep',
+  go_live_decisions: 'keep',
+  go_live_decision_criteria: 'keep',
+  go_live_decision_votes: 'keep',
+  migration_evidence: 'keep',
   sap_opening_file_requests: 'remove', // the SAP opening file of an opening balance journal the reset removes
   documents: 'partial', // uploaded and generated file records of transaction folders (TRANSACTION_FILE_FOLDERS)
   sequences: 'partial', // document number counters: transaction series restart (MASTER_SERIES keep their counter)
@@ -149,6 +157,8 @@ export const MASTER_CONFIG_TABLES = [
   'cas_documents',
   // legacy code tables of the go-live migration (Data Migration & Go-Live > Templates > Value Maps)
   'migration_value_maps',
+  // runbook and Go / No-Go criteria templates copied into each run and decision (Data Migration & Go-Live)
+  'go_live_runbook_steps', 'go_live_criteria',
 ];
 
 /**
