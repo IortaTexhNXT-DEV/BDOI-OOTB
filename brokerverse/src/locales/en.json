@@ -15299,7 +15299,8 @@
       "pdc_cancel": "Post-dated cheque cancellation",
       "pdc_bounce": "Bounced post-dated cheque",
       "receipt_reversal": "Reversal of a receipt",
-      "receipt_reversal_reject": "Return of a receipt reversal"
+      "receipt_reversal_reject": "Return of a receipt reversal",
+      "unapplied_refund": "Refund of an unapplied collection"
     }
   },
   "financialStatements": {
@@ -16086,6 +16087,83 @@
       "glCode": "Enter an account code or its first digits",
       "glOrder": "GL to must not come before GL from",
       "noLines": "Add at least one line"
+    }
+  },
+  "unapplied": {
+    "title": "Unapplied Collections",
+    "help": "Money received that no bill takes yet: a payment above what the policy owes, a bank credit not yet identified, or a payment before the bill. Allocate each to open bills by its date, or refund it.",
+    "record": "Record payment",
+    "kpis": {
+      "open": "Open items",
+      "amount": "Open amount",
+      "overdue": "Past the allocation date"
+    },
+    "allStatuses": "All statuses",
+    "allKinds": "All kinds",
+    "search": "Client, policy, receipt or reference",
+    "empty": "Nothing to allocate.",
+    "received": "Received",
+    "kind": "Kind",
+    "reference": "Receipt / reference",
+    "client": "Client",
+    "policy": "Policy",
+    "amount": "Amount",
+    "balance": "To allocate",
+    "allocateBy": "Allocate by",
+    "overdue": "Overdue",
+    "status": "Status",
+    "actionsFor": "Actions for {{reference}}",
+    "viewTitle": "Unapplied collection",
+    "details": "Details",
+    "refundReason": "Reason",
+    "remarks": "Remarks",
+    "allocations": "Allocations",
+    "noAllocations": "Not allocated yet.",
+    "bill": "Bill",
+    "allocatedOn": "Allocated on",
+    "allocatedBy": "Allocated by",
+    "activity": "Activity",
+    "allocateTitle": "Allocate {{amount}}",
+    "allocTotal": "Allocating {{total}}",
+    "cancel": "Cancel",
+    "allocate": "Allocate",
+    "searchBills": "Client, policy or bill number",
+    "find": "Find bills",
+    "noBills": "No open bill found.",
+    "dueDate": "Due",
+    "billBalance": "Bill balance",
+    "allocateAmount": "Allocate",
+    "allocateAmountFor": "Amount to allocate to {{bill}}",
+    "save": "Save",
+    "clientCode": "Client code",
+    "payer": "Paid by",
+    "refund": "Refund",
+    "refundTitle": "Refund {{amount}} to the client?",
+    "refundMessage": "The amount is set up as a refund payable to the client and paid by disbursement.",
+    "reverse": "Reverse",
+    "reverseTitle": "Reverse this payment?",
+    "reverseMessage": "The payment and its journal are reversed. Use this only for a payment recorded in error.",
+    "reverseReason": "Reason for the reversal",
+    "kinds": {
+      "excess": "Excess payment",
+      "floating": "Floating payment",
+      "advance": "Advance payment"
+    },
+    "statuses": {
+      "open": "Open",
+      "allocated": "Allocated",
+      "refunded": "Refunded",
+      "reversed": "Reversed"
+    },
+    "menu": {
+      "view": "View",
+      "allocate": "Allocate",
+      "refund": "Refund",
+      "reverse": "Reverse"
+    },
+    "problems": {
+      "aboveBill": "An amount is above what the bill has left to pay",
+      "aboveBalance": "The amounts are above what is left to allocate"
     }
   }
 }

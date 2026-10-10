@@ -17,6 +17,7 @@ import * as svc from './service.js';
 import * as billing from './billing.js';
 import * as reversal from './reversal.js';
 import * as batches from './batches.js';
+import * as unapplied from './unapplied.js';
 import { emailBill, emailReceipt } from './email.js';
 import { emailSendingStatus } from '../../lib/mailer.js';
 import { loadOpenItem, OPEN_ITEM_COLUMNS } from './opening.js';
@@ -137,6 +138,61 @@ define({
       return;
     }
     ok(res, b);
+  },
+});
+const uacExample = { id: 'uac_1', kind: 'excess', kindText: 'Excess payment', status: 'open', amount: 1500, balance: 1500, receiptNumber: 'OR-2026-00120', clientName: 'Andrea Villanueva',
+  policyNumber: 'POL-2026-90004', receivedDate: '2026-10-05', allocateBy: '2026-10-07', overdue: false };
+define({
+  method: 'GET', path: '/unapplied', summary: 'Unapplied collections (excess On Account, floating, advance): open first by the date they are to be allocated; filter status, kind, overdue, search',
+  screen: 'Accounts > Unapplied Collections', middleware: read, query: { status: 'open', overdue: 'true' },
+  response: { success: true, data: { rows: [uacExample], summary: { open: 1, openAmount: 1500, overdue: 0 } } },
+  handler: async (req, res) => ok(res, await unapplied.listUnapplied(pool, req.query)),
+});
+define({
+  method: 'GET', path: '/unapplied/:id', summary: 'One unapplied collection with its allocations', screen: 'Accounts > Unapplied Collections > View', middleware: read,
+  response: { success: true, data: { ...uacExample, allocations: [] } },
+  handler: async (req, res) => ok(res, await unapplied.getUnapplied(pool, req.params.id)),
+});
+define({
+  method: 'POST', path: '/unapplied', summary: 'Record a floating payment (no client or bill identified yet) or an advance payment (a client paying before the bill); posted Dr cash / Cr unapplied collections',
+  screen: 'Accounts > Unapplied Collections > Record payment', middleware: [...write, validate(z.object({ kind: z.enum(['floating', 'advance']), amount: z.coerce.number().positive(),
+    receivedDate: z.string().optional(), paymentMode: z.string().optional(), referenceNo: z.string().max(80).optional().nullable(), bankAccount: z.string().max(40).optional().nullable(),
+    customerCode: z.string().max(40).optional().nullable(), payerName: z.string().max(120).optional().nullable(), remarks: z.string().max(500).optional().nullable() }))],
+  request: { kind: 'floating', amount: 12500, receivedDate: '2026-10-05', referenceNo: 'MBT-0099812', payerName: 'Unknown depositor' }, response: { success: true, data: { ...uacExample, kind: 'floating' } },
+  handler: async (req, res) => {
+    const u = await withTransaction((db) => unapplied.recordUnapplied(db, req.body, req.user));
+    await audit(req, { entity: 'unapplied_collection', entityId: u.id, action: 'create', after: u });
+    created(res, u, `${u.kindText} recorded`);
+  },
+});
+define({
+  method: 'POST', path: '/unapplied/:id/allocate', summary: 'Allocate an unapplied collection to open bills (the bill settled as by a receipt; Dr unapplied collections / Cr premium receivable)',
+  screen: 'Accounts > Unapplied Collections > Allocate', middleware: [...write, validate(z.object({ allocations: z.array(z.object({ receivableId: z.string().min(1), amount: z.coerce.number().positive() })).min(1).max(50) }))],
+  request: { allocations: [{ receivableId: 'INV-2026-00104', amount: 1500 }] }, response: { success: true, data: { ...uacExample, status: 'allocated', balance: 0 }, message: 'PHP 1,500.00 allocated' },
+  handler: async (req, res) => {
+    const r = await withTransaction((db) => unapplied.allocateUnapplied(db, req.params.id, req.body, req.user));
+    await audit(req, { entity: 'unapplied_collection', entityId: r.item.id, action: 'allocate', after: { allocations: req.body.allocations, balance: r.item.balance } });
+    ok(res, r.item, r.message);
+  },
+});
+define({
+  method: 'POST', path: '/unapplied/:id/refund', summary: 'Refund what is left of an unapplied collection to the client with a reason (context unapplied_refund): Dr unapplied collections / Cr client refund payable',
+  screen: 'Accounts > Unapplied Collections > Refund', middleware: [...write, validate(z.object({ reasonCode: z.string().min(1), note: z.string().max(1000).optional() }))],
+  request: { reasonCode: 'UAC-REF-OVERPAID' }, response: { success: true, data: { ...uacExample, status: 'refunded', balance: 0 } },
+  handler: async (req, res) => {
+    const r = await withTransaction((db) => unapplied.refundUnapplied(db, req.params.id, req.body, req.user));
+    await audit(req, { entity: 'unapplied_collection', entityId: r.item.id, action: 'refund', after: { amount: r.item.amount, reason: r.item.refundReason } });
+    ok(res, r.item, r.message);
+  },
+});
+define({
+  method: 'POST', path: '/unapplied/:id/reverse', summary: 'Reverse a floating or advance payment recorded in error, nothing allocated (reason of context receipt_reversal)',
+  screen: 'Accounts > Unapplied Collections > Reverse', middleware: [requireAuth, requirePermission('reverse:receipts'), validate(z.object({ reasonCode: z.string().min(1), note: z.string().max(1000).optional() }))],
+  request: { reasonCode: 'RCT-REV-DUPLICATE' }, response: { success: true, data: { ...uacExample, status: 'reversed', balance: 0 } },
+  handler: async (req, res) => {
+    const r = await withTransaction((db) => unapplied.reverseUnapplied(db, req.params.id, req.body, req.user));
+    await audit(req, { entity: 'unapplied_collection', entityId: r.item.id, action: 'reverse', after: { reason: r.item.refundReason } });
+    ok(res, r.item, r.message);
   },
 });
 define({

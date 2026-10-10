@@ -21,7 +21,7 @@ export const TRANSACTION_TABLES = [
   'leads', 'clients', 'quotes', 'policies', 'endorsements', 'policy_payments',
   'broker_slips', 'insurer_offers', 'placements', 'risk_participants', 'quote_customer_responses',
   // receivables, receipts, collections, disbursements, petty cash movements (the funds themselves are masters)
-  'receivables', 'receipts', 'receipt_lines', 'receipt_applications', 'entry_matches', 'invoice_lists', 'receivable_participants', 'receivable_credits', 'remittance_allocations',
+  'receivables', 'receipts', 'receipt_lines', 'receipt_applications', 'unapplied_collections', 'unapplied_allocations', 'entry_matches', 'invoice_lists', 'receivable_participants', 'receivable_credits', 'remittance_allocations',
   'collection_items', 'collection_actions', 'disbursements', 'checkbooks', 'receipt_batches',
   'petty_cash_requests', 'petty_cash_request_lines', 'petty_cash_disbursements', 'petty_cash_receipts', 'petty_cash_replenishments',
   // commission, direct bill, remittance

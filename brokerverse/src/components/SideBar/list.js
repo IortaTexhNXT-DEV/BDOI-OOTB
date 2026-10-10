@@ -352,6 +352,14 @@ export const menuList = [
         permissions: ["read:receipts"],
       },
   {
+        // money received that no bill takes yet: excess On Account, floating and advance payments
+        id: 44,
+        name: "Unapplied Collections",
+        path: "/accounts/unapplied-collections",
+        includes: ["/accounts/unapplied-collections"],
+        permissions: ["read:receipts"],
+      },
+  {
         id: 12,
         name: "Collections",
         path: "/agent/collections",

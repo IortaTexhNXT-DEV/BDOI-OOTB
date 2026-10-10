@@ -4,6 +4,7 @@
 --   pdc_bounce   reasons a cheque was returned by the bank or reported bounced by the Insurance Partner
 --   receipt_reversal         reasons a receipt is reversed (cancelled, its payment journals reversed)
 --   receipt_reversal_reject  reasons a checker returns a reversal request
+--   unapplied_refund         reasons an unapplied collection (overpayment, advance) is refunded to the client
 -- The contexts are added to the Used For list of the Reason Codes master and their reasons to the master; an action of
 -- these kinds is taken with a reason code of its context (requiredReason in src/modules/ops-masters/records.js).
 -- Idempotent: a context is added once and a reason only when its code is missing, so administrator changes are kept.
@@ -12,12 +13,12 @@ UPDATE master_types t SET fields = (
   SELECT jsonb_agg(CASE WHEN f->>'name' = 'context'
     THEN jsonb_set(f, '{options}', (f->'options') || (
       SELECT COALESCE(jsonb_agg(c ORDER BY n), '[]'::jsonb)
-      FROM unnest(ARRAY['pdc_cancel', 'pdc_bounce', 'receipt_reversal', 'receipt_reversal_reject']) WITH ORDINALITY AS a(c, n)
+      FROM unnest(ARRAY['pdc_cancel', 'pdc_bounce', 'receipt_reversal', 'receipt_reversal_reject', 'unapplied_refund']) WITH ORDINALITY AS a(c, n)
       WHERE NOT (f->'options' ? c)))
     ELSE f END ORDER BY i)
   FROM jsonb_array_elements(t.fields) WITH ORDINALITY AS x(f, i))
 WHERE t.code = 'reason-code' AND EXISTS (
-  SELECT 1 FROM jsonb_array_elements(t.fields) f, unnest(ARRAY['pdc_cancel', 'pdc_bounce', 'receipt_reversal', 'receipt_reversal_reject']) c
+  SELECT 1 FROM jsonb_array_elements(t.fields) f, unnest(ARRAY['pdc_cancel', 'pdc_bounce', 'receipt_reversal', 'receipt_reversal_reject', 'unapplied_refund']) c
   WHERE f->>'name' = 'context' AND NOT (f->'options' ? c));
 
 INSERT INTO master_records(type_code, code, name, data, status, created_by)
@@ -44,6 +45,10 @@ FROM (VALUES ('PDC-CXL-CASH', 'Cash replacement', 'pdc_cancel', false, 3000),
              ('RCT-REV-OTHER', 'Other', 'receipt_reversal', true, 3290),
              ('RCT-REJ-NOPROOF', 'No supporting document', 'receipt_reversal_reject', false, 3300),
              ('RCT-REJ-WRONG', 'Wrong receipt selected', 'receipt_reversal_reject', false, 3310),
-             ('RCT-REJ-OTHER', 'Other', 'receipt_reversal_reject', true, 3390)) AS v(code, name, context, note, sort)
+             ('RCT-REJ-OTHER', 'Other', 'receipt_reversal_reject', true, 3390),
+             ('UAC-REF-OVERPAID', 'Overpayment', 'unapplied_refund', false, 3400),
+             ('UAC-REF-DUPLICATE', 'Paid twice', 'unapplied_refund', false, 3410),
+             ('UAC-REF-NOTTAKEN', 'Policy cancelled or not taken up', 'unapplied_refund', false, 3420),
+             ('UAC-REF-OTHER', 'Other', 'unapplied_refund', true, 3490)) AS v(code, name, context, note, sort)
 WHERE EXISTS (SELECT 1 FROM master_types WHERE code = 'reason-code')
   AND NOT EXISTS (SELECT 1 FROM master_records m WHERE m.type_code = 'reason-code' AND lower(m.code) = lower(v.code));

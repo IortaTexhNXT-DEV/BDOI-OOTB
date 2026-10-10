@@ -201,7 +201,18 @@ function collections(ctx) {
     AND (ci.assigned_to IS NOT NULL OR ci.commitment_date IS NOT NULL OR rv.due_date < ${ctx.T}::date)
     -- a promise to pay already followed up by a task of the collector who recorded it is listed through that task
     AND NOT EXISTS (SELECT 1 FROM work_tasks wt WHERE wt.source = 'collection' AND wt.entity_id = ci.id AND wt.status = 'open')
-    AND (p.id IS NULL OR ${rec(ctx, 'policy', 'p')})`;
+    AND (p.id IS NULL OR ${rec(ctx, 'policy', 'p')})`
+    + (ctx.can('write:receipts') ? ` UNION ALL ${unappliedCollections()}` : '');
+}
+
+/** Unapplied collections (On Account, floating, advance) to allocate by their SLA date (collections.unapplied_sla_days). */
+function unappliedCollections() {
+  return `SELECT ${select({
+    category: "'collections'", kind: "'Unapplied collection'", id: 'uc.id', ref: 'COALESCE(ucr.receipt_number, uc.reference_no, uc.id)',
+    title: "initcap(uc.kind) || ' payment' || COALESCE(' - ' || ucp.policy_number, '')", client_name: 'COALESCE(ucc.display_name, uc.payer_name)', due_date: 'uc.allocate_by',
+    status: "'open'", queue: 'true', next_action: "'Allocate it to a bill or refund it'", link: "'/accounts/unapplied-collections?item=' || uc.id", amount: 'uc.balance', created_at: 'uc.created_at',
+  })} FROM unapplied_collections uc LEFT JOIN receipts ucr ON ucr.id = uc.receipt_id LEFT JOIN clients ucc ON ucc.id = uc.client_id LEFT JOIN policies ucp ON ucp.id = uc.policy_id
+  WHERE uc.status = 'open'`;
 }
 
 function endorsements(ctx) {

@@ -228,12 +228,13 @@ export async function ensureBilled(db, { policy, amount, breakdown, source, user
   return (await policyReceivables(db, policy.id)).filter((r) => ['open', 'partial'].includes(r.status) && Number(r.balance) > 0);
 }
 
-async function applyToReceivable(db, rcv, amount, ctx) {
+export async function applyToReceivable(db, rcv, amount, ctx) {
   const policy = ctx.policy;
   await ensureBooked(db, rcv, policy, ctx.user);
   // a post-dated cheque the Insurance Partner collected (pdc.partner_collected): the money is in the partner's bank
   const partner = ctx.collectedBy || null;
-  const jv = await postEvent(partner ? 'pdc.partner_collected' : 'receipt.apply', {
+  // an amount held unapplied (On Account) moves from the unapplied collections (unapplied.allocate), no new cash
+  const jv = await postEvent(ctx.unappliedId ? 'unapplied.allocate' : partner ? 'pdc.partner_collected' : 'receipt.apply', {
     source: ctx.receipt ? 'receipt' : 'payment', entryType: 'PAYMENT_RECEIPT', transactionCode: ctx.receipt?.receipt_number || rcv.bill_number,
     referenceType: ctx.receipt ? 'Receipt' : 'Policy', referenceId: ctx.receipt?.id || policy.id, clientId: rcv.client_id, policyId: policy.id,
     policyNumber: policy.policy_number, date: ctx.date || (await today()), insuranceCompanyId: partner?.id ?? undefined,
@@ -241,7 +242,7 @@ async function applyToReceivable(db, rcv, amount, ctx) {
       : `Premium collected – ${policy.policy_number}${ctx.receipt ? ` (${ctx.receipt.receipt_number})` : ''}`,
     paymentMode: ctx.paymentMode, bankAccount: ctx.bankAccount || ctx.receipt?.bank_account_code || null, amounts: { amount },
     vars: { policyNumber: policy.policy_number, receiptSuffix: ctx.receipt ? ` (${ctx.receipt.receipt_number})` : '', memoRef: ctx.referenceNo || 'Premium collection', billNumber: rcv.bill_number,
-      insurer: partner?.name || '', chequeNumber: ctx.chequeNumber || '' },
+      insurer: partner?.name || '', chequeNumber: ctx.chequeNumber || '', reference: ctx.receipt?.receipt_number || ctx.referenceNo || '' },
   }, { db, user: ctx.user });
   const upd = (await db.query(`UPDATE receivables SET balance = balance - $2, last_payment_at = now(), updated_at = now(),
       status = CASE WHEN balance - $2 <= 0 THEN 'paid' ELSE 'partial' END WHERE id = $1 RETURNING *`, [rcv.id, amount])).rows[0];
@@ -249,8 +250,10 @@ async function applyToReceivable(db, rcv, amount, ctx) {
   // on an instalment plan the bill is next due on its first instalment not yet paid
   await syncDueDate(db, rcv.id);
   // collected_on: the date the money was received (the journal's date), not the time it was keyed in
-  await db.query(`INSERT INTO receipt_applications(receipt_id, receipt_line_id, receivable_id, amount, journal_id, payment_mode, reference_no, applied_by, collected_on)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`, [ctx.receipt?.id || null, ctx.lineId || null, rcv.id, amount, jv.id, ctx.paymentMode || null, ctx.referenceNo || null, ctx.user?.id ?? null, jv.jv_date || null]);
+  const app = (await db.query(`INSERT INTO receipt_applications(receipt_id, receipt_line_id, receivable_id, amount, journal_id, payment_mode, reference_no, applied_by, collected_on, unapplied_id)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id`, [ctx.receipt?.id || null, ctx.lineId || null, rcv.id, amount, jv.id, ctx.paymentMode || null, ctx.referenceNo || null, ctx.user?.id ?? null,
+    jv.jv_date || null, ctx.unappliedId || null])).rows[0];
+  upd.applicationId = app.id;
   await syncPolicyPaymentStatus(db, policy.id, ctx.user?.id ?? null);
   return upd;
 }
@@ -273,14 +276,15 @@ export async function syncPolicyPaymentStatus(db, policyId, userId = null) {
 }
 
 /** Commission eligibility: once nothing is open on the policy, the premium counts as collected. */
-async function commissionWhenSettled(db, policy, ctx) {
+export async function commissionWhenSettled(db, policy, ctx) {
   const stillOpen = (await db.query('SELECT count(*)::int AS n FROM receivables WHERE policy_id = $1 AND balance > 0 AND status IN (\'open\',\'partial\')', [policy.id])).rows[0].n;
   if (!stillOpen) await onPolicyPremiumCollected(db, policy.id, ctx.receipt?.receipt_number || null);
 }
 
 /**
  * Apply a payment to a policy's open receivables (oldest first). When nothing is open (first bill or an endorsement /
- * extra premium) a receivable is created for billAmount (or the remaining amount) and settled.
+ * extra premium) a receivable is created for billAmount (or the remaining amount) and settled. What is left once every
+ * bill is paid is held On Account (receipts.excess_handling on-account, unapplied.js) or billed on the policy (bill).
  */
 export async function applyToPolicy(db, ctx) {
   const { policy } = ctx;
@@ -297,7 +301,11 @@ export async function applyToPolicy(db, ctx) {
     await applyToReceivable(db, r, x, ctx);
     remaining = round2(remaining - x);
   }
-  if (remaining > 0) {
+  if (remaining > 0 && (await getSetting('receipts.excess_handling', 'bill')) === 'on-account') {
+    const { holdUnapplied } = await import('./unapplied.js');
+    await holdUnapplied(db, { kind: 'excess', amount: remaining, receipt: ctx.receipt, lineId: ctx.lineId, clientId: policy.client_id, policyId: policy.id,
+      date: ctx.date, paymentMode: ctx.paymentMode, referenceNo: ctx.referenceNo, payerName: policy.client_name, user: ctx.user });
+  } else if (remaining > 0) {
     const extra = await createReceivable(db, { policy, amount: remaining, breakdown: {}, source: ctx.source === 'policy' ? 'receipt' : (ctx.source || 'receipt'), reference: ctx.receipt?.receipt_number, user: ctx.user });
     await applyToReceivable(db, extra, remaining, ctx);
   }
