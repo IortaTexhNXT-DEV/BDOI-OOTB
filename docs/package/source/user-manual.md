@@ -813,6 +813,7 @@ The System Administrator can open every Master > Finance screen. The Accounting 
 ## Incentive programmes
 
 - **Master > Finance > Incentive Programs**: **Add Program** with the code, name, type (Target Based, Commission Based, Hybrid, Contest), target metric, base target, frequency and dates. Accounting calculates and pays the programmes but cannot change them.
+- **Incentive structure** (in the same pop-up): one row per tier with its name, the achievement band (from and to, as a % of the target, or a number of policies for the Policy Count metric; leave **To** empty on the top tier for "and above"), the payout type (fixed amount, % of achieved premium, or amount per policy) with its rate or amount, and an optional maximum payout. The bands must follow each other without gaps or overlaps, and an Active programme needs at least one tier. Enter a sample achievement to see the tier it reaches and the payout.
 
 ## Approvals
 

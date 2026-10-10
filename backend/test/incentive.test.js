@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { setup, loginAs } from './helpers.js';
 import { pool } from '../src/db/pool.js';
-import { keysEndingIn, parsePeriod, programPeriodKey } from '../src/modules/incentive/service.js';
+import { keysEndingIn, parsePeriod, payout, programPeriodKey } from '../src/modules/incentive/service.js';
 
 let ctx;
 let agentTok;
@@ -60,6 +60,30 @@ describe('programs', () => {
     expect(u.body.data).toMatchObject({ status: 'Inactive', stretchTarget: 150000 });
     expect((await ctx.api('delete', `/incentive/programs/${c.body.data.id}`)).status).toBe(200);
     expect((await ctx.api('get', `/incentive/programs/${c.body.data.id}`)).status).toBe(404);
+  });
+  it('keeps tiers in ascending bands without gaps or overlaps and an active program with at least one tier', async () => {
+    const body = { programName: 'Tier Program', programType: 'Target Based', applicableTo: ['Individual Agent'], startDate: '2026-10-01', endDate: '2026-12-31', targetMetric: 'Policy Count', calculationFrequency: 'Monthly', baseTarget: 10 };
+    const tier = (level, basis, value) => ({ level, basis, value });
+    const bad = async (structure, extra = {}) => (await ctx.api('post', '/incentive/programs').send({ ...body, ...extra, structure })).body;
+    expect((await bad([])).errors[0]).toMatchObject({ path: 'structure', message: 'An active program needs at least one tier' });
+    expect((await bad([tier('0-10', 'perUnit', 100), tier('10-20', 'perUnit', 200)])).errors[0].message).toMatch(/ascending order without overlapping/);
+    expect((await bad([tier('0-10', 'perUnit', 100), tier('15+', 'perUnit', 200)])).errors[0].message).toBe('The band from 10 to 15 is not covered by any tier');
+    expect((await bad([tier('10+', 'perUnit', 100), tier('20+', 'perUnit', 200)])).errors[0].message).toBe('Only the top tier may be open-ended');
+    expect((await bad([tier('0-10', 'percentOfAchieved', 1)])).errors[0].message).toMatch(/does not apply to this measure/);
+    const draft = await ctx.api('post', '/incentive/programs').send({ ...body, status: 'Draft', structure: [] });
+    expect(draft.status).toBe(201);
+    expect((await ctx.api('put', `/incentive/programs/${draft.body.data.id}`).send({ status: 'Active' })).status).toBe(400);
+    const r = await ctx.api('put', `/incentive/programs/${draft.body.data.id}`)
+      .send({ status: 'Active', structure: [tier('0-10', 'perUnit', 100), tier('11+', 'fixed', 5000)] });
+    expect(r.status).toBe(200);
+    expect(r.body.data.structure).toEqual([
+      { level: '0-10', basis: 'perUnit', type: 'Fixed Amount', value: 100, maxPayout: null },
+      { level: '11+', basis: 'fixed', type: 'Fixed Amount', value: 5000, maxPayout: null },
+    ]);
+    const program = { metric: 'policies', target: 10, structure: r.body.data.structure };
+    expect(payout(program, 4, 10)).toMatchObject({ amount: 400, tier: '0-10' });
+    expect(payout(program, 12, 10)).toMatchObject({ amount: 5000, tier: '11+' });
+    await ctx.api('delete', `/incentive/programs/${draft.body.data.id}`);
   });
 });
 

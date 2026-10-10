@@ -56,14 +56,39 @@ async function metricOf(targetMetric) {
   return m;
 }
 
-function validateStructure(structure) {
+// How a tier pays, by measure: a fixed amount, a % of the premium achieved (premium), an amount per policy (policy
+// count) or, for tiers kept from before the basis was stored, a % of the target.
+const TIER_BASES = { fixed: 'Fixed Amount', perUnit: 'Fixed Amount', percentOfAchieved: 'Percentage', percentOfTarget: 'Percentage' };
+const BASIS_METRIC = { percentOfAchieved: 'premium', perUnit: 'policies' };
+
+/**
+ * Tiers in ascending bands of one kind (% of target, or a count), each band starting where the one before ends
+ * (percentages share the edge, counts follow on by one), with an open-ended band ("110%+") only at the top.
+ */
+function validateStructure(structure, metric) {
   if (!Array.isArray(structure)) throw badRequest('Validation failed', [{ path: 'structure', message: 'structure must be an array of tiers' }]);
-  structure.forEach((s, i) => {
-    if (!s || !s.level || !['Percentage', 'Fixed Amount'].includes(s.type) || !Number.isFinite(toNumber(s.value, NaN))) {
-      throw badRequest('Validation failed', [{ path: `structure.${i}`, message: 'Each tier needs level, type (Percentage | Fixed Amount) and value' }]);
+  const fail = (i, message) => { throw badRequest('Validation failed', [{ path: `structure.${i}`, message }]); };
+  let prev = null;
+  const tiers = structure.map((s, i) => {
+    const basis = s?.basis || null;
+    const type = basis ? TIER_BASES[basis] : s?.type;
+    if (!s || !s.level || !['Percentage', 'Fixed Amount'].includes(type) || !Number.isFinite(toNumber(s.value, NaN)) || toNumber(s.value) < 0) {
+      fail(i, 'Each tier needs level, type (Percentage | Fixed Amount) and value');
     }
+    if (basis && (!TIER_BASES[basis] || (BASIS_METRIC[basis] && BASIS_METRIC[basis] !== metric))) fail(i, `Payout basis ${basis} does not apply to this measure`);
+    const r = tierRange(s.level);
+    if (!r || r.min > r.max) fail(i, 'The achievement band must read like 80-90%, 110%+, 0-10 or 31+');
+    if (prev) {
+      if (r.percent !== prev.percent) fail(i, 'All tiers must use the same kind of band');
+      if (prev.max === Infinity) fail(i, 'Only the top tier may be open-ended');
+      const expected = r.percent ? prev.max : prev.max + 1;
+      if (r.min < expected) fail(i, 'Tiers must be in ascending order without overlapping bands');
+      if (r.min > expected) fail(i, `The band from ${prev.max} to ${r.min} is not covered by any tier`);
+    }
+    prev = r;
+    return { ...s, type, ...(basis ? { basis } : {}), value: toNumber(s.value), maxPayout: s.maxPayout == null || s.maxPayout === '' ? null : toNumber(s.maxPayout) };
   });
-  return structure.map((s) => ({ ...s, value: toNumber(s.value), maxPayout: s.maxPayout == null || s.maxPayout === '' ? null : toNumber(s.maxPayout) }));
+  return tiers;
 }
 
 async function programValues(b, before) {
@@ -84,11 +109,13 @@ async function programValues(b, before) {
   if (stretch !== null && stretch < baseTarget) throw badRequest('Validation failed', [{ path: 'stretchTarget', message: 'stretchTarget must not be below baseTarget' }]);
   const status = b.status ?? before?.status ?? 'Active';
   if (!['Active', 'Inactive', 'Draft', 'Completed'].includes(status)) throw badRequest('Validation failed', [{ path: 'status', message: 'status must be Active, Inactive, Draft or Completed' }]);
+  const structure = b.structure !== undefined ? validateStructure(b.structure, metric) : before?.structure ?? [];
+  if (status === 'Active' && !structure.length) throw badRequest('Validation failed', [{ path: 'structure', message: 'An active program needs at least one tier' }]);
   return {
     name: b.programName ?? before?.name, description: b.description ?? before?.description ?? null, metric, target: baseTarget, reward: b.reward ?? before?.reward ?? null,
     period_from: from, period_to: to, status, program_type: programType || null, applicable_to: JSON.stringify(b.applicableTo ?? before?.applicable_to ?? []), target_metric: targetMetric,
     stretch_target: stretch, currency: b.Currency || b.currency || before?.currency || (await baseCurrency()), calculation_frequency: freq || null,
-    structure: JSON.stringify(b.structure !== undefined ? validateStructure(b.structure) : before?.structure ?? []), eligibility: JSON.stringify(b.eligibility ?? before?.eligibility ?? {}),
+    structure: JSON.stringify(structure), eligibility: JSON.stringify(b.eligibility ?? before?.eligibility ?? {}),
   };
 }
 
@@ -218,7 +245,6 @@ function tierRange(level) {
 /** Payout from the program tiers: tiers keyed on achievement % (levels with %) or on the achieved count. */
 export function payout(program, achieved, target) {
   const pct = target ? round2((achieved / target) * 100) : 0;
-  const monetary = program.metric === 'premium';
   let hit = null;
   for (const t of program.structure || []) {
     const r = tierRange(t.level);
@@ -227,9 +253,11 @@ export function payout(program, achieved, target) {
     if (x >= r.min && (x < r.max || (r.max !== Infinity && x === r.max && !r.percent))) hit = t;
   }
   if (!hit) return { achievementPercent: pct, amount: 0, tier: null };
+  const basis = tierBasis(program, hit);
   let amount;
-  if (hit.type === 'Percentage') amount = monetary ? achieved * hit.value / 100 : toNumber(program.target) * hit.value / 100;
-  else amount = program.metric === 'policies' ? hit.value * achieved : hit.value;
+  if (basis === 'percentOfAchieved') amount = achieved * hit.value / 100;
+  else if (basis === 'percentOfTarget') amount = toNumber(program.target) * hit.value / 100;
+  else amount = basis === 'perUnit' ? hit.value * achieved : hit.value;
   if (hit.maxPayout) amount = Math.min(amount, hit.maxPayout);
   return { achievementPercent: pct, amount: round2(amount), tier: hit.level };
 }
@@ -239,6 +267,7 @@ export function payout(program, achieved, target) {
  * target), perUnit (an amount per policy) or fixed (one amount); the same rules as payout().
  */
 function tierBasis(program, tier) {
+  if (tier.basis) return tier.basis;
   if (tier.type === 'Percentage') return program.metric === 'premium' ? 'percentOfAchieved' : 'percentOfTarget';
   return program.metric === 'policies' ? 'perUnit' : 'fixed';
 }

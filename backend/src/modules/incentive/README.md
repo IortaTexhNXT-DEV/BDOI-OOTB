@@ -30,6 +30,14 @@ who created / submitted / approved / rejected it, approval remarks, rejection re
 
 ## Main flows
 
+- Programs: the tiers in `structure` are `{ level, basis, value, maxPayout }`. `level` is the achievement band, as a
+  % of the target ("80-90%", "110%+") or as a count of policies ("0-10", "31+"); `basis` is how the tier pays:
+  `fixed` (one amount), `percentOfAchieved` (a % of the premium achieved, premium measure only) or `perUnit` (an
+  amount per policy, policy count only); `type` (Fixed Amount | Percentage) follows from it. Tiers stored without a
+  basis keep the rule they were made with (`tierBasis()`). The bands must be in ascending order of one kind, each
+  starting where the one before ends (percentages share the edge, counts follow on by one), with an open-ended band
+  only at the top; an Active program needs at least one tier.
+
 - Calculation: `POST /calculations` with a month and the active programs running in it. Each program is calculated
   over its calculation period that ends with that month (`programPeriodOn()`: the month, quarter, half or year of its
   `calculation_frequency`), against the target of that period: a quarterly program is run in the last month of its

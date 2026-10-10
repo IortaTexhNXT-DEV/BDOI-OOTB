@@ -9,12 +9,12 @@ import { Card } from "primereact/card";
 import { Tag } from "primereact/tag";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
-import { Calendar } from "primereact/calendar";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import { InputTextarea } from "primereact/inputtextarea";
 import { InputNumber } from "primereact/inputnumber";
 import { MultiSelect } from "primereact/multiselect";
+import DateField from "../../../../components/DateField";
 import FieldError from "../../../../components/FieldError";
 import { openConfirm } from "../../../../components/ConfirmDialog";
 import DetailDialog from "../../../../components/DetailDialog";
@@ -31,9 +31,10 @@ import ToggleButton from "../../../../components/ToggleButton";
 import InputField from "../../../../components/InputField";
 import incentiveService from "../../../../services/incentiveService";
 import mastersService from "../../../../services/mastersService";
-import { isoDate, loadSettings, showError, showSuccess } from "../../../Remittance/shared";
-import { calendarDateFormat, formatDate as formatAppDate } from "../../../../utility/dateFormat";
+import { loadSettings, showError, showSuccess } from "../../../Remittance/shared";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 import { requiredErrors, hasErrors, errorSummary } from "../../../../utility/requiredFields";
+import TierEditor, { bandKind, tierProblem } from "./TierEditor";
 import "./index.scss";
 
 const IncentiveProgramMaster = () => {
@@ -45,7 +46,7 @@ const IncentiveProgramMaster = () => {
 
   // State management
   const [programs, setPrograms] = useState([]);
-  const [config, setConfig] = useState({ types: [], frequencies: [], metrics: [], currencies: [], defaultCurrency: "" });
+  const [config, setConfig] = useState({ types: [], frequencies: [], metrics: [], metricMap: {}, currencies: [], defaultCurrency: "" });
   const [search, setSearch] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [selectedType, setSelectedType] = useState("All");
@@ -93,6 +94,7 @@ const IncentiveProgramMaster = () => {
         types: s["incentive.program_types"] || [],
         frequencies: s["incentive.calculation_frequencies"] || [],
         metrics: Object.keys(s["incentive.metric_map"] || {}),
+        metricMap: s["incentive.metric_map"] || {},
         currencies: currencies.map((c) => c.CurrencyCode).filter(Boolean),
         defaultCurrency: (currencies.find((c) => c.isBase === true) || {}).CurrencyCode || s["currency.default"] || ""
       }))
@@ -199,8 +201,7 @@ const IncentiveProgramMaster = () => {
     setCurrentProgram(rowData);
     setFormData({
       ...rowData,
-      startDate: rowData.startDate ? new Date(rowData.startDate) : null,
-      endDate: rowData.endDate ? new Date(rowData.endDate) : null,
+      structure: rowData.structure || [],
     });
     setErrors({});
     setShowDialog(true);
@@ -219,7 +220,10 @@ const IncentiveProgramMaster = () => {
       ["targetMetric", "Target metric"],
       ["calculationFrequency", "Calculation frequency"],
       ["baseTarget", "Base target", (v) => Number(v.baseTarget) > 0, "Base target must be greater than zero"],
+      ["structure", k("structureSection"), (v) => v.status !== "Active" || v.structure.length > 0, k("tierRequiredActive")],
     ]);
+    const problem = tierProblem(formData.structure, bandKind(config.metricMap[formData.targetMetric], formData.structure));
+    if (problem) found.structure = `${k("tierRow", { n: problem.index + 1 })}: ${k(problem.key, problem.values)}`;
     setErrors(found);
     if (hasErrors(found)) {
       showError(toast, { message: errorSummary(found) }, "Validation");
@@ -229,8 +233,8 @@ const IncentiveProgramMaster = () => {
     try {
       const programData = {
         ...formData,
-        startDate: isoDate(formData.startDate) || null,
-        endDate: isoDate(formData.endDate) || null,
+        startDate: formData.startDate || null,
+        endDate: formData.endDate || null,
       };
 
       if (mode === "add") {
@@ -509,19 +513,19 @@ const IncentiveProgramMaster = () => {
             <div className="form-row">
               <div className="form-field">
                 <label className="ipm-form__required">{k("startDate")}</label>
-                <Calendar
+                <DateField
+                  id="ipm-startDate"
                   value={formData.startDate}
-                  onChange={(e) => setFormData({...formData, startDate: e.value})}
-                  dateFormat={calendarDateFormat()}
+                  onChange={(e) => setFormData({...formData, startDate: e.target.value})}
                 />
                 <FieldError error={errors.startDate} />
               </div>
               <div className="form-field">
                 <label className="ipm-form__required">{k("endDate")}</label>
-                <Calendar
+                <DateField
+                  id="ipm-endDate"
                   value={formData.endDate}
-                  onChange={(e) => setFormData({...formData, endDate: e.value})}
-                  dateFormat={calendarDateFormat()}
+                  onChange={(e) => setFormData({...formData, endDate: e.target.value})}
                 />
                 <FieldError error={errors.endDate} />
               </div>
@@ -594,6 +598,15 @@ const IncentiveProgramMaster = () => {
               </div>
             </div>
           </div>
+
+          <h3 className="ipm-form__title">{k("structureSection")}</h3>
+          <TierEditor
+            value={formData.structure}
+            onChange={(structure) => setFormData((f) => ({ ...f, structure }))}
+            metric={config.metricMap[formData.targetMetric]}
+            target={Number(formData.baseTarget) || null}
+            error={errors.structure}
+          />
         </div>
       </Dialog>
 
@@ -633,9 +646,10 @@ const IncentiveProgramMaster = () => {
           {viewed.structure?.length ? (
             <DetailSection title={k("structureSection")} flush>
               <DataTable value={viewed.structure} size="small">
+                <Column header={k("tierName")} body={(data, o) => data.name || k("tierNumber", { n: o.rowIndex + 1 })} />
                 <Column field="level" header={k("achievementLevel")} />
-                <Column field="type" header={k("incentiveType")} />
-                <Column field="value" header={k("rateOrAmount")} />
+                <Column header={k("payoutBasis")} body={(data) => (data.basis ? k(`basis.${data.basis}`) : data.type)} />
+                <Column field="value" header={k("rateOrAmount")} className="text-right" headerClassName="text-right" />
                 <Column header={k("maxPayout")} body={(data) => formatCurrency(data.maxPayout)} className="text-right" headerClassName="text-right" />
               </DataTable>
             </DetailSection>
