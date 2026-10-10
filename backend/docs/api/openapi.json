@@ -34126,6 +34126,95 @@
         }
       }
     },
+    "/collections/send-due-date-reminders/preview": {
+      "get": {
+        "operationId": "getCollectionsSendDueDateRemindersPreview",
+        "summary": "What the due-date reminders would send now: items, clients (and those without an e-mail), amount outstanding and items by overdue level",
+        "tags": [
+          "Collections"
+        ],
+        "description": "Front-end touchpoint: Accounts > Collections > Send payment reminders\n\nAccess: read:collections, read:receipts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "integer"
+                        },
+                        "clients": {
+                          "type": "integer"
+                        },
+                        "withoutEmail": {
+                          "type": "integer"
+                        },
+                        "totalOutstanding": {
+                          "type": "number"
+                        },
+                        "byLevel": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "level": {
+                                "type": "string"
+                              },
+                              "count": {
+                                "type": "integer"
+                              },
+                              "amount": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "items": 3,
+                    "clients": 2,
+                    "withoutEmail": 0,
+                    "totalOutstanding": 24813.75,
+                    "byLevel": [
+                      {
+                        "level": "Overdue",
+                        "count": 2,
+                        "amount": 18000
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Collections > Send payment reminders",
+        "x-permissions": [
+          "read:collections",
+          "read:receipts"
+        ]
+      }
+    },
     "/collections/sync": {
       "post": {
         "operationId": "postCollectionsSync",

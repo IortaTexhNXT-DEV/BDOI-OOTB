@@ -31,6 +31,12 @@ define({
   handler: async (_req, res) => ok(res, await svc.dashboardStats(pool)),
 });
 define({
+  method: 'GET', path: '/send-due-date-reminders/preview', summary: 'What the due-date reminders would send now: items, clients (and those without an e-mail), amount outstanding and items by overdue level',
+  screen: `${SCREEN} > Send payment reminders`, middleware: read,
+  response: { success: true, data: { items: 3, clients: 2, withoutEmail: 0, totalOutstanding: 24813.75, byLevel: [{ level: 'Overdue', count: 2, amount: 18000 }] } },
+  handler: async (_req, res) => ok(res, await svc.dueDateReminderPreview(pool)),
+});
+define({
   method: 'POST', path: '/send-due-date-reminders', summary: 'Queue reminder e-mails and notify owners for items due soon or overdue (not reminded recently)', screen: SCREEN, middleware: write,
   request: {}, response: { success: true, message: '3 reminder(s) queued', data: { candidates: 3, emails: 3, notifications: 3, skipped: [] } },
   handler: async (req, res) => {

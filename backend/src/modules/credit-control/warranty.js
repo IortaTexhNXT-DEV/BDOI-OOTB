@@ -174,7 +174,16 @@ export async function requestCancellation(db, policyRef, b, user) {
 
 /** Actions taken on a policy from the monitor (most recent first). */
 export async function policyActions(db, policyRef) {
-  return (await db.query(`SELECT a.*, e.endorsement_number, (SELECT display_name FROM users u WHERE u.id = a.created_by) AS created_by_name FROM premium_warranty_actions a
+  const own = (await db.query(`SELECT a.*, e.endorsement_number, (SELECT display_name FROM users u WHERE u.id = a.created_by) AS created_by_name FROM premium_warranty_actions a
     JOIN policies p ON p.id = a.policy_id LEFT JOIN endorsements e ON e.id = a.endorsement_id WHERE p.id = $1 OR p.policy_number = $1 ORDER BY a.created_at DESC, a.id DESC`, [String(policyRef)])).rows
     .map((a) => ({ id: Number(a.id), action: a.action, notes: a.notes, endorsementNumber: a.endorsement_number, createdBy: a.created_by_name || a.created_by, createdAt: a.created_at }));
+  // the reminders, calls and commitments logged on the policy's collection belong to the same chase for the premium
+  const followUps = (await db.query(`SELECT ca.id, ca.action_type, ca.action_date, ca.notes, ca.commitment_date,
+      COALESCE(u.display_name, ca.action_by) AS by_name
+    FROM collection_actions ca JOIN collection_items ci ON ci.id = ca.collection_id JOIN policies p ON p.id = ci.policy_id
+    LEFT JOIN users u ON u.username = ca.action_by OR u.id = ca.action_by
+    WHERE p.id = $1 OR p.policy_number = $1`, [String(policyRef)])).rows
+    .map((a) => ({ id: `col-${a.id}`, action: `collection-${String(a.action_type || 'note').toLowerCase()}`, notes: a.notes, commitmentDate: a.commitment_date,
+      createdBy: a.by_name, createdAt: a.action_date, source: 'collection' }));
+  return [...own, ...followUps].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }

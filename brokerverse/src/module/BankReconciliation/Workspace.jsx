@@ -135,7 +135,6 @@ const Workspace = () => {
     title: t("bankReconciliation.dialog.flag"),
     severity: "danger",
     facts: bankFacts(l),
-    note: t("bankReconciliation.confirmations.notes.flag"),
     input: { type: "textarea", label: t("bankReconciliation.remarks"), required: true, maxLength: 500 },
     confirmLabel: t("bankReconciliation.flagBankError"),
   }, (remarks) => bankReconciliationService.flagLine(l.id, "bank-error", remarks), t("bankReconciliation.flagged"));
@@ -239,7 +238,17 @@ const Workspace = () => {
           <div className="flex gap-2 flex-wrap ml-auto">
             <Button icon="pi pi-upload" label={t("bankReconciliation.importStatement")} disabled={!linked} onClick={() => setDialog("import")} />
             <Button icon="pi pi-bolt" label={t("bankReconciliation.autoMatch")} disabled={!linked} loading={busy === "auto"}
-              onClick={() => act("auto", () => bankReconciliationService.autoMatch(account), (r) => t("bankReconciliation.autoMatched", { count: r.matched }))} />
+              onClick={() => confirmAct({
+                title: t("bankReconciliation.autoMatchTitle"),
+                message: t("bankReconciliation.autoMatchMessage"),
+                facts: [
+                  { label: t("bankReconciliation.bankAccount"), value: current ? `${current.code} – ${current.name}` : account },
+                  { label: t("bankReconciliation.unmatchedBank"), value: s ? `${s.unmatchedBank} · ${money(s.unmatchedBankAmount)}` : null, hidden: !s },
+                  { label: t("bankReconciliation.unmatchedBook"), value: s ? `${s.unmatchedBook} · ${money(s.unmatchedBookAmount)}` : null, hidden: !s },
+                ],
+                confirmLabel: t("bankReconciliation.autoMatch"),
+                confirmIcon: "pi pi-bolt",
+              }, () => bankReconciliationService.autoMatch(account), (r) => t("bankReconciliation.autoMatched", { count: r?.matched || 0 }))} />
             <Button icon="pi pi-clock" outlined label={t("bankReconciliation.staleCheques")} disabled={!linked} onClick={() => setDialog("stale")} />
             <Button icon="pi pi-file-check" label={rec ? `${t("bankReconciliation.reconciliation")} ${rec.recNumber}` : t("bankReconciliation.startReconciliation")}
               disabled={!linked} loading={busy === "rec"} onClick={openRec} />
@@ -370,7 +379,6 @@ const Workspace = () => {
               <label htmlFor="br-from">{t("bankReconciliation.reconcileFrom")}</label>
               <DateField id="br-from" value={form.reconcileFrom || ""} onChange={(e) => setForm({ ...form, reconcileFrom: e.target.value })} />
             </div>
-            <div className="col-12 md:col-6 flex align-items-end"><span className="pe-muted">{t("bankReconciliation.reconcileFromHelp")}</span></div>
           </div>
         )}
       </Dialog>

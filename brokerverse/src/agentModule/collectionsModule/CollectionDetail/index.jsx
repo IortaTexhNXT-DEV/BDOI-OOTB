@@ -63,10 +63,10 @@ const CollectionDetail = () => {
     setFollowUpType(type);
     setShowFollowUpModal(true);
   };
-  const handleSendEmail = async (body) => {
+  const handleSendEmail = async ({ notes, to, subject }) => {
     setLoadingFollowUp(true);
     // the server records the signed-in user as the one who sent it
-    const sendEmail = await collectionService.sendEmail(collection.id, { notes: body });
+    const sendEmail = await collectionService.sendEmail(collection.id, { notes, to: to || undefined, subject: subject || undefined });
     if (sendEmail.success) {
       toast.current?.show({
         severity: "success",

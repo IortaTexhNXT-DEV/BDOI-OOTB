@@ -16,6 +16,8 @@ import { printPdf } from "../../../components/Print";
 import DetailSection from "../../../components/DetailSection";
 import { RecordActivityLog } from "../../../components/ActivityLog";
 import { showErrorMessage } from "../../../utility/toastUtils";
+import DetailHeader from "../../../components/DetailHeader";
+import { statusLabel } from "../../../utils/statusSeverity";
 
 function PolicyReceipts() {
   const { t } = useTranslation();
@@ -23,7 +25,7 @@ function PolicyReceipts() {
   const [printLoading, setPrintLoading] = useState(false);
   const [emailOpen, setEmailOpen] = useState(false);
 
-  const { receiptDetailList, loading, currentReceiptId, receiptNumber, clientEmail, receiptStatus } =
+  const { receiptDetailList, loading, currentReceiptId, receiptNumber, clientEmail, receiptStatus, header } =
     useSelector(({ receiptsTableReducers }) => {
       return {
         loading: receiptsTableReducers?.loading,
@@ -33,6 +35,7 @@ function PolicyReceipts() {
           receiptsTableReducers?.currentReceiptDetails?.receiptNumber,
         clientEmail: receiptsTableReducers?.currentReceiptDetails?.clientEmail,
         receiptStatus: receiptsTableReducers?.currentReceiptDetails?.receiptStatus,
+        header: receiptsTableReducers?.currentReceiptDetails?.header || null,
       };
     });
 
@@ -100,6 +103,22 @@ function PolicyReceipts() {
         className="breadcrumbs_container"
         separatorIcon={<SvgDot color={"#000"} />}
       />
+
+      {header ? (
+        <DetailHeader
+          className="mt-3"
+          title={receiptNumber || ""}
+          subtitle={header.payerName}
+          status={receiptStatus ? { code: String(receiptStatus).toLowerCase(), label: receiptStatus } : null}
+          meta={[
+            { label: t("accounts.receiptDialogs.receiptDate"), value: header.receiptDate, type: "date" },
+            { label: t("accounts.receiptDialogs.customerCode"), value: header.customerCode },
+            { label: t("accounts.receiptDialogs.paymentMode"), value: header.paymentMode ? statusLabel(header.paymentMode) : null },
+            { label: t("accounts.receiptDialogs.reference"), value: header.referenceNo },
+            { label: t("accounts.receiptDialogs.amount"), value: header.amount, type: "amount", currency: header.currencyCode || undefined },
+          ]}
+        />
+      ) : null}
 
       <div className="listlable_textcontainer">
         <label className="listlable_text">{t("accounts.receiptsList")}</label>

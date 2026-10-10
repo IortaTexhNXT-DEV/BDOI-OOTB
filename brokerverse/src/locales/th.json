@@ -599,7 +599,12 @@
       "print": "พิมพ์",
       "approvedDone": "อนุมัติใบเสร็จแล้ว",
       "printedDone": "พิมพ์ใบเสร็จแล้ว",
-      "activity": "กิจกรรม"
+      "activity": "กิจกรรม",
+      "receiptDate": "วันที่ใบเสร็จ",
+      "customerCode": "รหัสลูกค้า",
+      "paymentMode": "วิธีการชำระ",
+      "reference": "เลขที่อ้างอิง",
+      "amount": "จำนวนเงินที่รับ"
     },
     "openEntryDialogs": {
       "matchTitle": "จับคู่รายการค้าง",
@@ -5014,7 +5019,32 @@
     "leadInsurer": "บริษัทประกันหลัก",
     "coInsurer": "บริษัทประกันร่วม",
     "total": "รวม",
-    "outstandingNote": "* จำนวนค้างชำระที่แสดงด้านบนคือยอดรวมของทุกบริษัทประกัน"
+    "outstandingNote": "* จำนวนค้างชำระที่แสดงด้านบนคือยอดรวมของทุกบริษัทประกัน",
+    "followUp": {
+      "titles": {
+        "Email": "ส่งอีเมลแจ้งเตือนการชำระเงิน",
+        "Call": "บันทึกการโทร",
+        "Note": "เพิ่มบันทึก",
+        "Commitment": "กำหนดวันที่ลูกค้ารับว่าจะชำระ"
+      },
+      "to": "ถึง",
+      "subject": "หัวเรื่อง",
+      "message": "ข้อความ",
+      "callOutcome": "ผลการโทร",
+      "callNotes": "บันทึกการโทร",
+      "note": "บันทึก",
+      "commitmentDate": "วันที่รับว่าจะชำระ",
+      "delayReason": "เหตุผลที่ล่าช้า",
+      "saveFailed": "ไม่สามารถบันทึกการติดตามได้",
+      "outcomes": {
+        "Answered": "รับสาย: รับว่าจะชำระ",
+        "NoAnswer": "ไม่รับสาย",
+        "WrongNumber": "หมายเลขไม่ถูกต้อง",
+        "CallbackRequested": "ขอให้โทรกลับ"
+      },
+      "emailSubject": "เบี้ยประกันถึงกำหนดชำระ: กรมธรรม์ {{policy}}",
+      "emailBody": "เรียน {{name}}\n\nเบี้ยประกันจำนวน {{amount}} ของกรมธรรม์ {{policy}} ถึงกำหนดชำระเมื่อวันที่ {{dueDate}} กรุณาชำระเงินโดยเร็วเพื่อให้ความคุ้มครองต่อเนื่อง\n\nหากท่านชำระแล้ว โปรดละเว้นการแจ้งเตือนนี้\n\nขอบคุณ"
+    }
   },
   "agingReport": {
     "backToCollections": "กลับไปที่ Collections",
@@ -5253,7 +5283,18 @@
     "remindersFailed": "ไม่สามารถส่งการแจ้งเตือนการชำระเงินได้",
     "remindersSentTitle": "ส่งการแจ้งเตือนแล้ว",
     "remindersSent": "ส่งการแจ้งเตือนการชำระเงินแล้ว",
-    "importOpenItems": "นำเข้ารายการค้างชำระ"
+    "importOpenItems": "นำเข้ารายการค้างชำระ",
+    "openItems": "รายการค้างชำระ",
+    "importOpenItemsTitle": "นำเข้ารายการค้างชำระ (เริ่มใช้งานระบบ)",
+    "importOpenItemsNote": "ใบแจ้งเบี้ยที่ยังไม่ชำระจากระบบเดิม นำเข้าตามกรมธรรม์ที่มีในระบบแล้ว ไม่มีการบันทึกบัญชี เนื่องจากยอดยกมาในบัญชีแยกประเภทรวมไว้แล้ว รายการที่นำเข้าแล้วสำหรับวันเริ่มใช้งานเดียวกันจะถูกข้าม",
+    "remindersScope_one": "จะส่งอีเมลแจ้งเตือนการชำระเงินสำหรับเบี้ยที่ถึงกำหนดหรือเกินกำหนด {{count}} รายการ",
+    "remindersScope_other": "จะส่งอีเมลแจ้งเตือนการชำระเงินสำหรับเบี้ยที่ถึงกำหนดหรือเกินกำหนด {{count}} รายการ",
+    "remindClients": "ลูกค้า",
+    "remindItems": "รายการเบี้ย",
+    "remindOutstanding": "ยอดค้างชำระรวม",
+    "remindLevel": "{{level}}",
+    "remindNoEmail": "ลูกค้าที่ไม่มีอีเมล (ไม่ได้ส่ง)",
+    "noneToRemind": "ขณะนี้ไม่มีเบี้ยที่ถึงกำหนดหรือเกินกำหนดที่ต้องแจ้งเตือน"
   },
   "documentLayouts": {
     "master": "มาสเตอร์",
@@ -6527,8 +6568,21 @@
       "removeInstalment": "ลบงวด",
       "acknowledgeTitle": "รับทราบรายการเกินวงเงินเครดิต",
       "acknowledgeMessage": "กรมธรรม์ที่ออกเกินวงเงินเครดิตของ {{client}} จะถูกบันทึกว่ารับทราบแล้ว",
-      "acknowledgeException": "รับทราบรายการ"
-    }
+      "acknowledgeException": "รับทราบรายการ",
+      "reminderPlaceholder": "เว้นว่างเพื่อส่งข้อความแจ้งเตือนมาตรฐาน"
+    },
+    "actionType": {
+      "collection-email": "ส่งอีเมลติดตามหนี้",
+      "collection-reminder": "ส่งอีเมลแจ้งเตือนการชำระเงิน",
+      "collection-call": "โทรติดตามหนี้",
+      "collection-note": "บันทึกการติดตามหนี้",
+      "collection-commitment": "ลูกค้ารับว่าจะชำระ"
+    },
+    "currentLimit": "วงเงินปัจจุบัน",
+    "lastChanged": "แก้ไขล่าสุด",
+    "newLimit": "วงเงินใหม่",
+    "limitHistory": "ประวัติการเปลี่ยนวงเงิน",
+    "noLimitChanges": "ยังไม่เคยเปลี่ยนวงเงิน"
   },
   "insurerRec": {
     "confirmations": {
@@ -6573,7 +6627,12 @@
     },
     "close": "ปิด",
     "readFile": "อ่านไฟล์",
-    "statementFile": "ไฟล์รายการเดินบัญชี"
+    "statementFile": "ไฟล์รายการเดินบัญชี",
+    "autoMatchTitle": "จับคู่รายการเดินบัญชีอัตโนมัติ",
+    "autoMatchMessage": "กฎการจับคู่จะจับคู่รายการธนาคารที่ยังไม่จับคู่กับรายการในบัญชี และบันทึกการจับคู่",
+    "autoMatched_one": "พบการจับคู่ {{count}} รายการ",
+    "autoMatched_other": "พบการจับคู่ {{count}} รายการ",
+    "autoMatched": "พบการจับคู่ {{count}} รายการ"
   },
   "periodEnd": {
     "runActivity": "Run activity",

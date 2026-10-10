@@ -688,7 +688,12 @@
       "print": "Print",
       "approvedDone": "Receipt approved",
       "printedDone": "Receipt printed",
-      "activity": "Activity"
+      "activity": "Activity",
+      "receiptDate": "Receipt date",
+      "customerCode": "Customer code",
+      "paymentMode": "Mode of payment",
+      "reference": "Reference",
+      "amount": "Amount received"
     },
     "openEntryDialogs": {
       "matchTitle": "Match open entries",
@@ -5935,7 +5940,32 @@
     "leadInsurer": "Lead Insurer",
     "coInsurer": "Co-Insurer",
     "total": "TOTAL",
-    "outstandingNote": "* Outstanding amount shown above is the total across all insurers."
+    "outstandingNote": "* Outstanding amount shown above is the total across all insurers.",
+    "followUp": {
+      "titles": {
+        "Email": "Send payment reminder",
+        "Call": "Log a call",
+        "Note": "Add note",
+        "Commitment": "Set commitment date"
+      },
+      "to": "To",
+      "subject": "Subject",
+      "message": "Message",
+      "callOutcome": "Call outcome",
+      "callNotes": "Call notes",
+      "note": "Note",
+      "commitmentDate": "Commitment date",
+      "delayReason": "Reason for delay",
+      "saveFailed": "The follow-up could not be saved",
+      "outcomes": {
+        "Answered": "Answered: promised payment",
+        "NoAnswer": "No answer",
+        "WrongNumber": "Wrong number",
+        "CallbackRequested": "Callback requested"
+      },
+      "emailSubject": "Premium due: policy {{policy}}",
+      "emailBody": "Dear {{name}},\n\nThe premium of {{amount}} for policy {{policy}} was due on {{dueDate}}. Please arrange the payment at your earliest convenience so that your cover continues without interruption.\n\nIf you have already paid, please disregard this reminder.\n\nThank you."
+    }
   },
   "agingReport": {
     "backToCollections": "Back to Collections",
@@ -6178,7 +6208,18 @@
     "remindersFailed": "The payment reminders could not be sent",
     "remindersSentTitle": "Reminders sent",
     "remindersSent": "The payment reminders were sent.",
-    "importOpenItems": "Import open items"
+    "importOpenItems": "Import open items",
+    "openItems": "Open items",
+    "importOpenItemsTitle": "Import open items (go-live)",
+    "importOpenItemsNote": "Unpaid premium bills of the old system, loaded against policies already in the system. No journal is posted: the GL opening balance carries them. Rows already loaded for the same go-live date are skipped.",
+    "remindersScope_one": "A payment reminder is e-mailed for {{count}} premium due or overdue.",
+    "remindersScope_other": "A payment reminder is e-mailed for {{count}} premiums due or overdue.",
+    "remindClients": "Clients",
+    "remindItems": "Premiums",
+    "remindOutstanding": "Total outstanding",
+    "remindLevel": "{{level}}",
+    "remindNoEmail": "Clients without an e-mail address (not sent)",
+    "noneToRemind": "No premium is due or overdue for a reminder now."
   },
   "iarLead": {
     "lead": "Prospect",
@@ -8092,7 +8133,7 @@
     "period": "Period",
     "importStatement": "Import statement",
     "autoMatch": "Auto-match",
-    "autoMatched": "{{count}} match(es) found",
+    "autoMatched": "{{count}} matches found",
     "staleCheques": "Stale cheques",
     "statementBalance": "Balance per bank",
     "bookBalance": "Balance per books",
@@ -8356,7 +8397,11 @@
     },
     "close": "Close",
     "readFile": "Read file",
-    "statementFile": "Statement file"
+    "statementFile": "Statement file",
+    "autoMatchTitle": "Auto-match the statement lines",
+    "autoMatchMessage": "The matching rules pair the unmatched bank lines with the book entries and record the matches.",
+    "autoMatched_one": "{{count}} match found",
+    "autoMatched_other": "{{count}} matches found"
   },
   "followUps": {
     "adviceReference": "Remittance advice / reference",
@@ -8875,7 +8920,12 @@
       "extension-requested": "Extension requested",
       "extension-approved": "Extension approved",
       "extension-rejected": "Extension rejected",
-      "cancellation-requested": "Cancellation requested"
+      "cancellation-requested": "Cancellation requested",
+      "collection-email": "Collection e-mail sent",
+      "collection-reminder": "Payment reminder e-mailed",
+      "collection-call": "Collection call",
+      "collection-note": "Collection note",
+      "collection-commitment": "Payment commitment"
     },
     "cancel": "Cancel",
     "send": "Send",
@@ -8934,8 +8984,14 @@
       "removeInstalment": "Remove instalment",
       "acknowledgeTitle": "Acknowledge credit limit exception",
       "acknowledgeMessage": "The policy issued over the credit limit of {{client}} is marked as acknowledged.",
-      "acknowledgeException": "Acknowledge exception"
-    }
+      "acknowledgeException": "Acknowledge exception",
+      "reminderPlaceholder": "Leave empty to send the standard reminder"
+    },
+    "currentLimit": "Current limit",
+    "lastChanged": "Last changed",
+    "newLimit": "New credit limit",
+    "limitHistory": "Limit changes",
+    "noLimitChanges": "The limit has not been changed yet."
   },
   "packagedProducts": {
     "active": "Active",

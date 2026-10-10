@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1213 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1214 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -20806,6 +20806,57 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"message\": \"3 reminder(s) queued\",\n  \"data\": {\n    \"candidates\": 3,\n    \"emails\": 3,\n    \"notifications\": 3,\n    \"skipped\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "What the due-date reminders would send now: items, clients (and those without an e-mail), amount outstanding and items by overdue level",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/collections/send-due-date-reminders/preview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "collections",
+                "send-due-date-reminders",
+                "preview"
+              ]
+            },
+            "description": "What the due-date reminders would send now: items, clients (and those without an e-mail), amount outstanding and items by overdue level\n\nFront-end touchpoint: Accounts > Collections > Send payment reminders\n\nAccess: read:collections, read:receipts"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/collections/send-due-date-reminders/preview",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "collections",
+                    "send-due-date-reminders",
+                    "preview"
+                  ]
+                },
+                "description": "What the due-date reminders would send now: items, clients (and those without an e-mail), amount outstanding and items by overdue level\n\nFront-end touchpoint: Accounts > Collections > Send payment reminders\n\nAccess: read:collections, read:receipts"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"items\": 3,\n    \"clients\": 2,\n    \"withoutEmail\": 0,\n    \"totalOutstanding\": 24813.75,\n    \"byLevel\": [\n      {\n        \"level\": \"Overdue\",\n        \"count\": 2,\n        \"amount\": 18000\n      }\n    ]\n  }\n}"
             }
           ]
         },
