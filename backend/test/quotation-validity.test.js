@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs, withDirectSend } from './helpers.js';
+import { setup, loginAs, withDirectSend, enableFeatures } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { addDays, today } from '../src/lib/dates.js';
@@ -31,6 +31,8 @@ const setValidity = (id, validUntil, issuedOn = null) => q('UPDATE quotes SET va
 beforeAll(async () => {
   ctx = await setup();
   await withDirectSend();
+  // the client's approval link is a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['quote-online-approval']);
   const a = await persona('v.associate', ['tis-sales-associate']);
   const o = await persona('v.officer', ['tis-sales-officer']);
   associate = a.api; associateId = a.id; officer = o.api; officerId = o.id;
