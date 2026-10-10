@@ -15,13 +15,17 @@
     padding: 0 !important;
     margin: 0 !important;
     border-radius: 50% !important;
-    color: #6c737f;
-    background: transparent;
-    border: 0;
+    color: #6c737f !important;
+    background: transparent !important;
+    border: 0 !important;
 
     &:enabled:hover {
-      background: #f3f4f6;
-      color: #111927;
+      background: #f3f4f6 !important;
+      color: #111927 !important;
+    }
+
+    &.p-button-danger {
+      color: var(--color-danger) !important;
     }
 
     &:focus-visible {
