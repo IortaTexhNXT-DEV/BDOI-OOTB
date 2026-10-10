@@ -434,17 +434,6 @@
       "paymentCount_other": "{{count}} payments",
       "statusConverted": "Converted",
       "statusDraft": "Draft",
-      "divisionCodeFrom": "Division Code From",
-      "divisionCodeTo": "Division Code To",
-      "orNumberFrom": "OR Number From",
-      "orNumberTo": "OR Number To",
-      "customerCodeFrom": "Customer Code From",
-      "customerCodeTo": "Customer Code To",
-      "cashierIdFrom": "Cashier ID From",
-      "cashierIdTo": "Cashier ID To",
-      "dateFrom": "Date From",
-      "dateTo": "Date To",
-      "select": "Select",
       "generate": "Generate",
       "generating": "Generating...",
       "fillRequiredFields": "Please fill in all required fields",
@@ -460,7 +449,19 @@
       "printReceipt": "Print receipt",
       "recordAnother": "Record another",
       "dismiss": "Dismiss",
-      "requiredTitle": "Required fields"
+      "requiredTitle": "Required fields",
+      "bulkUploadTitle": "Bulk upload receipts",
+      "officialReceipts": "Official receipts",
+      "printCriteria": {
+        "from": "From",
+        "to": "To",
+        "division": "Division",
+        "orNumber": "OR number",
+        "customerCode": "Customer code",
+        "cashier": "Cashier",
+        "receiptDate": "Receipt date",
+        "any": "Any"
+      }
     },
     "addReceipts": {
       "title": "Add Receipts",

@@ -352,17 +352,6 @@
       "paymentCount_other": "{{count}} การชำระเงิน",
       "statusConverted": "แปลงแล้ว",
       "statusDraft": "ฉบับร่าง",
-      "divisionCodeFrom": "รหัสฝ่ายจาก",
-      "divisionCodeTo": "รหัสฝ่ายถึง",
-      "orNumberFrom": "หมายเลข OR จาก",
-      "orNumberTo": "หมายเลข OR ถึง",
-      "customerCodeFrom": "รหัสลูกค้าจาก",
-      "customerCodeTo": "รหัสลูกค้าถึง",
-      "cashierIdFrom": "รหัสพนักงานเก็บเงินจาก",
-      "cashierIdTo": "รหัสพนักงานเก็บเงินถึง",
-      "dateFrom": "วันที่จาก",
-      "dateTo": "วันที่ถึง",
-      "select": "เลือก",
       "generate": "สร้าง",
       "generating": "กำลังสร้าง...",
       "fillRequiredFields": "กรุณากรอกข้อมูลในฟิลด์ที่จำเป็นทั้งหมด",
@@ -372,7 +361,19 @@
       "receiptsExportedSuccessfully": "ส่งออกใบเสร็จสำเร็จ",
       "success": "สำเร็จ",
       "error": "ข้อผิดพลาด",
-      "requiredTitle": "ข้อมูลที่ต้องระบุ"
+      "requiredTitle": "ข้อมูลที่ต้องระบุ",
+      "bulkUploadTitle": "อัปโหลดใบเสร็จรับเงินจำนวนมาก",
+      "officialReceipts": "ใบเสร็จรับเงินอย่างเป็นทางการ",
+      "printCriteria": {
+        "from": "จาก",
+        "to": "ถึง",
+        "division": "ฝ่าย",
+        "orNumber": "เลขที่ใบเสร็จ",
+        "customerCode": "รหัสลูกค้า",
+        "cashier": "แคชเชียร์",
+        "receiptDate": "วันที่ใบเสร็จ",
+        "any": "ทั้งหมด"
+      }
     },
     "addReceipts": {
       "title": "เพิ่มใบเสร็จ",

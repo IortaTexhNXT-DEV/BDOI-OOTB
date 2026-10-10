@@ -533,3 +533,39 @@
 .p-datatable .p-datatable-tbody > tr.receipt-row--recorded > td {
   background: #eff7f2 !important;
 }
+
+// Bulk Print: one row per criterion, its From and To side by side under their column headings
+.receipt-print-criteria {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  &__head,
+  &__row {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  &__head {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+  }
+
+  &__label {
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  @media (max-width: 576px) {
+    &__head {
+      display: none;
+    }
+
+    &__row {
+      grid-template-columns: 1fr;
+    }
+  }
+}
