@@ -212,7 +212,8 @@ set, the KPI figures (to pay, in payment, paid this week, failed) and the segmen
 is the payment record: Payee, Payment, Amounts (due to insurer, refund credits, voucher and bank amount, check Pass /
 Difference), Links, Approvals, the timeline and the activity of the voucher, batch and cheques. `GET
 /payments/:voucherId/account` gives the full account number (`write:disbursements`) and audits the reveal
-(`payee_bank_account` / `reveal`). It creates no payment and posts nothing.
+(`payee_bank_account` / `reveal`). `GET /payments/export.xlsx` (Export XLSX) holds every payment of the segment and
+filters, not one page, with the account masked. It creates no payment and posts nothing.
 
 Electronic transfers (`remittance.transfers_enabled`, TISPH off): `POST /transfers` and `POST /transfers/:id/execute`
 answer 409 `TRANSFERS_OFF` "Electronic transfers are replaced by Insurer payments.", and approving a pending transfer

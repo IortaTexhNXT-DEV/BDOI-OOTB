@@ -636,6 +636,15 @@ define({
   },
 });
 define({
+  method: 'GET', path: '/payments/export.xlsx',
+  summary: 'Insurer payments > Export XLSX: every payment of the segment and filters of GET /payments (not one page), with the payee account chip, batch, value date, bank reference, paid on, state and next step',
+  screen: S('Insurer payments > Export XLSX'), middleware: readPayments, query: { segment: 'all', insurerId: 3 }, response: '(xlsx file)',
+  handler: async (req, res) => {
+    const r = await payments.paymentExport(req.query, req.user);
+    return sendTable(res, { header: payments.EXPORT_HEADER, rows: r.rows, fileBase: `insurer-payments-${r.segment}`, format: 'xlsx', sheetName: 'Insurer payments' });
+  },
+});
+define({
   method: 'GET', path: '/payments/:voucherId',
   summary: 'Payment record (voucher id or no.): the row with the sections Payee (masked account, canReveal), Payment (method, value date, debit account, bank reference, paid on, failure reason), Amounts (due to insurer, refund credits netted, voucher and bank amount, check Pass / Difference), Links (remittances and schedules, voucher, batch, bank file, status file, cheque, journal), Approvals (remittance approvals with limit, voucher maker, batch created / approved, file generated, result imported), the timeline and the activity of the voucher, its batch and cheques',
   screen: S('Insurer payments > View payment'), middleware: readPayments,

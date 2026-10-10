@@ -9,6 +9,7 @@ import request from 'supertest';
 import { setup, loginAs } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
+import { paymentExport, EXPORT_HEADER } from '../src/modules/remittance/payments.js';
 
 let ctx;
 let insurerId;
@@ -21,6 +22,8 @@ async function persona(key, username, displayName, roles) {
   const token = await loginAs(ctx.app, username, 'Welcome@123');
   const call = (m, p) => request(ctx.app)[m](`/api${p}`).set('Authorization', `Bearer ${token}`);
   call.id = r.body.data.userId;
+  const claims = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString('utf8'));
+  call.user = { id: call.id, username, roles: claims.roles || roles, permissions: claims.permissions || [] };
   people[key] = call;
   return call;
 }
@@ -120,6 +123,24 @@ describe('payment states, next step and the batching state', () => {
     expect((await list('maker', `segment=all&q=${v.batch.batchNumber}`)).total).toBe(2);
   });
 
+  it('Export XLSX holds every payment of the segment and filters, not one page', async () => {
+    const r = await people.maker('get', `/remittance/payments/export.xlsx?segment=all&insurerId=${insurerId}`).buffer(true).parse((res, cb) => {
+      const chunks = [];
+      res.on('data', (c) => chunks.push(c));
+      res.on('end', () => cb(null, Buffer.concat(chunks)));
+    });
+    expect(r.status).toBe(200);
+    expect(r.headers['content-type']).toMatch(/spreadsheetml/);
+    expect(r.headers['content-disposition']).toContain('insurer-payments-all.xlsx');
+    expect(r.body.subarray(0, 2).toString()).toBe('PK');
+    const out = await paymentExport({ segment: 'to-pay', insurerId, perPage: 1 }, people.maker.user);
+    expect(out.rows).toHaveLength(2);
+    expect(out.rows[0]).toHaveLength(EXPORT_HEADER.length);
+    const ready = out.rows.find((x) => x[0] === v.ready.voucherNo);
+    expect(ready).toEqual(expect.arrayContaining([v.ready.remittanceNo, 2000, 'On file', 'To pay', 'Create batch']));
+    expect(ready.join(' ')).not.toContain('5566');
+  });
+
   it('with no Metrobank layout no batch can be made, with the reason, and paying by cheque stays possible', async () => {
     await q("UPDATE bank_file_layouts SET active = false WHERE bank_code = 'MBT'");
     try {
@@ -195,6 +216,7 @@ describe('payment states, next step and the batching state', () => {
   it('a user without remittance or disbursement rights sees no payment', async () => {
     await persona('sales', 'pyt.sales', 'S. Sales', ['sales']);
     expect((await people.sales('get', '/remittance/payments')).status).toBe(403);
+    expect((await people.sales('get', '/remittance/payments/export.xlsx')).status).toBe(403);
   });
 });
 

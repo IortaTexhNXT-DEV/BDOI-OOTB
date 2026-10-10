@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1276 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1277 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -83876,6 +83876,77 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"voucherId\": \"pv_102\",\n    \"voucherNo\": \"PV-2026-00102\",\n    \"bank\": \"Metropolitan Bank and Trust Company\",\n    \"accountNumber\": \"0071-5566-4821\",\n    \"accountName\": \"Pioneer Insurance & Surety Corp.\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Insurer payments > Export XLSX: every payment of the segment and filters of GET /payments (not one page), with the payee account chip, batch, value date, bank reference, paid on, state and next step",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/payments/export.xlsx?segment=all&insurerId=3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "payments",
+                "export.xlsx"
+              ],
+              "query": [
+                {
+                  "key": "segment",
+                  "value": "all"
+                },
+                {
+                  "key": "insurerId",
+                  "value": "3"
+                }
+              ]
+            },
+            "description": "Insurer payments > Export XLSX: every payment of the segment and filters of GET /payments (not one page), with the payee account chip, batch, value date, bank reference, paid on, state and next step\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments > Export XLSX\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/payments/export.xlsx?segment=all&insurerId=3",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "payments",
+                    "export.xlsx"
+                  ],
+                  "query": [
+                    {
+                      "key": "segment",
+                      "value": "all"
+                    },
+                    {
+                      "key": "insurerId",
+                      "value": "3"
+                    }
+                  ]
+                },
+                "description": "Insurer payments > Export XLSX: every payment of the segment and filters of GET /payments (not one page), with the payee account chip, batch, value date, bank reference, paid on, state and next step\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments > Export XLSX\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
             }
           ]
         },

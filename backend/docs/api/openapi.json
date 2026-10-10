@@ -138342,6 +138342,65 @@
         ]
       }
     },
+    "/remittance/payments/export.xlsx": {
+      "get": {
+        "operationId": "getRemittancePaymentsExport.xlsx",
+        "summary": "Insurer payments > Export XLSX: every payment of the segment and filters of GET /payments (not one page), with the payee account chip, batch, value date, bank reference, paid on, state and next step",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Insurer payments > Export XLSX\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements",
+        "parameters": [
+          {
+            "name": "segment",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "all"
+          },
+          {
+            "name": "insurerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Insurer payments > Export XLSX",
+        "x-permissions": [
+          "read:remittance",
+          "write:remittance",
+          "read:disbursements",
+          "write:disbursements"
+        ]
+      }
+    },
     "/remittance/processing-history": {
       "get": {
         "operationId": "getRemittanceProcessingHistory",

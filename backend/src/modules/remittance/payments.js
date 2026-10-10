@@ -23,7 +23,9 @@ import { many, one } from '../../db/pool.js';
 import { notFound } from '../../lib/errors.js';
 import { hasPermission, isAdmin } from '../../lib/auth.js';
 import { getSetting } from '../../lib/settings.js';
-import { activityEntries } from '../../lib/auditEvents.js';
+import { activityEntries, instant } from '../../lib/auditEvents.js';
+import { printFormat } from '../../lib/pdf/index.js';
+import { applyDatePattern } from '../../lib/pdf/format.js';
 import { businessTimeZone, isoDate, today as businessToday } from '../../lib/dates.js';
 import { params, round2 } from '../masters/helpers.js';
 import { eligibleStatuses } from '../integrations/bankfiles/batches.js';
@@ -221,6 +223,20 @@ export async function paymentList(qs, user, pg) {
   const { kpis, segments } = await kpisOf(base, baseValues);
   return { segment, rows: await rowsOut(raw, user, batching), total: agg.n, totals: { count: agg.n, amount: round2(agg.amount) }, kpis, segments, batching,
     legacyTransfers: await legacyCount() };
+}
+
+export const EXPORT_HEADER = ['Voucher no', 'Remittance', 'Insurer', 'Amount', 'Payee account', 'Account', 'Method', 'Batch', 'Batch status', 'Value date', 'Bank ref',
+  'Paid on', 'State', 'Next step'];
+
+/** The rows of Export XLSX: every payment of the segment and filters of GET /payments (not one page). */
+export async function paymentExport(qs, user) {
+  const r = await paymentList(qs, user, { limit: 100000, offset: 0 });
+  const fmt = await printFormat();
+  const day = (v) => (v ? instant(v, fmt)?.date || '' : '');
+  const rows = r.rows.map((x) => [x.voucherNo, x.remittances.map((m) => m.remittanceNo).join(', '), x.insurer?.name || '', x.amount, x.payee.label || '', x.payee.chip.label,
+    x.method?.label || '', x.batch?.number || '', x.batch?.statusLabel || '', x.valueDate ? applyDatePattern(x.valueDate, fmt.dateFormat) : '', x.bankReference || '', day(x.paidOn), x.stateLabel,
+    [x.nextStep?.label, x.nextStep?.reason].filter(Boolean).join(' · ')]);
+  return { segment: r.segment, rows };
 }
 
 const nameOf = async (id) => (id ? (await one('SELECT display_name, username FROM users WHERE id = $1', [id]).then((u) => u?.display_name || u?.username || null)) : null);
