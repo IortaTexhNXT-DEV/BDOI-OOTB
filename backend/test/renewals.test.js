@@ -32,6 +32,8 @@ beforeAll(async () => {
   await makeUser('u.maker', ['processing']);
   await makeUser('u.checker', ['processing']);
   await makeUser('f.finance', ['accounting']);
+  // the checkers approve renewal terms within a renewal terms limit (renewals.require_authority_limit, migration 0500)
+  await query(`INSERT INTO authority_limits(transaction_type, role_code, max_amount, status, decided_at) VALUES ('renewal_terms', 'processing', 5000000, 'active', now())`);
   await query(`INSERT INTO clients(id, client_code, display_name, email) VALUES ('cl_r1','CL-R-1','Renewal Client','renew@example.ph'), ('cl_r2','CL-R-2','No Mail Client',NULL)`);
   await query(`INSERT INTO policies(id, policy_number, client_id, product_id, insurance_company_id, owner_user_id, status, inception_date, expiry_date, sum_insured, premium_total, commission_amount)
     SELECT v.id, v.num, v.client, (SELECT id FROM products WHERE code = 'MOTOR'), (SELECT id FROM insurance_companies WHERE code = 'MAPFRE'),

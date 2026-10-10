@@ -164,7 +164,9 @@ export async function smsRenewalNotices() {
   for (const d of await days('messaging.renewal_notice_days', [30, 7])) {
     const rows = await many(`SELECT p.id, p.policy_number, p.expiry_date::text AS expiry, p.client_id, ic.name AS insurer FROM policies p LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
       WHERE p.status IN ('active', 'issued') AND p.expiry_date = $1::date AND p.client_id IS NOT NULL AND p.renewed_to IS NULL`, [addDays(now, d)]);
-    for (const p of rows) {
+    // lock-in and Scheme 2 accounts and held loans get no renewal reminder (renewals notice gate)
+    const gated = await (await import('../renewals/noticeGate.js')).gatedPolicies(rows.map((p) => p.id));
+    for (const p of rows.filter((x) => !gated.has(x.id))) {
       const m = await queueClientMessage(null, { event: 'renewal_notice', clientId: p.client_id, entity: 'policy', entityId: p.id, idempotencyKey: `sms:renewal:${p.id}:${p.expiry}:${d}`,
         vars: { policyNumber: p.policy_number, expiryDate: p.expiry, daysToExpiry: String(d), insurer: p.insurer } });
       if (!m || m.duplicate) continue;
@@ -197,10 +199,11 @@ export async function smsPaymentReminders() {
 export async function claimStatusChanged(claim, status, statusLabel) {
   const statuses = await getSetting('messaging.claim_update_statuses', []);
   if (!Array.isArray(statuses) || !statuses.includes(status)) return null;
-  const c = await one('SELECT c.id, c.claim_number, COALESCE(c.client_id, p.client_id) AS client_id, p.policy_number FROM claims c JOIN policies p ON p.id = c.policy_id WHERE c.id = $1', [claim.id]);
+  const c = await one(`SELECT c.id, c.claim_number, COALESCE(c.client_id, p.client_id) AS client_id, p.policy_number, COALESCE(c.rejected_reason, c.cancelled_reason) AS reason
+    FROM claims c JOIN policies p ON p.id = c.policy_id WHERE c.id = $1`, [claim.id]);
   if (!c?.client_id) return null;
   return queueClientMessage(null, { event: 'claim_update', clientId: c.client_id, entity: 'claim', entityId: c.id, idempotencyKey: `sms:claim:${c.id}:${status}`,
-    vars: { claimNumber: c.claim_number, claimStatus: statusLabel || status, policyNumber: c.policy_number } });
+    vars: { claimNumber: c.claim_number, claimStatus: statusLabel || status, policyNumber: c.policy_number, reason: ['rejected', 'cancelled'].includes(status) ? c.reason || '' : '' } });
 }
 
 /** Variables for an ad hoc message about a policy or a claim of the client. */

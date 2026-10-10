@@ -54,6 +54,7 @@ export const HELP_ROUTES = [
   ["/agent/renewal-batch", "renewal-batch-lapse-management-and-the-analytics"],
   ["/renewal/queue", "renewal-queue-and-at-risk-policies"],
   ["/renewal/at-risk", "renewal-queue-and-at-risk-policies"],
+  ["/renewal/lock-in-accounts", "lock-in-accounts"],
   ["/renewal/negotiations", "negotiations"],
   ["/renewal", "renewal-batch-lapse-management-and-the-analytics"],
   ["/agent/payments", "payments"],

@@ -10,7 +10,7 @@
   "pdf": "TISPH_User_Manual.pdf",
   "word": "TISPH_User_Manual.docx"
  },
- "sourceHash": "e10914a963d3bf6ed437d124eb9a838afa2a3fd452e3d0cc477da463625d96d2",
+ "sourceHash": "8dc92328d77d11290a646393d1df0f7e995f5944f446b384adeecc32cf8fa444",
  "roles": {
   "tis-sales-associate": {
    "id": "tis-sales-associate",
@@ -1949,6 +1949,20 @@
    "chapter": "Screen reference: Operations"
   },
   {
+   "id": "insurer-advice-and-communications",
+   "number": "17.13.6",
+   "title": "Insurer advice and communications",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "cancel-a-claim-or-verify-a-death",
+   "number": "17.13.7",
+   "title": "Cancel a claim or verify a death",
+   "level": 3,
+   "chapter": "Screen reference: Operations"
+  },
+  {
    "id": "renewal-policy",
    "number": "17.14",
    "title": "Renewal Policy",
@@ -1977,43 +1991,50 @@
    "chapter": "Screen reference: Operations"
   },
   {
-   "id": "negotiations",
+   "id": "lock-in-accounts",
    "number": "17.17",
+   "title": "Lock-in Accounts",
+   "level": 2,
+   "chapter": "Screen reference: Operations"
+  },
+  {
+   "id": "negotiations",
+   "number": "17.18",
    "title": "Negotiations",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "payments",
-   "number": "17.18",
+   "number": "17.19",
    "title": "Payments",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "cover-notes-binders",
-   "number": "17.19",
+   "number": "17.20",
    "title": "Cover notes (binders)",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "cancel-a-policy-computed-return-premium",
-   "number": "17.20",
+   "number": "17.21",
    "title": "Cancel a policy: computed return premium",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "claims-awaiting-documents",
-   "number": "17.21",
+   "number": "17.22",
    "title": "Claims awaiting documents",
    "level": 2,
    "chapter": "Screen reference: Operations"
   },
   {
    "id": "motor-claim-repairs-and-letters-of-authority",
-   "number": "17.22",
+   "number": "17.23",
    "title": "Motor claim repairs and letters of authority",
    "level": 2,
    "chapter": "Screen reference: Operations"

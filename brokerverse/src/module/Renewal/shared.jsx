@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { PageHeader, StatusChip } from "../../components/RecordPage";
 import { formatDate } from "../../utility/dateFormat";
 import "./renewalPages.scss";
@@ -20,7 +20,7 @@ RenewalHeader.defaultProps = { actions: null, meta: null };
 
 const STAGE_SEVERITY = {
   pipeline: "secondary", "notice-1": "info", "notice-2": "info", "final-notice": "info", quoted: "info", "pending-approval": "warning",
-  approved: "success", renewed: "success", lapsed: "danger",
+  approved: "success", renewed: "success", lapsed: "danger", "not-renewed": "danger",
 };
 
 /** Stage of a renewal as a chip: waiting stages in grey, notices and quotes as open work, approval pending, grace period in amber. */
@@ -75,3 +75,33 @@ export const PolicyCell = ({ policyNumber, insured, onOpen }) => (
 );
 PolicyCell.propTypes = { policyNumber: PropTypes.node, insured: PropTypes.node, onOpen: PropTypes.func };
 PolicyCell.defaultProps = { policyNumber: null, insured: null, onOpen: null };
+
+/**
+ * The renewal named in the address (?renewal=<id>: links from My Work and the notifications): `open(row)` runs once
+ * for it as soon as the list holds it. Returns the id asked for (null without one).
+ */
+export const useRenewalParam = (rows, open) => {
+  const location = useLocation();
+  const id = new URLSearchParams(location.search).get("renewal");
+  const done = useRef(null);
+  useEffect(() => {
+    if (!id || done.current === id || !rows?.length) return;
+    const row = rows.find((r) => [r.id, r.renewalId, r.renewalNumber].includes(id));
+    if (row) {
+      done.current = id;
+      open(row);
+    }
+  }, [id, rows, open]);
+  return id;
+};
+
+const TREATMENT_SEVERITY = { "lock-in": "warning", scheme2: "warning", held: "danger" };
+
+/** Notice treatment of a renewal (lock-in, Scheme 2, loan status): nothing while the notices go out normally. */
+export const NoticeChip = ({ treatment }) => {
+  const { t } = useTranslation();
+  if (!treatment || treatment.code === "send") return null;
+  return <StatusChip label={t(`renewalNotices.treatment.${treatment.code}`, treatment.label)} severity={TREATMENT_SEVERITY[treatment.code] || "warning"} />;
+};
+NoticeChip.propTypes = { treatment: PropTypes.shape({ code: PropTypes.string, label: PropTypes.string }) };
+NoticeChip.defaultProps = { treatment: null };

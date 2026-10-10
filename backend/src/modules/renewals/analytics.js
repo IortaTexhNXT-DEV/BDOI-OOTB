@@ -2,9 +2,10 @@
 import { many, one } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
 import { round2, today, daysBetween } from '../claims/util.js';
-import { BASE, OPEN, RISK_FACTORS, activityApi, listRenewals, readContext, riskOf, toApi } from './service.js';
+import { ACTIVITY_SQL, BASE, OPEN, RISK_FACTORS, activityApi, listRenewals, readContext, reinstatementWindow, riskOf, toApi } from './service.js';
+import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
-import { businessDate } from '../../lib/dates.js';
+import { addDays, businessDate } from '../../lib/dates.js';
 
 /** Renewal queue with the dashboard counters (total, due within renewals.due_soon_days, at risk, in grace period). */
 export async function renewalQueue(q, pg) {
@@ -26,10 +27,14 @@ export async function renewalQueue(q, pg) {
  * the factors found (renewals.risk_actions), the next open My Work task on the renewal (or the next step recorded on its
  * timeline) and the last contact.
  */
-export async function atRisk() {
+/** Record scope of the signed-in user (security.scoped_roles) as a predicate on the renewal; TRUE when unscoped. */
+const scoped = (q, params) => scopeSql(q?.[SCOPE] || null, 'renewal', 'r', params);
+
+export async function atRisk(q = {}) {
   const ctx = await readContext();
   const actions = (await getSetting('renewals.risk_actions', {})) || {};
-  const rows = await many(`${BASE} WHERE r.status = ANY($1) ORDER BY p.expiry_date`, [OPEN]);
+  const params = [OPEN];
+  const rows = await many(`${BASE} WHERE r.status = ANY($1) AND ${scoped(q, params)} ORDER BY p.expiry_date`, params);
   const ids = rows.map((r) => r.id);
   const [tasks, steps] = ids.length ? await Promise.all([
     many(`SELECT DISTINCT ON (t.entity_id) t.entity_id, t.id, t.title, t.due_date, u.display_name AS assignee FROM work_tasks t
@@ -70,7 +75,7 @@ export async function atRisk() {
 export async function timelines(ids) {
   if (!ids.length) return new Map();
   const [acts, notices, rquotes, quotes, rens] = await Promise.all([
-    many('SELECT * FROM renewal_activities WHERE renewal_id = ANY($1) ORDER BY at, id', [ids]),
+    many(`${ACTIVITY_SQL} WHERE a.renewal_id = ANY($1) ORDER BY a.at, a.id`, [ids]),
     many('SELECT * FROM renewal_notices WHERE renewal_id = ANY($1) ORDER BY sent_at', [ids]),
     many('SELECT * FROM renewal_quotes WHERE renewal_id = ANY($1) ORDER BY created_at', [ids]),
     many(`SELECT id, quote_number, status, premium_total, created_at, approval_sent_at, approval_sent_to, customer_accepted_at, doc->'renewal'->>'renewalId' AS renewal_id
@@ -79,12 +84,15 @@ export async function timelines(ids) {
       (SELECT display_name FROM users u WHERE u.id = r.submitted_by) AS submitted_name, (SELECT display_name FROM users u WHERE u.id = r.approved_by) AS approved_name
       FROM renewals r WHERE r.id = ANY($1)`, [ids]),
   ]);
+  const usernames = [...new Set([...notices.map((n) => n.sent_by), ...rquotes.map((q) => q.created_by), ...rens.map((r) => r.created_by)].filter(Boolean))];
+  const names = new Map((usernames.length ? await many('SELECT username, display_name FROM users WHERE username = ANY($1)', [usernames]) : []).map((u) => [u.username, u.display_name]));
   const out = new Map(ids.map((id) => [id, []]));
   const push = (id, e) => out.get(id)?.push({ id: e.id, date: e.date, at: e.date, type: e.type, category: e.category, method: e.method || null,
     description: e.description || null, outcome: e.outcome || null, nextAction: e.nextAction || null, followUpDate: e.followUpDate || null, by: e.by || null, source: e.source });
   const money = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const CATEGORY = { Note: 'note', 'Counter Offer': 'offer', 'Revised Offer': 'offer', 'Competitor Quote': 'offer', 'Quote Generated': 'quote',
-    'Submitted for Approval': 'status', Approved: 'status', Returned: 'status', Renewed: 'status', Lapsed: 'status', Reinstated: 'status' };
+    'Submitted for Approval': 'status', Approved: 'status', Returned: 'status', Renewed: 'status', Lapsed: 'status', Reinstated: 'status',
+    Reassigned: 'status', 'Not for Renewal': 'status' };
   for (const a of acts) {
     const x = activityApi(a);
     push(a.renewal_id, { ...x, id: `act-${a.id}`, date: a.at, category: CATEGORY[a.activity_type] || (/notice/i.test(a.activity_type) ? 'notice' : 'contact'), source: 'activity' });
@@ -92,12 +100,12 @@ export async function timelines(ids) {
   const logged = (id, pred) => acts.some((a) => a.renewal_id === id && pred(a));
   for (const n of notices) {
     if (!logged(n.renewal_id, (a) => /notice/i.test(a.activity_type) && Math.abs(new Date(a.at) - new Date(n.sent_at)) < 60000)) {
-      push(n.renewal_id, { id: `ntc-${n.id}`, date: n.sent_at, type: 'Renewal notice sent', category: 'notice', method: n.method, description: `Notice ${n.stage} (${n.notice_type}) to ${n.recipient || 'the client'}`, by: n.sent_by, source: 'notice' });
+      push(n.renewal_id, { id: `ntc-${n.id}`, date: n.sent_at, type: 'Renewal notice sent', category: 'notice', method: n.method, description: `Notice ${n.stage} (${n.notice_type}) to ${n.recipient || 'the client'}`, by: names.get(n.sent_by) || n.sent_by, source: 'notice' });
     }
   }
   for (const q of rquotes) {
     if (!logged(q.renewal_id, (a) => a.activity_type === 'Quote Generated' && Math.abs(new Date(a.at) - new Date(q.created_at)) < 60000)) {
-      push(q.renewal_id, { id: `rq-${q.id}`, date: q.created_at, type: 'Quote Generated', category: 'quote', description: `Re-rated quote ${q.quote_number}: ${money(q.total_premium)}`, by: q.created_by, source: 'quote' });
+      push(q.renewal_id, { id: `rq-${q.id}`, date: q.created_at, type: 'Quote Generated', category: 'quote', description: `Re-rated quote ${q.quote_number}: ${money(q.total_premium)}`, by: names.get(q.created_by) || q.created_by, source: 'quote' });
     }
   }
   for (const q of quotes) {
@@ -108,7 +116,7 @@ export async function timelines(ids) {
     if (q.customer_accepted_at) push(q.renewal_id, { id: `qa-${q.id}`, date: q.customer_accepted_at, type: 'Client accepted the quotation', category: 'status', description: `Quotation ${q.quote_number} accepted`, source: 'quotation' });
   }
   for (const r of rens) {
-    push(r.id, { id: `open-${r.id}`, date: r.created_at, type: 'Renewal opened', category: 'status', by: r.created_by, source: 'renewal' });
+    push(r.id, { id: `open-${r.id}`, date: r.created_at, type: 'Renewal opened', category: 'status', by: names.get(r.created_by) || r.created_by, source: 'renewal' });
     const has = (type) => logged(r.id, (a) => a.activity_type === type);
     if (r.submitted_at && !has('Submitted for Approval')) push(r.id, { id: `sub-${r.id}`, date: r.submitted_at, type: 'Submitted for Approval', category: 'status', description: r.approval_note, by: r.submitted_name, source: 'renewal' });
     if (r.approved_at && !has('Approved')) push(r.id, { id: `apr-${r.id}`, date: r.approved_at, type: 'Approved', category: 'status', by: r.approved_name, source: 'renewal' });
@@ -120,11 +128,13 @@ export async function timelines(ids) {
 }
 
 /** Renewals in negotiation (quoted / pending approval / approved, or with contact history) with their timeline. */
-export async function negotiations() {
+export async function negotiations(q = {}) {
   const ctx = await readContext();
-  const rows = await many(`${BASE} WHERE r.status = ANY($1) AND (r.status IN ('quoted', 'pending-approval', 'approved')
+  const params = [OPEN];
+  const own = scoped(q, params);
+  const rows = await many(`${BASE} WHERE r.status = ANY($1) AND ${own} AND (r.status IN ('quoted', 'pending-approval', 'approved')
     OR EXISTS (SELECT 1 FROM renewal_activities a WHERE a.renewal_id = r.id) OR EXISTS (SELECT 1 FROM renewal_notices n WHERE n.renewal_id = r.id)
-    OR EXISTS (SELECT 1 FROM quotes q WHERE q.doc->'renewal'->>'renewalId' = r.id AND q.deleted_at IS NULL)) ORDER BY r.updated_at DESC`, [OPEN]);
+    OR EXISTS (SELECT 1 FROM quotes q WHERE q.doc->'renewal'->>'renewalId' = r.id AND q.deleted_at IS NULL)) ORDER BY r.updated_at DESC`, params);
   const tl = await timelines(rows.map((r) => r.id));
   return rows.map((r) => {
     const a = toApi(r, ctx);
@@ -138,9 +148,10 @@ export async function negotiations() {
   });
 }
 
-export async function pendingApprovals() {
+export async function pendingApprovals(q = {}) {
   const ctx = await readContext();
-  const rows = await many(`${BASE} WHERE r.status = 'pending-approval' ORDER BY r.submitted_at`);
+  const params = [];
+  const rows = await many(`${BASE} WHERE r.status = 'pending-approval' AND ${scoped(q, params)} ORDER BY r.submitted_at`, params);
   return rows.map((r) => {
     const a = toApi(r, ctx);
     return {
@@ -151,24 +162,27 @@ export async function pendingApprovals() {
   });
 }
 
-export async function lapsed() {
+/** Lapsed renewals and those marked not for renewal, with win-back attempts and the reinstatement window (service.reinstatementWindow). */
+export async function lapsed(q = {}) {
   const ctx = await readContext();
-  const days = Number(await getSetting('renewals.reinstatement_days', 90));
-  const rows = await many(`${BASE} WHERE r.status = 'lapsed' ORDER BY r.lapsed_at DESC`);
+  const params = [];
+  const rows = await many(`${BASE} WHERE r.status IN ('lapsed', 'not-renewed') AND ${scoped(q, params)} ORDER BY r.lapsed_at DESC`, params);
   const acts = await many('SELECT * FROM renewal_activities WHERE renewal_id = ANY($1) AND activity_type = \'Win-back\' ORDER BY at', [rows.map((r) => r.id)]);
-  return rows.map((r) => {
+  const out = [];
+  for (const r of rows) {
     const a = toApi(r, ctx);
-    const lapseDate = r.lapsed_at ? new Date(r.lapsed_at).toISOString().slice(0, 10) : a.expiryDate;
-    const daysLapsed = Math.max(0, daysBetween(lapseDate, ctx.todayStr));
+    const w = await reinstatementWindow(r.lapsed_at || a.expiryDate, ctx.todayStr);
+    const daysLapsed = Math.max(0, daysBetween(w.lapseDate, ctx.todayStr));
     const attempts = acts.filter((x) => x.renewal_id === r.id).map(activityApi);
-    const deadline = new Date(`${lapseDate}T00:00:00Z`); deadline.setUTCDate(deadline.getUTCDate() + days);
-    return {
-      id: a.id, renewalId: a.id, policyNumber: a.policyNumber, insuredName: a.insuredName, product: a.product, lapseDate, daysLapsed,
+    out.push({
+      id: a.id, renewalId: a.id, renewalNumber: a.renewalNumber, policyNumber: a.policyNumber, insuredName: a.insuredName, product: a.product, lapseDate: w.lapseDate, daysLapsed,
+      status: a.status, statusCode: a.statusCode, disposition: r.disposition || 'lapsed',
       premiumLost: a.renewalPremium ?? a.currentPremium, lapseReason: r.lapse_reason, lapseReasonCode: r.lapse_reason_code ?? null, winBackAttempts: attempts,
-      reinstatementEligible: daysLapsed <= days, reinstatementDeadline: deadline.toISOString().slice(0, 10),
+      reinstatementEligible: w.eligible, reinstatementDeadline: w.basis === 'calendar' ? addDays(w.lapseDate, w.days) : null, reinstatementBasis: w.basis,
       winBackStatus: attempts.length ? 'In Progress' : 'Not Started',
-    };
-  });
+    });
+  }
+  return out;
 }
 
 /** Retention KPIs over renewals due in [from, to]: renewal rate, premium retention, cycle time, by product, by agent, monthly trend. */
@@ -180,7 +194,7 @@ export async function performance(q) {
     FROM renewals r JOIN policies p ON p.id = r.policy_id LEFT JOIN products pr ON pr.id = p.product_id
     LEFT JOIN users u ON u.id = COALESCE(r.owner_user_id, p.owner_user_id) WHERE r.due_date BETWEEN $1 AND $2`, [from, to]);
   const stats = (list) => {
-    const decided = list.filter((r) => ['renewed', 'lapsed'].includes(r.status));
+    const decided = list.filter((r) => ['renewed', 'lapsed', 'not-renewed'].includes(r.status));
     const renewed = list.filter((r) => r.status === 'renewed');
     const expiring = decided.reduce((s, r) => s + Number(r.premium_old || 0), 0);
     const retained = renewed.reduce((s, r) => s + Number(r.premium_new ?? r.premium_old ?? 0), 0);

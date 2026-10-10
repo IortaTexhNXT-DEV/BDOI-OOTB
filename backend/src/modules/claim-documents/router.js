@@ -86,12 +86,12 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/claims/:id/submit-to-insurer', summary: 'Record the submission of the claim file to the insurer; refused while a required document is missing (claims.require_documents_before_submission)',
-  screen: `${S} > Submit to insurer`, middleware: [...write, ownRecord('claim'), validate(z.object({ reference: z.string().max(100).optional(), note: z.string().max(1000).optional() }))],
+  method: 'POST', path: '/claims/:id/submit-to-insurer', summary: 'Submit the claim file to the insurer: e-mails the insurer (to, else its claims address) the policy reference, insured and documents submitted, and records the submission; refused while a required document is missing (claims.require_documents_before_submission)',
+  screen: `${S} > Submit to insurer`, middleware: [...write, ownRecord('claim'), validate(z.object({ reference: z.string().max(100).optional(), note: z.string().max(1000).optional(), to: z.string().email().max(200).optional() }))],
   request: { reference: 'E-mail to Malayan claims 04-Oct' }, response: { success: true, data: { ...example, submittedToInsurerAt: '2026-10-04T03:00:00Z' } },
   handler: async (req, res) => {
     const r = await withTransaction((db) => svc.submitToInsurer(db, req.params.id, req.body || {}, req.user));
-    await audit(req, { entity: 'claim', entityId: r.claimId, action: 'submit-to-insurer', after: { submittedToInsurerAt: r.submittedToInsurerAt, missingRequired: r.summary.missingRequired } });
+    await audit(req, { entity: 'claim', entityId: r.claimId, action: 'submit-to-insurer', after: { submittedToInsurerAt: r.submittedToInsurerAt, missingRequired: r.summary.missingRequired, emailedTo: r.insurerEmail?.to || null } });
     ok(res, r, `Claim ${r.claimNumber} submitted to the insurer`);
   },
 });

@@ -29,6 +29,7 @@ Where: the screens of your menus that show the module. A module without a screen
 
 | Area | Module | Access | What it allows | Where |
 |---|---|---|---|---|
+| Operations | Claims | Special | Record claim settlement funds received from an insurer | No screen of its own |
 | Accounts | Receipts | View | See receipts and post-dated cheques | Receipts and Post-Dated Cheques |
 | Accounts | Receipts | Create and edit | Issue official receipts, post cash, verify payments, handle post-dated cheques |  |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |

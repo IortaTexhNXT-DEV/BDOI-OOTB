@@ -258,10 +258,10 @@ export const FEATURES = Object.freeze([
   }),
   feature({
     key: 'renewals', name: 'Renewals', module: 'Operations', tier: P1,
-    description: 'Renewal run, notices at 90, 60 and 30 days, renewal queue, negotiations and lapse management',
-    requirements: ['TIS-BRD-RENEW-01', 'TIS-BRD-RENEW-02', 'TIS-BRD-RENEW-03', 'TIS-BRD-RENEW-05', 'PBSM-M24-LAP', 'PBSM-M15-REN-DUE'],
+    description: 'Renewal run, notices at 90, 60 and 30 days, renewal queue, negotiations, lapse management and lock-in accounts',
+    requirements: ['TIS-BRD-RENEW-01', 'TIS-BRD-RENEW-02', 'TIS-BRD-RENEW-03', 'TIS-BRD-RENEW-05', 'TIS-BRD-SCHM-03', 'PBSM-M24-LAP', 'PBSM-M15-REN-DUE'],
     menus: ['Operations > Renewals > Renewal Policy', 'Operations > Renewals > Renewal Batch', 'Operations > Renewals > Renewal Queue', 'Operations > Renewals > Negotiations',
-      'Operations > Renewals > Lapse Management'],
+      'Operations > Renewals > Lapse Management', 'Operations > Renewals > Lock-in Accounts'],
     jobs: ['renewal-notices', 'renewal-pipeline', 'renewal-queue'],
   }),
   feature({
@@ -344,7 +344,7 @@ export const FEATURES = Object.freeze([
       options: ['Never: not wanted', 'Yes: wanted'] },
     dependsOn: ['claims'],
     menus: ['Accounts > Claims Settlements'], api: ['/claim-payments'], data: ['claim_settlement_movements'],
-    documents: ['claims-settlements-paid-through-the-broker', 'ccd-bp-qrph-receipting-claim-funds'], permissions: ['read:receipts', 'write:receipts'],
+    documents: ['claims-settlements-paid-through-the-broker', 'ccd-bp-qrph-receipting-claim-funds', 'reverse-a-settlement-movement'], permissions: ['read:receipts', 'write:receipts'],
   }),
   feature({
     key: 'suppliers', name: 'Suppliers and supplier BIR 2307', module: 'Accounts', tier: P1,
