@@ -85,6 +85,14 @@ BEGIN
   UPDATE app_settings SET value = '4', updated_at = now() WHERE key = 'accounting.fiscal_year_start_month';
 END $$;
 
+-- ---------------------------------------------------------------- Language: English only (Pre-BSM NFR sheet)
+-- The TISPH edition offers one language; the shipped list (English and Filipino, or the earlier Thai) is replaced
+-- where it is still unchanged, so a picker never appears and no other language can be chosen by configuration.
+UPDATE app_settings SET value = '[{"code":"en","label":"English"}]'::jsonb, updated_at = now()
+ WHERE key = 'general.languages'
+   AND value IN ('[{"code":"en","label":"English"},{"code":"fil","label":"Filipino"}]'::jsonb, '[{"code":"en","label":"English"},{"code":"th","label":"Thai"},{"code":"fil","label":"Filipino"}]'::jsonb);
+UPDATE app_settings SET value = '"en"'::jsonb, updated_at = now() WHERE key = 'general.default_language' AND value <> '"en"'::jsonb;
+
 -- ---------------------------------------------------------------- M02 Offices & Branches: Head Office
 -- One office (M01 row 12). BR02 is a placeholder row.
 UPDATE branches SET address = '27F GT TOWER INTERNATIONAL',

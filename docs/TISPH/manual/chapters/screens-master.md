@@ -324,6 +324,14 @@ Master > System > Audit Trail shows every change made in the system: **Date & Ti
 
 ![Master > System > Audit Trail](images/screens-master/audit-trail.png)
 
+## Security Controls {#security-controls}
+
+{{screen:/master/configuration/security-controls}}
+
+Master > System Configuration > Security Controls lists the security, data-protection and operational requirements as controls, in five groups: **Sign-in and sessions** (idle timeout, lockout, throttling, single session, second factor, password policy, dormant accounts), **Data protection and retention**, **Audit and change control**, **Operations and resilience** (backups and restore drills, availability, scalability, performance, monitoring, support, deployment) and **Security assurance** (scans and penetration tests, incident response, secure development, certifications). Each line shows the **Requirements** it answers, the **Current state** read from the configuration, the **Target**, the **Status** (**Met**, **Review** for a value that differs from the target and is set at go-live, **Not met**, **No evidence**) and the **Latest evidence**.
+
+A control enforced by the application is changed on its own screen (the cog opens it). A control met outside the application is kept current with **Record evidence**: the evidence date, the result, a reference (report, ticket, certificate) and remarks; the latest evidence sets the status and stays valid for a year. Open a control to read its evidence history.
+
 ## Features & Releases {#features-and-releases}
 
 {{screen:/master/configuration/features}}

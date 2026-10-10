@@ -4,7 +4,7 @@
  * backlog never holds long locks. The audit trail is not purged unless housekeeping.audit_log_days is set, and then
  * never below the 7-year statutory minimum (BIR / Insurance Commission record keeping).
  */
-import { query } from '../db/pool.js';
+import { query, withTransaction } from '../db/pool.js';
 import { getSetting } from '../lib/settings.js';
 
 /** Statutory minimum retention of the audit trail: 7 years. */
@@ -50,6 +50,19 @@ async function purge(table, where, cutoff) {
   }
 }
 
+/** The audit trail is append-only (trigger audit_log_append_only); only this purge, past the statutory minimum, may delete from it. */
+async function purgeAudit(cutoff) {
+  return withTransaction(async (db) => {
+    await db.query("SET LOCAL app.audit_purge = 'on'");
+    let total = 0;
+    for (;;) {
+      const r = await db.query(`DELETE FROM audit_log WHERE ctid IN (SELECT ctid FROM audit_log WHERE at < $1 LIMIT ${BATCH})`, [cutoff]);
+      total += r.rowCount;
+      if (r.rowCount < BATCH) return total;
+    }
+  });
+}
+
 const days = async (key, fallback) => {
   const v = Number(await getSetting(key, fallback));
   return Number.isFinite(v) && v > 0 ? Math.floor(v) : 0;
@@ -68,7 +81,7 @@ export async function housekeeping(_params = {}, { now = new Date() } = {}) {
     deleted[name] = await purge(r.table, r.where, cutoffOf(d));
   }
   const auditDays = await days('housekeeping.audit_log_days', 0);
-  if (auditDays) deleted.audit_log = await purge('audit_log', 'at < $1', cutoffOf(Math.max(auditDays, AUDIT_MIN_DAYS)));
+  if (auditDays) deleted.audit_log = await purgeAudit(cutoffOf(Math.max(auditDays, AUDIT_MIN_DAYS)));
   else kept.push('audit_log');
   return { deleted, kept };
 }

@@ -70,6 +70,14 @@ export async function calendarPeriod(period = 'month', now = new Date()) {
  * object gives its UTC date. null when empty or not a date. Use businessDate() when an instant must be read in the
  * business time zone.
  */
+/** Is the value a real calendar date written YYYY-MM-DD (2026-02-30 is not)? */
+export function isCalendarDate(v) {
+  const s = String(v ?? '');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const d = new Date(`${s}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s;
+}
+
 export function isoDate(v) {
   if (v === null || v === undefined || v === '') return null;
   if (v instanceof Date) return Number.isNaN(v.getTime()) ? null : v.toISOString().slice(0, 10);

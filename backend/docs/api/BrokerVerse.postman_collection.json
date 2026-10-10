@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "2026.1.3",
-    "description": "BrokerVerse Platform API (1343 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1346 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -7675,7 +7675,7 @@
           ]
         },
         {
-          "name": "Second sign-in step: the challengeToken from /auth/login and the 6-digit authenticator code; returns the normal token payload (or passwordChangeRequired)",
+          "name": "Second sign-in step: the challengeToken from /auth/login and the 6-digit code of the authenticator app, or of the e-mail when the challenge was sent by e-mail (method email); returns the normal token payload (or passwordChangeRequired)",
           "request": {
             "method": "POST",
             "header": [
@@ -7695,7 +7695,7 @@
                 "2fa"
               ]
             },
-            "description": "Second sign-in step: the challengeToken from /auth/login and the 6-digit authenticator code; returns the normal token payload (or passwordChangeRequired)\n\nFront-end touchpoint: Sign-in > Two-factor code\n\nAccess: Public",
+            "description": "Second sign-in step: the challengeToken from /auth/login and the 6-digit code of the authenticator app, or of the e-mail when the challenge was sent by e-mail (method email); returns the normal token payload (or passwordChangeRequired)\n\nFront-end touchpoint: Sign-in > Two-factor code\n\nAccess: Public",
             "auth": {
               "type": "noauth"
             },
@@ -7731,7 +7731,7 @@
                     "2fa"
                   ]
                 },
-                "description": "Second sign-in step: the challengeToken from /auth/login and the 6-digit authenticator code; returns the normal token payload (or passwordChangeRequired)\n\nFront-end touchpoint: Sign-in > Two-factor code\n\nAccess: Public",
+                "description": "Second sign-in step: the challengeToken from /auth/login and the 6-digit code of the authenticator app, or of the e-mail when the challenge was sent by e-mail (method email); returns the normal token payload (or passwordChangeRequired)\n\nFront-end touchpoint: Sign-in > Two-factor code\n\nAccess: Public",
                 "auth": {
                   "type": "noauth"
                 },
@@ -97278,6 +97278,216 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"type\": \"policy\",\n      \"id\": \"pol_1\",\n      \"title\": \"POL-2026-00001\",\n      \"subtitle\": \"Juan Dela Cruz · Motor · NQQ 2025\",\n      \"status\": \"Active\",\n      \"link\": \"/agent/policydetail/pol_1\"\n    }\n  ],\n  \"total\": 1,\n  \"query\": \"NQQ 2025\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Security Controls",
+      "item": [
+        {
+          "name": "The controls register: every control with its group, requirement ids, current state, target, status (met, review, not-met, pending) and latest evidence",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/system-controls",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "system-controls"
+              ]
+            },
+            "description": "The controls register: every control with its group, requirement ids, current state, target, status (met, review, not-met, pending) and latest evidence\n\nFront-end touchpoint: Master > System Configuration > Security Controls\n\nAccess: read:settings, write:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/system-controls",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "system-controls"
+                  ]
+                },
+                "description": "The controls register: every control with its group, requirement ids, current state, target, status (met, review, not-met, pending) and latest evidence\n\nFront-end touchpoint: Master > System Configuration > Security Controls\n\nAccess: read:settings, write:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"key\": \"idle-timeout\",\n      \"kind\": \"enforced\",\n      \"group\": \"access\",\n      \"groupLabel\": \"Sign-in and sessions\",\n      \"name\": \"Idle session timeout\",\n      \"requirements\": [\n        \"TIS-BRD-NFR-03\"\n      ],\n      \"current\": \"30 minutes, enforced by the API and the browser\",\n      \"target\": \"Sign-out after 3 minutes without activity\",\n      \"status\": \"review\",\n      \"evidence\": null,\n      \"managedBy\": {\n        \"screen\": \"Master > System Configuration > Configuration\",\n        \"path\": \"/master/configuration/settings\"\n      }\n    }\n  ],\n  \"groups\": [\n    {\n      \"code\": \"access\",\n      \"label\": \"Sign-in and sessions\"\n    },\n    {\n      \"code\": \"data\",\n      \"label\": \"Data protection and retention\"\n    },\n    {\n      \"code\": \"audit\",\n      \"label\": \"Audit and change control\"\n    },\n    {\n      \"code\": \"operations\",\n      \"label\": \"Operations and resilience\"\n    },\n    {\n      \"code\": \"assurance\",\n      \"label\": \"Security assurance\"\n    }\n  ],\n  \"results\": [\n    \"met\",\n    \"not-met\",\n    \"review\"\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "The evidence recorded for a control, newest first",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/system-controls/:key/evidence",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "system-controls",
+                ":key",
+                "evidence"
+              ],
+              "variable": [
+                {
+                  "key": "key",
+                  "value": "",
+                  "description": "key (path parameter)"
+                }
+              ]
+            },
+            "description": "The evidence recorded for a control, newest first\n\nFront-end touchpoint: Master > System Configuration > Security Controls > Evidence\n\nAccess: read:settings, write:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/system-controls/:key/evidence",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "system-controls",
+                    ":key",
+                    "evidence"
+                  ],
+                  "variable": [
+                    {
+                      "key": "key",
+                      "value": "",
+                      "description": "key (path parameter)"
+                    }
+                  ]
+                },
+                "description": "The evidence recorded for a control, newest first\n\nFront-end touchpoint: Master > System Configuration > Security Controls > Evidence\n\nAccess: read:settings, write:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"controlKey\": \"backups\",\n      \"evidenceDate\": \"2026-10-01\",\n      \"result\": \"met\",\n      \"reference\": \"Azure backup report 2026-09\",\n      \"remarks\": \"Restore drill 42 minutes\",\n      \"recordedBy\": \"IT AppSupport\",\n      \"recordedAt\": \"2026-10-01T02:00:00Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record dated evidence of a control (evidence date, result met / not-met / review, reference, remarks); audited",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/system-controls/:key/evidence",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "system-controls",
+                ":key",
+                "evidence"
+              ],
+              "variable": [
+                {
+                  "key": "key",
+                  "value": "",
+                  "description": "key (path parameter)"
+                }
+              ]
+            },
+            "description": "Record dated evidence of a control (evidence date, result met / not-met / review, reference, remarks); audited\n\nFront-end touchpoint: Master > System Configuration > Security Controls > Record evidence\n\nAccess: write:settings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"evidenceDate\": \"2026-10-01\",\n  \"result\": \"met\",\n  \"reference\": \"Azure backup report 2026-09\",\n  \"remarks\": \"Restore drill 42 minutes\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/system-controls/:key/evidence",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "system-controls",
+                    ":key",
+                    "evidence"
+                  ],
+                  "variable": [
+                    {
+                      "key": "key",
+                      "value": "",
+                      "description": "key (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record dated evidence of a control (evidence date, result met / not-met / review, reference, remarks); audited\n\nFront-end touchpoint: Master > System Configuration > Security Controls > Record evidence\n\nAccess: write:settings",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"evidenceDate\": \"2026-10-01\",\n  \"result\": \"met\",\n  \"reference\": \"Azure backup report 2026-09\",\n  \"remarks\": \"Restore drill 42 minutes\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"controlKey\": \"backups\",\n    \"evidenceDate\": \"2026-10-01\",\n    \"result\": \"met\",\n    \"reference\": \"Azure backup report 2026-09\",\n    \"remarks\": \"Restore drill 42 minutes\",\n    \"recordedBy\": \"IT AppSupport\",\n    \"recordedAt\": \"2026-10-01T02:00:00Z\"\n  }\n}"
             }
           ]
         }

@@ -53,6 +53,7 @@ export const ENTITY_LABELS = {
   user_delegation: 'Delegation', sod_exception: 'Segregation of duties exception', access_review_item: 'Access review decision', tax_code: 'Tax code', scheduled_job: 'Scheduled job', posting_rule: 'Posting rule',
   insurer_statement_format: 'Insurer statement format', instalment_plan: 'Instalment plan', incentive_calculation: 'Incentive calculation',
   generated_report: 'Report', entry_match: 'Entry match', document_numbering: 'Document numbering', direct_bill_client_payment: 'Direct bill payment',
+  system_control: 'Security control',
   bank_rec_match: 'Bank reconciliation match', agent_event: 'Agent event', accounting_period: 'Accounting period', account_map: 'Account mapping',
   master_type: 'Master type', document: 'Document', database: 'Database', item: 'Item', task: 'Task',
   cas_document: 'CAS document', cas_book_print: 'Book print',
@@ -72,6 +73,8 @@ const ACTION_VERBS = {
   activate: 'activated', deactivate: 'deactivated', restore: 'restored', send: 'sent', resend: 'sent again', upload: 'uploaded', replace: 'replaced',
   'bulk-create': 'created by bulk upload', 'go-live-migration': 'loaded at go-live', convert: 'converted', 'convert-lead': 'created from a prospect',
   login: 'signed in', logout: 'signed out', 'reset-password': 'password reset', lock: 'locked', unlock: 'unlocked', provision: 'provisioned',
+  'auto-unlock': 'unlocked after the lockout period', 'session-superseded': 'earlier sessions ended by a new sign-in', 'apply-structure': 'numbering structure applied',
+  'record-evidence': 'evidence recorded',
   run: 'run', status: 'status changed', assign: 'assigned', renew: 'renewed', lapse: 'lapsed', endorse: 'endorsed', print: 'printed', email: 'e-mailed',
   'payment-capture': 'payment captured', 'pay-later': 'set to pay later', 'payment-confirm': 'payment confirmed', 'payment-reject': 'payment rejected',
   'payment-status': 'payment status changed', 'funds-received': 'funds received from the insurer', 'paid-to-claimant': 'paid to the claimant',
@@ -92,7 +95,8 @@ const ACTION_VERBS = {
  * send-bill, settle). A rejected remittance goes back to its maker, so reject reads as returned.
  */
 const ACTION_TITLES = {
-  session: { login: 'Signed in', logout: 'Signed out', 'refresh-token-reuse': 'Session token reused (session ended)', 'login-failed': 'Sign-in failed' },
+  session: { login: 'Signed in', logout: 'Signed out', 'refresh-token-reuse': 'Session token reused (session ended)', 'login-failed': 'Sign-in failed',
+    'session-superseded': 'Earlier sessions ended by a new sign-in' },
   remittance: {
     create: 'Remittance created', submit: 'Remittance submitted', withdraw: 'Remittance withdrawn from approval', return: 'Remittance returned to the maker',
     reject: 'Remittance returned to the maker', approve: 'Remittance approved', revoke: 'Remittance approval revoked', cancel: 'Remittance cancelled',

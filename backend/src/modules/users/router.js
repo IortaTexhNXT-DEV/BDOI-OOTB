@@ -277,7 +277,11 @@ define({
   handler: async (req, res) => {
     const before = await assertCanManage(req, req.params.id);
     await withTransaction(async (c) => {
-      await c.query('UPDATE users SET status = $2, failed_logins = 0, updated_by = $3 WHERE id = $1', [before.id, req.body.status, req.user.username]);
+      // a lock by an administrator is not released by the lockout timer; a reactivation restarts the dormancy clock
+      await c.query(`UPDATE users SET status = $2, failed_logins = 0, updated_by = $3,
+          locked_at = CASE WHEN $2 = 'locked' THEN now() ELSE NULL END, lock_reason = CASE WHEN $2 = 'locked' THEN 'administrator' ELSE NULL END,
+          reactivated_at = CASE WHEN $2 = 'active' AND status = 'inactive' THEN now() ELSE reactivated_at END
+        WHERE id = $1`, [before.id, req.body.status, req.user.username]);
       if (req.body.status !== 'active') await revokeSessions(before.id, { refresh: true, db: c });
     });
     const action = before.status === 'locked' && req.body.status === 'active' ? 'unlock' : 'status';

@@ -1,7 +1,7 @@
 /*
- * Lists translation keys used in src that are missing from src/locales/en.json (and, for
- * information, from th.json). A missing key without an inline default shows the raw key on screen;
- * one with a default (t("a.b", "Text")) shows the English default in every language.
+ * Lists translation keys used in src that are missing from src/locales/en.json, the one language bundled
+ * (i18n.js). A missing key without an inline default shows the raw key on screen; one with a default
+ * (t("a.b", "Text")) shows the English default.
  *
  *   node scripts/check-translations.js           report
  *   node scripts/check-translations.js --strict  exit with code 1 when en.json misses a key
@@ -30,7 +30,6 @@ function listFiles(dir) {
 }
 
 const en = load("en");
-const th = load("th");
 const used = new Map(); // key -> first "file:line"
 const defaults = new Map(); // key -> inline default text
 const dynamic = new Set();
@@ -51,12 +50,10 @@ for (const file of listFiles(SRC)) {
 
 const missingEn = [...used].filter(([key]) => !has(en, key));
 const noDefault = missingEn.filter(([key]) => !defaults.has(key));
-const missingTh = [...used].filter(([key]) => has(en, key) && !has(th, key));
 console.log(`Literal keys used: ${used.size}. Keys built at run time (by prefix): ${dynamic.size}.`);
 console.log(`\nMissing in en.json with an inline default (English shown in every language): ${missingEn.length - noDefault.length}`);
 console.log(`Missing in en.json without a default (the raw key is shown): ${noDefault.length}`);
 noDefault.forEach(([key, where]) => console.log(`  ${key}  ${where}`));
-console.log(`\nIn en.json but missing in th.json (English is shown): ${missingTh.length}`);
 if (ADD_DEFAULTS) {
   for (const [key] of missingEn) {
     if (!defaults.has(key)) continue;

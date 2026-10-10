@@ -270,6 +270,9 @@
       "name": "Search"
     },
     {
+      "name": "Security Controls"
+    },
+    {
       "name": "System"
     },
     {
@@ -12936,7 +12939,7 @@
     "/auth/login/2fa": {
       "post": {
         "operationId": "postAuthLogin2fa",
-        "summary": "Second sign-in step: the challengeToken from /auth/login and the 6-digit authenticator code; returns the normal token payload (or passwordChangeRequired)",
+        "summary": "Second sign-in step: the challengeToken from /auth/login and the 6-digit code of the authenticator app, or of the e-mail when the challenge was sent by e-mail (method email); returns the normal token payload (or passwordChangeRequired)",
         "tags": [
           "Auth"
         ],
@@ -163982,6 +163985,383 @@
           }
         },
         "x-screen": "Header > Global search"
+      }
+    },
+    "/system-controls": {
+      "get": {
+        "operationId": "getSystemControls",
+        "summary": "The controls register: every control with its group, requirement ids, current state, target, status (met, review, not-met, pending) and latest evidence",
+        "tags": [
+          "Security Controls"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Security Controls\n\nAccess: read:settings, write:settings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": {
+                            "type": "string"
+                          },
+                          "kind": {
+                            "type": "string"
+                          },
+                          "group": {
+                            "type": "string"
+                          },
+                          "groupLabel": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "requirements": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "current": {
+                            "type": "string"
+                          },
+                          "target": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "evidence": {},
+                          "managedBy": {
+                            "type": "object",
+                            "properties": {
+                              "screen": {
+                                "type": "string"
+                              },
+                              "path": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "groups": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "label": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "key": "idle-timeout",
+                      "kind": "enforced",
+                      "group": "access",
+                      "groupLabel": "Sign-in and sessions",
+                      "name": "Idle session timeout",
+                      "requirements": [
+                        "TIS-BRD-NFR-03"
+                      ],
+                      "current": "30 minutes, enforced by the API and the browser",
+                      "target": "Sign-out after 3 minutes without activity",
+                      "status": "review",
+                      "evidence": null,
+                      "managedBy": {
+                        "screen": "Master > System Configuration > Configuration",
+                        "path": "/master/configuration/settings"
+                      }
+                    }
+                  ],
+                  "groups": [
+                    {
+                      "code": "access",
+                      "label": "Sign-in and sessions"
+                    },
+                    {
+                      "code": "data",
+                      "label": "Data protection and retention"
+                    },
+                    {
+                      "code": "audit",
+                      "label": "Audit and change control"
+                    },
+                    {
+                      "code": "operations",
+                      "label": "Operations and resilience"
+                    },
+                    {
+                      "code": "assurance",
+                      "label": "Security assurance"
+                    }
+                  ],
+                  "results": [
+                    "met",
+                    "not-met",
+                    "review"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Security Controls",
+        "x-permissions": [
+          "read:settings",
+          "write:settings"
+        ]
+      }
+    },
+    "/system-controls/{key}/evidence": {
+      "get": {
+        "operationId": "getSystemControlsKeyEvidence",
+        "summary": "The evidence recorded for a control, newest first",
+        "tags": [
+          "Security Controls"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Security Controls > Evidence\n\nAccess: read:settings, write:settings",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "controlKey": {
+                            "type": "string"
+                          },
+                          "evidenceDate": {
+                            "type": "string"
+                          },
+                          "result": {
+                            "type": "string"
+                          },
+                          "reference": {
+                            "type": "string"
+                          },
+                          "remarks": {
+                            "type": "string"
+                          },
+                          "recordedBy": {
+                            "type": "string"
+                          },
+                          "recordedAt": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "controlKey": "backups",
+                      "evidenceDate": "2026-10-01",
+                      "result": "met",
+                      "reference": "Azure backup report 2026-09",
+                      "remarks": "Restore drill 42 minutes",
+                      "recordedBy": "IT AppSupport",
+                      "recordedAt": "2026-10-01T02:00:00Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Security Controls > Evidence",
+        "x-permissions": [
+          "read:settings",
+          "write:settings"
+        ]
+      },
+      "post": {
+        "operationId": "postSystemControlsKeyEvidence",
+        "summary": "Record dated evidence of a control (evidence date, result met / not-met / review, reference, remarks); audited",
+        "tags": [
+          "Security Controls"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Security Controls > Record evidence\n\nAccess: write:settings",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "controlKey": {
+                          "type": "string"
+                        },
+                        "evidenceDate": {
+                          "type": "string"
+                        },
+                        "result": {
+                          "type": "string"
+                        },
+                        "reference": {
+                          "type": "string"
+                        },
+                        "remarks": {
+                          "type": "string"
+                        },
+                        "recordedBy": {
+                          "type": "string"
+                        },
+                        "recordedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "controlKey": "backups",
+                    "evidenceDate": "2026-10-01",
+                    "result": "met",
+                    "reference": "Azure backup report 2026-09",
+                    "remarks": "Restore drill 42 minutes",
+                    "recordedBy": "IT AppSupport",
+                    "recordedAt": "2026-10-01T02:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Security Controls > Record evidence",
+        "x-permissions": [
+          "write:settings"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "evidenceDate": {
+                    "type": "string"
+                  },
+                  "result": {
+                    "type": "string"
+                  },
+                  "reference": {
+                    "type": "string"
+                  },
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "evidenceDate": "2026-10-01",
+                "result": "met",
+                "reference": "Azure backup report 2026-09",
+                "remarks": "Restore drill 42 minutes"
+              }
+            }
+          }
+        }
       }
     },
     "/version": {

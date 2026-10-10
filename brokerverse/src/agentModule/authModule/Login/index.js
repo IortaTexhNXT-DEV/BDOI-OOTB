@@ -334,6 +334,7 @@ const Login = () => {
         onSubmit={async (code) => handleResult(await authService.verifyTwoFactor(stepData.challengeToken, code))}
         onBack={() => backToSignIn()}
         backLabel={t("security.backToSignIn")}
+        method={stepData?.method === "email" ? "email" : "app"}
       />
     );
   } else if (step === "enrol2fa") {

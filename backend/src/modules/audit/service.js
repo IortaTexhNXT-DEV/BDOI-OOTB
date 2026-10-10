@@ -5,7 +5,7 @@
  */
 import { many, one } from '../../db/pool.js';
 import { badRequest } from '../../lib/errors.js';
-import { businessTimeZone } from '../../lib/dates.js';
+import { businessTimeZone, isCalendarDate } from '../../lib/dates.js';
 import { ENTITIES } from '../../lib/scope.js';
 import { RECORD_KEYS, groupFieldChanges, toEvents } from '../../lib/auditEvents.js';
 import { actionText, entityLabel } from '../../lib/auditLabels.js';
@@ -183,7 +183,7 @@ async function logFilter(q) {
   };
   const isoDay = (v, field) => {
     if (v === undefined || v === null || v === '') return null;
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(v)) || Number.isNaN(Date.parse(`${v}T00:00:00Z`))) throw badRequest('Validation failed', [{ path: field, message: `${field} must be a date (YYYY-MM-DD)` }]);
+    if (!isCalendarDate(v)) throw badRequest('Validation failed', [{ path: field, message: `${field} must be a date (YYYY-MM-DD)` }]);
     return String(v);
   };
   const from = isoDay(q.from, 'from');

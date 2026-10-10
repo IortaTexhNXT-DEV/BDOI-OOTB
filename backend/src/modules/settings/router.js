@@ -6,7 +6,7 @@ import { audit } from '../../lib/audit.js';
 import { many, one, query } from '../../db/pool.js';
 import { ok, paging } from '../../lib/respond.js';
 import { badRequest } from '../../lib/errors.js';
-import { businessTimeZone, today } from '../../lib/dates.js';
+import { businessTimeZone, isCalendarDate, today } from '../../lib/dates.js';
 import { assertNotControlled, assertParkedEvents } from '../posting-rules/service.js';
 import { assertNotOwnedElsewhere, settingOwner } from '../../lib/settingOwners.js';
 import { localizationErrors } from '../system-settings/service.js';
@@ -62,7 +62,7 @@ define({
     const { entity, entityId, username } = req.query;
     const iso = (v, field) => {
       if (v === undefined || v === '') return null;
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(String(v)) || Number.isNaN(Date.parse(`${v}T00:00:00Z`))) throw badRequest('Validation failed', [{ path: field, message: `${field} must be a date (YYYY-MM-DD)` }]);
+      if (!isCalendarDate(v)) throw badRequest('Validation failed', [{ path: field, message: `${field} must be a date (YYYY-MM-DD)` }]);
       return String(v);
     };
     const from = iso(req.query.from, 'from');

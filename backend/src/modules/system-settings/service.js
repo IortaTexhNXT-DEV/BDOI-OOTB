@@ -35,6 +35,18 @@ const BRAND_FIELDS = { logoUrl: 'The logo', faviconUrl: 'The favicon', primaryCo
 const HEX = /^#[0-9a-fA-F]{6}$|^#[0-9a-fA-F]{3}$/;
 const LANGUAGE = /^[a-z]{2,3}(-[A-Za-z]{2})?$/;
 
+/** Is the value a time zone the platform knows (an IANA name such as Asia/Manila)? An empty or unknown value would move every business date to UTC. */
+export function validTimeZone(value) {
+  const tz = String(value ?? '').trim();
+  if (!tz || tz.toUpperCase() === 'UTC') return tz.toUpperCase() === 'UTC';
+  try {
+    Intl.DateTimeFormat('en-US', { timeZone: tz });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Errors of the display currency (an active currency of the Currency master) and the default language in a change
  * ([key, value] pairs, the currency code normalised in place); `paths` names the field of each key in the errors.
@@ -47,6 +59,7 @@ export async function localizationErrors(changes, paths = {}) {
       if (!(await currencyChoices()).some((c) => c.code === change[1])) errors.push({ path: paths[change[0]] || change[0], message: 'Currency is not an active currency of the Currency master' });
     }
     if (change[0] === 'general.default_language' && !LANGUAGE.test(String(change[1] ?? '').trim())) errors.push({ path: paths[change[0]] || change[0], message: 'must be a language code such as en' });
+    if (change[0] === 'general.timezone' && !validTimeZone(change[1])) errors.push({ path: paths[change[0]] || change[0], message: 'must be a time zone name such as Asia/Manila' });
   }
   return errors;
 }

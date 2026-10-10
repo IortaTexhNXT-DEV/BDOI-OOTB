@@ -352,7 +352,7 @@ export async function deactivateDormant(db, { adminUsername = BUILT_IN_ADMIN } =
   const days = Number(await getSetting('access.dormant_days', 90)) || 0;
   if (days <= 0) return { deactivated: 0, reason: 'access.dormant_days is 0' };
   const { rows } = await db.query(`UPDATE users SET status = 'inactive', token_version = token_version + 1, updated_by = 'system', updated_at = now()
-    WHERE status = 'active' AND username <> $2 AND COALESCE(last_login_at, created_at) < now() - make_interval(days => $1::int)
+    WHERE status = 'active' AND username <> $2 AND GREATEST(COALESCE(last_login_at, created_at), reactivated_at) < now() - make_interval(days => $1::int)
     RETURNING username`, [days, adminUsername]);
   return { deactivated: rows.length, users: rows.map((r) => r.username), days };
 }

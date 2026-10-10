@@ -7511,7 +7511,9 @@
       "sso": "Single sign-on",
       "refresh": "Session renewed",
       "2fa": "Two-step verification"
-    }
+    },
+    "emailCode": "Sign-in code",
+    "emailCodeHelp": "The 6-digit code sent to your e-mail address."
   },
   "numberingMasters": {
     "master": "Master",
@@ -16073,5 +16075,52 @@
     "reversed": "Movement reversed",
     "reversedDone": "Movement reversed: journal {{journal}}",
     "payableNow": "Payable to the claimant now: {{amount}}"
+  },
+  "securityControls": {
+    "title": "Security Controls",
+    "help": "The security, data-protection and operational controls of the requirements with their current state against the target. Controls met outside the application carry dated evidence.",
+    "allGroups": "All groups",
+    "allStatuses": "All statuses",
+    "empty": "No controls match the filters",
+    "columns": {
+      "control": "Control",
+      "group": "Group",
+      "requirements": "Requirements",
+      "current": "Current state",
+      "target": "Target",
+      "status": "Status",
+      "evidence": "Latest evidence"
+    },
+    "status": {
+      "met": "Met",
+      "review": "Review",
+      "not-met": "Not met",
+      "pending": "No evidence"
+    },
+    "groups": {
+      "access": "Sign-in and sessions",
+      "data": "Data protection and retention",
+      "audit": "Audit and change control",
+      "operations": "Operations and resilience",
+      "assurance": "Security assurance"
+    },
+    "recordEvidence": "Record evidence",
+    "configure": "Configure",
+    "managedBy": "Changed on",
+    "noEvidence": "No evidence recorded",
+    "recordedBy": "Recorded by",
+    "evidenceRecorded": "Evidence recorded",
+    "recordTitle": "Record evidence: {{name}}",
+    "recordMessage": "The evidence is dated and kept with the control; the latest evidence sets the status of the control.",
+    "detail": {
+      "control": "Control",
+      "evidence": "Evidence"
+    },
+    "form": {
+      "evidenceDate": "Evidence date",
+      "result": "Result",
+      "reference": "Reference",
+      "remarks": "Remarks"
+    }
   }
 }

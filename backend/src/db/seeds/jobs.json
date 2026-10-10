@@ -90,5 +90,12 @@
     "description": "Create follow-up tasks from collection promises to pay, renewal next steps and claim follow-up dates, close those whose record is closed, and notify task reminders and newly overdue tasks",
     "cron": "*/15 * * * *",
     "handler": "myWorkReminders"
+  },
+  {
+    "code": "data-retention",
+    "name": "Data retention",
+    "description": "Flag the closed contracts past their retention period (five years for a closed contract, ten with a claim; Master > Configuration, Data retention) and, when the retention action is anonymise, replace the personal data of the clients whose every contract is past its period",
+    "cron": "30 3 1 * *",
+    "handler": "dataRetention"
   }
 ]

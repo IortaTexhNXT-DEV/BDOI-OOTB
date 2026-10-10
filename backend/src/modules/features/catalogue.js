@@ -78,11 +78,12 @@ export const FEATURES = Object.freeze([
   feature({
     key: 'system-configuration', name: 'System configuration', module: 'Platform', tier: PLAT,
     description: 'Settings, document numbering, job schedules, e-mail and document layouts, signatures and the e-mail outbox',
-    requirements: ['TIS-BRD-PROD-01', 'TIS-BRD-NFR-08.1', 'TIS-BRD-DOC-01', 'PBSM-M17v4-IFMON', 'TIS-BRD-NOTIF-01', 'TIS-BRD-NFR-10.6', 'TIS-BRD-QUOT-07', 'TIS-BRD-INTG-01'],
+    requirements: ['TIS-BRD-PROD-01', 'TIS-BRD-NFR-08.1', 'TIS-BRD-DOC-01', 'PBSM-M17v4-IFMON', 'TIS-BRD-NOTIF-01', 'TIS-BRD-NFR-10.6', 'TIS-BRD-QUOT-07', 'TIS-BRD-INTG-01',
+      'TIS-BRD-NFR-03', 'TIS-BRD-NFR-04', 'TIS-BRD-NFR-11.1', 'TIS-BRD-NFR-11.2', 'TIS-BRD-NFR-14.11', 'TIS-BRD-SEC-04', 'PBSM-NFR-SOW'],
     menus: ['Master > System Configuration > E-mail Layout', 'Master > System Configuration > Documents and Reports Layout',
       'Master > System Configuration > Document Signatures', 'Master > System Configuration > Configuration', 'Master > System Configuration > Document Numbering',
-      'Master > System Configuration > Schedules', 'Master > System Configuration > E-mail Outbox'],
-    jobs: ['housekeeping', 'daily-reports', 'email-outbox', 'integration-outbox'],
+      'Master > System Configuration > Schedules', 'Master > System Configuration > E-mail Outbox', 'Master > System Configuration > Security Controls'],
+    jobs: ['housekeeping', 'daily-reports', 'email-outbox', 'integration-outbox', 'data-retention'],
   }),
   feature({
     key: 'organisation-masters', name: 'Organisation and location masters', module: 'Platform', tier: PLAT,

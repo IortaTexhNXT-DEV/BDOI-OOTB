@@ -34,18 +34,80 @@ const DUMMY_HASH = bcrypt.hashSync(crypto.randomBytes(16).toString('hex'), 10);
 
 async function issueTokens(user, deviceId, familyId = null) {
   const jti = crypto.randomUUID();
+  const sid = familyId || jti;
   await query('INSERT INTO refresh_tokens(jti, user_id, device_id, family_id, expires_at) VALUES ($1,$2,$3,$4, now() + ($5 || \' seconds\')::interval)',
-    [jti, user.id, deviceId || null, familyId || jti, String(config.refreshTtl)]);
-  return { jti, accessToken: signAccess(user), refreshToken: signRefresh(user, jti), expiresIn: config.accessTtl, issuedAt: new Date().toISOString(), user: publicUser(user) };
+    [jti, user.id, deviceId || null, sid, String(config.refreshTtl)]);
+  return { jti, accessToken: signAccess(user, { sid }), refreshToken: signRefresh(user, jti), expiresIn: config.accessTtl, issuedAt: new Date().toISOString(), user: publicUser(user) };
+}
+
+/**
+ * Single-session control (security.single_session): a fresh sign-in ends every earlier session of the user (refresh
+ * tokens revoked, access tokens invalidated through the token version); the user is reloaded with the new version.
+ */
+async function supersedeSessions(req, user) {
+  if (!(await getSetting('security.single_session', false))) return user;
+  const live = (await query('SELECT count(*)::int AS n FROM refresh_tokens WHERE user_id = $1 AND revoked_at IS NULL AND expires_at > now()', [user.id])).rows[0].n;
+  if (!live) return user;
+  await query("UPDATE refresh_tokens SET revoked_at = now(), revoked_reason = 'superseded' WHERE user_id = $1 AND revoked_at IS NULL", [user.id]);
+  await revokeSessions(user.id);
+  await audit({ user: { id: user.id, username: user.username }, ip: req.ip }, { entity: 'session', entityId: user.id, action: 'session-superseded', after: { sessionsEnded: live } });
+  return loadUser('u.id = $1', [user.id]);
+}
+
+/**
+ * A lock set by failed sign-ins (lock_reason failed-logins) is released by itself after limits.lockout_minutes; one set
+ * by an administrator stays until unlocked. Returns the user as it is after the check.
+ */
+async function releaseExpiredLock(user) {
+  if (user.status !== 'locked' || user.lock_reason === 'administrator') return user;
+  const minutes = Math.max(0, Number(await getSetting('limits.lockout_minutes', 15)) || 0);
+  if (!minutes || !user.locked_at || Date.now() - new Date(user.locked_at).getTime() < minutes * 60000) return user;
+  await query("UPDATE users SET status = 'active', failed_logins = 0, locked_at = NULL, lock_reason = NULL WHERE id = $1 AND status = 'locked'", [user.id]);
+  await audit({ user: { id: user.id, username: user.username } }, { entity: 'user', entityId: user.id, action: 'auto-unlock', after: { lockedAt: user.locked_at, lockoutMinutes: minutes } });
+  return loadUser('u.id = $1', [user.id]);
+}
+
+/** The sign-in message of a locked account: how long a lock by failed sign-ins still lasts, else the administrator's lock. */
+async function lockedMessage(user) {
+  const minutes = Math.max(0, Number(await getSetting('limits.lockout_minutes', 15)) || 0);
+  if (user.lock_reason === 'administrator' || !minutes || !user.locked_at) return 'Account locked. Contact the administrator';
+  const left = Math.max(1, Math.ceil((new Date(user.locked_at).getTime() + minutes * 60000 - Date.now()) / 60000));
+  return `Account locked after failed sign-ins. Try again in ${left} minute${left === 1 ? '' : 's'}`;
 }
 const tokenBody = ({ jti: _jti, ...rest }) => rest;
 
-/** Roles that must enrol in two-factor authentication (security.require_2fa_roles, and always the platform administrator). */
+/**
+ * Who must sign in with a second factor: every user when security.require_2fa_all is on, else the roles of
+ * security.require_2fa_roles, and always the platform administrator.
+ */
 async function twoFactorRequiredFor(user) {
   // the platform administrator always signs in with a second factor, whatever the tenant's setting says
   if ((user.roles || []).includes(PLATFORM_ROLE)) return true;
+  if ((await getSetting('security.require_2fa_all', false)) === true) return true;
   const roles = (await getSetting('security.require_2fa_roles', [])) || [];
   return Array.isArray(roles) && (user.roles || []).some((r) => roles.includes(r));
+}
+
+/**
+ * One-time code by e-mail as the second factor (security.email_otp_enabled) for a user who must use a second factor
+ * and has no authenticator app: a 6-digit code is queued to the user's e-mail address and kept hashed on the user for
+ * security.email_otp_minutes. Returns the challenge payload, or null when the code cannot be sent.
+ */
+async function emailOtpChallenge(req, user, deviceId) {
+  if ((await getSetting('security.email_otp_enabled', false)) !== true || !user.email) return null;
+  const code = String(crypto.randomInt(100000, 1000000));
+  const minutes = Math.max(1, Number(await getSetting('security.email_otp_minutes', 10)) || 10);
+  const vars = { code, minutes, companyName: await companyName() };
+  const subject = renderTemplate(await getSetting('security.email_otp_subject', '{{companyName}}: your sign-in code'), vars, { html: false });
+  const html = renderTemplate(await getSetting('security.email_otp_body', '<p>Your sign-in code is <strong>{{code}}</strong>. It is valid for {{minutes}} minutes.</p>'), vars);
+  await withTransaction(async (c) => {
+    await c.query('UPDATE users SET email_otp_hash = $2, email_otp_expires_at = now() + ($3 || \' minutes\')::interval, email_otp_attempts = 0, failed_logins = 0 WHERE id = $1',
+      [user.id, hashCode(code, user.id), String(minutes)]);
+    await c.query('INSERT INTO email_outbox(to_address, subject, body_html, template, entity, entity_id) VALUES ($1,$2,$3,$4,$5,$6)', [user.email, subject, html, 'sign-in-code', 'user', user.id]);
+  });
+  const challengeToken = signToken({ sub: user.id, type: '2fa-challenge', method: 'email', deviceId: deviceId || null }, { expiresIn: minutes * 60 });
+  await recordLogin(req, { userId: user.id, username: user.username, success: false, reason: 'email-otp-sent' });
+  return { success: true, message: 'Enter the code sent to your e-mail address', twoFactorRequired: true, method: 'email', challengeToken, expiresIn: minutes * 60 };
 }
 
 /** Does the user have to change the password before using the application (flag set, or older than the maximum age)? */
@@ -59,8 +121,9 @@ async function passwordChangeState(user) {
  * changed, only a restricted token is issued (no refresh token): it reaches /auth/change-password, which then returns
  * the normal payload. A sign-in with Microsoft uses no password, so its age is not checked (passwordCheck false).
  */
-async function completeSignIn(req, user, { deviceId, method, passwordCheck = true }) {
-  await query('UPDATE users SET failed_logins = 0, last_login_at = now() WHERE id = $1', [user.id]);
+async function completeSignIn(req, user0, { deviceId, method, passwordCheck = true }) {
+  await query('UPDATE users SET failed_logins = 0, last_login_at = now(), email_otp_hash = NULL, email_otp_expires_at = NULL WHERE id = $1', [user0.id]);
+  const user = await supersedeSessions(req, user0);
   const change = passwordCheck ? await passwordChangeState(user) : { required: false };
   if (change.required) {
     await recordLogin(req, { userId: user.id, username: user.username, success: false, reason: change.expired ? 'password-expired' : 'password-change-required', method });
@@ -109,17 +172,19 @@ define({
       await recordLogin(req, { userId: user?.id ?? null, username, success: false, reason });
       throw unauthorized(message);
     };
-    const user = await loadUser('lower(u.username) = lower($1)', [username]);
-    if (!user) {
+    const found = await loadUser('lower(u.username) = lower($1)', [username]);
+    if (!found) {
       await bcrypt.compare(password, DUMMY_HASH);
       return fail(null, 'unknown-user', 'Invalid username or password');
     }
+    const user = await releaseExpiredLock(found);
     const okPw = await bcrypt.compare(password, user.password_hash);
-    if (user.status === 'locked') return fail(user, 'locked', 'Account locked. Contact the administrator');
+    if (user.status === 'locked') return fail(user, 'locked', await lockedMessage(user));
     if (user.status !== 'active') return fail(user, 'inactive', 'Account inactive');
     if (!okPw) {
       const max = Number(await getSetting('limits.max_login_attempts', 5));
-      await query('UPDATE users SET failed_logins = failed_logins + 1, status = CASE WHEN failed_logins + 1 >= $2 THEN \'locked\' ELSE status END WHERE id = $1', [user.id, max]);
+      await query(`UPDATE users SET failed_logins = failed_logins + 1, status = CASE WHEN failed_logins + 1 >= $2 THEN 'locked' ELSE status END,
+        locked_at = CASE WHEN failed_logins + 1 >= $2 THEN now() ELSE locked_at END, lock_reason = CASE WHEN failed_logins + 1 >= $2 THEN 'failed-logins' ELSE lock_reason END WHERE id = $1`, [user.id, max]);
       return fail(user, 'bad-password', 'Invalid username or password');
     }
     if (!(await passwordSignInAllowed(user))) {
@@ -135,6 +200,8 @@ define({
       return res.json({ success: true, message: 'Enter the code from your authenticator app', twoFactorRequired: true, challengeToken, expiresIn: minutes * 60 });
     }
     if (await twoFactorRequiredFor(user)) {
+      const byEmail = await emailOtpChallenge(req, user, deviceId);
+      if (byEmail) return res.json(byEmail);
       // Restricted session: only the enrolment endpoints; /auth/2fa/enable then returns the normal token payload.
       await query('UPDATE users SET failed_logins = 0 WHERE id = $1', [user.id]);
       await recordLogin(req, { userId: user.id, username: user.username, success: false, reason: '2fa-setup-required' });
@@ -206,14 +273,14 @@ define({
     if (user.status !== 'active') {
       hit(t.keys);
       await recordLogin(req, { userId: user.id, username: user.username, success: false, reason: user.status === 'locked' ? 'locked' : 'inactive', method: 'sso' });
-      throw unauthorized(user.status === 'locked' ? 'Account locked. Contact the administrator' : 'Account inactive');
+      throw unauthorized(user.status === 'locked' ? await lockedMessage(user) : 'Account inactive');
     }
     res.json(await completeSignIn(req, user, { deviceId: identity.deviceId, method: 'sso', passwordCheck: false }));
   },
 });
 
 define({
-  method: 'POST', path: '/login/2fa', auth: false, summary: 'Second sign-in step: the challengeToken from /auth/login and the 6-digit authenticator code; returns the normal token payload (or passwordChangeRequired)', screen: 'Sign-in > Two-factor code',
+  method: 'POST', path: '/login/2fa', auth: false, summary: 'Second sign-in step: the challengeToken from /auth/login and the 6-digit code of the authenticator app, or of the e-mail when the challenge was sent by e-mail (method email); returns the normal token payload (or passwordChangeRequired)', screen: 'Sign-in > Two-factor code',
   request: { challengeToken: '<jwt from /auth/login>', code: '123456' },
   response: { accessToken: '<jwt>', refreshToken: '<jwt>', expiresIn: 1800, user: { userId: 'usr_1', username: 'BrokerVerse', twoFactorEnabled: true } },
   middleware: [validate(z.object({ challengeToken: z.string().min(10), code: z.string().min(6).max(10), deviceId: z.string().max(200).optional() }))],
@@ -222,9 +289,25 @@ define({
     try { p = verify(req.body.challengeToken); } catch { throw unauthorized('Sign-in challenge expired; sign in again'); }
     if (p.type !== '2fa-challenge') throw unauthorized('Invalid sign-in challenge');
     const user = await loadUser('u.id = $1', [p.sub]);
-    if (!user || user.status !== 'active' || !user.totp_enabled) throw unauthorized('Invalid sign-in challenge');
+    const byEmail = p.method === 'email';
+    if (!user || user.status !== 'active' || (!byEmail && !user.totp_enabled)) throw unauthorized('Invalid sign-in challenge');
     const t = await throttle(req, res, 'login', user.username);
     if (t.limited) return;
+    if (byEmail) {
+      // the one-time code sent by e-mail: the latest code only, until it expires or too many wrong codes withdraw it
+      const otp = (await query('SELECT email_otp_hash, email_otp_attempts, email_otp_expires_at > now() AS live FROM users WHERE id = $1', [user.id])).rows[0];
+      const max = Math.max(1, Number(await getSetting('security.email_otp_max_attempts', 5)) || 5);
+      if (!otp?.email_otp_hash || !otp.live || !sameHash(otp.email_otp_hash, hashCode(req.body.code, user.id))) {
+        hit(t.keys);
+        if (otp?.email_otp_hash) {
+          await query('UPDATE users SET email_otp_attempts = email_otp_attempts + 1, email_otp_hash = CASE WHEN email_otp_attempts + 1 >= $2 THEN NULL ELSE email_otp_hash END WHERE id = $1', [user.id, max]);
+        }
+        await recordLogin(req, { userId: user.id, username: user.username, success: false, reason: 'bad-email-code', method: 'email-otp' });
+        throw unauthorized('Invalid or expired sign-in code');
+      }
+      clearKey(userKey('login', user.username));
+      return res.json(await completeSignIn(req, user, { deviceId: req.body.deviceId || p.deviceId, method: 'email-otp' }));
+    }
     const step = verifyTotp(decryptSecret(user.totp_secret), req.body.code, { afterStep: user.totp_last_step });
     if (step === null) {
       hit(t.keys);

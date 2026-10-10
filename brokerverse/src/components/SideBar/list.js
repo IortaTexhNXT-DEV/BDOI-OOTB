@@ -1420,6 +1420,13 @@ export const menuList = [
             includes: ["/master/configuration/audit-trail"],
           },
           {
+            // the security, data-protection and operational controls of the BRD with their state and evidence
+            id: 42,
+            name: "Security Controls",
+            path: "/master/configuration/security-controls",
+            includes: ["/master/configuration/security-controls"],
+          },
+          {
             id: 24,
             name: "E-mail Outbox",
             path: "/master/configuration/email-outbox",

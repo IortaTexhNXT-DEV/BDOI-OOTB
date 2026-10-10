@@ -2,15 +2,21 @@ import jwt from 'jsonwebtoken';
 import { config } from '../config.js';
 import { one, query } from '../db/pool.js';
 import { forbidden, unauthorized } from './errors.js';
+import { getSetting } from './settings.js';
+
+/** The last request of a sign-in is recorded at most this often (refresh_tokens.last_seen_at). */
+const SEEN_EVERY_SECONDS = 30;
 
 /**
  * Access token. `restrict` marks a restricted token: 'enrol2fa' only reaches the two-factor enrolment endpoints,
  * 'pwchange' only reaches change-password (the password must be changed first). `tv` is the user's token version:
  * raising users.token_version (password change or reset, deactivation, role change) invalidates every access token
- * issued before.
+ * issued before. `sid` is the sign-in (the refresh-token family) the token belongs to: its last request is recorded
+ * and the idle timeout (limits.session_idle_minutes) is enforced on it.
  */
-export const signAccess = (user, { restrict = null, expiresIn = config.accessTtl } = {}) => jwt.sign(
-  { sub: user.id, username: user.username, roles: user.roles, permissions: user.permissions, type: 'access', tv: Number(user.token_version || 0), ...(restrict ? { restrict } : {}) },
+export const signAccess = (user, { restrict = null, expiresIn = config.accessTtl, sid = null } = {}) => jwt.sign(
+  { sub: user.id, username: user.username, roles: user.roles, permissions: user.permissions, type: 'access', tv: Number(user.token_version || 0),
+    ...(restrict ? { restrict } : {}), ...(sid ? { sid } : {}) },
   config.jwtSecret, { expiresIn, algorithm: 'HS256' },
 );
 export const signRefresh = (user, jti) => jwt.sign({ sub: user.id, jti, type: 'refresh' }, config.jwtSecret, { expiresIn: config.refreshTtl, algorithm: 'HS256' });
@@ -32,7 +38,7 @@ export async function revokeSessions(userId, { refresh = false, db = { query } }
 export async function loadUser(where, params) {
   return one(`
     SELECT u.id, u.username, u.display_name, u.email, u.status, u.password_hash, u.last_login_at, u.must_change_password, u.password_changed_at,
-           u.totp_enabled, u.totp_secret, u.totp_pending_secret, u.totp_last_step, u.token_version,
+           u.totp_enabled, u.totp_secret, u.totp_pending_secret, u.totp_last_step, u.token_version, u.locked_at, u.lock_reason,
            u.first_name, u.last_name, u.phone, u.branch_code, u.employee_code, u.department, u.designation, u.reporting_to,
            -- effective roles: assigned roles plus the roles they inherit (roles.inherits)
            COALESCE((SELECT array_agg(DISTINCT er.code ORDER BY er.code) FROM user_effective_roles(u.id) er), '{}') AS roles,
@@ -77,8 +83,11 @@ export async function authenticate(req) {
     throw unauthorized('Invalid or expired token');
   }
   if (p.type !== 'access') throw unauthorized('Invalid or expired token');
-  const row = await one('SELECT status, token_version FROM users WHERE id = $1', [p.sub]);
+  const row = await one(`SELECT u.status, u.token_version,
+      (SELECT max(t.last_seen_at) FROM refresh_tokens t WHERE t.family_id = $2 AND t.revoked_at IS NULL) AS last_seen
+    FROM users u WHERE u.id = $1`, [p.sub, p.sid || null]);
   if (!row || row.status !== 'active' || Number(row.token_version) !== Number(p.tv || 0)) throw unauthorized('Session ended; sign in again');
+  if (p.sid) await touchSession(p.sid, row.last_seen);
   const restrict = p.restrict || (p.enrol2fa ? 'enrol2fa' : null);
   const user = {
     id: p.sub, username: p.username, roles: p.roles || [], permissions: p.permissions || [],
@@ -86,6 +95,22 @@ export async function authenticate(req) {
   };
   if (restrict && !RESTRICTED_PATHS[restrict]?.test(req.originalUrl || '')) throw forbidden(RESTRICTED_MESSAGE[restrict] || 'Restricted session');
   return user;
+}
+
+/**
+ * The idle timeout of a sign-in, enforced by the API: a sign-in whose last request is older than limits.session_idle_minutes
+ * is ended (its refresh tokens revoked), else its last request is recorded (at most every SEEN_EVERY_SECONDS).
+ * A sign-in without a live refresh token (signed out, superseded) is ended as well.
+ */
+async function touchSession(sid, lastSeen) {
+  if (!lastSeen) throw unauthorized('Session ended; sign in again');
+  const idleMinutes = Math.max(0, Number(await getSetting('limits.session_idle_minutes', 30)) || 0);
+  const ageSeconds = (Date.now() - new Date(lastSeen).getTime()) / 1000;
+  if (idleMinutes && ageSeconds > idleMinutes * 60) {
+    await query("UPDATE refresh_tokens SET revoked_at = now(), revoked_reason = 'idle' WHERE family_id = $1 AND revoked_at IS NULL", [sid]);
+    throw unauthorized('Session ended after inactivity; sign in again');
+  }
+  if (ageSeconds > SEEN_EVERY_SECONDS) await query('UPDATE refresh_tokens SET last_seen_at = now() WHERE family_id = $1 AND revoked_at IS NULL', [sid]);
 }
 
 /** Require a valid bearer token; attaches req.user = {id, username, roles, permissions, restrict}. */

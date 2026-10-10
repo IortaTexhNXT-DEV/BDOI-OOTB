@@ -154,6 +154,7 @@ export const HELP_ROUTES = [
   ["/master/configuration/document-numbering", "document-numbering"],
   ["/master/configuration/schedules", "schedules", "system-administrator-schedules"],
   ["/master/configuration/audit-trail", "audit-trail"],
+  ["/master/configuration/security-controls", "security-controls"],
   ["/master/configuration/features", "features-and-releases"],
   ["/master/platform/features", "features-and-releases"],
   ["/master/configuration/email-outbox", "e-mail-outbox"],

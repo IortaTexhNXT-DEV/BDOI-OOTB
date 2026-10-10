@@ -80,6 +80,8 @@ export const myWorkReminders = async () => {
 
 // Housekeeping: purge operational rows past the retention periods in System Settings, Housekeeping tab (daily)
 export { housekeeping } from './housekeeping.js';
+// Data retention: flag the closed contracts past their retention period, anonymise when configured (monthly)
+export { dataRetention } from './retention.js';
 
 /** Deactivate accounts nobody has signed in to for access.dormant_days (Master > User Management). */
 export const dormantUsers = async () => {

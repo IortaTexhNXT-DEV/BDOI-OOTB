@@ -2207,7 +2207,7 @@
   ""perPage"": 20,
   ""totalPages"": 1
 }"
-104,Auth,POST,/api/auth/login/2fa,Second sign-in step: the challengeToken from /auth/login and the 6-digit authenticator code; returns the normal token payload (or passwordChangeRequired),Sign-in > Two-factor code,Public,Public,"{
+104,Auth,POST,/api/auth/login/2fa,"Second sign-in step: the challengeToken from /auth/login and the 6-digit code of the authenticator app, or of the e-mail when the challenge was sent by e-mail (method email); returns the normal token payload (or passwordChangeRequired)",Sign-in > Two-factor code,Public,Public,"{
   ""challengeToken"": ""<jwt from /auth/login>"",
   ""code"": ""123456""
 }","{
@@ -28232,7 +28232,90 @@
   ""total"": 1,
   ""query"": ""NQQ 2025""
 }"
-1313,System,GET,/api/version,"Build and runtime information: name, version, git commit (GIT_COMMIT), build time (BUILD_TIME), release ref (GIT_REF), environment name (APP_ENVIRONMENT), start time, Node version, database reachability, pending migrations; release: the release identity of Help > About (settings release.*: web and API release, environment name, and with a bearer token the approvers of the release)",Operations / monitoring; Help > About,Public,Public,,"{
+1313,Security Controls,GET,/api/system-controls,"The controls register: every control with its group, requirement ids, current state, target, status (met, review, not-met, pending) and latest evidence",Master > System Configuration > Security Controls,Bearer JWT,"read:settings, write:settings",,"{
+  ""success"": true,
+  ""data"": [
+    {
+      ""key"": ""idle-timeout"",
+      ""kind"": ""enforced"",
+      ""group"": ""access"",
+      ""groupLabel"": ""Sign-in and sessions"",
+      ""name"": ""Idle session timeout"",
+      ""requirements"": [
+        ""TIS-BRD-NFR-03""
+      ],
+      ""current"": ""30 minutes, enforced by the API and the browser"",
+      ""target"": ""Sign-out after 3 minutes without activity"",
+      ""status"": ""review"",
+      ""evidence"": null,
+      ""managedBy"": {
+        ""screen"": ""Master > System Configuration > Configuration"",
+        ""path"": ""/master/configuration/settings""
+      }
+    }
+  ],
+  ""groups"": [
+    {
+      ""code"": ""access"",
+      ""label"": ""Sign-in and sessions""
+    },
+    {
+      ""code"": ""data"",
+      ""label"": ""Data protection and retention""
+    },
+    {
+      ""code"": ""audit"",
+      ""label"": ""Audit and change control""
+    },
+    {
+      ""code"": ""operations"",
+      ""label"": ""Operations and resilience""
+    },
+    {
+      ""code"": ""assurance"",
+      ""label"": ""Security assurance""
+    }
+  ],
+  ""results"": [
+    ""met"",
+    ""not-met"",
+    ""review""
+  ]
+}"
+1314,Security Controls,GET,/api/system-controls/:key/evidence,"The evidence recorded for a control, newest first",Master > System Configuration > Security Controls > Evidence,Bearer JWT,"read:settings, write:settings",,"{
+  ""success"": true,
+  ""data"": [
+    {
+      ""id"": 1,
+      ""controlKey"": ""backups"",
+      ""evidenceDate"": ""2026-10-01"",
+      ""result"": ""met"",
+      ""reference"": ""Azure backup report 2026-09"",
+      ""remarks"": ""Restore drill 42 minutes"",
+      ""recordedBy"": ""IT AppSupport"",
+      ""recordedAt"": ""2026-10-01T02:00:00Z""
+    }
+  ]
+}"
+1315,Security Controls,POST,/api/system-controls/:key/evidence,"Record dated evidence of a control (evidence date, result met / not-met / review, reference, remarks); audited",Master > System Configuration > Security Controls > Record evidence,Bearer JWT,write:settings,"{
+  ""evidenceDate"": ""2026-10-01"",
+  ""result"": ""met"",
+  ""reference"": ""Azure backup report 2026-09"",
+  ""remarks"": ""Restore drill 42 minutes""
+}","{
+  ""success"": true,
+  ""data"": {
+    ""id"": 1,
+    ""controlKey"": ""backups"",
+    ""evidenceDate"": ""2026-10-01"",
+    ""result"": ""met"",
+    ""reference"": ""Azure backup report 2026-09"",
+    ""remarks"": ""Restore drill 42 minutes"",
+    ""recordedBy"": ""IT AppSupport"",
+    ""recordedAt"": ""2026-10-01T02:00:00Z""
+  }
+}"
+1316,System,GET,/api/version,"Build and runtime information: name, version, git commit (GIT_COMMIT), build time (BUILD_TIME), release ref (GIT_REF), environment name (APP_ENVIRONMENT), start time, Node version, database reachability, pending migrations; release: the release identity of Help > About (settings release.*: web and API release, environment name, and with a bearer token the approvers of the release)",Operations / monitoring; Help > About,Public,Public,,"{
   ""name"": ""brokerverse-backend"",
   ""version"": ""2026.1.3"",
   ""commit"": ""a1b2c3d4e5f60718293a4b5c6d7e8f9012345678"",
@@ -28255,7 +28338,7 @@
     ""versionApprover"": ""Vijay""
   }
 }"
-1314,System Settings,GET,/api/settings,All configuration values (grouped); managedBy names the screen that changes a setting owned elsewhere,Master > Configuration,Bearer JWT,Any authenticated user,Query: ?group=tax,"{
+1317,System Settings,GET,/api/settings,All configuration values (grouped); managedBy names the screen that changes a setting owned elsewhere,Master > Configuration,Bearer JWT,Any authenticated user,Query: ?group=tax,"{
   ""success"": true,
   ""data"": [
     {
@@ -28271,7 +28354,7 @@
     }
   ]
 }"
-1315,System Settings,PUT,/api/settings,"Update one or more configuration values (a setting owned by another screen, e.g. branding.* or tax.vat_rate, is refused with that screen's name)",Master > Configuration,Bearer JWT,role:system-admin,"{
+1318,System Settings,PUT,/api/settings,"Update one or more configuration values (a setting owned by another screen, e.g. branding.* or tax.vat_rate, is refused with that screen's name)",Master > Configuration,Bearer JWT,role:system-admin,"{
   ""settings"": {
     ""limits.bulk_upload_max_rows"": 1000,
     ""notification.email_enabled"": true
@@ -28279,7 +28362,7 @@
 }","{
   ""success"": true
 }"
-1316,System Settings,GET,/api/settings/audit,"Audit trail (filter by entity / entityId / user and a from / to business-date range, general.timezone; newest first; with page / pageSize a page of the log and its total, else the latest `limit` entries)",Master > Audit trail,Bearer JWT,"role:system-admin, read:audit",Query: ?entity=policy&entityId=pol_1&username=BrokerVerse&from=2026-09-01&to=2026-09-30&page=1&pageSize=20,"{
+1319,System Settings,GET,/api/settings/audit,"Audit trail (filter by entity / entityId / user and a from / to business-date range, general.timezone; newest first; with page / pageSize a page of the log and its total, else the latest `limit` entries)",Master > Audit trail,Bearer JWT,"role:system-admin, read:audit",Query: ?entity=policy&entityId=pol_1&username=BrokerVerse&from=2026-09-01&to=2026-09-30&page=1&pageSize=20,"{
   ""success"": true,
   ""data"": [
     {
@@ -28294,7 +28377,7 @@
   ""pageSize"": 20,
   ""totalPages"": 1
 }"
-1317,System Settings,GET,/api/settings/audit/events,"Audit trail as business events (one per action, newest first, paged on the server): user display name and roles, date and time in general.timezone, source (screen / API / system job), record type and number, the event and its changed fields (label, old value, new value; secrets never shown). Filters: from / to (business dates), username, entity (record type, comma-separated; ""master"" = every master), entityRef (record id or number), action. export=csv | excel downloads every matching event, one row per changed field (at most 10,000 events)",Master > Audit trail,Bearer JWT,"role:system-admin, read:audit",Query: ?from=2026-09-01&to=2026-09-30&username=r.underwriter&entity=policy&entityRef=MC-2026-000123&action=update&page=1&pageSize=20,"{
+1320,System Settings,GET,/api/settings/audit/events,"Audit trail as business events (one per action, newest first, paged on the server): user display name and roles, date and time in general.timezone, source (screen / API / system job), record type and number, the event and its changed fields (label, old value, new value; secrets never shown). Filters: from / to (business dates), username, entity (record type, comma-separated; ""master"" = every master), entityRef (record id or number), action. export=csv | excel downloads every matching event, one row per changed field (at most 10,000 events)",Master > Audit trail,Bearer JWT,"role:system-admin, read:audit",Query: ?from=2026-09-01&to=2026-09-30&username=r.underwriter&entity=policy&entityRef=MC-2026-000123&action=update&page=1&pageSize=20,"{
   ""success"": true,
   ""data"": [
     {
@@ -28338,7 +28421,7 @@
   ""pageSize"": 20,
   ""totalPages"": 1
 }"
-1318,System Settings,GET,/api/settings/audit/options,Filter choices of the audit trail: record types and actions found in the log (with business labels) and the users who made changes,Master > Audit trail,Bearer JWT,"role:system-admin, read:audit",,"{
+1321,System Settings,GET,/api/settings/audit/options,Filter choices of the audit trail: record types and actions found in the log (with business labels) and the users who made changes,Master > Audit trail,Bearer JWT,"role:system-admin, read:audit",,"{
   ""success"": true,
   ""data"": {
     ""recordTypes"": [
@@ -28362,14 +28445,14 @@
     ]
   }
 }"
-1319,System Settings,GET,/api/settings/public,"Branding settings needed before sign-in (logo, colours, names)",Sign-in,Public,Public,,"{
+1322,System Settings,GET,/api/settings/public,"Branding settings needed before sign-in (logo, colours, names)",Sign-in,Public,Public,,"{
   ""success"": true,
   ""data"": {
     ""branding.logo_url"": """",
     ""branding.primary_color"": ""#0072d8""
   }
 }"
-1320,System Settings,GET,/api/system-settings,"System settings (branding, display currency, language, application name); public because the sign-in page needs them",System settings (API only); Sign-in; App shell,Public,Public,,"{
+1323,System Settings,GET,/api/system-settings,"System settings (branding, display currency, language, application name); public because the sign-in page needs them",System settings (API only); Sign-in; App shell,Public,Public,,"{
   ""success"": true,
   ""data"": {
     ""logoUrl"": ""/bdoi/iorta-technxt.png"",
@@ -28402,7 +28485,7 @@
     ""updatedAt"": ""2026-09-28T00:00:00.000Z""
   }
 }"
-1321,System Settings,PUT,/api/system-settings,"Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName); while BRAND_PACK is set a change to logoUrl, faviconUrl, the colours or systemName is refused",System settings (API only),Bearer JWT,write:settings,"{
+1324,System Settings,PUT,/api/system-settings,"Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName); while BRAND_PACK is set a change to logoUrl, faviconUrl, the colours or systemName is refused",System settings (API only),Bearer JWT,write:settings,"{
   ""systemName"": ""BrokerVerse"",
   ""displayCurrency"": ""PHP"",
   ""primaryColor"": ""#0072d8"",
@@ -28442,7 +28525,7 @@
     ""updatedAt"": ""2026-09-28T00:00:00.000Z""
   }
 }"
-1322,System Settings,GET,/api/system-settings/configuration,"Configuration catalogue: every app_settings key with group, label, type and value (drives a Configuration screen)",Master > Configuration,Bearer JWT,"read:settings, write:settings",Query: ?group=tax,"{
+1325,System Settings,GET,/api/system-settings/configuration,"Configuration catalogue: every app_settings key with group, label, type and value (drives a Configuration screen)",Master > Configuration,Bearer JWT,"read:settings, write:settings",Query: ?group=tax,"{
   ""success"": true,
   ""data"": {
     ""groups"": [
@@ -28468,7 +28551,7 @@
     ""total"": 1
   }
 }"
-1323,System Settings,PUT,/api/system-settings/configuration,"Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked (the display currency must be an active currency); settings owned by another screen are refused",Master > Configuration,Bearer JWT,write:settings,"{
+1326,System Settings,PUT,/api/system-settings/configuration,"Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked (the display currency must be an active currency); settings owned by another screen are refused",Master > Configuration,Bearer JWT,write:settings,"{
   ""settings"": {
     ""limits.bulk_upload_max_rows"": 1000,
     ""notification.email_enabled"": true
@@ -28481,7 +28564,7 @@
     ""total"": 0
   }
 }"
-1324,System Settings,POST,/api/system-settings/logo-presets,"Add a company logo preset (JSON { label, url, setActive } or multipart label + file + setActive); setActive is refused while BRAND_PACK is set",System settings (API only) > Add Company Logo,Bearer JWT,write:settings,"{
+1327,System Settings,POST,/api/system-settings/logo-presets,"Add a company logo preset (JSON { label, url, setActive } or multipart label + file + setActive); setActive is refused while BRAND_PACK is set",System settings (API only) > Add Company Logo,Bearer JWT,write:settings,"{
   ""label"": ""Sample Bank"",
   ""url"": ""https://example.com/logo.png"",
   ""setActive"": true
@@ -28518,7 +28601,7 @@
     ""updatedAt"": ""2026-09-28T00:00:00.000Z""
   }
 }"
-1325,System Settings,DELETE,/api/system-settings/logo-presets/:id,Remove a custom logo preset (built-in presets cannot be removed),System settings (API only) > Remove Logo,Bearer JWT,write:settings,,"{
+1328,System Settings,DELETE,/api/system-settings/logo-presets/:id,Remove a custom logo preset (built-in presets cannot be removed),System settings (API only) > Remove Logo,Bearer JWT,write:settings,,"{
   ""success"": true,
   ""data"": {
     ""logoUrl"": ""/bdoi/iorta-technxt.png"",
@@ -28551,7 +28634,7 @@
     ""updatedAt"": ""2026-09-28T00:00:00.000Z""
   }
 }"
-1326,System Settings,POST,/api/system-settings/upload/:field,"Upload the logo or favicon (multipart ""file""); stored under UPLOAD_DIR and recorded in documents. Refused while BRAND_PACK is set",System settings (API only) > Upload,Bearer JWT,write:settings,"{
+1329,System Settings,POST,/api/system-settings/upload/:field,"Upload the logo or favicon (multipart ""file""); stored under UPLOAD_DIR and recorded in documents. Refused while BRAND_PACK is set",System settings (API only) > Upload,Bearer JWT,write:settings,"{
   ""file"": ""(binary)""
 }","{
   ""success"": true,
@@ -28586,7 +28669,7 @@
     ""updatedAt"": ""2026-09-28T00:00:00.000Z""
   }
 }"
-1327,User Management,GET,/api/roles,"List roles with their permissions, user counts, department on the user form and last change (who and when)",Master > User Management > Role; User > Add / Edit,Bearer JWT,Any authenticated user,,"{
+1330,User Management,GET,/api/roles,"List roles with their permissions, user counts, department on the user form and last change (who and when)",Master > User Management > Role; User > Add / Edit,Bearer JWT,Any authenticated user,,"{
   ""success"": true,
   ""data"": [
     {
@@ -28606,7 +28689,7 @@
     }
   ]
 }"
-1328,User Management,POST,/api/roles,Create a role,Master > User Management > Role > Add,Bearer JWT,write:roles,"{
+1331,User Management,POST,/api/roles,Create a role,Master > User Management > Role > Add,Bearer JWT,write:roles,"{
   ""code"": ""branch-manager"",
   ""name"": ""Branch Manager"",
   ""permissions"": [
@@ -28621,7 +28704,7 @@
     ""code"": ""branch-manager""
   }
 }"
-1329,User Management,PUT,/api/roles/:id,"Update a role and its permissions (with access.change_approval, a new permission list waits for approval as a change of the role's access)",Master > User Management > Role > Edit,Bearer JWT,write:roles,"{
+1332,User Management,PUT,/api/roles/:id,"Update a role and its permissions (with access.change_approval, a new permission list waits for approval as a change of the role's access)",Master > User Management > Role > Edit,Bearer JWT,write:roles,"{
   ""name"": ""Branch Manager"",
   ""permissions"": [
     ""read:leads""
@@ -28629,10 +28712,10 @@
 }","{
   ""success"": true
 }"
-1330,User Management,DELETE,/api/roles/:id,Delete a non-system role with no users,Master > User Management > Role,Bearer JWT,write:roles,,"{
+1333,User Management,DELETE,/api/roles/:id,Delete a non-system role with no users,Master > User Management > Role,Bearer JWT,write:roles,,"{
   ""success"": true
 }"
-1331,User Management,GET,/api/roles/permissions,All permission codes grouped by module,Master > User Management > Role > Add,Bearer JWT,Any authenticated user,,"{
+1334,User Management,GET,/api/roles/permissions,All permission codes grouped by module,Master > User Management > Role > Add,Bearer JWT,Any authenticated user,,"{
   ""success"": true,
   ""data"": [
     {
@@ -28642,7 +28725,7 @@
     }
   ]
 }"
-1332,User Management,GET,/api/users,"List users (search, role, status, paging)",Master > User Management > User,Bearer JWT,read:users,Query: ?search=juan&role=sales&status=active&page=1&perPage=10,"{
+1335,User Management,GET,/api/users,"List users (search, role, status, paging)",Master > User Management > User,Bearer JWT,read:users,Query: ?search=juan&role=sales&status=active&page=1&perPage=10,"{
   ""success"": true,
   ""data"": [
     {
@@ -28662,7 +28745,7 @@
   ""page"": 1,
   ""perPage"": 10
 }"
-1333,User Management,POST,/api/users,"Create a user with roles (persona). Without a password a random temporary password is generated, returned once as temporaryPassword, and must be changed at the first sign-in",Master > User Management > User > Add,Bearer JWT,write:users,"{
+1336,User Management,POST,/api/users,"Create a user with roles (persona). Without a password a random temporary password is generated, returned once as temporaryPassword, and must be changed at the first sign-in",Master > User Management > User > Add,Bearer JWT,write:users,"{
   ""username"": ""maria.cruz"",
   ""displayName"": ""Maria Cruz"",
   ""email"": ""maria@example.com"",
@@ -28681,7 +28764,7 @@
     ""temporaryPassword"": ""<shown once>""
   }
 }"
-1334,User Management,GET,/api/users/:id,Get one user: the roles assigned to it (as the list and the edit form show them) and its effective roles with the inherited ones,Master > User Management > User > View,Bearer JWT,read:users,,"{
+1337,User Management,GET,/api/users/:id,Get one user: the roles assigned to it (as the list and the edit form show them) and its effective roles with the inherited ones,Master > User Management > User > View,Bearer JWT,read:users,,"{
   ""success"": true,
   ""data"": {
     ""userId"": ""usr_1"",
@@ -28697,7 +28780,7 @@
     ]
   }
 }"
-1335,User Management,PUT,/api/users/:id,Update a user and its roles,Master > User Management > User > Edit,Bearer JWT,write:users,"{
+1338,User Management,PUT,/api/users/:id,Update a user and its roles,Master > User Management > User > Edit,Bearer JWT,write:users,"{
   ""displayName"": ""Maria Cruz"",
   ""roles"": [
     ""sales"",
@@ -28707,17 +28790,17 @@
 }","{
   ""success"": true
 }"
-1336,User Management,DELETE,/api/users/:id,Deactivate (soft delete) a user; ends every session,Master > User Management > User,Bearer JWT,write:users,,"{
+1339,User Management,DELETE,/api/users/:id,Deactivate (soft delete) a user; ends every session,Master > User Management > User,Bearer JWT,write:users,,"{
   ""success"": true
 }"
-1337,User Management,POST,/api/users/:id/2fa/reset,Administrator turns off a user's two-factor authentication (lost device); the user enrols again,Master > User Management > User > Edit,Bearer JWT,write:users,,"{
+1340,User Management,POST,/api/users/:id/2fa/reset,Administrator turns off a user's two-factor authentication (lost device); the user enrols again,Master > User Management > User > Edit,Bearer JWT,write:users,,"{
   ""success"": true,
   ""data"": {
     ""userId"": ""usr_1"",
     ""twoFactorEnabled"": false
   }
 }"
-1338,User Management,GET,/api/users/:id/login-history,"Sign-in history of a user (success, from, to; paging)",Master > User Management > User > View > Sign-in history,Bearer JWT,read:users,Query: ?page=1&perPage=20&success=false&from=2026-09-01&to=2026-09-30,"{
+1341,User Management,GET,/api/users/:id/login-history,"Sign-in history of a user (success, from, to; paging)",Master > User Management > User > View > Sign-in history,Bearer JWT,read:users,Query: ?page=1&perPage=20&success=false&from=2026-09-01&to=2026-09-30,"{
   ""success"": true,
   ""data"": [
     {
@@ -28737,7 +28820,7 @@
   ""perPage"": 20,
   ""totalPages"": 1
 }"
-1339,User Management,POST,/api/users/:id/password,Set a user password (administrator; password policy and history apply),Master > User Management > User > Edit,Bearer JWT,write:users,"{
+1342,User Management,POST,/api/users/:id/password,Set a user password (administrator; password policy and history apply),Master > User Management > User > Edit,Bearer JWT,write:users,"{
   ""password"": ""Welcome@123""
 }","{
   ""success"": true,
@@ -28745,7 +28828,7 @@
     ""userId"": ""usr_1""
   }
 }"
-1340,User Management,POST,/api/users/:id/reset-password,"Administrator resets a user password. Without newPassword a random temporary password is generated and returned once as temporaryPassword; the user must change it at the next sign-in (mustChangePassword, default true). Ends every session of the user",Master > User Management > User > Reset password,Bearer JWT,write:users,"{
+1343,User Management,POST,/api/users/:id/reset-password,"Administrator resets a user password. Without newPassword a random temporary password is generated and returned once as temporaryPassword; the user must change it at the next sign-in (mustChangePassword, default true). Ends every session of the user",Master > User Management > User > Reset password,Bearer JWT,write:users,"{
   ""mustChangePassword"": true
 }","{
   ""success"": true,
@@ -28755,7 +28838,7 @@
     ""temporaryPassword"": ""<shown once>""
   }
 }"
-1341,User Management,PATCH,/api/users/:id/status,Activate / deactivate / lock / unlock a user (unlock = status active; clears failed sign-ins). Deactivating or locking ends every session,Master > User Management > User,Bearer JWT,write:users,"{
+1344,User Management,PATCH,/api/users/:id/status,Activate / deactivate / lock / unlock a user (unlock = status active; clears failed sign-ins). Deactivating or locking ends every session,Master > User Management > User,Bearer JWT,write:users,"{
   ""status"": ""active""
 }","{
   ""success"": true,
@@ -28764,7 +28847,7 @@
     ""status"": ""active""
   }
 }"
-1342,User Management,GET,/api/users/lookup,"Active users as a picker list { userId, name, branchCode } (search; petty cash requester / custodian)",Accounts > Petty Cash > Initiate; Request; Receipts,Bearer JWT,"read:users, read:disbursements",Query: ?search=ana,"{
+1345,User Management,GET,/api/users/lookup,"Active users as a picker list { userId, name, branchCode } (search; petty cash requester / custodian)",Accounts > Petty Cash > Initiate; Request; Receipts,Bearer JWT,"read:users, read:disbursements",Query: ?search=ana,"{
   ""success"": true,
   ""data"": [
     {
@@ -28774,7 +28857,7 @@
     }
   ]
 }"
-1343,User Management,GET,/api/users/stats,"User counts (total, active, by role)",Master > User Management > User,Bearer JWT,read:users,,"{
+1346,User Management,GET,/api/users/stats,"User counts (total, active, by role)",Master > User Management > User,Bearer JWT,read:users,,"{
   ""success"": true,
   ""data"": {
     ""totalUsers"": 12,

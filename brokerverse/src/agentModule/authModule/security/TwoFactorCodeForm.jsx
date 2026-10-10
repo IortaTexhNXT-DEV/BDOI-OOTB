@@ -5,8 +5,8 @@ import { InputText } from "primereact/inputtext";
 import { apiError } from "./passwordRules";
 import "./security.scss";
 
-/** Six-digit authenticator code. onSubmit(code) may throw; its message is shown. */
-const TwoFactorCodeForm = ({ onSubmit, onBack, intro, submitLabel, backLabel }) => {
+/** Six-digit code of the authenticator app, or of the e-mail (method "email"). onSubmit(code) may throw; its message is shown. */
+const TwoFactorCodeForm = ({ onSubmit, onBack, intro, submitLabel, backLabel, method = "app" }) => {
   const { t } = useTranslation();
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
@@ -31,7 +31,7 @@ const TwoFactorCodeForm = ({ onSubmit, onBack, intro, submitLabel, backLabel }) 
     <form className="bv-security__form" onSubmit={submit} noValidate>
       {intro && <p className="bv-security__intro">{intro}</p>}
       <div className="bv-security__field">
-        <label htmlFor="bv-2fa-code">{t("security.authenticatorCode")}</label>
+        <label htmlFor="bv-2fa-code">{method === "email" ? t("security.emailCode") : t("security.authenticatorCode")}</label>
         <InputText
           id="bv-2fa-code"
           value={code}
@@ -44,7 +44,7 @@ const TwoFactorCodeForm = ({ onSubmit, onBack, intro, submitLabel, backLabel }) 
           aria-describedby="bv-2fa-code-help"
         />
         <small id="bv-2fa-code-help" className="bv-security__help">
-          {t("security.codeHelp")}
+          {method === "email" ? t("security.emailCodeHelp") : t("security.codeHelp")}
         </small>
       </div>
       {error && (
