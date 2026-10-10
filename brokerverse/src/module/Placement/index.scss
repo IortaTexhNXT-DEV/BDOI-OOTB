@@ -253,7 +253,7 @@
 
   .journey-step {
     flex: 1 1 0;
-    min-width: 9rem;
+    min-width: 10.5rem;
     display: flex;
     align-items: flex-start;
     gap: 0;
@@ -303,6 +303,14 @@
     padding: 0 0.5rem 0 0.6rem;
   }
 
+  // one line per label and reference, so the steps keep one height; the full text is in the title
+  .journey-body { min-width: 0; }
+  .journey-label,
+  .journey-ref {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .journey-label { font-weight: 600; font-size: 0.85rem; color: $color-heading; }
   .journey-ref { font-size: 0.8rem; color: $color-text; }
   .journey-ref.muted { color: $color-placeholder; }
@@ -311,6 +319,7 @@
     background: none;
     border: none;
     padding: 0;
+    white-space: nowrap;
     font: inherit;
     font-size: 0.8rem;
     color: $brand-blue;
@@ -329,9 +338,20 @@
   gap: 0.75rem;
   font-size: 0.875rem;
 
-  .placement-field-label { color: $color-text-muted; }
-  .placement-field-value { color: $color-heading; text-align: right; }
+  .placement-field-label { color: $color-text-muted; flex: 0 0 auto; }
+  .placement-field-value { color: $color-heading; text-align: right; min-width: 0; overflow-wrap: anywhere; }
 }
+
+.placement-field.placement-field--wide {
+  grid-column: 1 / -1;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  .placement-field-value { text-align: left; }
+}
+
+// the offer tables scroll inside their tab instead of running past the card
+.placement-card .p-tabview-panels { overflow-x: auto; }
 
 .field-grid {
   display: grid;

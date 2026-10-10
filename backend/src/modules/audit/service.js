@@ -96,6 +96,14 @@ export async function recordHistory(entityIn, ref, { viewer = null, sort = 'desc
     rows = [...grouped, ...rows.filter((r) => !covered.has(r.action))]
       .sort((a, b) => (dir === 'ASC' ? 1 : -1) * (new Date(a.at) - new Date(b.at) || String(a.id).localeCompare(String(b.id))));
   }
+  // a policy's history includes what was done on its endorsements (created, sent, completed)
+  if (entity === 'policy') {
+    const endorsementRows = await many(`SELECT ${COLUMNS} FROM audit_log a WHERE a.entity = 'endorsement'
+      AND a.entity_id IN (SELECT id FROM endorsements WHERE policy_id = $1) ORDER BY a.at ${dir}, a.id ${dir} LIMIT $2`, [id, cap]);
+    if (endorsementRows.length) {
+      rows = [...rows, ...endorsementRows].sort((a, b) => (dir === 'ASC' ? 1 : -1) * (new Date(a.at) - new Date(b.at) || String(a.id).localeCompare(String(b.id))));
+    }
+  }
   const own = await lifecycleRows(entity, id, rows);
   if (own.length) {
     rows = [...rows, ...own].sort((a, b) => (dir === 'ASC' ? 1 : -1) * (new Date(a.at) - new Date(b.at) || String(a.id).localeCompare(String(b.id))));

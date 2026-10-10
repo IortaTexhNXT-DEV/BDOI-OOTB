@@ -137,7 +137,7 @@ const FollowUpModal = ({ loadingFollowUp, collection, visible, onHide, collectio
 
   return (
     <Dialog header={actionType ? k(`titles.${actionType}`, { defaultValue: actionType }) : ""} visible={visible} style={{ width: actionType === "Email" ? "640px" : "500px" }}
-      breakpoints={{ "700px": "95vw" }} footer={footer} onHide={close} className="follow-up-modal">
+      breakpoints={{ "700px": "95vw" }} footer={footer} onHide={close} className="follow-up-modal bv-centered">
       {renderContent()}
     </Dialog>
   );

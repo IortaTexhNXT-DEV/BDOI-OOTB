@@ -122,9 +122,10 @@ const PolicyTable = ({ filterExpiredOnly = false, setDisplayDialog, displayDialo
   };
   const unpaid = (p) => ["Pending", "Reviewing"].includes(p?.Payment);
   const menuItems = menuPolicy ? [
-    { label: t("policyList.claim", { defaultValue: "Claim" }), icon: "pi pi-exclamation-circle", command: () => startClaim(menuPolicy), disabled: unpaid(menuPolicy) },
+    // a claim or endorsement waits for the premium: the item says why it is not available
+    { label: unpaid(menuPolicy) ? t("policyTable.claimAfterPayment") : t("policyList.claim", { defaultValue: "Claim" }), icon: "pi pi-exclamation-circle", command: () => startClaim(menuPolicy), disabled: unpaid(menuPolicy) },
     ...(filterExpiredOnly ? [{ label: t("policyList.renewal", { defaultValue: "Renewal" }), icon: "pi pi-refresh", command: () => startRenewal(menuPolicy) }] : []),
-    ...(inForce(menuPolicy) ? [{ label: t("policyDetail.endorsement"), icon: "pi pi-file-edit", command: () => startEndorsement(menuPolicy), disabled: unpaid(menuPolicy) }] : []),
+    ...(inForce(menuPolicy) ? [{ label: unpaid(menuPolicy) ? t("policyTable.endorsementAfterPayment") : t("policyDetail.endorsement"), icon: "pi pi-file-edit", command: () => startEndorsement(menuPolicy), disabled: unpaid(menuPolicy) }] : []),
   ] : [];
 
   const actions = (p) => (

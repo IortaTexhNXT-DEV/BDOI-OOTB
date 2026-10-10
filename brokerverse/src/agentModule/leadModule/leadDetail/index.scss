@@ -42,16 +42,21 @@
         margin-bottom: 0;
       }
 
+      gap: 1rem;
+
       .label {
         flex: 0 0 40%;
-        color: #666;
+        min-width: 0;
+        color: var(--color-text-muted);
         font-weight: 500;
       }
 
       .value {
-        flex: 0 0 60%;
-        color: #333;
+        flex: 1 1 0;
+        min-width: 0;
+        color: var(--color-heading);
         font-weight: 400;
+        overflow-wrap: anywhere;
       }
     }
   }

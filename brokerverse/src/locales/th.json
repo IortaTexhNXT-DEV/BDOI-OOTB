@@ -5067,6 +5067,9 @@
       "InitiateCancel": "Cancellation initiated",
       "Completed": "Completed",
       "Cancelled": "Cancelled"
+    },
+    "types": {
+      "cancellation": "ยกเลิกกรมธรรม์"
     }
   },
   "endorsementSummary": {
@@ -5124,7 +5127,8 @@
     "endorsementNo": "Endorsement no.",
     "policyNo": "Policy no.",
     "endorsementType": "Endorsement type",
-    "sendToInsurer": "Send to insurer"
+    "sendToInsurer": "Send to insurer",
+    "policyExtension": "การขยายระยะเวลากรมธรรม์"
   },
   "coverageDetailsReview": {
     "pageTitle": "ตรวจสอบรายละเอียดความคุ้มครอง",
@@ -5317,7 +5321,7 @@
     "bulkUpload": "อัปโหลดหลายรายการ"
   },
   "bulkUploadQuotations": {
-    "header": "อัปโหลดใบเสนอราคาหลายรายการ"
+    "header": "อัปโหลดใบเสนอราคาจำนวนมาก"
   },
   "quoteStats": {
     "totalQuotations": "ใบเสนอราคารวม",
@@ -5422,9 +5426,9 @@
     "netPremium": "เบี้ยสุทธิ",
     "others": "อื่นๆ",
     "discount": "ส่วนลด",
-    "dst": "อากรแสตมป์ (DST)",
+    "dst": "อากรแสตมป์",
     "vat": "ภาษีมูลค่าเพิ่ม (VAT)",
-    "lgt": "ภาษีท้องถิ่น (LGT)",
+    "lgt": "ภาษีท้องถิ่น",
     "auditTrail": "ประวัติการแก้ไข",
     "share": "แชร์",
     "proceedToPolicy": "ดำเนินการเป็นกรมธรรม์",
@@ -5434,7 +5438,12 @@
     "waitingForCustomerApproval": "รอการอนุมัติจากลูกค้า",
     "quoteSentToSuccess": "ส่งใบเสนอราคาให้ {{sentTo}} เรียบร้อยแล้ว!",
     "errorSendingQuoteForApproval": "เกิดข้อผิดพลาดในการส่งใบเสนอราคาเพื่ออนุมัติ",
-    "pageTitle": "ใบเสนอราคา"
+    "pageTitle": "ใบเสนอราคา",
+    "scheduleOfCover": "ตารางความคุ้มครอง",
+    "scheduleSection": "หมวด / รายการ / ภัย",
+    "scheduleSumInsured": "ทุนประกัน",
+    "schedulePremium": "เบี้ยประกัน",
+    "fst": "ภาษีบริการดับเพลิง"
   },
   "policyList": {
     "title": "กรมธรรม์",
@@ -6115,7 +6124,9 @@
     "cancel": "Cancel",
     "insured": "Insured",
     "startEndorsement": "Start endorsement",
-    "endorsementTypes": "Endorsement types"
+    "endorsementTypes": "Endorsement types",
+    "claimAfterPayment": "เรียกร้องสินไหม (หลังชำระเบี้ย)",
+    "endorsementAfterPayment": "สลักหลัง (หลังชำระเบี้ย)"
   },
   "collectionsList": {
     "view": "ดู",
@@ -6148,7 +6159,8 @@
     "remindOutstanding": "ยอดค้างชำระรวม",
     "remindLevel": "{{level}}",
     "remindNoEmail": "ลูกค้าที่ไม่มีอีเมล (ไม่ได้ส่ง)",
-    "noneToRemind": "ขณะนี้ไม่มีเบี้ยที่ถึงกำหนดหรือเกินกำหนดที่ต้องแจ้งเตือน"
+    "noneToRemind": "ขณะนี้ไม่มีเบี้ยที่ถึงกำหนดหรือเกินกำหนดที่ต้องแจ้งเตือน",
+    "notYetOverdue": "ถึงกำหนด ยังไม่เกินกำหนด"
   },
   "documentLayouts": {
     "master": "มาสเตอร์",
@@ -6587,6 +6599,10 @@
         "activateTitle": "เปิดใช้งาน {{name}}",
         "activateMessage": "The record is offered again for new transactions."
       }
+    },
+    "cancellation": {
+      "confirmTitle": "สร้างสลักหลังยกเลิกกรมธรรม์ {{number}}",
+      "confirmMessage": "ระบบจะสร้างสลักหลังยกเลิกฉบับร่างพร้อมเบี้ยคืนด้านล่าง และส่งให้บริษัทประกันจากหน้าสรุป"
     }
   },
   "placement": {
@@ -6770,6 +6786,20 @@
     },
     "cancel": {
       "message": "The placement slip is cancelled. The insurers are not told automatically."
+    },
+    "send": {
+      "title": "ส่งใบวางประกัน {{number}} ให้บริษัทประกัน",
+      "resendTitle": "ส่งใบวางประกัน {{number}} อีกครั้ง",
+      "message_one": "คำสั่งวางประกันจะถูกส่งทางอีเมลถึงบริษัทประกันด้านล่างพร้อมใบวางประกัน",
+      "message_other": "คำสั่งวางประกันจะถูกส่งทางอีเมลถึงบริษัทประกัน {{count}} แห่งด้านล่าง พร้อมใบวางประกันของแต่ละแห่ง",
+      "leadInsurer": "ผู้รับประกันหลัก",
+      "coInsurer": "ผู้ร่วมรับประกัน"
+    },
+    "compare": {
+      "leadIs": "ผู้รับประกันหลัก: {{lead}}"
+    },
+    "addInsurer": {
+      "invited": "บริษัทประกันที่เชิญแล้ว"
     }
   },
   "financialStatements": {
@@ -8001,7 +8031,11 @@
       "deleteRuleAction": "Remove rule",
       "runMatched": "Matched by a rule",
       "runUnmatched": "Staying in the queue",
-      "leads": "Prospects"
+      "leads": "Prospects",
+      "reassignTitle_one": "โอนผู้มุ่งหวัง {{count}} ราย",
+      "reassignTitle_other": "โอนผู้มุ่งหวัง {{count}} ราย",
+      "queueTitle_one": "ส่งผู้มุ่งหวัง {{count}} รายเข้าคิว",
+      "queueTitle_other": "ส่งผู้มุ่งหวัง {{count}} รายเข้าคิว"
     },
     "cr": {
       "emailTitle": "E-mail comparison report",

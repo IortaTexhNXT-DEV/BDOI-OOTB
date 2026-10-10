@@ -26,6 +26,7 @@ import { Field, JourneyTimeline, PageHeader, StatusTag, formatDate, riskLabel, r
 import { isoDate, fromIso } from "./dates";
 import canOpen from "../../utils/canOpen";
 import "./index.scss";
+import KeyValueGrid from "../../components/KeyValueGrid";
 
 const OPEN = ["draft", "submitted", "responses-in"];
 
@@ -200,8 +201,8 @@ const BrokerSlipDetail = () => {
           <Field label={t("placement.fields.responseDue")}>{formatDate(slip.responseDueDate)}</Field>
           <Field label={t("placement.fields.bestPremium")}>{slip.comparison.summary.bestPremium == null ? "-" : formatCurrency(slip.comparison.summary.bestPremium)}</Field>
           <Field label={t("placement.fields.createdBy")}>{slip.createdBy}</Field>
-          {slip.remarks && <Field label={t("placement.fields.remarks")}>{slip.remarks}</Field>}
-          {slip.cancelReason && <Field label={t("placement.fields.reason")}>{slip.cancelReason}</Field>}
+          {slip.remarks && <Field wide label={t("placement.fields.remarks")}>{slip.remarks}</Field>}
+          {slip.cancelReason && <Field wide label={t("placement.fields.reason")}>{slip.cancelReason}</Field>}
         </div>
       </div>
 
@@ -258,7 +259,7 @@ const BrokerSlipDetail = () => {
                 ) : <div className="empty-note">{t("placement.compare.noOffers")}</div>}
                 {canSelect && (
                   <div className="form-actions">
-                    <span className="muted">{chosen.length > 1 ? t("placement.compare.coNote", { lead: lead?.insuranceCompanyName }) : t("placement.compare.singleNote")}</span>
+                    {chosen.length > 1 && lead ? <span className="muted">{t("placement.compare.leadIs", { lead: lead.insuranceCompanyName })}</span> : null}
                     {journey.quotationSlip !== "skip" && <Button label={t("placement.actions.prepareQuotation")} icon="pi pi-file-edit" disabled={!chosen.length || Math.abs(selectedTotal - 100) > 0.0001} loading={busy} onClick={() => next("quotation")} />}
                     {journey.quotationSlip !== "required" && journey.placementSlip !== "skip" && (
                       <Button label={t("placement.actions.preparePlacement")} icon="pi pi-briefcase" severity={journey.quotationSlip === "skip" ? undefined : "secondary"} outlined={journey.quotationSlip !== "skip"}
@@ -318,10 +319,17 @@ const BrokerSlipDetail = () => {
         )}
       </Dialog>
 
-      <Dialog className="placement-dialog" header={t("placement.actions.addInsurer")} visible={Boolean(addInsurer)} onHide={() => setAddInsurer(null)} style={{ width: "28rem" }}
+      <Dialog className="placement-dialog bv-centered" header={t("placement.actions.addInsurer")} visible={Boolean(addInsurer)} onHide={() => setAddInsurer(null)} style={{ width: "36rem" }} breakpoints={{ "640px": "95vw" }}
         footer={<><Button label={t("placement.actions.cancel")} text onClick={() => setAddInsurer(null)} /><Button label={t("placement.actions.add")} icon="pi pi-plus" disabled={!addInsurer?.insurer} loading={busy}
           onClick={async () => { const ok = await act(() => placementService.addInsurer(slip.id, addInsurer.insurer), t("placement.messages.insurerAdded")); if (ok) setAddInsurer(null); }} /></>}>
-        <Dropdown value={addInsurer?.insurer} options={options.insurers.filter((i) => !slip.offers.some((o) => o.insuranceCompanyId === i.id)).map((i) => ({ label: i.name, value: i.id }))}
+        <KeyValueGrid columns={2} className="mb-3" items={[
+          { label: t("placement.brokerSlip.title"), value: slip.slipNumber },
+          { label: t("placement.fields.customer"), value: slip.insuredName || slip.customerName },
+          { label: t("placement.fields.responseDue"), value: slip.responseDueDate, type: "date" },
+          { label: t("placement.addInsurer.invited"), value: slip.offers.map((o) => o.insuranceCompanyName).join(", "), span: "full" },
+        ]} />
+        <label htmlFor="rfq-add-insurer">{t("placement.fields.insurer")} *</label>
+        <Dropdown inputId="rfq-add-insurer" value={addInsurer?.insurer} options={options.insurers.filter((i) => !slip.offers.some((o) => o.insuranceCompanyId === i.id)).map((i) => ({ label: i.name, value: i.id }))}
           onChange={(e) => setAddInsurer({ insurer: e.value })} filter className="w-full" placeholder={t("placement.participants.chooseInsurer")} />
       </Dialog>
 

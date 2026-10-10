@@ -11,6 +11,7 @@ import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
 import service from "../../services/opsAccountingService";
 import { Field, PageHeader, date, isoOf, money, numericColumn, showError, showSuccess } from "./common";
+import { openConfirm } from "../../components/ConfirmDialog";
 
 const METHODS = ["auto", "pro-rata", "short-period", "flat"];
 const TYPES = ["FULL", "PARTIAL"];
@@ -48,16 +49,32 @@ const PolicyCancellation = () => {
       showError(toast, e);
     }
   };
+  // the endorsement is created inside the confirmation, which names the policy and the figures it carries
   const create = async () => {
-    try {
-      const b = body();
-      const e = await service.createCancellation({ policyId: quote.policyId, endorsementTypeIds: [], isCancelPolicy: true, cancellationType: b.cancellationType, cancellationReason: b.reason,
-        cancellationMethod: b.method === "auto" ? undefined : b.method, effectiveDate: b.effectiveDate, partialPercent: b.partialPercent, partialPremium: b.partialPremium });
-      showSuccess(toast, t("opsAcc.cancellation.created", { number: e.endorsementNumber }));
-      navigate(`/agent/endorsement/summary/${e.endorsementId}`, { state: { endorsementId: e.endorsementId, policyId: quote.policyId, endorsementData: e } });
-    } catch (e) {
-      showError(toast, e);
-    }
+    const b = body();
+    let e = null;
+    const done = await openConfirm({
+      title: t("opsAcc.cancellation.confirmTitle", { number: quote.policyNumber }),
+      severity: "warning",
+      message: t("opsAcc.cancellation.confirmMessage"),
+      facts: [
+        { label: t("opsAcc.policyNumber"), value: quote.policyNumber },
+        { label: t("opsAcc.cancellation.effectiveDate"), value: b.effectiveDate, type: "date" },
+        { label: t("opsAcc.cancellation.reason"), value: reason?.name || b.reason },
+        { label: t("opsAcc.cancellation.method"), value: t(`opsAcc.cancellation.methods.${quote.method}`) },
+        { label: t("opsAcc.cancellation.type"), value: t(`opsAcc.cancellation.types.${b.cancellationType}`) },
+        { label: t("opsAcc.cancellation.grossReturn"), value: quote.grossReturn, type: "amount", emphasis: true },
+        { label: t("opsAcc.cancellation.commission"), value: quote.commissionReversed, type: "amount" },
+      ],
+      confirmLabel: t("opsAcc.cancellation.create"),
+      onConfirm: async () => {
+        e = await service.createCancellation({ policyId: quote.policyId, endorsementTypeIds: [], isCancelPolicy: true, cancellationType: b.cancellationType, cancellationReason: b.reason,
+          cancellationMethod: b.method === "auto" ? undefined : b.method, effectiveDate: b.effectiveDate, partialPercent: b.partialPercent, partialPremium: b.partialPremium });
+      },
+    });
+    if (!done || !e) return;
+    showSuccess(toast, t("opsAcc.cancellation.created", { number: e.endorsementNumber }));
+    navigate(`/agent/endorsement/summary/${e.endorsementId}`, { state: { endorsementId: e.endorsementId, policyId: quote.policyId, endorsementData: e } });
   };
   const set = (patch) => { setForm((f) => ({ ...f, ...patch })); setQuote(null); };
   const reason = reasons.find((r) => r.code === form.reason);

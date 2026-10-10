@@ -1580,7 +1580,7 @@ const PolicyDetailView = () => {
     {
       key: "insuranceCompany",
       label: t("policyDetail.insuranceCompany"),
-      value: quotation.participantDetails?.[0]?.participantName || t("policyDetail.nA"),
+      value: quotation.participantDetails?.[0]?.participantName || participantDetails[0]?.insuranceCompanyName || rawPolicyData?.insuranceCompanyName || t("policyDetail.nA"),
     },
     {
       key: "accountCode",
@@ -1966,7 +1966,6 @@ const PolicyDetailView = () => {
               <SectionCard
                 title={t("policyDetail.endorsements")}
                 className="endorsement-section"
-                subtitle={t("policyDetail.endorsementsSubtitle")}
               >
                 {endorsements.length === 0 ? (
                   <div className="endorsement-empty-state">
@@ -2128,8 +2127,7 @@ const PolicyDetailView = () => {
                 )}
               </SectionCard>
 
-              <SectionCard title={t("policyDetail.history", { defaultValue: "History" })} className="policy-history-section"
-                subtitle={t("policyDetail.historySubtitle", { defaultValue: "Every change to this policy: who made it, when and what changed" })}>
+              <SectionCard title={t("policyDetail.history", { defaultValue: "History" })} className="policy-history-section">
                 <AuditTimeline entity="policy" recordId={rawPolicyData?.id || policyId} limit={10} />
               </SectionCard>
             </div>
@@ -2142,9 +2140,6 @@ const PolicyDetailView = () => {
                   title={t("policyDetail.paymentRequired")}
                   icon="pi pi-credit-card"
                 >
-                  <p className="payment-description">
-                    {t("policyDetail.paymentRequiredDescription")}
-                  </p>
                   <div className="payment-actions">
                     <Button
                       label={t("policyDetail.proceedToPayment")}

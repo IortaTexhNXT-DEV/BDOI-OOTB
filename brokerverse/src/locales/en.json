@@ -1254,7 +1254,21 @@
     "select": "Select",
     "add": "Add",
     "edit": "Edit",
-    "view": "View",
+    "view": {
+      "netAmount": "Net amount",
+      "posting": "Accounts",
+      "criteria": "Criteria",
+      "expenseAccount": "Expense account",
+      "lines": "Request paid",
+      "noLines": "No request line",
+      "vat": "VAT",
+      "wht": "WHT",
+      "pettyCashFund": "Petty cash fund",
+      "narration": "Narration",
+      "purpose": "Purpose",
+      "fund": "Fund",
+      "accounts": "Bank and accounts"
+    },
     "delete": "Delete",
     "search": "Search",
     "clear": "Clear",
@@ -1384,21 +1398,6 @@
       "wht": "Withholding tax",
       "netAmount": "Net amount",
       "recordDisbursements": "Record disbursements"
-    },
-    "view": {
-      "netAmount": "Net amount",
-      "posting": "Accounts",
-      "criteria": "Criteria",
-      "expenseAccount": "Expense account",
-      "lines": "Request paid",
-      "noLines": "No request line",
-      "vat": "VAT",
-      "wht": "WHT",
-      "pettyCashFund": "Petty cash fund",
-      "narration": "Narration",
-      "purpose": "Purpose",
-      "fund": "Fund",
-      "accounts": "Bank and accounts"
     }
   },
   "employeeBenefit": {
@@ -5938,6 +5937,9 @@
       "InitiateCancel": "Cancellation initiated",
       "Completed": "Completed",
       "Cancelled": "Cancelled"
+    },
+    "types": {
+      "cancellation": "Cancellation"
     }
   },
   "endorsementSummary": {
@@ -5998,7 +6000,8 @@
     "endorsementNo": "Endorsement no.",
     "policyNo": "Policy no.",
     "endorsementType": "Endorsement type",
-    "sendToInsurer": "Send to insurer"
+    "sendToInsurer": "Send to insurer",
+    "policyExtension": "Policy extension"
   },
   "coverageDetailsReview": {
     "pageTitle": "Coverage Details Review",
@@ -6202,7 +6205,7 @@
     "bulkUpload": "Bulk Upload"
   },
   "bulkUploadQuotations": {
-    "header": "Bulk Upload Quotations"
+    "header": "Bulk upload quotations"
   },
   "quoteStats": {
     "totalQuotations": "Total Quotations",
@@ -6307,9 +6310,9 @@
     "netPremium": "NET Premium",
     "others": "Others",
     "discount": "Discount",
-    "dst": "DST",
+    "dst": "Documentary stamp tax",
     "vat": "VAT",
-    "lgt": "LGT",
+    "lgt": "Local government tax",
     "auditTrail": "Audit Trail",
     "share": "Share",
     "proceedToPolicy": "Proceed to Policy",
@@ -6320,7 +6323,12 @@
     "quoteSentToSuccess": "Quote sent to {{sentTo}} successfully!",
     "errorSendingQuoteForApproval": "Error sending quote for approval",
     "notIncluded": "Not included",
-    "pageTitle": "Quotation Slip"
+    "pageTitle": "Quotation Slip",
+    "scheduleOfCover": "Schedule of cover",
+    "scheduleSection": "Section / item / perils",
+    "scheduleSumInsured": "Sum insured",
+    "schedulePremium": "Premium",
+    "fst": "Fire service tax"
   },
   "policyList": {
     "title": "Policies",
@@ -7050,7 +7058,9 @@
     "cancel": "Cancel",
     "insured": "Insured",
     "startEndorsement": "Start endorsement",
-    "endorsementTypes": "Endorsement types"
+    "endorsementTypes": "Endorsement types",
+    "claimAfterPayment": "Claim (after the premium is paid)",
+    "endorsementAfterPayment": "Endorsement (after the premium is paid)"
   },
   "collectionsList": {
     "view": "View",
@@ -7084,7 +7094,8 @@
     "remindOutstanding": "Total outstanding",
     "remindLevel": "{{level}}",
     "remindNoEmail": "Clients without an e-mail address (not sent)",
-    "noneToRemind": "No premium is due or overdue for a reminder now."
+    "noneToRemind": "No premium is due or overdue for a reminder now.",
+    "notYetOverdue": "Due, not yet overdue"
   },
   "iarLead": {
     "lead": "Prospect",
@@ -9127,7 +9138,8 @@
       "selectedTotal": "Selected shares total",
       "noOffers": "No insurer has made an offer yet.",
       "coNote": "Several offers make a co-insurance led by {{lead}}; the premium follows the lead's terms.",
-      "singleNote": "Select the offer(s) to place; the shares must total exactly 100%."
+      "singleNote": "Select the offer(s) to place; the shares must total exactly 100%.",
+      "leadIs": "Lead insurer: {{lead}}"
     },
     "offer": {
       "dialogTitle": "Response of {{insurer}}",
@@ -9336,6 +9348,17 @@
     },
     "cancel": {
       "message": "The placement slip is cancelled. The insurers are not told automatically."
+    },
+    "send": {
+      "title": "Send placement slip {{number}} to the insurers",
+      "resendTitle": "Send placement slip {{number}} again",
+      "message_one": "The firm order is e-mailed to the insurer below with its placement slip.",
+      "message_other": "The firm order is e-mailed to the {{count}} insurers below, each with its own placement slip.",
+      "leadInsurer": "Lead insurer",
+      "coInsurer": "Co-insurer"
+    },
+    "addInsurer": {
+      "invited": "Insurers already invited"
     }
   },
   "postingRules": {
@@ -12316,7 +12339,9 @@
       "types": {
         "FULL": "Whole policy",
         "PARTIAL": "Part of the cover"
-      }
+      },
+      "confirmTitle": "Create cancellation endorsement for {{number}}",
+      "confirmMessage": "A draft cancellation endorsement is created with the return premium below; it is sent to the insurer from its summary."
     },
     "pdc": {
       "title": "Post-Dated Cheques",
@@ -13095,7 +13120,11 @@
       "deleteRuleAction": "Remove rule",
       "runMatched": "Matched by a rule",
       "runUnmatched": "Staying in the queue",
-      "leads": "Prospects"
+      "leads": "Prospects",
+      "reassignTitle_one": "Reassign {{count}} prospect",
+      "reassignTitle_other": "Reassign {{count}} prospects",
+      "queueTitle_one": "Send {{count}} prospect to the queue",
+      "queueTitle_other": "Send {{count}} prospects to the queue"
     },
     "oc": {
       "title": "Marine Open Covers",

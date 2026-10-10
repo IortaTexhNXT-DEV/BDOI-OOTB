@@ -123,7 +123,7 @@ const CreditLimits = () => {
         </TabView>
       </div>
 
-      <Dialog className="pe-dialog" header={edit ? `${t("creditControl.setLimit")} · ${edit.row.clientName}` : ""} visible={!!edit} style={{ width: "min(640px, 96vw)" }} onHide={() => setEdit(null)}
+      <Dialog className="pe-dialog bv-centered" header={edit ? `${t("creditControl.setLimit")} · ${edit.row.clientName}` : ""} visible={!!edit} style={{ width: "min(640px, 96vw)" }} onHide={() => setEdit(null)}
         footer={<div><Button label={t("creditControl.cancel")} text onClick={() => setEdit(null)} /><Button label={t("creditControl.save")} icon="pi pi-save" onClick={saveLimit} /></div>}>
         {edit && (
           <div className="flex flex-column gap-3">
