@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { setup, loginAs } from './helpers.js';
+import { clearSettingsCache } from '../src/lib/settings.js';
 import { pool } from '../src/db/pool.js';
 
 let ctx;
@@ -79,6 +80,9 @@ describe('policies', () => {
     }
   });
   it('bulk uploads policies with client, receivable and commission', async () => {
+    // the broker's bulk issuance; TISPH's go-live-only upload (BULK-02) is covered by test/policy-corrections.test.js
+    await pool.query("UPDATE app_settings SET value = 'true' WHERE key = 'policies.bulk_upload_issue'");
+    clearSettingsCache();
     const csv = 'Policy Number,Insured Name,Email,Product,Insurance Company,Inception Date,Expiry Date,Sum Insured,Net Premium,Gross Premium\n'
       + 'UPL-0001,Rosa Villanueva,rosa@example.ph,Motor,MAPFRE,2026-09-01,2027-09-01,800000,12000,15030\nUPL-0002,No Premium,,Motor,MAPFRE,2026-09-01,2027-09-01,1,,\n';
     const r = await sales('post', '/policies/bulk-upload').attach('file', Buffer.from(csv), 'policies.csv');
