@@ -12,6 +12,7 @@ import { BASE_URL } from "../../../utility/constant";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import StatCards from "../../../components/StatCards";
+import RowActions, { actionsColumn } from "../../../components/RowActions";
 import { ChartCard, DashboardToolbar, LISTS, ShareChart, ThemedChart, changeOf, drillDown, formatValue, periodRange } from "../../../components/Dashboard";
 import { useChartTheme } from "../../../theme/chartTheme";
 import { formatPercent, progressValue } from "../../../utility/numberFormat";
@@ -166,11 +167,12 @@ const ClaimsDashboard = () => {
     const severity = { high: "danger", medium: "warning", low: "success" }[rowData.priority] || "secondary";
     return <Tag value={rowData.priority} severity={severity} />;
   };
+  // the claim and its audit trail; a claim is changed on its own page, not from the dashboard
   const actionBodyTemplate = (rowData) => (
-    <div className="flex gap-2">
-      <Button icon="pi pi-eye" rounded text onClick={() => navigate(`/agent/claimdetail/${rowData.claimId}`)} aria-label={t("common.view", "View")} tooltip={t("common.view", "View")} tooltipOptions={{ position: "top" }} />
-      <Button icon="pi pi-pencil" rounded text onClick={() => navigate(`/agent/claimaudittrail/${rowData.claimId}`)} aria-label={t("common.edit", "Edit")} tooltip={t("common.edit", "Edit")} tooltipOptions={{ position: "top" }} />
-    </div>
+    <RowActions onView={() => navigate(`/agent/claimdetail/${rowData.claimId}`)} viewLabel={t("common.view", "View")}>
+      <Button type="button" icon="pi pi-history" text rounded onClick={() => navigate(`/agent/claimaudittrail/${rowData.claimId}`)} aria-label={t("claims.auditTrail")}
+        tooltip={t("claims.auditTrail")} tooltipOptions={{ position: "top" }} />
+    </RowActions>
   );
 
   return (
@@ -232,7 +234,7 @@ const ClaimsDashboard = () => {
             <Column body={priorityBodyTemplate} header={t("claimsDashboard.priority")} />
             <Column body={statusBodyTemplate} header={t("claimsDashboard.status")} />
             <Column field="amount" header={t("claimsDashboard.amount")} body={(row) => (row.amount ? formatCurrency(row.amount) : "-")} className="bv-num" headerClassName="bv-num" />
-            <Column body={actionBodyTemplate} header="" style={{ width: "100px" }} />
+            <Column body={actionBodyTemplate} header={t("common.actions")} {...actionsColumn} />
           </DataTable>
         </ChartCard>
       </div>
