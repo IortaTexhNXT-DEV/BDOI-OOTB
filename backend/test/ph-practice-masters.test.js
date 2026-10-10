@@ -15,7 +15,8 @@ const SEED = path.join(here, '..', 'src', 'db', 'seeds', '69_ph_practice_masters
 const TYPES = { salutation: 10, 'civil-status': 6, gender: 2, nationality: 17, 'government-id-type': 12, 'customer-type': 10, 'payment-mode': 17, holiday: 42 };
 // payment modes: the 10 of seed 69 and the 7 TISPH modes (seed 80_tisph_configuration.sql); Stronghold is on the TISPH panel
 const TISPH_PAYMENT_MODES = ['EFT', 'CARD', 'CHCK', 'E-WALLET', 'OTC', 'MC', 'ADA'];
-const STARTER_INSURERS = ['FPG', 'MALAYAN', 'MAPFRE', 'MERCANTILE', 'PIONEER', 'STANDARD', 'STRONGHOLD'];
+// the starters MAPFRE, FPG and Mercantile are off the TISPH panel (seed 93_tisph_master_data.sql)
+const PANEL_INSURERS = ['MALAYAN', 'PIONEER', 'STANDARD', 'STRONGHOLD'];
 
 let ctx;
 beforeAll(async () => { ctx = await setup(); });
@@ -132,7 +133,7 @@ describe('Philippine practice masters (seed 69)', () => {
     expect(new Set(rows.map((b) => b.swift_code)).size).toBe(17);
   });
 
-  it('the 51 non-life insurers licensed by the Insurance Commission: 44 inactive to activate, the 6 starters and Stronghold active', async () => {
+  it('the 51 non-life insurers licensed by the Insurance Commission: 44 inactive to activate, the starters on the TISPH panel and Stronghold active', async () => {
     const rows = (await query("SELECT code, name, short_name, status, attrs FROM insurance_companies WHERE attrs ? 'icLineOfBusiness' ORDER BY code")).rows;
     expect(rows).toHaveLength(51);
     for (const r of rows) {
@@ -142,8 +143,8 @@ describe('Philippine practice masters (seed 69)', () => {
     }
     expect(rows.filter((r) => r.attrs.icLineOfBusiness === 'Composite').map((r) => r.code)).toEqual(['PARAMOUNT']);
     const active = rows.filter((r) => r.status === 'active').map((r) => r.code).sort();
-    expect(active).toEqual(STARTER_INSURERS);
-    expect(rows.filter((r) => r.status === 'inactive')).toHaveLength(44);
+    expect(active).toEqual(PANEL_INSURERS);
+    expect(rows.filter((r) => r.status === 'inactive')).toHaveLength(47);
     const ins = byCode(rows);
     expect(ins.AIG).toMatchObject({ name: 'AIG Philippines Insurance, Inc.', short_name: 'AIG', status: 'inactive' });
     expect(ins.BPIMS.name).toBe('BPI/MS Insurance Corporation');
