@@ -42,6 +42,7 @@ import { reconciliation } from './migration.js';
 import { presentKinds, productsOfKind, sheetKindOf } from './products.js';
 import { RULE_COLUMNS, RULE_LABELS, duplicateDetector, matchText } from './duplicates.js';
 import { loadMaps, mapsVersion, saveMap } from './maps.js';
+import { namingConvention } from './naming.js';
 import { KITS, kitWorkbook, readKitWorkbook } from './workbook.js';
 import { runForLoad } from './runs.js';
 import { comparable, fail, isDate } from './common.js';
@@ -119,7 +120,7 @@ export async function kits() {
     }
     out.push({ kit, title: KITS[kit].title, file: KITS[kit].file, sheets: rows });
   }
-  return { kits: out, ...(await goLiveState()), settings: await workspaceSettings() };
+  return { kits: out, ...(await goLiveState()), settings: await workspaceSettings(), naming: await namingConvention() };
 }
 
 /**

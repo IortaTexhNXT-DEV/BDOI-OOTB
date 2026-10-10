@@ -71,6 +71,7 @@ const NO_PII = {
   '/data-load/criteria': 'criteria template',
   '/data-load/decisions': 'decisions, criteria and votes',
   '/data-load/decisions/:id': 'decision, criteria and votes',
+  '/data-load/users': 'names and roles of the users of the workspace',
 };
 
 const fetchText = async (who, path, headers = {}) => {

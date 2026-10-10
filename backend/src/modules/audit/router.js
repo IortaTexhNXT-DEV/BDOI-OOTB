@@ -29,6 +29,9 @@ const MODULE_OF = {
   fleet_schedule: 'fleet', open_cover: 'marine', marine_declaration: 'marine', marine_certificate: 'marine',
   product_template: 'products', risk_mapping: 'products', posting_rule: 'masters', accounting_config_change: 'masters',
   authority_limit: 'access-control', scheduled_job: 'schedules',
+  // Data Migration & Go-Live: loads, reconciliations, runs, decisions and the go-live lock requests
+  data_load_batch: 'data-load', migration_reconciliation: 'data-load', migration_run: 'data-load', migration_run_step: 'data-load',
+  migration_run_defect: 'data-load', go_live_decision: 'data-load', go_live_lock: 'data-load', migration_value_map: 'data-load',
 };
 
 const event = {

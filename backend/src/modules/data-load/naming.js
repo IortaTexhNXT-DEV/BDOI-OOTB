@@ -34,6 +34,12 @@ export async function documentTypes() {
   return Array.isArray(v) ? v.map((x) => String(x).trim().toUpperCase()).filter(Boolean) : [];
 }
 
+/** The convention as the Templates tab shows it: the pattern, an example, the record types, document types and extensions. */
+export async function namingConvention() {
+  return { pattern: NAMING_PATTERN, example: NAMING_EXAMPLE, recordTypes: Object.entries(RECORD_TYPES).map(([code, label]) => ({ code, label })),
+    documentTypes: await documentTypes(), extensions: EXTENSIONS };
+}
+
 /** The parts of a file name, or the reason it does not follow the convention: { valid, reason?, recordType, recordNumber, documentType, date, sequence, ext }. */
 export function parseName(name, types) {
   const file = String(name || '').trim();

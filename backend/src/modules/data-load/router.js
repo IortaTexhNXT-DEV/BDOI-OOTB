@@ -34,7 +34,7 @@ import { defineRunRoutes } from './runRoutes.js';
  * granted read:data-load / write:data-load / approve:data-load (migrations 0244, 0247 and 0440); the downloads and the
  * review are masked for users without view:pii; the uploaded workbook is released only with write:data-load and view:pii.
  */
-const { router, define } = moduleRouter('Go-Live Data Workbench', '/data-load');
+const { router, define } = moduleRouter('Data Migration & Go-Live', '/data-load');
 const SCREEN = 'API (go-live scripts)';
 const WORKSPACE = 'Master > System Configuration > Data Migration & Go-Live';
 const canRead = [requireAuth, requirePermission('read:data-load', 'write:data-load')];
@@ -66,10 +66,12 @@ const duplicateRowExample = { ...reviewRowExample, id: 9013, row: 13, key: 'C-00
   duplicates: [{ rule: 'tin', label: 'Same TIN', kind: 'stored', recordId: 'cli_1a2b3c4d5e6f7a8b', number: 'C-000881', name: 'Andrea Lim' }] };
 
 define({
-  method: 'GET', path: '/kits', summary: 'The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date, the go-live lock and the settings of the workspace',
+  method: 'GET', path: '/kits', summary: 'The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date, the go-live lock, the settings of the workspace and the document file naming convention',
   screen: SCREEN, middleware: canRead,
   response: { success: true, data: { kits: [{ kit: 'configuration', title: 'Go-live configuration workbook', sheets: [{ key: 'users', name: 'Users', keyColumns: ['username'], columns: [] }] }], cutoverDate: '2026-11-01', locked: false,
-    settings: { legacySystemName: 'Legacy', loadApprovalRequired: true, dashboardDefaultOrigin: 'issued', unlockWindowDays: 7, unlockMaxHours: 4 } } },
+    settings: { legacySystemName: 'Legacy', loadApprovalRequired: true, dashboardDefaultOrigin: 'issued', unlockWindowDays: 7, unlockMaxHours: 4 },
+    naming: { pattern: '<RecordType>_<RecordNumber>_<DocumentType>_<YYYYMMDD>[_<n>].<ext>', example: 'POL_PC-MLY-2026-000101_POLSCH_20260225.pdf',
+      recordTypes: [{ code: 'POL', label: 'Policy' }], documentTypes: ['POLSCH', 'COC'], extensions: ['pdf', 'jpg'] } } },
   handler: async (_req, res) => ok(res, await svc.kits()),
 });
 define({
@@ -269,13 +271,14 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/batches/:id', summary: 'One load: status, result per sheet, the errors (sheet, row, column, message), the progress of its job (sheet, rows done and total) and its place in the queue',
+  method: 'GET', path: '/batches/:id', summary: 'One load: status, result per sheet, the errors (sheet, row, column, message), the progress of its job (sheet, rows done and total), its place in the queue and the users who may not decide on it (makers: load, undo)',
   screen: `${WORKSPACE} > Loads > Load`, middleware: canRead,
-  response: { success: true, data: { batch: { ...batchExample, status: 'running', progress: progressExample }, errors: [errorExample], totalErrors: 1, queue: { jobStatus: 'processing', ahead: 0, behind: null } } },
+  response: { success: true, data: { batch: { ...batchExample, status: 'running', progress: progressExample }, errors: [errorExample], totalErrors: 1, queue: { jobStatus: 'processing', ahead: 0, behind: null },
+    makers: { load: ['usr_7a1c'], undo: [] } } },
   handler: async (req, res) => {
     const batch = await svc.getBatch(req.params.id);
     const { total, errors } = await svc.batchErrors(batch.id, { limit: 2000 });
-    ok(res, { batch, errors, totalErrors: total, queue: await jobs.queueInfo(batch) });
+    ok(res, { batch, errors, totalErrors: total, queue: await jobs.queueInfo(batch), makers: await approval.makersOf(batch) });
   },
 });
 define({

@@ -29,7 +29,7 @@ import { many, one, pool, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { audit } from '../../lib/audit.js';
 import { getSetting } from '../../lib/settings.js';
-import { hasPermission, loadUser } from '../../lib/auth.js';
+import { ADMIN_ROLES, hasPermission, loadUser } from '../../lib/auth.js';
 import { notify } from '../notifications/service.js';
 import { notifyDecision } from '../notifications/approvals.js';
 import { MIGRATED_NUMBER_TARGETS, cocCollisions, collidingNumbers } from './numbering.js';
@@ -130,6 +130,21 @@ export const AUTO_CHECKS = {
 };
 
 // ------------------------------------------------------------------ reading
+
+/**
+ * Active users of the workspace (holders of read:, write: or approve:data-load, System Administrators included) for the
+ * owner of a checklist step and the approvers of a decision: name, role names and whether they may change (write) and
+ * approve (approve: the approvers of a decision are chosen among these).
+ */
+export async function workspaceUsers() {
+  const rows = await many(`SELECT u.id, COALESCE(u.display_name, u.username) AS name,
+      ARRAY(SELECT DISTINCT r.name FROM user_effective_roles(u.id) er JOIN roles r ON r.id = er.role_id ORDER BY r.name) AS roles,
+      bool_or(er.code = ANY($1) OR p.code = $2) AS can_write, bool_or(er.code = ANY($1) OR p.code = $3) AS can_approve
+    FROM users u JOIN LATERAL user_effective_roles(u.id) er ON true LEFT JOIN role_permissions rp ON rp.role_id = er.role_id LEFT JOIN permissions p ON p.id = rp.permission_id
+    WHERE u.status = 'active' AND (er.code = ANY($1) OR p.code = ANY($4))
+    GROUP BY u.id ORDER BY lower(COALESCE(u.display_name, u.username))`, [ADMIN_ROLES, WRITE, APPROVE, ['read:data-load', WRITE, APPROVE]]);
+  return rows.map((u) => ({ userId: u.id, name: u.name, roles: u.roles, canWrite: !!u.can_write, canApprove: !!u.can_approve }));
+}
 
 const toDecision = (d, criteria, votes) => ({
   id: Number(d.id), runId: Number(d.run_id), runNumber: d.run_number, runKind: d.run_kind, status: d.status, statusLabel: DECISION_STATUSES[d.status], meetingAt: d.meeting_at,

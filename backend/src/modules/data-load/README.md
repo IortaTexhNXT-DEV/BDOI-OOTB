@@ -3,8 +3,30 @@
 Loads a broker's go-live data from two Excel workbooks and keeps the history of every load: the **configuration** kit
 (everything needed to run new business, promoted from one environment to the next) and the **migration** kit (the open
 business of the legacy system at cutover). It also compares the configuration of two environments. API under
-`/api/data-load` (`read:data-load`, `write:data-load`; `approve:data-load` for the second-person approvals of the Data
-Migration & Go-Live workspace). The administrator guide is `docs/onboarding/GO_LIVE_DATA_WORKBENCH.md`.
+`/api/data-load` (module *Data Migration & Go-Live*; `read:data-load`, `write:data-load`; `approve:data-load` for the
+second-person approvals). The screens are the Data Migration & Go-Live workspace (front end
+`brokerverse/src/module/GoLiveWorkspace`, service `goLiveService.js`, i18n namespace `goLive`). The administrator guide
+is `docs/onboarding/GO_LIVE_DATA_WORKBENCH.md`.
+
+## Screens
+
+Master > System Configuration > Data Migration & Go-Live, one route per tab under `/master/configuration/go-live`:
+Overview (`GET /overview`), Templates (`GET /kits` with the naming convention, template downloads, value maps, name
+checker), Loads (`/loads`, `/loads/:id`), Reconciliation (`/reconciliation`, `/reconciliation/:id`), Mock Runs (`/runs`,
+`/runs/:id`), Cutover (`/cutover?run=`), Go-Live (`/decision`) and Hypercare. The screens read what they need to show a
+rule before the click, the server keeps the rule:
+
+| Read | Used for |
+|---|---|
+| `GET /batches/:id` `makers` (`load`: uploader, submitter, users who resolved a duplicate; `undo`: the requester) | Approve / Reject of a load and of its undo disabled for them (ApprovalActions) |
+| `GET /reconciliations/:id` `makers` (uploaders, submitters, approvers of its loads) and `signoffs[].signedById` | Accept and Sign disabled for them; a user signs one slot |
+| `GET /golive` `pendingRequest.requestedById`, `GET /golive/sap-opening-file` `pendingRequest.requestedById` | Approve of a lock, unlock or SAP opening file request disabled for its requester |
+| `GET /users` (active users holding a data-load permission, with `canWrite`, `canApprove`) | The owner of a checklist step, the approvers of a decision |
+| `GET /audit/records/:entity/:id` for `data_load_batch`, `migration_reconciliation`, `migration_run` ... (readable with `read:data-load`) | The activity log of a load, a reconciliation, a run |
+
+A load page follows its job by reading `GET /batches/:id` every 3 seconds while the batch is `validating`, `running` or
+`undoing`, so the progress shows again when the page is opened during a job. The rejection reasons
+(`data_load_reject`) are read from the Reason Codes master, readable with a data-load permission.
 
 ## Files
 
@@ -357,7 +379,9 @@ sheets). `test/migration-registry.test.js` checks the kits.
 `migration-amounts.test.js`, `migration-pdc.test.js`, `migration-jobs.test.js`, `migration-approval.test.js`,
 `migration-undo.test.js`, `migration-lock.test.js`, `migration-reconciliation.test.js`, `migration-opening-journal.test.js`,
 `migration-kpis.test.js`, `migration-runs.test.js`, `migration-decision.test.js`, `migration-retention.test.js`,
-`migration-pii.test.js` (every GET route of the workspace masked or listed with the reason), `migration-hypercare.test.js`
-(fixtures `migration.fixtures.js`), `reset-transactions.test.js`. The
+`migration-pii.test.js` (every GET route of the workspace masked or listed with the reason), `migration-hypercare.test.js`,
+`migration-workspace.test.js` (what the screens read: makers, users, naming convention, history and reasons; every change
+refused to a holder of `read:data-load` only) (fixtures `migration.fixtures.js`), `reset-transactions.test.js`. Front end
+(jest): `brokerverse/src/module/GoLiveWorkspace/*.test.jsx`, `utils/tisphMenus.test.js`. The
 suites that load at once set the cutover date and switch the approval of loads off with `goLiveSetup` and wait for the
 validation job with `validatedBatch` (`test/helpers.js`).

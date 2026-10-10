@@ -67,6 +67,13 @@ export function defineRunRoutes(define, { canRead, canWrite, canApprove, canWrit
     handler: async (_req, res) => ok(res, await hypercare()),
   });
 
+  define({
+    method: 'GET', path: '/users', summary: 'Active users of the workspace (read:, write: or approve:data-load) with their roles and whether they may change and approve: the owners of a checklist step and the approvers of a Go / No-Go decision are chosen among them',
+    screen: `${WORKSPACE} > Cutover; Go-Live`, middleware: canRead,
+    response: { success: true, data: [{ userId: 'usr_91b2', name: 'Liza Santos', roles: ['TIS Finance & General Accounting'], canWrite: false, canApprove: true }] },
+    handler: async (_req, res) => ok(res, await decisions.workspaceUsers()),
+  });
+
   // ------------------------------------------------------------------ runs
 
   define({

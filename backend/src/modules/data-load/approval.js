@@ -15,7 +15,7 @@
  * Approvers are notified on submit and on an undo request (notification and My Work, category Approvals), the maker on
  * the decision and at the end of the job.
  */
-import { one, pool } from '../../db/pool.js';
+import { many, one, pool } from '../../db/pool.js';
 import { badRequest, conflict, forbidden } from '../../lib/errors.js';
 import { audit } from '../../lib/audit.js';
 import { getSetting } from '../../lib/settings.js';
@@ -39,6 +39,18 @@ async function assertNotMaker(user, batch) {
   for (const maker of [batch.createdById, batch.submittedById]) await assertChecker(user, maker, 'load', { configurable: false });
   const resolved = await one('SELECT 1 AS x FROM data_load_rows WHERE batch_id = $1 AND resolved_by = $2 LIMIT 1', [batch.id, user.id]);
   if (resolved) throw forbidden(`Maker-checker: you resolved duplicates of ${batch.loadNumber}; another user decides on the load`);
+}
+
+/**
+ * Users who may not decide on a load or on its undo, for the screen to show the rule before the click: load (the
+ * uploader, the submitter and the users who resolved one of its duplicates) and undo (the requester).
+ */
+export async function makersOf(batch) {
+  const resolvers = await many('SELECT DISTINCT resolved_by FROM data_load_rows WHERE batch_id = $1 AND resolved_by IS NOT NULL', [batch.id]);
+  return {
+    load: [...new Set([batch.createdById, batch.submittedById, ...resolvers.map((r) => r.resolved_by)].filter(Boolean))],
+    undo: batch.undoRequestedById ? [batch.undoRequestedById] : [],
+  };
 }
 
 /** Submit a validated batch (validRowsOnly: a batch with rows in error, the valid rows only) for approval. */

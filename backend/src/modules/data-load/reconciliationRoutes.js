@@ -20,6 +20,7 @@ const reconExample = { id: 7, reconNumber: 'REC-000007', runId: 3, allBatches: t
   createdBy: 'Andrea Lim', createdAt: '2026-11-01T02:10:00Z', signedAt: null, supersededAt: null, supersededBy: null, signedReport: false, reportSha256: null,
   batches: [{ id: 12, loadNumber: 'MIG-000012', legacySystem: 'TISPH Excel', loadedAt: '2026-11-01T01:55:00Z', status: 'loaded' }], lines: [lineExample, tieoutExample],
   differences: [differenceExample], signoffs: [{ slot: 'data-owner', label: 'Data owner', signedBy: null, signedAt: null, remarks: null }, { slot: 'finance-head', label: 'Finance Head', signedBy: null, signedAt: null, remarks: null }],
+  makers: ['usr_7a1c'],
   summary: { lines: 2, matched: 2, differences: 1, openDifferences: 1, missingLegacy: [], signed: 0, slots: 2 } };
 const tieoutDefinition = { key: 'premiums-receivable', label: 'Premiums receivable', source: 'open-items', accounts: ['1202001'], measure: null, tolerance: 0 };
 const sapStateExample = { enabled: true, locked: true, journal: { id: 'jv_8f0c', journalNumber: 'OBJ-2026-0001', asAt: '2026-10-31', totalDebit: 18450000, totalCredit: 18450000, sapExportedAt: null },
@@ -54,7 +55,7 @@ export function defineReconciliationRoutes(define, { canRead, canWrite, canAppro
     handler: async (req, res) => ok(res, await recon.saveTieouts(req.body?.tieouts, req.user, req), 'Tie-outs saved'),
   });
   define({
-    method: 'GET', path: '/reconciliations/:id', summary: 'A reconciliation: its loads, lines (BrokerVerse and legacy value, difference, tolerance, status), checks and tie-outs with their accounts, differences, sign-offs and summary',
+    method: 'GET', path: '/reconciliations/:id', summary: 'A reconciliation: its loads, lines (BrokerVerse and legacy value, difference, tolerance, status), checks and tie-outs with their accounts, differences, sign-offs, summary and the users who uploaded, submitted or approved its loads (makers: they neither accept nor sign)',
     screen: SCREEN, middleware: canRead, response: { success: true, data: reconExample },
     handler: async (req, res) => ok(res, await recon.getReconciliation(req.params.id)),
   });

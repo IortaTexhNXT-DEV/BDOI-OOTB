@@ -156,7 +156,7 @@ const differenceOut = (d) => ({
 });
 const signoffOut = (s) => ({ slot: s.slot, label: s.label, signedBy: s.signed_by_name || s.signed_by, signedById: s.signed_by, signedAt: s.signed_at, remarks: s.remarks });
 
-/** A reconciliation with its loads, lines, differences, sign-offs and summary. */
+/** A reconciliation with its loads, lines, differences, sign-offs, the users who may not accept or sign it (makers) and summary. */
 export async function getReconciliation(id) {
   const r = await reconRow(id);
   const defs = await tieoutDefinitions();
@@ -172,7 +172,7 @@ export async function getReconciliation(id) {
     openingBalancesAsAt: asAtOf(r.cutover_date), status: r.status, computedAt: r.computed_at, createdBy: r.created_by_name || r.created_by, createdById: r.created_by, createdAt: r.created_at,
     signedAt: r.signed_at, supersededAt: r.superseded_at, supersededBy: r.superseded_by === null ? null : Number(r.superseded_by), signedReport: !!r.report_file_key, reportSha256: r.report_sha256,
     batches: batches.map((b) => ({ id: Number(b.id), loadNumber: b.load_number, legacySystem: b.legacy_system, loadedAt: b.loaded_at, status: b.status })),
-    lines: shown, differences: diffs.map(differenceOut), signoffs: signoffs.map(signoffOut),
+    lines: shown, differences: diffs.map(differenceOut), signoffs: signoffs.map(signoffOut), makers: await loaders(r),
     summary: {
       lines: shown.length, matched: shown.filter((l) => l.status === 'matched').length, differences: diffs.length,
       openDifferences: diffs.filter((d) => d.status === 'open').length,
