@@ -107862,12 +107862,22 @@
     "/posting-rules/flow": {
       "get": {
         "operationId": "getPostingRulesFlow",
-        "summary": "Accounting flow: for every business event, the screen that triggers it, the approval before posting, whether its journal is parked for approval or posted at once (accounting.parked_events) and the debit / credit lines of the rule in force (GL accounts resolved today)",
+        "summary": "Accounting reference: every business event grouped by module with when it posts, where, the approval before posting (worded from the settings in force), its journal state, pending and scheduled rule changes, the last posting date and the debit / credit lines with today's accounts and their mapping state (provisional, outside the chart, inactive); the other system journals; the accounts pending mapping; an edition code of the configuration. ?format=xlsx (accounting reference workbook; Technical sheet for finance administrators) or pdf (Accounting Entries Handbook, &download=1 as attachment)",
         "tags": [
           "Posting Rules"
         ],
         "description": "Front-end touchpoint: Master > Finance > Accounting Flow\n\nAccess: read:journal-vouchers, read:masters, read:settings",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "xlsx"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success",
@@ -107885,6 +107895,95 @@
                         "asOf": {
                           "type": "string"
                         },
+                        "edition": {
+                          "type": "string"
+                        },
+                        "controls": {
+                          "type": "object",
+                          "properties": {
+                            "autoPost": {
+                              "type": "boolean"
+                            },
+                            "configurationReview": {
+                              "type": "boolean"
+                            },
+                            "splitPremiumTaxes": {
+                              "type": "boolean"
+                            },
+                            "commissionVat": {
+                              "type": "boolean"
+                            },
+                            "commissionEwt": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "areas": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "count": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "mapping": {
+                          "type": "object",
+                          "properties": {
+                            "state": {
+                              "type": "string"
+                            },
+                            "pending": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "item": {
+                                    "type": "string"
+                                  },
+                                  "kind": {
+                                    "type": "string"
+                                  },
+                                  "glCode": {
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "type": "string"
+                                  },
+                                  "events": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "eventCode": {
+                                          "type": "string"
+                                        },
+                                        "label": {
+                                          "type": "string"
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "configure": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "pendingChanges": {
+                          "type": "array",
+                          "items": {}
+                        },
                         "events": {
                           "type": "array",
                           "items": {
@@ -107896,22 +107995,41 @@
                               "label": {
                                 "type": "string"
                               },
-                              "trigger": {
+                              "area": {
+                                "type": "string"
+                              },
+                              "when": {
+                                "type": "string"
+                              },
+                              "screen": {
+                                "type": "string"
+                              },
+                              "where": {
                                 "type": "string"
                               },
                               "approval": {
                                 "type": "string"
                               },
+                              "approvalControl": {},
+                              "authority": {},
                               "posting": {
                                 "type": "string"
                               },
-                              "alwaysPosted": {
+                              "postingText": {
                                 "type": "string"
                               },
                               "version": {
                                 "type": "integer"
                               },
-                              "debits": {
+                              "scheduled": {},
+                              "pending": {},
+                              "lastPosted": {
+                                "type": "string"
+                              },
+                              "mappingPending": {
+                                "type": "boolean"
+                              },
+                              "lines": {
                                 "type": "array",
                                 "items": {
                                   "type": "object",
@@ -107922,20 +108040,48 @@
                                     "amountKey": {
                                       "type": "string"
                                     },
+                                    "amount": {
+                                      "type": "string"
+                                    },
+                                    "perParticipant": {
+                                      "type": "boolean"
+                                    },
+                                    "condition": {},
                                     "account": {
                                       "type": "object",
                                       "properties": {
                                         "kind": {
                                           "type": "string"
                                         },
-                                        "label": {
+                                        "role": {
                                           "type": "string"
                                         },
-                                        "glCode": {}
+                                        "source": {
+                                          "type": "string"
+                                        },
+                                        "glCode": {
+                                          "type": "string"
+                                        },
+                                        "glName": {
+                                          "type": "string"
+                                        },
+                                        "mapping": {
+                                          "type": "string"
+                                        },
+                                        "configure": {
+                                          "type": "string"
+                                        },
+                                        "fallback": {},
+                                        "options": {},
+                                        "pendingChange": {}
                                       }
                                     }
                                   }
                                 }
+                              },
+                              "debits": {
+                                "type": "array",
+                                "items": {}
                               },
                               "credits": {
                                 "type": "array",
@@ -107948,13 +108094,23 @@
                                     "amountKey": {
                                       "type": "string"
                                     },
+                                    "amount": {
+                                      "type": "string"
+                                    },
+                                    "perParticipant": {
+                                      "type": "boolean"
+                                    },
+                                    "condition": {},
                                     "account": {
                                       "type": "object",
                                       "properties": {
                                         "kind": {
                                           "type": "string"
                                         },
-                                        "label": {
+                                        "role": {
+                                          "type": "string"
+                                        },
+                                        "source": {
                                           "type": "string"
                                         },
                                         "glCode": {
@@ -107962,7 +108118,16 @@
                                         },
                                         "glName": {
                                           "type": "string"
-                                        }
+                                        },
+                                        "mapping": {
+                                          "type": "string"
+                                        },
+                                        "configure": {
+                                          "type": "string"
+                                        },
+                                        "fallback": {},
+                                        "options": {},
+                                        "pendingChange": {}
                                       }
                                     }
                                   }
@@ -107970,6 +108135,10 @@
                               }
                             }
                           }
+                        },
+                        "systemJournals": {
+                          "type": "array",
+                          "items": {}
                         }
                       }
                     }
@@ -107978,45 +108147,271 @@
                 "example": {
                   "success": true,
                   "data": {
-                    "asOf": "2026-09-30",
+                    "asOf": "2026-10-09",
+                    "edition": "3F9A21C7",
+                    "controls": {
+                      "autoPost": true,
+                      "configurationReview": true,
+                      "splitPremiumTaxes": true,
+                      "commissionVat": true,
+                      "commissionEwt": true
+                    },
+                    "areas": [
+                      {
+                        "code": "premium",
+                        "name": "Premium billing",
+                        "count": 5
+                      }
+                    ],
+                    "mapping": {
+                      "state": "incomplete",
+                      "pending": [
+                        {
+                          "item": "Premium payable to insurers",
+                          "kind": "role",
+                          "glCode": "210245",
+                          "reason": "provisional",
+                          "events": [
+                            {
+                              "eventCode": "policy.issue.broker_billed",
+                              "label": "Policy issued – broker billed"
+                            }
+                          ],
+                          "configure": "/master/finance/premium-account-setup"
+                        }
+                      ]
+                    },
+                    "pendingChanges": [],
                     "events": [
                       {
-                        "eventCode": "receipt.apply",
-                        "label": "Premium collection applied",
-                        "trigger": "Accounts > Receipts",
-                        "approval": "Finance only",
+                        "eventCode": "policy.issue.broker_billed",
+                        "label": "Policy issued – broker billed",
+                        "area": "premium",
+                        "when": "A broker-billed policy is issued",
+                        "screen": "/agent/policy",
+                        "where": "Operations › Policy",
+                        "approval": "None: posted when the policy is issued",
+                        "approvalControl": null,
+                        "authority": null,
                         "posting": "posted",
-                        "alwaysPosted": "Posts with its sub-ledger: the bill, collection, commission or refund it records is used at once by the next steps",
-                        "version": 1,
-                        "debits": [
+                        "postingText": "Posted at once",
+                        "version": 2,
+                        "scheduled": null,
+                        "pending": null,
+                        "lastPosted": "2026-10-08",
+                        "mappingPending": true,
+                        "lines": [
                           {
-                            "side": "Dr",
-                            "amountKey": "amount",
+                            "side": "Cr",
+                            "amountKey": "due_to_insurer",
+                            "amount": "Premium due to the insurer",
+                            "perParticipant": true,
+                            "condition": null,
                             "account": {
-                              "kind": "resolver",
-                              "label": "Bank account of the receipt",
-                              "glCode": null
+                              "kind": "role",
+                              "role": "due_to_insurer",
+                              "source": "Premium payable to insurers (Account Determination › Premium)",
+                              "glCode": "210245",
+                              "glName": "Accounts Payable - Insurance Company",
+                              "mapping": "provisional",
+                              "configure": "/master/finance/premium-account-setup",
+                              "fallback": null,
+                              "options": null,
+                              "pendingChange": null
                             }
                           }
                         ],
+                        "debits": [],
                         "credits": [
                           {
                             "side": "Cr",
-                            "amountKey": "amount",
+                            "amountKey": "due_to_insurer",
+                            "amount": "Premium due to the insurer",
+                            "perParticipant": true,
+                            "condition": null,
                             "account": {
                               "kind": "role",
-                              "label": "Premiums receivable",
-                              "glCode": "1202001",
-                              "glName": "Premiums Receivable"
+                              "role": "due_to_insurer",
+                              "source": "Premium payable to insurers (Account Determination › Premium)",
+                              "glCode": "210245",
+                              "glName": "Accounts Payable - Insurance Company",
+                              "mapping": "provisional",
+                              "configure": "/master/finance/premium-account-setup",
+                              "fallback": null,
+                              "options": null,
+                              "pendingChange": null
                             }
                           }
                         ]
                       }
-                    ]
+                    ],
+                    "systemJournals": []
                   }
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Finance > Accounting Flow",
+        "x-permissions": [
+          "read:journal-vouchers",
+          "read:masters",
+          "read:settings"
+        ]
+      }
+    },
+    "/posting-rules/flow/{eventCode}/example": {
+      "get": {
+        "operationId": "getPostingRulesFlowEventCodeExample",
+        "summary": "Worked example of an event with sample amounts (nothing is posted): the amounts in business words and the balanced journal they build with today's accounts (?coInsurance=true: two insurers 60 / 40); 409 when the event has no rule in force",
+        "tags": [
+          "Posting Rules"
+        ],
+        "description": "Front-end touchpoint: Master > Finance > Accounting Flow\n\nAccess: read:journal-vouchers, read:masters, read:settings",
+        "parameters": [
+          {
+            "name": "eventCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "coInsurance",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "false"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "eventCode": {
+                          "type": "string"
+                        },
+                        "coInsurance": {
+                          "type": "boolean"
+                        },
+                        "coInsurable": {
+                          "type": "boolean"
+                        },
+                        "sample": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "amount": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "accountCode": {
+                                "type": "string"
+                              },
+                              "accountName": {
+                                "type": "string"
+                              },
+                              "debit": {
+                                "type": "integer"
+                              },
+                              "credit": {
+                                "type": "integer"
+                              },
+                              "example": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        },
+                        "totalDebit": {
+                          "type": "integer"
+                        },
+                        "totalCredit": {
+                          "type": "integer"
+                        },
+                        "balanced": {
+                          "type": "boolean"
+                        },
+                        "omitted": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "eventCode": "receipt.apply",
+                    "coInsurance": false,
+                    "coInsurable": false,
+                    "sample": [
+                      {
+                        "amount": "Amount of the receipt applied to the bill",
+                        "value": 11200
+                      }
+                    ],
+                    "lines": [
+                      {
+                        "accountCode": "106010",
+                        "accountName": "MBT Bank Balance",
+                        "debit": 11200,
+                        "credit": 0,
+                        "example": false
+                      },
+                      {
+                        "accountCode": "1202001",
+                        "accountName": "Premiums Receivable",
+                        "debit": 0,
+                        "credit": 11200,
+                        "example": false
+                      }
+                    ],
+                    "totalDebit": 11200,
+                    "totalCredit": 11200,
+                    "balanced": true,
+                    "omitted": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"

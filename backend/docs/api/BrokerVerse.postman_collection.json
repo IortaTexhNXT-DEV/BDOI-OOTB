@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1224 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1225 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -65554,21 +65554,27 @@
           ]
         },
         {
-          "name": "Accounting flow: for every business event, the screen that triggers it, the approval before posting, whether its journal is parked for approval or posted at once (accounting.parked_events) and the debit / credit lines of the rule in force (GL accounts resolved today)",
+          "name": "Accounting reference: every business event grouped by module with when it posts, where, the approval before posting (worded from the settings in force), its journal state, pending and scheduled rule changes, the last posting date and the debit / credit lines with today's accounts and their mapping state (provisional, outside the chart, inactive); the other system journals; the accounts pending mapping; an edition code of the configuration. ?format=xlsx (accounting reference workbook; Technical sheet for finance administrators) or pdf (Accounting Entries Handbook, &download=1 as attachment)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/posting-rules/flow",
+              "raw": "{{baseUrl}}/posting-rules/flow?format=xlsx",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "posting-rules",
                 "flow"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "xlsx"
+                }
               ]
             },
-            "description": "Accounting flow: for every business event, the screen that triggers it, the approval before posting, whether its journal is parked for approval or posted at once (accounting.parked_events) and the debit / credit lines of the rule in force (GL accounts resolved today)\n\nFront-end touchpoint: Master > Finance > Accounting Flow\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+            "description": "Accounting reference: every business event grouped by module with when it posts, where, the approval before posting (worded from the settings in force), its journal state, pending and scheduled rule changes, the last posting date and the debit / credit lines with today's accounts and their mapping state (provisional, outside the chart, inactive); the other system journals; the accounts pending mapping; an edition code of the configuration. ?format=xlsx (accounting reference workbook; Technical sheet for finance administrators) or pdf (Accounting Entries Handbook, &download=1 as attachment)\n\nFront-end touchpoint: Master > Finance > Accounting Flow\n\nAccess: read:journal-vouchers, read:masters, read:settings"
           },
           "response": [
             {
@@ -65577,16 +65583,22 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/posting-rules/flow",
+                  "raw": "{{baseUrl}}/posting-rules/flow?format=xlsx",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "posting-rules",
                     "flow"
+                  ],
+                  "query": [
+                    {
+                      "key": "format",
+                      "value": "xlsx"
+                    }
                   ]
                 },
-                "description": "Accounting flow: for every business event, the screen that triggers it, the approval before posting, whether its journal is parked for approval or posted at once (accounting.parked_events) and the debit / credit lines of the rule in force (GL accounts resolved today)\n\nFront-end touchpoint: Master > Finance > Accounting Flow\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+                "description": "Accounting reference: every business event grouped by module with when it posts, where, the approval before posting (worded from the settings in force), its journal state, pending and scheduled rule changes, the last posting date and the debit / credit lines with today's accounts and their mapping state (provisional, outside the chart, inactive); the other system journals; the accounts pending mapping; an edition code of the configuration. ?format=xlsx (accounting reference workbook; Technical sheet for finance administrators) or pdf (Accounting Entries Handbook, &download=1 as attachment)\n\nFront-end touchpoint: Master > Finance > Accounting Flow\n\nAccess: read:journal-vouchers, read:masters, read:settings"
               },
               "status": "OK",
               "code": 200,
@@ -65598,7 +65610,86 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-09-30\",\n    \"events\": [\n      {\n        \"eventCode\": \"receipt.apply\",\n        \"label\": \"Premium collection applied\",\n        \"trigger\": \"Accounts > Receipts\",\n        \"approval\": \"Finance only\",\n        \"posting\": \"posted\",\n        \"alwaysPosted\": \"Posts with its sub-ledger: the bill, collection, commission or refund it records is used at once by the next steps\",\n        \"version\": 1,\n        \"debits\": [\n          {\n            \"side\": \"Dr\",\n            \"amountKey\": \"amount\",\n            \"account\": {\n              \"kind\": \"resolver\",\n              \"label\": \"Bank account of the receipt\",\n              \"glCode\": null\n            }\n          }\n        ],\n        \"credits\": [\n          {\n            \"side\": \"Cr\",\n            \"amountKey\": \"amount\",\n            \"account\": {\n              \"kind\": \"role\",\n              \"label\": \"Premiums receivable\",\n              \"glCode\": \"1202001\",\n              \"glName\": \"Premiums Receivable\"\n            }\n          }\n        ]\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-09\",\n    \"edition\": \"3F9A21C7\",\n    \"controls\": {\n      \"autoPost\": true,\n      \"configurationReview\": true,\n      \"splitPremiumTaxes\": true,\n      \"commissionVat\": true,\n      \"commissionEwt\": true\n    },\n    \"areas\": [\n      {\n        \"code\": \"premium\",\n        \"name\": \"Premium billing\",\n        \"count\": 5\n      }\n    ],\n    \"mapping\": {\n      \"state\": \"incomplete\",\n      \"pending\": [\n        {\n          \"item\": \"Premium payable to insurers\",\n          \"kind\": \"role\",\n          \"glCode\": \"210245\",\n          \"reason\": \"provisional\",\n          \"events\": [\n            {\n              \"eventCode\": \"policy.issue.broker_billed\",\n              \"label\": \"Policy issued – broker billed\"\n            }\n          ],\n          \"configure\": \"/master/finance/premium-account-setup\"\n        }\n      ]\n    },\n    \"pendingChanges\": [],\n    \"events\": [\n      {\n        \"eventCode\": \"policy.issue.broker_billed\",\n        \"label\": \"Policy issued – broker billed\",\n        \"area\": \"premium\",\n        \"when\": \"A broker-billed policy is issued\",\n        \"screen\": \"/agent/policy\",\n        \"where\": \"Operations › Policy\",\n        \"approval\": \"None: posted when the policy is issued\",\n        \"approvalControl\": null,\n        \"authority\": null,\n        \"posting\": \"posted\",\n        \"postingText\": \"Posted at once\",\n        \"version\": 2,\n        \"scheduled\": null,\n        \"pending\": null,\n        \"lastPosted\": \"2026-10-08\",\n        \"mappingPending\": true,\n        \"lines\": [\n          {\n            \"side\": \"Cr\",\n            \"amountKey\": \"due_to_insurer\",\n            \"amount\": \"Premium due to the insurer\",\n            \"perParticipant\": true,\n            \"condition\": null,\n            \"account\": {\n              \"kind\": \"role\",\n              \"role\": \"due_to_insurer\",\n              \"source\": \"Premium payable to insurers (Account Determination › Premium)\",\n              \"glCode\": \"210245\",\n              \"glName\": \"Accounts Payable - Insurance Company\",\n              \"mapping\": \"provisional\",\n              \"configure\": \"/master/finance/premium-account-setup\",\n              \"fallback\": null,\n              \"options\": null,\n              \"pendingChange\": null\n            }\n          }\n        ],\n        \"debits\": [],\n        \"credits\": [\n          {\n            \"side\": \"Cr\",\n            \"amountKey\": \"due_to_insurer\",\n            \"amount\": \"Premium due to the insurer\",\n            \"perParticipant\": true,\n            \"condition\": null,\n            \"account\": {\n              \"kind\": \"role\",\n              \"role\": \"due_to_insurer\",\n              \"source\": \"Premium payable to insurers (Account Determination › Premium)\",\n              \"glCode\": \"210245\",\n              \"glName\": \"Accounts Payable - Insurance Company\",\n              \"mapping\": \"provisional\",\n              \"configure\": \"/master/finance/premium-account-setup\",\n              \"fallback\": null,\n              \"options\": null,\n              \"pendingChange\": null\n            }\n          }\n        ]\n      }\n    ],\n    \"systemJournals\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Worked example of an event with sample amounts (nothing is posted): the amounts in business words and the balanced journal they build with today's accounts (?coInsurance=true: two insurers 60 / 40); 409 when the event has no rule in force",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/posting-rules/flow/:eventCode/example?coInsurance=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posting-rules",
+                "flow",
+                ":eventCode",
+                "example"
+              ],
+              "query": [
+                {
+                  "key": "coInsurance",
+                  "value": "false"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "eventCode",
+                  "value": "",
+                  "description": "eventCode (path parameter)"
+                }
+              ]
+            },
+            "description": "Worked example of an event with sample amounts (nothing is posted): the amounts in business words and the balanced journal they build with today's accounts (?coInsurance=true: two insurers 60 / 40); 409 when the event has no rule in force\n\nFront-end touchpoint: Master > Finance > Accounting Flow\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/posting-rules/flow/:eventCode/example?coInsurance=false",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "posting-rules",
+                    "flow",
+                    ":eventCode",
+                    "example"
+                  ],
+                  "query": [
+                    {
+                      "key": "coInsurance",
+                      "value": "false"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "eventCode",
+                      "value": "",
+                      "description": "eventCode (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Worked example of an event with sample amounts (nothing is posted): the amounts in business words and the balanced journal they build with today's accounts (?coInsurance=true: two insurers 60 / 40); 409 when the event has no rule in force\n\nFront-end touchpoint: Master > Finance > Accounting Flow\n\nAccess: read:journal-vouchers, read:masters, read:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"eventCode\": \"receipt.apply\",\n    \"coInsurance\": false,\n    \"coInsurable\": false,\n    \"sample\": [\n      {\n        \"amount\": \"Amount of the receipt applied to the bill\",\n        \"value\": 11200\n      }\n    ],\n    \"lines\": [\n      {\n        \"accountCode\": \"106010\",\n        \"accountName\": \"MBT Bank Balance\",\n        \"debit\": 11200,\n        \"credit\": 0,\n        \"example\": false\n      },\n      {\n        \"accountCode\": \"1202001\",\n        \"accountName\": \"Premiums Receivable\",\n        \"debit\": 0,\n        \"credit\": 11200,\n        \"example\": false\n      }\n    ],\n    \"totalDebit\": 11200,\n    \"totalCredit\": 11200,\n    \"balanced\": true,\n    \"omitted\": []\n  }\n}"
             }
           ]
         },
