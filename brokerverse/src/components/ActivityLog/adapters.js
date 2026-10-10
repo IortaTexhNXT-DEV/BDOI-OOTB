@@ -120,10 +120,13 @@ export const fromStatusHistory = (rows = [], { statusLabels = {} } = {}) => {
   }, i));
 };
 
-/** GET /lead-assignment/history/:leadId: who the prospect went to, from whom, by which rule or person. */
+// a move by hand of a prospect nobody held is its first assignment, not a reassignment
+const assignmentAction = (r) => (["manual", "bulk"].includes(r.action) && !r.fromName && !r.fromUserId ? "assign" : r.action);
+
+/** GET /lead-assignment/history/:leadId: who the prospect went to, from whom, by which rule or person, and why. */
 export const fromAssignmentHistory = (rows = []) =>
   rows.map((r, i) => toEntry({
-    id: r.id, at: r.assignedAt, actionCode: r.action, user: userOf(r.assignedBy), remarks: r.reason,
+    id: r.id, at: r.assignedAt, actionCode: assignmentAction(r), user: userOf(r.assignedBy, null, r.assignedByRoles), remarks: r.reason,
     changes: [
       { field: "assignee", label: field("assignedTo"), before: r.fromName || null, after: r.toName || null },
       r.ruleName ? { field: "rule", label: field("rule"), before: null, after: r.ruleName } : null,

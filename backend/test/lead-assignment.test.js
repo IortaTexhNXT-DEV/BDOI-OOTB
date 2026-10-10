@@ -16,6 +16,8 @@ async function persona(username, roles, reportingTo = null) {
   tokens[username] = await loginAs(ctx.app, username, 'Welcome@123');
   return (m, p) => request(ctx.app)[m](`/api${p}`).set('Authorization', `Bearer ${tokens[username]}`);
 }
+const roleNames = async (username) => (await pool.query(`SELECT array_agg(ro.name ORDER BY ro.name) AS names FROM users u JOIN user_roles ur ON ur.user_id = u.id
+  JOIN roles ro ON ro.id = ur.role_id WHERE u.username = $1`, [username])).rows[0].names;
 const setting = async (key, value) => {
   await pool.query('UPDATE app_settings SET value = $2 WHERE key = $1', [key, JSON.stringify(value)]);
   clearSettingsCache();
@@ -77,6 +79,7 @@ describe('lead assignment rules', () => {
     expect(kh.body.data).toHaveLength(1);
     expect(kh.body.data[0]).toMatchObject({ action: 'manual', toUserId: ids['la.manager'], fromName: null });
     expect(kh.body.data[0].toName).toBeTruthy();
+    expect(kh.body.data[0].assignedByRoles).toEqual(await roleNames('la.manager'));
     await setting('leads.assignment_fallback', 'queue');
     const queued = await manager('post', '/leads').send({ firstName: 'Davaoeno', lob: 'FIRE', province: 'Davao del Sur' });
     expect(queued.body.assignmentStatus).toBe('queued');
@@ -181,7 +184,10 @@ describe('reassignment reasons, taking from the queue and running the rules', ()
     expect(r.status).toBe(200);
     expect(r.body.data).toMatchObject({ reasonCode: 'REA-TERRITORY', reason: 'Territory or branch change: Moved to Cebu' });
     const h = await ops('get', `/lead-assignment/history/${l.id}`);
-    expect(h.body.data[0]).toMatchObject({ action: 'manual', reasonCode: 'REA-TERRITORY', toName: 'la.ae1' });
+    expect(h.body.data[0]).toMatchObject({ action: 'manual', reasonCode: 'REA-TERRITORY', reason: 'Territory or branch change: Moved to Cebu', toName: 'la.ae1' });
+    // the person who moved it is named with the roles they hold
+    expect(h.body.data[0].assignedByRoles).toEqual(await roleNames('la.ops'));
+    expect(h.body.data[0].assignedByRoles.length).toBeGreaterThan(0);
     await setting('leads.reassignment_reason_required', false);
     expect((await ops('post', '/lead-assignment/reassign').send({ leadIds: [l.id], toUserId: ids['la.ae2'] })).status).toBe(200);
     await setting('leads.reassignment_reason_required', true);

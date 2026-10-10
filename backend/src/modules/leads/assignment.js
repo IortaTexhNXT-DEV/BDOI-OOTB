@@ -318,10 +318,13 @@ export async function queueList({ search, lob, branchCode, reasonCode } = {}) {
   [search || null, lob ? (untagged ? 'NONE' : lobOf(lob)) : null, branchCode || null, reasonCode ? (untaggedLine(reasonCode) ? 'NONE' : reasonCode) : null]);
 }
 
-/** The assignment history of a prospect. */
+// the role names of the user in a column, for the history to say who acted in which capacity
+const ROLES_OF = (column) => `COALESCE((SELECT array_agg(ro.name ORDER BY ro.name) FROM user_roles ur JOIN roles ro ON ro.id = ur.role_id WHERE ur.user_id = ${column}), '{}')`;
+
+/** The assignment history of a prospect, with the roles of the person who made each move. */
 export async function leadHistory(leadId) {
   const rows = await many(`SELECT h.id, h.action, h.reason, h.reason_code AS "reasonCode", h.assigned_at AS "assignedAt", h.from_user_id AS "fromUserId", fu.display_name AS "fromName",
-      h.to_user_id AS "toUserId", tu.display_name AS "toName", h.rule_id AS "ruleId", r.name AS "ruleName", bu.display_name AS "assignedBy"
+      h.to_user_id AS "toUserId", tu.display_name AS "toName", h.rule_id AS "ruleId", r.name AS "ruleName", bu.display_name AS "assignedBy", ${ROLES_OF('h.assigned_by')} AS "assignedByRoles"
     FROM lead_assignment_history h JOIN leads l ON l.id = h.lead_id LEFT JOIN users fu ON fu.id = h.from_user_id LEFT JOIN users tu ON tu.id = h.to_user_id
     LEFT JOIN users bu ON bu.id = h.assigned_by LEFT JOIN lead_assignment_rules r ON r.id = h.rule_id
     WHERE l.id = $1 OR l.lead_number = $1 ORDER BY h.assigned_at DESC, h.id DESC`, [String(leadId)]);
@@ -329,12 +332,13 @@ export async function leadHistory(leadId) {
   // a prospect given its account executive when it was captured or loaded has no move recorded yet: its current
   // assignment is the one entry, so the history still says to whom, by whom and under which rule
   const l = await one(`SELECT l.id, l.owner_user_id AS "toUserId", tu.display_name AS "toName", COALESCE(l.assigned_at, l.created_at) AS "assignedAt",
-      l.assignment_rule_id AS "ruleId", r.name AS "ruleName", COALESCE(cu.display_name, cu.username) AS "assignedBy"
+      l.assignment_rule_id AS "ruleId", r.name AS "ruleName", COALESCE(cu.display_name, cu.username) AS "assignedBy",
+      ${ROLES_OF('l.created_by')} AS "assignedByRoles"
     FROM leads l LEFT JOIN users tu ON tu.id = l.owner_user_id LEFT JOIN users cu ON cu.id = l.created_by LEFT JOIN lead_assignment_rules r ON r.id = l.assignment_rule_id
     WHERE (l.id = $1 OR l.lead_number = $1) AND l.owner_user_id IS NOT NULL`, [String(leadId)]);
   if (!l) return [];
   return [{ id: `${l.id}:current`, action: l.ruleId ? 'auto' : 'manual', reason: null, reasonCode: null, assignedAt: l.assignedAt, fromUserId: null, fromName: null,
-    toUserId: l.toUserId, toName: l.toName, ruleId: l.ruleId, ruleName: l.ruleName, assignedBy: l.assignedBy }];
+    toUserId: l.toUserId, toName: l.toName, ruleId: l.ruleId, ruleName: l.ruleName, assignedBy: l.assignedBy, assignedByRoles: l.assignedByRoles }];
 }
 
 /** The user and everyone reporting to them, directly or not (users.reporting_to), with their depth. */

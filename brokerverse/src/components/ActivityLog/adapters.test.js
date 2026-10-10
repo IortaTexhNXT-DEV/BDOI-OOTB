@@ -63,6 +63,13 @@ describe("activity log adapters", () => {
     const [la] = fromAssignmentHistory([{ id: 1, action: "auto", reason: null, assignedAt: "2026-10-01T00:00:00Z", fromName: null, toName: "Ana Sales", ruleName: "Motor leads", assignedBy: null }]);
     expect(la).toMatchObject({ actionCode: "auto", user: { displayName: null } });
     expect(la.changes.map((c) => [c.label, c.after])).toEqual([["Assigned to", "Ana Sales"], ["Rule", "Motor leads"]]);
+    const [first, moved] = fromAssignmentHistory([
+      { id: 5, action: "manual", reason: null, assignedAt: "2026-10-01T00:00:00Z", fromName: null, toName: "Ana Sales", assignedBy: "Lina Ops", assignedByRoles: ["Operations"] },
+      { id: 6, action: "manual", reason: "Territory or branch change: Moved to Cebu", assignedAt: "2026-10-02T00:00:00Z", fromUserId: 4, fromName: "Ana Sales",
+        toName: "Ben Sales", assignedBy: "Lina Ops", assignedByRoles: ["Operations", "Sales"] },
+    ]);
+    expect(first).toMatchObject({ actionCode: "assign", user: { displayName: "Lina Ops", role: "Operations" } });
+    expect(moved).toMatchObject({ actionCode: "manual", remarks: "Territory or branch change: Moved to Cebu", user: { role: "Operations, Sales" } });
     const [w] = fromWarrantyActions([{ id: 2, action: "request-cancellation", notes: "Unpaid", endorsementNumber: "END-1", createdBy: "Rosa Finance", createdAt: "2026-10-01T00:00:00Z" }],
       { actionLabels: { "request-cancellation": "Cancellation requested" } });
     expect(w).toMatchObject({ actionLabel: "Cancellation requested", user: { displayName: "Rosa Finance" }, remarks: "Unpaid" });
