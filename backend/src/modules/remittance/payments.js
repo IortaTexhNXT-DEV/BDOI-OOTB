@@ -29,7 +29,7 @@ import { applyDatePattern } from '../../lib/pdf/format.js';
 import { businessTimeZone, isoDate, today as businessToday } from '../../lib/dates.js';
 import { params, round2 } from '../masters/helpers.js';
 import { eligibleStatuses } from '../integrations/bankfiles/batches.js';
-import { decisionContext, limitSourceLabel, roleNames } from './decision.js';
+import { codeMoney, decisionContext, limitSourceLabel, roleNames } from './decision.js';
 
 export const SEGMENTS = ['to-pay', 'in-payment', 'paid', 'failed', 'all'];
 export const STATES = { 'to-pay': 'To pay', 'in-payment': 'In payment', paid: 'Paid', failed: 'Failed', cancelled: 'Cancelled' };
@@ -144,12 +144,14 @@ async function rowsOut(raw, user, batching) {
   const byId = new Map(rems.map((r) => [r.id, r]));
   const batchable = await eligibleStatuses();
   const write = hasPermission(user, 'write:disbursements');
+  const differences = await voucherDifferences(raw.filter((r) => ['to-pay', 'failed'].includes(r.state)).map((r) => r.id));
   return raw.map((r) => {
     const remittances = (r.remittance_ids || []).map((id) => byId.get(id)).filter(Boolean)
       .map((x) => ({ id: x.id, remittanceNo: x.remittance_number, dueToInsurer: round2(x.net_due), link: remittanceLink(x.id) }));
     const hasAccount = !!r.payee_account_number;
     const bank = r.payee_bank_name || r.payee_bank_code || null;
-    const selectable = ['to-pay', 'failed'].includes(r.state) && hasAccount && batchable.includes(r.voucher_status) && batching.allowed;
+    const difference = differences.get(r.id) || null;
+    const selectable = ['to-pay', 'failed'].includes(r.state) && hasAccount && batchable.includes(r.voucher_status) && batching.allowed && !difference;
     const actions = [{ code: 'view', label: 'View payment', allowed: true, link: paymentLink(r.voucher_number) }];
     if (remittances.length) actions.push({ code: 'open-remittance', label: 'Open remittance', allowed: true, link: remittances[0].link });
     if (r.batch_id) actions.push({ code: 'open-batch', label: 'Open batch', allowed: true, link: batchLink(r.batch_id) });
@@ -173,7 +175,10 @@ async function rowsOut(raw, user, batching) {
       cheque: r.cheque_id ? { id: r.cheque_id, number: r.cheque_no, status: r.cheque_status } : null,
       valueDate: isoDate(r.value_date), bankReference: r.bank_reference || null, paidOn: r.paid_on ? new Date(r.paid_on).toISOString() : null,
       failureReason: r.state === 'failed' ? (r.method === 'cheque' ? 'Cheque cancelled' : r.line_reason || 'Rejected by the bank') : null,
-      nextStep: nextStepOf(r, hasAccount), selectable, actions, link: paymentLink(r.voucher_number), voucherLink: voucherLink(r.id),
+      amountDifference: difference ? { amount: difference.difference, text: difference.text } : null,
+      nextStep: difference ? { code: 'amount-difference', label: 'Correct the voucher amount (Disbursement)', actor: { type: 'permission', name: 'Disbursement' }, reason: difference.text }
+        : nextStepOf(r, hasAccount),
+      selectable, actions, link: paymentLink(r.voucher_number), voucherLink: voucherLink(r.id),
     };
   });
 }
@@ -200,6 +205,31 @@ async function kpisOf(conds, values) {
     },
     segments: { 'to-pay': k.to_pay, 'in-payment': k.in_payment, paid: k.paid, failed: k.failed, all: k.all_count },
   };
+}
+
+/**
+ * The vouchers among `ids` whose amount differs from what their remittances owe (due to insurer, less the refund
+ * credits netted on the voucher): Map voucherId -> { voucherAmount, dueToInsurer, refundCredits, difference, text }.
+ * Such a voucher is not batched: the voucher of an R1 settlement pays the premium collected, which can fall short of
+ * the remittance (a policy not collected yet).
+ */
+export async function voucherDifferences(ids) {
+  const out = new Map();
+  if (!ids.length) return out;
+  const fmt = await printFormat();
+  const rows = await many(`SELECT d.id, d.amount, (SELECT sum(r.net_due) FROM remittances r WHERE x.data->'remittanceIds' ? r.id) AS due,
+      COALESCE((SELECT sum((ap->>'amount')::numeric) FROM insurer_refund_credits c CROSS JOIN LATERAL jsonb_array_elements(c.applications) ap WHERE ap->>'disbursementId' = d.id), 0) AS refund
+    FROM disbursements d JOIN LATERAL (SELECT s.data FROM remittance_items s WHERE s.kind = 'settlement' AND s.data->>'disbursementId' = d.id ORDER BY s.created_at DESC LIMIT 1) x ON TRUE
+    WHERE d.id = ANY($1) AND d.source = 'insurer-remittance'`, [ids.map(String)]);
+  for (const r of rows.filter((x) => x.due !== null)) {
+    const expected = round2(Number(r.due) - Number(r.refund));
+    const difference = round2(Number(r.amount) - expected);
+    if (Math.abs(difference) < 0.005) continue;
+    const money = (v) => codeMoney(Math.abs(v), fmt);
+    out.set(r.id, { voucherAmount: round2(r.amount), dueToInsurer: round2(r.due), refundCredits: round2(r.refund), difference,
+      text: `Voucher ${money(r.amount)} is ${money(difference)} ${difference < 0 ? 'less' : 'more'} than the ${money(expected)} due to the insurer.` });
+  }
+  return out;
 }
 
 /** Count of TRF- items of earlier releases (the Legacy transfers segment shows only when there are some). */

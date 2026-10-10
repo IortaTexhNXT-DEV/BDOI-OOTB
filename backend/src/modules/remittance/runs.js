@@ -3,7 +3,7 @@
  * history, the "Remittance schedules" job of Master > Schedules).
  *
  * A schedule (remittance-schedule master) names the insurers (or all active ones), the frequency, the next run date
- * and time, and the payment window: "Previous Monday to Friday" (the week before the run date; it needs a weekly
+ * and time, and the payment window: "Previous Monday to Friday" (the last Monday to Friday ended before the run date; it needs a weekly
  * schedule, MSG-RMT-007) or "Cut-off days" (policies incepted up to cutOffDays before the run date). The grouping is
  * stored for Phase 2; a run creates one draft per insurer from the policies incepted up to the end of the window that
  * are not on a remittance yet (service.js eligiblePolicies).
@@ -19,7 +19,7 @@ import { many, one, pool, query } from '../../db/pool.js';
 import { HttpError, badRequest } from '../../lib/errors.js';
 import { audit } from '../../lib/audit.js';
 import { hasPermission, isAdmin } from '../../lib/auth.js';
-import { businessTimeZone, addDays, today as businessToday } from '../../lib/dates.js';
+import { businessTimeZone, addDays, isoDate, today as businessToday } from '../../lib/dates.js';
 import { printFormat } from '../../lib/pdf/index.js';
 import { activityEntries, instant } from '../../lib/auditEvents.js';
 import { formatDate } from '../../lib/pdf/format.js';
@@ -45,17 +45,22 @@ const conflictOf = (code, message) => new HttpError(409, message, [{ path: 'sche
 
 const scheduleType = () => masters.getType('remittance-schedule');
 
-/** The window a run of schedule `s` on `runDate` covers: { from, to, catchUpFrom, weekly }. */
+/**
+ * The window a run of schedule `s` on `runDate` covers: { from, to, catchUpFrom, weekly }. "Previous Monday to Friday"
+ * is the last Monday to Friday that ended before the run date: on a Monday the week before, on a Saturday the week
+ * just ended.
+ */
 export function windowOf(s, runDate) {
   if (s.paymentWindow === WEEKLY_WINDOW) {
-    const monday = addDays(runDate, -((weekday(runDate) + 6) % 7) - 7);
-    return { from: monday, to: addDays(monday, 4), catchUpFrom: null, weekly: true };
+    const friday = addDays(runDate, -(((weekday(runDate) + 2) % 7) || 7));
+    return { from: addDays(friday, -4), to: friday, catchUpFrom: null, weekly: true };
   }
   const to = cutOffDate(s, runDate);
   return { from: to, to, catchUpFrom: null, weekly: false };
 }
 
-const windowText = (w, fmt) => (w.from === w.to ? `up to ${formatDate(w.from, fmt)}` : `${formatDate(w.from, fmt)} – ${formatDate(w.to, fmt)}`);
+const windowText = (w, fmt) => `${w.from === w.to ? `up to ${formatDate(w.from, fmt)}` : `${formatDate(w.from, fmt)} – ${formatDate(w.to, fmt)}`}${
+  w.catchUpFrom ? `, plus catch-up from ${formatDate(w.catchUpFrom, fmt)}` : ''}`;
 
 /** "Mondays 06:15", "Daily 05:50", "Monthly 06:15" from the frequency, the next run date and the run time. */
 function runsLabel(s) {
@@ -239,9 +244,10 @@ async function windowDoneText(s, done, runDate, fmt) {
 }
 
 /**
- * POST /remittance/schedules/:id/preview: what a run today would create, without writing anything: the window, per
- * insurer the policies ready and the amount due, and "Draft will be created" or "Nothing to remit"; windowDone when the
- * window already has a run (Run now is then refused with its reason).
+ * POST /remittance/schedules/:id/preview: what a run today would create, without writing anything: the window (with
+ * the catch-up: the earliest policy before the window not remitted yet), per insurer with policies ready the product
+ * lines, the policies and the amount due ("Draft will be created"); the insurers with nothing to remit are counted in
+ * totals.nothingToRemit; windowDone when the window already has a run (Run now is then refused with its reason).
  */
 export async function previewRun(id, { asOf = null } = {}) {
   const t = await scheduleType();
@@ -251,21 +257,28 @@ export async function previewRun(id, { asOf = null } = {}) {
   const w = windowOf(s, runDate);
   const done = await doneRun(s.code, w);
   const rows = [];
-  for (const ins of await coveredInsurers(s)) {
+  const covered = await coveredInsurers(s);
+  let catchUpFrom = null;
+  for (const ins of covered) {
     const pols = await eligiblePolicies({ insurerId: ins.id, to: w.to, kind: 'direct-bill' });
+    if (!pols.length) continue;
+    for (const p of pols) {
+      const day = isoDate(p.inception_date);
+      if (day && day < w.from && (!catchUpFrom || day < catchUpFrom)) catchUpFrom = day;
+    }
     const lines = pols.length ? await buildLines(pols.map((p) => ({ policyId: p.id })), ins.id) : [];
     const lineSet = [...new Set(pols.map((p) => p.product_line).filter(Boolean))].map((l) => l.charAt(0).toUpperCase() + l.slice(1));
     rows.push({ insurer: { id: ins.id, code: ins.code, name: ins.name }, productLine: lineSet.join(', ') || null, basis: pols.some((p) => p.gross_billed) ? 'Gross' : 'Net',
       ready: pols.length, held: 0, exceptions: 0, dueToInsurer: round2(lines.reduce((sum, l) => sum + l.net, 0)),
-      result: pols.length ? { code: 'draft', label: 'Draft will be created' } : { code: 'nothing', label: 'Nothing to remit' } });
+      result: { code: 'draft', label: 'Draft will be created' } });
   }
-  const drafts = rows.filter((r) => r.ready).length;
+  const drafts = rows.length;
   return {
     schedule: { id: s.id, code: s.code, name: s.name }, runDate,
-    window: { from: w.from, to: w.to, catchUpFrom: null, text: windowText(w, fmt) },
+    window: { from: w.from, to: w.to, catchUpFrom, text: windowText({ ...w, catchUpFrom }, fmt) },
     windowDone: done ? { done: true, runId: done.id, at: new Date(done.started_at).toISOString(), message: await windowDoneText(s, done, runDate, fmt) } : { done: false },
     paused: s.status !== 'Active', rows,
-    totals: { insurers: rows.length, drafts, ready: rows.reduce((n, r) => n + r.ready, 0), held: 0, exceptions: 0, dueToInsurer: round2(rows.reduce((n, r) => n + r.dueToInsurer, 0)) },
+    totals: { insurers: covered.length, nothingToRemit: covered.length - rows.length, drafts, ready: rows.reduce((n, r) => n + r.ready, 0), held: 0, exceptions: 0, dueToInsurer: round2(rows.reduce((n, r) => n + r.dueToInsurer, 0)) },
     verb: `Create ${drafts} draft remittance${drafts === 1 ? '' : 's'}`,
   };
 }

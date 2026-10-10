@@ -5,7 +5,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, remittanceBody } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { readWorkbook } from '../src/modules/documents/xlsx.js';
 
@@ -30,7 +30,7 @@ beforeAll(async () => {
   const [p] = await q(`INSERT INTO policies(policy_number, client_id, product_id, insurance_company_id, status, inception_date, expiry_date, issued_date, premium_total, commission_amount, sum_insured, renewed_from)
     VALUES ('TISPH-PC-DOC-0001', (SELECT id FROM clients ORDER BY id LIMIT 1), (SELECT id FROM products WHERE code = 'MOTOR'), $1, 'issued', DATE '2026-10-01', DATE '2027-10-01',
       DATE '2026-09-28', 64159.68, 24022.50, 1250000, NULL) RETURNING id`, [insurerId]);
-  const c = await ctx.api('post', '/remittance/remittances').send({ insurerCode: 'DOCINS', period: '2026-10', lines: [{ policyId: p.id }, { policyNo: 'EXT-DOC-2', premium: 12000, commission: 1800, tax: 200 }] });
+  const c = await ctx.api('post', '/remittance/remittances').send(await remittanceBody({ insurerCode: 'DOCINS', period: '2026-10', lines: [{ policyId: p.id }, { policyNo: 'EXT-DOC-2', premium: 12000, commission: 1800, tax: 200 }] }));
   expect(c.status).toBe(201);
   rem = c.body.data;
 });
@@ -82,11 +82,11 @@ describe('remittance advice', () => {
     await q(`INSERT INTO remittance_items(kind, reference_no, amount, status, insurance_company_id, data) VALUES ('settlement', 'SET-DOC-0001', 50137.18, 'Approved', $1, $2)`,
       [insurerId, JSON.stringify({ remittanceIds: [rem.id], disbursementId: d.id, voucherNumber: 'PV-DOC-0001' })]);
     await q("UPDATE remittances SET status = 'settled', settled_at = now() WHERE id = $1", [rem.id]);
-    const row = (await as(gm, 'get', `/remittance/remittances?segment=in-payment&insurerId=${insurerId}`)).body.data[0];
+    const row = (await as(gm, 'get', `/remittance/remittances?segment=all&insurerId=${insurerId}`)).body.data[0];
     expect(row).toMatchObject({ statusLabel: 'Settled (voucher raised)', voucher: { number: 'PV-DOC-0001' }, bankReference: 'MB123456' });
     expect(row.actions.map((a) => a.code)).toEqual(['view', 'download-schedule-xlsx', 'download-schedule-pdf', 'download-advice', 'open-voucher']);
     const rec = (await as(gm, 'get', `/remittance/remittances/${rem.id}`)).body.data;
-    expect(rec.payment).toMatchObject({ voucher: { number: 'PV-DOC-0001' }, method: 'bank-transfer', valueDate: '2026-10-13', bankReference: 'MB123456', settlement: { reference: 'SET-DOC-0001' } });
+    expect(rec.payment).toMatchObject({ voucher: { number: 'PV-DOC-0001' }, method: 'Bank transfer', valueDate: '2026-10-13', bankReference: 'MB123456', settlement: { reference: 'SET-DOC-0001' } });
     expect(rec.downloads.map((x) => x.code)).toEqual(['schedule-xlsx', 'schedule-pdf', 'advice']);
     const r = await binary(as(gm, 'get', `/remittance/remittances/${rem.id}/advice.pdf`));
     expect(r.status).toBe(200);

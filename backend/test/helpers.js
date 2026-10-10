@@ -189,3 +189,22 @@ export async function withOwnDamageOnly(policyId, sumInsured, ratePercent) {
   }
   return { net, gross };
 }
+
+/**
+ * A remittance body whose lines name a policy number with the amounts the test needs: each such policy is issued to
+ * the remittance's insurer at those amounts (premium, commission, tax) unless it exists, so the remittance is built at
+ * the system amounts as BrokerVerse requires. Lines naming a policy id are kept as they are.
+ */
+export async function remittanceBody(body) {
+  const { pool } = await import('../src/db/pool.js');
+  const ins = (await pool.query('SELECT id FROM insurance_companies WHERE id::text = $1 OR lower(code) = lower($1) ORDER BY id LIMIT 1', [String(body.insurerCode ?? body.insurerId)])).rows[0];
+  const lines = [];
+  for (const l of body.lines || []) {
+    if (l.policyId || l.premium === undefined) { lines.push(l); continue; }
+    await pool.query(`INSERT INTO policies(policy_number, status, insurance_company_id, premium_total, commission_amount, details, expiry_date)
+      VALUES ($1, 'issued', $2, $3, $4, $5, current_date + 365) ON CONFLICT (policy_number) DO NOTHING`,
+    [l.policyNo, ins?.id ?? null, l.premium, l.commission ?? 0, JSON.stringify({ taxTotal: l.tax ?? 0 })]);
+    lines.push({ policyNo: l.policyNo });
+  }
+  return { ...body, lines };
+}

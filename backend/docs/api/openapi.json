@@ -137238,7 +137238,7 @@
         "tags": [
           "Remittance"
         ],
-        "description": "Front-end touchpoint: Accounts > Remittance > Insurer payments\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements",
+        "description": "Front-end touchpoint: Accounts > Remittance > Insurer payments\n\nAccess: read:disbursements, write:disbursements",
         "parameters": [
           {
             "name": "segment",
@@ -137763,8 +137763,6 @@
         },
         "x-screen": "Accounts > Remittance > Insurer payments",
         "x-permissions": [
-          "read:remittance",
-          "write:remittance",
           "read:disbursements",
           "write:disbursements"
         ]
@@ -137777,7 +137775,7 @@
         "tags": [
           "Remittance"
         ],
-        "description": "Front-end touchpoint: Accounts > Remittance > Insurer payments > View payment\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements",
+        "description": "Front-end touchpoint: Accounts > Remittance > Insurer payments > View payment\n\nAccess: read:disbursements, write:disbursements",
         "parameters": [
           {
             "name": "voucherId",
@@ -138341,8 +138339,6 @@
         },
         "x-screen": "Accounts > Remittance > Insurer payments > View payment",
         "x-permissions": [
-          "read:remittance",
-          "write:remittance",
           "read:disbursements",
           "write:disbursements"
         ]
@@ -138435,7 +138431,7 @@
         "tags": [
           "Remittance"
         ],
-        "description": "Front-end touchpoint: Accounts > Remittance > Insurer payments > Export XLSX\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements",
+        "description": "Front-end touchpoint: Accounts > Remittance > Insurer payments > Export XLSX\n\nAccess: read:disbursements, write:disbursements",
         "parameters": [
           {
             "name": "segment",
@@ -138480,8 +138476,6 @@
         },
         "x-screen": "Accounts > Remittance > Insurer payments > Export XLSX",
         "x-permissions": [
-          "read:remittance",
-          "write:remittance",
           "read:disbursements",
           "write:disbursements"
         ]
@@ -141380,7 +141374,7 @@
     "/remittance/remittances/{id}/settle": {
       "post": {
         "operationId": "postRemittanceRemittancesIdSettle",
-        "summary": "Mark an approved remittance as settled (paid to the insurer)",
+        "summary": "Mark an approved remittance as settled (paid to the insurer); 409 SETTLE_OFF while remittance.direct_settle_enabled is off (TISPH: paid through the voucher of its settlement)",
         "tags": [
           "Remittance"
         ],
@@ -145374,7 +145368,7 @@
         "tags": [
           "Remittance"
         ],
-        "description": "Front-end touchpoint: Accounts > Remittance > Electronic Transfer; Accounts > Remittance > Insurer payments > Legacy transfers\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements",
+        "description": "Front-end touchpoint: Accounts > Remittance > Electronic Transfer; Accounts > Remittance > Insurer payments > Legacy transfers\n\nAccess: read:disbursements, write:disbursements",
         "parameters": [
           {
             "name": "legacy",
@@ -145565,8 +145559,6 @@
         },
         "x-screen": "Accounts > Remittance > Electronic Transfer; Accounts > Remittance > Insurer payments > Legacy transfers",
         "x-permissions": [
-          "read:remittance",
-          "write:remittance",
           "read:disbursements",
           "write:disbursements"
         ]
@@ -145678,7 +145670,7 @@
         "tags": [
           "Remittance"
         ],
-        "description": "Front-end touchpoint: Accounts > Remittance > Insurer payments > Legacy transfers > View\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements",
+        "description": "Front-end touchpoint: Accounts > Remittance > Insurer payments > Legacy transfers > View\n\nAccess: read:disbursements, write:disbursements",
         "parameters": [
           {
             "name": "id",
@@ -145826,8 +145818,6 @@
         },
         "x-screen": "Accounts > Remittance > Insurer payments > Legacy transfers > View",
         "x-permissions": [
-          "read:remittance",
-          "write:remittance",
           "read:disbursements",
           "write:disbursements"
         ]

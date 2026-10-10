@@ -205,7 +205,7 @@ describe('payment states, next step and the batching state', () => {
     expect(await decision('gm')).toMatchObject({ canDecide: false, blockedCode: 'NO_PERMISSION' });
     await persona('low', 'pyt.low', 'L. Limit', ['tis-finance']);
     await q("INSERT INTO authority_limits(transaction_type, user_id, max_amount, status, decided_at) VALUES ('payment_voucher', $1, 1000, 'active', now())", [people.low.id]);
-    expect(await decision('low')).toEqual({ canDecide: false, blockedCode: 'ABOVE_LIMIT', blockedReason: '₱7,000.00 is above your approval limit of ₱1,000.00.' });
+    expect(await decision('low')).toEqual({ canDecide: false, blockedCode: 'ABOVE_LIMIT', blockedReason: 'PHP 7,000.00 is above your approval limit of PHP 1,000.00.' });
     // the rules are those of the approval itself
     for (const who of ['maker', 'checker', 'cruz', 'low']) expect((await people[who]('post', `/bank-payments/batches/${v.batch.id}/approve`)).status, who).toBe(403);
     const listed = (await people.cruz('get', '/bank-payments/batches?status=for-approval')).body.data.find((b) => b.id === v.batch.id);

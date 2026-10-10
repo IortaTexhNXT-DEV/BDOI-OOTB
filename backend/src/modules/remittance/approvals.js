@@ -33,7 +33,7 @@ const MAX_ITEMS = 100;
 const LIST_SELECT = `SELECT a.*, (SELECT display_name FROM users u WHERE u.id = a.initiator_id) AS initiator_name,
     (SELECT display_name FROM users u WHERE u.id = a.action_by) AS action_by_name, (SELECT display_name FROM users u WHERE u.id = a.delegated_to) AS delegated_to_name,
     (SELECT display_name FROM users u WHERE u.id = a.reminded_by) AS reminded_by_name,
-    r.created_by AS maker_id, r.status AS record_status, r.version AS record_version, x.kind AS item_kind,
+    r.created_by AS maker_id, r.status AS record_status, r.version AS record_version, r.net_due AS record_amount, x.kind AS item_kind,
     ic.id AS insurer_id, ic.name AS insurer_name,
     (SELECT string_agg(DISTINCT rl.product, ', ') FROM remittance_lines rl WHERE rl.remittance_id = r.id) AS product_line
   FROM remittance_approvals a
@@ -102,7 +102,7 @@ async function rowOut(a, user, ctx, { labels, reminderHours }) {
     actions: [
       { code: 'view', label: 'View', allowed: true },
       { code: 'approve', label: 'Approve', allowed: decision.canDecide, ...(decision.canDecide ? {} : { blockedCode: decision.blockedCode, blockedReason: decision.blockedReason }) },
-      { code: 'reject', label: 'Reject', allowed: decision.canDecide || decision.blockedCode === 'ABOVE_LIMIT' },
+      { code: 'reject', label: 'Reject', allowed: decision.canDecide || ['ABOVE_LIMIT', 'CONTENT_CHANGED', 'TRANSFERS_OFF'].includes(decision.blockedCode) },
       { code: 'remind', label: 'Remind approver', allowed: pending && mineSubmitted && reminder.allowed && decision.eligibleApprovers.length > 0,
         ...(pending && mineSubmitted && !reminder.allowed ? { blockedReason: remindedText(ctx, reminder) } : {}) },
     ],
@@ -226,7 +226,10 @@ export function offCycleOf(r) {
   offCycle, offCycleReason: offCycle ? d.offCycleReason?.text || d.offCycleReason?.name || null : null };
 }
 
-/** Header, totals and the first lines of a remittance under approval, with the previous remittance of its insurer. */
+/**
+ * Header, totals and the first lines of a remittance under approval, with the previous remittance of its insurer: the
+ * latest one dated before it (remittance date, then creation), so remittances loaded together still find theirs.
+ */
 async function remittanceSummary(a, labels) {
   const r = await one(`SELECT r.*, i.name AS insurer_name, (SELECT display_name FROM users u WHERE u.id = r.created_by) AS created_by_name,
       (SELECT display_name FROM users u WHERE u.id = r.submitted_by) AS submitted_by_name FROM remittances r
@@ -234,8 +237,9 @@ async function remittanceSummary(a, labels) {
   if (!r) return null;
   const lines = await many(`SELECT policy_number, insured_name, product, premium, commission, tax, net FROM remittance_lines WHERE remittance_id = $1 ORDER BY id LIMIT 10`, [r.id]);
   const previous = await one(`SELECT p.id, p.remittance_number, p.net_due, p.remittance_date FROM remittances p
-    WHERE p.kind = $1 AND p.insurance_company_id = $2 AND p.id <> $3 AND p.status NOT IN ('draft', 'rejected', 'cancelled') AND p.created_at < $4
-    ORDER BY p.created_at DESC LIMIT 1`, [r.kind, r.insurance_company_id, r.id, r.created_at]);
+    WHERE p.kind = $1 AND p.insurance_company_id = $2 AND p.id <> $3 AND p.status NOT IN ('draft', 'rejected', 'cancelled')
+      AND (p.remittance_date, p.created_at, p.id) < ($4::date, $5::timestamptz, $3::text)
+    ORDER BY p.remittance_date DESC, p.created_at DESC, p.id DESC LIMIT 1`, [r.kind, r.insurance_company_id, r.id, r.remittance_date, r.created_at]);
   const net = Number(r.net_due);
   return {
     record: { id: r.id, remittanceNo: r.remittance_number, statusCode: r.status, statusLabel: labels[r.status] || r.status, insurer: { id: r.insurance_company_id, name: r.insurer_name },
@@ -313,7 +317,9 @@ export async function approvalSummary(id, user) {
   const s = a.entity === 'remittance' ? await remittanceSummary(a, labels) : await itemSummary(a);
   const activity = await activityOf(a, user);
   const summary = { record: s?.record ?? null, totals: s?.totals ?? null, lines: s?.lines ?? [], lineCount: s?.lineCount ?? 0, previous: s?.previous ?? null };
-  return { ...row, ...summary, checks: await checksOf(a, s, ctx), exceptions: await exceptionsOf(a), activity: activity.slice(-10) };
+  // the checks are those of a pending approval: a decision moves the remittance's version on, so a decided one has none
+  const checks = a.status === 'Pending' ? await checksOf(a, s, ctx) : [];
+  return { ...row, ...summary, checks, exceptions: await exceptionsOf(a), activity: activity.slice(-10) };
 }
 
 /** A failed item of a bulk decision as its result row. */

@@ -8,7 +8,7 @@
 import fs from 'node:fs';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, remittanceBody } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { requiredReason } from '../src/modules/ops-masters/records.js';
 import { actionTitle } from '../src/lib/auditLabels.js';
@@ -114,7 +114,7 @@ describe('the steps of a remittance in its activity log', () => {
   });
 
   it('the activity log of a remittance shows no raw action code', async () => {
-    const c = await ctx.api('post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo: 'EXT-STEPS-1', premium: 1000, commission: 150, tax: 0 }] });
+    const c = await ctx.api('post', '/remittance/remittances').send(await remittanceBody({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo: 'EXT-STEPS-1', premium: 1000, commission: 150, tax: 0 }] }));
     expect(c.status).toBe(201);
     const id = c.body.data.id;
     // the steps the later screens record, as the audit trail keeps them
@@ -136,7 +136,7 @@ describe('approve:remittance and the approval limit', () => {
   const setting = (settings) => ctx.api('put', '/settings').send({ settings }).then((r) => expect(r.status).toBe(200));
   /** A remittance of `net` PHP submitted by the administrator; returns its approval. */
   const submitted = async (policyNo, net) => {
-    const c = await ctx.api('post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo, premium: net + 1000, commission: 1000, tax: 0 }] });
+    const c = await ctx.api('post', '/remittance/remittances').send(await remittanceBody({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo, premium: net + 1000, commission: 1000, tax: 0 }] }));
     expect(c.status).toBe(201);
     expect((await ctx.api('post', '/remittance/remittances/process').send({ ids: [c.body.data.id] })).status).toBe(200);
     const a = (await ctx.api('get', '/remittance/approvals')).body.data.find((x) => x.entityId === c.body.data.id);
@@ -201,7 +201,7 @@ describe('approve:remittance and the approval limit', () => {
     const big = await submitted('EXT-AUTH-3', 1250000);
     const above = await santos('post', `/remittance/approvals/${big.id}/approve`).send({ comments: 'ok' });
     expect(above.status).toBe(403);
-    expect(above.body).toMatchObject({ message: '₱1,250,000.00 is above your approval limit of ₱1,000,000.00.', errors: [{ code: 'ABOVE_LIMIT' }] });
+    expect(above.body).toMatchObject({ message: 'PHP 1,250,000.00 is above your approval limit of PHP 1,000,000.00.', errors: [{ code: 'ABOVE_LIMIT' }] });
     // a rejection is not bound by the amount, and takes a reason of the remittance_reject context
     expect((await santos('post', `/remittance/approvals/${big.id}/reject`).send({ reasonCode: 'BRJ-DUPLICATE' })).status).toBe(400);
     expect((await santos('post', `/remittance/approvals/${big.id}/reject`).send({ reasonCode: 'RRJ-OTHER' })).status).toBe(400);

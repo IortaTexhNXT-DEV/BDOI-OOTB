@@ -39,7 +39,8 @@ import { bankAccountGl, postEvent } from '../accounting/lib/posting.js';
 import { allocate, isCoInsured, policyParticipants } from '../accounting/lib/coinsurance.js';
 import { assertChecker, isoDate, num, round2, today } from '../accounting/lib/http.js';
 import { renderTemplate } from '../documents/common.js';
-import { formatMoney } from '../../lib/money.js';
+import { printFormat } from '../../lib/pdf/index.js';
+import { codeMoney } from './decision.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { resolveCreditTerms } from '../commission-rates/terms.js';
 import { taxCodeRate } from '../accounting/lib/commissionTax.js';
@@ -453,7 +454,7 @@ export const billingLink = (id) => `/finance/remittance/billing?note=${encodeURI
 
 // approved with write:remittance (Remittance > Insurer billing)
 const askApproval = async (dn, user) => notifyApprovers({ audience: 'write:remittance', document: dn.documentType, number: dn.dnNumber, by: user?.username || 'system',
-  detail: `${dn.insurerName}, ${await formatMoney(dn.amount, dn.currency)}`, link: billingLink(dn.id), entity: 'commission_debit_note', entityId: dn.id });
+  detail: `${dn.insurerName}, ${codeMoney(dn.amount, dn.currency ? { ...(await printFormat()), currency: dn.currency } : await printFormat())}`, link: billingLink(dn.id), entity: 'commission_debit_note', entityId: dn.id });
 
 /** Release the items of a rejected / cancelled note so they can be billed again. */
 async function releaseItems(db, dnId) {

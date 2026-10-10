@@ -9,6 +9,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import cron from 'node-cron';
 import request from 'supertest';
 import { setupFinance } from './accounting.fixtures.js';
+import { remittanceBody } from './helpers.js';
 import { one, pool, query } from '../src/db/pool.js';
 import * as handlers from '../src/jobs/handlers.js';
 import { today } from '../src/lib/dates.js';
@@ -29,7 +30,7 @@ afterAll(async () => { await pool.end(); });
 
 const pendingFor = async (entityId) => (await ctx.api('get', '/remittance/approvals')).body.data.find((a) => a.entityId === entityId);
 const remittanceFor = async (net) => {
-  const c = await ctx.as('maker')('post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo: `EXT-${net}`, premium: net, commission: 0, tax: 0 }] });
+  const c = await ctx.as('maker')('post', '/remittance/remittances').send(await remittanceBody({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo: `EXT-${net}`, premium: net, commission: 0, tax: 0 }] }));
   expect(c.status).toBe(201);
   expect((await ctx.as('maker')('post', '/remittance/remittances/process').send({ ids: [c.body.data.id] })).status).toBe(200);
   return c.body.data.id;
@@ -51,7 +52,7 @@ describe('remittance approval limits come from the Authority Matrix', () => {
     expect(a.requiredLevels).toBe(1);
     const refused = await ctx.as('checker')('post', `/remittance/approvals/${a.id}/approve`).send({ comments: 'ok' });
     expect(refused.status).toBe(403);
-    expect(refused.body.message).toBe('₱1,500,000.00 is above your approval limit of ₱1,000,000.00.');
+    expect(refused.body.message).toBe('PHP 1,500,000.00 is above your approval limit of PHP 1,000,000.00.');
     expect(refused.body.errors[0].code).toBe('ABOVE_LIMIT');
     const ok = await manager('post', `/remittance/approvals/${a.id}/approve`).send({ comments: 'Within my authority' });
     expect(ok.status).toBe(200);
@@ -70,7 +71,7 @@ describe('remittance approval limits come from the Authority Matrix', () => {
       const a = await pendingFor(t.body.data.id);
       const refused = await ctx.as('checker')('post', `/remittance/approvals/${a.id}/approve`).send({});
       expect(refused.status).toBe(403);
-      expect(refused.body.message).toBe('₱40,000.00 is above your approval limit of ₱10,000.00.');
+      expect(refused.body.message).toBe('PHP 40,000.00 is above your approval limit of PHP 10,000.00.');
       expect(refused.body.errors[0].code).toBe('ABOVE_LIMIT');
       expect((await manager('post', `/remittance/approvals/${a.id}/approve`).send({})).body.data.status).toBe('Approved');
     } finally {

@@ -34,6 +34,12 @@ UPDATE app_settings s
    AND s.value->>'rejected' = 'Rejected' AND s.value->>'settled' = 'Completed'
    AND EXISTS (SELECT 1 FROM roles WHERE code = 'tis-finance');
 
+-- Status names in sentence case, as the screens write them (migration 0404)
+UPDATE app_settings s
+   SET value = s.value || '{"for-approval": "Pending approval"}'::jsonb, updated_at = now()
+ WHERE s.key = 'remittance.status_labels' AND s.updated_by IS NULL AND s.value->>'for-approval' = 'Pending Approval'
+   AND EXISTS (SELECT 1 FROM roles WHERE code = 'tis-finance');
+
 -- Off-cycle remittances come from Import policy list only (migration 0402): the bulk upload of earlier releases, whose
 -- typed amounts replaced the booked ones, is closed.
 UPDATE app_settings s
@@ -47,6 +53,12 @@ UPDATE app_settings s
 UPDATE app_settings s
    SET value = 'false'::jsonb, updated_at = now()
  WHERE s.key = 'remittance.transfers_enabled' AND s.updated_by IS NULL AND s.value = 'true'::jsonb
+   AND EXISTS (SELECT 1 FROM roles WHERE code = 'tis-finance');
+
+-- An approved remittance is paid through the voucher of its settlement only, never marked settled by hand (migration 0404).
+UPDATE app_settings s
+   SET value = 'false'::jsonb, updated_at = now()
+ WHERE s.key = 'remittance.direct_settle_enabled' AND s.updated_by IS NULL AND s.value = 'true'::jsonb
    AND EXISTS (SELECT 1 FROM roles WHERE code = 'tis-finance');
 
 -- The automated configurations ARM-001 and ARM-002 name insurers that are not on the TISPH panel, and SCH-001 runs

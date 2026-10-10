@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs, withoutConfigurationApproval } from './helpers.js';
+import { setup, loginAs, withoutConfigurationApproval, remittanceBody } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { activityEntries } from '../src/lib/auditEvents.js';
 
@@ -44,7 +44,7 @@ describe('remittance activity log', () => {
   let remId;
   let remNo;
   it('tells the whole life of a remittance: created, submitted, approved on the approval screen and settled by a settlement', async () => {
-    const c = await ctx.api('post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo: 'EXT-ACT-1', premium: 10000, commission: 1500, tax: 0 }] });
+    const c = await ctx.api('post', '/remittance/remittances').send(await remittanceBody({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo: 'EXT-ACT-1', premium: 10000, commission: 1500, tax: 0 }] }));
     expect(c.status).toBe(201);
     remId = c.body.data.id;
     remNo = c.body.data.remittanceNo;
@@ -65,9 +65,9 @@ describe('remittance activity log', () => {
     // the fields of earlier releases are kept
     expect(created).toMatchObject({ action: 'create', by: 'BrokerVerse', toStatus: 'Draft' });
     expect(new Date(created.at).getTime()).not.toBeNaN();
-    expect(submitted).toMatchObject({ fromStatus: null, toStatus: 'Pending Approval', user: { displayName: 'BrokerVerse Administrator' } });
+    expect(submitted).toMatchObject({ fromStatus: null, toStatus: 'Pending approval', user: { displayName: 'BrokerVerse Administrator' } });
     expect(approved).toMatchObject({ action: 'approve', by: 'al.finance', notes: 'Checked against the statement', remarks: 'Checked against the statement',
-      fromStatus: 'Pending Approval', toStatus: 'Approved', user: { displayName: 'Alma Finance', roles: ['Accounting'] } });
+      fromStatus: 'Pending approval', toStatus: 'Approved', user: { displayName: 'Alma Finance', roles: ['Accounting'] } });
     // a decision shows its level, the limit at decision and its source; the bookkeeping fields of the approval are not changes
     expect(approved.changes.every((c) => ['level', 'limitAtDecision', 'limitSource'].includes(c.field))).toBe(true);
     expect(approved.approval).toMatchObject({ limitSourceLabel: 'Role limit: Accounting' });

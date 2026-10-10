@@ -4,7 +4,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, remittanceBody } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 
 let ctx;
@@ -49,9 +49,9 @@ beforeAll(async () => {
   await persona('recon', 'sum.recon', 'C. Recon', ['tis-ccd-recon']);
   await persona('ops', 'sum.ops', 'O. Officer', ['tis-ops-officer']);
   await persona('sales', 'sum.sales', 'S. Sales', ['sales']);
-  const d = await people.maker('post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', period: '2026-10', lines: [{ policyNo: 'EXT-SUM-1', premium: 21000, commission: 1000, tax: 0 }] });
+  const d = await people.maker('post', '/remittance/remittances').send(await remittanceBody({ insurerCode: 'MALAYAN', period: '2026-10', lines: [{ policyNo: 'EXT-SUM-1', premium: 21000, commission: 1000, tax: 0 }] }));
   expect(d.status).toBe(201);
-  await people.maker('post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', period: '2026-10', lines: [{ policyNo: 'EXT-SUM-2', premium: 11000, commission: 1000, tax: 0 }] });
+  await people.maker('post', '/remittance/remittances').send(await remittanceBody({ insurerCode: 'MALAYAN', period: '2026-10', lines: [{ policyNo: 'EXT-SUM-2', premium: 11000, commission: 1000, tax: 0 }] }));
   const s = await people.maker('post', '/remittance/remittances/submit').send({ items: [{ id: d.body.data.id }] });
   expect(s.body.data.submitted).toBe(1);
   const e = await ctx.api('post', '/remittance/exceptions').send({ type: 'Amount Mismatch', severity: 'High', amount: 800, description: 'Short credit', assignedTo: 'sum.recon' });

@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, remittanceBody } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { collapseDuplicates } from '../src/modules/remittance/activity.js';
 
@@ -21,7 +21,7 @@ async function persona(key, username, displayName, roles) {
   people[key] = Object.assign((m, p) => request(ctx.app)[m](`/api${p}`).set('Authorization', `Bearer ${token}`), { id: r.body.data.userId });
 }
 async function submitted(policyNo, net) {
-  const c = await people.maker('post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo, premium: net + 1000, commission: 1000, tax: 0 }] });
+  const c = await people.maker('post', '/remittance/remittances').send(await remittanceBody({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo, premium: net + 1000, commission: 1000, tax: 0 }] }));
   expect(c.status).toBe(201);
   expect((await people.maker('post', '/remittance/remittances/process').send({ ids: [c.body.data.id] })).status).toBe(200);
   const [a] = await q("SELECT id FROM remittance_approvals WHERE entity = 'remittance' AND entity_id = $1", [c.body.data.id]);
@@ -52,11 +52,11 @@ describe('the decision under the remittance', () => {
     const log = await activity('maker', a.remittanceId);
     expect(log.map((e) => e.actionCode)).toEqual(['create', 'submit', 'approve']);
     const approved = log[2];
-    expect(approved).toMatchObject({ actionLabel: 'Remittance approved', fromStatus: 'Pending Approval', toStatus: 'Approved', remarks: 'Checked against the statement',
+    expect(approved).toMatchObject({ actionLabel: 'Remittance approved', fromStatus: 'Pending approval', toStatus: 'Approved', remarks: 'Checked against the statement',
       user: { displayName: 'J. Cruz', roles: ['TIS Finance & General Accounting'] },
       approval: { level: 1, requiredLevels: 1, limitAtDecision: 1000000, limitSourceLabel: 'Role limit: TIS Finance & General Accounting', reason: null } });
     expect(approved.changes).toEqual([
-      { field: 'limitAtDecision', label: 'Limit at decision', before: null, after: '₱1,000,000.00' },
+      { field: 'limitAtDecision', label: 'Limit at decision', before: null, after: 'PHP 1,000,000.00' },
       { field: 'limitSource', label: 'Limit source', before: null, after: 'Role limit: TIS Finance & General Accounting' }]);
     // the record carries the same log
     expect((await people.maker('get', `/remittance/remittances/${a.remittanceId}`)).body.data.activityLog.map((e) => e.actionCode)).toEqual(['create', 'submit', 'approve']);

@@ -18,8 +18,7 @@ import { many, one, query, withTransaction } from '../../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../../lib/errors.js';
 import { getSetting } from '../../../lib/settings.js';
 import { round2 } from '../../../lib/money.js';
-import { moneyText } from '../../../lib/auditEvents.js';
-import { printFormat } from '../../../lib/pdf/index.js';
+import { formatAmount, printFormat } from '../../../lib/pdf/index.js';
 import { nextDocumentNumber } from '../../../lib/numbering.js';
 import { companyName } from '../../../lib/letterhead.js';
 import { today } from '../../../lib/dates.js';
@@ -184,6 +183,9 @@ export async function createBatch(b, user) {
     const errors = [];
     if (vouchers.length !== new Set(b.disbursementIds).size) errors.push({ path: 'disbursementIds', message: 'Some vouchers were not found' });
     const lines = [];
+    // an insurer voucher that does not pay what its remittances owe is corrected first (Accounts > Remittance > Insurer payments)
+    const { voucherDifferences } = await import('../../remittance/payments.js');
+    const differences = await voucherDifferences(vouchers.filter((d) => d.source === 'insurer-remittance').map((d) => d.id));
     for (const d of vouchers.sort((x, y) => b.disbursementIds.indexOf(x.id) - b.disbursementIds.indexOf(y.id))) {
       const at = `voucher ${d.voucher_number}`;
       if (!statuses.includes(d.status)) errors.push({ path: at, message: `is ${d.status}; only vouchers ${statuses.join(' or ')} can be paid by bank file` });
@@ -192,6 +194,7 @@ export async function createBatch(b, user) {
       else if (!(Number(d.amount) > 0)) errors.push({ path: at, message: 'has no amount' });
       else if (limit && Number(d.amount) > limit) errors.push({ path: at, message: `is above the InstaPay limit of ${limit.toLocaleString('en-PH')}` });
       else if (perLine && Number(d.amount) > perLine) errors.push({ path: at, message: `is above the layout's limit per line of ${perLine.toLocaleString('en-PH')}` });
+      else if (differences.has(d.id)) errors.push({ path: at, message: differences.get(d.id).text });
       const acc = await payeeAccountOf(db, d);
       if (!acc) errors.push({ path: at, message: `${d.payee_name}: no bank account on file (Master > Finance > Bank File Layouts, Payee Bank Accounts)` });
       lines.push({ d, acc });
@@ -211,6 +214,9 @@ export async function createBatch(b, user) {
     return getBatch(batch.id, db);
   });
 }
+
+/** "PHP 1,000,000.00": the currency code and its decimals, as the payment screens write amounts. */
+const codeMoney = (v, fmt) => `${String(fmt.currency || 'PHP').toUpperCase()} ${formatAmount(v, fmt.decimals ?? 2)}`;
 
 async function transition(id, from, to, user, sets = {}) {
   return withTransaction(async (db) => {
@@ -271,7 +277,7 @@ export async function batchDecision(b, user, db = null) {
     }
     if (a.found && !a.unlimited && Number(b.total_amount) > a.limit) {
       const fmt = await printFormat();
-      return no('ABOVE_LIMIT', `${moneyText(Number(b.total_amount), fmt)} is above your approval limit of ${moneyText(a.limit, fmt)}.`);
+      return no('ABOVE_LIMIT', `${codeMoney(Number(b.total_amount), fmt)} is above your approval limit of ${codeMoney(a.limit, fmt)}.`);
     }
   }
   return { canDecide: true, blockedCode: null, blockedReason: null };

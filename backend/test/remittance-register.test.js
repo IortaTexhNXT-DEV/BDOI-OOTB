@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, remittanceBody } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { readWorkbook } from '../src/modules/documents/xlsx.js';
 
@@ -28,7 +28,7 @@ async function persona(key, username, displayName, roles) {
 
 /** A draft of the test insurer due to it for `net` PHP (premium net + 1,000, commission 1,000), made by `by`. */
 async function draft(policyNo, net, by = 'maker') {
-  const c = await people[by]('post', '/remittance/remittances').send({ insurerCode: 'RGTEST', period: '2026-10', lines: [{ policyNo, premium: net + 1000, commission: 1000, tax: 0 }] });
+  const c = await people[by]('post', '/remittance/remittances').send(await remittanceBody({ insurerCode: 'RGTEST', period: '2026-10', lines: [{ policyNo, premium: net + 1000, commission: 1000, tax: 0 }] }));
   expect(c.status, JSON.stringify(c.body)).toBe(201);
   return c.body.data;
 }
@@ -65,7 +65,7 @@ describe('segments, next step and actions', () => {
     const body = await list('maker', 'segment=in-approval');
     const s = body.data.find((x) => x.id === small.id);
     const b = body.data.find((x) => x.id === big.id);
-    expect(s).toMatchObject({ status: 'for-approval', statusLabel: 'Pending Approval', kind: 'direct-bill' });
+    expect(s).toMatchObject({ status: 'for-approval', statusLabel: 'Pending approval', kind: 'direct-bill' });
     expect(s.actions.map((a) => a.code)).not.toContain('submit');
     // the TIS Finance and General Manager approvers of the reference and sample data, not the submitter
     const eligible = s.decision.eligibleApprovers;
@@ -121,7 +121,7 @@ describe('segments, next step and actions', () => {
     expect(rec.decision.eligibleApprovers.map((u) => u.name)).toEqual(expect.arrayContaining(['A. Tan', 'J. Cruz']));
     expect(rec.decision.eligibleApprovers.map((u) => u.name)).not.toContain('M. Reyes');
     expect(rec.nextStep.label).toMatch(/^Awaiting remittance approver: /);
-    expect(rec).toMatchObject({ status: 'Pending Approval', statusCode: 'for-approval', statusLabel: 'Pending Approval', remittanceNo: small.remittanceNo, payment: null });
+    expect(rec).toMatchObject({ status: 'Pending approval', statusCode: 'for-approval', statusLabel: 'Pending approval', remittanceNo: small.remittanceNo, payment: null });
     expect(rec.downloads.map((d) => d.code)).toEqual(['schedule-xlsx', 'schedule-pdf']);
     expect(rec.lines).toHaveLength(1);
   });
@@ -141,7 +141,7 @@ describe('submitting several drafts', () => {
   it('submits the good drafts and gives the reason of each one that is not submitted', async () => {
     const good1 = await draft('EXT-RGT-S1', 1500);
     const good2 = await draft('EXT-RGT-S2', 2500);
-    const zero = await people.maker('post', '/remittance/remittances').send({ insurerCode: 'RGTEST', lines: [{ policyNo: 'EXT-RGT-S3', premium: 1000, commission: 1000, tax: 0 }] });
+    const zero = await people.maker('post', '/remittance/remittances').send(await remittanceBody({ insurerCode: 'RGTEST', lines: [{ policyNo: 'EXT-RGT-S3', premium: 1000, commission: 1000, tax: 0 }] }));
     const stale = await draft('EXT-RGT-S4', 3500);
     const r = await people.maker('post', '/remittance/remittances/submit').send({ items: [
       { id: good1.id, version: await versionOf(good1.id) }, { id: zero.body.data.id }, { id: good2.id }, { id: stale.id, version: 99 }, { id: 'rm_missing' }] });

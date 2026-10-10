@@ -126,8 +126,18 @@ async function settlementData(b, existing = {}) {
   };
 }
 
+/** What a settlement still needs to be submitted: a payment method, and the bank account of a method other than cheque. */
+function submissionErrors(d) {
+  const errors = [];
+  if (!d.paymentMethod) errors.push({ path: 'paymentMethod', message: 'Payment method is required' });
+  if (d.paymentMethod && !/check|cheque/i.test(d.paymentMethod) && !d.bankAccount) errors.push({ path: 'bankAccount', message: 'Bank account is required' });
+  return errors;
+}
+
 export async function createSettlement(b, user) {
   const { ins, totals, data } = await settlementData(b);
+  // a refused submission saves nothing: the draft would hold the lines and a retry would find none available
+  if (b.submit && submissionErrors(data).length) throw badRequest('Validation failed', submissionErrors(data));
   const ref = await nextDocumentNumber('settlement');
   const id = await insertItemNoTx({ kind: 'settlement', referenceNo: ref, insurerId: ins.id, amount: totals.netAmount, status: 'Draft', data: { ...data, settlementNo: ref }, userId: user.id });
   const x = await getItem('settlement', id);
@@ -147,20 +157,21 @@ export async function submitSettlement(id, b, user) {
   const x = await getItem('settlement', id);
   if (!['Draft', 'Rejected'].includes(x.status)) throw conflict(`Settlement is already ${x.status.toLowerCase()}`);
   const d = { ...x.data, ...(b.paymentMethod ? { paymentMethod: b.paymentMethod } : {}), ...(b.bankAccount ? { bankAccount: b.bankAccount } : {}) };
-  const errors = [];
-  if (!d.paymentMethod) errors.push({ path: 'paymentMethod', message: 'Payment method is required' });
-  if (d.paymentMethod && !/check|cheque/i.test(d.paymentMethod) && !d.bankAccount) errors.push({ path: 'bankAccount', message: 'Bank account is required' });
+  const errors = submissionErrors(d);
   if (errors.length) throw badRequest('Validation failed', errors);
   await withTransaction(async (c) => {
     await c.query('UPDATE remittance_items SET status = \'Pending Approval\', data = $2, updated_by = $3, updated_at = now() WHERE id = $1', [x.id, JSON.stringify(d), user.id]);
     await c.query('DELETE FROM remittance_approvals WHERE entity = \'item\' AND entity_id = $1 AND status = \'Pending\'', [x.id]);
-    await openApproval(c, { entity: 'item', entityId: x.id, referenceNo: x.reference_no, transactionType: 'Settlement', amount: Number(x.amount), description: `Settlement to ${d.insurerName} (${d.policies.length} policies)`, initiatorId: user.id });
+    await openApproval(c, { entity: 'item', entityId: x.id, referenceNo: x.reference_no, transactionType: 'Settlement', amount: Number(x.amount), description: `Settlement to ${d.insurerName} (${d.policies.length} polic${d.policies.length === 1 ? 'y' : 'ies'})`, initiatorId: user.id });
   });
   await askApproval({ transactionType: 'Settlement', referenceNo: x.reference_no, amount: Number(x.amount), description: d.insurerName, user, entityId: x.id });
   return itemOut(await getItem('settlement', x.id));
 }
 
 // ---------------- adjustments ----------------
+
+/** Statuses of a remittance an adjustment may change. */
+export const ADJUSTABLE = ['draft', 'rejected'];
 
 export async function createAdjustment(b, user) {
   requireFields(b, ['adjustmentType', 'reason', 'effectiveDate']);
@@ -170,6 +181,8 @@ export async function createAdjustment(b, user) {
   if (!type) throw badRequest('Validation failed', [{ path: 'adjustmentType', message: `${b.adjustmentType} is not an active adjustment type` }]);
   let rem = null;
   if (b.remittanceId || b.remittanceNo) rem = await getRemittance(b.remittanceId || b.remittanceNo);
+  // a submitted or approved remittance is what its approver decides on: it changes only as a draft or once returned
+  if (rem && !ADJUSTABLE.includes(rem.statusCode)) throw conflict(`${rem.remittanceNo} is ${rem.status}. Only a draft or returned remittance can be adjusted.`);
   const ref = b.referenceNo ? String(b.referenceNo) : await nextDocumentNumber('adjustment');
   if (await one('SELECT 1 FROM remittance_items WHERE reference_no = $1', [ref])) throw conflict(`Reference ${ref} already exists`);
   const original = toNumber(b.originalAmount ?? rem?.netAmount, 0);

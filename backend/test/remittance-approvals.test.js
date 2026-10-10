@@ -8,7 +8,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, remittanceBody } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { approvalInbox } from '../src/modules/remittance/approvals.js';
 import { decisionFor, eligibleApprovers, decisionContext } from '../src/modules/remittance/decision.js';
@@ -38,7 +38,7 @@ async function persona(key, username, displayName, { roles, permissions }) {
 
 /** A remittance of `net` PHP created and submitted by the maker; returns its approval row of the legacy list. */
 async function submitted(policyNo, net, by = 'maker') {
-  const c = await people[by]('post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo, premium: net + 1000, commission: 1000, tax: 0 }] });
+  const c = await people[by]('post', '/remittance/remittances').send(await remittanceBody({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo, premium: net + 1000, commission: 1000, tax: 0 }] }));
   expect(c.status, JSON.stringify(c.body)).toBe(201);
   expect((await people[by]('post', '/remittance/remittances/process').send({ ids: [c.body.data.id] })).status).toBe(200);
   const [a] = await q("SELECT id, version, reference_no FROM remittance_approvals WHERE entity = 'remittance' AND entity_id = $1 AND status = 'Pending'", [c.body.data.id]);
@@ -96,7 +96,7 @@ describe('who may decide, and why not', () => {
     expect(rowOf(await inbox('cruz', 'mine'), big.id)).toBeUndefined();
     expect(rowOf(await inbox('cruz', 'mine'), small.id)).toMatchObject({ decision: { canDecide: true, myLimit: 1000000, limitSourceLabel: 'Role limit: TIS Finance & General Accounting' } });
     const row = rowOf(await inbox('cruz', 'all'), big.id);
-    expect(row.decision).toMatchObject({ canDecide: false, blockedCode: 'ABOVE_LIMIT', blockedReason: '₱1,820,000.00 is above your approval limit of ₱1,000,000.00.', myLimit: 1000000 });
+    expect(row.decision).toMatchObject({ canDecide: false, blockedCode: 'ABOVE_LIMIT', blockedReason: 'PHP 1,820,000.00 is above your approval limit of PHP 1,000,000.00.', myLimit: 1000000 });
     const refused = await people.cruz('post', `/remittance/approvals/${big.id}/approve`).send({ version: big.version });
     expect(refused.status).toBe(403);
     expect(refused.body.errors[0].code).toBe('ABOVE_LIMIT');
@@ -134,7 +134,7 @@ describe('who may decide, and why not', () => {
     const checker = (await people.cruz('get', `/remittance/remittances/${small.remittanceId}`)).body.data.approval;
     expect(checker.actions.find((x) => x.code === 'approve')).toMatchObject({ allowed: true });
     expect(checker.actions.find((x) => x.code === 'remind')).toMatchObject({ allowed: false });
-    const draft = await people.maker('post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo: 'EXT-RAP-R0', premium: 2000, commission: 100, tax: 0 }] });
+    const draft = await people.maker('post', '/remittance/remittances').send(await remittanceBody({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo: 'EXT-RAP-R0', premium: 2000, commission: 100, tax: 0 }] }));
     expect((await people.maker('get', `/remittance/remittances/${draft.body.data.id}`)).body.data.approval).toBeNull();
   });
 

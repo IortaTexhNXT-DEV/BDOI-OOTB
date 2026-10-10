@@ -11,7 +11,7 @@ import { getSetting } from '../../lib/settings.js';
 import { renderTemplate } from '../documents/common.js';
 import { today as businessToday } from '../../lib/dates.js';
 import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
-import { formatMoney } from '../../lib/money.js';
+import { printFormat } from '../../lib/pdf/index.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { isoDate, params, round2, toNumber } from '../masters/helpers.js';
 import { createInsurerRemittance } from '../disbursements/service.js';
@@ -22,7 +22,7 @@ import { resolveCreditTerms } from '../commission-rates/terms.js';
 import { requiredReason } from '../ops-masters/records.js';
 import { audit } from '../../lib/audit.js';
 import { GROSS_BILLED_SQL } from './basis.js';
-import { approversFor, authorityTypeOf, decisionBlock, decisionContext, decisionFor, nextStepFor } from './decision.js';
+import { BLOCKED, approversFor, authorityTypeOf, codeMoney, decisionBlock, decisionContext, decisionFor, nextStepFor } from './decision.js';
 import { remittanceActivity } from './activity.js';
 
 export { authorityTypeOf };
@@ -168,16 +168,24 @@ export async function remittanceDetails(id, { viewer = null } = {}) {
 }
 
 /**
+ * The statuses that release the policies of a remittance for another one. A returned direct-bill remittance (rejected)
+ * is corrected and submitted again, so its policies stay on it until it is cancelled; an agency bill is closed by its
+ * rejection.
+ */
+export const RELEASED = { 'direct-bill': ['cancelled'], 'agency-bill': ['rejected', 'cancelled'] };
+
+/**
  * Policy rows eligible for billing / remittance (issued or active, not yet on a live remittance of this kind).
+ * `includeExpired` also takes expired policies (an imported catch-up or opening remittance of a policy that has run off).
  * Direct-bill policies are never remitted: the client paid the insurer, so no premium is payable (their commission is
  * billed with a commission debit note, see directbill.js).
  */
-export async function eligiblePolicies({ insurerId, agentUserId, from, to, productLine, policyIds, kind = 'direct-bill' }) {
-  const p = params([kind]);
+export async function eligiblePolicies({ insurerId, agentUserId, from, to, productLine, policyIds, kind = 'direct-bill', includeExpired = false }) {
+  const p = params([kind, RELEASED[kind] || RELEASED['direct-bill']]);
   const ins = insurerId ? p.add(Number(insurerId)) : null;
   // a co-insured policy is remitted to each participating insurer for its share (remittance_lines.insurance_company_id)
-  const conds = ['p.status IN (\'issued\', \'active\', \'renewed\')', 'p.billing_mode <> \'direct\'',
-    `NOT EXISTS (SELECT 1 FROM remittance_lines rl JOIN remittances rr ON rr.id = rl.remittance_id WHERE rl.policy_id = p.id AND rr.kind = $1 AND rr.status NOT IN ('rejected', 'cancelled')${ins ? ` AND (rl.insurance_company_id IS NULL OR rl.insurance_company_id = ${ins}::int)` : ''})`];
+  const conds = [`p.status IN ('issued', 'active', 'renewed'${includeExpired ? ", 'expired'" : ''})`, 'p.billing_mode <> \'direct\'',
+    `NOT EXISTS (SELECT 1 FROM remittance_lines rl JOIN remittances rr ON rr.id = rl.remittance_id WHERE rl.policy_id = p.id AND rr.kind = $1 AND rr.status <> ALL($2)${ins ? ` AND (rl.insurance_company_id IS NULL OR rl.insurance_company_id = ${ins}::int)` : ''})`];
   if (ins) conds.push(`((NOT ${CO_INSURED} AND p.insurance_company_id = ${ins}::int) OR (${CO_INSURED} AND EXISTS (SELECT 1 FROM risk_participants x WHERE x.entity_type = 'policy' AND x.entity_id = p.id AND x.status = 'active' AND x.insurance_company_id = ${ins}::int)))`);
   if (agentUserId) conds.push(`p.owner_user_id = ${p.add(agentUserId)}`);
   if (from) conds.push(`p.inception_date >= ${p.add(from)}::date`);
@@ -281,15 +289,49 @@ export async function defaultDueDate(from, insurerId = null) {
   return d.toISOString().slice(0, 10);
 }
 
+/**
+ * The lines of a new direct-bill remittance: each names a policy (policyId or policyNo) that is ready to remit to the
+ * insurer (eligiblePolicies: issued, not direct-bill, of this insurer, not on a remittance that holds it), once, and
+ * is remitted at the system amounts; premium, commission or tax sent with a line are ignored.
+ */
+async function policyLines(input, ins) {
+  const fail = (message) => badRequest('Validation failed', [{ path: 'lines', message }]);
+  const ids = [];
+  for (const l of input) {
+    const ref = String(l?.policyId || l?.policyNo || '').trim();
+    if (!ref) throw fail('Each line names a policy');
+    const p = await one('SELECT id, policy_number FROM policies WHERE id = $1 OR policy_number = $1', [ref]);
+    if (!p) throw fail(`Policy ${ref} was not found`);
+    if (ids.some((x) => x.id === p.id)) throw fail(`Policy ${p.policy_number} is on the remittance twice`);
+    ids.push(p);
+  }
+  const ready = new Set((await eligiblePolicies({ insurerId: ins.id, policyIds: ids.map((p) => p.id) })).map((p) => p.id));
+  for (const p of ids.filter((x) => !ready.has(x.id))) {
+    const on = await one(`SELECT r.remittance_number FROM remittance_lines rl JOIN remittances r ON r.id = rl.remittance_id WHERE rl.policy_id = $1 AND r.kind = 'direct-bill'
+      AND r.status <> ALL($2) AND (rl.insurance_company_id IS NULL OR rl.insurance_company_id = $3) ORDER BY r.created_at DESC LIMIT 1`, [p.id, RELEASED['direct-bill'], ins.id]);
+    throw fail(on ? `Policy ${p.policy_number} is already on ${on.remittance_number}` : `Policy ${p.policy_number} is not ready to remit to ${ins.name}`);
+  }
+  return buildLines(ids.map((p) => ({ policyId: p.id })), ins.id);
+}
+
 export async function createRemittance(b, user) {
   const kind = b.kind || 'direct-bill';
   if (!['direct-bill', 'agency-bill'].includes(kind)) throw badRequest('Validation failed', [{ path: 'kind', message: 'kind must be direct-bill or agency-bill' }]);
   const ins = await findInsurer(b.insurerId ?? b.insurerCode, { required: kind === 'direct-bill' });
   if (!Array.isArray(b.lines) || !b.lines.length) throw badRequest('Validation failed', [{ path: 'lines', message: 'At least one policy line is required' }]);
-  const lines = await buildLines(b.lines, kind === 'direct-bill' ? ins?.id : null);
+  const lines = kind === 'direct-bill' ? await policyLines(b.lines, ins) : await buildLines(b.lines);
   const dueDate = isoDate(b.dueDate) || await defaultDueDate(b.remittanceDate, kind === 'direct-bill' ? ins?.id : null);
   const id = await withTransaction((c) => insertRemittance(c, { kind, insurerId: ins?.id, period: b.period, dueDate, lines, remarks: b.remarks, date: isoDate(b.remittanceDate), userId: user.id }));
   return getRemittance(id);
+}
+
+/** The lines of remittance `r` whose policy (and insurer share) is also on another remittance that holds it. */
+async function policiesOnOtherRemittances(r) {
+  return many(`SELECT DISTINCT ON (rl.policy_id) rl.policy_number, o.remittance_number FROM remittance_lines rl
+      JOIN remittance_lines ol ON ol.policy_id = rl.policy_id AND ol.remittance_id <> rl.remittance_id
+        AND (rl.insurance_company_id IS NULL OR ol.insurance_company_id IS NULL OR ol.insurance_company_id = rl.insurance_company_id)
+      JOIN remittances o ON o.id = ol.remittance_id AND o.kind = $2 AND o.status <> ALL($3)
+    WHERE rl.remittance_id = $1 AND rl.policy_id IS NOT NULL ORDER BY rl.policy_id, o.created_at`, [r.id, r.kind, RELEASED[r.kind] || RELEASED['direct-bill']]);
 }
 
 export async function validateRemittances(ids) {
@@ -305,6 +347,7 @@ export async function validateRemittances(ids) {
     if (Number(r.net_due) <= 0) errors.push('Net amount must be greater than zero');
     if (r.kind === 'direct-bill' && !r.insurance_company_id) errors.push('Insurer is missing');
     if (r.insurance_company_id && !(await one('SELECT 1 FROM insurance_companies WHERE id = $1 AND status = \'active\'', [r.insurance_company_id]))) errors.push('Insurer is not active');
+    for (const x of await policiesOnOtherRemittances(r)) errors.push(`${x.policy_number} is also on ${x.remittance_number}`);
     results.push({ id: r.id, code: r.remittance_number, valid: !errors.length, errors });
   }
   return { totalValidated: results.length, validCount: results.filter((x) => x.valid).length, invalidCount: results.filter((x) => !x.valid).length, results };
@@ -365,7 +408,7 @@ export async function askApproval({ transactionType, referenceNo, amount, descri
   const users = (await approversFor(a, await decisionContext(user))).map((u) => u.id);
   if (!users.length) return;
   await notifyApprovers({ users, document: transactionType, number: referenceNo, by: user.username,
-    detail: `${description ? `${description}, ` : ''}${await formatMoney(amount)}`, link: approvalLink(a.id), entity, entityId });
+    detail: `${description ? `${description}, ` : ''}${codeMoney(amount, await printFormat())}`, link: approvalLink(a.id), entity, entityId });
 }
 
 export async function openApproval(c, { entity, entityId, referenceNo, transactionType, amount, description, initiatorId }) {
@@ -394,11 +437,11 @@ async function askRemittanceApprovals(ids, batchId, user) {
   for (const [userId, list] of byUser) {
     if (list.length === 1) {
       const [a] = list;
-      await notifyApprovers({ users: [userId], document: 'Remittance', number: a.reference_no, by: user.username, detail: await formatMoney(Number(a.amount)),
+      await notifyApprovers({ users: [userId], document: 'Remittance', number: a.reference_no, by: user.username, detail: codeMoney(Number(a.amount), await printFormat()),
         link: approvalLink(a.id), entity: 'remittance', entityId: a.entity_id });
     } else {
       await notifyApprovers({ users: [userId], document: 'Remittance batch', number: batchId, by: user.username, link: APPROVAL_LINK, entity: 'remittance_batch', entityId: batchId,
-        message: `${user.username} submitted ${list.length} remittances in batch ${batchId} (${await formatMoney(round2(list.reduce((s, a) => s + Number(a.amount), 0)))})` });
+        message: `${user.username} submitted ${list.length} remittances in batch ${batchId} (${codeMoney(round2(list.reduce((s, a) => s + Number(a.amount), 0)), await printFormat())})` });
     }
   }
 }
@@ -417,7 +460,7 @@ export async function processRemittances(ids, user) {
       total += Number(r.net_due);
       await c.query('UPDATE remittances SET status = \'for-approval\', submitted_by = $2, submitted_at = now(), batch_ref = $3, updated_by = $2, updated_at = now() WHERE id = $1', [r.id, user.id, batchId]);
       await c.query('DELETE FROM remittance_approvals WHERE entity = \'remittance\' AND entity_id = $1 AND status = \'Pending\'', [r.id]);
-      await openApproval(c, { entity: 'remittance', entityId: r.id, referenceNo: r.remittance_number, transactionType: r.kind === 'agency-bill' ? 'Agency Bill' : 'Insurer Remittance', amount: Number(r.net_due), description: `Remittance ${r.remittance_number} (${r.policy_count} policies)`, initiatorId: user.id });
+      await openApproval(c, { entity: 'remittance', entityId: r.id, referenceNo: r.remittance_number, transactionType: r.kind === 'agency-bill' ? 'Agency Bill' : 'Insurer Remittance', amount: Number(r.net_due), description: `Remittance ${r.remittance_number} (${r.policy_count} polic${Number(r.policy_count) === 1 ? 'y' : 'ies'})`, initiatorId: user.id });
     }
     await c.query(`INSERT INTO remittance_items(kind, reference_no, amount, status, data, created_by, updated_by) VALUES ('batch', $1, $2, 'Pending Approval', $3, $4, $4)`,
       [batchId, round2(total), JSON.stringify({ processedIds: ok.map((x) => x.id), itemCount: ok.length, durationMs: Date.now() - started }), user.id]);
@@ -448,7 +491,10 @@ async function raiseInsurerVoucher(c, item, lineIds, user) {
     // only premium collected up to the end of the settlement period: a later collection on the same policy belongs to
     // the next settlement, so the voucher agrees with the settlement it pays
     const periodEnd = Array.isArray(item.data?.settlementPeriod) ? item.data.settlementPeriod[1] || null : null;
-    voucher = await createInsurerRemittance(c, { insuranceCompanyId: item.insurance_company_id, policyIds, toDate: periodEnd, transactionCode: 'REMT', remarks: `Settlement ${item.reference_no}` }, maker);
+    // the voucher is paid the way the settlement was submitted: a cheque, or else a bank transfer
+    const method = item.data?.paymentMethod ? (/check|cheque/i.test(item.data.paymentMethod) ? 'check' : 'bank-transfer') : undefined;
+    voucher = await createInsurerRemittance(c, { insuranceCompanyId: item.insurance_company_id, policyIds, toDate: periodEnd, transactionCode: 'REMT', remarks: `Settlement ${item.reference_no}`,
+      paymentMode: method }, maker);
   } catch (e) {
     if (e.status !== 409) throw e; // 409: nothing collected and not yet remitted for these policies
   }
@@ -481,6 +527,10 @@ async function applyDecision(c, a, decision, user, remarks) {
     await raiseInsurerVoucher(c, item, lineIds, user);
   }
   if (item.kind === 'adjustment' && item.remittance_id) {
+    const rem = (await c.query('SELECT remittance_number, status FROM remittances WHERE id = $1 FOR UPDATE', [item.remittance_id])).rows[0];
+    if (rem && !['draft', 'rejected'].includes(rem.status)) {
+      throw conflict(`${rem.remittance_number} is ${(await statusLabels())[rem.status] || rem.status}. Only a draft or returned remittance can be adjusted.`);
+    }
     const amt = toNumber(item.data.adjustmentAmount, 0);
     await c.query('UPDATE remittances SET adjustments = adjustments + $2, net_due = net_due + $2, updated_by = $3, updated_at = now() WHERE id = $1', [item.remittance_id, amt, user.id]);
   }
@@ -488,8 +538,9 @@ async function applyDecision(c, a, decision, user, remarks) {
 
 export const APPROVAL_SELECT = `SELECT a.*, (SELECT display_name FROM users u WHERE u.id = a.initiator_id) AS initiator_name,
   (SELECT display_name FROM users u WHERE u.id = a.action_by) AS action_by_name, (SELECT display_name FROM users u WHERE u.id = a.delegated_to) AS delegated_to_name,
-  (SELECT r.created_by FROM remittances r WHERE a.entity = 'remittance' AND r.id = a.entity_id) AS maker_id
-  FROM remittance_approvals a`;
+  r.created_by AS maker_id, r.version AS record_version, r.net_due AS record_amount, x.kind AS item_kind
+  FROM remittance_approvals a LEFT JOIN remittances r ON a.entity = 'remittance' AND r.id = a.entity_id
+  LEFT JOIN remittance_items x ON a.entity = 'item' AND x.id = a.entity_id`;
 
 export function approvalOut(a) {
   const ageHours = (Date.now() - new Date(a.created_at).getTime()) / 3600000;
@@ -530,7 +581,7 @@ export async function getApproval(id) {
  * A refused decision: the message, with the code the screens key on as errors[0].code. A decision already taken by
  * someone else, or an approval changed since it was shown (STALE), is a conflict (409); the other codes are 403.
  */
-export const refusal = (code, message) => new HttpError(['ALREADY_DECIDED', 'STALE'].includes(code) ? 409 : 403, message, [{ path: 'approval', code, message }]);
+export const refusal = (code, message) => new HttpError(['ALREADY_DECIDED', 'STALE', 'CONTENT_CHANGED', 'TRANSFERS_OFF'].includes(code) ? 409 : 403, message, [{ path: 'approval', code, message }]);
 
 const STALE_TEXT = 'This approval changed since it was shown. Reload to see the current version.';
 
@@ -604,6 +655,10 @@ export async function decide(id, action, body, user, { req = null, version = nul
   const decision = { remarks, ...(reasonCode ? { reasonCode } : {}), limitAtDecision: d.myLimit, limitSource: d.limitSource };
   await withTransaction(async (c) => {
     const cur = await lockPending(c, a, version);
+    if (action === 'approve' && a.entity === 'remittance' && a.entity_version !== null && a.entity_version !== undefined) {
+      const rem = (await c.query('SELECT version FROM remittances WHERE id = $1 FOR UPDATE', [a.entity_id])).rows[0];
+      if (rem && rem.version !== a.entity_version) throw refusal('CONTENT_CHANGED', BLOCKED.CONTENT_CHANGED());
+    }
     const hist = [...(cur.history || [])];
     if (action === 'approve' && a.current_level < a.required_levels) {
       hist.push({ action: 'Approved', by: user.id, at: new Date().toISOString(), level: a.current_level, ...decision });
@@ -641,7 +696,15 @@ export async function decideFor(entity, entityId, action, body, user, opts = {})
   return decide(a.id, action, body, user, opts);
 }
 
+export const SETTLE_OFF = 'An approved remittance is paid through its payment voucher in Insurer payments.';
+
+/**
+ * Mark an approved remittance settled with a payment reference, while remittance.direct_settle_enabled is on. TISPH
+ * (off): a remittance is paid through the voucher of its settlement only, so a remittance never reads settled without
+ * one; refused with 409 SETTLE_OFF.
+ */
 export async function settleRemittance(id, b, user) {
+  if ((await getSetting('remittance.direct_settle_enabled')) === false) throw new HttpError(409, SETTLE_OFF, [{ path: 'remittance', code: 'SETTLE_OFF', message: SETTLE_OFF }]);
   const r = await getRemittanceRow(id);
   if (r.status !== 'approved') throw conflict('Only approved remittances can be settled');
   await query(`UPDATE remittances SET status = 'settled', settled_at = now(), remarks = COALESCE($2, remarks), data = data || $3, updated_by = $4, updated_at = now() WHERE id = $1`,

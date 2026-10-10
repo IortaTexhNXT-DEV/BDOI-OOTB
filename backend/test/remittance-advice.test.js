@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, remittanceBody } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 
@@ -17,7 +17,7 @@ const binary = (r) => r.buffer(true).parse((res, cb) => { const b = []; res.on('
 
 describe('remittance advice (Accounts > Remittance > Tracking > Print)', () => {
   it('prints the remittance on the letterhead with its policies and signatures; the agency bill keeps its own title', async () => {
-    const c = await ctx.api('post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo: 'EXT-ADV-1', premium: 12000, commission: 1800, tax: 0 }] });
+    const c = await ctx.api('post', '/remittance/remittances').send(await remittanceBody({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo: 'EXT-ADV-1', premium: 12000, commission: 1800, tax: 0 }] }));
     expect(c.status).toBe(201);
     const { id, remittanceNo } = c.body.data;
     const r = await binary(ctx.api('get', `/remittance/remittances/${id}/pdf`));
@@ -43,7 +43,7 @@ describe('remittance advice (Accounts > Remittance > Tracking > Print)', () => {
 
 describe('remittance advice letter (Remittances > Download advice)', () => {
   it('prints the portrait letter beside the print of earlier releases; before payment the amount paid is empty', async () => {
-    const c = await ctx.api('post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', period: '2026-10', lines: [{ policyNo: 'EXT-ADV-2', premium: 15000, commission: 2250, tax: 0 }] });
+    const c = await ctx.api('post', '/remittance/remittances').send(await remittanceBody({ insurerCode: 'MALAYAN', period: '2026-10', lines: [{ policyNo: 'EXT-ADV-2', premium: 15000, commission: 2250, tax: 0 }] }));
     const { id, remittanceNo } = c.body.data;
     const r = await binary(ctx.api('get', `/remittance/remittances/${id}/advice.pdf`));
     expect(r.status).toBe(200);

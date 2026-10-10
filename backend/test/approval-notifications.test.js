@@ -7,6 +7,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { setupFinance, makePolicy } from './accounting.fixtures.js';
+import { remittanceBody } from './helpers.js';
 import { pool, query, withTransaction } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { addDays, today } from '../src/lib/dates.js';
@@ -190,7 +191,7 @@ describe('remittance', () => {
   it('a submitted remittance goes to its eligible approvers by name, never to a role; the maker hears of the return with a link to the record', async () => {
     const recon = await admin('post', '/users').send({ username: 'ap.recon', password: PASSWORD, displayName: 'ap.recon', roles: ['tis-ccd-recon'], email: 'ap.recon@example.ph' });
     expect(recon.status).toBe(201);
-    const c = await maker('post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo: 'EXT-NTF-1', premium: 9000, commission: 1000, tax: 0 }] });
+    const c = await maker('post', '/remittance/remittances').send(await remittanceBody({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo: 'EXT-NTF-1', premium: 9000, commission: 1000, tax: 0 }] }));
     expect(c.status, JSON.stringify(c.body)).toBe(201);
     const remId = c.body.data.id;
     expect((await maker('post', '/remittance/remittances/process').send({ ids: [remId] })).status).toBe(200);

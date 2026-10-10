@@ -83758,7 +83758,7 @@
                 }
               ]
             },
-            "description": "Insurer payments (read:remittance or read:disbursements): the payment vouchers of insurer remittances with segment=to-pay|in-payment|paid|failed|all (a draft voucher is To pay, next step \"Submit voucher (Disbursement)\"), insurerId, from / to (value date), method fund-transfer|cheque, q (PV, REM, batch or bank ref.), paging: rows with state, masked payee account, method, batch, next step, selectable and actions; totals of the filtered set, the 4 KPI figures and segment counts over the filters, batching { allowed, code, reason } (NO_LAYOUT \"No Metrobank layout configured. Pay by cheque or ask the administrator.\", NO_PERMISSION) and the count of legacy transfers\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements"
+            "description": "Insurer payments (read:remittance or read:disbursements): the payment vouchers of insurer remittances with segment=to-pay|in-payment|paid|failed|all (a draft voucher is To pay, next step \"Submit voucher (Disbursement)\"), insurerId, from / to (value date), method fund-transfer|cheque, q (PV, REM, batch or bank ref.), paging: rows with state, masked payee account, method, batch, next step, selectable and actions; totals of the filtered set, the 4 KPI figures and segment counts over the filters, batching { allowed, code, reason } (NO_LAYOUT \"No Metrobank layout configured. Pay by cheque or ask the administrator.\", NO_PERMISSION) and the count of legacy transfers\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments\n\nAccess: read:disbursements, write:disbursements"
           },
           "response": [
             {
@@ -83810,7 +83810,7 @@
                     }
                   ]
                 },
-                "description": "Insurer payments (read:remittance or read:disbursements): the payment vouchers of insurer remittances with segment=to-pay|in-payment|paid|failed|all (a draft voucher is To pay, next step \"Submit voucher (Disbursement)\"), insurerId, from / to (value date), method fund-transfer|cheque, q (PV, REM, batch or bank ref.), paging: rows with state, masked payee account, method, batch, next step, selectable and actions; totals of the filtered set, the 4 KPI figures and segment counts over the filters, batching { allowed, code, reason } (NO_LAYOUT \"No Metrobank layout configured. Pay by cheque or ask the administrator.\", NO_PERMISSION) and the count of legacy transfers\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements"
+                "description": "Insurer payments (read:remittance or read:disbursements): the payment vouchers of insurer remittances with segment=to-pay|in-payment|paid|failed|all (a draft voucher is To pay, next step \"Submit voucher (Disbursement)\"), insurerId, from / to (value date), method fund-transfer|cheque, q (PV, REM, batch or bank ref.), paging: rows with state, masked payee account, method, batch, next step, selectable and actions; totals of the filtered set, the 4 KPI figures and segment counts over the filters, batching { allowed, code, reason } (NO_LAYOUT \"No Metrobank layout configured. Pay by cheque or ask the administrator.\", NO_PERMISSION) and the count of legacy transfers\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments\n\nAccess: read:disbursements, write:disbursements"
               },
               "status": "OK",
               "code": 200,
@@ -83849,7 +83849,7 @@
                 }
               ]
             },
-            "description": "Payment record (voucher id or no.): the row with the sections Payee (masked account, canReveal), Payment (method, value date, debit account, bank reference, paid on, failure reason), Amounts (due to insurer, refund credits netted, voucher and bank amount, check Pass / Difference), Links (remittances and schedules, voucher, batch, bank file, status file, cheque, journal), Approvals (remittance approvals with limit, voucher maker, batch created / approved, file generated, result imported), the timeline and the activity of the voucher, its batch and cheques\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments > View payment\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements"
+            "description": "Payment record (voucher id or no.): the row with the sections Payee (masked account, canReveal), Payment (method, value date, debit account, bank reference, paid on, failure reason), Amounts (due to insurer, refund credits netted, voucher and bank amount, check Pass / Difference), Links (remittances and schedules, voucher, batch, bank file, status file, cheque, journal), Approvals (remittance approvals with limit, voucher maker, batch created / approved, file generated, result imported), the timeline and the activity of the voucher, its batch and cheques\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments > View payment\n\nAccess: read:disbursements, write:disbursements"
           },
           "response": [
             {
@@ -83875,7 +83875,7 @@
                     }
                   ]
                 },
-                "description": "Payment record (voucher id or no.): the row with the sections Payee (masked account, canReveal), Payment (method, value date, debit account, bank reference, paid on, failure reason), Amounts (due to insurer, refund credits netted, voucher and bank amount, check Pass / Difference), Links (remittances and schedules, voucher, batch, bank file, status file, cheque, journal), Approvals (remittance approvals with limit, voucher maker, batch created / approved, file generated, result imported), the timeline and the activity of the voucher, its batch and cheques\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments > View payment\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements"
+                "description": "Payment record (voucher id or no.): the row with the sections Payee (masked account, canReveal), Payment (method, value date, debit account, bank reference, paid on, failure reason), Amounts (due to insurer, refund credits netted, voucher and bank amount, check Pass / Difference), Links (remittances and schedules, voucher, batch, bank file, status file, cheque, journal), Approvals (remittance approvals with limit, voucher maker, batch created / approved, file generated, result imported), the timeline and the activity of the voucher, its batch and cheques\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments > View payment\n\nAccess: read:disbursements, write:disbursements"
               },
               "status": "OK",
               "code": 200,
@@ -83984,7 +83984,7 @@
                 }
               ]
             },
-            "description": "Insurer payments > Export XLSX: every payment of the segment and filters of GET /payments (not one page), with the payee account chip, batch, value date, bank reference, paid on, state and next step\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments > Export XLSX\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements"
+            "description": "Insurer payments > Export XLSX: every payment of the segment and filters of GET /payments (not one page), with the payee account chip, batch, value date, bank reference, paid on, state and next step\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments > Export XLSX\n\nAccess: read:disbursements, write:disbursements"
           },
           "response": [
             {
@@ -84013,7 +84013,7 @@
                     }
                   ]
                 },
-                "description": "Insurer payments > Export XLSX: every payment of the segment and filters of GET /payments (not one page), with the payee account chip, batch, value date, bank reference, paid on, state and next step\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments > Export XLSX\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements"
+                "description": "Insurer payments > Export XLSX: every payment of the segment and filters of GET /payments (not one page), with the payee account chip, batch, value date, bank reference, paid on, state and next step\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments > Export XLSX\n\nAccess: read:disbursements, write:disbursements"
               },
               "status": "OK",
               "code": 200,
@@ -85333,7 +85333,7 @@
           ]
         },
         {
-          "name": "Mark an approved remittance as settled (paid to the insurer)",
+          "name": "Mark an approved remittance as settled (paid to the insurer); 409 SETTLE_OFF while remittance.direct_settle_enabled is off (TISPH: paid through the voucher of its settlement)",
           "request": {
             "method": "POST",
             "header": [
@@ -85361,7 +85361,7 @@
                 }
               ]
             },
-            "description": "Mark an approved remittance as settled (paid to the insurer)\n\nFront-end touchpoint: Accounts > Remittance > Settlement\n\nAccess: write:remittance",
+            "description": "Mark an approved remittance as settled (paid to the insurer); 409 SETTLE_OFF while remittance.direct_settle_enabled is off (TISPH: paid through the voucher of its settlement)\n\nFront-end touchpoint: Accounts > Remittance > Settlement\n\nAccess: write:remittance",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"referenceNo\": \"PESONET-889201\",\n  \"paymentMethod\": \"bank_transfer\",\n  \"paymentDate\": \"2026-09-30\"\n}",
@@ -85402,7 +85402,7 @@
                     }
                   ]
                 },
-                "description": "Mark an approved remittance as settled (paid to the insurer)\n\nFront-end touchpoint: Accounts > Remittance > Settlement\n\nAccess: write:remittance",
+                "description": "Mark an approved remittance as settled (paid to the insurer); 409 SETTLE_OFF while remittance.direct_settle_enabled is off (TISPH: paid through the voucher of its settlement)\n\nFront-end touchpoint: Accounts > Remittance > Settlement\n\nAccess: write:remittance",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"referenceNo\": \"PESONET-889201\",\n  \"paymentMethod\": \"bank_transfer\",\n  \"paymentDate\": \"2026-09-30\"\n}",
@@ -87244,7 +87244,7 @@
                 }
               ]
             },
-            "description": "Electronic transfers (status: Pending, Approved, Completed, Failed, Rejected). legacy=1 (Insurer payments > Legacy transfers, read-only): the TRF- items with the masked account, approved by, the journal posted at approval and its reversal or \"Not reversed\", totals (status, q, paging)\n\nFront-end touchpoint: Accounts > Remittance > Electronic Transfer; Accounts > Remittance > Insurer payments > Legacy transfers\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements"
+            "description": "Electronic transfers (status: Pending, Approved, Completed, Failed, Rejected). legacy=1 (Insurer payments > Legacy transfers, read-only): the TRF- items with the masked account, approved by, the journal posted at approval and its reversal or \"Not reversed\", totals (status, q, paging)\n\nFront-end touchpoint: Accounts > Remittance > Electronic Transfer; Accounts > Remittance > Insurer payments > Legacy transfers\n\nAccess: read:disbursements, write:disbursements"
           },
           "response": [
             {
@@ -87272,7 +87272,7 @@
                     }
                   ]
                 },
-                "description": "Electronic transfers (status: Pending, Approved, Completed, Failed, Rejected). legacy=1 (Insurer payments > Legacy transfers, read-only): the TRF- items with the masked account, approved by, the journal posted at approval and its reversal or \"Not reversed\", totals (status, q, paging)\n\nFront-end touchpoint: Accounts > Remittance > Electronic Transfer; Accounts > Remittance > Insurer payments > Legacy transfers\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements"
+                "description": "Electronic transfers (status: Pending, Approved, Completed, Failed, Rejected). legacy=1 (Insurer payments > Legacy transfers, read-only): the TRF- items with the masked account, approved by, the journal posted at approval and its reversal or \"Not reversed\", totals (status, q, paging)\n\nFront-end touchpoint: Accounts > Remittance > Electronic Transfer; Accounts > Remittance > Insurer payments > Legacy transfers\n\nAccess: read:disbursements, write:disbursements"
               },
               "status": "OK",
               "code": 200,
@@ -87388,7 +87388,7 @@
                 }
               ]
             },
-            "description": "One electronic transfer (id or TRF no.), read-only: beneficiary, masked account, method, amount, status, the approval and its decisions, the journal posted at approval, its reversal, the activity\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments > Legacy transfers > View\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements"
+            "description": "One electronic transfer (id or TRF no.), read-only: beneficiary, masked account, method, amount, status, the approval and its decisions, the journal posted at approval, its reversal, the activity\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments > Legacy transfers > View\n\nAccess: read:disbursements, write:disbursements"
           },
           "response": [
             {
@@ -87414,7 +87414,7 @@
                     }
                   ]
                 },
-                "description": "One electronic transfer (id or TRF no.), read-only: beneficiary, masked account, method, amount, status, the approval and its decisions, the journal posted at approval, its reversal, the activity\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments > Legacy transfers > View\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements"
+                "description": "One electronic transfer (id or TRF no.), read-only: beneficiary, masked account, method, amount, status, the approval and its decisions, the journal posted at approval, its reversal, the activity\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments > Legacy transfers > View\n\nAccess: read:disbursements, write:disbursements"
               },
               "status": "OK",
               "code": 200,

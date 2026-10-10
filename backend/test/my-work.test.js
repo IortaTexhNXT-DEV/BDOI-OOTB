@@ -3,7 +3,7 @@
 // automatic follow-up tasks and the reminder job.
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, remittanceBody } from './helpers.js';
 import { pool, query, one } from '../src/db/pool.js';
 import { today, addDays } from '../src/lib/dates.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
@@ -145,7 +145,7 @@ describe('open items per role and scope', () => {
   });
 
   it('remittance approvals open the approvals panel, never for the remittance\'s maker, and only with a remittance limit', async () => {
-    const c = await as('mw.acct1', 'post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo: 'EXT-MW-1', premium: 5000, commission: 500, tax: 0 }] });
+    const c = await as('mw.acct1', 'post', '/remittance/remittances').send(await remittanceBody({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo: 'EXT-MW-1', premium: 5000, commission: 500, tax: 0 }] }));
     expect(c.status, JSON.stringify(c.body)).toBe(201);
     expect((await as('mw.acct2', 'post', '/remittance/remittances/process').send({ ids: [c.body.data.id] })).status).toBe(200);
     const approval = await one("SELECT id FROM remittance_approvals WHERE entity = 'remittance' AND entity_id = $1", [c.body.data.id]);

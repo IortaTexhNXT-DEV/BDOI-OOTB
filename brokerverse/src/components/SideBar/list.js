@@ -453,7 +453,7 @@ export const menuList = [
             name: "Insurer payments",
             path: "/finance/remittance/payments",
             includes: ["/finance/remittance/payments"],
-            permissions: ["read:remittance", "read:disbursements"],
+            permissions: ["read:disbursements", "write:disbursements"],
           },
           {
             id: 4,

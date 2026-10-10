@@ -230,7 +230,7 @@ for (const action of ['approve', 'reject']) {
   });
 }
 define({
-  method: 'POST', path: '/remittances/:id/settle', summary: 'Mark an approved remittance as settled (paid to the insurer)', screen: S('Settlement'), middleware: write,
+  method: 'POST', path: '/remittances/:id/settle', summary: 'Mark an approved remittance as settled (paid to the insurer); 409 SETTLE_OFF while remittance.direct_settle_enabled is off (TISPH: paid through the voucher of its settlement)', screen: S('Settlement'), middleware: write,
   request: { referenceNo: 'PESONET-889201', paymentMethod: 'bank_transfer', paymentDate: '2026-09-30' }, response: { success: true, data: { ...rem, status: 'Completed', statusCode: 'settled' } },
   handler: async (req, res) => ok(res, await logged('remittance', 'settle', (r) => svc.settleRemittance(r.params.id, r.body || {}, r.user))(req, res), 'Remittance settled'),
 });
@@ -615,7 +615,8 @@ define({
 
 // ---------------- insurer payments ----------------
 // A read model of the insurer vouchers with their batch or cheque (payments.js); it pays and posts nothing.
-const readPayments = canRead('remittance', 'read:disbursements', 'write:disbursements');
+// the payment vouchers, payees and their bank accounts belong to Disbursement: read:remittance alone does not open them
+const readPayments = [requireAuth, requirePermission('read:disbursements', 'write:disbursements')];
 const payRow = { id: 'pv_102', voucherNo: 'PV-2026-00102', voucherStatus: 'for-approval', voucherStatusLabel: 'Submitted', state: 'to-pay', stateLabel: 'To pay', amount: 409141.43, currency: 'PHP',
   insurer: { id: 3, code: 'PIONEER', name: 'Pioneer Insurance & Surety Corp.', shortName: 'Pioneer' },
   remittance: { id: 'rm_21', remittanceNo: 'REM-2026-00021', dueToInsurer: 409141.43, link: '/finance/remittance/remittances/rm_21' }, remittances: [], settlement: { id: 'rmi_5', reference: 'SET-2026-00005' },

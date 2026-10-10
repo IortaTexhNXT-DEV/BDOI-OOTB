@@ -9,7 +9,9 @@
  * figures and segment counts of the page over the same filters, computed in SQL, never over one page.
  *
  * Segments map onto today's statuses: My work and Drafts are draft and rejected (Returned), In approval is
- * for-approval, In payment is approved and settled (voucher raised); All takes a status filter. The payment of a
+ * for-approval, In payment is approved, and settled (voucher raised) with a voucher not paid yet (the figure of the KPI
+ * Approved, not paid); a settled remittance without a voucher (earlier releases) is under All only. All takes a status
+ * filter. The payment of a
  * remittance is the voucher its settlement raised (remittance_items.data.disbursementId) until the Phase 2 lifecycle.
  * The source and the off-cycle reason are kept in remittances.data (source run-now / import, importId, importNo,
  * offCycleReason); a remittance of a schedule run without a source is a weekly run, any other is manual.
@@ -24,9 +26,12 @@ import { formatDate, isoDateOf } from '../../lib/pdf/format.js';
 import { round2, params } from '../masters/helpers.js';
 import { APPROVAL_SELECT, lineOut, processRemittances, remittanceDetails, statusCode, statusLabels, validateRemittances } from './service.js';
 import { decisionBlock, decisionContext, nextStepFor, whenText } from './decision.js';
+import { voucherDifferences } from './payments.js';
 
 export const SEGMENTS = { 'my-work': ['draft', 'rejected'], drafts: ['draft', 'rejected'], 'in-approval': ['for-approval'], 'in-payment': ['approved', 'settled'], all: null };
 export const SOURCES = { 'weekly-run': 'Weekly run', 'run-now': 'Run now', import: 'Import', manual: 'Manual' };
+/** Payment modes of a voucher (disbursements.payment_mode) as the record names them. */
+const PAYMENT_MODES = { check: 'Cheque', 'bank-transfer': 'Bank transfer', cash: 'Cash', card: 'Card', gcash: 'GCash' };
 export const KPIS = ['to-submit', 'awaiting-approval', 'approved-not-paid', 'overdue'];
 const MAX_ITEMS = 100;
 const voucherLink = (id) => `/accounts/paymentvoucher/detailview/${id}`;
@@ -91,6 +96,7 @@ async function filterConds(qs, p, today) {
 /** The segment (and on All the status filter) as conditions; My work is empty for a user who cannot prepare. */
 async function segmentConds(segment, qs, user, p) {
   if (segment === 'my-work' && !hasPermission(user, 'write:remittance')) return ['FALSE'];
+  if (segment === 'in-payment') return [UNPAID_SQL];
   const statuses = SEGMENTS[segment];
   if (statuses) return [`r.status = ANY(${p.add(statuses)})`];
   const wanted = [];
@@ -198,7 +204,7 @@ async function kpisOf(conds, values, today) {
       count(*) FILTER (WHERE ${UNPAID_SQL})::int AS unpaid, COALESCE(sum(r.net_due) FILTER (WHERE ${UNPAID_SQL}), 0) AS unpaid_amount,
       COALESCE(max(${t}::date - (COALESCE(r.approved_at, r.updated_at) AT TIME ZONE ${z})::date) FILTER (WHERE ${UNPAID_SQL}), 0) AS oldest_days,
       count(*) FILTER (WHERE ${overdueSql(t)})::int AS overdue, COALESCE(sum(r.net_due) FILTER (WHERE ${overdueSql(t)}), 0) AS overdue_amount,
-      count(*) FILTER (WHERE r.status IN ('approved', 'settled'))::int AS in_payment, count(*)::int AS all_count
+      count(*)::int AS all_count
     ${FROM} WHERE ${conds.join(' AND ')}`, p.values);
   return {
     kpis: {
@@ -207,7 +213,7 @@ async function kpisOf(conds, values, today) {
       approvedNotPaid: { count: k.unpaid, amount: round2(k.unpaid_amount), oldestDays: Number(k.oldest_days) || 0 },
       overdue: { count: k.overdue, amount: round2(k.overdue_amount) },
     },
-    segments: { 'my-work': k.to_submit, drafts: k.to_submit, 'in-approval': k.awaiting, 'in-payment': k.in_payment, all: k.all_count },
+    segments: { 'my-work': k.to_submit, drafts: k.to_submit, 'in-approval': k.awaiting, 'in-payment': k.unpaid, all: k.all_count },
   };
 }
 
@@ -264,6 +270,7 @@ export async function remittanceRecord(id, user) {
   const v = row.voucher;
   const voucher = v ? await one('SELECT voucher_date, payment_mode, reference_no, paid_at FROM disbursements WHERE id = $1', [v.id]) : null;
   const settlement = v ? await one(`SELECT x.id, x.reference_no FROM remittance_items x WHERE x.kind = 'settlement' AND x.data->>'disbursementId' = $1 ORDER BY x.created_at DESC LIMIT 1`, [v.id]) : null;
+  const differences = v ? await voucherDifferences([v.id]) : new Map();
   const downloads = row.actions.filter((a) => a.code.startsWith('download-')).map((a) => ({ code: a.code.replace(/^download-/, ''), label: a.label.replace(/^Download /, ''), href: a.href }));
   return {
     ...details, ...row,
@@ -272,7 +279,8 @@ export async function remittanceRecord(id, user) {
     // `status` stays the label the Tracking screen of earlier releases shows until it is retired; statusCode is the code
     status: details.status, statusCode: row.status, decision: details.decision ?? null,
     lines: lines.map(lineOut),
-    payment: v ? { voucher: v, method: voucher?.payment_mode || null, valueDate: isoDate(voucher?.voucher_date), bankReference: voucher?.paid_at ? voucher.reference_no || null : null,
+    payment: v ? { voucher: v, method: voucher?.payment_mode ? PAYMENT_MODES[voucher.payment_mode] || voucher.payment_mode : null,
+      amountDifference: differences.has(v.id) ? { amount: differences.get(v.id).difference, text: differences.get(v.id).text } : null, valueDate: isoDate(voucher?.voucher_date), bankReference: voucher?.paid_at ? voucher.reference_no || null : null,
       paidOn: voucher?.paid_at ? new Date(voucher.paid_at).toISOString() : null, settlement: settlement ? { id: settlement.id, reference: settlement.reference_no } : null } : null,
     downloads,
   };

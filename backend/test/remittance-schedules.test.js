@@ -139,8 +139,9 @@ describe('preview, Run now and the run history', () => {
     const p = await people.maker('post', `/remittance/schedules/${sch.id}/preview`);
     expect(p.status, JSON.stringify(p.body)).toBe(200);
     const runDate = await today();
-    const monday = addDays(runDate, -((new Date(`${runDate}T00:00:00Z`).getUTCDay() + 6) % 7) - 7);
-    expect(p.body.data.window).toMatchObject({ from: monday, to: addDays(monday, 4) });
+    // the last Monday to Friday that ended before today
+    const friday = addDays(runDate, -(((new Date(`${runDate}T00:00:00Z`).getUTCDay() + 2) % 7) || 7));
+    expect(p.body.data.window).toMatchObject({ from: addDays(friday, -4), to: friday });
     expect(p.body.data.windowDone).toEqual({ done: false });
     expect(p.body.data.rows).toEqual([expect.objectContaining({ insurer: expect.objectContaining({ code: 'SCTEST' }), ready: 2, held: 0, exceptions: 0, dueToInsurer: 20400,
       result: { code: 'draft', label: 'Draft will be created' } })]);
@@ -150,7 +151,9 @@ describe('preview, Run now and the run history', () => {
     // the seeded weekly schedule previews every active insurer, without writing either
     const w = byCode(await schedules(), 'TIS-WEEKLY');
     const pw = await people.maker('post', `/remittance/schedules/${w.id}/preview`);
-    expect(pw.body.data.rows.length).toBe(w.covers.count);
+    // the insurers with nothing to remit are counted, not listed
+    expect(pw.body.data.rows.length + pw.body.data.totals.nothingToRemit).toBe(w.covers.count);
+    expect(pw.body.data.rows.every((x) => x.ready > 0)).toBe(true);
     expect(pw.body.data.totals.dueToInsurer).toBe(Math.round(pw.body.data.rows.reduce((s, x) => s + x.dueToInsurer, 0) * 100) / 100);
     expect(await count('remittances')).toBe(before[0]);
   });

@@ -12,6 +12,9 @@
  * whose hash was already committed is refused, and a validated import not committed within 7 days counts as
  * discarded. The drafts still need Submit for approval and the approval of another user.
  *
+ * An issued, active, renewed or expired policy can be imported (an expired policy is remitted on a catch-up or opening
+ * remittance); a policy on a remittance that is not cancelled, a returned one included, is Already on REM.
+ *
  * Row results of R1: ready, ready-variance, already-on-rem, not-found, not-issued, insurer-differs,
  * product-line-differs, direct-bill, duplicate (and skipped at commit). Held and Exception arrive with the Phase 2
  * collections engine.
@@ -128,7 +131,7 @@ async function lookups(numbers) {
   const ids = policies.map((p) => p.id);
   const parts = ids.length ? await many(`SELECT entity_id, insurance_company_id FROM risk_participants WHERE entity_type = 'policy' AND status = 'active' AND entity_id = ANY($1)`, [ids]) : [];
   const live = ids.length ? await many(`SELECT rl.policy_id, rl.insurance_company_id, r.insurance_company_id AS remittance_insurer, r.remittance_number, r.status FROM remittance_lines rl
-    JOIN remittances r ON r.id = rl.remittance_id WHERE r.kind = 'direct-bill' AND r.status NOT IN ('rejected', 'cancelled') AND rl.policy_id = ANY($1) ORDER BY r.created_at`, [ids]) : [];
+    JOIN remittances r ON r.id = rl.remittance_id WHERE r.kind = 'direct-bill' AND r.status <> 'cancelled' AND rl.policy_id = ANY($1) ORDER BY r.created_at`, [ids]) : [];
   const insurers = await many("SELECT id, code, name, short_name FROM insurance_companies WHERE status = 'active'");
   return {
     policy: new Map(policies.map((p) => [p.policy_number.toLowerCase(), p])),
@@ -159,7 +162,7 @@ async function evaluate(rows, idx, labels) {
     if (!p) { done('not-found', 'Policy not found'); continue; }
     row.policy = p;
     if (p.status === 'cancelled') { done('not-issued', 'Policy is cancelled'); continue; }
-    if (!['issued', 'active', 'renewed'].includes(p.status)) { done('not-issued', 'Policy not issued'); continue; }
+    if (!['issued', 'active', 'renewed', 'expired'].includes(p.status)) { done('not-issued', 'Policy not issued'); continue; }
     if (p.billing_mode === 'direct') { done('direct-bill', 'Direct-bill policy: the client paid the insurer'); continue; }
     const ins = look.insurer.get(v.insurerCode.toLowerCase());
     const allowed = new Set([p.insurance_company_id, ...(look.participants.get(p.id) || [])].filter(Boolean).map(Number));
@@ -371,11 +374,11 @@ export async function commitImport(id, b, user, req) {
   const skipped = [];
   for (const rows of groups.values()) {
     const insurerId = rows[0].insurance_company_id;
-    const eligible = new Set((await eligiblePolicies({ insurerId, policyIds: rows.map((r) => r.policy_id) })).map((p) => p.id));
+    const eligible = new Set((await eligiblePolicies({ insurerId, policyIds: rows.map((r) => r.policy_id), includeExpired: true })).map((p) => p.id));
     const use = rows.filter((r) => eligible.has(r.policy_id));
     for (const r of rows.filter((x) => !eligible.has(x.policy_id))) {
       const on = await one(`SELECT r.remittance_number FROM remittance_lines rl JOIN remittances r ON r.id = rl.remittance_id WHERE rl.policy_id = $1 AND r.kind = 'direct-bill'
-        AND r.status NOT IN ('rejected', 'cancelled') ORDER BY r.created_at DESC LIMIT 1`, [r.policy_id]);
+        AND r.status <> 'cancelled' ORDER BY r.created_at DESC LIMIT 1`, [r.policy_id]);
       skipped.push({ row: r, message: on ? `Skipped: already on ${on.remittance_number}` : 'Skipped: no longer ready to remit' });
     }
     if (!use.length) continue;

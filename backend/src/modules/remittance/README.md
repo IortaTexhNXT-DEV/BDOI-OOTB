@@ -81,9 +81,14 @@ level, amount, myLimit, unlimited, limitSource, limitSourceLabel }` with the cod
 order: `ALREADY_DECIDED` ("Approved by J. Cruz at 10:32."), `NO_PERMISSION`, `SUBMITTER` (the remittance's submitter)
 or `MAKER` (an item's initiator, or the remittance's creator), `EARLIER_LEVEL`, `DELEGATED_AWAY` (legacy per-item
 delegation), `NO_AUTHORITY` (no limit, own, role or delegated, while `remittance.require_authority_limit` is on, TISPH;
-or `access.authority_without_limit` = refuse) and, to approve, `ABOVE_LIMIT` ("PHP 1,820,000.00 is above your approval
-limit of PHP 1,000,000.00."). A rejection is not bound by the amount. `decide()` refuses with the same code
-(`errors[0].code`; 403, or 409 for `ALREADY_DECIDED` and `STALE`). `eligibleApprovers(amount, initiatorIds, type)`
+or `access.authority_without_limit` = refuse) and, to approve, `TRANSFERS_OFF` (a legacy transfer while
+`remittance.transfers_enabled` is off), `CONTENT_CHANGED` (the remittance's version moved on since its submission:
+"This remittance changed after it was submitted. Reject it so the preparer can submit it again.") and `ABOVE_LIMIT`
+("PHP 1,820,000.00 is above your approval limit of PHP 1,000,000.00."). A remittance is decided at its amount now
+(`remittances.net_due`), not the amount kept at submission. A rejection is bound by neither. `decide()` refuses with
+the same code (`errors[0].code`; 403, or 409 for `ALREADY_DECIDED`, `STALE`, `CONTENT_CHANGED` and `TRANSFERS_OFF`) and
+checks the remittance's version again under lock in the decision's transaction. Amounts in these texts and in the
+approval notices are written "PHP 1,234.56" (`decision.js#codeMoney`). `eligibleApprovers(amount, initiatorIds, type)`
 lists the active users with the permission whose limit covers the amount, delegates included (`coveringFor`); they are
 the "next step" of a pending approval ("Awaiting remittance approver: J. Cruz, A. Tan", or "No eligible approver") and
 the only people told of it. My Work's remittance source applies the same rules in SQL and links to
@@ -105,9 +110,11 @@ totals, the KPI figures (awaiting my decision, past SLA, submitted by me, decide
 chips of the page (`permission`, `canDecide`, the remittance limit and its source, and `covering`: the people the user
 covers for today through a dated delegation, with its last day). Decided covers the last 30 days. `GET
 /approvals/export.xlsx` writes every row of the view and filters. Without `view` the legacy queue of the Approval Workflow screen is answered. `GET /approvals/:id` (or
-`remittance:<id>`) is the review panel: header, totals, first 10 lines, the previous remittance of the insurer with
-the change in %, the checks R1 can answer (content unchanged since submission, from `remittances.version` against the
-version kept at submission; today's accounting period, as information), open exceptions and the latest activity.
+`remittance:<id>`) is the review panel: header, totals, first 10 lines, the previous remittance of the insurer (the
+latest one dated before it, by remittance date then creation, so remittances loaded together find theirs) with the
+change in %, the checks R1 can answer while the approval is pending (content unchanged since submission, from
+`remittances.version` against the version kept at submission; today's accounting period, as information; a decided
+approval has none, the decision itself moves the version on), open exceptions and the latest activity.
 `POST /approvals/decide {items:[{id,version}], action, reasonCode, note}` decides each item on its own and answers a
 result per item ("Approved", "Already approved by J. Cruz at 10:32."). `POST /approvals/:id/remind` lets the submitter
 remind the eligible approvers once per `remittance.reminder_interval_hours` (4); a second reminder too early answers
@@ -132,7 +139,9 @@ direct-bill remittances only (agency bills never appear), filtered by coverage w
 `data.windowFrom`, else of the remittance date), insurer, product line, source (`data.source`: weekly-run, run-now,
 import; a schedule run without one is weekly-run, anything else manual), status (segment All), a KPI card (`kpi`) and
 `q` (REM, policy or OR number), paged and sorted on the server. Segments use today's statuses: My work and Drafts are
-draft and rejected (labelled Returned for TISPH), In approval is for-approval, In payment approved and settled; My work
+draft and rejected (labelled Returned for TISPH), In approval is for-approval, In payment approved, and settled with a
+voucher not paid yet (the KPI Approved, not paid; a settled remittance of earlier releases without a voucher is under
+All only); My work
 is empty for a user without `write:remittance`. Each row carries the status code and label, the flags (off-cycle with
 the reason of `data.offCycleReason`, overdue: due date passed and not settled with a paid voucher, open exceptions), the
 next step (a pending one: "Awaiting J. Cruz" or "Awaiting remittance approver (2)", from `decision.js`; a draft "Submit
@@ -165,7 +174,9 @@ Import policy list (`imports.js`, migration 0402): the file selects policies and
 /imports/limits` (IMPORT_MAX_MB, `remittance.import_max_rows`), `POST /imports/validate` (multipart file and
 `purposeCode`, a `remittance_off_cycle` reason): a file above the limit or of another type is refused with "Choose an
 .xlsx or .csv file of at most 10 MB.", a missing column with "Column Policy No not found."; otherwise the file, its
-SHA-256 hash and one result per row are kept under IMP-yyyy-nnnn (validated) and nothing is created. Row results:
+SHA-256 hash and one result per row are kept under IMP-yyyy-nnnn (validated) and nothing is created. An issued,
+active, renewed or expired policy can be imported (an expired one on a catch-up or opening remittance); a policy on a
+remittance that is not cancelled, a returned one included, is Already on REM. Row results:
 Ready, Ready · Variance (Expected Due to Insurer differs from the system amount by more than PHP 1.00), Already on REM,
 Not found, Not issued, Insurer differs, Product line differs, Direct bill, Duplicate in file. `GET /imports`, `GET
 /imports/:id` (counts, the remittances to create per insurer and product line with their basis, the same committed
@@ -181,7 +192,8 @@ drafts at the booked amounts of the policies, never at typed ones.
 
 Schedules and runs (`runs.js`, migration 0403): a schedule (remittance-schedule master, Setup > Schedules) names its
 kind, the insurers or all active ones (`allInsurers`), the frequency, the next run date and time (`runTime`), the
-grouping (stored for Phase 2) and the payment window: "Previous Monday to Friday" (the week before the run date; it
+grouping (stored for Phase 2) and the payment window: "Previous Monday to Friday" (the last Monday to Friday that
+ended before the run date; it
 needs the frequency Weekly and a Monday as next run, else 400 with `errors[0].code` MSG-RMT-007) or "Cut-off days"
 (policies incepted up to `cutOffDays` before the run date). New codes come from the `remittance_schedule` series
 (SCH-001, SCH-002 ...); creation, edits (before and after), pause and resume are audited. The schedules have no timer of
@@ -192,8 +204,10 @@ lastStatus }` (the cron and the job link for administrators only) and per schedu
 ("Mondays 06:15"), next run (none while paused), `lastRun { at, result, counts, message, trigger }` and the row menu of
 the caller (`actions`: View; with `write:remittance` Edit, Preview run, Run now and Pause or Resume, Run now disabled
 with its reason, PAUSED or WINDOW_DONE, while the schedule is paused or its current window has a run).
-`POST /schedules/:id/preview` is a dry run: per insurer the policies ready and the amount due, "Draft will be created"
-or "Nothing to remit", and `windowDone` when the window was run. `POST /schedules/:id/run {reasonCode, note}` is Run now
+`POST /schedules/:id/preview` is a dry run: the window with its catch-up ("05/10/2026 – 09/10/2026, plus catch-up from
+12/08/2026": the earliest ready policy before the window), per insurer with policies ready the product lines, the
+policies and the amount due ("Draft will be created"), the insurers with nothing to remit counted in
+`totals.nothingToRemit`, and `windowDone` when the window was run. `POST /schedules/:id/run {reasonCode, note}` is Run now
 (`write:remittance`, a `remittance_off_cycle` reason). Every run, by the job or by a user, is a row of
 `remittance_runs` (window, counts, drafts, result success / nothing / failed, message MSG-RMT-008 "Weekly run done: 3
 remittance(s) created, 0 policies held, 0 exceptions."); a window has one run that did not fail (a unique index), so a
@@ -210,7 +224,11 @@ and its latest cheque (a cheque written by a bank file result is the bank paymen
 step "Submit voucher (Disbursement)"), In payment, Paid, Failed (line rejected or cheque cancelled; next step "Re-batch
 or pay by cheque" with the bank's reason). The payee account is masked ("···4821", chip On file / No account); a row is
 `selectable` for a batch when it is To pay or Failed, the voucher can go on a batch (`bank_payments.allow_draft_vouchers`)
-and the account is on file. `batching { allowed, code, reason }`: `NO_PERMISSION` without `write:disbursements`,
+and the account is on file, and not while the voucher's amount differs from what its remittances owe
+(`voucherDifferences`: due to insurer less the refund credits netted; `amountDifference` and the next step "Correct the
+voucher amount (Disbursement)" with "Voucher PHP 89,026.00 is PHP 19,028.31 less than the PHP 108,054.31 due to the
+insurer."; Bank Payment Files refuses such a voucher on a new batch too). The routes need `read:disbursements` or
+`write:disbursements`: `read:remittance` alone does not open the vouchers and payees. `batching { allowed, code, reason }`: `NO_PERMISSION` without `write:disbursements`,
 `NO_LAYOUT` ("No Metrobank layout configured. Pay by cheque or ask the administrator.") while no active layout exists for
 the bank of `remittance.payment_bank_code`; paying by cheque stays possible. The answer has the totals of the filtered
 set, the KPI figures (to pay, in payment, paid this week, failed) and the segment counts. `GET /payments/:voucherId`
@@ -221,8 +239,9 @@ Difference), Links, Approvals, the timeline and the activity of the voucher, bat
 filters, not one page, with the account masked. It creates no payment and posts nothing.
 
 Electronic transfers (`remittance.transfers_enabled`, TISPH off): `POST /transfers` and `POST /transfers/:id/execute`
-answer 409 `TRANSFERS_OFF` "Electronic transfers are replaced by Insurer payments.", and approving a pending transfer
-approval is refused the same way (it would post `remittance.transfer`); rejecting it stays possible. `GET
+answer 409 `TRANSFERS_OFF` "Electronic transfers are replaced by Insurer payments.", and a pending transfer approval
+carries the decision block `TRANSFERS_OFF` (no approver is offered it; approving it is refused, it would post
+`remittance.transfer`); rejecting it stays possible. `GET
 /transfers?legacy=1` and `GET /transfers/:id` show the TRF- items read-only with the approval, the journal posted at
 approval and its reversal ("Not reversed").
 
@@ -289,3 +308,17 @@ before approval).
   `remittance.payment_bank_code` (Master > Finance > Bank File Layouts). Pay by cheque in Disbursement meanwhile.
 - A transfer answers "Electronic transfers are replaced by Insurer payments.": `remittance.transfers_enabled` is off
   (TISPH). Pay the voucher from Insurer payments.
+
+One remittance per policy, at the system amounts: `POST /remittances` (direct bill) takes lines that name a policy
+(`policyId` or `policyNo`) ready to remit to the insurer (`eligiblePolicies`), once each, and builds them at the
+booked amounts; premium, commission or tax sent with a line are ignored, and an unknown, repeated or already remitted
+policy is refused ("Policy POL-… is already on REM-…"). A policy stays on its remittance until that one is cancelled:
+a returned remittance (rejected) is corrected and submitted again, so it keeps its policies (`service.js#RELEASED`), and
+`validateRemittances` refuses to submit a remittance whose policy is also on another one ("POL-… is also on REM-…").
+An adjustment changes a draft or returned remittance only (409 otherwise, also when its approval is decided). While
+`remittance.direct_settle_enabled` is off (TISPH, migration 0404) `POST /remittances/:id/settle` answers 409 `SETTLE_OFF`
+"An approved remittance is paid through its payment voucher in Insurer payments.". A settlement submitted with
+`submit: true` is checked first: a refused submission (payment method, bank account) saves no draft. The voucher an
+approved settlement raises is paid the way the settlement was submitted (cheque, else bank transfer); the record's
+Payment names it ("Cheque", "Bank transfer") and carries `amountDifference` when the voucher does not pay what the
+remittances owe.

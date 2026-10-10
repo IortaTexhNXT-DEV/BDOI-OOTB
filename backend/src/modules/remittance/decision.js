@@ -5,7 +5,8 @@
  * sentence the screens show (blockedCode / blockedReason), so a blocked decision is explained before anyone clicks:
  * the approval is still pending, the user holds approve:remittance, did not submit or prepare it, did not approve an
  * earlier level, is not bypassed by a legacy per-item delegation, has an Authority Matrix limit when
- * remittance.require_authority_limit asks for one, and (to approve) a limit that covers the amount. These are the
+ * remittance.require_authority_limit asks for one, and (to approve) a remittance unchanged since its submission and a
+ * limit that covers its amount as it is now (not as it was submitted). These are the
  * rules of the remittance source of My Work (my-work/sources.js: notMine, not approved by me, withinAuthority).
  *
  * eligibleApprovers() names the people who can decide an amount: active users holding approve:remittance whose
@@ -16,8 +17,8 @@ import { ADMIN_ROLES, hasPermission, isAdmin } from '../../lib/auth.js';
 import { pool } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
 import { today as businessToday } from '../../lib/dates.js';
-import { printFormat } from '../../lib/pdf/index.js';
-import { instant, moneyText } from '../../lib/auditEvents.js';
+import { formatAmount, printFormat } from '../../lib/pdf/index.js';
+import { instant } from '../../lib/auditEvents.js';
 import { effectiveAuthority } from '../access-control/service.js';
 
 /**
@@ -34,6 +35,8 @@ export const BLOCKED = {
   ABOVE_LIMIT: ({ amount, limit }) => `${amount} is above your approval limit of ${limit}.`,
   NO_AUTHORITY: ({ type }) => `You have no approval limit for ${type}. Ask an administrator to set one in the Authority Matrix.`,
   NO_PERMISSION: () => 'You can view approvals but not decide them.',
+  TRANSFERS_OFF: () => 'Electronic transfers are replaced by Insurer payments.',
+  CONTENT_CHANGED: () => 'This remittance changed after it was submitted. Reject it so the preparer can submit it again.',
   DELEGATED_AWAY: ({ name }) => `Delegated to ${name}.`,
   ALREADY_DECIDED: ({ decision, name, when }) => `${decision} by ${name} ${when}.`,
 };
@@ -48,6 +51,7 @@ export async function decisionContext(user, { db = pool, now = new Date() } = {}
     requireLimit: !!(await getSetting('remittance.require_authority_limit')),
     enforced: (await getSetting('access.authority_enforced', true)) !== false,
     refuseWithoutLimit: String(await getSetting('access.authority_without_limit', 'allow')) === 'refuse',
+    transfersEnabled: (await getSetting('remittance.transfers_enabled')) !== false,
     mine: new Map(), pools: new Map(), typeNames: null, roleNames: null,
   };
 }
@@ -82,8 +86,9 @@ export function limitSourceLabel(source, names = {}) {
   return role ? `Role limit: ${names[role[1]] || role[1]}` : source;
 }
 
-/** "PHP 1,000,000.00" in the configured currency and decimals. */
-export const amountText = (ctx, v) => moneyText(v, ctx.fmt);
+/** "PHP 1,000,000.00": the code of the configured currency and its decimals, as the remittance screens write amounts. */
+export const codeMoney = (v, fmt) => `${String(fmt?.currency || 'PHP').toUpperCase()} ${formatAmount(v, fmt?.decimals ?? 2)}`;
+export const amountText = (ctx, v) => codeMoney(v, ctx.fmt);
 
 /** "at 10:32" for an instant of today (business time zone), else "on 12/10/2026 10:32". */
 export function whenText(ctx, at) {
@@ -120,8 +125,10 @@ const myEarlierLevel = (a, userId) => (a.history || []).find((h) => h.action ===
 export async function decisionFor(a, user, ctx = null, { action = 'approve' } = {}) {
   ctx = ctx || await decisionContext(user);
   const type = authorityTypeOf(a.entity);
+  // a remittance is approved at its amount now: anything that moved it after the submission is caught below
+  const current = a.entity === 'remittance' && a.status === 'Pending' && a.record_amount !== null && a.record_amount !== undefined ? Number(a.record_amount) : Number(a.amount);
   const base = { canDecide: false, blockedCode: null, blockedReason: null, level: { current: a.current_level, required: a.required_levels },
-    amount: Number(a.amount), myLimit: null, unlimited: false, limitSource: null, limitSourceLabel: null };
+    amount: current, myLimit: null, unlimited: false, limitSource: null, limitSourceLabel: null };
   const blocked = (code, vars = {}, extra = {}) => ({ ...base, ...extra, blockedCode: code, blockedReason: BLOCKED[code](vars) });
   if (a.status !== 'Pending') {
     return blocked('ALREADY_DECIDED', { decision: a.status, name: a.action_by_name || 'another user', when: whenText(ctx, a.action_at) });
@@ -132,6 +139,9 @@ export async function decisionFor(a, user, ctx = null, { action = 'approve' } = 
   const earlier = myEarlierLevel(a, user.id);
   if (earlier !== null) return blocked('EARLIER_LEVEL', { level: Number(earlier) });
   if (a.delegated_to && a.delegated_to !== user.id && !isAdmin(user)) return blocked('DELEGATED_AWAY', { name: a.delegated_to_name || 'another user' });
+  if (action === 'approve' && a.item_kind === 'transfer' && ctx.transfersEnabled === false) return blocked('TRANSFERS_OFF');
+  if (action === 'approve' && a.entity === 'remittance' && a.entity_version !== null && a.entity_version !== undefined
+    && a.record_version !== null && a.record_version !== undefined && Number(a.record_version) !== Number(a.entity_version)) return blocked('CONTENT_CHANGED');
   const auth = await myAuthority(ctx, type);
   const limits = { myLimit: auth.found && !auth.unlimited ? auth.limit : null, unlimited: !!auth.unlimited, limitSource: auth.source,
     limitSourceLabel: limitSourceLabel(auth.source, await roleNames(ctx)) };
@@ -184,7 +194,8 @@ export const excludedFor = (a) => [a.initiator_id, a.maker_id, ...(a.history || 
 
 /** The approvers who can decide the pending approval `a` now (the delegate alone for a legacy per-item delegation). */
 export async function approversFor(a, ctx) {
-  const list = await eligibleApprovers(a.amount, excludedFor(a), authorityTypeOf(a.entity), ctx);
+  const amount = a.entity === 'remittance' && a.record_amount !== null && a.record_amount !== undefined ? a.record_amount : a.amount;
+  const list = await eligibleApprovers(amount, excludedFor(a), authorityTypeOf(a.entity), ctx);
   return a.delegated_to ? list.filter((u) => u.id === a.delegated_to) : list;
 }
 
