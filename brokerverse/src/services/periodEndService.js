@@ -32,7 +32,9 @@ const periodEndService = {
   fiscalYears: () => request("/period-end/fiscal-years"),
   fiscalYear: (code) => request(`/period-end/fiscal-years/${code}`),
   createFiscalYear: (startDate) => post("/period-end/fiscal-years", startDate ? { startDate } : {}),
-  setPeriodStatus: (period, status, remarks) => post(`/period-end/periods/${period}/status`, { status, remarks: remarks || undefined }),
+  /** reason: { reasonCode, note } (components/ReasonPicker reasonPayload) */
+  setPeriodStatus: (period, status, reason) => post(`/period-end/periods/${period}/status`, { status, ...reason }),
+  statusPreview: (period, status) => request(`/period-end/periods/${period}/status-preview${qs({ status })}`),
   periodHistory: (period) => request(`/period-end/periods/${period}/history`),
   periodChecks: (period) => request(`/period-end/periods/${period}/checks`),
 
