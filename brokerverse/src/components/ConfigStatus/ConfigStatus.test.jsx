@@ -23,6 +23,15 @@ describe("ConfigStatus", () => {
     expect(screen.queryByRole("button")).toBeNull();
   });
 
+  it("opens what it summarises when given onClick, without the configuration panel", () => {
+    signIn(["system-admin"]);
+    const open = jest.fn();
+    inApp(<ConfigStatus state="ready" feature="Weekly run" label="12/10/2026 06:15 · 3 created" onClick={open} />);
+    fireEvent.click(screen.getByRole("button", { name: "Weekly run: 12/10/2026 06:15 · 3 created" }));
+    expect(open).toHaveBeenCalledTimes(1);
+    expect(configureLink()).toBeNull();
+  });
+
   it("lists the missing items in business words, without setting keys, and no Configure link for other users", () => {
     signIn(["accounting"]);
     inApp(<ConfigStatus state="incomplete" feature="CAS" missing={["BIR permit number (cas.permit_number)", "invoice.atp_number", "Backup custodian"]} />);

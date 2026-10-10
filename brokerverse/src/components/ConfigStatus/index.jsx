@@ -40,9 +40,10 @@ export const mayConfigure = (path, permission) => {
  * numbering series): Ready, Incomplete or Off. When items are missing, or when the user may configure the feature,
  * the chip opens a small panel with the missing items and, for those users only, a Configure link to the screen
  * where it is set up. `label` names the state in the feature's own words (Automation: On / Off) and `tone="danger"` marks
- * a state that stops the business (a job that is off).
+ * a state that stops the business (a job that is off). With `onClick` the chip opens what it summarises instead (the
+ * run history behind "Weekly run 12/10/2026 06:15 · 3 created").
  */
-const ConfigStatus = ({ state, feature, label, tone, missing = [], to = SETTINGS_PATH, area, permission, className = "" }) => {
+const ConfigStatus = ({ state, feature, label, tone, missing = [], to = SETTINGS_PATH, area, permission, onClick, className = "" }) => {
   const { t } = useTranslation();
   const panel = useRef(null);
   const panelId = `bv-config-${useId().replace(/:/g, "")}`;
@@ -60,6 +61,7 @@ const ConfigStatus = ({ state, feature, label, tone, missing = [], to = SETTINGS
     </>
   );
 
+  if (onClick) return <button type="button" className={`${classes} bv-config-status--action`} aria-label={name} onClick={onClick}>{body}</button>;
   if (!items.length && !configurable) return <span className={classes} role="status" aria-label={name}>{body}</span>;
   return (
     <>
@@ -105,6 +107,8 @@ ConfigStatus.propTypes = {
   area: PropTypes.string,
   /** permission that may configure it (an API permission such as write:masters); the administrator role when left out */
   permission: PropTypes.string,
+  /** opens what the chip summarises (no configuration panel then) */
+  onClick: PropTypes.func,
   className: PropTypes.string,
 };
 
