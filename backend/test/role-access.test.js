@@ -148,7 +148,7 @@ describe('empty forms are refused with field messages', () => {
       ['/product-configurator/coverages', 'coverageCode'], ['/product-configurator/rating-factors', 'factorCode'], ['/product-configurator/underwriting-rules', 'ruleCode'],
       ['/renewals/campaigns', 'campaignName'], [`/renewals/${rn}/activities`, 'type'], ['/remittance/adjustments', 'adjustmentType'],
       ['/masters/remittance-automated', 'code'], ['/incentive/programs', 'programName'], ['/remittance/exceptions', 'type'],
-      ['/remittance/schedules', 'code'],
+      ['/remittance/schedules', 'name'],
     ];
     for (const [p, field] of cases) {
       const r = await ctx.api('post', p).send({});

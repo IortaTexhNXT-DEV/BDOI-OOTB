@@ -184,7 +184,18 @@ describe('work items', () => {
     const h = await ctx.api('get', '/remittance/adjustments/history');
     expect(h.body.data.some((x) => x.referenceNo === auto.body.data.referenceNo && x.processedBy)).toBe(true);
   });
-  it('electronic transfers check method limits and need approval before execution', async () => {
+  it('electronic transfers are closed for TISPH: insurers are paid from Insurer payments', async () => {
+    const t = await ctx.api('post', '/remittance/transfers').send({ beneficiary: 'Standard Insurance Co., Inc.', amount: 40000, method: 'InstaPay', purpose: 'Premium' });
+    expect(t.status).toBe(409);
+    expect(t.body.message).toBe('Electronic transfers are replaced by Insurer payments.');
+    expect(t.body.errors[0].code).toBe('TRANSFERS_OFF');
+    const [approved] = (await pool.query("SELECT id FROM remittance_items WHERE kind = 'transfer' AND status = 'Approved' LIMIT 1")).rows;
+    expect((await ctx.api('post', `/remittance/transfers/${approved.id}/execute`).send({ status: 'Completed', bankReference: 'IP-0' })).status).toBe(409);
+    expect((await as(sales, 'post', '/remittance/transfers').send({})).status).toBe(403);
+  });
+  it('electronic transfers check method limits and need approval before execution (transfers on)', async () => {
+    await pool.query("UPDATE app_settings SET value = 'true' WHERE key = 'remittance.transfers_enabled'");
+    clearSettingsCache();
     const m = await ctx.api('get', '/remittance/transfers/methods');
     expect(m.body.data.find((x) => x.value === 'InstaPay').limit).toBe(50000);
     expect((await ctx.api('post', '/remittance/transfers').send({ beneficiary: 'X', amount: 60000, method: 'InstaPay' })).status).toBe(400);
@@ -194,6 +205,20 @@ describe('work items', () => {
     await as(fin, 'post', `/remittance/approvals/${(await ctx.api('get', '/remittance/approvals?transactionType=Electronic%20Transfer')).body.data.find((a) => a.entityId === t.body.data.id).id}/approve`).send({ comments: 'ok' });
     const ex = await ctx.api('post', `/remittance/transfers/${t.body.data.id}/execute`).send({ status: 'Completed', bankReference: 'IP-1' });
     expect(ex.body.data.status).toBe('Completed');
+    // a transfer still pending when transfers are switched off cannot be approved (it would post its journal); it can be rejected
+    const p1 = await ctx.api('post', '/remittance/transfers').send({ beneficiary: 'Standard Insurance Co., Inc.', amount: 30000, method: 'InstaPay', purpose: 'Premium' });
+    const p2 = await ctx.api('post', '/remittance/transfers').send({ beneficiary: 'Standard Insurance Co., Inc.', amount: 20000, method: 'InstaPay', purpose: 'Premium' });
+    await pool.query("UPDATE app_settings SET value = 'false' WHERE key = 'remittance.transfers_enabled'");
+    clearSettingsCache();
+    const pending = (await ctx.api('get', '/remittance/approvals?transactionType=Electronic%20Transfer')).body.data;
+    const a1 = pending.find((a) => a.entityId === p1.body.data.id);
+    const refused = await as(fin, 'post', `/remittance/approvals/${a1.id}/approve`).send({ comments: 'ok' });
+    expect(refused.status).toBe(409);
+    expect(refused.body.message).toBe('Electronic transfers are replaced by Insurer payments.');
+    expect((await pool.query('SELECT status, journal_id FROM remittance_items WHERE id = $1', [p1.body.data.id])).rows[0]).toMatchObject({ status: 'Pending', journal_id: null });
+    const a2 = pending.find((a) => a.entityId === p2.body.data.id);
+    const rejected = await as(fin, 'post', `/remittance/approvals/${a2.id}/reject`).send({ reasonCode: 'RRJ-OTHER', note: 'Paid from Insurer payments' });
+    expect(rejected.status, JSON.stringify(rejected.body)).toBe(200);
   });
   it('statements, reports and exceptions', async () => {
     const s = await ctx.api('post', '/remittance/statements/generate').send({ period: '2025-12', selectionType: 'all', templateCode: 'STM-001' });
@@ -223,12 +248,17 @@ describe('work items', () => {
     expect(s.body.data.scheduledJobs.length).toBeGreaterThanOrEqual(2);
     const created = await ctx.api('post', '/remittance/schedules').send({ code: 'SCH-9', name: 'Weekly run', frequency: 'Weekly', nextRun: '2026-10-05', time: '09:00', linkedProcesses: ['ARM-001'] });
     expect(created.status).toBe(201);
-    const run = await ctx.api('post', `/remittance/schedules/${created.body.data.id}/run`);
-    expect(run.status).toBe(200);
-    expect(run.body.data.execution.executionId).toMatch(/^BLK-/);
+    expect((await ctx.api('post', `/remittance/schedules/${created.body.data.id}/run`)).status).toBe(400);
+    const run = await ctx.api('post', `/remittance/schedules/${created.body.data.id}/run`).send({ reasonCode: 'ROC-MISSED' });
+    expect(run.status, JSON.stringify(run.body)).toBe(200);
+    expect(run.body.data.run.executionRef).toMatch(/^BLK-/);
+    expect(run.body.data.run).toMatchObject({ scheduleCode: 'SCH-9', reason: { code: 'ROC-MISSED', text: 'Missed run' } });
+    expect((await ctx.api('post', `/remittance/schedules/${created.body.data.id}/run`).send({ reasonCode: 'ROC-MISSED' })).body.errors[0].code).toBe('WINDOW_DONE');
     const paused = await ctx.api('patch', `/remittance/schedules/${created.body.data.id}/status`).send({ status: 'Paused' });
     expect(paused.body.data.status).toBe('Inactive');
-    expect((await ctx.api('post', `/remittance/schedules/${created.body.data.id}/run`)).status).toBe(409);
+    const again = await ctx.api('post', `/remittance/schedules/${created.body.data.id}/run`).send({ reasonCode: 'ROC-MISSED' });
+    expect(again.status).toBe(409);
+    expect(again.body.errors[0].code).toBe('PAUSED');
     // approval cover is given in Master > User Management > Delegations (user_delegations), not on the Remittance screen
     expect((await ctx.api('post', '/remittance/approvals/delegations').send({ delegateTo: 'r.finance', fromDate: '2026-10-01', toDate: '2026-10-07', reason: 'Leave' })).status).toBe(404);
   });

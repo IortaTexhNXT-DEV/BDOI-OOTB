@@ -40,3 +40,31 @@ UPDATE app_settings s
    SET value = 'false'::jsonb, updated_at = now()
  WHERE s.key = 'remittance.bulk_upload_enabled' AND s.updated_by IS NULL AND s.value = 'true'::jsonb
    AND EXISTS (SELECT 1 FROM roles WHERE code = 'tis-finance');
+
+-- ---------------------------------------------------------------- insurer payments and schedules
+-- Insurers are paid from Insurer payments, through Bank Payment Files and Disbursement (migration 0403): electronic
+-- transfers are neither created, executed nor approved any more.
+UPDATE app_settings s
+   SET value = 'false'::jsonb, updated_at = now()
+ WHERE s.key = 'remittance.transfers_enabled' AND s.updated_by IS NULL AND s.value = 'true'::jsonb
+   AND EXISTS (SELECT 1 FROM roles WHERE code = 'tis-finance');
+
+-- The automated configurations ARM-001 and ARM-002 name insurers that are not on the TISPH panel, and SCH-001 runs
+-- ARM-001: retired and paused while unchanged. TISPH remits weekly with TIS-WEEKLY: every Monday at 06:15 for the
+-- policies of the Monday to Friday before, every active insurer. The "Remittance schedules" job of Master > Schedules
+-- stays off until TISPH switches it on.
+UPDATE master_records SET status = 'inactive', updated_at = now()
+ WHERE ((type_code = 'remittance-automated' AND code IN ('ARM-001', 'ARM-002')) OR (type_code = 'remittance-schedule' AND code = 'SCH-001'))
+   AND status = 'active' AND created_by = 'seed' AND updated_by IS NULL
+   AND EXISTS (SELECT 1 FROM roles WHERE code = 'tis-finance');
+
+INSERT INTO master_records(type_code, code, name, data, status, created_by)
+SELECT 'remittance-schedule', 'TIS-WEEKLY', 'Weekly remittance',
+       jsonb_build_object('code', 'TIS-WEEKLY', 'name', 'Weekly remittance', 'kind', 'Remittance run', 'allInsurers', true, 'insurers', '[]'::jsonb,
+         'frequency', 'Weekly', 'paymentWindow', 'Previous Monday to Friday', 'groupBy', 'Insurer and product line', 'runTime', '06:15', 'cutOffDays', 0,
+         'timezone', tz.name, 'nextRun', to_char(date_trunc('week', (now() AT TIME ZONE tz.name)::date) + interval '7 days', 'YYYY-MM-DD')),
+       'active', 'seed'
+  FROM (SELECT COALESCE((SELECT value #>> '{}' FROM app_settings WHERE key = 'general.timezone'), 'Asia/Manila') AS name) tz
+ WHERE EXISTS (SELECT 1 FROM roles WHERE code = 'tis-finance')
+   AND EXISTS (SELECT 1 FROM master_types WHERE code = 'remittance-schedule')
+   AND NOT EXISTS (SELECT 1 FROM master_records WHERE type_code = 'remittance-schedule' AND code = 'TIS-WEEKLY');

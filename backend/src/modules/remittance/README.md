@@ -11,8 +11,8 @@ Remittance Master). Permissions: `read:remittance`, `write:remittance` (prepare,
 | File | What it does |
 |---|---|
 | `router.js` | All routes. |
-| `service.js` | Remittances and bills to insurers and agencies, the approval queue (Authority Matrix limits, maker-checker), automated remittance generation and schedule runs, and the journal of an approved work item (`postItemJournal`). |
-| `items.js` | Work items stored in `remittance_items` by kind: settlement, adjustment, transfer, statement, exception, notification, bulk upload, bank transaction; remittance schedules (`runSchedule`, `runDueSchedules`), analytics and history. |
+| `service.js` | Remittances and bills to insurers and agencies, the approval queue (Authority Matrix limits, maker-checker), automated remittance generation and the drafts of a schedule run, the transfer gate (`assertTransfersEnabled`) and the journal of an approved work item (`postItemJournal`). |
+| `items.js` | Work items stored in `remittance_items` by kind: settlement, adjustment, transfer, statement, exception, notification, bulk upload, bank transaction; the date helpers of a remittance schedule, analytics and history. |
 | `directbill.js` | Direct bill: billing mode of a policy, commission booked at issue, commission debit notes (`DN-`), collections from the insurer (`DNC-`) with creditable withholding tax; the commission billing statements of gross-remittance business (`CBS-`). |
 | `basis.js` | Remittance basis of broker-billed premium (net or gross) by insurer and product (`remittance.basis_rules`, `remittance.default_basis`). |
 | `clientPayments.js` | Direct bill: the client's payment to the insurer (date, amount, insurer OR / reference, proof), the payment status of a policy and the check before a debit note is approved. |
@@ -23,10 +23,13 @@ Remittance Master). Permissions: `read:remittance`, `write:remittance` (prepare,
 | `register.js` | The Remittances register (segments, filters, flags, next step, actions, totals and KPI figures of the filtered set), the record's data, the submission of several drafts and the register export rows. |
 | `documents.js` | The remittance schedule (XLSX, PDF), the advice letter (PDF), the register workbook and the Import policy list template. |
 | `imports.js` | Import policy list: validation of a file with a result per row, commit into off-cycle drafts, error report, discard. |
+| `payments.js` | Insurer payments: the read model of the insurer vouchers with their batch or cheque, the payment record, the batching state, the audited reveal of the account number; the legacy transfers (TRF-), read-only. |
+| `runs.js` | Remittance schedules and their runs: the Setup > Schedules table and the automation state, MSG-RMT-007, the preview, Run now, one run per window, the run history, the job (`runDueSchedules`). |
+| `summary.js` | `GET /remittance/summary`: the counts of the menu entries per user, the run strip and the landing page. |
 
 ## Main tables
 
-`remittances`, `remittance_lines`, `remittance_items`, `remittance_approvals`, `remittance_imports`, `remittance_import_rows`,
+`remittances`, `remittance_lines`, `remittance_items`, `remittance_approvals`, `remittance_imports`, `remittance_import_rows`, `remittance_runs`,
 `remittance_allocations`, `commission_debit_notes`, `commission_debit_note_lines`, `commission_debit_note_collections`,
 `direct_bill_items`, `direct_bill_client_payments`, `insurer_refund_credits`. Payment to the insurer is a payment voucher in the disbursements
 module (`disbursements`, `invoice_lists`).
@@ -166,16 +169,64 @@ as discarded. `POST /imports/:id/discard`. The bulk upload of earlier releases (
 `/bulk/:id/process`) answers 409 `USE_IMPORT` while `remittance.bulk_upload_enabled` is off (TISPH), and creates its
 drafts at the booked amounts of the policies, never at typed ones.
 
-Schedules: Accounts > Remittance > Scheduling (remittance-schedule master) says what to remit: insurers, cut-off days
-before the run date, frequency and next run date. The schedules have no timer of their own: the job
-`remittance-schedules` of Master > Schedules (handler `remittanceSchedules`, daily, disabled until switched on) runs the
-active schedules whose next run date has come, in the business time zone, and moves the date on by the frequency.
+Schedules and runs (`runs.js`, migration 0403): a schedule (remittance-schedule master, Setup > Schedules) names its
+kind, the insurers or all active ones (`allInsurers`), the frequency, the next run date and time (`runTime`), the
+grouping (stored for Phase 2) and the payment window: "Previous Monday to Friday" (the week before the run date; it
+needs the frequency Weekly and a Monday as next run, else 400 with `errors[0].code` MSG-RMT-007) or "Cut-off days"
+(policies incepted up to `cutOffDays` before the run date). New codes come from the `remittance_schedule` series
+(SCH-001, SCH-002 ...); creation, edits (before and after), pause and resume are audited. The schedules have no timer of
+their own: the job `remittance-schedules` of Master > Schedules (handler `remittanceSchedules`, daily 06:15, disabled
+until switched on) runs the active schedules whose next run date has come, in the business time zone, and moves the
+date on by the frequency. `GET /schedules` answers `automation { jobEnabled, checkedDaily, timeZone, lastCheckAt,
+lastStatus }` (the cron and the job link for administrators only) and per schedule its covers ("All active (4)"), runs
+("Mondays 06:15"), next run (none while paused) and `lastRun { at, result, counts, message, trigger }`.
+`POST /schedules/:id/preview` is a dry run: per insurer the policies ready and the amount due, "Draft will be created"
+or "Nothing to remit", and `windowDone` when the window was run. `POST /schedules/:id/run {reasonCode, note}` is Run now
+(`write:remittance`, a `remittance_off_cycle` reason). Every run, by the job or by a user, is a row of
+`remittance_runs` (window, counts, drafts, result success / nothing / failed, message MSG-RMT-008 "Weekly run done: 3
+remittance(s) created, 0 policies held, 0 exceptions."); a window has one run that did not fail (a unique index), so a
+second run answers 409 `WINDOW_DONE` "This week's run is done (12/10/2026 06:15). Next run Mon 19/10/2026 06:15." and
+the job skips the schedule and moves its next run on. The drafts carry `data.source` (weekly-run for the job, run-now),
+`runId`, the window and the off-cycle reason; their activity log reads "Created by Run now (TIS-WEEKLY)". `GET
+/schedules/:id/runs` is the run history, `GET /schedules/:id/activity` the schedule's changes and runs. Held policies
+and exceptions are 0 until the Phase 2 eligibility (R1 selects by inception date and groups per insurer).
+
+Insurer payments (`payments.js`): `GET /payments?segment=to-pay|in-payment|paid|failed|all` (insurer, value date range,
+method, `q` on PV, REM, batch or bank reference) lists the vouchers of source `insurer-remittance` with the remittance
+of the settlement that raised them. The state comes from the voucher, its latest line on a batch that is not cancelled
+and its latest cheque (a cheque written by a bank file result is the bank payment): To pay (a draft voucher too, next
+step "Submit voucher (Disbursement)"), In payment, Paid, Failed (line rejected or cheque cancelled; next step "Re-batch
+or pay by cheque" with the bank's reason). The payee account is masked ("···4821", chip On file / No account); a row is
+`selectable` for a batch when it is To pay or Failed, the voucher can go on a batch (`bank_payments.allow_draft_vouchers`)
+and the account is on file. `batching { allowed, code, reason }`: `NO_PERMISSION` without `write:disbursements`,
+`NO_LAYOUT` ("No Metrobank layout configured. Pay by cheque or ask the administrator.") while no active layout exists for
+the bank of `remittance.payment_bank_code`; paying by cheque stays possible. The answer has the totals of the filtered
+set, the KPI figures (to pay, in payment, paid this week, failed) and the segment counts. `GET /payments/:voucherId`
+is the payment record: Payee, Payment, Amounts (due to insurer, refund credits, voucher and bank amount, check Pass /
+Difference), Links, Approvals, the timeline and the activity of the voucher, batch and cheques. `GET
+/payments/:voucherId/account` gives the full account number (`write:disbursements`) and audits the reveal
+(`payee_bank_account` / `reveal`). It creates no payment and posts nothing.
+
+Electronic transfers (`remittance.transfers_enabled`, TISPH off): `POST /transfers` and `POST /transfers/:id/execute`
+answer 409 `TRANSFERS_OFF` "Electronic transfers are replaced by Insurer payments.", and approving a pending transfer
+approval is refused the same way (it would post `remittance.transfer`); rejecting it stays possible. `GET
+/transfers?legacy=1` and `GET /transfers/:id` show the TRF- items read-only with the approval, the journal posted at
+approval and its reversal ("Not reversed").
+
+Summary (`summary.js`): `GET /summary` answers per user the counts of the menu entries (Remittances: My work;
+Approvals: awaiting my decision; Insurer payments: to pay, `write:disbursements` only; Reconciliation: my draft insurer
+statements and the submitted ones I may approve; Exceptions: assigned to me, `GET /exceptions?assignedTo=me`; Insurer
+billing: my draft debit notes and the overdue ones, `GET /direct-bill?attention=mine`; Setup: 0), each the total of the
+list it opens; the run strip (last run, next run, automation On / Off) and the landing (Approvals, Exceptions or
+Remittances > My work).
 
 ## Key settings
 
 `remittance.approval_levels` (fallback only), `remittance.require_authority_limit` (default false, TISPH true),
 `remittance.item_delegation_enabled` (default true, TISPH false), `remittance.reminder_interval_hours` (4),
 `remittance.import_max_rows` (5000), `remittance.bulk_upload_enabled` (default true, TISPH false),
+`remittance.transfers_enabled` (default true, TISPH false), `remittance.payment_bank_code` (MBT: the bank whose payment
+file layout batches insurer vouchers),
 `remittance.priority_thresholds`, `remittance.priority_sla_hours`,
 `remittance.default_due_days` (due date of a new remittance when the insurer has no `remittance_terms_days`), `remittance.transfer_methods`, `remittance.status_labels` (TISPH: rejected "Returned", settled "Settled (voucher raised)"),
 `remittance.advice_title` / `remittance.agency_bill_title` (titles of the printed remittance advice and agency bill),
@@ -215,3 +266,9 @@ before approval).
   download the error report. A validated import older than 7 days is discarded: validate the file again.
 - Bulk Processing answers "Bulk processing is replaced by Import policy list on Remittances." while
   `remittance.bulk_upload_enabled` is off (TISPH).
+- Run now answers "This week's run is done (...)": the window already has a run that did not fail (`remittance_runs`).
+  An off-cycle catch-up goes through Import policy list. A failed run (result failed, with its message) frees the window.
+- Insurer payments cannot batch ("No Metrobank layout configured"): no active bank file layout exists for the bank of
+  `remittance.payment_bank_code` (Master > Finance > Bank File Layouts). Pay by cheque in Disbursement meanwhile.
+- A transfer answers "Electronic transfers are replaced by Insurer payments.": `remittance.transfers_enabled` is off
+  (TISPH). Pay the voucher from Insurer payments.

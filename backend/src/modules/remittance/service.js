@@ -534,6 +534,17 @@ export const refusal = (code, message) => new HttpError(['ALREADY_DECIDED', 'STA
 
 const STALE_TEXT = 'This approval changed since it was shown. Reload to see the current version.';
 
+export const TRANSFERS_OFF = 'Electronic transfers are replaced by Insurer payments.';
+
+/**
+ * Electronic transfers of earlier releases are created, executed and approved only while remittance.transfers_enabled
+ * is on (TISPH: off, insurers are paid from Insurer payments); refused with 409 TRANSFERS_OFF. A pending transfer can
+ * still be rejected.
+ */
+export async function assertTransfersEnabled() {
+  if ((await getSetting('remittance.transfers_enabled')) === false) throw new HttpError(409, TRANSFERS_OFF, [{ path: 'transfer', code: 'TRANSFERS_OFF', message: TRANSFERS_OFF }]);
+}
+
 /** Legacy hand-over of one approval to another user, while remittance.item_delegation_enabled is on. */
 async function delegateApproval(a, body, user) {
   if (!hasPermission(user, 'approve:remittance')) throw refusal('NO_PERMISSION', 'You can view approvals but not decide them.');
@@ -582,6 +593,7 @@ export async function decide(id, action, body, user, { req = null, version = nul
   }
   const d = await decisionFor(a, user, ctx, { action });
   if (!d.canDecide) throw refusal(d.blockedCode, d.blockedReason);
+  if (action === 'approve' && a.entity === 'item' && (await one('SELECT kind FROM remittance_items WHERE id = $1', [a.entity_id]))?.kind === 'transfer') await assertTransfersEnabled();
   let remarks = body.note ?? body.comments ?? body.remarks ?? body.reason ?? null;
   let reasonCode = null;
   if (action === 'reject') {
@@ -760,12 +772,15 @@ async function logExecution({ created, configCode, started, triggeredBy, extra =
   return { executionId: ref, remittances: created, recordsProcessed: records, totalAmount: total, duration: `${Math.max(1, Math.round((Date.now() - started) / 1000))}s` };
 }
 
-/** A draft direct-bill remittance of an insurer's eligible policies (inception up to `to`); null when there is none. */
-async function draftForInsurer({ insurerId, to, dueDate, configCode, period }, user) {
+/**
+ * A draft direct-bill remittance of an insurer's eligible policies (inception up to `to`); null when there is none.
+ * `data` is kept on the remittance (the run that created it: source, run, window, off-cycle reason).
+ */
+async function draftForInsurer({ insurerId, to, dueDate, configCode, period, data }, user) {
   const pols = await eligiblePolicies({ insurerId, to, kind: 'direct-bill' });
   if (!pols.length) return null;
   const lines = await buildLines(pols.map((p) => ({ policyId: p.id })), insurerId);
-  const id = await withTransaction((c) => insertRemittance(c, { kind: 'direct-bill', insurerId, period, dueDate, lines, configCode, userId: user?.id || null }));
+  const id = await withTransaction((c) => insertRemittance(c, { kind: 'direct-bill', insurerId, period, dueDate, lines, configCode, userId: user?.id || null, data }));
   return getRemittance(id);
 }
 
@@ -791,7 +806,7 @@ export async function executeAutomated(b, user, triggeredBy = 'manual') {
  * Remit what a remittance schedule names: one draft remittance per insurer, of the policies incepted up to the cut-off
  * date (`to`), due after the insurer's remittance terms. Unknown or inactive insurer codes are skipped and reported.
  */
-export async function executeForInsurers({ insurerCodes, to, scheduleCode, runDate }, user, triggeredBy = 'manual') {
+export async function executeForInsurers({ insurerCodes, to, scheduleCode, runDate, data }, user, triggeredBy = 'manual') {
   const started = Date.now();
   const date = runDate || (await businessToday());
   const created = [];
@@ -799,7 +814,7 @@ export async function executeForInsurers({ insurerCodes, to, scheduleCode, runDa
   for (const code of insurerCodes || []) {
     const ins = await one('SELECT * FROM insurance_companies WHERE (lower(code) = lower($1) OR id::text = $1) AND status = $2', [String(code), 'active']);
     if (!ins) { skipped.push({ insurerCode: code, reason: 'Insurer not found or not active' }); continue; }
-    const r = await draftForInsurer({ insurerId: ins.id, to, dueDate: await defaultDueDate(date, ins.id), configCode: scheduleCode, period: date.slice(0, 7) }, user);
+    const r = await draftForInsurer({ insurerId: ins.id, to, dueDate: await defaultDueDate(date, ins.id), configCode: scheduleCode, period: date.slice(0, 7), data }, user);
     if (r) created.push(r);
     else skipped.push({ insurerCode: ins.code, reason: 'Nothing to remit up to the cut-off date' });
   }

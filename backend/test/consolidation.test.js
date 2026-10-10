@@ -12,6 +12,7 @@ import { setupFinance } from './accounting.fixtures.js';
 import { one, pool, query } from '../src/db/pool.js';
 import * as handlers from '../src/jobs/handlers.js';
 import { today } from '../src/lib/dates.js';
+import { clearSettingsCache } from '../src/lib/settings.js';
 import { RETIRED_TYPES } from '../src/modules/masters/service.js';
 
 let ctx;
@@ -50,7 +51,8 @@ describe('remittance approval limits come from the Authority Matrix', () => {
     expect(a.requiredLevels).toBe(1);
     const refused = await ctx.as('checker')('post', `/remittance/approvals/${a.id}/approve`).send({ comments: 'ok' });
     expect(refused.status).toBe(403);
-    expect(refused.body.message).toMatch(/Remittance approval of PHP 1,500,000.00 is above your approval authority of PHP 1,000,000.00/);
+    expect(refused.body.message).toBe('PHP 1,500,000.00 is above your approval limit of PHP 1,000,000.00.');
+    expect(refused.body.errors[0].code).toBe('ABOVE_LIMIT');
     const ok = await manager('post', `/remittance/approvals/${a.id}/approve`).send({ comments: 'Within my authority' });
     expect(ok.status).toBe(200);
     expect(ok.body.data.status).toBe('Approved');
@@ -59,21 +61,30 @@ describe('remittance approval limits come from the Authority Matrix', () => {
 
   it('settlements, adjustments and transfers use the remittance_settlement limit (user limits included)', async () => {
     await query(`INSERT INTO authority_limits(transaction_type, user_id, max_amount, status, decided_at) VALUES ('remittance_settlement', $1, 10000, 'active', now())`, [ctx.userIds.checker]);
+    // electronic transfers are closed for TISPH (seed 90); the base setting opens them
+    await query("UPDATE app_settings SET value = 'true' WHERE key = 'remittance.transfers_enabled'");
+    clearSettingsCache();
     try {
       const t = await ctx.as('maker')('post', '/remittance/transfers').send({ beneficiary: 'FPG Insurance Co., Inc.', amount: 40000, method: 'InstaPay', purpose: 'Premium' });
       expect(t.status).toBe(201);
       const a = await pendingFor(t.body.data.id);
       const refused = await ctx.as('checker')('post', `/remittance/approvals/${a.id}/approve`).send({});
       expect(refused.status).toBe(403);
-      expect(refused.body.message).toMatch(/above your approval authority of PHP 10,000.00 \(user limit\)/);
+      expect(refused.body.message).toBe('PHP 40,000.00 is above your approval limit of PHP 10,000.00.');
+      expect(refused.body.errors[0].code).toBe('ABOVE_LIMIT');
       expect((await manager('post', `/remittance/approvals/${a.id}/approve`).send({})).body.data.status).toBe('Approved');
     } finally {
       await query("DELETE FROM authority_limits WHERE transaction_type = 'remittance_settlement' AND user_id = $1", [ctx.userIds.checker]);
+      await query("UPDATE app_settings SET value = 'false' WHERE key = 'remittance.transfers_enabled'");
+      clearSettingsCache();
     }
   });
 
   it('falls back to remittance.approval_levels only while the matrix has no remittance limit', async () => {
     await query("UPDATE authority_limits SET status = 'retired' WHERE transaction_type = 'remittance' AND status = 'active'");
+    // without a remittance limit an approver decides only while remittance.require_authority_limit is off (TISPH: on)
+    await query("UPDATE app_settings SET value = 'false' WHERE key = 'remittance.require_authority_limit'");
+    clearSettingsCache();
     try {
       const id = await remittanceFor(200000); // levels setting: up to 100,000 one level, up to 1,000,000 two
       const a = await pendingFor(id);
@@ -82,7 +93,9 @@ describe('remittance approval limits come from the Authority Matrix', () => {
       expect(first.body.data).toMatchObject({ status: 'Pending', currentLevel: 2 });
       expect((await manager('post', `/remittance/approvals/${a.id}/approve`).send({})).body.data.status).toBe('Approved');
     } finally {
-      await query("UPDATE authority_limits SET status = 'active' WHERE transaction_type = 'remittance' AND status = 'retired' AND decision_note = 'Out-of-the-box default'");
+      await query("UPDATE authority_limits SET status = 'active' WHERE transaction_type = 'remittance' AND status = 'retired' AND decision_note IN ('Out-of-the-box default', 'TISPH default')");
+      await query("UPDATE app_settings SET value = 'true' WHERE key = 'remittance.require_authority_limit'");
+      clearSettingsCache();
     }
   });
 

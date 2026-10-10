@@ -104,12 +104,13 @@ export const dormantUsers = async () => {
 };
 
 /**
- * Remittance schedules (Accounts > Remittance > Scheduling): run the active schedules whose next run date has come
- * (draft remittances per insurer up to the cut-off date) and move their next run date on. Daily, disabled by default.
+ * Remittance schedules (Accounts > Remittance > Setup > Schedules): run the active schedules whose next run date has
+ * come (draft remittances per insurer for the window of the run, recorded as remittance runs) and move their next run
+ * date on. Daily, disabled by default.
  */
 export async function remittanceSchedules() {
   if (!(await tableExists('remittances'))) return { skipped: 'remittances table missing' };
-  return (await import('../modules/remittance/items.js')).runDueSchedules();
+  return (await import('../modules/remittance/runs.js')).runDueSchedules();
 }
 
 /**

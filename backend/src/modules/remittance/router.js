@@ -12,7 +12,6 @@ import { remittanceUpload, sendWorkbook, staticUploads, templateCsv } from '../d
 import * as directBill from './directbill.js';
 import * as clientPayments from './clientPayments.js';
 import { pool, withTransaction } from '../../db/pool.js';
-import { businessTimeZone } from '../../lib/dates.js';
 import { buildPdf, sendPdf } from '../documents/pdf.js';
 import { commissionDebitNoteDoc, remittanceAdviceDoc } from '../documents/templates.js';
 import { sendTable } from '../documents/tabular.js';
@@ -21,6 +20,9 @@ import { ACTIVITY_HEADER, activityRows, remittanceActivity } from './activity.js
 import * as register from './register.js';
 import * as documents from './documents.js';
 import * as imports from './imports.js';
+import * as runs from './runs.js';
+import * as payments from './payments.js';
+import { remittanceSummary } from './summary.js';
 
 /** Remittance (Accounts > Remittance, 16 screens) and the Remittance Master overview. */
 const { router, define } = moduleRouter('Remittance', '/remittance');
@@ -32,6 +34,8 @@ const upload = importUpload();
 const singleFile = (req, res, next) => upload.single('file')(req, res, (e) => next(e ? badRequest(e.message) : undefined));
 // the bulk upload of earlier releases, while remittance.bulk_upload_enabled is on (409 with a pointer to Import policy list)
 const bulkOpen = (req, res, next) => items.assertBulkUpload().then(() => next(), next);
+// electronic transfers of earlier releases, while remittance.transfers_enabled is on (409: insurers are paid from Insurer payments)
+const transfersOpen = (req, res, next) => svc.assertTransfersEnabled().then(() => next(), next);
 const S = (name) => `Accounts > Remittance > ${name}`;
 const sendXlsx = (res, { buffer, fileName }) => {
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -50,6 +54,20 @@ const logged = (entity, action, fn) => async (req) => {
   await audit(req, { entity, entityId: id, action, before: out?.before, after: out?.after ?? out });
   return out;
 };
+
+// ---------------- summary ----------------
+define({
+  method: 'GET', path: '/summary',
+  summary: 'What Accounts > Remittance holds for the caller: counts per menu entry (remittances in my work, approvals awaiting my decision, insurer payments to pay (write:disbursements, else null), insurer statements to act on, exceptions assigned to me, my draft and overdue debit notes, setup), the entries with something overdue, the run strip (last run, next run, automation on or off) and the landing page',
+  screen: S('Landing'), middleware: read,
+  response: { success: true, data: { counts: { remittances: 3, approvals: 1, payments: 2, reconciliation: 0, exceptions: 0, billing: 1, setup: 0 },
+    overdue: { remittances: false, approvals: false, payments: false, reconciliation: false, exceptions: false, billing: true, setup: false },
+    runStrip: { lastRun: { id: 'run_0123456789abcdef', scheduleCode: 'TIS-WEEKLY', at: '2026-10-11T22:15:00.000Z', text: '12/10/2026 06:15', result: 'success', resultLabel: 'Success',
+      counts: { scanned: 14, ready: 14, held: 0, exceptions: 0, created: 3 }, message: 'Weekly run done: 3 remittance(s) created, 0 policies held, 0 exceptions.', failed: false },
+    nextRun: { scheduleCode: 'TIS-WEEKLY', date: '2026-10-19', text: 'Mon 19/10/2026 06:15' }, automation: { on: false, label: 'Automation Off', checkedDaily: '06:15', timeZone: 'Asia/Manila' } },
+    landing: { code: 'approvals', link: '/finance/remittance/approvals' } } },
+  handler: async (req, res) => ok(res, await remittanceSummary(req.user)),
+});
 
 // ---------------- remittances (tracking, direct / agency bills) ----------------
 const regRow = { id: 'rm_21', remittanceNo: 'REM-2026-00021', kind: 'direct-bill', status: 'for-approval', statusLabel: 'Pending Approval',
@@ -255,11 +273,11 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/direct-bill', summary: 'Commission debit notes (insurerCode, status code or label, from / to, search, paging)', screen: S('Direct Bill Processing > Debit Notes'), middleware: read,
+  method: 'GET', path: '/direct-bill', summary: 'Commission debit notes (insurerCode, status code or label, from / to, search, attention=mine: my drafts and the notes overdue with a balance; paging)', screen: S('Direct Bill Processing > Debit Notes'), middleware: read,
   query: { status: 'Open,Partially Collected', insurerCode: 'MALAYAN', page: 1, perPage: 20 }, response: { success: true, data: [dnExample] },
   handler: async (req, res) => {
     const pg = paging(req.query, { page: 1, perPage: 50 });
-    const { rows, total, summary } = await directBill.listDebitNotes(req.query, pg);
+    const { rows, total, summary } = await directBill.listDebitNotes({ ...req.query, userId: req.user.id }, pg);
     sendList(res, rows, total, pg, { summary });
   },
 });
@@ -571,6 +589,58 @@ define({
   handler: async (req, res) => ok(res, (await logged('remittance_item', 'complete-adjustment', (r) => items.completeItem('adjustment', r.params.id, ['Approved'], 'Completed', { processedDate: new Date().toISOString() }, r.user))(req, res)).after, 'Adjustment completed'),
 });
 
+// ---------------- insurer payments ----------------
+// A read model of the insurer vouchers with their batch or cheque (payments.js); it pays and posts nothing.
+const readPayments = canRead('remittance', 'read:disbursements', 'write:disbursements');
+const payRow = { id: 'pv_102', voucherNo: 'PV-2026-00102', voucherStatus: 'for-approval', voucherStatusLabel: 'Submitted', state: 'to-pay', stateLabel: 'To pay', amount: 409141.43, currency: 'PHP',
+  insurer: { id: 3, code: 'PIONEER', name: 'Pioneer Insurance & Surety Corp.', shortName: 'Pioneer' },
+  remittance: { id: 'rm_21', remittanceNo: 'REM-2026-00021', dueToInsurer: 409141.43, link: '/finance/remittance/remittances/rm_21' }, remittances: [], settlement: { id: 'rmi_5', reference: 'SET-2026-00005' },
+  payee: { bank: { code: 'MBT', name: 'Metropolitan Bank and Trust Company' }, accountMasked: '···4821', accountName: 'Pioneer Insurance & Surety Corp.', label: 'Metropolitan Bank and Trust Company ···4821',
+    chip: { code: 'on-file', label: 'On file' } },
+  method: null, batch: null, cheque: null, valueDate: '2026-10-12', bankReference: null, paidOn: null, failureReason: null,
+  nextStep: { code: 'create-batch', label: 'Create batch', actor: { type: 'permission', name: 'Bank Payment Files' } }, selectable: true,
+  actions: [{ code: 'view', label: 'View payment', allowed: true, link: '/finance/remittance/payments?payment=PV-2026-00102' }, { code: 'open-remittance', label: 'Open remittance', allowed: true, link: '/finance/remittance/remittances/rm_21' },
+    { code: 'pay-by-cheque', label: 'Pay by cheque', allowed: true, link: '/accounts/paymentvoucher/detailview/pv_102' }],
+  link: '/finance/remittance/payments?payment=PV-2026-00102', voucherLink: '/accounts/paymentvoucher/detailview/pv_102' };
+const batchingExample = { allowed: false, code: 'NO_LAYOUT', reason: payments.NO_LAYOUT, bankCode: 'MBT', layout: null, chequeAllowed: true };
+define({
+  method: 'GET', path: '/payments',
+  summary: 'Insurer payments (read:remittance or read:disbursements): the payment vouchers of insurer remittances with segment=to-pay|in-payment|paid|failed|all (a draft voucher is To pay, next step "Submit voucher (Disbursement)"), insurerId, from / to (value date), method fund-transfer|cheque, q (PV, REM, batch or bank ref.), paging: rows with state, masked payee account, method, batch, next step, selectable and actions; totals of the filtered set, the 4 KPI figures and segment counts over the filters, batching { allowed, code, reason } (NO_LAYOUT "No Metrobank layout configured. Pay by cheque or ask the administrator.", NO_PERMISSION) and the count of legacy transfers',
+  screen: S('Insurer payments'), middleware: readPayments, query: { segment: 'to-pay', insurerId: 3, from: '2026-10-01', to: '2026-10-31', method: 'fund-transfer', q: 'PV-2026', page: 1, perPage: 50 },
+  response: { success: true, data: [payRow], total: 1, page: 1, perPage: 50, totalPages: 1, segment: 'to-pay', totals: { count: 1, amount: 409141.43 },
+    kpis: { toPay: { count: 1, amount: 409141.43 }, inPayment: { count: 0, amount: 0 }, paidThisWeek: { count: 0, amount: 0 }, failed: { count: 0, amount: 0 } },
+    segments: { 'to-pay': 1, 'in-payment': 0, paid: 0, failed: 0, all: 1 }, batching: batchingExample, legacyTransfers: 4 },
+  handler: async (req, res) => {
+    const pg = paging(req.query, { page: 1, perPage: 50 });
+    const r = await payments.paymentList(req.query, req.user, pg);
+    sendList(res, r.rows, r.total, pg, { segment: r.segment, totals: r.totals, kpis: r.kpis, segments: r.segments, batching: r.batching, legacyTransfers: r.legacyTransfers });
+  },
+});
+define({
+  method: 'GET', path: '/payments/:voucherId',
+  summary: 'Payment record (voucher id or no.): the row with the sections Payee (masked account, canReveal), Payment (method, value date, debit account, bank reference, paid on, failure reason), Amounts (due to insurer, refund credits netted, voucher and bank amount, check Pass / Difference), Links (remittances and schedules, voucher, batch, bank file, status file, cheque, journal), Approvals (remittance approvals with limit, voucher maker, batch created / approved, file generated, result imported), the timeline and the activity of the voucher, its batch and cheques',
+  screen: S('Insurer payments > View payment'), middleware: readPayments,
+  response: { success: true, data: { ...payRow, payee: { ...payRow.payee, canReveal: true, verification: payRow.payee.chip },
+    payment: { method: null, amount: 409141.43, valueDate: '2026-10-12', debitAccount: null, bankReference: null, paidOn: null, failureReason: null },
+    amounts: { dueToInsurer: 409141.43, refundCredits: 0, voucherAmount: 409141.43, bankAmount: null, check: { code: 'pass', label: 'Pass', difference: 0 } },
+    links: { remittances: [{ remittanceNo: 'REM-2026-00021', link: '/finance/remittance/remittances/rm_21', schedule: '/remittance/remittances/rm_21/schedule.xlsx' }], voucher: { number: 'PV-2026-00102', link: payRow.voucherLink },
+      batch: null, bankFile: null, statusFile: null, cheque: null, journal: null, bankReconciliation: null },
+    approvals: { remittances: [{ remittanceNo: 'REM-2026-00021', by: 'J. Cruz', at: '2026-10-12T02:32:00.000Z', limitAtDecision: 1000000, limitSourceLabel: 'Role limit: TIS Finance & General Accounting' }],
+      voucherMaker: { name: 'M. Reyes', at: '2026-10-12T03:00:00.000Z' }, batchCreatedBy: null, batchApprovedBy: null, fileGeneratedBy: null, resultImportedBy: null },
+    timeline: [{ code: 'voucher-raised', label: 'Voucher raised', done: true, at: '2026-10-12T03:00:00.000Z', by: 'M. Reyes' }], activity: [], batching: batchingExample } },
+  handler: async (req, res) => ok(res, await payments.paymentRecord(req.params.voucherId, req.user)),
+});
+define({
+  method: 'GET', path: '/payments/:voucherId/account', summary: 'Show full number: the insurer\'s bank account number of a payment in full (write:disbursements; every reveal is audited)',
+  screen: S('Insurer payments > View payment > Show full number'), middleware: [requireAuth, requirePermission('write:disbursements')],
+  response: { success: true, data: { voucherId: 'pv_102', voucherNo: 'PV-2026-00102', bank: 'Metropolitan Bank and Trust Company', accountNumber: '0071-5566-4821', accountName: 'Pioneer Insurance & Surety Corp.' } },
+  handler: async (req, res) => {
+    const a = await payments.paymentAccount(req.params.voucherId);
+    await audit(req, { entity: 'payee_bank_account', entityId: a.voucherId, action: 'reveal', after: { voucherId: a.voucherId, voucherNo: a.voucherNo, account: payments.maskAccount(a.accountNumber) } });
+    ok(res, a);
+  },
+});
+
 // ---------------- electronic transfers ----------------
 define({
   method: 'GET', path: '/transfers/methods', summary: 'Transfer methods and limits (configuration)', screen: S('Electronic Transfer'), middleware: read,
@@ -578,12 +648,29 @@ define({
   handler: async (_req, res) => ok(res, await items.transferMethods()),
 });
 define({
-  method: 'GET', path: '/transfers', summary: 'Electronic transfers (status: Pending, Approved, Completed, Failed, Rejected)', screen: S('Electronic Transfer'), middleware: read, query: { status: 'Pending,Approved' },
-  response: { success: true, data: [{ id: 'rmi_3', reference: 'TRF-2026-00001', beneficiary: 'Malayan Insurance Co., Inc.', amount: 125000, method: 'PESONet', status: 'Pending', date: '2026-09-26' }] },
-  handler: async (req, res) => listOf(req, res, 'transfer', items.transferOut),
+  method: 'GET', path: '/transfers',
+  summary: 'Electronic transfers (status: Pending, Approved, Completed, Failed, Rejected). legacy=1 (Insurer payments > Legacy transfers, read-only): the TRF- items with the masked account, approved by, the journal posted at approval and its reversal or "Not reversed", totals (status, q, paging)',
+  screen: `${S('Electronic Transfer')}; ${S('Insurer payments > Legacy transfers')}`, middleware: readPayments, query: { legacy: 1, status: 'Pending,Approved' },
+  response: { success: true, data: [{ id: 'rmi_3', reference: 'TRF-2026-00001', beneficiary: 'Malayan Insurance Co., Inc.', bank: 'Metrobank', accountMasked: '···6612', amount: 125000, method: 'PESONet', status: 'Approved',
+    approvedBy: { name: 'Fe Approver', at: '2026-09-27T02:00:00.000Z' }, journal: { id: 'jv_1', number: 'JV-2026-00031' }, reversal: { reversed: false, number: null, date: null, label: 'Not reversed' },
+    readOnly: true, chip: { code: 'legacy', label: 'Recorded outside a payment voucher' }, creationDisabled: true, date: '2026-09-26' }], total: 1, totals: { count: 1, amount: 125000 } },
+  handler: async (req, res) => {
+    if (!['1', 'true'].includes(String(req.query.legacy || ''))) return listOf(req, res, 'transfer', items.transferOut);
+    const pg = paging(req.query, { page: 1, perPage: 50 });
+    const r = await payments.legacyTransfers(req.query, pg);
+    return sendList(res, r.rows, r.total, pg, { totals: r.totals });
+  },
 });
 define({
-  method: 'POST', path: '/transfers', summary: 'New electronic transfer (limit check, then approval)', screen: S('Electronic Transfer > New Transfer'), middleware: write,
+  method: 'GET', path: '/transfers/:id', summary: 'One electronic transfer (id or TRF no.), read-only: beneficiary, masked account, method, amount, status, the approval and its decisions, the journal posted at approval, its reversal, the activity',
+  screen: S('Insurer payments > Legacy transfers > View'), middleware: readPayments,
+  response: { success: true, data: { id: 'rmi_3', reference: 'TRF-2026-00001', readOnly: true, chip: { code: 'legacy', label: 'Recorded outside a payment voucher' }, journal: { id: 'jv_1', number: 'JV-2026-00031' },
+    reversal: { reversed: false, label: 'Not reversed' }, approval: { status: 'Approved', decisions: [{ action: 'Approved', by: 'Fe Approver', at: '2026-09-27T02:00:00.000Z', remarks: null }] }, activity: [] } },
+  handler: async (req, res) => ok(res, await payments.legacyTransfer(req.params.id, req.user)),
+});
+define({
+  method: 'POST', path: '/transfers', summary: 'New electronic transfer (limit check, then approval); 409 TRANSFERS_OFF "Electronic transfers are replaced by Insurer payments." while remittance.transfers_enabled is off',
+  screen: S('Electronic Transfer > New Transfer'), middleware: [...write, transfersOpen],
   request: { beneficiary: 'Malayan Insurance Co., Inc.', amount: 125000, method: 'PESONet', accountNumber: '0012-3456-78', bankName: 'BDO', purpose: 'September premium remittance', remittanceNo: 'REM-2026-00001' },
   response: { success: true, data: { reference: 'TRF-2026-00001', status: 'Pending' } },
   handler: async (req, res) => {
@@ -593,7 +680,8 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/transfers/:id/execute', summary: 'Record the bank result of an approved transfer (Completed / Failed)', screen: S('Electronic Transfer'), middleware: write,
+  method: 'POST', path: '/transfers/:id/execute', summary: 'Record the bank result of an approved transfer (Completed / Failed); 409 TRANSFERS_OFF while remittance.transfers_enabled is off',
+  screen: S('Electronic Transfer'), middleware: [...write, transfersOpen],
   request: { status: 'Completed', bankReference: 'PSN-20260930-7781' }, response: { success: true, data: { status: 'Completed' } },
   handler: async (req, res) => {
     const status = req.body?.status === 'Failed' ? 'Failed' : 'Completed';
@@ -627,9 +715,10 @@ define({
 
 // ---------------- exceptions ----------------
 define({
-  method: 'GET', path: '/exceptions', summary: 'Remittance exceptions (status: Open, In Progress, Escalated, Resolved)', screen: S('Exceptions'), middleware: read,
+  method: 'GET', path: '/exceptions', summary: 'Remittance exceptions (status: Open, In Progress, Escalated, Resolved; assignedTo=me: assigned to the caller)', screen: S('Exceptions'), middleware: read,
+  query: { status: 'Open,In Progress,Escalated', assignedTo: 'me' },
   response: { success: true, data: [{ id: 'rmi_4', exceptionId: 'EXC-2026-00001', severity: 'Critical', type: 'Amount Mismatch', remittanceNo: 'REM-2026-00001', amount: 25000, age: 2, assignedTo: 'Finance Officer', status: 'Open' }] },
-  handler: async (req, res) => listOf(req, res, 'exception', items.exceptionOut),
+  handler: async (req, res) => listOf(req.query.assignedTo === 'me' ? { ...req, query: { ...req.query, assignedToAny: await items.assigneeNames(req.user) } } : req, res, 'exception', items.exceptionOut),
 });
 define({
   method: 'POST', path: '/exceptions', summary: 'Log an exception (type from the exception master)', screen: S('Exceptions'), middleware: write,
@@ -683,52 +772,88 @@ define({
   },
 });
 
-// ---------------- scheduling ----------------
-// What to remit (insurers, cut-off, frequency, next run date). The schedules have no timer of their own: the
-// "Remittance schedules" job of Master > Schedules runs the due ones (items.runDueSchedules).
+// ---------------- schedules and runs ----------------
+// What to remit and when (remittance-schedule master). The schedules have no timer of their own: the "Remittance
+// schedules" job of Master > Schedules runs the due ones (runs.runDueSchedules); Run now runs one off-cycle.
+const runExample = { id: 'run_0123456789abcdef', scheduleCode: 'TIS-WEEKLY', startedAt: '2026-10-12T22:15:00.000Z', startedText: '13/10/2026 06:15', finishedAt: '2026-10-12T22:15:04.000Z',
+  trigger: { code: 'user', label: 'Run now · M. Reyes', user: { id: 'usr_4', name: 'M. Reyes' } }, reason: { code: 'ROC-MISSED', text: 'Missed run' },
+  window: { from: '2026-10-05', to: '2026-10-09', catchUpFrom: null, text: '05/10/2026 – 09/10/2026' }, counts: { scanned: 14, ready: 14, held: 0, exceptions: 0, created: 3 },
+  dueToInsurer: 1234567.89, drafts: [{ id: 'rm_21', remittanceNo: 'REM-2026-00021', link: '/finance/remittance/remittances/rm_21' }], executionRef: 'BLK-2026-00003',
+  result: { code: 'success', label: 'Success' }, message: 'Weekly run done: 3 remittance(s) created, 0 policies held, 0 exceptions.' };
+const scheduleExample = { id: 7, code: 'TIS-WEEKLY', name: 'Weekly remittance', kind: 'Remittance run', frequency: 'Weekly', paymentWindow: 'Previous Monday to Friday', cutOffDays: 0,
+  groupBy: 'Insurer and product line', runTime: '06:15', allInsurers: true, insurers: [], covers: { allActive: true, count: 4, insurers: [{ id: 3, code: 'PIONEER', name: 'Pioneer Insurance & Surety Corp.' }], label: 'All active (4)' },
+  runs: 'Mondays 06:15', nextRun: '2026-10-19', nextRunText: 'Mon 19/10/2026 06:15',
+  lastRun: { id: runExample.id, at: runExample.startedAt, text: '12/10/2026 06:15', result: 'success', resultLabel: 'Success', counts: runExample.counts, message: runExample.message, trigger: runExample.trigger },
+  status: 'Active', isActive: true, timeZone: 'Asia/Manila' };
+const scheduleBody = { name: 'Weekly remittance', kind: 'Remittance run', allInsurers: true, frequency: 'Weekly', paymentWindow: 'Previous Monday to Friday', groupBy: 'Insurer and product line',
+  runTime: '06:15', nextRun: '2026-10-19' };
 define({
-  method: 'GET', path: '/schedules', summary: 'Remittance schedules (remittance-schedule master), upcoming run dates and the Master > Schedules job that runs them', screen: S('Scheduling'), middleware: read,
-  response: { success: true, data: { scheduledJobs: [{ id: 1, code: 'SCH-001', name: 'Monthly remittance - Malayan', insurers: ['MALAYAN'], cutOffDays: 5, nextRun: '2026-10-01', frequency: 'Monthly', status: 'Active' }],
-    upcomingEvents: [{ status: '2026-10-01', date: '2026-10-01', content: 'Monthly remittance - Malayan' }], timeZone: 'Asia/Manila', job: { code: 'remittance-schedules', cron: '15 6 * * *', enabled: false } } },
-  handler: async (_req, res) => ok(res, await items.schedules()),
+  method: 'GET', path: '/schedules',
+  summary: 'Remittance schedules (Setup > Schedules): the automation state (jobEnabled, checked daily at, time zone, last check and its status; the cron and the job link for administrators only) and per schedule its kind, the insurers it covers, frequency, payment window, grouping, runs ("Mondays 06:15"), next run (none while paused), last run (time, result, counts, message, trigger) and status; scheduledJobs, upcomingEvents and job for the Scheduling screen of earlier releases',
+  screen: `${S('Setup > Schedules')}; ${S('Scheduling')}`, middleware: read,
+  response: { success: true, data: { automation: { jobEnabled: false, checkedDaily: '06:15', timeZone: 'Asia/Manila', lastCheckAt: null, lastStatus: null, cron: '15 6 * * *', jobCode: 'remittance-schedules', link: '/master/configuration/schedules' },
+    schedules: [scheduleExample], timeZone: 'Asia/Manila', job: { code: 'remittance-schedules', enabled: false } } },
+  handler: async (req, res) => ok(res, await runs.listSchedules(req.user)),
 });
 define({
-  method: 'POST', path: '/schedules', summary: 'New remittance schedule: insurers, cut-off days, frequency and next run date (stored in the remittance-schedule master)', screen: S('Scheduling > New Schedule'), middleware: write,
-  request: { code: 'SCH-0003', name: 'Weekly remittance - Pioneer', insurers: ['PIONEER'], cutOffDays: 3, frequency: 'Weekly', nextRun: '2026-10-05' },
-  response: { success: true, data: { id: 3, code: 'SCH-0003', status: 'Active' } },
+  method: 'POST', path: '/schedules',
+  summary: 'New remittance schedule (write:remittance): kind, insurers or all active insurers, frequency, payment window, grouping, run time, next run date; the code comes from the remittance_schedule series (SCH-003) when none is given. The window "Previous Monday to Friday" needs the frequency Weekly (400, errors[0].code MSG-RMT-007) and a Monday as next run',
+  screen: S('Setup > Schedules > New schedule'), middleware: write, request: scheduleBody, response: { success: true, data: { id: 9, code: 'SCH-003', status: 'Active' } },
+  handler: async (req, res) => created(res, await runs.createSchedule(req.body || {}, req.user, req), 'Schedule created'),
+});
+define({
+  method: 'GET', path: '/schedules/:id', summary: 'One remittance schedule as listed on Setup > Schedules', screen: S('Setup > Schedules > View'), middleware: read,
+  response: { success: true, data: scheduleExample },
+  handler: async (req, res) => ok(res, await runs.getSchedule(req.params.id)),
+});
+define({
+  method: 'PUT', path: '/schedules/:id',
+  summary: 'Change a remittance schedule (write:remittance; checked as it will be saved, MSG-RMT-007 for a window that needs a weekly schedule; audited with before and after)',
+  screen: S('Setup > Schedules > Edit'), middleware: write, request: { frequency: 'Monthly' },
+  response: { success: false, message: 'Validation failed', errors: [{ path: 'frequency', code: 'MSG-RMT-007', message: runs.MSG_RMT_007 }] },
+  handler: async (req, res) => ok(res, await runs.updateSchedule(req.params.id, req.body || {}, req.user, req), 'Schedule saved'),
+});
+define({
+  method: 'PATCH', path: '/schedules/:id/status', summary: 'Pause / resume a schedule (a paused schedule has no next run; audited)', screen: S('Setup > Schedules > Pause schedule'), middleware: write,
+  request: { status: 'Paused' }, response: { success: true, data: { status: 'Inactive' } },
   handler: async (req, res) => {
-    const t = await masters.getType('remittance-schedule');
-    await items.assertScheduleInsurers(req.body || {});
-    const s = await masters.createRecord(t, { timezone: await businessTimeZone(), ...(req.body || {}) }, req.user);
-    await audit(req, { entity: 'master:remittance-schedule', entityId: s.id, action: 'create', after: s });
-    created(res, s, 'Schedule created');
+    const paused = ['Paused', 'Inactive', false].includes(req.body?.status);
+    ok(res, await runs.setScheduleStatus(req.params.id, paused, req.user, req), paused ? 'Schedule paused' : 'Schedule resumed');
   },
 });
 define({
-  method: 'PUT', path: '/schedules/:id', summary: 'Change a remittance schedule (insurers, cut-off days, frequency, next run date)', screen: S('Scheduling > Edit Schedule'), middleware: write,
-  request: { insurers: ['PIONEER', 'MALAYAN'], cutOffDays: 5, nextRun: '2026-10-12' }, response: { success: true, data: { id: 3, code: 'SCH-0003', status: 'Active' } },
+  method: 'GET', path: '/schedules/:id/runs', summary: 'Run history of a schedule, newest first: started, trigger (Job, or Run now · user), reason, window, counts, drafts, result and message (paging)',
+  screen: `${S('Remittances > Run history')}; ${S('Setup > Schedules > View')}`, middleware: read, query: { page: 1, perPage: 20 },
+  response: { success: true, data: [runExample], total: 1, page: 1, perPage: 20, totalPages: 1, schedule: { id: 7, code: 'TIS-WEEKLY', name: 'Weekly remittance' } },
   handler: async (req, res) => {
-    const t = await masters.getType('remittance-schedule');
-    await items.assertScheduleInsurers(req.body || {});
-    const { before, after } = await masters.updateRecord(t, req.params.id, req.body || {}, req.user);
-    await audit(req, { entity: 'master:remittance-schedule', entityId: req.params.id, action: 'update', before, after });
-    ok(res, after, 'Schedule saved');
+    const pg = paging(req.query, { page: 1, perPage: 20 });
+    const r = await runs.scheduleRuns(req.params.id, pg);
+    sendList(res, r.rows, r.total, pg, { schedule: r.schedule });
   },
 });
 define({
-  method: 'PATCH', path: '/schedules/:id/status', summary: 'Pause / resume a schedule', screen: S('Scheduling'), middleware: write, request: { status: 'Paused' }, response: { success: true, data: { status: 'Inactive' } },
-  handler: async (req, res) => {
-    const t = await masters.getType('remittance-schedule');
-    const status = ['Paused', 'Inactive', false].includes(req.body?.status) ? 'inactive' : 'active';
-    const { before, after } = await masters.setRecordStatus(t, req.params.id, status, req.user);
-    await audit(req, { entity: 'master:remittance-schedule', entityId: req.params.id, action: `status:${status}`, before, after });
-    ok(res, after, status === 'active' ? 'Schedule resumed' : 'Schedule paused');
-  },
+  method: 'GET', path: '/schedules/:id/activity', summary: 'Activity log of a schedule: its changes (before and after) and its runs, oldest first', screen: S('Setup > Schedules > View'), middleware: read,
+  response: { success: true, data: [{ ...activity, actionCode: 'run', actionLabel: 'Run now: Weekly run done: 3 remittance(s) created, 0 policies held, 0 exceptions.', remarks: 'Off-cycle: Missed run' }] },
+  handler: async (req, res) => ok(res, await runs.scheduleActivity(req.params.id, req.user)),
 });
 define({
-  method: 'POST', path: '/schedules/:id/run', summary: 'Run a schedule now: draft remittances for its insurers up to the cut-off date (or its linked automated remittance)', screen: S('Scheduling > Run Now'), middleware: write,
-  response: { success: true, data: { schedule: { id: 1 }, execution: { executionId: 'BLK-2026-00003', remittances: [] } } },
-  handler: async (req, res) => ok(res, await logged('remittance_schedule', 'run', (r) => items.runSchedule(r.params.id, r.user))(req, res), 'Schedule executed'),
+  method: 'POST', path: '/schedules/:id/preview',
+  summary: 'Preview a run (dry run, writes nothing): the window, per insurer the policies ready, the product lines, basis and due to insurer, and "Draft will be created" or "Nothing to remit", the totals and the verb; windowDone with the reason when the window already has a run',
+  screen: `${S('Remittances > Run now')}; ${S('Setup > Schedules > Preview run')}`, middleware: write,
+  response: { success: true, data: { schedule: { id: 7, code: 'TIS-WEEKLY', name: 'Weekly remittance' }, runDate: '2026-10-12', window: runExample.window, windowDone: { done: false }, paused: false,
+    rows: [{ insurer: { id: 3, code: 'PIONEER', name: 'Pioneer Insurance & Surety Corp.' }, productLine: 'Motor', basis: 'Net', ready: 12, held: 0, exceptions: 0, dueToInsurer: 409141.43,
+      result: { code: 'draft', label: 'Draft will be created' } }], totals: { insurers: 1, drafts: 1, ready: 12, held: 0, exceptions: 0, dueToInsurer: 409141.43 }, verb: 'Create 1 draft remittance' } },
+  handler: async (req, res) => ok(res, await runs.previewRun(req.params.id)),
+});
+define({
+  method: 'POST', path: '/schedules/:id/run',
+  summary: 'Run now (write:remittance): an off-cycle run of the schedule\'s window with a remittance_off_cycle reason (reasonCode, note when the reason needs one); drafts per insurer, recorded in the run history. 409 WINDOW_DONE "This week\'s run is done (12/10/2026 06:15). Next run Mon 19/10/2026 06:15." when the window already has a run, 409 PAUSED. The message is MSG-RMT-008',
+  screen: `${S('Remittances > Run now')}; ${S('Setup > Schedules > Run now')}`, middleware: write, request: { reasonCode: 'ROC-MISSED', note: null },
+  response: { success: true, message: runExample.message, data: { run: runExample, message: runExample.message, drafts: [{ id: 'rm_21', remittanceNo: 'REM-2026-00021', insurer: 'Pioneer Insurance & Surety Corp.', policies: 12, dueToInsurer: 409141.43, link: '/finance/remittance/remittances/rm_21' }], schedule: scheduleExample } },
+  handler: async (req, res) => {
+    const r = await runs.runNow(req.params.id, req.body || {}, req.user, req);
+    ok(res, r, r.message);
+  },
 });
 
 // ---------------- import policy list ----------------

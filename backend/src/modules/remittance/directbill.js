@@ -373,6 +373,11 @@ export async function listDebitNotes(qs, pg) {
     add('d.status = ANY(?)', wanted);
   }
   if (ITEM_BASES.includes(qs.basis)) add('d.basis = ?', qs.basis);
+  // needing the user's attention: the user's drafts and the notes past their due date with a balance
+  if (qs.attention === 'mine') {
+    vals.push(qs.userId || '', await today());
+    conds.push(`((d.status = 'draft' AND d.created_by = $${vals.length - 1}) OR (d.status IN ('open', 'partial') AND d.due_date < $${vals.length}::date))`);
+  }
   if (isoDate(qs.from)) add('d.dn_date >= ?::date', isoDate(qs.from));
   if (isoDate(qs.to)) add('d.dn_date <= ?::date', isoDate(qs.to));
   if (qs.search) add('(d.dn_number ILIKE \'%\' || ? || \'%\' OR i.name ILIKE \'%\' || $' + (vals.length + 1) + ' || \'%\')', qs.search);

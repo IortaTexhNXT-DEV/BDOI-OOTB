@@ -6,13 +6,12 @@ import { many, one, query, withTransaction } from '../../db/pool.js';
 import { HttpError, badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { renderTemplate } from '../documents/common.js';
-import { addCalendarMonths, addDays, businessTimeZone, today } from '../../lib/dates.js';
+import { addCalendarMonths, addDays, today } from '../../lib/dates.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { assertRowLimit } from '../../lib/uploadLimits.js';
 import { readXlsx } from '../documents/xlsx.js';
 import { fileSize, isoDate, lastMonths, params, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
-import * as masters from '../masters/service.js';
-import { askApproval, createRemittance, eligiblePolicies, executeAutomated, executeForInsurers, findInsurer, getRemittance, openApproval, postItemJournal, statusLabels } from './service.js';
+import { askApproval, createRemittance, eligiblePolicies, findInsurer, getRemittance, openApproval, postItemJournal, statusLabels } from './service.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { companyName } from '../../lib/letterhead.js';
 import { VISIBLE_TO_USER } from '../notifications/service.js';
@@ -31,6 +30,12 @@ export function itemOut(x) {
   };
 }
 
+/** The names an exception may be assigned to a user by (assignedTo holds the username, the display name or the id). */
+export async function assigneeNames(user) {
+  const u = await one('SELECT id, username, display_name FROM users WHERE id = $1', [user?.id || '']);
+  return u ? [u.id, u.username, u.display_name].filter(Boolean) : [];
+}
+
 export async function getItem(kind, id) {
   const x = await one(`${ITEM_SELECT} WHERE x.kind = $1 AND (x.id = $2 OR x.reference_no = $2)`, [kind, String(id)]);
   if (!x) throw notFound(`${kind} not found`);
@@ -44,6 +49,7 @@ export async function listItems(kind, qs, pg, mapper = itemOut) {
   if (qs.search) conds.push(`(x.reference_no ILIKE ${p.add(`%${qs.search}%`)} OR x.data::text ILIKE $${p.values.length})`);
   if (qs.from) conds.push(`x.created_at >= ${p.add(isoDate(qs.from))}::date`);
   if (qs.to) conds.push(`x.created_at < (${p.add(isoDate(qs.to))}::date + 1)`);
+  if (Array.isArray(qs.assignedToAny)) conds.push(`x.data->>'assignedTo' = ANY(${p.add(qs.assignedToAny)})`);
   const where = conds.join(' AND ');
   const total = (await one(`SELECT count(*)::int AS n FROM remittance_items x WHERE ${where}`, p.values)).n;
   const rows = await many(`${ITEM_SELECT} WHERE ${where} ORDER BY x.created_at DESC LIMIT ${p.add(pg.limit)} OFFSET ${p.add(pg.offset)}`, p.values);
@@ -332,14 +338,12 @@ export async function inbox(user) {
 
 // ---------------- schedules ----------------
 //
-// A remittance schedule (remittance-schedule master, Accounts > Remittance > Scheduling) says what to remit and how
-// often: the insurers, the cut-off (policies incepted up to cutOffDays before the run date), the frequency and the next
-// run date. It has no timer of its own: the "Remittance schedules" job of Master > Schedules (handler
-// remittanceSchedules, seeded disabled) runs every active schedule whose next run date has come, in the business time
-// zone, then moves the date on by the frequency. "Run now" on the Scheduling screen runs one schedule at once.
+// A remittance schedule (remittance-schedule master, Accounts > Remittance > Setup > Schedules) says what to remit and
+// how often: the insurers (or all active ones), the payment window (the Monday to Friday before the run date, or a
+// cut-off of cutOffDays before it), the frequency and the next run date. It has no timer of its own: the "Remittance
+// schedules" job of Master > Schedules runs the due ones (runs.js). These are the date helpers of a schedule.
 
 export const SCHEDULE_JOB = 'remittance-schedules';
-const SYSTEM_USER = { id: null, username: 'system', roles: [], permissions: [] };
 const isoDay = (v) => {
   const d = String(v || '').trim().slice(0, 10);
   return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : null;
@@ -366,7 +370,7 @@ const firstFrom = (start, frequency, date, strict = false) => {
 };
 /**
  * Next run date of a schedule ('YYYY-MM-DD'): the stored next run date rolled forward by the frequency while it is
- * before `asOf` (the business date), so "Upcoming events" never lists a run in the past. null without a date.
+ * before `asOf` (the business date), so a run in the past is never shown as next. null without a date.
  */
 export function nextRunOf(r, asOf) {
   const d = isoDay(r.nextRun);
@@ -374,26 +378,13 @@ export function nextRunOf(r, asOf) {
   return asOf ? firstFrom(d, r.frequency, asOf) : d;
 }
 /** Next run date after a run on `runDate`: the first date of the series after the run date (a later stored date is kept). */
-const afterRun = (r, runDate) => firstFrom(isoDay(r.nextRun) || runDate, r.frequency, runDate, true);
-const insurerCodes = (r) => (Array.isArray(r.insurers) ? r.insurers : r.insurers ? String(r.insurers).split(',') : []).map((x) => String(x).trim()).filter(Boolean);
+export const afterRun = (r, runDate) => firstFrom(isoDay(r.nextRun) || runDate, r.frequency, runDate, true);
+export const scheduleDay = isoDay;
+export const insurerCodes = (r) => (Array.isArray(r.insurers) ? r.insurers : r.insurers ? String(r.insurers).split(',') : []).map((x) => String(x).trim()).filter(Boolean);
 /** Cut-off date of a run: policies incepted up to this date are remitted (cutOffDays before the run date). */
-const cutOffDate = (r, runDate) => addDays(runDate, -Math.max(0, Math.floor(Number(r.cutOffDays) || 0)));
+export const cutOffDate = (r, runDate) => addDays(runDate, -Math.max(0, Math.floor(Number(r.cutOffDays) || 0)));
 
-export async function schedules() {
-  const asOf = await today();
-  const t = await masters.getType('remittance-schedule');
-  const { rows } = await masters.listRecords(t, {}, { limit: 500, offset: 0 });
-  const runs = await many('SELECT data->>\'scheduleId\' AS sid, max(created_at) AS last FROM remittance_items WHERE kind = \'execution\' AND data ? \'scheduleId\' GROUP BY 1');
-  const job = await one('SELECT code, name, cron, enabled, last_run_at, last_status FROM scheduled_jobs WHERE code = $1', [SCHEDULE_JOB]);
-  const jobs = rows.map((r) => ({ ...r, id: r.id, name: r.name, frequency: r.frequency, insurers: insurerCodes(r), cutOffDays: r.cutOffDays ?? 0, nextRun: nextRunOf(r, asOf),
-    lastRun: runs.find((x) => Number(x.sid) === r.id)?.last || r.lastRun || null, status: r.status === 'Active' ? 'Active' : 'Paused' }));
-  const upcomingEvents = jobs.filter((j) => j.status === 'Active' && j.nextRun).sort((a, b) => String(a.nextRun).localeCompare(String(b.nextRun)))
-    .slice(0, 10).map((j) => ({ status: j.nextRun, date: j.nextRun, content: j.name, scheduleId: j.id }));
-  return { scheduledJobs: jobs, upcomingEvents, timeZone: await businessTimeZone(),
-    job: job ? { code: job.code, name: job.name, cron: job.cron, enabled: job.enabled, lastRunAt: job.last_run_at, lastStatus: job.last_status, link: '/master/configuration/schedules' } : null };
-}
-
-/** Insurer codes of a schedule body that do not name an active insurer (validation of Scheduling > New / Edit). */
+/** Insurer codes of a schedule body that do not name an active insurer (validation of Setup > Schedules > New / Edit). */
 export async function assertScheduleInsurers(body) {
   if (body.insurers === undefined) return;
   const bad = [];
@@ -401,57 +392,6 @@ export async function assertScheduleInsurers(body) {
     if (!(await one('SELECT 1 FROM insurance_companies WHERE (lower(code) = lower($1) OR id::text = $1) AND status = $2', [code, 'active']))) bad.push(code);
   }
   if (bad.length) throw badRequest('Validation failed', [{ path: 'insurers', message: `Unknown or inactive insurer: ${bad.join(', ')}` }]);
-}
-
-/**
- * Run one schedule: a draft remittance per insurer of the schedule (policies up to the cut-off date), or, for a
- * schedule without insurers, its linked automated remittance configuration. Records the last run and moves the next
- * run date past the run date.
- */
-export async function runSchedule(id, user, { asOf = null, triggeredBy = null } = {}) {
-  const t = await masters.getType('remittance-schedule');
-  const s = await masters.getRecord(t, id);
-  if (s.status !== 'Active') throw conflict('Schedule is paused');
-  const runDate = asOf || (await today());
-  const insurers = insurerCodes(s);
-  const by = triggeredBy || `schedule:${s.code}`;
-  let execution;
-  if (insurers.length) {
-    execution = await executeForInsurers({ insurerCodes: insurers, to: cutOffDate(s, runDate), scheduleCode: s.code, runDate }, user, by);
-  } else {
-    const linked = Array.isArray(s.linkedProcesses) ? s.linkedProcesses : [];
-    const configCode = linked.find((x) => /^ARM-/.test(String(x))) || null;
-    if (!configCode) throw badRequest(`Schedule ${s.code} names no insurers and no automated remittance configuration; choose the insurers to remit`);
-    execution = await executeAutomated({ configCode }, user, by);
-  }
-  await query('UPDATE remittance_items SET data = data || $2 WHERE reference_no = $1', [execution.executionId, JSON.stringify({ scheduleId: String(s.id), scheduleCode: s.code })]);
-  const next = afterRun(s, runDate);
-  await query(`UPDATE master_records SET data = data || jsonb_build_object('lastRun', $2::text) || CASE WHEN $4::text IS NULL THEN '{}'::jsonb ELSE jsonb_build_object('nextRun', $4::text) END,
-    updated_by = $3, updated_at = now() WHERE id = $1`, [s.id, runDate, user?.id || null, next]);
-  return { schedule: await masters.getRecord(t, id), execution };
-}
-
-/**
- * Scheduled job "Remittance schedules" (Master > Schedules): run every active remittance schedule whose next run date
- * is on or before the business date (a schedule without a next run date is due at once). One failing schedule does not
- * stop the others; its error is in the job output.
- */
-export async function runDueSchedules({ asOf = null } = {}) {
-  const runDate = asOf || (await today());
-  const t = await masters.getType('remittance-schedule');
-  const { rows } = await masters.listRecords(t, {}, { limit: 1000, offset: 0 });
-  const due = rows.filter((r) => r.status === 'Active' && (!isoDay(r.nextRun) || isoDay(r.nextRun) <= runDate));
-  const ran = [];
-  const errors = [];
-  for (const r of due) {
-    try {
-      const { execution, schedule } = await runSchedule(r.id, SYSTEM_USER, { asOf: runDate, triggeredBy: `job:${SCHEDULE_JOB}` });
-      ran.push({ schedule: r.code, executionId: execution.executionId, remittances: execution.remittances.length, totalAmount: execution.totalAmount, nextRun: schedule.nextRun });
-    } catch (e) {
-      errors.push({ schedule: r.code, error: e.message });
-    }
-  }
-  return { asOf: runDate, due: due.length, ran, errors };
 }
 
 // ---------------- bulk processing ----------------
