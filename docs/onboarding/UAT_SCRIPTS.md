@@ -8,7 +8,13 @@ request ID from the error message (see `SUPPORT_AND_ESCALATION.md`).
 Before you start: the System Administrator has finished `GO_LIVE_DATA_SETUP.md` steps 1 to 10 and each tester has a
 user with one role. The scripts follow the roles of the user manual, then My Work (every role), the Compliance
 Officer (AML/CFT), the compliance registers and the IT checks of the test environments. Scenarios that depend on a
-module switched off for the broker are marked not applicable. The Test Plan maps each script to its module and test cases.
+module switched off for the broker are marked not applicable. The generic Test Plan (archived in
+`docs/archive/2026-10-10/`) mapped each script to its module and test cases.
+
+For TISPH, these scripts are replaced by the TISPH UAT test cases: the test strategy
+(`docs/TISPH/testing/TISPH_Test_Strategy.docx`), the test pack (`docs/TISPH/testing/TISPH_Test_Pack.xlsx`) and the
+test cases of each FRS (`docs/TISPH/frs/`). The scripts below were written for the generic broker roles and include
+modules removed from the TISPH build; they are rewritten per persona as the TISPH UAT test cases are produced.
 
 ## System Administrator (Super Admin)
 

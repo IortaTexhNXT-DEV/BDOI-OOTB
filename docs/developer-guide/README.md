@@ -14,7 +14,7 @@ defects in production.
 | [backend.md](backend.md) | The API and scheduled jobs (`backend/`): layout, running and testing, configuration, tracing a defect, logs, common production issues, how to add routes, settings, migrations, masters, posting rules, number series, reports and jobs. |
 | [frontend.md](frontend.md) | The React application (`brokerverse/`), written by the front-end team. |
 | [dashboards.md](dashboards.md) | The dashboard and chart standard: data colour tokens, chart forms, KPI cards, periods, drill-down and accessibility. |
-| Technical Reference (`docs/package/07_Technical/BrokerVerse_Technical_Reference.pdf`) | Module catalogue (purpose, routes, tables, jobs, posting events, settings of all 70 modules), the platform engines, and the chapter "How to review a change" used by code reviewers. |
+| [`backend/docs/MODULE_GUIDE.md`](../../backend/docs/MODULE_GUIDE.md) and the module READMEs (`backend/src/modules/*/README.md`) | Modules of the API: purpose, routes, tables, jobs and settings. The TISPH architecture is described in `docs/TISPH/pack/TISPH_Solution_Architecture.docx` (index: [`docs/TISPH/README.md`](../TISPH/README.md)). |
 
 ## Repository layout
 
@@ -26,10 +26,10 @@ defects in production.
 | `deploy/RELEASE_PIPELINE.md` | Build once, promote through Dev, SIT, UAT, Pre-Prod and Production with approvals; migrations policy; rollback; hotfix. |
 | `docs/onboarding/` | Go-live workbench, smoke test and transaction reset, client data masking, branding and e-signatures. |
 | `deploy/README.md` | What to check before a site goes live. |
-| `docs/review/CODE_REVIEW.md` | Code reviews: what was found, fixed and left open. |
-| `docs/e2e/` | End-to-end test runs on the screens and their defect register. |
-| `docs/package/` | The documentation pack: sales, commercials, contracts, onboarding, delivery (including the user manual), support, technical and management documents. See `docs/package/README.md`. |
-| `docs/architecture/`, `docs/manual/`, `docs/decks/` | Architecture description, user manual screenshots and their capture tools, role presentations. |
+| `docs/e2e/` | UAT scenario run, go-live rehearsal, document and report sweep, role walk, and the end-to-end test tooling. The earlier generic code reviews, end-to-end reports and defect register are in `docs/archive/2026-10-10/`. |
+| `docs/TISPH/` | TISPH documents: functional specifications, the document pack (architecture, security, data, environments, migration, operations, governance) and the test pack. Start with `docs/TISPH/README.md`. |
+| `docs/package/` | Product documents still used by the code or not yet replaced: user manual source, upload templates, brand packs, data dictionary workbook, templates. See `docs/package/README.md`. |
+| `docs/architecture/`, `docs/manual/`, `docs/decks/` | Table catalogue and indicative load test, user manual screenshots and their capture tools, role presentations. |
 | `backend/docs/api/` | Generated API list: OpenAPI, Postman collection, the API touchpoint workbook (screen to API). |
 | `docker-compose.yml` | Database, API and web server for a single-server installation. |
 

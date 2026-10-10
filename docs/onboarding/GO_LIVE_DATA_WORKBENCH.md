@@ -8,9 +8,9 @@ go-live data with two Excel workbooks instead of one upload per object:
 | `configuration` | `GoLive_Configuration_Workbook.xlsx` | Everything needed to run new business: company, system settings, location masters, branches, departments, hierarchy, designations, users, currencies, exchange rates, chart of accounts, banks, bank accounts, signatories, transaction codes, write-off reasons, insurers, lines of business, products, policy types, covers, vehicle brands / models / variants / vehicles, commission rate matrix, premium taxes and charges, LGU tax rates, authority limits, document numbering |
 | `migration` | `GoLive_Migration_Workbook.xlsx` | The open business of the old system at cutover: clients, in-force policies (legacy numbers kept), open premium receivables, open claims, GL opening balances |
 
-The step-by-step set-up and the controls around the migration are in `GO_LIVE_DATA_SETUP.md` and
-`docs/package/source/data-migration-and-cutover.md`; the workbench replaces the one-off uploads they list for these
-objects (the single uploads stay available).
+The step-by-step set-up and the controls around the migration are in `GO_LIVE_DATA_SETUP.md` and the TISPH Data
+Migration and Cutover Plan (`docs/TISPH/pack/TISPH_Data_Migration_and_Cutover.docx`); the workbench replaces the
+one-off uploads they list for these objects (the single uploads stay available).
 
 ## Workbook layout
 
