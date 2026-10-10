@@ -22,20 +22,33 @@ export const SCOPE_ENTITY = { quotation: 'quote', policy: 'policy', claim: 'clai
 export async function recordId(entity, ref) {
   const scopeKey = SCOPE_ENTITY[entity];
   const e = scopeKey && ENTITIES[scopeKey];
-  if (!e) return String(ref);
-  const row = await one(`SELECT id::text AS id FROM ${e.table} WHERE ${e.keys.map((k) => `${k}::text = $1`).join(' OR ')} LIMIT 1`, [String(ref)]);
+  if (e) {
+    const row = await one(`SELECT id::text AS id FROM ${e.table} WHERE ${e.keys.map((k) => `${k}::text = $1`).join(' OR ')} LIMIT 1`, [String(ref)]);
+    return row?.id || String(ref);
+  }
+  const [table, col] = RECORD_KEYS[entity] || [];
+  if (!table) return String(ref);
+  const row = await one(`SELECT id::text AS id FROM ${table} WHERE id::text = $1 OR ${col}::text = $1 LIMIT 1`, [String(ref)]).catch(() => null);
   return row?.id || String(ref);
 }
 
 /**
- * The steps a record keeps in its own columns (when, by whom): [action, time column, user column]. Records created
- * before their screens wrote the audit trail (sample data, go-live loads, older releases) still show how they got to
- * where they are; a step is only taken from the record when the trail has no entry for it.
+ * The steps a record keeps in its own columns (when, by whom): [action, time, user, extra]. Records created before
+ * their screens wrote the audit trail (sample data, go-live loads, older releases) still show how they got to where
+ * they are; a step is only taken from the record when the trail has no entry for it. Time and user are columns of
+ * the record (t) or a sub-query on it; extra.when limits a step to records in that state (a rejection only kept in
+ * the status), extra.after is the change the step made (status reached, number of the record it created).
  */
+const POLICY_OF_QUOTE = (col) => `(SELECT p.${col} FROM policies p WHERE p.id = t.policy_id)`;
 const LIFECYCLE = {
   lead: ['leads', [['create', 'created_at', 'created_by'], ['assign', 'assigned_at', null]]],
   quotation: ['quotes', [['create', 'created_at', 'created_by'], ['send-for-approval', 'approval_sent_at', null], ['approve', 'approved_at', 'approved_by'],
-    ['customer-accept', 'customer_accepted_at', null], ['submit', 'submitted_to_insurer_at', 'submitted_by']]],
+    ['customer-accept', 'customer_accepted_at', null], ['submit', 'submitted_to_insurer_at', 'submitted_by'],
+    ['reject', 't.updated_at', 't.updated_by', { when: "t.status = 'rejected'", after: { quotationStatus: "'Rejected'" } }],
+    ['convert-to-policy', POLICY_OF_QUOTE('created_at'), POLICY_OF_QUOTE('created_by'),
+      { when: 't.policy_id IS NOT NULL', after: { quotationStatus: "'ConvertedToPolicy'", policyNumber: POLICY_OF_QUOTE('policy_number') } }]]],
+  policy: ['policies', [['create', 'created_at', 'created_by', { after: { policyNumber: 't.policy_number', policyStatus: 't.status' } }],
+    ['payment-confirm', 'paid_at', null, { after: { paymentStatus: 't.payment_status' } }]]],
   broker_slip: ['broker_slips', [['create', 'created_at', 'created_by']]],
   placement: ['placements', [['create', 'created_at', 'created_by'], ['send', 'sent_at', null], ['acknowledge', 'acknowledged_at', 'acknowledged_by'],
     ['record-epolicy', 'epolicy_received_at', 'epolicy_received_by'], ['check', 'checked_at', 'checked_by'], ['book', 'issued_at', 'issued_by']]],
@@ -43,27 +56,43 @@ const LIFECYCLE = {
   journal_voucher: ['journal_vouchers', [['create', 'created_at', 'created_by'], ['approve', 'approved_at', 'approved_by'], ['post', 'posted_at', 'posted_by'],
     ['reject', 'rejected_at', 'rejected_by'], ['cancel', 'cancelled_at', 'cancelled_by']]],
   disbursement: ['disbursements', [['create', 'created_at', 'created_by'], ['approve', 'approved_at', 'approved_by'], ['pay', 'paid_at', null]]],
-  petty_cash_request: ['petty_cash_requests', [['create', 'created_at', 'created_by'], ['approve', 'approved_at', 'approved_by'], ['reject', 'rejected_at', 'rejected_by']]],
+  petty_cash_request: ['petty_cash_requests', [['create', 'created_at', 'created_by'], ['approve', 'approved_at', 'approved_by'], ['reject', 'rejected_at', 'rejected_by'],
+    ['disburse', '(SELECT min(d.created_at) FROM petty_cash_disbursements d WHERE d.request_id = t.id)',
+      '(SELECT d.created_by FROM petty_cash_disbursements d WHERE d.request_id = t.id ORDER BY d.created_at LIMIT 1)', { when: "t.status = 'disbursed'" }]]],
+  petty_cash_fund: ['petty_cash_funds', [['create', 'created_at', 'created_by', { after: { fundSize: 't.fund_size', status: 't.status' } }]]],
+  petty_cash_disbursement: ['petty_cash_disbursements', [['create', 'created_at', 'created_by', { after: { status: 't.status' } }]]],
   commission_line: ['commissions', [['accrue', 'accrued_at', null], ['mark-eligible', 'eligible_at', 'eligible_by'], ['approve', 'approved_at', 'approved_by'],
     ['pay', 'paid_at', 'paid_by'], ['reverse', 'reversed_at', 'reversed_by']]],
 };
 /** Trail actions that already tell a step (a record loaded in bulk was created by the load). */
-const SAME_STEP = { create: /^(create|create-from-.*|bulk-create|go-live-migration|convert.*)$/ };
+const SAME_STEP = { create: /^(create|create-from-.*|bulk-create|go-live-migration|convert.*)$/, 'convert-to-policy': /^(convert-to-policy|update-converted-policy)$/ };
+const sqlOf = (expr) => (/^[a-z_]+$/.test(expr) ? `t.${expr}` : expr);
 
-/** The steps of a record taken from its own columns that its trail does not hold, as audit rows. */
+/** The steps of a record taken from its own columns that its trail does not hold, as audit rows (in step order). */
 async function lifecycleRows(entity, id, stored) {
   const [table, steps] = LIFECYCLE[entity] || [];
   if (!table) return [];
-  const cols = [...new Set(steps.flatMap(([, at, by]) => [at, by]).filter(Boolean))];
-  const rec = await one(`SELECT ${cols.join(', ')} FROM ${table} WHERE id::text = $1`, [id]).catch(() => null);
+  const cols = steps.flatMap(([, at, by, extra = {}], i) => [
+    `${sqlOf(at)} AS s${i}_at`, by ? `${sqlOf(by)} AS s${i}_by` : null, extra.when ? `(${extra.when}) AS s${i}_when` : null,
+    ...Object.values(extra.after || {}).map((expr, j) => `${expr} AS s${i}_a${j}`)].filter(Boolean));
+  const rec = await one(`SELECT ${cols.join(', ')} FROM ${table} t WHERE t.id::text = $1`, [id]).catch(() => null);
   if (!rec) return [];
   const told = (action) => stored.some((r) => (SAME_STEP[action] || new RegExp(`^${action}(-|$)`)).test(String(r.action || '')));
-  return steps.filter(([action, at]) => rec[at] && !told(action)).map(([action, at, by]) => {
-    const who = by ? rec[by] : null;
-    return { id: `${action}-${id}`, at: rec[at], user_id: who && /^usr_/.test(who) ? who : null, username: who && !/^usr_/.test(who) ? who : null,
-      entity, entity_id: id, action, before_data: null, after_data: null, source: null };
+  // a user column holds a user id or a username; anything else (a load script's tag) reads as the system
+  const names = steps.map((s, i) => rec[`s${i}_by`]).filter((v) => v && !/^usr_/.test(v));
+  const known = names.length ? new Set((await many('SELECT username FROM users WHERE username = ANY($1::text[])', [names])).map((u) => u.username)) : new Set();
+  return steps.map(([action, , , extra = {}], i) => ({ action, extra, i })).filter(({ action, extra, i }) => rec[`s${i}_at`]
+    && (!extra.when || rec[`s${i}_when`]) && !told(action)).map(({ action, extra, i }) => {
+    const who = rec[`s${i}_by`] && (/^usr_/.test(rec[`s${i}_by`]) || known.has(rec[`s${i}_by`])) ? rec[`s${i}_by`] : null;
+    const after = extra.after ? Object.fromEntries(Object.keys(extra.after).map((k, j) => [k, rec[`s${i}_a${j}`]]).filter(([, v]) => v != null)) : null;
+    return { id: `${action}-${id}`, at: rec[`s${i}_at`], user_id: who && /^usr_/.test(who) ? who : null, username: who && !/^usr_/.test(who) ? who : null,
+      entity, entity_id: id, action, before_data: null, after_data: after, source: { channel: 'record' }, step: i };
   });
 }
+
+/** Newest first (or oldest first); steps taken at the same moment keep the order they happen in (created before approved). */
+const byTime = (dir) => (a, b) => (dir === 'ASC' ? 1 : -1) * (new Date(a.at) - new Date(b.at) || (a.step ?? -1) - (b.step ?? -1)
+  || String(a.id).localeCompare(String(b.id)));
 
 /**
  * Events of one record, newest first (sort=asc for oldest first). A claim's history is its field-level trail
@@ -105,9 +134,7 @@ export async function recordHistory(entityIn, ref, { viewer = null, sort = 'desc
     }
   }
   const own = await lifecycleRows(entity, id, rows);
-  if (own.length) {
-    rows = [...rows, ...own].sort((a, b) => (dir === 'ASC' ? 1 : -1) * (new Date(a.at) - new Date(b.at) || String(a.id).localeCompare(String(b.id))));
-  }
+  if (own.length) rows = [...rows, ...own].sort(byTime(dir));
   return toEvents(rows, { viewer });
 }
 
