@@ -12,7 +12,7 @@ import { queueEmail } from '../../lib/mailer.js';
 import { addDays, today, isoDate } from '../../lib/dates.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { num, round2, renderTemplate, emailTemplate, amountText } from '../documents/common.js';
-import { nextDocumentNumber } from '../../lib/numbering.js';
+import { nextDocumentNumber, numberingContext } from '../../lib/numbering.js';
 import { insurerId } from '../policies/service.js';
 import { quotationCharges } from '../premium-charges/service.js';
 import { journeyFor, resolveLob, assertStep } from './journey.js';
@@ -182,7 +182,7 @@ export async function createSlip(input, userId) {
     const insurers = await resolveInsurers(db, body.insurers?.length ? body.insurers : defaults);
     // one request to several insurers is a future-release feature (modules/features): one insurer per client
     if (insurers.length > 1) await assertFeature('rfq-multi-insurer', { write: true });
-    const number = await nextDocumentNumber('broker_slip', { db, unique: { table: 'broker_slips', column: 'slip_number' } });
+    const number = await nextDocumentNumber('broker_slip', { db, unique: { table: 'broker_slips', column: 'slip_number' }, ...(await numberingContext({ db, userId, productId, lob })) });
     const covers = Array.isArray(body.requestedCovers) ? body.requestedCovers : [];
     const r = await db.query(`INSERT INTO broker_slips(slip_number, lead_id, client_id, product_id, product_type, lob, insured_name, risk_details, doc, requested_covers,
         sum_insured, currency, inception_date, expiry_date, response_due_date, remarks, owner_user_id, created_by)

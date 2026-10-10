@@ -234,4 +234,9 @@ font-weight: 500;
         flex: 0 0 50%;
         max-width: 50%;
     }
+}.branch__switch {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-top: 1.75rem;
 }

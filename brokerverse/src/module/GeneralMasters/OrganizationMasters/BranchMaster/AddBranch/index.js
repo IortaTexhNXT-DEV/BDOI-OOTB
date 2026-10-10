@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -13,6 +13,7 @@ import { Card } from "primereact/card";
 import { useFormik } from "formik";
 import CustomToast from "../../../../../components/Toast";
 import { InputText } from "primereact/inputtext";
+import { InputSwitch } from "primereact/inputswitch";
 import DepartMentList from "./DepartMentList";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -20,6 +21,7 @@ import {
   postAddBranchMiddleware,
 } from "../store/branchMiddleware";
 import useMasterOptions from "../../../common/useMasterOptions";
+import mastersService from "../../../../../services/mastersService";
 import { phoneCountryCode } from "../../../../../utility/phoneFormat";
 
 const initialValues = {
@@ -36,6 +38,9 @@ const initialValues = {
   Country: "Philippines",
   PhoneNumber: "",
   Fax: "",
+  IssuingOffice: false,
+  Region: "",
+  NumberingCode: "",
 };
 
 function AddBranch({ action }) {
@@ -64,6 +69,14 @@ function AddBranch({ action }) {
   const City = useMasterOptions("city");
   const State = useMasterOptions("state");
   const Country = useMasterOptions("country");
+  // the regions of the Branch master definition (Master > Configuration, type branch)
+  const [regionOptions, setRegionOptions] = useState([]);
+  useEffect(() => {
+    mastersService
+      .definition("branch")
+      .then((d) => setRegionOptions(((d?.fields || []).find((f) => f.name === "Region")?.options || []).map((r) => ({ label: r, value: r }))))
+      .catch(() => setRegionOptions([]));
+  }, []);
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
 
@@ -148,6 +161,9 @@ function AddBranch({ action }) {
         Country: countryData,
         PhoneNumber: getBranchPatch?.PhoneNumber,
         Fax: getBranchPatch?.Fax,
+        IssuingOffice: getBranchPatch?.IssuingOffice === true || getBranchPatch?.IssuingOffice === "true",
+        Region: getBranchPatch?.Region || "",
+        NumberingCode: getBranchPatch?.NumberingCode || "",
       };
 
       formik.setValues({ ...formik.values, ...updatedValues });
@@ -501,6 +517,41 @@ function AddBranch({ action }) {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="col-12 md:col-6 lg:col-3">
+            <DropDowns
+              className="dropdown__container"
+              label={t("generalMasters.region")}
+              value={action === "view" ? organizationBranchView.Region : formik.values.Region}
+              onChange={(e) => formik.setFieldValue("Region", e.value)}
+              options={regionOptions}
+              optionLabel="label"
+              placeholder={t("generalMasters.select")}
+              dropdownIcon={<SvgDropdown color={"#000"} />}
+              disabled={action === "view"}
+            />
+          </div>
+          <div class="col-12 md:col-6 lg:col-3">
+            <InputField
+              classNames="field__container"
+              label={t("generalMasters.numberingCode")}
+              placeholder={t("generalMasters.enter")}
+              value={action === "view" ? organizationBranchView.NumberingCode : formik.values.NumberingCode}
+              onChange={(e) => formik.setFieldValue("NumberingCode", String(e.target.value || "").replace(/[^0-9A-Za-z]/g, "").slice(0, 3))}
+              disabled={action === "view"}
+            />
+          </div>
+          <div class="col-12 md:col-6 lg:col-3 branch__switch">
+            <InputSwitch
+              inputId="branch-issuing-office"
+              checked={action === "view" ? organizationBranchView.IssuingOffice === true || organizationBranchView.IssuingOffice === "true" : !!formik.values.IssuingOffice}
+              onChange={(e) => formik.setFieldValue("IssuingOffice", !!e.value)}
+              disabled={action === "view"}
+            />
+            <label htmlFor="branch-issuing-office">{t("generalMasters.issuingOffice")}</label>
           </div>
         </div>
       </Card>

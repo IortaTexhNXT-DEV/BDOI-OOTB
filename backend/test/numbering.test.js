@@ -222,7 +222,83 @@ describe('document numbering: API', () => {
 
   it('endorsements take their number inside the transaction', async () => {
     const src = fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src', 'modules', 'endorsements', 'service.js'), 'utf8');
-    expect(src).toMatch(/withTransaction\(async \(db\) => \{\s*const number = await nextDocumentNumber\('endorsement', \{ db/);
+    expect(src).toMatch(/withTransaction\(async \(db\) => \{\s*const series = isCancel[^;]+;\s*const number = await nextDocumentNumber\(series, \{ db/);
+  });
+});
+
+describe('document numbering: TISPH structure (offices, segments, numbering per policy)', () => {
+  const f = (pattern, seq, segments, width = 6, prefix = 'PRN', branch = null) => one('SELECT format_document_number($1, $2, $3, $4, $5::date, $6, NULL, $7::jsonb) AS n',
+    [pattern, prefix, width, seq, '2026-10-10', branch, JSON.stringify(segments)]).then((r) => r.n);
+
+  it('formats the segment tokens of the TIS Policy Number, the cover note, the endorsement and the placement slip', async () => {
+    const seg = { OFFICE: '1', PRODUCT: '1', SUBLINE: '1', BUSINESS: '1', PARENT: '1111000001' };
+    expect(await f('{PRODUCT}{SUBLINE}{BUSINESS}{OFFICE}{SEQ}', 1, seg)).toBe('1111000001');
+    expect(await f('{PRODUCT}{SUBLINE}{BUSINESS}{OFFICE}{SEQ}', 123456, { ...seg, PRODUCT: '2', BUSINESS: '2' })).toBe('2121123456');
+    expect(await f('{PREFIX}-{PARENT}-{SEQ}', 1, seg, 2, 'ENDT')).toBe('ENDT-1111000001-01');
+    expect(await f('{PREFIX}-{PARENT}-{SEQ}', 1, seg, 1, 'CAN')).toBe('CAN-1111000001-1');
+    expect(await f('{PREFIX}-{YY}-{BRANCH}-{SEQ}', 1, seg, 7, 'CN', 'HO')).toBe('CN-26-HO-0000001');
+    expect(await f('{PREFIX}/{BRANCH}/{YY}/{SEQ}', 1, seg, 5, 'PS', 'HO')).toBe('PS/HO/26/00001');
+    // a segment without a value drops with its separator, as {BRANCH} does
+    expect(await f('{PREFIX}-{OFFICE}-{SEQ}', 5, {}, 5, 'POL')).toBe('POL-00005');
+  });
+
+  it('a per_document series counts under the parent number and needs one', async () => {
+    await query("UPDATE document_numbering SET pattern = '{PREFIX}-{PARENT}-{SEQ}', seq_width = 2, reset_rule = 'per_document' WHERE code = 'endorsement'");
+    const issue = (parent) => one('SELECT next_document_number($1, NULL, NULL, NULL, $2::jsonb) AS n', ['endorsement', JSON.stringify({ PARENT: parent })]).then((r) => r.n);
+    expect(await issue('1111000001')).toBe('END-1111000001-01');
+    expect(await issue('1111000001')).toBe('END-1111000001-02');
+    expect(await issue('1111000002')).toBe('END-1111000002-01');
+    await expect(one("SELECT next_document_number('endorsement') AS n")).rejects.toThrow(/parent document number is required/);
+    // the pattern rules: {PARENT} only with per_document, and per_document only with {PARENT}
+    const noParent = await ctx.api('put', '/document-numbering/endorsement').send({ pattern: '{PREFIX}-{SEQ}', resetRule: 'per_document' });
+    expect(noParent.status).toBe(400);
+    expect(JSON.stringify(noParent.body)).toMatch(/needs \{PARENT\}/);
+    const stray = await ctx.api('put', '/document-numbering/endorsement').send({ pattern: '{PREFIX}-{PARENT}-{YYYY}-{SEQ}', resetRule: 'yearly' });
+    expect(stray.status).toBe(400);
+    await query("UPDATE document_numbering SET pattern = '{PREFIX}-{YYYY}-{SEQ}', seq_width = 5, reset_rule = 'yearly' WHERE code = 'endorsement'");
+  });
+
+  it('numberingContext resolves the issuing office, the product, sub-line and business type segments of the user and product', async () => {
+    const { numberingContext } = await import('../src/lib/numbering.js');
+    const r = await ctx.api('post', '/users').send({ username: 'dn.office', password: 'Welcome@123', displayName: 'DN Office', email: 'dn.office@example.ph', roles: ['claims'], branchCode: 'HO' });
+    expect(r.status).toBe(201);
+    const motor = (await one("SELECT id FROM products WHERE code = 'MOTOR'")).id;
+    const ctxNew = await numberingContext({ userId: r.body.data.userId, productId: motor });
+    expect(ctxNew).toMatchObject({ branch: 'HO', segments: { OFFICE: '1', PRODUCT: '1', SUBLINE: '0', BUSINESS: '1' } });
+    const ctxRenewal = await numberingContext({ userId: r.body.data.userId, productCode: 'CTPL', policyTypeCode: 'CTPL', renewal: true });
+    expect(ctxRenewal.segments).toMatchObject({ PRODUCT: '2', SUBLINE: '2', BUSINESS: '2' });
+    // no user office: the default office of numbering.default_office
+    const noUser = await numberingContext({ productCode: 'PA' });
+    expect(noUser).toMatchObject({ branch: 'HO', segments: { OFFICE: '1', PRODUCT: '3' } });
+    // the issuing office flag and region of the Branch master
+    const ho = await ctx.api('get', '/masters/branch?search=HO');
+    expect(ho.status).toBe(200);
+    expect(ho.body.data.find((b) => b.BranchCode === 'HO')).toMatchObject({ IssuingOffice: true, Region: 'NCR', NumberingCode: '1' });
+  });
+
+  it('the proposed numbering structure is previewed, applied once with an audit entry, and refused to other roles', async () => {
+    const before = await ctx.api('get', '/document-numbering/structure');
+    expect(before.status).toBe(200);
+    const policy = before.body.data.find((r) => r.code === 'policy');
+    expect(policy).toMatchObject({ applies: true, target: { prefix: 'PRN', pattern: '{PRODUCT}{SUBLINE}{BUSINESS}{OFFICE}{SEQ}', seqWidth: 6, resetRule: 'never' }, preview: '1111000001' });
+    expect(before.body.data.find((r) => r.code === 'endorsement').preview).toBe('ENDT-1101000001-01');
+    expect(before.body.data.find((r) => r.code === 'cancellation_notice')).toMatchObject({ applies: true, target: { active: true } });
+    expect((await ctx.api('post', '/document-numbering/structure/apply').set('Authorization', `Bearer ${claimsToken}`)).status).toBe(403);
+    const applied = await ctx.api('post', '/document-numbering/structure/apply');
+    expect(applied.status).toBe(200);
+    expect(applied.body.data.map((a) => a.code).sort()).toEqual(['cancellation_notice', 'cover_note', 'endorsement', 'placement', 'policy']);
+    const row = await one("SELECT prefix, pattern, seq_width, reset_rule FROM document_numbering WHERE code = 'policy'");
+    expect(row).toEqual({ prefix: 'PRN', pattern: '{PRODUCT}{SUBLINE}{BUSINESS}{OFFICE}{SEQ}', seq_width: 6, reset_rule: 'never' });
+    expect((await one("SELECT active FROM document_numbering WHERE code = 'cancellation_notice'")).active).toBe(true);
+    expect((await one("SELECT count(*)::int AS n FROM audit_log WHERE entity = 'document_numbering' AND action = 'apply-structure'")).n).toBe(5);
+    // a policy number issued with the context of a head-office Motor comprehensive new business is the 10-digit PRN
+    const n = await nextDocumentNumber('policy', { segments: { OFFICE: '1', PRODUCT: '1', SUBLINE: '1', BUSINESS: '1' } });
+    expect(n).toMatch(/^1111\d{6}$/);
+    const again = await ctx.api('post', '/document-numbering/structure/apply');
+    expect(again.body.data).toEqual([]);
+    await query("UPDATE document_numbering SET prefix = 'POL', pattern = '{PREFIX}-{YYYY}-{SEQ}', seq_width = 5, reset_rule = 'yearly' WHERE code = 'policy'");
+    await query("UPDATE document_numbering SET prefix = 'END', pattern = '{PREFIX}-{YYYY}-{SEQ}', seq_width = 5, reset_rule = 'yearly' WHERE code = 'endorsement'");
+    await query("UPDATE document_numbering SET active = false WHERE code = 'cancellation_notice'");
   });
 });
 

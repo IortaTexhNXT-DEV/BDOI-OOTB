@@ -163,6 +163,31 @@ describe('record-level scoping (agents see only their own book)', () => {
     expect((await as('ag.one', 'get', '/search?q=x')).status).toBe(400);
   });
 
+  it('office-scoped roles (security.office_scoped_roles) see the records of every user of their office, not of another office', async () => {
+    const r = await ctx.api('post', '/roles').send({ code: 'office-desk', name: 'Office desk (test)', permissions: ['read:leads', 'write:leads', 'read:clients', 'read:policies', 'read:quotations'] });
+    expect(r.status).toBe(201);
+    await ctx.api('put', '/settings').send({ settings: { 'security.office_scoped_roles': ['office-desk'] } });
+    await query("INSERT INTO branches(code, name, status) VALUES ('BR02', 'Cebu Branch', 'active') ON CONFLICT (code) DO NOTHING");
+    for (const [u, branch] of [['of.ho1', 'HO'], ['of.ho2', 'HO'], ['of.cebu', 'BR02']]) {
+      const c = await ctx.api('post', '/users').send({ username: u, password: 'Welcome@123', displayName: u, email: `${u}@example.ph`, roles: ['office-desk'], branchCode: branch });
+      expect(c.status).toBe(201);
+      ids[u] = c.body.data.userId;
+      tok[u] = await loginAs(ctx.app, u, 'Welcome@123');
+    }
+    const lead = await as('of.ho1', 'post', '/leads').send({ firstName: 'Office', lastName: 'Lead', emailId: 'office.lead@example.ph', lob: 'MOTOR' });
+    expect(lead.status).toBe(201);
+    // a colleague of the same office sees and works the record; another office does not; own-book agents are unaffected
+    expect((await as('of.ho2', 'get', `/leads/${lead.body.leadId}`)).status).toBe(200);
+    expect((await as('of.ho2', 'get', '/leads?pageSize=100')).body.data.map((l) => l.leadId)).toContain(lead.body.leadId);
+    expect((await as('of.cebu', 'get', `/leads/${lead.body.leadId}`)).status).toBe(404);
+    expect((await as('of.cebu', 'get', '/leads?pageSize=100')).body.data.map((l) => l.leadId)).not.toContain(lead.body.leadId);
+    expect((await as('ag.one', 'get', `/leads/${lead.body.leadId}`)).status).toBe(404);
+    // the office is not a wall for the administrator
+    expect((await ctx.api('get', `/leads/${lead.body.leadId}`)).status).toBe(200);
+    await ctx.api('put', '/settings').send({ settings: { 'security.office_scoped_roles': [] } });
+    expect((await as('of.cebu', 'get', `/leads/${lead.body.leadId}`)).status).toBe(200);
+  });
+
   it('scoped roles come from security.scoped_roles', async () => {
     expect((await ctx.api('put', '/settings').send({ settings: { 'security.scoped_roles': [] } })).status).toBe(200);
     const r = await as('ag.one', 'get', '/leads?pageSize=500');

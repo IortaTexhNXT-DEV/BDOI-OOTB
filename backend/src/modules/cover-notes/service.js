@@ -14,7 +14,7 @@ import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { addDays, isoDate, today } from '../../lib/dates.js';
 import { round2 } from '../../lib/money.js';
-import { nextDocumentNumber } from '../../lib/numbering.js';
+import { nextDocumentNumber, numberingContext } from '../../lib/numbering.js';
 import { notify } from '../notifications/service.js';
 
 const SELECT = `SELECT cn.*, c.display_name AS client_name, c.client_code, c.email AS client_email, ic.name AS insurer_name, pr.name AS product_name,
@@ -120,7 +120,8 @@ export async function issueCoverNote(db, b, user) {
   if (!Number.isInteger(days) || days < 1 || days > max) throw badRequest('Validation failed', [{ path: 'validityDays', message: `Cover period must be 1 to ${max} days (cover_note.max_validity_days)` }]);
   const from = isoDate(b.coverFrom) || s.inception || (await today());
   const to = addDays(from, days);
-  const number = await nextDocumentNumber('cover_note', { db, unique: { table: 'cover_notes', column: 'cover_note_number' } });
+  const number = await nextDocumentNumber('cover_note', { db, unique: { table: 'cover_notes', column: 'cover_note_number' },
+    ...(await numberingContext({ db, userId: user?.id ?? null, productId: s.product_id, lob: s.lob })) });
   const r = (await db.query(`INSERT INTO cover_notes(cover_note_number, source, quote_id, placement_id, client_id, insurance_company_id, product_id, lob, insured_name, risk_description,
       sum_insured, premium_total, currency, cover_from, cover_to, validity_days, conditions, insurer_reference, created_by, updated_by)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$19) RETURNING id`,

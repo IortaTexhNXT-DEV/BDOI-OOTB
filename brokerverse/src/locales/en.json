@@ -3577,7 +3577,9 @@
       "read": "Read only",
       "write": "Read and change"
     },
-    "createdOn": "Created on"
+    "createdOn": "Created on",
+    "numberingCode": "Numbering Code",
+    "issuingOffice": "Issuing office"
   },
   "agent": {
     "createQuote": "Create Quote",
@@ -7553,7 +7555,7 @@
       "seqWidth": "Sequence digits",
       "startNumber": "Start number (new period)",
       "tokens": "Insert token",
-      "tokenHelp": "Click a token to add it to the format. {BRANCH} and {LOB} are filled by the transaction; when empty they are left out with their separator.",
+      "tokenHelp": "Click a token to add it to the format. {BRANCH}, {LOB}, {OFFICE}, {PRODUCT}, {SUBLINE}, {BUSINESS} and {PARENT} are filled by the transaction; when empty they are left out with their separator.",
       "sampleBranch": "Sample branch",
       "sampleLob": "Sample line of business",
       "preview": "Next number preview",
@@ -7568,13 +7570,15 @@
         "yearly": "Every calendar year",
         "fiscal_yearly": "Every fiscal year",
         "monthly": "Every month",
-        "never": "Never"
+        "never": "Never",
+        "per_document": "Per parent document"
       },
       "resetShort": {
         "yearly": "Yearly",
         "fiscal_yearly": "Fiscal year",
         "monthly": "Monthly",
-        "never": "Never"
+        "never": "Never",
+        "per_document": "Per document"
       },
       "tokenLabels": {
         "PREFIX": "Prefix",
@@ -7584,7 +7588,12 @@
         "FY": "Fiscal year",
         "BRANCH": "Branch code",
         "LOB": "Line of business",
-        "SEQ": "Sequence"
+        "SEQ": "Sequence",
+        "OFFICE": "Office numbering code",
+        "PRODUCT": "Product type code",
+        "SUBLINE": "Sub-line code",
+        "BUSINESS": "Business type code",
+        "PARENT": "Parent document number"
       },
       "modules": {
         "sales": "Sales",
@@ -7602,7 +7611,12 @@
       "configurationNote": "Document number prefixes and formats are maintained on Master > Document Numbering.",
       "openScreen": "Open Document Numbering",
       "issuedCount": "Numbers issued",
-      "lowestNext": "Lowest next number"
+      "lowestNext": "Lowest next number",
+      "structure": "Apply numbering structure",
+      "structureMessage": "{{count}} series take the numbering structure proposed for Toyota Insurance Services. Numbers already issued keep their format.",
+      "structureApply": "Apply structure",
+      "structureDone": "Numbering structure applied to {{count}} series",
+      "structureNoChange": "The series already follow the numbering structure"
     },
     "commissionRates": {
       "title": "Commission Rate Matrix",

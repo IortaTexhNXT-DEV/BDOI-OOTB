@@ -34,13 +34,30 @@ define({
   response: { success: true, data: [example], modules: [{ module: 'policy', count: 5 }], tokens: svc.TOKENS, resetRules: svc.RESET_RULES },
   handler: async (req, res) => ok(res, await svc.listSeries(req.query), 'OK', { modules: await svc.modules(), tokens: svc.TOKENS, resetRules: svc.RESET_RULES }),
 });
+const structureRow = { code: 'policy', name: 'TIS Policy Number (PRN)', module: 'policy', applies: true, changed: ['name', 'prefix', 'pattern', 'seqWidth', 'resetRule'], errors: [],
+  current: { prefix: 'POL', pattern: '{PREFIX}-{YYYY}-{SEQ}', seqWidth: 5, resetRule: 'yearly', active: true },
+  target: { prefix: 'PRN', pattern: '{PRODUCT}{SUBLINE}{BUSINESS}{OFFICE}{SEQ}', seqWidth: 6, resetRule: 'never', active: true }, preview: '1111000001' };
+define({
+  method: 'GET', path: '/structure', summary: 'The numbering structure proposed for the broker (setting numbering.structure) against the series as they are: the change each series would take and a preview of the first number', screen: `${SCREEN} > Apply numbering structure`,
+  middleware: canRead('settings'), response: { success: true, data: [structureRow] },
+  handler: async (_req, res) => ok(res, await svc.structurePreview()),
+});
+define({
+  method: 'POST', path: '/structure/apply', summary: 'Apply the proposed numbering structure to the series it names (name, prefix, pattern, sequence width, reset rule, active); audited per series; refused when a pattern is invalid or two active series would share a prefix', screen: `${SCREEN} > Apply numbering structure`,
+  middleware: canWrite('settings'), response: { success: true, data: [{ code: 'policy', changed: ['prefix', 'pattern', 'seqWidth', 'resetRule'] }] },
+  handler: async (req, res) => {
+    const applied = await svc.applyStructure(req.user);
+    for (const a of applied) await audit(req, { entity: 'document_numbering', entityId: a.code, action: 'apply-structure', before: a.before, after: a.after });
+    ok(res, applied, applied.length ? `Numbering structure applied to ${applied.length} series` : 'The series already follow the structure');
+  },
+});
 define({
   method: 'GET', path: '/:code', summary: 'One document series', screen: SCREEN, middleware: canRead('settings'),
   response: { success: true, data: example },
   handler: async (req, res) => ok(res, await svc.getSeries(req.params.code)),
 });
 define({
-  method: 'GET', path: '/:code/preview', summary: 'Preview the next number; unsaved pattern, prefix, seqWidth, resetRule, startNumber, branch, lob and date may be given', screen: `${SCREEN} > Edit`,
+  method: 'GET', path: '/:code/preview', summary: 'Preview the next number; unsaved pattern, prefix, seqWidth, resetRule, startNumber, branch, lob, office, product, subline, business, parent and date may be given', screen: `${SCREEN} > Edit`,
   middleware: canRead('settings'), query: { pattern: '{PREFIX}-{BRANCH}-{YY}{MM}-{SEQ}', prefix: 'POL', seqWidth: 6, resetRule: 'monthly', branch: 'MKT' },
   response: { success: true, data: { valid: true, errors: [], preview: 'POL-MKT-2609-000001', periodKey: '2026-09', currentValue: 0, nextNumber: 1 } },
   handler: async (req, res) => ok(res, await svc.previewSeries(req.params.code, req.query)),

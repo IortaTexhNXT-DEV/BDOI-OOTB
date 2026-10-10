@@ -19,7 +19,7 @@ import { today, isoDate } from '../../lib/dates.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { notify } from '../notifications/service.js';
 import { num, round2, renderTemplate, emailTemplate, amountText } from '../documents/common.js';
-import { nextDocumentNumber } from '../../lib/numbering.js';
+import { nextDocumentNumber, numberingContext } from '../../lib/numbering.js';
 import { quoteStatusOut } from '../documents/statuses.js';
 import { clientFromLead, createClientInTx } from '../clients/service.js';
 import { issuePolicy, getPolicyRow } from '../policies/service.js';
@@ -151,7 +151,8 @@ export async function storeSlipDocument(id, userId) {
 }
 
 async function insertPlacement(db, data, parts, userId, participantStatus) {
-  const number = await nextDocumentNumber('placement', { db, unique: { table: 'placements', column: 'placement_number' } });
+  const number = await nextDocumentNumber('placement', { db, unique: { table: 'placements', column: 'placement_number' },
+    ...(await numberingContext({ db, userId, productId: data.product_id || null, lob: data.lob || null, policyTypeId: data.policy_type_id || null })) });
   const row = { placement_number: number, owner_user_id: userId, created_by: userId, ...data };
   const keys = Object.keys(row);
   const r = await db.query(`INSERT INTO placements(${keys.join(',')}) VALUES (${keys.map((_, i) => `$${i + 1}`).join(',')}) RETURNING id`, Object.values(row));

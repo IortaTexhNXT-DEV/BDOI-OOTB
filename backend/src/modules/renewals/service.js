@@ -16,7 +16,7 @@ import { lobOf, num } from '../documents/common.js';
 import { renderTemplate } from '../claims/docs.js';
 import { quotationCharges } from '../premium-charges/service.js';
 import { assertApprovalLimit, daysBetween, round2, shownDate, today, unprocessable, usersWithRole } from '../claims/util.js';
-import { nextDocumentNumber } from '../../lib/numbering.js';
+import { nextDocumentNumber, numberingContext } from '../../lib/numbering.js';
 import { companyName } from '../../lib/letterhead.js';
 import { addDays, businessDate } from '../../lib/dates.js';
 import { workingDaysBetween } from '../../lib/workingCalendar.js';
@@ -642,13 +642,14 @@ export async function completeRenewal(id, user, input = {}) {
   const result = await withTransaction(async (db) => {
     const lock = await db.query('SELECT status FROM renewals WHERE id = $1 FOR UPDATE', [r.id]);
     if (lock.rows[0].status !== r.status) throw conflict('The renewal was updated by someone else; reload and try again');
-    const old = (await db.query('SELECT net_premium, premium_total, product_type, lob, insured_name, doc, lead_id FROM policies WHERE id = $1', [r.policy_id])).rows[0];
+    const old = (await db.query('SELECT net_premium, premium_total, product_type, lob, insured_name, doc, lead_id, product_id, policy_type_id FROM policies WHERE id = $1', [r.policy_id])).rows[0];
     // net premium of the new term: the re-rated one when the quoted premium is taken, else in the expiring term's proportion
     const quoted = r.premium_breakdown || {};
     const takesQuote = Number(quoted.grossPremium) > 0 && Math.abs(Number(quoted.grossPremium) - premium) < 0.01 && Number(quoted.netPremium) > 0;
     const net = takesQuote ? round2(quoted.netPremium)
       : Number(old.premium_total) > 0 && Number(old.net_premium) > 0 ? round2((Number(old.net_premium) / Number(old.premium_total)) * premium) : premium;
-    const policyNumber = input.policyNumber || await nextDocumentNumber('policy', { db, unique: { table: 'policies', column: 'policy_number' } });
+    const policyNumber = input.policyNumber || await nextDocumentNumber('policy', { db, unique: { table: 'policies', column: 'policy_number' },
+      ...(await numberingContext({ db, userId: user?.id ?? null, productId: old.product_id, lob: old.lob, policyTypeId: old.policy_type_id, renewal: true })) });
     // how the expiring term came in (go-live migration, bulk upload) is not carried: the renewal term is new business
     const doc = { ...(old.doc || {}) };
     delete doc.source;

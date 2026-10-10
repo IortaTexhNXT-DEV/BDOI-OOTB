@@ -10,7 +10,7 @@ import { toLead } from '../leads/service.js';
 import { mapColumns } from '../documents/tabular.js';
 import { publicUrl } from '../uploads/storage.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
-import { nextDocumentNumber } from '../../lib/numbering.js';
+import { nextDocumentNumber, numberingContext } from '../../lib/numbering.js';
 import { writeParticipants, legacyParticipantDetails, leadOf, participantsOf } from '../placement/participants.js';
 import { isoDate, postingDate, today } from '../../lib/dates.js';
 
@@ -325,7 +325,9 @@ export async function issuePolicy(db, src, body, userId) {
   const term = Number(await getSetting('policies.default_term_months', 12));
   const expiry = cols.expiry_date || addMonths(inception, term);
   const issuedOn = cols.issued_date || await today();
-  const number = cols.policy_number || await nextDocumentNumber('policy', { db, unique: { table: 'policies', column: 'policy_number' } });
+  // the number carries the issuing office and the product, sub-line and business type segments of the series pattern
+  const number = cols.policy_number || await nextDocumentNumber('policy', { db, unique: { table: 'policies', column: 'policy_number' },
+    ...(await numberingContext({ db, userId, productId, lob: src.lob, policyTypeId: src.policyTypeId, renewal: src.receivableSource === 'renewal' })) });
   if (cols.policy_number) await assertUniqueNumber(db, number, null);
   const paymentStatus = cols.payment_status || 'Pending';
   const r = await db.query(`INSERT INTO policies(policy_number, quote_id, client_id, lead_id, product_id, policy_type_id, insurance_company_id, owner_user_id,

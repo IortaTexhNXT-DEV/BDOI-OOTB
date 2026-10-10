@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "2026.1.3",
-    "description": "BrokerVerse Platform API (1341 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1343 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -33908,7 +33908,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"policy\",\n      \"name\": \"Policy\",\n      \"module\": \"policy\",\n      \"prefix\": \"POL\",\n      \"pattern\": \"{PREFIX}-{YYYY}-{SEQ}\",\n      \"seqWidth\": 5,\n      \"resetRule\": \"yearly\",\n      \"startNumber\": 1,\n      \"active\": true,\n      \"periodKey\": \"2026\",\n      \"currentValue\": 41,\n      \"periodStartNumber\": null,\n      \"nextNumber\": 42,\n      \"nextPreview\": \"POL-2026-00042\"\n    }\n  ],\n  \"modules\": [\n    {\n      \"module\": \"policy\",\n      \"count\": 5\n    }\n  ],\n  \"tokens\": [\n    \"{PREFIX}\",\n    \"{YYYY}\",\n    \"{YY}\",\n    \"{MM}\",\n    \"{FY}\",\n    \"{BRANCH}\",\n    \"{LOB}\",\n    \"{SEQ}\"\n  ],\n  \"resetRules\": [\n    \"yearly\",\n    \"fiscal_yearly\",\n    \"monthly\",\n    \"never\"\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"policy\",\n      \"name\": \"Policy\",\n      \"module\": \"policy\",\n      \"prefix\": \"POL\",\n      \"pattern\": \"{PREFIX}-{YYYY}-{SEQ}\",\n      \"seqWidth\": 5,\n      \"resetRule\": \"yearly\",\n      \"startNumber\": 1,\n      \"active\": true,\n      \"periodKey\": \"2026\",\n      \"currentValue\": 41,\n      \"periodStartNumber\": null,\n      \"nextNumber\": 42,\n      \"nextPreview\": \"POL-2026-00042\"\n    }\n  ],\n  \"modules\": [\n    {\n      \"module\": \"policy\",\n      \"count\": 5\n    }\n  ],\n  \"tokens\": [\n    \"{PREFIX}\",\n    \"{YYYY}\",\n    \"{YY}\",\n    \"{MM}\",\n    \"{FY}\",\n    \"{BRANCH}\",\n    \"{LOB}\",\n    \"{OFFICE}\",\n    \"{PRODUCT}\",\n    \"{SUBLINE}\",\n    \"{BUSINESS}\",\n    \"{PARENT}\",\n    \"{SEQ}\"\n  ],\n  \"resetRules\": [\n    \"yearly\",\n    \"fiscal_yearly\",\n    \"monthly\",\n    \"never\",\n    \"per_document\"\n  ]\n}"
             }
           ]
         },
@@ -34160,7 +34160,7 @@
           ]
         },
         {
-          "name": "Preview the next number; unsaved pattern, prefix, seqWidth, resetRule, startNumber, branch, lob and date may be given",
+          "name": "Preview the next number; unsaved pattern, prefix, seqWidth, resetRule, startNumber, branch, lob, office, product, subline, business, parent and date may be given",
           "request": {
             "method": "GET",
             "header": [],
@@ -34204,7 +34204,7 @@
                 }
               ]
             },
-            "description": "Preview the next number; unsaved pattern, prefix, seqWidth, resetRule, startNumber, branch, lob and date may be given\n\nFront-end touchpoint: Master > Document Numbering > Edit\n\nAccess: read:settings, write:settings"
+            "description": "Preview the next number; unsaved pattern, prefix, seqWidth, resetRule, startNumber, branch, lob, office, product, subline, business, parent and date may be given\n\nFront-end touchpoint: Master > Document Numbering > Edit\n\nAccess: read:settings, write:settings"
           },
           "response": [
             {
@@ -34252,7 +34252,7 @@
                     }
                   ]
                 },
-                "description": "Preview the next number; unsaved pattern, prefix, seqWidth, resetRule, startNumber, branch, lob and date may be given\n\nFront-end touchpoint: Master > Document Numbering > Edit\n\nAccess: read:settings, write:settings"
+                "description": "Preview the next number; unsaved pattern, prefix, seqWidth, resetRule, startNumber, branch, lob, office, product, subline, business, parent and date may be given\n\nFront-end touchpoint: Master > Document Numbering > Edit\n\nAccess: read:settings, write:settings"
               },
               "status": "OK",
               "code": 200,
@@ -34265,6 +34265,106 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"valid\": true,\n    \"errors\": [],\n    \"preview\": \"POL-MKT-2609-000001\",\n    \"periodKey\": \"2026-09\",\n    \"currentValue\": 0,\n    \"nextNumber\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "The numbering structure proposed for the broker (setting numbering.structure) against the series as they are: the change each series would take and a preview of the first number",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/document-numbering/structure",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "document-numbering",
+                "structure"
+              ]
+            },
+            "description": "The numbering structure proposed for the broker (setting numbering.structure) against the series as they are: the change each series would take and a preview of the first number\n\nFront-end touchpoint: Master > Document Numbering > Apply numbering structure\n\nAccess: read:settings, write:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/document-numbering/structure",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "document-numbering",
+                    "structure"
+                  ]
+                },
+                "description": "The numbering structure proposed for the broker (setting numbering.structure) against the series as they are: the change each series would take and a preview of the first number\n\nFront-end touchpoint: Master > Document Numbering > Apply numbering structure\n\nAccess: read:settings, write:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"policy\",\n      \"name\": \"TIS Policy Number (PRN)\",\n      \"module\": \"policy\",\n      \"applies\": true,\n      \"changed\": [\n        \"name\",\n        \"prefix\",\n        \"pattern\",\n        \"seqWidth\",\n        \"resetRule\"\n      ],\n      \"errors\": [],\n      \"current\": {\n        \"prefix\": \"POL\",\n        \"pattern\": \"{PREFIX}-{YYYY}-{SEQ}\",\n        \"seqWidth\": 5,\n        \"resetRule\": \"yearly\",\n        \"active\": true\n      },\n      \"target\": {\n        \"prefix\": \"PRN\",\n        \"pattern\": \"{PRODUCT}{SUBLINE}{BUSINESS}{OFFICE}{SEQ}\",\n        \"seqWidth\": 6,\n        \"resetRule\": \"never\",\n        \"active\": true\n      },\n      \"preview\": \"1111000001\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Apply the proposed numbering structure to the series it names (name, prefix, pattern, sequence width, reset rule, active); audited per series; refused when a pattern is invalid or two active series would share a prefix",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/document-numbering/structure/apply",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "document-numbering",
+                "structure",
+                "apply"
+              ]
+            },
+            "description": "Apply the proposed numbering structure to the series it names (name, prefix, pattern, sequence width, reset rule, active); audited per series; refused when a pattern is invalid or two active series would share a prefix\n\nFront-end touchpoint: Master > Document Numbering > Apply numbering structure\n\nAccess: write:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/document-numbering/structure/apply",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "document-numbering",
+                    "structure",
+                    "apply"
+                  ]
+                },
+                "description": "Apply the proposed numbering structure to the series it names (name, prefix, pattern, sequence width, reset rule, active); audited per series; refused when a pattern is invalid or two active series would share a prefix\n\nFront-end touchpoint: Master > Document Numbering > Apply numbering structure\n\nAccess: write:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"policy\",\n      \"changed\": [\n        \"prefix\",\n        \"pattern\",\n        \"seqWidth\",\n        \"resetRule\"\n      ]\n    }\n  ]\n}"
             }
           ]
         }

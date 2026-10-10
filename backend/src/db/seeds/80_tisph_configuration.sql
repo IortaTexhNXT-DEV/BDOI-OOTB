@@ -86,13 +86,25 @@ BEGIN
 END $$;
 
 -- ---------------------------------------------------------------- M02 Offices & Branches: Head Office
--- One office (M01 row 12). BR02 is a placeholder row. Region and "Issuing Office" have no field on the Branch master.
+-- One office (M01 row 12). BR02 is a placeholder row.
 UPDATE branches SET address = '27F GT TOWER INTERNATIONAL',
        attrs = attrs || jsonb_build_object('AddressLine2', 'AYALA AVE. COR H V DELA COSTA ST.', 'AddressLine3', 'SALCEDO VILLAGE')
          || CASE WHEN attrs->>'City' = 'Makati' THEN '{"City": "Makati City"}'::jsonb ELSE '{}'::jsonb END
          || CASE WHEN attrs->>'CompanyName' = 'iorta TechNXT Corp.' THEN '{"CompanyName": "Toyota Insurance Services Philippines Corporation"}'::jsonb ELSE '{}'::jsonb END,
        updated_at = now()
  WHERE code = 'HO' AND address = 'Makati City' AND updated_by IS NULL;
+
+-- The head office issues the documents (TIS-BRD-MAS-02): issuing-office flag, region and the numbering code that fills
+-- the {OFFICE} token of the document numbering structure (migration 0590; the fields are added here as well because
+-- the Branch master definition is seeded after the migrations run)
+UPDATE master_types SET fields = fields || $j$[
+  {"name":"IssuingOffice","label":"Issuing Office","type":"boolean","required":false,"default":false},
+  {"name":"Region","label":"Region","type":"select","required":false,"options":["NCR","CAR","Region I","Region II","Region III","Region IV-A","MIMAROPA","Region V","Region VI","Region VII","Region VIII","Region IX","Region X","Region XI","Region XII","Region XIII","BARMM"]},
+  {"name":"NumberingCode","label":"Numbering Code","type":"string","required":false,"maxLength":3}
+]$j$::jsonb, updated_at = now()
+WHERE code = 'branch' AND NOT EXISTS (SELECT 1 FROM jsonb_array_elements(fields) f WHERE f->>'name' = 'IssuingOffice');
+UPDATE branches SET attrs = attrs || '{"IssuingOffice": true, "Region": "NCR", "NumberingCode": "1"}'::jsonb, updated_at = now()
+ WHERE code = 'HO' AND NOT (attrs ? 'IssuingOffice');
 
 -- ---------------------------------------------------------------- M03 Departments
 INSERT INTO master_records(type_code, code, name, data, status, created_by)

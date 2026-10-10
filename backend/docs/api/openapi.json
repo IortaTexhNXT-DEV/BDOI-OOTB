@@ -58154,13 +58154,19 @@
                     "{FY}",
                     "{BRANCH}",
                     "{LOB}",
+                    "{OFFICE}",
+                    "{PRODUCT}",
+                    "{SUBLINE}",
+                    "{BUSINESS}",
+                    "{PARENT}",
                     "{SEQ}"
                   ],
                   "resetRules": [
                     "yearly",
                     "fiscal_yearly",
                     "monthly",
-                    "never"
+                    "never",
+                    "per_document"
                   ]
                 }
               }
@@ -58577,7 +58583,7 @@
     "/document-numbering/{code}/preview": {
       "get": {
         "operationId": "getDocumentNumberingCodePreview",
-        "summary": "Preview the next number; unsaved pattern, prefix, seqWidth, resetRule, startNumber, branch, lob and date may be given",
+        "summary": "Preview the next number; unsaved pattern, prefix, seqWidth, resetRule, startNumber, branch, lob, office, product, subline, business, parent and date may be given",
         "tags": [
           "Document Numbering"
         ],
@@ -58701,6 +58707,221 @@
         "x-screen": "Master > Document Numbering > Edit",
         "x-permissions": [
           "read:settings",
+          "write:settings"
+        ]
+      }
+    },
+    "/document-numbering/structure": {
+      "get": {
+        "operationId": "getDocumentNumberingStructure",
+        "summary": "The numbering structure proposed for the broker (setting numbering.structure) against the series as they are: the change each series would take and a preview of the first number",
+        "tags": [
+          "Document Numbering"
+        ],
+        "description": "Front-end touchpoint: Master > Document Numbering > Apply numbering structure\n\nAccess: read:settings, write:settings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "module": {
+                            "type": "string"
+                          },
+                          "applies": {
+                            "type": "boolean"
+                          },
+                          "changed": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "errors": {
+                            "type": "array",
+                            "items": {}
+                          },
+                          "current": {
+                            "type": "object",
+                            "properties": {
+                              "prefix": {
+                                "type": "string"
+                              },
+                              "pattern": {
+                                "type": "string"
+                              },
+                              "seqWidth": {
+                                "type": "integer"
+                              },
+                              "resetRule": {
+                                "type": "string"
+                              },
+                              "active": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "target": {
+                            "type": "object",
+                            "properties": {
+                              "prefix": {
+                                "type": "string"
+                              },
+                              "pattern": {
+                                "type": "string"
+                              },
+                              "seqWidth": {
+                                "type": "integer"
+                              },
+                              "resetRule": {
+                                "type": "string"
+                              },
+                              "active": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "preview": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "code": "policy",
+                      "name": "TIS Policy Number (PRN)",
+                      "module": "policy",
+                      "applies": true,
+                      "changed": [
+                        "name",
+                        "prefix",
+                        "pattern",
+                        "seqWidth",
+                        "resetRule"
+                      ],
+                      "errors": [],
+                      "current": {
+                        "prefix": "POL",
+                        "pattern": "{PREFIX}-{YYYY}-{SEQ}",
+                        "seqWidth": 5,
+                        "resetRule": "yearly",
+                        "active": true
+                      },
+                      "target": {
+                        "prefix": "PRN",
+                        "pattern": "{PRODUCT}{SUBLINE}{BUSINESS}{OFFICE}{SEQ}",
+                        "seqWidth": 6,
+                        "resetRule": "never",
+                        "active": true
+                      },
+                      "preview": "1111000001"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Document Numbering > Apply numbering structure",
+        "x-permissions": [
+          "read:settings",
+          "write:settings"
+        ]
+      }
+    },
+    "/document-numbering/structure/apply": {
+      "post": {
+        "operationId": "postDocumentNumberingStructureApply",
+        "summary": "Apply the proposed numbering structure to the series it names (name, prefix, pattern, sequence width, reset rule, active); audited per series; refused when a pattern is invalid or two active series would share a prefix",
+        "tags": [
+          "Document Numbering"
+        ],
+        "description": "Front-end touchpoint: Master > Document Numbering > Apply numbering structure\n\nAccess: write:settings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "changed": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "code": "policy",
+                      "changed": [
+                        "prefix",
+                        "pattern",
+                        "seqWidth",
+                        "resetRule"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Document Numbering > Apply numbering structure",
+        "x-permissions": [
           "write:settings"
         ]
       }

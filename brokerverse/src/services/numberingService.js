@@ -36,6 +36,8 @@ const numberingService = {
   updateSeries: (code, body) => call(`/document-numbering/${enc(code)}`, { method: "PUT", body: JSON.stringify(body) }).then((r) => r.data),
   setNextNumber: (code, nextNumber) =>
     call(`/document-numbering/${enc(code)}/next-number`, { method: "PUT", body: JSON.stringify({ nextNumber }) }).then((r) => r.data),
+  structure: () => call("/document-numbering/structure").then((r) => r.data || []),
+  applyStructure: () => call("/document-numbering/structure/apply", { method: "POST" }),
 
   // Commission Rate Matrix
   listRates: (params) => call(`/commission-rates${qs(params)}`).then((r) => r.data || []),

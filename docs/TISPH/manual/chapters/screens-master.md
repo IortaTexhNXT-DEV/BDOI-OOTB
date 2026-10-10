@@ -34,7 +34,7 @@ Every printed document and report PDF (quotation, request for quotation, placeme
 
 **Company** lists **Company Code**, **Company Name**, **License Number**, **Country**, **Email ID** and **Status**. The company record of Toyota Insurance Services Philippines Corporation holds its legal name, TIN, Insurance Commission licence, address, logo and contacts, and is marked as the letterhead company. **Add** creates a company; the pencil changes it.
 
-**Branch** lists **Branch Code**, **Branch Name**, **Country**, **Email ID** and **Status** (for example the head office and the Cebu branch). The branch is chosen on users, receipts, vouchers and journals.
+**Branch** lists **Branch Code**, **Branch Name**, **Country**, **Email ID** and **Status** (for example the head office and the Cebu branch). The branch is chosen on users, receipts, vouchers and journals. The branch record also carries **Region**, **Issuing office** (the office whose code enters the document numbers) and **Numbering Code** (the digit the office contributes to a numeric reference such as the TIS Policy Number). Users of a role limited to its office see the records of their own office only.
 
 ## Insurance companies {#insurance-companies}
 
@@ -301,6 +301,8 @@ Every number the system issues comes from a series on Master > Document Numberin
 {{screen:/master/configuration/document-numbering}}
 
 The usual format is the prefix, the year and a sequence (for example OR-2026-00001), reset every year. Filter by module and status. A number already issued is never issued again; a change to a series applies to the next number.
+
+A format may also carry the issuing office (**Branch code** or **Office numbering code**), the **Product type**, **Sub-line** and **Business type** codes of the Numbering Segment master, and the **Parent document number** for a series that counts under its policy (counter reset **Per parent document**). **Apply numbering structure** shows the structure proposed for Toyota Insurance Services (TIS Policy Number of 10 digits, cover note CN-YY-HO-#######, endorsement ENDT-<policy number>-nn, cancellation notice CAN-<policy number>-n, placement slip PS/HO/YY/#####) with the first number each series would issue, and applies it once confirmed; numbers already issued keep their format.
 
 ## Schedules {#schedules}
 

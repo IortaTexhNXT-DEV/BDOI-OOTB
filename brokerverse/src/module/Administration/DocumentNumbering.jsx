@@ -14,10 +14,11 @@ import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import numberingService from "../../services/numberingService";
 import KeyValueGrid from "../../components/KeyValueGrid";
+import { openConfirm } from "../../components/ConfirmDialog";
 import "./index.scss";
 
-const RESET_RULES = ["yearly", "fiscal_yearly", "monthly", "never"];
-const TOKENS = ["PREFIX", "YYYY", "YY", "MM", "FY", "BRANCH", "LOB", "SEQ"];
+const RESET_RULES = ["yearly", "fiscal_yearly", "monthly", "never", "per_document"];
+const TOKENS = ["PREFIX", "YYYY", "YY", "MM", "FY", "BRANCH", "LOB", "OFFICE", "PRODUCT", "SUBLINE", "BUSINESS", "PARENT", "SEQ"];
 const MODULE_SEVERITY = { finance: "success", accounting: "success", policy: "info", sales: "info", renewals: "info", claims: "warning", placement: "warning" };
 
 /** The next number the counter will issue, formatted by the server; shown in a monospace chip. */
@@ -41,6 +42,7 @@ const DocumentNumbering = () => {
   const [preview, setPreview] = useState(null);
   const [saving, setSaving] = useState(false);
   const [nextDialog, setNextDialog] = useState(null);
+  const [applying, setApplying] = useState(false);
 
   const moduleLabel = (m) => k(`modules.${m}`, { defaultValue: m ? m.charAt(0).toUpperCase() + m.slice(1) : "" });
   const error = (e) => toast.current?.show({ severity: "error", summary: k("title"), detail: e.message, life: 6000 });
@@ -149,6 +151,35 @@ const DocumentNumbering = () => {
     }
   };
 
+  // the numbering structure proposed for the broker (Pre-BSM M21): the series it changes, confirmed before it is applied
+  const applyStructure = async () => {
+    setApplying(true);
+    try {
+      const rows = await numberingService.structure();
+      const changes = rows.filter((r) => r.applies);
+      if (!changes.length) {
+        toast.current?.show({ severity: "info", summary: k("structure"), detail: k("structureNoChange") });
+        return;
+      }
+      await openConfirm({
+        title: k("structure"),
+        message: k("structureMessage", { count: changes.length }),
+        facts: changes.map((r) => ({ label: r.name, value: `${r.target.pattern} → ${r.preview}` })),
+        confirmLabel: k("structureApply"),
+        confirmIcon: "pi pi-check",
+        onConfirm: async () => {
+          await numberingService.applyStructure();
+          toast.current?.show({ severity: "success", summary: k("structure"), detail: k("structureDone", { count: changes.length }) });
+          load();
+        },
+      });
+    } catch (e) {
+      error(e);
+    } finally {
+      setApplying(false);
+    }
+  };
+
   const statusOptions = [
     { label: t("numberingMasters.all"), value: "all" },
     { label: t("numberingMasters.active"), value: "active" },
@@ -192,7 +223,10 @@ const DocumentNumbering = () => {
         <div>
           <h2>{k("title")}</h2>
         </div>
-        <Button icon="pi pi-refresh" outlined label={t("numberingMasters.refresh")} className="dn__refresh" onClick={load} loading={loading} />
+        <div className="dn__header-actions">
+          <Button icon="pi pi-sitemap" outlined label={k("structure")} className="dn__refresh" onClick={applyStructure} loading={applying} />
+          <Button icon="pi pi-refresh" outlined label={t("numberingMasters.refresh")} className="dn__refresh" onClick={load} loading={loading} />
+        </div>
       </div>
 
       <div className="dn__stats">

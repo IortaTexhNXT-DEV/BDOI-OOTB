@@ -5,12 +5,17 @@
  */
 import { many, one, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
+import { getSetting } from '../../lib/settings.js';
+import { SEGMENT_KEYS } from '../../lib/numbering.js';
 
-export const TOKENS = ['{PREFIX}', '{YYYY}', '{YY}', '{MM}', '{FY}', '{BRANCH}', '{LOB}', '{SEQ}'];
-export const RESET_RULES = ['yearly', 'fiscal_yearly', 'monthly', 'never'];
+export const TOKENS = ['{PREFIX}', '{YYYY}', '{YY}', '{MM}', '{FY}', '{BRANCH}', '{LOB}', '{OFFICE}', '{PRODUCT}', '{SUBLINE}', '{BUSINESS}', '{PARENT}', '{SEQ}'];
+export const RESET_RULES = ['yearly', 'fiscal_yearly', 'monthly', 'never', 'per_document'];
+/** Sample segment values of the preview when the edit dialog gives none (the TISPH proposal: Motor, comprehensive, new business, head office). */
+const SAMPLE_SEGMENTS = { OFFICE: '1', PRODUCT: '1', SUBLINE: '1', BUSINESS: '1', PARENT: '1101000001' };
 
 const SELECT = `SELECT d.*, k.period_key, q.value AS current_value, numbering_start_number(d.code, k.period_key) AS period_start,
-    format_document_number(d.pattern, d.prefix, d.seq_width, COALESCE(q.value + 1, numbering_start_number(d.code, k.period_key)), k.today, NULL, NULL) AS next_preview,
+    format_document_number(d.pattern, d.prefix, d.seq_width, COALESCE(q.value + 1, numbering_start_number(d.code, k.period_key)), k.today, NULL, NULL,
+      '{"OFFICE":"1","PRODUCT":"1","SUBLINE":"1","BUSINESS":"1","PARENT":"1101000001"}'::jsonb) AS next_preview,
     (SELECT u.display_name FROM users u WHERE u.id::text = d.updated_by) AS updated_by_name
   FROM document_numbering d
   CROSS JOIN LATERAL (SELECT numbering_business_date() AS today, numbering_period_key(d.reset_rule, numbering_business_date()) AS period_key) k
@@ -44,13 +49,19 @@ export async function getSeries(code, db = null) {
   return toSeries(row);
 }
 
-/** Pattern rules: known tokens only, {PREFIX} and {SEQ} present, and a period token for the reset rule (else numbers would repeat). */
+/**
+ * Pattern rules: known tokens only, {SEQ} present, a period token for the reset rule (else numbers would repeat) and
+ * {PARENT} for a series that counts per document. A pattern without {PREFIX} is allowed (a numeric reference such as
+ * the TIS Policy Number); the prefix then only names the series.
+ */
 export function validatePattern(pattern, resetRule) {
   const errors = [];
   const unknown = (pattern.match(/\{[^}]*\}/g) || []).filter((t) => !TOKENS.includes(t));
   if (unknown.length) errors.push({ path: 'pattern', message: `Unknown token(s) ${unknown.join(', ')}; use ${TOKENS.join(' ')}` });
   if (/[{}]/.test(pattern.replace(/\{[^}]*\}/g, ''))) errors.push({ path: 'pattern', message: 'Unbalanced brace in pattern' });
-  for (const t of ['{PREFIX}', '{SEQ}']) if (!pattern.includes(t)) errors.push({ path: 'pattern', message: `Pattern must contain ${t}` });
+  if (!pattern.includes('{SEQ}')) errors.push({ path: 'pattern', message: 'Pattern must contain {SEQ}' });
+  if (resetRule === 'per_document' && !pattern.includes('{PARENT}')) errors.push({ path: 'pattern', message: 'A series that counts per document needs {PARENT} in the pattern' });
+  if (resetRule !== 'per_document' && pattern.includes('{PARENT}')) errors.push({ path: 'pattern', message: '{PARENT} is only used by a series that counts per document (reset rule per_document)' });
   const hasYear = pattern.includes('{YYYY}') || pattern.includes('{YY}');
   if (resetRule === 'yearly' && !hasYear) errors.push({ path: 'pattern', message: 'A yearly reset needs {YYYY} or {YY} in the pattern' });
   if (resetRule === 'fiscal_yearly' && !pattern.includes('{FY}')) errors.push({ path: 'pattern', message: 'A fiscal-year reset needs {FY} in the pattern' });
@@ -108,8 +119,63 @@ export async function previewSeries(code, q = {}) {
     FROM (SELECT COALESCE($2::date, numbering_business_date()) AS d) k`, [code, q.date || null, resetRule]);
   // a changed reset rule starts a new counter period: preview from the start number (or the configured next number of that period)
   const seq = r.current_value === null || r.current_value === undefined ? Number(q.startNumber ?? r.period_start ?? s.startNumber) : Number(r.current_value) + 1;
-  const f = await one('SELECT format_document_number($1, $2, $3, $4, $5::date, $6, $7) AS n', [pattern, q.prefix ?? s.prefix, width, seq, r.date, q.branch || null, q.lob || null]);
+  const segments = Object.fromEntries(SEGMENT_KEYS.map((k) => [k, q[k.toLowerCase()] || SAMPLE_SEGMENTS[k]]));
+  const f = await one('SELECT format_document_number($1, $2, $3, $4, $5::date, $6, $7, $8::jsonb) AS n',
+    [pattern, q.prefix ?? s.prefix, width, seq, r.date, q.branch || null, q.lob || null, JSON.stringify(segments)]);
   return { valid: true, errors: [], preview: f.n, periodKey: r.period_key, currentValue: Number(r.current_value || 0), nextNumber: seq };
+}
+
+/** The keys of a structure entry a series takes over (name, prefix, pattern, seqWidth, resetRule, active). */
+const STRUCTURE_KEYS = ['name', 'prefix', 'pattern', 'seqWidth', 'resetRule', 'active'];
+
+/**
+ * The numbering structure proposed for this broker (setting numbering.structure: series code -> { prefix, pattern,
+ * seqWidth, resetRule, active, name }) against the series as they are: one row per series with the change it would
+ * make and a preview of the first number in the new format.
+ */
+export async function structurePreview() {
+  const structure = (await getSetting('numbering.structure', {})) || {};
+  const rows = [];
+  for (const [code, target] of Object.entries(structure)) {
+    if (!target || typeof target !== 'object') continue;
+    const current = (await many(`${SELECT} WHERE d.code = $1`, [code]).then((r) => r.map(toSeries)))[0];
+    if (!current) { rows.push({ code, name: code, applies: false, reason: 'Series not configured' }); continue; }
+    const after = { ...current, ...Object.fromEntries(STRUCTURE_KEYS.filter((k) => target[k] !== undefined).map((k) => [k, target[k]])) };
+    const errors = validatePattern(String(after.pattern), after.resetRule);
+    const changed = STRUCTURE_KEYS.filter((k) => target[k] !== undefined && String(target[k]) !== String(current[k]));
+    const preview = errors.length ? null : (await one('SELECT format_document_number($1, $2, $3, $4, numbering_business_date(), $5, NULL, $6::jsonb) AS n',
+      [after.pattern, after.prefix, Number(after.seqWidth), Number(after.startNumber || 1), current.module === 'placement' || code === 'cover_note' ? 'HO' : null, JSON.stringify(SAMPLE_SEGMENTS)])).n;
+    rows.push({ code, name: after.name, module: current.module, applies: changed.length > 0 && !errors.length, changed, errors,
+      current: { prefix: current.prefix, pattern: current.pattern, seqWidth: current.seqWidth, resetRule: current.resetRule, active: current.active },
+      target: { prefix: after.prefix, pattern: after.pattern, seqWidth: Number(after.seqWidth), resetRule: after.resetRule, active: !!after.active }, preview });
+  }
+  return rows;
+}
+
+/** Apply the proposed structure to every series it names (prefix clashes and pattern errors stop the whole change). */
+export async function applyStructure(user) {
+  const rows = await structurePreview();
+  const invalid = rows.filter((r) => r.errors?.length);
+  if (invalid.length) throw badRequest('Validation failed', invalid.flatMap((r) => r.errors.map((e) => ({ path: r.code, message: e.message }))));
+  const applied = [];
+  await withTransaction(async (db) => {
+    for (const r of rows.filter((x) => x.applies)) {
+      const sets = [];
+      const values = [r.code];
+      for (const [key, col] of Object.entries(COLUMNS)) {
+        if (!STRUCTURE_KEYS.includes(key) || !r.changed.includes(key)) continue;
+        values.push(key === 'name' ? r.name : r.target[key]);
+        sets.push(`${col} = $${values.length}`);
+      }
+      values.push(user?.id ?? null);
+      await db.query(`UPDATE document_numbering SET ${sets.join(', ')}, updated_by = $${values.length} WHERE code = $1`, values);
+      applied.push({ code: r.code, changed: r.changed, before: r.current, after: r.target });
+    }
+    const clash = (await db.query(`SELECT a.code, a.prefix, b.code AS other FROM document_numbering a JOIN document_numbering b ON b.id < a.id AND upper(a.prefix) = upper(b.prefix)
+      WHERE a.active AND b.active`)).rows[0];
+    if (clash) throw conflict(`Prefix ${clash.prefix} would be used by two active series (${clash.code}, ${clash.other})`);
+  });
+  return applied;
 }
 
 /**

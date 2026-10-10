@@ -3,7 +3,8 @@
  *
  * A user is scoped when every role they hold is listed in the setting security.scoped_roles (default: none).
  * A scoped user only sees and acts on records they own (owner_user_id / agent_user_id / created_by, whichever the
- * table uses) or records that belong to clients they own. Everyone else is unaffected.
+ * table uses) or records that belong to clients they own. A user whose roles are all in security.office_scoped_roles
+ * sees the records owned by the users of their office (users.branch_code). Everyone else is unaffected.
  *
  * Usage:
  *  - lists / stats: `svc.list({ ...req.query, [SCOPE]: await scopeOf(req) })`, and in the WHERE builder
@@ -32,11 +33,42 @@ export async function isScoped(user) {
   return roles.every((r) => scoped.includes(r));
 }
 
-/** The request's scope: null (sees everything) or { userId, ids } where ids are the values the owner columns may hold. Cached on req. */
+/** Roles whose holders only see the records of their own office (setting security.office_scoped_roles, TIS-BRD-MAS-02). */
+export async function officeScopedRoles() {
+  const v = await getSetting('security.office_scoped_roles', []);
+  return Array.isArray(v) ? v : [];
+}
+
+/** True when every role the user holds is an office-scoped role (own-book scoping, checked first, is the narrower one). */
+export async function isOfficeScoped(user) {
+  const roles = user?.roles || [];
+  if (!roles.length) return false;
+  const scoped = await officeScopedRoles();
+  return roles.every((r) => scoped.includes(r));
+}
+
+/**
+ * The owner values an office-scoped user may see: the ids and user names of every user of the office (users.branch_code)
+ * the user belongs to; a user without an office sees their own records only.
+ */
+async function officeMembers(user) {
+  const me = (await query('SELECT branch_code FROM users WHERE id = $1', [user.id])).rows[0];
+  const own = [user.id, user.username].filter(Boolean);
+  if (!me?.branch_code) return { office: null, ids: own };
+  const rows = (await query('SELECT id, username FROM users WHERE upper(branch_code) = upper($1)', [me.branch_code])).rows;
+  return { office: me.branch_code, ids: [...new Set([...own, ...rows.flatMap((r) => [r.id, r.username])].filter(Boolean))] };
+}
+
+/**
+ * The request's scope: null (sees everything), { userId, ids } for an own-book user, or { userId, office, ids } for an
+ * office-scoped user, where ids are the values the owner columns may hold. Cached on req.
+ */
 export async function scopeOf(req) {
   if (!req.user) return null;
   if (req.recordScope !== undefined) return req.recordScope;
-  req.recordScope = (await isScoped(req.user)) ? { userId: req.user.id, ids: [req.user.id, req.user.username].filter(Boolean) } : null;
+  if (await isScoped(req.user)) req.recordScope = { userId: req.user.id, ids: [req.user.id, req.user.username].filter(Boolean) };
+  else if (await isOfficeScoped(req.user)) req.recordScope = { userId: req.user.id, ...(await officeMembers(req.user)) };
+  else req.recordScope = null;
   return req.recordScope;
 }
 

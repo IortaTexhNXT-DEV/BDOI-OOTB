@@ -13,7 +13,7 @@ import { publicUrl } from '../uploads/storage.js';
 import { premiumBreakdown } from '../quotations/premium.js';
 import { quotationCharges } from '../premium-charges/service.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
-import { nextDocumentNumber } from '../../lib/numbering.js';
+import { nextDocumentNumber, numberingContext, seriesActive } from '../../lib/numbering.js';
 import { companyName } from '../../lib/letterhead.js';
 import { isoDate, postingDate } from '../../lib/dates.js';
 
@@ -185,9 +185,12 @@ export async function createEndorsement(body, userId) {
     }
   }
   const type = await typeOf(ids, isCancel);
-  // number and row in one transaction: a failed insert does not use up a number
+  // number and row in one transaction: a failed insert does not use up a number; a cancellation takes a cancellation
+  // notice number when that series is active, else an endorsement number; both may count under the policy number
   const r = await withTransaction(async (db) => {
-    const number = await nextDocumentNumber('endorsement', { db, unique: { table: 'endorsements', column: 'endorsement_number' } });
+    const series = isCancel && (await seriesActive('cancellation_notice', db)) ? 'cancellation_notice' : 'endorsement';
+    const number = await nextDocumentNumber(series, { db, unique: { table: 'endorsements', column: 'endorsement_number' }, parent: policy.policy_number,
+      ...(await numberingContext({ db, userId, productId: policy.product_id, lob: policy.lob, policyTypeId: policy.policy_type_id })) });
     return (await db.query(`INSERT INTO endorsements(endorsement_number, policy_id, client_id, endorsement_type, status, changes, premium_delta, effective_date, remarks,
         endorsement_type_ids, is_cancel, cancellation_type, created_by, cancellation_method, cancellation_reason, return_calculation)
       VALUES ($1,$2,$3,$4,'draft',$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING id`,
