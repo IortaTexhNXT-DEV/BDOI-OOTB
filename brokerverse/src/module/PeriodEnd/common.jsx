@@ -10,12 +10,13 @@ import DetailHeader from "../../components/DetailHeader";
 import DetailSection from "../../components/DetailSection";
 import { RecordActivityLog } from "../../components/ActivityLog";
 import { formatCurrency } from "../../utility/currencyConverter";
-import { formatDate } from "../../utility/dateFormat";
+import { formatDate, formatInstant } from "../../utility/dateFormat";
 import "./index.scss";
 
 export const money = (v) => (v === null || v === undefined || v === "" ? "" : formatCurrency(Number(v)));
 export const date = (v) => (v ? formatDate(v) : "-");
-export const dateTime = (v) => (v ? formatDate(v, { withTime: true }) : "-");
+/** An instant in the business time zone, as the detail grids and activity logs show it. */
+export const dateTime = (v) => formatInstant(v);
 export const showError = (toast, e) => toast.current?.show({ severity: "error", summary: "Error", detail: e.message, life: 7000 });
 export const showSuccess = (toast, detail) => toast.current?.show({ severity: "success", summary: "Done", detail, life: 5000 });
 
