@@ -48,10 +48,12 @@ export function receiptRow(r, lines = []) {
     receivableId: r.receivable_id, clientId: r.client_id, clientEmail: r.client_email || null, externalRef: r.external_ref,
     policy: r.policy_id ? { policyId: r.policy_id, id: r.policy_id, policyNumber: r.policy_number, insurer: r.insurer_name || null, status: r.policy_status || null } : null,
     receiptsList: lines.map(lineRow), createdBy: r.created_by, createdAt: r.created_at, updatedAt: r.updated_at, cancelledAt: r.cancelled_at, cancelReason: r.cancel_reason,
+    collectedBy: r.collected_by_insurer_id ? { insurerId: r.collected_by_insurer_id, name: r.collected_by_name || null, reference: r.partner_reference || null } : null,
   };
 }
 
-const HEADER_SQL = `SELECT r.*, p.status AS policy_status, ic.name AS insurer_name, cl.email AS client_email FROM receipts r LEFT JOIN policies p ON p.id = r.policy_id
+const HEADER_SQL = `SELECT r.*, p.status AS policy_status, ic.name AS insurer_name, cl.email AS client_email,
+    (SELECT x.name FROM insurance_companies x WHERE x.id = r.collected_by_insurer_id) AS collected_by_name FROM receipts r LEFT JOIN policies p ON p.id = r.policy_id
   LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id LEFT JOIN clients cl ON cl.id = r.client_id`;
 const linesOf = async (db, ids) => {
   if (!ids.length) return new Map();
@@ -114,8 +116,10 @@ async function processLine(db, receipt, line, user, receivableId = null) {
     if (delta === 0) return;
     if (!line.policy_id) throw badRequest(`Line ${line.line_no}: policy ${line.policy_number || ''} not found`);
     const policy = await requirePolicy(db, line.policy_id);
+    const collectedBy = receipt.collected_by_insurer_id
+      ? (await db.query('SELECT id, name FROM insurance_companies WHERE id = $1', [receipt.collected_by_insurer_id])).rows[0] || null : null;
     await applyToPolicy(db, { policy, amount: delta, billAmount: Number(line.lc_amount), breakdown: breakdownOf(line), source, receipt, lineId: line.id, receivableId,
-      paymentMode: receipt.payment_mode, referenceNo: receipt.reference_no, date: receipt.received_date, user });
+      paymentMode: receipt.payment_mode, referenceNo: receipt.reference_no, date: receipt.received_date, user, collectedBy });
     await db.query('UPDATE receipt_lines SET applied_amount = paid, updated_at = now() WHERE id = $1', [line.id]);
   } else if (line.policy_id && Number(line.lc_amount) > 0) {
     const policy = await requirePolicy(db, line.policy_id);
@@ -180,6 +184,12 @@ export async function createReceipt(db, b, user, { source = 'api' } = {}) {
   if (str(b.bankAccountCode ?? b.bankAccount)) {
     header.bank_account_code = str(b.bankAccountCode ?? b.bankAccount);
     await db.query('UPDATE receipts SET bank_account_code = $2 WHERE id = $1', [header.id, header.bank_account_code]);
+  }
+  // a post-dated cheque collected by the Insurance Partner (Accounts > Post-Dated Cheques > Partner cleared)
+  if (b.collectedByInsurerId) {
+    header.collected_by_insurer_id = Number(b.collectedByInsurerId);
+    header.partner_reference = str(b.partnerReference);
+    await db.query('UPDATE receipts SET collected_by_insurer_id = $2, partner_reference = $3 WHERE id = $1', [header.id, header.collected_by_insurer_id, header.partner_reference]);
   }
   let n = 0;
   for (const l of lines) {

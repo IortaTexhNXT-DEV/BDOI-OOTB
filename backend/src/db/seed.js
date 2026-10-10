@@ -93,6 +93,10 @@ for (const [role, items] of Object.entries(SALES_ACTIVITY_PERMS)) ROLE_PERMS[rol
 const APPROVAL_PERMS = { sales: ['quotations:approve', 'policies:approve', 'renewals:approve'], processing: ['quotations:approve', 'policies:approve', 'renewals:approve'],
   operations: ['quotations:approve', 'policies:approve', 'renewals:approve'], claims: ['claims:approve'] };
 for (const [role, items] of Object.entries(APPROVAL_PERMS)) ROLE_PERMS[role].push(...items);
+// Post-dated cheque log (permissions of migration 0520, FRS COLL-05 default grants): Accounting encodes and forwards,
+// the Accounting Manager approves cancellations, Operations reads.
+const PDC_PERMS = { accounting: ['pdc'], 'accounting-manager': ['pdc:approve'], operations: ['pdc:read'] };
+for (const [role, items] of Object.entries(PDC_PERMS)) ROLE_PERMS[role].push(...items);
 
 // TISPH personas (RBAC v4 screen matrix, migration 0348). Screen rights map to module permissions: C/U -> write,
 // R -> read, A -> approve where the module has an approval. Sales and Operations both raise quotations, placements,
@@ -114,8 +118,9 @@ Object.assign(ROLE_PERMS, {
   'tis-ops-associate': [...TIS_OPS],
   'tis-ops-officer': [...TIS_OPS, 'journal-vouchers:read', 'fixed-assets:read'],
   'tis-ops-unit-head': [...TIS_OPS, ...TIS_FRONT_APPROVALS, 'claims:approve', ...TIS_ACCOUNTING_READS, 'payables:approve'],
-  'tis-ccd-pdu': [...TIS_CCD],
-  'tis-ccd-pdc': [...TIS_CCD, 'collections:read', 'remittance:read', 'bank-reconciliation:read'],
+  // PDC Management (RBAC v4): CCD-PDU CRU, CCD-PDC CRUD and the checker of cancellations, every other persona reads
+  'tis-ccd-pdu': [...TIS_CCD, 'pdc'],
+  'tis-ccd-pdc': [...TIS_CCD, 'collections:read', 'remittance:read', 'bank-reconciliation:read', 'pdc', 'pdc:approve'],
   'tis-ccd-bp': [...TIS_CCD, 'collections', 'remittance:read', 'bank-reconciliation:read'],
   // insurer statement reconciliation is prepared under write:remittance (see the role guide)
   'tis-ccd-recon': [...TIS_CCD, 'collections', 'remittance', 'insurer-reconciliation:approve', 'bank-reconciliation', 'disbursements:read'],
@@ -132,6 +137,8 @@ Object.assign(ROLE_PERMS, {
     'lead-assignment', 'campaigns', ...TIS_ACCOUNTING_READS, 'payables:approve', 'bank-reconciliation:read', 'period-end:read', 'audit:read', 'users:read',
     'roles:read', 'access-control:read', 'remittance:approve'],
 });
+for (const role of ['tis-sales-associate', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-ops-associate', 'tis-ops-officer', 'tis-ops-unit-head', 'tis-ccd-bp', 'tis-ccd-recon',
+  'tis-finance', 'tis-it-admin', 'tis-general-manager']) ROLE_PERMS[role].push('pdc:read');
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'], 'tis-superid': ['system-admin'] };
 /** The permission codes of a ROLE_PERMS entry: "module" is read and write, "module:action" that one permission. */

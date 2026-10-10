@@ -22,7 +22,7 @@ import { CHANGE_LABELS, ROLE_SECTIONS, configurationReview } from './service.js'
 /** Modules of the reference, in the order of the accounting cycle (one source for grouping and order). */
 export const AREAS = [
   { code: 'premium', name: 'Premium billing', events: ['policy.issue.broker_billed', 'policy.renewal.broker_billed', 'endorsement.additional_premium', 'endorsement.return_premium', 'policy.cancel'] },
-  { code: 'collections', name: 'Collections', events: ['receipt.apply'] },
+  { code: 'collections', name: 'Collections', events: ['receipt.apply', 'pdc.partner_collected'] },
   { code: 'remittance', name: 'Remittance to insurers', events: ['remittance.settlement', 'remittance.adjustment', 'remittance.transfer', 'insurer_statement.adjustment', 'insurer.refund_due', 'insurer.refund_applied'] },
   { code: 'direct-bill', name: 'Direct-bill commission', events: ['directbill.commission', 'directbill.commission_return', 'commission.billing_statement', 'directbill.collection'] },
   { code: 'overrides', name: 'Overriding commission', events: ['override_commission.accrual', 'override_commission.settlement'] },
@@ -82,6 +82,8 @@ export const EVENT_FLOW = {
     approval: { text: 'None: posted when the cancellation is completed' }, ...RETURN },
   'receipt.apply': { when: 'An official receipt is applied to a bill, or a verified payment is captured', screen: '/accounts/receipts', where: 'Accounts › Receipts',
     approval: { text: 'None: posted when the receipt is applied' }, amounts: { amount: 'Amount of the receipt applied to the bill' } },
+  'pdc.partner_collected': { when: 'The Insurance Partner advises that a forwarded post-dated cheque cleared', screen: '/accounts/post-dated-cheques', where: 'Accounts › Post-Dated Cheques',
+    approval: { text: 'None: posted with the acknowledgement receipt on the collection date' }, amounts: { amount: 'Amount of the cheque collected by the Insurance Partner' } },
   'remittance.settlement': { when: 'A remittance settlement with credit or debit notes is approved', screen: '/finance/remittance/settlement/process', where: 'Accounts › Remittance › Settlement',
     approval: REMITTANCE, authority: 'remittance_settlement', payeeTypes: INSURER, amounts: { net: 'Net amount of the settlement' } },
   'remittance.adjustment': { when: 'A remittance adjustment is approved', screen: '/finance/remittance/adjustments', where: 'Accounts › Remittance › Adjustments',

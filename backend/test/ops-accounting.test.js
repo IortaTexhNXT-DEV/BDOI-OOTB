@@ -16,6 +16,7 @@ import { straightLine, depreciationStep } from '../src/modules/fixed-assets/serv
 import { ensureCalendar, getPeriod } from '../src/modules/period-end/fiscal.js';
 import { coverNoteExpiry } from '../src/modules/cover-notes/jobs.js';
 import { pdcDepositDue } from '../src/modules/pdc/jobs.js';
+import { clearSettingsCache } from '../src/lib/settings.js';
 import { claimDocumentReminders } from '../src/modules/claim-documents/jobs.js';
 
 let ctx; let admin; let manager; let asOf;
@@ -194,6 +195,8 @@ describe('post-dated cheque register', () => {
     expect((await pdcDepositDue()).due).toBeGreaterThanOrEqual(1);
   });
   it('deposits a cheque on its date: the receipt is created and posted; not before its date', async () => {
+    await query('UPDATE app_settings SET value = $1 WHERE key = \'pdc.default_deposit_account\'', [JSON.stringify('ACC-MBT-001')]);
+    clearSettingsCache();
     expect((await ctx.as('maker')('post', `/pdc/${second.id}/deposit`).send({ depositAccount: 'ACC-MBT-001' })).status).toBe(409);
     const r = await ctx.as('maker')('post', `/pdc/${first.id}/deposit`).send({ depositAccount: 'ACC-MBT-001' });
     expect(r.status).toBe(200);

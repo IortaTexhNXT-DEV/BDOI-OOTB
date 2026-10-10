@@ -231,13 +231,17 @@ export async function ensureBilled(db, { policy, amount, breakdown, source, user
 async function applyToReceivable(db, rcv, amount, ctx) {
   const policy = ctx.policy;
   await ensureBooked(db, rcv, policy, ctx.user);
-  const jv = await postEvent('receipt.apply', {
+  // a post-dated cheque the Insurance Partner collected (pdc.partner_collected): the money is in the partner's bank
+  const partner = ctx.collectedBy || null;
+  const jv = await postEvent(partner ? 'pdc.partner_collected' : 'receipt.apply', {
     source: ctx.receipt ? 'receipt' : 'payment', entryType: 'PAYMENT_RECEIPT', transactionCode: ctx.receipt?.receipt_number || rcv.bill_number,
     referenceType: ctx.receipt ? 'Receipt' : 'Policy', referenceId: ctx.receipt?.id || policy.id, clientId: rcv.client_id, policyId: policy.id,
-    policyNumber: policy.policy_number, date: ctx.date || (await today()),
-    description: `Premium collected – ${policy.policy_number}${ctx.receipt ? ` (${ctx.receipt.receipt_number})` : ''}`,
+    policyNumber: policy.policy_number, date: ctx.date || (await today()), insuranceCompanyId: partner?.id ?? undefined,
+    description: partner ? `Premium collected by ${partner.name} – ${policy.policy_number}${ctx.receipt ? ` (${ctx.receipt.receipt_number})` : ''}`
+      : `Premium collected – ${policy.policy_number}${ctx.receipt ? ` (${ctx.receipt.receipt_number})` : ''}`,
     paymentMode: ctx.paymentMode, bankAccount: ctx.bankAccount || ctx.receipt?.bank_account_code || null, amounts: { amount },
-    vars: { policyNumber: policy.policy_number, receiptSuffix: ctx.receipt ? ` (${ctx.receipt.receipt_number})` : '', memoRef: ctx.referenceNo || 'Premium collection', billNumber: rcv.bill_number },
+    vars: { policyNumber: policy.policy_number, receiptSuffix: ctx.receipt ? ` (${ctx.receipt.receipt_number})` : '', memoRef: ctx.referenceNo || 'Premium collection', billNumber: rcv.bill_number,
+      insurer: partner?.name || '', chequeNumber: ctx.chequeNumber || '' },
   }, { db, user: ctx.user });
   const upd = (await db.query(`UPDATE receivables SET balance = balance - $2, last_payment_at = now(), updated_at = now(),
       status = CASE WHEN balance - $2 <= 0 THEN 'paid' ELSE 'partial' END WHERE id = $1 RETURNING *`, [rcv.id, amount])).rows[0];

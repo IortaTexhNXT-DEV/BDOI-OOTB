@@ -333,6 +333,15 @@ async function approvals(ctx) {
       FROM premium_warranty_extensions wx JOIN policies p ON p.id = wx.policy_id LEFT JOIN clients c ON c.id = p.client_id
       WHERE wx.status = 'pending' AND ${notMine(ctx, 'wx.requested_by')}`);
   }
+  // post-dated cheque cancellations: decided by the holders of approve:pdc, never by the user who requested them
+  if (ctx.can('approve:pdc') && await has('post_dated_cheques')) {
+    out.push(`SELECT ${select({ ...base, kind: "'PDC cancellation'", id: 'pd.id', ref: 'pd.pdc_number', title: "'Cheque ' || pd.cheque_number || COALESCE(' - ' || rc.name, '')",
+      client_name: CLIENT('c'), due_date: due('pd.cancel_requested_at'), status: 'pd.status', link: "'/accounts/post-dated-cheques?cheque=' || pd.id", amount: 'pd.amount',
+      created_at: 'pd.cancel_requested_at' })}
+      FROM post_dated_cheques pd LEFT JOIN clients c ON c.id = pd.client_id
+      LEFT JOIN master_records rc ON rc.type_code = 'reason-code' AND rc.code = pd.cancel_reason_code
+      WHERE pd.status = 'cancellation-pending' AND pd.cancel_approved_at IS NULL AND ${notMine(ctx, 'pd.cancel_requested_by')}`);
+  }
   // incentive batches: decided by the holders of approve:incentive, never by the user who ran or submitted the batch
   if (ctx.can('approve:incentive') && await has('incentive_calculations')) {
     out.push(`SELECT ${select({ ...base, kind: "'Incentive calculation'", id: 'ic.batch_id', ref: 'ic.batch_id', title: "'Incentives of ' || ic.period", due_date: due('COALESCE(ic.submitted_date, ic.created_at)'),
