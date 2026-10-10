@@ -2068,8 +2068,12 @@ To change or add a layout, select the pencil or **New layout**:
 
 For broker-billed policies Accounting remits the collected premium, net of the broker's commission, to each insurer by its share.
 
-1. **Automated Processing**: the **Scheduled Remittances** list shows each insurer's remittance schedule, policies and estimated amount (Below minimum when there is nothing to remit). Tick the insurers that are ready, select **Validate**, then **Process Selected**. Draft remittances (REM-YYYY-NNNNN) are created. The due date follows the insurer's remittance terms, else `remittance.default_due_days` (30 days).
-2. **Tracking**: find the remittance (filters **Remittance No**, **Insurer**, **Date Range**, **Status**) and process it; it goes for approval.
+**The Remittance menu.** Accounts > Remittance holds **Remittances**, **Approvals**, **Insurer payments**, **Reconciliation**, **Exceptions**, **Insurer billing** and **Setup**, and **Settlement** until the payment path of the next release replaces it. Opening Accounts > Remittance itself takes you to what needs you: Approvals when a remittance awaits your decision, Exceptions when some are assigned to you, else your remittances. Each role sees the entries of its work: Finance all of them; the General Manager all but Setup; Cash Control the reconciliation and exceptions (and, for reconciliation, approvals, payments and billing); Operations the remittances, and its officers and unit heads the exceptions and insurer billing; IT reads them all. Reconciliation opens the insurer statements, which are no longer a menu of their own, and Insurer billing the commission debit notes. The addresses of the earlier screens (Automated Processing, Tracking, Statements, Bulk Processing, Scheduling, Electronic Transfer, Approval Workflow, Direct Bill Processing and the others) open their new place.
+
+**Setup > Schedules.** One table lists the schedules with their code, name, kind, the insurers covered ("All active (4)", select it for the list), grouping, window, when they run ("Mondays 06:15"), the next and the last run, the last result ("6 created · 3 held · 1 exception(s)", or "Failed: …") and the status. The **Automation** chip says whether the daily remittance job is on; while it is off the chip is red and an administrator sees **Turn on** (confirmation "Turn on the daily remittance job?"). The row menu (⋮, also with the keyboard: Enter opens it, the arrows move, Escape closes it) offers **View** (the schedule, its latest runs and its activity log, with **Run history**), and to Finance **Edit**, **Preview run**, **Run now…** and **Pause** or **Resume** (confirmation "Pause TIS-WEEKLY? No remittance is created until it is resumed."). **New schedule** is in the menu at the top right. In **Edit** every field is a list; Monthly with the window "Previous Monday to Friday" is refused under Frequency. **Run now** shows the window, asks for the off-cycle reason and shows per insurer what will be created with the totals; nothing is created until you press **Create n draft remittances**, and once the week has been run it is disabled with the reason and the next run. Users without the right to change schedules see a **View only** chip.
+
+1. Draft remittances (REM-YYYY-NNNNN) are created by the weekly run of TIS-WEEKLY, by **Run now** on Setup > Schedules, or by **Import policy list** (see below). The due date follows the insurer's remittance terms, else `remittance.default_due_days` (30 days).
+2. **Remittances**: find the remittance (filters **Remittance No**, **Insurer**, **Date Range**, **Status**) and process it; it goes for approval.
 3. **Approvals**: another user approves it within his or her limit for Remittance approval in Master > Users and Access > Authority Matrix. The delivered limits let an Accounting user approve up to PHP 1,000,000.00 and an Accounting Manager without limit; a larger remittance waits for the Accounting Manager. Cover during leave is given in Users and Access > Delegations. Neither the user who prepared nor the user who submitted the remittance can approve it.
    - Only the users who can decide the amount are notified, by name; the notification and the My Work item open the approval. The submitter sees whom the remittance waits on ("Awaiting remittance approver: J. Cruz, A. Tan") and can remind them once every 4 hours (`remittance.reminder_interval_hours`).
    - Each approval says whether you can decide it and, if not, why: you submitted it, it is above your approval limit, you have no approval limit, or it was already decided by someone else.
@@ -2094,7 +2098,7 @@ On Bank Payment Files a batch tells the user who prepared it, who submitted it o
 
 ![Accounts > Remittance > Settlement](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-rem-settlement.png)
 
-For a co-insured policy each insurer is remitted its own share. A refund due from an insurer (return premium on premium already remitted) is netted against its next remittance. The other remittance screens (Statements, Reconciliation, Bulk Processing, Scheduling, Electronic Transfer, Exception Management, Agency Bill Processing, Adjustments, Notifications, History, Analytics) are described in the Module reference.
+For a co-insured policy each insurer is remitted its own share. A refund due from an insurer (return premium on premium already remitted) is netted against its next remittance. The remittance screens of earlier releases (Statements, Bulk Processing, Scheduling, Electronic Transfer, Agency Bill Processing, Adjustments, Notifications, History, Analytics) are no longer in the menu; their addresses open the new pages.
 
 ## Direct bill: commission debit notes
 
@@ -2968,24 +2972,14 @@ The landing page of every role after sign-in: My Work with the role preset (cate
 
 | Screen | Purpose and main content |
 |---|---|
-| Automated Processing | Scheduled remittances per insurer; **Validate**, **Process Selected**, **Schedule for Later**, **View History**. |
-| Tracking | Remittances (REM-) with insurer, policies, gross amount, commission, net amount and status. |
-| Statements | Remittance statements for insurers, prepared in steps (**Previous**, **Next**) and e-mailed as a download link. |
-| Settlement | Insurer settlements (SET-): insurer, policies, calculation, adjustments, payment, workflow; **Save draft**, **Submit for approval**, **Print**. |
-| Reconciliation | Match imported bank transactions with remittances within PHP 0.50 (`remittance.reconciliation_tolerance`); **Download template** (CSV: TransDate, Reference, Amount, Description), **Import** (a line without a date, reference or amount refuses the file), **Auto Match**, **Match Selected**, **Force Match**. |
-| Bulk Processing | Upload remittance data in bulk; **Download template** gives the workbook of the columns of the bulk processing configuration. The policies are remitted at their booked amounts. Closed for TISPH: use Import policy list. |
-| Scheduling | Remittance schedules (insurers or all active insurers, payment window, frequency, next run date and time); **New schedule**, **Run now** (with an off-cycle reason; once per window). The `remittance-schedules` job in Master > Schedules runs the due schedules daily once it is switched on; every run is kept in the run history. |
-| Electronic Transfer | Transfers by InstaPay, PESONet or RTGS (PhilPaSS) within their limits; **New transfer**, **Batch process**, **Export**. Closed for TISPH: insurers are paid from Insurer payments. |
-| Approval Workflow | Approvals of remittances, settlements, transfers and adjustments within the approver's Authority Matrix limit; pending, overdue and history. |
-| Exception Management | Remittance exceptions; assignment and reports. |
-| Agency Bill Processing | Statements of account (bills) to agencies; **Load agencies**, **Validate**, **Process bills**. |
-| Direct Bill Processing | Commission debit notes (DN-) to insurers; tabs Raise Debit Note, Debit Notes, Billing Mode. |
-| Adjustments | Remittance adjustments (ADJ-); **New Adjustment** (Create New Adjustment), approval by another user. |
-| Notifications | Remittance notifications to insurers; **Compose**. SMS and letter are logged only. |
-| History | Every remittance event; **Export History**. |
-| Analytics | Remittance KPIs against the targets in `remittance.kpi_targets`. |
-
-![Accounts > Remittance > Automated Processing](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-rem-automated.png)
+| Remittances | Remittances (REM-) with insurer, policies, amounts and status; in this release the Tracking screen. Automated Processing, Tracking, Statements, Bulk Processing, Agency Bill Processing, Adjustments, Notifications, History and Analytics open here. |
+| Approvals | Approvals of remittances, settlements, transfers and adjustments within the approver's Authority Matrix limit; in this release the Approval Workflow screen. |
+| Insurer payments | Payment vouchers of insurer remittances; in this release the transfers of earlier releases, read-only for TISPH. |
+| Reconciliation | Insurer statements (Insurer Reconciliation) and their workspace. |
+| Exceptions | Remittance exceptions; assignment and reports. |
+| Insurer billing | Commission debit notes (DN-) and billing statements to insurers; tabs Raise Debit Note, Debit Notes, Billing Mode. |
+| Setup | **Schedules**: the schedules of the remittance runs, the Automation chip, **New schedule**, **Edit**, **Preview run**, **Run now** (with an off-cycle reason; once per window) and **Pause** / **Resume**, each with its run history and activity log. The `remittance-schedules` job in Master > Schedules runs the due schedules daily once it is switched on. |
+| Settlement | Insurer settlements (SET-): insurer, policies, calculation, adjustments, payment, workflow; **Save draft**, **Submit for approval**, **Print**. Kept until the payment path of the next release. |
 
 ## Commission
 
