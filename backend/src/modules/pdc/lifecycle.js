@@ -92,7 +92,7 @@ export async function encodeOptions(db, { policy: ref, bill: billRef = null } = 
     bills: bills.map((b) => ({ id: b.id, billNumber: b.bill_number, balance: Number(b.balance), dueDate: isoDate(b.due_date) })),
     billId: bill.id, billNumber: bill.bill_number, billBalance: Number(bill.balance), planned: rows.planned, instalmentCount: rows.instalmentCount, rows: rows.rows,
     defaultPayee: PAYEES.includes(await getSetting('pdc.default_payee', 'insurance-partner')) ? await getSetting('pdc.default_payee', 'insurance-partner') : 'insurance-partner',
-    depositAccount: (await getSetting('pdc.default_deposit_account', '')) || null,
+    depositAccount: (await getSetting('pdc.default_deposit_account', null)) || null,
     maxCheques: Number(await getSetting('pdc.max_cheques_per_set', 12)) || 12, brstnRequired: (await getSetting('pdc.brstn_required', false)) === true,
   };
 }
@@ -170,7 +170,7 @@ export async function encodeSet(db, b, user) {
   if (!bill || !['open', 'partial'].includes(bill.status) || !(Number(bill.balance) > EPS)) throw conflict(`Policy ${p.policy_number} has no open bill to pay`);
   const payee = b.payee || (await getSetting('pdc.default_payee', 'insurance-partner'));
   if (!PAYEES.includes(payee)) throw fail('payee', 'Payee is the Insurance Partner or TISPH');
-  if (payee === 'tisph' && !(await getSetting('pdc.default_deposit_account', ''))) throw fail('payee', 'No TISPH collection bank account is set (pdc.default_deposit_account)');
+  if (payee === 'tisph' && !(await getSetting('pdc.default_deposit_account', null))) throw fail('payee', 'No TISPH collection bank account is set up for deposits');
   if (payee === 'insurance-partner' && !p.insurance_company_id) throw fail('payee', `Policy ${p.policy_number} has no Insurance Partner`);
   const input = Array.isArray(b.rows) ? b.rows : [];
   if (!input.length) throw fail('rows', 'Keep at least one cheque in the set');

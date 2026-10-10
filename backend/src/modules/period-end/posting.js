@@ -28,7 +28,7 @@ const nextMonth = (month) => {
  */
 export async function cutoffPeriod(eventCode, date) {
   const month = monthOf(date);
-  const day = Number(await getSetting('accounting.operations_cutoff_day', 0)) || 0;
+  const day = Number(await getSetting('accounting.operations_cutoff_day', null)) || 0;
   if (!day || Number(String(date).slice(8, 10)) < day) return month;
   const events = (await getSetting('accounting.operations_cutoff_events', [])) || [];
   return events.includes(eventCode) ? nextMonth(month) : month;

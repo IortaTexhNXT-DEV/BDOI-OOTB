@@ -40,7 +40,7 @@ export const CAPTURE_SQL = `SELECT pp.*, p.policy_number, r.bill_number, rc.rece
 export async function paymentSettings() {
   const modes = (await getSetting('policy.payment_capture_modes', DEFAULT_MODES)) || DEFAULT_MODES;
   const gatewayUrl = String((await getSetting('policy.payment_gateway_url', '')) || '');
-  const proofRequired = Boolean(await getSetting('policy.payment_capture_proof_required', false));
+  const proofRequired = Boolean(await getSetting('policy.payment_capture_proof_required', null));
   return { modes: modes.map((m) => ({ value: m, label: MODE_LABELS[m] || m, referenceRequired: NEEDS_REFERENCE.includes(m) })), gateway: { enabled: Boolean(gatewayUrl), url: gatewayUrl || null },
     proofRequired };
 }

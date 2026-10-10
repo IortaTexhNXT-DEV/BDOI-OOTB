@@ -113,7 +113,7 @@ describe('encoding a set against the instalment plan (FR-PDC-001 to 004)', () =>
     await setting('pdc.default_deposit_account', '');
     const t = await ctx.as('maker')('post', '/pdc/sets').send({ policyNumber: p.policy.policy_number, billId: e.billId, payee: 'tisph', rows: rowsOf(e, 60) });
     expect(t.status).toBe(400);
-    expect(t.body.errors[0].message).toBe('No TISPH collection bank account is set (pdc.default_deposit_account)');
+    expect(t.body.errors[0].message).toBe('No TISPH collection bank account is set up for deposits');
     await setting('pdc.default_deposit_account', 'ACC-MBT-001');
   });
 });

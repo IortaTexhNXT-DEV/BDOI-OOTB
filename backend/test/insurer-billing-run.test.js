@@ -85,7 +85,7 @@ describe('billing run and statements (FR-RMT-020 to 023)', () => {
     const tax = await commissionTax(24022.5);
     const ewt = r2(24022.5 * (await ewtRate()));
     expect(statement).toMatchObject({ documentType: 'Billing Statement', basis: 'net', statusCode: 'draft', commission: 24022.5, vat: tax.vat, amount: r2(24022.5 + tax.vat),
-      expectedEwt: ewt, netPayable: r2(24022.5 + tax.vat - ewt), dueDate: addDays(day, 15), remarks: '1 booked account/s', settlement: 'Retention' });
+      expectedEwt: ewt, netPayable: r2(24022.5 + tax.vat - ewt), dueDate: addDays(day, 15), remarks: 'Motor Car Insurance Commission, 1 booked account/s', settlement: 'Retention' });
     expect(statement.lines).toEqual([expect.objectContaining({ policyNo: rem.lines[0].policy_number, remittanceNumber: 'REM-IBR-0001' })]);
     const again = await finance('post', '/remittance/billing-runs').send({ billingDate: day, insurerId: ins.id });
     expect(again.body.message).toMatch(/^Nothing to bill for Billing Run Insurance Corp\. up to \d{2}\/\d{2}\/\d{4}\.$/);

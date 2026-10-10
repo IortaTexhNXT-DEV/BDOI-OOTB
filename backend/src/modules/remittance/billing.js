@@ -73,11 +73,13 @@ async function insertStatement(db, { insurerId, basis, productLine, billingDate,
   const dates = lines.map((l) => isoDate(l.inception_date)).filter(Boolean).sort();
   const number = await nextDocumentNumber('billing_statement', { db });
   const due = addDays(billingDate, Number(await getSetting('insurer_billing.due_days', 15)) || 0);
+  const particulars = (await getSetting('insurer_billing.particulars', {}))?.[productLine];
+  const remarks = [particulars, `${lines.length} booked account/s`].filter(Boolean).join(', ');
   const d = (await db.query(`INSERT INTO commission_debit_notes(dn_number, insurance_company_id, period_from, period_to, dn_date, due_date, currency, gross_premium, commission, vat, amount,
       ewt_rate, expected_ewt, balance, status, remarks, created_by, updated_by, basis, product_line, billing_run_id)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$11,'draft',$14,$15,$15,$16,$17,$18) RETURNING id`,
   [number, insurerId, dates[0] || null, dates.at(-1) || null, billingDate, due, await baseCurrency(), sum('gross_premium'), commission, vat, amount,
-    commission ? round2(ewt / commission) : 0, ewt, `${lines.length} booked account/s`, user?.id || null, basis, productLine, runId])).rows[0];
+    commission ? round2(ewt / commission) : 0, ewt, remarks, user?.id || null, basis, productLine, runId])).rows[0];
   let n = 0;
   for (const l of lines) {
     n += 1;

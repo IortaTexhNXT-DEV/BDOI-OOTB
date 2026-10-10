@@ -165,7 +165,7 @@ export async function listPdcs(db, q = {}) {
       onHand: s.at_tis, onHandAmount: Number(s.at_tis_amount), dueNow: s.due_now, dueNowAmount: Number(s.due_now_amount) },
     counts: { open: s.open, 'at-tis': s.at_tis, 'with-partners': s.partners, awaiting: s.awaiting, bounced: s.bounced, 'cancellation-pending': s.pending, closed: s.closed,
       'deposit-due': s.deposit_due },
-    ageing: { buckets: bucketDays.slice(0, 3), amounts: ageing }, depositAccount: (await getSetting('pdc.default_deposit_account', '')) || null, rows,
+    ageing: { buckets: bucketDays.slice(0, 3), amounts: ageing }, depositAccount: (await getSetting('pdc.default_deposit_account', null)) || null, rows,
   };
 }
 
@@ -266,8 +266,8 @@ export async function depositPdc(db, id, b, user) {
   if (d.payee !== 'tisph') throw conflict(`Cheque ${d.pdc_number} is payable to the Insurance Partner; it is forwarded, not deposited`);
   const on = isoDate(b.depositDate) || (await today());
   if (on < isoDate(d.cheque_date)) throw conflict(`Cheque ${d.pdc_number} is dated ${isoDate(d.cheque_date)}; it cannot be deposited before its date`);
-  const account = (await getSetting('pdc.default_deposit_account', '')) || null;
-  if (!account) throw badRequest('Validation failed', [{ path: 'depositAccount', message: 'No TISPH collection bank account is set (pdc.default_deposit_account)' }]);
+  const account = (await getSetting('pdc.default_deposit_account', null)) || null;
+  if (!account) throw badRequest('Validation failed', [{ path: 'depositAccount', message: 'No TISPH collection bank account is set up for deposits' }]);
   if (b.depositAccount && b.depositAccount !== account) {
     throw badRequest('Validation failed', [{ path: 'depositAccount', message: `Retained cheques are deposited to the collection account ${account} only` }]);
   }

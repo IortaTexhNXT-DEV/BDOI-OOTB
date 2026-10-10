@@ -23,7 +23,7 @@ const daysBetween = (a, b) => Math.round((Date.parse(`${b}T00:00:00Z`) - Date.pa
 /** The finance close date of a period: accounting.finance_close_day of its month (capped at its end), else its end. */
 export async function financeCloseDate(period) {
   const end = iso(period.end_date);
-  const day = Number(await getSetting('accounting.finance_close_day', 0)) || 0;
+  const day = Number(await getSetting('accounting.finance_close_day', null)) || 0;
   if (!day) return end;
   const date = `${end.slice(0, 7)}-${String(day).padStart(2, '0')}`;
   return date < end ? date : end;
@@ -32,7 +32,7 @@ export async function financeCloseDate(period) {
 /** The last day Finance may post into a period before the job soft-closes it. */
 export async function adjustmentDeadline(period, graceDays) {
   const end = iso(period.end_date);
-  const window = Number(await getSetting('accounting.adjustment_window_working_days', 0)) || 0;
+  const window = Number(await getSetting('accounting.adjustment_window_working_days', null)) || 0;
   if (!window) return addDays(end, graceDays);
   return nthWorkingDay(addDays(end, 1).slice(0, 7), window);
 }

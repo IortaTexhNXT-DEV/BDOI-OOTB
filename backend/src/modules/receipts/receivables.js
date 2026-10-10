@@ -303,7 +303,7 @@ export async function applyToPolicy(db, ctx) {
     await applyToReceivable(db, r, x, ctx);
     remaining = round2(remaining - x);
   }
-  if (remaining > 0 && (await getSetting('receipts.excess_handling', 'bill')) === 'on-account') {
+  if (remaining > 0 && (await getSetting('receipts.excess_handling', null)) === 'on-account') {
     const { holdUnapplied } = await import('./unapplied.js');
     await holdUnapplied(db, { kind: 'excess', amount: remaining, receipt: ctx.receipt, lineId: ctx.lineId, clientId: policy.client_id, policyId: policy.id,
       date: ctx.date, paymentMode: ctx.paymentMode, referenceNo: ctx.referenceNo, payerName: policy.client_name, user: ctx.user });
