@@ -38,7 +38,8 @@ Damage rate on a quotation). Migration 0485.
   covers it, and the decider's limit is checked. An open quotation keeps its promotion
   (`promotions.keep_on_open_quotes`); a new version is used when the quotation is changed (`promotionNotice`).
 - **Policy.** Conversion counts a unit (`promotion_units`), refuses a chassis already on an earlier policy, and carries
-  `doc.promotion` to the policy (the lock-in years are read by the renewal lock-in record). A cancellation from
-  inception returns the unit.
+  `doc.promotion` to the policy. A promotion with lock-in years puts the policy in lock-in from its inception
+  (`policy_lock_ins`, source `promotion`, written on issuance from a quotation or a placement slip by `issuePolicy`
+  through `recordLockIn` of the renewals module). A cancellation from inception returns the unit.
 - **Caps.** One approved cap per product and channel type on a day; not backdated; a replacement ends the replaced cap
   the day before it starts.

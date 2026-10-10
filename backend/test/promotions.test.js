@@ -5,6 +5,7 @@ import { pool } from '../src/db/pool.js';
 import { addDays, today } from '../src/lib/dates.js';
 import { promotionStatus } from '../src/modules/promotions/service.js';
 import { countPromotionUnit } from '../src/modules/promotions/quote.js';
+import { issuePolicy } from '../src/modules/policies/service.js';
 
 let ctx;
 let maker;
@@ -247,5 +248,32 @@ describe('discount caps (FR-PRM-010)', () => {
     await approver.api('post', `/discount-caps/${r.body.data.id}/approve`).send({});
     const old = (await approver.api('get', `/discount-caps?channelType=affinity&productId=${ctplId}`).send()).body.data.find((c) => c.id === capId);
     expect(old.effectiveTo).toBe(addDays(now, 9));
+  });
+});
+
+describe('lock-in of a policy issued under a promotion (FRS SCHM-03 FR-LCK-001)', () => {
+  const issue = async (code) => {
+    const quote = (await associate.api('post', '/quotations').send(motor({ promotion: { code } }))).body;
+    const row = (await q('SELECT * FROM quotes WHERE id = $1', [quote.quotationId]))[0];
+    const c = await pool.connect();
+    try {
+      return (await issuePolicy(c, { quoteId: row.id, leadId: row.lead_id, productId: row.product_id, insuranceCompanyId: row.insurance_company_id, sumInsured: row.sum_insured,
+        netPremium: row.premium_base, grossPremium: row.premium_total, commissionAmount: row.commission_amount, currency: row.currency, productType: row.product_type, lob: row.lob, doc: row.doc }, { inception: now }, associate.id)).policyId;
+    } finally {
+      c.release();
+    }
+  };
+
+  it('a promotion with lock-in years puts the policy in lock-in from its inception; one without does not', async () => {
+    const r = await maker.api('post', '/promotions').send(promo({ code: 'PRM-TEST-LOCK', unitQuota: null, lockInYears: 3 }));
+    await maker.api('post', `/promotions/${r.body.data.id}/submit`).send({});
+    expect((await approver.api('post', `/promotions/${r.body.data.id}/approve`).send({})).body.data.status).toBe('active');
+    const locked = await issue('PRM-TEST-LOCK');
+    expect(await q(`SELECT source, reference, start_date::text AS start, years, end_date::text AS "end", status, loan_status, created_by
+      FROM policy_lock_ins WHERE policy_id = $1`, [locked])).toEqual([{ source: 'promotion', reference: 'PRM-TEST-LOCK v1', start: now, years: 3,
+      end: `${Number(now.slice(0, 4)) + 3}${now.slice(4)}`, status: 'active', loan_status: 'current', created_by: 'pr.associate' }]);
+    await q("UPDATE promotions SET lockin_years = NULL WHERE code = 'PRM-TEST-LOCK'");
+    const open = await issue('PRM-TEST-LOCK');
+    expect(await q('SELECT id FROM policy_lock_ins WHERE policy_id = $1', [open])).toEqual([]);
   });
 });
