@@ -408,6 +408,10 @@ export async function accountingFlow(db) {
       const isParked = !ALWAYS_POSTED[code] && Array.isArray(parked) && parked.includes(code);
       const posting = isParked ? 'parked' : controls.autoPost || ALWAYS_POSTED[code] ? 'posted' : 'pending';
       const approval = await approvalOf(flow.approval);
+      // the settings behind the facts, for the technical details of finance administrators
+      const settings = [...(ALWAYS_POSTED[code] ? [] : [{ key: 'accounting.parked_events', value: isParked }, { key: 'accounting.auto_post_system_entries', value: controls.autoPost }]),
+        ...(flow.approval.setting ? [{ key: flow.approval.setting, value: approval.control.on }] : []),
+        ...[...new Set(lines.map((l) => conditionOf(code, l.amountKey)?.setting).filter(Boolean))].map((key) => ({ key, value: conditionOn[key] }))];
       events.push({
         eventCode: code, label: ev.label, module: ev.module, area: area.code, summary: rule?.description || null, when: flow.when, screen: flow.screen, where: flow.where,
         trigger: flow.when, approval: approval.text, approvalControl: approval.control, authority: authorityOf(isParked ? 'journal_voucher' : flow.authority),
@@ -415,7 +419,7 @@ export async function accountingFlow(db) {
         ruleId: rule?.id || null, version: rule?.version || null, effectiveFrom: iso(rule?.effective_from), approvedAt: rule?.approved_at || null, description: rule?.description || null,
         scheduled: scheduledByEvent.get(code) || null, pending: pendingRule.get(code) || null, lastPosted: src.lastPosted.get(code) || null,
         mappingPending: lines.some((l) => l.condition?.on !== false && (l.account.mapping || l.account.options?.some((o) => o.mapping) || l.account.fallback?.mapping)),
-        lines, debits: lines.filter((l) => l.side === 'Dr'), credits: lines.filter((l) => l.side === 'Cr'),
+        settings, lines, debits: lines.filter((l) => l.side === 'Dr'), credits: lines.filter((l) => l.side === 'Cr'),
       });
     }
   }
@@ -443,6 +447,7 @@ export async function accountingFlow(db) {
       approval: approval.text, approvalControl: approval.control, authority: null, posting: 'posted', postingText: POSTING_TEXT.posted, alwaysPosted: null, fixed: true,
       ruleId: null, version: null, effectiveFrom: null, approvedAt: null, description: s.summary, scheduled: null, pending: null, lastPosted: null,
       mappingPending: lines.some((l) => l.account.mapping || l.account.options?.some((o) => o.mapping) || l.account.fallback?.mapping),
+      settings: [...(s.approval.setting ? [{ key: s.approval.setting, value: approval.control.on }] : []), ...(condition ? [{ key: s.condition.setting, value: condition.on }] : [])],
       lines, debits: lines.filter((l) => l.side === 'Dr'), credits: lines.filter((l) => l.side === 'Cr') });
   }
 
