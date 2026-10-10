@@ -934,7 +934,7 @@ const PolicyReceipts = () => {
             ].map((c) => {
               const label = t(`accounts.receipts.printCriteria.${c.key}`);
               const pick = ([value, set], end) => (
-                <Dropdown value={value} onChange={(e) => set(e.value)} options={c.options} optionLabel="name" optionValue="code" filter={c.filter} showClear
+                <Dropdown value={value} onChange={(e) => set(e.value)} options={c.options} optionLabel="name" optionValue="code" filter={c.filter} showClear={!!value}
                   disabled={c.loading} className="w-full" aria-label={`${label} ${t(`accounts.receipts.printCriteria.${end}`)}`}
                   placeholder={c.loading ? t("common.loading") : t("accounts.receipts.printCriteria.any")} />
               );
