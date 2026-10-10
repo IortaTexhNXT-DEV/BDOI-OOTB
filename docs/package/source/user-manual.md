@@ -485,7 +485,11 @@ The menus are set per role by the TISPH screen matrix and do not follow these le
 
 ### User Access Matrix
 
-The matrix lists every user with roles, branch, status, last sign-in, two-step verification, password age and segregation-of-duties conflicts. The cards at the top count **Active users**, **Dormant (90+ days)**, **Segregation-of-duties conflicts** and **Active without two-step verification**; select a card to filter the list. **Export to Excel** downloads the matrix for an access review; **Sign out everywhere** ends every session of a user.
+The matrix lists who has access to what, for an audit: each user with roles by name (a role held through another role, such as the System Administrator through SUPERID, shows as an outlined chip), department, branch, status, last sign-in, two-step verification, password age and segregation-of-duties conflicts. Active users show by default; the **Status** filter shows the others. The cards at the top count **Active users**, **Dormant** (no sign-in for the dormant period), **Open SoD conflicts** (active users with a conflict and no exception in force), **Without two-step** and **Waiting for approval** (users concerned by a change of access waiting for approval); select a card to filter the list. Filter further by name, **Department** and **Role**; **Include base platform roles** adds the generic roles of the base platform to the role list.
+
+Select a user to open the access panel: roles with their department and the roles they include, what the person can do by area and module, approval authority today (with its source: a role, a personal limit or a delegation), delegations given and received, conflicts with their exceptions, the last access review and the changes waiting for approval. The **⋮** menu of a row opens the user record, the conflicts on Segregation of Duties and, for users who may manage users, **Sign out everywhere** (an administrator account only by a System Administrator).
+
+**Export to Excel** downloads the users, the roles of each user (direct or through another role), the conflicts with their exceptions and the delegations in effect, with the company, the date and time and who exported it.
 
 ![Master > Users and Access > User Access Matrix](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-access-matrix.png)
 
@@ -506,23 +510,40 @@ Select a cell to open the **Approval limit** panel: the limit in effect, then th
 
 ### Delegations
 
-A delegation lets another user approve for an approver who is away.
+A delegation lets another user approve with the limit of an approver who is away, for chosen transactions and dates. It applies once another administrator who may approve access changes approves it; neither the requester nor the person covering approves it.
 
 1. Choose Users and Access > Delegations and select **New delegation**.
-2. Choose **Approver away** and **Covered by**, the **Transactions** covered (**All transactions** or a type), **From** and **To** dates and the **Reason**.
-3. Select **Save**.
+2. Choose the **Approver away**: only people who can approve a transaction checked by the Authority Matrix are offered, by department. The transactions he or she can approve are listed with the authority today; untick those not covered.
+3. Choose who it is **Covered by**. A person who cannot reach the approval step of a chosen transaction is shown but cannot be chosen, with the reason.
+4. Enter **From** (today or later) and **To** (at most 90 days, setting Longest delegation) and choose the **Reason** (Vacation or annual leave, Sick leave, Business travel, Training or seminar, Position vacant, or Other with a note). **Effect** shows what the person covering will be able to approve.
+5. Select **Submit for approval**.
+
+The list shows **Current and upcoming**, **Waiting for approval**, **Ended** and **All**, with the status of each delegation (Waiting for approval, Scheduled, In effect, Ended, Ended early, Rejected, Withdrawn). Select a delegation to see it, its approval and the authority of the person covering on a date. **End early** stops a delegation at once, with a reason; both people are told. A delegation never lowers the authority of the person covering: while no limit is set for him or her and Not set allows the approval, a delegation changes nothing. **Export to Excel** downloads the list for audit.
 
 ![New delegation](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-delegation-new.png)
 
 ### Segregation of Duties
 
-A rule names either two roles that one person should not hold together (**Roles held together**) or two sets of access a role or a person should not combine (**Access combined**, for example issuing receipts and issuing policies), what happens (**When assigned**: **Block** refuses the combination, **Warn** allows it with a warning), the reason and the status. Access rules are checked when roles are given to a user and when the access of a role changes on Role Permissions. The delivered rules are SOD-CLM-ACCT (Claims and Accounting: the claims handler should not also release claim payments), SOD-PROC-ACCT (Processing Team and Accounting: the person who places and issues business should not also release premium to insurers) and SOD-PROC-MGR (Processing Team and Accounting Manager: the person who places business should not approve its payments), all three Block; and SOD-SALES-ACCT (Sales & Marketing and Accounting), SOD-SALES-CLM (Sales & Marketing and Claims) and SOD-TIS-BP-RECON (CCD-BP and CCD-Recon: the user who issues receipts should not also reverse them), all three Warn; and the access rules SOD-ACC-RCPT-SELL (receipting and selling), SOD-ACC-PLACE-PAY (placing and paying insurers), SOD-ACC-CLAIM-PAY (claims and payment) and SOD-ACC-ADMIN-TXN (user administration and transactions), all Warn. **New rule** adds a rule; **Switch off** disables one.
+A rule names either two roles that one person should not hold together (**Roles held together**) or two sets of access a role or a person should not combine (**Access combined**, for example issuing receipts and issuing policies), and what happens when roles are given (**Block** refuses the combination, **Warn** allows it and lists the person under Conflicts). The screen has three tabs:
+
+- **Conflicts**: every active user who breaks a rule, with the roles held together and the state: **Open**, **Accepted until** a date (an exception in force), **Exception waiting for approval** or **Exception expired** (open again after its date). **Request exception** accepts a conflict for one person until a date (at most 365 days, setting Longest exception) with a reason (Small team, Temporary cover, Role change in progress, Compensating review in place with who reviews, Test account, Other); another administrator who is not the person concerned approves it. Nobody requests an exception for himself or herself. **End exception** opens the conflict again at once. An exception does not lift a Block rule when roles are given.
+- **Rules**: each rule with its two roles or sets of access, Block or Warn, the number of users breaking it and its status. **New rule**, **Edit**, **Switch off** and **Switch on** take a reason and wait for another administrator's approval; the rule code is given by the system. Rules between two base platform roles show with **Include base platform roles**. The delivered TISPH rule is Receipting and reversals (CCD-BP with CCD-Recon, Warn); the access rules Receipting and selling, Placing and paying insurers, Claims and payment and Administration and transactions all warn.
+- **Waiting for approval**: rule changes and exceptions to approve, reject (with the reason) or withdraw.
+
+**Export to Excel** downloads the rules, the conflicts by user, the exceptions and the changes waiting for approval.
 
 ![Master > Users and Access > Segregation of Duties](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-sod.png)
 
 ### Access Reviews
 
-Confirm at least every quarter that each active user still needs his or her access. **Start a review** creates the review with every active user; for each user choose **Keep** or **Revoke** (the decision starts as **To review**). The closed review is kept as the audit record.
+Confirm at least every quarter that each active user still needs his or her access.
+
+1. Select **Start a review**: the name is proposed from the month, the **Due** date from the review period (14 days); choose the **Scope**: all active users, departments or roles. The panel says how many users will be reviewed.
+2. Open the review. The users are grouped by department with their roles at the start, last sign-in, conflicts and outcome. Select a user and choose **Keep access**, **Remove roles** (tick the roles to remove; removing every role deactivates the account) or **Deactivate account**. A removal needs a reason (Left the company, Moved to another job or department, Access no longer needed, More access than the job needs, Segregation of duties conflict, Account not used, Temporary assignment ended, Other); keeping a dormant user or one with an open conflict needs a note. **Save and next** moves to the next user to review. Tick several users and select **Keep selected** to keep them at once.
+3. Nobody decides his or her own line, and an administrator account is decided only by a System Administrator. The built-in administrator is never deactivated.
+4. When every user is decided, select **Submit for sign-off**. Another administrator who decided none of the removals signs it off: the removals then apply (the roles still held are removed, accounts are deactivated, their sessions end) and the review closes. **Return** sends it back with remarks for changes.
+
+The list shows each review with its scope, due date (Overdue when it has passed), progress, removals and status. **Export to Excel** downloads the list, or one review with its summary and every decision. My Work lists the open reviews and the reviews waiting for sign-off.
 
 ## Company, branches and the letterhead
 
