@@ -38,7 +38,9 @@ minimal, clearly-correct front-end fix.
   `blockedReason`), refuses with the same code in `errors[0].code`, and takes the record `version` the screen showed
   (409 when it moved on); `src/modules/remittance/decision.js` is the model, and Bank Payment Files answers the same
   block for a batch (`batchDecision` in `src/modules/integrations/bankfiles/batches.js`, read-only beside the rules
-  `approveBatch` enforces). A bank account number is masked in lists and records ("···4821"); the full number is a
+  `approveBatch` enforces), as Insurer billing does for a commission debit note (`debitNoteDecision` in
+  `src/modules/remittance/directbill.js`). On the screen a blocked decision is the EligibilityNote line, never a
+  disabled button; a new batch is made with the shared `components/BankBatchDialog`, never a copy of it. A bank account number is masked in lists and records ("···4821"); the full number is a
   route of its own behind the write permission, and each reveal is audited (`GET /remittance/payments/:id/account`).
   Which role holds which
   permission is `ROLE_PERMS` in the same file (the broker roles and the TISPH roles `tis-*` of the RBAC v4 sheet); a
