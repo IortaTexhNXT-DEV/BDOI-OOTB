@@ -82,6 +82,7 @@ TEST_DATABASE_URL=... npx vitest run test/receipts.test.js                      
 npm run lint                                                                            # eslint src test scripts, must be clean
 DATABASE_URL=... npm run check:settings                                                  # settings read vs seeded
 npm run export:api                                                                      # after changing routes
+DATABASE_URL=... npm run manual:role-facts                                               # after changing roles, grants or menus
 ```
 
 Every test file drops and recreates the schema of the test database, so never point `TEST_DATABASE_URL` at a database
