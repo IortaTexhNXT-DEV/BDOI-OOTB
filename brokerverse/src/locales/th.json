@@ -5416,7 +5416,9 @@
       "year_end_reverse": "การกลับรายการปิดบัญชีสิ้นปี",
       "cas_print_void": "การยกเลิกการพิมพ์สมุดบัญชี CAS",
       "cas_document_change": "การแก้ไขเอกสาร CAS",
-      "incentive_batch_reject": "การปฏิเสธชุดคำนวณค่าตอบแทนจูงใจ"
+      "incentive_batch_reject": "การปฏิเสธชุดคำนวณค่าตอบแทนจูงใจ",
+      "sales_invoice_cancel": "การยกเลิกใบกำกับภาษีขาย",
+      "invoice_payment_cancel": "การยกเลิกการรับชำระตามใบกำกับภาษี"
     }
   },
   "opsAcc": {
@@ -5432,6 +5434,119 @@
         "section": "การจัดการประกันภัย",
         "intro": "รหัสเหตุผลของการตัดสินใจ แยกตามการใช้งาน: ใบเสนอราคา สินไหม การต่ออายุ การโอนย้ายผู้มุ่งหวัง และการตัดสินใจทางบัญชี เหตุผลการยกเลิกและการตัดหนี้สูญมีข้อมูลหลักของตนเอง"
       }
+    }
+  },
+  "birTax": {
+    "datFilesHelp": "สร้างไฟล์จากรายงาน QAP, SAWT, SLSP และ 1604-E และตรวจสอบกับรายงานก่อนดาวน์โหลด",
+    "salesInvoicesHelp": "ใบกำกับภาษีขายของบริการนายหน้า เลขที่เรียงตามลำดับ ใบที่ยกเลิกยังคงเลขที่เดิม",
+    "eisHelp": "ใบกำกับภาษีอิเล็กทรอนิกส์ที่รอส่งระบบ EIS ของกรมสรรพากร พร้อมสถานะและการส่งซ้ำ",
+    "permitMissing": "ยังไม่ได้ตั้งค่าเลขที่ ATP หรือใบอนุญาต CAS สำหรับใบกำกับภาษี",
+    "sellerTinMissing": "ยังไม่มีเลขประจำตัวผู้เสียภาษีของบริษัทในข้อมูลบริษัท",
+    "datFiles": "ไฟล์ DAT ของกรมสรรพากร",
+    "salesInvoices": "ใบกำกับภาษีขาย",
+    "eis": "ใบกำกับภาษีอิเล็กทรอนิกส์ (EIS)",
+    "acceptedAt": "รับเมื่อ",
+    "all": "ทั้งหมด",
+    "amounts": "จำนวนเงิน",
+    "cancelPaymentNote": "ใบรับชำระยังคงเลขที่เดิมและพิมพ์ว่ายกเลิก รายการบัญชีถูกกลับรายการและยอดคงค้างของใบกำกับภาษีกลับคืน",
+    "cancellation": "การยกเลิก",
+    "cancelledAt": "ยกเลิกเมื่อ",
+    "checksAgainstReport": "การตรวจสอบกับรายงาน",
+    "detailRecords": "จำนวนรายการรายละเอียด",
+    "eisConnection": "การเชื่อมต่อ e-Invoicing",
+    "eisOffMsg": "การเชื่อมต่อ e-Invoicing ปิดอยู่ ไม่มีรายการถูกส่ง",
+    "eisStatus": "EIS",
+    "eisSubmission": "ใบกำกับภาษีอิเล็กทรอนิกส์",
+    "errors": "ข้อผิดพลาด",
+    "expectedEwtAmount": "ภาษีหัก ณ ที่จ่ายที่คาดไว้",
+    "file": "ไฟล์",
+    "generateFile": "สร้างไฟล์",
+    "generatedAt": "สร้างเมื่อ",
+    "generatedBy": "สร้างโดย",
+    "generatedFiles": "ไฟล์ที่สร้างแล้ว",
+    "generatedMsg": "สร้าง {{fileName}} แล้ว",
+    "invoicingSetup": "การตั้งค่าใบกำกับภาษี",
+    "lastSent": "ส่งล่าสุด",
+    "lines": "รายการ",
+    "noErrors": "ไม่มีข้อผิดพลาด",
+    "noFileSelected": "ยังไม่มีไฟล์ที่สร้าง",
+    "noGeneratedFiles": "ไม่มีไฟล์ที่สร้างในปีนี้",
+    "noInvoices": "ไม่พบใบกำกับภาษี",
+    "outbox": "รายการรอส่ง",
+    "outboxEmpty": "ไม่มีใบกำกับภาษีอิเล็กทรอนิกส์รอส่ง",
+    "parties": "ผู้ขายและผู้ซื้อ",
+    "payloadHash": "ค่าแฮชและลายมือชื่อของข้อมูล",
+    "printCount": "จำนวนครั้งที่พิมพ์",
+    "problem": "ปัญหา",
+    "quarter": "ไตรมาส",
+    "queueInvoices": "เข้าคิวใบกำกับภาษี",
+    "queuedAt": "เข้าคิวเมื่อ",
+    "recordManualUpload": "บันทึกการอัปโหลดด้วยตนเอง",
+    "recordNo": "ลำดับรายการ",
+    "report": "รายงาน",
+    "search": "ค้นหา",
+    "sellerTin": "เลขประจำตัวผู้เสียภาษีผู้ขาย",
+    "serialFromTo": "{{from}} ถึง {{to}}",
+    "serialRangeLabel": "ช่วงเลขที่",
+    "submittedAt": "ส่งเมื่อ",
+    "tin": "เลขประจำตัวผู้เสียภาษี",
+    "totalIssued": "รวมที่ออกแล้ว",
+    "validation": "การตรวจสอบ",
+    "vatAmount": "ภาษีมูลค่าเพิ่ม",
+    "vatStatus": "สถานะภาษีมูลค่าเพิ่ม",
+    "year": "ปี",
+    "datCheck": {
+      "detailSum": "{{name}}: รายการรายละเอียดเทียบกับรายการควบคุม",
+      "exempt": "{{name}} ผู้รับเงินที่ได้รับยกเว้น",
+      "records": "จำนวนรายการรายละเอียด",
+      "incomePayment": "เงินได้ที่จ่าย",
+      "taxWithheld": "ภาษีที่หักไว้",
+      "exemptSales": "ยอดขายที่ได้รับยกเว้น",
+      "zeroRatedSales": "ยอดขายอัตราศูนย์",
+      "taxableSales": "ยอดขายที่ต้องเสียภาษี",
+      "outputTax": "ภาษีขาย",
+      "exemptPurchases": "ยอดซื้อที่ได้รับยกเว้น",
+      "zeroRatedPurchases": "ยอดซื้ออัตราศูนย์",
+      "purchaseOfServices": "ซื้อบริการ",
+      "purchaseOfCapitalGoods": "ซื้อสินค้าทุน",
+      "purchaseOfOtherGoods": "ซื้อสินค้าอื่น",
+      "inputTax": "ภาษีซื้อ"
+    },
+    "datError": {
+      "tinMissing": "ไม่มีเลขประจำตัวผู้เสียภาษี",
+      "nameMissing": "ไม่มีชื่อ",
+      "atcMissing": "ไม่มีรหัส ATC",
+      "negativeAmount": "จำนวนเงินติดลบ"
+    },
+    "datResult": {
+      "valid": "ถูกต้อง",
+      "invalid": "มีข้อผิดพลาด",
+      "agrees": "ตรงกัน",
+      "differs": "ไม่ตรงกัน"
+    },
+    "setupMissing": {
+      "tin": "เลขประจำตัวผู้เสียภาษีของบริษัท",
+      "address": "ที่อยู่จดทะเบียน",
+      "permit": "เลขที่ ATP หรือใบอนุญาต CAS",
+      "permitDate": "วันที่ ATP หรือใบอนุญาต CAS",
+      "serialRange": "ช่วงเลขที่ที่จดทะเบียน"
+    },
+    "eisMissing": {
+      "accreditationId": "รหัสการรับรอง",
+      "endpoint": "ที่อยู่สำหรับส่งข้อมูล",
+      "credentials": "ข้อมูลรับรองของระบบ",
+      "signingKey": "กุญแจลงนาม"
+    },
+    "eisMode": {
+      "test": "ทดสอบ",
+      "live": "ใช้งานจริง",
+      "manual": "ด้วยตนเอง"
+    },
+    "paymentModes": {
+      "bank-transfer": "โอนผ่านธนาคาร",
+      "check": "เช็ค",
+      "cash": "เงินสด",
+      "online": "ชำระออนไลน์"
     }
   }
 }

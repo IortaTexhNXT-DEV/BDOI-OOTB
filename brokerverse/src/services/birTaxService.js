@@ -20,6 +20,7 @@ const request = async (path, options = {}) => {
   if (!response.ok || body.success === false) {
     const error = new Error(body.message || `Request failed (${response.status})`);
     error.status = response.status;
+    error.errors = body.errors || [];
     throw error;
   }
   return body.data;
@@ -78,6 +79,10 @@ const birTaxService = {
   datLayout: () => request("/bir/dat-files/layout"),
   datPreview: (type, params) => request(`/bir/dat-files/${enc(type)}${qs(params)}`),
   datDownload: (type, params) => openFile(`/bir/dat-files/${enc(type)}/download${qs(params)}`, { fallbackName: `${type}.DAT` }),
+  datFiles: (params) => request(`/bir/dat-files${qs(params)}`),
+  generateDat: (type, body) => post(`/bir/dat-files/${enc(type)}/generate`, body),
+  datFile: (id) => request(`/bir/dat-files/generated/${enc(id)}`),
+  downloadDatFile: (id, fileName) => openFile(`/bir/dat-files/generated/${enc(id)}/download`, { fallbackName: fileName || "file.DAT" }),
 
   // sales invoices
   invoices: (params) => request(`/bir/invoices${qs(params)}`),
@@ -85,10 +90,10 @@ const birTaxService = {
   seller: () => request("/bir/invoices/seller"),
   invoiceCandidates: (type) => request(`/bir/invoices/candidates${qs({ type })}`),
   issueInvoice: (body) => post("/bir/invoices", body),
-  cancelInvoice: (id, reason) => post(`/bir/invoices/${enc(id)}/cancel`, { reason }),
+  cancelInvoice: (id, reason) => post(`/bir/invoices/${enc(id)}/cancel`, reason),
   invoicePdf: (id) => openFile(`/bir/invoices/${enc(id)}/pdf`),
   recordPayment: (id, body) => post(`/bir/invoices/${enc(id)}/payments`, body),
-  cancelPayment: (paymentId, reason) => post(`/bir/invoices/payments/${enc(paymentId)}/cancel`, { reason }),
+  cancelPayment: (paymentId, reason) => post(`/bir/invoices/payments/${enc(paymentId)}/cancel`, reason),
   paymentPdf: (paymentId) => openFile(`/bir/invoices/payments/${enc(paymentId)}/pdf`),
 
   // EIS outbox
