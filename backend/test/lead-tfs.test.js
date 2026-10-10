@@ -10,6 +10,7 @@ import { setup, loginAs } from './helpers.js';
 import { pool, query, one } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { writeXlsx } from '../src/lib/xlsx.js';
+import { actionTitle } from '../src/lib/auditLabels.js';
 import { leadAssignmentSla, leadRetention } from '../src/modules/leads/assignment.js';
 
 const PASSWORD = 'Welcome@123';
@@ -56,7 +57,7 @@ describe('TFS account import', () => {
       'Row 4: Insurance Provider Nowhere Insurance is not an insurer of Master > Insurance Company', 'Row 5: Loan ID LN-1 appears twice in the file']);
     const lead = (await ctx.api('get', '/leads?query=Andrea')).body.data.find((l) => l.loanId === 'LN-1');
     expect(lead).toMatchObject({ customerType: 'TFS', source: 'TFS', tfsReference: 'TFS-1', insuranceProviderName: 'Malayan Insurance Co., Inc.', policyExpiryDate: '2026-12-15',
-      loanMaturityDate: '2028-12-15', productGroup: 'Motor', srp: 1078000, lob: 'MOTOR', vehicle: { make: 'Toyota', model: 'Raize', variant: '1.0 Turbo CVT', modelYear: '2023', plateNumber: 'NAB 1234' } });
+      loanMaturityDate: '2028-12-15', productGroup: 'Motor', srp: 1078000, lob: 'MOTOR', productName: 'Motor Vehicle Insurance', vehicle: { make: 'Toyota', model: 'Raize', variant: '1.0 Turbo CVT', modelYear: '2023', plateNumber: 'NAB 1234' } });
     expect(lead.importBatchNumber).toMatch(/^LIB-/);
   });
 
@@ -66,6 +67,11 @@ describe('TFS account import', () => {
     expect((await one("SELECT count(*)::int AS n, max(status) AS status FROM leads WHERE loan_id = 'LN-1'"))).toEqual({ n: 1, status: 'Contacted' });
     const bad = await as['tf.officer']('post', '/leads/tfs-import').attach('file', sheet(TFS, [tfsRow({ loan: 'LN-1', status: 'Foo' })]), 'TFS_bad.xlsx');
     expect(bad.body.data.errors[0].message).toMatch(/Status must be one of New, Contacted/);
+  });
+  it('names the import and the update in the history of the prospect', () => {
+    expect(actionTitle('lead', 'tfs-import')).toBe('Prospect created from the TFS account file');
+    expect(actionTitle('lead', 'tfs-update')).toBe('Prospect updated from the TFS account file');
+    expect(actionTitle('lead', 'bulk-update')).toBe('Prospect updated by bulk upload');
   });
 
   it('downloads the TFS account template', async () => {

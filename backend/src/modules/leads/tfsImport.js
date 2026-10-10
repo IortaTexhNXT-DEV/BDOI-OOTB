@@ -54,6 +54,8 @@ export const TFS_COLUMNS = [
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 /** The insurer named in a row (code or name, active), or null. */
+const motorProduct = () => one("SELECT code FROM products WHERE status = 'active' AND upper(line) = 'MOTOR' ORDER BY (upper(code) = 'MOTOR') DESC, id LIMIT 1");
+
 async function insurerOf(value) {
   const v = String(value ?? '').trim();
   if (!v) return null;
@@ -90,6 +92,8 @@ async function rowBody(row, { expiryRequired, source }) {
     leadCategory: v.leadCategory || 'Retail', customerType: 'TFS', source, ...(v.status ? { status: v.status } : {}), ...(v.disposition ? { disposition: v.disposition } : {}),
     lob: /motor/i.test(String(v.productGroup || '')) ? 'MOTOR' : undefined,
   };
+  // a Motor account is tagged with the comprehensive Motor product (code MOTOR, else the first active Motor product)
+  if (body.lob === 'MOTOR') body.product = (await motorProduct())?.code;
   for (const k of Object.keys(body)) if (body[k] === undefined || body[k] === '') delete body[k];
   return { body, errors };
 }

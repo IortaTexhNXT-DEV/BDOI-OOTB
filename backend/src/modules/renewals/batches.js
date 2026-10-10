@@ -212,7 +212,7 @@ export async function queueQuotes(id, policyRefs, user) {
     await query(`UPDATE talkbot_call_lines SET quote_status = 'skipped', skip_reason = $3 WHERE policy_id = $2 AND (batch_id = $1 OR (batch_id IS NULL AND line_status = 'active'
       AND list_id = (SELECT l.list_id FROM talkbot_call_lines l WHERE l.policy_id = $2 AND l.line_status = 'active' ORDER BY l.outcome_at DESC NULLS LAST LIMIT 1)))`, [b.id, x.policy_id, check.reason]);
   }
-  const message = `Renewal quotes queued: ${queued.length} policies, ${skipped} skipped as not confirmed by Talkbot`;
+  const message = `Renewal quotes queued: ${queued.length} ${queued.length === 1 ? 'policy' : 'policies'}, ${skipped} skipped as not confirmed by Talkbot`;
   if (!queued.length) return { jobId: null, queued: 0, skipped, batchId: b.batch_number, message };
   await query(`UPDATE renewal_batch_policies SET is_selected = true, quote_status = 'Queued', skip_reason = NULL, error = NULL WHERE id = ANY($1)`, [queued]);
   return { ...(await startJob(b, queued, user, QUOTE_JOB_TYPE)), skipped, message };

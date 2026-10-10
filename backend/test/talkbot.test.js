@@ -313,7 +313,7 @@ describe('call list', () => {
       expect(r.status, JSON.stringify(r.body)).toBe(201);
       expect(r.body.data.batches).toHaveLength(1);
       batch = r.body.data.batches[0];
-      expect(r.body.message).toBe(`Renewal batch ${batch.batchNumber} created with 1 policies`);
+      expect(r.body.message).toBe(`Renewal batch ${batch.batchNumber} created with 1 policy`);
       const again = await as['tb.ops']('post', `/talkbot/lists/${list.id}/renewal-batches`);
       expect(again.status).toBe(400);
       expect(again.body.message).toBe('No Talkbot-confirmed account on this list is waiting for a renewal batch');
@@ -338,7 +338,7 @@ describe('call list', () => {
       const b = await ctx.api('post', '/policy-renewals/create-batches').send({ policies: [{ policyId: 'pol_tb2', isSelected: true }] });
       expect(b.status, JSON.stringify(b.body)).toBe(201);
       const q = await ctx.api('post', `/policy-renewals/batches/${b.body.data.batchId}/generate-quotes`).send({ selectedPolicyIds: ['pol_tb2'] });
-      expect(q.body.message).toBe('Renewal quotes queued: 1 policies, 0 skipped as not confirmed by Talkbot');
+      expect(q.body.message).toBe('Renewal quotes queued: 1 policy, 0 skipped as not confirmed by Talkbot');
       await setting('talkbot.bulk_quote_filter', true);
     });
     it('skips a confirmation older than talkbot.confirmation_valid_days', async () => {

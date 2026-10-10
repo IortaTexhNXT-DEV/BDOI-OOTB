@@ -63,7 +63,7 @@ define({
   handler: async (req, res) => {
     const l = await svc.createList(req.body, req.user.id, { scope: await scopeOf(req) });
     await audit(req, { entity: 'talkbot_call_list', entityId: l.id, action: 'create', after: { listNumber: l.listNumber, accounts: l.accounts, criteria: l.criteria, leftOut: l.leftOut } });
-    created(res, l, `Call list ${l.listNumber} created with ${l.accounts} accounts`);
+    created(res, l, `Call list ${l.listNumber} created with ${l.accounts} ${l.accounts === 1 ? 'account' : 'accounts'}`);
   },
 });
 define({
@@ -181,7 +181,7 @@ define({
     const r = await svc.createRenewalBatches(req.params.id, req.user);
     for (const b of r.batches) await audit(req, { entity: 'renewal-batch', entityId: b.id, action: 'create', after: { batchId: b.batchNumber, totalPolicies: b.policies, talkbotCallList: r.listNumber } });
     await audit(req, { entity: 'talkbot_call_list', entityId: req.params.id, action: 'create-renewal-batch', after: { listNumber: r.listNumber, batches: r.batches.map((b) => b.batchNumber) } });
-    const message = r.batches.map((b) => `Renewal batch ${b.batchNumber} created with ${b.policies} policies`).join('; ');
+    const message = r.batches.map((b) => `Renewal batch ${b.batchNumber} created with ${b.policies} ${b.policies === 1 ? 'policy' : 'policies'}`).join('; ');
     created(res, r, message);
   },
 });

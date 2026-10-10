@@ -96,6 +96,9 @@ const ACTION_TITLES = {
     create: 'Call list created', download: 'Call list downloaded', 'mark-sent': 'Call list marked as sent to Talkbot', 'upload-results': 'Talkbot results uploaded',
     cancel: 'Call list cancelled', close: 'Call list closed', 'create-renewal-batch': 'Renewal batch created from the confirmed accounts',
   },
+  // prospects loaded from the TFS account file or updated by a bulk upload (TIS-BRD-LEAD-01, LEAD-07)
+  lead: { 'tfs-import': 'Prospect created from the TFS account file', 'tfs-update': 'Prospect updated from the TFS account file',
+    'bulk-update': 'Prospect updated by bulk upload' },
   talkbot_call_line: { remove: 'Account removed from the call list', restore: 'Account put back on the call list', 'record-outcome': 'Talkbot outcome recorded by hand' },
   session: { login: 'Signed in', logout: 'Signed out', 'refresh-token-reuse': 'Session token reused (session ended)', 'login-failed': 'Sign-in failed' },
   remittance: {
