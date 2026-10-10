@@ -1,8 +1,8 @@
 /**
  * Operational masters maintained by the teams that use them, on the generic master store (master_types /
  * master_records, the same records as /masters/:type, its upload template and the go-live configuration kit):
- *   short-period-rate, cancellation-reason      Master > Insurance Management (rating masters: write:masters only;
- *                                                read with read:endorsements for the cancellation screen)
+ *   short-period-rate, cancellation-reason,     Master > Insurance Management (rating masters: write:masters only;
+ *   endorsement-type                             read with read:endorsements for the cancellation and endorsement screens)
  *   claim-document-requirement, repair-shop      Master > Insurance Management / Operations (write:masters or write:claims)
  *   supplier                                     Accounts > Payables > Suppliers (write:masters or write:payables)
  *   asset-class                                  Master > Finance > Asset Classes (write:masters or write:fixed-assets)
@@ -14,7 +14,7 @@
  *                                                claims, renewals, period-end (period close, year-end, CAS books),
  *                                                incentive (batch rejection), roles and access-control (access changes),
  *                                                remittance (remittance decisions, exceptions, insurer reconciliation
- *                                                and billing))
+ *                                                and billing), policies (corrections), endorsements (rejection))
  * Reading needs the read permission of an owning module (or read:masters).
  */
 import { moduleRouter } from '../../lib/registry.js';
@@ -30,10 +30,11 @@ const { router, define } = moduleRouter('Operational Masters', '/ops-masters');
 /** Type -> the module(s) whose permissions read and write it (besides read:masters / write:masters); write: false = masters only. */
 export const OWNERS = {
   'short-period-rate': { module: 'endorsements', write: false }, 'cancellation-reason': { module: 'endorsements', write: false },
+  'endorsement-type': { module: 'endorsements', write: false },
   'claim-document-requirement': { module: 'claims' }, 'repair-shop': { module: 'claims' }, supplier: { module: 'payables' }, 'asset-class': { module: 'fixed-assets' },
   'cost-centre': { module: 'journal-vouchers' },
   'sales-activity-type': { module: 'sales-activities', write: false }, 'sales-activity-outcome': { module: 'sales-activities', write: false },
-  'lead-source': { module: 'leads', write: false }, 'reason-code': { module: ['quotations', 'claims', 'renewals', 'period-end', 'incentive', 'roles', 'access-control', 'remittance'], write: false },
+  'lead-source': { module: 'leads', write: false }, 'reason-code': { module: ['quotations', 'claims', 'renewals', 'period-end', 'incentive', 'roles', 'access-control', 'remittance', 'policies', 'endorsements'], write: false },
 };
 const SCREEN = 'Master > Insurance Management / Accounts > Payables / Master > Finance (operational masters)';
 

@@ -8,7 +8,7 @@ import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { audit } from '../../lib/audit.js';
 import { queueEmail } from '../../lib/mailer.js';
-import { addDays, businessTimeZone, today } from '../../lib/dates.js';
+import { addDays, businessDate, businessTimeZone, today } from '../../lib/dates.js';
 import { formatDate } from '../../lib/pdf/format.js';
 import { companyName } from '../../lib/letterhead.js';
 import { notify } from '../notifications/service.js';
@@ -58,16 +58,20 @@ export async function endOfBusinessDay(iso) {
   return utcMidnight - (localAsUtc - utcMidnight);
 }
 
+/** The business date a quotation was issued (a quotation loaded without one: the day it was created). */
+const issuedOn = async (q) => q.issued_on || businessDate(q.created_at);
+
 /** The validity facts the quotation detail shows and the extension rules (whether Extend is offered). */
 export async function validityOf(q) {
   const [extensionDays, maxExtensions, maxDays, extendable, now] = await Promise.all([
     getSetting('quotations.extension_days', 30), getSetting('quotations.max_extensions', 1), getSetting('quotations.max_validity_days', 60),
     statusesOf('quotations.extendable_statuses', ['Draft', 'PendingCustomer', 'CustomerAccepted', 'Approved', 'SubmittedToInsurer']), today()]);
-  const latest = q.issued_on ? addDays(q.issued_on, Number(maxDays)) : null;
+  const issued = await issuedOn(q);
+  const latest = issued ? addDays(issued, Number(maxDays)) : null;
   const expired = q.status === 'expired' || pastValidity(q, now);
   const daysLeft = q.valid_until && !expired ? Math.round((Date.parse(`${q.valid_until}T00:00:00Z`) - Date.parse(`${now}T00:00:00Z`)) / 86400000) : 0;
   return {
-    validUntil: q.valid_until, issuedOn: q.issued_on, latestValidUntil: latest, daysLeft, expired, extensionCount: q.extension_count || 0,
+    validUntil: q.valid_until, issuedOn: issued, latestValidUntil: latest, daysLeft, expired, extensionCount: q.extension_count || 0,
     maxExtensions: Number(maxExtensions), extensionDays: Number(extensionDays), extendedAt: q.extended_at || null, extendedBy: q.extended_by_name || q.extended_by || null,
     extensionRemarks: q.extension_remarks || null,
     extendable: !expired && extendable.includes(q.status) && (q.extension_count || 0) < Number(maxExtensions) && Boolean(latest) && q.valid_until < latest,

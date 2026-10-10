@@ -272,6 +272,7 @@ const PlacementDetail = () => {
 
       <DetailDialog header={t("placement.acknowledge.title")} visible={Boolean(acknowledging)} onHide={() => setAcknowledging(null)} size="md" className="placement-dialog"
         footer={<><Button label={t("placement.actions.cancel")} text onClick={() => setAcknowledging(null)} /><Button label={t("placement.actions.acknowledge")} icon="pi pi-check" loading={busy}
+          disabled={!String(acknowledging?.reference || "").trim() && !String(acknowledging?.remarks || "").trim()}
           onClick={async () => { const ok = await act(() => placementService.acknowledgePlacement(p.id, { reference: acknowledging.reference.trim() || undefined, remarks: acknowledging.remarks || undefined }),
             t("placement.messages.acknowledged")); if (ok) setAcknowledging(null); }} /></>}>
         {acknowledging && (

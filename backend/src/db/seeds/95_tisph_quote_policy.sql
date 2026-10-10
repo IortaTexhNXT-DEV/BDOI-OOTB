@@ -6,6 +6,9 @@
 UPDATE master_types SET fields = fields || $j$[{"name":"quoteValidityDays","label":"Quotation Validity (days)","type":"integer","required":false,"column":"quote_validity_days"}]$j$::jsonb
 WHERE code = 'product' AND NOT fields @> '[{"name":"quoteValidityDays"}]'::jsonb;
 
+-- Quotations loaded without their issue date (go-live load, sample data) count from the day they were created.
+UPDATE quotes SET issued_on = (created_at AT TIME ZONE 'Asia/Manila')::date WHERE issued_on IS NULL;
+
 -- A spoiled quotation is not revived (QUOT-04): Expired has no way back to Draft; the customer gets a new quotation.
 UPDATE app_settings SET value = value - 'Expired', updated_at = now()
  WHERE key = 'quotations.transitions' AND updated_by IS NULL AND value->'Expired' = '["Draft"]'::jsonb;

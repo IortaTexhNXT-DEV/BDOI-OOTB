@@ -97,7 +97,7 @@ const QuotationValidityPanel = ({ quotation, onChanged }) => {
       {versions.length > 1 ? (
         <DataTable value={versions} dataKey="version" size="small" className="mt-3">
           <Column header={t("quotationValidity.version")} body={(r) => `v${r.version}${r.current ? ` (${t("quotationValidity.current")})` : ""}`} />
-          <Column header={t("quotationValidity.status")} body={(r) => <StatusChip label={r.status} />} />
+          <Column header={t("quotationValidity.status")} body={(r) => <StatusChip code={r.status} />} />
           <Column header={t("quotationValidity.grossPremium")} body={(r) => amount(r.grossPremium, r.currency)} className="bv-num" headerClassName="bv-num" />
           <Column header={t("quotationValidity.validUntil")} body={(r) => date(r.validUntil)} />
           <Column header={t("quotationValidity.supersededAt")} body={(r) => formatValue(r.supersededAt, { type: "datetime" })} />
@@ -110,7 +110,7 @@ const QuotationValidityPanel = ({ quotation, onChanged }) => {
         header={viewed ? t("quotationValidity.versionTitle", { number: viewed.quotationNumber, version: viewed.version }) : ""}>
         {viewed ? (
           <KeyValueGrid columns={2} items={[
-            { label: t("quotationValidity.status"), value: <StatusChip label={viewed.quotationStatus} /> },
+            { label: t("quotationValidity.status"), value: <StatusChip code={viewed.quotationStatus} /> },
             { label: t("quotationValidity.insurer"), value: viewed.insuranceCompanyName },
             { label: t("quotationValidity.sumInsured"), value: viewed.totalSumInsured, type: "amount", currency: viewed.currency },
             { label: t("quotationValidity.netPremium"), value: viewed.netPremium, type: "amount", currency: viewed.currency },
