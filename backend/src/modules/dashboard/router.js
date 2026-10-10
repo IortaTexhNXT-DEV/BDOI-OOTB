@@ -18,6 +18,12 @@ const ORIGIN_QUERY = 'issued';
 const compareOf = (v) => (v === 'lastYear' ? 'lastYear' : 'previous');
 
 define({
+  method: 'GET', path: '/dashboard/settings', summary: 'Dashboard defaults for the signed-in user: the business counted when the user has not chosen (defaultOrigin issued = Issued since go-live, all = All business) and the cutover date',
+  screen: 'Dashboard > Executive Dashboard; Sales Dashboard', middleware: [requireAuth],
+  response: { success: true, data: { defaultOrigin: 'issued', cutoverDate: '2026-11-01' } },
+  handler: async (_req, res) => send(res, await svc.dashboardSettings()),
+});
+define({
   method: 'GET', path: '/agent/get-dashboard-details', summary: 'Sales home (Account Executive): own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers); origin=issued|all: the policies counted (renewals due count every policy)', screen: 'Dashboard > Sales Dashboard',
   middleware: [requireAuth, requirePermission('read:leads', 'read:quotations', 'read:policies')], query: { scope: 'mine', origin: ORIGIN_QUERY },
   response: { success: true, data: { funnel: { leads: 16, quotations: 14, policies: 8 }, premiumThisMonth: 125000, renewalsDueIn60Days: 3, recentQuotations: [], expiringPolicies: [] } },

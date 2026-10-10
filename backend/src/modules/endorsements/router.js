@@ -110,7 +110,7 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/:id', summary: 'Get one endorsement (by id or number)', screen: `${SCREEN} > Detailed view`, middleware: [...canRead, ownRecord('endorsement')],
+  method: 'GET', path: '/:id', summary: 'Get one endorsement (by id or number); policyOrigin migrated and policyLegacyNumber when the policy was migrated at go-live', screen: `${SCREEN} > Detailed view`, middleware: [...canRead, ownRecord('endorsement')],
   response: { ...example, success: true }, handler: async (req, res) => sendEntity(res, out(await svc.getEndorsementRow(req.params.id))),
 });
 

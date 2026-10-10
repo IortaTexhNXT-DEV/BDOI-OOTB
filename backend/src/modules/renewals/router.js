@@ -197,7 +197,7 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/', summary: 'Renewals (clientId, policyId, status, search, page, limit)', screen: 'Clients > Renewals tab; renewal quote wizard', middleware: wizardRead,
+  method: 'GET', path: '/', summary: 'Renewals (clientId, policyId, status, origin of the expiring policy issued / migrated, search, page, limit); each carries policyOrigin and policyLegacyNumber (renewal of a legacy policy)', screen: 'Clients > Renewals tab; renewal quote wizard', middleware: wizardRead,
   query: { clientId: 'cl_1', page: 1, limit: 50 }, response: { success: true, data: [renewalExample], pagination: { page: 1, limit: 50, total: 1, totalPages: 1 } },
   handler: async (req, res) => { const pg = paging(req.query, { page: 1, perPage: 50 }); const { total, items } = await svc.listRenewals(await withScope(req), pg); listMeta(res, items, total, pg, 'renewals'); },
 });

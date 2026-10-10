@@ -198,6 +198,51 @@ describe('API origin block and filter', () => {
   });
 });
 
+describe('business issued in BrokerVerse on a migrated policy', () => {
+  it('endorsements, renewals and the renewed term carry the origin of the migrated policy and its legacy number', async () => {
+    const policy = await one("SELECT * FROM policies WHERE policy_number = 'PC-MLY-2026-000101'");
+    const e = await one("INSERT INTO endorsements(policy_id, endorsement_type) VALUES ($1, 'change') RETURNING id", [policy.id]);
+    const end = await api('get', `/endorsements/${e.id}`);
+    expect(end.status).toBe(200);
+    expect(end.body.data).toMatchObject({ policyOrigin: 'migrated', policyLegacyNumber: 'PC-MLY-2026-000101' });
+
+    await query("INSERT INTO renewals(renewal_number, policy_id, client_id, status, due_date, premium_old) VALUES ('RN-ORIG-1', $1, $2, 'pipeline', $3, 25000)",
+      [policy.id, policy.client_id, policy.expiry_date]);
+    const renewals = (await api('get', '/policy-renewals?origin=migrated&limit=50')).body.data;
+    expect(renewals.map((r) => r.renewalNumber)).toEqual(['RN-ORIG-1']);
+    expect(renewals[0]).toMatchObject({ policyOrigin: 'migrated', policyLegacyNumber: 'PC-MLY-2026-000101' });
+    expect((await api('get', '/policy-renewals?origin=issued&limit=50')).body.data.map((r) => r.renewalNumber)).not.toContain('RN-ORIG-1');
+    const queue = (await api('get', '/renewals/queue?origin=migrated&pageSize=50')).body.data;
+    expect(queue.map((r) => r.renewalNumber)).toEqual(['RN-ORIG-1']);
+
+    // the renewed term is issued in BrokerVerse and points to the legacy term
+    await query(`INSERT INTO policies SELECT (jsonb_populate_record(NULL::policies, to_jsonb(p) || jsonb_build_object('id', 'pol_orig_renewed', 'policy_number', 'POL-ORIG-1',
+        'origin', 'issued', 'legacy_system', NULL, 'legacy_number', NULL, 'migrated_at', NULL, 'migrated_by', NULL, 'load_batch_id', NULL, 'doc', p.doc - 'source',
+        'renewed_from', p.id))).* FROM policies p WHERE p.id = $1`, [policy.id]);
+    const renewed = (await api('get', '/policies/POL-ORIG-1')).body.data;
+    expect(renewed).toMatchObject({ origin: { kind: 'issued' }, renewedFrom: policy.id, renewedFromOrigin: 'migrated', renewedFromLegacyNumber: 'PC-MLY-2026-000101' });
+    const legacy = (await api('get', '/policies/PC-MLY-2026-000101')).body.data;
+    expect(legacy).toMatchObject({ renewedFrom: null, renewedFromOrigin: null, renewedFromLegacyNumber: null });
+    await query("DELETE FROM policies WHERE id = 'pol_orig_renewed'");
+    await query("DELETE FROM renewals WHERE renewal_number = 'RN-ORIG-1'");
+    await query('DELETE FROM endorsements WHERE id = $1', [e.id]);
+  });
+});
+
+describe('dashboard settings', () => {
+  it('serve the origin view the dashboards open on and the cutover date to any signed-in user', async () => {
+    const r = await api('get', '/dashboard/settings');
+    expect(r.status).toBe(200);
+    expect(r.body.data).toEqual({ defaultOrigin: 'issued', cutoverDate: cutover });
+    await query("UPDATE app_settings SET value = '\"all\"' WHERE key = 'dashboard.default_origin'");
+    clearSettingsCache();
+    expect((await api('get', '/dashboard/settings')).body.data.defaultOrigin).toBe('all');
+    await query("UPDATE app_settings SET value = '\"issued\"' WHERE key = 'dashboard.default_origin'");
+    clearSettingsCache();
+    expect((await request(app).get('/api/dashboard/settings')).status).toBe(401);
+  });
+});
+
 describe('origin fields are read-only', () => {
   it('refuses a change of origin, legacy number or load on a client, a policy and a claim; a body sending back what it read is accepted', async () => {
     const client = await one("SELECT id FROM clients WHERE client_code = 'LEG-C-0001'");

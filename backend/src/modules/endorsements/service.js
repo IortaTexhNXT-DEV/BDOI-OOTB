@@ -33,10 +33,13 @@ export function toEndorsement(r) {
     // the summary screen reads every change group (personalDetails, motorDetails, policyExtension, coverageChanges ...)
     summary: { ...changes, status, endorsementTypeIds: r.endorsement_type_ids || [], coverageChanges: changes.coverageChanges || null, premiumDelta: Number(r.premium_delta) },
     createdBy: r.created_by_name || r.created_by, createdAt: r.created_at, updatedAt: r.updated_at,
+    // an endorsement is business issued in BrokerVerse; on a policy migrated at go-live it is flagged with the policy's origin and legacy number
+    policyOrigin: r.policy_origin || 'issued', policyLegacyNumber: r.policy_origin === 'migrated' ? r.policy_legacy_number || null : null,
   };
 }
 
 const SELECT = `SELECT e.*, p.policy_number, p.expiry_date AS policy_expiry, p.lob, p.insured_name, c.display_name AS client_name, c.client_code,
+  p.origin AS policy_origin, p.legacy_number AS policy_legacy_number,
   (SELECT u.display_name FROM users u WHERE u.id = e.created_by) AS created_by_name
   FROM endorsements e JOIN policies p ON p.id = e.policy_id LEFT JOIN clients c ON c.id = e.client_id`;
 

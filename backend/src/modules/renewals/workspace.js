@@ -19,7 +19,7 @@ const read = [requireAuth, requirePermission('read:renewals')];
 const write = [requireAuth, requirePermission('write:renewals')];
 const approve = [requireAuth, requirePermission('write:renewals'), requirePermission('approve:renewals')];
 const noteSchema = z.object({ note: z.string().max(2000).optional(), reason: z.string().max(2000).optional() }).passthrough();
-const queueItem = { id: 'rnw_1', renewalNumber: 'RN-2026-00001', policyNumber: 'POL-2025-00012', insuredName: 'Maria Santos', product: 'Motor Vehicle Insurance', insurer: 'MAPFRE Insurance Corporation', expiryDate: '2026-10-30', daysToExpiry: 32, currentPremium: 18500, renewalPremium: 21450.5, premiumVariancePct: 15.95, status: 'Quote Sent', statusCode: 'quoted', retentionRisk: 'Medium', riskScore: 35, noticeStage: 1, nextNotice: { stage: 2, code: 'second', label: 'Second Notice' }, assignedAgent: 'Ana Reyes', renewalAttempts: 1 };
+const queueItem = { id: 'rnw_1', renewalNumber: 'RN-2026-00001', policyNumber: 'POL-2025-00012', insuredName: 'Maria Santos', product: 'Motor Vehicle Insurance', insurer: 'MAPFRE Insurance Corporation', expiryDate: '2026-10-30', daysToExpiry: 32, currentPremium: 18500, renewalPremium: 21450.5, premiumVariancePct: 15.95, status: 'Quote Sent', statusCode: 'quoted', retentionRisk: 'Medium', riskScore: 35, noticeStage: 1, nextNotice: { stage: 2, code: 'second', label: 'Second Notice' }, assignedAgent: 'Ana Reyes', renewalAttempts: 1, policyOrigin: 'migrated', policyLegacyNumber: 'PC-MLY-2025-000101' };
 
 /** Run a renewal command, audit it and answer with the updated renewal. */
 // Record-level scope: a renewal (/:id...) or policy (/policies/:policyId) of someone else's book answers 404.
@@ -35,8 +35,8 @@ const command = (action, fn, message) => async (req, res) => {
 };
 
 define({
-  method: 'GET', path: '/queue', summary: 'Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, page, pageSize)', screen: 'Operations > Renewals > Renewal Queue',
-  middleware: read, query: { search: 'Santos', status: 'Pending', risk: 'High', from: '2026-10-01', to: '2026-12-31', page: 1, pageSize: 20 },
+  method: 'GET', path: '/queue', summary: 'Renewal pipeline / queue with dashboard counters (search, status, risk, agent, from, to, origin of the expiring policy issued / migrated, page, pageSize); each item carries policyOrigin and policyLegacyNumber', screen: 'Operations > Renewals > Renewal Queue',
+  middleware: read, query: { search: 'Santos', status: 'Pending', risk: 'High', from: '2026-10-01', to: '2026-12-31', origin: 'migrated', page: 1, pageSize: 20 },
   response: { success: true, data: [queueItem], dashboard: { totalPolicies: 14, dueSoon: 5, atRisk: 3, inGracePeriod: 1 }, total: 14, page: 1, perPage: 20, totalPages: 1 },
   handler: async (req, res) => {
     const pg = paging(req.query, { page: 1, perPage: 50 });

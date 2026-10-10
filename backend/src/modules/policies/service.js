@@ -46,7 +46,10 @@ export function toPolicy(r) {
     valueAddedTax: quote?.valueAddedTax ?? doc.valueAddedTax, documentaryStampTax: quote?.documentaryStampTax ?? doc.documentaryStampTax,
     localGovernmentTax: quote?.localGovernmentTax ?? doc.localGovernmentTax, fireServiceTax: quote?.fireServiceTax ?? doc.fireServiceTax,
     discount: quote?.discount ?? doc.discount, accountPremiumOthers: quote?.accountPremiumOthers ?? doc.accountPremiumOthers,
-    renewedFrom: r.renewed_from, renewedTo: r.renewed_to, client, lead: r.lead_row ? toLead(r.lead_row) : null, quotation: quote,
+    renewedFrom: r.renewed_from, renewedTo: r.renewed_to,
+    // a renewal of a policy migrated at go-live is issued in BrokerVerse and linked to the legacy term
+    renewedFromOrigin: r.renewed_from ? r.renewed_from_origin || 'issued' : null, renewedFromLegacyNumber: r.renewed_from_origin === 'migrated' ? r.renewed_from_legacy_number || null : null,
+    client, lead: r.lead_row ? toLead(r.lead_row) : null, quotation: quote,
     fireRiskDetails: doc.fireRiskDetails || quote?.fireRiskDetails, firePremiumDetails: doc.firePremiumDetails || quote?.firePremiumDetails,
     createdBy: r.created_by_name || r.created_by, updatedBy: r.updated_by, createdAt: r.created_at, updatedAt: r.updated_at,
     origin: originOf(r),
@@ -54,9 +57,11 @@ export function toPolicy(r) {
 }
 
 export const POLICY_SELECT = `SELECT p.*, ic.name AS insurer_name, pr.name AS product_name, pr.line AS product_line, row_to_json(c.*) AS client_row, row_to_json(l.*) AS lead_row,
-  row_to_json(q.*) AS quote_row, (SELECT u.display_name FROM users u WHERE u.id = p.created_by) AS created_by_name, ${originColumns('p')}
+  row_to_json(q.*) AS quote_row, (SELECT u.display_name FROM users u WHERE u.id = p.created_by) AS created_by_name, ${originColumns('p')},
+  rf.origin AS renewed_from_origin, rf.legacy_number AS renewed_from_legacy_number
   FROM policies p LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN leads l ON l.id = p.lead_id LEFT JOIN quotes q ON q.id = p.quote_id
-  LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id LEFT JOIN products pr ON pr.id = p.product_id`;
+  LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id LEFT JOIN products pr ON pr.id = p.product_id
+  LEFT JOIN policies rf ON rf.id = p.renewed_from`;
 
 const TAX_KEYS = ['valueAddedTax', 'documentaryStampTax', 'localGovernmentTax', 'fireServiceTax'];
 const hasTaxes = (p) => TAX_KEYS.some((k) => p[k] !== undefined && p[k] !== null);

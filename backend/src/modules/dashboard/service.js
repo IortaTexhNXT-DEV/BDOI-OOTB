@@ -39,6 +39,11 @@ export async function dashboardOrigin(value) {
   if (v) throw badRequest('origin must be issued or all');
   return (await getSetting('dashboard.default_origin', 'issued')) === 'all' ? 'all' : 'issued';
 }
+/** Defaults of the dashboard screens: the origin view they open on and the cutover date ("Issued since go-live"). */
+export async function dashboardSettings() {
+  const cutover = String((await getSetting('golive.cutover_date', '')) || '').trim();
+  return { defaultOrigin: await dashboardOrigin(), cutoverDate: /^\d{4}-\d{2}-\d{2}$/.test(cutover) ? cutover : null };
+}
 /** SQL condition on the policies of `alias` ('' for an unqualified column) counted by an origin view. */
 const originCond = async (origin, alias) => (origin === 'all' ? 'TRUE' : (await kpiOriginWhere(alias, 'kpi')) || 'TRUE');
 
