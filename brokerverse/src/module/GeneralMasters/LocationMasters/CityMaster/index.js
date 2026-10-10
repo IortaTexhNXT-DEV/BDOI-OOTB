@@ -8,7 +8,6 @@ import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import { useDispatch, useSelector } from "react-redux";

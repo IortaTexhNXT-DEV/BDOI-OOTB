@@ -109,7 +109,7 @@ const PostDatedCheques = () => {
     showSuccess(toast, t(`opsAcc.pdc.${action}Done`));
     load();
   };
-  const clear = async (pdc) => {
+  const markCleared = async (pdc) => {
     const ok = await openConfirm({
       title: t("opsAcc.confirmations.pdc.clearTitle", { number: pdc.pdcNumber }),
       message: t("opsAcc.confirmations.pdc.clearMessage"),
@@ -124,7 +124,7 @@ const PostDatedCheques = () => {
   const actions = (r) => (
     <span className="flex gap-1 flex-wrap">
       {r.status === "on-hand" && <Button label={t("opsAcc.pdc.deposit")} size="small" outlined onClick={() => setDeposit({ pdc: r, depositAccount: accounts[0]?.value || null, depositDate: new Date() })} />}
-      {r.status === "deposited" && <Button label={t("opsAcc.pdc.clear")} size="small" outlined onClick={() => clear(r)} />}
+      {r.status === "deposited" && <Button label={t("opsAcc.pdc.clear")} size="small" outlined onClick={() => markCleared(r)} />}
       {["deposited", "cleared"].includes(r.status) && <Button label={t("opsAcc.pdc.bounce")} size="small" severity="danger" outlined onClick={() => setBounce({ pdc: r, reason: "", bounceCharge: 0 })} />}
       {["bounced", "on-hand"].includes(r.status) && <Button label={t("opsAcc.pdc.replace")} size="small" text onClick={() => openForm({ ...emptyCheque, mode: "replace", pdc: r, amount: r.amount })} />}
       {r.status === "on-hand" && <Button label={t("opsAcc.pdc.return")} size="small" text onClick={() => close(r, "return")} />}
