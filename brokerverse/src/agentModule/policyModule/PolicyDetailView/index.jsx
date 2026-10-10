@@ -32,6 +32,7 @@ import logger from "../../../utility/logger";
 import NextStep from "../../../components/NextStep";
 import { hasPermission } from "../../../utils/canOpen";
 import { printPdf } from "../../../components/Print";
+import CommissionBreakdown from "../../../module/Commission/CommissionBreakdown";
 
 /**
  * Open a PDF that still has to be fetched in a new tab. The tab is opened at the click, before the fetch, so that the
@@ -2183,6 +2184,12 @@ const PolicyDetailView = () => {
               {isDirectBill && (
                 <SidebarSection title={t("policyDetail.directBill")} icon="pi pi-building">
                   <p className="payment-description">{t("policyDetail.directBillDescription")}</p>
+                </SidebarSection>
+              )}
+
+              {(hasPermission("read:commission-rules") || hasPermission("read:remittance") || hasPermission("read:commission")) && (
+                <SidebarSection title={t("commissionBreakdown.title")} icon="pi pi-percentage" className="commission-breakdown-section">
+                  <CommissionBreakdown policyId={policyId} />
                 </SidebarSection>
               )}
 

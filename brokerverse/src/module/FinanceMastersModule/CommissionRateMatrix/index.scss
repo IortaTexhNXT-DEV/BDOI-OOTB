@@ -1,0 +1,43 @@
+// Commission Rate Matrix: the rules register, the peril rates table of a rule and the Test rate result per peril
+.cr__page {
+  .cr__peril-rates {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cr__status-line {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .cr__perils {
+    .p-inputnumber,
+    .p-dropdown {
+      width: 100%;
+      min-width: 7rem;
+    }
+  }
+
+  .cr__result-perils {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.5rem 0;
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+
+    th,
+    td {
+      padding: 0.25rem 0.4rem;
+      text-align: right;
+      border-bottom: 1px solid var(--surface-border);
+    }
+
+    th:first-child,
+    td:first-child {
+      text-align: left;
+    }
+  }
+}
