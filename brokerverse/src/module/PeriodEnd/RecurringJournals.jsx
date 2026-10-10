@@ -11,6 +11,11 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
 import periodEndService from "../../services/periodEndService";
+import { openConfirm } from "../../components/ConfirmDialog";
+import DetailDialog from "../../components/DetailDialog";
+import DetailHeader from "../../components/DetailHeader";
+import DetailSection from "../../components/DetailSection";
+import { RecordActivityLog } from "../../components/ActivityLog";
 import { calendarDateFormat, toDate, toIsoDate } from "../../utility/dateFormat";
 import { JournalDialog, JournalLink, PageHeader, StatusTag, date, money, showError, showSuccess } from "./common";
 import LinesEditor, { emptyLines } from "./LinesEditor";
@@ -70,6 +75,27 @@ const RecurringJournals = () => {
   };
 
   const runDue = async (row) => {
+    const today = toIsoDate(new Date());
+    const due = (row ? [row] : rows).filter((r) => r.kind === "recurring" && r.status === "active" && r.nextRunDate && r.nextRunDate <= today);
+    const ok = await openConfirm({
+      title: row ? t("periodEnd.confirmations.postTemplateTitle", { code: row.code }) : t("periodEnd.confirmations.postDueTitle"),
+      message: t("periodEnd.confirmations.postDueMessage"),
+      facts: row
+        ? [
+          { label: t("periodEnd.name"), value: row.name },
+          { label: t("periodEnd.nextRun"), value: row.nextRunDate, type: "date" },
+          { label: t("periodEnd.amount"), value: row.totalDebit, type: "amount" },
+          { label: t("periodEnd.autoPost"), value: !!row.autoPost, type: "boolean" },
+        ]
+        : [
+          { label: t("periodEnd.confirmations.dueTemplates"), value: due.length, type: "number" },
+          { label: t("periodEnd.asOf"), value: today, type: "date" },
+          { label: t("periodEnd.amount"), value: due.reduce((sum, r) => sum + Number(r.totalDebit || 0), 0), type: "amount", emphasis: true },
+        ],
+      note: t("periodEnd.confirmations.postDueNote"),
+      confirmLabel: t("periodEnd.confirmations.postDue"),
+    });
+    if (!ok) return;
     try {
       const r = await periodEndService.runDueRecurring(null, row?.id);
       showSuccess(toast, `${r.created.length} ${t("periodEnd.journalsGenerated")}${r.errors.length ? ` · ${r.errors.map((e) => e.error).join("; ")}` : ""}`);
@@ -143,14 +169,33 @@ const RecurringJournals = () => {
         )}
       </Dialog>
 
-      <Dialog className="pe-dialog" header={detail ? `${detail.code} ${detail.name}` : ""} visible={!!detail} style={{ width: "min(760px, 95vw)" }} onHide={() => setDetail(null)}>
-        <DataTable value={detail?.runs || []} size="small" emptyMessage={t("periodEnd.noJournals")}>
-          <Column header={t("periodEnd.date")} body={(r) => date(r.occurrenceDate)} />
-          <Column field="period" header={t("periodEnd.period")} />
-          <Column header={t("periodEnd.journal")} body={(r) => <JournalLink journal={{ ...r, date: r.occurrenceDate }} onOpen={setJournal} />} />
-          <Column header={t("periodEnd.statusLabel")} body={(r) => <StatusTag status={r.status === "undone" ? "undone" : r.journalStatus} />} />
-        </DataTable>
-      </Dialog>
+      <DetailDialog visible={!!detail} onHide={() => setDetail(null)} header={t("periodEnd.confirmations.templateHeader")} size="lg">
+        {detail && (
+          <>
+            <DetailHeader title={detail.code} subtitle={detail.name} status={{ code: detail.status, label: t(`periodEnd.status.${detail.status}`) }}
+              meta={[
+                { label: t("periodEnd.kindLabel"), value: t(`periodEnd.kind.${detail.kind}`) },
+                { label: t("periodEnd.frequencyLabel"), value: t(`periodEnd.frequency.${detail.frequency}`) },
+                { label: t("periodEnd.nextRun"), value: detail.nextRunDate, type: "date" },
+                { label: t("periodEnd.endDate"), value: detail.endDate, type: "date" },
+                { label: t("periodEnd.amount"), value: detail.totalDebit, type: "amount" },
+                { label: t("periodEnd.autoPost"), value: !!detail.autoPost, type: "boolean" },
+                { label: t("periodEnd.autoReverse"), value: !!detail.autoReverse, type: "boolean" },
+              ]} />
+            <DetailSection title={t("periodEnd.generated")} flush>
+              <DataTable value={detail.runs || []} size="small" emptyMessage={t("periodEnd.noJournals")}>
+                <Column header={t("periodEnd.date")} body={(r) => date(r.occurrenceDate)} />
+                <Column field="period" header={t("periodEnd.period")} />
+                <Column header={t("periodEnd.journal")} body={(r) => <JournalLink journal={{ ...r, date: r.occurrenceDate }} onOpen={setJournal} />} />
+                <Column header={t("periodEnd.statusLabel")} body={(r) => <StatusTag status={r.status === "undone" ? "undone" : r.journalStatus} />} />
+              </DataTable>
+            </DetailSection>
+            <DetailSection title={t("periodEnd.confirmations.activity")}>
+              <RecordActivityLog entity="recurring_journal" recordId={detail.id} />
+            </DetailSection>
+          </>
+        )}
+      </DetailDialog>
       <JournalDialog journal={journal} onHide={() => setJournal(null)} />
     </div>
   );

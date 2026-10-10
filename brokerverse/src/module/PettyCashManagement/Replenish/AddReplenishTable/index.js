@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { openConfirm } from "../../../../components/ConfirmDialog";
 import { showSuccessMessage } from "../../../../utility/toastUtils";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -41,6 +42,18 @@ const AddReplenishTable = () => {
     return !isNaN(Amount) ? total + Amount : total;
   }, 0);
   const handleSubmit = async () => {
+    const ok = await openConfirm({
+      title: t("pettyCash.confirm.replenishTitle"),
+      message: t("pettyCash.confirm.replenishMessage"),
+      facts: [
+        { label: t("pettyCash.confirm.fund"), value: ReplenishFund.code || ReplenishFund.pettyCashCode, hidden: !(ReplenishFund.code || ReplenishFund.pettyCashCode) },
+        { label: t("pettyCash.confirm.lines"), value: selectedRows.length, type: "number" },
+        { label: t("pettyCash.confirm.availableCash"), value: ReplenishFund.availableCash, type: "amount", hidden: ReplenishFund.availableCash === undefined },
+        { label: t("pettyCash.confirm.replenishAmount"), value: totalAmount, type: "amount", emphasis: true },
+      ],
+      confirmLabel: t("pettyCash.confirm.recordReplenishment"),
+    });
+    if (!ok) return;
     const result = await dispatch(postAddReplenishMiddleware(totalAmount));
     if (postAddReplenishMiddleware.rejected.match(result)) {
       toastRef.current.showToast({ severity: "error", detail: result.payload });
@@ -241,7 +254,7 @@ const AddReplenishTable = () => {
         <div className="col-12 md:col-12 lg:col-12">
           <div className="btn__container">
             <Button
-              label="Approve"
+              label={t("pettyCash.confirm.recordReplenishment")}
               className="add__btn"
               disabled={selectedRows.length === 0}
               onClick={() => {

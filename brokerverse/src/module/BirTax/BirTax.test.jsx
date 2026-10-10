@@ -4,7 +4,10 @@ import { ScheduleTable, cellValue } from "./common";
 import { isPathAllowed } from "../../utils/menuPermissions";
 import { menuList } from "../../components/SideBar/list";
 
-jest.mock("react-i18next", () => ({ useTranslation: () => ({ t: (k, o) => (o && o.defaultValue) || k }) }));
+jest.mock("react-i18next", () => ({
+  useTranslation: () => ({ t: (k, o) => (o && o.defaultValue) || k }),
+  initReactI18next: { type: "3rdParty", init: () => {} },
+}));
 
 describe("BIR forms and invoicing screens", () => {
   it("shows a schedule with its columns and totals", () => {

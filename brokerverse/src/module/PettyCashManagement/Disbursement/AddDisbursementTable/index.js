@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { openConfirm } from "../../../../components/ConfirmDialog";
 import { showSuccessMessage } from "../../../../utility/toastUtils";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -77,6 +78,19 @@ const AddDisbursementTable = () => {
   }, [selectedRows]);
   const handleNext = async () => {
     const lines = selectedRows.length ? selectedRows : AddDisbursmentTable;
+    const sum = (key) => (lines || []).reduce((total, item) => total + (parseFloat(item[key]) || 0), 0);
+    const ok = await openConfirm({
+      title: t("pettyCash.confirm.disbursementsTitle"),
+      message: t("pettyCash.confirm.disbursementsMessage"),
+      facts: [
+        { label: t("pettyCash.confirm.lines"), value: (lines || []).length, type: "number" },
+        { label: t("pettyCash.amount"), value: sum("Amount"), type: "amount" },
+        { label: t("pettyCash.confirm.wht"), value: sum("WHT"), type: "amount" },
+        { label: t("pettyCash.confirm.netAmount"), value: sum("Amount") - sum("WHT"), type: "amount", emphasis: true },
+      ],
+      confirmLabel: t("pettyCash.confirm.recordDisbursements"),
+    });
+    if (!ok) return;
     const result = await dispatch(postEditDisbursmentMiddleware(lines));
     if (postEditDisbursmentMiddleware.rejected.match(result)) {
       toastRef.current.showToast({ severity: "error", detail: result.payload });
@@ -423,7 +437,7 @@ if(formAction === "Edit" ){
         <div className="col-12 md:col-12 lg:col-12">
           <div className="btn__container">
             <Button
-              label="Approve"
+              label={t("pettyCash.confirm.recordDisbursements")}
               className="add__btn"
               onClick={() => {
                 handleNext();

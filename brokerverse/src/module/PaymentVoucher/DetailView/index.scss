@@ -243,8 +243,8 @@ margin:10px 0px
   color: #667085;
   cursor: pointer;
   &.active {
-    background: #2563eb;
-    color: #fff;
+    background: var(--primary-color);
+    color: var(--primary-color-text);
   }
   &:disabled {
     opacity: 0.5;

@@ -11,6 +11,7 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
 import periodEndService from "../../services/periodEndService";
+import { openConfirm } from "../../components/ConfirmDialog";
 import { PageHeader, StatusTag, showError, showSuccess } from "./common";
 
 const EMPTY = { code: "", label: "", description: "", itemType: "manual", severity: "warning", active: true, sortOrder: 200 };
@@ -54,6 +55,18 @@ const CloseChecklist = () => {
     }
   };
   const remove = async (row) => {
+    const ok = await openConfirm({
+      title: t("periodEnd.confirmations.deleteItemTitle"),
+      severity: "danger",
+      message: t("periodEnd.confirmations.deleteItemMessage"),
+      facts: [
+        { label: t("periodEnd.code"), value: row.code },
+        { label: t("periodEnd.item"), value: row.label },
+        { label: t("periodEnd.severity"), value: t(`periodEnd.severityValue.${row.severity}`) },
+      ],
+      confirmLabel: t("periodEnd.confirmations.deleteItem"),
+    });
+    if (!ok) return;
     try {
       await periodEndService.deleteChecklistItem(row.code);
       load();
@@ -78,8 +91,8 @@ const CloseChecklist = () => {
           <Column header={t("periodEnd.statusLabel")} body={(r) => <StatusTag status={r.active ? "active" : "inactive"} />} />
           <Column header={t("periodEnd.actions")} body={(r) => (
             <div className="flex gap-1">
-              <Button icon="pi pi-pencil" text size="small" onClick={() => setEditing({ isNew: false, values: { ...EMPTY, ...r, description: r.description || "" } })} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
-              {!r.isSystem && <Button icon="pi pi-trash" text size="small" severity="danger" onClick={() => remove(r)} aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />}
+              <Button icon="pi pi-pencil" text size="small" onClick={() => setEditing({ isNew: false, values: { ...EMPTY, ...r, description: r.description || "" } })} aria-label={t("periodEnd.edit")} tooltip={t("periodEnd.edit")} tooltipOptions={{ position: "top" }} />
+              {!r.isSystem && <Button icon="pi pi-trash" text size="small" severity="danger" onClick={() => remove(r)} aria-label={t("periodEnd.confirmations.deleteItem")} tooltip={t("periodEnd.confirmations.deleteItem")} tooltipOptions={{ position: "top" }} />}
             </div>
           )} />
         </DataTable>

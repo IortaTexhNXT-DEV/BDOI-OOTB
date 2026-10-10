@@ -31,18 +31,13 @@ import BulkUploadModal from "./BulkUploadModal";
 import { PAGE_SIZE, PAGE_SIZES } from "../../hooks/useServerList";
 import { calendarDateFormat, formatDate as formatAppDate } from "../../utility/dateFormat";
 import logger from "../../utility/logger";
+import { printPdf } from "../../components/Print";
 
 const Index = () => {
   const { t } = useTranslation();
   const [visiblePopup, setVisiblePopup] = useState(false);
   const [code, setCode] = useState("");
   const [codeTo, setCodeTo] = useState("");
-  const [division, setDivision] = useState("");
-  const [divisionTo, setDivisionTo] = useState("");
-  const [number, setNumber] = useState("");
-  const [numberto, setNumberTo] = useState("");
-  const [cashier, setCashier] = useState("");
-  const [cashierto, setCashierto] = useState("");
   // Set dateFrom to yesterday (t-1 day) and dateTo to today
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
@@ -159,13 +154,9 @@ const Index = () => {
           life: 3000,
         });
 
-        // Download the file
-        const link = document.createElement("a");
-        link.href = result.data.url;
-        link.download = result.data.filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        printPdf(result.data.url, { fileName: result.data.filename }).catch((error) =>
+          toast.current?.show({ severity: "error", summary: t("common.error"), detail: error.message, life: 4000 })
+        );
 
         // Close the modal
         setVisiblePopup(false);
@@ -173,12 +164,6 @@ const Index = () => {
         // Reset form
         setCode("");
         setCodeTo("");
-        setDivision("");
-        setDivisionTo("");
-        setNumber("");
-        setNumberTo("");
-        setCashier("");
-        setCashierto("");
         setDateFrom(yesterday);
         setDateTo(new Date());
       } else if (
@@ -200,12 +185,6 @@ const Index = () => {
         // Reset form
         setCode("");
         setCodeTo("");
-        setDivision("");
-        setDivisionTo("");
-        setNumber("");
-        setNumberTo("");
-        setCashier("");
-        setCashierto("");
         setDateFrom(yesterday);
         setDateTo(new Date());
       } else {
@@ -290,26 +269,6 @@ const Index = () => {
       }
     }
   };
-  // Division Code options
-  const divisionOptions = [
-    { name: "DIV001", code: "DIV001" },
-    { name: "DIV002", code: "DIV002" },
-    { name: "DIV003", code: "DIV003" },
-  ];
-
-  // OR Number options
-  const orNumberOptions = [
-    { name: "OR001", code: "OR001" },
-    { name: "OR002", code: "OR002" },
-    { name: "OR003", code: "OR003" },
-  ];
-
-  // Cashier ID options
-  const cashierOptions = [
-    { name: "CASH001", code: "CASH001" },
-    { name: "CASH002", code: "CASH002" },
-    { name: "CASH003", code: "CASH003" },
-  ];
   const template2 = {
     layout:
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
@@ -450,25 +409,27 @@ const Index = () => {
         </div>
         <div className="bulk__text">
           <div className="filter_bulk_button_container">
-            <div className="bulk_button_container" onClick={handleModal}>
+            <button type="button" className="bulk_button_container" onClick={handleModal}>
               <p className="addtext">{t("paymentVoucher.bulkPrint")}</p>
-            </div>
+            </button>
           </div>
           <div className="filter_bulk_button_container">
-            <div
+            <button
+              type="button"
               className="bulk_button_container"
               onClick={handleBulkUploadModal}
             >
               <p className="addtext">{t("paymentVoucher.bulkUpload")}</p>
-            </div>
+            </button>
           </div>
           <div className="filter_bulk_button_container">
-            <div
+            <button
+              type="button"
               className="bulk_button_container"
               onClick={() => navigate("/accounts/paymentvoucher/bulk-disburse")}
             >
-              <p className="addtext">Bulk Disburse</p>
-            </div>
+              <p className="addtext">{t("paymentVoucher.bulkDisburse.title")}</p>
+            </button>
           </div>
           <div className="filterbutton_container">
             <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
@@ -479,25 +440,27 @@ const Index = () => {
         </div>
         <div className="mobile-header-actions">
           <div className="filter_bulk_button_container">
-            <div className="bulk_button_container" onClick={handleModal}>
+            <button type="button" className="bulk_button_container" onClick={handleModal}>
               <p className="addtext">{t("paymentVoucher.bulkPrint")}</p>
-            </div>
+            </button>
           </div>
           <div className="filter_bulk_button_container">
-            <div
+            <button
+              type="button"
               className="bulk_button_container"
               onClick={handleBulkUploadModal}
             >
               <p className="addtext">{t("paymentVoucher.bulkUpload")}</p>
-            </div>
+            </button>
           </div>
           <div className="filter_bulk_button_container">
-            <div
+            <button
+              type="button"
               className="bulk_button_container"
               onClick={() => navigate("/accounts/paymentvoucher/bulk-disburse")}
             >
-              <p className="addtext">Bulk Disburse</p>
-            </div>
+              <p className="addtext">{t("paymentVoucher.bulkDisburse.title")}</p>
+            </button>
           </div>
           <div className="filterbutton_container">
             <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
@@ -676,71 +639,18 @@ const Index = () => {
       <div className="col-12">
         <Dialog
           visible={visiblePopup}
-          className="dialog_fields"
+          header={t("paymentVoucher.bulkPrint")}
+          className="dialog_fields bv-centered"
           onHide={() => {
             setVisiblePopup(false);
           }}
+          footer={(
+            <>
+              <Button type="button" label={t("common.cancel")} text onClick={() => setVisiblePopup(false)} />
+              <Button type="button" icon="pi pi-print" label={t("paymentVoucher.generate")} loading={bulkPrintLoading} onClick={handleBulkPrint} />
+            </>
+          )}
         >
-          {/* Division Code From and To */}
-          <div className="grid">
-            <div className="col-12 md:col-6 lg:col-6">
-              <DropDowns
-                value={division}
-                onChange={(e) => setDivision(e.value)}
-                className="dropdown__container"
-                label={t("paymentVoucher.divisionCodeFrom")}
-                options={divisionOptions}
-                optionLabel="name"
-                optionValue="code"
-                placeholder={t("paymentVoucher.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-              />
-            </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <DropDowns
-                value={divisionTo}
-                onChange={(e) => setDivisionTo(e.value)}
-                className="dropdown__container"
-                label={t("paymentVoucher.divisionCodeTo")}
-                options={divisionOptions}
-                optionLabel="name"
-                optionValue="code"
-                placeholder={t("paymentVoucher.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-              />
-            </div>
-          </div>
-
-          {/* OR Number From and To */}
-          <div className="grid">
-            <div className="col-12 md:col-6 lg:col-6">
-              <DropDowns
-                value={number}
-                onChange={(e) => setNumber(e.value)}
-                className="dropdown__container"
-                label={t("paymentVoucher.orNumberFrom")}
-                options={orNumberOptions}
-                optionLabel="name"
-                optionValue="code"
-                placeholder={t("paymentVoucher.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-              />
-            </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <DropDowns
-                value={numberto}
-                onChange={(e) => setNumberTo(e.value)}
-                className="dropdown__container"
-                label={t("paymentVoucher.orNumberTo")}
-                options={orNumberOptions}
-                optionLabel="name"
-                optionValue="code"
-                placeholder={t("paymentVoucher.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-              />
-            </div>
-          </div>
-
           {/* Customer Code From and To - Dynamic values from API */}
           <div className="grid">
             <div className="col-12 md:col-6 lg:col-6">
@@ -769,36 +679,6 @@ const Index = () => {
                 placeholder={clientsLoading ? t("common.loading") : t("paymentVoucher.select")}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 disabled={clientsLoading}
-              />
-            </div>
-          </div>
-
-          {/* Cashier ID From and To */}
-          <div className="grid">
-            <div className="col-12 md:col-6 lg:col-6">
-              <DropDowns
-                value={cashier}
-                onChange={(e) => setCashier(e.value)}
-                className="dropdown__container"
-                label={t("paymentVoucher.cashierIdFrom")}
-                options={cashierOptions}
-                optionLabel="name"
-                optionValue="code"
-                placeholder={t("paymentVoucher.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-              />
-            </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <DropDowns
-                value={cashierto}
-                onChange={(e) => setCashierto(e.value)}
-                className="dropdown__container"
-                label={t("paymentVoucher.cashierIdTo")}
-                options={cashierOptions}
-                optionLabel="name"
-                optionValue="code"
-                placeholder={t("paymentVoucher.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
               />
             </div>
           </div>
@@ -835,17 +715,6 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="update_btn">
-            <div
-              className="cursor-pointer"
-              onClick={handleBulkPrint}
-              disabled={bulkPrintLoading}
-            >
-              <div className="update_btnlabel">
-                {bulkPrintLoading ? t("paymentVoucher.generating") : t("paymentVoucher.generate")}
-              </div>
-            </div>
-          </div>
         </Dialog>
       </div>
 

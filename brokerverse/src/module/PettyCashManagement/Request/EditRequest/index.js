@@ -25,11 +25,16 @@ import SvgAdd from "../../../../assets/icons/SvgAdd";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import SvgDeleteIcon from "../../../../assets/icons/SvgDeleteIcon";
-import { Dialog } from "primereact/dialog";
 import { Checkbox } from "primereact/checkbox";
 import AddDialog from "./AddDialog";
 import { useParams } from "react-router-dom";
 import { calendarDateFormat } from "../../../../utility/dateFormat";
+import { openConfirm } from "../../../../components/ConfirmDialog";
+import ApprovalActions from "../../../../components/ApprovalActions";
+import DetailSection from "../../../../components/DetailSection";
+import KeyValueGrid from "../../../../components/KeyValueGrid";
+import StatusChip from "../../../../components/StatusChip";
+import { RecordActivityLog } from "../../../../components/ActivityLog";
 
 const initialValue = {
     Date: new Date(),
@@ -48,8 +53,7 @@ const EditRequestForm = ({ action }) => {
     const navigate = useNavigate();
     const [checked, setChecked] = useState(false);
     const [codedata, setcodeData] = useState([])
-    const [rejectVisible, setRejectVisible] = useState(false);
-    const [rejectReason, setRejectReason] = useState("");
+    const [activityKey, setActivityKey] = useState(0);
     const { id } = useParams();
     const { editrequestDetails, AddRequestTable, loading } = useSelector(
         ({ pettyCashRequestReducer }) => {
@@ -82,12 +86,31 @@ const EditRequestForm = ({ action }) => {
             navigate("/accounts/pettycash/pettycashrequest")
         );
     };
-    const handleTransition = async (transition, reason) => {
-        const result = await dispatch(transitionRequestMiddleware({ id, action: transition, reason }));
-        showResult(result, transitionRequestMiddleware, result.payload?.status, () => {
-            setRejectVisible(false);
-            setRejectReason("");
+    // submit, approve and reject of the request, each confirmed with the request's figures; reject takes the reason
+    const handleTransition = async (transition) => {
+        const reject = transition === "reject";
+        let result;
+        const answer = await openConfirm({
+            title: t(`pettyCash.confirm.${transition}Title`, { number: editrequestDetails?.RequestNumber }),
+            severity: reject ? "danger" : "neutral",
+            message: t(`pettyCash.confirm.${transition}Message`),
+            facts: [
+                { label: t("pettyCash.transactionNumber"), value: editrequestDetails?.RequestNumber },
+                { label: t("pettyCash.requesterName"), value: editrequestDetails?.RequesterName },
+                { label: t("pettyCash.requestDate"), value: editrequestDetails?.requestDateValue, type: "date" },
+                { label: t("pettyCash.confirm.lines"), value: AddRequestTable.length, type: "number" },
+                { label: t("pettyCash.totalAmount"), value: editrequestDetails?.TotalAmount, type: "amount", emphasis: true },
+            ],
+            input: reject ? { type: "textarea", label: t("pettyCash.rejectReason"), required: true, minLength: 3, maxLength: 500 } : undefined,
+            confirmLabel: t(`pettyCash.confirm.${transition}`),
+            onConfirm: async (reason) => {
+                result = await dispatch(transitionRequestMiddleware({ id, action: transition, reason }));
+                if (transitionRequestMiddleware.rejected.match(result)) throw new Error(result.payload);
+            },
         });
+        if (answer === null || answer === false) return;
+        setActivityKey((k) => k + 1);
+        toastRef.current.showToast({ detail: t(`pettyCash.confirm.${transition}Done`) });
     };
     const requestStatus = editrequestDetails?.status;
     const validate = (values) => {
@@ -372,48 +395,30 @@ const EditRequestForm = ({ action }) => {
                             onClick={() => handleTransition("submit")}
                             disabled={loading}
                         /> : null}
-                        {action === "view" && requestStatus === "submitted" ? <>
-                            <Button
-                                label={t("common.reject")}
-                                className="add__btn"
-                                outlined
-                                onClick={() => setRejectVisible(true)}
-                                disabled={loading}
+                        {action === "view" && requestStatus === "submitted" ? (
+                            <ApprovalActions
+                                initiator={{ id: editrequestDetails?.createdBy }}
+                                approveLabel={t("pettyCash.confirm.approve")}
+                                rejectLabel={t("pettyCash.confirm.reject")}
+                                onApprove={() => handleTransition("approve")}
+                                onReject={() => handleTransition("reject")}
+                                busy={loading}
                             />
-                            <Button
-                                label={t("pettyCash.approve")}
-                                className="add__btn"
-                                onClick={() => handleTransition("approve")}
-                                disabled={loading}
-                            />
-                        </> : null}
+                        ) : null}
                     </div>
                 </div>
             </div>
             <AddDialog visible={visible} setVisible={setVisible} />
-            <Dialog
-                header={t("common.reject")}
-                visible={rejectVisible}
-                style={{ width: "30vw" }}
-                onHide={() => setRejectVisible(false)}
-                className="dailog__container"
-            >
-                <InputField
-                    classNames="fielduniqueone__container"
-                    label={t("pettyCash.rejectReason", "Reason")}
-                    value={rejectReason}
-                    onChange={(e) => setRejectReason(e.target.value)}
-                />
-                <div className="btn__container mt-3">
-                    <Button
-                        label={t("common.reject")}
-                        className="add__btn"
-                        onClick={() => handleTransition("reject", rejectReason.trim())}
-                        disabled={loading || rejectReason.trim().length < 3}
-                    />
-                </div>
-            </Dialog>
-
+            {action === "view" && editrequestDetails?.id ? (
+                <DetailSection title={t("pettyCash.confirm.approval")} className="mt-4">
+                    <KeyValueGrid columns={4} items={[
+                        { label: t("pettyCash.confirm.status"), value: requestStatus ? <StatusChip code={requestStatus} label={t(`pettyCash.confirm.statuses.${requestStatus}`, { defaultValue: requestStatus })} /> : null },
+                        { label: t("pettyCash.confirm.approvedAt"), value: editrequestDetails.approvedAt, type: "datetime" },
+                        { label: t("pettyCash.rejectReason"), value: editrequestDetails.rejectionReason, span: 2, hidden: !editrequestDetails.rejectionReason },
+                    ]} />
+                    <RecordActivityLog key={activityKey} entity="petty_cash_request" recordId={editrequestDetails.id} />
+                </DetailSection>
+            ) : null}
         </div>
     );
 };

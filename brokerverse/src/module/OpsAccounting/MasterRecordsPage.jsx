@@ -11,12 +11,13 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
 import service from "../../services/opsAccountingService";
+import { openConfirm } from "../../components/ConfirmDialog";
 import { Field, OpsTag, PageHeader, showError, showSuccess } from "./common";
 
 const HIDDEN = ["audit-user", "audit-date"];
-const display = (f, v) => {
+const display = (f, v, t) => {
   if (v === null || v === undefined || v === "") return "";
-  if (f.type === "boolean") return v === true || v === "true" ? "Yes" : "No";
+  if (f.type === "boolean") return v === true || v === "true" ? t("detailView.yes") : t("detailView.no");
   return String(v);
 };
 
@@ -62,6 +63,15 @@ const MasterRecordsPage = ({ type, title, group, section, intro, columns }) => {
     }
   };
   const toggle = async (r) => {
+    const action = r.isActive ? "deactivate" : "activate";
+    const ok = await openConfirm({
+      title: t(`opsAcc.confirmations.master.${action}Title`, { name: title }),
+      severity: r.isActive ? "warning" : "neutral",
+      message: t(`opsAcc.confirmations.master.${action}Message`),
+      facts: shown.slice(0, 3).map((f) => ({ label: f.label, value: display(f, r[f.name], t) })),
+      confirmLabel: t(`opsAcc.${action}`),
+    });
+    if (!ok) return;
     try {
       await service.setMasterStatus(type, r.id, r.isActive ? "Inactive" : "Active");
       load();
@@ -93,7 +103,7 @@ const MasterRecordsPage = ({ type, title, group, section, intro, columns }) => {
           <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("opsAcc.search")} className="w-20rem" />
         </div>
         <DataTable value={rows} dataKey="id" loading={loading} size="small" stripedRows paginator rows={25} emptyMessage={t("opsAcc.none")}>
-          {shown.map((f) => <Column key={f.name} header={f.label} body={(r) => display(f, r[f.name])} />)}
+          {shown.map((f) => <Column key={f.name} header={f.label} body={(r) => display(f, r[f.name], t)} />)}
           <Column header={t("opsAcc.statusLabel")} body={(r) => <OpsTag status={r.isActive ? "active" : "inactive"} />} />
           <Column body={(r) => (
             <span className="flex gap-1">
