@@ -1,9 +1,8 @@
 <!--
 Owner: see WRITER_GUIDE.md. Screens of this chapter: the sign-in page, the side bar and header, My Work, My Profile,
 notifications, a list with filters, a form, an approval, the audit trail, the Help panel.
-Screens to refresh (redesign in another stream): the Notification page (View all notifications) and the remittance
-approval levels in "Approvals and maker-checker". No screenshot of the sign-in page: Microsoft sign-in is off on the
-capture system.
+Screens to refresh (redesign in another stream): the Notification page (View all notifications). No screenshot of the
+sign-in page: Microsoft sign-in is off on the capture system.
 -->
 # Getting started {#getting-started}
 
@@ -259,8 +258,9 @@ Most screens open on a list. The lists work the same way everywhere.
 - **Paging**: the list shows 20 rows per page; change the number at the bottom right. The arrows go to the first,
   previous, next and last page, and the text next to them shows the rows on screen and the total (for example 1 - 16
   of 16). Search and filters apply to the whole list, not only to the page on screen.
-- **Row actions**: at the end of the row. The eye or the arrow opens the record, the pencil edits it, the bin deletes
-  it. An action your role may not use is not shown, or is greyed out.
+- **Row actions**: at the end of the row. **View** (the eye) opens the record and **Edit** (the pencil) changes it;
+  on lists with more actions, the three dots open the row menu, with **View** first. An action your role may not use
+  is not shown; an action that cannot be taken now is greyed out in the menu with the reason.
 - **Export**: lists that can be exported have **Generate Report**, **Export** or **Excel** and **CSV**. The file
   downloads to your computer and contains the rows of the search and filters.
 
@@ -283,10 +283,38 @@ overdue or lost.
 - **Save**, or the action named on the button (for example **Create Placement Slip**), stores the record. **Cancel**
   or the X closes the form without saving. Nothing is stored until you save.
 - After a save the system shows a confirmation at the top right and, for most records, the number it issued.
-- Deleting a record or a task asks for confirmation first: the question names the action, and the button repeats
-  the verb, for example **Delete task**. A decline, return or reversal asks for the reason, chosen from a list.
-- Other decisions take effect as soon as you select them, without a question: for example **Approve** on a renewal of
-  Negotiations or **Approve settlement** on a claim. Check the record before you select the decision.
+- An action that changes or removes a record asks for confirmation first (see [Confirmations](#confirmations)).
+
+### Confirmations {#confirmations}
+
+A confirmation says in one sentence what is about to happen, lists the facts of the record it applies to (amounts in
+pesos on the right, dates as DD/MM/YYYY) and says what follows. The button names the action, for example
+**Submit 3 remittances**, **Register cheque** or **Escalate**; **Cancel** or the X closes the confirmation and
+changes nothing.
+
+- A rejection, return, reversal, cancellation or escalation asks for the **Reason**, chosen from the list of reasons
+  that TIS IT AppSupport / Admin keeps on [Reason Codes](#lead-sources-and-reason-codes). The reason **Other** also needs a **Note**.
+- The button shows that the action is running. The confirmation closes when the action is done; if the system refuses
+  it, the confirmation stays open with the message, and nothing is changed.
+
+![Escalate a remittance exception: the facts of the exception and the reason chosen from the list](images/getting-started/confirm-dialog.png)
+
+### Record details {#record-details}
+
+**View** in a list opens the details of the record, in a window or on a page of its own. The details show the number,
+the status and the main facts at the top, then the facts in groups (label above, value below), and the record's
+activity. **Close** closes the window; **Edit** is shown to the roles that may change the record. Personal data is
+masked as in [Personal data masking](#personal-data-masking).
+
+![Bank details opened from the bank list: the facts in groups, Close and Edit](images/getting-started/detail-view.png)
+
+### Printing {#printing}
+
+**Print** prints the document of the record (receipt, voucher, debit note, schedule), on the letterhead of Toyota
+Insurance Services Philippines, and never the screen: the browser's print window opens with the document only. Where
+the browser cannot print from the page, the document opens in a new tab to print from there. While a print is being
+prepared its button shows that it is working. Documents such as the remittance schedule and advice are downloaded as
+PDF or XLSX files instead. A print is recorded in the activity of the record; repeated prints show as one entry.
 
 ## Uploads and templates {#uploads-and-templates}
 
@@ -329,7 +357,7 @@ approves and who approves your work.
 | Claim decisions and settlement | {{roles:approve:claims}} |
 | Supplier invoice | {{roles:approve:payables}} |
 | Journal voucher, payment voucher and cheque | Another TIS Finance & General Accounting user |
-| Remittance to an insurer, and its settlement, adjustment or electronic transfer | {{roles:write:remittance}}, another user than the one who prepared it |
+| Remittance to an insurer, and its settlement or adjustment | {{roles:approve:remittance}}, within the approval limit, never the user who prepared or submitted it |
 | Bank reconciliation | {{roles:approve:bank-reconciliation}} |
 | Insurer statement reconciliation | {{roles:approve:insurer-reconciliation}} |
 | Credit control decisions | {{roles:approve:credit-control}} |
@@ -339,12 +367,13 @@ approves and who approves your work.
 | Role access changes and authority limits | {{roles:approve:access-control}} |
 
 **Approval limits.** The [Authority Matrix](#authority-matrix) sets the largest amount each role may approve per
-transaction. As delivered it holds no limit, which the role chapters show as "Not set":
+transaction. As delivered:
 
-- a claim settlement is approved by the approver whatever its amount;
-- a remittance to an insurer follows the remittance approval levels instead: one approval up to PHP 100,000.00, two
-  approvals up to PHP 1,000,000.00 and three approvals above that, each by a different user. As soon as TISPH enters
-  remittance limits on the Authority Matrix, one approval by a user whose limit covers the amount is enough.
+- a remittance, and its settlement or adjustment, is approved by TIS Finance & General Accounting up to
+  PHP 1,000,000.00 and by the TIS General Manager without limit. A user without a remittance limit cannot approve
+  or reject a remittance;
+- the other transactions hold no limit, which the role chapters show as "Not set": a claim settlement, for example,
+  is approved by the approver whatever its amount.
 
 To approve:
 
@@ -352,7 +381,13 @@ To approve:
    or reject**.
 2. Select the arrow at the end of the row. The record opens with its approval actions.
 3. Check the record, then choose **Approve**, or the decline action of the screen (**Reject** or **Return**) with
-   the reason. The decision is recorded in the audit trail of the record.
+   the reason. The decision is recorded in the activity of the record.
+
+When you may not decide a record (you entered or submitted it, or its amount is above your limit), the decision
+buttons are greyed out or not shown, and a line next to them says why and, where the system knows them, who can
+decide. The system applies the same rule when the decision is sent.
+
+![A remittance submitted by the user: the line under the steps says that another user decides, and who can](images/getting-started/maker-checker-note.png)
 
 ![Approvals in My Work of the TIS Operations Unit Head: a renewal premium and a claim settlement](images/getting-started/my-work-approvals.png)
 
@@ -387,10 +422,13 @@ To search the audit trail:
 
 ![Master > System > Audit Trail with the sign-ins of the day](images/getting-started/audit-trail.png)
 
-On a record, the activity log lists the events newest first, grouped by day. Each event shows the user and role, the
-action (Created, Updated, Submitted, Approved, Rejected, Posted, Reversed and others), the remarks and **What
-changed** (**Field**, **Before**, **After**). Search the events, filter by **User** and **Kind of event**, and select
-**Export** for an Excel or CSV file.
+On a record, the activity log (the **Activity**, **History** or **Audit Trail** tab) lists the events newest first,
+grouped by day. Each event shows what was done, the date and time, the user's name and role, the status before and
+after, the remarks or reason given and, under **What changed**, each field changed with its value **Before** and
+**After**. Masked personal data stays masked. Where the record offers them, search the events, filter by **User** and
+**Kind of event**, or export them (**Export**, **Download log (XLSX)**).
+
+![Activity of a remittance: submitted by the CCD-Recon user, with What changed open](images/getting-started/activity-log.png)
 
 ## Personal data masking {#personal-data-masking}
 

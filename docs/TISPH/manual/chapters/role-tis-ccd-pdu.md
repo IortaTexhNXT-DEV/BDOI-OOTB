@@ -45,7 +45,7 @@ payment status.
 
 1. Choose {{menu:/accounts/post-dated-cheques}}. The cards show the cheques **On hand**, the cheques **Due for
    deposit** and the number **Bounced**.
-2. On the **Cheque register** tab (the list of cheques, not the **Register cheque** button), select the status in
+2. On the **Cheques** tab, select the status in
    the first list (**On hand** is shown first; **All** shows every cheque) and type a PDC number, cheque number,
    client, policy or bill in the search box.
 3. Select **Export to Excel** to download the register with the status selected.
@@ -62,10 +62,10 @@ the system sends a notification of these cheques to the Cash Control users.
 3. In **Reference**, type the bill number (for example INV-2026-95007) or the policy number.
 4. In **Drawee bank**, select the client's bank. If the bank is not in the list, type it in **Drawee bank (if not in
    the list)**.
-5. Type the **Cheque no.** and the **Amount**. Pick the **Cheque date** from the calendar of the field: a date typed
-   in the field is not taken.
+5. Type the **Cheque no.**, the **Cheque date** (DD/MM/YYYY, or pick it from the calendar of the field) and the
+   **Amount**.
 6. In **Kept in**, type where the cheque is filed, for example "Finance vault, drawer 2". Add **Remarks** if needed.
-7. Select **Save**. The system gives the cheque its PDC number (PDC-2026-00004) with the status **On Hand**.
+7. Select **Register cheque**. The system gives the cheque its PDC number (PDC-2026-00004) with the status **On Hand**.
 
 | Field | Required | What to enter | Rule |
 |---|---|---|---|
@@ -73,7 +73,7 @@ the system sends a notification of these cheques to the Cash Control users.
 | **Reference** | Yes | The bill or policy number | The bill must have an open balance |
 | **Drawee bank** | Yes, one of the two | The client's bank | Type it in **Drawee bank (if not in the list)** when it is not listed |
 | **Cheque no.** | Yes | The number printed on the cheque | |
-| **Cheque date** | Yes | The date on the cheque, picked from the calendar | The cheque cannot be deposited before this date |
+| **Cheque date** | Yes | The date on the cheque | The cheque cannot be deposited before this date |
 | **Amount** | Yes | The amount of the cheque | Not more than the bill balance left after the cheques already on hand for it |
 | **Kept in** | No | Vault, drawer or folder | Printed on the register and the export |
 
@@ -117,7 +117,7 @@ e-mail address is on file, receives an e-mail about the returned cheque.
 ### Replace, return or cancel a cheque {#ccd-pdu-post-dated-cheques-replace}
 
 - **Replace** (on a cheque **On Hand** or **Bounced**): enter the new cheque as in
-  [Register a post-dated cheque](#ccd-pdu-post-dated-cheques-encode) and select **Save**. The old cheque becomes
+  [Register a post-dated cheque](#ccd-pdu-post-dated-cheques-encode) and select **Register replacement**. The old cheque becomes
   **Replaced** and the new one is linked to it, against the same bill (or the policy when the bill is closed).
 - **Return** (on a cheque **On Hand**): type why the cheque goes back to the client and select **Return cheque**. The
   cheque becomes **Returned**; the bill stays open.
