@@ -10,7 +10,7 @@ import { InputText } from "primereact/inputtext";
 import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
 import service from "../../services/creditControlService";
-import { promptText } from "../../utility/dialogs";
+import { openConfirm } from "../../components/ConfirmDialog";
 import { PageHeader, dateTime, money, showError, showSuccess } from "./common";
 
 /**
@@ -54,15 +54,25 @@ const CreditLimits = () => {
     }
   };
   const acknowledge = async (x) => {
-    const remarks = await promptText(t("creditControl.acknowledgeRemarks"));
+    const remarks = await openConfirm({
+      title: t("creditControl.confirmations.acknowledgeTitle"),
+      severity: "warning",
+      message: t("creditControl.confirmations.acknowledgeMessage", { client: x.clientName }),
+      facts: [
+        { label: t("creditControl.client"), value: x.clientName },
+        { label: t("creditControl.policyNumber"), value: x.policyNumber },
+        { label: t("creditControl.creditLimit"), value: x.creditLimit, type: "amount" },
+        { label: t("creditControl.newPremium"), value: x.newAmount, type: "amount" },
+        { label: t("creditControl.exposure"), value: x.exposureAfter, type: "amount" },
+        { label: t("creditControl.exceededBy"), value: x.exceededBy, type: "amount", emphasis: true },
+      ],
+      input: { type: "textarea", label: t("creditControl.acknowledgeRemarks"), maxLength: 1000 },
+      confirmLabel: t("creditControl.confirmations.acknowledgeException"),
+      onConfirm: (value) => service.acknowledgeException(x.id, value),
+    });
     if (remarks === null) return;
-    try {
-      await service.acknowledgeException(x.id, remarks);
-      showSuccess(toast, t("creditControl.acknowledged"));
-      load();
-    } catch (e) {
-      showError(toast, e);
-    }
+    showSuccess(toast, t("creditControl.acknowledged"));
+    load();
   };
 
   return (

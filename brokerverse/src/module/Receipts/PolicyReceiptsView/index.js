@@ -13,6 +13,8 @@ import documentTemplateService from "../../../services/documentTemplateService";
 import emailService from "../../../services/emailService";
 import EmailDocumentDialog from "../../../components/EmailDocumentDialog";
 import { printPdf } from "../../../components/Print";
+import DetailSection from "../../../components/DetailSection";
+import { RecordActivityLog } from "../../../components/ActivityLog";
 import { showErrorMessage } from "../../../utility/toastUtils";
 
 function PolicyReceipts() {
@@ -247,6 +249,11 @@ function PolicyReceipts() {
           }}
         />
       </div>
+      {currentReceiptId ? (
+        <DetailSection title={t("accounts.receiptDialogs.activity")} className="mt-4">
+          <RecordActivityLog entity="receipt" recordId={currentReceiptId} />
+        </DetailSection>
+      ) : null}
       <EmailDocumentDialog
         visible={emailOpen}
         onHide={() => setEmailOpen(false)}

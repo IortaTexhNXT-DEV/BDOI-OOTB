@@ -4,13 +4,25 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
-import { Dialog } from "primereact/dialog";
-import { InputTextarea } from "primereact/inputtextarea";
 import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
 import bankReconciliationService from "../../services/bankReconciliationService";
+import { openConfirm } from "../../components/ConfirmDialog";
+import ApprovalActions from "../../components/ApprovalActions";
+import { ActivityLog, fromStatusHistory } from "../../components/ActivityLog";
+import { printPdf } from "../../components/Print";
 import { BrTag, PageHeader, date, dateTime, money, periodLabel, showError, showSuccess } from "./common";
 import { hasPermission } from "../../utils/canOpen";
+
+const RUN_STATUSES = ["draft", "prepared", "approved", "cancelled"];
+
+// prepare, approve, reopen and cancel of a run: the call, its tone and the message once done
+const RUN_ACTIONS = {
+  prepare: { call: (id, remarks) => bankReconciliationService.prepare(id, remarks), done: "bankReconciliation.prepared" },
+  approve: { call: (id, remarks) => bankReconciliationService.approve(id, remarks), done: "bankReconciliation.approvedMsg" },
+  reopen: { call: (id, remarks) => bankReconciliationService.reopen(id, remarks), done: "bankReconciliation.reopened", severity: "warning", required: true },
+  cancel: { call: (id, remarks) => bankReconciliationService.cancel(id, remarks), severity: "danger" },
+};
 
 const Line = ({ label, value, sign, indent, strong, total }) => (
   <tr className={total ? "br-brs-total" : strong ? "pe-subtotal" : ""}>
@@ -52,8 +64,6 @@ const ReconciliationRun = () => {
   const navigate = useNavigate();
   const toast = useRef(null);
   const [rec, setRec] = useState(null);
-  const [dialog, setDialog] = useState(null);
-  const [remarks, setRemarks] = useState("");
   const [busy, setBusy] = useState(null);
 
   const load = useCallback(async () => {
@@ -70,8 +80,6 @@ const ReconciliationRun = () => {
     try {
       const r = await fn();
       if (r && r.statement) setRec(r); else await load();
-      setDialog(null);
-      setRemarks("");
       if (message) showSuccess(toast, message);
     } catch (e) {
       showError(toast, e);
@@ -79,28 +87,57 @@ const ReconciliationRun = () => {
       setBusy(null);
     }
   };
-  const print = async () => {
+  const print = () => {
     setBusy("pdf");
-    try {
-      window.open(await bankReconciliationService.pdfUrl(rec.id), "_blank");
-    } catch (e) {
-      showError(toast, e);
-    } finally {
-      setBusy(null);
-    }
+    printPdf(`/bank-reconciliation/reconciliations/${encodeURIComponent(rec.id)}/pdf`, { fileName: `bank-reconciliation-${rec.recNumber}.pdf` })
+      .catch((e) => showError(toast, e))
+      .finally(() => setBusy(null));
   };
 
   if (!rec) return <div className="pe-page"><Toast ref={toast} /></div>;
   const s = rec.statement || {};
   const items = s.items || {};
   const agree = Number(s.difference) === 0;
-  const confirm = () => {
-    if (dialog === "prepare") return act("prepare", () => bankReconciliationService.prepare(rec.id, remarks), t("bankReconciliation.prepared"));
-    if (dialog === "approve") return act("approve", () => bankReconciliationService.approve(rec.id, remarks), t("bankReconciliation.approvedMsg"));
-    if (dialog === "reopen") return act("reopen", () => bankReconciliationService.reopen(rec.id, remarks), t("bankReconciliation.reopened"));
-    if (dialog === "cancel") return act("cancel", () => bankReconciliationService.cancel(rec.id, remarks).then(() => navigate("/accounts/bank-reconciliation/reconciliations")));
-    return null;
+
+  const runAction = async (name) => {
+    const action = RUN_ACTIONS[name];
+    let out;
+    const remarks = await openConfirm({
+      title: t(`bankReconciliation.dialog.${name}`),
+      severity: action.severity || "neutral",
+      facts: [
+        { label: t("bankReconciliation.recNumber"), value: rec.recNumber },
+        { label: t("bankReconciliation.bankAccount"), value: rec.bankAccount },
+        { label: t("bankReconciliation.period"), value: periodLabel(rec.period) },
+        { label: t("bankReconciliation.confirmations.asOfDate"), value: rec.asOfDate, type: "date" },
+        { label: t("bankReconciliation.adjustedBankBalance"), value: s.adjustedBankBalance, type: "amount" },
+        { label: t("bankReconciliation.adjustedBookBalance"), value: s.adjustedBookBalance, type: "amount" },
+        { label: t("bankReconciliation.difference"), value: s.difference, type: "amount", emphasis: true },
+      ],
+      note: t(`bankReconciliation.confirmations.notes.${name}`),
+      input: { type: "textarea", label: t("bankReconciliation.remarks"), required: !!action.required, maxLength: 1000 },
+      confirmLabel: t(`bankReconciliation.confirmations.${name}`),
+      cancelLabel: name === "cancel" ? t("bankReconciliation.confirmations.keep") : undefined,
+      onConfirm: async (value) => { out = await action.call(rec.id, value); },
+    });
+    if (remarks === null) return;
+    if (name === "cancel") {
+      navigate("/accounts/bank-reconciliation/reconciliations");
+      return;
+    }
+    if (out && out.statement) setRec(out); else await load();
+    showSuccess(toast, t(action.done));
   };
+
+  const statusLabels = Object.fromEntries(RUN_STATUSES.map((k) => [k, t(`bankReconciliation.status.${k}`)]));
+  // each status move as the step it was: started, prepared, approved, reopened, cancelled
+  const history = fromStatusHistory(rec.history || [], { statusLabels }).map((e, i) => {
+    const h = rec.history[i];
+    if (!h.from) return { ...e, actionCode: "create" };
+    if (h.to === "draft") return { ...e, actionCode: "reopen" };
+    if (h.to === "prepared") return { ...e, actionCode: "submit", actionLabel: statusLabels.prepared };
+    return { ...e, actionCode: { approved: "approve", cancelled: "cancel" }[h.to] || e.actionCode };
+  });
 
   return (
     <div className="pe-page">
@@ -110,11 +147,13 @@ const ReconciliationRun = () => {
         <Button icon="pi pi-arrow-left" text label={t("bankReconciliation.back")} onClick={() => navigate("/accounts/bank-reconciliation/reconciliations")} />
         <Button icon="pi pi-th-large" outlined label={t("bankReconciliation.workspace")} onClick={() => navigate(`/accounts/bank-reconciliation?account=${encodeURIComponent(rec.bankAccount)}&period=${rec.period}`)} />
         {rec.status === "draft" && <Button icon="pi pi-refresh" outlined label={t("bankReconciliation.refresh")} loading={busy === "refresh"} onClick={() => act("refresh", load)} />}
-        {rec.status === "draft" && <Button icon="pi pi-send" label={t("bankReconciliation.prepare")} disabled={!agree} onClick={() => setDialog("prepare")} />}
-        {canApprove && rec.status === "prepared" && <Button icon="pi pi-check" label={t("bankReconciliation.approve")} onClick={() => setDialog("approve")} />}
-        {canApprove && ["prepared", "approved"].includes(rec.status) && <Button icon="pi pi-undo" severity="warning" outlined label={t("bankReconciliation.reopen")} onClick={() => setDialog("reopen")} />}
+        {rec.status === "draft" && <Button icon="pi pi-send" label={t("bankReconciliation.prepare")} disabled={!agree} onClick={() => runAction("prepare")} />}
+        {canApprove && rec.status === "prepared" && (
+          <ApprovalActions initiator={{ id: rec.preparedBy }} approveLabel={t("bankReconciliation.confirmations.approve")} onApprove={() => runAction("approve")} />
+        )}
+        {canApprove && ["prepared", "approved"].includes(rec.status) && <Button icon="pi pi-undo" outlined label={t("bankReconciliation.reopen")} onClick={() => runAction("reopen")} />}
         <Button icon="pi pi-print" outlined label={t("bankReconciliation.printPdf")} loading={busy === "pdf"} onClick={print} />
-        {rec.status === "draft" && <Button icon="pi pi-ban" text severity="secondary" label={t("bankReconciliation.cancelRun")} onClick={() => setDialog("cancel")} />}
+        {rec.status === "draft" && <Button icon="pi pi-ban" text severity="secondary" label={t("bankReconciliation.cancelRun")} onClick={() => runAction("cancel")} />}
       </PageHeader>
 
       <div className="pe-kpis">
@@ -177,31 +216,8 @@ const ReconciliationRun = () => {
 
       <div className="pe-card">
         <div className="pe-card-title">{t("bankReconciliation.history")}</div>
-        <DataTable value={rec.history} size="small" emptyMessage={t("bankReconciliation.none")}>
-          <Column header={t("bankReconciliation.when")} body={(r) => dateTime(r.changedAt)} />
-          <Column header={t("bankReconciliation.from")} body={(r) => (r.from ? <BrTag status={r.from} /> : "-")} />
-          <Column header={t("bankReconciliation.to")} body={(r) => <BrTag status={r.to} />} />
-          <Column field="changedBy" header={t("bankReconciliation.by")} />
-          <Column field="remarks" header={t("bankReconciliation.remarks")} />
-        </DataTable>
+        <ActivityLog entries={history} />
       </div>
-
-      <Dialog className="pe-dialog" visible={!!dialog} style={{ width: "min(520px, 95vw)" }} onHide={() => setDialog(null)}
-        header={dialog ? t(`bankReconciliation.dialog.${dialog}`) : ""}
-        footer={(
-          <div>
-            <Button label={t("bankReconciliation.cancel")} text onClick={() => setDialog(null)} />
-            <Button label={t("bankReconciliation.confirm")} icon="pi pi-check" loading={!!busy} onClick={confirm} disabled={dialog === "reopen" && !remarks.trim()} />
-          </div>
-        )}>
-        {dialog && (
-          <div>
-            <p className="pe-muted mt-0">{t(`bankReconciliation.dialogHelp.${dialog}`)}</p>
-            <label htmlFor="br-run-remarks">{t("bankReconciliation.remarks")}{dialog === "reopen" ? " *" : ""}</label>
-            <InputTextarea id="br-run-remarks" value={remarks} onChange={(e) => setRemarks(e.target.value)} rows={3} className="w-full" autoResize />
-          </div>
-        )}
-      </Dialog>
     </div>
   );
 };

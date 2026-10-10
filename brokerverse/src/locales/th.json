@@ -546,6 +546,39 @@
       "success": "สำเร็จ",
       "messageContent": "เนื้อหาข้อความ",
       "rowCount": "จำนวนแถว :"
+    },
+    "receiptDialogs": {
+      "recordPaymentMessage": "ระบบจะออกใบเสร็จรับเงินสำหรับการชำระนี้",
+      "balanceAfter": "ยอดคงเหลือหลังชำระ",
+      "recordAmount": "บันทึก {{amount}}",
+      "approveTitle": "อนุมัติใบเสร็จ",
+      "approveMessage_one": "การชำระเงินของกรมธรรม์ {{count}} รายการจะถูกบันทึกบัญชี",
+      "approveMessage_other": "การชำระเงินของกรมธรรม์ {{count}} รายการจะถูกบันทึกบัญชี",
+      "amountApplied": "ยอดที่ตัดชำระ",
+      "approveReceipt": "อนุมัติใบเสร็จ",
+      "approve": "อนุมัติ",
+      "print": "พิมพ์",
+      "approvedDone": "อนุมัติใบเสร็จแล้ว",
+      "printedDone": "พิมพ์ใบเสร็จแล้ว",
+      "activity": "กิจกรรม"
+    },
+    "openEntryDialogs": {
+      "matchTitle": "จับคู่รายการค้าง",
+      "matchMessage_one": "รายการเดบิตและเครดิต {{count}} คู่จะถูกจับคู่",
+      "matchMessage_other": "รายการเดบิตและเครดิต {{count}} คู่จะถูกจับคู่",
+      "debitsSelected": "เดบิตที่เลือก",
+      "debitTotal": "ยอดรวมเดบิต",
+      "creditsSelected": "เครดิตที่เลือก",
+      "creditTotal": "ยอดรวมเครดิต",
+      "difference": "ผลต่าง",
+      "writeOffAmount": "ยอดตัดจำหน่าย",
+      "matchEntries_one": "จับคู่ {{count}} คู่",
+      "matchEntries_other": "จับคู่ {{count}} คู่",
+      "unmatchTitle": "ยกเลิกการจับคู่",
+      "unmatchMessage_one": "การจับคู่ {{count}} รายการจะถูกยกเลิกและรายการจะกลับเป็นค้าง",
+      "unmatchMessage_other": "การจับคู่ {{count}} รายการจะถูกยกเลิกและรายการจะกลับเป็นค้าง",
+      "unmatchEntries_one": "ยกเลิกการจับคู่ {{count}} รายการ",
+      "unmatchEntries_other": "ยกเลิกการจับคู่ {{count}} รายการ"
     }
   },
   "renewalWaiting": {
@@ -5035,7 +5068,15 @@
     "overdue": "เกินกำหนด",
     "partiallyPaid": "ชำระบางส่วน",
     "committed": "ยืนยันแล้ว",
-    "escalated": "ยกระดับ"
+    "escalated": "ยกระดับ",
+    "remindersTitle": "ส่งการแจ้งเตือนการชำระเงิน",
+    "remindersMessage": "ระบบจะส่งอีเมลแจ้งเตือนการชำระเงินถึงลูกค้าทุกรายที่มีเบี้ยครบกำหนดหรือเกินกำหนด",
+    "remindersNote": "การแจ้งเตือนแต่ละรายการจะถูกบันทึกในประวัติการติดตามของรายการเรียกเก็บ",
+    "sendReminders": "ส่งการแจ้งเตือน",
+    "remindersFailed": "ไม่สามารถส่งการแจ้งเตือนการชำระเงินได้",
+    "remindersSentTitle": "ส่งการแจ้งเตือนแล้ว",
+    "remindersSent": "ส่งการแจ้งเตือนการชำระเงินแล้ว",
+    "importOpenItems": "นำเข้ารายการค้างชำระ"
   },
   "documentLayouts": {
     "master": "มาสเตอร์",
@@ -6167,5 +6208,77 @@
     "instruction2": "Enter the policies in the file",
     "fileBeingProcessed": "The file is being processed. The policies are created as each row is read.",
     "goLive": "Existing policies (go-live): in-force policies of the old system, created without a bill, journal or commission. Their unpaid premiums are loaded with Import open items (Accounts > Collections)."
+  },
+  "creditControl": {
+    "confirmations": {
+      "remindTitle": "ส่งการแจ้งเตือนเบี้ยประกัน",
+      "remindMessage": "ระบบจะส่งอีเมลแจ้งเตือนเบี้ยประกันถึงลูกค้า",
+      "reminderMessage": "ข้อความถึงลูกค้า",
+      "reminderTemplate": "หากไม่ระบุข้อความ ระบบจะส่งแม่แบบแจ้งเตือนการเรียกเก็บเงิน",
+      "cancellationTitle": "ขอยกเลิกกรมธรรม์เนื่องจากไม่ชำระเบี้ย",
+      "cancellationMessage": "ระบบจะสร้างร่างสลักหลังยกเลิกกรมธรรม์ให้ฝ่ายปฏิบัติการ",
+      "notesForOperations": "หมายเหตุถึงฝ่ายปฏิบัติการ",
+      "cancellationNote": "กรมธรรม์ยังมีผลคุ้มครองจนกว่าฝ่ายปฏิบัติการจะออกสลักหลัง",
+      "requestCancellation": "ขอยกเลิก",
+      "approveExtensionTitle": "อนุมัติการขยายระยะเวลาชำระเบี้ย",
+      "rejectExtensionTitle": "ปฏิเสธการขยายระยะเวลาชำระเบี้ย",
+      "approveExtension": "อนุมัติการขยาย",
+      "rejectExtension": "ปฏิเสธการขยาย",
+      "historyTitle": "ประวัติการติดตามเบี้ยประกัน",
+      "activity": "กิจกรรม",
+      "cancelPlanTitle": "ยกเลิกแผนผ่อนชำระ",
+      "cancelPlanMessage": "แผนผ่อนชำระของใบแจ้งหนี้ {{bill}} จะถูกยกเลิก",
+      "cancelPlanNote": "ใบแจ้งหนี้ยังคงค้างชำระ โดยครบกำหนดตามวันที่ของงวดแรกที่ยังไม่ชำระ",
+      "keepPlan": "เก็บแผนไว้",
+      "invoicePlanMessage": "ใบแจ้งหนี้ {{bill}} จะถูกยกเลิกและแทนที่ด้วยใบแจ้งหนี้รายงวด {{count}} ฉบับ แต่ละฉบับมีวันครบกำหนดของตนเอง",
+      "invoicePlanNote": "รายการบันทึกบัญชีของใบแจ้งหนี้จะถูกกลับรายการ และบันทึกบัญชีแยกตามใบแจ้งหนี้แต่ละฉบับ",
+      "issueInvoices": "ออกใบแจ้งหนี้ {{count}} ฉบับ",
+      "removeInstalment": "ลบงวด",
+      "acknowledgeTitle": "รับทราบรายการเกินวงเงินเครดิต",
+      "acknowledgeMessage": "กรมธรรม์ที่ออกเกินวงเงินเครดิตของ {{client}} จะถูกบันทึกว่ารับทราบแล้ว",
+      "acknowledgeException": "รับทราบรายการ"
+    }
+  },
+  "insurerRec": {
+    "confirmations": {
+      "submitTitle": "ส่งการกระทบยอดเพื่อขออนุมัติ",
+      "submitMessage": "รายการเดินบัญชี {{number}} จะถูกส่งเพื่อขออนุมัติ",
+      "approveTitle": "อนุมัติการกระทบยอด",
+      "rejectTitle": "ปฏิเสธการกระทบยอด",
+      "approveMessage": "การกระทบยอดของรายการเดินบัญชี {{number}} จะได้รับการอนุมัติ",
+      "rejectMessage": "รายการเดินบัญชี {{number}} จะกลับสู่สถานะร่าง",
+      "approveNote": "รายการปรับปรุงบัญชีจะถูกบันทึกเมื่ออนุมัติ",
+      "approve": "อนุมัติการกระทบยอด",
+      "reject": "ปฏิเสธการกระทบยอด",
+      "cancelTitle": "ยกเลิกรายการเดินบัญชี",
+      "cancelMessage": "รายการเดินบัญชี {{number}} จะถูกยกเลิกและไม่สามารถกระทบยอดได้อีก",
+      "keepStatement": "เก็บรายการเดินบัญชีไว้",
+      "unmatchMessage": "บรรทัด {{line}} จะกลับไปอยู่ในรายการที่ไม่พบในข้อมูลของนายหน้า",
+      "removeResolutionMessage": "การแก้ไขผลต่างของ {{policy}} จะถูกลบ และผลต่างจะกลับเป็นยังไม่ได้แก้ไข",
+      "activity": "กิจกรรม"
+    }
+  },
+  "bankReconciliation": {
+    "confirmations": {
+      "asOfDate": "ณ วันที่",
+      "prepare": "จัดทำการกระทบยอด",
+      "approve": "อนุมัติการกระทบยอด",
+      "reopen": "เปิดการกระทบยอดอีกครั้ง",
+      "cancel": "ยกเลิกการกระทบยอด",
+      "keep": "เก็บการกระทบยอดไว้",
+      "cancelChequeTitle": "ยกเลิกเช็คค้างจ่าย {{cheque}}",
+      "keepCheque": "เก็บเช็คไว้",
+      "approveAdjustmentMessage": "รายการปรับปรุง {{journal}} จะได้รับการอนุมัติและบันทึกเข้าบัญชีแยกประเภท",
+      "approveAndPost": "อนุมัติและบันทึกบัญชี",
+      "unmatchMessage": "การจับคู่ที่เคลียร์เมื่อ {{date}} จะถูกยกเลิก และทั้งสองฝั่งจะกลับเป็นยังไม่จับคู่",
+      "notes": {
+        "prepare": "ตัวเลขในรายงานจะถูกล็อกและส่งการกระทบยอดเพื่อขออนุมัติ",
+        "approve": "การจับคู่ทั้งหมดที่เคลียร์ถึงสิ้นงวดจะถูกล็อก",
+        "reopen": "การกระทบยอดจะกลับสู่สถานะร่างและปลดล็อกการจับคู่",
+        "cancel": "การกระทบยอดฉบับร่างจะถูกยกเลิก โดยการจับคู่ยังคงอยู่",
+        "cancelCheque": "รายการจ่ายเงินจะถูกกลับรายการและเจ้าหนี้จะถูกเปิดใหม่",
+        "flag": "บรรทัดนี้จะเป็นรายการกระทบยอดฝั่งธนาคาร โดยไม่มีการบันทึกบัญชี"
+      }
+    }
   }
 }

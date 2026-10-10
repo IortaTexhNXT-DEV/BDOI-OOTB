@@ -11,7 +11,7 @@ import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputNumber } from "primereact/inputnumber";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import { openConfirm } from "../../../components/ConfirmDialog";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import { Calendar } from "primereact/calendar";
@@ -310,7 +310,8 @@ function BranchAdding() {
         state: { recorded: { receiptId: receipt?.receiptId, receiptNumber: receipt?.receiptNumber, billNumber: bill.billNumber, amount, remaining, customerName: values.customerName, clientEmail: receipt?.clientEmail || "" } },
       });
     } catch (error) {
-      showErrorMessage(apiError(error) || t("accounts.addReceipts.paymentFailed"), t("accounts.receipts.error"));
+      // shown in the confirmation, which stays open
+      throw new Error(apiError(error) || t("accounts.addReceipts.paymentFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -320,17 +321,21 @@ function BranchAdding() {
     formik.setTouched(Object.fromEntries(Object.keys(formik.initialValues).map((k) => [k, true])));
     if (!canRecord) return;
     const remaining = round2(selectedBill.balance - round2(amountReceived));
-    confirmDialog({
-      header: t("accounts.addReceipts.confirmTitle"),
-      message: t("accounts.addReceipts.confirmMessage", {
-        amount: formatCurrency(amountReceived),
-        bill: selectedBill.billNumber,
-        balance: formatCurrency(remaining),
-      }),
-      icon: "pi pi-question-circle",
-      acceptLabel: t("accounts.addReceipts.recordPayment"),
-      rejectLabel: t("accounts.addReceipts.cancel"),
-      accept: recordPayment,
+    openConfirm({
+      title: t("accounts.addReceipts.confirmTitle"),
+      message: t("accounts.receiptDialogs.recordPaymentMessage"),
+      facts: [
+        { label: t("accounts.addReceipts.customerName"), value: values.customerName },
+        { label: t("accounts.addReceipts.billNumber"), value: selectedBill.billNumber },
+        { label: t("accounts.addReceipts.receiptMode"), value: values.receiptMode },
+        { label: t("accounts.addReceipts.receiptDate"), value: toDateText(values.receiptDate), type: "date" },
+        { label: t("accounts.addReceipts.billBalance"), value: selectedBill.balance, type: "amount" },
+        { label: t("accounts.addReceipts.amountReceived"), value: round2(amountReceived), type: "amount", emphasis: true },
+        { label: t("accounts.receiptDialogs.balanceAfter"), value: remaining, type: "amount" },
+      ],
+      confirmLabel: t("accounts.receiptDialogs.recordAmount", { amount: formatCurrency(amountReceived) }),
+      cancelLabel: t("accounts.addReceipts.cancel"),
+      onConfirm: recordPayment,
     });
   };
 
@@ -388,7 +393,6 @@ function BranchAdding() {
 
   return (
     <div className="overall_add_policy_receipts_container">
-      <ConfirmDialog />
       <div>
         <Button
           type="button"

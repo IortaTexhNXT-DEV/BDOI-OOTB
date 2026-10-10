@@ -10,8 +10,14 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
 import service from "../../services/creditControlService";
-import { promptText } from "../../utility/dialogs";
-import { CcTag, PageHeader, date, dateTime, isoOf, money, showError, showSuccess } from "./common";
+import { openConfirm } from "../../components/ConfirmDialog";
+import ApprovalActions from "../../components/ApprovalActions";
+import DetailDialog from "../../components/DetailDialog";
+import DetailHeader from "../../components/DetailHeader";
+import DetailSection from "../../components/DetailSection";
+import KeyValueGrid from "../../components/KeyValueGrid";
+import { ActivityLog, fromWarrantyActions, humanize } from "../../components/ActivityLog";
+import { CcTag, PageHeader, date, isoOf, money, showError, showSuccess } from "./common";
 
 const FILTERS = ["attention", "breached", "at-risk", "all"];
 
@@ -56,24 +62,61 @@ const WarrantyMonitor = () => {
       return undefined;
     }
   };
-  const remind = async (row) => {
-    const notes = await promptText(t("creditControl.reminderNotes"));
-    if (notes === null) return;
-    await run(() => service.remind(row.policyId, notes), (r) => t("creditControl.reminderSent", { to: r.to }));
+  // the action runs inside the confirmation (an error stays there); the toast and the reload follow once it succeeded
+  const confirmRun = async (options, fn, message) => {
+    let out;
+    const answer = await openConfirm({ ...options, onConfirm: async (value) => { out = await fn(value); } });
+    if (answer === false || answer === null) return;
+    showSuccess(toast, typeof message === "function" ? message(out) : message);
+    await load();
   };
-  const cancellation = async (row) => {
-    const notes = await promptText(t("creditControl.cancellationNotes", { policy: row.policyNumber }));
-    if (notes === null) return;
-    await run(() => service.requestCancellation(row.policyId, notes), (r) => t("creditControl.cancellationRaised", { number: r.endorsementNumber || "" }));
-  };
+  const policyFacts = (r) => [
+    { label: t("creditControl.policyNumber"), value: r.policyNumber },
+    { label: t("creditControl.client"), value: r.clientName },
+    { label: t("creditControl.insurer"), value: r.insurerName },
+    { label: t("creditControl.deadline"), value: r.deadline, type: "date" },
+    { label: t("creditControl.daysPast"), value: r.daysPastDeadline, type: "number", hidden: !r.daysPastDeadline },
+    { label: t("creditControl.premiumDue"), value: r.premiumDue, type: "amount", emphasis: true },
+  ];
+  const remind = (row) => confirmRun({
+    title: t("creditControl.confirmations.remindTitle"),
+    message: t("creditControl.confirmations.remindMessage"),
+    facts: policyFacts(row),
+    input: { type: "textarea", label: t("creditControl.confirmations.reminderMessage"), maxLength: 1000 },
+    note: t("creditControl.confirmations.reminderTemplate"),
+    confirmLabel: t("creditControl.remind"),
+  }, (notes) => service.remind(row.policyId, notes), (r) => t("creditControl.reminderSent", { to: r.to }));
+  const cancellation = (row) => confirmRun({
+    title: t("creditControl.confirmations.cancellationTitle"),
+    severity: "danger",
+    message: t("creditControl.confirmations.cancellationMessage"),
+    facts: policyFacts(row),
+    input: { type: "textarea", label: t("creditControl.confirmations.notesForOperations"), maxLength: 1000 },
+    note: t("creditControl.confirmations.cancellationNote"),
+    confirmLabel: t("creditControl.confirmations.requestCancellation"),
+  }, (notes) => service.requestCancellation(row.policyId, notes), (r) => t("creditControl.cancellationRaised", { number: r.endorsementNumber || "" }));
   const saveExtension = async () => {
     const out = await run(() => service.requestExtension(extension.row.policyId, { requestedDeadline: isoOf(extension.requestedDeadline), reason: extension.reason }), t("creditControl.extensionRequested"));
     if (out) setExtension(null);
   };
-  const decide = async (x, action) => {
-    const remarks = await promptText(action === "approve" ? t("creditControl.approveRemarks") : t("creditControl.rejectReason"));
-    if (remarks === null) return;
-    await run(() => service.decideExtension(x.id, action, remarks), t(action === "approve" ? "creditControl.extensionApproved" : "creditControl.extensionRejected"));
+  const decide = (x, action) => {
+    const approve = action === "approve";
+    return confirmRun({
+      title: t(approve ? "creditControl.confirmations.approveExtensionTitle" : "creditControl.confirmations.rejectExtensionTitle"),
+      severity: approve ? "neutral" : "danger",
+      facts: [
+        { label: t("creditControl.policyNumber"), value: x.policyNumber },
+        { label: t("creditControl.client"), value: x.clientName },
+        { label: t("creditControl.currentDeadline"), value: x.currentDeadline, type: "date" },
+        { label: t("creditControl.requestedDeadline"), value: x.requestedDeadline, type: "date" },
+        { label: t("creditControl.reason"), value: x.reason },
+        { label: t("creditControl.requestedBy"), value: x.requestedBy },
+      ],
+      input: approve
+        ? { type: "textarea", label: t("creditControl.approveRemarks"), maxLength: 1000 }
+        : { type: "textarea", label: t("creditControl.rejectReason"), required: true, maxLength: 1000 },
+      confirmLabel: t(approve ? "creditControl.confirmations.approveExtension" : "creditControl.confirmations.rejectExtension"),
+    }, (remarks) => service.decideExtension(x.id, action, remarks), t(approve ? "creditControl.extensionApproved" : "creditControl.extensionRejected"));
   };
   const showActions = async (row) => {
     try {
@@ -105,11 +148,9 @@ const WarrantyMonitor = () => {
             <Column header={t("creditControl.requestedDeadline")} body={(r) => date(r.requestedDeadline)} />
             <Column field="reason" header={t("creditControl.reason")} />
             <Column field="requestedBy" header={t("creditControl.requestedBy")} />
-            <Column body={(r) => (
-              <div className="flex gap-1">
-                <Button icon="pi pi-check" text size="small" tooltip={t("creditControl.approve")} onClick={() => decide(r, "approve")} aria-label={t("creditControl.approve")} />
-                <Button icon="pi pi-times" text size="small" severity="danger" tooltip={t("creditControl.reject")} onClick={() => decide(r, "reject")} aria-label={t("creditControl.reject")} />
-              </div>
+            <Column style={{ minWidth: "14rem" }} body={(r) => (
+              <ApprovalActions size="small" initiator={{ id: r.requestedById }} approveLabel={t("creditControl.approve")} rejectLabel={t("creditControl.reject")}
+                onApprove={() => decide(r, "approve")} onReject={() => decide(r, "reject")} />
             )} />
           </DataTable>
         </div>
@@ -151,26 +192,40 @@ const WarrantyMonitor = () => {
         footer={<div><Button label={t("creditControl.cancel")} text onClick={() => setExtension(null)} /><Button label={t("creditControl.send")} icon="pi pi-send" onClick={saveExtension} disabled={!extension?.requestedDeadline || !extension?.reason?.trim()} /></div>}>
         {extension && (
           <div className="grid">
-            <div className="col-12">{t("creditControl.currentDeadline")}: <b>{date(extension.row.deadline)}</b></div>
-            <div className="col-12"><label>{t("creditControl.requestedDeadline")} *</label>
-              <Calendar value={extension.requestedDeadline} minDate={new Date(`${extension.row.deadline}T00:00:00`)} onChange={(e) => setExtension({ ...extension, requestedDeadline: e.value })} showIcon className="w-full" /></div>
-            <div className="col-12"><label>{t("creditControl.reason")} *</label>
-              <InputTextarea value={extension.reason} rows={3} onChange={(e) => setExtension({ ...extension, reason: e.target.value })} className="w-full" /></div>
+            <div className="col-12">
+              <KeyValueGrid columns={2} items={[
+                { label: t("creditControl.client"), value: extension.row.clientName },
+                { label: t("creditControl.currentDeadline"), value: extension.row.deadline, type: "date" },
+                { label: t("creditControl.premiumDue"), value: extension.row.premiumDue, type: "amount" },
+                { label: t("creditControl.daysPast"), value: extension.row.daysPastDeadline, type: "number" },
+              ]} />
+            </div>
+            <div className="col-12"><label htmlFor="cc-ext-deadline">{t("creditControl.requestedDeadline")} *</label>
+              <Calendar inputId="cc-ext-deadline" value={extension.requestedDeadline} minDate={new Date(`${extension.row.deadline}T00:00:00`)} onChange={(e) => setExtension({ ...extension, requestedDeadline: e.value })} showIcon className="w-full" /></div>
+            <div className="col-12"><label htmlFor="cc-ext-reason">{t("creditControl.reason")} *</label>
+              <InputTextarea id="cc-ext-reason" value={extension.reason} rows={3} onChange={(e) => setExtension({ ...extension, reason: e.target.value })} className="w-full" /></div>
           </div>
         )}
       </Dialog>
 
-      <Dialog className="pe-dialog" header={actions ? `${t("creditControl.history")} · ${actions.row.policyNumber}` : ""} visible={!!actions} style={{ width: "min(760px, 96vw)" }} onHide={() => setActions(null)}>
+      <DetailDialog visible={!!actions} onHide={() => setActions(null)} size="md" header={t("creditControl.confirmations.historyTitle")}>
         {actions && (
-          <DataTable value={actions.list} dataKey="id" size="small" stripedRows emptyMessage={t("creditControl.none")}>
-            <Column header={t("creditControl.when")} body={(r) => dateTime(r.createdAt)} />
-            <Column header={t("creditControl.action")} body={(r) => t(`creditControl.actionType.${r.action}`, { defaultValue: r.action })} />
-            <Column field="notes" header={t("creditControl.notes")} />
-            <Column field="endorsementNumber" header={t("creditControl.endorsement")} />
-            <Column field="createdBy" header={t("creditControl.by")} />
-          </DataTable>
+          <>
+            <DetailHeader title={actions.row.policyNumber} subtitle={actions.row.clientName}
+              status={{ code: actions.row.status, label: t(`creditControl.status.${actions.row.status}`, { defaultValue: humanize(actions.row.status) }) }}
+              meta={[
+                { label: t("creditControl.insurer"), value: actions.row.insurerName },
+                { label: t("creditControl.deadline"), value: actions.row.deadline, type: "date" },
+                { label: t("creditControl.premiumDue"), value: actions.row.premiumDue, type: "amount" },
+              ]} />
+            <DetailSection title={t("creditControl.confirmations.activity")}>
+              <ActivityLog entries={fromWarrantyActions(actions.list, {
+                actionLabels: Object.fromEntries(actions.list.map((a) => [a.action, t(`creditControl.actionType.${a.action}`, { defaultValue: humanize(a.action) })])),
+              })} />
+            </DetailSection>
+          </>
         )}
-      </Dialog>
+      </DetailDialog>
     </div>
   );
 };

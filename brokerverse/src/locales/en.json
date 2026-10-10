@@ -635,6 +635,39 @@
       "rowCount": "Row count :",
       "rejectReason": "Reason",
       "print": "Print"
+    },
+    "receiptDialogs": {
+      "recordPaymentMessage": "An official receipt is issued for the payment.",
+      "balanceAfter": "Balance after payment",
+      "recordAmount": "Record {{amount}}",
+      "approveTitle": "Approve receipt",
+      "approveMessage_one": "The payment on {{count}} policy line is posted.",
+      "approveMessage_other": "The payments on {{count}} policy lines are posted.",
+      "amountApplied": "Amount applied",
+      "approveReceipt": "Approve receipt",
+      "approve": "Approve",
+      "print": "Print",
+      "approvedDone": "Receipt approved",
+      "printedDone": "Receipt printed",
+      "activity": "Activity"
+    },
+    "openEntryDialogs": {
+      "matchTitle": "Match open entries",
+      "matchMessage_one": "{{count}} debit and credit pair is matched.",
+      "matchMessage_other": "{{count}} debit and credit pairs are matched.",
+      "debitsSelected": "Debits selected",
+      "debitTotal": "Debit total",
+      "creditsSelected": "Credits selected",
+      "creditTotal": "Credit total",
+      "difference": "Difference",
+      "writeOffAmount": "Write-off amount",
+      "matchEntries_one": "Match {{count}} pair",
+      "matchEntries_other": "Match {{count}} pairs",
+      "unmatchTitle": "Unmatch entries",
+      "unmatchMessage_one": "{{count}} match is undone and its entries are open again.",
+      "unmatchMessage_other": "{{count}} matches are undone and their entries are open again.",
+      "unmatchEntries_one": "Unmatch {{count}} match",
+      "unmatchEntries_other": "Unmatch {{count}} matches"
     }
   },
   "renewalWaiting": {
@@ -5960,7 +5993,15 @@
     "partiallyPaid": "Partially Paid",
     "committed": "Committed",
     "escalated": "Escalated",
-    "sendPaymentRemindersNow": "Send Payment Reminders Now"
+    "sendPaymentRemindersNow": "Send Payment Reminders Now",
+    "remindersTitle": "Send payment reminders",
+    "remindersMessage": "A payment reminder is e-mailed to every client with a premium due or overdue.",
+    "remindersNote": "Each reminder is recorded in the follow-up history of its collection.",
+    "sendReminders": "Send reminders",
+    "remindersFailed": "The payment reminders could not be sent",
+    "remindersSentTitle": "Reminders sent",
+    "remindersSent": "The payment reminders were sent.",
+    "importOpenItems": "Import open items"
   },
   "iarLead": {
     "lead": "Prospect",
@@ -8021,6 +8062,27 @@
       "stale": "Stale",
       "duplicate": "Duplicate",
       "new": "New"
+    },
+    "confirmations": {
+      "asOfDate": "As of date",
+      "prepare": "Prepare reconciliation",
+      "approve": "Approve reconciliation",
+      "reopen": "Reopen reconciliation",
+      "cancel": "Cancel reconciliation",
+      "keep": "Keep reconciliation",
+      "cancelChequeTitle": "Cancel stale cheque {{cheque}}",
+      "keepCheque": "Keep cheque",
+      "approveAdjustmentMessage": "Adjustment journal {{journal}} is approved and posted to the general ledger.",
+      "approveAndPost": "Approve and post",
+      "unmatchMessage": "The match cleared on {{date}} is undone; both sides return to unmatched.",
+      "notes": {
+        "prepare": "The statement figures are frozen and the reconciliation goes for approval.",
+        "approve": "Every match cleared up to the period end is locked.",
+        "reopen": "The reconciliation returns to draft and its matches are unlocked.",
+        "cancel": "The draft reconciliation is cancelled. Matches are kept.",
+        "cancelCheque": "The payment journal is reversed and the payable is re-opened.",
+        "flag": "The line becomes a reconciling item on the bank side. No journal is posted."
+      }
     }
   },
   "followUps": {
@@ -8415,6 +8477,23 @@
       "missingInBroker": "Not found at the broker",
       "missingInInsurer": "Missing on the insurer statement",
       "all": "All lines"
+    },
+    "confirmations": {
+      "submitTitle": "Submit reconciliation for approval",
+      "submitMessage": "Statement {{number}} is sent for approval.",
+      "approveTitle": "Approve reconciliation",
+      "rejectTitle": "Reject reconciliation",
+      "approveMessage": "The reconciliation of statement {{number}} is approved.",
+      "rejectMessage": "Statement {{number}} returns to draft.",
+      "approveNote": "The adjustment journals are posted on approval.",
+      "approve": "Approve reconciliation",
+      "reject": "Reject reconciliation",
+      "cancelTitle": "Cancel statement",
+      "cancelMessage": "Statement {{number}} is cancelled and can no longer be reconciled.",
+      "keepStatement": "Keep statement",
+      "unmatchMessage": "Line {{line}} returns to the lines not found at the broker.",
+      "removeResolutionMessage": "The resolution of {{policy}} is removed and the difference is unresolved again.",
+      "activity": "Activity"
     }
   },
   "creditControl": {
@@ -8555,7 +8634,35 @@
     "collectedOn": "Collected on",
     "remitBy": "Remit by (terms)",
     "daysOverdue": "Days overdue",
-    "amountDue": "Amount due"
+    "amountDue": "Amount due",
+    "confirmations": {
+      "remindTitle": "Send premium reminder",
+      "remindMessage": "A premium reminder is e-mailed to the client.",
+      "reminderMessage": "Message to the client",
+      "reminderTemplate": "Without a message, the collection reminder template is sent.",
+      "cancellationTitle": "Request cancellation for non-payment",
+      "cancellationMessage": "A draft cancellation endorsement is raised for Operations.",
+      "notesForOperations": "Notes for Operations",
+      "cancellationNote": "The policy stays in force until Operations issues the endorsement.",
+      "requestCancellation": "Request cancellation",
+      "approveExtensionTitle": "Approve warranty extension",
+      "rejectExtensionTitle": "Reject warranty extension",
+      "approveExtension": "Approve extension",
+      "rejectExtension": "Reject extension",
+      "historyTitle": "Premium warranty history",
+      "activity": "Activity",
+      "cancelPlanTitle": "Cancel instalment plan",
+      "cancelPlanMessage": "The instalment plan of bill {{bill}} is cancelled.",
+      "cancelPlanNote": "The bill stays open, due on the date of its first unpaid instalment.",
+      "keepPlan": "Keep plan",
+      "invoicePlanMessage": "Bill {{bill}} is cancelled and replaced by {{count}} instalment invoices, each with its own due date.",
+      "invoicePlanNote": "The booking journal of the bill is reversed and each invoice is booked on its own.",
+      "issueInvoices": "Issue {{count}} invoices",
+      "removeInstalment": "Remove instalment",
+      "acknowledgeTitle": "Acknowledge credit limit exception",
+      "acknowledgeMessage": "The policy issued over the credit limit of {{client}} is marked as acknowledged.",
+      "acknowledgeException": "Acknowledge exception"
+    }
   },
   "packagedProducts": {
     "active": "Active",

@@ -16,11 +16,9 @@ import { getPaymentDetails } from "../store/receiptsMiddleware";
 import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import documentTemplateService from "../../../services/documentTemplateService";
+import { printPdf } from "../../../components/Print";
 import mastersService from "../../../services/mastersService";
-import {
-  showSuccessMessage,
-  showErrorMessage,
-} from "../../../utility/toastUtils";
+import { showErrorMessage } from "../../../utility/toastUtils";
 
 /** Receipt payment modes accepted by the receipts API. */
 const PAYMENT_MODES = [
@@ -86,7 +84,7 @@ function PolicyReceipts() {
   minDate.setDate(minDate.getDate() + 1);
   const handleSubmit = async (values) => {
     setProducts("Print");
-    if (products == "Print") {
+    if (products === "Print") {
       toastRef.current?.showToast();
 
       if (!receiptId) {
@@ -99,26 +97,7 @@ function PolicyReceipts() {
 
       try {
         setPrintLoading(true);
-        showSuccessMessage(
-          t("accounts.addReceiptEdit.generatingPdf"),
-          t("common.success")
-        );
-
-        const result = await documentTemplateService.getReceiptPdf(receiptId, {
-          fileName: `receipt-${receiptId}.pdf`,
-        });
-
-        if (!result.success) {
-          throw new Error(
-            result.error || t("accounts.addReceiptEdit.failedToPrintReceipt")
-          );
-        }
-
-        showSuccessMessage(
-          t("accounts.addReceiptEdit.pdfDownloadedSuccess"),
-          t("common.success")
-        );
-
+        await printPdf(documentTemplateService.receiptPdfPath(receiptId), { fileName: `receipt-${receiptId}.pdf` });
         navigate("/accounts/receipts");
       } catch (error) {
         showErrorMessage(
@@ -189,9 +168,9 @@ function PolicyReceipts() {
       <CustomToast
         ref={toastRef}
         message={
-          products == "Approve"
-            ? "Approved Successfully"
-            : "Printed Successfully"
+          products === "Approve"
+            ? t("accounts.receiptDialogs.approvedDone")
+            : t("accounts.receiptDialogs.printedDone")
         }
       />
       <span onClick={() => navigate(-1)}>
@@ -327,9 +306,9 @@ function PolicyReceipts() {
       </Card>
 
       <div className="exit_print_buttons">
-        {products == "Print" ? (
+        {products === "Print" ? (
           <Button
-            label="Print"
+            label={t("accounts.receiptDialogs.print")}
             className="print"
             onClick={() => {
               formik.handleSubmit();
@@ -338,7 +317,7 @@ function PolicyReceipts() {
           />
         ) : (
           <Button
-            label="Approve"
+            label={t("accounts.receiptDialogs.approve")}
             className="print"
             onClick={() => {
               formik.handleSubmit();

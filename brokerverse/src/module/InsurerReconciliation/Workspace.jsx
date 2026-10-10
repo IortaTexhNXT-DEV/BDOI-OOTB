@@ -12,10 +12,20 @@ import { RadioButton } from "primereact/radiobutton";
 import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
 import service from "../../services/insurerReconciliationService";
-import { Diff, IrTag, PageHeader, date, dateTime, money, showError, showSuccess } from "./common";
-import { promptText } from "../../utility/dialogs";
+import { openConfirm } from "../../components/ConfirmDialog";
+import ApprovalActions from "../../components/ApprovalActions";
+import { ActivityLog, fromLifecycle, useRecordActivity } from "../../components/ActivityLog";
+import { Diff, IrTag, PageHeader, date, money, showError, showSuccess } from "./common";
 
 const num = (v) => Number(v || 0);
+
+// the steps a statement keeps in its own fields, shown when its audit trail cannot be read
+const STATEMENT_STEPS = [
+  { action: "import", at: "createdAt", by: "createdBy" },
+  { action: "submit", at: "submittedAt", by: "submittedBy" },
+  { action: "reject", at: "rejectedAt", by: "rejectedBy", remarks: "rejectionReason" },
+  { action: "approve", at: "approvedAt", by: "approvedBy", remarks: "approvalRemarks" },
+];
 
 /**
  * Accounts > Insurer Reconciliation > statement: the insurer's lines against the broker's records, the differences
@@ -31,6 +41,8 @@ const Workspace = () => {
   const [loading, setLoading] = useState(false);
   const [resolve, setResolve] = useState(null); // { target, kind, note, premiumAdjustment, commissionAdjustment }
   const [match, setMatch] = useState(null); // { line, search, candidates }
+  const activity = useRecordActivity("insurer_statement", id);
+  const reloadActivity = activity.reload;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -49,11 +61,22 @@ const Workspace = () => {
       const out = await fn();
       if (message) showSuccess(toast, typeof message === "function" ? message(out) : message);
       await load();
+      reloadActivity();
       return out;
     } catch (e) {
       showError(toast, e);
       return undefined;
     }
+  };
+  // the action runs inside the confirmation (an error stays there); the toast and the reload follow once it succeeded
+  const confirmRun = async (options, fn, message) => {
+    let out;
+    const answer = await openConfirm({ ...options, onConfirm: async (value) => { out = await fn(value); } });
+    if (answer === false || answer === null) return undefined;
+    if (message) showSuccess(toast, message);
+    await load();
+    reloadActivity();
+    return out ?? true;
   };
 
   const draft = st?.status === "draft";
@@ -76,18 +99,77 @@ const Workspace = () => {
       showError(toast, e);
     }
   };
-  const decide = async (action) => {
-    const remarks = await promptText(action === "approve" ? t("insurerRec.approveRemarks") : t("insurerRec.rejectReason"));
-    if (remarks === null || remarks === undefined) return;
-    await run(() => (action === "approve" ? service.approve(st.id, remarks) : service.reject(st.id, remarks)),
-      action === "approve" ? t("insurerRec.approvedDone") : t("insurerRec.rejectedDone"));
+  const statementFacts = () => [
+    { label: t("insurerRec.insurer"), value: st.insurerName },
+    { label: t("insurerRec.type"), value: t(`insurerRec.type_${st.statementType}`) },
+    { label: t("insurerRec.period"), value: `${date(st.periodFrom)} – ${date(st.periodTo)}` },
+    { label: t("insurerRec.summary.lines"), value: st.summary.lines, type: "number" },
+    { label: t("insurerRec.summary.matched"), value: st.summary.matched, type: "number" },
+    { label: t("insurerRec.summary.unresolved"), value: st.summary.unresolved, type: "number" },
+    { label: t("insurerRec.premiumAdjustment"), value: st.summary.adjustments.premium, type: "amount" },
+    { label: t("insurerRec.commissionAdjustment"), value: st.summary.adjustments.commission, type: "amount" },
+  ];
+  const lineFacts = (l) => [
+    { label: t("insurerRec.policyNo"), value: l.policyNumber },
+    { label: t("insurerRec.insured"), value: l.insured },
+    { label: t("insurerRec.grossPremium"), value: l.grossPremium, type: "amount" },
+    { label: t("insurerRec.commission"), value: l.commission, type: "amount" },
+    { label: t("insurerRec.amountPaid"), value: l.amountPaid, type: "amount", hidden: l.amountPaid === undefined },
+  ];
+  const submit = () => confirmRun({
+    title: t("insurerRec.confirmations.submitTitle"),
+    message: t("insurerRec.confirmations.submitMessage", { number: st.statementNumber }),
+    facts: statementFacts(),
+    confirmLabel: t("insurerRec.submit"),
+  }, () => service.submit(st.id), t("insurerRec.submitted"));
+  const decide = (action) => {
+    const approve = action === "approve";
+    const adjusted = num(st.summary.adjustments.premium) !== 0 || num(st.summary.adjustments.commission) !== 0;
+    return confirmRun({
+      title: t(approve ? "insurerRec.confirmations.approveTitle" : "insurerRec.confirmations.rejectTitle"),
+      severity: approve ? "neutral" : "danger",
+      message: t(approve ? "insurerRec.confirmations.approveMessage" : "insurerRec.confirmations.rejectMessage", { number: st.statementNumber }),
+      facts: statementFacts(),
+      note: approve && adjusted ? t("insurerRec.confirmations.approveNote") : null,
+      input: approve
+        ? { type: "textarea", label: t("insurerRec.approveRemarks"), maxLength: 1000 }
+        : { type: "textarea", label: t("insurerRec.rejectReason"), required: true, maxLength: 1000 },
+      confirmLabel: t(approve ? "insurerRec.confirmations.approve" : "insurerRec.confirmations.reject"),
+    }, (remarks) => (approve ? service.approve(st.id, remarks) : service.reject(st.id, remarks)), approve ? t("insurerRec.approvedDone") : t("insurerRec.rejectedDone"));
   };
   const cancel = async () => {
-    const reason = await promptText(t("insurerRec.cancelReason"));
-    if (reason === null || reason === undefined) return;
-    const out = await run(() => service.cancel(st.id, reason), t("insurerRec.cancelled"));
+    const out = await confirmRun({
+      title: t("insurerRec.confirmations.cancelTitle"),
+      severity: "danger",
+      message: t("insurerRec.confirmations.cancelMessage", { number: st.statementNumber }),
+      facts: statementFacts(),
+      input: { type: "textarea", label: t("insurerRec.cancelReason"), maxLength: 1000 },
+      confirmLabel: t("insurerRec.cancelStatement"),
+      cancelLabel: t("insurerRec.confirmations.keepStatement"),
+    }, (reason) => service.cancel(st.id, reason), t("insurerRec.cancelled"));
     if (out) navigate("/accounts/insurer-reconciliation/statements");
   };
+  const unmatch = (l) => confirmRun({
+    title: t("insurerRec.unmatch"),
+    severity: "warning",
+    message: t("insurerRec.confirmations.unmatchMessage", { line: l.lineNo }),
+    facts: [...lineFacts(l), { label: t("insurerRec.brokerGross"), value: l.broker?.grossPremium, type: "amount", hidden: !l.broker }],
+    confirmLabel: t("insurerRec.unmatch"),
+  }, () => service.unmatch(st.id, l.id), t("insurerRec.unmatched"));
+  const removeResolution = (r) => confirmRun({
+    title: t("insurerRec.removeResolution"),
+    severity: "warning",
+    message: t("insurerRec.confirmations.removeResolutionMessage", { policy: r.policyNumber }),
+    facts: [
+      { label: t("insurerRec.policyNo"), value: r.policyNumber },
+      { label: t("insurerRec.insured"), value: r.insured },
+      { label: t("insurerRec.resolution"), value: t(`insurerRec.status.${r.resolution.kind}`) },
+      { label: t("insurerRec.note"), value: r.resolution.note },
+      { label: t("insurerRec.premiumAdjustment"), value: r.resolution.premiumAdjustment, type: "amount", hidden: r.resolution.kind !== "adjustment" },
+      { label: t("insurerRec.commissionAdjustment"), value: r.resolution.commissionAdjustment, type: "amount", hidden: r.resolution.kind !== "adjustment" },
+    ],
+    confirmLabel: t("insurerRec.removeResolution"),
+  }, () => service.removeResolution(st.id, r.resolution.id), t("insurerRec.resolutionRemoved"));
   const download = (format) => service.downloadReport(st.id, format, `insurer-reconciliation-${st.statementNumber}`).catch((e) => showError(toast, e));
 
   const resolutionBody = (r) => (r.resolution ? (
@@ -104,8 +186,8 @@ const Workspace = () => {
       {l.matchStatus !== "matched" && <Button icon="pi pi-comment" text size="small" tooltip={t("insurerRec.resolve")} onClick={() => openResolve(l)} aria-label={t("insurerRec.resolve")} />}
       {l.matchStatus === "unmatched"
         ? <Button icon="pi pi-link" text size="small" tooltip={t("insurerRec.matchByHand")} onClick={() => searchCandidates(l, l.policyNumber)} aria-label={t("insurerRec.matchByHand")} />
-        : <Button icon="pi pi-times" text size="small" tooltip={t("insurerRec.unmatch")} onClick={() => run(() => service.unmatch(st.id, l.id), t("insurerRec.unmatched"))} aria-label={t("insurerRec.unmatch")} />}
-      {l.resolution && <Button icon="pi pi-undo" text size="small" tooltip={t("insurerRec.removeResolution")} onClick={() => run(() => service.removeResolution(st.id, l.resolution.id), t("insurerRec.resolutionRemoved"))} aria-label={t("insurerRec.removeResolution")} />}
+        : <Button icon="pi pi-times" text size="small" tooltip={t("insurerRec.unmatch")} onClick={() => unmatch(l)} aria-label={t("insurerRec.unmatch")} />}
+      {l.resolution && <Button icon="pi pi-undo" text size="small" tooltip={t("insurerRec.removeResolution")} onClick={() => removeResolution(l)} aria-label={t("insurerRec.removeResolution")} />}
     </div>
   ) : null);
 
@@ -137,9 +219,11 @@ const Workspace = () => {
         subtitle={`${t(`insurerRec.type_${st.statementType}`)}${st.statementRef ? ` ${st.statementRef}` : ""} · ${date(st.periodFrom)} - ${date(st.periodTo)} · ${t("insurerRec.tolerance")} ${money(st.tolerance)}`}>
         <IrTag status={st.status} />
         {draft && <Button icon="pi pi-bolt" label={t("insurerRec.autoMatch")} outlined onClick={() => run(() => service.autoMatch(st.id), (r) => t("insurerRec.autoMatched", r))} />}
-        {draft && <Button icon="pi pi-send" label={t("insurerRec.submit")} onClick={() => run(() => service.submit(st.id), t("insurerRec.submitted"))} />}
-        {st.status === "submitted" && <Button icon="pi pi-check" label={t("insurerRec.approve")} onClick={() => decide("approve")} />}
-        {st.status === "submitted" && <Button icon="pi pi-times" label={t("insurerRec.reject")} severity="danger" outlined onClick={() => decide("reject")} />}
+        {draft && <Button icon="pi pi-send" label={t("insurerRec.submit")} onClick={submit} />}
+        {st.status === "submitted" && (
+          <ApprovalActions initiator={{ id: st.createdById }} approveLabel={t("insurerRec.confirmations.approve")} rejectLabel={t("insurerRec.confirmations.reject")}
+            onApprove={() => decide("approve")} onReject={() => decide("reject")} />
+        )}
         {draft && <Button icon="pi pi-ban" label={t("insurerRec.cancelStatement")} text onClick={cancel} />}
         <Button icon="pi pi-file-excel" label="Excel" outlined onClick={() => download("xlsx")} />
         <Button icon="pi pi-file-pdf" label="PDF" outlined onClick={() => download("pdf")} />
@@ -157,7 +241,6 @@ const Workspace = () => {
         {t("insurerRec.totalsLine", { insurerGross: money(s.insurer.grossPremium), brokerGross: money(s.broker.grossPremium), insurerComm: money(s.insurer.commission),
           brokerComm: money(s.broker.commission), premiumAdj: money(s.adjustments.premium), commissionAdj: money(s.adjustments.commission) })}
         {st.rejectionReason && st.status === "draft" && <div className="text-red-600 mt-1">{t("insurerRec.rejectedBecause", { reason: st.rejectionReason })}</div>}
-        {st.approvedAt && <div className="mt-1">{t("insurerRec.approvedBy", { name: st.approvedBy, at: dateTime(st.approvedAt) })}</div>}
       </div>
 
       <div className="pe-card">
@@ -177,13 +260,18 @@ const Workspace = () => {
               <Column body={(r) => (draft ? (
                 <div className="flex gap-1">
                   <Button icon="pi pi-comment" text size="small" tooltip={t("insurerRec.resolve")} onClick={() => openResolve(r)} aria-label={t("insurerRec.resolve")} />
-                  {r.resolution && <Button icon="pi pi-undo" text size="small" tooltip={t("insurerRec.removeResolution")} onClick={() => run(() => service.removeResolution(st.id, r.resolution.id), t("insurerRec.resolutionRemoved"))} aria-label={t("insurerRec.removeResolution")} />}
+                  {r.resolution && <Button icon="pi pi-undo" text size="small" tooltip={t("insurerRec.removeResolution")} onClick={() => removeResolution(r)} aria-label={t("insurerRec.removeResolution")} />}
                 </div>
               ) : null)} />
             </DataTable>
           </TabPanel>
           <TabPanel header={`${t("insurerRec.tab.all")} (${st.lines.length})`}>{lineTable(st.lines)}</TabPanel>
         </TabView>
+      </div>
+
+      <div className="pe-card mt-2">
+        <h3 className="mt-0">{t("insurerRec.confirmations.activity")}</h3>
+        <ActivityLog entries={activity.error ? fromLifecycle(st, STATEMENT_STEPS) : activity.entries} loading={activity.loading} />
       </div>
 
       <Dialog className="pe-dialog" header={resolve ? `${t("insurerRec.resolve")} · ${resolve.target.policyNumber}` : ""} visible={!!resolve} style={{ width: "min(620px, 96vw)" }} onHide={() => setResolve(null)}
@@ -219,7 +307,7 @@ const Workspace = () => {
           <div>
             <div className="flex gap-2 mb-2">
               <InputText value={match.search} onChange={(e) => setMatch({ ...match, search: e.target.value })} placeholder={t("insurerRec.searchCandidates")} className="w-full" />
-              <Button icon="pi pi-search" onClick={() => searchCandidates(match.line, match.search)} aria-label="Search" tooltip="Search" tooltipOptions={{ position: "top" }} />
+              <Button icon="pi pi-search" onClick={() => searchCandidates(match.line, match.search)} aria-label={t("common.search")} tooltip={t("common.search")} tooltipOptions={{ position: "top" }} />
             </div>
             <DataTable value={match.candidates} dataKey="id" size="small" stripedRows scrollable scrollHeight="360px" emptyMessage={t("insurerRec.none")}>
               <Column header={t("insurerRec.brokerRecord")} body={(r) => t(`insurerRec.record.${r.type}`)} />
