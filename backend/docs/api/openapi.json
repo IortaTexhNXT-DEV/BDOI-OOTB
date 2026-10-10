@@ -134270,7 +134270,7 @@
     "/remittance/exceptions/{id}/escalate": {
       "post": {
         "operationId": "postRemittanceExceptionsIdEscalate",
-        "summary": "Escalate an exception",
+        "summary": "Escalate an exception with a reason of the exception_escalate context ({ reasonCode, note }; the note is required when the reason asks for one)",
         "tags": [
           "Remittance"
         ],
@@ -134336,13 +134336,17 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "reason": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
                     "type": "string"
                   }
                 }
               },
               "example": {
-                "reason": "Past SLA"
+                "reasonCode": "EXE-SLA",
+                "note": "Insurer has not answered for 5 days"
               }
             }
           }

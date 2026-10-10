@@ -23,6 +23,7 @@ import * as imports from './imports.js';
 import * as runs from './runs.js';
 import * as payments from './payments.js';
 import { remittanceSummary } from './summary.js';
+import { requiredReason } from '../ops-masters/records.js';
 
 /** Remittance (Accounts > Remittance, 16 screens) and the Remittance Master overview. */
 const { router, define } = moduleRouter('Remittance', '/remittance');
@@ -758,16 +759,24 @@ define({
     created(res, e, 'Exception logged');
   },
 });
-const EXC_ACTIONS = { assign: ['In Progress', (b) => ({ assignedTo: b.assignedTo })], resolve: ['Resolved', (b) => ({ resolution: b.resolution, resolvedAt: new Date().toISOString() })], escalate: ['Escalated', (b) => ({ escalationReason: b.reason })] };
+// escalation takes a reason of the exception_escalate context (Reason Codes master) and an optional note
+const escalation = async (b) => {
+  const r = await requiredReason(pool, 'exception_escalate', { reasonCode: b.reasonCode, note: b.note });
+  return { escalationReason: r.text, escalationReasonCode: r.code };
+};
+const EXC_ACTIONS = { assign: ['In Progress', (b) => ({ assignedTo: b.assignedTo })], resolve: ['Resolved', (b) => ({ resolution: b.resolution, resolvedAt: new Date().toISOString() })], escalate: ['Escalated', escalation] };
 for (const [action, [to, extra]] of Object.entries(EXC_ACTIONS)) {
   define({
-    method: 'POST', path: `/exceptions/:id/${action}`, summary: `${action[0].toUpperCase()}${action.slice(1)} an exception`, screen: S('Exceptions'), middleware: write,
-    request: action === 'assign' ? { assignedTo: 'finance.officer' } : action === 'resolve' ? { resolution: 'Insurer credited the difference' } : { reason: 'Past SLA' }, response: { success: true, data: { status: to } },
+    method: 'POST', path: `/exceptions/:id/${action}`,
+    summary: action === 'escalate' ? 'Escalate an exception with a reason of the exception_escalate context ({ reasonCode, note }; the note is required when the reason asks for one)' : `${action[0].toUpperCase()}${action.slice(1)} an exception`,
+    screen: S('Exceptions'), middleware: write,
+    request: action === 'assign' ? { assignedTo: 'finance.officer' } : action === 'resolve' ? { resolution: 'Insurer credited the difference' } : { reasonCode: 'EXE-SLA', note: 'Insurer has not answered for 5 days' }, response: { success: true, data: { status: to } },
     handler: async (req, res) => {
       const b = req.body || {};
       if (action === 'assign' && !b.assignedTo) throw badRequest('Validation failed', [{ path: 'assignedTo', message: 'assignedTo is required' }]);
       if (action === 'resolve' && !b.resolution) throw badRequest('Validation failed', [{ path: 'resolution', message: 'resolution is required' }]);
-      const out = await logged('remittance_item', `exception-${action}`, (r) => items.completeItem('exception', r.params.id, ['Open', 'In Progress', 'Escalated'], to, extra(b), r.user))(req, res);
+      const data = await extra(b);
+      const out = await logged('remittance_item', `exception-${action}`, (r) => items.completeItem('exception', r.params.id, ['Open', 'In Progress', 'Escalated'], to, data, r.user))(req, res);
       ok(res, items.exceptionOut({ ...(await items.getItem('exception', out.after.id)) }), `Exception ${to.toLowerCase()}`);
     },
   });

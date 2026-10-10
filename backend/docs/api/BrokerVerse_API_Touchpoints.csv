@@ -22537,8 +22537,9 @@
     ""status"": ""In Progress""
   }
 }"
-1109,Remittance,POST,/api/remittance/exceptions/:id/escalate,Escalate an exception,Accounts > Remittance > Exceptions,Bearer JWT,write:remittance,"{
-  ""reason"": ""Past SLA""
+1109,Remittance,POST,/api/remittance/exceptions/:id/escalate,"Escalate an exception with a reason of the exception_escalate context ({ reasonCode, note }; the note is required when the reason asks for one)",Accounts > Remittance > Exceptions,Bearer JWT,write:remittance,"{
+  ""reasonCode"": ""EXE-SLA"",
+  ""note"": ""Insurer has not answered for 5 days""
 }","{
   ""success"": true,
   ""data"": {

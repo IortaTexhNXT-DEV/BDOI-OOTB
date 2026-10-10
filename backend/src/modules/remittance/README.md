@@ -228,6 +228,10 @@ billing: my draft debit notes and the overdue ones, `GET /direct-bill?attention=
 list it opens; the run strip (last run, next run, automation On / Off) and the landing (Approvals, Exceptions or
 Remittances > My work).
 
+Exceptions: `POST /exceptions/:id/escalate` takes a reason of the `exception_escalate` context (`{ reasonCode, note }`,
+validated with the Reason Codes master; the note is required when the reason asks for one) and keeps its text in
+`data.escalationReason` and its code in `data.escalationReasonCode`. Assign and resolve are unchanged.
+
 ## Key settings
 
 `remittance.approval_levels` (fallback only), `remittance.require_authority_limit` (default false, TISPH true),

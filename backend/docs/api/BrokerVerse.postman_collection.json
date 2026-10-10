@@ -82176,7 +82176,7 @@
           ]
         },
         {
-          "name": "Escalate an exception",
+          "name": "Escalate an exception with a reason of the exception_escalate context ({ reasonCode, note }; the note is required when the reason asks for one)",
           "request": {
             "method": "POST",
             "header": [
@@ -82204,10 +82204,10 @@
                 }
               ]
             },
-            "description": "Escalate an exception\n\nFront-end touchpoint: Accounts > Remittance > Exceptions\n\nAccess: write:remittance",
+            "description": "Escalate an exception with a reason of the exception_escalate context ({ reasonCode, note }; the note is required when the reason asks for one)\n\nFront-end touchpoint: Accounts > Remittance > Exceptions\n\nAccess: write:remittance",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"Past SLA\"\n}",
+              "raw": "{\n  \"reasonCode\": \"EXE-SLA\",\n  \"note\": \"Insurer has not answered for 5 days\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -82245,10 +82245,10 @@
                     }
                   ]
                 },
-                "description": "Escalate an exception\n\nFront-end touchpoint: Accounts > Remittance > Exceptions\n\nAccess: write:remittance",
+                "description": "Escalate an exception with a reason of the exception_escalate context ({ reasonCode, note }; the note is required when the reason asks for one)\n\nFront-end touchpoint: Accounts > Remittance > Exceptions\n\nAccess: write:remittance",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"reason\": \"Past SLA\"\n}",
+                  "raw": "{\n  \"reasonCode\": \"EXE-SLA\",\n  \"note\": \"Insurer has not answered for 5 days\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"

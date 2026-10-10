@@ -237,6 +237,15 @@ describe('work items', () => {
     expect((await ctx.api('post', `/remittance/exceptions/${e.body.data.id}/resolve`).send({})).status).toBe(400);
     const r = await ctx.api('post', `/remittance/exceptions/${e.body.data.id}/resolve`).send({ resolution: 'Insurer credited' });
     expect(r.body.data.status).toBe('Resolved');
+    // escalation takes a reason of the exception_escalate context, never free text alone
+    const x = await ctx.api('post', '/remittance/exceptions').send({ type: 'Amount Mismatch', severity: 'High', amount: 300, description: 'No answer from insurer' });
+    const escalate = (body) => ctx.api('post', `/remittance/exceptions/${x.body.data.id}/escalate`).send(body);
+    expect((await escalate({ reason: 'Past SLA' })).status).toBe(400);
+    expect((await escalate({ reasonCode: 'RRJ-AMOUNT' })).status).toBe(400);
+    expect((await escalate({ reasonCode: 'EXE-OTHER' })).status).toBe(400);
+    const up = await escalate({ reasonCode: 'EXE-SLA', note: 'Five days without an answer' });
+    expect(up.status).toBe(200);
+    expect(up.body.data).toMatchObject({ status: 'Escalated', escalationReason: 'Past SLA: Five days without an answer', escalationReasonCode: 'EXE-SLA' });
     expect((await ctx.api('get', '/remittance/exceptions?status=Open')).body.data.length).toBeGreaterThanOrEqual(2);
   });
   it('notifications and schedules', async () => {
