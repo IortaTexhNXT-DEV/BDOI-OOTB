@@ -121,6 +121,7 @@ as nil.
 | `sample/96_ops_accounting.sql` | the Toyota dealers' service centres as accredited repair shops; suppliers |
 | `sample/97_distribution.sql` | dealer programmes (Toyota Makati free first year on TFS loans, Toyota Alabang half subsidy with an uploaded batch, Toyota Cebu commercial pick-ups), lead assignment rules for the TFS referrals, campaign segments, templates and campaigns, a shared Report Builder report |
 | `sample/98_integrations.sql` | demo CTPL COC series (Pioneer, Maagap, Stronghold), payee bank accounts of the panel insurers, an insurer API mapping for Pioneer |
+| `sample/99_cash_control.sql` | Cash Control: a set of post-dated cheques forwarded to the Insurance Partner and one kept for TISPH, a floating and an advance payment held unapplied, a receipt voucher batch with commission kept apart, a receipt reversal waiting for approval, a policy held from the fully paid remittance; the collection account of retained cheques and the panel insurers' TINs where empty |
 
 The TISPH files replace a reference value only while it is still the reference value and nobody has changed it, so
 they apply to a new database and, at the next start, to a database already in use, without undoing administrator changes.

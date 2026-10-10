@@ -95,7 +95,8 @@ describe('gross remittance', () => {
     expect(statement).toMatchObject({ basis: 'gross', documentType: 'Billing Statement', statusCode: 'for-approval', amount: 1680, journalNumber: null });
     expect(statement.dnNumber).toMatch(/^CBS-\d{4}-\d{5}$/);
     expect((await ctx.as('maker')('post', `/remittance/direct-bill/${statement.id}/approve`).send({})).status).toBe(403);
-    // a billing statement is approved only when the insurer has a TIN (FRS FR-RMT-021)
+    // a billing statement is approved only when the insurer has a TIN (FRS FR-RMT-021); the sample gives it one
+    await query("UPDATE insurance_companies SET tin = NULL WHERE code = 'MALAYAN'");
     const noTin = await ctx.as('checker')('post', `/remittance/direct-bill/${statement.id}/approve`).send({});
     expect(noTin.status).toBe(409);
     expect(noTin.body.message).toMatch(/has no TIN/);
