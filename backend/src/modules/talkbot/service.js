@@ -23,6 +23,7 @@ import { writeXlsx } from '../../lib/xlsx.js';
 import { requiredReason } from '../ops-masters/records.js';
 import { rate, renewablePolicies } from '../renewals/service.js';
 import { createBatch } from '../renewals/batches.js';
+import { gatedPolicies } from '../renewals/noticeGate.js';
 import { CONFIRMED, NOT_REACHED, OUTCOME_LABELS, OUTCOMES } from './outcomes.js';
 
 export const LIST_STATUS = { draft: 'Draft', sent: 'Sent to Talkbot', 'results-loaded': 'Results loaded', closed: 'Closed', cancelled: 'Cancelled' };
@@ -41,7 +42,7 @@ const CELL_MAX = 200;
 const fieldError = (path, message) => badRequest(message, [{ path, message }]);
 
 const REASON = {
-  quoted: 'Renewal already being quoted', lockIn: 'Lock-in or Scheme 2', doNotCall: 'Do not call', noMobile: 'No mobile number',
+  quoted: 'Renewal already being quoted', lockIn: 'Lock-in or Scheme 2', held: 'Held: TFS loan status', doNotCall: 'Do not call', noMobile: 'No mobile number',
   onList: (n) => `Already on call list ${n}`, called: (n) => `Called ${n} times`, notRenewable: 'No longer renewable',
 };
 
@@ -93,6 +94,7 @@ export async function defaultWindow(day = null) {
 
 const truthy = (v) => v === true || ['true', 'yes', '1'].includes(String(v ?? '').toLowerCase());
 /** Lock-in and Scheme 2 accounts (TIS-BRD-SCHM-03): renewal handled under the lock-in, left out of call lists. */
+/** A lock-in flag on the policy itself (accounts loaded before the lock-in records of Renewals); see policy_lock_ins. */
 const lockedIn = (details) => truthy(details?.lockIn) || truthy(details?.scheme2);
 
 /** The vehicle as Talkbot reads it: "<Model Year> <MAKE> <Vehicle Model> <Model Variant>" from the policy or its quotation. */
@@ -105,10 +107,11 @@ const LOYALTY = `(WITH RECURSIVE ch(pid, d) AS (SELECT p.renewed_from, 1 WHERE p
      UNION ALL SELECT pp.renewed_from, ch.d + 1 FROM policies pp JOIN ch ON pp.id = ch.pid WHERE pp.renewed_from IS NOT NULL AND ch.d < 50)
    SELECT count(*) FROM ch)::int`;
 
-/** What the eligibility rules and the file need of each policy. */
+/** What the eligibility rules and the file need of each policy, with its notice treatment when it is not "send". */
 async function policyFacts(ids) {
   if (!ids.length) return [];
-  return many(`SELECT p.id, p.policy_number, p.client_id, p.owner_user_id, p.expiry_date, p.sum_insured, p.premium_total, p.product_id, p.details, p.status,
+  const gated = await gatedPolicies(ids);
+  const rows = await many(`SELECT p.id, p.policy_number, p.client_id, p.owner_user_id, p.expiry_date, p.sum_insured, p.premium_total, p.product_id, p.details, p.status,
       p.renewed_to, p.channel_id, pr.line AS product_line, pr.name AS product_name, q.doc AS quote_doc, cl.display_name AS client_name, cl.phone, cl.email,
       (SELECT r.status FROM renewals r WHERE r.policy_id = p.id AND r.status <> ALL('{renewed,lapsed}') ORDER BY r.created_at DESC LIMIT 1) AS renewal_status,
       (SELECT pc.granted AND pc.withdrawn_at IS NULL FROM privacy_consents pc WHERE pc.party_type = 'client' AND pc.party_id = p.client_id AND pc.purpose = 'marketing'
@@ -116,6 +119,7 @@ async function policyFacts(ids) {
       (SELECT count(*) FROM claims c WHERE c.policy_id = p.id)::int AS claims_count, ${LOYALTY} AS loyalty_years
     FROM policies p LEFT JOIN products pr ON pr.id = p.product_id LEFT JOIN clients cl ON cl.id = p.client_id LEFT JOIN quotes q ON q.id = p.quote_id
     WHERE p.id = ANY($1)`, [ids]);
+  return rows.map((r) => ({ ...r, gate: gated.get(r.id) || null }));
 }
 
 /** The other call lists of the policies (not cancelled, line not removed), except one list. */
@@ -135,6 +139,8 @@ async function otherLists(ids, exceptListId = null) {
  */
 function exclusionOf(p, lists, s, { full = true, since }) {
   if (BEING_QUOTED.includes(p.renewal_status)) return REASON.quoted;
+  // the notice gate of the renewals (FR-LCK-010): a lock-in or Scheme 2 account is reviewed, not called; a held loan is not called
+  if (p.gate) return p.gate.code === 'held' ? REASON.held : REASON.lockIn;
   if (lockedIn(p.details)) return REASON.lockIn;
   if (p.marketing_consent === false) return REASON.doNotCall;
   if (full) {

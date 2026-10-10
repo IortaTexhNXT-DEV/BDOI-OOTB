@@ -76,15 +76,31 @@ const agentConversion = `SELECT x.kind, x.month, x.client_id AS "clientId", x.pr
   ) x JOIN users u ON u.id = x.user_id
   LEFT JOIN branches b ON b.code = u.branch_code`;
 
+/**
+ * Notice treatment of a policy as the renewal notice gate decides it (renewals/noticeGate.js, FR-LCK-010): held when the
+ * TFS loan status blocks notices ($3, lockin.blocking_loan_statuses); suppressed for an active lock-in running past the
+ * expiry, or a Scheme 2 Motor account whose loan is still open ($4, lockin.suppress_scheme2_motor); a lock-in flag on the
+ * policy itself counts as a lock-in; send otherwise.
+ */
+const NOTICE_TREATMENT = `CASE
+    WHEN lk.id IS NOT NULL AND COALESCE(lk.loan_status, 'current') = ANY($3::text[]) THEN 'Held: loan status'
+    WHEN lk.status = 'active' AND lk.source <> 'scheme2' AND lk.end_date >= p.expiry_date + 1 THEN 'Suppressed: lock-in'
+    WHEN lk.status = 'active' AND lk.source = 'scheme2' AND $4::boolean AND COALESCE(lk.loan_status, 'current') <> 'closed'
+      AND upper(${PRODUCT_LINE}) = 'MOTOR' THEN 'Suppressed: Scheme 2'
+    WHEN lower(COALESCE(p.details->>'lockIn', '')) IN ('true', 'yes', '1') THEN 'Suppressed: lock-in'
+    WHEN lower(COALESCE(p.details->>'scheme2', '')) IN ('true', 'yes', '1') THEN 'Suppressed: Scheme 2'
+    ELSE 'Send' END`;
+
 const renewalNotice = `SELECT x.*, CASE WHEN x."daysToExpiry" <= 30 THEN '30 days' WHEN x."daysToExpiry" <= 60 THEN '60 days' ELSE '90 days' END AS bucket FROM (
   SELECT p.policy_number AS "policyNumber", p.expiry_date AS "expiryDate", (p.expiry_date - $2::date) AS "daysToExpiry",
     u.display_name AS coordinator, ${POLICY_DIMS}, c.phone AS mobile, c.email,
     NULLIF(concat_ws(' ', ${vehicle('modelYear')}, upper(${BRAND}), ${vehicle('vehicleModel')}, ${vehicle('modelVariant')}), '') AS vehicle,
     ${vehicle('plateNumber')} AS "plateNumber", ${vehicle('chassisNumber')} AS "chassisNumber", COALESCE(${vehicle('motorNumber')}, ${vehicle('engineNumber')}) AS "engineNumber",
     ${PRODUCT_LINE} AS "productLine", p.sum_insured AS "sumInsured", p.premium_total AS premium,
-    CASE WHEN lower(COALESCE(p.details->>'lockIn', p.details->>'scheme2', '')) IN ('true', 'yes', '1') THEN 'Suppressed: Lock-in' ELSE 'Notice' END AS "noticeTreatment",
+    ${NOTICE_TREATMENT} AS "noticeTreatment",
     tb.outcome AS "talkbotOutcome"
   FROM policies p ${POLICY_JOINS}
+  LEFT JOIN policy_lock_ins lk ON lk.policy_id = p.id
   LEFT JOIN LATERAL (SELECT CASE l.outcome WHEN 'not-called' THEN 'Not called' WHEN 'willing' THEN 'Willing to renew' WHEN 'not-willing' THEN 'Not willing to renew'
       WHEN 'already-renewed' THEN 'Already renewed' WHEN 'call-back' THEN 'Call back' WHEN 'wrong-contact' THEN 'Wrong contact' WHEN 'uncontacted' THEN 'Uncontacted'
       WHEN 'missed-call' THEN 'Missed call' ELSE l.outcome END AS outcome
@@ -131,11 +147,12 @@ export const SALES_QUERIES = {
   },
   renewalNotice: {
     sql: renewalNotice, filters: ['agent', 'insurer', 'branch', 'client', 'product'],
+    extras: [setting('lockin.blocking_loan_statuses', ['past-due', 'fraud', 'terminated', 'legal-dispute'], 'text[]'), setting('lockin.suppress_scheme2_motor', true, 'boolean')],
     criteria: {
       All: { groupBy: 'bucket' }, '30 Days': { where: 't.bucket = \'30 days\'' }, '60 Days': { where: 't.bucket = \'60 days\'' }, '90 Days': { where: 't.bucket = \'90 days\'' },
-      'Lock-in': { where: 't."noticeTreatment" <> \'Notice\'' },
+      'Suppressed or Held': { where: 't."noticeTreatment" <> \'Send\'' },
     },
     orderBy: 'f."expiryDate", f."policyNumber"',
-    summary: { suppressed: 'count(*) FILTER (WHERE f."noticeTreatment" <> \'Notice\')' },
+    summary: { suppressed: 'count(*) FILTER (WHERE f."noticeTreatment" <> \'Send\')' },
   },
 };

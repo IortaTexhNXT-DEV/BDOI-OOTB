@@ -161,7 +161,7 @@ The business category of a policy is:
 
 **Agent Policy Conversion**. One row per agent and month (or per agent, or per branch and month): prospects created, prospects converted, quotations, policies, accounts (distinct clients), the quotation conversion %, premium, commission, and the incentive tier and payout of the month from Accounts > Incentive. A month without business gives no row.
 
-**Renewal Notice Listing**. Choose the **To Date** (the as-of date) and the Report Criteria: All, 30 Days, 60 Days, 90 Days or Lock-in. Each policy expiring within 90 days of that date is listed with the days to expiry, the coordinator, the client and contact details, the unit, plate, chassis and engine numbers, the previous insurer, the product line, the sum insured, the premium, the Talkbot outcome and the notice treatment. A lock-in policy shows **Suppressed: Lock-in**.
+**Renewal Notice Listing**. Choose the **To Date** (the as-of date) and the Report Criteria: All, 30 Days, 60 Days, 90 Days or Suppressed or Held. Each policy expiring within 90 days of that date is listed with the days to expiry, the coordinator, the client and contact details, the unit, plate, chassis and engine numbers, the previous insurer, the product line, the sum insured, the premium, the Talkbot outcome and the notice treatment. The notice treatment is the one of the renewal notices: **Send**, **Suppressed: lock-in** or **Suppressed: Scheme 2** for an account under a lock-in, or **Held: loan status** when the TFS loan status holds the notices (see [Lock-in Accounts](#lock-in-accounts)).
 
 ## Report Builder {#report-builder}
 

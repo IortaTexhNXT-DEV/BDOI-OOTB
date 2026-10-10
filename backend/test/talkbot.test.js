@@ -141,6 +141,20 @@ describe('call list', () => {
     expect(p.body.data.excluded).toEqual({ 'No mobile number': 1, 'Do not call': 1, 'Lock-in or Scheme 2': 1, 'Renewal already being quoted': 1 });
     expect(p.body.data.leftOut).toMatch(/^4 accounts left out: /);
   });
+  it('leaves out the accounts the renewal notice gate suppresses or holds (lock-in record, TFS loan status)', async () => {
+    await query(`INSERT INTO policy_lock_ins(policy_id, source, reference, start_date, years, end_date, tfs_loan_account)
+      VALUES ('pol_tb2', 'promotion', 'PROMO-TB', $1::date - 365, 3, $1::date + 730, 'TFS-LN-TB2')`, [addDays(day, 400)]);
+    try {
+      const locked = await as['tb.sales']('post', '/talkbot/preview').send(window());
+      expect(locked.body.data).toMatchObject({ eligible: 1 });
+      expect(locked.body.data.excluded['Lock-in or Scheme 2']).toBe(2);
+      await query("UPDATE policy_lock_ins SET loan_status = 'fraud' WHERE policy_id = 'pol_tb2'");
+      const held = await as['tb.sales']('post', '/talkbot/preview').send(window());
+      expect(held.body.data.excluded['Held: TFS loan status']).toBe(1);
+    } finally {
+      await query("DELETE FROM policy_lock_ins WHERE policy_id = 'pol_tb2'");
+    }
+  });
   it('refuses more accounts than talkbot.max_accounts', async () => {
     await setting('talkbot.max_accounts', 1);
     const r = await as['tb.sales']('post', '/talkbot/lists').send(window());

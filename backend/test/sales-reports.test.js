@@ -136,13 +136,25 @@ describe('Renewal Notice Listing', () => {
     const rows = r.body.data.rows;
     expect(rows.map((x) => [x.policyNumber, x.bucket])).toEqual([['POL-RN-1', '30 days'], ['POL-RN-2', '60 days'], ['POL-RN-3', '90 days']]);
     expect(rows[0]).toMatchObject({ daysToExpiry: 15, coordinator: 'rp.sales', client: 'Andrea M. Villanueva', vehicle: '2024 TOYOTA Raize', plateNumber: 'NAB 1234',
-      chassisNumber: 'MHKA1BA1JPK000001', engineNumber: '1KRA000001', insurer: 'Report Test Insurance Corp.', noticeTreatment: 'Notice' });
+      chassisNumber: 'MHKA1BA1JPK000001', engineNumber: '1KRA000001', insurer: 'Report Test Insurance Corp.', noticeTreatment: 'Send' });
     expect(r.body.data.groups.map((g) => [g.group, g.count])).toEqual([['30 days', 1], ['60 days', 1], ['90 days', 1]]);
   });
   it('marks a lock-in policy as suppressed in its bucket', async () => {
     const r = await run('renewal-notice-listing', { ReportCriteria: '60 Days', ToDate: '2025-03-15' });
-    expect(r.body.data.rows).toEqual([expect.objectContaining({ policyNumber: 'POL-RN-2', noticeTreatment: 'Suppressed: Lock-in' })]);
+    expect(r.body.data.rows).toEqual([expect.objectContaining({ policyNumber: 'POL-RN-2', noticeTreatment: 'Suppressed: lock-in' })]);
     expect(r.body.data.summary.suppressed).toBe(1);
+  });
+  it('follows the notice gate of the lock-in records: suppressed during a lock-in, held on a blocking TFS loan status', async () => {
+    await query(`INSERT INTO policy_lock_ins(policy_id, source, reference, start_date, years, end_date, tfs_loan_account)
+      VALUES ('pol_rn3', 'scheme1-ara', 'ARA-RN3', '2024-06-10', 3, '2027-06-10', 'TFS-LN-RN3'), ('pol_rn1', 'promotion', 'PROMO-RN1', '2024-03-30', 3, '2027-03-30', 'TFS-LN-RN1')`);
+    await query("UPDATE policy_lock_ins SET loan_status = 'past-due' WHERE policy_id = 'pol_rn1'");
+    try {
+      const r = await run('renewal-notice-listing', { ReportCriteria: 'Suppressed or Held', ToDate: '2025-03-15' });
+      expect(r.body.data.rows.map((x) => [x.policyNumber, x.noticeTreatment])).toEqual([['POL-RN-1', 'Held: loan status'], ['POL-RN-2', 'Suppressed: lock-in'],
+        ['POL-RN-3', 'Suppressed: lock-in']]);
+    } finally {
+      await query("DELETE FROM policy_lock_ins WHERE policy_id IN ('pol_rn1', 'pol_rn3')");
+    }
   });
 });
 
