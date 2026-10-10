@@ -197,13 +197,14 @@ Object.assign(roleMenuPermissions, {
   "tis-ops-officer": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, ...TIS_OPS_REMITTANCE, "Journal Voucher", "Fixed Assets"] },
   "tis-ops-unit-head": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, ...TIS_OPS_REMITTANCE, "Journal Voucher", "Fixed Assets", "Disbursement", "Payables"] },
   "tis-ccd-pdu": TIS_CCD(["Post-Dated Cheques", "Receipts"]),
-  // Cash Control: the remittance reconciliation and the exceptions it works (no proof of payment); Recon also decides
+  // Cash Control: the remittance reconciliation and the exceptions it works (no proof of payment); BP and Recon keep the
+  // instalment plans and the follow-ups of Credit Control (write:collections); Recon also decides
   // insurer statements (approve:insurer-reconciliation) and reads payments and billing. The claim settlement funds an
   // insurer remits are banked by Cash Control (write:receipts).
   "tis-ccd-pdc": TIS_CCD(["Post-Dated Cheques", "Receipts", "Collections", "Bank Reconciliation", ...REMITTANCE("Remittances", "Reconciliation", "Exceptions", "Held policies")]),
-  "tis-ccd-bp": TIS_CCD(["Receipts", "Collections", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation",
+  "tis-ccd-bp": TIS_CCD(["Receipts", "Collections", "Credit Control", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation",
     ...REMITTANCE("Remittances", "Reconciliation", "Exceptions", "Held policies")]),
-  "tis-ccd-recon": TIS_CCD(["Receipts", "Collections", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation", "Open Entry Matching", "Open Entry Unmatching",
+  "tis-ccd-recon": TIS_CCD(["Receipts", "Collections", "Credit Control", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation", "Open Entry Matching", "Open Entry Unmatching",
     "Disbursement", ...REMITTANCE("Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Held policies", "Insurer billing")]),
   // Finance & General Accounting: the Accounting menus, plus the audit trail and the schedules (interface monitor)
   "tis-finance": {

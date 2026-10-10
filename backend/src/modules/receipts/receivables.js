@@ -148,7 +148,7 @@ export async function createReceivable(db, { policy, amount, breakdown = {}, sou
   if (policy.billing_mode === 'direct') throw badRequest(`Policy ${policy.policy_number} is direct billed: the client pays the insurer, so no premium is billed or collected by the broker`);
   const gross = round2(amount);
   if (!(gross > 0)) throw badRequest('Receivable amount must be greater than zero');
-  const creditDays = (await resolveCreditTerms(policy.insurance_company_id, { db })).premiumWarrantyDays;
+  const creditDays = (await resolveCreditTerms(policy.insurance_company_id, { db, clientId: policy.client_id })).premiumWarrantyDays;
   const billNumber = await nextDocumentNumber('invoice', { db, unique: { table: 'receivables', column: 'bill_number' } });
   // a package gives its own split (each insurer carries its own sections); otherwise the premium is split by share
   const computed = given || await premiumSplit(db, policy, gross, breakdown, source);
