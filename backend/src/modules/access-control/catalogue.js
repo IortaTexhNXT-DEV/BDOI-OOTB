@@ -152,6 +152,7 @@ const PERMISSION_LIST = {
   'write:audit': ['audit', 'edit', 'Not used by any screen', { checked: false }],
   'read:data-load': ['data-load', 'view', 'Download go-live workbooks, read the load history, compare environments'],
   'write:data-load': ['data-load', 'edit', 'Upload, validate and load the go-live workbooks'],
+  'approve:data-load': ['data-load', 'approve', 'Approve another user\'s data load and its undo, sign reconciliations, vote Go / No-Go, approve the go-live lock'],
   'read:users': ['users', 'view', 'See users and their sign-in history'],
   'write:users': ['users', 'edit', 'Create users, change their roles, reset passwords, lock and unlock'],
   'read:roles': ['roles', 'view', 'Not used by any screen (every signed-in user sees the list of roles)', { checked: false }],

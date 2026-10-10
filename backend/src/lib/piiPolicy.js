@@ -7,8 +7,7 @@
  *                                 'on-request': holders get masked values unless the request carries the header
  *                                 X-Unmask-PII: 1 (the "Show full identifiers" switch of the top bar); each such request
  *                                 is recorded in the audit trail (entity personal_data, action unmask)
- *   privacy.masking_exempt_paths  API path prefixes answered unmasked (the user's own profile, sign-in, configuration,
- *                                 the go-live workbench, the personal data export to a data subject)
+ *   privacy.masking_exempt_paths  API path prefixes answered unmasked (the user's own profile, sign-in, configuration)
  * Only list and view endpoints (GET) and the exports they produce are masked: the answer to a create or update echoes
  * what the user sent. A request without a signed-in user (public pages such as a customer's quotation response) is not
  * masked: those endpoints expose only what the customer needs.
@@ -22,7 +21,7 @@ import { logger } from './logger.js';
 
 export const VIEW_PII = 'view:pii';
 export const UNMASK_HEADER = 'x-unmask-pii';
-export const DEFAULT_EXEMPT_PATHS = ['/api/auth', '/api/s3', '/api/settings', '/api/system-settings', '/api/data-load', '/api/health'];
+export const DEFAULT_EXEMPT_PATHS = ['/api/auth', '/api/s3', '/api/settings', '/api/system-settings', '/api/health'];
 
 async function loadPolicySettings() {
   const enabled = (await getSetting('privacy.masking_enabled', true)) !== false;

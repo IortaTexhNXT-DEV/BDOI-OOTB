@@ -34,6 +34,7 @@ export const ROLES = [
   ['tis-finance', 'TIS Finance & General Accounting', 'RBAC v4 Finance & GenAcctg: disbursements, journal vouchers, payables, fixed assets, commission and remittance, period end, bank reconciliation and posting rule approvals; reads the front office', false],
   ['tis-it-admin', 'TIS IT AppSupport / Admin', 'RBAC v4 IT AppSupport/Admin: users, roles, access control, settings, reference masters, product configurator, schedules and interfaces; reads business data, enters no business transactions', false],
   ['tis-general-manager', 'TIS General Manager', 'RBAC v4 TIS General Manager: front office (leads to claims) with every approval of the front office and supplier invoices; reads accounting, administration and the audit trail', false],
+  ['tis-auditor', 'TIS Audit (read only)', 'Internal and external audit: reads the Data Migration & Go-Live workspace and the audit trail, changes nothing', false],
   ['tis-superid', 'SUPERID (UAT only)', 'RBAC v4 SUPERID for user acceptance testing: includes the System Administrator. Set the role Inactive before go-live', false],
 ];
 /** Role codes of earlier releases (renamed or merged by migration 0140_broker_roles.sql); a fresh seed never creates them. */
@@ -127,6 +128,12 @@ Object.assign(ROLE_PERMS, {
     'lead-assignment', 'campaigns', ...TIS_ACCOUNTING_READS, 'payables:approve', 'bank-reconciliation:read', 'period-end:read', 'audit:read', 'users:read',
     'roles:read', 'access-control:read'],
 });
+// Data Migration & Go-Live (migration 0440): IT AppSupport loads, Finance, the Operations Unit Head and the General
+// Manager approve another user's load, auditors read. The System Administrator holds all three.
+const MIGRATION_PERMS = { 'tis-it-admin': ['data-load'], 'tis-finance': ['data-load:read', 'data-load:approve'], 'tis-ops-unit-head': ['data-load:read', 'data-load:approve'],
+  'tis-general-manager': ['data-load:read', 'data-load:approve'] };
+for (const [role, items] of Object.entries(MIGRATION_PERMS)) ROLE_PERMS[role].push(...items);
+ROLE_PERMS['tis-auditor'] = ['profile', 'notifications', 'data-load:read', 'audit:read'];
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'], 'tis-superid': ['system-admin'] };
 /** The permission codes of a ROLE_PERMS entry: "module" is read and write, "module:action" that one permission. */

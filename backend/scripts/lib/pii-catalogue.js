@@ -362,6 +362,8 @@ export const CATALOGUE = {
   'campaigns.notes': 'freeText',
   // remarks given with the approval of an incentive batch (migration 0387)
   'incentive_calculations.approval_remarks': 'freeText',
+  // remarks given with the approval or rejection of a data load (migration 0440)
+  'data_load_batches.decision_remarks': 'freeText',
   'campaign_recipients.party_name': 'partyName',
   'campaign_recipients.email': 'email',
 };
