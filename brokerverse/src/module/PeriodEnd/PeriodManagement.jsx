@@ -110,7 +110,7 @@ const PeriodManagement = () => {
 
   const lastChange = (row) => {
     const c = row.lastChange;
-    if (!c) return <span className="pe-muted">—</span>;
+    if (!c) return <span className="pe-muted">-</span>;
     return (
       <div className="pm-last-change">
         <div className="pm-last-change__who">
@@ -189,7 +189,7 @@ const PeriodManagement = () => {
           <Column header={t("periodEnd.severity")} body={(r) => t(`periodEnd.severityValue.${r.severity}`)} />
           <Column header={t("periodEnd.statusLabel")} body={(r) => <StatusTag status={r.status} />} />
           <Column header={t("periodManagement.countOrAmount")} className="bv-num" headerClassName="bv-num"
-            body={(r) => (r.status === "failed" || r.status === "warning" ? (r.amount !== null && r.amount !== undefined ? money(r.amount) : r.count) : "—")} />
+            body={(r) => (r.status === "failed" || r.status === "warning" ? (r.amount !== null && r.amount !== undefined ? money(r.amount) : r.count) : "-")} />
         </DataTable>
       </Dialog>
     </div>
