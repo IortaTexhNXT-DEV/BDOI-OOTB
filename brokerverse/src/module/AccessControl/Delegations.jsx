@@ -1,11 +1,12 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
+import { Badge } from "primereact/badge";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Menu } from "primereact/menu";
-import { SelectButton } from "primereact/selectbutton";
+import { TabPanel, TabView } from "primereact/tabview";
 import { Tag } from "primereact/tag";
 import LoadingBar from "../../components/LoadingBar";
 import PageHeader from "../../components/PageHeader";
@@ -98,11 +99,19 @@ const Delegations = () => {
       <PageHeader title={k("delegationsTitle", "Delegations")} home={k("master", "Master")} section={k("userManagement", "Users and Access")}
         trail={[k("delegationsTitle", "Delegations")]} actions={actions}
         help={k("delegation.help", "Cover for an approver who is away: the person covering approves with the approver's limit for the chosen transactions and dates, once another administrator approves the delegation.")} />
+      <TabView className="bv-tabbar rp-tabs" activeIndex={VIEWS.indexOf(view)} onTabChange={(e) => set({ view: VIEWS[e.index] === "current" ? null : VIEWS[e.index] })}>
+        {VIEWS.map((v) => (
+          <TabPanel key={v} header={(
+            <span className="rp-tab">
+              {viewWords[v]}
+              {data ? <Badge value={counts[v]} severity={v === "pending" && counts[v] ? "warning" : "secondary"} className="rp-tab__badge" /> : null}
+            </span>
+          )} />
+        ))}
+      </TabView>
       <div className="rp-card bv-loading-host">
         <LoadingBar active={refreshing} />
         <div className="rp-toolbar rp-toolbar--wrap">
-          <SelectButton value={view} onChange={(e) => e.value && set({ view: e.value === "current" ? null : e.value })} aria-label={k("delegation.views", "Delegations to show")}
-            options={VIEWS.map((v) => ({ value: v, label: data ? `${viewWords[v]} (${counts[v]})` : viewWords[v] }))} />
           <span className="p-input-icon-left rp-search">
             <i className="pi pi-search" />
             <InputText value={filters.search} onChange={(e) => set({ q: e.target.value })} placeholder={k("delegation.search", "Find a person")} aria-label={k("delegation.search", "Find a person")} />

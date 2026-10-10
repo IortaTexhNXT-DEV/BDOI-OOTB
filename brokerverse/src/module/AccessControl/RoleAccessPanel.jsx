@@ -18,7 +18,6 @@ import { ChangeActions, ChangeDetails, changeCounts, useChangeActions } from "./
 import RoleAccessReview, { SodWarning } from "./RoleAccessReview";
 import { dateTime, useAccessNames, useLabels } from "./common";
 
-const ROLE_PATH = "/master/generals/usermanagement/role";
 const MATRIX_PATH = "/master/generals/usermanagement/access-matrix";
 const LEVEL_COLUMNS = ["view", "edit", "approve", "special"];
 
@@ -135,7 +134,6 @@ const RoleAccessPanel = ({ role, idx, roleByCode, technical, approval, editing, 
       </div>
       <div className="rp-panel__actions">
         <Button label={k("rolePermissions.compareWith", "Compare with…")} icon="pi pi-clone" outlined onClick={onCompare} disabled={editing} />
-        {canOpen(ROLE_PATH) && role.id ? <Button label={k("rolePermissions.roleDetails", "Role details")} outlined onClick={() => navigate(`${ROLE_PATH}/view/${role.id}`)} /> : null}
         {!editing ? (
           <Button label={k("rolePermissions.editAccess", "Edit access")} icon="pi pi-pencil" disabled={!!role.editBlocked} onClick={onEdit}
             tooltip={blockedText || undefined} tooltipOptions={{ showOnDisabled: true, position: "bottom" }} />

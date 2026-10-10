@@ -71,9 +71,9 @@ const UserAccessMatrix = () => {
     { key: "active", label: k("statActive", "Active users"), value: figure("active"), active: !filters.flag && filters.status === "active",
       onClick: () => set({ flag: null, status: null }) },
     flagCard("dormant", k("uam.statDormant", "Dormant"), data ? k("uam.dormantNote", "No sign-in for {{days}}+ days", { days: data.dormantDays }) : null),
-    flagCard("conflicts", k("uam.statConflicts", "Open SoD conflicts"), k("uam.conflictsNote", "Active users without an exception")),
-    flagCard("twoStep", k("uam.statTwoStep", "Without two-step"), k("uam.twoStepNote", "Active users")),
-    flagCard("pending", k("uam.statPending", "Waiting for approval"), k("uam.pendingNote", "Users concerned by a change")),
+    flagCard("conflicts", k("uam.statDutyConflicts", "Duty conflicts"), k("uam.dutyConflictsNote", "No exception accepted")),
+    flagCard("twoStep", k("uam.statNoTwoStep", "No two-step sign-in"), k("uam.twoStepNote", "Active users")),
+    flagCard("pending", k("uam.statChanges", "Changes pending"), k("uam.changesNote", "Users with a change to approve")),
   ];
 
   const signOut = async (u) => {
@@ -104,20 +104,26 @@ const UserAccessMatrix = () => {
   );
 
   const userCell = (u) => <TwoLines main={<strong>{u.displayName}</strong>} sub={[u.username, u.designation].filter(Boolean).join(" · ")} />;
-  const rolesCell = (u) => (
+  // base platform roles show with "Include base platform roles"; without it they are counted in one chip
+  const platform = new Set((data?.roles || []).filter((r) => r.platform).map((r) => r.code));
+  const rolesCell = (u) => {
+    const hidden = base ? 0 : u.roles.filter((c) => platform.has(c)).length + u.included.filter((x) => platform.has(x.code)).length;
+    return (
     <div className="access-chips">
-      {u.roleNames.map((name, i) => (
+      {u.roleNames.map((name, i) => (base || !platform.has(u.roles[i]) ? (
         <span key={u.roles[i]} className="access-chip-stack">
           <Tag value={name} className={u.platformRoles.includes(u.roles[i]) ? "rp-tag-muted" : "access-role-tag"} />
           {technical ? <span className="rp-code">{u.roles[i]}</span> : null}
         </span>
-      ))}
-      {u.included.map((x) => (
+      ) : null))}
+      {u.included.filter((x) => base || !platform.has(x.code)).map((x) => (
         <Tag key={x.code} value={x.name} className="access-role-tag access-role-tag--through" title={k("uam.through", "Through {{role}}", { role: x.throughName })} />
       ))}
+      {hidden ? <Tag value={k("uam.baseRolesHidden", "{{count}} base platform roles", { count: hidden })} className="rp-tag-muted" /> : null}
       {u.pending.map((p) => <Tag key={p.ref} severity="warning" icon="pi pi-clock" value={k("uam.pendingChip", "{{kind}} waiting", { kind: p.kindLabel })} title={p.ref} />)}
     </div>
-  );
+    );
+  };
   const signInCell = (u) => (
     <TwoLines main={u.lastLoginAt ? dateTime(u.lastLoginAt) : k("never", "Never")}
       sub={u.dormant ? <span className="access-warn">{k("dormantFor", "Dormant {{days}} days", { days: u.daysSinceLogin })}</span> : null} />
@@ -155,7 +161,7 @@ const UserAccessMatrix = () => {
               action={<Button label={k("uam.clearFilters", "Clear filters")} text onClick={() => set({ q: null, dept: null, role: null, status: null, flag: null })} />} />
           ) : <EmptyState icon="pi pi-users" text={k("uam.noUsers", "No user yet")} />}>
           <Column header={k("colUser", "User")} sortable sortField="displayName" body={userCell} frozen style={{ minWidth: "14rem" }} />
-          <Column header={k("colDepartment", "Department")} sortable sortField="department" body={(u) => u.department || <span className="rp-muted">{k("otherRoles", "Other roles")}</span>} />
+          <Column header={k("colDepartment", "Department")} sortable sortField="department" body={(u) => u.department || u.hrDepartment || <span className="rp-muted">—</span>} />
           <Column header={k("colRoles", "Roles")} body={rolesCell} style={{ minWidth: "16rem" }} />
           <Column header={k("colBranch", "Branch")} sortable sortField="branchName" body={(u) => u.branchName || u.branch || "—"} />
           <Column header={k("colStatus", "Status")} sortable sortField="status" body={(u) => <StatusTag status={u.status} label={statusWords[u.status] || u.status} />} />

@@ -12,9 +12,10 @@ import { EmptyState, LoadError, StatusTag, TwoLines, dateTime, useLabels } from 
 
 /**
  * Approve, reject (remarks required, the requester sees them) and withdraw a change of access waiting for approval,
- * each asked first; `onDone` reloads what changed.
+ * each asked first; `onDone` reloads what changed. `words` names the actions in the confirmations as the buttons do
+ * ({ approve: "Sign off", reject: "Return" }).
  */
-export const useChangeActions = (onDone) => {
+export const useChangeActions = (onDone, words = {}) => {
   const k = useLabels();
   const [busy, setBusy] = useState(null);
   const run = useCallback(async (change, action) => {
@@ -29,21 +30,23 @@ export const useChangeActions = (onDone) => {
       setBusy(null);
     }
   }, [onDone]);
+  const approveWord = words.approve || k("approve", "Approve");
+  const rejectWord = words.reject || k("reject", "Reject");
   const approve = useCallback(async (change) => {
-    if (!(await confirmAction(k("changes.approveConfirm", "Approve {{ref}}? {{what}}", { ref: change.ref, what: change.summary?.[0] || change.targetLabel }),
-      { header: k("changes.approveTitle", "Approve {{ref}}", { ref: change.ref }), acceptLabel: k("approve", "Approve"), rejectLabel: k("cancel", "Cancel") }))) return;
+    if (!(await confirmAction(k("changes.actionConfirm", "{{action}} {{ref}}? {{what}}", { action: approveWord, ref: change.ref, what: change.summary?.[0] || change.targetLabel }),
+      { header: `${approveWord} ${change.ref}`, acceptLabel: approveWord, rejectLabel: k("cancel", "Cancel") }))) return;
     await run(change, () => accessControlService.decideAccessChange(change.id, "approve"));
-  }, [k, run]);
+  }, [k, run, approveWord]);
   const reject = useCallback(async (change) => {
     const remarks = await promptText(k("changes.rejectReason", "Why is it rejected? The requester sees this."), "",
-      { header: k("changes.rejectTitle", "Reject {{ref}}", { ref: change.ref }), acceptLabel: k("reject", "Reject"), rejectLabel: k("cancel", "Cancel") });
+      { header: `${rejectWord} ${change.ref}`, acceptLabel: rejectWord, rejectLabel: k("cancel", "Cancel") });
     if (remarks === null) return;
     if (!remarks) {
       notifyError(k("changes.rejectRequired", "Give the reason for rejecting it"));
       return;
     }
     await run(change, () => accessControlService.decideAccessChange(change.id, "reject", remarks));
-  }, [k, run]);
+  }, [k, run, rejectWord]);
   const withdraw = useCallback(async (change) => {
     if (!(await confirmAction(k("changes.withdrawConfirm", "Withdraw {{ref}}? Nothing is changed.", { ref: change.ref }),
       { header: k("withdraw", "Withdraw"), acceptLabel: k("withdraw", "Withdraw"), rejectLabel: k("cancel", "Cancel"), danger: true }))) return;
@@ -75,7 +78,7 @@ ChangeActions.propTypes = { change: PropTypes.object.isRequired, actions: PropTy
  */
 export const PendingBlock = ({ change, onDone, title, approveLabel, rejectLabel }) => {
   const k = useLabels();
-  const actions = useChangeActions(onDone);
+  const actions = useChangeActions(onDone, { approve: approveLabel, reject: rejectLabel });
   return (
     <section className="access-pending" aria-label={k("changes.waiting", "Waiting for approval")}>
       <div className="access-pending__head">

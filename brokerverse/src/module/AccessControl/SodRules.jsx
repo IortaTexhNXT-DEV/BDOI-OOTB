@@ -55,8 +55,8 @@ const SodRules = () => {
     { key: "accepted", label: k("sod.statAccepted", "Accepted exceptions"), value: ready ? stats.accepted : null, onClick: () => show({ state: "accepted" }),
       active: tab === "conflicts" && params.get("state") === "accepted" },
     { key: "ending", label: k("sod.statEnding", "Exceptions ending in 30 days"), value: ready ? stats.endingSoon : null, onClick: () => show({ state: "accepted" }) },
-    { key: "rules", label: k("sod.statRules", "Rules on"), value: ready ? stats.rulesOn : null,
-      note: ready && stats.platformOn ? k("sod.platformNote", "+{{count}} between base platform roles", { count: stats.platformOn }) : null,
+    { key: "rules", label: k("sod.statActiveRules", "Active rules"), value: ready ? stats.rulesOn : null,
+      note: ready && stats.platformOn ? k("sod.platformRulesNote", "And {{count}} for base platform roles", { count: stats.platformOn }) : null,
       onClick: () => set({ tab: "rules" }), active: tab === "rules" },
   ];
 

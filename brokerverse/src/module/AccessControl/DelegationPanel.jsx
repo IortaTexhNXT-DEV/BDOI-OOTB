@@ -221,6 +221,9 @@ const DelegationPanel = ({ target, onHide, onDone }) => {
             <label htmlFor="dlg-away">{k("colDelegator", "Approver away")}</label>
             <Dropdown inputId="dlg-away" value={form.delegatorId} options={approvers} optionGroupLabel="label" optionGroupChildren="items" filter
               onChange={(e) => chooseAway(e.value)} placeholder={k("delegation.chooseAway", "Choose the approver who is away")} className={problemText("delegatorId") ? "p-invalid" : ""}
+              emptyMessage={base ? k("delegation.noApprover", "Nobody can approve a checked transaction")
+                : k("delegation.noApproverTisph", "No approver holds a TISPH role; tick Include base platform roles")}
+              emptyFilterMessage={base ? undefined : k("delegation.noApproverFound", "No approver found among the TISPH roles; tick Include base platform roles")}
               itemTemplate={(o) => <span className="rp-cell-stack"><span>{o.label}</span><span className="rp-muted">{o.person.roleNames.join(", ")}</span></span>} />
             <FieldError error={problemText("delegatorId")} />
             <BaseRolesCheck checked={base} onChange={setBase} id="dlg-base" />

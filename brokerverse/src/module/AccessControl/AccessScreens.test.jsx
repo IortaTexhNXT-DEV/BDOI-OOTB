@@ -79,7 +79,7 @@ describe("User Access Matrix", () => {
     expect(screen.getByText("Mariela Valentino")).toBeInTheDocument();
     expect(screen.queryByText("Old Account")).not.toBeInTheDocument();
     expect(screen.queryByText("tis-ccd-bp")).not.toBeInTheDocument();
-    const conflicts = screen.getByRole("button", { name: /Open SoD conflicts/ });
+    const conflicts = screen.getByRole("button", { name: /Duty conflicts/ });
     expect(within(conflicts).getByText("1")).toBeInTheDocument();
     fireEvent.click(conflicts);
     await waitFor(() => expect(screen.queryByText("Mariela Valentino")).not.toBeInTheDocument());

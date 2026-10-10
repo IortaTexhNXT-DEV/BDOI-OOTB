@@ -8,7 +8,7 @@ import { overview } from "./roleAccess.fixture";
 jest.mock("../../services/accessControlService", () => ({
   __esModule: true,
   default: {
-    roleAccess: jest.fn(), checkRoleAccess: jest.fn(), proposeRoleAccess: jest.fn(), downloadRoleAccess: jest.fn(), accessChanges: jest.fn(),
+    roleAccess: jest.fn(), checkRoleAccess: jest.fn(), proposeRoleAccess: jest.fn(), downloadRoleAccess: jest.fn(), accessChanges: jest.fn(), accessControls: jest.fn(), proposeAccessControls: jest.fn(),
     decideAccessChange: jest.fn(), withdrawAccessChange: jest.fn(),
   },
 }));
@@ -90,7 +90,32 @@ describe("Role Permissions", () => {
     signInAs(["tis-general-manager"], ["read:access-control"]);
     renderAt();
     await screen.findByRole("listbox");
-    expect(screen.queryByRole("button", { name: "More options" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "More options" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Show technical names")).not.toBeInTheDocument();
+  });
+
+  it("shows the access controls with the change waiting for approval instead of the form", async () => {
+    accessControlService.accessControls.mockResolvedValue({
+      items: [{ key: "access.change_approval", name: "Changes of access wait for a second administrator", type: "boolean", options: null, value: true },
+        { key: "access.authority_without_limit", name: "An approver without a limit for the transaction", type: "choice", value: "allow",
+          options: [{ value: "allow", name: "May approve" }, { value: "refuse", name: "Is refused" }] }],
+      pending: { id: 21, ref: "CFG-21", status: "pending", summary: ["Changes of access wait for a second administrator: On → Off"], requestedBy: "it.one",
+        requestedAt: "2026-10-09T02:00:00Z", canDecide: true, canWithdraw: false },
+    });
+    renderAt("/master/generals/usermanagement/role-permissions?controls=1");
+    const dialog = await screen.findByRole("dialog");
+    expect(await within(dialog).findByText("Changes of access wait for a second administrator: On → Off")).toBeInTheDocument();
+    expect(within(dialog).getByLabelText("Changes of access wait for a second administrator")).toBeDisabled();
+    expect(within(dialog).getByRole("button", { name: "Approve" })).toBeInTheDocument();
+    expect(within(dialog).queryByRole("button", { name: "Withdraw" })).not.toBeInTheDocument();
+    expect(within(dialog).queryByRole("button", { name: "Submit for approval" })).not.toBeInTheDocument();
+  });
+
+  it("exports every TISPH role from the By role view", async () => {
+    renderAt();
+    await screen.findByRole("listbox");
+    fireEvent.click(screen.getByRole("button", { name: "Export to Excel" }));
+    await waitFor(() => expect(accessControlService.downloadRoleAccess).toHaveBeenCalledWith({ roles: undefined, base: undefined }));
   });
 
   it("compares roles side by side and lists the changes waiting for approval", async () => {

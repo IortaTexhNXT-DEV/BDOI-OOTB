@@ -126,6 +126,9 @@ export const TechnicalSwitch = ({ allowed, technical, onChange, id = "access-tec
 TechnicalSwitch.propTypes = { allowed: PropTypes.bool, technical: PropTypes.bool, onChange: PropTypes.func.isRequired, id: PropTypes.string };
 
 /** The "Include base platform roles" check box of a toolbar. */
+/** Access controls of Role Permissions: the switches that decide how access is enforced (approved by a second administrator). */
+export const ACCESS_CONTROLS_PATH = "/master/generals/usermanagement/role-permissions?controls=1";
+
 export const BaseRolesCheck = ({ checked, onChange, id = "access-base-roles" }) => {
   const k = useLabels();
   return (

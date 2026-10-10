@@ -18,6 +18,7 @@ import RoleList from "./RoleList";
 import RoleAccessPanel from "./RoleAccessPanel";
 import RoleCompare, { MAX_COMPARED } from "./RoleCompare";
 import RoleAccessChanges from "./RoleAccessChanges";
+import AccessControlsDialog from "./AccessControlsDialog";
 import { BASE_ROLES_KEY, TECHNICAL_NAMES_KEY, readPreference, useLabels, writePreference } from "./common";
 import "../Administration/index.scss";
 import "./index.scss";
@@ -109,10 +110,13 @@ const RolePermissions = () => {
     const next = nextInGroup(groups, selected);
     go({ view: "compare", roles: [selected, next].filter(Boolean).join(",") });
   };
+  // By role exports every role shown (TISPH roles, the base platform ones too when they are shown)
+  const exportScope = { role: base ? k("rolePermissions.exportAllBase", "Every role, base platform roles included")
+    : k("rolePermissions.exportAll", "Every TISPH role"), compare: k("rolePermissions.exportCompared", "The roles compared"),
+  pending: k("rolePermissions.exportPending", "The roles with a change waiting for approval") }[view];
   const exportExcel = async () => {
     let codes = [];
-    if (view === "role") codes = groups.find((g) => g.items.some((r) => r.code === selected))?.items.map((r) => r.code) || [];
-    if (view === "compare") codes = compared;
+    if (view === "compare") codes = compared.length ? compared : [selected, nextInGroup(groups, selected)].filter(Boolean);
     if (view === "pending") codes = allRoles.filter((r) => r.pending).map((r) => r.code);
     try {
       await accessControlService.downloadRoleAccess({ roles: codes.join(",") || undefined, base: base ? 1 : undefined });
@@ -127,18 +131,19 @@ const RolePermissions = () => {
 
   const actions = (
     <>
-      <Button label={k("exportExcel", "Export to Excel")} icon="pi pi-file-excel" outlined onClick={exportExcel} disabled={!data} />
-      {mayTechnical ? (
-        <>
-          <Button icon="pi pi-ellipsis-v" text rounded aria-label={k("rolePermissions.moreOptions", "More options")} onClick={(e) => menu.current?.toggle(e)} />
-          <OverlayPanel ref={menu} className="rp-menu">
-            <div className="rp-check">
-              <InputSwitch inputId="rp-technical" checked={technical} onChange={(e) => changeTechnical(!!e.value)} />
-              <label htmlFor="rp-technical">{k("rolePermissions.technicalNames", "Show technical names")}</label>
-            </div>
-          </OverlayPanel>
-        </>
-      ) : null}
+      <Button label={k("exportExcel", "Export to Excel")} icon="pi pi-file-excel" outlined onClick={exportExcel} disabled={!data}
+        tooltip={exportScope} tooltipOptions={{ position: "bottom", showOnDisabled: true }} />
+      <Button icon="pi pi-ellipsis-v" text rounded aria-label={k("rolePermissions.moreOptions", "More options")} onClick={(e) => menu.current?.toggle(e)} />
+      <OverlayPanel ref={menu} className="rp-menu">
+        <Button label={k("controls.title", "Access controls")} icon="pi pi-shield" text className="rp-menu__item"
+          onClick={() => { menu.current?.hide(); go({ controls: "1" }); }} />
+        {mayTechnical ? (
+          <div className="rp-check">
+            <InputSwitch inputId="rp-technical" checked={technical} onChange={(e) => changeTechnical(!!e.value)} />
+            <label htmlFor="rp-technical">{k("rolePermissions.technicalNames", "Show technical names")}</label>
+          </div>
+        ) : null}
+      </OverlayPanel>
     </>
   );
   const tabs = [
@@ -200,6 +205,7 @@ const RolePermissions = () => {
         </div>
       ) : null}
       {body}
+      <AccessControlsDialog visible={params.get("controls") === "1"} onHide={() => go({ controls: null, change: null })} onChanged={reload} />
     </div>
   );
 };

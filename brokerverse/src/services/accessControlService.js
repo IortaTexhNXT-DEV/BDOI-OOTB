@@ -56,6 +56,8 @@ const accessControlService = {
   accessChanges: (params) => request("GET", `/changes${queryString(params)}`).then((r) => r.data),
   decideAccessChange: (id, decision, remarks) => request("POST", `/changes/${id}/decision`, { decision, remarks }),
   withdrawAccessChange: (id) => request("POST", `/changes/${id}/withdraw`),
+  accessControls: () => request("GET", "/controls").then((r) => r.data),
+  proposeAccessControls: (body) => request("POST", "/controls", body),
 
   transactionTypes: () => request("GET", "/transaction-types").then((r) => r.data),
   authorityMatrix: () => request("GET", "/authority-matrix").then((r) => r.data),

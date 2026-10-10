@@ -165,6 +165,32 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    line-height: 20px;
+  }
+
+  // a count keeps the tab as high as the tabs without one
+  .rp-tab__badge {
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    font-size: 11px;
+    line-height: 20px;
+  }
+
+  // the tab bar scrolls sideways on a narrow screen instead of stacking its tabs
+  .rp-tabs .p-tabview-nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+
+    > li {
+      flex: 0 0 auto;
+    }
+
+    .p-tabview-nav-link {
+      white-space: nowrap;
+    }
   }
 
   .rp-error {
@@ -878,6 +904,14 @@
   color: $color-text;
   font-size: 12px;
   white-space: nowrap;
+  max-width: 100%;
+
+  // on a narrow screen the pill wraps inside the filter card
+  @media (max-width: 640px) {
+    flex-wrap: wrap;
+    white-space: normal;
+    border-radius: $radius-sm;
+  }
 
   .am-rule__dot {
     width: 8px;
@@ -908,11 +942,17 @@
     border-left: 1px solid $color-border;
   }
 
+  // role names sit right-aligned over their right-aligned limits
   .p-datatable-thead > tr > th.am-role {
     min-width: 8.5rem;
     max-width: 11rem;
     vertical-align: bottom;
+    text-align: right;
     border-left: 1px solid $color-border;
+
+    .p-column-header-content {
+      justify-content: flex-end;
+    }
   }
 
   .am-col-type {
@@ -929,12 +969,13 @@
   .am-role__head {
     display: flex;
     flex-direction: column;
+    align-items: flex-end;
     gap: 2px;
   }
 
   .am-role__name {
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
     white-space: normal;
@@ -1040,6 +1081,17 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
+  }
+
+  // one label style in every panel, the same as the reason fields (theme/bdoi/consistency.scss .bv-field-label)
+  .admin__field > label,
+  .access-checklist legend {
+    margin: 0;
+    font-family: $font-body;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 18px;
+    color: $color-text;
   }
 
   .am-panel__grid {
@@ -1397,5 +1449,120 @@
     flex-wrap: wrap;
     align-items: baseline;
     gap: 4px 8px;
+  }
+}
+
+// Segregation of Duties > Rules: the two sides of an access rule as chips
+.sod-sides {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .sod-sides__with {
+    font-size: 12px;
+  }
+}
+
+// stat cards keep their whole title on a narrow screen
+@media (max-width: 640px) {
+  .access-stats .bv-stat-label,
+  .access-stats .bv-stat-note {
+    white-space: normal;
+  }
+}
+
+// links of the person's access panel (roles, waiting changes) in the brand colour, underlined on hover only
+.access-panel {
+  a {
+    color: $brand-blue;
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: $focus-ring;
+      border-radius: 2px;
+    }
+  }
+
+  // the close button takes the focus on opening; the ring shows for the keyboard only, as on the other panels
+  .p-sidebar-close:focus:not(:focus-visible) {
+    outline: none;
+    box-shadow: none;
+  }
+}
+
+// Authority Matrix > Upload
+.am-upload {
+  .am-upload__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .am-upload__steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    padding-left: 20px;
+
+    li {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px 16px;
+    }
+  }
+
+  .am-upload__button {
+    flex: 0 0 auto;
+    max-width: 100%;
+    white-space: nowrap;
+
+    .p-button-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .am-upload__message {
+    width: 100%;
+    margin-top: 16px;
+    justify-content: flex-start;
+  }
+}
+
+// Role Permissions > More options > Access controls
+.rp-menu .rp-menu__item {
+  width: 100%;
+  justify-content: flex-start;
+  margin-bottom: 4px;
+}
+
+.access-controls {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid $color-border;
+    color: $color-text;
+  }
+
+  .access-controls__choice {
+    min-width: 10rem;
   }
 }

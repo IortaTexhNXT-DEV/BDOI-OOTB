@@ -9,6 +9,23 @@ import LoadingBar from "../../components/LoadingBar";
 import { visibleRules } from "./sod";
 import { BaseRolesCheck, EmptyState, LoadError, StatusTag, TwoLines, dateTime, useLabels } from "./common";
 
+const SHOWN = 3;
+
+/** Access of one side of a rule as chips ("Users › Create and edit", the full path on hover), the rest behind "+n more". */
+const AccessChips = ({ names }) => {
+  const k = useLabels();
+  const short = (name) => String(name).split(" › ").slice(-2).join(" › ");
+  const rest = names.slice(SHOWN);
+  return (
+    <div className="access-chips">
+      {names.slice(0, SHOWN).map((n) => <Tag key={n} value={short(n)} title={n} className="rp-tag-muted" />)}
+      {rest.length ? <Tag value={k("sod.more", "+{{count}} more", { count: rest.length })} title={rest.join("\n")} className="rp-tag-muted" /> : null}
+    </div>
+  );
+};
+
+AccessChips.propTypes = { names: PropTypes.arrayOf(PropTypes.string).isRequired };
+
 /**
  * Tab "Rules": each rule with the two roles (or the two sets of access), Block or Warn, the users breaking it, its
  * status and the change waiting for approval. Rules between two base platform roles show with "Include base platform
@@ -23,7 +40,11 @@ const SodRulesTab = ({ state, base, onBase, technical, onEdit, onUsers }) => {
   const hidden = (state.data?.rows || []).length - rows.length;
 
   const between = (r) => (r.kind === "access" ? (
-    <TwoLines main={r.accessANames.join("; ")} sub={k("notCombinedWith", "not combined with {{access}}", { access: r.accessBNames.join("; ") })} />
+    <div className="sod-sides">
+      <AccessChips names={r.accessANames} />
+      <span className="rp-muted sod-sides__with">{k("sod.notWith", "not combined with")}</span>
+      <AccessChips names={r.accessBNames} />
+    </div>
   ) : (
     <TwoLines main={`${r.roleAName || r.roleA} + ${r.roleBName || r.roleB}`} sub={[r.roleADepartment, r.roleBDepartment].filter(Boolean).filter((d, i, a) => a.indexOf(d) === i).join(" · ")} />
   ));
@@ -47,7 +68,7 @@ const SodRulesTab = ({ state, base, onBase, technical, onEdit, onUsers }) => {
           action={edit ? <Button label={k("newRule", "New rule")} icon="pi pi-plus" text onClick={() => onEdit(null)} /> : null} />}>
         <Column header={k("colRule", "Rule")} sortable sortField="name" body={(r) => <TwoLines main={<strong>{r.name}</strong>} sub={r.reason} code={technical ? r.code : null} />}
           style={{ minWidth: "16rem" }} />
-        <Column header={k("colBetween", "Between")} body={between} style={{ minWidth: "16rem" }} />
+        <Column header={k("colBetween", "Between")} body={between} style={{ minWidth: "20rem" }} />
         <Column header={k("colAction", "When assigned")} body={(r) => <Tag value={r.action === "block" ? k("actionBlock", "Block") : k("actionWarn", "Warn")}
           severity={r.action === "block" ? "danger" : "warning"} />} />
         <Column header={k("sod.colUsers", "Users")} body={(r) => (r.users ? <Button label={String(r.users)} link className="rp-linkbtn" onClick={() => onUsers(r)}

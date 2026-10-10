@@ -6,14 +6,14 @@ import { Column } from "primereact/column";
 import { ColumnGroup } from "primereact/columngroup";
 import { DataTable } from "primereact/datatable";
 import { Dropdown } from "primereact/dropdown";
-import { InputSwitch } from "primereact/inputswitch";
+import { Checkbox } from "primereact/checkbox";
 import { InputText } from "primereact/inputtext";
 import { MultiSelect } from "primereact/multiselect";
 import { Row } from "primereact/row";
 import { Tag } from "primereact/tag";
-import { SETTINGS_PATH, configurePath, mayConfigure } from "../../components/ConfigStatus";
+import { mayConfigure } from "../../components/ConfigStatus";
 import { cellState, columnGroups, departmentOptions, gapCount, limitValue, visibleRoles, visibleRows } from "./authorityFormat";
-import { shortDate, useAccessNames, useLabels } from "./common";
+import { ACCESS_CONTROLS_PATH, BaseRolesCheck, shortDate, useAccessNames, useLabels } from "./common";
 
 /** One cell of the matrix: the limit (or Not set), a chip for a change waiting or scheduled; a button that opens the panel. */
 const LimitCell = ({ row, role, cell, withoutLimit, onOpen }) => {
@@ -66,7 +66,7 @@ const AuthorityLimitsTab = ({ data, filters, onFilters, technical, onOpen }) => 
   const ordered = groups.flatMap((g) => g.items);
   const gaps = gapCount(data, { base });
   const ruleRefuse = data?.withoutLimit === "refuse";
-  const settings = configurePath(SETTINGS_PATH, "security");
+  const settings = ACCESS_CONTROLS_PATH;
 
   const header = (
     <ColumnGroup>
@@ -101,12 +101,9 @@ const AuthorityLimitsTab = ({ data, filters, onFilters, technical, onOpen }) => 
           placeholder={k("authority.allDepartments", "All departments")} aria-label={k("authority.departments", "Departments")} className="am-filter" />
         <Dropdown value={scope} onChange={(e) => set({ scope: e.value })} aria-label={k("authority.roles", "Roles")} className="am-filter"
           options={[{ value: "approvers", label: k("authority.approverRoles", "Approver roles") }, { value: "all", label: k("allRoles", "All roles") }]} />
+        <BaseRolesCheck checked={base} onChange={(on) => set({ base: on })} id="am-base" />
         <span className="rp-check">
-          <InputSwitch inputId="am-base" checked={base} onChange={(e) => set({ base: !!e.value })} />
-          <label htmlFor="am-base">{k("rolePermissions.includeBase", "Include base platform roles")}</label>
-        </span>
-        <span className="rp-check">
-          <InputSwitch inputId="am-unchecked" checked={unchecked} onChange={(e) => set({ unchecked: !!e.value })} />
+          <Checkbox inputId="am-unchecked" checked={unchecked} onChange={(e) => set({ unchecked: !!e.checked })} />
           <label htmlFor="am-unchecked">{k("authority.includeUnchecked", "Include transactions not checked yet")}</label>
         </span>
         <span className="am-spacer" />
@@ -114,8 +111,8 @@ const AuthorityLimitsTab = ({ data, filters, onFilters, technical, onOpen }) => 
           title={ruleRefuse ? k("authority.ruleRefuseTip", "An approver whose roles have no limit for a transaction cannot approve it")
             : k("authority.ruleAllowTip", "An approver whose roles have no limit for a transaction may approve any amount")}>
           <span className="am-rule__dot" aria-hidden="true" />
-          {ruleRefuse ? k("authority.ruleRefuse", "Without a limit: approvals refused") : k("authority.ruleAllow", "Without a limit: approvals not restricted")}
-          {mayConfigure(settings) ? <Link to={settings} className="am-rule__link">{k("authority.configure", "Configure")}</Link> : null}
+          {ruleRefuse ? k("authority.ruleRefuse", "Approver without a limit: refused") : k("authority.ruleAllow", "Approver without a limit: may approve")}
+          {mayConfigure(settings, "write:access-control") ? <Link to={settings} className="am-rule__link">{k("authority.configure", "Configure")}</Link> : null}
         </span>
         {gaps ? (
           <Button type="button" className={`am-gaps${gapsOnly ? " is-on" : ""}`} size="small" outlined={!gapsOnly} severity="warning" aria-pressed={gapsOnly}

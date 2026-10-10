@@ -8,7 +8,6 @@ import { Message } from "primereact/message";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Skeleton } from "primereact/skeleton";
 import { TabPanel, TabView } from "primereact/tabview";
-import ImportDialog from "../../components/ImportDialog";
 import LoadingBar from "../../components/LoadingBar";
 import PageHeader from "../../components/PageHeader";
 import { mayViewTechnical } from "../../components/TechnicalDetails";
@@ -21,6 +20,7 @@ import AuthorityLimitPanel from "./AuthorityLimitPanel";
 import AuthorityPendingTab from "./AuthorityPendingTab";
 import AuthorityPersonalTab from "./AuthorityPersonalTab";
 import AuthorityHistoryTab from "./AuthorityHistoryTab";
+import AuthorityUploadDialog from "./AuthorityUploadDialog";
 import AuthorityUploadReview from "./AuthorityUploadReview";
 import { BASE_ROLES_KEY, TECHNICAL_NAMES_KEY, readPreference, useLabels, writePreference } from "./common";
 import "../Administration/index.scss";
@@ -61,8 +61,8 @@ const AuthorityMatrix = () => {
   const loader = useCallback(() => accessControlService.authorityMatrix(), []);
   const { data, loading, refreshing, error, reload } = useStableLoad(loader);
   const edit = !!data?.abilities?.edit;
-  const uploadTargets = useMemo(() => [accessControlService.authorityUploadTarget(k("authority.uploadTarget", "Authority limits"),
-    { base: filters.base, unchecked: filters.unchecked, all: filters.scope === "all" })], [k, filters.base, filters.unchecked, filters.scope]);
+  const uploadTarget = useMemo(() => accessControlService.authorityUploadTarget(k("authority.uploadTarget", "Authority limits"),
+    { base: filters.base, unchecked: filters.unchecked, all: filters.scope === "all" }), [k, filters.base, filters.unchecked, filters.scope]);
 
   const go = (patch) => setParams((current) => {
     const next = new URLSearchParams(current);
@@ -164,9 +164,7 @@ const AuthorityMatrix = () => {
         {body}
       </div>
       <AuthorityLimitPanel target={panel} data={data} technical={technical} onHide={() => setPanel(null)} onDone={reload} />
-      <ImportDialog visible={importing} onHide={() => setImporting(false)} title={k("authority.uploadTitle", "Upload approval limits")} onDone={uploaded}
-        note={k("authority.uploadNote", "The template holds the matrix as it is: change the limits you want to change and keep the other rows.")}
-        targets={uploadTargets} />
+      <AuthorityUploadDialog visible={importing} target={uploadTarget} onHide={() => setImporting(false)} onChecked={uploaded} />
       <AuthorityUploadReview result={review} onHide={() => setReview(null)} onSubmitted={submitted} />
     </div>
   );

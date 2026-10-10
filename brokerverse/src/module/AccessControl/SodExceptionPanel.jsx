@@ -78,7 +78,7 @@ const SodExceptionPanel = ({ conflict, asOf, maxDays = 365, approval = true, onH
             { key: "user", label: k("colUser", "User"), value: [conflict.userName, conflict.department].filter(Boolean).join(" · ") },
             { key: "rule", label: k("colRule", "Rule"), value: <span>{conflict.ruleName} <Tag value={conflict.action === "block" ? k("actionBlock", "Block") : k("actionWarn", "Warn")}
               severity={conflict.action === "block" ? "danger" : "warning"} /></span> },
-            { key: "held", label: k("sod.heldTogether", "Held together"), value: conflict.heldTogether.join(" + "), span: "full" },
+            { key: "held", label: k("sod.rolesHeld", "Roles held"), value: conflict.heldTogether.join(" + "), span: "full" },
             { key: "risk", label: k("sod.risk", "Risk"), value: conflict.risk, hidden: !conflict.risk, span: "full" },
           ]} />
           <ReasonPicker context="sod_exception" value={reason} onChange={setReason} showErrors={tried} />

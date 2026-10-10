@@ -18,9 +18,9 @@ const uploadResult = {
   changes: [{ row: 2, transactionType: "journal_voucher", transactionName: "Journal voucher approval", measure: "amount", roleCode: "tis-finance", who: "TIS Finance",
     maxAmount: 2500000, unlimited: false, effectiveFrom: "2026-10-10", referenceNo: "BR-2026-020", referenceDate: "2026-10-01", before: { set: true, maxAmount: 1000000 } }],
 };
-jest.mock("../../components/ImportDialog", () => ({
+jest.mock("./AuthorityUploadDialog", () => ({
   __esModule: true,
-  default: ({ visible, onDone }) => (visible ? <button type="button" onClick={() => onDone(uploadResult)}>finish upload</button> : null),
+  default: ({ visible, onChecked }) => (visible ? <button type="button" onClick={() => onChecked(uploadResult)}>finish upload</button> : null),
 }));
 
 // the first render of a suite loads the PrimeReact styles, which takes a few seconds on a loaded machine
@@ -93,7 +93,7 @@ describe("Authority Matrix", () => {
     expect(await screen.findByRole("button", { name: /^Approval limit of TIS Finance for Journal voucher approval: ₱1,000,000.00$/ })).toBeInTheDocument();
     expect(within(cellOf("TIS Finance", "Payment voucher")).getByText("Pending")).toBeInTheDocument();
     expect(cellOf("TIS Finance", "Payment voucher")).toHaveAttribute("title", expect.stringContaining("CFG-7"));
-    expect(screen.getByText("Without a limit: approvals not restricted")).toBeInTheDocument();
+    expect(screen.getByText("Approver without a limit: may approve")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /approver limit/ })).not.toBeInTheDocument();
     fireEvent.click(screen.getByLabelText("Include base platform roles"));
     expect(within(await screen.findByRole("button", { name: /^Approval limit of Accounting for Journal voucher approval/ })).getByText("No limit")).toBeInTheDocument();
@@ -123,8 +123,23 @@ describe("Authority Matrix", () => {
     fireEvent.click(await screen.findByRole("button", { name: /^Approval limit of TIS Sales Officer for Quotation discount/ }));
     const input = within(panel()).getByLabelText("Approval limit (% of premium)");
     expect(input).toHaveValue("10%");
+    fireEvent.change(input, { target: { value: "150" } });
+    fireEvent.blur(input);
+    fireEvent.click(within(panel()).getByRole("button", { name: "Submit for approval" }));
+    expect(within(panel()).getByText("A percent limit cannot be over 100")).toBeInTheDocument();
+    expect(accessControlService.proposeAuthorityChange).not.toHaveBeenCalled();
     fireEvent.click(within(panel()).getByLabelText("No limit"));
     expect(within(panel()).getByLabelText("Approval limit (% of premium)")).toBeDisabled();
+  });
+
+  it("closes the limit panel of a checked transaction and keeps the matrix", async () => {
+    renderAt();
+    fireEvent.click(await screen.findByRole("button", { name: /^Approval limit of TIS Finance for Journal voucher approval/ }));
+    fireEvent.click(within(panel()).getByRole("button", { name: "Cancel" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(cellOf("TIS Finance", "Journal voucher approval")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /^Approval limit of TIS Finance for Journal voucher approval/ }));
+    expect(within(panel()).getByLabelText("Approval limit (PHP)")).toHaveValue("₱1,000,000.00");
   });
 
   it("sends a limit for approval once the reference is given, keeping the matrix on screen while it reloads", async () => {

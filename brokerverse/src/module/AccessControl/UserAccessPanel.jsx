@@ -55,7 +55,7 @@ const UserAccessPanel = ({ userId, technical = false, onHide }) => {
             <StatusTag status={u.status} label={statusWords[u.status] || u.status} />
             <KeyValueGrid columns={2} items={[
               { key: "username", label: k("uam.username", "Username"), value: u.username },
-              { key: "department", label: k("colDepartment", "Department"), value: u.department || k("otherRoles", "Other roles") },
+              { key: "department", label: k("colDepartment", "Department"), value: u.department || u.hrDepartment || null },
               { key: "designation", label: k("uam.designation", "Designation"), value: u.designation },
               { key: "branch", label: k("colBranch", "Branch"), value: u.branchName || u.branch },
               { key: "signin", label: k("colLastSignIn", "Last sign-in"), value: u.lastLoginAt ? dateTime(u.lastLoginAt) : k("never", "Never") },

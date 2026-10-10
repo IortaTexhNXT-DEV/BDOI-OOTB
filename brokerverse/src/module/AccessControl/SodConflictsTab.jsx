@@ -80,7 +80,8 @@ const SodConflictsTab = ({ state, rules, directory, technical, onException, onCh
         <Dropdown value={filters.department} options={departments} onChange={(e) => set({ dept: e.value })} showClear placeholder={k("uam.allDepartments", "All departments")}
           aria-label={k("colDepartment", "Department")} className="access-filter" />
         <MultiSelect value={filters.states} options={STATES.map((s) => ({ value: s, label: words(s) }))} onChange={(e) => set({ state: e.value.join(",") })}
-          aria-label={k("sod.colState", "State")} maxSelectedLabels={2} className="access-filter" />
+          aria-label={k("sod.colState", "State")} maxSelectedLabels={1} placeholder={k("sod.allStates", "All states")} className="access-filter"
+          selectedItemsLabel={filters.states.length === STATES.length ? k("sod.allStates", "All states") : k("sod.statesChosen", "{{count}} states", { count: filters.states.length })} />
         <span className="rp-check">
           <Checkbox inputId="sod-all-users" checked={params.get("all") === "1"} onChange={(e) => set({ all: e.checked ? "1" : null })} />
           <label htmlFor="sod-all-users">{k("sod.inactiveToo", "Include inactive users")}</label>
@@ -94,7 +95,7 @@ const SodConflictsTab = ({ state, rules, directory, technical, onException, onCh
           : <EmptyState icon="pi pi-check-circle" text={k("sod.noConflicts", "No user holds a conflicting combination")} />}>
         <Column header={k("colUser", "User")} sortable sortField="userName" body={(c) => <TwoLines main={<strong>{c.userName}</strong>} sub={c.username} />} />
         <Column header={k("colDepartment", "Department")} sortable sortField="department" body={(c) => c.department || "—"} />
-        <Column header={k("sod.heldTogether", "Held together")} body={(c) => c.heldTogether.join(" + ")} />
+        <Column header={k("sod.rolesHeld", "Roles held")} body={(c) => c.heldTogether.join(" + ")} />
         <Column header={k("colRule", "Rule")} sortable sortField="ruleName" body={(c) => (
           <TwoLines main={<span className="access-rule">{c.ruleName} <Tag value={c.action === "block" ? k("actionBlock", "Block") : k("actionWarn", "Warn")}
             severity={c.action === "block" ? "danger" : "warning"} /></span>} code={technical ? c.ruleCode : null} />
