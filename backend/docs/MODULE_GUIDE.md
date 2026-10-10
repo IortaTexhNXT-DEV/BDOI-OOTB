@@ -63,7 +63,9 @@ minimal, clearly-correct front-end fix.
   other records are dropped unless they resolve to a number or name, so store the name next to the id. A record
   type whose steps are stamped on its own columns (created / approved / posted ... at and by) is listed in
   `LIFECYCLE` of `src/modules/audit/service.js`, so records the trail never saw (sample data, go-live loads) still
-  show those steps.
+  show those steps. A step may read a sub-query on the record (the policy a quotation became), apply only in a state
+  (`when`: a rejection kept only in the status) and carry the change it made (`after`: the status reached, the
+  number created); steps taken at the same moment keep their order (created before approved).
 - Errors: throw `badRequest`, `notFound`, `conflict`, `forbidden` from `src/lib/errors.js`; the error handler turns
   them into the JSON error body with the request id.
 - Shared helpers: dates in `src/lib/dates.js` (`today`, `isoDate`, `addDays`, `businessDate`), amounts in

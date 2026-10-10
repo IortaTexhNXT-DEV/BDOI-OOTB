@@ -75612,7 +75612,7 @@
                   ],
                   "placeholders": {
                     "clientName": "Maria Santos",
-                    "companyName": "iorta TechNXT Corp.",
+                    "companyName": "Insurance Broker Inc.",
                     "policyNumber": "PC-MLY-2026-000101",
                     "insurer": "Malayan Insurance Co., Inc.",
                     "expiryDate": "2026-11-03",
@@ -93709,6 +93709,61 @@
           }
         },
         "x-screen": "Accounts > Petty Cash > Disbursement > View",
+        "x-permissions": [
+          "read:disbursements"
+        ]
+      }
+    },
+    "/petty-cash/disbursements/{id}/pdf": {
+      "get": {
+        "operationId": "getPettyCashDisbursementsIdPdf",
+        "summary": "Printable petty cash voucher (PDF, broker letterhead; prepared, approved and received by blocks)",
+        "tags": [
+          "Petty Cash"
+        ],
+        "description": "Front-end touchpoint: Accounts > Petty Cash > Disbursement > View > Print\n\nAccess: read:disbursements",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "download",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "(application/pdf)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Petty Cash > Disbursement > View > Print",
         "x-permissions": [
           "read:disbursements"
         ]
@@ -144776,7 +144831,7 @@
     "/users/{id}": {
       "get": {
         "operationId": "getUsersId",
-        "summary": "Get one user",
+        "summary": "Get one user: the roles assigned to it (as the list and the edit form show them) and its effective roles with the inherited ones",
         "tags": [
           "User Management"
         ],
@@ -144816,6 +144871,18 @@
                           "items": {
                             "type": "string"
                           }
+                        },
+                        "roleNames": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "effectiveRoles": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
                         }
                       }
                     }
@@ -144827,6 +144894,12 @@
                     "userId": "usr_1",
                     "username": "juan.santos",
                     "roles": [
+                      "sales"
+                    ],
+                    "roleNames": [
+                      "Sales & Marketing (Account Executive)"
+                    ],
+                    "effectiveRoles": [
                       "sales"
                     ]
                   }
