@@ -1,6 +1,7 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
 import { apiErrorMessage } from "../utility/apiError";
+import { printPdf } from "../components/Print/printPdf";
 
 /**
  * Operations and accounting API: cover notes (/cover-notes), policy cancellation (/cancellations), post-dated cheques
@@ -28,21 +29,18 @@ const put = (path, payload = {}) => request(path, { method: "PUT", body: JSON.st
 const patch = (path, payload = {}) => request(path, { method: "PATCH", body: JSON.stringify(payload) });
 const id = (v) => encodeURIComponent(v);
 
-/** Fetch a file with the session token and open it (PDF in a new tab) or save it (spreadsheets). */
-const openFile = async (path, fileName, { download = false } = {}) => {
+/** Print a PDF of the API (components/Print printPdf), or fetch a spreadsheet with the session token and save it. */
+const openFile = async (path, fileName = "document.pdf", { download = false } = {}) => {
+  if (!download) return printPdf(path, { fileName });
   const response = await fetch(`${BASE_URL}${path}`, { headers: { ...authService.getAuthHeader() } });
   if (!response.ok) await handle(response);
   const url = URL.createObjectURL(await response.blob());
-  if (download) {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  } else {
-    window.open(url, "_blank", "noopener");
-  }
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 60000);
 };
 
