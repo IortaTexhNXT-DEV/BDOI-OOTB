@@ -15,9 +15,10 @@ import { Toast } from "primereact/toast";
 import service from "../../services/distributionService";
 import mastersService from "../../services/mastersService";
 import { hasPermission } from "../../utils/canOpen";
-import DetailDialog from "../../components/DetailDialog";
-import KeyValueGrid from "../../components/KeyValueGrid";
-import { Field, PageHeader, StatusTag, dateTime, fromIsoDay, isoDay, money, printFile, showError, showSuccess } from "./common";
+import PageHeader from "../../components/PageHeader";
+import RowActions, { actionsColumn } from "../../components/RowActions";
+import DealerPremiumPreview, { usePayerTerms } from "./DealerPremiumPreview";
+import { Field, StatusTag, dateTime, fromIsoDay, isoDay, money, printFile, showError, showSuccess } from "./common";
 
 const EMPTY = { code: "", name: "", dealerChannelId: null, bankChannelId: null, insuranceCompanyId: null, vehicleType: "private_cars", ownDamageRate: 1.5, actsOfNatureRate: 0.5,
   bodilyInjury: 0, propertyDamage: 0, includeCtpl: true, ctplTermYears: 3, freeFirstYear: false, subsidyPayer: "none", subsidyType: "percent", subsidyValue: 0, issueMode: "quotation",
@@ -41,7 +42,8 @@ const DealerProgrammes = () => {
   const [banks, setBanks] = useState([]);
   const [insurers, setInsurers] = useState([]);
   const [form, setForm] = useState(null);
-  const [preview, setPreview] = useState(null); // { programme, invoicePrice, result }
+  const [preview, setPreview] = useState(null);
+  const [vehicleTypes, setVehicleTypes] = useState([]);
   const [uploadFor, setUploadFor] = useState(null);
   const [result, setResult] = useState(null);
   const [batches, setBatches] = useState([]);
@@ -63,6 +65,7 @@ const DealerProgrammes = () => {
     service.channelOptions("dealer_group,dealer_branch").then((r) => setDealers(r.map((c) => ({ value: c.id, label: c.label })))).catch(() => setDealers([]));
     service.channelOptions("financing_bank,bank_branch").then((r) => setBanks(r.map((c) => ({ value: c.id, label: c.label })))).catch(() => setBanks([]));
     mastersService.options("insurance-company").then((r) => setInsurers(r.map((x) => ({ value: Number(x.id), label: x.label })))).catch(() => setInsurers([]));
+    service.previewOptions().then((r) => setVehicleTypes(r.vehicleTypes.map((v) => ({ value: v.value, label: v.label, threeYears: v.ctplPremium3Year !== null })))).catch(() => setVehicleTypes([]));
   }, []);
   const openBatch = async (b) => {
     setBatch(b);
@@ -83,13 +86,6 @@ const DealerProgrammes = () => {
       showSuccess(toast, r.message);
       setForm(null);
       load();
-    } catch (e) {
-      showError(toast, e);
-    }
-  };
-  const runPreview = async () => {
-    try {
-      setPreview({ ...preview, result: await service.premiumPreview(preview.programme.id, { invoicePrice: preview.invoicePrice }) });
     } catch (e) {
       showError(toast, e);
     }
@@ -118,18 +114,14 @@ const DealerProgrammes = () => {
     }
   };
 
-  const payerText = (p) => {
-    if (p.freeFirstYear) return t("distribution.mp.freeYear", "First year free, paid by the {{payer}}", { payer: t(`distribution.mp.payer.${p.subsidyPayer === "bank" ? "bank" : "dealer"}`, p.subsidyPayer) });
-    if (p.subsidyPayer === "none") return t("distribution.mp.buyerPays", "The buyer pays");
-    const amount = p.subsidyType === "percent" ? `${p.subsidyValue}%` : p.subsidyType === "full" ? t("distribution.mp.all", "all") : money(p.subsidyValue);
-    return t("distribution.mp.subsidy", "{{payer}} pays {{amount}}, the buyer the rest", { payer: t(`distribution.mp.payer.${p.subsidyPayer}`, p.subsidyPayer), amount });
-  };
+  const payerTerms = usePayerTerms();
+  const threeYearCtpl = !form?.vehicleType || vehicleTypes.find((v) => v.value === form.vehicleType)?.threeYears !== false;
 
   return (
     <div className="pe-page">
       <Toast ref={toast} />
       <PageHeader home={t("distribution.home.operations", "Operations")} section={t("distribution.home.sales", "Sales & Marketing")} title={t("distribution.mp.title", "Dealer Programmes")}
-        subtitle={t("distribution.mp.subtitle", "Brand-new vehicle programmes with dealers and financing banks, the dealers' sales uploads and the bank endorsement letters.")}>
+        help={t("distribution.mp.subtitle", "Brand-new vehicle programmes with dealers and financing banks, the dealers' sales uploads and the bank endorsement letters.")}>
         {write ? <Button label={t("distribution.mp.add", "Add programme")} icon="pi pi-plus" onClick={() => setForm({ ...EMPTY })} /> : null}
       </PageHeader>
       <div className="pe-card">
@@ -138,20 +130,24 @@ const DealerProgrammes = () => {
             <DataTable value={programmes} dataKey="id" size="small" stripedRows emptyMessage={t("distribution.common.none", "Nothing to show")}>
               <Column field="code" header={t("distribution.common.code", "Code")} />
               <Column field="name" header={t("distribution.common.name", "Name")} />
-              <Column field="dealerName" header={t("distribution.mp.dealer", "Dealer")} />
-              <Column field="bankName" header={t("distribution.mp.bank", "Financing bank")} />
+              <Column header={t("distribution.mp.dealerBank", "Dealer / financing bank")} body={(p) => (
+                <span>{p.dealerName}{p.bankName ? <><br /><small className="pe-muted">{p.bankName}</small></> : null}</span>
+              )} />
               <Column field="insurerName" header={t("distribution.mp.insurer", "Insurer")} />
-              <Column header={t("distribution.mp.rates", "Rates")} body={(p) => `${p.ownDamageRate}% OD${p.actsOfNatureRate ? `, ${p.actsOfNatureRate}% AON` : ""}${p.includeCtpl ? `, CTPL ${p.ctplTermYears}y` : ""}`} />
-              <Column header={t("distribution.mp.whoPays", "Who pays")} body={payerText} />
+              <Column header={t("distribution.mp.rates", "Rates")} body={(p) => (
+                <span className="dist-rates">{[`OD ${p.ownDamageRate}%`, p.actsOfNatureRate ? `AON ${p.actsOfNatureRate}%` : null, p.includeCtpl ? `CTPL ${p.ctplTermYears}y` : null]
+                  .filter(Boolean).map((r) => <span key={r}>{r}</span>)}</span>
+              )} />
+              <Column header={t("distribution.mp.whoPays", "Who pays")} body={payerTerms} />
               <Column header={t("distribution.mp.issueMode", "Upload creates")} body={(p) => t(`distribution.mp.mode.${p.issueMode}`, p.issueMode)} />
               <Column field="sales" header={t("distribution.mp.sales", "Sales")} className="bv-num" headerClassName="bv-num" />
               <Column header={t("distribution.common.status", "Status")} body={(p) => <StatusTag status={p.status} />} />
-              <Column body={(p) => (
-                <div className="dist-actions">
-                  <Button icon="pi pi-calculator" text size="small" tooltip={t("distribution.mp.preview", "Premium preview")} aria-label={t("distribution.mp.preview", "Premium preview")} onClick={() => setPreview({ programme: p, invoicePrice: 1000000, result: null })} />
-                  {write ? <Button icon="pi pi-pencil" text size="small" aria-label={t("distribution.common.edit", "Edit")}
-                    onClick={() => setForm({ ...EMPTY, ...p, mortgageeClause: p.mortgageeClause || "", notes: p.notes || "", effectiveFrom: fromIsoDay(p.effectiveFrom), effectiveTo: fromIsoDay(p.effectiveTo) })} /> : null}
-                </div>
+              <Column {...actionsColumn} header={t("common.actions", "Actions")} body={(p) => (
+                <RowActions editLabel={t("distribution.mp.edit", "Edit programme")} onEdit={write ? () => setForm({ ...EMPTY, ...p, mortgageeClause: p.mortgageeClause || "", notes: p.notes || "",
+                  effectiveFrom: fromIsoDay(p.effectiveFrom), effectiveTo: fromIsoDay(p.effectiveTo) }) : null}>
+                  <Button type="button" icon="pi pi-calculator" text rounded tooltip={t("distribution.mp.preview", "Premium preview")} tooltipOptions={{ position: "top" }}
+                    aria-label={t("distribution.mp.preview", "Premium preview")} onClick={() => setPreview(p)} />
+                </RowActions>
               )} />
             </DataTable>
           </TabPanel>
@@ -159,7 +155,7 @@ const DealerProgrammes = () => {
             {write ? (
               <div className="dist-toolbar">
                 <Dropdown value={uploadFor} options={programmes.filter((p) => p.status === "active").map((p) => ({ value: p.id, label: `${p.code} · ${p.name}` }))}
-                  placeholder={t("distribution.mp.choose", "Choose the programme")} onChange={(e) => setUploadFor(e.value)} className="w-24rem" />
+                  placeholder={t("distribution.mp.choose", "Choose the programme")} onChange={(e) => setUploadFor(e.value)} className="dist-upload-programme" />
                 <Button label={t("distribution.mp.template", "Template")} icon="pi pi-download" outlined size="small" onClick={() => run(() => service.salesTemplate())} />
                 <input ref={fileRef} type="file" accept=".xlsx,.csv" hidden onChange={(e) => upload(e.target.files?.[0])} aria-label={t("distribution.mp.file", "Sales file")} />
                 <Button label={t("distribution.mp.uploadFile", "Upload sales")} icon="pi pi-upload" size="small" disabled={!uploadFor || busy} loading={busy} onClick={() => fileRef.current?.click()} />
@@ -181,7 +177,8 @@ const DealerProgrammes = () => {
               <Column field="rowsCreated" header={t("distribution.mp.created", "Created")} className="bv-num" headerClassName="bv-num" />
               <Column field="rowsFailed" header={t("distribution.mp.failed", "Failed")} className="bv-num" headerClassName="bv-num" />
               <Column header={t("distribution.common.status", "Status")} body={(b) => <StatusTag status={b.status} />} />
-              <Column header={t("distribution.mp.uploaded", "Uploaded")} body={(b) => `${dateTime(b.createdAt)} ${b.createdBy || ""}`} />
+              <Column header={t("distribution.mp.uploaded", "Uploaded")} body={(b) => dateTime(b.createdAt)} />
+              <Column field="createdBy" header={t("distribution.mp.uploadedBy", "Uploaded by")} />
             </DataTable>
             {batch ? (
               <>
@@ -228,7 +225,10 @@ const DealerProgrammes = () => {
               <Dropdown value={form.bankChannelId} options={banks} filter showClear onChange={(e) => set({ bankChannelId: e.value || null })} />
             </Field>
             <Field label={t("distribution.mp.insurer", "Insurer")}><Dropdown value={form.insuranceCompanyId} options={insurers} filter showClear onChange={(e) => set({ insuranceCompanyId: e.value || null })} /></Field>
-            <Field label={t("distribution.mp.vehicleType", "Default vehicle class")}><InputText value={form.vehicleType || ""} onChange={(e) => set({ vehicleType: e.target.value })} /></Field>
+            <Field label={t("distribution.mp.vehicleType", "Default vehicle class")} htmlFor="mp-class">
+              <Dropdown inputId="mp-class" value={form.vehicleType} options={vehicleTypes} filter
+                onChange={(e) => set({ vehicleType: e.value, ...(vehicleTypes.find((v) => v.value === e.value)?.threeYears === false ? { ctplTermYears: 1 } : {}) })} />
+            </Field>
             <Field label={t("distribution.mp.odRate", "Own damage rate %")}><InputNumber value={form.ownDamageRate} min={0} maxFractionDigits={4} onValueChange={(e) => set({ ownDamageRate: e.value ?? 0 })} /></Field>
             <Field label={t("distribution.mp.aonRate", "Acts of nature rate %")}><InputNumber value={form.actsOfNatureRate} min={0} maxFractionDigits={4} onValueChange={(e) => set({ actsOfNatureRate: e.value ?? 0 })} /></Field>
             <Field label={t("distribution.mp.bi", "Excess bodily injury")}><InputNumber value={form.bodilyInjury} min={0} onValueChange={(e) => set({ bodilyInjury: e.value ?? 0 })} /></Field>
@@ -236,7 +236,8 @@ const DealerProgrammes = () => {
             <Field label={t("distribution.mp.ctpl", "CTPL")}>
               <span className="flex align-items-center gap-2"><Checkbox inputId="mp-ctpl" checked={form.includeCtpl} onChange={(e) => set({ includeCtpl: e.checked })} />
                 <label htmlFor="mp-ctpl">{t("distribution.mp.includeCtpl", "Include CTPL")}</label>
-                <Dropdown value={form.ctplTermYears} options={[1, 3].map((v) => ({ value: v, label: t("distribution.mp.years", "{{count}} year(s)", { count: v }) }))} onChange={(e) => set({ ctplTermYears: e.value })} disabled={!form.includeCtpl} /></span>
+                <Dropdown value={form.ctplTermYears} options={[1, 3].map((v) => ({ value: v, label: t("distribution.mp.years", "{{count}} year(s)", { count: v }), disabled: v === 3 && !threeYearCtpl }))}
+                  onChange={(e) => set({ ctplTermYears: e.value })} disabled={!form.includeCtpl} /></span>
             </Field>
             <Field label={t("distribution.mp.issueMode", "Upload creates")}>
               <Dropdown value={form.issueMode} options={["quotation", "policy"].map((v) => ({ value: v, label: t(`distribution.mp.mode.${v}`, v) }))} onChange={(e) => set({ issueMode: e.value })} />
@@ -268,28 +269,7 @@ const DealerProgrammes = () => {
         )}
       </Dialog>
 
-      <DetailDialog visible={!!preview} onHide={() => setPreview(null)} size="md" header={preview ? `${t("distribution.mp.preview", "Premium preview")} · ${preview.programme.code}` : ""}>
-        {preview && (
-          <>
-            <div className="flex align-items-end gap-2 mb-3">
-              <Field label={t("distribution.mp.invoicePrice", "Invoice price")} htmlFor="mp-preview-price">
-                <InputNumber inputId="mp-preview-price" value={preview.invoicePrice} min={1} onValueChange={(e) => setPreview({ ...preview, invoicePrice: e.value })} />
-              </Field>
-              <Button label={t("distribution.mp.compute", "Compute")} icon="pi pi-calculator" outlined onClick={runPreview} disabled={!preview.invoicePrice} />
-            </div>
-            {preview.result ? (
-              <KeyValueGrid columns={3} items={[
-                { label: t("distribution.mp.net", "Net premium"), value: preview.result.netPremium, type: "amount" },
-                { label: t("distribution.mp.taxes", "Taxes"), value: preview.result.taxes, type: "amount" },
-                { label: t("distribution.mp.ctpl", "CTPL"), value: preview.result.ctplPremium, type: "amount" },
-                { label: t("distribution.mp.gross", "Total"), value: preview.result.grossPremium, type: "amount" },
-                { label: t("distribution.mp.payerShare", "Dealer / bank"), value: preview.result.payer, type: "amount" },
-                { label: t("distribution.mp.buyerShare", "Buyer"), value: preview.result.buyer, type: "amount" },
-              ]} />
-            ) : null}
-          </>
-        )}
-      </DetailDialog>
+      <DealerPremiumPreview programme={preview} onHide={() => setPreview(null)} toast={toast} />
     </div>
   );
 };

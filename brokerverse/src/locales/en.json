@@ -12690,10 +12690,7 @@
       "deleteReasonHint": "Vehicle sold, total loss ..."
     },
     "mp": {
-      "freeYear": "First year free, paid by the {{payer}}",
-      "buyerPays": "The buyer pays",
-      "all": "all",
-      "subsidy": "{{payer}} pays {{amount}}, the buyer the rest",
+      "buyerPays": "Buyer pays",
       "title": "Dealer Programmes",
       "subtitle": "Brand-new vehicle programmes with dealers and financing banks, the dealers' sales uploads and the bank endorsement letters.",
       "add": "Add programme",
@@ -12748,7 +12745,6 @@
       "clause": "Mortgagee clause",
       "clauseHelp": "Used when the bank has no clause of its own ({{bankName}} is replaced by the bank's name)",
       "invoicePrice": "Invoice price",
-      "compute": "Compute",
       "net": "Net premium",
       "taxes": "Taxes",
       "gross": "Total",
@@ -12765,7 +12761,38 @@
         "percent": "Percent of premium",
         "amount": "Fixed amount",
         "full": "Full premium"
-      }
+      },
+      "terms": {
+        "firstYear": "{{payer}}, first year",
+        "buyer": "Buyer",
+        "full": "{{payer}}, full premium",
+        "share": "{{payer}} {{share}}, buyer the rest"
+      },
+      "computePremium": "Compute premium",
+      "vehicleClass": "Vehicle class",
+      "location": "Location (LGT)",
+      "standardLgt": "Standard LGT rate",
+      "financing": "Financing",
+      "financedBy": "Financed by {{bank}}",
+      "priceRange": "Enter an amount from {{min}} to {{max}}",
+      "payerPays": "{{payer}} pays",
+      "line": "Cover / charge",
+      "lineBase": "On",
+      "lineRate": "Rate",
+      "lineAmount": "Amount",
+      "ctplYears_one": "CTPL ({{count}} year)",
+      "ctplYears_other": "CTPL ({{count}} years)",
+      "adjustment": "Rating adjustment",
+      "basis": {
+        "sumInsured": "Sum insured {{amount}}",
+        "od": "Own damage / theft {{rate}}",
+        "aon": "Acts of nature {{rate}}",
+        "lgt": "LGT {{rate}} {{place}}",
+        "standard": "(standard rate)",
+        "programme": "Programme {{code}}"
+      },
+      "dealerBank": "Dealer / financing bank",
+      "uploadedBy": "Uploaded by"
     },
     "ch": {
       "confirmDelete": "Remove the channel {{name}}? A channel with business is made inactive instead.",

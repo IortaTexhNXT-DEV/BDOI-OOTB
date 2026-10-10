@@ -95,6 +95,7 @@ const distributionService = {
   createProgramme: (body) => post(MP, body),
   updateProgramme: (programmeId, body) => put(`${MP}/${id(programmeId)}`, body),
   premiumPreview: (programmeId, params) => request(`${MP}/${id(programmeId)}/premium-preview${qs(params)}`),
+  previewOptions: () => request(`${MP}/preview-options`),
   uploadSales: (programmeId, file) => upload(`${MP}/${id(programmeId)}/sales/upload`, file),
   salesTemplate: () => fileFrom(`${MP}/upload-template`, "Dealer_Sales_Upload_Template.xlsx"),
   salesBatches: (params) => request(`${MP}/batches${qs(params)}`),
