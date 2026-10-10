@@ -37,7 +37,7 @@ afterAll(async () => { await pool.end(); });
 describe('catalogue', () => {
   it('runs every TISPH layout over the sample business', async () => {
     const codes = (await q("SELECT code FROM report_definitions WHERE code LIKE 'tisph-%' ORDER BY sort_order")).map((r) => r.code);
-    expect(codes).toHaveLength(16);
+    expect(codes).toHaveLength(18);
     for (const code of codes) await run(ctx.api, code, { FromDate: addDays(day, -20), ToDate: day });
   });
 

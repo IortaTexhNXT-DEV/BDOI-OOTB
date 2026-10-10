@@ -8,7 +8,8 @@
  *        dailyGlBalance     beginning balance and the balance at the end of each calendar day from From Date
  * CR-15  paymentSummary, dailyReversals, pdcEncoded, pdcCancelled, pdcMaturing, pdcMaturingMatrix, pdcHistory,
  *        pdcAcknowledgements
- * CR-14  netRemittanceFullyPaid, netRemittancePartiallyPaid, premiumPaymentStatus, invoiceTracker; the bank matching
+ * CR-14  netRemittanceFullyPaid, netRemittancePartiallyPaid, premiumPaymentStatus, invoiceTracker, soaPerPartner,
+ *        reconciliationSchedule; the bank matching
  *        reports insufficientPayments and overpayments
  */
 import { FS_MAP } from '../accounting/fsVersions.js';
@@ -163,6 +164,29 @@ const invoiceTracker = `SELECT x.*, CASE WHEN x.balance <= 0 THEN 'Paid' WHEN x.
     LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
     WHERE rv.status NOT IN ('cancelled', 'credited') AND COALESCE(rv.created_at::date, rv.due_date) BETWEEN $1 AND $2) x`;
 
+// Statement of account per Insurance Partner (TIS-BRD-RPT-OPS-08): premium, remitting and commission sections of the
+// broker-billed policies incepting in the period, from their bills
+const soaPerPartner = `SELECT ${INSURER_DIMS}, p.policy_number AS "policyNumber", ${CLIENT_DIMS}, pr.name AS product, pr.id::text AS _product_id, pr.code AS _product_code,
+    p.inception_date AS "inceptionDate", b.gross AS "grossPremium", b.net AS "netPremium", b.vat, b.dst, b.lgt, b.commission, b.commission_vat AS "commissionVat",
+    b.commission_ewt AS "commissionEwt", b.gross - b.commission AS "netRemitting", b.gross - b.balance AS "collected", rm.remittance_number AS "remittanceNumber",
+    initcap(rm.status) AS "remittanceStatus"
+  FROM policies p JOIN (SELECT rv.policy_id, sum(rv.amount) AS gross, sum(COALESCE(rv.net_premium, 0)) AS net, sum(COALESCE(rv.vat, 0)) AS vat, sum(COALESCE(rv.dst, 0)) AS dst,
+      sum(COALESCE(rv.lgt, 0)) AS lgt, sum(COALESCE(rv.commission_amount, 0)) AS commission, sum(COALESCE(rv.commission_vat, 0)) AS commission_vat,
+      sum(COALESCE(rv.commission_ewt, 0)) AS commission_ewt, sum(rv.balance) AS balance
+    FROM receivables rv WHERE rv.status NOT IN ('cancelled', 'written-off', 'credited') GROUP BY rv.policy_id) b ON b.policy_id = p.id
+  LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN products pr ON pr.id = p.product_id LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id ${REMITTED}
+  WHERE p.billing_mode <> 'direct' AND p.inception_date BETWEEN $1 AND $2`;
+// Reconciliation schedule (TIS-BRD-RPT-OPS-09): each line of the insurers' statements of the period against the
+// broker's records, with the differences
+const reconciliationSchedule = `SELECT ${INSURER_DIMS}, s.statement_number AS "statementNumber", s.statement_ref AS "statementReference", s.period_from AS "periodFrom", s.period_to AS "periodTo",
+    l.line_no AS "lineNo", l.policy_number AS "policyNumber", l.insured_name AS "insuredName", l.txn_date AS "transactionDate",
+    l.gross_premium AS "partnerGross", l.broker_gross AS "tisphGross", COALESCE(l.gross_premium, 0) - COALESCE(l.broker_gross, 0) AS "grossDifference",
+    l.commission AS "partnerCommission", l.broker_commission AS "tisphCommission", COALESCE(l.commission, 0) - COALESCE(l.broker_commission, 0) AS "commissionDifference",
+    l.amount_paid AS "partnerPaid", l.broker_amount AS "tisphAmount", COALESCE(l.amount_paid, 0) - COALESCE(l.broker_amount, 0) AS "paidDifference",
+    initcap(replace(COALESCE(l.match_status, 'unmatched'), '-', ' ')) AS status, initcap(s.status) AS "statementStatus"
+  FROM insurer_statement_lines l JOIN insurer_statements s ON s.id = l.statement_id LEFT JOIN insurance_companies ic ON ic.id = s.insurance_company_id
+  WHERE COALESCE(s.period_to, s.created_at::date) BETWEEN $1 AND $2`;
+
 export const TISPH_QUERIES = {
   fsByVersion: {
     sql: fsRows(`(LEAST($1::date, ${YS}) - interval '1 year')::date`), filters: ['account', 'fsVersion'], defaults: FS_VERSION,
@@ -230,6 +254,14 @@ export const TISPH_QUERIES = {
     summary: { overdue: 'count(*) FILTER (WHERE f.status = \'Overdue\')', notDue: 'count(*) FILTER (WHERE f.status = \'Not due\')',
       partiallyPaid: 'count(*) FILTER (WHERE f."paymentState" = \'Partially paid\')', paid: 'count(*) FILTER (WHERE f."paymentState" = \'Paid\')',
       overpayments: "(SELECT count(*) FROM unapplied_collections u WHERE u.kind = 'excess' AND u.status = 'open')" },
+  },
+  soaPerPartner: {
+    sql: soaPerPartner, filters: ['insurer', 'product'], criteria: { 'Principal Insurer': { groupBy: 'insurer' }, Product: { groupBy: 'product' }, Overall: {} },
+    orderBy: 'f.insurer, f."inceptionDate", f."policyNumber"',
+  },
+  reconciliationSchedule: {
+    sql: reconciliationSchedule, filters: ['insurer', 'status'], criteria: { 'Principal Insurer': { groupBy: 'insurer' }, Status: { groupBy: 'status' }, Overall: {} },
+    orderBy: 'f.insurer, f."statementNumber", f."lineNo"',
   },
   premiumPaymentStatus: {
     sql: premiumPaymentStatus, filters: ['insurer', 'client', 'product'],
