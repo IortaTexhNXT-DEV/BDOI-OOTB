@@ -12,6 +12,7 @@ import KeyValueGrid from "../KeyValueGrid";
 import StatusChip from "../StatusChip";
 import ConfirmDialog from "../ConfirmDialog";
 import { HelpTip } from "../PageHeader";
+import UploadPreview from "./UploadPreview";
 import "./index.scss";
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -57,8 +58,18 @@ const ErrorTable = ({ errors }) => {
  * summary from `previewFacts(result)` and the errors with row and column, nothing saved), then loads the file after the
  * confirmation that `confirmLoad(result)` describes (ConfirmDialog props). note / help: one sentence behind the help
  * icon of the title. onDone(result) is called after an upload that saved at least one row.
+ *
+ * Upload preview (an import the server keeps between validation and loading, such as the remittance policy list):
+ * `steps` add fields before the file ([{ key, label, node }]) with `fields` (sent with the file) and `fieldsReady`;
+ * `previewRows` (UploadPreview loadRows) shows the rows read with their result, filtered by `resultFilters`, with
+ * `rowColumns`; `onErrorReport(preview)` downloads the error report; `onCommit(preview)` loads what was validated
+ * (instead of sending the file again) once `preview.canCommit` is not false. `loadLabel` may be a function of the
+ * preview ("Create 3 draft remittances").
  */
-const ImportDialog = ({ visible, onHide, title, targets, note, help, goLiveDate = false, onDone, previewFacts, confirmLoad, loadLabel }) => {
+const ImportDialog = ({
+  visible, onHide, title, targets, note, help, goLiveDate = false, onDone, previewFacts, confirmLoad, loadLabel,
+  steps, fields: extraFields, fieldsReady = true, previewRows, rowColumns, resultFilters, onErrorReport, onCommit,
+}) => {
   const { t } = useTranslation();
   const [target, setTarget] = useState(targets?.[0] || null);
   const [file, setFile] = useState(null);
@@ -80,7 +91,7 @@ const ImportDialog = ({ visible, onHide, title, targets, note, help, goLiveDate 
   }, [visible, targets]);
 
   const validates = !!target?.validatePath;
-  const fields = () => (goLiveDate ? { goLiveDate: date } : {});
+  const fields = () => ({ ...(extraFields || {}), ...(goLiveDate ? { goLiveDate: date } : {}) });
   const changed = () => { setResult(null); setPreview(null); setError(null); };
 
   const download = async () => {
@@ -110,10 +121,10 @@ const ImportDialog = ({ visible, onHide, title, targets, note, help, goLiveDate 
     setError(null);
     setResult(null);
     try {
-      const r = await importService.upload(target.uploadPath, file, fields());
+      const r = onCommit ? await onCommit(preview) : await importService.upload(target.uploadPath, file, fields());
       setResult(r);
       setPreview(null);
-      if (onDone && (r.created || r.updated || r.accounts)) onDone(r);
+      if (onDone && (onCommit || r.created || r.updated || r.accounts)) onDone(r);
     } catch (e) {
       setError(failure(e));
       throw e;
@@ -127,8 +138,11 @@ const ImportDialog = ({ visible, onHide, title, targets, note, help, goLiveDate 
     else load().catch(() => {});
   };
 
-  const ready = !!(target && file && (!goLiveDate || ISO_DATE.test(date)));
-  const loadReady = ready && (!validates || preview?.valid === true);
+  const ready = !!(target && file && fieldsReady && (!goLiveDate || ISO_DATE.test(date)));
+  const committable = (p) => (onCommit ? !!p && p.canCommit !== false : p?.valid === true);
+  const loadReady = ready && (!validates || committable(preview));
+  const loadText = typeof loadLabel === "function" ? (preview && loadLabel(preview)) || t("importDialog.upload") : loadLabel || t("importDialog.upload");
+  const previewErrors = preview ? errorRows(preview.errors).length || Number(preview.counts?.errors) || 0 : 0;
   const tip = help || note;
   const defaultFacts = (r) => [
     { label: t("importDialog.rows"), value: r.rows ?? r.total, type: "number", hidden: (r.rows ?? r.total) === undefined },
@@ -150,7 +164,7 @@ const ImportDialog = ({ visible, onHide, title, targets, note, help, goLiveDate 
         <Button type="button" label={busy === "validate" ? t("importDialog.validating") : t("importDialog.validate")} icon="pi pi-check-square" outlined
           onClick={validate} disabled={!ready || !!busy} />
       )}
-      <Button type="button" label={busy === "upload" ? t("importDialog.uploading") : loadLabel || t("importDialog.upload")} icon="pi pi-upload"
+      <Button type="button" label={busy === "upload" ? t("importDialog.uploading") : loadText} icon="pi pi-upload"
         onClick={upload} disabled={!loadReady || !!busy} />
     </div>
   );
@@ -173,6 +187,12 @@ const ImportDialog = ({ visible, onHide, title, targets, note, help, goLiveDate 
               <Button type="button" label={t("importDialog.downloadTemplate")} icon="pi pi-download" outlined size="small" className="import-dialog__button" onClick={download} disabled={!target} />
             </div>
           </div>
+          {(steps || []).map((s) => (
+            <div className="import-dialog__step" key={s.key}>
+              <span className="import-dialog__label"><span className="import-dialog__no">{number()}</span>{s.label}</span>
+              <div className="import-dialog__control">{s.node}</div>
+            </div>
+          ))}
           {goLiveDate && (
             <div className="import-dialog__step">
               <label htmlFor="import-go-live" className="import-dialog__label"><span className="import-dialog__no">{number()}</span>{t("importDialog.goLiveDate")}</label>
@@ -208,10 +228,14 @@ const ImportDialog = ({ visible, onHide, title, targets, note, help, goLiveDate 
           <section className="import-dialog__outcome" aria-label={t("importDialog.validationResult")}>
             <div className="import-dialog__outcome-title">
               <span>{t("importDialog.validationResult")}</span>
-              <StatusChip label={preview.valid ? t("importDialog.valid") : t("importDialog.invalid")} severity={preview.valid ? "success" : "danger"} />
+              {onCommit && preview.statusLabel
+                ? <StatusChip code={preview.status} label={preview.statusLabel} />
+                : <StatusChip label={preview.valid ? t("importDialog.valid") : t("importDialog.invalid")} severity={preview.valid ? "success" : "danger"} />}
             </div>
             <KeyValueGrid columns="auto" items={previewFacts ? previewFacts(preview) : defaultFacts(preview)} />
-            <ErrorTable errors={preview.errors} />
+            {previewRows ? (
+              <UploadPreview preview={preview} loadRows={previewRows} columns={rowColumns || []} filters={resultFilters} onErrorReport={onErrorReport} hasErrors={previewErrors > 0} />
+            ) : <ErrorTable errors={preview.errors} />}
           </section>
         )}
         {result && (
@@ -245,8 +269,22 @@ ImportDialog.propTypes = {
   onDone: PropTypes.func,
   previewFacts: PropTypes.func,
   confirmLoad: PropTypes.func,
-  loadLabel: PropTypes.string,
+  loadLabel: PropTypes.oneOfType([PropTypes.string, PropTypes.func]),
+  /** further steps before the file: [{ key, label, node }] */
+  steps: PropTypes.arrayOf(PropTypes.shape({ key: PropTypes.string.isRequired, label: PropTypes.node, node: PropTypes.node })),
+  /** form fields sent with the file (validate and upload) */
+  fields: PropTypes.object,
+  /** false while the further steps are incomplete */
+  fieldsReady: PropTypes.bool,
+  previewRows: PropTypes.func,
+  rowColumns: PropTypes.array,
+  resultFilters: PropTypes.arrayOf(PropTypes.shape({ label: PropTypes.string, value: PropTypes.any })),
+  onErrorReport: PropTypes.func,
+  /** loads the validated preview on the server: (preview) => Promise<result> */
+  onCommit: PropTypes.func,
 };
+
+export { UploadPreview };
 
 /** Upload target of a master type (GET /masters/:type/template, POST /masters/:type/upload). */
 export const masterTarget = (type, label) => ({ label, templatePath: `/masters/${type}/template?samples=true`, uploadPath: `/masters/${type}/upload` });

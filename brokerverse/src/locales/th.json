@@ -6713,7 +6713,11 @@
     "errors": "ข้อผิดพลาด",
     "row": "แถว",
     "column": "คอลัมน์",
-    "message": "ข้อความ"
+    "message": "ข้อความ",
+    "rowPreview": "แถวที่อ่านได้",
+    "showRows": "แสดง",
+    "errorReport": "ดาวน์โหลดรายงานข้อผิดพลาด",
+    "noRows": "ไม่มีแถว"
   },
   "periodManagement": {
     "help": "งวดที่ปิดชั่วคราวรับการบันทึกบัญชีจากผู้จัดการฝ่ายบัญชีเท่านั้น งวดที่ปิดแล้วไม่รับการบันทึก",
@@ -7548,5 +7552,23 @@
       "eligible_one": "Mark {{count}} line eligible",
       "eligible_other": "Mark {{count}} lines eligible"
     }
+  },
+  "eligibilityNote": {
+    "approvers": "ผู้ที่ตัดสินได้: {{names}}"
+  },
+  "decisionBar": {
+    "label": "การตัดสิน",
+    "approve": "อนุมัติ",
+    "reject": "ปฏิเสธ",
+    "yourLimit": "วงเงินของคุณ {{amount}}",
+    "noLimit": "ไม่มีวงเงินอนุมัติ",
+    "thisItem": "รายการนี้ {{amount}}"
+  },
+  "rowActions": {
+    "label": "การดำเนินการ"
+  },
+  "detailHeader": {
+    "lifecycle": "ขั้นตอนของรายการ",
+    "currentStep": "(ขั้นตอนปัจจุบัน)"
   }
 }

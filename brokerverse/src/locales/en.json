@@ -7452,7 +7452,11 @@
     "errors": "Errors",
     "row": "Row",
     "column": "Column",
-    "message": "Message"
+    "message": "Message",
+    "rowPreview": "Rows read",
+    "showRows": "Show",
+    "errorReport": "Download error report",
+    "noRows": "No rows."
   },
   "periodManagement": {
     "help": "Soft-closed periods take postings from Accounting Managers only; closed periods take none.",
@@ -13051,5 +13055,23 @@
       "eligible_one": "Mark {{count}} line eligible",
       "eligible_other": "Mark {{count}} lines eligible"
     }
+  },
+  "eligibilityNote": {
+    "approvers": "Can decide: {{names}}"
+  },
+  "decisionBar": {
+    "label": "Decision",
+    "approve": "Approve",
+    "reject": "Reject",
+    "yourLimit": "Your limit {{amount}}",
+    "noLimit": "No approval limit",
+    "thisItem": "This item {{amount}}"
+  },
+  "rowActions": {
+    "label": "Actions"
+  },
+  "detailHeader": {
+    "lifecycle": "Lifecycle",
+    "currentStep": "(current step)"
   }
 }

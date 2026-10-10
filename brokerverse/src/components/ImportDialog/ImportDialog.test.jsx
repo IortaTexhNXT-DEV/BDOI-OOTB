@@ -79,4 +79,56 @@ describe("ImportDialog", () => {
     expect(fileSize(2048)).toBe("2.0 KB");
     expect(fileSize(3 * 1024 * 1024)).toBe("3.0 MB");
   });
+
+  it("upload preview: further steps, the rows read with their result filtered on the server, the error report, then commit", async () => {
+    const targets = [{ label: "Policy list", templatePath: "/remittance/imports/template", validatePath: "/remittance/imports/validate" }];
+    const preview = { id: "imp_1", status: "validated", statusLabel: "Validated", canCommit: true, counts: { rows: 3, ready: 2, errors: 1 }, errors: [] };
+    importService.upload.mockResolvedValueOnce(preview);
+    const rows = { all: [{ row: 2, policyNo: "TISPH-PC-1", due: 40191.18, result: { code: "ready", label: "Ready" } },
+      { row: 3, policyNo: "TISPH-PC-2", due: 1200, result: { code: "ready", label: "Ready" } },
+      { row: 4, policyNo: "X-9", due: null, result: { code: "not-found", label: "Not found", severity: "danger" } }] };
+    rows.errors = [rows.all[2]];
+    const previewRows = jest.fn((p, { result }) => Promise.resolve({ rows: rows[result], total: rows[result].length }));
+    const onErrorReport = jest.fn().mockResolvedValue();
+    const onCommit = jest.fn().mockResolvedValue({ message: "2 draft remittance(s) created." });
+    const onDone = jest.fn();
+    const { rerender } = render(<ImportDialog visible onHide={() => {}} title="Import policy list" targets={targets} fields={{ purposeCode: "ROC-GOLIVE" }} fieldsReady={false}
+      steps={[{ key: "purpose", label: "Purpose", node: <span>purpose picker</span> }]} previewRows={previewRows} onErrorReport={onErrorReport} onCommit={onCommit} onDone={onDone}
+      rowColumns={[{ field: "row", header: "Row", type: "number", key: true }, { field: "policyNo", header: "Policy No" }, { field: "due", header: "Due", type: "amount" },
+        { field: "result", header: "Result", type: "result" }]}
+      resultFilters={[{ label: "All rows", value: "all" }, { label: "Errors", value: "errors" }]}
+      loadLabel={(p) => `Create ${p.counts.ready} draft remittances`} previewFacts={(p) => [{ label: "Ready", value: p.counts.ready, type: "number" }]} />);
+    expect(screen.getByText("Purpose")).toBeInTheDocument();
+    expect(screen.getByText("purpose picker")).toBeInTheDocument();
+    choose(csv("policies.xlsx"));
+    expect(button("Validate")).toBeDisabled();
+    rerender(<ImportDialog visible onHide={() => {}} title="Import policy list" targets={targets} fields={{ purposeCode: "ROC-GOLIVE" }} fieldsReady
+      steps={[{ key: "purpose", label: "Purpose", node: <span>purpose picker</span> }]} previewRows={previewRows} onErrorReport={onErrorReport} onCommit={onCommit} onDone={onDone}
+      rowColumns={[{ field: "row", header: "Row", type: "number", key: true }, { field: "policyNo", header: "Policy No" }, { field: "due", header: "Due", type: "amount" },
+        { field: "result", header: "Result", type: "result" }]}
+      resultFilters={[{ label: "All rows", value: "all" }, { label: "Errors", value: "errors" }]}
+      loadLabel={(p) => `Create ${p.counts.ready} draft remittances`} previewFacts={(p) => [{ label: "Ready", value: p.counts.ready, type: "number" }]} />);
+    fireEvent.click(button("Validate"));
+    expect(await screen.findByText("TISPH-PC-1")).toBeInTheDocument();
+    expect(importService.upload).toHaveBeenCalledWith("/remittance/imports/validate", expect.any(File), { purposeCode: "ROC-GOLIVE" });
+    expect(previewRows).toHaveBeenLastCalledWith(preview, { result: "all", page: 1, perPage: 50 });
+    const region = screen.getByRole("region", { name: "Rows read" });
+    expect(within(region).getByText((_, el) => !!el?.classList?.contains("p-tag") && el.textContent === "Not found")).toHaveClass("p-tag-danger");
+    expect(within(region).getByText(/40,191\.18/)).toBeInTheDocument();
+    expect(screen.getByText("Validated")).toBeInTheDocument();
+
+    fireEvent.keyDown(screen.getByLabelText("Show"), { key: "ArrowDown", code: "ArrowDown", keyCode: 40, which: 40, altKey: true });
+    fireEvent.click(await screen.findByRole("option", { name: "Errors", hidden: true }));
+    await waitFor(() => expect(previewRows).toHaveBeenLastCalledWith(preview, { result: "errors", page: 1, perPage: 50 }));
+    await waitFor(() => expect(within(region).queryByText("TISPH-PC-1")).toBeNull());
+
+    fireEvent.click(button("Download error report"));
+    await waitFor(() => expect(onErrorReport).toHaveBeenCalledWith(preview));
+
+    fireEvent.click(button("Create 2 draft remittances"));
+    await screen.findByText("2 draft remittance(s) created.");
+    expect(onCommit).toHaveBeenCalledWith(preview);
+    expect(importService.upload).toHaveBeenCalledTimes(1);
+    expect(onDone).toHaveBeenCalled();
+  });
 });

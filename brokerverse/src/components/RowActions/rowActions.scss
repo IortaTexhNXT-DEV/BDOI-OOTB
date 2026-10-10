@@ -1,0 +1,61 @@
+// Row menu of a list (components/RowActions). Theme CSS variables only.
+
+.bv-row-actions {
+  display: inline-flex;
+}
+
+.bv-row-actions__trigger.p-button {
+  width: 2rem;
+  height: 2rem;
+  color: var(--color-text);
+}
+
+.bv-row-actions__menu {
+  position: fixed;
+  z-index: 1200;
+  min-width: 12rem;
+  max-width: 22rem;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  background: var(--color-surface, #fff);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  font-family: var(--font-body);
+}
+
+.bv-row-actions__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 14px;
+  font-size: 14px;
+  color: var(--color-heading);
+  cursor: pointer;
+  outline: none;
+
+  &:hover,
+  &:focus {
+    background: var(--color-hover, rgba(0, 0, 0, 0.05));
+  }
+
+  &:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--primary-color);
+  }
+}
+
+.bv-row-actions__item--blocked {
+  cursor: default;
+
+  .bv-row-actions__label {
+    color: var(--color-text-muted);
+  }
+}
+
+.bv-row-actions__reason {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-text);
+  white-space: normal;
+}
