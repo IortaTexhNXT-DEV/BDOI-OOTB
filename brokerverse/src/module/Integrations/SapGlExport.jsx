@@ -96,19 +96,19 @@ const SapGlExport = () => {
           <Dropdown value={status} showClear placeholder={t("sapGl.allStatuses")} aria-label={t("sapGl.status")} options={STATUSES.map((s) => ({ label: t(`sapGl.statuses.${s}`), value: s }))}
             onChange={(e) => setStatus(e.value)} />
         </div>
-        <DataTable {...list.tableProps} dataKey="id" size="small" stripedRows emptyMessage={list.error || t("sapGl.noRuns")}>
+        <DataTable {...list.tableProps} dataKey="id" size="small" stripedRows scrollable emptyMessage={list.error || t("sapGl.noRuns")}>
           <Column header={t("sapGl.exportDate")} body={(r) => <div><div>{date(r.exportDate)}</div><div className="pe-muted">{t("sapGl.runNo", { n: r.runNo })}</div></div>} />
-          <Column header={t("sapGl.window")} body={(r) => <div className="pe-muted">{dateTime(r.windowFrom)} - {dateTime(r.windowTo)}</div>} />
+          <Column header={t("sapGl.window")} body={(r) => <div className="pe-muted"><div className="white-space-nowrap">{dateTime(r.windowFrom)} -</div><div className="white-space-nowrap">{dateTime(r.windowTo)}</div></div>} />
           <Column header={t("sapGl.status")} body={(r) => <Tag className="pe-tag" value={t(`sapGl.statuses.${r.status}`)} severity={SEVERITY[r.status] || "info"} />} />
           <Column header={t("sapGl.lines")} body={(r) => `${r.journalCount} / ${r.lineCount}`} />
           <Column header={t("sapGl.debit")} body={(r) => money(r.totalDebit)} className="bv-num" headerClassName="bv-num" />
           <Column header={t("sapGl.credit")} body={(r) => money(r.totalCredit)} className="bv-num" headerClassName="bv-num" />
           <Column header={t("sapGl.trigger")} body={(r) => <div><div>{t(`sapGl.triggers.${r.trigger}`)}</div><div className="pe-muted">{r.createdBy || ""}</div></div>} />
           <Column header={t("sapGl.notes")} body={notes} style={{ maxWidth: "18rem" }} />
-          <Column header={t("sapGl.files")} style={{ minWidth: "16rem" }} body={(r) => (r.files.length ? (
+          <Column header={t("sapGl.files")} body={(r) => (r.files.length ? (
             <div className="flex flex-column align-items-start gap-1">
               {r.files.map((f) => (
-                <Button key={f.kind} icon="pi pi-download" label={f.fileName} text size="small" className="white-space-nowrap" onClick={() => download(r, f.kind)} />
+                <Button key={f.kind} icon="pi pi-download" label={f.fileName} text size="small" className="sap-gl-file" onClick={() => download(r, f.kind)} />
               ))}
             </div>
           ) : "-")} />
