@@ -6613,7 +6613,10 @@
       "collection-reminder": "ส่งอีเมลแจ้งเตือนการชำระเงิน",
       "collection-call": "โทรติดตามหนี้",
       "collection-note": "บันทึกการติดตามหนี้",
-      "collection-commitment": "ลูกค้ารับว่าจะชำระ"
+      "collection-commitment": "ลูกค้ารับว่าจะชำระ",
+      "collection-sms": "ส่งการแจ้งเตือนชำระเงินทาง SMS",
+      "collection-visit": "เข้าพบเพื่อติดตามการชำระเงิน",
+      "collection-escalation": "ส่งเรื่องติดตามการชำระเงินต่อ"
     },
     "currentLimit": "วงเงินปัจจุบัน",
     "lastChanged": "แก้ไขล่าสุด",
@@ -6669,7 +6672,9 @@
     "autoMatchMessage": "กฎการจับคู่จะจับคู่รายการธนาคารที่ยังไม่จับคู่กับรายการในบัญชี และบันทึกการจับคู่",
     "autoMatched_one": "พบการจับคู่ {{count}} รายการ",
     "autoMatched_other": "พบการจับคู่ {{count}} รายการ",
-    "autoMatched": "พบการจับคู่ {{count}} รายการ"
+    "autoMatched": "พบการจับคู่ {{count}} รายการ",
+    "notYetPrepared": "ยังไม่ได้จัดทำ",
+    "notYetApproved": "ยังไม่ได้อนุมัติ"
   },
   "periodEnd": {
     "runActivity": "Run activity",

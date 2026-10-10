@@ -92,13 +92,13 @@ export const fromPostingRuleHistory = (rows = []) =>
 const SOURCES = { manual: "manual", "close-run": "closeRun", "year-end": "yearEnd", "year-end-reversal": "yearEndReversal", job: "job" };
 
 /**
- * Status histories { from, to, remarks, changedBy, changedAt, source }: periods (Period Management), bank
+ * Status histories { from, to, remarks, changedBy, changedByRoles, changedAt, source }: periods (Period Management), bank
  * reconciliations, close runs. `statusLabels` labels the status codes ({ "soft-closed": "Soft closed" }).
  */
 export const fromStatusHistory = (rows = [], { statusLabels = {} } = {}) => {
   const label = (code) => (code ? statusLabels[code] || statusLabel(code) : null);
   return rows.map((r, i) => toEntry({
-    id: r.id, at: r.changedAt, actionCode: "status", user: userOf(r.changedBy), fromStatus: label(r.from), toStatus: label(r.to), remarks: r.remarks,
+    id: r.id, at: r.changedAt, actionCode: "status", user: userOf(r.changedBy, null, r.changedByRoles), fromStatus: label(r.from), toStatus: label(r.to), remarks: r.remarks,
     source: r.source ? { channel: r.source === "job" ? "job" : "screen", label: SOURCES[r.source] ? i18n.t(`activityLog.sources.${SOURCES[r.source]}`) : humanize(r.source) } : null,
   }, i));
 };
@@ -113,11 +113,18 @@ export const fromAssignmentHistory = (rows = []) =>
     ],
   }, i));
 
-/** GET /credit-control/warranty/:policyId/actions; `actionLabels` names the actions as the screen does. */
+/**
+ * GET /credit-control/warranty/:policyId/actions (the monitor's own actions and the follow-ups on the policy's
+ * collection); `actionLabels` names the actions as the screen does.
+ */
 export const fromWarrantyActions = (rows = [], { actionLabels = {} } = {}) =>
   rows.map((r, i) => toEntry({
-    id: r.id, at: r.createdAt, actionCode: r.action, actionLabel: actionLabels[r.action] || null, user: userOf(r.createdBy), remarks: r.notes,
-    changes: r.endorsementNumber ? [{ field: "endorsement", label: field("endorsement"), before: null, after: r.endorsementNumber }] : [],
+    id: r.id, at: r.createdAt, actionCode: r.action, actionLabel: actionLabels[r.action] || null, user: userOf(r.createdBy, null, r.createdByRoles), remarks: r.notes,
+    changes: [
+      r.endorsementNumber ? { field: "endorsement", label: field("endorsement"), before: null, after: r.endorsementNumber } : null,
+      r.callOutcome ? { field: "callOutcome", label: field("outcome"), before: null, after: humanize(r.callOutcome) } : null,
+      r.commitmentDate ? { field: "commitmentDate", label: field("commitmentDate"), before: null, after: formatDate(r.commitmentDate) } : null,
+    ],
   }, i));
 
 /** followUpActions of GET /collections/:id (calls, e-mails, notes, payment commitments). */

@@ -8428,7 +8428,9 @@
     "autoMatchTitle": "Auto-match the statement lines",
     "autoMatchMessage": "The matching rules pair the unmatched bank lines with the book entries and record the matches.",
     "autoMatched_one": "{{count}} match found",
-    "autoMatched_other": "{{count}} matches found"
+    "autoMatched_other": "{{count}} matches found",
+    "notYetPrepared": "Not yet prepared",
+    "notYetApproved": "Not yet approved"
   },
   "followUps": {
     "adviceReference": "Remittance advice / reference",
@@ -8952,7 +8954,10 @@
       "collection-reminder": "Payment reminder e-mailed",
       "collection-call": "Collection call",
       "collection-note": "Collection note",
-      "collection-commitment": "Payment commitment"
+      "collection-commitment": "Payment commitment",
+      "collection-sms": "Payment reminder sent by SMS",
+      "collection-visit": "Collection visit",
+      "collection-escalation": "Collection escalated"
     },
     "cancel": "Cancel",
     "send": "Send",
