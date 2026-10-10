@@ -40,7 +40,7 @@ describe("promotion of a quotation", () => {
   it("shows the terms; only a holder of write:promotion-rates changes the rate", () => {
     const { rerender } = render(<PromotionPanel quotation={{ ...QUOTE, promotion: PROMO }} />);
     expect(screen.getByText("PRM-FORTUNER26 v1")).toBeInTheDocument();
-    expect(screen.getByText("PHP 9,018.00 (19.50%)")).toBeInTheDocument();
+    expect(screen.getByText(/9,018\.00 \(19\.50%\)/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Change promo rate" })).toBeNull();
     localStorage.setItem("USER_PERMISSIONS", JSON.stringify(["read:quotations", "write:quotations", "write:promotion-rates"]));
     rerender(<PromotionPanel quotation={{ ...QUOTE, promotion: { ...PROMO } }} />);

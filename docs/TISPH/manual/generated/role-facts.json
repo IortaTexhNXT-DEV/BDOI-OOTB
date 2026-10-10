@@ -703,6 +703,39 @@
       "TIS Operations Unit Head"
      ],
      "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Policy > Endorsement approval and booking",
+     "approval": "Return premium / refund to client within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
     }
    ],
    "sod": [
@@ -1409,6 +1442,27 @@
     {
      "what": "Approve or return renewal terms of another user",
      "kind": "maker-checker"
+    },
+    {
+     "what": "Quotation discount",
+     "kind": "authority",
+     "type": "quotation_discount",
+     "step": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "limit": "10%"
+    },
+    {
+     "what": "Policy issuance",
+     "kind": "authority",
+     "type": "policy_issue",
+     "step": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "limit": "PHP 3,000,000.00"
+    },
+    {
+     "what": "Return premium / refund to client",
+     "kind": "authority",
+     "type": "return_premium",
+     "step": "Operations > Policy > Endorsement approval and booking",
+     "limit": "PHP 50,000.00"
     }
    ],
    "approvedBy": [
@@ -1468,6 +1522,39 @@
      "approval": "Underwriting referral approval within the approver's limit",
      "approvers": [
       "TIS Operations Unit Head"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Policy > Endorsement approval and booking",
+     "approval": "Return premium / refund to client within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
      ],
      "kind": "authority"
     }
@@ -2324,6 +2411,27 @@
     {
      "what": "Approve or return renewal terms of another user",
      "kind": "maker-checker"
+    },
+    {
+     "what": "Quotation discount",
+     "kind": "authority",
+     "type": "quotation_discount",
+     "step": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "limit": "15%"
+    },
+    {
+     "what": "Policy issuance",
+     "kind": "authority",
+     "type": "policy_issue",
+     "step": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "limit": "PHP 10,000,000.00"
+    },
+    {
+     "what": "Return premium / refund to client",
+     "kind": "authority",
+     "type": "return_premium",
+     "step": "Operations > Policy > Endorsement approval and booking",
+     "limit": "PHP 250,000.00"
     }
    ],
    "approvedBy": [
@@ -2391,6 +2499,39 @@
      "approval": "Underwriting referral approval within the approver's limit",
      "approvers": [
       "TIS Operations Unit Head"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Policy > Endorsement approval and booking",
+     "approval": "Return premium / refund to client within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
      ],
      "kind": "authority"
     }
@@ -3137,6 +3278,39 @@
      "approval": "Underwriting referral approval within the approver's limit",
      "approvers": [
       "TIS Operations Unit Head"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Policy > Endorsement approval and booking",
+     "approval": "Return premium / refund to client within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
      ],
      "kind": "authority"
     }
@@ -3985,6 +4159,39 @@
      "approval": "Underwriting referral approval within the approver's limit",
      "approvers": [
       "TIS Operations Unit Head"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Policy > Endorsement approval and booking",
+     "approval": "Return premium / refund to client within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
      ],
      "kind": "authority"
     }
@@ -4875,6 +5082,27 @@
      "type": "underwriting_referral",
      "step": "Operations > Sales & Marketing > Quotations > Underwriting referral",
      "limit": "PHP 10,000,000.00"
+    },
+    {
+     "what": "Quotation discount",
+     "kind": "authority",
+     "type": "quotation_discount",
+     "step": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "limit": "15%"
+    },
+    {
+     "what": "Policy issuance",
+     "kind": "authority",
+     "type": "policy_issue",
+     "step": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "limit": "PHP 10,000,000.00"
+    },
+    {
+     "what": "Return premium / refund to client",
+     "kind": "authority",
+     "type": "return_premium",
+     "step": "Operations > Policy > Endorsement approval and booking",
+     "limit": "PHP 250,000.00"
     }
    ],
    "approvedBy": [
@@ -4970,6 +5198,39 @@
      "approval": "Underwriting referral approval within the approver's limit",
      "approvers": [
       "TIS Operations Unit Head"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Policy > Endorsement approval and booking",
+     "approval": "Return premium / refund to client within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
      ],
      "kind": "authority"
     }
@@ -5116,6 +5377,28 @@
      "approval": "Remittance settlement, adjustment and transfer within the approver's limit",
      "approvers": [
       "TIS Finance & General Accounting",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
       "TIS General Manager"
      ],
      "kind": "authority"
@@ -5368,6 +5651,28 @@
      "approval": "Remittance settlement, adjustment and transfer within the approver's limit",
      "approvers": [
       "TIS Finance & General Accounting",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
       "TIS General Manager"
      ],
      "kind": "authority"
@@ -5643,6 +5948,28 @@
      "approval": "Remittance settlement, adjustment and transfer within the approver's limit",
      "approvers": [
       "TIS Finance & General Accounting",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
       "TIS General Manager"
      ],
      "kind": "authority"
@@ -6029,6 +6356,28 @@
      "approval": "Remittance settlement, adjustment and transfer within the approver's limit",
      "approvers": [
       "TIS Finance & General Accounting",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
       "TIS General Manager"
      ],
      "kind": "authority"
@@ -7458,6 +7807,28 @@
       "TIS General Manager"
      ],
      "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
     }
    ],
    "sod": [
@@ -8880,6 +9251,28 @@
      "approval": "Remittance settlement, adjustment and transfer within the approver's limit",
      "approvers": [
       "TIS Finance & General Accounting",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
       "TIS General Manager"
      ],
      "kind": "authority"
@@ -10516,6 +10909,27 @@
      "type": "remittance_settlement",
      "step": "Accounts > Remittance > Approvals (settlement, adjustment, transfer)",
      "limit": "No limit"
+    },
+    {
+     "what": "Quotation discount",
+     "kind": "authority",
+     "type": "quotation_discount",
+     "step": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "limit": "25%"
+    },
+    {
+     "what": "Policy issuance",
+     "kind": "authority",
+     "type": "policy_issue",
+     "step": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "limit": "No limit"
+    },
+    {
+     "what": "Return premium / refund to client",
+     "kind": "authority",
+     "type": "return_premium",
+     "step": "Operations > Policy > Endorsement approval and booking",
+     "limit": "No limit"
     }
    ],
    "approvedBy": [
@@ -10593,6 +11007,39 @@
      "approval": "Underwriting referral approval within the approver's limit",
      "approvers": [
       "TIS Operations Unit Head"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount)",
+     "approval": "Quotation discount within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Sales & Marketing > Placement Slips > Check against slip",
+     "approval": "Policy issuance within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
+     ],
+     "kind": "authority"
+    },
+    {
+     "work": "Operations > Policy > Endorsement approval and booking",
+     "approval": "Return premium / refund to client within the approver's limit",
+     "approvers": [
+      "TIS Sales Officer",
+      "TIS Sales Unit Head",
+      "TIS Operations Unit Head",
+      "TIS General Manager"
      ],
      "kind": "authority"
     }

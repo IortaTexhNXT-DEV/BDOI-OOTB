@@ -326,7 +326,7 @@ export async function sendForApproval(id, user) {
   await assertCurrent(q, 'sending it to the customer');
   assertReferralCleared(q, 'sending it to the customer');
   // QUOT-03: the raiser never sends; a second user holding approve:quotations approves the quotation, which sends it
-  const release = q.status === 'draft' && await getSetting('quotations.approve_before_send', false);
+  const release = q.status === 'draft' && await getSetting('quotations.approve_before_send', true);
   if (release) {
     if ([q.created_by, q.agent_user_id].includes(user.id)) {
       throw forbidden(`Maker-checker: quotation ${q.quote_number} is approved and sent to the client by a user other than the one who raised it`);
@@ -658,7 +658,7 @@ export async function quoteById(id) {
     brokerSlipId: slip?.id || null, brokerSlipNumber: slip?.slip_number || null, placementId: placement?.id || null, placementNumber: placement?.placement_number || null,
     placementStatus: placement?.status || null, journey, validity: await validityOf(row),
     // QUOT-03: a Draft reaches the client only through a second user's approval
-    approveBeforeSend: row.status === 'draft' && Boolean(await getSetting('quotations.approve_before_send', false)),
+    approveBeforeSend: row.status === 'draft' && Boolean(await getSetting('quotations.approve_before_send', true)),
     offers: offers.map((o) => ({ offerId: o.id, insuranceCompanyId: o.insurance_company_id, insuranceCompanyName: o.insurer_name, status: o.status, premium: o.premium === null ? null : Number(o.premium),
       rate: o.rate === null ? null : Number(o.rate), premiumTotal: o.premium_total === null ? null : Number(o.premium_total), offeredShare: Number(o.offered_share), deductibles: o.deductibles,
       validityDate: o.validity_date, selected: o.selected })),

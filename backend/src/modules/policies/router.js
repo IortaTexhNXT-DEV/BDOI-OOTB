@@ -54,10 +54,10 @@ define({
     const migration = mode === 'go-live';
     // TISPH (policies.bulk_upload_issue off): a policy is issued through its placement slip; the upload only loads the
     // in-force book at go-live, by the go-live data owner (write:data-load)
-    if (!migration && !(await getSetting('policies.bulk_upload_issue', true))) {
+    if (!migration && !(await getSetting('policies.bulk_upload_issue', false))) {
       throw badRequest('Policies are issued through the placement slip once the insurer confirms; the bulk upload only loads the in-force policies at go-live');
     }
-    if (migration && !(await getSetting('policies.bulk_upload_issue', true)) && !hasPermission(req.user, 'write:data-load')) {
+    if (migration && !(await getSetting('policies.bulk_upload_issue', false)) && !hasPermission(req.user, 'write:data-load')) {
       throw forbidden('Requires permission: write:data-load (go-live load of in-force policies)');
     }
     const errors = [];

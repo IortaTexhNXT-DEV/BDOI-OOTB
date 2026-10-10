@@ -271,7 +271,7 @@ export const MASTER_TEMPLATES = [
     notes: ['The endorsement types of the TISPH panel (M12). An endorsement names one or more types; the section groups them on the printed endorsement.'],
     formats: { financial: 'Yes when the type changes the premium or the sum insured', premiumImpact: 'Yes when the type is priced (additional or return premium)',
       lines: 'Lines of business it applies to (MOTOR, ACCIDENT, LIFE ...; several separated by ,) or * for every line', section: 'insured, vehicle, cover, period, cancellation or other' },
-    samples: [{ code: 'CPLT', name: 'Change of Plate Number', financial: 'No', premiumImpact: 'No', lines: 'MOTOR', section: 'vehicle', sortOrder: '110' }],
+    samples: [{ code: 'CMOB', name: 'Change of Mobile Number', financial: 'No', premiumImpact: 'No', lines: '*', section: 'insured', sortOrder: '990' }],
   },
   {
     type: 'claim-document-requirement', menu: 'Master > Insurance Management > Claim Document Checklist',

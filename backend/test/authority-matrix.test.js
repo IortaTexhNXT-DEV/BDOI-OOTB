@@ -69,7 +69,8 @@ describe('the matrix', () => {
     expect(m.roles.find((r) => r.code === 'processing').approves).not.toContain('underwriting_referral');
     expect(m.roles.find((r) => r.code === 'accounting')).toMatchObject({ platform: true, department: null });
     expect(m.rows.find((r) => r.code === 'journal_voucher')).toMatchObject({ checked: true, step: 'Accounts > Journal Vouchers > Approve' });
-    expect(m.rows.find((r) => r.code === 'quotation_discount')).toMatchObject({ checked: false, step: null });
+    expect(m.rows.find((r) => r.code === 'write_off')).toMatchObject({ checked: false, step: null });
+    expect(m.rows.find((r) => r.code === 'quotation_discount')).toMatchObject({ checked: true });
     expect(m).toMatchObject({ withoutLimit: 'allow', referenceRequired: true, asOf: day, abilities: { edit: true, approve: true } });
     expect(m.rows.find((r) => r.code === 'payment_voucher').cells.accounting).toMatchObject({ set: true, maxAmount: 2000000, pending: null });
   });
@@ -85,11 +86,12 @@ describe('the matrix', () => {
   });
 
   it('every transaction type an approval step checks is in the registry', () => {
-    const files = ['journal-vouchers/service.js', 'quotations/service.js', 'disbursements/service.js', 'claims/service.js', 'integrations/bankfiles/batches.js', 'remittance/service.js'];
+    const files = ['journal-vouchers/service.js', 'quotations/service.js', 'disbursements/service.js', 'claims/service.js', 'integrations/bankfiles/batches.js', 'remittance/service.js',
+      'placement/placements.js', 'endorsements/service.js', 'endorsements/workflow.js'];
     const used = new Set();
     for (const f of files) {
       const src = fs.readFileSync(new URL(`../src/modules/${f}`, import.meta.url), 'utf8');
-      for (const m of src.matchAll(/assertAuthority\([^,]+,\s*[^,]+,\s*'([a-z_]+)'/g)) used.add(m[1]);
+      for (const m of src.matchAll(/assertAuthority\(\s*[^,]+,\s*[^,]+,\s*'([a-z_]+)'/g)) used.add(m[1]);
       if (src.includes('authorityTypeOf(')) ['remittance', 'remittance_settlement'].forEach((t) => used.add(t));
     }
     expect(used.size).toBeGreaterThan(4);
@@ -218,12 +220,12 @@ describe('upload', () => {
     const jv = sheets[0].rows.find((x) => x[11] === 'journal_voucher' && x[12] === 'tis-finance');
     expect(jv.slice(0, 7)).toEqual(['Journal voucher approval', 'TIS Finance & General Accounting', 'Finance and Accounting', 'Amount in PHP', 'PHP 1,000,000.00', '1000000', 'No']);
     expect(sheets[0].rows.some((x) => x[12] === 'accounting')).toBe(false);
-    expect(sheets[0].rows.some((x) => x[11] === 'quotation_discount')).toBe(false);
+    expect(sheets[0].rows.some((x) => x[11] === 'write_off')).toBe(false);
     const base = readWorkbook((await binary(as['am.gm']('get', '/access-control/authority-matrix/template?base=1'))).body);
     expect(base[0].rows.some((x) => x[12] === 'accounting' && x[11] === 'payment_voucher')).toBe(true);
-    expect(base[0].rows.some((x) => x[11] === 'quotation_discount')).toBe(false);
+    expect(base[0].rows.some((x) => x[11] === 'write_off')).toBe(false);
     const every = readWorkbook((await binary(as['am.gm']('get', '/access-control/authority-matrix/template?unchecked=1&all=1'))).body);
-    expect(every[0].rows.some((x) => x[12] === 'tis-sales-associate' && x[11] === 'quotation_discount')).toBe(true);
+    expect(every[0].rows.some((x) => x[12] === 'tis-sales-associate' && x[11] === 'write_off')).toBe(true);
     const data = String(readZip(r.body).get('xl/worksheets/sheet1.xml'));
     expect(data).toContain('<formula1>Lists!$B$2:$B$');
   });

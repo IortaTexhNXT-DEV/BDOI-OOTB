@@ -405,7 +405,7 @@ export async function completeEndorsement(body, userId, { approver = null } = {}
     // The referrers' comsub follows the returned premium (broker or direct billed): unpaid lines are reduced or their
     // accrual reversed, paid lines clawed back, in proportion to the return (commission/service.js adjustForReturnPremium)
     const returnedGross = credit?.amount || (billingMode === 'direct' && delta < 0 ? -delta : 0);
-    const reverseCommission = !e.is_cancel || (await getSetting('endorsements.cancellation_reverses_commission', true)) !== false;
+    const reverseCommission = !e.is_cancel || (await getSetting('endorsements.cancellation_reverses_commission', false)) !== false;
     if (returnedGross > 0 && reverseCommission) {
       const { adjustForReturnPremium } = await import('../commission/service.js');
       const comsub = await adjustForReturnPremium(db, { policyId: p.id, returnedGross, baseGross: Number(p.premium_total), endorsementId: e.id, reference: e.endorsement_number, user: { id: userId } });

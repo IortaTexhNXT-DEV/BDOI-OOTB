@@ -16,6 +16,7 @@ import DetailSection from "../../../components/DetailSection";
 import DetailDialog from "../../../components/DetailDialog";
 import KeyValueGrid from "../../../components/KeyValueGrid";
 import FieldError from "../../../components/FieldError";
+import { formatValue } from "../../../components/KeyValueGrid/formatValue";
 
 const CLOSED = ["ConvertedToPolicy", "Expired", "Rejected", "Dropped"];
 const rate = (v) => (v === null || v === undefined ? null : `${Number(v)}%`);
@@ -119,7 +120,7 @@ const PromotionPanel = ({ quotation, onChanged, readOnly }) => {
           { label: t("quotePromotion.aonRate"), value: rate(promo.promoAon), hidden: promo.benefit !== "rate" },
           { label: t("quotePromotion.discountPct"), value: rate(promo.discountPct), hidden: promo.benefit !== "discount" },
           { label: t("quotePromotion.standardGross"), value: promo.standardGrossPremium, type: "amount", currency: quotation.currency },
-          { label: t("quotePromotion.promoDiscount"), value: `${quotation.currency || "PHP"} ${Number(promo.promoDiscount).toLocaleString("en-PH", { minimumFractionDigits: 2 })} (${pct(promo.promoDiscountPct)})` },
+          { label: t("quotePromotion.promoDiscount"), value: `${formatValue(promo.promoDiscount, { type: "amount", currency: quotation.currency })} (${pct(promo.promoDiscountPct)})` },
           { label: t("quotePromotion.totalDiscount"), value: pct(promo.totalDiscountPct) },
           { label: t("quotePromotion.cap"), value: `${pct(promo.cap?.minPct)} - ${pct(promo.cap?.maxPct)}` },
           { label: t("quotePromotion.rateChange"), value: promo.rateChange ? `${rate(promo.rateChange.from)} → ${rate(promo.rateChange.to)}, ${promo.rateChange.reason}` : null,

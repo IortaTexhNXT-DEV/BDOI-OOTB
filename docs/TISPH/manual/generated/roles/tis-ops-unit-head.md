@@ -135,6 +135,9 @@ Approval limits of this role on the Authority Matrix:
 |---|---|---|
 | Claim settlement approval | Operations > Claims > Settlement approval | Not set: no amount limit applies |
 | Underwriting referral approval | Operations > Sales & Marketing > Quotations > Underwriting referral | PHP 10,000,000.00 |
+| Quotation discount | Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount) | 15% |
+| Policy issuance | Operations > Sales & Marketing > Placement Slips > Check against slip | PHP 10,000,000.00 |
+| Return premium / refund to client | Operations > Policy > Endorsement approval and booking | PHP 250,000.00 |
 
 Who approves the work of this role:
 
@@ -150,6 +153,9 @@ Who approves the work of this role:
 | Accounts > Remittance > Approvals | Remittance approval within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Remittance > Approvals (settlement, adjustment, transfer) | Remittance settlement, adjustment and transfer within the approver's limit | TIS Finance & General Accounting or TIS General Manager |
 | Operations > Sales & Marketing > Quotations > Underwriting referral | Underwriting referral approval within the approver's limit | TIS Operations Unit Head |
+| Operations > Sales & Marketing > Quotations > Underwriting referral (promotion discount) | Quotation discount within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
+| Operations > Sales & Marketing > Placement Slips > Check against slip | Policy issuance within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
+| Operations > Policy > Endorsement approval and booking | Return premium / refund to client within the approver's limit | TIS Sales Officer, TIS Sales Unit Head, TIS Operations Unit Head or TIS General Manager |
 
 The user who enters a record never approves it: the approval is always another user's.
 

@@ -97,7 +97,7 @@ export async function computeReturn(db, policy, input = {}) {
   if (!method && type.startsWith('PRO_RATA')) method = 'pro-rata';
   if (!method) {
     if (daysInForce === 0) method = 'flat';
-    else if (initiatedBy === 'insured' && (await getSetting('endorsements.short_period_for_insured', true)) !== false) method = 'short-period';
+    else if (initiatedBy === 'insured' && (await getSetting('endorsements.short_period_for_insured', false)) !== false) method = 'short-period';
     else method = 'pro-rata';
   }
 
@@ -154,7 +154,7 @@ export async function computeReturn(db, policy, input = {}) {
   const booked = num(policy.commission_amount) > 0 && policyBase > 0 ? num(policy.commission_amount) / policyBase : null;
   const rate = booked ?? (await resolveCommissionRate({ insurerId: policy.insurance_company_id, productId: policy.product_id, lob: policy.lob, date: inception, db })).rate;
   // CANC-03 (endorsements.cancellation_reverses_commission off): a cancelled policy takes back no commission
-  const reverses = (await getSetting('endorsements.cancellation_reverses_commission', true)) !== false;
+  const reverses = (await getSetting('endorsements.cancellation_reverses_commission', false)) !== false;
   const commission = reverses ? round2(Math.min(returnNet * (rate || 0), returnNet)) : 0;
   const basis = policy.id ? await policyBasis(db, policy) : 'net';
   const ctax = basis === 'gross' ? commissionTaxes(0) : commissionTaxes(commission, ratesOf(await commissionTaxSetup(db)));

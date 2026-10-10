@@ -53,6 +53,9 @@ export const SAMPLE_MASTERS = [
   { table: 'campaign_segments', label: 'sample campaign segments', where: "created_by = 'seed'" },
   { table: 'lead_assignment_rules', label: 'sample lead assignment rules', where: "created_by = 'seed'" },
   { table: 'motor_programmes', label: 'sample vehicle programmes', where: "created_by = 'seed'" },
+  // sample promotions (their lines go with them) and the sample discount cap of seeds/sample/95_tisph_quote_policy.sql
+  { table: 'promotions', label: 'sample promotions', where: "id LIKE 'prm\\_sample\\_%'" },
+  { table: 'discount_caps', label: 'sample discount caps', where: "remarks = 'Affinity partners of the Toyota owners club'" },
   { table: 'distribution_channels', label: 'sample distribution channels', where: "created_by = 'seed'" },
   // fictional insurers of releases before the TISPH sample (migration 0365 removes them from a database in use)
   { table: 'insurance_companies', label: 'fictional insurers', where: "code IN ('SECUREGUARD','APEX','LIBERTYSHIELD','SENTINEL','GOLDENHORIZON','INTEGRITY','EVERSAFE')" },
