@@ -1,6 +1,7 @@
 /**
- * Role directory of the access screens: the department of each role, its one-line summary and its order, and the
- * roles of the base platform. The source is the settings the user form groups its roles by (migration 0391):
+ * Role directory of the access screens and the user form: the department of each role, its one-line summary and its
+ * order, and the roles of the base platform. The single source is the settings of migration 0362 (Master >
+ * Configuration, group access):
  *   access.role_groups     [{ name, roles: [{ code, summary }] }]: departments in screen order, roles in order inside
  *   access.platform_roles  [code]: the generic roles of the base platform, shown only when asked for
  * A role in no department (created later) has department null and sorts after the others. Full access: the
@@ -11,7 +12,8 @@ import { adminEquivalentRoles } from '../../lib/auth.js';
 
 const list = (v) => (Array.isArray(v) ? v : []);
 
-export async function roleDirectory(db) {
+/** The departments in order, the place of each role in them ({ department, summary, order } by code) and the base platform roles. */
+export async function roleGroups() {
   const [groups, platform] = await Promise.all([getSetting('access.role_groups', []), getSetting('access.platform_roles', [])]);
   const place = new Map();
   const departments = [];
@@ -23,7 +25,11 @@ export async function roleDirectory(db) {
       if (r?.code && !place.has(r.code)) place.set(r.code, { department: name, summary: r.summary || null, order: (gi + 1) * 100 + ri });
     });
   });
-  const platformRoles = new Set(list(platform));
+  return { departments, place, platform: new Set(list(platform)) };
+}
+
+export async function roleDirectory(db) {
+  const { departments, place, platform: platformRoles } = await roleGroups();
   const fullAccess = new Set(await adminEquivalentRoles(db));
   const { rows } = await db.query('SELECT id, code, name, description, status, inherits FROM roles ORDER BY id');
   const roles = rows.map((r) => ({

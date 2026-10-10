@@ -40,10 +40,11 @@ database description, and `test/role-permissions.test.js` fails.
 
 ## Role directory
 
-`roleDirectory(db)` reads the settings of the user form (migration 0391): `access.role_groups` (departments in screen
-order, each with its roles and a one-line summary) and `access.platform_roles` (the generic roles of the base
-platform, shown only with "Include base platform roles"). A role in no department is listed under Other roles. Full
-access: the System Administrator role and every role that includes it (SUPERID).
+`roleDirectory(db)` reads the settings that also group the roles of the user form and the Role list (migration 0362;
+the one place departments are kept): `access.role_groups` (departments in screen order, each with its roles and a
+one-line summary) and `access.platform_roles` (the generic roles of the base platform, shown only with "Include base
+platform roles"). `roleGroups()` reads them for both the access screens and `GET /api/roles`. A role in no department
+is listed under Other roles. Full access: the System Administrator role and every role that includes it (SUPERID).
 
 ## Role Permissions
 

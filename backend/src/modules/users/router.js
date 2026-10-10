@@ -5,6 +5,7 @@ import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { askAccessApproval, changeApproval } from '../access-control/changes.js';
 import { proposeRoleAccess } from '../access-control/roleAccess.js';
 import { BASELINE } from '../access-control/catalogue.js';
+import { roleGroups } from '../access-control/roles.js';
 import { validate, z } from '../../lib/validate.js';
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
@@ -13,7 +14,6 @@ import { assertPasswordAllowed, passwordPolicy, recordHistory, savePassword } fr
 import { temporaryPassword as temporaryPasswordFor } from '../../lib/secrets.js';
 import { loginHistory } from '../../lib/loginHistory.js';
 import { assertSod } from '../access-control/service.js';
-import { getSetting } from '../../lib/settings.js';
 
 const { router, define } = moduleRouter('User Management', '/users');
 const admin = [requireAuth, requirePermission('write:users')];
@@ -315,18 +315,6 @@ define({
 
 // ---- Roles & permissions
 const rolesRouter = moduleRouter('User Management', '/roles');
-/**
- * Department of each role on the user form (setting access.role_groups: [{ name, roles: [{ code, summary }] }]) and the
- * roles of the base platform (access.platform_roles), which are not offered for a new assignment.
- */
-async function roleGroups() {
-  const [groups, platform] = await Promise.all([getSetting('access.role_groups', []), getSetting('access.platform_roles', [])]);
-  const place = new Map();
-  (Array.isArray(groups) ? groups : []).forEach((g, gi) => (Array.isArray(g?.roles) ? g.roles : []).forEach((r, ri) => {
-    if (r?.code && !place.has(r.code)) place.set(r.code, { department: String(g.name || ''), summary: r.summary || null, groupOrder: gi * 100 + ri });
-  }));
-  return { place, platform: new Set(Array.isArray(platform) ? platform : []) };
-}
 rolesRouter.define({
   method: 'GET', path: '/', summary: 'List roles with their permissions, user counts, department on the user form and last change (who and when)',
   screen: 'Master > User Management > Role; User > Add / Edit', middleware: [requireAuth],
@@ -344,7 +332,7 @@ rolesRouter.define({
       LEFT JOIN users u ON u.id = last.user_id
       ORDER BY r.id`), roleGroups()]);
     ok(res, rows.map((r) => ({ ...r, department: place.get(r.code)?.department || null, summary: place.get(r.code)?.summary || null,
-      groupOrder: place.get(r.code)?.groupOrder ?? null, platform: platform.has(r.code) })));
+      groupOrder: place.get(r.code)?.order ?? null, platform: platform.has(r.code) })));
   },
 });
 rolesRouter.define({

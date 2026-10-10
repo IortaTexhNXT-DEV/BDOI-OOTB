@@ -2,7 +2,7 @@
  * Role Permissions (Master > Users and Access): the access catalogue in business words, the roles by department with
  * their own and included access, changes of a role's access through the approval of another administrator
  * (approve:access-control, never the requester), segregation-of-duties access rules, the Role form's permission list
- * as a change waiting for approval, the export for audit, My Work, and migrations 0391-0393 run twice.
+ * as a change waiting for approval, the export for audit, My Work, and migrations 0392-0395 run twice.
  */
 import fs from 'node:fs';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
@@ -310,7 +310,7 @@ describe('export for audit', () => {
   });
 });
 
-describe('migrations 0391-0395 on a database in use', () => {
+describe('migrations 0392-0395 on a database in use', () => {
   it('change nothing when run again', async () => {
     const state = async () => ({
       settings: await q("SELECT key, value FROM app_settings WHERE key IN ('access.role_groups', 'access.platform_roles', 'access.change_approval') ORDER BY key"),
@@ -318,7 +318,7 @@ describe('migrations 0391-0395 on a database in use', () => {
       perm: await q("SELECT description FROM permissions WHERE code = 'approve:access-control'"),
     });
     const first = await state();
-    for (const f of ['0391_role_directory.sql', '0392_access_change_approval.sql', '0393_sod_access_rules.sql', '0394_authority_matrix_changes.sql', '0395_access_controls_approval.sql']) {
+    for (const f of ['0392_access_change_approval.sql', '0393_sod_access_rules.sql', '0394_authority_matrix_changes.sql', '0395_access_controls_approval.sql']) {
       await pool.query(fs.readFileSync(new URL(`../src/db/migrations/${f}`, import.meta.url), 'utf8'));
     }
     expect(await state()).toEqual(first);
