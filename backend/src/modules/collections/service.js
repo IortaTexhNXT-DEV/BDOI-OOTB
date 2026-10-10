@@ -99,7 +99,7 @@ export async function listCollections(db, q, pg) {
   const sort = SORTS[q.sortField] || 'due_date';
   const dir = String(q.sortOrder).toLowerCase() === 'desc' ? 'DESC' : 'ASC';
   const rows = (await db.query(`SELECT * FROM (${BASE}) y ${f.where} ORDER BY ${sort} ${dir} NULLS LAST, id LIMIT $${params.length + 1} OFFSET $${params.length + 2}`, [...params, pg.limit, pg.offset])).rows;
-  return { rows: rows.map(itemRow), total };
+  return { rows: rows.map(itemRow), total, overdueLevels: [t.l1, t.l2] };
 }
 
 export async function getCollection(db, id) {
@@ -183,6 +183,7 @@ async function reminderCandidates(db) {
  * e-mail address), the amount outstanding and the items by overdue level.
  */
 export async function dueDateReminderPreview(db) {
+  const t = await thresholds();
   const items = (await reminderCandidates(db)).map(itemRow);
   const byLevel = {};
   for (const x of items) {
@@ -195,6 +196,8 @@ export async function dueDateReminderPreview(db) {
     items: items.length, clients: new Set(items.map((x) => x.clientId)).size,
     withoutEmail: new Set(items.filter((x) => !x.client.email).map((x) => x.clientId)).size,
     totalOutstanding: round2(items.reduce((sum, x) => sum + x.outstandingAmount, 0)), byLevel: Object.values(byLevel),
+    // the day bands of the levels (collections.overdue_levels): level 1 up to the first, level 2 up to the second, level 3 beyond
+    overdueLevels: [t.l1, t.l2],
   };
 }
 

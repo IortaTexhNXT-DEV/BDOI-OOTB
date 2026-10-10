@@ -300,7 +300,7 @@
     "netPremium": "เบี้ยสุทธิ",
     "paid": "ชำระแล้ว",
     "balance": "ยอดคงเหลือ",
-    "unpaid": "ยังไม่ชำระ",
+    "unpaid": "ค้างชำระ",
     "discounts": "ส่วนลด",
     "others": "อื่นๆ",
     "receiptDetailView": "รายละเอียดใบเสร็จ",
@@ -418,7 +418,7 @@
       "failedToLoadReceiptDetails": "โหลดรายละเอียดใบเสร็จไม่สำเร็จ กรุณาลองอีกครั้ง",
       "amountReceived": "จำนวนเงินที่ได้รับ",
       "back": "ย้อนกลับ",
-      "balanceHint": "ยอดค้างชำระ: {{balance}} การชำระบางส่วนจะคงยอดที่เหลือไว้",
+      "balanceHint": "ยอดค้างชำระ: {{balance}}",
       "billAmount": "ยอดใบแจ้งหนี้",
       "billBalance": "ยอดคงเหลือ",
       "billDueDate": "วันครบกำหนด",
@@ -604,12 +604,15 @@
       "customerCode": "รหัสลูกค้า",
       "paymentMode": "วิธีการชำระ",
       "reference": "เลขที่อ้างอิง",
-      "amount": "จำนวนเงินที่รับ"
+      "amount": "จำนวนเงินที่รับ",
+      "customer": "ลูกค้า",
+      "policyNumber": "เลขที่กรมธรรม์",
+      "branch": "สาขา"
     },
     "openEntryDialogs": {
       "matchTitle": "จับคู่รายการค้าง",
-      "matchMessage_one": "รายการเดบิตและเครดิต {{count}} คู่จะถูกจับคู่",
-      "matchMessage_other": "รายการเดบิตและเครดิต {{count}} คู่จะถูกจับคู่",
+      "matchMessage_one": "จับคู่รายการเดบิตและเครดิต {{count}} คู่หรือไม่",
+      "matchMessage_other": "จับคู่รายการเดบิตและเครดิต {{count}} คู่หรือไม่",
       "debitsSelected": "เดบิตที่เลือก",
       "debitTotal": "ยอดรวมเดบิต",
       "creditsSelected": "เครดิตที่เลือก",
@@ -647,7 +650,8 @@
       "new": "New correction",
       "newReversal": "New reversal",
       "print": "Print {{number}}"
-    }
+    },
+    "appliedPolicies": "กรมธรรม์ที่ชำระด้วยใบเสร็จนี้"
   },
   "renewalWaiting": {
     "clients": "ลูกค้า",
@@ -5306,7 +5310,10 @@
     "remindLevel": "{{level}}",
     "remindNoEmail": "ลูกค้าที่ไม่มีอีเมล (ไม่ได้ส่ง)",
     "noneToRemind": "ขณะนี้ไม่มีเบี้ยที่ถึงกำหนดหรือเกินกำหนดที่ต้องแจ้งเตือน",
-    "notYetOverdue": "ถึงกำหนด ยังไม่เกินกำหนด"
+    "notYetOverdue": "ถึงกำหนด ยังไม่เกินกำหนด",
+    "allLevels": "ทุกระดับ",
+    "levelBand": "ระดับ {{level}} ({{from}}–{{to}} วัน)",
+    "levelBeyond": "ระดับ {{level}} ({{from}} วันขึ้นไป)"
   },
   "documentLayouts": {
     "master": "มาสเตอร์",
@@ -6862,5 +6869,10 @@
     "clear": "นำไฟล์ออก",
     "none": "ยังไม่ได้เลือกไฟล์",
     "accepted": "ไฟล์ {{types}}"
+  },
+  "emailDocument": {
+    "sendEmail": "ส่งอีเมล",
+    "ccOptional": "สำเนาถึง (ไม่บังคับ)",
+    "ccPlaceholder": "name@example.com, name2@example.com"
   }
 }

@@ -379,7 +379,7 @@
     "netPremium": "Net Premium",
     "paid": "Paid",
     "balance": "Balance",
-    "unpaid": "UnPaid",
+    "unpaid": "Unpaid",
     "discounts": "Discounts",
     "others": "Others",
     "receiptDetailView": "Receipt Detail View",
@@ -503,7 +503,7 @@
       "failedToLoadReceiptDetails": "Failed to load receipt details. Please try again.",
       "amountReceived": "Amount received",
       "back": "Back",
-      "balanceHint": "Outstanding balance: {{balance}}. A partial payment leaves the rest open.",
+      "balanceHint": "Outstanding balance: {{balance}}",
       "billAmount": "Bill amount",
       "billBalance": "Balance",
       "billDueDate": "Due date",
@@ -693,12 +693,15 @@
       "customerCode": "Customer code",
       "paymentMode": "Mode of payment",
       "reference": "Reference",
-      "amount": "Amount received"
+      "amount": "Amount received",
+      "customer": "Customer",
+      "policyNumber": "Policy number",
+      "branch": "Branch"
     },
     "openEntryDialogs": {
       "matchTitle": "Match open entries",
-      "matchMessage_one": "{{count}} debit and credit pair is matched.",
-      "matchMessage_other": "{{count}} debit and credit pairs are matched.",
+      "matchMessage_one": "Match {{count}} debit and credit pair?",
+      "matchMessage_other": "Match {{count}} debit and credit pairs?",
       "debitsSelected": "Debits selected",
       "debitTotal": "Debit total",
       "creditsSelected": "Credits selected",
@@ -736,7 +739,8 @@
       "new": "New correction",
       "newReversal": "New reversal",
       "print": "Print {{number}}"
-    }
+    },
+    "appliedPolicies": "Policies paid by this receipt"
   },
   "renewalWaiting": {
     "clients": "Clients",
@@ -6231,7 +6235,10 @@
     "remindLevel": "{{level}}",
     "remindNoEmail": "Clients without an e-mail address (not sent)",
     "noneToRemind": "No premium is due or overdue for a reminder now.",
-    "notYetOverdue": "Due, not yet overdue"
+    "notYetOverdue": "Due, not yet overdue",
+    "allLevels": "All levels",
+    "levelBand": "Level {{level}} ({{from}}–{{to}} days)",
+    "levelBeyond": "Level {{level}} ({{from}}+ days)"
   },
   "iarLead": {
     "lead": "Prospect",
@@ -8621,7 +8628,10 @@
     "emailReceipt": "E-mail receipt",
     "emailReceiptTitle": "E-mail receipt {{number}}",
     "emailInvoice": "E-mail invoice",
-    "emailInvoiceTitle": "E-mail invoice {{number}}"
+    "emailInvoiceTitle": "E-mail invoice {{number}}",
+    "sendEmail": "Send e-mail",
+    "ccOptional": "Cc (optional)",
+    "ccPlaceholder": "name@example.com, name2@example.com"
   },
   "emailOutbox": {
     "title": "E-mail Outbox",

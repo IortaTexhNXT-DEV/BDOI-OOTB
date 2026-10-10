@@ -18,6 +18,14 @@ import { RecordActivityLog } from "../../../components/ActivityLog";
 import { showErrorMessage } from "../../../utility/toastUtils";
 import DetailHeader from "../../../components/DetailHeader";
 import { statusLabel } from "../../../utils/statusSeverity";
+import { formatCurrency } from "../../../utility/currencyConverter";
+
+// the amounts of the applied policies as the header shows the receipt amount; the foreign amount has no home symbol
+const amountBody = (field, foreign = false) => (row) => {
+  const v = row[field];
+  if (v === null || v === undefined || v === "") return "—";
+  return foreign ? Number(v).toLocaleString("en", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : formatCurrency(v);
+};
 
 function PolicyReceipts() {
   const { t } = useTranslation();
@@ -113,7 +121,7 @@ function PolicyReceipts() {
           meta={[
             { label: t("accounts.receiptDialogs.receiptDate"), value: header.receiptDate, type: "date" },
             { label: t("accounts.receiptDialogs.customerCode"), value: header.customerCode },
-            { label: t("accounts.receiptDialogs.paymentMode"), value: header.paymentMode ? statusLabel(header.paymentMode) : null },
+            { label: t("accounts.receiptDialogs.paymentMode"), value: header.paymentMode ? t(`paymentVoucher.detail.modes.${String(header.paymentMode).toLowerCase()}`, { defaultValue: statusLabel(header.paymentMode) }) : null },
             { label: t("accounts.receiptDialogs.reference"), value: header.referenceNo },
             { label: t("accounts.receiptDialogs.amount"), value: header.amount, type: "amount", currency: header.currencyCode || undefined },
           ]}
@@ -121,7 +129,7 @@ function PolicyReceipts() {
       ) : null}
 
       <div className="listlable_textcontainer">
-        <label className="listlable_text">{t("accounts.receiptsList")}</label>
+        <label className="listlable_text">{t("accounts.appliedPolicies")}</label>
       </div>
 
       <div className="card">
@@ -161,36 +169,48 @@ function PolicyReceipts() {
           ></Column>
           <Column
             field="netPremium"
+            body={amountBody("netPremium")}
+            align="right"
             header={t("accounts.netPremium")}
             headerStyle={headerStyle}
             className="fieldvalue_container"
           ></Column>
           <Column
             field="paid"
+            body={amountBody("paid")}
+            align="right"
             header={t("accounts.paid")}
             headerStyle={headerStyle}
             className="fieldvalue_container"
           ></Column>
           <Column
             field="unPaid"
+            body={amountBody("unPaid")}
+            align="right"
             header={t("accounts.unpaid")}
             headerStyle={headerStyle}
             className="fieldvalue_container"
           ></Column>
           <Column
             field="discounts"
+            body={amountBody("discounts")}
+            align="right"
             header={t("accounts.discounts")}
             headerStyle={headerStyle}
             className="fieldvalue_container"
           ></Column>
           <Column
             field="dst"
+            body={amountBody("dst")}
+            align="right"
             header="DST"
             headerStyle={headerStyle}
             className="fieldvalue_container"
           ></Column>
           <Column
             field="lgt"
+            body={amountBody("lgt")}
+            align="right"
             header="LGT"
             headerStyle={headerStyle}
             className="fieldvalue_container"
@@ -198,24 +218,32 @@ function PolicyReceipts() {
 
           <Column
             field="vat"
+            body={amountBody("vat")}
+            align="right"
             header="VAT"
             headerStyle={headerStyle}
             className="fieldvalue_containers"
           ></Column>
           <Column
             field="ewt"
+            body={amountBody("ewt")}
+            align="right"
             header="EWT"
             headerStyle={headerStyle}
             className="fieldvalue_container"
           ></Column>
           <Column
             field="fcAmount"
+            body={amountBody("fcAmount", true)}
+            align="right"
             header={t("accounts.fcAmount")}
             headerStyle={headerStyle}
             className="fieldvalue_container"
           ></Column>
           <Column
             field="lcAmount"
+            body={amountBody("lcAmount")}
+            align="right"
             header={t("accounts.lcAmount")}
             headerStyle={headerStyle}
             className="fieldvalue_container"

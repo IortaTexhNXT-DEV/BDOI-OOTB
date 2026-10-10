@@ -187,12 +187,13 @@ const WarrantyMonitor = () => {
         </DataTable>
       </div>
 
-      <Dialog className="pe-dialog" header={extension ? `${t("creditControl.requestExtension")} · ${extension.row.policyNumber}` : ""} visible={!!extension} style={{ width: "min(520px, 96vw)" }} onHide={() => setExtension(null)}
-        footer={<div><Button label={t("creditControl.cancel")} text onClick={() => setExtension(null)} /><Button label={t("creditControl.send")} icon="pi pi-send" onClick={saveExtension} disabled={!extension?.requestedDeadline || !extension?.reason?.trim()} /></div>}>
+      {/* centred like the reminder and cancellation confirms of the same row */}
+      <Dialog className="pe-dialog bv-centered" header={extension ? `${t("creditControl.requestExtension")} · ${extension.row.policyNumber}` : ""} visible={!!extension} style={{ width: "min(520px, 96vw)" }} onHide={() => setExtension(null)}
+        footer={<div><Button label={t("creditControl.cancel")} outlined onClick={() => setExtension(null)} /><Button label={t("creditControl.requestExtension")} icon="pi pi-calendar-plus" onClick={saveExtension} disabled={!extension?.requestedDeadline || !extension?.reason?.trim()} /></div>}>
         {extension && (
           <div className="grid">
             <div className="col-12">
-              <KeyValueGrid columns={2} items={[
+              <KeyValueGrid columns={1} items={[
                 { label: t("creditControl.client"), value: extension.row.clientName },
                 { label: t("creditControl.currentDeadline"), value: extension.row.deadline, type: "date" },
                 { label: t("creditControl.premiumDue"), value: extension.row.premiumDue, type: "amount" },
