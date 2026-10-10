@@ -85,5 +85,8 @@
 .sap-gl-file.p-button {
   padding: 0.25rem 0.25rem;
   white-space: nowrap;
-  font-size: 0.85rem;
+
+  .p-button-label {
+    font-size: 0.85rem;
+  }
 }
