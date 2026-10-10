@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1314 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1351 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -5470,6 +5470,290 @@
               ],
               "cookie": [],
               "body": "(text/csv attachment)"
+            }
+          ]
+        },
+        {
+          "name": "Financial statement versions (TIS01 local FS, TIS02 BS/IS, TIS03 budget) with their line counts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/accounting/fs-versions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "accounting",
+                "fs-versions"
+              ]
+            },
+            "description": "Financial statement versions (TIS01 local FS, TIS02 BS/IS, TIS03 budget) with their line counts\n\nFront-end touchpoint: Master > Finance > Financial Statement Versions; Reports (FS version)\n\nAccess: read:journal-vouchers, read:masters, read:reports"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/fs-versions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "fs-versions"
+                  ]
+                },
+                "description": "Financial statement versions (TIS01 local FS, TIS02 BS/IS, TIS03 budget) with their line counts\n\nFront-end touchpoint: Master > Finance > Financial Statement Versions; Reports (FS version)\n\nAccess: read:journal-vouchers, read:masters, read:reports"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"TIS01\",\n      \"name\": \"TIS01 Local financial statements\",\n      \"scope\": \"full\",\n      \"status\": \"active\",\n      \"lineCount\": 30\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add a financial statement version with its lines, or as a copy of another version (copyFrom)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/accounting/fs-versions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "accounting",
+                "fs-versions"
+              ]
+            },
+            "description": "Add a financial statement version with its lines, or as a copy of another version (copyFrom)\n\nFront-end touchpoint: Master > Finance > Financial Statement Versions > Add\n\nAccess: write:journal-vouchers",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"TIS04\",\n  \"name\": \"TIS04 Group reporting\",\n  \"copyFrom\": \"TIS02\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/fs-versions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "fs-versions"
+                  ]
+                },
+                "description": "Add a financial statement version with its lines, or as a copy of another version (copyFrom)\n\nFront-end touchpoint: Master > Finance > Financial Statement Versions > Add\n\nAccess: write:journal-vouchers",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"TIS04\",\n  \"name\": \"TIS04 Group reporting\",\n  \"copyFrom\": \"TIS02\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"TIS04\",\n    \"name\": \"TIS01 Local financial statements\",\n    \"purpose\": \"Statutory financial statements by line item\",\n    \"scope\": \"full\",\n    \"status\": \"active\",\n    \"lineCount\": 30,\n    \"lines\": [\n      {\n        \"lineNo\": 10,\n        \"statement\": \"bs\",\n        \"section\": \"Current Assets\",\n        \"caption\": \"Cash and cash equivalents\",\n        \"glFrom\": \"100\",\n        \"glTo\": \"109\",\n        \"normalBalance\": \"debit\",\n        \"accounts\": 5\n      }\n    ],\n    \"unmapped\": [\n      {\n        \"code\": \"700000\",\n        \"name\": \"Suspense - conversion\",\n        \"accountType\": \"asset\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One financial statement version: its lines with the GL ranges and the accounts each takes, and the accounts no line takes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/accounting/fs-versions/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "accounting",
+                "fs-versions",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "One financial statement version: its lines with the GL ranges and the accounts each takes, and the accounts no line takes\n\nFront-end touchpoint: Master > Finance > Financial Statement Versions\n\nAccess: read:journal-vouchers, read:masters, read:reports"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/fs-versions/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "fs-versions",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One financial statement version: its lines with the GL ranges and the accounts each takes, and the accounts no line takes\n\nFront-end touchpoint: Master > Finance > Financial Statement Versions\n\nAccess: read:journal-vouchers, read:masters, read:reports"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"TIS01\",\n    \"name\": \"TIS01 Local financial statements\",\n    \"purpose\": \"Statutory financial statements by line item\",\n    \"scope\": \"full\",\n    \"status\": \"active\",\n    \"lineCount\": 30,\n    \"lines\": [\n      {\n        \"lineNo\": 10,\n        \"statement\": \"bs\",\n        \"section\": \"Current Assets\",\n        \"caption\": \"Cash and cash equivalents\",\n        \"glFrom\": \"100\",\n        \"glTo\": \"109\",\n        \"normalBalance\": \"debit\",\n        \"accounts\": 5\n      }\n    ],\n    \"unmapped\": [\n      {\n        \"code\": \"700000\",\n        \"name\": \"Suspense - conversion\",\n        \"accountType\": \"asset\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a financial statement version: name, purpose, scope, status and its lines (the list sent replaces the lines)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/accounting/fs-versions/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "accounting",
+                "fs-versions",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a financial statement version: name, purpose, scope, status and its lines (the list sent replaces the lines)\n\nFront-end touchpoint: Master > Finance > Financial Statement Versions > Edit\n\nAccess: write:journal-vouchers",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lines\": [\n    {\n      \"lineNo\": 10,\n      \"statement\": \"bs\",\n      \"section\": \"Current Assets\",\n      \"caption\": \"Cash and cash equivalents\",\n      \"glFrom\": \"100\",\n      \"glTo\": \"109\",\n      \"normalBalance\": \"debit\",\n      \"accounts\": 5\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/fs-versions/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "fs-versions",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a financial statement version: name, purpose, scope, status and its lines (the list sent replaces the lines)\n\nFront-end touchpoint: Master > Finance > Financial Statement Versions > Edit\n\nAccess: write:journal-vouchers",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"lines\": [\n    {\n      \"lineNo\": 10,\n      \"statement\": \"bs\",\n      \"section\": \"Current Assets\",\n      \"caption\": \"Cash and cash equivalents\",\n      \"glFrom\": \"100\",\n      \"glTo\": \"109\",\n      \"normalBalance\": \"debit\",\n      \"accounts\": 5\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"TIS01\",\n    \"name\": \"TIS01 Local financial statements\",\n    \"purpose\": \"Statutory financial statements by line item\",\n    \"scope\": \"full\",\n    \"status\": \"active\",\n    \"lineCount\": 30,\n    \"lines\": [\n      {\n        \"lineNo\": 10,\n        \"statement\": \"bs\",\n        \"section\": \"Current Assets\",\n        \"caption\": \"Cash and cash equivalents\",\n        \"glFrom\": \"100\",\n        \"glTo\": \"109\",\n        \"normalBalance\": \"debit\",\n        \"accounts\": 5\n      }\n    ],\n    \"unmapped\": [\n      {\n        \"code\": \"700000\",\n        \"name\": \"Suspense - conversion\",\n        \"accountType\": \"asset\"\n      }\n    ]\n  }\n}"
             }
           ]
         },
@@ -67682,12 +67966,12 @@
       "name": "Post-Dated Cheques",
       "item": [
         {
-          "name": "Post-dated cheque register (status on-hand | deposited | cleared | bounced | replaced | returned | cancelled | open | all, dueBy, clientId, policyId, search; format=xlsx or csv)",
+          "name": "PDC tracking log: tab open | at-tis | with-partners | awaiting | bounced | cancellation-pending | closed | deposit-due | all (or status), insurerId, payee, chequeFrom/chequeTo, receivedFrom/receivedTo, policyId, setId, search; format=xlsx or csv",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/pdc?status=on-hand",
+              "raw": "{{baseUrl}}/pdc?tab=with-partners",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -67696,12 +67980,12 @@
               ],
               "query": [
                 {
-                  "key": "status",
-                  "value": "on-hand"
+                  "key": "tab",
+                  "value": "with-partners"
                 }
               ]
             },
-            "description": "Post-dated cheque register (status on-hand | deposited | cleared | bounced | replaced | returned | cancelled | open | all, dueBy, clientId, policyId, search; format=xlsx or csv)\n\nFront-end touchpoint: Accounts > Post-Dated Cheques\n\nAccess: read:receipts"
+            "description": "PDC tracking log: tab open | at-tis | with-partners | awaiting | bounced | cancellation-pending | closed | deposit-due | all (or status), insurerId, payee, chequeFrom/chequeTo, receivedFrom/receivedTo, policyId, setId, search; format=xlsx or csv\n\nFront-end touchpoint: Accounts > Post-Dated Cheques\n\nAccess: read:pdc"
           },
           "response": [
             {
@@ -67710,7 +67994,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/pdc?status=on-hand",
+                  "raw": "{{baseUrl}}/pdc?tab=with-partners",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -67719,12 +68003,12 @@
                   ],
                   "query": [
                     {
-                      "key": "status",
-                      "value": "on-hand"
+                      "key": "tab",
+                      "value": "with-partners"
                     }
                   ]
                 },
-                "description": "Post-dated cheque register (status on-hand | deposited | cleared | bounced | replaced | returned | cancelled | open | all, dueBy, clientId, policyId, search; format=xlsx or csv)\n\nFront-end touchpoint: Accounts > Post-Dated Cheques\n\nAccess: read:receipts"
+                "description": "PDC tracking log: tab open | at-tis | with-partners | awaiting | bounced | cancellation-pending | closed | deposit-due | all (or status), insurerId, payee, chequeFrom/chequeTo, receivedFrom/receivedTo, policyId, setId, search; format=xlsx or csv\n\nFront-end touchpoint: Accounts > Post-Dated Cheques\n\nAccess: read:pdc"
               },
               "status": "OK",
               "code": 200,
@@ -67736,12 +68020,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-04\",\n    \"summary\": {\n      \"onHand\": 3,\n      \"onHandAmount\": 37575,\n      \"dueNow\": 1,\n      \"dueNowAmount\": 12525,\n      \"bounced\": 0\n    },\n    \"rows\": [\n      {\n        \"id\": \"pdc_1\",\n        \"pdcNumber\": \"PDC-2026-00001\",\n        \"clientName\": \"ABC Trading Corp.\",\n        \"policyNumber\": \"POL-2026-00011\",\n        \"billNumber\": \"INV-2026-00031\",\n        \"bankName\": \"BDO Unibank\",\n        \"chequeNumber\": \"0001234\",\n        \"chequeDate\": \"2026-11-15\",\n        \"amount\": 12525,\n        \"status\": \"on-hand\",\n        \"storageLocation\": \"Vault A, folder 11\",\n        \"dueInDays\": 42\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-16\",\n    \"summary\": {\n      \"atTis\": 3,\n      \"withPartners\": 4,\n      \"awaiting\": 1,\n      \"bounced\": 0\n    },\n    \"counts\": {\n      \"open\": 7\n    },\n    \"ageing\": {\n      \"buckets\": [\n        30,\n        60,\n        90\n      ],\n      \"amounts\": {\n        \"current\": 38362.5,\n        \"b1\": 12787.5\n      }\n    },\n    \"rows\": [\n      {\n        \"id\": \"pdc_1\",\n        \"pdcNumber\": \"PDC-2026-00121\",\n        \"setNumber\": \"PCS-2026-00031\",\n        \"clientName\": \"Andrea Villanueva\",\n        \"policyNumber\": \"POL-2026-90004\",\n        \"billNumber\": \"INV-2026-00104\",\n        \"instalmentText\": \"1 of 4\",\n        \"payee\": \"insurance-partner\",\n        \"insurerName\": \"Standard Insurance Co., Inc.\",\n        \"bankName\": \"BPI\",\n        \"chequeNumber\": \"0045121\",\n        \"chequeDate\": \"2026-10-15\",\n        \"amount\": 12787.5,\n        \"status\": \"warehoused\",\n        \"statusText\": \"Warehoused\",\n        \"custodyText\": \"Standard Insurance Co., Inc.\",\n        \"ageing\": {\n          \"code\": \"current\",\n          \"label\": \"Current\",\n          \"days\": -6\n        },\n        \"receiptNumber\": null\n      }\n    ]\n  }\n}"
             }
           ]
         },
         {
-          "name": "Register a post-dated cheque on hand against a bill (receivableId) or a policy (policyId); nothing is posted until it is deposited",
+          "name": "Register one cheque payable to TISPH against a bill (receivableId) or a policy (policyId), outside a set; nothing is posted until it is deposited",
           "request": {
             "method": "POST",
             "header": [
@@ -67759,7 +68043,7 @@
                 "pdc"
               ]
             },
-            "description": "Register a post-dated cheque on hand against a bill (receivableId) or a policy (policyId); nothing is posted until it is deposited\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Register\n\nAccess: write:receipts",
+            "description": "Register one cheque payable to TISPH against a bill (receivableId) or a policy (policyId), outside a set; nothing is posted until it is deposited\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Register\n\nAccess: write:pdc",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"receivableId\": \"rcv_1\",\n  \"bankId\": 3,\n  \"chequeNumber\": \"0001234\",\n  \"chequeDate\": \"2026-11-15\",\n  \"amount\": 12525,\n  \"storageLocation\": \"Vault A, folder 11\"\n}",
@@ -67790,7 +68074,7 @@
                     "pdc"
                   ]
                 },
-                "description": "Register a post-dated cheque on hand against a bill (receivableId) or a policy (policyId); nothing is posted until it is deposited\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Register\n\nAccess: write:receipts",
+                "description": "Register one cheque payable to TISPH against a bill (receivableId) or a policy (policyId), outside a set; nothing is posted until it is deposited\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Register\n\nAccess: write:pdc",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"receivableId\": \"rcv_1\",\n  \"bankId\": 3,\n  \"chequeNumber\": \"0001234\",\n  \"chequeDate\": \"2026-11-15\",\n  \"amount\": 12525,\n  \"storageLocation\": \"Vault A, folder 11\"\n}",
@@ -67811,12 +68095,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pdc_1\",\n    \"pdcNumber\": \"PDC-2026-00001\",\n    \"clientName\": \"ABC Trading Corp.\",\n    \"policyNumber\": \"POL-2026-00011\",\n    \"billNumber\": \"INV-2026-00031\",\n    \"bankName\": \"BDO Unibank\",\n    \"chequeNumber\": \"0001234\",\n    \"chequeDate\": \"2026-11-15\",\n    \"amount\": 12525,\n    \"status\": \"on-hand\",\n    \"storageLocation\": \"Vault A, folder 11\",\n    \"dueInDays\": 42\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pdc_1\",\n    \"pdcNumber\": \"PDC-2026-00121\",\n    \"setNumber\": \"PCS-2026-00031\",\n    \"clientName\": \"Andrea Villanueva\",\n    \"policyNumber\": \"POL-2026-90004\",\n    \"billNumber\": \"INV-2026-00104\",\n    \"instalmentText\": \"1 of 4\",\n    \"payee\": \"insurance-partner\",\n    \"insurerName\": \"Standard Insurance Co., Inc.\",\n    \"bankName\": \"BPI\",\n    \"chequeNumber\": \"0045121\",\n    \"chequeDate\": \"2026-10-15\",\n    \"amount\": 12787.5,\n    \"status\": \"warehoused\",\n    \"statusText\": \"Warehoused\",\n    \"custodyText\": \"Standard Insurance Co., Inc.\",\n    \"ageing\": {\n      \"code\": \"current\",\n      \"label\": \"Current\",\n      \"days\": -6\n    },\n    \"receiptNumber\": null\n  }\n}"
             }
           ]
         },
         {
-          "name": "One post-dated cheque",
+          "name": "One post-dated cheque with its set, transmittal, advices, AR, cancellation and replacement links",
           "request": {
             "method": "GET",
             "header": [],
@@ -67837,7 +68121,7 @@
                 }
               ]
             },
-            "description": "One post-dated cheque\n\nFront-end touchpoint: Accounts > Post-Dated Cheques\n\nAccess: read:receipts"
+            "description": "One post-dated cheque with its set, transmittal, advices, AR, cancellation and replacement links\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Cheque\n\nAccess: read:pdc"
           },
           "response": [
             {
@@ -67862,7 +68146,7 @@
                     }
                   ]
                 },
-                "description": "One post-dated cheque\n\nFront-end touchpoint: Accounts > Post-Dated Cheques\n\nAccess: read:receipts"
+                "description": "One post-dated cheque with its set, transmittal, advices, AR, cancellation and replacement links\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Cheque\n\nAccess: read:pdc"
               },
               "status": "OK",
               "code": 200,
@@ -67874,12 +68158,103 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pdc_1\",\n    \"pdcNumber\": \"PDC-2026-00001\",\n    \"clientName\": \"ABC Trading Corp.\",\n    \"policyNumber\": \"POL-2026-00011\",\n    \"billNumber\": \"INV-2026-00031\",\n    \"bankName\": \"BDO Unibank\",\n    \"chequeNumber\": \"0001234\",\n    \"chequeDate\": \"2026-11-15\",\n    \"amount\": 12525,\n    \"status\": \"on-hand\",\n    \"storageLocation\": \"Vault A, folder 11\",\n    \"dueInDays\": 42\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pdc_1\",\n    \"pdcNumber\": \"PDC-2026-00121\",\n    \"setNumber\": \"PCS-2026-00031\",\n    \"clientName\": \"Andrea Villanueva\",\n    \"policyNumber\": \"POL-2026-90004\",\n    \"billNumber\": \"INV-2026-00104\",\n    \"instalmentText\": \"1 of 4\",\n    \"payee\": \"insurance-partner\",\n    \"insurerName\": \"Standard Insurance Co., Inc.\",\n    \"bankName\": \"BPI\",\n    \"chequeNumber\": \"0045121\",\n    \"chequeDate\": \"2026-10-15\",\n    \"amount\": 12787.5,\n    \"status\": \"warehoused\",\n    \"statusText\": \"Warehoused\",\n    \"custodyText\": \"Standard Insurance Co., Inc.\",\n    \"ageing\": {\n      \"code\": \"current\",\n      \"label\": \"Current\",\n      \"days\": -6\n    },\n    \"receiptNumber\": null\n  }\n}"
             }
           ]
         },
         {
-          "name": "Record a bounced cheque: its receipt is cancelled (journal reversed, bill open again), Accounting and the client are told",
+          "name": "Edit a cheque: every detail while Received at TIS; afterwards only the remarks and the vault folder",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pdc/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pdc",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Edit a cheque: every detail while Received at TIS; afterwards only the remarks and the vault folder\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Cheque > Edit\n\nAccess: write:pdc",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storageLocation\": \"Vault A-14\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/pdc/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pdc",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Edit a cheque: every detail while Received at TIS; afterwards only the remarks and the vault folder\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Cheque > Edit\n\nAccess: write:pdc",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"storageLocation\": \"Vault A-14\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pdc_1\",\n    \"pdcNumber\": \"PDC-2026-00121\",\n    \"setNumber\": \"PCS-2026-00031\",\n    \"clientName\": \"Andrea Villanueva\",\n    \"policyNumber\": \"POL-2026-90004\",\n    \"billNumber\": \"INV-2026-00104\",\n    \"instalmentText\": \"1 of 4\",\n    \"payee\": \"insurance-partner\",\n    \"insurerName\": \"Standard Insurance Co., Inc.\",\n    \"bankName\": \"BPI\",\n    \"chequeNumber\": \"0045121\",\n    \"chequeDate\": \"2026-10-15\",\n    \"amount\": 12787.5,\n    \"status\": \"warehoused\",\n    \"statusText\": \"Warehoused\",\n    \"custodyText\": \"Standard Insurance Co., Inc.\",\n    \"ageing\": {\n      \"code\": \"current\",\n      \"label\": \"Current\",\n      \"days\": -6\n    },\n    \"receiptNumber\": null,\n    \"storageLocation\": \"Vault A-14\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "The bank returned a deposited cheque payable to TISPH (reasonCode of the pdc_bounce reasons, or reason): its receipt is cancelled, Cash Control and the client are told",
           "request": {
             "method": "POST",
             "header": [
@@ -67906,10 +68281,10 @@
                 }
               ]
             },
-            "description": "Record a bounced cheque: its receipt is cancelled (journal reversed, bill open again), Accounting and the client are told\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Bounced\n\nAccess: write:receipts",
+            "description": "The bank returned a deposited cheque payable to TISPH (reasonCode of the pdc_bounce reasons, or reason): its receipt is cancelled, Cash Control and the client are told\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Bounced\n\nAccess: write:pdc",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"DAIF (drawn against insufficient funds)\",\n  \"bouncedOn\": \"2026-11-17\",\n  \"bounceCharge\": 500\n}",
+              "raw": "{\n  \"reasonCode\": \"PDC-BNC-DAIF\",\n  \"bouncedOn\": \"2026-11-17\",\n  \"bounceCharge\": 500\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -67946,10 +68321,10 @@
                     }
                   ]
                 },
-                "description": "Record a bounced cheque: its receipt is cancelled (journal reversed, bill open again), Accounting and the client are told\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Bounced\n\nAccess: write:receipts",
+                "description": "The bank returned a deposited cheque payable to TISPH (reasonCode of the pdc_bounce reasons, or reason): its receipt is cancelled, Cash Control and the client are told\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Bounced\n\nAccess: write:pdc",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"reason\": \"DAIF (drawn against insufficient funds)\",\n  \"bouncedOn\": \"2026-11-17\",\n  \"bounceCharge\": 500\n}",
+                  "raw": "{\n  \"reasonCode\": \"PDC-BNC-DAIF\",\n  \"bouncedOn\": \"2026-11-17\",\n  \"bounceCharge\": 500\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -67967,12 +68342,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"pdc\": {\n      \"id\": \"pdc_1\",\n      \"pdcNumber\": \"PDC-2026-00001\",\n      \"clientName\": \"ABC Trading Corp.\",\n      \"policyNumber\": \"POL-2026-00011\",\n      \"billNumber\": \"INV-2026-00031\",\n      \"bankName\": \"BDO Unibank\",\n      \"chequeNumber\": \"0001234\",\n      \"chequeDate\": \"2026-11-15\",\n      \"amount\": 12525,\n      \"status\": \"bounced\",\n      \"storageLocation\": \"Vault A, folder 11\",\n      \"dueInDays\": 42\n    },\n    \"emailedTo\": \"client@example.ph\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"pdc\": {\n      \"id\": \"pdc_1\",\n      \"pdcNumber\": \"PDC-2026-00121\",\n      \"setNumber\": \"PCS-2026-00031\",\n      \"clientName\": \"Andrea Villanueva\",\n      \"policyNumber\": \"POL-2026-90004\",\n      \"billNumber\": \"INV-2026-00104\",\n      \"instalmentText\": \"1 of 4\",\n      \"payee\": \"insurance-partner\",\n      \"insurerName\": \"Standard Insurance Co., Inc.\",\n      \"bankName\": \"BPI\",\n      \"chequeNumber\": \"0045121\",\n      \"chequeDate\": \"2026-10-15\",\n      \"amount\": 12787.5,\n      \"status\": \"bounced\",\n      \"statusText\": \"Warehoused\",\n      \"custodyText\": \"Standard Insurance Co., Inc.\",\n      \"ageing\": {\n        \"code\": \"current\",\n        \"label\": \"Current\",\n        \"days\": -6\n      },\n      \"receiptNumber\": null\n    },\n    \"emailedTo\": \"client@example.ph\"\n  }\n}"
             }
           ]
         },
         {
-          "name": "Cancel a cheque registered in error (reason required)",
+          "name": "Request cancellation of a cheque (reasonCode of the pdc_cancel reasons, replacementFollows cheque | cash | none): Cancellation pending until a holder of approve:pdc decides",
           "request": {
             "method": "POST",
             "header": [
@@ -67982,14 +68357,14 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/pdc/:id/cancel",
+              "raw": "{{baseUrl}}/pdc/:id/cancellation",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "pdc",
                 ":id",
-                "cancel"
+                "cancellation"
               ],
               "variable": [
                 {
@@ -67999,10 +68374,10 @@
                 }
               ]
             },
-            "description": "Cancel a cheque registered in error (reason required)\n\nFront-end touchpoint: Accounts > Post-Dated Cheques\n\nAccess: write:receipts",
+            "description": "Request cancellation of a cheque (reasonCode of the pdc_cancel reasons, replacementFollows cheque | cash | none): Cancellation pending until a holder of approve:pdc decides\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Request cancellation\n\nAccess: write:pdc",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"Entered twice\"\n}",
+              "raw": "{\n  \"reasonCode\": \"PDC-CXL-CHEQUE\",\n  \"note\": \"Client changed bank\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -68022,14 +68397,14 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/pdc/:id/cancel",
+                  "raw": "{{baseUrl}}/pdc/:id/cancellation",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "pdc",
                     ":id",
-                    "cancel"
+                    "cancellation"
                   ],
                   "variable": [
                     {
@@ -68039,10 +68414,10 @@
                     }
                   ]
                 },
-                "description": "Cancel a cheque registered in error (reason required)\n\nFront-end touchpoint: Accounts > Post-Dated Cheques\n\nAccess: write:receipts",
+                "description": "Request cancellation of a cheque (reasonCode of the pdc_cancel reasons, replacementFollows cheque | cash | none): Cancellation pending until a holder of approve:pdc decides\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Request cancellation\n\nAccess: write:pdc",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"reason\": \"Entered twice\"\n}",
+                  "raw": "{\n  \"reasonCode\": \"PDC-CXL-CHEQUE\",\n  \"note\": \"Client changed bank\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -68060,7 +68435,102 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pdc_1\",\n    \"pdcNumber\": \"PDC-2026-00001\",\n    \"clientName\": \"ABC Trading Corp.\",\n    \"policyNumber\": \"POL-2026-00011\",\n    \"billNumber\": \"INV-2026-00031\",\n    \"bankName\": \"BDO Unibank\",\n    \"chequeNumber\": \"0001234\",\n    \"chequeDate\": \"2026-11-15\",\n    \"amount\": 12525,\n    \"status\": \"cancelled\",\n    \"storageLocation\": \"Vault A, folder 11\",\n    \"dueInDays\": 42\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"pdc\": {\n      \"id\": \"pdc_1\",\n      \"pdcNumber\": \"PDC-2026-00121\",\n      \"setNumber\": \"PCS-2026-00031\",\n      \"clientName\": \"Andrea Villanueva\",\n      \"policyNumber\": \"POL-2026-90004\",\n      \"billNumber\": \"INV-2026-00104\",\n      \"instalmentText\": \"1 of 4\",\n      \"payee\": \"insurance-partner\",\n      \"insurerName\": \"Standard Insurance Co., Inc.\",\n      \"bankName\": \"BPI\",\n      \"chequeNumber\": \"0045121\",\n      \"chequeDate\": \"2026-10-15\",\n      \"amount\": 12787.5,\n      \"status\": \"cancellation-pending\",\n      \"statusText\": \"Warehoused\",\n      \"custodyText\": \"Standard Insurance Co., Inc.\",\n      \"ageing\": {\n        \"code\": \"current\",\n        \"label\": \"Current\",\n        \"days\": -6\n      },\n      \"receiptNumber\": null\n    }\n  },\n  \"message\": \"Cancellation of cheque PDC-2026-00122 sent for approval\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve or return a cancellation request (never the requester; remark required to return). Approval cancels a cheque at TIS, or requests the pull-out from the partner",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pdc/:id/cancellation/decision",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pdc",
+                ":id",
+                "cancellation",
+                "decision"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve or return a cancellation request (never the requester; remark required to return). Approval cancels a cheque at TIS, or requests the pull-out from the partner\n\nFront-end touchpoint: My Work > Approvals > PDC cancellation\n\nAccess: approve:pdc",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"approve\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/pdc/:id/cancellation/decision",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pdc",
+                    ":id",
+                    "cancellation",
+                    "decision"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve or return a cancellation request (never the requester; remark required to return). Approval cancels a cheque at TIS, or requests the pull-out from the partner\n\nFront-end touchpoint: My Work > Approvals > PDC cancellation\n\nAccess: approve:pdc",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"action\": \"approve\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"pdc\": {\n      \"id\": \"pdc_1\",\n      \"pdcNumber\": \"PDC-2026-00121\",\n      \"setNumber\": \"PCS-2026-00031\",\n      \"clientName\": \"Andrea Villanueva\",\n      \"policyNumber\": \"POL-2026-90004\",\n      \"billNumber\": \"INV-2026-00104\",\n      \"instalmentText\": \"1 of 4\",\n      \"payee\": \"insurance-partner\",\n      \"insurerName\": \"Standard Insurance Co., Inc.\",\n      \"bankName\": \"BPI\",\n      \"chequeNumber\": \"0045121\",\n      \"chequeDate\": \"2026-10-15\",\n      \"amount\": 12787.5,\n      \"status\": \"cancellation-pending\",\n      \"statusText\": \"Warehoused\",\n      \"custodyText\": \"Standard Insurance Co., Inc.\",\n      \"ageing\": {\n        \"code\": \"current\",\n        \"label\": \"Current\",\n        \"days\": -6\n      },\n      \"receiptNumber\": null\n    },\n    \"pullOut\": true\n  },\n  \"message\": \"Cancellation approved. Pull-out requested from Standard Insurance Co., Inc.\"\n}"
             }
           ]
         },
@@ -68092,7 +68562,7 @@
                 }
               ]
             },
-            "description": "Record that the bank cleared a deposited cheque\n\nFront-end touchpoint: Accounts > Post-Dated Cheques\n\nAccess: write:receipts",
+            "description": "Record that the bank cleared a deposited cheque\n\nFront-end touchpoint: Accounts > Post-Dated Cheques\n\nAccess: write:pdc",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"clearedOn\": \"2026-11-17\"\n}",
@@ -68132,7 +68602,7 @@
                     }
                   ]
                 },
-                "description": "Record that the bank cleared a deposited cheque\n\nFront-end touchpoint: Accounts > Post-Dated Cheques\n\nAccess: write:receipts",
+                "description": "Record that the bank cleared a deposited cheque\n\nFront-end touchpoint: Accounts > Post-Dated Cheques\n\nAccess: write:pdc",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"clearedOn\": \"2026-11-17\"\n}",
@@ -68153,12 +68623,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pdc_1\",\n    \"pdcNumber\": \"PDC-2026-00001\",\n    \"clientName\": \"ABC Trading Corp.\",\n    \"policyNumber\": \"POL-2026-00011\",\n    \"billNumber\": \"INV-2026-00031\",\n    \"bankName\": \"BDO Unibank\",\n    \"chequeNumber\": \"0001234\",\n    \"chequeDate\": \"2026-11-15\",\n    \"amount\": 12525,\n    \"status\": \"cleared\",\n    \"storageLocation\": \"Vault A, folder 11\",\n    \"dueInDays\": 42\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pdc_1\",\n    \"pdcNumber\": \"PDC-2026-00121\",\n    \"setNumber\": \"PCS-2026-00031\",\n    \"clientName\": \"Andrea Villanueva\",\n    \"policyNumber\": \"POL-2026-90004\",\n    \"billNumber\": \"INV-2026-00104\",\n    \"instalmentText\": \"1 of 4\",\n    \"payee\": \"insurance-partner\",\n    \"insurerName\": \"Standard Insurance Co., Inc.\",\n    \"bankName\": \"BPI\",\n    \"chequeNumber\": \"0045121\",\n    \"chequeDate\": \"2026-10-15\",\n    \"amount\": 12787.5,\n    \"status\": \"cleared\",\n    \"statusText\": \"Warehoused\",\n    \"custodyText\": \"Standard Insurance Co., Inc.\",\n    \"ageing\": {\n      \"code\": \"current\",\n      \"label\": \"Current\",\n      \"days\": -6\n    },\n    \"receiptNumber\": null\n  }\n}"
             }
           ]
         },
         {
-          "name": "Deposit a cheque on or after its date: creates and posts the official receipt (receipt.apply) on the bank account deposited to",
+          "name": "Deposit a cheque payable to TISPH on or after its date to the collection account (pdc.default_deposit_account): the receipt is created and posted (receipt.apply)",
           "request": {
             "method": "POST",
             "header": [
@@ -68185,10 +68655,10 @@
                 }
               ]
             },
-            "description": "Deposit a cheque on or after its date: creates and posts the official receipt (receipt.apply) on the bank account deposited to\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Deposit\n\nAccess: write:receipts",
+            "description": "Deposit a cheque payable to TISPH on or after its date to the collection account (pdc.default_deposit_account): the receipt is created and posted (receipt.apply)\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Deposit\n\nAccess: write:pdc",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"depositAccount\": \"ACC-OPS-001\",\n  \"depositDate\": \"2026-11-15\"\n}",
+              "raw": "{\n  \"depositDate\": \"2026-11-15\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -68225,10 +68695,10 @@
                     }
                   ]
                 },
-                "description": "Deposit a cheque on or after its date: creates and posts the official receipt (receipt.apply) on the bank account deposited to\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Deposit\n\nAccess: write:receipts",
+                "description": "Deposit a cheque payable to TISPH on or after its date to the collection account (pdc.default_deposit_account): the receipt is created and posted (receipt.apply)\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Deposit\n\nAccess: write:pdc",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"depositAccount\": \"ACC-OPS-001\",\n  \"depositDate\": \"2026-11-15\"\n}",
+                  "raw": "{\n  \"depositDate\": \"2026-11-15\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -68246,12 +68716,291 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"pdc\": {\n      \"id\": \"pdc_1\",\n      \"pdcNumber\": \"PDC-2026-00001\",\n      \"clientName\": \"ABC Trading Corp.\",\n      \"policyNumber\": \"POL-2026-00011\",\n      \"billNumber\": \"INV-2026-00031\",\n      \"bankName\": \"BDO Unibank\",\n      \"chequeNumber\": \"0001234\",\n      \"chequeDate\": \"2026-11-15\",\n      \"amount\": 12525,\n      \"status\": \"deposited\",\n      \"storageLocation\": \"Vault A, folder 11\",\n      \"dueInDays\": 42,\n      \"receiptNumber\": \"OR-2026-00112\"\n    },\n    \"receiptNumber\": \"OR-2026-00112\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"pdc\": {\n      \"id\": \"pdc_1\",\n      \"pdcNumber\": \"PDC-2026-00121\",\n      \"setNumber\": \"PCS-2026-00031\",\n      \"clientName\": \"Andrea Villanueva\",\n      \"policyNumber\": \"POL-2026-90004\",\n      \"billNumber\": \"INV-2026-00104\",\n      \"instalmentText\": \"1 of 4\",\n      \"payee\": \"insurance-partner\",\n      \"insurerName\": \"Standard Insurance Co., Inc.\",\n      \"bankName\": \"BPI\",\n      \"chequeNumber\": \"0045121\",\n      \"chequeDate\": \"2026-10-15\",\n      \"amount\": 12787.5,\n      \"status\": \"deposited\",\n      \"statusText\": \"Warehoused\",\n      \"custodyText\": \"Standard Insurance Co., Inc.\",\n      \"ageing\": {\n        \"code\": \"current\",\n        \"label\": \"Current\",\n        \"days\": -6\n      },\n      \"receiptNumber\": \"OR-2026-00112\"\n    },\n    \"receiptNumber\": \"OR-2026-00112\"\n  }\n}"
             }
           ]
         },
         {
-          "name": "Replace a bounced (or on-hand) cheque by a new cheque for the same bill or policy",
+          "name": "Partner bounced: the Insurance Partner reports the cheque returned (reasonCode of the pdc_bounce reasons); its AR, if any, is cancelled and the client told",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pdc/:id/partner-bounced",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pdc",
+                ":id",
+                "partner-bounced"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Partner bounced: the Insurance Partner reports the cheque returned (reasonCode of the pdc_bounce reasons); its AR, if any, is cancelled and the client told\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Partner bounced\n\nAccess: write:pdc",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"PDC-BNC-DAIF\",\n  \"bouncedOn\": \"2026-12-17\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/pdc/:id/partner-bounced",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pdc",
+                    ":id",
+                    "partner-bounced"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Partner bounced: the Insurance Partner reports the cheque returned (reasonCode of the pdc_bounce reasons); its AR, if any, is cancelled and the client told\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Partner bounced\n\nAccess: write:pdc",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"PDC-BNC-DAIF\",\n  \"bouncedOn\": \"2026-12-17\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"pdc\": {\n      \"id\": \"pdc_1\",\n      \"pdcNumber\": \"PDC-2026-00121\",\n      \"setNumber\": \"PCS-2026-00031\",\n      \"clientName\": \"Andrea Villanueva\",\n      \"policyNumber\": \"POL-2026-90004\",\n      \"billNumber\": \"INV-2026-00104\",\n      \"instalmentText\": \"1 of 4\",\n      \"payee\": \"insurance-partner\",\n      \"insurerName\": \"Standard Insurance Co., Inc.\",\n      \"bankName\": \"BPI\",\n      \"chequeNumber\": \"0045121\",\n      \"chequeDate\": \"2026-10-15\",\n      \"amount\": 12787.5,\n      \"status\": \"bounced\",\n      \"statusText\": \"Warehoused\",\n      \"custodyText\": \"Standard Insurance Co., Inc.\",\n      \"ageing\": {\n        \"code\": \"current\",\n        \"label\": \"Current\",\n        \"days\": -6\n      },\n      \"receiptNumber\": null\n    },\n    \"emailedTo\": \"client@example.ph\"\n  },\n  \"message\": \"Cheque PDC-2026-00123 marked bounced\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Partner cleared: the Insurance Partner collected the cheque; the cheque is Cleared and its acknowledgement receipt raised on the collection date (pdc.partner_collected)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pdc/:id/partner-cleared",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pdc",
+                ":id",
+                "partner-cleared"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Partner cleared: the Insurance Partner collected the cheque; the cheque is Cleared and its acknowledgement receipt raised on the collection date (pdc.partner_collected)\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Partner cleared\n\nAccess: write:pdc",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"collectedOn\": \"2026-10-16\",\n  \"partnerReference\": \"7781204\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/pdc/:id/partner-cleared",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pdc",
+                    ":id",
+                    "partner-cleared"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Partner cleared: the Insurance Partner collected the cheque; the cheque is Cleared and its acknowledgement receipt raised on the collection date (pdc.partner_collected)\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Partner cleared\n\nAccess: write:pdc",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"collectedOn\": \"2026-10-16\",\n  \"partnerReference\": \"7781204\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"pdc\": {\n      \"id\": \"pdc_1\",\n      \"pdcNumber\": \"PDC-2026-00121\",\n      \"setNumber\": \"PCS-2026-00031\",\n      \"clientName\": \"Andrea Villanueva\",\n      \"policyNumber\": \"POL-2026-90004\",\n      \"billNumber\": \"INV-2026-00104\",\n      \"instalmentText\": \"1 of 4\",\n      \"payee\": \"insurance-partner\",\n      \"insurerName\": \"Standard Insurance Co., Inc.\",\n      \"bankName\": \"BPI\",\n      \"chequeNumber\": \"0045121\",\n      \"chequeDate\": \"2026-10-15\",\n      \"amount\": 12787.5,\n      \"status\": \"cleared\",\n      \"statusText\": \"Warehoused\",\n      \"custodyText\": \"Standard Insurance Co., Inc.\",\n      \"ageing\": {\n        \"code\": \"current\",\n        \"label\": \"Current\",\n        \"days\": -6\n      },\n      \"receiptNumber\": \"OR-2026-00213\"\n    },\n    \"receiptNumber\": \"OR-2026-00213\"\n  },\n  \"message\": \"Cheque PDC-2026-00121 cleared; AR OR-2026-00213 raised\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Partner returned: the Insurance Partner sent back a cheque whose cancellation was approved; the cheque is Cancelled, back in the TIS vault",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pdc/:id/partner-returned",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pdc",
+                ":id",
+                "partner-returned"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Partner returned: the Insurance Partner sent back a cheque whose cancellation was approved; the cheque is Cancelled, back in the TIS vault\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Partner returned\n\nAccess: write:pdc",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"returnedOn\": \"2026-11-05\",\n  \"partnerReference\": \"SICI-PO-0091\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/pdc/:id/partner-returned",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pdc",
+                    ":id",
+                    "partner-returned"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Partner returned: the Insurance Partner sent back a cheque whose cancellation was approved; the cheque is Cancelled, back in the TIS vault\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Partner returned\n\nAccess: write:pdc",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"returnedOn\": \"2026-11-05\",\n  \"partnerReference\": \"SICI-PO-0091\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"pdc\": {\n      \"id\": \"pdc_1\",\n      \"pdcNumber\": \"PDC-2026-00121\",\n      \"setNumber\": \"PCS-2026-00031\",\n      \"clientName\": \"Andrea Villanueva\",\n      \"policyNumber\": \"POL-2026-90004\",\n      \"billNumber\": \"INV-2026-00104\",\n      \"instalmentText\": \"1 of 4\",\n      \"payee\": \"insurance-partner\",\n      \"insurerName\": \"Standard Insurance Co., Inc.\",\n      \"bankName\": \"BPI\",\n      \"chequeNumber\": \"0045121\",\n      \"chequeDate\": \"2026-10-15\",\n      \"amount\": 12787.5,\n      \"status\": \"cancelled\",\n      \"statusText\": \"Warehoused\",\n      \"custodyText\": \"Standard Insurance Co., Inc.\",\n      \"ageing\": {\n        \"code\": \"current\",\n        \"label\": \"Current\",\n        \"days\": -6\n      },\n      \"receiptNumber\": null\n    }\n  },\n  \"message\": \"Cheque PDC-2026-00122 cancelled\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Replace a bounced cheque, or one cancelled for a cheque replacement, by a new cheque for the same instalment (same set and payee)",
           "request": {
             "method": "POST",
             "header": [
@@ -68278,10 +69027,10 @@
                 }
               ]
             },
-            "description": "Replace a bounced (or on-hand) cheque by a new cheque for the same bill or policy\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Replace\n\nAccess: write:receipts",
+            "description": "Replace a bounced cheque, or one cancelled for a cheque replacement, by a new cheque for the same instalment (same set and payee)\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Replace\n\nAccess: write:pdc",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"bankId\": 3,\n  \"chequeNumber\": \"0005678\",\n  \"chequeDate\": \"2026-11-25\",\n  \"amount\": 12525\n}",
+              "raw": "{\n  \"bankId\": 3,\n  \"chequeNumber\": \"2000000113\",\n  \"chequeDate\": \"2026-11-15\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -68318,10 +69067,10 @@
                     }
                   ]
                 },
-                "description": "Replace a bounced (or on-hand) cheque by a new cheque for the same bill or policy\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Replace\n\nAccess: write:receipts",
+                "description": "Replace a bounced cheque, or one cancelled for a cheque replacement, by a new cheque for the same instalment (same set and payee)\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Replace\n\nAccess: write:pdc",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"bankId\": 3,\n  \"chequeNumber\": \"0005678\",\n  \"chequeDate\": \"2026-11-25\",\n  \"amount\": 12525\n}",
+                  "raw": "{\n  \"bankId\": 3,\n  \"chequeNumber\": \"2000000113\",\n  \"chequeDate\": \"2026-11-15\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -68339,12 +69088,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"replaced\": {\n      \"id\": \"pdc_1\",\n      \"pdcNumber\": \"PDC-2026-00001\",\n      \"clientName\": \"ABC Trading Corp.\",\n      \"policyNumber\": \"POL-2026-00011\",\n      \"billNumber\": \"INV-2026-00031\",\n      \"bankName\": \"BDO Unibank\",\n      \"chequeNumber\": \"0001234\",\n      \"chequeDate\": \"2026-11-15\",\n      \"amount\": 12525,\n      \"status\": \"replaced\",\n      \"storageLocation\": \"Vault A, folder 11\",\n      \"dueInDays\": 42\n    },\n    \"pdc\": {\n      \"id\": \"pdc_1\",\n      \"pdcNumber\": \"PDC-2026-00002\",\n      \"clientName\": \"ABC Trading Corp.\",\n      \"policyNumber\": \"POL-2026-00011\",\n      \"billNumber\": \"INV-2026-00031\",\n      \"bankName\": \"BDO Unibank\",\n      \"chequeNumber\": \"0001234\",\n      \"chequeDate\": \"2026-11-15\",\n      \"amount\": 12525,\n      \"status\": \"on-hand\",\n      \"storageLocation\": \"Vault A, folder 11\",\n      \"dueInDays\": 42\n    }\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"replaced\": {\n      \"id\": \"pdc_1\",\n      \"pdcNumber\": \"PDC-2026-00121\",\n      \"setNumber\": \"PCS-2026-00031\",\n      \"clientName\": \"Andrea Villanueva\",\n      \"policyNumber\": \"POL-2026-90004\",\n      \"billNumber\": \"INV-2026-00104\",\n      \"instalmentText\": \"1 of 4\",\n      \"payee\": \"insurance-partner\",\n      \"insurerName\": \"Standard Insurance Co., Inc.\",\n      \"bankName\": \"BPI\",\n      \"chequeNumber\": \"0045121\",\n      \"chequeDate\": \"2026-10-15\",\n      \"amount\": 12787.5,\n      \"status\": \"replaced\",\n      \"statusText\": \"Warehoused\",\n      \"custodyText\": \"Standard Insurance Co., Inc.\",\n      \"ageing\": {\n        \"code\": \"current\",\n        \"label\": \"Current\",\n        \"days\": -6\n      },\n      \"receiptNumber\": null\n    },\n    \"pdc\": {\n      \"id\": \"pdc_1\",\n      \"pdcNumber\": \"PDC-2026-00140\",\n      \"setNumber\": \"PCS-2026-00031\",\n      \"clientName\": \"Andrea Villanueva\",\n      \"policyNumber\": \"POL-2026-90004\",\n      \"billNumber\": \"INV-2026-00104\",\n      \"instalmentText\": \"1 of 4\",\n      \"payee\": \"insurance-partner\",\n      \"insurerName\": \"Standard Insurance Co., Inc.\",\n      \"bankName\": \"BPI\",\n      \"chequeNumber\": \"0045121\",\n      \"chequeDate\": \"2026-10-15\",\n      \"amount\": 12787.5,\n      \"status\": \"warehoused\",\n      \"statusText\": \"Warehoused\",\n      \"custodyText\": \"Standard Insurance Co., Inc.\",\n      \"ageing\": {\n        \"code\": \"current\",\n        \"label\": \"Current\",\n        \"days\": -6\n      },\n      \"receiptNumber\": null\n    }\n  },\n  \"message\": \"Replacement cheque PDC-2026-00140 encoded in set PCS-2026-00031\"\n}"
             }
           ]
         },
         {
-          "name": "Return an unused cheque on hand to the client (reason required)",
+          "name": "Return to client a cheque in the TIS vault (Received at TIS or Cancelled): date, returned to and reason",
           "request": {
             "method": "POST",
             "header": [
@@ -68371,10 +69120,10 @@
                 }
               ]
             },
-            "description": "Return an unused cheque on hand to the client (reason required)\n\nFront-end touchpoint: Accounts > Post-Dated Cheques\n\nAccess: write:receipts",
+            "description": "Return to client a cheque in the TIS vault (Received at TIS or Cancelled): date, returned to and reason\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Return to client\n\nAccess: write:pdc",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"Policy cancelled; cheque returned to the client\"\n}",
+              "raw": "{\n  \"returnedOn\": \"2026-11-08\",\n  \"returnedTo\": \"Andrea Villanueva\",\n  \"reason\": \"Cancelled cheque handed back\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -68411,10 +69160,10 @@
                     }
                   ]
                 },
-                "description": "Return an unused cheque on hand to the client (reason required)\n\nFront-end touchpoint: Accounts > Post-Dated Cheques\n\nAccess: write:receipts",
+                "description": "Return to client a cheque in the TIS vault (Received at TIS or Cancelled): date, returned to and reason\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Return to client\n\nAccess: write:pdc",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"reason\": \"Policy cancelled; cheque returned to the client\"\n}",
+                  "raw": "{\n  \"returnedOn\": \"2026-11-08\",\n  \"returnedTo\": \"Andrea Villanueva\",\n  \"reason\": \"Cancelled cheque handed back\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -68432,12 +69181,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pdc_1\",\n    \"pdcNumber\": \"PDC-2026-00001\",\n    \"clientName\": \"ABC Trading Corp.\",\n    \"policyNumber\": \"POL-2026-00011\",\n    \"billNumber\": \"INV-2026-00031\",\n    \"bankName\": \"BDO Unibank\",\n    \"chequeNumber\": \"0001234\",\n    \"chequeDate\": \"2026-11-15\",\n    \"amount\": 12525,\n    \"status\": \"returned\",\n    \"storageLocation\": \"Vault A, folder 11\",\n    \"dueInDays\": 42\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pdc_1\",\n    \"pdcNumber\": \"PDC-2026-00121\",\n    \"setNumber\": \"PCS-2026-00031\",\n    \"clientName\": \"Andrea Villanueva\",\n    \"policyNumber\": \"POL-2026-90004\",\n    \"billNumber\": \"INV-2026-00104\",\n    \"instalmentText\": \"1 of 4\",\n    \"payee\": \"insurance-partner\",\n    \"insurerName\": \"Standard Insurance Co., Inc.\",\n    \"bankName\": \"BPI\",\n    \"chequeNumber\": \"0045121\",\n    \"chequeDate\": \"2026-10-15\",\n    \"amount\": 12787.5,\n    \"status\": \"returned\",\n    \"statusText\": \"Warehoused\",\n    \"custodyText\": \"Standard Insurance Co., Inc.\",\n    \"ageing\": {\n      \"code\": \"current\",\n      \"label\": \"Current\",\n      \"days\": -6\n    },\n    \"receiptNumber\": null\n  }\n}"
             }
           ]
         },
         {
-          "name": "Cheques on hand due for deposit within pdc.due_window_days",
+          "name": "Cheques payable to TISPH received at TIS and due for deposit within pdc.due_window_days",
           "request": {
             "method": "GET",
             "header": [],
@@ -68451,7 +69200,7 @@
                 "deposit-due"
               ]
             },
-            "description": "Cheques on hand due for deposit within pdc.due_window_days\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Deposit due\n\nAccess: read:receipts"
+            "description": "Cheques payable to TISPH received at TIS and due for deposit within pdc.due_window_days\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Deposit due\n\nAccess: read:pdc"
           },
           "response": [
             {
@@ -68469,7 +69218,7 @@
                     "deposit-due"
                   ]
                 },
-                "description": "Cheques on hand due for deposit within pdc.due_window_days\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Deposit due\n\nAccess: read:receipts"
+                "description": "Cheques payable to TISPH received at TIS and due for deposit within pdc.due_window_days\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Deposit due\n\nAccess: read:pdc"
               },
               "status": "OK",
               "code": 200,
@@ -68481,7 +69230,661 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-04\",\n    \"windowDays\": 3,\n    \"total\": 12525,\n    \"rows\": [\n      {\n        \"id\": \"pdc_1\",\n        \"pdcNumber\": \"PDC-2026-00001\",\n        \"clientName\": \"ABC Trading Corp.\",\n        \"policyNumber\": \"POL-2026-00011\",\n        \"billNumber\": \"INV-2026-00031\",\n        \"bankName\": \"BDO Unibank\",\n        \"chequeNumber\": \"0001234\",\n        \"chequeDate\": \"2026-11-15\",\n        \"amount\": 12525,\n        \"status\": \"on-hand\",\n        \"storageLocation\": \"Vault A, folder 11\",\n        \"dueInDays\": 42\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-04\",\n    \"windowDays\": 3,\n    \"total\": 12525,\n    \"rows\": [\n      {\n        \"id\": \"pdc_1\",\n        \"pdcNumber\": \"PDC-2026-00121\",\n        \"setNumber\": \"PCS-2026-00031\",\n        \"clientName\": \"Andrea Villanueva\",\n        \"policyNumber\": \"POL-2026-90004\",\n        \"billNumber\": \"INV-2026-00104\",\n        \"instalmentText\": \"1 of 4\",\n        \"payee\": \"insurance-partner\",\n        \"insurerName\": \"Standard Insurance Co., Inc.\",\n        \"bankName\": \"BPI\",\n        \"chequeNumber\": \"0045121\",\n        \"chequeDate\": \"2026-10-15\",\n        \"amount\": 12787.5,\n        \"status\": \"warehoused\",\n        \"statusText\": \"Warehoused\",\n        \"custodyText\": \"Standard Insurance Co., Inc.\",\n        \"ageing\": {\n          \"code\": \"current\",\n          \"label\": \"Current\",\n          \"days\": -6\n        },\n        \"receiptNumber\": null\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Encode PDCs: the policy (policy=number), its open bills and the unpaid instalments of the bill picked (bill=), with the payee proposed",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pdc/encode?policy=POL-2026-90004",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pdc",
+                "encode"
+              ],
+              "query": [
+                {
+                  "key": "policy",
+                  "value": "POL-2026-90004"
+                }
+              ]
+            },
+            "description": "Encode PDCs: the policy (policy=number), its open bills and the unpaid instalments of the bill picked (bill=), with the payee proposed\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Encode PDCs\n\nAccess: write:pdc"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/pdc/encode?policy=POL-2026-90004",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pdc",
+                    "encode"
+                  ],
+                  "query": [
+                    {
+                      "key": "policy",
+                      "value": "POL-2026-90004"
+                    }
+                  ]
+                },
+                "description": "Encode PDCs: the policy (policy=number), its open bills and the unpaid instalments of the bill picked (bill=), with the payee proposed\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Encode PDCs\n\nAccess: write:pdc"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"policyNumber\": \"POL-2026-90004\",\n    \"clientName\": \"Andrea Villanueva\",\n    \"insurerName\": \"Standard Insurance Co., Inc.\",\n    \"billNumber\": \"INV-2026-00104\",\n    \"planned\": true,\n    \"instalmentCount\": 4,\n    \"rows\": [\n      {\n        \"seq\": 1,\n        \"dueDate\": \"2026-10-15\",\n        \"amount\": 12787.5\n      }\n    ],\n    \"defaultPayee\": \"insurance-partner\",\n    \"maxCheques\": 12\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cheques that need follow-up with the Insurance Partner (forwarded not received, matured without advice, pull-outs not returned)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pdc/follow-up",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pdc",
+                "follow-up"
+              ]
+            },
+            "description": "Cheques that need follow-up with the Insurance Partner (forwarded not received, matured without advice, pull-outs not returned)\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Follow-up\n\nAccess: read:pdc"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/pdc/follow-up",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pdc",
+                    "follow-up"
+                  ]
+                },
+                "description": "Cheques that need follow-up with the Insurance Partner (forwarded not received, matured without advice, pull-outs not returned)\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Follow-up\n\nAccess: read:pdc"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-11-19\",\n    \"forwardAckDays\": 5,\n    \"confirmationGraceDays\": 3,\n    \"rows\": [\n      {\n        \"id\": \"pdc_1\",\n        \"pdcNumber\": \"PDC-2026-00121\",\n        \"setNumber\": \"PCS-2026-00031\",\n        \"clientName\": \"Andrea Villanueva\",\n        \"policyNumber\": \"POL-2026-90004\",\n        \"billNumber\": \"INV-2026-00104\",\n        \"instalmentText\": \"1 of 4\",\n        \"payee\": \"insurance-partner\",\n        \"insurerName\": \"Standard Insurance Co., Inc.\",\n        \"bankName\": \"BPI\",\n        \"chequeNumber\": \"0045121\",\n        \"chequeDate\": \"2026-10-15\",\n        \"amount\": 12787.5,\n        \"status\": \"warehoused\",\n        \"statusText\": \"Warehoused\",\n        \"custodyText\": \"Standard Insurance Co., Inc.\",\n        \"ageing\": {\n          \"code\": \"current\",\n          \"label\": \"Current\",\n          \"days\": -6\n        },\n        \"receiptNumber\": null,\n        \"followUpReason\": \"4 days past date, no maturity advice\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "PDC sets (status open | closed | cancelled, policyId)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pdc/sets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pdc",
+                "sets"
+              ]
+            },
+            "description": "PDC sets (status open | closed | cancelled, policyId)\n\nFront-end touchpoint: Accounts > Post-Dated Cheques\n\nAccess: read:pdc"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/pdc/sets",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pdc",
+                    "sets"
+                  ]
+                },
+                "description": "PDC sets (status open | closed | cancelled, policyId)\n\nFront-end touchpoint: Accounts > Post-Dated Cheques\n\nAccess: read:pdc"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"setNumber\": \"PCS-2026-00031\",\n      \"policyNumber\": \"POL-2026-90004\",\n      \"payee\": \"insurance-partner\",\n      \"status\": \"open\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Encode PDCs: one set (PCS-) and one cheque per row against the unpaid instalments of a bill, Received at TIS; nothing is posted",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pdc/sets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pdc",
+                "sets"
+              ]
+            },
+            "description": "Encode PDCs: one set (PCS-) and one cheque per row against the unpaid instalments of a bill, Received at TIS; nothing is posted\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Encode PDCs\n\nAccess: write:pdc",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"policyNumber\": \"POL-2026-90004\",\n  \"billId\": \"INV-2026-00104\",\n  \"payee\": \"insurance-partner\",\n  \"storageLocation\": \"Vault A-12\",\n  \"rows\": [\n    {\n      \"seq\": 1,\n      \"bankId\": 2,\n      \"branch\": \"Ayala Avenue\",\n      \"accountNumber\": \"3159-0456-21\",\n      \"brstn\": \"010040018\",\n      \"chequeNumber\": \"0045121\",\n      \"chequeDate\": \"2026-10-15\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/pdc/sets",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pdc",
+                    "sets"
+                  ]
+                },
+                "description": "Encode PDCs: one set (PCS-) and one cheque per row against the unpaid instalments of a bill, Received at TIS; nothing is posted\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Encode PDCs\n\nAccess: write:pdc",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"policyNumber\": \"POL-2026-90004\",\n  \"billId\": \"INV-2026-00104\",\n  \"payee\": \"insurance-partner\",\n  \"storageLocation\": \"Vault A-12\",\n  \"rows\": [\n    {\n      \"seq\": 1,\n      \"bankId\": 2,\n      \"branch\": \"Ayala Avenue\",\n      \"accountNumber\": \"3159-0456-21\",\n      \"brstn\": \"010040018\",\n      \"chequeNumber\": \"0045121\",\n      \"chequeDate\": \"2026-10-15\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"set\": {\n      \"setNumber\": \"PCS-2026-00031\",\n      \"chequeCount\": 4,\n      \"total\": 51150\n    },\n    \"cheques\": [\n      {\n        \"id\": \"pdc_1\",\n        \"pdcNumber\": \"PDC-2026-00121\",\n        \"setNumber\": \"PCS-2026-00031\",\n        \"clientName\": \"Andrea Villanueva\",\n        \"policyNumber\": \"POL-2026-90004\",\n        \"billNumber\": \"INV-2026-00104\",\n        \"instalmentText\": \"1 of 4\",\n        \"payee\": \"insurance-partner\",\n        \"insurerName\": \"Standard Insurance Co., Inc.\",\n        \"bankName\": \"BPI\",\n        \"chequeNumber\": \"0045121\",\n        \"chequeDate\": \"2026-10-15\",\n        \"amount\": 12787.5,\n        \"status\": \"warehoused\",\n        \"statusText\": \"Warehoused\",\n        \"custodyText\": \"Standard Insurance Co., Inc.\",\n        \"ageing\": {\n          \"code\": \"current\",\n          \"label\": \"Current\",\n          \"days\": -6\n        },\n        \"receiptNumber\": null\n      }\n    ]\n  },\n  \"message\": \"Set PCS-2026-00031 saved with 4 cheques, PHP 51,150.00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "A PDC set with its cheques per instalment (the cheque paying it now and the ones it replaced), count, total and end of term",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pdc/sets/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pdc",
+                "sets",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "A PDC set with its cheques per instalment (the cheque paying it now and the ones it replaced), count, total and end of term\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Set\n\nAccess: read:pdc"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/pdc/sets/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pdc",
+                    "sets",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "A PDC set with its cheques per instalment (the cheque paying it now and the ones it replaced), count, total and end of term\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Set\n\nAccess: read:pdc"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"setNumber\": \"PCS-2026-00031\",\n    \"status\": \"open\",\n    \"chequeCount\": 4,\n    \"total\": 51150,\n    \"lastChequeDate\": \"2027-01-15\",\n    \"instalments\": [\n      {\n        \"seq\": 1,\n        \"current\": {\n          \"id\": \"pdc_1\",\n          \"pdcNumber\": \"PDC-2026-00121\",\n          \"setNumber\": \"PCS-2026-00031\",\n          \"clientName\": \"Andrea Villanueva\",\n          \"policyNumber\": \"POL-2026-90004\",\n          \"billNumber\": \"INV-2026-00104\",\n          \"instalmentText\": \"1 of 4\",\n          \"payee\": \"insurance-partner\",\n          \"insurerName\": \"Standard Insurance Co., Inc.\",\n          \"bankName\": \"BPI\",\n          \"chequeNumber\": \"0045121\",\n          \"chequeDate\": \"2026-10-15\",\n          \"amount\": 12787.5,\n          \"status\": \"warehoused\",\n          \"statusText\": \"Warehoused\",\n          \"custodyText\": \"Standard Insurance Co., Inc.\",\n          \"ageing\": {\n            \"code\": \"current\",\n            \"label\": \"Current\",\n            \"days\": -6\n          },\n          \"receiptNumber\": null\n        },\n        \"earlier\": []\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Acknowledgement receipt (PDF) of the post-dated cheques of a set, given to the client on receipt; no journal is posted",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pdc/sets/:id/acknowledgement",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pdc",
+                "sets",
+                ":id",
+                "acknowledgement"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Acknowledgement receipt (PDF) of the post-dated cheques of a set, given to the client on receipt; no journal is posted\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Set > Print acknowledgement\n\nAccess: read:pdc"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/pdc/sets/:id/acknowledgement",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pdc",
+                    "sets",
+                    ":id",
+                    "acknowledgement"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Acknowledgement receipt (PDF) of the post-dated cheques of a set, given to the client on receipt; no journal is posted\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Set > Print acknowledgement\n\nAccess: read:pdc"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "application/pdf"
+            }
+          ]
+        },
+        {
+          "name": "Transmittals to the Insurance Partners (status sent | partly-received | received, insurerId)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pdc/transmittals",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pdc",
+                "transmittals"
+              ]
+            },
+            "description": "Transmittals to the Insurance Partners (status sent | partly-received | received, insurerId)\n\nFront-end touchpoint: Accounts > Post-Dated Cheques\n\nAccess: read:pdc"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/pdc/transmittals",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pdc",
+                    "transmittals"
+                  ]
+                },
+                "description": "Transmittals to the Insurance Partners (status sent | partly-received | received, insurerId)\n\nFront-end touchpoint: Accounts > Post-Dated Cheques\n\nAccess: read:pdc"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"transmittalNumber\": \"PT-2026-00008\",\n      \"insurerName\": \"Standard Insurance Co., Inc.\",\n      \"forwardedOn\": \"2026-10-12\",\n      \"status\": \"received\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Forward to Insurance Partner: the cheques ticked (Received at TIS, payee Insurance Partner, one partner) on a transmittal PT-, Forwarded; open pull-outs of the partner are carried on it",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pdc/transmittals",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pdc",
+                "transmittals"
+              ]
+            },
+            "description": "Forward to Insurance Partner: the cheques ticked (Received at TIS, payee Insurance Partner, one partner) on a transmittal PT-, Forwarded; open pull-outs of the partner are carried on it\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Forward to Insurance Partner\n\nAccess: write:pdc",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pdcIds\": [\n    \"pdc_1\",\n    \"pdc_2\"\n  ],\n  \"forwardedOn\": \"2026-10-12\",\n  \"sentBy\": \"courier\",\n  \"courierReference\": \"LBC-778812\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/pdc/transmittals",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pdc",
+                    "transmittals"
+                  ]
+                },
+                "description": "Forward to Insurance Partner: the cheques ticked (Received at TIS, payee Insurance Partner, one partner) on a transmittal PT-, Forwarded; open pull-outs of the partner are carried on it\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Forward to Insurance Partner\n\nAccess: write:pdc",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pdcIds\": [\n    \"pdc_1\",\n    \"pdc_2\"\n  ],\n  \"forwardedOn\": \"2026-10-12\",\n  \"sentBy\": \"courier\",\n  \"courierReference\": \"LBC-778812\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"transmittal\": {\n      \"transmittalNumber\": \"PT-2026-00008\",\n      \"count\": 4,\n      \"total\": 51150\n    }\n  },\n  \"message\": \"4 cheques forwarded to Standard Insurance Co., Inc. on transmittal PT-2026-00008\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "A transmittal with its cheques and the pull-outs carried on it; format=xlsx or csv for the list sent with the cheques",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pdc/transmittals/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pdc",
+                "transmittals",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "A transmittal with its cheques and the pull-outs carried on it; format=xlsx or csv for the list sent with the cheques\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Transmittal\n\nAccess: read:pdc"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/pdc/transmittals/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pdc",
+                    "transmittals",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "A transmittal with its cheques and the pull-outs carried on it; format=xlsx or csv for the list sent with the cheques\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Transmittal\n\nAccess: read:pdc"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"transmittalNumber\": \"PT-2026-00008\",\n    \"status\": \"sent\",\n    \"count\": 4,\n    \"total\": 51150,\n    \"cheques\": [\n      {\n        \"id\": \"pdc_1\",\n        \"pdcNumber\": \"PDC-2026-00121\",\n        \"setNumber\": \"PCS-2026-00031\",\n        \"clientName\": \"Andrea Villanueva\",\n        \"policyNumber\": \"POL-2026-90004\",\n        \"billNumber\": \"INV-2026-00104\",\n        \"instalmentText\": \"1 of 4\",\n        \"payee\": \"insurance-partner\",\n        \"insurerName\": \"Standard Insurance Co., Inc.\",\n        \"bankName\": \"BPI\",\n        \"chequeNumber\": \"0045121\",\n        \"chequeDate\": \"2026-10-15\",\n        \"amount\": 12787.5,\n        \"status\": \"warehoused\",\n        \"statusText\": \"Warehoused\",\n        \"custodyText\": \"Standard Insurance Co., Inc.\",\n        \"ageing\": {\n          \"code\": \"current\",\n          \"label\": \"Current\",\n          \"days\": -6\n        },\n        \"receiptNumber\": null\n      }\n    ],\n    \"pullOuts\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Partner received: the cheques of the transmittal (all, or those ticked) are Warehoused with the Insurance Partner",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pdc/transmittals/:id/received",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pdc",
+                "transmittals",
+                ":id",
+                "received"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Partner received: the cheques of the transmittal (all, or those ticked) are Warehoused with the Insurance Partner\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Partner received\n\nAccess: write:pdc",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"receivedOn\": \"2026-10-14\",\n  \"receivedBy\": \"J. Dizon\",\n  \"partnerReference\": \"SICI-TR-1045\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/pdc/transmittals/:id/received",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "pdc",
+                    "transmittals",
+                    ":id",
+                    "received"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Partner received: the cheques of the transmittal (all, or those ticked) are Warehoused with the Insurance Partner\n\nFront-end touchpoint: Accounts > Post-Dated Cheques > Partner received\n\nAccess: write:pdc",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"receivedOn\": \"2026-10-14\",\n  \"receivedBy\": \"J. Dizon\",\n  \"partnerReference\": \"SICI-TR-1045\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"transmittal\": {\n      \"transmittalNumber\": \"PT-2026-00008\",\n      \"status\": \"received\"\n    }\n  },\n  \"message\": \"4 cheques of transmittal PT-2026-00008 are warehoused with Standard Insurance Co., Inc.\"\n}"
             }
           ]
         }
@@ -80712,99 +82115,6 @@
           ]
         },
         {
-          "name": "Cancel a receipt: reverses its payment journals and restores receivable balances",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/receipts/:id/cancel",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "receipts",
-                ":id",
-                "cancel"
-              ],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "",
-                  "description": "id (path parameter)"
-                }
-              ]
-            },
-            "description": "Cancel a receipt: reverses its payment journals and restores receivable balances\n\nFront-end touchpoint: Accounts > Receipts > View\n\nAccess: write:receipts",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"reason\": \"Cheque bounced\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/receipts/:id/cancel",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "receipts",
-                    ":id",
-                    "cancel"
-                  ],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "id (path parameter)"
-                    }
-                  ]
-                },
-                "description": "Cancel a receipt: reverses its payment journals and restores receivable balances\n\nFront-end touchpoint: Accounts > Receipts > View\n\nAccess: write:receipts",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"reason\": \"Cheque bounced\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"receiptId\": \"or_1\",\n    \"receiptNumber\": \"OR-2026-00001\",\n    \"receiptType\": \"Payment\",\n    \"receiptDate\": \"2026-09-28\",\n    \"customerCode\": \"CL-2026-00001\",\n    \"currencyCode\": \"PHP\",\n    \"transactionCode\": \"PAYMENT\",\n    \"transactionNumber\": \"RT-2026-00001\",\n    \"name\": \"Maria Santos\",\n    \"policyRefId\": \"pol_1\",\n    \"policyNumber\": \"POL-2026-00001\",\n    \"receiptStatus\": \"Cancelled\",\n    \"amount\": 11862.5,\n    \"receiptsList\": [\n      {\n        \"receiptListId\": \"rl_1\",\n        \"policies\": \"POL-2026-00001\",\n        \"netPremium\": \"10000.00\",\n        \"paid\": \"11862.50\",\n        \"unPaid\": \"0.00\",\n        \"discounts\": \"0.00\",\n        \"dst\": \"1250.00\",\n        \"lgt\": \"75.00\",\n        \"vat\": \"1200.00\",\n        \"ewt\": \"0.00\",\n        \"other\": \"0.00\",\n        \"fcAmount\": \"0.00\",\n        \"lcAmount\": \"11862.50\",\n        \"status\": \"Paid\"\n      }\n    ]\n  }\n}"
-            }
-          ]
-        },
-        {
           "name": "E-mail the official receipt to the client with its PDF attached (to: default the client's e-mail address; cc; note); 400 without an address",
           "request": {
             "method": "POST",
@@ -80894,6 +82204,529 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"message\": \"E-mail to maria.santos@example.ph queued\",\n  \"data\": {\n    \"emailId\": 41,\n    \"to\": \"maria.santos@example.ph\",\n    \"cc\": null,\n    \"subject\": \"Official receipt OR-2026-00001 for policy POL-2026-00001\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Attach the proof of payment of a receipt (deposit slip, transfer confirmation, cheque copy: an uploaded file key and its name); a remittance run on the fully paid basis needs it",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/receipts/:id/proof",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipts",
+                ":id",
+                "proof"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Attach the proof of payment of a receipt (deposit slip, transfer confirmation, cheque copy: an uploaded file key and its name); a remittance run on the fully paid basis needs it\n\nFront-end touchpoint: Accounts > Receipts > View > Proof of payment\n\nAccess: write:receipts",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"proofKey\": \"/api/s3/object/receipts/deposit-slip-0091.pdf\",\n  \"proofFileName\": \"deposit-slip-0091.pdf\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/receipts/:id/proof",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "receipts",
+                    ":id",
+                    "proof"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Attach the proof of payment of a receipt (deposit slip, transfer confirmation, cheque copy: an uploaded file key and its name); a remittance run on the fully paid basis needs it\n\nFront-end touchpoint: Accounts > Receipts > View > Proof of payment\n\nAccess: write:receipts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"proofKey\": \"/api/s3/object/receipts/deposit-slip-0091.pdf\",\n  \"proofFileName\": \"deposit-slip-0091.pdf\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"receiptId\": \"or_1\",\n    \"receiptNumber\": \"OR-2026-00001\",\n    \"receiptType\": \"Payment\",\n    \"receiptDate\": \"2026-09-28\",\n    \"customerCode\": \"CL-2026-00001\",\n    \"currencyCode\": \"PHP\",\n    \"transactionCode\": \"PAYMENT\",\n    \"transactionNumber\": \"RT-2026-00001\",\n    \"name\": \"Maria Santos\",\n    \"policyRefId\": \"pol_1\",\n    \"policyNumber\": \"POL-2026-00001\",\n    \"receiptStatus\": \"Converted\",\n    \"amount\": 11862.5,\n    \"receiptsList\": [\n      {\n        \"receiptListId\": \"rl_1\",\n        \"policies\": \"POL-2026-00001\",\n        \"netPremium\": \"10000.00\",\n        \"paid\": \"11862.50\",\n        \"unPaid\": \"0.00\",\n        \"discounts\": \"0.00\",\n        \"dst\": \"1250.00\",\n        \"lgt\": \"75.00\",\n        \"vat\": \"1200.00\",\n        \"ewt\": \"0.00\",\n        \"other\": \"0.00\",\n        \"fcAmount\": \"0.00\",\n        \"lcAmount\": \"11862.50\",\n        \"status\": \"Paid\"\n      }\n    ],\n    \"proof\": {\n      \"fileName\": \"deposit-slip-0091.pdf\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reverse a receipt with a reason (context receipt_reversal): sent to a checker when receipts.reversal_requires_approval, else cancelled at once (payment journals reversed, bills re-opened)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/receipts/:id/reversal",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipts",
+                ":id",
+                "reversal"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reverse a receipt with a reason (context receipt_reversal): sent to a checker when receipts.reversal_requires_approval, else cancelled at once (payment journals reversed, bills re-opened)\n\nFront-end touchpoint: Accounts > Receipts > View > Reverse receipt\n\nAccess: reverse:receipts",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"RCT-REV-DAIF\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/receipts/:id/reversal",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "receipts",
+                    ":id",
+                    "reversal"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reverse a receipt with a reason (context receipt_reversal): sent to a checker when receipts.reversal_requires_approval, else cancelled at once (payment journals reversed, bills re-opened)\n\nFront-end touchpoint: Accounts > Receipts > View > Reverse receipt\n\nAccess: reverse:receipts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"RCT-REV-DAIF\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"receiptId\": \"or_1\",\n    \"receiptNumber\": \"OR-2026-00001\",\n    \"receiptType\": \"Payment\",\n    \"receiptDate\": \"2026-09-28\",\n    \"customerCode\": \"CL-2026-00001\",\n    \"currencyCode\": \"PHP\",\n    \"transactionCode\": \"PAYMENT\",\n    \"transactionNumber\": \"RT-2026-00001\",\n    \"name\": \"Maria Santos\",\n    \"policyRefId\": \"pol_1\",\n    \"policyNumber\": \"POL-2026-00001\",\n    \"receiptStatus\": \"Converted\",\n    \"amount\": 11862.5,\n    \"receiptsList\": [\n      {\n        \"receiptListId\": \"rl_1\",\n        \"policies\": \"POL-2026-00001\",\n        \"netPremium\": \"10000.00\",\n        \"paid\": \"11862.50\",\n        \"unPaid\": \"0.00\",\n        \"discounts\": \"0.00\",\n        \"dst\": \"1250.00\",\n        \"lgt\": \"75.00\",\n        \"vat\": \"1200.00\",\n        \"ewt\": \"0.00\",\n        \"other\": \"0.00\",\n        \"fcAmount\": \"0.00\",\n        \"lcAmount\": \"11862.50\",\n        \"status\": \"Paid\"\n      }\n    ],\n    \"reversal\": {\n      \"status\": \"pending\",\n      \"reasonCode\": \"RCT-REV-DAIF\",\n      \"reason\": \"Cheque returned DAIF\"\n    }\n  },\n  \"message\": \"Reversal of receipt OR-2026-00012 sent for approval\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve or return a receipt reversal requested by another user (maker-checker); a return needs a reason (context receipt_reversal_reject)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/receipts/:id/reversal/decision",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipts",
+                ":id",
+                "reversal",
+                "decision"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve or return a receipt reversal requested by another user (maker-checker); a return needs a reason (context receipt_reversal_reject)\n\nFront-end touchpoint: Accounts > Receipts > View > Reversal; My Work > Approvals\n\nAccess: approve:receipt-reversal",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"approve\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/receipts/:id/reversal/decision",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "receipts",
+                    ":id",
+                    "reversal",
+                    "decision"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve or return a receipt reversal requested by another user (maker-checker); a return needs a reason (context receipt_reversal_reject)\n\nFront-end touchpoint: Accounts > Receipts > View > Reversal; My Work > Approvals\n\nAccess: approve:receipt-reversal",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"action\": \"approve\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"receiptId\": \"or_1\",\n    \"receiptNumber\": \"OR-2026-00001\",\n    \"receiptType\": \"Payment\",\n    \"receiptDate\": \"2026-09-28\",\n    \"customerCode\": \"CL-2026-00001\",\n    \"currencyCode\": \"PHP\",\n    \"transactionCode\": \"PAYMENT\",\n    \"transactionNumber\": \"RT-2026-00001\",\n    \"name\": \"Maria Santos\",\n    \"policyRefId\": \"pol_1\",\n    \"policyNumber\": \"POL-2026-00001\",\n    \"receiptStatus\": \"Cancelled\",\n    \"amount\": 11862.5,\n    \"receiptsList\": [\n      {\n        \"receiptListId\": \"rl_1\",\n        \"policies\": \"POL-2026-00001\",\n        \"netPremium\": \"10000.00\",\n        \"paid\": \"11862.50\",\n        \"unPaid\": \"0.00\",\n        \"discounts\": \"0.00\",\n        \"dst\": \"1250.00\",\n        \"lgt\": \"75.00\",\n        \"vat\": \"1200.00\",\n        \"ewt\": \"0.00\",\n        \"other\": \"0.00\",\n        \"fcAmount\": \"0.00\",\n        \"lcAmount\": \"11862.50\",\n        \"status\": \"Paid\"\n      }\n    ]\n  },\n  \"message\": \"Receipt OR-2026-00012 reversed\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "A bank's report of payments (multipart \"file\"): each line matched by its reference to what the policy owes within bank_matching.tolerance; overpaid: the excess held On Account; underpaid: listed as insufficient; no bill found: a floating payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/receipts/bank-payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipts",
+                "bank-payments"
+              ]
+            },
+            "description": "A bank's report of payments (multipart \"file\"): each line matched by its reference to what the policy owes within bank_matching.tolerance; overpaid: the excess held On Account; underpaid: listed as insufficient; no bill found: a floating payment\n\nFront-end touchpoint: Accounts > Receipts > Bank payments\n\nAccess: write:receipts",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"file\": \"(xlsx) columns: Date, Reference, Amount, Bank Account, Payer, Remarks\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/receipts/bank-payments",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "receipts",
+                    "bank-payments"
+                  ]
+                },
+                "description": "A bank's report of payments (multipart \"file\"): each line matched by its reference to what the policy owes within bank_matching.tolerance; overpaid: the excess held On Account; underpaid: listed as insufficient; no bill found: a floating payment\n\nFront-end touchpoint: Accounts > Receipts > Bank payments\n\nAccess: write:receipts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"file\": \"(xlsx) columns: Date, Reference, Amount, Bank Account, Payer, Remarks\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Processed 4 rows: 2 matched, 1 overpaid, 1 underpaid, 0 not found, 0 failed\",\n    \"batch\": {\n      \"batchNumber\": \"RVB-2026-00006\",\n      \"kind\": \"bank-payments\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Bank payments upload template (XLSX)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/receipts/bank-payments/template",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipts",
+                "bank-payments",
+                "template"
+              ]
+            },
+            "description": "Bank payments upload template (XLSX)\n\nFront-end touchpoint: Accounts > Receipts > Bank payments > Download template\n\nAccess: read:receipts"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/receipts/bank-payments/template",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "receipts",
+                    "bank-payments",
+                    "template"
+                  ]
+                },
+                "description": "Bank payments upload template (XLSX)\n\nFront-end touchpoint: Accounts > Receipts > Bank payments > Download template\n\nAccess: read:receipts"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
+            }
+          ]
+        },
+        {
+          "name": "Receipt voucher batches (bulk uploads), newest first, with their premium and commission totals",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/receipts/batches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipts",
+                "batches"
+              ]
+            },
+            "description": "Receipt voucher batches (bulk uploads), newest first, with their premium and commission totals\n\nFront-end touchpoint: Accounts > Receipts > Receipt batches\n\nAccess: read:receipts"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/receipts/batches",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "receipts",
+                    "batches"
+                  ]
+                },
+                "description": "Receipt voucher batches (bulk uploads), newest first, with their premium and commission totals\n\nFront-end touchpoint: Accounts > Receipts > Receipt batches\n\nAccess: read:receipts"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"rvb_1\",\n      \"batchNumber\": \"RVB-2026-00004\",\n      \"fileName\": \"rv-2026-10-05.xlsx\",\n      \"rows\": 240,\n      \"created\": 238,\n      \"failed\": 2,\n      \"premiumTotal\": 1250000,\n      \"commissionTotal\": 182300,\n      \"commissionRows\": 51\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "One receipt batch: the commission part kept apart, or for a bank payment upload its lines and how each was matched; format=xlsx or csv exports them",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/receipts/batches/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipts",
+                "batches",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One receipt batch: the commission part kept apart, or for a bank payment upload its lines and how each was matched; format=xlsx or csv exports them\n\nFront-end touchpoint: Accounts > Receipts > Receipt batches > Export commission\n\nAccess: read:receipts"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/receipts/batches/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "receipts",
+                    "batches",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One receipt batch: the commission part kept apart, or for a bank payment upload its lines and how each was matched; format=xlsx or csv exports them\n\nFront-end touchpoint: Accounts > Receipts > Receipt batches > Export commission\n\nAccess: read:receipts"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batchNumber\": \"RVB-2026-00004\",\n    \"commissionLines\": [\n      {\n        \"row\": 5,\n        \"policyNumber\": \"POL-2026-90004\",\n        \"insurer\": \"Malayan Insurance Co., Inc.\",\n        \"amount\": 4200,\n        \"referenceNo\": \"BDO-1\",\n        \"receiptNumber\": \"OR-2026-00120\"\n      }\n    ]\n  }\n}"
             }
           ]
         },
@@ -81010,6 +82843,134 @@
                   ]
                 },
                 "description": "Official receipts upload template (XLSX: Data, Columns and Instructions sheets)\n\nFront-end touchpoint: Accounts > Receipts > Bulk upload > Download template\n\nAccess: read:receipts"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
+            }
+          ]
+        },
+        {
+          "name": "Payments the clients made directly to the insurance company (multipart \"file\"): each settles the policy's bills with a receipt of channel insurer-direct (Dr premium payable / Cr premium receivable)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/receipts/insurer-direct",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipts",
+                "insurer-direct"
+              ]
+            },
+            "description": "Payments the clients made directly to the insurance company (multipart \"file\"): each settles the policy's bills with a receipt of channel insurer-direct (Dr premium payable / Cr premium receivable)\n\nFront-end touchpoint: Accounts > Receipts > Insurer-direct payments\n\nAccess: write:receipts",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"file\": \"(xlsx) columns: Policy Number, Amount, Date Paid, Insurer Reference, Remarks\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/receipts/insurer-direct",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "receipts",
+                    "insurer-direct"
+                  ]
+                },
+                "description": "Payments the clients made directly to the insurance company (multipart \"file\"): each settles the policy's bills with a receipt of channel insurer-direct (Dr premium payable / Cr premium receivable)\n\nFront-end touchpoint: Accounts > Receipts > Insurer-direct payments\n\nAccess: write:receipts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"file\": \"(xlsx) columns: Policy Number, Amount, Date Paid, Insurer Reference, Remarks\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Processed 2 rows: 2 created, 0 failed\",\n    \"batch\": {\n      \"batchNumber\": \"RVB-2026-00007\",\n      \"kind\": \"insurer-direct\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Payments made directly to the insurer: upload template (XLSX)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/receipts/insurer-direct/template",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipts",
+                "insurer-direct",
+                "template"
+              ]
+            },
+            "description": "Payments made directly to the insurer: upload template (XLSX)\n\nFront-end touchpoint: Accounts > Receipts > Insurer-direct payments > Download template\n\nAccess: read:receipts"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/receipts/insurer-direct/template",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "receipts",
+                    "insurer-direct",
+                    "template"
+                  ]
+                },
+                "description": "Payments made directly to the insurer: upload template (XLSX)\n\nFront-end touchpoint: Accounts > Receipts > Insurer-direct payments > Download template\n\nAccess: read:receipts"
               },
               "status": "OK",
               "code": 200,
@@ -81383,6 +83344,502 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"receiptId\": \"or_1\",\n      \"receiptNumber\": \"OR-2026-00001\",\n      \"receiptType\": \"Payment\",\n      \"receiptDate\": \"2026-09-28\",\n      \"customerCode\": \"CL-2026-00001\",\n      \"currencyCode\": \"PHP\",\n      \"transactionCode\": \"PAYMENT\",\n      \"transactionNumber\": \"RT-2026-00001\",\n      \"name\": \"Maria Santos\",\n      \"policyRefId\": \"pol_1\",\n      \"policyNumber\": \"POL-2026-00001\",\n      \"receiptStatus\": \"Converted\",\n      \"amount\": 11862.5,\n      \"receiptsList\": [\n        {\n          \"receiptListId\": \"rl_1\",\n          \"policies\": \"POL-2026-00001\",\n          \"netPremium\": \"10000.00\",\n          \"paid\": \"11862.50\",\n          \"unPaid\": \"0.00\",\n          \"discounts\": \"0.00\",\n          \"dst\": \"1250.00\",\n          \"lgt\": \"75.00\",\n          \"vat\": \"1200.00\",\n          \"ewt\": \"0.00\",\n          \"other\": \"0.00\",\n          \"fcAmount\": \"0.00\",\n          \"lcAmount\": \"11862.50\",\n          \"status\": \"Paid\"\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Unapplied collections (excess On Account, floating, advance): open first by the date they are to be allocated; filter status, kind, overdue, search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/receipts/unapplied?status=open&overdue=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipts",
+                "unapplied"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "open"
+                },
+                {
+                  "key": "overdue",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Unapplied collections (excess On Account, floating, advance): open first by the date they are to be allocated; filter status, kind, overdue, search\n\nFront-end touchpoint: Accounts > Unapplied Collections\n\nAccess: read:receipts"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/receipts/unapplied?status=open&overdue=true",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "receipts",
+                    "unapplied"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "open"
+                    },
+                    {
+                      "key": "overdue",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Unapplied collections (excess On Account, floating, advance): open first by the date they are to be allocated; filter status, kind, overdue, search\n\nFront-end touchpoint: Accounts > Unapplied Collections\n\nAccess: read:receipts"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"rows\": [\n      {\n        \"id\": \"uac_1\",\n        \"kind\": \"excess\",\n        \"kindText\": \"Excess payment\",\n        \"status\": \"open\",\n        \"amount\": 1500,\n        \"balance\": 1500,\n        \"receiptNumber\": \"OR-2026-00120\",\n        \"clientName\": \"Andrea Villanueva\",\n        \"policyNumber\": \"POL-2026-90004\",\n        \"receivedDate\": \"2026-10-05\",\n        \"allocateBy\": \"2026-10-07\",\n        \"overdue\": false\n      }\n    ],\n    \"summary\": {\n      \"open\": 1,\n      \"openAmount\": 1500,\n      \"overdue\": 0\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record a floating payment (no client or bill identified yet) or an advance payment (a client paying before the bill); posted Dr cash / Cr unapplied collections",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/receipts/unapplied",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipts",
+                "unapplied"
+              ]
+            },
+            "description": "Record a floating payment (no client or bill identified yet) or an advance payment (a client paying before the bill); posted Dr cash / Cr unapplied collections\n\nFront-end touchpoint: Accounts > Unapplied Collections > Record payment\n\nAccess: write:receipts",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kind\": \"floating\",\n  \"amount\": 12500,\n  \"receivedDate\": \"2026-10-05\",\n  \"referenceNo\": \"MBT-0099812\",\n  \"payerName\": \"Unknown depositor\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/receipts/unapplied",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "receipts",
+                    "unapplied"
+                  ]
+                },
+                "description": "Record a floating payment (no client or bill identified yet) or an advance payment (a client paying before the bill); posted Dr cash / Cr unapplied collections\n\nFront-end touchpoint: Accounts > Unapplied Collections > Record payment\n\nAccess: write:receipts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"kind\": \"floating\",\n  \"amount\": 12500,\n  \"receivedDate\": \"2026-10-05\",\n  \"referenceNo\": \"MBT-0099812\",\n  \"payerName\": \"Unknown depositor\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"uac_1\",\n    \"kind\": \"floating\",\n    \"kindText\": \"Excess payment\",\n    \"status\": \"open\",\n    \"amount\": 1500,\n    \"balance\": 1500,\n    \"receiptNumber\": \"OR-2026-00120\",\n    \"clientName\": \"Andrea Villanueva\",\n    \"policyNumber\": \"POL-2026-90004\",\n    \"receivedDate\": \"2026-10-05\",\n    \"allocateBy\": \"2026-10-07\",\n    \"overdue\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One unapplied collection with its allocations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/receipts/unapplied/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipts",
+                "unapplied",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One unapplied collection with its allocations\n\nFront-end touchpoint: Accounts > Unapplied Collections > View\n\nAccess: read:receipts"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/receipts/unapplied/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "receipts",
+                    "unapplied",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One unapplied collection with its allocations\n\nFront-end touchpoint: Accounts > Unapplied Collections > View\n\nAccess: read:receipts"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"uac_1\",\n    \"kind\": \"excess\",\n    \"kindText\": \"Excess payment\",\n    \"status\": \"open\",\n    \"amount\": 1500,\n    \"balance\": 1500,\n    \"receiptNumber\": \"OR-2026-00120\",\n    \"clientName\": \"Andrea Villanueva\",\n    \"policyNumber\": \"POL-2026-90004\",\n    \"receivedDate\": \"2026-10-05\",\n    \"allocateBy\": \"2026-10-07\",\n    \"overdue\": false,\n    \"allocations\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Allocate an unapplied collection to open bills (the bill settled as by a receipt; Dr unapplied collections / Cr premium receivable)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/receipts/unapplied/:id/allocate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipts",
+                "unapplied",
+                ":id",
+                "allocate"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Allocate an unapplied collection to open bills (the bill settled as by a receipt; Dr unapplied collections / Cr premium receivable)\n\nFront-end touchpoint: Accounts > Unapplied Collections > Allocate\n\nAccess: write:receipts",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"allocations\": [\n    {\n      \"receivableId\": \"INV-2026-00104\",\n      \"amount\": 1500\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/receipts/unapplied/:id/allocate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "receipts",
+                    "unapplied",
+                    ":id",
+                    "allocate"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Allocate an unapplied collection to open bills (the bill settled as by a receipt; Dr unapplied collections / Cr premium receivable)\n\nFront-end touchpoint: Accounts > Unapplied Collections > Allocate\n\nAccess: write:receipts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"allocations\": [\n    {\n      \"receivableId\": \"INV-2026-00104\",\n      \"amount\": 1500\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"uac_1\",\n    \"kind\": \"excess\",\n    \"kindText\": \"Excess payment\",\n    \"status\": \"allocated\",\n    \"amount\": 1500,\n    \"balance\": 0,\n    \"receiptNumber\": \"OR-2026-00120\",\n    \"clientName\": \"Andrea Villanueva\",\n    \"policyNumber\": \"POL-2026-90004\",\n    \"receivedDate\": \"2026-10-05\",\n    \"allocateBy\": \"2026-10-07\",\n    \"overdue\": false\n  },\n  \"message\": \"PHP 1,500.00 allocated\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Refund what is left of an unapplied collection to the client with a reason (context unapplied_refund): Dr unapplied collections / Cr client refund payable",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/receipts/unapplied/:id/refund",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipts",
+                "unapplied",
+                ":id",
+                "refund"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Refund what is left of an unapplied collection to the client with a reason (context unapplied_refund): Dr unapplied collections / Cr client refund payable\n\nFront-end touchpoint: Accounts > Unapplied Collections > Refund\n\nAccess: write:receipts",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"UAC-REF-OVERPAID\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/receipts/unapplied/:id/refund",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "receipts",
+                    "unapplied",
+                    ":id",
+                    "refund"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Refund what is left of an unapplied collection to the client with a reason (context unapplied_refund): Dr unapplied collections / Cr client refund payable\n\nFront-end touchpoint: Accounts > Unapplied Collections > Refund\n\nAccess: write:receipts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"UAC-REF-OVERPAID\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"uac_1\",\n    \"kind\": \"excess\",\n    \"kindText\": \"Excess payment\",\n    \"status\": \"refunded\",\n    \"amount\": 1500,\n    \"balance\": 0,\n    \"receiptNumber\": \"OR-2026-00120\",\n    \"clientName\": \"Andrea Villanueva\",\n    \"policyNumber\": \"POL-2026-90004\",\n    \"receivedDate\": \"2026-10-05\",\n    \"allocateBy\": \"2026-10-07\",\n    \"overdue\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reverse a floating or advance payment recorded in error, nothing allocated (reason of context receipt_reversal)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/receipts/unapplied/:id/reverse",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "receipts",
+                "unapplied",
+                ":id",
+                "reverse"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reverse a floating or advance payment recorded in error, nothing allocated (reason of context receipt_reversal)\n\nFront-end touchpoint: Accounts > Unapplied Collections > Reverse\n\nAccess: reverse:receipts",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"RCT-REV-DUPLICATE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/receipts/unapplied/:id/reverse",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "receipts",
+                    "unapplied",
+                    ":id",
+                    "reverse"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reverse a floating or advance payment recorded in error, nothing allocated (reason of context receipt_reversal)\n\nFront-end touchpoint: Accounts > Unapplied Collections > Reverse\n\nAccess: reverse:receipts",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"RCT-REV-DUPLICATE\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"uac_1\",\n    \"kind\": \"excess\",\n    \"kindText\": \"Excess payment\",\n    \"status\": \"reversed\",\n    \"amount\": 1500,\n    \"balance\": 0,\n    \"receiptNumber\": \"OR-2026-00120\",\n    \"clientName\": \"Andrea Villanueva\",\n    \"policyNumber\": \"POL-2026-90004\",\n    \"receivedDate\": \"2026-10-05\",\n    \"allocateBy\": \"2026-10-07\",\n    \"overdue\": false\n  }\n}"
             }
           ]
         }
@@ -82867,6 +85324,132 @@
           ]
         },
         {
+          "name": "Insurer billing runs (newest first) and the next billing dates (insurer_billing.run_days moved off non-working days)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/billing-runs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "billing-runs"
+              ]
+            },
+            "description": "Insurer billing runs (newest first) and the next billing dates (insurer_billing.run_days moved off non-working days)\n\nFront-end touchpoint: Accounts > Remittance > Insurer billing > Billing run\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/billing-runs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "billing-runs"
+                  ]
+                },
+                "description": "Insurer billing runs (newest first) and the next billing dates (insurer_billing.run_days moved off non-working days)\n\nFront-end touchpoint: Accounts > Remittance > Insurer billing > Billing run\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"nextBillingDates\": [\n      \"2026-10-26\",\n      \"2026-11-13\"\n    ],\n    \"runs\": [\n      {\n        \"id\": 3,\n        \"billingDate\": \"2026-10-15\",\n        \"trigger\": \"job\",\n        \"statements\": 2,\n        \"result\": \"success\",\n        \"message\": \"Billing run done: 2 billing statement(s) drafted.\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Run the insurer billing now for a billing date (default today, not in the future) and optionally one insurer: drafts the billing statements of the remittances approved before that date and not yet billed",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/billing-runs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "billing-runs"
+              ]
+            },
+            "description": "Run the insurer billing now for a billing date (default today, not in the future) and optionally one insurer: drafts the billing statements of the remittances approved before that date and not yet billed\n\nFront-end touchpoint: Accounts > Remittance > Insurer billing > Billing run\n\nAccess: write:remittance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"billingDate\": \"2026-10-15\",\n  \"insurerId\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/billing-runs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "billing-runs"
+                  ]
+                },
+                "description": "Run the insurer billing now for a billing date (default today, not in the future) and optionally one insurer: drafts the billing statements of the remittances approved before that date and not yet billed\n\nFront-end touchpoint: Accounts > Remittance > Insurer billing > Billing run\n\nAccess: write:remittance",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"billingDate\": \"2026-10-15\",\n  \"insurerId\": 4\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"run\": {\n      \"id\": 4,\n      \"billingDate\": \"2026-10-15\",\n      \"statements\": 1\n    },\n    \"notes\": [\n      {\n        \"number\": \"CBS-2026-00031\",\n        \"insurer\": \"Malayan Insurance Co., Inc.\",\n        \"productLine\": \"Motor\",\n        \"basis\": \"net\",\n        \"amount\": 26905.2\n      }\n    ]\n  },\n  \"message\": \"Billing run done: 1 billing statement(s) drafted.\"\n}"
+            }
+          ]
+        },
+        {
           "name": "Send an agency bill or insurer remittance statement (queues an e-mail to the agent or insurer)",
           "request": {
             "method": "POST",
@@ -83447,7 +86030,7 @@
           ]
         },
         {
-          "name": "Approve (opens it for sending and collection) a debit note; maker-checker: not the maker",
+          "name": "Approve (opens it for sending and collection; a net-basis billing statement is settled by retention) a debit note (write:remittance) or billing statement (approve:insurer-billing, insurer TIN required); maker-checker: not the maker",
           "request": {
             "method": "POST",
             "header": [
@@ -83475,7 +86058,7 @@
                 }
               ]
             },
-            "description": "Approve (opens it for sending and collection) a debit note; maker-checker: not the maker\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: write:remittance",
+            "description": "Approve (opens it for sending and collection; a net-basis billing statement is settled by retention) a debit note (write:remittance) or billing statement (approve:insurer-billing, insurer TIN required); maker-checker: not the maker\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: write:remittance, approve:insurer-billing",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"remarks\": \"Checked against the placements\"\n}",
@@ -83516,7 +86099,7 @@
                     }
                   ]
                 },
-                "description": "Approve (opens it for sending and collection) a debit note; maker-checker: not the maker\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: write:remittance",
+                "description": "Approve (opens it for sending and collection; a net-basis billing statement is settled by retention) a debit note (write:remittance) or billing statement (approve:insurer-billing, insurer TIN required); maker-checker: not the maker\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: write:remittance, approve:insurer-billing",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"remarks\": \"Checked against the placements\"\n}",
@@ -83841,6 +86424,85 @@
           ]
         },
         {
+          "name": "A billing statement with its schedule as Excel or CSV (format=xlsx | csv): particulars per product line (Gross Amount, VAT, Net of VAT, EWT, Net Amount Payable) and the policy lines",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/direct-bill/:id/export?format=xlsx",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "direct-bill",
+                ":id",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "xlsx"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "A billing statement with its schedule as Excel or CSV (format=xlsx | csv): particulars per product line (Gross Amount, VAT, Net of VAT, EWT, Net Amount Payable) and the policy lines\n\nFront-end touchpoint: Accounts > Remittance > Insurer billing > Billing statement > Export\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/direct-bill/:id/export?format=xlsx",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "direct-bill",
+                    ":id",
+                    "export"
+                  ],
+                  "query": [
+                    {
+                      "key": "format",
+                      "value": "xlsx"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "A billing statement with its schedule as Excel or CSV (format=xlsx | csv): particulars per product line (Gross Amount, VAT, Net of VAT, EWT, Net Amount Payable) and the policy lines\n\nFront-end touchpoint: Accounts > Remittance > Insurer billing > Billing statement > Export\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            }
+          ]
+        },
+        {
           "name": "Printable commission debit note (PDF, broker letterhead; download=1 for an attachment)",
           "request": {
             "method": "GET",
@@ -83920,7 +86582,7 @@
           ]
         },
         {
-          "name": "Reject (a billing_reject reasonCode with its note, or a reason; its commission becomes unbilled again) a debit note; maker-checker: not the maker",
+          "name": "Reject (a billing_reject reasonCode with its note, or a reason; its commission becomes unbilled again) a debit note (write:remittance) or billing statement (approve:insurer-billing, insurer TIN required); maker-checker: not the maker",
           "request": {
             "method": "POST",
             "header": [
@@ -83948,7 +86610,7 @@
                 }
               ]
             },
-            "description": "Reject (a billing_reject reasonCode with its note, or a reason; its commission becomes unbilled again) a debit note; maker-checker: not the maker\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: write:remittance",
+            "description": "Reject (a billing_reject reasonCode with its note, or a reason; its commission becomes unbilled again) a debit note (write:remittance) or billing statement (approve:insurer-billing, insurer TIN required); maker-checker: not the maker\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: write:remittance, approve:insurer-billing",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"reasonCode\": \"BRJ-AMOUNT\",\n  \"note\": \"Wrong period\"\n}",
@@ -83989,7 +86651,7 @@
                     }
                   ]
                 },
-                "description": "Reject (a billing_reject reasonCode with its note, or a reason; its commission becomes unbilled again) a debit note; maker-checker: not the maker\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: write:remittance",
+                "description": "Reject (a billing_reject reasonCode with its note, or a reason; its commission becomes unbilled again) a debit note (write:remittance) or billing statement (approve:insurer-billing, insurer TIN required); maker-checker: not the maker\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: write:remittance, approve:insurer-billing",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"reasonCode\": \"BRJ-AMOUNT\",\n  \"note\": \"Wrong period\"\n}",
@@ -85163,6 +87825,67 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"status\": \"Resolved\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Held policies (instalment hold): part-paid policies not remitted until fully paid, with the plan, premium, paid to date, balance, next due date and bounced cheques (status held | released, insurerId, q)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/held?status=held",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "held"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "held"
+                }
+              ]
+            },
+            "description": "Held policies (instalment hold): part-paid policies not remitted until fully paid, with the plan, premium, paid to date, balance, next due date and bounced cheques (status held | released, insurerId, q)\n\nFront-end touchpoint: Accounts > Remittance > Held policies\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/held?status=held",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "held"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "held"
+                    }
+                  ]
+                },
+                "description": "Held policies (instalment hold): part-paid policies not remitted until fully paid, with the plan, premium, paid to date, balance, next due date and bounced cheques (status held | released, insurerId, q)\n\nFront-end touchpoint: Accounts > Remittance > Held policies\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-19\",\n    \"totals\": {\n      \"count\": 1,\n      \"premium\": 25817.34,\n      \"paidToDate\": 12908.68,\n      \"balance\": 12908.66\n    },\n    \"rows\": [\n      {\n        \"policyNumber\": \"POL-2026-95034\",\n        \"clientName\": \"R. Santos\",\n        \"insurerName\": \"Malayan Insurance Co., Inc.\",\n        \"plan\": \"4 instalments\",\n        \"premium\": 25817.34,\n        \"paidToDate\": 12908.68,\n        \"balance\": 12908.66,\n        \"nextDue\": \"2026-11-03\",\n        \"heldSince\": \"2026-10-12\",\n        \"status\": \"held\"\n      }\n    ]\n  }\n}"
             }
           ]
         },
