@@ -14,6 +14,7 @@ the client for approval, approved on maker-checker and converted to a policy thr
 | `service.js` | Create, change, status changes along `quotations.transitions`, send for approval (signed link), the public approval link, submission to the insurer, conversion to a policy, underwriting referral decisions. |
 | `validity.js` | The validity cycle and the versions (TIS-BRD-QUOT-04): validity days per product, extension, expiry reminder and spoil jobs, read-only versions. |
 | `premium.js`, `motorTariff.js` | Premium breakdown (covers, taxes, commission) and the motor tariff of the Product Configurator. |
+| `creditLife.js` | Credit Life quotation rules (TIS-BRD-QUOT-06, PJRN-03): eligibility, the fixed rate, the reduced sum insured referral. |
 | `customerResponses.js` | The client's answer received outside the approval link. |
 | `shape.js` | Row to API object (`toQuote`) and the fields never stored in the quotation document. |
 
@@ -38,3 +39,14 @@ the client for approval, approved on maker-checker and converted to a policy thr
   copies the current terms to `quote_versions` and continues as `version + 1` in Draft with the approval link and the
   client's and approver's stamps cleared (audit `new-version`). `body.version` older than the current version is
   refused (409); a quotation with an open placement slip cannot be changed. `GET /:id/versions`, `GET /:id/versions/:n`.
+
+## Credit Life
+
+Setting `credit_life.rules` (migration 0484). A quotation of one of `products` (CL-VOL) carries `doc.creditLife`
+(`loanAccountNo`, `borrowerBirthDate` or the party's birth date, `accountCount`, `pendingBalance`, `loanTermYears`,
+`sumInsured`). Refused: a corporate party, an agent or referrer code, age at or above `maxAge`, more than `maxAccounts`,
+a pending balance, a term outside `termYears`, a rate other than `ratePerThousand`, another open quotation of the loan
+account. Priced at `ratePerThousand` per 1,000 of the sum insured (default `defaultSumInsured`). A lower sum insured adds
+the rule `CL_SI_REDUCTION` to the underwriting referral for `siReductionRoles`, so sending, approval and conversion wait
+for its approval (maker-checker). CL-COMP (new business) skips the quotation step of its placement journey: a quotation
+for it is refused and the screens open the direct placement.

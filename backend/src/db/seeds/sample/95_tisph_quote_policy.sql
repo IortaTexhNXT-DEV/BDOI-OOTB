@@ -39,3 +39,22 @@ SELECT 'end_sample_95101', 'END-2026-95101', p.id, p.client_id, 'motor-details',
   FROM policies p, users u
  WHERE p.id = 'pol_sls_03' AND p.status = 'active' AND u.username = 'agent.msantos'
 ON CONFLICT (id) DO NOTHING;
+
+-- A Credit Life renewal quotation (CL-VOL) of Enrique Tolentino: the sum insured follows the outstanding balance of
+-- PHP 650,000 at 3.68 per 1,000, so it waits for the approval of the reduced sum insured.
+INSERT INTO quotes(id, quote_number, lead_id, product_id, insurance_company_id, agent_user_id, created_by, status, product_type, lob, sum_insured, premium_base, vat, dst, lgt, fst,
+  others, premium_total, commission_rate, commission_amount, currency, issued_on, valid_until, doc, created_at, updated_at, version_started_at)
+SELECT 'qt_sample_cl_01', 'QT-2026-95101', l.id, p.id, ic.id, u.id, u.id, 'draft', 'CL-VOL', 'LIFE', 650000, 2392, 0, 299, 17.94, 0, 47.84, 2756.78, 0.15, 358.8, 'PHP',
+       current_date - 2, current_date + 28,
+       jsonb_build_object('productType', 'CL-VOL', 'totalSumInsured', 650000, 'netPremium', 2392, 'discount', 0, 'insuranceCompanyName', ic.name,
+         'creditLife', jsonb_build_object('loanAccountNo', 'TFS-2023-0045817', 'borrowerBirthDate', l.birth_date, 'borrowerAge', date_part('year', age(current_date, l.birth_date))::int,
+           'accountCount', 1, 'pendingBalance', 0, 'loanTermYears', 3, 'sumInsured', 650000, 'ratePerThousand', 3.68, 'defaultSumInsured', 1000000),
+         'underwritingReferral', jsonb_build_object('status', 'pending', 'ruleCodes', jsonb_build_array('CL_SI_REDUCTION'),
+           'authorityRoles', jsonb_build_array('tis-sales-officer', 'tis-sales-unit-head', 'tis-ops-unit-head', 'tis-general-manager'),
+           'authorityRoleNames', jsonb_build_array('TIS Sales Officer', 'TIS Sales Unit Head', 'TIS Operations Unit Head', 'TIS General Manager'),
+           'reasons', jsonb_build_array('CL_SI_REDUCTION: Sum insured reduced from PHP 1,000,000.00 to PHP 650,000.00: approval needed before issuance'),
+           'requestedAt', to_char(now() - interval '2 days', 'YYYY-MM-DD"T"HH24:MI:SS"Z"'), 'creditLifeSumInsured', 650000)),
+       now() - interval '2 days', now() - interval '2 days', now() - interval '2 days'
+  FROM leads l, products p, insurance_companies ic, users u
+ WHERE l.id = 'ld_sls_12' AND p.code = 'CL-VOL' AND ic.name = 'Malayan Insurance Co., Inc.' AND u.username = 'agent.msantos'
+ON CONFLICT (id) DO NOTHING;

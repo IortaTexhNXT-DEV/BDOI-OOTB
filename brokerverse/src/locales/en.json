@@ -12138,6 +12138,26 @@
     "changeReason": "Reason for change",
     "versionTitle": "Quotation {{number}} version {{version}}"
   },
+  "creditLifeQuote": {
+    "title": "{{product}} quotation",
+    "panelTitle": "Credit Life",
+    "borrower": "Borrower",
+    "insurer": "Insurer",
+    "loanAccountNo": "TFS loan account no.",
+    "borrowerBirthDate": "Borrower's date of birth",
+    "borrowerAge": "Age",
+    "accountCount": "TFS accounts",
+    "pendingBalance": "Pending balance",
+    "loanTermYears": "Term (years)",
+    "sumInsured": "Sum insured",
+    "defaultSumInsured": "1,000,000.00",
+    "rate": "Rate per 1,000",
+    "premium": "Premium",
+    "create": "Create quotation",
+    "cancel": "Cancel",
+    "chooseBorrower": "Choose the borrower",
+    "chooseInsurer": "Choose the insurer"
+  },
   "myWork": {
     "loadFailed": "My Work could not be loaded",
     "calendar": {

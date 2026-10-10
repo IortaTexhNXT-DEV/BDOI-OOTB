@@ -11,6 +11,7 @@ import QuoteStatsCards from "../quoteModule/quoteListing/QuoteStatsCards";
 import { RFQ_PATH, entryOf, rfqState } from "../../module/Sales/salesProducts";
 import { prospectFormState } from "../leadModule/leadListing/useProspectStart";
 import { ProductPickerDialog } from "../../module/Sales/ProductPicker";
+import CreditLifeQuoteDialog from "../quoteModule/creditLife/CreditLifeQuoteDialog";
 
 /** Bulk upload: template and importer of the API (Data, Columns and Instructions sheets; failed rows listed). */
 const UPLOAD_TARGETS = [{ label: "Quotations", templatePath: "/quotations/bulk-upload/template", uploadPath: "/quotations/bulk-upload" }];
@@ -20,6 +21,7 @@ const ClientListingCard = () => {
   const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [choosingProduct, setChoosingProduct] = useState(false);
+  const [creditLife, setCreditLife] = useState(null);
   const navigate = useNavigate();
 
   const items = [{ label: t("quotationPage.title") }];
@@ -34,6 +36,11 @@ const ClientListingCard = () => {
   // benefits from their own forms, any other product from a Request for Quotation to the insurers
   const start = (p) => {
     setChoosingProduct(false);
+    // Credit Life: its own quotation (eligibility and fixed rate), or the direct placement of new business
+    if (String(p?.lob || "").toUpperCase() === "LIFE") {
+      setCreditLife(p);
+      return;
+    }
     const entry = entryOf(p);
     if (entry === "motor" || entry === "fire") navigate("/agent/leadlisting");
     else if (entry === "iar") navigate("/agent/createlead/iar", { state: prospectFormState({ product: p }) });
@@ -75,6 +82,7 @@ const ClientListingCard = () => {
             <Button label={t("quotationPage.createQuote")} icon="pi pi-plus" onClick={() => setChoosingProduct(true)} style={{ borderRadius: "8px" }} />
             <ProductPickerDialog visible={choosingProduct} onHide={() => setChoosingProduct(false)} onSelect={start}
               header={t("quotationPage.createQuote")} hint={t("productPicker.createQuoteHint")} />
+            <CreditLifeQuoteDialog product={creditLife} onHide={() => setCreditLife(null)} />
           </div>
         </div>
         <div

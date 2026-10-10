@@ -33,6 +33,7 @@ import { notifyError } from "../../../../utility/dialogs";
 import { openConfirm } from "../../../../components/ConfirmDialog";
 import { RFQ_PATH, entryOf, isUntagged, rfqState } from "../../../../module/Sales/salesProducts";
 import { ProductPickerDialog } from "../../../../module/Sales/ProductPicker";
+import CreditLifeQuoteDialog from "../../creditLife/CreditLifeQuoteDialog";
 import leadService from "../../../../services/leadService";
 import { getLeadByIdMiddleware } from "../../../leadModule/Store/leadMiddleware";
 // gross premium of a quotation row: the stored total, else the sum of the motor cover premiums
@@ -446,7 +447,13 @@ const QuoteListingCard = () => {
   // their forms, any other product through a Request for Quotation to the insurers
   const [choosingProduct, setChoosingProduct] = useState(false);
   const [tagging, setTagging] = useState(false);
+  const [creditLife, setCreditLife] = useState(null);
   const addQuote = (p) => {
+    // Credit Life: its own quotation (eligibility and fixed rate), or the direct placement of new business
+    if (String(p?.lob || "").toUpperCase() === "LIFE") {
+      setCreditLife(p);
+      return;
+    }
     const entry = entryOf(p);
     if (entry === "motor") handleclick();
     else if (entry === "fire") handleClickFireAndAlliedPerils();
@@ -501,6 +508,7 @@ const QuoteListingCard = () => {
                 hint={isUntagged(currentLeadDetails) ? t("productPicker.quoteHint", { name: [currentLeadDetails.firstName, currentLeadDetails.lastName].filter(Boolean).join(" ") || currentLeadDetails.companyName }) : t("productPicker.addQuoteHint")}
                 value={currentLeadDetails?.lob ? { lob: currentLeadDetails.lob, productId: currentLeadDetails.productId ?? null } : null}
               />
+              <CreditLifeQuoteDialog product={creditLife} lead={leadRefId || null} onHide={() => setCreditLife(null)} />
             </div>
           </div>
         </div>

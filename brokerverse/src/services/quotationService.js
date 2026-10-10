@@ -898,6 +898,11 @@ class QuotationService {
     });
   }
 
+  /** Create a quotation and return it; throws the server's message with its field messages (Credit Life rules). */
+  createQuotationStrict(quotationData) {
+    return this.request("/quotations", { method: "POST", body: JSON.stringify(quotationData) });
+  }
+
   /** Extend the validity of a quotation (extend:quotations); returns the quotation with its new validity. */
   extendQuotation(quotationId, remarks) {
     return this.request(`/quotations/${encodeURIComponent(quotationId)}/extend`, {

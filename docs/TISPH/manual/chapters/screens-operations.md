@@ -129,6 +129,16 @@ A quotation is valid for the days set on its product (**Quotation validity (days
 - The day after the last valid day the quotation becomes **Expired**. A quotation whose placement slip is already with the insurer is followed on the placement slip instead.
 - Changing a quotation the client has already received keeps the terms the client saw as a read-only version and makes the change the next version (version 2, version 3) of the same quotation number, back in **Draft**: send it to the client again. The earlier link sent to the client stops working. The versions are listed with their status and gross premium; **View** shows a superseded version as it was. A quotation with an open placement slip cannot be changed: cancel the placement slip first.
 
+### Credit Life quotation {#credit-life-quotation}
+
+Credit Life new business (the complimentary cover of a TFS motor loan) takes no quotation: choosing it under **Create Quote** opens the direct placement. A Credit Life quotation is raised at renewal, on the voluntary product.
+
+1. Choose {{menu:/agent/Quotation}}, select **Create Quote** and choose Credit Life, then the voluntary product (or **Add Quote** on the prospect).
+2. Choose the borrower (client or prospect) and the **Insurer**, and enter the **TFS loan account no.**, the **Borrower's date of birth**, the **TFS accounts**, the **Pending balance**, the **Term (years)** of the loan (1 to 5) and the **Sum insured** (empty: PHP 1,000,000.00).
+3. Select **Create quotation**. The premium is 3.68 per 1,000 of sum insured; the rate cannot be changed.
+
+The quotation is refused for a corporate account, a borrower aged 65 or over, more than 6 TFS accounts, a pending balance, an agent or referrer, or a loan account that already has an open quotation. A sum insured below PHP 1,000,000.00 is referred: it is sent to the client only once {{roles:approve:quotations}} other than the raiser approves it in **Underwriting referral**. The quotation page shows the Credit Life terms in **Credit Life**.
+
 ### Create a motor quotation {#create-a-motor-quotation}
 
 A motor quotation is made for a prospect and has four steps: **Policy details**, **Coverage**, **Accessories** and **Summary**. Nothing is saved until the last step, so you can move with **Back** and **Next**.

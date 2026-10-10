@@ -29,6 +29,7 @@ import { companyName } from '../../lib/letterhead.js';
 import { assertNotDeclined, assertFactsCaptured, referralFor, assertReferralCleared, assertMayDecide } from '../product-configurator/underwriting.js';
 import { assertAuthority } from '../access-control/service.js';
 import { decisionReason } from '../ops-masters/records.js';
+import { creditLifeTerms, withReduction } from './creditLife.js';
 import { validityDays, assertCurrent, validityOf, endOfBusinessDay, isIssued, openPlacement, keepVersion, nextVersionCols } from './validity.js';
 
 export async function getQuoteRow(id, db = null) {
@@ -64,6 +65,28 @@ async function quoteParticipants(c, doc, explicit, fallbackIc) {
   return { parts, icId: lead?.insuranceCompanyId || named || fallbackIc || null, doc: next };
 }
 
+/** The insured party of a quotation for the Credit Life rules: its birth date and whether it is a corporate account. */
+async function partyOf(c, leadId, clientId) {
+  if (leadId) {
+    const l = (await c.query('SELECT lead_category, company_name, first_name, birth_date FROM leads WHERE id = $1', [leadId])).rows[0];
+    if (l) return { birth_date: l.birth_date, corporate: l.lead_category === 'Corporate' || Boolean(l.company_name && !l.first_name) };
+  }
+  if (clientId) {
+    const cl = (await c.query('SELECT client_type, birth_date FROM clients WHERE id = $1', [clientId])).rows[0];
+    if (cl) return { birth_date: cl.birth_date, corporate: cl.client_type === 'corporate' };
+  }
+  return null;
+}
+
+/** Credit Life terms applied to the quotation document (null for another product) and the names of the approver roles. */
+async function applyCreditLife(c, product, doc, party, quoteId) {
+  const cl = await creditLifeTerms(c, product, doc, party, quoteId);
+  if (!cl) return null;
+  Object.assign(doc, cl.doc, { creditLife: cl.creditLife });
+  const names = cl.reduction ? Object.fromEntries((await c.query('SELECT code, name FROM roles WHERE code = ANY($1)', [cl.reduction.authorityRoles])).rows.map((r) => [r.code, r.name])) : {};
+  return { ...cl, names };
+}
+
 const quoteTotals = (b) => ({ sumInsured: b.totalSumInsured, premium: b.netPremium, taxes: round2(num(b.valueAddedTax) + num(b.documentaryStampTax) + num(b.localGovernmentTax) + num(b.fireServiceTax)),
   premiumTotal: b.grossPremium, commissionAmount: b.commissionAmount });
 
@@ -90,6 +113,8 @@ export async function createQuote(body, userId, db = null) {
     if (!body.brokerSlipId && !raw.renewal?.policyId) {
       const journey = await journeyFor({ lob: body.lob, productType: body.productType, productId: body.productId }, c);
       assertStep(journey, 'brokerSlip', ['required'], `The ${journey.lob} placement journey starts with a Broker Slip: prepare the Quotation Slip from the broker slip's offers`);
+      // QUOT-01: a product placed without a quotation (Credit Life new business, from the TFS batch) takes none
+      assertStep(journey, 'quotationSlip', ['skip'], `${body.productType || journey.key} is placed without a quotation: raise its placement slip directly`);
     }
     // the product the quotation is for (Quick Quote, broker slip): its line of business prices the quotation when none is
     // given (a Personal Accident quotation is not priced as motor); without a product the database links one by type or line
@@ -97,10 +122,11 @@ export async function createQuote(body, userId, db = null) {
     if (productId && raw.lob) await productOfLine(c, { lob: raw.lob, product: productId, active: false });
     if (productId && !raw.lob) raw.lob = await resolveLob({ productId, productType: body.productType }, c);
     const { parts, icId, doc } = await quoteParticipants(c, raw, body.participants, null);
+    const cl = await applyCreditLife(c, { productId, productType: body.productType }, doc, await partyOf(c, leadId, body.clientId), null);
     const b = await premiumBreakdown(doc, { insurerId: icId });
     await assertFactsCaptured(b.underwriting);
     assertNotDeclined(b.underwriting, 'The quotation');
-    const referral = referralFor(b.underwriting);
+    const referral = withReduction(referralFor(b.underwriting), cl?.reduction, null, cl?.names);
     if (referral) doc.underwritingReferral = referral;
     const number = await nextDocumentNumber('quote', { db: c, unique: { table: 'quotes', column: 'quote_number' } });
     // valid through valid_until: the product's quotation validity (Product Master), else limits.quote_validity_days
@@ -163,10 +189,12 @@ export async function updateQuote(id, body, userId) {
       await keepVersion(c, before, userId, body.changeReason);
     }
     const { parts, icId, doc } = await quoteParticipants(c, merged, body.participants, before.insurance_company_id);
+    const cl = await applyCreditLife(c, { productId: before.product_id, productType: body.productType || before.product_type }, doc,
+      await partyOf(c, body.leadRefId || before.lead_id, before.client_id), before.id);
     const b = await premiumBreakdown(doc, { insurerId: icId });
     await assertFactsCaptured(b.underwriting);
     assertNotDeclined(b.underwriting, 'The quotation');
-    const referral = referralFor(b.underwriting, before.doc?.underwritingReferral || null);
+    const referral = withReduction(referralFor(b.underwriting, before.doc?.underwritingReferral || null), cl?.reduction, before.doc?.underwritingReferral || null, cl?.names);
     if (referral) doc.underwritingReferral = referral; else delete doc.underwritingReferral;
     const data = { ...premiumCols(b), insurance_company_id: icId, lob: b.lob, product_type: body.productType || before.product_type,
       doc: JSON.stringify({ ...withServerCovers(doc, b), premiumBreakdown: b }), updated_by: userId, updated_at: new Date(), ...(newVersion ? nextVersionCols(before) : {}) };

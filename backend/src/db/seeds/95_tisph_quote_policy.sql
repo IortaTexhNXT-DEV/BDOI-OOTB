@@ -144,3 +144,9 @@ WHERE EXISTS (SELECT 1 FROM master_records m WHERE m.type_code = 'cancellation-r
 -- CANC-03: a cancellation returns premium pro-rata on the days left whoever initiates it, and takes back no commission.
 UPDATE app_settings SET value = 'false'::jsonb, updated_at = now()
  WHERE key IN ('endorsements.short_period_for_insured', 'endorsements.cancellation_reverses_commission') AND updated_by IS NULL AND value = 'true'::jsonb;
+
+-- ---------------------------------------------------------------- Credit Life journey (QUOT-01)
+-- New business (CL-COMP) is placed without a quotation; a renewal (CL-VOL) needs its quotation (migration 0484).
+UPDATE app_settings SET value = value || $j${"CL-COMP": {"brokerSlip": "skip", "quotationSlip": "skip", "placementSlip": "required", "directPolicy": "skip"},
+  "CL-VOL": {"brokerSlip": "skip", "quotationSlip": "required", "placementSlip": "required", "directPolicy": "skip"}}$j$::jsonb, updated_at = now()
+ WHERE key = 'placement.journey' AND updated_by IS NULL AND NOT (value ? 'CL-COMP');
