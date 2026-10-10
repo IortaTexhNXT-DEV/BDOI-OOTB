@@ -30,5 +30,5 @@ Build and check
   cd /home/user/BDOI-OOTB/docs/package/tools
   python3 build_all.py <name>          (source/<name>.md into its folder: .docx, contents page and PDF)
   python3 build_all.py --list          (which source becomes which file in which folder)
-A new source needs a row in DOCUMENTS in build_all.py and an entry in DOCS in build_pack_index.py.
+A new source needs a row in DOCUMENTS in build_all.py.
 Render a few pages to PNG (pdftoppm -r 50 -f N -l M -png file.pdf /tmp/x) and look at them before finishing.
