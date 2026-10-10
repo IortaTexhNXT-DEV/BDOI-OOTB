@@ -104,6 +104,10 @@ minimal, clearly-correct front-end fix.
   record with a compare-and-set of its status before the job starts (`data-load/service.js` `moveBatch`), answer 202
   with the job and write the progress outside the job's transaction (`outsideTransaction` of `db/pool.js`). A job that
   stops leaves its record in a state a sweep can see (`data-load/jobs.js` `sweep`).
+- A GET route of `/api/data-load` is listed in `test/migration-pii.test.js`, masked and tested or with the reason it
+  carries no personal identifier; a file built for a download is built while serving it (never in a job), so it is
+  masked per user. Evidence of the go-live goes to the storage folder `go-live-evidence` and is served only by a
+  data-load route that checks the caller.
 - Any route that loads legacy business (go-live, opening, migrated data) calls `assertMigrationOpen(kind)` or uses the
   `migrationImportOpen(kind)` middleware (`src/lib/goLiveLock.js`); `test/migration-lock.test.js` lists every such route
   as guarded or exempt with the reason, so a new import route must be classified there.

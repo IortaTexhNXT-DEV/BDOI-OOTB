@@ -27,6 +27,13 @@ Migration & Go-Live workspace). The administrator guide is `docs/onboarding/GO_L
 | `sapOpening.js` | The one-time SAP opening file of the opening balance journal: request, approval by another user (after the lock), generation once |
 | `workbook.js` | Workbook builder and reader (per-object download, Lists, Instructions, the hidden Control sheet), errors and reconciliation workbooks |
 | `numbering.js` | Legacy numbers against the numbering series and the COC series |
+| `runs.js` | Mock Runs tab: runs (Mock 1, Mock 2, dress rehearsal, extra mock, production), their checklist copied from the runbook, start, complete, cancel, timings, defects list, the run report (XLSX, PDF) |
+| `cutover.js` | Cutover tab: checklist steps (start after the steps they depend on, done with evidence, block, skip, edit), the runbook template, defects |
+| `decisions.js` | Go / No-Go: decisions with their approvers, criteria copied from the template, automatic checks (`AUTO_CHECKS`), waivers, voting and outcome |
+| `evidence.js` | Evidence files of runs, steps, reconciliations, decisions and defects (storage folder `go-live-evidence`) |
+| `evidence-pack.js` | The evidence pack of a run (ZIP with `manifest.csv`), built on download and masked for the user |
+| `overview.js`, `hypercare.js` | Overview and Hypercare tabs |
+| `runRoutes.js` | Routes of the overview, runs, checklist, defects, evidence, Go / No-Go and hypercare (declared on the router of `router.js`) |
 | `compare.js`, `comparisons.js` | Environment comparison |
 | `common.js` | Cell values, row errors, the sheet contract |
 
@@ -54,6 +61,16 @@ Migration & Go-Live workspace). The administrator guide is `docs/onboarding/GO_L
   transaction reset.
 - `sap_opening_file_requests` (0443): the request of the SAP opening file, its decision and the SAP GL run generated;
   one pending at a time; removed by the transaction reset with the journal it is about.
+- `migration_runs` (0444; `run_number` RUN- and the id; kind, environment, cutover date, planned and actual times,
+  status, result, exit criteria, personal data used and the DPO approval, restore point, evidence pack SHA-256 and
+  archive reference; one production run that is not cancelled), `migration_run_steps` (the checklist: the runbook step
+  copied with its owner, planned and actual times, status, notes, dependencies), `migration_run_defects` (`defect_number`
+  DEF- and the id), `go_live_decisions`, `go_live_decision_criteria` (status, automatic result, evidence, waiver),
+  `go_live_decision_votes` (the named approvers and their votes), `migration_evidence` (files of a run, step,
+  reconciliation, decision or defect with their SHA-256). Kept by the transaction reset. `data_load_batches.run_id`,
+  `migration_reconciliations.run_id` and `go_live_lock_requests.decision_id` are foreign keys from 0444.
+- `go_live_runbook_steps` and `go_live_criteria` (0444, filled by `seeds/92_go_live_workspace.sql`): the templates
+  copied into each run and decision; configuration kept by the reset.
 
 The load history is kept by the transaction reset: loaded migration batches are marked `undone`
 (`scripts/lib/table-classification.js`, `mark-reset`).
@@ -205,6 +222,69 @@ by `/api/s3/object` and the file delete) with its SHA-256. `afterBatchChange(bat
 jobs and the direct load, supersedes the signed (or partly signed) reconciliations of the run with a new one (the screen
 and upload figures and the tolerances carried over) and computes the open ones again; it never fails the load.
 
+## Mock runs and the cutover checklist
+
+`runs.js`, `cutover.js`. `POST /runs` creates a run and copies the active runbook steps (PC-1 to PC-8, CO-1 to CO-10,
+GL-1, HC-1, HC-2) into its checklist; a production extract needs `dpoApprovalRef`; a second production run is refused
+(unique index). A load names its run (`POST /batches` field `runId`, a planned or running run). Start sets the actual
+start; complete needs the result, whether the exit criteria were met and a summary (refused while a load of the run is
+in progress); cancel needs a reason (never the production run once go-live is locked). A completed run only takes its
+evidence pack hash and archive reference; that hash must be the hash of a pack of the run downloaded from the workspace
+(audit `migration_run` `evidence-pack`). Steps: start in a running run once every step of `depends_on` is done or
+skipped; done needs an evidence file when the runbook names evidence (`evidence_hint`), or a note; CO-3 records or
+needs the run's restore point; block and skip need a note; each move is a compare-and-set, audited
+`migration_run_step`. Late: ended after its planned end, or still open past it. Defects: severity 1 to 4, the load and
+step of the run. Report: `GET /runs/:id/report?format=xlsx|pdf`.
+
+Evidence (`evidence.js`): `POST /evidence` (multipart `file`, `ownerType`, `ownerId`, `note`; the file type checked by
+its signature) stores the file in `go-live-evidence` with its SHA-256; `GET /evidence/:id` is the only way out
+(`read:data-load`, audited `download`); the uploader removes a file while the run is planned or running.
+
+Evidence pack (`evidence-pack.js`, `GET /runs/:id/evidence-pack`): run report, every evidence file, per load its
+summary, rows and errors workbooks (and the uploaded workbook for `write:data-load` with `view:pii`), the signed PDF and
+the workbook of each reconciliation, the decisions, the lock requests and an audit extract (per-record entries of the
+run's loads, go-live and migration settings changes, imports refused while locked), with `manifest.csv` (path, bytes,
+SHA-256). Built while serving the download, so every workbook in it is masked for a user without `view:pii`; the ZIP's
+SHA-256 is in `X-Content-SHA256` and in the audit trail.
+
+## Go / No-Go
+
+`decisions.js`. A decision of a run names at least `migration.go_live_min_approvers` approvers (active, holding
+`approve:data-load`, one with the role Finance Head, not the creator) and copies the active criteria. Automatic
+criteria (`auto_check`): G2 `production-load` (a loaded migration load of the run; none of them with a row in error, an
+unresolved duplicate or valid rows only), G3 `reconciliation-checks` (the latest reconciliation of the run that is not
+superseded: every check and tie-out line matched, or each of its differences accepted), G4 `reconciliation-signed`, G6
+`environment-mirrored` (latest comparison), G7 `users-ready` (no active seeded account but the first administrator, no
+active user with role `tis-superid`, `security.password_sign_in_enabled` off), G8 `numbering` (`collidingNumbers` of
+the client, policy, invoice and claim series over every form, and `cocCollisions`), G9 `restore-point` (CO-3 done with
+an evidence file, the run's restore point), G11 `evidence-archived` (the pack hash, matching a download, and the
+archive reference). They are computed when the decision is created, on refresh (draft) and when voting opens; a waived
+criterion found met becomes met. Manual criteria are set met or not met with their evidence (`write:data-load`). A
+waiver needs `approve:data-load`, a reason, a waivable criterion (G2 to G5 are not) and another user than the creator.
+Voting opens when every criterion is met or waived; each named approver votes once; all Go: `go`; one No-Go: `no-go`
+at once, with the reason, actions and new date given in that vote. One decision in draft or voting per run. The lock
+reads the latest Go decision of the production run (`golive.js` `lockConditions`).
+
+## Overview and hypercare
+
+`GET /overview` (`overview.js`): phases (Templates, Mock 1, Mock 2, Dress rehearsal, Cutover, Go-live, Hypercare), the
+current run (production, else the latest open run) with checklist progress, reconciliation and decision, loads by status
+and rows by result, open defects of severity 1 and 2, and what waits for the user (loads, undos and lock requests to
+approve that are not their own, votes, steps they own). `GET /hypercare` (`hypercare.js`), once go-live is locked, for
+`migration.hypercare_days`: business issued since the cutover date, migrated open items collected, renewals of migrated
+policies due in 60 days, endorsements, claims and cancellations on migrated policies, edits to migrated records after
+the lock (audit entries other than `migrate-*`), daily checks (trial balance, sub-ledger tie-out of the month-end check,
+yesterday's SAP GL file, numbering, lock), imports refused while locked, unlocks, open defects of the production run.
+
+## Retention
+
+`jobs/housekeeping.js` `dataLoadRetention`: the batch record always stays. Rows and the uploaded workbook of a loaded or
+undone migration load of the production run are kept `migration.evidence_retention_years` after `golive.locked_at`
+(for ever while go-live is not locked or the setting is 0); those of every other finished load (failed, rejected,
+withdrawn, expired, loaded, undone) go after `housekeeping.data_load_rows_days` and `housekeeping.data_load_files_days`.
+A load validated, waiting or in progress is never touched. Each purge is audited (`purge-rows`, `purge-file` with the
+file's SHA-256). Runs, checklists, decisions, reconciliations and evidence files are not purged.
+
 ## Opening balance journal and the SAP opening file
 
 `period-end/opening.js` writes, with every opening balances set (the Opening Balances sheet and the single-object
@@ -276,6 +356,8 @@ sheets). `test/migration-registry.test.js` checks the kits.
 `migration-audit.test.js`, `migration-numbers.test.js`, `migration-review.test.js`, `migration-duplicates.test.js`,
 `migration-amounts.test.js`, `migration-pdc.test.js`, `migration-jobs.test.js`, `migration-approval.test.js`,
 `migration-undo.test.js`, `migration-lock.test.js`, `migration-reconciliation.test.js`, `migration-opening-journal.test.js`,
-`migration-kpis.test.js` (fixtures `migration.fixtures.js`), `reset-transactions.test.js`. The
+`migration-kpis.test.js`, `migration-runs.test.js`, `migration-decision.test.js`, `migration-retention.test.js`,
+`migration-pii.test.js` (every GET route of the workspace masked or listed with the reason), `migration-hypercare.test.js`
+(fixtures `migration.fixtures.js`), `reset-transactions.test.js`. The
 suites that load at once set the cutover date and switch the approval of loads off with `goLiveSetup` and wait for the
 validation job with `validatedBatch` (`test/helpers.js`).

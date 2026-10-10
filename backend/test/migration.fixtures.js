@@ -3,6 +3,7 @@
  * data only, the administrator's API, users of the roles the workspace is used with, migration workbooks and the
  * records of the production run the go-live lock rests on.
  */
+import zlib from 'node:zlib';
 import request from 'supertest';
 import { expect } from 'vitest';
 import { migrate } from '../src/db/migrate.js';
@@ -14,11 +15,12 @@ import { writeXlsx } from '../src/lib/xlsx.js';
 import { addDays, today } from '../src/lib/dates.js';
 import { goLiveSetup, loginAs, settledBatch, validatedBatch } from './helpers.js';
 
-/** Permissions of the test roles: loader (uploads, submits), approver (decides), both (a cutover administrator). */
+/** Permissions of the test roles: loader (uploads, submits), approver (decides), both (a cutover administrator), reader (an auditor). */
 export const ROLES = {
   'dl-loader': ['read:data-load', 'write:data-load'],
   'dl-approver': ['read:data-load', 'approve:data-load'],
   'dl-both': ['read:data-load', 'write:data-load', 'approve:data-load'],
+  'dl-reader': ['read:data-load'],
 };
 
 /**
@@ -92,18 +94,8 @@ export async function setLock(on) {
   clearSettingsCache();
 }
 
-/**
- * The production run with its Go decision, signed reconciliation and restore point, as the Mock Runs, Reconciliation and
- * Go-Live tabs record them. The tables are created with the shapes of the specification when this database does not have
- * them yet (the suite's database is created again by the next suite).
- */
+/** The production run with its Go decision, signed reconciliation and restore point, as the Mock Runs, Reconciliation and Go-Live tabs record them. */
 export async function productionRun({ decision = 'go', reconciliation = 'signed', restorePoint = true } = {}) {
-  await query(`CREATE TABLE IF NOT EXISTS migration_runs (id bigserial PRIMARY KEY, run_number text, kind text NOT NULL, title text NOT NULL, environment text NOT NULL,
-    cutover_date date, status text NOT NULL DEFAULT 'planned', restore_point timestamptz, created_at timestamptz NOT NULL DEFAULT now())`);
-  await query(`CREATE TABLE IF NOT EXISTS go_live_decisions (id bigserial PRIMARY KEY, run_id bigint NOT NULL, status text NOT NULL DEFAULT 'draft', decided_at timestamptz,
-    created_at timestamptz NOT NULL DEFAULT now())`);
-  await query(`CREATE TABLE IF NOT EXISTS migration_reconciliations (id bigserial PRIMARY KEY, run_id bigint, cutover_date date NOT NULL, status text NOT NULL DEFAULT 'open',
-    signed_at timestamptz, created_at timestamptz NOT NULL DEFAULT now())`);
   await query('DELETE FROM go_live_decisions');
   await query('DELETE FROM migration_reconciliations');
   await query('DELETE FROM migration_runs');
@@ -113,3 +105,33 @@ export async function productionRun({ decision = 'go', reconciliation = 'signed'
   if (reconciliation) await query('INSERT INTO migration_reconciliations(run_id, cutover_date, status) VALUES ($1, now()::date, $2)', [run.id, reconciliation]);
   return run.id;
 }
+
+/** The entries of a ZIP archive (an evidence pack, an XLSX file): Map of name -> Buffer. */
+export function unzip(buf) {
+  let end = buf.length - 22;
+  while (end >= 0 && buf.readUInt32LE(end) !== 0x06054b50) end -= 1;
+  const out = new Map();
+  let p = buf.readUInt32LE(end + 16);
+  for (let n = buf.readUInt16LE(end + 10); n > 0; n -= 1) {
+    const method = buf.readUInt16LE(p + 10);
+    const size = buf.readUInt32LE(p + 20);
+    const nameLen = buf.readUInt16LE(p + 28);
+    const local = buf.readUInt32LE(p + 42);
+    const name = buf.toString('utf8', p + 46, p + 46 + nameLen);
+    const start = local + 30 + buf.readUInt16LE(local + 26) + buf.readUInt16LE(local + 28);
+    const data = buf.subarray(start, start + size);
+    out.set(name, method === 8 ? zlib.inflateRawSync(data) : Buffer.from(data));
+    p += 46 + nameLen + buf.readUInt16LE(p + 30) + buf.readUInt16LE(p + 32);
+  }
+  return out;
+}
+
+/** All the text of a download: a ZIP (evidence pack, XLSX) is opened, nested archives too. */
+export function textOf(buf) {
+  if (!Buffer.isBuffer(buf)) return JSON.stringify(buf);
+  if (buf.length > 4 && buf.readUInt32LE(0) === 0x04034b50) return [...unzip(buf).values()].map(textOf).join('\n');
+  return buf.toString('utf8');
+}
+
+/** Read a binary response body (supertest) into a Buffer. */
+export const binary = (r) => r.buffer(true).parse((res, cb) => { const d = []; res.on('data', (x) => d.push(x)); res.on('end', () => cb(null, Buffer.concat(d))); });

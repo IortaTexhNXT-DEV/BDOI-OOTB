@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1328 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1364 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -38708,7 +38708,7 @@
             "description": "Upload a workbook (multipart \"file\", field kit): creates the load (MIG- / CFG- number), keeps the file and its SHA-256 and starts its validation as a job (dry run: all sheets in load order in one transaction that is rolled back); 202 with the batch (validating) and the job; follow GET /batches/:id\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Upload\n\nAccess: write:data-load",
             "body": {
               "mode": "raw",
-              "raw": "\"multipart/form-data file, kit=configuration|migration, legacySystem (migration: the source shown on the migrated records; the default legacy system when empty)\"",
+              "raw": "\"multipart/form-data file, kit=configuration|migration, runId (the run of the load: planned or running), legacySystem (migration: the source shown on the migrated records; the default legacy system when empty)\"",
               "options": {
                 "raw": {
                   "language": "json"
@@ -38740,7 +38740,7 @@
                 "description": "Upload a workbook (multipart \"file\", field kit): creates the load (MIG- / CFG- number), keeps the file and its SHA-256 and starts its validation as a job (dry run: all sheets in load order in one transaction that is rolled back); 202 with the batch (validating) and the job; follow GET /batches/:id\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Upload\n\nAccess: write:data-load",
                 "body": {
                   "mode": "raw",
-                  "raw": "\"multipart/form-data file, kit=configuration|migration, legacySystem (migration: the source shown on the migrated records; the default legacy system when empty)\"",
+                  "raw": "\"multipart/form-data file, kit=configuration|migration, runId (the run of the load: planned or running), legacySystem (migration: the source shown on the migrated records; the default legacy system when empty)\"",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -40665,6 +40665,782 @@
           ]
         },
         {
+          "name": "The Go / No-Go criteria template copied into each decision (G2 to G5 never waived; automatic criteria computed from the records)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/criteria",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "criteria"
+              ]
+            },
+            "description": "The Go / No-Go criteria template copied into each decision (G2 to G5 never waived; automatic criteria computed from the records)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Go / No-Go\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/criteria",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "criteria"
+                  ]
+                },
+                "description": "The Go / No-Go criteria template copied into each decision (G2 to G5 never waived; automatic criteria computed from the records)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Go / No-Go\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"G2\",\n      \"title\": \"Migration load of the production run loaded with no row in error and not with valid rows only\",\n      \"evidenceHint\": \"Load record\",\n      \"automatic\": true,\n      \"waivable\": false,\n      \"sort\": 20,\n      \"status\": \"active\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a criterion of the template (new decisions copy it): title, evidence, order, active; a criterion that is never waived stays so and stays active",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/criteria/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "criteria",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a criterion of the template (new decisions copy it): title, evidence, order, active; a criterion that is never waived stays so and stays active\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Go / No-Go\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"evidenceHint\": \"Signed sample sheets (CO-8)\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/criteria/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "criteria",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a criterion of the template (new decisions copy it): title, evidence, order, active; a criterion that is never waived stays so and stays active\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Go / No-Go\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"evidenceHint\": \"Signed sample sheets (CO-8)\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Criterion saved\",\n  \"data\": {\n    \"code\": \"G5\",\n    \"title\": \"Business validation samples passed\",\n    \"evidenceHint\": \"Signed sample sheets (CO-8)\",\n    \"automatic\": false,\n    \"waivable\": false,\n    \"sort\": 50,\n    \"status\": \"active\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Go / No-Go decisions, newest first, with their criteria and approvers (filter runId)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/decisions?runId=3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "decisions"
+              ],
+              "query": [
+                {
+                  "key": "runId",
+                  "value": "3"
+                }
+              ]
+            },
+            "description": "Go / No-Go decisions, newest first, with their criteria and approvers (filter runId)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Go / No-Go\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/decisions?runId=3",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "decisions"
+                  ],
+                  "query": [
+                    {
+                      "key": "runId",
+                      "value": "3"
+                    }
+                  ]
+                },
+                "description": "Go / No-Go decisions, newest first, with their criteria and approvers (filter runId)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Go / No-Go\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 2,\n      \"runId\": 3,\n      \"runNumber\": \"RUN-000003\",\n      \"runKind\": \"production\",\n      \"status\": \"voting\",\n      \"statusLabel\": \"Voting\",\n      \"meetingAt\": \"2026-11-01T08:00:00Z\",\n      \"reason\": null,\n      \"actions\": null,\n      \"newDate\": null,\n      \"minuteRef\": null,\n      \"createdBy\": \"Andrea Lim\",\n      \"createdAt\": \"2026-11-01T07:30:00Z\",\n      \"decidedAt\": null,\n      \"criteria\": [\n        {\n          \"code\": \"G8\",\n          \"title\": \"Numbering continues above every legacy number in every period, branch and line, and every COC series\",\n          \"waivable\": true,\n          \"automatic\": true,\n          \"status\": \"not-met\",\n          \"statusLabel\": \"Not met\",\n          \"autoResult\": {\n            \"met\": false,\n            \"detail\": \"1 legacy number(s) a series would issue again\",\n            \"items\": [\n              {\n                \"series\": \"policy\",\n                \"label\": \"Policy number\",\n                \"number\": \"POL-2027-00005\",\n                \"next\": 1,\n                \"periods\": [\n                  \"2027\"\n                ]\n              }\n            ],\n            \"checkedAt\": \"2026-11-01T08:00:00Z\"\n          },\n          \"evidence\": null,\n          \"waivedBy\": null,\n          \"waiverReason\": null,\n          \"updatedBy\": \"Andrea Lim\",\n          \"updatedAt\": \"2026-11-01T08:00:00Z\"\n        }\n      ],\n      \"approvers\": [\n        {\n          \"userId\": \"usr_91b2\",\n          \"name\": \"Liza Santos\",\n          \"roleLabel\": \"Finance Head\",\n          \"vote\": \"go\",\n          \"remarks\": \"Trial balance agrees\",\n          \"votedAt\": \"2026-11-01T08:10:00Z\"\n        }\n      ],\n      \"summary\": {\n        \"criteria\": 11,\n        \"met\": 11,\n        \"votes\": 1,\n        \"approvers\": 3\n      }\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create the Go / No-Go decision of a run with its approvers (users who may approve go-live, at least migration.go_live_min_approvers, one as Finance Head, not the creator); the criteria are copied and the automatic ones computed",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/decisions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "decisions"
+              ]
+            },
+            "description": "Create the Go / No-Go decision of a run with its approvers (users who may approve go-live, at least migration.go_live_min_approvers, one as Finance Head, not the creator); the criteria are copied and the automatic ones computed\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Go / No-Go > New decision\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"runId\": 3,\n  \"meetingAt\": \"2026-11-01T08:00:00Z\",\n  \"approvers\": [\n    {\n      \"userId\": \"usr_91b2\",\n      \"roleLabel\": \"Finance Head\"\n    },\n    {\n      \"userId\": \"usr_44d0\",\n      \"roleLabel\": \"General Manager\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/decisions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "decisions"
+                  ]
+                },
+                "description": "Create the Go / No-Go decision of a run with its approvers (users who may approve go-live, at least migration.go_live_min_approvers, one as Finance Head, not the creator); the criteria are copied and the automatic ones computed\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Go / No-Go > New decision\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"runId\": 3,\n  \"meetingAt\": \"2026-11-01T08:00:00Z\",\n  \"approvers\": [\n    {\n      \"userId\": \"usr_91b2\",\n      \"roleLabel\": \"Finance Head\"\n    },\n    {\n      \"userId\": \"usr_44d0\",\n      \"roleLabel\": \"General Manager\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Decision created\",\n  \"data\": {\n    \"id\": 2,\n    \"runId\": 3,\n    \"runNumber\": \"RUN-000003\",\n    \"runKind\": \"production\",\n    \"status\": \"draft\",\n    \"statusLabel\": \"Voting\",\n    \"meetingAt\": \"2026-11-01T08:00:00Z\",\n    \"reason\": null,\n    \"actions\": null,\n    \"newDate\": null,\n    \"minuteRef\": null,\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-11-01T07:30:00Z\",\n    \"decidedAt\": null,\n    \"criteria\": [\n      {\n        \"code\": \"G8\",\n        \"title\": \"Numbering continues above every legacy number in every period, branch and line, and every COC series\",\n        \"waivable\": true,\n        \"automatic\": true,\n        \"status\": \"not-met\",\n        \"statusLabel\": \"Not met\",\n        \"autoResult\": {\n          \"met\": false,\n          \"detail\": \"1 legacy number(s) a series would issue again\",\n          \"items\": [\n            {\n              \"series\": \"policy\",\n              \"label\": \"Policy number\",\n              \"number\": \"POL-2027-00005\",\n              \"next\": 1,\n              \"periods\": [\n                \"2027\"\n              ]\n            }\n          ],\n          \"checkedAt\": \"2026-11-01T08:00:00Z\"\n        },\n        \"evidence\": null,\n        \"waivedBy\": null,\n        \"waiverReason\": null,\n        \"updatedBy\": \"Andrea Lim\",\n        \"updatedAt\": \"2026-11-01T08:00:00Z\"\n      }\n    ],\n    \"approvers\": [\n      {\n        \"userId\": \"usr_91b2\",\n        \"name\": \"Liza Santos\",\n        \"roleLabel\": \"Finance Head\",\n        \"vote\": \"go\",\n        \"remarks\": \"Trial balance agrees\",\n        \"votedAt\": \"2026-11-01T08:10:00Z\"\n      }\n    ],\n    \"summary\": {\n      \"criteria\": 11,\n      \"met\": 11,\n      \"votes\": 1,\n      \"approvers\": 3\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "A decision: criteria with their automatic results, evidence and waivers; approvers and votes; outcome",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/decisions/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "decisions",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "A decision: criteria with their automatic results, evidence and waivers; approvers and votes; outcome\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Go / No-Go\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/decisions/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "decisions",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "A decision: criteria with their automatic results, evidence and waivers; approvers and votes; outcome\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Go / No-Go\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 2,\n    \"runId\": 3,\n    \"runNumber\": \"RUN-000003\",\n    \"runKind\": \"production\",\n    \"status\": \"voting\",\n    \"statusLabel\": \"Voting\",\n    \"meetingAt\": \"2026-11-01T08:00:00Z\",\n    \"reason\": null,\n    \"actions\": null,\n    \"newDate\": null,\n    \"minuteRef\": null,\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-11-01T07:30:00Z\",\n    \"decidedAt\": null,\n    \"criteria\": [\n      {\n        \"code\": \"G8\",\n        \"title\": \"Numbering continues above every legacy number in every period, branch and line, and every COC series\",\n        \"waivable\": true,\n        \"automatic\": true,\n        \"status\": \"not-met\",\n        \"statusLabel\": \"Not met\",\n        \"autoResult\": {\n          \"met\": false,\n          \"detail\": \"1 legacy number(s) a series would issue again\",\n          \"items\": [\n            {\n              \"series\": \"policy\",\n              \"label\": \"Policy number\",\n              \"number\": \"POL-2027-00005\",\n              \"next\": 1,\n              \"periods\": [\n                \"2027\"\n              ]\n            }\n          ],\n          \"checkedAt\": \"2026-11-01T08:00:00Z\"\n        },\n        \"evidence\": null,\n        \"waivedBy\": null,\n        \"waiverReason\": null,\n        \"updatedBy\": \"Andrea Lim\",\n        \"updatedAt\": \"2026-11-01T08:00:00Z\"\n      }\n    ],\n    \"approvers\": [\n      {\n        \"userId\": \"usr_91b2\",\n        \"name\": \"Liza Santos\",\n        \"roleLabel\": \"Finance Head\",\n        \"vote\": \"go\",\n        \"remarks\": \"Trial balance agrees\",\n        \"votedAt\": \"2026-11-01T08:10:00Z\"\n      }\n    ],\n    \"summary\": {\n      \"criteria\": 11,\n      \"met\": 11,\n      \"votes\": 1,\n      \"approvers\": 3\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record a criterion of a draft decision: met or not met for a manual criterion and its evidence (write:data-load); waived with a reason (approve:data-load, not the creator; refused on G2 to G5)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/decisions/:id/criteria/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "decisions",
+                ":id",
+                "criteria",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Record a criterion of a draft decision: met or not met for a manual criterion and its evidence (write:data-load); waived with a reason (approve:data-load, not the creator; refused on G2 to G5)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Go / No-Go\n\nAccess: write:data-load, approve:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"waived\",\n  \"waiverReason\": \"Project Sponsor approval in writing, ref. PS-2026-11\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/decisions/:id/criteria/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "decisions",
+                    ":id",
+                    "criteria",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record a criterion of a draft decision: met or not met for a manual criterion and its evidence (write:data-load); waived with a reason (approve:data-load, not the creator; refused on G2 to G5)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Go / No-Go\n\nAccess: write:data-load, approve:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"waived\",\n  \"waiverReason\": \"Project Sponsor approval in writing, ref. PS-2026-11\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Criterion saved\",\n  \"data\": {\n    \"id\": 2,\n    \"runId\": 3,\n    \"runNumber\": \"RUN-000003\",\n    \"runKind\": \"production\",\n    \"status\": \"draft\",\n    \"statusLabel\": \"Voting\",\n    \"meetingAt\": \"2026-11-01T08:00:00Z\",\n    \"reason\": null,\n    \"actions\": null,\n    \"newDate\": null,\n    \"minuteRef\": null,\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-11-01T07:30:00Z\",\n    \"decidedAt\": null,\n    \"criteria\": [\n      {\n        \"code\": \"G8\",\n        \"title\": \"Numbering continues above every legacy number in every period, branch and line, and every COC series\",\n        \"waivable\": true,\n        \"automatic\": true,\n        \"status\": \"not-met\",\n        \"statusLabel\": \"Not met\",\n        \"autoResult\": {\n          \"met\": false,\n          \"detail\": \"1 legacy number(s) a series would issue again\",\n          \"items\": [\n            {\n              \"series\": \"policy\",\n              \"label\": \"Policy number\",\n              \"number\": \"POL-2027-00005\",\n              \"next\": 1,\n              \"periods\": [\n                \"2027\"\n              ]\n            }\n          ],\n          \"checkedAt\": \"2026-11-01T08:00:00Z\"\n        },\n        \"evidence\": null,\n        \"waivedBy\": null,\n        \"waiverReason\": null,\n        \"updatedBy\": \"Andrea Lim\",\n        \"updatedAt\": \"2026-11-01T08:00:00Z\"\n      }\n    ],\n    \"approvers\": [\n      {\n        \"userId\": \"usr_91b2\",\n        \"name\": \"Liza Santos\",\n        \"roleLabel\": \"Finance Head\",\n        \"vote\": \"go\",\n        \"remarks\": \"Trial balance agrees\",\n        \"votedAt\": \"2026-11-01T08:10:00Z\"\n      }\n    ],\n    \"summary\": {\n      \"criteria\": 11,\n      \"met\": 11,\n      \"votes\": 1,\n      \"approvers\": 3\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Open the voting once every criterion is met or waived (the automatic criteria are computed again); the approvers are notified",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/decisions/:id/open-voting",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "decisions",
+                ":id",
+                "open-voting"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Open the voting once every criterion is met or waived (the automatic criteria are computed again); the approvers are notified\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Go / No-Go\n\nAccess: write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/decisions/:id/open-voting",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "decisions",
+                    ":id",
+                    "open-voting"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Open the voting once every criterion is met or waived (the automatic criteria are computed again); the approvers are notified\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Go / No-Go\n\nAccess: write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Voting open\",\n  \"data\": {\n    \"id\": 2,\n    \"runId\": 3,\n    \"runNumber\": \"RUN-000003\",\n    \"runKind\": \"production\",\n    \"status\": \"voting\",\n    \"statusLabel\": \"Voting\",\n    \"meetingAt\": \"2026-11-01T08:00:00Z\",\n    \"reason\": null,\n    \"actions\": null,\n    \"newDate\": null,\n    \"minuteRef\": null,\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-11-01T07:30:00Z\",\n    \"decidedAt\": null,\n    \"criteria\": [\n      {\n        \"code\": \"G8\",\n        \"title\": \"Numbering continues above every legacy number in every period, branch and line, and every COC series\",\n        \"waivable\": true,\n        \"automatic\": true,\n        \"status\": \"not-met\",\n        \"statusLabel\": \"Not met\",\n        \"autoResult\": {\n          \"met\": false,\n          \"detail\": \"1 legacy number(s) a series would issue again\",\n          \"items\": [\n            {\n              \"series\": \"policy\",\n              \"label\": \"Policy number\",\n              \"number\": \"POL-2027-00005\",\n              \"next\": 1,\n              \"periods\": [\n                \"2027\"\n              ]\n            }\n          ],\n          \"checkedAt\": \"2026-11-01T08:00:00Z\"\n        },\n        \"evidence\": null,\n        \"waivedBy\": null,\n        \"waiverReason\": null,\n        \"updatedBy\": \"Andrea Lim\",\n        \"updatedAt\": \"2026-11-01T08:00:00Z\"\n      }\n    ],\n    \"approvers\": [\n      {\n        \"userId\": \"usr_91b2\",\n        \"name\": \"Liza Santos\",\n        \"roleLabel\": \"Finance Head\",\n        \"vote\": \"go\",\n        \"remarks\": \"Trial balance agrees\",\n        \"votedAt\": \"2026-11-01T08:10:00Z\"\n      }\n    ],\n    \"summary\": {\n      \"criteria\": 11,\n      \"met\": 11,\n      \"votes\": 1,\n      \"approvers\": 3\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Compute the automatic criteria again (G2 load, G3 checks and tie-outs, G4 sign-off, G6 comparison, G7 users, G8 numbering, G9 restore point, G11 evidence pack); draft only",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/decisions/:id/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "decisions",
+                ":id",
+                "refresh"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Compute the automatic criteria again (G2 load, G3 checks and tie-outs, G4 sign-off, G6 comparison, G7 users, G8 numbering, G9 restore point, G11 evidence pack); draft only\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Go / No-Go\n\nAccess: write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/decisions/:id/refresh",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "decisions",
+                    ":id",
+                    "refresh"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Compute the automatic criteria again (G2 load, G3 checks and tie-outs, G4 sign-off, G6 comparison, G7 users, G8 numbering, G9 restore point, G11 evidence pack); draft only\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Go / No-Go\n\nAccess: write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Criteria refreshed\",\n  \"data\": {\n    \"id\": 2,\n    \"runId\": 3,\n    \"runNumber\": \"RUN-000003\",\n    \"runKind\": \"production\",\n    \"status\": \"draft\",\n    \"statusLabel\": \"Voting\",\n    \"meetingAt\": \"2026-11-01T08:00:00Z\",\n    \"reason\": null,\n    \"actions\": null,\n    \"newDate\": null,\n    \"minuteRef\": null,\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-11-01T07:30:00Z\",\n    \"decidedAt\": null,\n    \"criteria\": [\n      {\n        \"code\": \"G8\",\n        \"title\": \"Numbering continues above every legacy number in every period, branch and line, and every COC series\",\n        \"waivable\": true,\n        \"automatic\": true,\n        \"status\": \"not-met\",\n        \"statusLabel\": \"Not met\",\n        \"autoResult\": {\n          \"met\": false,\n          \"detail\": \"1 legacy number(s) a series would issue again\",\n          \"items\": [\n            {\n              \"series\": \"policy\",\n              \"label\": \"Policy number\",\n              \"number\": \"POL-2027-00005\",\n              \"next\": 1,\n              \"periods\": [\n                \"2027\"\n              ]\n            }\n          ],\n          \"checkedAt\": \"2026-11-01T08:00:00Z\"\n        },\n        \"evidence\": null,\n        \"waivedBy\": null,\n        \"waiverReason\": null,\n        \"updatedBy\": \"Andrea Lim\",\n        \"updatedAt\": \"2026-11-01T08:00:00Z\"\n      }\n    ],\n    \"approvers\": [\n      {\n        \"userId\": \"usr_91b2\",\n        \"name\": \"Liza Santos\",\n        \"roleLabel\": \"Finance Head\",\n        \"vote\": \"go\",\n        \"remarks\": \"Trial balance agrees\",\n        \"votedAt\": \"2026-11-01T08:10:00Z\"\n      }\n    ],\n    \"summary\": {\n      \"criteria\": 11,\n      \"met\": 11,\n      \"votes\": 1,\n      \"approvers\": 3\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Vote Go or No-Go (a named approver of the decision, once). A No-Go gives the reason, the actions and the new date and ends the decision; the last Go makes it Go",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/decisions/:id/vote",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "decisions",
+                ":id",
+                "vote"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Vote Go or No-Go (a named approver of the decision, once). A No-Go gives the reason, the actions and the new date and ends the decision; the last Go makes it Go\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Go / No-Go > Vote\n\nAccess: approve:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vote\": \"no-go\",\n  \"remarks\": \"Tie-out of due to insurers open\",\n  \"reason\": \"Due to insurers differ by PHP 12,400\",\n  \"actions\": \"Explain the difference with the Finance Head\",\n  \"newDate\": \"2026-11-09\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/decisions/:id/vote",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "decisions",
+                    ":id",
+                    "vote"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Vote Go or No-Go (a named approver of the decision, once). A No-Go gives the reason, the actions and the new date and ends the decision; the last Go makes it Go\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Go / No-Go > Vote\n\nAccess: approve:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"vote\": \"no-go\",\n  \"remarks\": \"Tie-out of due to insurers open\",\n  \"reason\": \"Due to insurers differ by PHP 12,400\",\n  \"actions\": \"Explain the difference with the Finance Head\",\n  \"newDate\": \"2026-11-09\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Vote recorded\",\n  \"data\": {\n    \"id\": 2,\n    \"runId\": 3,\n    \"runNumber\": \"RUN-000003\",\n    \"runKind\": \"production\",\n    \"status\": \"no-go\",\n    \"statusLabel\": \"Voting\",\n    \"meetingAt\": \"2026-11-01T08:00:00Z\",\n    \"reason\": null,\n    \"actions\": null,\n    \"newDate\": null,\n    \"minuteRef\": null,\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-11-01T07:30:00Z\",\n    \"decidedAt\": null,\n    \"criteria\": [\n      {\n        \"code\": \"G8\",\n        \"title\": \"Numbering continues above every legacy number in every period, branch and line, and every COC series\",\n        \"waivable\": true,\n        \"automatic\": true,\n        \"status\": \"not-met\",\n        \"statusLabel\": \"Not met\",\n        \"autoResult\": {\n          \"met\": false,\n          \"detail\": \"1 legacy number(s) a series would issue again\",\n          \"items\": [\n            {\n              \"series\": \"policy\",\n              \"label\": \"Policy number\",\n              \"number\": \"POL-2027-00005\",\n              \"next\": 1,\n              \"periods\": [\n                \"2027\"\n              ]\n            }\n          ],\n          \"checkedAt\": \"2026-11-01T08:00:00Z\"\n        },\n        \"evidence\": null,\n        \"waivedBy\": null,\n        \"waiverReason\": null,\n        \"updatedBy\": \"Andrea Lim\",\n        \"updatedAt\": \"2026-11-01T08:00:00Z\"\n      }\n    ],\n    \"approvers\": [\n      {\n        \"userId\": \"usr_91b2\",\n        \"name\": \"Liza Santos\",\n        \"roleLabel\": \"Finance Head\",\n        \"vote\": \"go\",\n        \"remarks\": \"Trial balance agrees\",\n        \"votedAt\": \"2026-11-01T08:10:00Z\"\n      }\n    ],\n    \"summary\": {\n      \"criteria\": 11,\n      \"met\": 11,\n      \"votes\": 1,\n      \"approvers\": 3\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Withdraw a decision in draft or voting, with a reason",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/decisions/:id/withdraw",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "decisions",
+                ":id",
+                "withdraw"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Withdraw a decision in draft or voting, with a reason\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Go / No-Go\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Meeting moved\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/decisions/:id/withdraw",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "decisions",
+                    ":id",
+                    "withdraw"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Withdraw a decision in draft or voting, with a reason\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Go-Live > Go / No-Go\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Meeting moved\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Decision withdrawn\",\n  \"data\": {\n    \"id\": 2,\n    \"runId\": 3,\n    \"runNumber\": \"RUN-000003\",\n    \"runKind\": \"production\",\n    \"status\": \"withdrawn\",\n    \"statusLabel\": \"Voting\",\n    \"meetingAt\": \"2026-11-01T08:00:00Z\",\n    \"reason\": null,\n    \"actions\": null,\n    \"newDate\": null,\n    \"minuteRef\": null,\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-11-01T07:30:00Z\",\n    \"decidedAt\": null,\n    \"criteria\": [\n      {\n        \"code\": \"G8\",\n        \"title\": \"Numbering continues above every legacy number in every period, branch and line, and every COC series\",\n        \"waivable\": true,\n        \"automatic\": true,\n        \"status\": \"not-met\",\n        \"statusLabel\": \"Not met\",\n        \"autoResult\": {\n          \"met\": false,\n          \"detail\": \"1 legacy number(s) a series would issue again\",\n          \"items\": [\n            {\n              \"series\": \"policy\",\n              \"label\": \"Policy number\",\n              \"number\": \"POL-2027-00005\",\n              \"next\": 1,\n              \"periods\": [\n                \"2027\"\n              ]\n            }\n          ],\n          \"checkedAt\": \"2026-11-01T08:00:00Z\"\n        },\n        \"evidence\": null,\n        \"waivedBy\": null,\n        \"waiverReason\": null,\n        \"updatedBy\": \"Andrea Lim\",\n        \"updatedAt\": \"2026-11-01T08:00:00Z\"\n      }\n    ],\n    \"approvers\": [\n      {\n        \"userId\": \"usr_91b2\",\n        \"name\": \"Liza Santos\",\n        \"roleLabel\": \"Finance Head\",\n        \"vote\": \"go\",\n        \"remarks\": \"Trial balance agrees\",\n        \"votedAt\": \"2026-11-01T08:10:00Z\"\n      }\n    ],\n    \"summary\": {\n      \"criteria\": 11,\n      \"met\": 11,\n      \"votes\": 1,\n      \"approvers\": 3\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Check a list of legacy document file names against the naming convention (multipart \"file\": .xlsx or .csv with the names in the first column or a File Name column, or .txt with one name per line; never the files): valid or invalid with the reason, and whether the record it names is in BrokerVerse",
           "request": {
             "method": "POST",
@@ -40809,6 +41585,282 @@
               ],
               "cookie": [],
               "body": "(xlsx file)"
+            }
+          ]
+        },
+        {
+          "name": "Evidence files of a record (ownerType run, step, reconciliation, decision or defect, and ownerId) or of everything of a run (runId)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/evidence?ownerType=step&ownerId=31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "evidence"
+              ],
+              "query": [
+                {
+                  "key": "ownerType",
+                  "value": "step"
+                },
+                {
+                  "key": "ownerId",
+                  "value": "31"
+                }
+              ]
+            },
+            "description": "Evidence files of a record (ownerType run, step, reconciliation, decision or defect, and ownerId) or of everything of a run (runId)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/evidence?ownerType=step&ownerId=31",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "evidence"
+                  ],
+                  "query": [
+                    {
+                      "key": "ownerType",
+                      "value": "step"
+                    },
+                    {
+                      "key": "ownerId",
+                      "value": "31"
+                    }
+                  ]
+                },
+                "description": "Evidence files of a record (ownerType run, step, reconciliation, decision or defect, and ownerId) or of everything of a run (runId)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 5,\n      \"ownerType\": \"step\",\n      \"ownerId\": 31,\n      \"fileName\": \"Cutover_Log_CO-3.pdf\",\n      \"contentType\": \"application/pdf\",\n      \"sizeBytes\": 48211,\n      \"sha256\": \"2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae\",\n      \"note\": \"Restore time 22:00\",\n      \"uploadedBy\": \"Paolo Cruz\",\n      \"uploadedAt\": \"2026-10-31T14:20:00Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Attach an evidence file (multipart \"file\", ownerType, ownerId, note) to a run, checklist step, reconciliation, decision or defect; kept in the go-live evidence store with its SHA-256",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/evidence",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "evidence"
+              ]
+            },
+            "description": "Attach an evidence file (multipart \"file\", ownerType, ownerId, note) to a run, checklist step, reconciliation, decision or defect; kept in the go-live evidence store with its SHA-256\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence > Attach\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "\"multipart/form-data file, ownerType, ownerId, note\"",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/evidence",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "evidence"
+                  ]
+                },
+                "description": "Attach an evidence file (multipart \"file\", ownerType, ownerId, note) to a run, checklist step, reconciliation, decision or defect; kept in the go-live evidence store with its SHA-256\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence > Attach\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "\"multipart/form-data file, ownerType, ownerId, note\"",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Evidence attached\",\n  \"data\": {\n    \"id\": 5,\n    \"ownerType\": \"step\",\n    \"ownerId\": 31,\n    \"fileName\": \"Cutover_Log_CO-3.pdf\",\n    \"contentType\": \"application/pdf\",\n    \"sizeBytes\": 48211,\n    \"sha256\": \"2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae\",\n    \"note\": \"Restore time 22:00\",\n    \"uploadedBy\": \"Paolo Cruz\",\n    \"uploadedAt\": \"2026-10-31T14:20:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Download an evidence file (the only way it is served; each download is audited)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/evidence/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "evidence",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Download an evidence file (the only way it is served; each download is audited)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/evidence/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "evidence",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Download an evidence file (the only way it is served; each download is audited)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(file)"
+            }
+          ]
+        },
+        {
+          "name": "Remove an evidence file: its uploader, while the run is planned or running",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/evidence/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "evidence",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Remove an evidence file: its uploader, while the run is planned or running\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence > Remove\n\nAccess: write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/evidence/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "evidence",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Remove an evidence file: its uploader, while the run is planned or running\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence > Remove\n\nAccess: write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Evidence removed\",\n  \"data\": {\n    \"id\": 5,\n    \"ownerType\": \"step\",\n    \"ownerId\": 31,\n    \"fileName\": \"Cutover_Log_CO-3.pdf\",\n    \"contentType\": \"application/pdf\",\n    \"sizeBytes\": 48211,\n    \"sha256\": \"2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae\",\n    \"note\": \"Restore time 22:00\",\n    \"uploadedBy\": \"Paolo Cruz\",\n    \"uploadedAt\": \"2026-10-31T14:20:00Z\"\n  }\n}"
             }
           ]
         },
@@ -41783,6 +42835,55 @@
           ]
         },
         {
+          "name": "Hypercare figures after the go-live lock: business issued since go-live, migrated open items collected, renewals of migrated policies, endorsements, claims and cancellations on migrated policies, edits to migrated records, daily checks and tie-outs, imports refused while locked, unlocks and relocks, open defects of the production run; { started: false } before the lock",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/hypercare",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "hypercare"
+              ]
+            },
+            "description": "Hypercare figures after the go-live lock: business issued since go-live, migrated open items collected, renewals of migrated policies, endorsements, claims and cancellations on migrated policies, edits to migrated records, daily checks and tie-outs, imports refused while locked, unlocks and relocks, open defects of the production run; { started: false } before the lock\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Hypercare\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/hypercare",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "hypercare"
+                  ]
+                },
+                "description": "Hypercare figures after the go-live lock: business issued since go-live, migrated open items collected, renewals of migrated policies, endorsements, claims and cancellations on migrated policies, edits to migrated records, daily checks and tie-outs, imports refused while locked, unlocks and relocks, open defects of the production run; { started: false } before the lock\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Hypercare\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"started\": true,\n    \"cutoverDate\": \"2026-11-02\",\n    \"daysSinceGoLive\": 3,\n    \"hypercareDays\": 28,\n    \"issued\": {\n      \"policies\": 41,\n      \"grossPremium\": 812500,\n      \"endorsements\": 3,\n      \"receipts\": 57,\n      \"receiptAmount\": 1250000,\n      \"claims\": 2\n    },\n    \"migratedItems\": {\n      \"count\": 640,\n      \"cleared\": 52,\n      \"openingBalance\": 8450000,\n      \"collected\": 912000,\n      \"openBalance\": 7538000,\n      \"collectedPercent\": 10.79,\n      \"ageing\": []\n    },\n    \"renewals\": {\n      \"due\": 118,\n      \"renewed\": 9\n    },\n    \"migratedPolicies\": {\n      \"endorsements\": 6,\n      \"claims\": 4,\n      \"cancellations\": 1,\n      \"cancelledPremium\": -5400\n    },\n    \"edits\": {\n      \"total\": 12,\n      \"byEntity\": [\n        {\n          \"entity\": \"policy\",\n          \"count\": 9\n        }\n      ],\n      \"byDay\": []\n    },\n    \"checks\": [\n      {\n        \"code\": \"trial-balance\",\n        \"label\": \"Trial balance balanced\",\n        \"ok\": true,\n        \"detail\": null\n      }\n    ],\n    \"lock\": {\n      \"refused\": 1,\n      \"latestRefused\": [],\n      \"unlocks\": []\n    },\n    \"defects\": [\n      {\n        \"severity\": 1,\n        \"open\": 0\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date, the go-live lock and the settings of the workspace",
           "request": {
             "method": "GET",
@@ -41915,6 +43016,55 @@
               ],
               "cookie": [],
               "body": "(xlsx file)"
+            }
+          ]
+        },
+        {
+          "name": "Overview of the programme: phases, cutover date and lock, the current run (checklist progress, reconciliation, Go / No-Go), loads by status, rows loaded by result, latest loads, open defects of severity 1 and 2, and what waits for the user (approvals, votes, checklist steps)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "overview"
+              ]
+            },
+            "description": "Overview of the programme: phases, cutover date and lock, the current run (checklist progress, reconciliation, Go / No-Go), loads by status, rows loaded by result, latest loads, open defects of severity 1 and 2, and what waits for the user (approvals, votes, checklist steps)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Overview\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/overview",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "overview"
+                  ]
+                },
+                "description": "Overview of the programme: phases, cutover date and lock, the current run (checklist progress, reconciliation, Go / No-Go), loads by status, rows loaded by result, latest loads, open defects of severity 1 and 2, and what waits for the user (approvals, votes, checklist steps)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Overview\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"cutoverDate\": \"2026-11-02\",\n    \"locked\": false,\n    \"environment\": \"production\",\n    \"phases\": [\n      {\n        \"key\": \"mock-1\",\n        \"label\": \"Mock 1\",\n        \"status\": \"done\"\n      }\n    ],\n    \"run\": {\n      \"id\": 3,\n      \"runNumber\": \"RUN-000003\",\n      \"kind\": \"production\",\n      \"title\": \"Production cutover\",\n      \"status\": \"running\",\n      \"checklist\": {\n        \"done\": 12,\n        \"total\": 21,\n        \"blocked\": 0,\n        \"percent\": 57\n      },\n      \"reconciliation\": {\n        \"id\": 7,\n        \"reconNumber\": \"REC-000007\",\n        \"status\": \"open\",\n        \"openDifferences\": 1\n      },\n      \"decision\": null\n    },\n    \"loads\": {\n      \"loaded\": 2,\n      \"pendingApproval\": 1,\n      \"failed\": 0,\n      \"rows\": {\n        \"new\": 1450,\n        \"changed\": 4,\n        \"unchanged\": 0,\n        \"duplicate\": 2\n      },\n      \"latest\": []\n    },\n    \"defects\": {\n      \"severity1\": 0,\n      \"severity2\": 1\n    },\n    \"forMe\": {\n      \"approvals\": [\n        {\n          \"type\": \"load\",\n          \"id\": 13,\n          \"reference\": \"MIG-000013\"\n        }\n      ],\n      \"votes\": [],\n      \"steps\": []\n    }\n  }\n}"
             }
           ]
         },
@@ -42888,6 +44038,1722 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"definitions\": [\n      {\n        \"key\": \"premiums-receivable\",\n        \"label\": \"Premiums receivable\",\n        \"source\": \"open-items\",\n        \"accounts\": [\n          \"1202001\"\n        ],\n        \"measure\": null,\n        \"tolerance\": 0\n      }\n    ],\n    \"lines\": [\n      {\n        \"id\": 77,\n        \"kind\": \"tieout\",\n        \"object\": \"Tie-out\",\n        \"measure\": \"premiums-receivable\",\n        \"group\": null,\n        \"label\": \"Premiums receivable\",\n        \"sides\": {\n          \"system\": \"GL opening balance\",\n          \"other\": \"Open items loaded\"\n        },\n        \"systemValue\": 845300,\n        \"legacyValue\": 845300,\n        \"legacySource\": null,\n        \"difference\": 0,\n        \"tolerance\": 0,\n        \"toleranceReason\": null,\n        \"accounts\": [\n          \"1202001\"\n        ],\n        \"status\": \"matched\",\n        \"updatedBy\": null,\n        \"updatedAt\": null\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "The runbook template copied into each new run: steps by phase with owner role, timetable slot, duration, evidence and dependencies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/runbook",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "runbook"
+              ]
+            },
+            "description": "The runbook template copied into each new run: steps by phase with owner role, timetable slot, duration, evidence and dependencies\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Cutover > Runbook\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/runbook",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "runbook"
+                  ]
+                },
+                "description": "The runbook template copied into each new run: steps by phase with owner role, timetable slot, duration, evidence and dependencies\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Cutover > Runbook\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"CO-3\",\n      \"title\": \"Pre-load checks and restore point\",\n      \"phase\": \"cutover\",\n      \"phaseLabel\": \"Cutover\",\n      \"ownerRole\": \"DevOps lead\",\n      \"offsetLabel\": \"Saturday 22:00\",\n      \"durationMinutes\": 30,\n      \"evidenceHint\": \"Cutover log with the restore time\",\n      \"dependsOn\": [\n        \"CO-2\"\n      ],\n      \"sort\": 130,\n      \"status\": \"active\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a step of the runbook template (new runs copy it): title, owner role, timetable slot, duration, evidence, dependencies, order, active or inactive",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/runbook/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "runbook",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a step of the runbook template (new runs copy it): title, owner role, timetable slot, duration, evidence, dependencies, order, active or inactive\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Cutover > Runbook\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ownerRole\": \"DevOps lead\",\n  \"durationMinutes\": 45\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/runbook/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "runbook",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a step of the runbook template (new runs copy it): title, owner role, timetable slot, duration, evidence, dependencies, order, active or inactive\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Cutover > Runbook\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ownerRole\": \"DevOps lead\",\n  \"durationMinutes\": 45\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Runbook step saved\",\n  \"data\": {\n    \"code\": \"CO-3\",\n    \"title\": \"Pre-load checks and restore point\",\n    \"durationMinutes\": 45\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Runs (Mock 1, Mock 2, dress rehearsal, extra mock, production), newest first, with their loads and open defects; filters kind, status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/runs?kind=mock-2&status=completed&page=1&perPage=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "runs"
+              ],
+              "query": [
+                {
+                  "key": "kind",
+                  "value": "mock-2"
+                },
+                {
+                  "key": "status",
+                  "value": "completed"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "Runs (Mock 1, Mock 2, dress rehearsal, extra mock, production), newest first, with their loads and open defects; filters kind, status\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/runs?kind=mock-2&status=completed&page=1&perPage=50",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "runs"
+                  ],
+                  "query": [
+                    {
+                      "key": "kind",
+                      "value": "mock-2"
+                    },
+                    {
+                      "key": "status",
+                      "value": "completed"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "perPage",
+                      "value": "50"
+                    }
+                  ]
+                },
+                "description": "Runs (Mock 1, Mock 2, dress rehearsal, extra mock, production), newest first, with their loads and open defects; filters kind, status\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 3,\n      \"runNumber\": \"RUN-000003\",\n      \"kind\": \"production\",\n      \"kindLabel\": \"Production\",\n      \"title\": \"Production cutover\",\n      \"environment\": \"production\",\n      \"cutoverDate\": \"2026-11-02\",\n      \"plannedStart\": \"2026-10-31T09:30:00Z\",\n      \"plannedEnd\": \"2026-11-01T10:00:00Z\",\n      \"actualStart\": \"2026-10-31T09:31:00Z\",\n      \"actualEnd\": null,\n      \"durationMs\": null,\n      \"status\": \"running\",\n      \"statusLabel\": \"Running\",\n      \"result\": null,\n      \"resultLabel\": null,\n      \"exitCriteria\": \"Reconciliation signed; Go decision\",\n      \"exitCriteriaMet\": null,\n      \"summary\": null,\n      \"personalData\": \"production-extract\",\n      \"personalDataLabel\": \"Production extract\",\n      \"dpoApprovalRef\": \"DPO-2026-014\",\n      \"restorePoint\": \"2026-10-31T14:00:00Z\",\n      \"evidencePackSha256\": null,\n      \"archiveRef\": null,\n      \"loads\": 2,\n      \"defectsOpen\": 1,\n      \"defectsTotal\": 4,\n      \"createdBy\": \"Andrea Lim\",\n      \"createdAt\": \"2026-10-20T02:00:00Z\",\n      \"closedBy\": null,\n      \"closedAt\": null\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 50,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create a run (one production run at a time); its cutover checklist is copied from the runbook. A production extract needs the DPO approval reference",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/runs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "runs"
+              ]
+            },
+            "description": "Create a run (one production run at a time); its cutover checklist is copied from the runbook. A production extract needs the DPO approval reference\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > New run\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kind\": \"mock-2\",\n  \"title\": \"Mock 2 - full extract\",\n  \"cutoverDate\": \"2026-11-02\",\n  \"plannedStart\": \"2026-10-10T01:00:00Z\",\n  \"plannedEnd\": \"2026-10-11T09:00:00Z\",\n  \"personalData\": \"masked-copy\",\n  \"dpoApprovalRef\": null,\n  \"exitCriteria\": \"No validation error; every control figure reconciles\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/runs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "runs"
+                  ]
+                },
+                "description": "Create a run (one production run at a time); its cutover checklist is copied from the runbook. A production extract needs the DPO approval reference\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > New run\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"kind\": \"mock-2\",\n  \"title\": \"Mock 2 - full extract\",\n  \"cutoverDate\": \"2026-11-02\",\n  \"plannedStart\": \"2026-10-10T01:00:00Z\",\n  \"plannedEnd\": \"2026-10-11T09:00:00Z\",\n  \"personalData\": \"masked-copy\",\n  \"dpoApprovalRef\": null,\n  \"exitCriteria\": \"No validation error; every control figure reconciles\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"RUN-000003 created\",\n  \"data\": {\n    \"id\": 3,\n    \"runNumber\": \"RUN-000003\",\n    \"kind\": \"production\",\n    \"kindLabel\": \"Production\",\n    \"title\": \"Production cutover\",\n    \"environment\": \"production\",\n    \"cutoverDate\": \"2026-11-02\",\n    \"plannedStart\": \"2026-10-31T09:30:00Z\",\n    \"plannedEnd\": \"2026-11-01T10:00:00Z\",\n    \"actualStart\": \"2026-10-31T09:31:00Z\",\n    \"actualEnd\": null,\n    \"durationMs\": null,\n    \"status\": \"running\",\n    \"statusLabel\": \"Running\",\n    \"result\": null,\n    \"resultLabel\": null,\n    \"exitCriteria\": \"Reconciliation signed; Go decision\",\n    \"exitCriteriaMet\": null,\n    \"summary\": null,\n    \"personalData\": \"production-extract\",\n    \"personalDataLabel\": \"Production extract\",\n    \"dpoApprovalRef\": \"DPO-2026-014\",\n    \"restorePoint\": \"2026-10-31T14:00:00Z\",\n    \"evidencePackSha256\": null,\n    \"archiveRef\": null,\n    \"loads\": 2,\n    \"defectsOpen\": 1,\n    \"defectsTotal\": 4,\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-10-20T02:00:00Z\",\n    \"closedBy\": null,\n    \"closedAt\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "A run: its record, loads with validate / load / undo times and rows per second, checklist timings, reconciliations, Go / No-Go decisions, defects by status and totals",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/runs/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "runs",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "A run: its record, loads with validate / load / undo times and rows per second, checklist timings, reconciliations, Go / No-Go decisions, defects by status and totals\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/runs/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "runs",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "A run: its record, loads with validate / load / undo times and rows per second, checklist timings, reconciliations, Go / No-Go decisions, defects by status and totals\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"runNumber\": \"RUN-000003\",\n    \"kind\": \"production\",\n    \"kindLabel\": \"Production\",\n    \"title\": \"Production cutover\",\n    \"environment\": \"production\",\n    \"cutoverDate\": \"2026-11-02\",\n    \"plannedStart\": \"2026-10-31T09:30:00Z\",\n    \"plannedEnd\": \"2026-11-01T10:00:00Z\",\n    \"actualStart\": \"2026-10-31T09:31:00Z\",\n    \"actualEnd\": null,\n    \"durationMs\": null,\n    \"status\": \"running\",\n    \"statusLabel\": \"Running\",\n    \"result\": null,\n    \"resultLabel\": null,\n    \"exitCriteria\": \"Reconciliation signed; Go decision\",\n    \"exitCriteriaMet\": null,\n    \"summary\": null,\n    \"personalData\": \"production-extract\",\n    \"personalDataLabel\": \"Production extract\",\n    \"dpoApprovalRef\": \"DPO-2026-014\",\n    \"restorePoint\": \"2026-10-31T14:00:00Z\",\n    \"evidencePackSha256\": null,\n    \"archiveRef\": null,\n    \"loads\": 2,\n    \"defectsOpen\": 1,\n    \"defectsTotal\": 4,\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-10-20T02:00:00Z\",\n    \"closedBy\": null,\n    \"closedAt\": null,\n    \"loadsList\": [],\n    \"steps\": [],\n    \"reconciliations\": [],\n    \"decisions\": [],\n    \"defectsByStatus\": {\n      \"open\": 1\n    },\n    \"timings\": {\n      \"validateMs\": 5400,\n      \"loadMs\": 61000,\n      \"undoMs\": 0,\n      \"rowsLoaded\": 1456,\n      \"stepsDone\": 12,\n      \"steps\": 21,\n      \"lateSteps\": [],\n      \"elapsedMs\": null\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a run: title, dates, personal data and DPO approval, exit criteria, summary, restore point; the SHA-256 of a downloaded evidence pack of the run and its archive reference (also once the run is completed)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/runs/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "runs",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a run: title, dates, personal data and DPO approval, exit criteria, summary, restore point; the SHA-256 of a downloaded evidence pack of the run and its archive reference (also once the run is completed)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"evidencePackSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n  \"archiveRef\": \"TISPH-ARCH-2026-0042\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/runs/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "runs",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a run: title, dates, personal data and DPO approval, exit criteria, summary, restore point; the SHA-256 of a downloaded evidence pack of the run and its archive reference (also once the run is completed)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"evidencePackSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n  \"archiveRef\": \"TISPH-ARCH-2026-0042\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Run saved\",\n  \"data\": {\n    \"id\": 3,\n    \"runNumber\": \"RUN-000003\",\n    \"kind\": \"production\",\n    \"kindLabel\": \"Production\",\n    \"title\": \"Production cutover\",\n    \"environment\": \"production\",\n    \"cutoverDate\": \"2026-11-02\",\n    \"plannedStart\": \"2026-10-31T09:30:00Z\",\n    \"plannedEnd\": \"2026-11-01T10:00:00Z\",\n    \"actualStart\": \"2026-10-31T09:31:00Z\",\n    \"actualEnd\": null,\n    \"durationMs\": null,\n    \"status\": \"running\",\n    \"statusLabel\": \"Running\",\n    \"result\": null,\n    \"resultLabel\": null,\n    \"exitCriteria\": \"Reconciliation signed; Go decision\",\n    \"exitCriteriaMet\": null,\n    \"summary\": null,\n    \"personalData\": \"production-extract\",\n    \"personalDataLabel\": \"Production extract\",\n    \"dpoApprovalRef\": \"DPO-2026-014\",\n    \"restorePoint\": \"2026-10-31T14:00:00Z\",\n    \"evidencePackSha256\": null,\n    \"archiveRef\": null,\n    \"loads\": 2,\n    \"defectsOpen\": 1,\n    \"defectsTotal\": 4,\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-10-20T02:00:00Z\",\n    \"closedBy\": null,\n    \"closedAt\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel a planned or running run with a reason (never the production run once go-live is locked)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/runs/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "runs",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel a planned or running run with a reason (never the production run once go-live is locked)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Replaced by an extra mock after the cleansing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/runs/:id/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "runs",
+                    ":id",
+                    "cancel"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cancel a planned or running run with a reason (never the production run once go-live is locked)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Replaced by an extra mock after the cleansing\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"RUN-000003 cancelled\",\n  \"data\": {\n    \"id\": 3,\n    \"runNumber\": \"RUN-000003\",\n    \"kind\": \"production\",\n    \"kindLabel\": \"Production\",\n    \"title\": \"Production cutover\",\n    \"environment\": \"production\",\n    \"cutoverDate\": \"2026-11-02\",\n    \"plannedStart\": \"2026-10-31T09:30:00Z\",\n    \"plannedEnd\": \"2026-11-01T10:00:00Z\",\n    \"actualStart\": \"2026-10-31T09:31:00Z\",\n    \"actualEnd\": null,\n    \"durationMs\": null,\n    \"status\": \"cancelled\",\n    \"statusLabel\": \"Running\",\n    \"result\": null,\n    \"resultLabel\": null,\n    \"exitCriteria\": \"Reconciliation signed; Go decision\",\n    \"exitCriteriaMet\": null,\n    \"summary\": null,\n    \"personalData\": \"production-extract\",\n    \"personalDataLabel\": \"Production extract\",\n    \"dpoApprovalRef\": \"DPO-2026-014\",\n    \"restorePoint\": \"2026-10-31T14:00:00Z\",\n    \"evidencePackSha256\": null,\n    \"archiveRef\": null,\n    \"loads\": 2,\n    \"defectsOpen\": 1,\n    \"defectsTotal\": 4,\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-10-20T02:00:00Z\",\n    \"closedBy\": null,\n    \"closedAt\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Complete a running run with its result (passed, passed-with-issues, failed), whether the exit criteria were met and a summary; refused while one of its loads is in progress",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/runs/:id/complete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "runs",
+                ":id",
+                "complete"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Complete a running run with its result (passed, passed-with-issues, failed), whether the exit criteria were met and a summary; refused while one of its loads is in progress\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"result\": \"passed-with-issues\",\n  \"exitCriteriaMet\": true,\n  \"summary\": \"Reconciled; two severity 3 defects deferred\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/runs/:id/complete",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "runs",
+                    ":id",
+                    "complete"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Complete a running run with its result (passed, passed-with-issues, failed), whether the exit criteria were met and a summary; refused while one of its loads is in progress\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"result\": \"passed-with-issues\",\n  \"exitCriteriaMet\": true,\n  \"summary\": \"Reconciled; two severity 3 defects deferred\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"RUN-000003 completed\",\n  \"data\": {\n    \"id\": 3,\n    \"runNumber\": \"RUN-000003\",\n    \"kind\": \"production\",\n    \"kindLabel\": \"Production\",\n    \"title\": \"Production cutover\",\n    \"environment\": \"production\",\n    \"cutoverDate\": \"2026-11-02\",\n    \"plannedStart\": \"2026-10-31T09:30:00Z\",\n    \"plannedEnd\": \"2026-11-01T10:00:00Z\",\n    \"actualStart\": \"2026-10-31T09:31:00Z\",\n    \"actualEnd\": null,\n    \"durationMs\": null,\n    \"status\": \"completed\",\n    \"statusLabel\": \"Running\",\n    \"result\": \"passed-with-issues\",\n    \"resultLabel\": null,\n    \"exitCriteria\": \"Reconciliation signed; Go decision\",\n    \"exitCriteriaMet\": null,\n    \"summary\": null,\n    \"personalData\": \"production-extract\",\n    \"personalDataLabel\": \"Production extract\",\n    \"dpoApprovalRef\": \"DPO-2026-014\",\n    \"restorePoint\": \"2026-10-31T14:00:00Z\",\n    \"evidencePackSha256\": null,\n    \"archiveRef\": null,\n    \"loads\": 2,\n    \"defectsOpen\": 1,\n    \"defectsTotal\": 4,\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-10-20T02:00:00Z\",\n    \"closedBy\": null,\n    \"closedAt\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Defects of a run, newest first",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/runs/:id/defects",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "runs",
+                ":id",
+                "defects"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Defects of a run, newest first\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Defects\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/runs/:id/defects",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "runs",
+                    ":id",
+                    "defects"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Defects of a run, newest first\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Defects\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 8,\n      \"defectNumber\": \"DEF-000008\",\n      \"runId\": 3,\n      \"title\": \"Plate number with a trailing space refused\",\n      \"object\": \"Policies - Motor\",\n      \"severity\": 3,\n      \"status\": \"fixed\",\n      \"owner\": \"Migration lead\",\n      \"batchId\": 12,\n      \"loadNumber\": \"MIG-000012\",\n      \"stepId\": 32,\n      \"stepCode\": \"CO-4\",\n      \"description\": \"Rows 14-18 of the motor sheet\",\n      \"resolution\": \"Trimmed in the extract\",\n      \"foundBy\": \"Andrea Lim\",\n      \"foundAt\": \"2026-11-01T01:10:00Z\",\n      \"closedAt\": null\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record a defect of a run: title, object, severity 1 to 4, status, owner, the load and step of the run it was found in, description, resolution",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/runs/:id/defects",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "runs",
+                ":id",
+                "defects"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Record a defect of a run: title, object, severity 1 to 4, status, owner, the load and step of the run it was found in, description, resolution\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Defects > Add\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Plate number with a trailing space refused\",\n  \"object\": \"Policies - Motor\",\n  \"severity\": 3,\n  \"batchId\": 12,\n  \"stepId\": 32\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/runs/:id/defects",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "runs",
+                    ":id",
+                    "defects"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record a defect of a run: title, object, severity 1 to 4, status, owner, the load and step of the run it was found in, description, resolution\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Defects > Add\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Plate number with a trailing space refused\",\n  \"object\": \"Policies - Motor\",\n  \"severity\": 3,\n  \"batchId\": 12,\n  \"stepId\": 32\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"DEF-000008 recorded\",\n  \"data\": {\n    \"id\": 8,\n    \"defectNumber\": \"DEF-000008\",\n    \"runId\": 3,\n    \"title\": \"Plate number with a trailing space refused\",\n    \"object\": \"Policies - Motor\",\n    \"severity\": 3,\n    \"status\": \"fixed\",\n    \"owner\": \"Migration lead\",\n    \"batchId\": 12,\n    \"loadNumber\": \"MIG-000012\",\n    \"stepId\": 32,\n    \"stepCode\": \"CO-4\",\n    \"description\": \"Rows 14-18 of the motor sheet\",\n    \"resolution\": \"Trimmed in the extract\",\n    \"foundBy\": \"Andrea Lim\",\n    \"foundAt\": \"2026-11-01T01:10:00Z\",\n    \"closedAt\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a defect (closing it records when)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/runs/:id/defects/:defectId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "runs",
+                ":id",
+                "defects",
+                ":defectId"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "defectId",
+                  "value": "",
+                  "description": "defectId (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a defect (closing it records when)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Defects > Edit\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"fixed\",\n  \"resolution\": \"Trimmed in the extract\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/runs/:id/defects/:defectId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "runs",
+                    ":id",
+                    "defects",
+                    ":defectId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "defectId",
+                      "value": "",
+                      "description": "defectId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a defect (closing it records when)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Defects > Edit\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"fixed\",\n  \"resolution\": \"Trimmed in the extract\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"DEF-000008 saved\",\n  \"data\": {\n    \"id\": 8,\n    \"defectNumber\": \"DEF-000008\",\n    \"runId\": 3,\n    \"title\": \"Plate number with a trailing space refused\",\n    \"object\": \"Policies - Motor\",\n    \"severity\": 3,\n    \"status\": \"fixed\",\n    \"owner\": \"Migration lead\",\n    \"batchId\": 12,\n    \"loadNumber\": \"MIG-000012\",\n    \"stepId\": 32,\n    \"stepCode\": \"CO-4\",\n    \"description\": \"Rows 14-18 of the motor sheet\",\n    \"resolution\": \"Trimmed in the extract\",\n    \"foundBy\": \"Andrea Lim\",\n    \"foundAt\": \"2026-11-01T01:10:00Z\",\n    \"closedAt\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Evidence pack of a run (ZIP with manifest.csv giving the SHA-256 of each file): run report, evidence files, each load (summary, rows, errors; the uploaded workbook only for users with write:data-load and view:pii), reconciliations with the signed PDF, Go / No-Go, lock requests and an audit extract. Built on download and masked for a user without view:pii; its SHA-256 is in X-Content-SHA256 and the audit trail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/runs/:id/evidence-pack",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "runs",
+                ":id",
+                "evidence-pack"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Evidence pack of a run (ZIP with manifest.csv giving the SHA-256 of each file): run report, evidence files, each load (summary, rows, errors; the uploaded workbook only for users with write:data-load and view:pii), reconciliations with the signed PDF, Go / No-Go, lock requests and an audit extract. Built on download and masked for a user without view:pii; its SHA-256 is in X-Content-SHA256 and the audit trail\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence pack\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/runs/:id/evidence-pack",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "runs",
+                    ":id",
+                    "evidence-pack"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Evidence pack of a run (ZIP with manifest.csv giving the SHA-256 of each file): run report, evidence files, each load (summary, rows, errors; the uploaded workbook only for users with write:data-load and view:pii), reconciliations with the signed PDF, Go / No-Go, lock requests and an audit extract. Built on download and masked for a user without view:pii; its SHA-256 is in X-Content-SHA256 and the audit trail\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Evidence pack\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(application/zip)"
+            }
+          ]
+        },
+        {
+          "name": "Run report (format=xlsx or pdf): summary, checklist timings, loads with timings, results, defects; built when downloaded",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/runs/:id/report?format=xlsx",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "runs",
+                ":id",
+                "report"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "xlsx"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Run report (format=xlsx or pdf): summary, checklist timings, loads with timings, results, defects; built when downloaded\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Report\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/runs/:id/report?format=xlsx",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "runs",
+                    ":id",
+                    "report"
+                  ],
+                  "query": [
+                    {
+                      "key": "format",
+                      "value": "xlsx"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Run report (format=xlsx or pdf): summary, checklist timings, loads with timings, results, defects; built when downloaded\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs > Report\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx or pdf file)"
+            }
+          ]
+        },
+        {
+          "name": "Start a planned run (actual start now)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/runs/:id/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "runs",
+                ":id",
+                "start"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Start a planned run (actual start now)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/runs/:id/start",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "runs",
+                    ":id",
+                    "start"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Start a planned run (actual start now)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Mock Runs\n\nAccess: write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"RUN-000003 started\",\n  \"data\": {\n    \"id\": 3,\n    \"runNumber\": \"RUN-000003\",\n    \"kind\": \"production\",\n    \"kindLabel\": \"Production\",\n    \"title\": \"Production cutover\",\n    \"environment\": \"production\",\n    \"cutoverDate\": \"2026-11-02\",\n    \"plannedStart\": \"2026-10-31T09:30:00Z\",\n    \"plannedEnd\": \"2026-11-01T10:00:00Z\",\n    \"actualStart\": \"2026-10-31T09:31:00Z\",\n    \"actualEnd\": null,\n    \"durationMs\": null,\n    \"status\": \"running\",\n    \"statusLabel\": \"Running\",\n    \"result\": null,\n    \"resultLabel\": null,\n    \"exitCriteria\": \"Reconciliation signed; Go decision\",\n    \"exitCriteriaMet\": null,\n    \"summary\": null,\n    \"personalData\": \"production-extract\",\n    \"personalDataLabel\": \"Production extract\",\n    \"dpoApprovalRef\": \"DPO-2026-014\",\n    \"restorePoint\": \"2026-10-31T14:00:00Z\",\n    \"evidencePackSha256\": null,\n    \"archiveRef\": null,\n    \"loads\": 2,\n    \"defectsOpen\": 1,\n    \"defectsTotal\": 4,\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-10-20T02:00:00Z\",\n    \"closedBy\": null,\n    \"closedAt\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cutover checklist of a run by phase: owner, planned and actual start and end, status, evidence count, notes, the steps each waits for; progress, elapsed against plan, next step, late steps",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/runs/:id/steps",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "runs",
+                ":id",
+                "steps"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cutover checklist of a run by phase: owner, planned and actual start and end, status, evidence count, notes, the steps each waits for; progress, elapsed against plan, next step, late steps\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Cutover\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/runs/:id/steps",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "runs",
+                    ":id",
+                    "steps"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cutover checklist of a run by phase: owner, planned and actual start and end, status, evidence count, notes, the steps each waits for; progress, elapsed against plan, next step, late steps\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Cutover\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"runId\": 3,\n    \"runNumber\": \"RUN-000003\",\n    \"runStatus\": \"running\",\n    \"steps\": [\n      {\n        \"id\": 31,\n        \"runId\": 3,\n        \"code\": \"CO-3\",\n        \"title\": \"Pre-load checks and restore point\",\n        \"phase\": \"cutover\",\n        \"phaseLabel\": \"Cutover\",\n        \"sort\": 130,\n        \"ownerUserId\": \"usr_7a1c\",\n        \"ownerName\": \"Paolo Cruz\",\n        \"ownerRole\": \"DevOps lead\",\n        \"offsetLabel\": \"Saturday 22:00\",\n        \"durationMinutes\": 30,\n        \"evidenceHint\": \"Cutover log with the restore time\",\n        \"evidenceRequired\": true,\n        \"evidenceCount\": 1,\n        \"plannedStart\": \"2026-10-31T14:00:00Z\",\n        \"plannedEnd\": \"2026-10-31T14:30:00Z\",\n        \"actualStart\": \"2026-10-31T14:02:00Z\",\n        \"actualEnd\": \"2026-10-31T14:25:00Z\",\n        \"elapsedMs\": 1380000,\n        \"late\": false,\n        \"status\": \"done\",\n        \"statusLabel\": \"Done\",\n        \"notes\": null,\n        \"dependsOn\": [\n          \"CO-2\"\n        ],\n        \"waitingFor\": [],\n        \"updatedBy\": \"Paolo Cruz\",\n        \"updatedAt\": \"2026-10-31T14:25:00Z\"\n      }\n    ],\n    \"progress\": {\n      \"done\": 12,\n      \"total\": 21,\n      \"percent\": 57,\n      \"plannedMs\": 54000000,\n      \"elapsedMs\": 41000000,\n      \"next\": {\n        \"id\": 32,\n        \"code\": \"CO-4\",\n        \"title\": \"Validate\"\n      },\n      \"late\": []\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a checklist step: owner (user or role), planned start and end, notes",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/runs/:id/steps/:stepId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "runs",
+                ":id",
+                "steps",
+                ":stepId"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "stepId",
+                  "value": "",
+                  "description": "stepId (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a checklist step: owner (user or role), planned start and end, notes\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Cutover > Edit\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ownerUserId\": \"usr_7a1c\",\n  \"plannedStart\": \"2026-10-31T14:00:00Z\",\n  \"plannedEnd\": \"2026-10-31T14:30:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/runs/:id/steps/:stepId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "runs",
+                    ":id",
+                    "steps",
+                    ":stepId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "stepId",
+                      "value": "",
+                      "description": "stepId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a checklist step: owner (user or role), planned start and end, notes\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Cutover > Edit\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ownerUserId\": \"usr_7a1c\",\n  \"plannedStart\": \"2026-10-31T14:00:00Z\",\n  \"plannedEnd\": \"2026-10-31T14:30:00Z\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Step saved\",\n  \"data\": {\n    \"id\": 31,\n    \"runId\": 3,\n    \"code\": \"CO-3\",\n    \"title\": \"Pre-load checks and restore point\",\n    \"phase\": \"cutover\",\n    \"phaseLabel\": \"Cutover\",\n    \"sort\": 130,\n    \"ownerUserId\": \"usr_7a1c\",\n    \"ownerName\": \"Paolo Cruz\",\n    \"ownerRole\": \"DevOps lead\",\n    \"offsetLabel\": \"Saturday 22:00\",\n    \"durationMinutes\": 30,\n    \"evidenceHint\": \"Cutover log with the restore time\",\n    \"evidenceRequired\": true,\n    \"evidenceCount\": 1,\n    \"plannedStart\": \"2026-10-31T14:00:00Z\",\n    \"plannedEnd\": \"2026-10-31T14:30:00Z\",\n    \"actualStart\": \"2026-10-31T14:02:00Z\",\n    \"actualEnd\": \"2026-10-31T14:25:00Z\",\n    \"elapsedMs\": 1380000,\n    \"late\": false,\n    \"status\": \"done\",\n    \"statusLabel\": \"Done\",\n    \"notes\": null,\n    \"dependsOn\": [\n      \"CO-2\"\n    ],\n    \"waitingFor\": [],\n    \"updatedBy\": \"Paolo Cruz\",\n    \"updatedAt\": \"2026-10-31T14:25:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Block a step not started or in progress, with a note",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/runs/:id/steps/:stepId/block",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "runs",
+                ":id",
+                "steps",
+                ":stepId",
+                "block"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "stepId",
+                  "value": "",
+                  "description": "stepId (path parameter)"
+                }
+              ]
+            },
+            "description": "Block a step not started or in progress, with a note\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Cutover > Blocked\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Legacy day-end still running\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/runs/:id/steps/:stepId/block",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "runs",
+                    ":id",
+                    "steps",
+                    ":stepId",
+                    "block"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "stepId",
+                      "value": "",
+                      "description": "stepId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Block a step not started or in progress, with a note\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Cutover > Blocked\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"note\": \"Legacy day-end still running\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"CO-1 blocked\",\n  \"data\": {\n    \"id\": 31,\n    \"runId\": 3,\n    \"code\": \"CO-1\",\n    \"title\": \"Pre-load checks and restore point\",\n    \"phase\": \"cutover\",\n    \"phaseLabel\": \"Cutover\",\n    \"sort\": 130,\n    \"ownerUserId\": \"usr_7a1c\",\n    \"ownerName\": \"Paolo Cruz\",\n    \"ownerRole\": \"DevOps lead\",\n    \"offsetLabel\": \"Saturday 22:00\",\n    \"durationMinutes\": 30,\n    \"evidenceHint\": \"Cutover log with the restore time\",\n    \"evidenceRequired\": true,\n    \"evidenceCount\": 1,\n    \"plannedStart\": \"2026-10-31T14:00:00Z\",\n    \"plannedEnd\": \"2026-10-31T14:30:00Z\",\n    \"actualStart\": \"2026-10-31T14:02:00Z\",\n    \"actualEnd\": \"2026-10-31T14:25:00Z\",\n    \"elapsedMs\": 1380000,\n    \"late\": false,\n    \"status\": \"blocked\",\n    \"statusLabel\": \"Done\",\n    \"notes\": null,\n    \"dependsOn\": [\n      \"CO-2\"\n    ],\n    \"waitingFor\": [],\n    \"updatedBy\": \"Paolo Cruz\",\n    \"updatedAt\": \"2026-10-31T14:25:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Finish a step in progress (actual end now); a step whose runbook names evidence needs an evidence file or a note saying why there is none; CO-3 records the restore point (restorePoint) or needs it on the run",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/runs/:id/steps/:stepId/done",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "runs",
+                ":id",
+                "steps",
+                ":stepId",
+                "done"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "stepId",
+                  "value": "",
+                  "description": "stepId (path parameter)"
+                }
+              ]
+            },
+            "description": "Finish a step in progress (actual end now); a step whose runbook names evidence needs an evidence file or a note saying why there is none; CO-3 records the restore point (restorePoint) or needs it on the run\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Cutover > Done\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": null,\n  \"restorePoint\": \"2026-10-31T14:00:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/runs/:id/steps/:stepId/done",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "runs",
+                    ":id",
+                    "steps",
+                    ":stepId",
+                    "done"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "stepId",
+                      "value": "",
+                      "description": "stepId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Finish a step in progress (actual end now); a step whose runbook names evidence needs an evidence file or a note saying why there is none; CO-3 records the restore point (restorePoint) or needs it on the run\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Cutover > Done\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"note\": null,\n  \"restorePoint\": \"2026-10-31T14:00:00Z\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"CO-3 done\",\n  \"data\": {\n    \"id\": 31,\n    \"runId\": 3,\n    \"code\": \"CO-3\",\n    \"title\": \"Pre-load checks and restore point\",\n    \"phase\": \"cutover\",\n    \"phaseLabel\": \"Cutover\",\n    \"sort\": 130,\n    \"ownerUserId\": \"usr_7a1c\",\n    \"ownerName\": \"Paolo Cruz\",\n    \"ownerRole\": \"DevOps lead\",\n    \"offsetLabel\": \"Saturday 22:00\",\n    \"durationMinutes\": 30,\n    \"evidenceHint\": \"Cutover log with the restore time\",\n    \"evidenceRequired\": true,\n    \"evidenceCount\": 1,\n    \"plannedStart\": \"2026-10-31T14:00:00Z\",\n    \"plannedEnd\": \"2026-10-31T14:30:00Z\",\n    \"actualStart\": \"2026-10-31T14:02:00Z\",\n    \"actualEnd\": \"2026-10-31T14:25:00Z\",\n    \"elapsedMs\": 1380000,\n    \"late\": false,\n    \"status\": \"done\",\n    \"statusLabel\": \"Done\",\n    \"notes\": null,\n    \"dependsOn\": [\n      \"CO-2\"\n    ],\n    \"waitingFor\": [],\n    \"updatedBy\": \"Paolo Cruz\",\n    \"updatedAt\": \"2026-10-31T14:25:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Skip a step not started or blocked, with a note",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/runs/:id/steps/:stepId/skip",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "runs",
+                ":id",
+                "steps",
+                ":stepId",
+                "skip"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "stepId",
+                  "value": "",
+                  "description": "stepId (path parameter)"
+                }
+              ]
+            },
+            "description": "Skip a step not started or blocked, with a note\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Cutover > Skip\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Not part of a mock run\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/runs/:id/steps/:stepId/skip",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "runs",
+                    ":id",
+                    "steps",
+                    ":stepId",
+                    "skip"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "stepId",
+                      "value": "",
+                      "description": "stepId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Skip a step not started or blocked, with a note\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Cutover > Skip\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"note\": \"Not part of a mock run\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"PC-1 skipped\",\n  \"data\": {\n    \"id\": 31,\n    \"runId\": 3,\n    \"code\": \"PC-1\",\n    \"title\": \"Pre-load checks and restore point\",\n    \"phase\": \"cutover\",\n    \"phaseLabel\": \"Cutover\",\n    \"sort\": 130,\n    \"ownerUserId\": \"usr_7a1c\",\n    \"ownerName\": \"Paolo Cruz\",\n    \"ownerRole\": \"DevOps lead\",\n    \"offsetLabel\": \"Saturday 22:00\",\n    \"durationMinutes\": 30,\n    \"evidenceHint\": \"Cutover log with the restore time\",\n    \"evidenceRequired\": true,\n    \"evidenceCount\": 1,\n    \"plannedStart\": \"2026-10-31T14:00:00Z\",\n    \"plannedEnd\": \"2026-10-31T14:30:00Z\",\n    \"actualStart\": \"2026-10-31T14:02:00Z\",\n    \"actualEnd\": \"2026-10-31T14:25:00Z\",\n    \"elapsedMs\": 1380000,\n    \"late\": false,\n    \"status\": \"skipped\",\n    \"statusLabel\": \"Done\",\n    \"notes\": null,\n    \"dependsOn\": [\n      \"CO-2\"\n    ],\n    \"waitingFor\": [],\n    \"updatedBy\": \"Paolo Cruz\",\n    \"updatedAt\": \"2026-10-31T14:25:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Start a step of a running run (actual start now); refused until every step it depends on is done or skipped",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/runs/:id/steps/:stepId/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "runs",
+                ":id",
+                "steps",
+                ":stepId",
+                "start"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "stepId",
+                  "value": "",
+                  "description": "stepId (path parameter)"
+                }
+              ]
+            },
+            "description": "Start a step of a running run (actual start now); refused until every step it depends on is done or skipped\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Cutover > Start\n\nAccess: write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/runs/:id/steps/:stepId/start",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "runs",
+                    ":id",
+                    "steps",
+                    ":stepId",
+                    "start"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "stepId",
+                      "value": "",
+                      "description": "stepId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Start a step of a running run (actual start now); refused until every step it depends on is done or skipped\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Cutover > Start\n\nAccess: write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"CO-3 started\",\n  \"data\": {\n    \"id\": 31,\n    \"runId\": 3,\n    \"code\": \"CO-3\",\n    \"title\": \"Pre-load checks and restore point\",\n    \"phase\": \"cutover\",\n    \"phaseLabel\": \"Cutover\",\n    \"sort\": 130,\n    \"ownerUserId\": \"usr_7a1c\",\n    \"ownerName\": \"Paolo Cruz\",\n    \"ownerRole\": \"DevOps lead\",\n    \"offsetLabel\": \"Saturday 22:00\",\n    \"durationMinutes\": 30,\n    \"evidenceHint\": \"Cutover log with the restore time\",\n    \"evidenceRequired\": true,\n    \"evidenceCount\": 1,\n    \"plannedStart\": \"2026-10-31T14:00:00Z\",\n    \"plannedEnd\": \"2026-10-31T14:30:00Z\",\n    \"actualStart\": \"2026-10-31T14:02:00Z\",\n    \"actualEnd\": null,\n    \"elapsedMs\": 1380000,\n    \"late\": false,\n    \"status\": \"in-progress\",\n    \"statusLabel\": \"Done\",\n    \"notes\": null,\n    \"dependsOn\": [\n      \"CO-2\"\n    ],\n    \"waitingFor\": [],\n    \"updatedBy\": \"Paolo Cruz\",\n    \"updatedAt\": \"2026-10-31T14:25:00Z\"\n  }\n}"
             }
           ]
         },

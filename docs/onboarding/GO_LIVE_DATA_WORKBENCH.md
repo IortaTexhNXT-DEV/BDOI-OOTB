@@ -572,6 +572,84 @@ loads chosen) and counts the records **of those loads** (`load_batch_id`), never
   cutover date, opening balances as at), lines, checks and tie-outs, tolerances, differences with their explanations
   and acceptances, sign-offs. It carries counts, amounts, codes and numbers only, no personal identifier.
 
+## Mock runs and the cutover checklist
+
+Data Migration & Go-Live > Mock Runs (`/api/data-load/runs`, migration 0444). Each attempt is a **run**: Mock 1, Mock 2,
+the dress rehearsal, an extra mock or the production run (one at a time). A run records its cutover date, planned and
+actual start and end, the personal data it used (synthetic, masked copy or production extract, the last with the
+reference of the DPO approval), its exit criteria, result (passed, passed with issues, failed) and summary, the restore
+point noted before the load and, at the end, the SHA-256 and archive reference of its evidence pack. Each load is
+uploaded into a run (field `runId`, a planned or running run); the run shows its loads with validate, load and undo
+times and rows per second, its reconciliations and decisions, its defects (title, object, severity 1 to 4, status,
+owner, load, step) and the run report (`GET /runs/:id/report?format=xlsx|pdf`).
+
+Creating a run copies the **runbook** (Data Migration & Go-Live > Cutover, `GET /runbook`, reference seed
+`92_go_live_workspace.sql`, from sections 12 and 13 of the plan) into its checklist:
+
+| Phase | Steps |
+|---|---|
+| Pre-cutover | PC-1 Production deployed with reference data only; PC-2 Configuration loaded and authority limits approved; PC-3 Environment comparison mirrored; PC-4 Users and sign-in ready; PC-5 Smoke test or dress rehearsal, then reset; PC-6 Bank accounts reconcile-from date; PC-7 Cutover date set and fiscal year open; PC-8 Schedules paused and e-mail off |
+| Cutover | CO-1 Legacy freeze; CO-2 Extract and control figures; CO-3 Pre-load checks and restore point; CO-4 Validate; CO-5 Migrate; CO-6 Reconcile; CO-7 Differences explained and accepted; CO-8 Business validation samples; CO-9 Go / No-Go; CO-10 Production: lock on, interfaces on, evidence archived |
+| Go-live, hypercare | GL-1 Go-live floor support; HC-1 Hypercare daily checks; HC-2 Hypercare exit |
+
+Each step has an owner (a user or the role of the plan), planned and actual start and end, a status (not started, in
+progress, done, blocked, skipped) and notes. A step starts once the run is started and every step it waits for is
+done or skipped (a mock skips the pre-cutover steps with a note). A step whose runbook names evidence is done with an
+evidence file (`POST /api/data-load/evidence`) or a note saying why there is none; CO-3 records the restore point.
+Block and skip need a note. Every move is audited. Evidence files are kept in the evidence store with their SHA-256,
+downloaded only from the workspace (each download audited) and removed only by their uploader while the run is open.
+
+## Go / No-Go
+
+Data Migration & Go-Live > Go-Live (`/api/data-load/decisions`). The decision of a run names its approvers (at least
+`migration.go_live_min_approvers`, default 2; one votes as Finance Head; each holds approve:data-load; not the user who
+creates the decision) and copies the criteria of section 16 of the plan:
+
+| Criterion | Checked |
+|---|---|
+| G1 UAT signed off, no open severity 1 or 2 defect | On screen, with its evidence |
+| G2 Migration load of the production run loaded with no row in error, no unresolved duplicate, not with valid rows only | From the loads of the run |
+| G3 Trial balance, receivables control and sub-ledger tie-outs agree, or their differences are accepted | From the latest reconciliation of the run |
+| G4 Every legacy control figure reconciled; reconciliation signed | From the latest reconciliation of the run |
+| G5 Business validation samples passed | On screen, with its evidence |
+| G6 Configuration mirrored with UAT | From the latest environment comparison |
+| G7 Demo accounts and SUPERID inactive, password sign-in off except break-glass | From the users and `security.password_sign_in_enabled` |
+| G8 Numbering continues above every legacy number in every period, branch and line, and every COC series | From the numbering series and COC series |
+| G9 Restore point noted | CO-3 done with an evidence file and the restore point on the run |
+| G10 Hypercare team and support contacts in place | On screen, with its evidence |
+| G11 Evidence pack archived | SHA-256 of a downloaded evidence pack of the run and the archive reference recorded on the run |
+
+G2 to G5 are never waived; another criterion that is not met may be waived by a holder of approve:data-load other
+than the creator, with a reason. Voting opens when every criterion is met or waived; each named approver votes once,
+Go or No-Go. All Go makes the decision **Go**; a No-Go makes it **No-Go** at once, with the reason, the actions and the
+new date. The go-live lock needs the Go decision of the production run.
+
+## Evidence pack and retention
+
+`GET /api/data-load/runs/:id/evidence-pack` (read:data-load) returns a ZIP built when downloaded: the run report, the
+evidence files, per load its summary, rows and errors workbooks (and the uploaded workbook for a user with
+write:data-load and view:pii), each reconciliation with its signed PDF, the Go / No-Go decisions, the lock requests and
+an audit extract, with `manifest.csv` listing the SHA-256 of every file. Personal identifiers are masked for a user
+without view:pii. The SHA-256 of the ZIP is returned in `X-Content-SHA256` and recorded in the audit trail; recording it
+on the run with the archive reference meets G11.
+
+Housekeeping keeps the rows and the uploaded workbook of the production run's loads for
+`migration.evidence_retention_years` (default 10) after the go-live lock, and for ever before it; the rows and workbooks
+of every other finished load go after `housekeeping.data_load_rows_days` and `housekeeping.data_load_files_days`
+(default 365; 0 keeps them). The load record and its file SHA-256 always stay; each deletion is audited. Runs,
+checklists, decisions, reconciliations and evidence files are kept.
+
+## Hypercare
+
+Data Migration & Go-Live > Hypercare (`GET /api/data-load/hypercare`), from the go-live lock for
+`migration.hypercare_days` (default 28): business issued in BrokerVerse since the cutover date (policies and premium,
+endorsements, receipts, claims), migrated open items collected (count, amount, share of the opening balance, ageing
+now), migrated policies due for renewal in 60 days and renewed, endorsements, claims and cancellations on migrated
+policies, edits to migrated records since the lock, the daily checks (trial balance, sub-ledgers against their control
+accounts, yesterday's SAP GL file, numbering above the legacy numbers, lock on), imports refused while locked, unlocks
+and relocks, and the open defects of the production run. The Overview tab (`GET /api/data-load/overview`) shows the
+phases, the current run and what waits for the user.
+
 ## Load history and the transaction reset
 
 The transaction reset keeps the load history (`data_load_batches`, `data_load_rows`, `data_load_comparisons`) as the
@@ -579,8 +657,8 @@ evidence of the mock runs: the loaded migration batches, whose records the reset
 `undone` with the reason "transaction reset" (`scripts/lib/table-classification.js`, action `mark-reset`). Batch
 statuses also include the approval and undo states of the Data Migration & Go-Live workspace (`pending-approval`,
 `rejected`, `withdrawn`, `expired`, `running`, `validating`, `undo-pending`, `undoing`, `undone`). The reconciliations
-with their lines, differences and sign-offs are kept too; the requests of the SAP opening file go with the journals the
-reset removes.
+with their lines, differences and sign-offs, the runs with their checklists, defects, decisions and evidence files are
+kept too; the requests of the SAP opening file go with the journals the reset removes.
 
 ## Go-live rehearsal
 

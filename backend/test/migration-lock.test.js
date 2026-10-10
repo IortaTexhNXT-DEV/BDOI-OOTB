@@ -266,6 +266,9 @@ describe('route inventory', () => {
     'POST /data-load/golive/sap-opening-file/approve': 'sends the opening balances to SAP once, loads nothing into BrokerVerse',
     'POST /data-load/golive/sap-opening-file/reject': 'a decision that loads nothing',
     'POST /data-load/golive/sap-opening-file/withdraw': 'withdraws a request: loads nothing',
+    'POST /data-load/runs/:id/cancel': 'the record of a run, no business record',
+    'POST /data-load/evidence': 'evidence file of a run, no business record',
+    'POST /data-load/decisions': 'the Go / No-Go decision, no business record',
   };
 
   it('every import-like route is guarded by the lock or listed as exempt with a reason', () => {
