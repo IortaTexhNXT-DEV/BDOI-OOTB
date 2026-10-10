@@ -400,17 +400,7 @@ Each quotation, request for quotation and placement slip shows its journey as a 
 
 ## What the system posts
 
-Every journal is built from the posting rule of its business event (Master > Finance > Posting Rules); **Accounting Flow** shows, for each event, the screen that triggers it, the approval before it posts and the accounts it debits and credits. The main events of the cycle:
-
-| Event | Journal (summary) |
-|---|---|
-| Policy issued, broker billed | Dr Premiums Receivable at the gross premium; Cr Premiums Payable to Insurers (each insurer by its share), the premium VAT, DST and LGT due to insurers, and Brokerage Commission Income. |
-| Policy issued, direct bill | Dr Commission Receivable from the insurer; Cr Brokerage Commission Income and Output VAT. No premium bill. |
-| Official receipt | Dr Cash in Bank (or the account of the receipt mode); Cr Premiums Receivable. |
-| Remittance settlement paid | Dr Premiums Payable to Insurers; Cr Cash in Bank. |
-| Commission approved and paid | Dr Commission Expense; Cr Commission Payable; at payout Dr Commission Payable; Cr Cash in Bank and Withholding Tax Payable. |
-| Endorsement | Additional premium: as a new bill. Return premium: the reverse, and the refund due from each insurer when the premium was already remitted. |
-| Debit note collected | Dr Cash in Bank and Creditable Withholding Tax (BIR Form 2307); Cr Commission Receivable. |
+Every journal is built from the posting rule of its business event (Master > Finance > Posting Rules). **Accounting Flow** (Master > Finance) is the accounting reference of these entries: for every event, grouped by module, when it posts, the approval before posting and its debit and credit lines with the accounts in force today. It is built from the rules and accounts in force, so it is always current; export it as the **Accounting Entries Handbook** (PDF) for Finance sign-off, or to Excel for audit.
 
 Each payable and commission line carries the insurer, so the remittance, the Co-insurance Register and the Due to Insurers by Co-insurer report show each insurer's part. A rounding difference of a share split goes to the lead insurer.
 
@@ -2603,7 +2593,16 @@ Posting rule versions, their activation and account determination changes wait o
 
 ![Master > Finance > Account Determination](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-acct-det.png)
 
-**Accounting Flow** shows, for each operational event, what it posts, read from the posting rules in force: the screen or action that triggers it, the approval before it posts, whether its journal is **Parked for approval** or **Posted at once**, and the accounts it debits and credits. **Open the rule** opens the posting rule.
+**Accounting Flow** is the Finance accounting reference: the journal each business event posts, read from the posting rules and accounts in force. It is read only; rules change on Posting Rules and accounts on Account Determination, both through Configuration Approvals.
+
+- Under the title: the date of the rules in force and the **edition** of the configuration (it changes whenever a rule or an account changes and is printed on the exports, so a signed handbook can be matched to the configuration), the **Account mapping** status (Ready, or Incomplete with the accounts Finance still has to confirm) and the number of **changes pending approval**.
+- **Contents** on the left lists the modules in the order of the accounting cycle (premium billing, collections, remittance to insurers, direct-bill commission, overriding commission, agent and referrer commission, incentives, claims, payments and payables, petty cash, sales invoices, write-offs, fixed assets, other system journals); click an event to go to it. A dot marks an event with an account to map or a change waiting for approval.
+- Filter with the search box (event, account code or name, amount), **Module**, **Account** (the events that post to an account) and **Mapping pending only**. The filters stay in the address, so the link can be shared.
+- Each event shows **When** it posts, **Where** (the screen, a link when you can open it), the **Approval before posting**, the **Approval limit** of the Authority Matrix where the approval checks one, and **Last posted**. Its chips say whether the journal is **Posted at once**, **Waits for approval** (posted when another user approves it in Journal Voucher) or **Saved as pending**, and show a **Change pending approval**, a **New rule from** a later date or **Mapping pending**.
+- The entries list the debits, then the credits: the account and where it comes from, the amount in business words (the info icon gives the formula of a derived amount; **For each insurer** marks a line posted per insurer of a co-insured policy) and the notes: a line that posts only when a setting is on, **Mapping pending** with **Map the account** (an account that is provisional, such as 210245, or outside the TISPH chart), **Account inactive**, **Account change pending**.
+- **Example** shows the journal of the event for sample amounts, for a single insurer or two insurers (60 / 40); nothing is posted.
+- **Export** gives the **Accounting reference (Excel)** (entries, events, accounts pending mapping, examples) and the **Accounting entries handbook (PDF)**, with a sign-off block (Prepared by, Reviewed by, Approved by). **Print** prints the page as filtered.
+- Finance administrators also see **Open the rule** (opens the event on Posting Rules) and, under **Technical details**, the rule code, version, lines and settings of the event.
 
 The events whose journals are parked are listed in the setting `accounting.parked_events` (Master > Configuration, group accounting). A parked journal waits on Accounts > Journal Voucher (tick **System journals parked for approval**) and in My Work > Approvals until a user other than the one whose action created it approves it, which posts it. It cannot be rejected on its own: cancel its source document (the collection, the invoice, the payment), which cancels the journal. TISPH parks the collection of commission from an insurer, the service invoice and its payment, and the payment of supplier invoices. Premium bookings, collections applied to bills, direct-bill commission, refunds due from insurers and write-offs always post at once, because the bill, the remittance or the matching that comes next reads them; the setting refuses them.
 
@@ -3025,7 +3024,7 @@ See the chapter Reports, dashboards, schedules and notifications.
 | Account Determination | GL account per account role, payable per payee type, cash account per payment mode, commission taxes, write-off reasons. |
 | Posting Rules | The journal rule of each business event; simulate, version, history. |
 | Configuration Approvals | Pending posting configuration changes for a second user. |
-| Accounting Flow | What each event posts, from the rules in force. |
+| Accounting Flow | The accounting reference: what each event posts, from the rules and accounts in force; Excel and the Accounting Entries Handbook. |
 | Package Bundles | Packages sold under one master policy (sections with their own insurer): code, bundle, customer segment, sections, bundle discount, default sum insured; **Add bundle**. |
 | Insurer Rate Tables | Each insurer's rates for package products: product, insurer, rate basis, rate, minimum premium, deductible, key benefits, commission, effective dates; used by Package Bundles; **Add rate**. |
 | Premium Taxes & LGU Rates | VAT or premium tax, DST, FST and the local government tax per city or municipality (code, city, province, rate, effective dates); tabs Local government tax, Tax and charge rules, Calculator; **Add city / municipality**. |
