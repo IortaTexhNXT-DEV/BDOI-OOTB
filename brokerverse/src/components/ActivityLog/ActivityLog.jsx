@@ -7,8 +7,9 @@
  *   <ActivityLog entries={entries} loading={loading} error={error} onRetry={reload} />
  *   <RecordActivityLog entity="journal_voucher" recordId={voucher.id} />   // loads GET /audit/records/:entity/:id
  *
- * Entries: { id, at, actionCode, actionLabel?, user: { displayName, username, role }, fromStatus, toStatus, remarks,
- * changes: [{ field, label, before, after }], source }; ./adapters makes them from the API's history rows.
+ * Entries: { id, at, seq?, actionCode, actionLabel?, user: { displayName, username, role }, fromStatus, toStatus, remarks,
+ * changes: [{ field, label, before, after }], source }; ./adapters makes them from the API's history rows. `seq` orders
+ * entries made at the same moment (created before approved); without it they keep the order given.
  */
 import React, { useId, useMemo, useState } from "react";
 import PropTypes from "prop-types";
@@ -35,11 +36,17 @@ const timeOf = (e) => {
   return Number.isNaN(ms) ? null : ms;
 };
 
+// entries made at the same moment: in the order the steps happen (seq) when known, else as given
+const tie = (a, b, order) => {
+  if (a.e.seq === undefined || a.e.seq === null || b.e.seq === undefined || b.e.seq === null) return a.i - b.i;
+  return order === "asc" ? a.e.seq - b.e.seq : b.e.seq - a.e.seq;
+};
+
 /** Entries in order (newest first unless `order` is "asc"), grouped by business day. */
 export const groupByDay = (entries, order = "desc") => {
   const sorted = (entries || [])
     .map((e, i) => ({ e, i, ms: timeOf(e) }))
-    .sort((a, b) => (a.ms === null || b.ms === null ? a.i - b.i : (order === "asc" ? a.ms - b.ms : b.ms - a.ms) || a.i - b.i))
+    .sort((a, b) => (a.ms === null || b.ms === null ? a.i - b.i : (order === "asc" ? a.ms - b.ms : b.ms - a.ms) || tie(a, b, order)))
     .map(({ e }) => ({ ...e, when: whenOf(e) }));
   const days = [];
   sorted.forEach((e) => {
@@ -67,8 +74,9 @@ const Value = ({ value, masked }) => {
 Value.propTypes = { value: PropTypes.any, masked: PropTypes.bool };
 Value.defaultProps = { value: null, masked: false };
 
+// an action taken on the application's own screens is the usual case and is not labelled
 const sourceText = (source) => {
-  if (!source) return null;
+  if (!source || source.channel === "application") return null;
   return source.channel === "screen" && source.name ? source.name : source.label || source.name || null;
 };
 
@@ -141,6 +149,7 @@ const ActivityEntry = ({ entry, expanded }) => {
 const entryShape = PropTypes.shape({
   id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   at: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+  seq: PropTypes.number,
   actionCode: PropTypes.string,
   actionLabel: PropTypes.string,
   user: PropTypes.shape({ displayName: PropTypes.string, username: PropTypes.string, role: PropTypes.string, roles: PropTypes.arrayOf(PropTypes.string) }),

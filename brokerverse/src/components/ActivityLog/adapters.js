@@ -1,6 +1,6 @@
 /**
  * The history rows of the API, as each endpoint returns them, turned into ActivityLog entries:
- *   { id, at, actionCode, actionLabel, user: { displayName, username, role }, fromStatus, toStatus, remarks,
+ *   { id, at, seq, actionCode, actionLabel, user: { displayName, username, role }, fromStatus, toStatus, remarks,
  *     changes: [{ field, label, before, after, masked }], source }
  * Screens pass their rows as they are: <ActivityLog entries={fromRemittanceActivity(details.activityLog)} />.
  */
@@ -23,10 +23,10 @@ const userOf = (displayName, username, roles) => {
 };
 
 /** One entry with the defaults: no status line when the status did not move, no changes list when there is none. */
-export const toEntry = ({ id, at = null, day, date, time, actionCode = null, actionLabel = null, user = null, fromStatus = null, toStatus = null, remarks = null, changes = [], source = null }, index = 0) => {
+export const toEntry = ({ id, at = null, seq = null, day, date, time, actionCode = null, actionLabel = null, user = null, fromStatus = null, toStatus = null, remarks = null, changes = [], source = null }, index = 0) => {
   const moved = (fromStatus || toStatus) && fromStatus !== toStatus;
   return {
-    id: id ?? `${actionCode || "entry"}-${at || index}`, at, day, date, time, actionCode, actionLabel, user: user || userOf(), fromStatus: moved ? fromStatus : null,
+    id: id ?? `${actionCode || "entry"}-${at || index}`, at, seq, day, date, time, actionCode, actionLabel, user: user || userOf(), fromStatus: moved ? fromStatus : null,
     toStatus: moved ? toStatus : null, remarks: remarks || null, changes: (changes || []).filter(Boolean), source,
   };
 };
@@ -155,7 +155,7 @@ export const fromLifecycle = (record, steps = []) =>
     ? steps
       .filter((s) => record[s.at])
       .map((s, i) => toEntry({
-        id: `${s.action}-${i}`, at: record[s.at], actionCode: s.action, actionLabel: s.label || null, user: userOf(s.by ? record[s.by] : null),
+        id: `${s.action}-${i}`, at: record[s.at], seq: i, actionCode: s.action, actionLabel: s.label || null, user: userOf(s.by ? record[s.by] : null),
         toStatus: s.toStatus || null, remarks: s.remarks ? record[s.remarks] : null,
       }, i))
     : [];

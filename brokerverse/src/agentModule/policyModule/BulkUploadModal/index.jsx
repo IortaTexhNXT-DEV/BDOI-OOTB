@@ -144,11 +144,9 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
               />
             </div>
 
-            <div className="flex align-items-start gap-2 mb-3">
+            <div className="upload-option">
               <Checkbox inputId="policy-go-live" checked={goLive} onChange={(e) => setGoLive(e.checked)} disabled={loading} />
-              <label htmlFor="policy-go-live">
-                {t("bulkUploadPolicies.goLive")}
-              </label>
+              <label htmlFor="policy-go-live">{t("bulkUploadPolicies.goLive")}</label>
             </div>
 
             <div className="upload-area">

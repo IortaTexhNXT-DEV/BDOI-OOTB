@@ -12,6 +12,7 @@ import { MultiSelect } from "primereact/multiselect";
 import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
 import service from "../../services/distributionService";
+import auditService from "../../services/auditService";
 import mastersService from "../../services/mastersService";
 import addressService from "../../services/addressService";
 import useMasterOptions from "../../agentModule/component/useMasterOptions";
@@ -19,7 +20,7 @@ import { hasPermission } from "../../utils/canOpen";
 import { openConfirm } from "../../components/ConfirmDialog";
 import DetailDialog from "../../components/DetailDialog";
 import KeyValueGrid from "../../components/KeyValueGrid";
-import { ActivityLog, fromAssignmentHistory } from "../../components/ActivityLog";
+import { ActivityLog, fromAssignmentHistory, fromAuditEvents } from "../../components/ActivityLog";
 import { Field, PageHeader, StatusTag, dateTime, showError, showSuccess } from "./common";
 import { lobChoices, useProductLines } from "../Sales/salesProducts";
 import ReassignDialog from "./ReassignDialog";
@@ -222,8 +223,11 @@ const LeadAssignment = () => {
   const openHistory = async (lead) => {
     setHistory({ lead, entries: [], loading: true, error: null });
     try {
-      const rows = await service.assignmentHistory(lead.id);
-      setHistory({ lead, entries: fromAssignmentHistory(rows), loading: false, error: null });
+      // the assignment moves, with the prospect's own trail (created, assigned on capture) around them
+      const [rows, trail] = await Promise.all([service.assignmentHistory(lead.id), auditService.getRecordHistory("lead", lead.id).catch(() => ({ events: [] }))]);
+      const assignments = fromAssignmentHistory(rows);
+      const own = fromAuditEvents(trail.events).filter((e) => !(assignments.length && /assign/.test(e.actionCode || "")));
+      setHistory({ lead, entries: [...assignments, ...own], loading: false, error: null });
     } catch (e) {
       setHistory({ lead, entries: [], loading: false, error: e?.message || true });
     }

@@ -5848,7 +5848,10 @@
       "coInsurer": "ผู้ร่วมรับประกัน"
     },
     "compare": {
-      "leadIs": "ผู้รับประกันหลัก: {{lead}}"
+      "leadIs": "ผู้รับประกันหลัก: {{lead}}",
+      "deductiblesTerms": "ค่าเสียหายส่วนแรกและเงื่อนไข",
+      "selectFirst": "เลือกข้อเสนออย่างน้อยหนึ่งรายการเพื่อจัดทำสลิป",
+      "sharesMustTotal": "สัดส่วนที่เลือกรวม {{total}}% ต้องรวมเป็น 100%"
     },
     "addInsurer": {
       "invited": "บริษัทประกันที่เชิญแล้ว"
@@ -6573,7 +6576,7 @@
     "header": "Bulk upload policies",
     "instruction2": "Enter the policies in the file",
     "fileBeingProcessed": "The file is being processed. The policies are created as each row is read.",
-    "goLive": "Existing policies (go-live): in-force policies of the old system, created without a bill, journal or commission. Their unpaid premiums are loaded with Import open items (Accounts > Collections)."
+    "goLive": "กรมธรรม์ที่มีผลบังคับอยู่แล้ว (นำเข้าเมื่อเริ่มใช้ระบบ: ไม่สร้างใบแจ้งหนี้ บัญชี หรือคอมมิชชั่น)"
   },
   "creditControl": {
     "confirmations": {
