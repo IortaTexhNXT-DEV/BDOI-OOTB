@@ -17,6 +17,7 @@ import { buildPdf, sendPdf } from '../documents/pdf.js';
 import { placingSlipDoc, printablePolicy } from '../documents/templates.js';
 import { ownRecord, withScope } from '../../lib/scope.js';
 import * as svc from './service.js';
+import { TRANSITIONS, availableMoves, movePolicy } from './lifecycle.js';
 
 const { router, define } = moduleRouter('Policies', '/policies');
 const SCREEN = 'Operations > Policy';
@@ -149,6 +150,24 @@ define({
     const { before, after } = await svc.updatePolicy(req.params.id, req.body, actor(req));
     await audit(req, { entity: 'policy', entityId: after.id, action: 'update', before: out(before), after: out(after) });
     sendEntity(res, out(after), { message: 'Policy updated' });
+  },
+});
+define({
+  method: 'GET', path: '/:id/moves', summary: 'The lifecycle moves available on the policy (suspended, reinstated, lapsed) and the reason context of each', screen: `${SCREEN} > Policy detail`,
+  middleware: [...canRead, ownRecord('policy')], response: { success: true, data: { status: 'active', moves: [{ status: 'suspended', context: 'policy_suspend' }, { status: 'lapsed', context: 'lapse' }] } },
+  handler: async (req, res) => {
+    const p = await svc.getPolicyRow(req.params.id);
+    res.json({ success: true, data: { status: p.status, moves: availableMoves(p.status).map((s) => ({ status: s, context: TRANSITIONS[s].context })) } });
+  },
+});
+define({
+  method: 'POST', path: '/:id/status', summary: 'Move the policy in its lifecycle: suspended (premium warranty, reason context policy_suspend), reinstated (policy_reinstate; back to active) or lapsed (lapse reasons); the move is guarded by the current status, carries the reason and is audited', screen: `${SCREEN} > Policy detail > Status`,
+  middleware: [...canWrite, ownRecord('policy'), validate(z.object({ status: z.enum(Object.keys(TRANSITIONS)), reasonCode: z.string().min(1).max(40), note: z.string().max(1000).nullable().optional() }).strict())],
+  request: { status: 'suspended', reasonCode: 'SUS-WARRANTY', note: 'Premium unpaid 60 days after inception' }, response: { ...example, status: 'Suspended', success: true },
+  handler: async (req, res) => {
+    const { before, after, reason, move } = await movePolicy(req.params.id, req.body, req.user);
+    await audit(req, { entity: 'policy', entityId: after.id, action: move, before: { status: before.status }, after: { status: after.status, reason: reason.code, remarks: reason.text } });
+    sendEntity(res, out(after), { message: `Policy ${after.status}` });
   },
 });
 define({

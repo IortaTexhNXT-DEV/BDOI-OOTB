@@ -110,6 +110,26 @@ class PolicyService {
     }
   }
 
+  /** The lifecycle moves available on a policy (suspended, reinstated, lapsed) with their reason context. */
+  async getPolicyMoves(policyId) {
+    const response = await fetch(`${this.baseURL}/policies/${policyId}/moves`, { headers: this.getAuthHeader() });
+    const json = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(json.message || `Request failed (${response.status})`);
+    return json.data || { status: null, moves: [] };
+  }
+
+  /** Move a policy in its lifecycle: { status, reasonCode, note }. */
+  async movePolicy(policyId, payload) {
+    const response = await fetch(`${this.baseURL}/policies/${policyId}/status`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...this.getAuthHeader() },
+      body: JSON.stringify(payload),
+    });
+    const json = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(json.message || `Request failed (${response.status})`);
+    return json;
+  }
+
   async updatePolicy(policyId, payload = {}) {
     if (!policyId) {
       return {

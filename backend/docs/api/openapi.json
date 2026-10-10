@@ -273,6 +273,9 @@
       "name": "Security Controls"
     },
     {
+      "name": "Service Levels"
+    },
+    {
       "name": "System"
     },
     {
@@ -111439,6 +111442,94 @@
         ]
       }
     },
+    "/policies/{id}/moves": {
+      "get": {
+        "operationId": "getPoliciesIdMoves",
+        "summary": "The lifecycle moves available on the policy (suspended, reinstated, lapsed) and the reason context of each",
+        "tags": [
+          "Policies"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Policy detail\n\nAccess: read:policies",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string"
+                        },
+                        "moves": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string"
+                              },
+                              "context": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "status": "active",
+                    "moves": [
+                      {
+                        "status": "suspended",
+                        "context": "policy_suspend"
+                      },
+                      {
+                        "status": "lapsed",
+                        "context": "lapse"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Policy detail",
+        "x-permissions": [
+          "read:policies"
+        ]
+      }
+    },
     "/policies/{id}/payment-status": {
       "patch": {
         "operationId": "patchPoliciesIdPaymentStatus",
@@ -112165,6 +112256,129 @@
               },
               "example": {
                 "reason": "No matching credit in the bank statement"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/policies/{id}/status": {
+      "post": {
+        "operationId": "postPoliciesIdStatus",
+        "summary": "Move the policy in its lifecycle: suspended (premium warranty, reason context policy_suspend), reinstated (policy_reinstate; back to active) or lapsed (lapse reasons); the move is guarded by the current status, carries the reason and is audited",
+        "tags": [
+          "Policies"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Policy detail > Status\n\nAccess: write:policies",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "policyId": {
+                      "type": "string"
+                    },
+                    "policyNumber": {
+                      "type": "string"
+                    },
+                    "clientId": {
+                      "type": "string"
+                    },
+                    "insuredName": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "paymentStatus": {
+                      "type": "string"
+                    },
+                    "inception": {
+                      "type": "string"
+                    },
+                    "expiry": {
+                      "type": "string"
+                    },
+                    "grossPremium": {
+                      "type": "number"
+                    },
+                    "billNumber": {
+                      "type": "string"
+                    },
+                    "quoteRefId": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "policyId": "pol_1",
+                  "policyNumber": "POL-2026-00001",
+                  "clientId": "cl_1",
+                  "insuredName": "Juan Dela Cruz",
+                  "status": "Suspended",
+                  "paymentStatus": "Pending",
+                  "inception": "2026-10-01",
+                  "expiry": "2027-10-01",
+                  "grossPremium": 23171.25,
+                  "billNumber": "INV-2026-00001",
+                  "quoteRefId": "qt_1",
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Policy detail > Status",
+        "x-permissions": [
+          "write:policies"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  },
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "status": "suspended",
+                "reasonCode": "SUS-WARRANTY",
+                "note": "Premium unpaid 60 days after inception"
               }
             }
           }
@@ -164362,6 +164576,415 @@
             }
           }
         }
+      }
+    },
+    "/service-levels": {
+      "get": {
+        "operationId": "getServiceLevels",
+        "summary": "The service level register (filters: document, active) with the count of open and breached clocks",
+        "tags": [
+          "Service Levels"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Service Levels\n\nAccess: read:settings, write:settings",
+        "parameters": [
+          {
+            "name": "document",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "placement"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "document": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "targetHours": {
+                            "type": "integer"
+                          },
+                          "workingTime": {
+                            "type": "boolean"
+                          },
+                          "escalateToRoles": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "active": {
+                            "type": "boolean"
+                          },
+                          "monitored": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    },
+                    "summary": {
+                      "type": "object",
+                      "properties": {
+                        "open": {
+                          "type": "integer"
+                        },
+                        "breached": {
+                          "type": "integer"
+                        },
+                        "dueSoon": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "code": "POL-PLACED",
+                      "document": "placement",
+                      "name": "Insurer issues the policy",
+                      "targetHours": 16,
+                      "workingTime": true,
+                      "escalateToRoles": [
+                        "tis-ops-unit-head"
+                      ],
+                      "active": true,
+                      "monitored": true
+                    }
+                  ],
+                  "summary": {
+                    "open": 12,
+                    "breached": 2,
+                    "dueSoon": 3
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Service Levels",
+        "x-permissions": [
+          "read:settings",
+          "write:settings"
+        ]
+      }
+    },
+    "/service-levels/{code}": {
+      "put": {
+        "operationId": "putServiceLevelsCode",
+        "summary": "Change a service level: name, description, target hours, working time, escalation roles, active; audited",
+        "tags": [
+          "Service Levels"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Service Levels > Edit\n\nAccess: write:settings",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "document": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "targetHours": {
+                          "type": "integer"
+                        },
+                        "workingTime": {
+                          "type": "boolean"
+                        },
+                        "escalateToRoles": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "active": {
+                          "type": "boolean"
+                        },
+                        "monitored": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "code": "POL-PLACED",
+                    "document": "placement",
+                    "name": "Insurer issues the policy",
+                    "targetHours": 16,
+                    "workingTime": true,
+                    "escalateToRoles": [
+                      "tis-ops-unit-head"
+                    ],
+                    "active": true,
+                    "monitored": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Service Levels > Edit",
+        "x-permissions": [
+          "write:settings"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "targetHours": {
+                    "type": "integer"
+                  },
+                  "workingTime": {
+                    "type": "boolean"
+                  },
+                  "escalateToRoles": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "targetHours": 16,
+                "workingTime": true,
+                "escalateToRoles": [
+                  "tis-ops-unit-head"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/service-levels/clocks": {
+      "get": {
+        "operationId": "getServiceLevelsClocks",
+        "summary": "The open service level clocks (filters: targetCode, ownerId, breached, limit), breaches first",
+        "tags": [
+          "Service Levels"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Service Levels > Open items\n\nAccess: read:settings, write:settings",
+        "parameters": [
+          {
+            "name": "targetCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "POL-PLACED"
+          },
+          {
+            "name": "breached",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "true"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "targetCode": {
+                            "type": "string"
+                          },
+                          "ref": {
+                            "type": "string"
+                          },
+                          "dueAt": {
+                            "type": "string"
+                          },
+                          "breachedAt": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "targetCode": "POL-PLACED",
+                      "ref": "PS-2026-00012",
+                      "dueAt": "2026-10-12T08:00:00Z",
+                      "breachedAt": null
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Service Levels > Open items",
+        "x-permissions": [
+          "read:settings",
+          "write:settings"
+        ]
+      }
+    },
+    "/service-levels/run": {
+      "post": {
+        "operationId": "postServiceLevelsRun",
+        "summary": "Run the service level monitor now (the sla-monitor job): opens, closes, marks and escalates the clocks",
+        "tags": [
+          "Service Levels"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Service Levels\n\nAccess: write:settings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "opened": {
+                          "type": "integer"
+                        },
+                        "closed": {
+                          "type": "integer"
+                        },
+                        "breached": {
+                          "type": "integer"
+                        },
+                        "escalated": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "opened": 3,
+                    "closed": 1,
+                    "breached": 1,
+                    "escalated": 1
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Service Levels",
+        "x-permissions": [
+          "write:settings"
+        ]
       }
     },
     "/version": {

@@ -4702,7 +4702,21 @@
     "print": "Print",
     "close": "Close",
     "download": "Download",
-    "noVehicleDetails": "No vehicle details recorded"
+    "noVehicleDetails": "No vehicle details recorded",
+    "suspend": "Suspend",
+    "reinstate": "Reinstate",
+    "lapse": "Lapse",
+    "moveTitle": {
+      "suspended": "Suspend policy {{number}}",
+      "reinstated": "Reinstate policy {{number}}",
+      "lapsed": "Lapse policy {{number}}"
+    },
+    "moveMessage": {
+      "suspended": "The policy is suspended under its premium warranty; cover is on hold until it is reinstated.",
+      "reinstated": "The policy returns to active with its original dates.",
+      "lapsed": "The policy is lapsed and leaves the renewal pipeline."
+    },
+    "moveDone": "Policy {{status}}"
   },
   "uploadPolicy": {
     "title": "Prospects",
@@ -12252,7 +12266,8 @@
       "periodClose": "Period close",
       "access": "Users and access",
       "systems": "System health",
-      "tasks": "Tasks"
+      "tasks": "Tasks",
+      "sla": "Service levels"
     },
     "priority": {
       "urgent": "Urgent",
@@ -15014,7 +15029,9 @@
       "sod_exception": "Segregation of duties exception",
       "access_review": "Access review removal",
       "feature_change": "Feature change (platform)",
-      "feature_reject": "Feature change rejected (platform)"
+      "feature_reject": "Feature change rejected (platform)",
+      "policy_suspend": "Policy suspension",
+      "policy_reinstate": "Policy reinstatement"
     }
   },
   "financialStatements": {
@@ -16121,6 +16138,60 @@
       "result": "Result",
       "reference": "Reference",
       "remarks": "Remarks"
+    }
+  },
+  "serviceLevels": {
+    "title": "Service Levels",
+    "help": "The turnaround of every status a document waits in, in working time by the holiday calendar or in calendar time, and the roles told when it is breached. The open items are timed against the register.",
+    "runNow": "Run monitor",
+    "runDone": "Monitor run: {{opened}} opened, {{closed}} closed, {{breached}} breached, {{escalated}} escalated",
+    "statOpen": "Open items",
+    "statDueSoon": "Due within 8 hours",
+    "statBreached": "Breached",
+    "tabs": {
+      "register": "Register",
+      "clocks": "Open items ({{count}})"
+    },
+    "allDocuments": "All documents",
+    "empty": "No service levels match the filter",
+    "noClocks": "No open items",
+    "columns": {
+      "name": "Service level",
+      "document": "Document",
+      "target": "Turnaround",
+      "escalation": "Escalated to",
+      "monitored": "Clock",
+      "status": "Status",
+      "item": "Item",
+      "client": "Client",
+      "owner": "Owner",
+      "started": "Started",
+      "due": "Due",
+      "breached": "Breached"
+    },
+    "workingHours": "{{count}} working hours",
+    "calendarHours": "{{count}} hours",
+    "monitored": "Timed",
+    "register": "Register only",
+    "breachedOnly": "Breached only",
+    "breached": "Breached",
+    "running": "Running",
+    "documents": {
+      "lead": "Prospect",
+      "quotation": "Quotation",
+      "placement": "Placement slip",
+      "policy": "Policy",
+      "endorsement": "Endorsement",
+      "cancellation": "Cancellation",
+      "claim": "Claim",
+      "renewal": "Renewal"
+    },
+    "editTitle": "Edit service level: {{name}}",
+    "saved": "Service level saved",
+    "form": {
+      "targetHours": "Turnaround (hours)",
+      "workingTime": "Working time",
+      "escalateTo": "Escalate to"
     }
   }
 }

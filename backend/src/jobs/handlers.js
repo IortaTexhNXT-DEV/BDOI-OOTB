@@ -12,8 +12,7 @@ const tableExists = async (t) => !!(await one('SELECT 1 FROM information_schema.
 
 export async function policyExpiry() {
   if (!(await tableExists('policies'))) return { skipped: 'policies table missing' };
-  const r = await query('UPDATE policies SET status = \'expired\' WHERE status IN (\'active\',\'issued\') AND expiry_date < $1::date', [await today()]);
-  return { expired: r.rowCount };
+  return (await import('../modules/policies/lifecycle.js')).expirePolicies();
 }
 export async function quoteExpiry() {
   if (!(await tableExists('quotes'))) return { skipped: 'quotes table missing' };
@@ -82,6 +81,8 @@ export const myWorkReminders = async () => {
 export { housekeeping } from './housekeeping.js';
 // Data retention: flag the closed contracts past their retention period, anonymise when configured (monthly)
 export { dataRetention } from './retention.js';
+// Service levels: the clocks of the open items against the service level register, with escalation on breach
+export { slaMonitor } from '../lib/sla.js';
 
 /** Deactivate accounts nobody has signed in to for access.dormant_days (Master > User Management). */
 export const dormantUsers = async () => {

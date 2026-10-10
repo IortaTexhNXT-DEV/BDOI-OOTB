@@ -144,7 +144,7 @@ the title shows your role, today's date and the company.
 | Part | What it shows |
 |---|---|
 | **Overdue**, **Due today**, **Next 7 days**, **Open items**, **Open tasks** | The number of your items in each group. Select a figure to filter the list. |
-| **My Items** | Every open item you own or may act on, by category on the left: Quotations, Requests for quotation, Placement slips, Renewals, Premiums due, Collection follow-ups, Endorsements, Claims, Approvals, Missing documents and Tasks, and for finance and IT roles Bank reconciliations, Period close, Users and access and System health. You see only the categories your role may read. The red badge is the number overdue. |
+| **My Items** | Every open item you own or may act on, by category on the left: Quotations, Requests for quotation, Placement slips, Renewals, Premiums due, Collection follow-ups, Endorsements, Claims, Approvals, Missing documents, Service levels (your items timed against the service level register, with the deadline and the breaches first) and Tasks, and for finance and IT roles Bank reconciliations, Period close, Users and access and System health. You see only the categories your role may read. The red badge is the number overdue. |
 | **My Team** | Shown only to a user to whom other employees report: one row per person with open, overdue and due-today counts, and **Reassign** to move an item to yourself or to someone in the team. |
 | **My Tasks** | Your work diary: tasks you created, tasks given to you and tasks you gave to others. |
 | **Calendar** | Your tasks and items by due date, for one day or a week, with the overdue ones above. |

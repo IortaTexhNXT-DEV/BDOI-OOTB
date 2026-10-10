@@ -97,5 +97,12 @@
     "description": "Flag the closed contracts past their retention period (five years for a closed contract, ten with a claim; Master > Configuration, Data retention) and, when the retention action is anonymise, replace the personal data of the clients whose every contract is past its period",
     "cron": "30 3 1 * *",
     "handler": "dataRetention"
+  },
+  {
+    "code": "sla-monitor",
+    "name": "Service level monitor",
+    "description": "Keep the service level clocks of the open items (Master > System Configuration > Service Levels): open a clock when an item enters a status, close it when the item moves on, mark the breaches and escalate each breach once to the roles of the service level",
+    "cron": "*/30 * * * *",
+    "handler": "slaMonitor"
   }
 ]

@@ -1420,6 +1420,13 @@ export const menuList = [
             includes: ["/master/configuration/audit-trail"],
           },
           {
+            // turnaround per status of the documents, in working time, with escalation on breach
+            id: 43,
+            name: "Service Levels",
+            path: "/master/configuration/service-levels",
+            includes: ["/master/configuration/service-levels"],
+          },
+          {
             // the security, data-protection and operational controls of the BRD with their state and evidence
             id: 42,
             name: "Security Controls",

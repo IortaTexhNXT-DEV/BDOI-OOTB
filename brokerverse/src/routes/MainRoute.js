@@ -72,6 +72,7 @@ import DocumentSignaturesPage from "../module/DocumentLayouts/DocumentSignatures
 import ConfigurationPage from "../module/Administration/Configuration";
 import SchedulesPage from "../module/Administration/Schedules";
 import SecurityControlsPage from "../module/Administration/SecurityControls";
+import ServiceLevelsPage from "../module/Administration/ServiceLevels";
 import DocumentNumberingPage from "../module/Administration/DocumentNumbering";
 import CommissionRateMatrix from "../module/FinanceMastersModule/CommissionRateMatrix";
 import AuditTrailPage from "../module/Administration/AuditTrail";
@@ -886,6 +887,7 @@ const Maincomponent = () => {
           <Route path="master/configuration/settings" element={<ConfigurationPage />} />
           <Route path="master/configuration/schedules" element={<SchedulesPage />} />
           <Route path="master/configuration/security-controls" element={<SecurityControlsPage />} />
+          <Route path="master/configuration/service-levels" element={<ServiceLevelsPage />} />
           <Route path="master/configuration/document-numbering" element={<DocumentNumberingPage />} />
           <Route path="master/finance/commission-rate-matrix" element={<CommissionRateMatrix />} />
           <Route path="master/configuration/audit-trail" element={<AuditTrailPage />} />

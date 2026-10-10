@@ -324,6 +324,14 @@ Master > System > Audit Trail shows every change made in the system: **Date & Ti
 
 ![Master > System > Audit Trail](images/screens-master/audit-trail.png)
 
+## Service Levels {#service-levels}
+
+{{screen:/master/configuration/service-levels}}
+
+Master > System Configuration > Service Levels holds the turnaround of every status a document waits in: the prospect first contact, the quotation despatch, the placement steps (verify KYC and payment, approve and send, insurer issues, e-policy checked and booked), the endorsement and cancellation steps and the claim handling. Each line shows the **Document**, the **Turnaround** in working hours (by the working week and the Holiday master) or in calendar hours, the roles **Escalated to** on a breach, whether a **Clock** is kept for it and its **Status**. The pencil changes the turnaround, the working-time switch, the escalation roles and the active flag.
+
+**Open items** lists the items timed against the register with **Started**, **Due** and **Running** or **Breached**; the figures above count the open, due within 8 hours and breached items. The monitor runs every 30 minutes (**Run monitor** runs it now): it opens a clock when an item enters a status, closes it when the item moves on, marks the breach and tells the escalation roles and the owner once. The owner sees the items under **Service levels** on My Work.
+
 ## Security Controls {#security-controls}
 
 {{screen:/master/configuration/security-controls}}

@@ -332,6 +332,10 @@ The policy page shows the cards **Gross Premium**, **Expiry Date** and **Client 
 
 ![The policy page, with Documents & Billing](images/screens-operations/policy-details.png)
 
+### Policy status {#policy-status}
+
+A booked policy is **Active**. It becomes **Expired** on the night after its expiry date (each expiry is recorded in the policy's history), **Cancelled** by a completed cancellation endorsement and **Renewed** when its renewal term is booked. Between those, the policy page offers the moves of the policy's lifecycle to a user who may change policies: **Suspend** (the premium warranty is breached or a payment is dishonoured; cover is on hold), **Reinstate** (a suspended or lapsed policy returns to **Active**) and **Lapse** (the policy leaves the renewal pipeline). Each move asks for a reason from the Reason Codes master and a note where the reason needs one, and is recorded in the policy's **History** with the user and the time.
+
 ### Raise an endorsement request {#raise-an-endorsement-request}
 
 1. Choose {{menu:/agent/policy}}.

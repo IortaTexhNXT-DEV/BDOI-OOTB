@@ -31,6 +31,8 @@ import { formatDate as formatConfiguredDate } from "../../../utility/dateFormat"
 import logger from "../../../utility/logger";
 import NextStep from "../../../components/NextStep";
 import { hasPermission } from "../../../utils/canOpen";
+import { openConfirm } from "../../../components/ConfirmDialog";
+import policyService from "../../../services/policyService";
 import { printPdf } from "../../../components/Print";
 
 /**
@@ -434,6 +436,28 @@ const PolicyDetailView = () => {
       dispatch(policyDetailsDataMiddleWare({ policyId }));
     }
   }, [policyId, dispatch]);
+
+  // the lifecycle moves of the policy (suspend under the premium warranty, reinstate, lapse), each with a coded reason
+  const [moves, setMoves] = useState([]);
+  useEffect(() => {
+    if (!policyId || !hasPermission("write:policies")) return;
+    policyService.getPolicyMoves(policyId).then((m) => setMoves(m.moves || [])).catch(() => setMoves([]));
+  }, [policyId, rawPolicyData?.status]);
+  const movePolicy = async (move) => {
+    const number = rawPolicyData?.policyNumber || policyId;
+    await openConfirm({
+      title: t(`policyDetail.moveTitle.${move.status}`, { number }),
+      message: t(`policyDetail.moveMessage.${move.status}`),
+      severity: move.status === "reinstated" ? "neutral" : "warning",
+      facts: [{ label: t("policyDetail.status"), value: rawPolicyData?.status }],
+      reason: { context: move.context },
+      confirmLabel: t(`policyDetail.${move.status === "suspended" ? "suspend" : move.status === "reinstated" ? "reinstate" : "lapse"}`),
+      onConfirm: async (reason) => {
+        await policyService.movePolicy(policyId, { status: move.status, reasonCode: reason.reasonCode, note: reason.note || null });
+        dispatch(policyDetailsDataMiddleWare({ policyId }));
+      },
+    });
+  };
 
   useEffect(() => {
     if (!hasPermission("write:renewals") && !hasPermission("write:quotations")) return;
@@ -1664,6 +1688,15 @@ const PolicyDetailView = () => {
             />
           </div>
           <div className="header-actions">
+            {moves.map((move) => (
+              <Button
+                key={move.status}
+                label={t(`policyDetail.${move.status === "suspended" ? "suspend" : move.status === "reinstated" ? "reinstate" : "lapse"}`)}
+                icon={move.status === "reinstated" ? "pi pi-replay" : "pi pi-pause"}
+                onClick={() => movePolicy(move)}
+                className="p-button-outlined"
+              />
+            ))}
             {isRenewable() && (
               <Button
                 label={t("policyDetail.renew")}

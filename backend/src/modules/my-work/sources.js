@@ -40,6 +40,8 @@ export const CATEGORIES = [
   { code: 'access', label: 'Users and access', icon: 'pi pi-users', permission: 'read:users' },
   { code: 'systems', label: 'System health', icon: 'pi pi-server', permission: 'write:schedules' },
   { code: 'tasks', label: 'Tasks', icon: 'pi pi-calendar', permission: null },
+  // the open items against the service level register (sla_clocks, kept by the sla-monitor job)
+  { code: 'sla', label: 'Service levels', icon: 'pi pi-stopwatch', permission: null },
 ];
 export const CATEGORY_CODES = CATEGORIES.map((c) => c.code);
 
@@ -497,7 +499,19 @@ function tasks(ctx) {
   })} FROM work_tasks t WHERE t.status = 'open'${own}`;
 }
 
-const BUILDERS = { quotes, rfq, placements, renewals, receivables, collections, endorsements, claims, approvals, documents, bankrec, periodClose, access, systems, tasks };
+/** Service level clocks of the open items: due on the deadline day, urgent once breached (the owner follows up; the escalation roles are notified by the job). */
+async function sla(ctx) {
+  if (!(await exists(ctx, 'sla_clocks'))) return null;
+  return `SELECT ${select({
+    category: "'sla'", kind: 'st.name', id: 'sc.id::text', ref: 'sc.ref', title: "COALESCE(sc.title, st.document) || ' - ' || st.name", client_name: 'sc.client_name',
+    due_date: localDate(ctx, 'sc.due_at'), status: "CASE WHEN sc.breached_at IS NOT NULL THEN 'breached' ELSE 'running' END",
+    next_action: "CASE WHEN sc.breached_at IS NOT NULL THEN 'Service level breached: complete the step' ELSE 'Complete the step within the service level' END",
+    priority: "CASE WHEN sc.breached_at IS NOT NULL THEN 'urgent' WHEN sc.due_at < now() + interval '8 hours' THEN 'high' ELSE 'normal' END",
+    owner_id: 'sc.owner_id', link: 'sc.link', created_at: 'sc.started_at',
+  })} FROM sla_clocks sc JOIN sla_targets st ON st.code = sc.target_code WHERE sc.closed_at IS NULL AND st.active`;
+}
+
+const BUILDERS = { quotes, rfq, placements, renewals, receivables, collections, endorsements, claims, approvals, documents, bankrec, periodClose, access, systems, tasks, sla };
 
 /** The categories the user may see (approvals and tasks: everyone; the rest by permission). */
 export const visibleCategories = (user) => CATEGORIES.filter((c) => !c.permission || hasPermission(user, c.permission));

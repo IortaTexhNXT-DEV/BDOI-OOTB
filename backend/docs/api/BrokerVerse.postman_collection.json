@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "2026.1.3",
-    "description": "BrokerVerse Platform API (1346 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1352 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -66820,6 +66820,71 @@
           ]
         },
         {
+          "name": "The lifecycle moves available on the policy (suspended, reinstated, lapsed) and the reason context of each",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/policies/:id/moves",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "policies",
+                ":id",
+                "moves"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "The lifecycle moves available on the policy (suspended, reinstated, lapsed) and the reason context of each\n\nFront-end touchpoint: Operations > Policy > Policy detail\n\nAccess: read:policies"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/policies/:id/moves",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "policies",
+                    ":id",
+                    "moves"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "The lifecycle moves available on the policy (suspended, reinstated, lapsed) and the reason context of each\n\nFront-end touchpoint: Operations > Policy > Policy detail\n\nAccess: read:policies"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"status\": \"active\",\n    \"moves\": [\n      {\n        \"status\": \"suspended\",\n        \"context\": \"policy_suspend\"\n      },\n      {\n        \"status\": \"lapsed\",\n        \"context\": \"lapse\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Finance (write:receipts): set the payment status (policies.payment_statuses) and method. Other users record payments with POST /policies/:id/payments for finance to verify",
           "request": {
             "method": "PATCH",
@@ -67281,6 +67346,99 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"capture\": {\n      \"id\": \"pp_1\",\n      \"policyId\": \"pol_1\",\n      \"policyNumber\": \"POL-2026-00001\",\n      \"receivableId\": \"rcv_1\",\n      \"billNumber\": \"INV-2026-00001\",\n      \"amount\": 11862.5,\n      \"paymentMode\": \"bank-transfer\",\n      \"referenceNo\": \"BDO-778812\",\n      \"paymentDate\": \"2026-09-28\",\n      \"status\": \"rejected\",\n      \"receiptNumber\": null\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Move the policy in its lifecycle: suspended (premium warranty, reason context policy_suspend), reinstated (policy_reinstate; back to active) or lapsed (lapse reasons); the move is guarded by the current status, carries the reason and is audited",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/policies/:id/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "policies",
+                ":id",
+                "status"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Move the policy in its lifecycle: suspended (premium warranty, reason context policy_suspend), reinstated (policy_reinstate; back to active) or lapsed (lapse reasons); the move is guarded by the current status, carries the reason and is audited\n\nFront-end touchpoint: Operations > Policy > Policy detail > Status\n\nAccess: write:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"suspended\",\n  \"reasonCode\": \"SUS-WARRANTY\",\n  \"note\": \"Premium unpaid 60 days after inception\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/policies/:id/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "policies",
+                    ":id",
+                    "status"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Move the policy in its lifecycle: suspended (premium warranty, reason context policy_suspend), reinstated (policy_reinstate; back to active) or lapsed (lapse reasons); the move is guarded by the current status, carries the reason and is audited\n\nFront-end touchpoint: Operations > Policy > Policy detail > Status\n\nAccess: write:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"suspended\",\n  \"reasonCode\": \"SUS-WARRANTY\",\n  \"note\": \"Premium unpaid 60 days after inception\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"policyId\": \"pol_1\",\n  \"policyNumber\": \"POL-2026-00001\",\n  \"clientId\": \"cl_1\",\n  \"insuredName\": \"Juan Dela Cruz\",\n  \"status\": \"Suspended\",\n  \"paymentStatus\": \"Pending\",\n  \"inception\": \"2026-10-01\",\n  \"expiry\": \"2027-10-01\",\n  \"grossPremium\": 23171.25,\n  \"billNumber\": \"INV-2026-00001\",\n  \"quoteRefId\": \"qt_1\",\n  \"success\": true\n}"
             }
           ]
         },
@@ -97488,6 +97646,279 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"controlKey\": \"backups\",\n    \"evidenceDate\": \"2026-10-01\",\n    \"result\": \"met\",\n    \"reference\": \"Azure backup report 2026-09\",\n    \"remarks\": \"Restore drill 42 minutes\",\n    \"recordedBy\": \"IT AppSupport\",\n    \"recordedAt\": \"2026-10-01T02:00:00Z\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Service Levels",
+      "item": [
+        {
+          "name": "The service level register (filters: document, active) with the count of open and breached clocks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/service-levels?document=placement",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "service-levels"
+              ],
+              "query": [
+                {
+                  "key": "document",
+                  "value": "placement"
+                }
+              ]
+            },
+            "description": "The service level register (filters: document, active) with the count of open and breached clocks\n\nFront-end touchpoint: Master > System Configuration > Service Levels\n\nAccess: read:settings, write:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/service-levels?document=placement",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "service-levels"
+                  ],
+                  "query": [
+                    {
+                      "key": "document",
+                      "value": "placement"
+                    }
+                  ]
+                },
+                "description": "The service level register (filters: document, active) with the count of open and breached clocks\n\nFront-end touchpoint: Master > System Configuration > Service Levels\n\nAccess: read:settings, write:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"POL-PLACED\",\n      \"document\": \"placement\",\n      \"name\": \"Insurer issues the policy\",\n      \"targetHours\": 16,\n      \"workingTime\": true,\n      \"escalateToRoles\": [\n        \"tis-ops-unit-head\"\n      ],\n      \"active\": true,\n      \"monitored\": true\n    }\n  ],\n  \"summary\": {\n    \"open\": 12,\n    \"breached\": 2,\n    \"dueSoon\": 3\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a service level: name, description, target hours, working time, escalation roles, active; audited",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/service-levels/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "service-levels",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a service level: name, description, target hours, working time, escalation roles, active; audited\n\nFront-end touchpoint: Master > System Configuration > Service Levels > Edit\n\nAccess: write:settings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetHours\": 16,\n  \"workingTime\": true,\n  \"escalateToRoles\": [\n    \"tis-ops-unit-head\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/service-levels/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "service-levels",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a service level: name, description, target hours, working time, escalation roles, active; audited\n\nFront-end touchpoint: Master > System Configuration > Service Levels > Edit\n\nAccess: write:settings",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"targetHours\": 16,\n  \"workingTime\": true,\n  \"escalateToRoles\": [\n    \"tis-ops-unit-head\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"POL-PLACED\",\n    \"document\": \"placement\",\n    \"name\": \"Insurer issues the policy\",\n    \"targetHours\": 16,\n    \"workingTime\": true,\n    \"escalateToRoles\": [\n      \"tis-ops-unit-head\"\n    ],\n    \"active\": true,\n    \"monitored\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "The open service level clocks (filters: targetCode, ownerId, breached, limit), breaches first",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/service-levels/clocks?targetCode=POL-PLACED&breached=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "service-levels",
+                "clocks"
+              ],
+              "query": [
+                {
+                  "key": "targetCode",
+                  "value": "POL-PLACED"
+                },
+                {
+                  "key": "breached",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "The open service level clocks (filters: targetCode, ownerId, breached, limit), breaches first\n\nFront-end touchpoint: Master > System Configuration > Service Levels > Open items\n\nAccess: read:settings, write:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/service-levels/clocks?targetCode=POL-PLACED&breached=true",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "service-levels",
+                    "clocks"
+                  ],
+                  "query": [
+                    {
+                      "key": "targetCode",
+                      "value": "POL-PLACED"
+                    },
+                    {
+                      "key": "breached",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "The open service level clocks (filters: targetCode, ownerId, breached, limit), breaches first\n\nFront-end touchpoint: Master > System Configuration > Service Levels > Open items\n\nAccess: read:settings, write:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"targetCode\": \"POL-PLACED\",\n      \"ref\": \"PS-2026-00012\",\n      \"dueAt\": \"2026-10-12T08:00:00Z\",\n      \"breachedAt\": null\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Run the service level monitor now (the sla-monitor job): opens, closes, marks and escalates the clocks",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/service-levels/run",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "service-levels",
+                "run"
+              ]
+            },
+            "description": "Run the service level monitor now (the sla-monitor job): opens, closes, marks and escalates the clocks\n\nFront-end touchpoint: Master > System Configuration > Service Levels\n\nAccess: write:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/service-levels/run",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "service-levels",
+                    "run"
+                  ]
+                },
+                "description": "Run the service level monitor now (the sla-monitor job): opens, closes, marks and escalates the clocks\n\nFront-end touchpoint: Master > System Configuration > Service Levels\n\nAccess: write:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"opened\": 3,\n    \"closed\": 1,\n    \"breached\": 1,\n    \"escalated\": 1\n  }\n}"
             }
           ]
         }

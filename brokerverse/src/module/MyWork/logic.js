@@ -24,6 +24,7 @@ export const CATEGORY_ICONS = {
   access: "pi pi-users",
   systems: "pi pi-server",
   tasks: "pi pi-calendar",
+  sla: "pi pi-stopwatch",
 };
 
 /**
