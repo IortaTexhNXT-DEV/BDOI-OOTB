@@ -77,6 +77,7 @@ import SchedulesPage from "../module/Administration/Schedules";
 import DocumentNumberingPage from "../module/Administration/DocumentNumbering";
 import CommissionRateMatrix from "../module/FinanceMastersModule/CommissionRateMatrix";
 import AuditTrailPage from "../module/Administration/AuditTrail";
+import GoLiveWorkspace from "../module/GoLiveWorkspace";
 import EmailOutboxPage from "../module/Administration/EmailOutbox";
 import CompanyMasters from "../module/GeneralMasters/OrganizationMasters/CompanyMaster";
 import BranchMasters from "../module/GeneralMasters/OrganizationMasters/BranchMaster";
@@ -916,6 +917,7 @@ const Maincomponent = () => {
           <Route path="master/finance/commission-rate-matrix" element={<CommissionRateMatrix />} />
           <Route path="master/configuration/audit-trail" element={<AuditTrailPage />} />
           <Route path="master/configuration/email-outbox" element={<EmailOutboxPage />} />
+          <Route path="master/configuration/go-live/*" element={<GoLiveWorkspace />} />
           <Route path="master/finance/company" element={<CompanyMaster />} />
           <Route path="master/finance/currency" element={<CurrencyMaster />} />
 

@@ -188,7 +188,9 @@ Object.assign(roleMenuPermissions, {
   "tis-sales-unit-head": { ...TIS_SALES, accounts: [...TIS_SALES.accounts, "Disbursement", "Payables", "Incentive"] },
   "tis-ops-associate": TIS_OPERATIONS,
   "tis-ops-officer": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, "Journal Voucher", "Fixed Assets"] },
-  "tis-ops-unit-head": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, "Journal Voucher", "Fixed Assets", "Disbursement", "Payables"] },
+  // the data owner of policies, clients and claims approves the migration loads (approve:data-load)
+  "tis-ops-unit-head": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, "Journal Voucher", "Fixed Assets", "Disbursement", "Payables"],
+    master: [...TIS_OPERATIONS.master, "System Configuration > Data Migration & Go-Live"] },
   "tis-ccd-pdu": TIS_CCD(["Post-Dated Cheques", "Receipts"]),
   "tis-ccd-pdc": TIS_CCD(["Post-Dated Cheques", "Receipts", "Collections", "Bank Reconciliation", "Insurer Reconciliation"]),
   // the claim settlement funds an insurer remits are banked by Cash Control (write:receipts)
@@ -198,7 +200,8 @@ Object.assign(roleMenuPermissions, {
   // Finance & General Accounting: the Accounting menus, plus the audit trail and the schedules (interface monitor)
   "tis-finance": {
     ...roleMenuPermissions.accounting,
-    master: [...roleMenuPermissions.accounting.master, "System Configuration > Audit Trail", "System Configuration > Schedules"],
+    master: [...roleMenuPermissions.accounting.master, "System Configuration > Audit Trail", "System Configuration > Schedules",
+      "System Configuration > Data Migration & Go-Live"],
   },
   // IT AppSupport / Admin: administration and the reference masters; the business screens read only.
   "tis-it-admin": {
@@ -225,8 +228,11 @@ Object.assign(roleMenuPermissions, {
     commission: roleMenuPermissions.accounting.commission,
     reports: ["All Reports", "Operational Reports", "Financial Reports"],
     master: ["User Management > User", "User Management > Role", "User Management > User Access Matrix", "User Management > Role Permissions",
-      "User Management > Authority Matrix", "User Management > Segregation of Duties", "System Configuration > Audit Trail", "Insurance Management > Distribution Channels"],
+      "User Management > Authority Matrix", "User Management > Segregation of Duties", "System Configuration > Audit Trail", "Insurance Management > Distribution Channels",
+      "System Configuration > Data Migration & Go-Live"],
   },
+  // TIS Audit: the migration workspace and the audit trail, read only (read:data-load, read:audit)
+  "tis-auditor": { master: ["System Configuration > Data Migration & Go-Live", "System Configuration > Audit Trail"] },
 });
 
 /** Roles of the signed-in user, from the login response stored by authService. */

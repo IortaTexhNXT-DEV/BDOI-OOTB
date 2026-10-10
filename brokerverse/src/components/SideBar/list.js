@@ -1532,6 +1532,13 @@ export const menuList = [
             path: "/master/configuration/insurer-integration",
             includes: ["/master/configuration/insurer-integration"],
           },
+          {
+            // templates, loads, reconciliation, mock runs, cutover, Go / No-Go, go-live lock and hypercare
+            id: 33,
+            name: "Data Migration & Go-Live",
+            path: "/master/configuration/go-live",
+            includes: ["/master/configuration/go-live"],
+          },
         ],
       },
     ],

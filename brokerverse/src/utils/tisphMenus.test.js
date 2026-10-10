@@ -5,7 +5,7 @@ import { menuList } from "../components/SideBar/list";
 import { helpSectionFor } from "../components/HelpPanel/helpRoutes";
 
 const TIS_ROLES = ["tis-sales-associate", "tis-sales-officer", "tis-sales-unit-head", "tis-ops-associate", "tis-ops-officer", "tis-ops-unit-head", "tis-ccd-pdu",
-  "tis-ccd-pdc", "tis-ccd-bp", "tis-ccd-recon", "tis-finance", "tis-it-admin", "tis-general-manager"];
+  "tis-ccd-pdc", "tis-ccd-bp", "tis-ccd-recon", "tis-finance", "tis-it-admin", "tis-general-manager", "tis-auditor"];
 const norm = (s) => String(s).trim().toLowerCase();
 
 /** A grant ("Item", "Group > Item") that names no screen of the menu. */
@@ -64,6 +64,22 @@ describe("TISPH roles (RBAC v4): menus", () => {
     expect(isPathAllowed("/master/generals/usermanagement/user", menuList, ["tis-general-manager"])).toBe(true);
     expect(isPathAllowed("/master/configuration/settings", menuList, ["tis-general-manager"])).toBe(false);
     expect(filterMenuForRoles(menuList, ["tis-superid", "system-admin"])).toEqual(menuList);
+  });
+
+  it("Data Migration & Go-Live opens to the roles of the migration and to the auditor, every tab by its address", () => {
+    const tabs = ["", "/templates", "/loads", "/loads/12", "/reconciliation", "/reconciliation/7", "/runs", "/runs/3", "/cutover", "/decision", "/hypercare"]
+      .map((p) => `/master/configuration/go-live${p}`);
+    for (const role of ["tis-it-admin", "tis-finance", "tis-ops-unit-head", "tis-general-manager", "tis-auditor"]) {
+      expect(tabs.filter((p) => !isPathAllowed(p, menuList, [role])).map((p) => `${role} ${p}`)).toEqual([]);
+    }
+    for (const role of ["tis-ops-associate", "tis-ops-officer", "tis-sales-officer", "tis-ccd-recon"]) {
+      expect(isPathAllowed("/master/configuration/go-live/loads", menuList, [role])).toBe(false);
+    }
+    // the auditor sees the workspace and the audit trail, and nothing else
+    expect(filterMenuForRoles(menuList, ["tis-auditor"]).map((m) => m.name)).toEqual(["Master"]);
+    expect(isPathAllowed("/master/configuration/audit-trail", menuList, ["tis-auditor"])).toBe(true);
+    expect(isPathAllowed("/master/configuration/settings", menuList, ["tis-auditor"])).toBe(false);
+    expect(helpSectionFor("/master/configuration/go-live/loads/12").matched).toBe(true);
   });
 
   it("the Lead Sources and Reason Codes masters have their manual section", () => {
