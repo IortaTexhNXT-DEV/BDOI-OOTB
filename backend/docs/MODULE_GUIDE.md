@@ -87,6 +87,13 @@ minimal, clearly-correct front-end fix.
   fields. Figures that leave migrated business out (production, commission, incentive) add `kpiOriginWhere(alias,
   kind)`. All in `src/lib/origin.js`; never test the older flags (`source = 'go-live-migration'`, `doc.source`) in new
   code. A record created by an import of legacy business is written with `origin = 'migrated'`.
+- Go-live workbooks (`src/modules/data-load`): an object of a kit is a sheet declared in `registry.js`; its importer
+  translates legacy codes through the value maps (`resolveValue(ctx, object, value)`, `maps.js`), checks peso amounts
+  with `pesoValue` (at most two decimals, never rounded) and reports each record it creates or changes with
+  `ctx.record(...)`. The engine gives every row its result (New, Changed, Unchanged, Duplicate, Error) and runs the
+  duplicate rules of the object (`duplicates.js`); see the module README. A table that keeps uploaded rows with personal
+  identifiers in JSON gets the `pii_protect_columns('json:<column>')` trigger and its `PII_STORAGE` entry, as
+  `data_load_rows` does (migration 0441).
 - Every mutation calls `audit(req, {...})` from `src/lib/audit.js`; several entries of one request (one per record of a
   data load) go in one insert with `auditMany(req, entries)`. Workflow events that someone must act on
   create a notification with `notify()` from `src/modules/notifications/service.js`; customer-facing e-mails go

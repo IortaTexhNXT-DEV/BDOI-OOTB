@@ -14,6 +14,8 @@ import { clearSettingsCache } from '../src/lib/settings.js';
 import { writeXlsx } from '../src/lib/xlsx.js';
 import { addDays, today } from '../src/lib/dates.js';
 import { cocClash, cocCollisions, collidingNumber, collidingNumbers, seriesClash, seriesShapes } from '../src/modules/data-load/numbering.js';
+import { registerForPolicy } from '../src/modules/integrations/ctpl.js';
+import { findPolicy } from '../src/modules/receipts/receivables.js';
 
 let api;
 let kits;
@@ -31,6 +33,7 @@ function book(kit, sheets) {
   });
 }
 const upload = (kit, wb) => api('post', '/data-load/batches').field('kit', kit).attach('file', wb, `${kit}.xlsx`);
+const load = (id) => api('post', `/data-load/batches/${id}/load`).send({});
 const pattern = (code, p) => query('UPDATE document_numbering SET pattern = $2 WHERE code = $1', [code, p]);
 
 beforeAll(async () => {
@@ -147,5 +150,69 @@ describe('COC numbers', () => {
     expect(await cocClash(ins, 'C00000009')).toBeNull();
     expect(await cocClash(ins, 'X00000050')).toBeNull();
     expect(await cocClash(other, 'C00000050')).toBeNull();
+  });
+});
+
+describe('migrated CTPL certificates', () => {
+  const ctpl = (number, coc) => ({ 'Policy Number': number, 'Client Code': 'NUM-CTPL-C', Insurer: 'MALAYAN', Product: 'CTPL', 'Inception Date': addDays(cutover, -30),
+    'Expiry Date': addDays(cutover, 330), 'Issue Date': addDays(cutover, -31), 'Gross Premium': '610.00', 'Plate Number': `P ${number.slice(-3)}`, 'Chassis Number': `CH-${number}`,
+    'COC Number': coc, 'Authentication Code': 'AU-778' });
+  const client = { 'Client Code': 'NUM-CTPL-C', 'Client Type': 'corporate', 'Company Name': 'CTPL Fleet Corp.' };
+
+  it('refuses a COC number that a COC series of the insurer has still to issue', async () => {
+    const r = await upload('migration', book('migration', { Clients: [client], 'Policies - CTPL': [ctpl('CTPL-MIG-001', 'C00000500')] }));
+    expect(r.body.data.errors).toEqual([expect.objectContaining({ column: 'COC Number', message: expect.stringMatching(/range of a COC series of MALAYAN whose next number is 10/) })]);
+  });
+
+  it('records the COC of a migrated CTPL policy as authenticated (manual, not sent to the LTO), so it is never issued again', async () => {
+    const outbox = (await one('SELECT count(*)::int AS n FROM integration_outbox')).n;
+    const r = await upload('migration', book('migration', { Clients: [client], 'Policies - CTPL': [ctpl('CTPL-MIG-002', 'LEG-COC-778899')] }));
+    expect(r.body.data.errors).toEqual([]);
+    expect((await load(r.body.data.batch.id)).status).toBe(200);
+    const a = await one("SELECT * FROM ctpl_authentications WHERE policy_number = 'CTPL-MIG-002'");
+    expect(a).toMatchObject({ coc_number: 'LEG-COC-778899', status: 'authenticated', method: 'manual', lto_status: 'not-required', auth_code: 'AU-778', outbox_id: null,
+      load_batch_id: r.body.data.batch.id, chassis_number: 'CH-CTPL-MIG-002' });
+    expect((await one('SELECT count(*)::int AS n FROM integration_outbox')).n).toBe(outbox);
+    // a CTPL policy issued after go-live cannot get the same COC number
+    const issued = await one(`INSERT INTO policies(policy_number, client_id, insurance_company_id, product_id, status, inception_date, expiry_date, lob)
+      SELECT 'CTPL-NEW-001', c.id, i.id, p.id, 'active', $1::date, $1::date + 365, 'CTPL' FROM clients c, insurance_companies i, products p
+       WHERE c.client_code = 'NUM-CTPL-C' AND i.code = 'MALAYAN' AND p.code = 'CTPL' RETURNING id`, [cutover]);
+    await expect(registerForPolicy({ query }, issued.id, null, { force: true, cocNumber: 'LEG-COC-778899' })).rejects.toThrow(/ctpl_authentications_coc_uq/);
+    // and the same certificate in a later load is refused
+    const twice = await upload('migration', book('migration', { 'Policies - CTPL': [ctpl('CTPL-MIG-003', 'LEG-COC-778899')] }));
+    expect(twice.body.data.batch.rowsDuplicate).toBe(1);
+  });
+});
+
+describe('policy number of another insurer', () => {
+  const motor = (insurer) => ({ 'Policy Number': 'SHARED-001', 'Client Code': 'NUM-CTPL-C', Insurer: insurer, Product: 'MOTOR', 'Inception Date': addDays(cutover, -30),
+    'Expiry Date': addDays(cutover, 330), 'Issue Date': addDays(cutover, -31), 'Gross Premium': '20000.00', 'Plate Number': `SH ${insurer}` });
+
+  it('offers the insurer suffix and loads the policy as number/INSURER with the number as printed kept as legacy number', async () => {
+    await query(`INSERT INTO policies(policy_number, client_id, insurance_company_id, status, inception_date, expiry_date)
+      SELECT 'SHARED-001', c.id, i.id, 'active', $1::date - 30, $1::date + 330 FROM clients c, insurance_companies i WHERE c.client_code = 'NUM-CTPL-C' AND i.code = 'FPG'`, [cutover]);
+    const r = await upload('migration', book('migration', { 'Policies - Motor': [motor('MALAYAN')] }));
+    const id = r.body.data.batch.id;
+    const rows = (await api('get', `/data-load/batches/${id}/rows`)).body.data;
+    expect(rows[0]).toMatchObject({ result: 'duplicate', duplicates: [expect.objectContaining({ rule: 'policy-number', insurerCode: 'FPG', number: 'SHARED-001' })] });
+    expect(rows[0].errors).toEqual([expect.objectContaining({ message: expect.stringMatching(/load it with the insurer suffix \(SHARED-001\/MALAYAN\)/) })]);
+    const res = await api('post', `/data-load/batches/${id}/resolutions`).send({ rule: 'policy-number', resolution: 'insurer-suffix', reason: 'Two insurers use the same number' });
+    expect(res.body.data.batch).toMatchObject({ rowsDuplicate: 0, rowsNew: 1 });
+    expect((await load(id)).status).toBe(200);
+    const p = await one("SELECT p.policy_number, p.legacy_number, p.origin FROM policies p WHERE p.policy_number = 'SHARED-001/MALAYAN'");
+    expect(p).toEqual({ policy_number: 'SHARED-001/MALAYAN', legacy_number: 'SHARED-001', origin: 'migrated' });
+    // the number as printed finds the other insurer's policy, the full number the migrated one
+    const fpg = (await one("SELECT id FROM insurance_companies WHERE code = 'FPG'")).id;
+    expect((await findPolicy({ query }, 'SHARED-001')).insurance_company_id).toBe(fpg);
+    expect((await findPolicy({ query }, 'SHARED-001/MALAYAN')).legacy_number).toBe('SHARED-001');
+    // the same row again is the same policy: unchanged, no duplicate
+    const again = await upload('migration', book('migration', { 'Policies - Motor': [motor('MALAYAN')] }));
+    expect(again.body.data.batch).toMatchObject({ rowsUnchanged: 1, rowsDuplicate: 0 });
+  });
+
+  it('the same number of the same insurer is an error, not a duplicate', async () => {
+    const r = await upload('migration', book('migration', { 'Policies - Motor': [motor('FPG')] }));
+    expect(r.body.data.batch.rowsDuplicate).toBe(0);
+    expect(r.body.data.errors).toEqual([expect.objectContaining({ column: 'Policy Number', message: 'Policy number SHARED-001 already belongs to a policy issued in BrokerVerse' })]);
   });
 });

@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1279 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1291 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -38617,7 +38617,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 20,\n  \"totalPages\": 1\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 477,\n      \"rowsError\": 2,\n      \"rowsNew\": 470,\n      \"rowsChanged\": 4,\n      \"rowsUnchanged\": 3,\n      \"rowsDuplicate\": 1,\n      \"fileSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n      \"validateMs\": 5400,\n      \"loadMs\": null,\n      \"sameFileAs\": null,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies-motor\",\n          \"name\": \"Policies - Motor\",\n          \"read\": 120,\n          \"valid\": 117,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 110,\n          \"updated\": 4,\n          \"unchanged\": 3,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"duplicate\": 1,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 20,\n  \"totalPages\": 1\n}"
             }
           ]
         },
@@ -38694,7 +38694,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Validated: 2 row(s) with errors\",\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies\",\n        \"sheetName\": \"Policies\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Validated: 2 row(s) with errors\",\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 477,\n      \"rowsError\": 2,\n      \"rowsNew\": 470,\n      \"rowsChanged\": 4,\n      \"rowsUnchanged\": 3,\n      \"rowsDuplicate\": 1,\n      \"fileSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n      \"validateMs\": 5400,\n      \"loadMs\": null,\n      \"sameFileAs\": null,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies-motor\",\n          \"name\": \"Policies - Motor\",\n          \"read\": 120,\n          \"valid\": 117,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 110,\n          \"updated\": 4,\n          \"unchanged\": 3,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"duplicate\": 1,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies-motor\",\n        \"sheetName\": \"Policies - Motor\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ]\n  }\n}"
             }
           ]
         },
@@ -38759,12 +38759,107 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies\",\n        \"sheetName\": \"Policies\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ],\n    \"totalErrors\": 1\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 477,\n      \"rowsError\": 2,\n      \"rowsNew\": 470,\n      \"rowsChanged\": 4,\n      \"rowsUnchanged\": 3,\n      \"rowsDuplicate\": 1,\n      \"fileSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n      \"validateMs\": 5400,\n      \"loadMs\": null,\n      \"sameFileAs\": null,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies-motor\",\n          \"name\": \"Policies - Motor\",\n          \"read\": 120,\n          \"valid\": 117,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 110,\n          \"updated\": 4,\n          \"unchanged\": 3,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"duplicate\": 1,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies-motor\",\n        \"sheetName\": \"Policies - Motor\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ],\n    \"totalErrors\": 1\n  }\n}"
             }
           ]
         },
         {
-          "name": "The rows in error of a batch as a workbook in the kit layout with an Errors column, to fix and upload again",
+          "name": "Duplicate rows of a batch with the records they match (in the file or in BrokerVerse) and their resolution; filter rule (tin, name-birth-date, company-name, vehicle, coc, policy-number, insurer-variant, master-name)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/batches/:id/duplicates?rule=tin&page=1&perPage=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "batches",
+                ":id",
+                "duplicates"
+              ],
+              "query": [
+                {
+                  "key": "rule",
+                  "value": "tin"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "50"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Duplicate rows of a batch with the records they match (in the file or in BrokerVerse) and their resolution; filter rule (tin, name-birth-date, company-name, vehicle, coc, policy-number, insurer-variant, master-name)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Duplicates\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/batches/:id/duplicates?rule=tin&page=1&perPage=50",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "batches",
+                    ":id",
+                    "duplicates"
+                  ],
+                  "query": [
+                    {
+                      "key": "rule",
+                      "value": "tin"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "perPage",
+                      "value": "50"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Duplicate rows of a batch with the records they match (in the file or in BrokerVerse) and their resolution; filter rule (tin, name-birth-date, company-name, vehicle, coc, policy-number, insurer-variant, master-name)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Duplicates\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 9013,\n      \"sheet\": \"clients\",\n      \"sheetName\": \"Clients\",\n      \"row\": 13,\n      \"key\": \"C-000990\",\n      \"result\": \"duplicate\",\n      \"values\": {\n        \"clientCode\": \"C-000881\",\n        \"email\": \"andrea.lim@example.ph\"\n      },\n      \"changes\": [],\n      \"duplicates\": [\n        {\n          \"rule\": \"tin\",\n          \"label\": \"Same TIN\",\n          \"kind\": \"stored\",\n          \"recordId\": \"cli_1a2b3c4d5e6f7a8b\",\n          \"number\": \"C-000881\",\n          \"name\": \"Andrea Lim\"\n        }\n      ],\n      \"errors\": [],\n      \"warnings\": [],\n      \"resolution\": null,\n      \"resolutionReason\": null,\n      \"resolvedBy\": null,\n      \"resolvedAt\": null,\n      \"record\": null\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 50,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "The rows in error and the unresolved duplicates of a batch as a workbook in the kit layout with an Errors column, to fix and upload again (masked for a user without view:pii)",
           "request": {
             "method": "GET",
             "header": [],
@@ -38787,7 +38882,7 @@
                 }
               ]
             },
-            "description": "The rows in error of a batch as a workbook in the kit layout with an Errors column, to fix and upload again\n\nFront-end touchpoint: API (go-live scripts) > Download errors\n\nAccess: read:data-load, write:data-load"
+            "description": "The rows in error and the unresolved duplicates of a batch as a workbook in the kit layout with an Errors column, to fix and upload again (masked for a user without view:pii)\n\nFront-end touchpoint: API (go-live scripts) > Download errors\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -38814,7 +38909,7 @@
                     }
                   ]
                 },
-                "description": "The rows in error of a batch as a workbook in the kit layout with an Errors column, to fix and upload again\n\nFront-end touchpoint: API (go-live scripts) > Download errors\n\nAccess: read:data-load, write:data-load"
+                "description": "The rows in error and the unresolved duplicates of a batch as a workbook in the kit layout with an Errors column, to fix and upload again (masked for a user without view:pii)\n\nFront-end touchpoint: API (go-live scripts) > Download errors\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,
@@ -38921,7 +39016,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Loaded\",\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"loaded\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"temporaryPasswords\": [\n      {\n        \"username\": \"andrea.lim\",\n        \"displayName\": \"Andrea Lim\",\n        \"temporaryPassword\": \"<shown once>\"\n      }\n    ],\n    \"reconciliation\": null\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Loaded\",\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"loaded\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 477,\n      \"rowsError\": 2,\n      \"rowsNew\": 470,\n      \"rowsChanged\": 4,\n      \"rowsUnchanged\": 3,\n      \"rowsDuplicate\": 1,\n      \"fileSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n      \"validateMs\": 5400,\n      \"loadMs\": null,\n      \"sameFileAs\": null,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies-motor\",\n          \"name\": \"Policies - Motor\",\n          \"read\": 120,\n          \"valid\": 117,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 110,\n          \"updated\": 4,\n          \"unchanged\": 3,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"duplicate\": 1,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"temporaryPasswords\": [\n      {\n        \"username\": \"andrea.lim\",\n        \"displayName\": \"Andrea Lim\",\n        \"temporaryPassword\": \"<shown once>\"\n      }\n    ],\n    \"reconciliation\": null\n  }\n}"
             }
           ]
         },
@@ -38993,6 +39088,212 @@
           ]
         },
         {
+          "name": "Resolve duplicate rows (rows: ids, or rule: every row of that rule): load-as-new, use-existing (no record created; a client code or insurer value is mapped to the existing record for later loads), insurer-suffix (policy number of another insurer, loaded as number/INSURER), or null to clear; reason required. The batch is validated again",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/batches/:id/resolutions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "batches",
+                ":id",
+                "resolutions"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Resolve duplicate rows (rows: ids, or rule: every row of that rule): load-as-new, use-existing (no record created; a client code or insurer value is mapped to the existing record for later loads), insurer-suffix (policy number of another insurer, loaded as number/INSURER), or null to clear; reason required. The batch is validated again\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Duplicates > Resolve\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rows\": [\n    9013\n  ],\n  \"resolution\": \"use-existing\",\n  \"targetCode\": \"C-000881\",\n  \"reason\": \"Same client as in BrokerVerse (TIN verified)\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/batches/:id/resolutions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "batches",
+                    ":id",
+                    "resolutions"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Resolve duplicate rows (rows: ids, or rule: every row of that rule): load-as-new, use-existing (no record created; a client code or insurer value is mapped to the existing record for later loads), insurer-suffix (policy number of another insurer, loaded as number/INSURER), or null to clear; reason required. The batch is validated again\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Duplicates > Resolve\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rows\": [\n    9013\n  ],\n  \"resolution\": \"use-existing\",\n  \"targetCode\": \"C-000881\",\n  \"reason\": \"Same client as in BrokerVerse (TIN verified)\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Resolved 1 row(s)\",\n  \"data\": {\n    \"resolved\": 1,\n    \"maps\": 1,\n    \"rows\": [\n      9013\n    ],\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 477,\n      \"rowsError\": 2,\n      \"rowsNew\": 470,\n      \"rowsChanged\": 4,\n      \"rowsUnchanged\": 3,\n      \"rowsDuplicate\": 1,\n      \"fileSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n      \"validateMs\": 5400,\n      \"loadMs\": null,\n      \"sameFileAs\": null,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies-motor\",\n          \"name\": \"Policies - Motor\",\n          \"read\": 120,\n          \"valid\": 117,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 110,\n          \"updated\": 4,\n          \"unchanged\": 3,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"duplicate\": 1,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Review of a validation: the rows of a batch with their result (new, changed, unchanged, duplicate, error), the changed columns old -> new, duplicates, errors and warnings; filters sheet, result, search; paging; masked for a user without view:pii",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/batches/:id/rows?sheet=clients&result=changed&search=lim&page=1&perPage=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "batches",
+                ":id",
+                "rows"
+              ],
+              "query": [
+                {
+                  "key": "sheet",
+                  "value": "clients"
+                },
+                {
+                  "key": "result",
+                  "value": "changed"
+                },
+                {
+                  "key": "search",
+                  "value": "lim"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "50"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Review of a validation: the rows of a batch with their result (new, changed, unchanged, duplicate, error), the changed columns old -> new, duplicates, errors and warnings; filters sheet, result, search; paging; masked for a user without view:pii\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Review\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/batches/:id/rows?sheet=clients&result=changed&search=lim&page=1&perPage=50",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "batches",
+                    ":id",
+                    "rows"
+                  ],
+                  "query": [
+                    {
+                      "key": "sheet",
+                      "value": "clients"
+                    },
+                    {
+                      "key": "result",
+                      "value": "changed"
+                    },
+                    {
+                      "key": "search",
+                      "value": "lim"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "perPage",
+                      "value": "50"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Review of a validation: the rows of a batch with their result (new, changed, unchanged, duplicate, error), the changed columns old -> new, duplicates, errors and warnings; filters sheet, result, search; paging; masked for a user without view:pii\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Review\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 9012,\n      \"sheet\": \"clients\",\n      \"sheetName\": \"Clients\",\n      \"row\": 12,\n      \"key\": \"C-000881\",\n      \"result\": \"changed\",\n      \"values\": {\n        \"clientCode\": \"C-000881\",\n        \"email\": \"andrea.lim@example.ph\"\n      },\n      \"changes\": [\n        {\n          \"column\": \"email\",\n          \"header\": \"Email\",\n          \"old\": \"a.lim@example.ph\",\n          \"new\": \"andrea.lim@example.ph\"\n        }\n      ],\n      \"duplicates\": [],\n      \"errors\": [],\n      \"warnings\": [],\n      \"resolution\": null,\n      \"resolutionReason\": null,\n      \"resolvedBy\": null,\n      \"resolvedAt\": null,\n      \"record\": null\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 50,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        },
+        {
           "name": "Validate a batch again (dry run), e.g. after a correction on screen or a change of the cutover date",
           "request": {
             "method": "POST",
@@ -39055,7 +39356,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies\",\n        \"sheetName\": \"Policies\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"loadNumber\": \"MIG-000007\",\n      \"kit\": \"migration\",\n      \"legacySystem\": \"TISPH Excel\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 477,\n      \"rowsError\": 2,\n      \"rowsNew\": 470,\n      \"rowsChanged\": 4,\n      \"rowsUnchanged\": 3,\n      \"rowsDuplicate\": 1,\n      \"fileSha256\": \"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\n      \"validateMs\": 5400,\n      \"loadMs\": null,\n      \"sameFileAs\": null,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies-motor\",\n          \"name\": \"Policies - Motor\",\n          \"read\": 120,\n          \"valid\": 117,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 110,\n          \"updated\": 4,\n          \"unchanged\": 3,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"duplicate\": 1,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies-motor\",\n        \"sheetName\": \"Policies - Motor\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ]\n  }\n}"
             }
           ]
         },
@@ -39449,6 +39750,154 @@
           ]
         },
         {
+          "name": "Check a list of legacy document file names against the naming convention (multipart \"file\": .xlsx or .csv with the names in the first column or a File Name column, or .txt with one name per line; never the files): valid or invalid with the reason, and whether the record it names is in BrokerVerse",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/document-names/check",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "document-names",
+                "check"
+              ]
+            },
+            "description": "Check a list of legacy document file names against the naming convention (multipart \"file\": .xlsx or .csv with the names in the first column or a File Name column, or .txt with one name per line; never the files): valid or invalid with the reason, and whether the record it names is in BrokerVerse\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Document Naming\n\nAccess: read:data-load, write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "\"multipart/form-data file\"",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/document-names/check",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "document-names",
+                    "check"
+                  ]
+                },
+                "description": "Check a list of legacy document file names against the naming convention (multipart \"file\": .xlsx or .csv with the names in the first column or a File Name column, or .txt with one name per line; never the files): valid or invalid with the reason, and whether the record it names is in BrokerVerse\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Document Naming\n\nAccess: read:data-load, write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "\"multipart/form-data file\"",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Checked 2 name(s): 1 invalid\",\n  \"data\": {\n    \"token\": \"rpt_4f2a9c1d0e7b3a55\",\n    \"fileName\": \"Legacy_Files.xlsx\",\n    \"summary\": {\n      \"names\": 2,\n      \"valid\": 1,\n      \"invalid\": 1,\n      \"recordFound\": 1,\n      \"recordMissing\": 0\n    },\n    \"results\": [\n      {\n        \"name\": \"POL_PC-MLY-2026-000101_POLSCH_20260225.pdf\",\n        \"valid\": true,\n        \"reason\": null,\n        \"recordType\": \"POL\",\n        \"recordTypeLabel\": \"Policy\",\n        \"recordNumber\": \"PC-MLY-2026-000101\",\n        \"documentType\": \"POLSCH\",\n        \"date\": \"2026-02-25\",\n        \"recordFound\": true\n      },\n      {\n        \"name\": \"scan001.pdf\",\n        \"valid\": false,\n        \"reason\": \"The name must have the parts <RecordType>_<RecordNumber>_<DocumentType>_<YYYYMMDD>[_<n>].<ext>\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Result of a document name check (XLSX): summary and one row per name; only for the user who ran the check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/document-names/check/:token/workbook",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "document-names",
+                "check",
+                ":token",
+                "workbook"
+              ],
+              "variable": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "description": "token (path parameter)"
+                }
+              ]
+            },
+            "description": "Result of a document name check (XLSX): summary and one row per name; only for the user who ran the check\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Document Naming > Download\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/document-names/check/:token/workbook",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "document-names",
+                    "check",
+                    ":token",
+                    "workbook"
+                  ],
+                  "variable": [
+                    {
+                      "key": "token",
+                      "value": "",
+                      "description": "token (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Result of a document name check (XLSX): summary and one row per name; only for the user who ran the check\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Document Naming > Download\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
+            }
+          ]
+        },
+        {
           "name": "The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date, the go-live lock and the settings of the workspace",
           "request": {
             "method": "GET",
@@ -39498,12 +39947,12 @@
           ]
         },
         {
-          "name": "Workbook of a kit (XLSX): Instructions, Lists and one sheet per object; prefill=true fills it with the current data of this environment (promotion to the next environment)",
+          "name": "Workbook of a kit (XLSX): Instructions, Lists, one sheet per object (the migration kit has one policy sheet per product) and the hidden Control sheet; objects: some of the objects only (comma list of keys); prefill=true fills it with the current data of this environment, masked for a user without view:pii",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/data-load/kits/:kit/template?prefill=true",
+              "raw": "{{baseUrl}}/data-load/kits/:kit/template?prefill=true&objects=policies-motor,open-items",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -39517,6 +39966,10 @@
                 {
                   "key": "prefill",
                   "value": "true"
+                },
+                {
+                  "key": "objects",
+                  "value": "policies-motor,open-items"
                 }
               ],
               "variable": [
@@ -39527,7 +39980,7 @@
                 }
               ]
             },
-            "description": "Workbook of a kit (XLSX): Instructions, Lists and one sheet per object; prefill=true fills it with the current data of this environment (promotion to the next environment)\n\nFront-end touchpoint: API (go-live scripts) > Download template\n\nAccess: read:data-load, write:data-load"
+            "description": "Workbook of a kit (XLSX): Instructions, Lists, one sheet per object (the migration kit has one policy sheet per product) and the hidden Control sheet; objects: some of the objects only (comma list of keys); prefill=true fills it with the current data of this environment, masked for a user without view:pii\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates\n\nAccess: read:data-load, write:data-load"
           },
           "response": [
             {
@@ -39536,7 +39989,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/data-load/kits/:kit/template?prefill=true",
+                  "raw": "{{baseUrl}}/data-load/kits/:kit/template?prefill=true&objects=policies-motor,open-items",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -39550,6 +40003,10 @@
                     {
                       "key": "prefill",
                       "value": "true"
+                    },
+                    {
+                      "key": "objects",
+                      "value": "policies-motor,open-items"
                     }
                   ],
                   "variable": [
@@ -39560,7 +40017,522 @@
                     }
                   ]
                 },
-                "description": "Workbook of a kit (XLSX): Instructions, Lists and one sheet per object; prefill=true fills it with the current data of this environment (promotion to the next environment)\n\nFront-end touchpoint: API (go-live scripts) > Download template\n\nAccess: read:data-load, write:data-load"
+                "description": "Workbook of a kit (XLSX): Instructions, Lists, one sheet per object (the migration kit has one policy sheet per product) and the hidden Control sheet; objects: some of the objects only (comma list of keys); prefill=true fills it with the current data of this environment, masked for a user without view:pii\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
+            }
+          ]
+        },
+        {
+          "name": "Value maps of the legacy code tables: legacy value -> BrokerVerse code per object (insurer, product, branch, user, channel, client, payment-status, claim-status, vehicle-type); filters object, search; paging",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/value-maps?object=insurer&search=malayan&page=1&perPage=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "value-maps"
+              ],
+              "query": [
+                {
+                  "key": "object",
+                  "value": "insurer"
+                },
+                {
+                  "key": "search",
+                  "value": "malayan"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "Value maps of the legacy code tables: legacy value -> BrokerVerse code per object (insurer, product, branch, user, channel, client, payment-status, claim-status, vehicle-type); filters object, search; paging\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/value-maps?object=insurer&search=malayan&page=1&perPage=50",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "value-maps"
+                  ],
+                  "query": [
+                    {
+                      "key": "object",
+                      "value": "insurer"
+                    },
+                    {
+                      "key": "search",
+                      "value": "malayan"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "perPage",
+                      "value": "50"
+                    }
+                  ]
+                },
+                "description": "Value maps of the legacy code tables: legacy value -> BrokerVerse code per object (insurer, product, branch, user, channel, client, payment-status, claim-status, vehicle-type); filters object, search; paging\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 4,\n      \"object\": \"insurer\",\n      \"objectLabel\": \"Insurer\",\n      \"legacyValue\": \"Malayan Ins. Co., Inc.\",\n      \"targetCode\": \"MALAYAN\",\n      \"note\": \"Legacy insurer table\",\n      \"createdBy\": \"Andrea Lim\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"updatedBy\": \"Andrea Lim\",\n      \"updatedAt\": \"2026-10-28T09:00:00Z\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 50,\n  \"totalPages\": 1,\n  \"objects\": [\n    {\n      \"key\": \"insurer\",\n      \"label\": \"Insurer\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add a value map (or change the target of the map of the same legacy value); the code is checked against its master",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/value-maps",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "value-maps"
+              ]
+            },
+            "description": "Add a value map (or change the target of the map of the same legacy value); the code is checked against its master\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps > Add\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"object\": \"insurer\",\n  \"legacyValue\": \"Malayan Ins. Co., Inc.\",\n  \"targetCode\": \"MALAYAN\",\n  \"note\": \"Legacy insurer table\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/value-maps",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "value-maps"
+                  ]
+                },
+                "description": "Add a value map (or change the target of the map of the same legacy value); the code is checked against its master\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps > Add\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"object\": \"insurer\",\n  \"legacyValue\": \"Malayan Ins. Co., Inc.\",\n  \"targetCode\": \"MALAYAN\",\n  \"note\": \"Legacy insurer table\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Value map saved\",\n  \"data\": {\n    \"id\": 4,\n    \"object\": \"insurer\",\n    \"objectLabel\": \"Insurer\",\n    \"legacyValue\": \"Malayan Ins. Co., Inc.\",\n    \"targetCode\": \"MALAYAN\",\n    \"note\": \"Legacy insurer table\",\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-10-28T09:00:00Z\",\n    \"updatedBy\": \"Andrea Lim\",\n    \"updatedAt\": \"2026-10-28T09:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One value map",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/value-maps/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "value-maps",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One value map\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/value-maps/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "value-maps",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One value map\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 4,\n    \"object\": \"insurer\",\n    \"objectLabel\": \"Insurer\",\n    \"legacyValue\": \"Malayan Ins. Co., Inc.\",\n    \"targetCode\": \"MALAYAN\",\n    \"note\": \"Legacy insurer table\",\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-10-28T09:00:00Z\",\n    \"updatedBy\": \"Andrea Lim\",\n    \"updatedAt\": \"2026-10-28T09:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a value map",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/value-maps/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "value-maps",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a value map\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps > Edit\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"legacyValue\": \"Malayan Ins. Co., Inc.\",\n  \"targetCode\": \"MALAYAN\",\n  \"note\": \"Legacy insurer table\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/value-maps/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "value-maps",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a value map\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps > Edit\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"legacyValue\": \"Malayan Ins. Co., Inc.\",\n  \"targetCode\": \"MALAYAN\",\n  \"note\": \"Legacy insurer table\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Value map saved\",\n  \"data\": {\n    \"id\": 4,\n    \"object\": \"insurer\",\n    \"objectLabel\": \"Insurer\",\n    \"legacyValue\": \"Malayan Ins. Co., Inc.\",\n    \"targetCode\": \"MALAYAN\",\n    \"note\": \"Legacy insurer table\",\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-10-28T09:00:00Z\",\n    \"updatedBy\": \"Andrea Lim\",\n    \"updatedAt\": \"2026-10-28T09:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Remove a value map (rows already loaded keep their records)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/value-maps/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "value-maps",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Remove a value map (rows already loaded keep their records)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps > Remove\n\nAccess: write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/value-maps/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "value-maps",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Remove a value map (rows already loaded keep their records)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps > Remove\n\nAccess: write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Value map removed\",\n  \"data\": {\n    \"id\": 4,\n    \"object\": \"insurer\",\n    \"objectLabel\": \"Insurer\",\n    \"legacyValue\": \"Malayan Ins. Co., Inc.\",\n    \"targetCode\": \"MALAYAN\",\n    \"note\": \"Legacy insurer table\",\n    \"createdBy\": \"Andrea Lim\",\n    \"createdAt\": \"2026-10-28T09:00:00Z\",\n    \"updatedBy\": \"Andrea Lim\",\n    \"updatedAt\": \"2026-10-28T09:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Upload the Value Maps sheet: each row adds a map or changes the map of the same legacy value; all or nothing (the rows in error are listed)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/value-maps/upload",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "value-maps",
+                "upload"
+              ]
+            },
+            "description": "Upload the Value Maps sheet: each row adds a map or changes the map of the same legacy value; all or nothing (the rows in error are listed)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps > Upload\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "\"multipart/form-data file\"",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/value-maps/upload",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "value-maps",
+                    "upload"
+                  ]
+                },
+                "description": "Upload the Value Maps sheet: each row adds a map or changes the map of the same legacy value; all or nothing (the rows in error are listed)\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps > Upload\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "\"multipart/form-data file\"",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Value maps loaded: 3 added, 1 changed\",\n  \"data\": {\n    \"created\": 3,\n    \"updated\": 1,\n    \"errors\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "The value maps as one sheet (XLSX), to change and upload again",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/value-maps/workbook",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "value-maps",
+                "workbook"
+              ]
+            },
+            "description": "The value maps as one sheet (XLSX), to change and upload again\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps > Download\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/value-maps/workbook",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "value-maps",
+                    "workbook"
+                  ]
+                },
+                "description": "The value maps as one sheet (XLSX), to change and upload again\n\nFront-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps > Download\n\nAccess: read:data-load, write:data-load"
               },
               "status": "OK",
               "code": 200,

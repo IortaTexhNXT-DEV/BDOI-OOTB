@@ -63916,6 +63916,26 @@
                           "rowsError": {
                             "type": "integer"
                           },
+                          "rowsNew": {
+                            "type": "integer"
+                          },
+                          "rowsChanged": {
+                            "type": "integer"
+                          },
+                          "rowsUnchanged": {
+                            "type": "integer"
+                          },
+                          "rowsDuplicate": {
+                            "type": "integer"
+                          },
+                          "fileSha256": {
+                            "type": "string"
+                          },
+                          "validateMs": {
+                            "type": "integer"
+                          },
+                          "loadMs": {},
+                          "sameFileAs": {},
                           "sheets": {
                             "type": "array",
                             "items": {
@@ -63955,6 +63975,9 @@
                                   "type": "integer"
                                 },
                                 "skipped": {
+                                  "type": "integer"
+                                },
+                                "duplicate": {
                                   "type": "integer"
                                 },
                                 "message": {}
@@ -64001,22 +64024,31 @@
                       "status": "failed",
                       "cutoverDate": "2026-11-01",
                       "rowsRead": 480,
-                      "rowsValid": 478,
+                      "rowsValid": 477,
                       "rowsError": 2,
+                      "rowsNew": 470,
+                      "rowsChanged": 4,
+                      "rowsUnchanged": 3,
+                      "rowsDuplicate": 1,
+                      "fileSha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                      "validateMs": 5400,
+                      "loadMs": null,
+                      "sameFileAs": null,
                       "sheets": [
                         {
-                          "sheet": "policies",
-                          "name": "Policies",
+                          "sheet": "policies-motor",
+                          "name": "Policies - Motor",
                           "read": 120,
-                          "valid": 118,
+                          "valid": 117,
                           "errors": 2,
                           "held": 0,
-                          "created": 118,
-                          "updated": 0,
-                          "unchanged": 0,
+                          "created": 110,
+                          "updated": 4,
+                          "unchanged": 3,
                           "proposed": 0,
                           "ignored": 0,
                           "skipped": 0,
+                          "duplicate": 1,
                           "message": null
                         }
                       ],
@@ -64109,6 +64141,26 @@
                             "rowsError": {
                               "type": "integer"
                             },
+                            "rowsNew": {
+                              "type": "integer"
+                            },
+                            "rowsChanged": {
+                              "type": "integer"
+                            },
+                            "rowsUnchanged": {
+                              "type": "integer"
+                            },
+                            "rowsDuplicate": {
+                              "type": "integer"
+                            },
+                            "fileSha256": {
+                              "type": "string"
+                            },
+                            "validateMs": {
+                              "type": "integer"
+                            },
+                            "loadMs": {},
+                            "sameFileAs": {},
                             "sheets": {
                               "type": "array",
                               "items": {
@@ -64148,6 +64200,9 @@
                                     "type": "integer"
                                   },
                                   "skipped": {
+                                    "type": "integer"
+                                  },
+                                  "duplicate": {
                                     "type": "integer"
                                   },
                                   "message": {}
@@ -64207,22 +64262,31 @@
                       "status": "failed",
                       "cutoverDate": "2026-11-01",
                       "rowsRead": 480,
-                      "rowsValid": 478,
+                      "rowsValid": 477,
                       "rowsError": 2,
+                      "rowsNew": 470,
+                      "rowsChanged": 4,
+                      "rowsUnchanged": 3,
+                      "rowsDuplicate": 1,
+                      "fileSha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                      "validateMs": 5400,
+                      "loadMs": null,
+                      "sameFileAs": null,
                       "sheets": [
                         {
-                          "sheet": "policies",
-                          "name": "Policies",
+                          "sheet": "policies-motor",
+                          "name": "Policies - Motor",
                           "read": 120,
-                          "valid": 118,
+                          "valid": 117,
                           "errors": 2,
                           "held": 0,
-                          "created": 118,
-                          "updated": 0,
-                          "unchanged": 0,
+                          "created": 110,
+                          "updated": 4,
+                          "unchanged": 3,
                           "proposed": 0,
                           "ignored": 0,
                           "skipped": 0,
+                          "duplicate": 1,
                           "message": null
                         }
                       ],
@@ -64234,8 +64298,8 @@
                     },
                     "errors": [
                       {
-                        "sheet": "policies",
-                        "sheetName": "Policies",
+                        "sheet": "policies-motor",
+                        "sheetName": "Policies - Motor",
                         "row": 14,
                         "column": "Issue Date",
                         "message": "Issue Date 2026-11-02 is on or after the cutover date 2026-11-01"
@@ -64338,6 +64402,26 @@
                             "rowsError": {
                               "type": "integer"
                             },
+                            "rowsNew": {
+                              "type": "integer"
+                            },
+                            "rowsChanged": {
+                              "type": "integer"
+                            },
+                            "rowsUnchanged": {
+                              "type": "integer"
+                            },
+                            "rowsDuplicate": {
+                              "type": "integer"
+                            },
+                            "fileSha256": {
+                              "type": "string"
+                            },
+                            "validateMs": {
+                              "type": "integer"
+                            },
+                            "loadMs": {},
+                            "sameFileAs": {},
                             "sheets": {
                               "type": "array",
                               "items": {
@@ -64377,6 +64461,9 @@
                                     "type": "integer"
                                   },
                                   "skipped": {
+                                    "type": "integer"
+                                  },
+                                  "duplicate": {
                                     "type": "integer"
                                   },
                                   "message": {}
@@ -64438,22 +64525,31 @@
                       "status": "failed",
                       "cutoverDate": "2026-11-01",
                       "rowsRead": 480,
-                      "rowsValid": 478,
+                      "rowsValid": 477,
                       "rowsError": 2,
+                      "rowsNew": 470,
+                      "rowsChanged": 4,
+                      "rowsUnchanged": 3,
+                      "rowsDuplicate": 1,
+                      "fileSha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                      "validateMs": 5400,
+                      "loadMs": null,
+                      "sameFileAs": null,
                       "sheets": [
                         {
-                          "sheet": "policies",
-                          "name": "Policies",
+                          "sheet": "policies-motor",
+                          "name": "Policies - Motor",
                           "read": 120,
-                          "valid": 118,
+                          "valid": 117,
                           "errors": 2,
                           "held": 0,
-                          "created": 118,
-                          "updated": 0,
-                          "unchanged": 0,
+                          "created": 110,
+                          "updated": 4,
+                          "unchanged": 3,
                           "proposed": 0,
                           "ignored": 0,
                           "skipped": 0,
+                          "duplicate": 1,
                           "message": null
                         }
                       ],
@@ -64465,8 +64561,8 @@
                     },
                     "errors": [
                       {
-                        "sheet": "policies",
-                        "sheetName": "Policies",
+                        "sheet": "policies-motor",
+                        "sheetName": "Policies - Motor",
                         "row": 14,
                         "column": "Issue Date",
                         "message": "Issue Date 2026-11-02 is on or after the cutover date 2026-11-01"
@@ -64495,10 +64591,219 @@
         ]
       }
     },
+    "/data-load/batches/{id}/duplicates": {
+      "get": {
+        "operationId": "getDataLoadBatchesIdDuplicates",
+        "summary": "Duplicate rows of a batch with the records they match (in the file or in BrokerVerse) and their resolution; filter rule (tin, name-birth-date, company-name, vehicle, coc, policy-number, insurer-variant, master-name)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Duplicates\n\nAccess: read:data-load, write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "rule",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "tin"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 50
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "sheet": {
+                            "type": "string"
+                          },
+                          "sheetName": {
+                            "type": "string"
+                          },
+                          "row": {
+                            "type": "integer"
+                          },
+                          "key": {
+                            "type": "string"
+                          },
+                          "result": {
+                            "type": "string"
+                          },
+                          "values": {
+                            "type": "object",
+                            "properties": {
+                              "clientCode": {
+                                "type": "string"
+                              },
+                              "email": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "changes": {
+                            "type": "array",
+                            "items": {}
+                          },
+                          "duplicates": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "rule": {
+                                  "type": "string"
+                                },
+                                "label": {
+                                  "type": "string"
+                                },
+                                "kind": {
+                                  "type": "string"
+                                },
+                                "recordId": {
+                                  "type": "string"
+                                },
+                                "number": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "errors": {
+                            "type": "array",
+                            "items": {}
+                          },
+                          "warnings": {
+                            "type": "array",
+                            "items": {}
+                          },
+                          "resolution": {},
+                          "resolutionReason": {},
+                          "resolvedBy": {},
+                          "resolvedAt": {},
+                          "record": {}
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    },
+                    "totalPages": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 9013,
+                      "sheet": "clients",
+                      "sheetName": "Clients",
+                      "row": 13,
+                      "key": "C-000990",
+                      "result": "duplicate",
+                      "values": {
+                        "clientCode": "C-000881",
+                        "email": "andrea.lim@example.ph"
+                      },
+                      "changes": [],
+                      "duplicates": [
+                        {
+                          "rule": "tin",
+                          "label": "Same TIN",
+                          "kind": "stored",
+                          "recordId": "cli_1a2b3c4d5e6f7a8b",
+                          "number": "C-000881",
+                          "name": "Andrea Lim"
+                        }
+                      ],
+                      "errors": [],
+                      "warnings": [],
+                      "resolution": null,
+                      "resolutionReason": null,
+                      "resolvedBy": null,
+                      "resolvedAt": null,
+                      "record": null
+                    }
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "perPage": 50,
+                  "totalPages": 1
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Loads > Duplicates",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      }
+    },
     "/data-load/batches/{id}/errors": {
       "get": {
         "operationId": "getDataLoadBatchesIdErrors",
-        "summary": "The rows in error of a batch as a workbook in the kit layout with an Errors column, to fix and upload again",
+        "summary": "The rows in error and the unresolved duplicates of a batch as a workbook in the kit layout with an Errors column, to fix and upload again (masked for a user without view:pii)",
         "tags": [
           "Go-Live Data Workbench"
         ],
@@ -64610,6 +64915,26 @@
                             "rowsError": {
                               "type": "integer"
                             },
+                            "rowsNew": {
+                              "type": "integer"
+                            },
+                            "rowsChanged": {
+                              "type": "integer"
+                            },
+                            "rowsUnchanged": {
+                              "type": "integer"
+                            },
+                            "rowsDuplicate": {
+                              "type": "integer"
+                            },
+                            "fileSha256": {
+                              "type": "string"
+                            },
+                            "validateMs": {
+                              "type": "integer"
+                            },
+                            "loadMs": {},
+                            "sameFileAs": {},
                             "sheets": {
                               "type": "array",
                               "items": {
@@ -64649,6 +64974,9 @@
                                     "type": "integer"
                                   },
                                   "skipped": {
+                                    "type": "integer"
+                                  },
+                                  "duplicate": {
                                     "type": "integer"
                                   },
                                   "message": {}
@@ -64703,22 +65031,31 @@
                       "status": "loaded",
                       "cutoverDate": "2026-11-01",
                       "rowsRead": 480,
-                      "rowsValid": 478,
+                      "rowsValid": 477,
                       "rowsError": 2,
+                      "rowsNew": 470,
+                      "rowsChanged": 4,
+                      "rowsUnchanged": 3,
+                      "rowsDuplicate": 1,
+                      "fileSha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                      "validateMs": 5400,
+                      "loadMs": null,
+                      "sameFileAs": null,
                       "sheets": [
                         {
-                          "sheet": "policies",
-                          "name": "Policies",
+                          "sheet": "policies-motor",
+                          "name": "Policies - Motor",
                           "read": 120,
-                          "valid": 118,
+                          "valid": 117,
                           "errors": 2,
                           "held": 0,
-                          "created": 118,
-                          "updated": 0,
-                          "unchanged": 0,
+                          "created": 110,
+                          "updated": 4,
+                          "unchanged": 3,
                           "proposed": 0,
                           "ignored": 0,
                           "skipped": 0,
+                          "duplicate": 1,
                           "message": null
                         }
                       ],
@@ -64822,6 +65159,503 @@
         ]
       }
     },
+    "/data-load/batches/{id}/resolutions": {
+      "post": {
+        "operationId": "postDataLoadBatchesIdResolutions",
+        "summary": "Resolve duplicate rows (rows: ids, or rule: every row of that rule): load-as-new, use-existing (no record created; a client code or insurer value is mapped to the existing record for later loads), insurer-suffix (policy number of another insurer, loaded as number/INSURER), or null to clear; reason required. The batch is validated again",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Duplicates > Resolve\n\nAccess: write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "resolved": {
+                          "type": "integer"
+                        },
+                        "maps": {
+                          "type": "integer"
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "batch": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "loadNumber": {
+                              "type": "string"
+                            },
+                            "kit": {
+                              "type": "string"
+                            },
+                            "legacySystem": {
+                              "type": "string"
+                            },
+                            "fileName": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "cutoverDate": {
+                              "type": "string"
+                            },
+                            "rowsRead": {
+                              "type": "integer"
+                            },
+                            "rowsValid": {
+                              "type": "integer"
+                            },
+                            "rowsError": {
+                              "type": "integer"
+                            },
+                            "rowsNew": {
+                              "type": "integer"
+                            },
+                            "rowsChanged": {
+                              "type": "integer"
+                            },
+                            "rowsUnchanged": {
+                              "type": "integer"
+                            },
+                            "rowsDuplicate": {
+                              "type": "integer"
+                            },
+                            "fileSha256": {
+                              "type": "string"
+                            },
+                            "validateMs": {
+                              "type": "integer"
+                            },
+                            "loadMs": {},
+                            "sameFileAs": {},
+                            "sheets": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "sheet": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "read": {
+                                    "type": "integer"
+                                  },
+                                  "valid": {
+                                    "type": "integer"
+                                  },
+                                  "errors": {
+                                    "type": "integer"
+                                  },
+                                  "held": {
+                                    "type": "integer"
+                                  },
+                                  "created": {
+                                    "type": "integer"
+                                  },
+                                  "updated": {
+                                    "type": "integer"
+                                  },
+                                  "unchanged": {
+                                    "type": "integer"
+                                  },
+                                  "proposed": {
+                                    "type": "integer"
+                                  },
+                                  "ignored": {
+                                    "type": "integer"
+                                  },
+                                  "skipped": {
+                                    "type": "integer"
+                                  },
+                                  "duplicate": {
+                                    "type": "integer"
+                                  },
+                                  "message": {}
+                                }
+                              }
+                            },
+                            "loadedCounts": {},
+                            "reconciliation": {},
+                            "createdBy": {
+                              "type": "string"
+                            },
+                            "createdAt": {
+                              "type": "string"
+                            },
+                            "validatedAt": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Resolved 1 row(s)",
+                  "data": {
+                    "resolved": 1,
+                    "maps": 1,
+                    "rows": [
+                      9013
+                    ],
+                    "batch": {
+                      "id": 7,
+                      "loadNumber": "MIG-000007",
+                      "kit": "migration",
+                      "legacySystem": "TISPH Excel",
+                      "fileName": "GoLive_Migration_Workbook.xlsx",
+                      "status": "failed",
+                      "cutoverDate": "2026-11-01",
+                      "rowsRead": 480,
+                      "rowsValid": 477,
+                      "rowsError": 2,
+                      "rowsNew": 470,
+                      "rowsChanged": 4,
+                      "rowsUnchanged": 3,
+                      "rowsDuplicate": 1,
+                      "fileSha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                      "validateMs": 5400,
+                      "loadMs": null,
+                      "sameFileAs": null,
+                      "sheets": [
+                        {
+                          "sheet": "policies-motor",
+                          "name": "Policies - Motor",
+                          "read": 120,
+                          "valid": 117,
+                          "errors": 2,
+                          "held": 0,
+                          "created": 110,
+                          "updated": 4,
+                          "unchanged": 3,
+                          "proposed": 0,
+                          "ignored": 0,
+                          "skipped": 0,
+                          "duplicate": 1,
+                          "message": null
+                        }
+                      ],
+                      "loadedCounts": null,
+                      "reconciliation": null,
+                      "createdBy": "BrokerVerse Administrator",
+                      "createdAt": "2026-10-28T09:00:00Z",
+                      "validatedAt": "2026-10-28T09:00:05Z"
+                    },
+                    "errors": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Loads > Duplicates > Resolve",
+        "x-permissions": [
+          "write:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "rows": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  "resolution": {
+                    "type": "string"
+                  },
+                  "targetCode": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "rows": [
+                  9013
+                ],
+                "resolution": "use-existing",
+                "targetCode": "C-000881",
+                "reason": "Same client as in BrokerVerse (TIN verified)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-load/batches/{id}/rows": {
+      "get": {
+        "operationId": "getDataLoadBatchesIdRows",
+        "summary": "Review of a validation: the rows of a batch with their result (new, changed, unchanged, duplicate, error), the changed columns old -> new, duplicates, errors and warnings; filters sheet, result, search; paging; masked for a user without view:pii",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Loads > Review\n\nAccess: read:data-load, write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sheet",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "clients"
+          },
+          {
+            "name": "result",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "changed"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "lim"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 50
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "sheet": {
+                            "type": "string"
+                          },
+                          "sheetName": {
+                            "type": "string"
+                          },
+                          "row": {
+                            "type": "integer"
+                          },
+                          "key": {
+                            "type": "string"
+                          },
+                          "result": {
+                            "type": "string"
+                          },
+                          "values": {
+                            "type": "object",
+                            "properties": {
+                              "clientCode": {
+                                "type": "string"
+                              },
+                              "email": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "changes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "column": {
+                                  "type": "string"
+                                },
+                                "header": {
+                                  "type": "string"
+                                },
+                                "old": {
+                                  "type": "string"
+                                },
+                                "new": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "duplicates": {
+                            "type": "array",
+                            "items": {}
+                          },
+                          "errors": {
+                            "type": "array",
+                            "items": {}
+                          },
+                          "warnings": {
+                            "type": "array",
+                            "items": {}
+                          },
+                          "resolution": {},
+                          "resolutionReason": {},
+                          "resolvedBy": {},
+                          "resolvedAt": {},
+                          "record": {}
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    },
+                    "totalPages": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 9012,
+                      "sheet": "clients",
+                      "sheetName": "Clients",
+                      "row": 12,
+                      "key": "C-000881",
+                      "result": "changed",
+                      "values": {
+                        "clientCode": "C-000881",
+                        "email": "andrea.lim@example.ph"
+                      },
+                      "changes": [
+                        {
+                          "column": "email",
+                          "header": "Email",
+                          "old": "a.lim@example.ph",
+                          "new": "andrea.lim@example.ph"
+                        }
+                      ],
+                      "duplicates": [],
+                      "errors": [],
+                      "warnings": [],
+                      "resolution": null,
+                      "resolutionReason": null,
+                      "resolvedBy": null,
+                      "resolvedAt": null,
+                      "record": null
+                    }
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "perPage": 50,
+                  "totalPages": 1
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Loads > Review",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      }
+    },
     "/data-load/batches/{id}/validate": {
       "post": {
         "operationId": "postDataLoadBatchesIdValidate",
@@ -64887,6 +65721,26 @@
                             "rowsError": {
                               "type": "integer"
                             },
+                            "rowsNew": {
+                              "type": "integer"
+                            },
+                            "rowsChanged": {
+                              "type": "integer"
+                            },
+                            "rowsUnchanged": {
+                              "type": "integer"
+                            },
+                            "rowsDuplicate": {
+                              "type": "integer"
+                            },
+                            "fileSha256": {
+                              "type": "string"
+                            },
+                            "validateMs": {
+                              "type": "integer"
+                            },
+                            "loadMs": {},
+                            "sameFileAs": {},
                             "sheets": {
                               "type": "array",
                               "items": {
@@ -64926,6 +65780,9 @@
                                     "type": "integer"
                                   },
                                   "skipped": {
+                                    "type": "integer"
+                                  },
+                                  "duplicate": {
                                     "type": "integer"
                                   },
                                   "message": {}
@@ -64984,22 +65841,31 @@
                       "status": "failed",
                       "cutoverDate": "2026-11-01",
                       "rowsRead": 480,
-                      "rowsValid": 478,
+                      "rowsValid": 477,
                       "rowsError": 2,
+                      "rowsNew": 470,
+                      "rowsChanged": 4,
+                      "rowsUnchanged": 3,
+                      "rowsDuplicate": 1,
+                      "fileSha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                      "validateMs": 5400,
+                      "loadMs": null,
+                      "sameFileAs": null,
                       "sheets": [
                         {
-                          "sheet": "policies",
-                          "name": "Policies",
+                          "sheet": "policies-motor",
+                          "name": "Policies - Motor",
                           "read": 120,
-                          "valid": 118,
+                          "valid": 117,
                           "errors": 2,
                           "held": 0,
-                          "created": 118,
-                          "updated": 0,
-                          "unchanged": 0,
+                          "created": 110,
+                          "updated": 4,
+                          "unchanged": 3,
                           "proposed": 0,
                           "ignored": 0,
                           "skipped": 0,
+                          "duplicate": 1,
                           "message": null
                         }
                       ],
@@ -65011,8 +65877,8 @@
                     },
                     "errors": [
                       {
-                        "sheet": "policies",
-                        "sheetName": "Policies",
+                        "sheet": "policies-motor",
+                        "sheetName": "Policies - Motor",
                         "row": 14,
                         "column": "Issue Date",
                         "message": "Issue Date 2026-11-02 is on or after the cutover date 2026-11-01"
@@ -66047,6 +66913,206 @@
         ]
       }
     },
+    "/data-load/document-names/check": {
+      "post": {
+        "operationId": "postDataLoadDocumentNamesCheck",
+        "summary": "Check a list of legacy document file names against the naming convention (multipart \"file\": .xlsx or .csv with the names in the first column or a File Name column, or .txt with one name per line; never the files): valid or invalid with the reason, and whether the record it names is in BrokerVerse",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Document Naming\n\nAccess: read:data-load, write:data-load",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "token": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "names": {
+                              "type": "integer"
+                            },
+                            "valid": {
+                              "type": "integer"
+                            },
+                            "invalid": {
+                              "type": "integer"
+                            },
+                            "recordFound": {
+                              "type": "integer"
+                            },
+                            "recordMissing": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "valid": {
+                                "type": "boolean"
+                              },
+                              "reason": {},
+                              "recordType": {
+                                "type": "string"
+                              },
+                              "recordTypeLabel": {
+                                "type": "string"
+                              },
+                              "recordNumber": {
+                                "type": "string"
+                              },
+                              "documentType": {
+                                "type": "string"
+                              },
+                              "date": {
+                                "type": "string"
+                              },
+                              "recordFound": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Checked 2 name(s): 1 invalid",
+                  "data": {
+                    "token": "rpt_4f2a9c1d0e7b3a55",
+                    "fileName": "Legacy_Files.xlsx",
+                    "summary": {
+                      "names": 2,
+                      "valid": 1,
+                      "invalid": 1,
+                      "recordFound": 1,
+                      "recordMissing": 0
+                    },
+                    "results": [
+                      {
+                        "name": "POL_PC-MLY-2026-000101_POLSCH_20260225.pdf",
+                        "valid": true,
+                        "reason": null,
+                        "recordType": "POL",
+                        "recordTypeLabel": "Policy",
+                        "recordNumber": "PC-MLY-2026-000101",
+                        "documentType": "POLSCH",
+                        "date": "2026-02-25",
+                        "recordFound": true
+                      },
+                      {
+                        "name": "scan001.pdf",
+                        "valid": false,
+                        "reason": "The name must have the parts <RecordType>_<RecordNumber>_<DocumentType>_<YYYYMMDD>[_<n>].<ext>"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Templates > Document Naming",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              },
+              "example": "multipart/form-data file"
+            }
+          }
+        }
+      }
+    },
+    "/data-load/document-names/check/{token}/workbook": {
+      "get": {
+        "operationId": "getDataLoadDocumentNamesCheckTokenWorkbook",
+        "summary": "Result of a document name check (XLSX): summary and one row per name; only for the user who ran the check",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Document Naming > Download\n\nAccess: read:data-load, write:data-load",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Templates > Document Naming > Download",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      }
+    },
     "/data-load/kits": {
       "get": {
         "operationId": "getDataLoadKits",
@@ -66188,11 +67254,11 @@
     "/data-load/kits/{kit}/template": {
       "get": {
         "operationId": "getDataLoadKitsKitTemplate",
-        "summary": "Workbook of a kit (XLSX): Instructions, Lists and one sheet per object; prefill=true fills it with the current data of this environment (promotion to the next environment)",
+        "summary": "Workbook of a kit (XLSX): Instructions, Lists, one sheet per object (the migration kit has one policy sheet per product) and the hidden Control sheet; objects: some of the objects only (comma list of keys); prefill=true fills it with the current data of this environment, masked for a user without view:pii",
         "tags": [
           "Go-Live Data Workbench"
         ],
-        "description": "Front-end touchpoint: API (go-live scripts) > Download template\n\nAccess: read:data-load, write:data-load",
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates\n\nAccess: read:data-load, write:data-load",
         "parameters": [
           {
             "name": "kit",
@@ -66210,6 +67276,15 @@
               "type": "string"
             },
             "example": "true"
+          },
+          {
+            "name": "objects",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "policies-motor,open-items"
           }
         ],
         "responses": {
@@ -66234,7 +67309,745 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "API (go-live scripts) > Download template",
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Templates",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      }
+    },
+    "/data-load/value-maps": {
+      "get": {
+        "operationId": "getDataLoadValueMaps",
+        "summary": "Value maps of the legacy code tables: legacy value -> BrokerVerse code per object (insurer, product, branch, user, channel, client, payment-status, claim-status, vehicle-type); filters object, search; paging",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps\n\nAccess: read:data-load, write:data-load",
+        "parameters": [
+          {
+            "name": "object",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "insurer"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "malayan"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 50
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "object": {
+                            "type": "string"
+                          },
+                          "objectLabel": {
+                            "type": "string"
+                          },
+                          "legacyValue": {
+                            "type": "string"
+                          },
+                          "targetCode": {
+                            "type": "string"
+                          },
+                          "note": {
+                            "type": "string"
+                          },
+                          "createdBy": {
+                            "type": "string"
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "updatedBy": {
+                            "type": "string"
+                          },
+                          "updatedAt": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    },
+                    "totalPages": {
+                      "type": "integer"
+                    },
+                    "objects": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": {
+                            "type": "string"
+                          },
+                          "label": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 4,
+                      "object": "insurer",
+                      "objectLabel": "Insurer",
+                      "legacyValue": "Malayan Ins. Co., Inc.",
+                      "targetCode": "MALAYAN",
+                      "note": "Legacy insurer table",
+                      "createdBy": "Andrea Lim",
+                      "createdAt": "2026-10-28T09:00:00Z",
+                      "updatedBy": "Andrea Lim",
+                      "updatedAt": "2026-10-28T09:00:00Z"
+                    }
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "perPage": 50,
+                  "totalPages": 1,
+                  "objects": [
+                    {
+                      "key": "insurer",
+                      "label": "Insurer"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      },
+      "post": {
+        "operationId": "postDataLoadValueMaps",
+        "summary": "Add a value map (or change the target of the map of the same legacy value); the code is checked against its master",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps > Add\n\nAccess: write:data-load",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "object": {
+                          "type": "string"
+                        },
+                        "objectLabel": {
+                          "type": "string"
+                        },
+                        "legacyValue": {
+                          "type": "string"
+                        },
+                        "targetCode": {
+                          "type": "string"
+                        },
+                        "note": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "updatedBy": {
+                          "type": "string"
+                        },
+                        "updatedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Value map saved",
+                  "data": {
+                    "id": 4,
+                    "object": "insurer",
+                    "objectLabel": "Insurer",
+                    "legacyValue": "Malayan Ins. Co., Inc.",
+                    "targetCode": "MALAYAN",
+                    "note": "Legacy insurer table",
+                    "createdBy": "Andrea Lim",
+                    "createdAt": "2026-10-28T09:00:00Z",
+                    "updatedBy": "Andrea Lim",
+                    "updatedAt": "2026-10-28T09:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps > Add",
+        "x-permissions": [
+          "write:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "object": {
+                    "type": "string"
+                  },
+                  "legacyValue": {
+                    "type": "string"
+                  },
+                  "targetCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "object": "insurer",
+                "legacyValue": "Malayan Ins. Co., Inc.",
+                "targetCode": "MALAYAN",
+                "note": "Legacy insurer table"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-load/value-maps/{id}": {
+      "get": {
+        "operationId": "getDataLoadValueMapsId",
+        "summary": "One value map",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps\n\nAccess: read:data-load, write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "object": {
+                          "type": "string"
+                        },
+                        "objectLabel": {
+                          "type": "string"
+                        },
+                        "legacyValue": {
+                          "type": "string"
+                        },
+                        "targetCode": {
+                          "type": "string"
+                        },
+                        "note": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "updatedBy": {
+                          "type": "string"
+                        },
+                        "updatedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 4,
+                    "object": "insurer",
+                    "objectLabel": "Insurer",
+                    "legacyValue": "Malayan Ins. Co., Inc.",
+                    "targetCode": "MALAYAN",
+                    "note": "Legacy insurer table",
+                    "createdBy": "Andrea Lim",
+                    "createdAt": "2026-10-28T09:00:00Z",
+                    "updatedBy": "Andrea Lim",
+                    "updatedAt": "2026-10-28T09:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      },
+      "put": {
+        "operationId": "putDataLoadValueMapsId",
+        "summary": "Change a value map",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps > Edit\n\nAccess: write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "object": {
+                          "type": "string"
+                        },
+                        "objectLabel": {
+                          "type": "string"
+                        },
+                        "legacyValue": {
+                          "type": "string"
+                        },
+                        "targetCode": {
+                          "type": "string"
+                        },
+                        "note": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "updatedBy": {
+                          "type": "string"
+                        },
+                        "updatedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Value map saved",
+                  "data": {
+                    "id": 4,
+                    "object": "insurer",
+                    "objectLabel": "Insurer",
+                    "legacyValue": "Malayan Ins. Co., Inc.",
+                    "targetCode": "MALAYAN",
+                    "note": "Legacy insurer table",
+                    "createdBy": "Andrea Lim",
+                    "createdAt": "2026-10-28T09:00:00Z",
+                    "updatedBy": "Andrea Lim",
+                    "updatedAt": "2026-10-28T09:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps > Edit",
+        "x-permissions": [
+          "write:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "legacyValue": {
+                    "type": "string"
+                  },
+                  "targetCode": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "legacyValue": "Malayan Ins. Co., Inc.",
+                "targetCode": "MALAYAN",
+                "note": "Legacy insurer table"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteDataLoadValueMapsId",
+        "summary": "Remove a value map (rows already loaded keep their records)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps > Remove\n\nAccess: write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "object": {
+                          "type": "string"
+                        },
+                        "objectLabel": {
+                          "type": "string"
+                        },
+                        "legacyValue": {
+                          "type": "string"
+                        },
+                        "targetCode": {
+                          "type": "string"
+                        },
+                        "note": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "updatedBy": {
+                          "type": "string"
+                        },
+                        "updatedAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Value map removed",
+                  "data": {
+                    "id": 4,
+                    "object": "insurer",
+                    "objectLabel": "Insurer",
+                    "legacyValue": "Malayan Ins. Co., Inc.",
+                    "targetCode": "MALAYAN",
+                    "note": "Legacy insurer table",
+                    "createdBy": "Andrea Lim",
+                    "createdAt": "2026-10-28T09:00:00Z",
+                    "updatedBy": "Andrea Lim",
+                    "updatedAt": "2026-10-28T09:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps > Remove",
+        "x-permissions": [
+          "write:data-load"
+        ]
+      }
+    },
+    "/data-load/value-maps/upload": {
+      "post": {
+        "operationId": "postDataLoadValueMapsUpload",
+        "summary": "Upload the Value Maps sheet: each row adds a map or changes the map of the same legacy value; all or nothing (the rows in error are listed)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps > Upload\n\nAccess: write:data-load",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "created": {
+                          "type": "integer"
+                        },
+                        "updated": {
+                          "type": "integer"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Value maps loaded: 3 added, 1 changed",
+                  "data": {
+                    "created": 3,
+                    "updated": 1,
+                    "errors": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps > Upload",
+        "x-permissions": [
+          "write:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              },
+              "example": "multipart/form-data file"
+            }
+          }
+        }
+      }
+    },
+    "/data-load/value-maps/workbook": {
+      "get": {
+        "operationId": "getDataLoadValueMapsWorkbook",
+        "summary": "The value maps as one sheet (XLSX), to change and upload again",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps > Download\n\nAccess: read:data-load, write:data-load",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Configuration > Data Migration & Go-Live > Templates > Value Maps > Download",
         "x-permissions": [
           "read:data-load",
           "write:data-load"

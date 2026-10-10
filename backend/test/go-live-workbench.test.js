@@ -100,8 +100,10 @@ describe('templates', () => {
       expect(r.status).toBe(200);
       expect(r.headers['content-type']).toContain('spreadsheetml');
       const sheets = readWorkbook(r.body);
-      expect(sheets.map((s) => s.name)).toEqual(['Instructions', 'Lists', ...k.sheets.map((s) => s.name)]);
-      for (const s of k.sheets) {
+      // the single Policies sheet of the earlier layout is read, never downloaded; the hidden Control sheet comes last
+      const shown = k.sheets.filter((s) => !s.legacyLayout);
+      expect(sheets.map((s) => s.name)).toEqual(['Instructions', 'Lists', ...shown.map((s) => s.name), 'Control']);
+      for (const s of shown) {
         const ws = sheets.find((x) => x.name === s.name);
         const required = s.columns.filter((c) => c.required).map((c) => `${c.header} *`);
         for (const h of required) expect(ws.rows[0]).toContain(h);
@@ -188,7 +190,7 @@ describe('configuration kit', () => {
     expect(users.rows.length).toBe(3); // header, sample, the one row in error
     expect(users.rows[2][0]).toBe('wb.ae2');
     expect(users.rows[2][users.rows[0].indexOf('Errors')]).toMatch(/Roles: Unknown role/);
-    for (const s of sheets.filter((x) => !['Instructions', 'Lists', 'Users'].includes(x.name))) expect(s.rows.length).toBeLessThanOrEqual(2);
+    for (const s of sheets.filter((x) => !['Instructions', 'Lists', 'Users', 'Control'].includes(x.name))) expect(s.rows.length).toBeLessThanOrEqual(2);
     // load the valid rows of the first file, then the corrected row
     const partial = await load(batchA.id, { validRowsOnly: true });
     expect(partial.status).toBe(200);
@@ -331,7 +333,7 @@ describe('migration kit', () => {
     expect(r.status).toBe(201);
     expect(r.body.data.errors).toEqual([]);
     expect(r.body.data.batch.status).toBe('validated');
-    expect(r.body.data.batch.sheets.map((s) => [s.sheet, s.created])).toEqual([['clients', 2], ['policies', 2], ['open-items', 1], ['claims', 1], ['opening-balances', 4]]);
+    expect(r.body.data.batch.sheets.filter((s) => s.read).map((s) => [s.sheet, s.created])).toEqual([['clients', 2], ['policies', 2], ['open-items', 1], ['claims', 1], ['opening-balances', 4]]);
     expect(r.body.data.batch.reconciliation.checks.every((c) => c.ok)).toBe(true);
     expect(await count("SELECT count(*)::int AS n FROM policies WHERE policy_number LIKE 'OLD-%'")).toBe(0);
     expect(await count("SELECT count(*)::int AS n FROM clients WHERE client_code LIKE 'OLD-%'")).toBe(0);
