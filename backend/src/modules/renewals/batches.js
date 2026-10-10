@@ -4,7 +4,8 @@ import { getSetting } from '../../lib/settings.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { round2 } from '../claims/util.js';
 import { enqueue, registerJobType } from './queue.js';
-import { ensureRenewal, generateQuote, renewablePolicies, sendNotice } from './service.js';
+import { ensureRenewal, generateQuote, lineOf, renewablePolicies, sendNotice } from './service.js';
+import { confirmationOf, talkbotStatus } from '../talkbot/status.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 
 export const QUEUE = 'renewal-notices';
@@ -12,14 +13,16 @@ export const JOB_TYPE = 'renewal-batch-notices';
 export const QUOTE_JOB_TYPE = 'renewal-batch-quotes';
 
 const POLICY_COLS = `bp.*, p.policy_number, p.expiry_date, p.premium_total, p.status AS policy_status, cl.display_name AS client_name, cl.email AS client_email,
-  ic.name AS insurer_name, pr.name AS product_name,
+  ic.name AS insurer_name, pr.name AS product_name, pr.line AS product_line,
   (SELECT COALESCE(sum(rv.balance), 0) FROM receivables rv WHERE rv.policy_id = p.id AND rv.balance > 0 AND rv.status NOT IN ('paid','written-off'))::numeric AS unpaid`;
 const POLICY_FROM = `FROM renewal_batch_policies bp JOIN policies p ON p.id = bp.policy_id LEFT JOIN clients cl ON cl.id = p.client_id
   LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id LEFT JOIN products pr ON pr.id = p.product_id`;
 
 const policyApi = (r) => ({
   id: r.id, policyId: r.policy_id, renewalId: r.renewal_id, isSelected: r.is_selected, noticeStatus: r.notice_status, noticeSentAt: r.notice_sent_at,
-  error: r.error, attempts: r.attempts, createdAt: r.created_at,
+  error: r.error, attempts: r.attempts, createdAt: r.created_at, skipReason: r.skip_reason || null,
+  talkbotOutcome: r.talkbot?.outcome || null, talkbotOutcomeLabel: r.talkbot?.label || null, talkbotCallList: r.talkbot?.listNumber || null,
+  talkbotConfirmedOn: r.talkbot?.confirmed ? r.talkbot.outcomeDate : null,
   quoteStatus: r.quote_status, quoteNumber: r.quote_number, quotedPremium: r.quoted_premium, quotedAt: r.quoted_at,
   policy: {
     id: r.policy_id, policyNumber: r.policy_number, insuranceCompanyName: r.insurer_name, clientName: r.client_name, ClientName: r.client_name,
@@ -30,7 +33,7 @@ const policyApi = (r) => ({
 const batchApi = (b) => ({
   id: b.id, batchId: b.batch_number, batchNumber: b.batch_number, status: b.status, criteriaOption: b.criteria || {},
   totalPolicies: b.total_policies ?? 0, processedCount: b.sent_count ?? 0, sentCount: b.sent_count ?? 0, failedCount: b.failed_count ?? 0,
-  queuedCount: b.queued_count ?? 0, notSentCount: b.not_sent_count ?? 0, quotedCount: b.quoted_count ?? 0, selectedCount: b.selected_count ?? 0, createdBy: b.created_by, createdAt: b.created_at, updatedAt: b.updated_at, completedAt: b.completed_at,
+  queuedCount: b.queued_count ?? 0, notSentCount: b.not_sent_count ?? 0, quotedCount: b.quoted_count ?? 0, skippedCount: b.skipped_count ?? 0, selectedCount: b.selected_count ?? 0, createdBy: b.created_by, createdAt: b.created_at, updatedAt: b.updated_at, completedAt: b.completed_at,
 });
 const COUNTS = `(SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id)::int AS total_policies,
   (SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id AND x.notice_status = 'Sent')::int AS sent_count,
@@ -38,6 +41,7 @@ const COUNTS = `(SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id 
   (SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id AND x.notice_status = 'Queued')::int AS queued_count,
   (SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id AND x.notice_status = 'NotSent')::int AS not_sent_count,
   (SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id AND x.quote_status = 'Quoted')::int AS quoted_count,
+  (SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id AND x.quote_status = 'Skipped')::int AS skipped_count,
   (SELECT count(*) FROM renewal_batch_policies x WHERE x.batch_id = b.id AND x.is_selected)::int AS selected_count`;
 
 async function loadBatch(id) {
@@ -46,12 +50,32 @@ async function loadBatch(id) {
   return b;
 }
 
-/** Renewable policies matching the batch criteria (expiry range, insurer, product, premium range, client, payment status). */
-async function policiesByCriteria(c = {}, limit) {
-  const { all } = await renewablePolicies({ ...c, renewableOnly: 'true' }, { limit, offset: 0 });
-  // a policy with a renewal already in progress stays with that renewal (it is not batched a second time)
-  return all.filter((p) => p.renewalState !== 'in-progress').slice(0, limit).map((p) => ({ id: p.policyId }));
+/**
+ * Policies whose latest Talkbot outcome (talkbotOutcome, 'not-called' also for policies never on a call list) and call
+ * list (talkbotCallList: number or id) match; all policies when neither is given ('All').
+ */
+export async function byTalkbot(items, { talkbotOutcome = null, talkbotCallList = null } = {}, idOf = (p) => p.policyId) {
+  const outcome = talkbotOutcome && talkbotOutcome !== 'All' ? talkbotOutcome : null;
+  const list = talkbotCallList && talkbotCallList !== 'All' ? String(talkbotCallList) : null;
+  const status = await talkbotStatus(items.map(idOf));
+  const annotated = items.map((p) => ({ ...p, talkbot: status.get(idOf(p)) || null }));
+  if (!outcome && !list) return annotated;
+  return annotated.filter((p) => (!outcome || (p.talkbot?.outcome || 'not-called') === outcome) && (!list || [p.talkbot?.listNumber, p.talkbot?.listId].includes(list)));
 }
+
+/** Renewable policies matching the batch criteria (expiry range, insurer, product, premium range, client, payment status, Talkbot outcome and call list). */
+async function policiesByCriteria(c = {}, limit) {
+  const { all } = await renewablePolicies({ ...c, renewableOnly: 'true' }, { limit: 100000, offset: 0 });
+  // a policy with a renewal already in progress stays with that renewal (it is not batched a second time)
+  const open = await byTalkbot(all.filter((p) => p.renewalState !== 'in-progress'), c);
+  return open.slice(0, limit).map((p) => ({ id: p.policyId }));
+}
+
+/** The batch policies with their Talkbot outcome. */
+const withTalkbot = async (rows) => {
+  const status = await talkbotStatus(rows.map((r) => r.policy_id));
+  return rows.map((r) => ({ ...r, talkbot: status.get(r.policy_id) || null }));
+};
 
 export async function createBatch(input, user) {
   const max = Number(await getSetting('renewals.batch_max_policies', 500));
@@ -102,7 +126,7 @@ export async function listBatches(q, pg) {
 
 export async function getBatch(id) {
   const b = await loadBatch(id);
-  const policies = await many(`SELECT ${POLICY_COLS} ${POLICY_FROM} WHERE bp.batch_id = $1 ORDER BY p.expiry_date, p.policy_number`, [b.id]);
+  const policies = await withTalkbot(await many(`SELECT ${POLICY_COLS} ${POLICY_FROM} WHERE bp.batch_id = $1 ORDER BY p.expiry_date, p.policy_number`, [b.id]));
   return { ...batchApi(b), policies: policies.map(policyApi) };
 }
 
@@ -113,7 +137,7 @@ export async function batchPolicies(id, q, pg) {
   if (q.noticeStatus) { params.push(q.noticeStatus); w += ` AND bp.notice_status = $${params.length}`; }
   if (q.isSelected !== undefined) { params.push(String(q.isSelected) === 'true'); w += ` AND bp.is_selected = $${params.length}`; }
   const total = (await one(`SELECT count(*)::int AS n FROM renewal_batch_policies bp WHERE ${w}`, params)).n;
-  const rows = await many(`SELECT ${POLICY_COLS} ${POLICY_FROM} WHERE ${w} ORDER BY p.expiry_date, p.policy_number LIMIT $${params.length + 1} OFFSET $${params.length + 2}`, [...params, pg.limit, pg.offset]);
+  const rows = await withTalkbot(await many(`SELECT ${POLICY_COLS} ${POLICY_FROM} WHERE ${w} ORDER BY p.expiry_date, p.policy_number LIMIT $${params.length + 1} OFFSET $${params.length + 2}`, [...params, pg.limit, pg.offset]));
   return { total, items: rows.map(policyApi) };
 }
 
@@ -160,16 +184,38 @@ export async function retryFailed(id, user) {
   return startJob(b, rows.map((r) => r.id), user);
 }
 
-/** Queue re-rated renewal quotes for the selected policies (not yet quoted); processed by the renewal-batch-quotes job. */
+/**
+ * Queue re-rated renewal quotes for the selected policies (not yet quoted, failed or skipped); processed by the
+ * renewal-batch-quotes job. With talkbot.bulk_quote_filter on, a Motor policy that is not Talkbot-confirmed (or whose
+ * confirmation is older than talkbot.confirmation_valid_days) is not queued: its quote status becomes Skipped with the
+ * reason (FRS LEAD-09 FR-TBT-022). Other lines are quoted as before. Returns { jobId, queued, skipped, batchId, message }.
+ */
 export async function queueQuotes(id, policyRefs, user) {
   const b = await loadBatch(id);
   if (b.status === 'Cancelled') throw conflict('Batch is cancelled');
   const refs = (policyRefs || []).map(String);
   if (!refs.length) throw badRequest('Select at least one policy to prepare renewal quotes');
-  const rows = await many(`UPDATE renewal_batch_policies bp SET is_selected = true, quote_status = 'Queued', error = NULL FROM policies p
-    WHERE bp.batch_id = $1 AND p.id = bp.policy_id AND (p.id = ANY($2) OR p.policy_number = ANY($2) OR bp.id::text = ANY($2)) AND bp.quote_status IN ('NotQuoted', 'Failed') RETURNING bp.id`, [b.id, refs]);
-  if (!rows.length) throw conflict('The selected policies already have a renewal quote');
-  return startJob(b, rows.map((r) => r.id), user, QUOTE_JOB_TYPE);
+  const items = await many(`SELECT bp.id, bp.policy_id, pr.line AS product_line, p.lob, p.product_type, pr.name AS product_name FROM renewal_batch_policies bp
+    JOIN policies p ON p.id = bp.policy_id LEFT JOIN products pr ON pr.id = p.product_id
+    WHERE bp.batch_id = $1 AND (p.id = ANY($2) OR p.policy_number = ANY($2) OR bp.id::text = ANY($2)) AND bp.quote_status IN ('NotQuoted', 'Failed', 'Skipped')`, [b.id, refs]);
+  if (!items.length) throw conflict('The selected policies already have a renewal quote');
+  const filter = (await getSetting('talkbot.bulk_quote_filter', true)) !== false;
+  const motor = items.filter((x) => lineOf(x) === 'MOTOR');
+  const status = filter ? await talkbotStatus(motor.map((x) => x.policy_id)) : new Map();
+  const queued = [];
+  let skipped = 0;
+  for (const x of items) {
+    const check = filter && lineOf(x) === 'MOTOR' ? await confirmationOf(status.get(x.policy_id)) : { ok: true };
+    if (check.ok) { queued.push(x.id); continue; }
+    skipped += 1;
+    await query("UPDATE renewal_batch_policies SET is_selected = true, quote_status = 'Skipped', skip_reason = $2, error = $2 WHERE id = $1", [x.id, check.reason]);
+    await query(`UPDATE talkbot_call_lines SET quote_status = 'skipped', skip_reason = $3 WHERE policy_id = $2 AND (batch_id = $1 OR (batch_id IS NULL AND line_status = 'active'
+      AND list_id = (SELECT l.list_id FROM talkbot_call_lines l WHERE l.policy_id = $2 AND l.line_status = 'active' ORDER BY l.outcome_at DESC NULLS LAST LIMIT 1)))`, [b.id, x.policy_id, check.reason]);
+  }
+  const message = `Renewal quotes queued: ${queued.length} policies, ${skipped} skipped as not confirmed by Talkbot`;
+  if (!queued.length) return { jobId: null, queued: 0, skipped, batchId: b.batch_number, message };
+  await query(`UPDATE renewal_batch_policies SET is_selected = true, quote_status = 'Queued', skip_reason = NULL, error = NULL WHERE id = ANY($1)`, [queued]);
+  return { ...(await startJob(b, queued, user, QUOTE_JOB_TYPE)), skipped, message };
 }
 
 async function startJob(b, itemIds, user, type = JOB_TYPE) {
@@ -225,6 +271,9 @@ export async function runBatchQuotesJob(payload, { progress }) {
         const { quote } = await generateQuote(renewalId, user);
         await query(`UPDATE renewal_batch_policies SET quote_status = 'Quoted', quote_number = $3, quoted_premium = $4, quoted_at = now(), renewal_id = $2 WHERE id = $1`,
           [itemId, renewalId, quote.quoteNumber, quote.quotedPremium]);
+        // the Talkbot call list line of the policy shows its renewal quote
+        await query(`UPDATE talkbot_call_lines SET quote_status = 'quoted', quote_number = $3, skip_reason = NULL, batch_id = COALESCE(batch_id, $1)
+          WHERE policy_id = $2 AND line_status = 'active' AND outcome = 'willing' AND (batch_id = $1 OR batch_id IS NULL)`, [batchId, item.policy_id, quote.quoteNumber]);
         succeeded += 1;
       } catch (e) {
         await query('UPDATE renewal_batch_policies SET quote_status = \'Failed\', error = $2 WHERE id = $1', [itemId, e.message]);
@@ -254,7 +303,7 @@ export async function statistics(id) {
 
 export const REPORT_COLUMNS = [
   ['policyNumber', 'Policy No.'], ['clientName', 'Client'], ['email', 'E-mail'], ['insurer', 'Insurer'], ['product', 'Product'], ['expiryDate', 'Expiry'],
-  ['premium', 'Gross premium'], ['paymentStatus', 'Payment'], ['quoteNumber', 'Renewal quote'], ['quotedPremium', 'Renewal premium'], ['noticeStatus', 'Notice status'], ['noticeSentAt', 'Sent at'], ['attempts', 'Attempts'], ['error', 'Error'],
+  ['premium', 'Gross premium'], ['paymentStatus', 'Payment'], ['quoteStatus', 'Quote status'], ['quoteNumber', 'Renewal quote'], ['quotedPremium', 'Renewal premium'], ['noticeStatus', 'Notice status'], ['noticeSentAt', 'Sent at'], ['attempts', 'Attempts'], ['error', 'Error'],
 ].map(([key, header]) => ({ key, header }));
 export async function reportRows(id) {
   const b = await getBatch(id);
@@ -262,7 +311,7 @@ export async function reportRows(id) {
     batch: b,
     rows: b.policies.map((p) => ({
       policyNumber: p.policy.policyNumber, clientName: p.policy.clientName, email: p.policy.email, insurer: p.policy.insuranceCompanyName, product: p.policy.productType,
-      expiryDate: p.policy.expiryDate, premium: p.policy.grossPremium, paymentStatus: p.policy.paymentStatus, quoteNumber: p.quoteNumber || '', quotedPremium: p.quotedPremium ?? '', noticeStatus: p.noticeStatus,
+      expiryDate: p.policy.expiryDate, premium: p.policy.grossPremium, paymentStatus: p.policy.paymentStatus, quoteStatus: p.quoteStatus, quoteNumber: p.quoteNumber || '', quotedPremium: p.quotedPremium ?? '', noticeStatus: p.noticeStatus,
       noticeSentAt: p.noticeSentAt ? new Date(p.noticeSentAt).toISOString() : '', attempts: p.attempts, error: p.error || '',
     })),
   };

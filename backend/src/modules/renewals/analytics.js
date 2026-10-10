@@ -5,10 +5,25 @@ import { round2, today, daysBetween } from '../claims/util.js';
 import { BASE, OPEN, RISK_FACTORS, activityApi, listRenewals, readContext, riskOf, toApi } from './service.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { businessDate } from '../../lib/dates.js';
+import { talkbotStatus } from '../talkbot/status.js';
 
-/** Renewal queue with the dashboard counters (total, due within renewals.due_soon_days, at risk, in grace period). */
-export async function renewalQueue(q, pg) {
-  const { total, items, all } = await listRenewals({ ...q, openOnly: q.status ? undefined : 'true' }, pg);
+/**
+ * Renewal queue with the dashboard counters (total, due within renewals.due_soon_days, at risk, in grace period). With
+ * talkbot (a user holding read:talkbot-calls) each renewal carries its latest Talkbot outcome and the queue can be
+ * filtered on it (talkbotOutcome).
+ */
+export async function renewalQueue(q, pg, { talkbot = false } = {}) {
+  const r = await listRenewals({ ...q, openOnly: q.status ? undefined : 'true' }, pg);
+  let { total, items } = r;
+  const { all } = r;
+  if (talkbot) {
+    const status = await talkbotStatus(all.map((x) => x.policyId));
+    const tagged = all.map((x) => ({ ...x, talkbot: status.get(x.policyId) || null }));
+    const outcome = q.talkbotOutcome && q.talkbotOutcome !== 'All' ? q.talkbotOutcome : null;
+    const shown = outcome ? tagged.filter((x) => (x.talkbot?.outcome || 'not-called') === outcome) : tagged;
+    total = shown.length;
+    items = shown.slice(pg.offset, pg.offset + pg.limit);
+  }
   const dueSoonDays = Number(await getSetting('renewals.due_soon_days', 30)) || 0;
   return {
     total, items,

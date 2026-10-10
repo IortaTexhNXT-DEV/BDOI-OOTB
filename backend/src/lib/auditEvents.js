@@ -333,6 +333,7 @@ export async function resolveRefs(ids) {
 
 /** Record numbers of audited records: entity -> [table, number expression]. */
 export const RECORD_NUMBERS = {
+  talkbot_call_list: ['talkbot_call_lists', 'list_number'],
   policy: ['policies', 'policy_number'], quotation: ['quotes', 'quote_number'], claim: ['claims', 'claim_number'],
   client: ['clients', "display_name || COALESCE(' (' || client_code || ')', '')"], lead: ['leads', 'COALESCE(lead_number, display_name)'],
   endorsement: ['endorsements', 'endorsement_number'], receipt: ['receipts', 'receipt_number'], renewal: ['renewals', 'renewal_number'],
@@ -346,6 +347,7 @@ export const RECORD_KEYS = {
   lead: ['leads', 'lead_number'], endorsement: ['endorsements', 'endorsement_number'], receipt: ['receipts', 'receipt_number'],
   renewal: ['renewals', 'renewal_number'], journal_voucher: ['journal_vouchers', 'jv_number'], user: ['users', 'username'],
   disbursement: ['disbursements', 'voucher_number'], petty_cash_request: ['petty_cash_requests', 'request_number'], petty_cash_fund: ['petty_cash_funds', 'code'],
+  talkbot_call_list: ['talkbot_call_lists', 'list_number'],
 };
 
 /** "entity|id" -> record number / name for a list of audit rows; master records use their code / name. */

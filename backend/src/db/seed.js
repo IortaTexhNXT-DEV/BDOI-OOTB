@@ -93,6 +93,10 @@ for (const [role, items] of Object.entries(SALES_ACTIVITY_PERMS)) ROLE_PERMS[rol
 const APPROVAL_PERMS = { sales: ['quotations:approve', 'policies:approve', 'renewals:approve'], processing: ['quotations:approve', 'policies:approve', 'renewals:approve'],
   operations: ['quotations:approve', 'policies:approve', 'renewals:approve'], claims: ['claims:approve'] };
 for (const [role, items] of Object.entries(APPROVAL_PERMS)) ROLE_PERMS[role].push(...items);
+// Talkbot call lists of Motor renewals (permissions of migration 0460): Sales & Marketing and Operations maintain them,
+// the Processing Team views them and creates the renewal batch of the confirmed accounts (write:renewals).
+const TALKBOT_PERMS = { sales: ['talkbot-calls'], operations: ['talkbot-calls'], processing: ['talkbot-calls:read'] };
+for (const [role, items] of Object.entries(TALKBOT_PERMS)) ROLE_PERMS[role].push(...items);
 
 // TISPH personas (RBAC v4 screen matrix, migration 0348). Screen rights map to module permissions: C/U -> write,
 // R -> read, A -> approve where the module has an approval. Sales and Operations both raise quotations, placements,
@@ -132,6 +136,9 @@ Object.assign(ROLE_PERMS, {
     'lead-assignment', 'campaigns', ...TIS_ACCOUNTING_READS, 'payables:approve', 'bank-reconciliation:read', 'period-end:read', 'audit:read', 'users:read',
     'roles:read', 'access-control:read', 'remittance:approve'],
 });
+// Talkbot call lists (migration 0460): the Sales personas and the General Manager maintain them, Operations view them.
+for (const role of ['tis-sales-associate', 'tis-sales-officer', 'tis-sales-unit-head', 'tis-general-manager']) ROLE_PERMS[role].push('talkbot-calls');
+for (const role of ['tis-ops-associate', 'tis-ops-officer', 'tis-ops-unit-head']) ROLE_PERMS[role].push('talkbot-calls:read');
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'], 'tis-superid': ['system-admin'] };
 /** The permission codes of a ROLE_PERMS entry: "module" is read and write, "module:action" that one permission. */

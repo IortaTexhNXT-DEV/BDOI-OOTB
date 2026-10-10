@@ -1,5 +1,5 @@
 import { moduleRouter } from '../../lib/registry.js';
-import { requireAuth, requirePermission } from '../../lib/auth.js';
+import { hasPermission, requireAuth, requirePermission } from '../../lib/auth.js';
 import { validate, z } from '../../lib/validate.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created, paging, pageMeta } from '../../lib/respond.js';
@@ -10,6 +10,9 @@ import * as batches from './batches.js';
 import { getJob, queueStats } from './queue.js';
 import workspace from './workspace.js';
 import { toQuote } from '../quotations/shape.js';
+import { getSetting } from '../../lib/settings.js';
+import { many } from '../../db/pool.js';
+import { OUTCOMES, OUTCOME_LABELS } from '../talkbot/outcomes.js';
 
 /**
  * Policy renewals used by the agent screens: client view renewals tab, renewal quote wizard (coverage -> order summary),
@@ -134,13 +137,13 @@ define({
 });
 
 define({
-  method: 'POST', path: '/batches/:id/generate-quotes', summary: 'Prepare re-rated renewal quotes for the selected policies of a batch (background job; poll /queue/:jobId)', screen: 'Operations > Renewals > Renewal Batch > Generate Renewal Quotes',
+  method: 'POST', path: '/batches/:id/generate-quotes', summary: 'Prepare re-rated renewal quotes for the selected policies of a batch (background job; poll /queue/:jobId); with talkbot.bulk_quote_filter a Motor policy not confirmed by Talkbot is Skipped with the reason', screen: 'Operations > Renewals > Renewal Batch > Generate Renewal Quotes',
   middleware: [...write, validate(z.object({ selectedPolicyIds: z.array(z.string()).optional(), policyIds: z.array(z.string()).optional() }).passthrough())],
-  request: { selectedPolicyIds: ['pol_1', 'pol_2'] }, response: { success: true, message: 'Renewal quotes queued', data: { jobId: '17', queued: 2, batchId: 'RB-2026-00001' } },
+  request: { selectedPolicyIds: ['pol_1', 'pol_2'] }, response: { success: true, message: 'Renewal quotes queued: 2 policies, 1 skipped as not confirmed by Talkbot', data: { jobId: '17', queued: 2, skipped: 1, batchId: 'RB-2026-00001' } },
   handler: async (req, res) => {
     const r = await batches.queueQuotes(req.params.id, req.body.selectedPolicyIds || req.body.policyIds, req.user);
     await audit(req, { entity: 'renewal-batch', entityId: req.params.id, action: 'generate-quotes', after: r });
-    ok(res, r, 'Renewal quotes queued');
+    ok(res, r, r.message);
   },
 });
 
@@ -150,12 +153,30 @@ define({
   screen: 'Operations > Renewals > Renewal Policy; Renewal Batch > Generate Policy List', middleware: wizardRead,
   query: { expiryFrom: '2026-09-30', expiryTo: '2026-10-30', paymentStatus: 'All', page: 1, limit: 50 },
   response: { success: true, data: [{ policyId: 'pol_1', policyNumber: 'POL-2025-00012', clientName: 'Maria Santos', expiryDate: '2026-10-20', daysToExpiry: 20, renewalState: 'due', renewalStateLabel: 'Due for renewal', canRenew: true }], pagination: { page: 1, limit: 50, total: 1, totalPages: 1 } },
-  handler: async (req, res) => { const pg = paging(req.query, { page: 1, perPage: 50 }); const { total, items } = await svc.renewablePolicies(await withScope(req), pg); listMeta(res, items, total, pg, 'policies'); },
+  handler: async (req, res) => {
+    const pg = paging(req.query, { page: 1, perPage: 50 });
+    if (!hasPermission(req.user, 'read:talkbot-calls')) {
+      const { total, items } = await svc.renewablePolicies(await withScope(req), pg);
+      return listMeta(res, items, total, pg, 'policies');
+    }
+    // the Talkbot outcome of each policy (columns Talkbot outcome and Confirmed on) and the criteria talkbotOutcome, talkbotCallList
+    const { all } = await svc.renewablePolicies(await withScope(req), { limit: 100000, offset: 0 });
+    const rows = (await batches.byTalkbot(all, req.query)).map(({ talkbot, ...p }) => ({ ...p, talkbotOutcome: talkbot?.outcome || null, talkbotOutcomeLabel: talkbot?.label || null,
+      talkbotCallList: talkbot?.listNumber || null, talkbotConfirmedOn: talkbot?.confirmed ? talkbot.outcomeDate : null }));
+    return listMeta(res, rows.slice(pg.offset, pg.offset + pg.limit), rows.length, pg, 'policies');
+  },
 });
 define({
   method: 'GET', path: '/options', summary: 'Renewal criteria defaults (expiry window from today, grace period) and insurer / product choices', screen: 'Operations > Renewals > Renewal Batch > Create Batch; Renewal Policy',
   middleware: wizardRead, response: { success: true, data: { today: '2026-09-30', windowDays: 30, expiryFrom: '2026-09-30', expiryTo: '2026-10-30', graceDays: 30, insurers: [{ id: 'ic_1', name: 'MAPFRE Insurance Corporation' }], products: [{ id: 2, name: 'Motor Vehicle Insurance', line: 'motor' }] } },
-  handler: async (_req, res) => ok(res, await svc.renewalOptions()),
+  handler: async (req, res) => {
+    const o = await svc.renewalOptions();
+    if (!hasPermission(req.user, 'read:talkbot-calls')) return ok(res, o);
+    // Create Batch Renewal: the Talkbot criteria; Motor defaults to Willing to renew while talkbot.bulk_quote_filter is on
+    const bulkQuoteFilter = (await getSetting('talkbot.bulk_quote_filter', true)) !== false;
+    const callLists = await many("SELECT id, list_number AS \"listNumber\", task_name AS \"taskName\" FROM talkbot_call_lists WHERE status <> 'cancelled' ORDER BY created_at DESC LIMIT 100");
+    return ok(res, { ...o, talkbot: { bulkQuoteFilter, defaultOutcome: bulkQuoteFilter ? 'willing' : null, outcomes: OUTCOMES.map((code) => ({ code, label: OUTCOME_LABELS[code] })), callLists } });
+  },
 });
 
 // ---------------------------------------------------------------- renewals of a policy

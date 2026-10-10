@@ -59,6 +59,7 @@ export const FILE_ROUTES = [
   { module: 'data-load', method: 'POST', path: '/batches', templates: ['kit:configuration', 'kit:migration'] },
   { module: 'motor-programmes', method: 'POST', path: '/:id/sales/upload', templates: ['dealer-sales'] },
   { module: 'fleet', method: 'POST', path: '/:id/vehicles/upload', templates: ['fleet-vehicles'] },
+  { module: 'talkbot', method: 'POST', path: '/lists/:id/results', templates: ['talkbot-results'] },
   { module: 'claims', method: 'POST', path: '/', noTemplate: 'Claim documents and photos attached to a claim (single files)' },
   { module: 'claims', method: 'PUT', path: '/:id', noTemplate: 'Claim documents and photos attached to a claim (single files)' },
   { module: 'claims', method: 'PUT', path: '/settle/:id', noTemplate: 'Settlement documents attached to a claim (single files)' },

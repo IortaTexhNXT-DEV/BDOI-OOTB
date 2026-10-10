@@ -99,8 +99,8 @@ function cellXml(ref, value, type, sst, rowStyle = null) {
   return `<c r="${ref}" s="${style}" t="s"><v>${sst.idx(text)}</v></c>`;
 }
 
-/** Rows above the table of a branded sheet: the logo row (when there is a logo), the banner lines, one blank row. */
-export const bannerRows = (sheet) => (sheet.banner?.length || sheet.logo ? (sheet.logo ? 1 : 0) + (sheet.banner?.length || 0) + 1 : 0);
+/** Rows above the table of a branded sheet: the logo row (when there is a logo), the banner lines, one blank row (none with bannerGap: false). */
+export const bannerRows = (sheet) => (sheet.banner?.length || sheet.logo ? (sheet.logo ? 1 : 0) + (sheet.banner?.length || 0) + (sheet.bannerGap === false ? 0 : 1) : 0);
 
 function sheetXml(sheet, sst) {
   const cols = sheet.columns;
@@ -191,7 +191,8 @@ const stylesXml = ({ headerBg = '#1f4e78', headerText = '#ffffff', titleColor = 
  * Sheet options: headerStyle 'navy' (navy header for every column), rowStyles (array by data row: 'sample' | 'bold' |
  * 'added' | 'missing' | 'changed' | 'good' | 'bad'), cellStyle ((row index, column index) => one of those names, or null),
  * validations ([{ sqref, formula, strict }]: drop-down lists), banner (lines above the table: company, registration,
- * title) and logo (true: the brand logo above the banner).
+ * title), bannerGap (false: the header row follows the banner without a blank row) and logo (true: the brand logo above the
+ * banner).
  * Branding (`brand`, modules/branding documentBranding().excel plus the logo): { headerBg, headerText, titleColor,
  * logoImage: { buffer, type: 'png' | 'jpeg', width, height } }.
  * Date cells are shown in dateFormat (the general.date_format pattern, e.g. DD/MM/YYYY).
