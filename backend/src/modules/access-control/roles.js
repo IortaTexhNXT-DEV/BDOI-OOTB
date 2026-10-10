@@ -34,3 +34,23 @@ export async function roleDirectory(db) {
   roles.sort((a, b) => a.order - b.order);
   return { departments, roles };
 }
+
+/** The administrator account created by the seed (never deactivated by the dormant job or an access review). */
+export const BUILT_IN_ADMIN = 'BrokerVerse';
+
+/**
+ * Is the user an administrator account: the built-in administrator, or a holder of a full-access role (directly or
+ * through an included role)? Only a System Administrator changes, signs out or removes the access of such an account.
+ */
+export async function isAdminAccount(db, userId) {
+  const full = await adminEquivalentRoles(db);
+  const { rows } = await db.query(`SELECT u.username = $3 OR EXISTS (SELECT 1 FROM user_effective_roles(u.id) er WHERE er.code = ANY($2)) AS admin
+    FROM users u WHERE u.id = $1`, [userId, full, BUILT_IN_ADMIN]);
+  return !!rows[0]?.admin;
+}
+
+/** The department of a person: the department of the first of their roles in the order of the directory (null: none). */
+export const departmentOf = (dir, roleCodes) => {
+  const held = new Set(roleCodes || []);
+  return dir.roles.find((r) => held.has(r.code) && r.department)?.department || null;
+};

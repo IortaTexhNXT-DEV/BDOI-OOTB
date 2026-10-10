@@ -8,8 +8,9 @@
  * a small team: the change is then applied at once by the module that requests it.
  *
  * Each kind registers its handler (registerAccessKind): label, screen link, business summary, the extra checks on the
- * person deciding, what approving it applies and, optionally, the words of its notifications. Kinds: role-access
- * (roleAccess.js), authority-limits (authority.js).
+ * person deciding, what approving it applies, what a rejection or a withdrawal undoes and, optionally, the words of
+ * its notifications. Kinds: role-access (roleAccess.js), authority-limits (authority.js), delegation (delegations.js),
+ * sod-rule and sod-exception (sod.js), access-review (reviews.js).
  */
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
@@ -23,7 +24,8 @@ export const APPROVER = 'approve:access-control';
 /**
  * handler: { label, link(change) -> screen path, describe(db, row) -> { targetLabel, summary: [lines] },
  * assertDecider(db, row, user) (throws when this user may not decide it), apply(db, row, user) -> result,
- * requested(change, user) -> text of the approval request, applied(change) -> what approving it did }
+ * closed(db, row, status, user) (a rejection or a withdrawal; optional), requested(change, user) -> text of the approval
+ * request, applied(change) -> what approving it did }
  */
 export function registerAccessKind(kind, handler) {
   KINDS.set(kind, handler);
@@ -103,6 +105,7 @@ export async function decideAccessChange(db, id, { decision, remarks }, user) {
   let result = null;
   if (decision === 'reject') {
     if (!String(remarks || '').trim()) throw badRequest('Validation failed', [{ path: 'remarks', message: 'Give the reason for rejecting the change' }]);
+    if (k.closed) await k.closed(db, c, 'rejected', user);
   } else {
     result = await k.apply(db, c, user);
   }
@@ -124,6 +127,7 @@ export const appliedText = (c) => KINDS.get(c.kind)?.applied?.(c) || `the access
 export async function withdrawAccessChange(db, id, user) {
   const c = await lock(db, id);
   if (c.requested_by !== user?.id && !mayApprove(user)) throw forbidden('Only the requester or an approver can withdraw the change');
+  if (KINDS.get(c.kind).closed) await KINDS.get(c.kind).closed(db, c, 'withdrawn', user);
   await db.query("UPDATE accounting_config_changes SET status = 'withdrawn', decided_by = $2, decided_at = now() WHERE id = $1", [c.id, user?.id ?? null]);
   return getAccessChange(db, c.id, user);
 }

@@ -113,7 +113,7 @@ export const SYSTEM_TABLES = Object.keys(SYSTEM_RESET_ACTIONS);
 export const MASTER_CONFIG_TABLES = [
   // settings, numbering series, users, roles and access
   'app_settings', 'document_numbering', 'users', 'user_roles', 'roles', 'role_permissions', 'permissions',
-  'authority_limits', 'authority_transaction_types', 'sod_rules', 'user_delegations', 'remittance_delegations',
+  'authority_limits', 'authority_transaction_types', 'sod_rules', 'sod_exceptions', 'user_delegations', 'remittance_delegations',
   // generic and dedicated masters
   'master_types', 'master_records', 'branches', 'signatories', 'e_signatures', 'document_signature_slots', 'brand_pack_enablements', 'banks', 'insurance_companies', 'commission_referrers',
   'countries', 'regions', 'states', 'cities', 'districts', 'postal_codes', 'currencies',
@@ -171,7 +171,7 @@ export const CONFIG_FILE_FOLDERS = ['logo', 'favicon', 'company-logo', 'product-
 export const PURGE_SYSTEM_TABLES = ['notifications', 'email_outbox', 'generated_reports', 'job_runs', 'job_queue', 'sequences', 'documents', 'opening_balances',
   'integration_outbox', 'integration_attempts', 'integration_inbox'];
 export const PURGE_DEMO_CONFIG_TABLES = ['petty_cash_funds', 'package_bundles', 'package_bundle_sections', 'insurer_rate_tables',
-  'user_delegations', 'remittance_delegations',
+  'user_delegations', 'remittance_delegations', 'sod_exceptions',
   // demo COC series, payee bank accounts and insurer API mapping of seeds/sample/75_integrations.sql
   'coc_series', 'payee_bank_accounts', 'insurer_api_mappings'];
 
