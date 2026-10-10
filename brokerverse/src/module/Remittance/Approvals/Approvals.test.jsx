@@ -1,5 +1,5 @@
 import React from "react";
-import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import "../../../i18n";
 import { ConfirmDialogHost } from "../../../components/ConfirmDialog";
@@ -147,7 +147,7 @@ describe("Approvals", () => {
     expect(await screen.findByText("Your limit PHP 1,000,000.00")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Approve" }));
     expect(await screen.findByText("Approve REM-2026-00051 for PHP 409,141.43? Settlement and payment follow in Disbursement.")).toBeInTheDocument();
-    await act(async () => { fireEvent.click(within(dialog()).getByRole("button", { name: "Approve" })); });
+    fireEvent.click(within(dialog()).getByRole("button", { name: "Approve" }));
     expect(remittanceService.approveApproval).toHaveBeenCalledWith(51, { version: 1 });
     expect(await screen.findByText("Approved by J. Cruz at 10:32.")).toBeInTheDocument();
     await waitFor(() => expect(screen.queryByRole("button", { name: "Approve" })).not.toBeInTheDocument());
@@ -167,7 +167,7 @@ describe("Approvals", () => {
     expect(remittanceService.rejectApproval).not.toHaveBeenCalled();
     fireEvent.keyDown(within(dialog()).getByLabelText(/^Reason/), { key: "ArrowDown", code: "ArrowDown", keyCode: 40, which: 40, altKey: true });
     fireEvent.click(await screen.findByRole("option", { name: "Rates to be corrected", hidden: true }));
-    await act(async () => { fireEvent.click(within(dialog()).getByRole("button", { name: "Reject and return to maker" })); });
+    fireEvent.click(within(dialog()).getByRole("button", { name: "Reject and return to maker" }));
     expect(remittanceService.rejectApproval).toHaveBeenCalledWith(61, { reasonCode: "RRJ-RATES", note: undefined }, 1);
     expect(await screen.findByText("Remittance returned to the maker.")).toBeInTheDocument();
   });

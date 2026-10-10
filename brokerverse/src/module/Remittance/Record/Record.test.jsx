@@ -1,5 +1,5 @@
 import React from "react";
-import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import "../../../i18n";
 import { ConfirmDialogHost } from "../../../components/ConfirmDialog";
@@ -98,7 +98,7 @@ describe("Remittance record", () => {
     expect(screen.getByRole("button", { name: "Reject" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Approve" }));
     expect(await screen.findByText("Approve REM-2026-00021 for PHP 409,141.43? Settlement and payment follow in Disbursement.")).toBeInTheDocument();
-    await act(async () => { fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Approve" })); });
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Approve" }));
     expect(remittanceService.approveApproval).toHaveBeenCalledWith(21, { version: 1 });
     expect(await screen.findByText("Approved by J. Cruz at 10:32. Reload to see the current version.")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Reload" }));
@@ -142,17 +142,18 @@ describe("Remittance record", () => {
     print.mockRestore();
   });
 
-  it.each([
-    [404, "Remittance not found."],
-    [403, "You do not have access to remittances."],
-  ])("a %s shows its state", async (status, text) => {
-    remittanceService.getRemittance.mockRejectedValue(failWith(status));
+  it("an unknown remittance says so and leads back to Remittances", async () => {
+    remittanceService.getRemittance.mockRejectedValue(failWith(404));
     show();
-    expect(await screen.findByText(text)).toBeInTheDocument();
-    if (status === 404) {
-      fireEvent.click(screen.getByRole("button", { name: "Back to Remittances" }));
-      expect(await screen.findByText("Register")).toBeInTheDocument();
-    }
+    expect(await screen.findByText("Remittance not found.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Back to Remittances" }));
+    expect(await screen.findByText("Register")).toBeInTheDocument();
+  });
+
+  it("a user without access is told so", async () => {
+    remittanceService.getRemittance.mockRejectedValue(failWith(403));
+    show();
+    expect(await screen.findByText("You do not have access to remittances.")).toBeInTheDocument();
   });
 
   it("a load error offers Try again", async () => {
