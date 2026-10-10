@@ -1,0 +1,54 @@
+[
+ {
+  "username": "carla.mendoza",
+  "role": "tis-sales-associate"
+ },
+ {
+  "username": "paolo.villanueva",
+  "role": "tis-sales-officer"
+ },
+ {
+  "username": "teresa.lim",
+  "role": "tis-sales-unit-head"
+ },
+ {
+  "username": "jenny.bautista",
+  "role": "tis-ops-associate"
+ },
+ {
+  "username": "mark.castillo",
+  "role": "tis-ops-officer"
+ },
+ {
+  "username": "liza.fernandez",
+  "role": "tis-ops-unit-head"
+ },
+ {
+  "username": "rowena.cruz",
+  "role": "tis-ccd-pdu"
+ },
+ {
+  "username": "allan.domingo",
+  "role": "tis-ccd-pdc"
+ },
+ {
+  "username": "grace.navarro",
+  "role": "tis-ccd-bp"
+ },
+ {
+  "username": "edwin.ramos",
+  "role": "tis-ccd-recon"
+ },
+ {
+  "username": "cecilia.tan",
+  "role": "tis-finance"
+ },
+ {
+  "username": "kevin.santiago",
+  "role": "tis-it-admin"
+ },
+ {
+  "username": "antonio.delrosario",
+  "role": "tis-general-manager"
+ }
+]
