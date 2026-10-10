@@ -1412,18 +1412,19 @@ A fiscal year (for example FY2026) has twelve monthly periods (2026-01 to 2026-1
 | Closed | Nobody. Reopen the period first. |
 | Locked | Nobody. The periods of a closed fiscal year are locked. |
 
-The Actions column offers Soft-close and Close for open periods and Reopen for closed ones. Every change asks for remarks and is kept in the period history with the user and time. Reopening a period and posting into a soft-closed period need the Accounting Manager (approve:period-end).
+The Actions column offers Soft-close and Close for open periods and Reopen for soft-closed and closed ones. The side panel of a soft-close or close runs the blocking month-end checks first and lists them with their result and a Resolve link; the action stays disabled while a check fails. Every change asks for a reason from the Reason Codes master (with a note when the reason needs one) and is kept in the period history with the user, role, time and reason. Reopening a period and posting into a soft-closed period need the Accounting Manager (approve:period-end); other users see Reopen disabled. Next fiscal year asks for a confirmation naming the year it creates.
 
 ![Period Management seen by the Accounting Manager](pe-periods-mgr)
 
 ### Import the go-live opening balances
 
-![Import opening balances (go-live)](pe-opening)
+![Import opening balances](pe-opening)
 
 1. Select Import opening balances.
 2. Select Download template (`Opening_Balances_Upload_Template.xlsx`) and enter the old system's trial balance at the day before go-live, one row per account with a debit or a credit.
 3. Enter the Go-live date.
-4. Choose the file and select Upload.
+4. Choose the file and select Validate. The result shows the rows, accounts, total debit and credit and the difference, and lists every error with its row and column; nothing is loaded yet.
+5. Select Load opening balances and confirm. The confirmation states the go-live date and the totals, and the earlier load it replaces.
 
 Debits must equal credits, otherwise nothing is loaded. Loading again with the same date replaces the earlier load. The balances go into the fiscal year that contains the go-live date and are read by the trial balance, financial statements, general ledger detail and bank reconciliation; the year-end close carries them forward. No opening journal is posted, so screens that add up journals only, such as Accounting Query, show movements from the go-live date. A go-live date after journals already posted in the same fiscal year is refused. The balance of Premiums Receivable must equal the open items imported on Accounts > Collections (Chapter 14).
 

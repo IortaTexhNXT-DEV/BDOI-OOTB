@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1213 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1215 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -55327,7 +55327,7 @@
           ]
         },
         {
-          "name": "A fiscal year with its periods",
+          "name": "A fiscal year with its periods, the latest status change of each period and the status moves the user may make",
           "request": {
             "method": "GET",
             "header": [],
@@ -55349,7 +55349,7 @@
                 }
               ]
             },
-            "description": "A fiscal year with its periods\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers"
+            "description": "A fiscal year with its periods, the latest status change of each period and the status moves the user may make\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers"
           },
           "response": [
             {
@@ -55375,7 +55375,7 @@
                     }
                   ]
                 },
-                "description": "A fiscal year with its periods\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers"
+                "description": "A fiscal year with its periods, the latest status change of each period and the status moves the user may make\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers"
               },
               "status": "OK",
               "code": 200,
@@ -55387,7 +55387,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"FY2026\",\n    \"periods\": [\n      {\n        \"period\": \"2026-01\",\n        \"periodNo\": 1,\n        \"status\": \"closed\"\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"FY2026\",\n    \"periods\": [\n      {\n        \"period\": \"2026-01\",\n        \"periodNo\": 1,\n        \"status\": \"closed\",\n        \"lastChange\": {\n          \"to\": \"closed\",\n          \"at\": \"2026-02-05T02:00:00Z\",\n          \"byName\": \"Ana Santos\",\n          \"reasonCode\": \"PCL-MONTHEND\",\n          \"reasonName\": \"Month-end close completed\",\n          \"remarks\": \"Month-end close completed\",\n          \"source\": \"manual\"\n        },\n        \"actions\": {\n          \"reopen\": {\n            \"allowed\": false,\n            \"reason\": \"permission\",\n            \"message\": \"Reopening a period requires permission approve:period-end\"\n          }\n        }\n      }\n    ]\n  }\n}"
             }
           ]
         },
@@ -55583,6 +55583,85 @@
           ]
         },
         {
+          "name": "Go-live: check the old system's trial balance (multipart \"file\" + goLiveDate) without loading it: rows, accounts, total debit and credit, difference, every error with its row and column, and the earlier load of the fiscal year that a load would replace",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/opening-balances/validate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "opening-balances",
+                "validate"
+              ]
+            },
+            "description": "Go-live: check the old system's trial balance (multipart \"file\" + goLiveDate) without loading it: rows, accounts, total debit and credit, difference, every error with its row and column, and the earlier load of the fiscal year that a load would replace\n\nFront-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goLiveDate\": \"2026-10-01\",\n  \"file\": \"(multipart) Opening_Balances_Upload_Template.xlsx\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/opening-balances/validate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "opening-balances",
+                    "validate"
+                  ]
+                },
+                "description": "Go-live: check the old system's trial balance (multipart \"file\" + goLiveDate) without loading it: rows, accounts, total debit and credit, difference, every error with its row and column, and the earlier load of the fiscal year that a load would replace\n\nFront-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"goLiveDate\": \"2026-10-01\",\n  \"file\": \"(multipart) Opening_Balances_Upload_Template.xlsx\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"valid\": false,\n    \"fiscalYear\": \"FY2026\",\n    \"goLiveDate\": \"2026-10-01\",\n    \"asAt\": \"2026-09-30\",\n    \"rows\": 8,\n    \"accounts\": 7,\n    \"totalDebit\": 2102400,\n    \"totalCredit\": 2102300,\n    \"difference\": 100,\n    \"ignored\": [\n      {\n        \"row\": 9,\n        \"accountCode\": \"1301001\"\n      }\n    ],\n    \"errors\": [\n      {\n        \"row\": 4,\n        \"column\": \"Account Code\",\n        \"message\": \"Account 9999999 is not in the chart of accounts\"\n      }\n    ],\n    \"previous\": {\n      \"goLiveDate\": \"2026-10-01\",\n      \"accounts\": 7,\n      \"loadedAt\": \"2026-10-02T03:00:00Z\",\n      \"loadedBy\": \"Ana Santos\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Run the month-end checklist for a period without a close run (preview)",
           "request": {
             "method": "GET",
@@ -55650,7 +55729,7 @@
           ]
         },
         {
-          "name": "Status history of a period (who opened, soft-closed, closed, reopened or locked it and why)",
+          "name": "Status history of a period (who opened, soft-closed, closed, reopened or locked it, with their roles, and why)",
           "request": {
             "method": "GET",
             "header": [],
@@ -55673,7 +55752,7 @@
                 }
               ]
             },
-            "description": "Status history of a period (who opened, soft-closed, closed, reopened or locked it and why)\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers"
+            "description": "Status history of a period (who opened, soft-closed, closed, reopened or locked it, with their roles, and why)\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers"
           },
           "response": [
             {
@@ -55700,7 +55779,7 @@
                     }
                   ]
                 },
-                "description": "Status history of a period (who opened, soft-closed, closed, reopened or locked it and why)\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers"
+                "description": "Status history of a period (who opened, soft-closed, closed, reopened or locked it, with their roles, and why)\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers"
               },
               "status": "OK",
               "code": 200,
@@ -55712,12 +55791,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"from\": \"open\",\n      \"to\": \"closed\",\n      \"remarks\": \"August closed\",\n      \"changedBy\": \"Finance Manager\",\n      \"changedAt\": \"2026-09-05T02:00:00Z\"\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 12,\n      \"from\": \"open\",\n      \"to\": \"closed\",\n      \"remarks\": \"Month-end close completed\",\n      \"reasonCode\": \"PCL-MONTHEND\",\n      \"reasonName\": \"Month-end close completed\",\n      \"source\": \"manual\",\n      \"changedBy\": \"Finance Manager\",\n      \"changedByName\": \"Finance Manager\",\n      \"changedByRoles\": [\n        \"Accounting Manager\"\n      ],\n      \"changedAt\": \"2026-09-05T02:00:00Z\"\n    }\n  ]\n}"
             }
           ]
         },
         {
-          "name": "Open, soft-close or close a period (closing runs the blocking checks; reopening needs approve:period-end and remarks; locked periods cannot change)",
+          "name": "Open, soft-close or close a period with a reason of the Reason Codes master (period_close to soft-close or close, period_reopen to reopen; note when the reason asks for one). Closing runs the blocking checks; reopening needs approve:period-end; locked periods cannot change",
           "request": {
             "method": "POST",
             "header": [
@@ -55745,10 +55824,10 @@
                 }
               ]
             },
-            "description": "Open, soft-close or close a period (closing runs the blocking checks; reopening needs approve:period-end and remarks; locked periods cannot change)\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: write:period-end",
+            "description": "Open, soft-close or close a period with a reason of the Reason Codes master (period_close to soft-close or close, period_reopen to reopen; note when the reason asks for one). Closing runs the blocking checks; reopening needs approve:period-end; locked periods cannot change\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: write:period-end",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"status\": \"soft_closed\",\n  \"remarks\": \"Pending insurer statements\"\n}",
+              "raw": "{\n  \"status\": \"soft_closed\",\n  \"reasonCode\": \"PCL-MONTHEND\",\n  \"note\": \"Insurer statements pending\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -55786,10 +55865,10 @@
                     }
                   ]
                 },
-                "description": "Open, soft-close or close a period (closing runs the blocking checks; reopening needs approve:period-end and remarks; locked periods cannot change)\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: write:period-end",
+                "description": "Open, soft-close or close a period with a reason of the Reason Codes master (period_close to soft-close or close, period_reopen to reopen; note when the reason asks for one). Closing runs the blocking checks; reopening needs approve:period-end; locked periods cannot change\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: write:period-end",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"status\": \"soft_closed\",\n  \"remarks\": \"Pending insurer statements\"\n}",
+                  "raw": "{\n  \"status\": \"soft_closed\",\n  \"reasonCode\": \"PCL-MONTHEND\",\n  \"note\": \"Insurer statements pending\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -55808,6 +55887,85 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"period\": \"2026-08\",\n    \"status\": \"soft_closed\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Before a status change (read-only): whether the user may make it and why not, the reason context to choose from, and the blocking month-end checks a soft-close or close runs first",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/periods/:period/status-preview?status=soft_closed",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "periods",
+                ":period",
+                "status-preview"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "soft_closed"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "period",
+                  "value": "",
+                  "description": "period (path parameter)"
+                }
+              ]
+            },
+            "description": "Before a status change (read-only): whether the user may make it and why not, the reason context to choose from, and the blocking month-end checks a soft-close or close runs first\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/periods/:period/status-preview?status=soft_closed",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "periods",
+                    ":period",
+                    "status-preview"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "soft_closed"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "period",
+                      "value": "",
+                      "description": "period (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Before a status change (read-only): whether the user may make it and why not, the reason context to choose from, and the blocking month-end checks a soft-close or close runs first\n\nFront-end touchpoint: Accounts > Period End > Period Management\n\nAccess: read:period-end, read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"period\": \"2026-08\",\n    \"fiscalYear\": \"FY2026\",\n    \"from\": \"open\",\n    \"to\": \"soft_closed\",\n    \"allowed\": false,\n    \"reason\": \"checks\",\n    \"message\": null,\n    \"reasonContext\": \"period_close\",\n    \"checks\": [\n      {\n        \"code\": \"unposted_journals\",\n        \"label\": \"No unposted or pending journals in the period\",\n        \"severity\": \"blocking\",\n        \"status\": \"failed\",\n        \"count\": 2,\n        \"amount\": null\n      }\n    ]\n  }\n}"
             }
           ]
         },
