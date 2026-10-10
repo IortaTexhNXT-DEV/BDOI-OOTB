@@ -13,6 +13,7 @@ import { useServerList } from "../../../hooks/useServerList";
 import { statusLabel } from "../../../utils/statusSeverity";
 import { EmptyState, FilterBar, RowActions, StatusChip } from "../../../components/RecordPage";
 import { CONTINUE_ROUTE as STEP_ROUTE, stepForStatus } from "../../claimsModule/shared/claimJourney";
+import { OriginFilter, originColumnBody } from "../../../components/OriginChip";
 
 // claim status codes of the server (it also accepts "open" for every status still being worked on)
 const STATUSES = ["open", "registered", "in-review", "pending-approval", "approved", "settled", "closed", "rejected"];
@@ -21,8 +22,9 @@ const STATUSES = ["open", "registered", "in-review", "pending-approval", "approv
 const CONTINUE_ROUTE = { ...STEP_ROUTE, payment: (id) => `/agent/claimdetailedview/${id}` };
 
 /**
- * Operations > Claims list: paged, searched (claim number, policy number, client) and filtered by status on the
- * server. The search, status and page are kept while a claim is opened (the state belongs to the page).
+ * Operations > Claims list: paged, searched (claim number, policy number, client) and filtered by status and origin
+ * (registered in BrokerVerse or migrated at go-live) on the server. The search, filters and page are kept while a claim
+ * is opened (the state belongs to the page).
  */
 const ClaimTable = ({ state, patch }) => {
   const { t } = useTranslation();
@@ -30,13 +32,13 @@ const ClaimTable = ({ state, patch }) => {
   const { formatCurrency } = useFormatCurrency();
 
   const fetchPage = useCallback(async ({ page, pageSize }) => {
-    const res = await claimsService.getClaimsList(page, pageSize, { search: state.search.trim(), status: state.status });
+    const res = await claimsService.getClaimsList(page, pageSize, { search: state.search.trim(), status: state.status, origin: state.origin });
     if (!res.success) throw new Error(res.error || t("claims.loadFailed", { defaultValue: "Claims could not be loaded" }));
     const body = res.data || {};
     const claims = body.data?.claims || body.claims || [];
     const total = body.data?.pagination?.total ?? body.total ?? claims.length;
     return { rows: claims, total };
-  }, [state.search, state.status, t]);
+  }, [state.search, state.status, state.origin, t]);
   const list = useServerList(fetchPage, { key: "claims" });
 
   const lobOf = (r) => r.lob || r.productType;
@@ -58,18 +60,20 @@ const ClaimTable = ({ state, patch }) => {
 
   return (
     <>
-      <FilterBar active={!!(state.search || state.status)} onClear={() => patch({ search: "", status: "" })}>
+      <FilterBar active={!!(state.search || state.status || state.origin)} onClear={() => patch({ search: "", status: "", origin: "" })}>
         <span className="p-input-icon-left bv-filter-bar__search">
           <i className="pi pi-search" />
           <InputText placeholder={t("claims.searchPlaceholder", { defaultValue: "Search by claim number, policy number or client" })} aria-label={t("listCommon.search")}
             value={state.search} onChange={(e) => patch({ search: e.target.value })} />
         </span>
         <Dropdown value={state.status} options={statusOptions} onChange={(e) => patch({ status: e.value })} aria-label={t("claims.colStatus", { defaultValue: "Status" })} />
+        <OriginFilter value={state.origin} onChange={(origin) => patch({ origin })} />
       </FilterBar>
       <DataTable {...list.tableProps} dataKey="id" size="small"
         emptyMessage={list.error || <EmptyState icon="pi-flag" title={t("claims.noClaims", { defaultValue: "No claims found" })} text={t("claimFlow.emptyText")} />}>
         <Column header={t("claimFlow.col.claim")} body={(r) => stack(r.claimNumber, r.clientName || r.policyHolderName)} />
         <Column header={t("claimFlow.col.policy")} body={(r) => stack(r.policyNumber, r.productType || r.lob)} />
+        <Column header={t("origin.title")} body={originColumnBody} />
         <Column header={t("claimFlow.col.loss")} body={(r) => stack(r.dateOfIncident ? formatDate(r.dateOfIncident) : null, r.typeOfIncident)} />
         <Column header={t("claimFlow.col.reported")} body={(r) => formatDate(r.reportedDate, { empty: "—" })} className="bv-nowrap" />
         <Column header={t("claimFlow.col.estimate")} body={(r) => (r.estimatedClaimAmount ? formatCurrency(r.estimatedClaimAmount) : "—")} className="bv-num" headerClassName="bv-num" />
@@ -81,7 +85,7 @@ const ClaimTable = ({ state, patch }) => {
 };
 
 ClaimTable.propTypes = {
-  state: PropTypes.shape({ search: PropTypes.string, status: PropTypes.string }).isRequired,
+  state: PropTypes.shape({ search: PropTypes.string, status: PropTypes.string, origin: PropTypes.string }).isRequired,
   patch: PropTypes.func.isRequired,
 };
 

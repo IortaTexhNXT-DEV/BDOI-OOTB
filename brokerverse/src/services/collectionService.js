@@ -24,6 +24,7 @@ class CollectionService {
         queryParams.append("overdueLevel", params.overdueLevel);
       if (params.clientId) queryParams.append("clientId", params.clientId);
       if (params.search) queryParams.append("search", params.search);
+      if (params.origin) queryParams.append("origin", params.origin);
       if (params.sortField) queryParams.append("sortField", params.sortField);
       if (params.sortOrder) queryParams.append("sortOrder", params.sortOrder);
 

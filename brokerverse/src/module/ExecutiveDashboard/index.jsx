@@ -10,12 +10,13 @@ import { useNavigate } from "react-router-dom";
 import dashboardService from "../../services/dashboardService";
 import reportsService from "../../services/reportsService";
 import StatCards from "../../components/StatCards";
-import { ChartCard, DashboardToolbar, LISTS, ThemedChart, drillDown, formatValue } from "../../components/Dashboard";
+import { ChartCard, DashboardToolbar, LISTS, ThemedChart, drillDown, formatValue, useDashboardOrigin } from "../../components/Dashboard";
 import { ChartSkeleton } from "../../components/Skeletons";
 import { useChartTheme } from "../../theme/chartTheme";
 import { menuList } from "../../components/SideBar/list";
 import { getUserRoles, isPathAllowed } from "../../utils/menuPermissions";
 import { formatPercent, progressValue } from "../../utility/numberFormat";
+import { formatDate } from "../../utility/dateFormat";
 import { statusLabel } from "../../utils/statusSeverity";
 import "./index.scss";
 
@@ -42,7 +43,8 @@ const targetStatus = (t, value, target, lowerIsBetter) => {
  * Executive Dashboard: premium written, policies in force, new business, claims ratio, retention and what the broker is
  * owed, for the period to date against the previous period or the same period last year; premium by month and by
  * product line, claims by stage, and the regions, products and sales persons behind the figures. Each figure opens the
- * list behind it.
+ * list behind it. The figures count the business issued in BrokerVerse since go-live, or all business with the migrated
+ * policies (the toolbar switch, kept per user).
  */
 const ExecutiveDashboard = () => {
   const { t } = useTranslation();
@@ -57,6 +59,7 @@ const ExecutiveDashboard = () => {
   const [canOpenSettings] = useState(() => isPathAllowed(SETTINGS_PATH, menuList, getUserRoles()));
   const [period, setPeriod] = useState("month");
   const [compare, setCompare] = useState("previous");
+  const { origin, setOrigin, ready } = useDashboardOrigin();
   const [dashboard, setDashboard] = useState(null);
   const [claimsSummary, setClaimsSummary] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -64,12 +67,13 @@ const ExecutiveDashboard = () => {
   const showError = (error) => toast.current?.show({ severity: "error", summary: t("common.error", "Error"), detail: error.message });
 
   const load = useCallback(() => {
+    if (!ready) return;
     setLoading(true);
     Promise.all([
-      dashboardService.getExecutive(period, compare).then(setDashboard),
+      dashboardService.getExecutive(period, compare, origin).then(setDashboard),
       dashboardService.getClaims().then(setClaimsSummary),
     ]).catch(showError).finally(() => setLoading(false));
-  }, [period, compare]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [period, compare, origin, ready]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, [load]);
 
   const range = dashboard?.period ? {
@@ -97,9 +101,12 @@ const ExecutiveDashboard = () => {
   const money = (v) => formatValue("currency", v, { compact: true });
   const comparison = t(`dashboards.vs.${compare}`, compare === "lastYear" ? "vs same period last year" : "vs previous period");
   const k = dashboard?.executiveKPIs || {};
-  const issued = () => drillDown(navigate, LISTS.policiesIssued(range?.from, range?.to));
+  // the lists behind the figures show the same business as the dashboard: issued in BrokerVerse, or all
+  const listOrigin = origin === "issued" ? "issued" : "";
+  const issued = () => drillDown(navigate, LISTS.policiesIssued(range?.from, range?.to, "", listOrigin));
   const targetNote = (key, format) => (k[key]?.target ? t("dashboards.targetNote", { target: formatValue(format, k[key].target, { compact: true }), achieved: formatPercent(k[key].achievement ?? 0), defaultValue: "Target {{target}} · {{achieved}} achieved" }) : null);
   const receivables = dashboard?.receivables;
+  const sinceGoLive = dashboard?.issuedSinceGoLive;
 
   const kpis = [
     { key: "totalRevenue", label: t("executiveDashboard.totalRevenue"), value: dashboard ? money(k.totalRevenue?.value) : null, change: k.totalRevenue?.change, comparison, note: targetNote("totalRevenue", "currency"), onClick: issued },
@@ -116,6 +123,9 @@ const ExecutiveDashboard = () => {
     { key: "receivableInsurers", label: t("executiveDashboard.commissionReceivable", "Commission receivable"), value: receivables ? money(receivables.commissionFromInsurers) : null,
       note: receivables ? t("executiveDashboard.unbilledOverdueNote", { unbilled: money(receivables.commissionUnbilled), overdue: money(receivables.commissionOverdue), defaultValue: "{{unbilled}} unbilled · {{overdue}} overdue" }) : null,
       onClick: () => navigate("/finance/remittance/directbill") },
+    ...(sinceGoLive ? [{ key: "issuedSinceGoLive", label: t("dashboards.sinceGoLive.title", "Issued since go-live"), value: money(sinceGoLive.premium),
+      note: t("dashboards.sinceGoLive.note", { count: sinceGoLive.policies, date: formatDate(sinceGoLive.cutoverDate), defaultValue: "{{count}} policies since {{date}}" }),
+      onClick: () => drillDown(navigate, LISTS.policiesIssued(sinceGoLive.cutoverDate, null, "", "issued")) }] : []),
   ];
 
   // premium written by month (12 months to date); the period target is drawn as a reference line on a monthly view
@@ -149,7 +159,7 @@ const ExecutiveDashboard = () => {
   return (
     <div className="executive-dashboard bv-dash-page">
       <Toast ref={toast} />
-      <DashboardToolbar title={t("executiveDashboard.title")} period={period} onPeriod={setPeriod} compare={compare} onCompare={setCompare}
+      <DashboardToolbar title={t("executiveDashboard.title")} period={period} onPeriod={setPeriod} compare={compare} onCompare={setCompare} origin={origin} onOrigin={setOrigin}
         range={range} asOf={dashboard?.asOf} onRefresh={load} loading={loading}
         actions={(
           <>
@@ -200,7 +210,7 @@ const ExecutiveDashboard = () => {
 
         <ChartCard title={t("executiveDashboard.topPerformingProducts")}>
           <DataTable value={dashboard?.topProducts || []} size="small" loading={!dashboard} className="products-table"
-            onRowClick={(e) => drillDown(navigate, LISTS.policiesIssued(null, null, e.data.product))} rowClassName={() => "bv-clickable-row"}>
+            onRowClick={(e) => drillDown(navigate, LISTS.policiesIssued(null, null, e.data.product, listOrigin))} rowClassName={() => "bv-clickable-row"}>
             <Column field="product" header={t("executiveDashboard.product")} />
             <Column field="premium" header={t("executiveDashboard.premium")} body={(row) => full(row.premium)} {...num} />
             <Column field="policies" header={t("executiveDashboard.policies")} {...num} />

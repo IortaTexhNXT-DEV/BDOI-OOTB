@@ -649,7 +649,8 @@
         "posted": "Posted",
         "rejected": "Rejected",
         "reversed": "Reversed",
-        "cancelled": "Cancelled"
+        "cancelled": "Cancelled",
+        "opening": "Opening balance"
       },
       "kinds": {
         "standard": "Standard",
@@ -660,7 +661,8 @@
         "manual": "Manual entry",
         "correction": "Correction JV",
         "reversal": "Reversal JV",
-        "upload": "Upload"
+        "upload": "Upload",
+        "go-live-opening": "Go-live opening balances"
       },
       "confirm": {
         "approveTitle": "Approve journal voucher {{number}}",
@@ -13409,6 +13411,15 @@
     "compareText": {
       "previous": "compared with {{from}} to {{to}}",
       "lastYear": "compared with {{from}} to {{to}} last year"
+    },
+    "origin": {
+      "title": "Business counted",
+      "issued": "Issued since go-live",
+      "all": "All business"
+    },
+    "sinceGoLive": {
+      "title": "Issued since go-live",
+      "note": "{{count}} policies since {{date}}"
     }
   },
   "confirmDialog": {
@@ -15374,5 +15385,21 @@
         "lock": "Go-live lock on"
       }
     }
+  },
+  "origin": {
+    "title": "Origin",
+    "all": "All",
+    "issued": "Issued in BrokerVerse",
+    "migrated": "Migrated",
+    "migratedPolicy": "Migrated policy",
+    "renewalOfLegacyPolicy": "Renewal of legacy policy",
+    "legacyNo": "Legacy no. {{number}}",
+    "load": "Load {{number}}",
+    "legacySystem": "Legacy system: {{name}}",
+    "migratedAt": "Migrated {{time}}",
+    "migratedBy": "by {{name}}",
+    "renewalOfLegacy": "Renewal of legacy policy {{number}}",
+    "renewalOfLegacyText": "Issued in BrokerVerse; the expiring term was migrated at go-live.",
+    "openingBalance": "Opening balance"
   }
 }

@@ -15,13 +15,15 @@ const get = async (path) => {
 /** Dashboard KPIs; every amount is a raw number, formatted by the screen. */
 const dashboardService = {
   /** Executive Dashboard of a period (month / quarter / year to date) compared with the previous period or last year. */
-  getExecutive: (period = "month", compare = "previous") => get(`/dashboard/executive?period=${encodeURIComponent(period)}&compare=${encodeURIComponent(compare)}`),
+  getExecutive: (period = "month", compare = "previous", origin = undefined) => get(`/dashboard/executive?period=${encodeURIComponent(period)}&compare=${encodeURIComponent(compare)}${origin ? `&origin=${encodeURIComponent(origin)}` : ""}`),
   getSales: (scope = "mine") => get(`/dashboard/sales?scope=${encodeURIComponent(scope)}`),
-  /** Sales Dashboard: { period } or { from, to }, compare (previous / lastYear), optional salesPerson (user id). */
+  /** Sales Dashboard: { period } or { from, to }, compare (previous / lastYear), optional salesPerson (user id) and origin (issued / all). */
   getSalesOverview: (query = {}) => {
     const qs = new URLSearchParams(Object.entries(query).filter(([, v]) => v !== undefined && v !== null && v !== "")).toString();
     return get(`/dashboard/sales/overview${qs ? `?${qs}` : ""}`);
   },
+  /** Dashboard defaults: { defaultOrigin } (issued = Issued since go-live, all = All business). */
+  getSettings: () => get("/dashboard/settings"),
   getProcessing: () => get("/dashboard/processing"),
   getClaims: () => get("/dashboard/claims"),
   getAgentHome: (scope = "mine") => get(`/agent/get-dashboard-details?scope=${encodeURIComponent(scope)}`),

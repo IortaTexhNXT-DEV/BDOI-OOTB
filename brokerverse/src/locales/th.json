@@ -557,7 +557,8 @@
         "posted": "Posted",
         "rejected": "Rejected",
         "reversed": "Reversed",
-        "cancelled": "Cancelled"
+        "cancelled": "Cancelled",
+        "opening": "ยอดยกมา"
       },
       "kinds": {
         "standard": "Standard",
@@ -568,7 +569,8 @@
         "manual": "Manual entry",
         "correction": "Correction JV",
         "reversal": "Reversal JV",
-        "upload": "Upload"
+        "upload": "Upload",
+        "go-live-opening": "ยอดยกมาเมื่อเริ่มใช้งานจริง"
       },
       "confirm": {
         "approveTitle": "Approve journal voucher {{number}}",
@@ -6604,6 +6606,15 @@
     "compareText": {
       "previous": "เทียบกับ {{from}} ถึง {{to}}",
       "lastYear": "เทียบกับ {{from}} ถึง {{to}} ปีที่แล้ว"
+    },
+    "origin": {
+      "title": "ธุรกิจที่นับ",
+      "issued": "ออกตั้งแต่เริ่มใช้งานจริง",
+      "all": "ธุรกิจทั้งหมด"
+    },
+    "sinceGoLive": {
+      "title": "ออกตั้งแต่เริ่มใช้งานจริง",
+      "note": "{{count}} กรมธรรม์ตั้งแต่ {{date}}"
     }
   },
   "myWork": {
@@ -9913,5 +9924,21 @@
         "lock": "ล็อกเปิดใช้งานอยู่"
       }
     }
+  },
+  "origin": {
+    "title": "ที่มา",
+    "all": "ทั้งหมด",
+    "issued": "ออกใน BrokerVerse",
+    "migrated": "ย้ายข้อมูล",
+    "migratedPolicy": "กรมธรรม์ที่ย้ายข้อมูล",
+    "renewalOfLegacyPolicy": "ต่ออายุกรมธรรม์ระบบเดิม",
+    "legacyNo": "เลขที่ระบบเดิม {{number}}",
+    "load": "ชุดโหลด {{number}}",
+    "legacySystem": "ระบบเดิม: {{name}}",
+    "migratedAt": "ย้ายข้อมูลเมื่อ {{time}}",
+    "migratedBy": "โดย {{name}}",
+    "renewalOfLegacy": "ต่ออายุกรมธรรม์ระบบเดิม {{number}}",
+    "renewalOfLegacyText": "ออกใน BrokerVerse; งวดที่หมดอายุย้ายมาจากระบบเดิมเมื่อเริ่มใช้งานจริง",
+    "openingBalance": "ยอดยกมา"
   }
 }

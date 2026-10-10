@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
+import { SelectButton } from "primereact/selectbutton";
 import { formatBusinessDateTime, formatDate, getBusinessTimeZone } from "../../utility/dateFormat";
 import { allowedDashboards } from "./personas";
 import { COMPARISONS, PERIODS } from "./periods";
@@ -26,9 +27,10 @@ DataAsOf.defaultProps = { asOf: null };
  * The one row of controls above a dashboard, scoping every card and chart below it: the dashboard switcher (the
  * dashboards the user's roles may open), the period and its comparison, the screen's own filters, and on the right
  * the dates covered, when the figures were read and a refresh. Leave `onPeriod` / `onCompare` out where a screen has
- * no period of its own.
+ * no period of its own. With `onOrigin` it also switches between the business issued in BrokerVerse since go-live
+ * (`origin` "issued") and all business, migrated policies included ("all"); keep the choice with useDashboardOrigin.
  */
-const DashboardToolbar = ({ title, period, onPeriod, periods, compare, onCompare, range, asOf, onRefresh, loading, children, actions }) => {
+const DashboardToolbar = ({ title, period, onPeriod, periods, compare, onCompare, origin, onOrigin, range, asOf, onRefresh, loading, children, actions }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -57,6 +59,11 @@ const DashboardToolbar = ({ title, period, onPeriod, periods, compare, onCompare
         {onCompare ? (
           <Dropdown value={compare} options={COMPARISONS.map((c) => ({ label: t(`dashboards.compare.${c}`), value: c }))} onChange={(e) => onCompare(e.value)} aria-label={t("dashboards.comparison", "Compare with")} />
         ) : null}
+        {onOrigin ? (
+          <SelectButton value={origin} allowEmpty={false} onChange={(e) => (e.value ? onOrigin(e.value) : null)} className="bv-dash-toolbar__origin"
+            options={[{ label: t("dashboards.origin.issued", "Issued since go-live"), value: "issued" }, { label: t("dashboards.origin.all", "All business"), value: "all" }]}
+            aria-label={t("dashboards.origin.title", "Business counted")} data-testid="dashboard-origin" />
+        ) : null}
         {children}
         <span className="bv-dash-toolbar__spacer" />
         <DataAsOf asOf={asOf} />
@@ -76,6 +83,9 @@ DashboardToolbar.propTypes = {
   periods: PropTypes.arrayOf(PropTypes.string),
   compare: PropTypes.string,
   onCompare: PropTypes.func,
+  /** "issued" (Issued since go-live) or "all" (All business) */
+  origin: PropTypes.oneOf(["issued", "all"]),
+  onOrigin: PropTypes.func,
   range: PropTypes.shape({ from: PropTypes.string, to: PropTypes.string, previousFrom: PropTypes.string, previousTo: PropTypes.string }),
   asOf: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.instanceOf(Date)]),
   onRefresh: PropTypes.func,
@@ -84,7 +94,7 @@ DashboardToolbar.propTypes = {
   actions: PropTypes.node,
 };
 DashboardToolbar.defaultProps = {
-  period: "month", onPeriod: null, periods: PERIODS, compare: "previous", onCompare: null, range: null, asOf: null, onRefresh: null, loading: false, children: null, actions: null,
+  period: "month", onPeriod: null, periods: PERIODS, compare: "previous", onCompare: null, origin: "issued", onOrigin: null, range: null, asOf: null, onRefresh: null, loading: false, children: null, actions: null,
 };
 
 export default DashboardToolbar;

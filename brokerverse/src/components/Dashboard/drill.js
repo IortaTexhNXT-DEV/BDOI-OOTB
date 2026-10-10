@@ -13,15 +13,15 @@ const write = (key, value) => {
 
 const POLICY_FILTERS = {
   paymentStatus: "", productType: "", insuranceCompanyName: "", clientName: "",
-  issuedDateFrom: null, issuedDateTo: null, expiryDateFrom: null, expiryDateTo: null, premiumMin: null, premiumMax: null,
+  issuedDateFrom: null, issuedDateTo: null, expiryDateFrom: null, expiryDateTo: null, premiumMin: null, premiumMax: null, origin: "",
 };
 
 /** The lists a dashboard opens: { path, key, state } of each. */
 export const LISTS = {
-  /** Policies issued between two dates (YYYY-MM-DD), optionally of one product. */
-  policiesIssued: (from, to, productType = "") => ({
+  /** Policies issued between two dates (YYYY-MM-DD), optionally of one product and one origin ("issued" = issued in BrokerVerse). */
+  policiesIssued: (from, to, productType = "", origin = "") => ({
     path: "/agent/policy", key: "policies",
-    state: { search: "", showFilters: true, applied: { ...POLICY_FILTERS, issuedDateFrom: from || null, issuedDateTo: to || null, productType } },
+    state: { search: "", showFilters: true, applied: { ...POLICY_FILTERS, issuedDateFrom: from || null, issuedDateTo: to || null, productType, origin } },
   }),
   /** Policies expiring between two dates. */
   policiesExpiring: (from, to) => ({

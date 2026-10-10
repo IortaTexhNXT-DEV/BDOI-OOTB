@@ -30,6 +30,7 @@ import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { getDisplayCurrencyConfig, numberLocale } from "../../../utility/currencyConverter";
 import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
 import useMasterOptions from "../../GeneralMasters/common/useMasterOptions";
+import OriginChip from "../../../components/OriginChip";
 
 /** Receipt modes shown to the user, with the payment mode the receipts API records (cash / check / bank-transfer / online). */
 const RECEIPT_MODES = [
@@ -657,7 +658,12 @@ function BranchAdding() {
               <Column
                 field="billNumber"
                 header={t("accounts.addReceipts.billNumber")}
-                body={(row) => (row.oldBillNumber ? t("accounts.addReceipts.billWithOldNumber", { bill: row.billNumber, old: row.oldBillNumber }) : row.billNumber)}
+                body={(row) => (
+                  <span className="flex align-items-center gap-2 flex-wrap">
+                    {row.oldBillNumber ? t("accounts.addReceipts.billWithOldNumber", { bill: row.billNumber, old: row.oldBillNumber }) : row.billNumber}
+                    <OriginChip origin={row.origin} compact />
+                  </span>
+                )}
               />
               <Column
                 field="source"

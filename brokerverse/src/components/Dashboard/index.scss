@@ -281,6 +281,11 @@
     display: none !important;
   }
 
+  // the business counted stays on paper: only the chosen view of the origin switch is printed
+  .bv-dash-toolbar .bv-dash-toolbar__origin .p-button.p-highlight {
+    display: inline-flex !important;
+  }
+
   .bv-chart-card {
     break-inside: avoid;
     box-shadow: none;

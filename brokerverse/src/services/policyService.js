@@ -71,6 +71,7 @@ class PolicyService {
         params.append("policyNumber", searchQuery);
       }
       if (filters.lob) params.append("lob", filters.lob);
+      if (filters.origin) params.append("origin", filters.origin);
 
       const response = await fetch(
         `${this.baseURL}/policies?${params.toString()}`,

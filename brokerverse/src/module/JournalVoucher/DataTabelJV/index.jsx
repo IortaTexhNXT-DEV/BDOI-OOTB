@@ -9,6 +9,8 @@ import SvgIconeye from "../../../assets/icons/SvgIconeye";
 import { getJournalVoucherViewData } from "../store/journalVoucherMiddleware";
 import { useDispatch } from "react-redux";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import StatusChip from "../../../components/StatusChip";
+import { originColumnBody } from "../../../components/OriginChip";
 
 const DataTabelJV = ({ 
   handleEdit, 
@@ -146,9 +148,11 @@ const DataTabelJV = ({
           headerStyle={headerStyle}
           body={(r) => {
             const labels = { draft: "Draft", "for-approval": "Awaiting approval", approved: "Approved", posted: "Posted", rejected: "Rejected", reversed: "Reversed" };
+            if (r.status === "opening") return <StatusChip label={translate("origin.openingBalance")} severity="info" />;
             return labels[r.status] || r.status || "-";
           }}
         ></Column>
+        <Column header={translate("origin.title")} body={originColumnBody} className="fieldvalue_container" headerStyle={headerStyle}></Column>
 
         <Column
 

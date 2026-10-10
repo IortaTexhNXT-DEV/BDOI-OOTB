@@ -18,6 +18,7 @@ import { EmptyState, FilterBar, KeyFacts, PanelSection, RowActions, SectionCard,
 import { calendarDateFormat, formatDate, toIsoDate } from "../../../utility/dateFormat";
 import { downloadCsv } from "../../../utility/csvExport";
 import { ExpiryCell, PolicyCell, RenewalHeader, RiskChip, StageChip } from "../shared";
+import OriginChip, { OriginFilter, policyOriginOf } from "../../../components/OriginChip";
 import "./index.scss";
 
 const METHODS = ["Email", "SMS", "Phone", "Letter"];
@@ -25,7 +26,8 @@ const METHODS = ["Email", "SMS", "Phone", "Letter"];
 /**
  * Operations > Renewals > Renewal Queue: open renewals with their expiry, premium, stage, retention risk and contacts so
  * far. Row actions follow the stage: prepare the renewal quote, send the next notice, record a reminder, complete an
- * approved renewal; the detail opens on the right.
+ * approved renewal; the detail opens on the right. Renewals of policies migrated at go-live are marked and can be listed
+ * apart (Origin).
  */
 const RenewalQueue = () => {
   const { t } = useTranslation();
@@ -42,6 +44,7 @@ const RenewalQueue = () => {
   const [agent, setAgent] = useState("");
   const [range, setRange] = useState(null);
   const [due, setDue] = useState("");
+  const [origin, setOrigin] = useState("");
   const [panelId, setPanelId] = useState(null);
   const [reminder, setReminder] = useState(null);
 
@@ -51,7 +54,7 @@ const RenewalQueue = () => {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const { items, dashboard: d } = await renewalsWorkspaceService.getQueue();
+      const { items, dashboard: d } = await renewalsWorkspaceService.getQueue(origin ? { origin } : {});
       setRows(items);
       setDashboard(d || {});
     } catch (e) {
@@ -59,7 +62,7 @@ const RenewalQueue = () => {
     } finally {
       setLoading(false);
     }
-  }, [showError]);
+  }, [showError, origin]);
   useEffect(() => { load(); }, [load]);
 
   const refreshPipeline = async () => {
@@ -175,8 +178,8 @@ const RenewalQueue = () => {
       <StatCards items={figures} />
 
       <SectionCard>
-        <FilterBar active={!!(search || stage || risk || agent || range || due)}
-          onClear={() => { setSearch(""); setStage(""); setRisk(""); setAgent(""); setRange(null); setDue(""); }}>
+        <FilterBar active={!!(search || stage || risk || agent || range || due || origin)}
+          onClear={() => { setSearch(""); setStage(""); setRisk(""); setAgent(""); setRange(null); setDue(""); setOrigin(""); }}>
           <span className="p-input-icon-left bv-filter-bar__search">
             <i className="pi pi-search" />
             <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("queue.searchHint")} aria-label={t("queue.searchHint")} />
@@ -189,10 +192,12 @@ const RenewalQueue = () => {
             options={[{ label: t("queue.allAgents"), value: "" }, ...agents.map((a) => ({ label: a, value: a }))]} />
           <Calendar value={range} onChange={(e) => setRange(e.value)} selectionMode="range" readOnlyInput showIcon dateFormat={calendarDateFormat()}
             placeholder={t("queue.expiryRange")} aria-label={t("queue.expiryRange")} />
+          <OriginFilter value={origin} onChange={setOrigin} />
         </FilterBar>
         <DataTable value={filtered} dataKey="id" loading={loading} paginator rows={20} size="small" sortField="daysToExpiry" sortOrder={1}
           emptyMessage={<EmptyState icon="pi-calendar" title={t("queue.emptyTitle")} text={rows.length ? t("queue.emptyFiltered") : t("queue.emptyText")} />}>
           <Column field="policyNumber" header={t("queue.col.policy")} sortable body={(r) => <PolicyCell policyNumber={r.policyNumber} insured={r.insuredName} onOpen={() => setPanelId(r.id)} />} />
+          <Column header={t("origin.title")} body={(r) => <OriginChip origin={policyOriginOf(r)} variant="renewal" compact />} />
           <Column field="product" header={t("queue.col.product")} sortable body={(r) => <span className="bv-cell-stack"><span>{r.product}</span><small>{r.insurer}</small></span>} />
           <Column field="daysToExpiry" header={t("queue.col.expiry")} sortable body={(r) => <ExpiryCell date={r.expiryDate} days={r.daysToExpiry} />} />
           <Column field="currentPremium" header={t("queue.col.premium")} sortable body={(r) => formatCurrency(r.currentPremium)} className="bv-num" headerClassName="bv-num" />
@@ -209,6 +214,7 @@ const RenewalQueue = () => {
             <StageChip row={selected} />
             <RiskChip level={selected.retentionRisk} />
             <span>{selected.renewalNumber}</span>
+            <OriginChip origin={policyOriginOf(selected)} variant="renewal" />
           </>
         ) : null}
         footer={selected ? (

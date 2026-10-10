@@ -15,6 +15,7 @@ import { toClientRow } from "../store/clientsReducer";
 import { formatDate } from "../../../../utility/dateFormat";
 import { useListState, useServerList } from "../../../../hooks/useServerList";
 import { statusLabel, statusSeverity } from "../../../../utils/statusSeverity";
+import { OriginFilter, originColumnBody } from "../../../../components/OriginChip";
 
 const TABS = [
   { key: "all", labelKey: "clients.all", clientType: undefined },
@@ -24,22 +25,23 @@ const TABS = [
 
 /**
  * Clients list: All / Individual / Company tabs over every client, paged and searched by the server (name, client
- * code, e-mail, phone). The tab, search and page are kept while a client is opened.
+ * code, e-mail, phone) and filtered by origin (issued in BrokerVerse or migrated at go-live). The tab, search, origin and
+ * page are kept while a client is opened.
  */
 const ClientListingCard = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [state, patch] = useListState("clients", { tab: 0, search: "" });
+  const [state, patch] = useListState("clients", { tab: 0, search: "", origin: "" });
   const clientType = TABS[state.tab]?.clientType;
 
   const fetchPage = useCallback(async ({ page, pageSize }) => {
-    const res = await clientService.getClients(page, pageSize, { search: state.search.trim(), clientType });
+    const res = await clientService.getClients(page, pageSize, { search: state.search.trim(), clientType, origin: state.origin || undefined });
     if (!res.success) throw new Error(res.error);
     const body = res.data || {};
     const clients = body.data?.clients || [];
     return { rows: clients.map(toClientRow), total: body.data?.pagination?.totalCount ?? body.total ?? clients.length };
-  }, [state.search, clientType]);
+  }, [state.search, state.origin, clientType]);
   const list = useServerList(fetchPage, { key: "clients" });
 
   const openClient = (row) => navigate(`/agent/clientview/${row.id || row.LeadID}`);
@@ -71,11 +73,13 @@ const ClientListingCard = () => {
             <i className="pi pi-search" />
             <InputText placeholder={t("clients.search")} aria-label={t("clients.search")} value={state.search} onChange={(e) => patch({ search: e.target.value })} />
           </span>
+          <OriginFilter value={state.origin} onChange={(origin) => patch({ origin })} />
         </div>
         <DataTable {...list.tableProps} scrollable dataKey="id" size="small" stripedRows className="corrections__table__main" onRowClick={(e) => openClient(e.data)} rowClassName={() => "cursor-pointer"}
           emptyMessage={list.error ? t("clients.errorLoadingClients", { message: list.error }) : t("listCommon.noRecords")}>
           <Column header={t("clients.clientIdSearch")} body={(r) => <span className="nowrap">{r.LeadID || "-"}</span>} />
           <Column header={t("clients.assuredName")} body={(r) => r.DisplayName || r.FirstName || "-"} style={{ minWidth: "11rem" }} />
+          <Column header={t("origin.title")} body={originColumnBody} />
           <Column header={t("clients.category")} body={(r) => (r.category === "Corporate" ? t("clients.company") : t("clients.individualTab"))} />
           <Column header={t("leads.col.email")} body={(r) => <span className="bv-break">{r.EmailID || "-"}</span>} style={{ minWidth: "11rem" }} />
           <Column header={t("leads.col.mobile")} body={(r) => <span className="nowrap">{r.ContactNumber || "-"}</span>} />

@@ -8,6 +8,7 @@ import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { formatDate } from "../../../utility/dateFormat";
 import StatCards from "../../../components/StatCards";
 import { PageHeader, StatusChip } from "../../../components/RecordPage";
+import OriginChip from "../../../components/OriginChip";
 import ClientTabs from "./clientViewCard";
 import "./index.scss";
 
@@ -63,6 +64,7 @@ const ClientView = () => {
             {type ? <StatusChip label={t(`client360.type.${type}`, type)} severity="secondary" /> : null}
             {client.kycStatus ? <StatusChip label={t(`onboarding.kycStatus.${client.kycStatus}`, { defaultValue: client.kycStatus })} severity={KYC_SEVERITY[client.kycStatus] || "info"} /> : null}
             {client.status && client.status !== "active" ? <StatusChip status={client.status} /> : null}
+            <OriginChip origin={client.origin} />
             {client.contactNumber ? <>{sep}<span><i className="pi pi-phone mr-1" aria-hidden="true" />{client.contactNumber}</span></> : null}
             {client.emailId ? <>{sep}<span><i className="pi pi-envelope mr-1" aria-hidden="true" />{client.emailId}</span></> : null}
             {client.city || client.province ? <>{sep}<span>{[client.city, client.province].filter(Boolean).join(", ")}</span></> : null}

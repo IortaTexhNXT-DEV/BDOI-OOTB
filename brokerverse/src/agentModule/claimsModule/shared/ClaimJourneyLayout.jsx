@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
 import { Steps } from "primereact/steps";
 import { KeyFacts, PageHeader, SectionCard, StatusChip } from "../../../components/RecordPage";
+import OriginChip, { isMigrated, policyOriginOf } from "../../../components/OriginChip";
 import { formatCurrency } from "../../../utility/currencyConverter";
 import { formatDate } from "../../../utility/dateFormat";
 import { CLAIM_STEPS, claimLobOf, stepIndex } from "./claimJourney";
@@ -56,6 +57,7 @@ const ClaimJourneyLayout = ({ step, claim, claimNumber, holderName, reference, s
             {!claim && reference ? <>{sep}<span>{reference}</span></> : null}
             {lob ? <StatusChip label={t(`claimFlow.lob.${lob}`, lob)} severity="secondary" /> : null}
             {shownStatus ? <StatusChip status={claim?.lifecycleStatus || shownStatus} label={shownStatus} /> : null}
+            {isMigrated(claim?.origin) ? <OriginChip origin={claim.origin} /> : <OriginChip origin={policyOriginOf(claim)} variant="policy" />}
           </>
         )}
         actions={(

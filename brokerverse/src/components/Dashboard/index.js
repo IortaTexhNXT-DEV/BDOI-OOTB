@@ -12,5 +12,6 @@ export { DASHBOARDS, PERSONA_DASHBOARD, allowedDashboards, defaultDashboard } fr
 export { COMPARISONS, PERIODS, changeOf, periodRange } from "./periods";
 export { formatValue } from "./format";
 export { usePatterns } from "./usePatterns";
+export { ORIGIN_VIEWS, useDashboardOrigin } from "./useDashboardOrigin";
 export { LISTS, drillDown } from "./drill";
 export { default as ShareChart } from "./ShareChart";

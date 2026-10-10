@@ -22,13 +22,14 @@ import { getCategoriesForLob, MOTOR_CATEGORIES } from "../../endorsementModule/c
 import { calendarDateFormat, formatDate as formatAppDate, toDate } from "../../../utility/dateFormat";
 import useMasterOptions from "../../../module/GeneralMasters/common/useMasterOptions";
 import { useListState, useServerList } from "../../../hooks/useServerList";
+import { OriginFilter, originColumnBody } from "../../../components/OriginChip";
 
 // Legacy export for backward compatibility (Motor categories)
 export const categories = MOTOR_CATEGORIES;
 
 const NO_FILTERS = {
   paymentStatus: "", productType: "", insuranceCompanyName: "", clientName: "",
-  issuedDateFrom: null, issuedDateTo: null, expiryDateFrom: null, expiryDateTo: null, premiumMin: null, premiumMax: null,
+  issuedDateFrom: null, issuedDateTo: null, expiryDateFrom: null, expiryDateTo: null, premiumMin: null, premiumMax: null, origin: "",
 };
 const DATE_FILTERS = ["issuedDateFrom", "issuedDateTo", "expiryDateFrom", "expiryDateTo"];
 
@@ -52,7 +53,7 @@ const PolicyTable = ({ filterExpiredOnly = false, setDisplayDialog, displayDialo
   const menu = useRef(null);
   const [state, patch] = useListState(filterExpiredOnly ? "policies-expired" : "policies", { search: "", applied: NO_FILTERS, showFilters: false });
   // filters being edited in the panel; they reach the server with Apply
-  const [draft, setDraft] = useState(state.applied);
+  const [draft, setDraft] = useState({ ...NO_FILTERS, ...state.applied });
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [menuPolicy, setMenuPolicy] = useState(null);
   const insurers = useMasterOptions("insurance-company");
@@ -186,6 +187,7 @@ const PolicyTable = ({ filterExpiredOnly = false, setDisplayDialog, displayDialo
             {field(t("policyTable.paymentStatus"), <Dropdown value={draft.paymentStatus} onChange={(e) => setDraftField("paymentStatus", e.value)} options={paymentStatusOptions} className="w-full" />)}
             {field(t("policyTable.productType"), <Dropdown value={draft.productType} onChange={(e) => setDraftField("productType", e.value)} options={productTypeOptions} className="w-full" />)}
             {field(t("policyTable.insuranceCompany"), <Dropdown value={draft.insuranceCompanyName} onChange={(e) => setDraftField("insuranceCompanyName", e.value)} options={insurerOptions} filter className="w-full" />)}
+            {field(t("origin.title"), <OriginFilter value={draft.origin} onChange={(v) => setDraftField("origin", v)} className="w-full" />)}
             {field(t("policyTable.clientName"), <InputText value={draft.clientName} onChange={(e) => setDraftField("clientName", e.target.value)} className="w-full" />)}
             {DATE_FILTERS.map((k) => (
               <React.Fragment key={k}>
@@ -205,6 +207,7 @@ const PolicyTable = ({ filterExpiredOnly = false, setDisplayDialog, displayDialo
       <Menu model={menuItems} popup ref={menu} breakpoint="767px" />
       <DataTable {...list.tableProps} scrollable dataKey="id" size="small" stripedRows className="corrections__table__main" emptyMessage={t("listCommon.noRecords")}>
         <Column header={t("policyTable.policyNumber")} body={(p) => <span className="nowrap">{p.policyNumber?.toUpperCase() || "-"}</span>} />
+        <Column header={t("origin.title")} body={originColumnBody} />
         <Column header={t("policyTable.clientId")} body={(p) => <span className="nowrap">{p.ClientCode}</span>} />
         <Column header={t("policyTable.clientNameHeader")} body={(p) => p.ClientName} style={{ minWidth: "11rem" }} />
         <Column header={t("policyTable.grossPremiumHeader")} body={(p) => formatCurrency(p.grossPremium)} />

@@ -141,7 +141,7 @@ export const HELP_ROUTES = [
   ["/master/configuration/settings", "configuration"],
   ["/master/configuration/document-numbering", "document-numbering"],
   ["/master/configuration/schedules", "system-administrator-schedules"],
-  ["/master/configuration/go-live", "go-live-data-load"],
+  ["/master/configuration/go-live", "data-migration-and-go-live"],
   ["/master/configuration/audit-trail", "audit-trail"],
   ["/master/configuration/email-outbox", "e-mail-outbox"],
   ["/master/configuration/integrations", "integrations"],

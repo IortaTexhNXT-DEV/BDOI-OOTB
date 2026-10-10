@@ -18,6 +18,7 @@ import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 import logger from "../../../utility/logger";
 import { ActivityLog, fromCollectionActions } from "../../../components/ActivityLog";
+import OriginChip, { isMigrated, policyOriginOf } from "../../../components/OriginChip";
 
 const CollectionDetail = () => {
   const { t } = useTranslation();
@@ -237,6 +238,7 @@ const CollectionDetail = () => {
           onClick={() => navigate("/agent/collections")}
         />
         <h2>{t("collectionDetail.collectionDetails")}</h2>
+        {isMigrated(collection.origin) ? <OriginChip origin={collection.origin} /> : <OriginChip origin={policyOriginOf(collection)} variant="policy" />}
       </div>
 
       {collection.outstandingAmount > 0 && (
