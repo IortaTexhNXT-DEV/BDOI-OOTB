@@ -784,12 +784,15 @@ const scheduleExample = { id: 7, code: 'TIS-WEEKLY', name: 'Weekly remittance', 
   groupBy: 'Insurer and product line', runTime: '06:15', allInsurers: true, insurers: [], covers: { allActive: true, count: 4, insurers: [{ id: 3, code: 'PIONEER', name: 'Pioneer Insurance & Surety Corp.' }], label: 'All active (4)' },
   runs: 'Mondays 06:15', nextRun: '2026-10-19', nextRunText: 'Mon 19/10/2026 06:15',
   lastRun: { id: runExample.id, at: runExample.startedAt, text: '12/10/2026 06:15', result: 'success', resultLabel: 'Success', counts: runExample.counts, message: runExample.message, trigger: runExample.trigger },
-  status: 'Active', isActive: true, timeZone: 'Asia/Manila' };
+  status: 'Active', isActive: true, timeZone: 'Asia/Manila',
+  actions: [{ code: 'view', label: 'View', allowed: true }, { code: 'edit', label: 'Edit', allowed: true }, { code: 'preview', label: 'Preview run', allowed: true },
+    { code: 'run-now', label: 'Run now…', allowed: false, blockedCode: 'WINDOW_DONE', blockedReason: 'This week\'s run is done (12/10/2026 06:15). Next run Mon 19/10/2026 06:15.' },
+    { code: 'pause', label: 'Pause', allowed: true }] };
 const scheduleBody = { name: 'Weekly remittance', kind: 'Remittance run', allInsurers: true, frequency: 'Weekly', paymentWindow: 'Previous Monday to Friday', groupBy: 'Insurer and product line',
   runTime: '06:15', nextRun: '2026-10-19' };
 define({
   method: 'GET', path: '/schedules',
-  summary: 'Remittance schedules (Setup > Schedules): the automation state (jobEnabled, checked daily at, time zone, last check and its status; the cron and the job link for administrators only) and per schedule its kind, the insurers it covers, frequency, payment window, grouping, runs ("Mondays 06:15"), next run (none while paused), last run (time, result, counts, message, trigger) and status; scheduledJobs, upcomingEvents and job for the Scheduling screen of earlier releases',
+  summary: 'Remittance schedules (Setup > Schedules): the automation state (jobEnabled, checked daily at, time zone, last check and its status; the cron and the job link for administrators only) and per schedule its kind, the insurers it covers, frequency, payment window, grouping, runs ("Mondays 06:15"), next run (none while paused), last run (time, result, counts, message, trigger), status and the row menu of the caller (actions: View; Edit, Preview run, Run now (disabled with the reason while paused or once the window has run) and Pause / Resume with write:remittance); scheduledJobs, upcomingEvents and job for the Scheduling screen of earlier releases',
   screen: `${S('Setup > Schedules')}; ${S('Scheduling')}`, middleware: read,
   response: { success: true, data: { automation: { jobEnabled: false, checkedDaily: '06:15', timeZone: 'Asia/Manila', lastCheckAt: null, lastStatus: null, cron: '15 6 * * *', jobCode: 'remittance-schedules', link: '/master/configuration/schedules' },
     schedules: [scheduleExample], timeZone: 'Asia/Manila', job: { code: 'remittance-schedules', enabled: false } } },
@@ -804,7 +807,7 @@ define({
 define({
   method: 'GET', path: '/schedules/:id', summary: 'One remittance schedule as listed on Setup > Schedules', screen: S('Setup > Schedules > View'), middleware: read,
   response: { success: true, data: scheduleExample },
-  handler: async (req, res) => ok(res, await runs.getSchedule(req.params.id)),
+  handler: async (req, res) => ok(res, await runs.getSchedule(req.params.id, req.user)),
 });
 define({
   method: 'PUT', path: '/schedules/:id',

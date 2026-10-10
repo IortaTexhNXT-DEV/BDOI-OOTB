@@ -141257,7 +141257,7 @@
     "/remittance/schedules": {
       "get": {
         "operationId": "getRemittanceSchedules",
-        "summary": "Remittance schedules (Setup > Schedules): the automation state (jobEnabled, checked daily at, time zone, last check and its status; the cron and the job link for administrators only) and per schedule its kind, the insurers it covers, frequency, payment window, grouping, runs (\"Mondays 06:15\"), next run (none while paused), last run (time, result, counts, message, trigger) and status; scheduledJobs, upcomingEvents and job for the Scheduling screen of earlier releases",
+        "summary": "Remittance schedules (Setup > Schedules): the automation state (jobEnabled, checked daily at, time zone, last check and its status; the cron and the job link for administrators only) and per schedule its kind, the insurers it covers, frequency, payment window, grouping, runs (\"Mondays 06:15\"), next run (none while paused), last run (time, result, counts, message, trigger), status and the row menu of the caller (actions: View; Edit, Preview run, Run now (disabled with the reason while paused or once the window has run) and Pause / Resume with write:remittance); scheduledJobs, upcomingEvents and job for the Scheduling screen of earlier releases",
         "tags": [
           "Remittance"
         ],
@@ -141454,6 +141454,23 @@
                               },
                               "timeZone": {
                                 "type": "string"
+                              },
+                              "actions": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "code": {
+                                      "type": "string"
+                                    },
+                                    "label": {
+                                      "type": "string"
+                                    },
+                                    "allowed": {
+                                      "type": "boolean"
+                                    }
+                                  }
+                                }
                               }
                             }
                           }
@@ -141542,7 +141559,36 @@
                         },
                         "status": "Active",
                         "isActive": true,
-                        "timeZone": "Asia/Manila"
+                        "timeZone": "Asia/Manila",
+                        "actions": [
+                          {
+                            "code": "view",
+                            "label": "View",
+                            "allowed": true
+                          },
+                          {
+                            "code": "edit",
+                            "label": "Edit",
+                            "allowed": true
+                          },
+                          {
+                            "code": "preview",
+                            "label": "Preview run",
+                            "allowed": true
+                          },
+                          {
+                            "code": "run-now",
+                            "label": "Run now…",
+                            "allowed": false,
+                            "blockedCode": "WINDOW_DONE",
+                            "blockedReason": "This week's run is done (12/10/2026 06:15). Next run Mon 19/10/2026 06:15."
+                          },
+                          {
+                            "code": "pause",
+                            "label": "Pause",
+                            "allowed": true
+                          }
+                        ]
                       }
                     ],
                     "timeZone": "Asia/Manila",
@@ -141855,6 +141901,23 @@
                         },
                         "timeZone": {
                           "type": "string"
+                        },
+                        "actions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "allowed": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -141914,7 +141977,36 @@
                     },
                     "status": "Active",
                     "isActive": true,
-                    "timeZone": "Asia/Manila"
+                    "timeZone": "Asia/Manila",
+                    "actions": [
+                      {
+                        "code": "view",
+                        "label": "View",
+                        "allowed": true
+                      },
+                      {
+                        "code": "edit",
+                        "label": "Edit",
+                        "allowed": true
+                      },
+                      {
+                        "code": "preview",
+                        "label": "Preview run",
+                        "allowed": true
+                      },
+                      {
+                        "code": "run-now",
+                        "label": "Run now…",
+                        "allowed": false,
+                        "blockedCode": "WINDOW_DONE",
+                        "blockedReason": "This week's run is done (12/10/2026 06:15). Next run Mon 19/10/2026 06:15."
+                      },
+                      {
+                        "code": "pause",
+                        "label": "Pause",
+                        "allowed": true
+                      }
+                    ]
                   }
                 }
               }
@@ -142790,6 +142882,23 @@
                             },
                             "timeZone": {
                               "type": "string"
+                            },
+                            "actions": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "code": {
+                                    "type": "string"
+                                  },
+                                  "label": {
+                                    "type": "string"
+                                  },
+                                  "allowed": {
+                                    "type": "boolean"
+                                  }
+                                }
+                              }
                             }
                           }
                         }
@@ -142910,7 +143019,36 @@
                       },
                       "status": "Active",
                       "isActive": true,
-                      "timeZone": "Asia/Manila"
+                      "timeZone": "Asia/Manila",
+                      "actions": [
+                        {
+                          "code": "view",
+                          "label": "View",
+                          "allowed": true
+                        },
+                        {
+                          "code": "edit",
+                          "label": "Edit",
+                          "allowed": true
+                        },
+                        {
+                          "code": "preview",
+                          "label": "Preview run",
+                          "allowed": true
+                        },
+                        {
+                          "code": "run-now",
+                          "label": "Run now…",
+                          "allowed": false,
+                          "blockedCode": "WINDOW_DONE",
+                          "blockedReason": "This week's run is done (12/10/2026 06:15). Next run Mon 19/10/2026 06:15."
+                        },
+                        {
+                          "code": "pause",
+                          "label": "Pause",
+                          "allowed": true
+                        }
+                      ]
                     }
                   }
                 }

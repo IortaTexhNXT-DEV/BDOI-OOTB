@@ -18,7 +18,7 @@
 import { many, one, pool, query } from '../../db/pool.js';
 import { HttpError, badRequest } from '../../lib/errors.js';
 import { audit } from '../../lib/audit.js';
-import { isAdmin } from '../../lib/auth.js';
+import { hasPermission, isAdmin } from '../../lib/auth.js';
 import { businessTimeZone, addDays, today as businessToday } from '../../lib/dates.js';
 import { printFormat } from '../../lib/pdf/index.js';
 import { activityEntries, instant } from '../../lib/auditEvents.js';
@@ -117,7 +117,26 @@ async function coveredInsurers(s) {
   return many("SELECT id, code, name FROM insurance_companies WHERE (code = ANY($1) OR id::text = ANY($1)) AND status = 'active' ORDER BY name", [codes]);
 }
 
-async function scheduleOut(s, { last, asOf, fmt }) {
+/**
+ * The row menu of a schedule for `user` (§3.2 actions): View for everyone; with write:remittance Edit, Preview run,
+ * Run now and Pause or Resume. Run now stays in the menu, disabled with its reason, while the schedule is paused or its
+ * current window already has a run (WINDOW_DONE, the text of the refusal with the next run).
+ */
+async function scheduleActions(s, user, { asOf, fmt }) {
+  const out = [{ code: 'view', label: 'View', allowed: true }];
+  if (!hasPermission(user, 'write:remittance')) return out;
+  out.push({ code: 'edit', label: 'Edit', allowed: true }, { code: 'preview', label: 'Preview run', allowed: true });
+  const active = s.status === 'Active';
+  const done = active ? await doneRun(s.code, windowOf(s, asOf)) : null;
+  let block = null;
+  if (!active) block = { blockedCode: 'PAUSED', blockedReason: `${s.code} is paused. Resume it to run it.` };
+  else if (done) block = { blockedCode: 'WINDOW_DONE', blockedReason: await windowDoneText(s, done, asOf, fmt) };
+  out.push({ code: 'run-now', label: 'Run now…', allowed: !block, ...(block || {}) });
+  out.push(active ? { code: 'pause', label: 'Pause', allowed: true } : { code: 'resume', label: 'Resume', allowed: true });
+  return out;
+}
+
+async function scheduleOut(s, { last, asOf, fmt, user }) {
   const insurers = await coveredInsurers(s);
   const active = s.status === 'Active';
   const next = active ? nextRunOf(s, asOf) : null;
@@ -132,6 +151,7 @@ async function scheduleOut(s, { last, asOf, fmt }) {
     lastRun: run ? { id: run.id, at: run.startedAt, text: run.startedText, result: run.result.code, resultLabel: run.result.label, counts: run.counts, message: run.message, trigger: run.trigger }
       : null,
     status: active ? 'Active' : 'Paused', isActive: active, timeZone: s.timezone || null,
+    actions: await scheduleActions(s, user, { asOf, fmt }),
   };
 }
 
@@ -146,7 +166,7 @@ export async function listSchedules(user) {
   const { rows } = await masters.listRecords(t, {}, { limit: 500, offset: 0 });
   const last = await lastRuns(rows.map((r) => r.code));
   const schedules = [];
-  for (const s of rows) schedules.push(await scheduleOut(s, { last: last.get(s.code), asOf, fmt }));
+  for (const s of rows) schedules.push(await scheduleOut(s, { last: last.get(s.code), asOf, fmt, user }));
   const legacy = await many('SELECT data->>\'scheduleId\' AS sid, max(created_at) AS last FROM remittance_items WHERE kind = \'execution\' AND data ? \'scheduleId\' GROUP BY 1');
   const scheduledJobs = rows.map((r) => ({ ...r, insurers: insurerCodes(r), cutOffDays: r.cutOffDays ?? 0, nextRun: nextRunOf(r, asOf),
     lastRun: legacy.find((x) => Number(x.sid) === r.id)?.last || r.lastRun || null, status: r.status === 'Active' ? 'Active' : 'Paused' }));
@@ -161,10 +181,10 @@ export async function listSchedules(user) {
   };
 }
 
-/** One schedule of the Setup > Schedules table. */
-export async function getSchedule(id) {
+/** One schedule of the Setup > Schedules table, with the row menu of `user`. */
+export async function getSchedule(id, user) {
   const s = await masters.getRecord(await scheduleType(), id);
-  return scheduleOut(s, { last: (await lastRuns([s.code])).get(s.code), asOf: await businessToday(), fmt: await printFormat() });
+  return scheduleOut(s, { last: (await lastRuns([s.code])).get(s.code), asOf: await businessToday(), fmt: await printFormat(), user });
 }
 
 /**
@@ -317,7 +337,7 @@ export async function runSchedule(id, user, { asOf = null, trigger = 'user', rea
   return {
     run, message,
     drafts: created.map((r) => ({ id: r.id, remittanceNo: r.remittanceNo, insurer: r.insurerName || null, policies: r.policyCount, dueToInsurer: round2(r.netAmount), link: recordLink(r.id) })),
-    schedule: await getSchedule(s.id),
+    schedule: await getSchedule(s.id, user),
   };
 }
 

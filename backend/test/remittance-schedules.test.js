@@ -108,6 +108,19 @@ describe('TISPH schedules and the automation state', () => {
     expect((await people.gm('put', `/remittance/schedules/${r.body.data.id}`).send({ name: 'x' })).status).toBe(403);
     expect((await people.gm('get', '/remittance/schedules')).status).toBe(200);
   });
+
+  it('each row carries the menu of the caller: View only for a read-only user, the changes and runs for write:remittance', async () => {
+    const codes = (row) => row.actions.map((x) => x.code);
+    expect(codes(byCode(await schedules('gm'), 'TIS-WEEKLY'))).toEqual(['view']);
+    const w = byCode(await schedules(), 'TIS-WEEKLY');
+    expect(codes(w)).toEqual(['view', 'edit', 'preview', 'run-now', 'pause']);
+    expect(w.actions.find((x) => x.code === 'run-now')).toMatchObject({ label: 'Run now…', allowed: true });
+    const paused = byCode(await schedules(), 'SCH-001');
+    expect(codes(paused)).toEqual(['view', 'edit', 'preview', 'run-now', 'resume']);
+    expect(paused.actions.find((x) => x.code === 'run-now')).toEqual({ code: 'run-now', label: 'Run now…', allowed: false, blockedCode: 'PAUSED',
+      blockedReason: 'SCH-001 is paused. Resume it to run it.' });
+    expect((await people.gm('get', `/remittance/schedules/${w.id}`)).body.data.actions).toEqual([{ code: 'view', label: 'View', allowed: true }]);
+  });
 });
 
 describe('preview, Run now and the run history', () => {
@@ -176,6 +189,9 @@ describe('preview, Run now and the run history', () => {
     expect(await count('remittance_runs')).toBe(1);
     const p = (await people.maker('post', `/remittance/schedules/${sch.id}/preview`)).body.data;
     expect(p.windowDone).toMatchObject({ done: true, runId: run.id, message: again.body.message });
+    // the row menu keeps Run now, disabled with the same reason
+    expect(byCode(await schedules(), sch.code).actions.find((x) => x.code === 'run-now')).toEqual({ code: 'run-now', label: 'Run now…', allowed: false,
+      blockedCode: 'WINDOW_DONE', blockedReason: again.body.message });
   });
 
   it('the run history and the schedule row show the run; the schedule activity logs it', async () => {

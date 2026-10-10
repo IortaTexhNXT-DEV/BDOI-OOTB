@@ -179,7 +179,9 @@ their own: the job `remittance-schedules` of Master > Schedules (handler `remitt
 until switched on) runs the active schedules whose next run date has come, in the business time zone, and moves the
 date on by the frequency. `GET /schedules` answers `automation { jobEnabled, checkedDaily, timeZone, lastCheckAt,
 lastStatus }` (the cron and the job link for administrators only) and per schedule its covers ("All active (4)"), runs
-("Mondays 06:15"), next run (none while paused) and `lastRun { at, result, counts, message, trigger }`.
+("Mondays 06:15"), next run (none while paused), `lastRun { at, result, counts, message, trigger }` and the row menu of
+the caller (`actions`: View; with `write:remittance` Edit, Preview run, Run now and Pause or Resume, Run now disabled
+with its reason, PAUSED or WINDOW_DONE, while the schedule is paused or its current window has a run).
 `POST /schedules/:id/preview` is a dry run: per insurer the policies ready and the amount due, "Draft will be created"
 or "Nothing to remit", and `windowDone` when the window was run. `POST /schedules/:id/run {reasonCode, note}` is Run now
 (`write:remittance`, a `remittance_off_cycle` reason). Every run, by the job or by a user, is a row of
