@@ -134910,6 +134910,12 @@
                                 "productLine": {
                                   "type": "string"
                                 },
+                                "basis": {
+                                  "type": "string"
+                                },
+                                "basisLabel": {
+                                  "type": "string"
+                                },
                                 "policies": {
                                   "type": "integer"
                                 },
@@ -135012,6 +135018,8 @@
                             "name": "Pioneer Insurance & Surety Corp."
                           },
                           "productLine": "Motor",
+                          "basis": "net",
+                          "basisLabel": "Net",
                           "policies": 46,
                           "dueToInsurer": 1204553.1,
                           "varianceRows": 4
@@ -135198,6 +135206,12 @@
                               "productLine": {
                                 "type": "string"
                               },
+                              "basis": {
+                                "type": "string"
+                              },
+                              "basisLabel": {
+                                "type": "string"
+                              },
                               "policies": {
                                 "type": "integer"
                               },
@@ -135281,6 +135295,8 @@
                           "name": "Pioneer Insurance & Surety Corp."
                         },
                         "productLine": "Motor",
+                        "basis": "net",
+                        "basisLabel": "Net",
                         "policies": 46,
                         "dueToInsurer": 1204553.1,
                         "varianceRows": 4
@@ -135465,6 +135481,12 @@
                                   "productLine": {
                                     "type": "string"
                                   },
+                                  "basis": {
+                                    "type": "string"
+                                  },
+                                  "basisLabel": {
+                                    "type": "string"
+                                  },
                                   "policies": {
                                     "type": "integer"
                                   },
@@ -135578,6 +135600,8 @@
                             "name": "Pioneer Insurance & Surety Corp."
                           },
                           "productLine": "Motor",
+                          "basis": "net",
+                          "basisLabel": "Net",
                           "policies": 46,
                           "dueToInsurer": 1204553.1,
                           "varianceRows": 4
@@ -135787,6 +135811,12 @@
                               "productLine": {
                                 "type": "string"
                               },
+                              "basis": {
+                                "type": "string"
+                              },
+                              "basisLabel": {
+                                "type": "string"
+                              },
                               "policies": {
                                 "type": "integer"
                               },
@@ -135870,6 +135900,8 @@
                           "name": "Pioneer Insurance & Surety Corp."
                         },
                         "productLine": "Motor",
+                        "basis": "net",
+                        "basisLabel": "Net",
                         "policies": 46,
                         "dueToInsurer": 1204553.1,
                         "varianceRows": 4
@@ -135945,6 +135977,53 @@
           }
         },
         "x-screen": "Accounts > Remittance > Remittances > Import policy list > Download error report",
+        "x-permissions": [
+          "read:remittance",
+          "write:remittance"
+        ]
+      }
+    },
+    "/remittance/imports/{id}/file": {
+      "get": {
+        "operationId": "getRemittanceImportsIdFile",
+        "summary": "The file of an import as it was uploaded (.xlsx or .csv)",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Remittances > Import history > Download file\n\nAccess: read:remittance, write:remittance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "(xlsx or csv file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Remittances > Import history > Download file",
         "x-permissions": [
           "read:remittance",
           "write:remittance"
@@ -136355,6 +136434,12 @@
                               "productLine": {
                                 "type": "string"
                               },
+                              "basis": {
+                                "type": "string"
+                              },
+                              "basisLabel": {
+                                "type": "string"
+                              },
                               "policies": {
                                 "type": "integer"
                               },
@@ -136438,6 +136523,8 @@
                           "name": "Pioneer Insurance & Surety Corp."
                         },
                         "productLine": "Motor",
+                        "basis": "net",
+                        "basisLabel": "Net",
                         "policies": 46,
                         "dueToInsurer": 1204553.1,
                         "varianceRows": 4

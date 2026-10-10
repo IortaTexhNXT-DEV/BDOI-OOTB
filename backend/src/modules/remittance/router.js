@@ -883,7 +883,7 @@ const impExample = { id: 'imp_1', importNo: 'IMP-2026-0004', status: 'validated'
   purpose: { code: 'ROC-GOLIVE', name: 'Go-live opening', note: null, text: 'Go-live opening' }, file: { name: 'opening.xlsx', size: 18342, sizeText: '18 KB', hash: '9f2c...' },
   counts: { rows: 52, ready: 46, warnings: 4, errors: 6, held: 0, exceptions: 0 }, uploadedBy: { id: 'usr_4', name: 'M. Reyes' }, uploadedAt: '2026-10-12T02:00:00.000Z',
   committedBy: null, committedAt: null, discardedAt: null, drafts: [], sameFile: null,
-  toCreate: [{ insurer: { id: 3, name: 'Pioneer Insurance & Surety Corp.' }, productLine: 'Motor', policies: 46, dueToInsurer: 1204553.1, varianceRows: 4 }],
+  toCreate: [{ insurer: { id: 3, name: 'Pioneer Insurance & Surety Corp.' }, productLine: 'Motor', basis: 'net', basisLabel: 'Net', policies: 46, dueToInsurer: 1204553.1, varianceRows: 4 }],
   totals: { remittances: 1, policies: 46, dueToInsurer: 1204553.1 }, canCommit: true, commitBlockedReason: null, canDiscard: true };
 define({
   method: 'GET', path: '/imports/template', summary: 'Remittance_Policy_List_Template.xlsx: Data (required headers dark red, 2 samples), Columns (the active insurer codes, the product lines, other accepted headers) and Instructions',
@@ -934,6 +934,16 @@ define({
   method: 'GET', path: '/imports/:id/errors.xlsx', summary: 'Error report of an import: the columns of the file plus Result and Message, one row per file row in file order',
   screen: S('Remittances > Import policy list > Download error report'), middleware: read, response: '(xlsx file)',
   handler: async (req, res) => sendXlsx(res, await imports.errorReport(req.params.id)),
+});
+define({
+  method: 'GET', path: '/imports/:id/file', summary: 'The file of an import as it was uploaded (.xlsx or .csv)',
+  screen: S('Remittances > Import history > Download file'), middleware: read, response: '(xlsx or csv file)',
+  handler: async (req, res) => {
+    const f = await imports.importFile(req.params.id);
+    res.type(f.contentType);
+    res.setHeader('Content-Disposition', `attachment; filename="${String(f.fileName).replace(/[^\x20-\x7e]/g, '_').replace(/"/g, '')}"`);
+    res.sendFile(f.path);
+  },
 });
 define({
   method: 'POST', path: '/imports/:id/commit',

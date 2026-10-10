@@ -31,6 +31,7 @@ import { requiredReason } from '../ops-masters/records.js';
 import { readXlsx } from '../documents/xlsx.js';
 import { normKey, parseCsv } from '../documents/tabular.js';
 import { fileSize, round2, saveFile } from '../masters/helpers.js';
+import { objectExists, resolveKey } from '../uploads/storage.js';
 import { buildLines, defaultDueDate, eligiblePolicies, insertRemittance, statusLabels } from './service.js';
 
 export const PRODUCT_LINES = ['Motor', 'Personal Accident', 'Credit Life', 'Marine'];
@@ -199,13 +200,15 @@ async function sameFileText(twin) {
   return `This file was imported on ${formatDate(twin.committed_at, fmt)} as ${twin.import_no} (${twin.drafts} draft${Number(twin.drafts) === 1 ? '' : 's'}).`;
 }
 
-/** The remittances to create, one per insurer and product line of the ready rows. */
+/** The remittances to create, one per insurer and product line of the ready rows, with their basis (as the register reads it). */
 async function toCreate(importId) {
   const rows = await many(`SELECT ic.id AS insurer_id, ic.name AS insurer_name, pr.line AS product_line, count(*)::int AS policies, COALESCE(sum(x.system_due), 0) AS due,
-      count(*) FILTER (WHERE x.result = 'ready-variance')::int AS variance_rows
+      count(*) FILTER (WHERE x.result = 'ready-variance')::int AS variance_rows,
+      bool_or(EXISTS (SELECT 1 FROM receivables rv WHERE rv.policy_id = x.policy_id AND rv.status <> 'cancelled' AND rv.remittance_basis = 'gross')) AS gross
     FROM remittance_import_rows x JOIN insurance_companies ic ON ic.id = x.insurance_company_id JOIN policies p ON p.id = x.policy_id LEFT JOIN products pr ON pr.id = p.product_id
     WHERE x.import_id = $1 AND x.result = ANY($2) GROUP BY ic.id, ic.name, pr.line`, [importId, READY]);
-  return rows.map((r) => ({ insurer: { id: r.insurer_id, name: r.insurer_name }, productLine: lineName(r.product_line), policies: r.policies, dueToInsurer: round2(r.due), varianceRows: r.variance_rows }))
+  return rows.map((r) => ({ insurer: { id: r.insurer_id, name: r.insurer_name }, productLine: lineName(r.product_line), basis: r.gross ? 'gross' : 'net',
+    basisLabel: r.gross ? 'Gross' : 'Net', policies: r.policies, dueToInsurer: round2(r.due), varianceRows: r.variance_rows }))
     .sort((a, b) => a.insurer.name.localeCompare(b.insurer.name) || String(a.productLine).localeCompare(String(b.productLine)));
 }
 
@@ -291,6 +294,15 @@ export async function listImports(qs, pg) {
   const out = [];
   for (const r of rows) out.push(await importOut(r, { withGroups: false }));
   return { rows: out, total };
+}
+
+/** GET /remittance/imports/:id/file: the file as it was uploaded ({ path, fileName, contentType }). */
+export async function importFile(id) {
+  const imp = await getImportRow(id);
+  if (!imp.file_key || !objectExists(imp.file_key)) throw notFound(`The file of ${imp.import_no} is no longer stored`);
+  const csv = /\.csv$/i.test(imp.file_name || '');
+  return { path: resolveKey(imp.file_key), fileName: imp.file_name,
+    contentType: csv ? 'text/csv' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
 }
 
 /** The result filter of the rows: a result code, 'ready' (with variance), 'warnings' or 'errors'. */

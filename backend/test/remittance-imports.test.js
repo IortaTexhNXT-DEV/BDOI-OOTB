@@ -146,6 +146,7 @@ describe('a file of 52 rows: 46 ready, 6 not', () => {
     expect(imp.toCreate.map((g) => [g.insurer.name, g.productLine, g.policies, g.varianceRows])).toEqual([
       ['Import Alpha Insurance Corp.', 'Personal Accident', 4, 0], ['Import Alpha Insurance Corp.', 'Motor', 40, 4], ['Import Beta Insurance Corp.', 'Motor', 2, 0]].sort((x, y) => `${x[0]}${x[1]}`.localeCompare(`${y[0]}${y[1]}`)));
     expect(imp.totals).toMatchObject({ remittances: 3, policies: 46 });
+    expect(imp.toCreate.every((g) => g.basis === 'net' && g.basisLabel === 'Net')).toBe(true);
     expect((await q("SELECT count(*)::int AS n FROM remittances WHERE data->>'importId' = $1", [imp.id]))[0].n).toBe(0);
     const errors = await people.maker('get', `/remittance/imports/${imp.id}/rows?result=errors`);
     expect(errors.body.data.map((x) => [x.rowNo, x.resultLabel, x.message])).toEqual([
@@ -222,6 +223,19 @@ describe('a file of 52 rows: 46 ready, 6 not', () => {
     const r = await people.gm('get', '/remittance/imports');
     expect(r.status).toBe(200);
     expect(r.body.data[1]).toMatchObject({ id: imp.id, status: 'committed', statusLabel: 'Committed', drafts: expect.arrayContaining([expect.objectContaining({ remittanceNo: expect.stringMatching(/^REM-/) })]) });
+  });
+
+  it('downloads the file of an import as it was uploaded, for a reader of remittances', async () => {
+    const r = await binary(people.gm('get', `/remittance/imports/${imp.importNo}/file`));
+    expect(r.status).toBe(200);
+    expect(r.headers['content-type']).toMatch(/^text\/csv/);
+    expect(r.headers['content-disposition']).toBe('attachment; filename="golive.csv"');
+    expect(Buffer.compare(r.body, buffer)).toBe(0);
+    expect((await people.gm('get', '/remittance/imports/IMP-1999-0001/file')).status).toBe(404);
+    const outsider = await ctx.api('post', '/users').send({ username: 'imp.outsider', password: 'Welcome@123', displayName: 'No Access', email: 'imp.outsider@example.ph', roles: ['tis-ccd-pdu'] });
+    expect(outsider.status).toBe(201);
+    const token = await loginAs(ctx.app, 'imp.outsider', 'Welcome@123');
+    expect((await request(ctx.app).get(`/api/remittance/imports/${imp.id}/file`).set('Authorization', `Bearer ${token}`)).status).toBe(403);
   });
 });
 

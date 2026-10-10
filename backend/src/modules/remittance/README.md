@@ -163,9 +163,9 @@ Import policy list (`imports.js`, migration 0402): the file selects policies and
 SHA-256 hash and one result per row are kept under IMP-yyyy-nnnn (validated) and nothing is created. Row results:
 Ready, Ready · Variance (Expected Due to Insurer differs from the system amount by more than PHP 1.00), Already on REM,
 Not found, Not issued, Insurer differs, Product line differs, Direct bill, Duplicate in file. `GET /imports`, `GET
-/imports/:id` (counts, the remittances to create per insurer and product line, the same committed file), `GET
-/imports/:id/rows?result=`, `GET /imports/:id/errors.xlsx` (the file's columns plus Result and Message, one row per
-file row), `POST /imports/:id/commit {version}`: one draft per insurer and product line from the ready rows, at the
+/imports/:id` (counts, the remittances to create per insurer and product line with their basis, the same committed
+file), `GET /imports/:id/rows?result=`, `GET /imports/:id/errors.xlsx` (the file's columns plus Result and Message, one
+row per file row), `GET /imports/:id/file` (the file as uploaded, read:remittance; Import history), `POST /imports/:id/commit {version}`: one draft per insurer and product line from the ready rows, at the
 system amounts (`buildLines`), with `data.source` import, `importId`, `importNo` and `offCycleReason`; each line keeps
 `expected_due`, `variance` (system minus expected), `insurer_reference` and `remark`; a policy remitted since the
 validation is skipped ("Skipped: already on REM-..."); the draft's activity log reads "Imported from IMP-...". A file
