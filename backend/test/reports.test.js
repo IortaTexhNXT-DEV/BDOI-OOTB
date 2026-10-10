@@ -190,6 +190,11 @@ describe('running reports', () => {
     }
     const byType = await run('claims-position', { ...Y, ReportCriteria: 'Claim Type' });
     expect(byType.data.groupBy).toBe('claimType');
+    // settled claims by their settlement date: June only holds the settlement of RPT-CLM-2 (reported in May)
+    const june = await run('claims-settled', { FromDate: '2025-06-01', ToDate: '2025-06-30', Branch: 'RPT' });
+    expect(june.data.rows.map((r) => [r.claimNumber, r.settledAmount])).toEqual([['RPT-CLM-2', 7000]]);
+    expect((await run('claims-settled', { FromDate: '2025-05-01', ToDate: '2025-05-31', Branch: 'RPT' })).total).toBe(0);
+    expect(Object.keys((await run('claims-position', { ...Y })).data.rows[0])).toEqual(expect.arrayContaining(['offerAmount', 'requirements', 'followUpDate']));
   });
   it('renewal retention, commission statement and remittance summary', async () => {
     const r = await run('renewal-retention', { ...Y });

@@ -110,6 +110,29 @@ UPDATE report_definitions
        description = 'Claims reported in the period with estimate, approved and settled amounts, age and ageing bucket. Criteria: All, Open, Partial, Settled, Rejected, Cancelled, Aging (open claims by ageing bucket), Claim Type.'
  WHERE code = 'claims-position' AND NOT (parameters #> '{properties,ReportCriteria,enum}') ? 'Partial';
 
+-- Claims Position: the insurer's offered amount, the requirements received and the follow-up date (Insurance Claims
+-- Report columns), once.
+UPDATE report_definitions
+   SET default_columns = (SELECT jsonb_agg(col ORDER BY ord) FROM (
+           SELECT c AS col, i * 10 AS ord FROM jsonb_array_elements(default_columns) WITH ORDINALITY AS e(c, i)
+           UNION ALL SELECT '{"key":"requirements","label":"Requirements Received","type":"text"}'::jsonb, 105
+           UNION ALL SELECT '{"key":"offerAmount","label":"Insurer Offer","type":"money"}'::jsonb, 115
+           UNION ALL SELECT '{"key":"followUpDate","label":"Follow-up Date","type":"date"}'::jsonb, 145) x),
+       updated_at = now()
+ WHERE code = 'claims-position' AND NOT default_columns @> '[{"key": "offerAmount"}]'::jsonb;
+
+-- Settled Claims: the claims settled in the period by their settlement date, with the same filters and the access of
+-- the Claims Position report.
+INSERT INTO report_definitions(code, name, category, description, screen, query_name, parameters, default_columns, roles, sort_order)
+SELECT 'claims-settled', 'Settled Claims', 'operational',
+       'Claims settled in the period by settlement date, with claim type, insurer, estimate, insurer offer, approved and settled amounts.',
+       'Reports > All Reports', 'claimsSettled',
+       jsonb_set(d.parameters, '{properties,ReportCriteria}', '{"type":"string","title":"Report Criteria","enum":["Overall","Principal Insurer","Claim Type"],"default":"Overall"}'::jsonb),
+       '[{"key":"claimNumber","label":"Claim No.","type":"text"},{"key":"policyNumber","label":"Policy No.","type":"text"},{"key":"client","label":"Client","type":"text"},{"key":"insurer","label":"Insurer","type":"text"},{"key":"product","label":"Product","type":"text"},{"key":"claimType","label":"Claim Type","type":"text"},{"key":"lossDate","label":"Loss Date","type":"date"},{"key":"reportedDate","label":"Reported","type":"date"},{"key":"settledDate","label":"Settled On","type":"date"},{"key":"lossType","label":"Loss Type","type":"text"},{"key":"estimateAmount","label":"Estimate","type":"money"},{"key":"offerAmount","label":"Insurer Offer","type":"money"},{"key":"approvedAmount","label":"Approved","type":"money"},{"key":"settledAmount","label":"Settled","type":"money"},{"key":"ageDays","label":"Days to Settle","type":"integer","total":false}]'::jsonb,
+       d.roles, d.sort_order + 1
+  FROM report_definitions d WHERE d.code = 'claims-position'
+ON CONFLICT (code) DO NOTHING;
+
 -- ---------------------------------------------------------------- TISPH claims
 -- New claims go to the Operations Associates and Officers (fewest open claims first); the follow-up days of an unsettled
 -- claim follow Pre-BSM M15 (partial loss 30, motor total loss 60, personal accident 30, fire, marine and engineering 90,

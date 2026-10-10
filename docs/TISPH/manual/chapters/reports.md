@@ -94,7 +94,8 @@ There is no scheduled or e-mailed report in the TISPH menus: run the reports whe
 
 | Report | Contents |
 |---|---|
-| **Claims Position** | Claims reported in the period with claim type, line, estimate, approved and settled amounts, settlement date, age and ageing bucket; filter by insurer, product, agent, branch or client |
+| **Claims Position** | Claims reported in the period with claim type, line, estimate, insurer offer, approved and settled amounts, requirements received, follow-up date, settlement date, age and ageing bucket; filter by insurer, product, agent, branch or client |
+| **Settled Claims** | Claims settled in the period by settlement date, overall, by principal insurer or by claim type, with the estimate, insurer offer, approved and settled amounts (Reports > All Reports) |
 | **Claims Ageing** | Open claims by ageing bucket (optionally per insurer or agent) with estimate and approved amounts |
 | **Co-insurance Register** | Co-insured policies incepted in the period: each participating insurer with its role, share, premium, commission, premium taxes and premium due |
 | **Remittance Summary**, **Broker Commission Statement** | The remittances and the commission of the period, for information |
