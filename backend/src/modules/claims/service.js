@@ -485,12 +485,13 @@ export async function registrationCheck({ policyRef, lossDate, reportedDate }) {
   const loss = await businessDate(lossDate);
   const reported = (await businessDate(reportedDate)) || await today();
   const due = (await one(`SELECT COALESCE(sum(balance), 0)::numeric AS due FROM receivables WHERE policy_id = $1 AND balance > 0 AND status NOT IN ('paid', 'written-off')`, [policy.id])).due;
+  const labels = await statusLabels();
   return {
     policyId: policy.id, policyNumber: policy.policy_number, outstandingPremium: round2(Number(due)),
     blockUnpaidPremium: (await getSetting('claims.block_unpaid_premium')) !== false,
     problems: loss ? await acceptanceCheck(policy, loss) : [], claimsRatio: await claimsRatio(policy.client_id),
     intimation: loss ? await intimation(loss, reported) : null,
-    duplicates: loss ? (await duplicatesOf(policy.id, loss)).map((d) => ({ claimNumber: d.claim_number, status: d.status, lossCause: d.loss_type })) : [],
+    duplicates: (loss ? await duplicatesOf(policy.id, loss) : []).map((d) => ({ claimNumber: d.claim_number, status: d.status, statusLabel: labels[d.status], lossCause: d.loss_type })),
     deathBenefitOnly: ((await getSetting('claims.death_benefit_products', [])) || []).includes(policy.product_code),
   };
 }

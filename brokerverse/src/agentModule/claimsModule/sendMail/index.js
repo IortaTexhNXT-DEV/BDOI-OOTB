@@ -91,7 +91,7 @@ const SendMail = () => {
       { label: t("claimHandling.check.outstandingPremium"), value: formatCurrency(check.outstandingPremium || 0) },
       { label: t("claimHandling.check.claimsRatio"), value: check.claimsRatio?.ratio === null || check.claimsRatio?.ratio === undefined ? "—" : `${check.claimsRatio.ratio}%` },
       { label: t("claimHandling.check.intimation"), value: check.intimation ? t("claimHandling.check.days", { count: check.intimation.days }) : "—" },
-      ...duplicates.map((d) => ({ label: t("claimHandling.check.sameDate"), value: `${d.claimNumber} · ${d.status}` })),
+      ...duplicates.map((d) => ({ label: t("claimHandling.check.sameDate"), value: `${d.claimNumber} · ${d.statusLabel || d.status}` })),
     ];
     const notes = [
       duplicates.length ? t("claimHandling.check.duplicateNote") : null,

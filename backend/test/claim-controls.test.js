@@ -111,7 +111,7 @@ describe('first notice of loss', () => {
     expect(r.status).toBe(200);
     expect(r.body.data).toMatchObject({ outstandingPremium: 12500, blockUnpaidPremium: false, claimsRatio: { claims: 1, claimsAmount: 8000, premium: 20000, ratio: 40 } });
     expect(r.body.data.intimation).toMatchObject({ days: 200, late: true });
-    expect(r.body.data.duplicates).toEqual([{ claimNumber: 'CLM-F3-OLD', status: 'settled', lossCause: null }]);
+    expect(r.body.data.duplicates).toEqual([{ claimNumber: 'CLM-F3-OLD', status: 'settled', statusLabel: 'Settled', lossCause: null }]);
     expect((await as('cc.sales', 'get', '/claims/registration-check?policyId=f3')).status).toBe(403);
     expect((await fnol('cc.ops', { policyRefId: 'f3' })).status).toBe(201);
   });
