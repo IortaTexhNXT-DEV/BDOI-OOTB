@@ -314,7 +314,10 @@
     "screenLayout": "The screen layout",
     "openSection": "Open this section",
     "downloadPdf": "Download user manual (PDF)",
+    "downloadWord": "Download user manual (Word)",
     "browseManual": "Browse the whole user manual",
+    "yourRole": "Your role",
+    "openRoleChapter": "Open my role chapter",
     "contactSupport": "Contact support",
     "email": "E-mail",
     "phone": "Telephone",
@@ -342,6 +345,7 @@
     "api": "API",
     "environment": "Environment",
     "buildDate": "Build date",
+    "manual": "User manual",
     "vendor": "iNXT BrokerVerse by iorta TechNXT"
   },
   "validation": {

@@ -3,6 +3,7 @@ import path from "path";
 import { filterMenuForRoles, isPathAllowed, roleMenuPermissions } from "./menuPermissions";
 import { menuList } from "../components/SideBar/list";
 import { helpSectionFor } from "../components/HelpPanel/helpRoutes";
+import { flattenLeaves } from "../components/SideBar/menuTree";
 
 const TIS_ROLES = ["tis-sales-associate", "tis-sales-officer", "tis-sales-unit-head", "tis-ops-associate", "tis-ops-officer", "tis-ops-unit-head", "tis-ccd-pdu",
   "tis-ccd-pdc", "tis-ccd-bp", "tis-ccd-recon", "tis-finance", "tis-it-admin", "tis-general-manager"];
@@ -99,5 +100,19 @@ describe("TISPH roles (RBAC v4): menus", () => {
     expect(layouts.filter((p) => !isPathAllowed(p, menuList, ["tis-it-admin"]))).toEqual([]);
     expect(layouts.filter((p) => isPathAllowed(p, menuList, ["tis-general-manager"]) || isPathAllowed(p, menuList, ["tis-ops-unit-head"]))).toEqual([]);
     expect(layouts.map((p) => helpSectionFor(p).matched)).toEqual([true, true, true]);
+  });
+
+  it("ships the TISPH edition of the user manual, with a chapter per role and a section for every screen of its menus", () => {
+    const config = JSON.parse(fs.readFileSync(path.join(__dirname, "../../help.config.json"), "utf8"));
+    const manual = JSON.parse(fs.readFileSync(path.join(__dirname, "../../public/help/sections.json"), "utf8"));
+    expect(config.edition).toBe("tisph");
+    expect(manual.edition).toBe("tisph");
+    expect(manual.brandPack).toBe("toyota-insurance-services");
+    const ids = new Set(manual.sections.map((s) => s.id));
+    expect(Object.keys(manual.roles).sort()).toEqual([...TIS_ROLES].sort());
+    expect(Object.values(manual.roles).filter((r) => !ids.has(r.id))).toEqual([]);
+    const uncovered = TIS_ROLES.flatMap((role) => flattenLeaves(filterMenuForRoles(menuList, [role])).map((l) => l.item.path))
+      .filter((p) => !ids.has(helpSectionFor(p, ids).id));
+    expect([...new Set(uncovered)]).toEqual([]);
   });
 });

@@ -1,7 +1,9 @@
 /**
- * Which section of the user manual (public/help/user-manual.html, built by `npm run help:build` from
- * docs/package/source/user-manual.md) explains a screen: [address prefix, heading id]. The longest matching prefix
- * wins; record numbers in the address do not matter. helpRoutes.test.js checks every id against public/help/sections.json.
+ * Which section of the user manual (public/help/user-manual.html, built by `npm run help:build` for the edition of
+ * help.config.json) explains a screen: [address prefix, heading id, ...other ids]. The longest matching prefix wins;
+ * record numbers in the address do not matter. Where the editions name the section differently, the TISPH id comes
+ * first and the product manual's id after it: the first id the published manual has is used. helpRoutes.test.js checks
+ * the routes against public/help/sections.json.
  */
 export const HELP_ROUTES = [
   // home and dashboards
@@ -46,7 +48,7 @@ export const HELP_ROUTES = [
   ["/agent/claimrequest/settlementapproval", "approve-a-settlement-checker"],
   ["/agent/claimrequest/settlementdetails", "assessment-and-settlement-maker"],
   ["/agent/claimdetailedview", "claim-details-documents-and-audit-trail"],
-  ["/agent/expired-policies", "operations-client-servicing-renewals"],
+  ["/agent/expired-policies", "renewal-policy", "operations-client-servicing-renewals"],
   ["/agent/renewal", "renew-a-policy"],
   ["/agent/renewal-batch", "renewal-batch-lapse-management-and-the-analytics"],
   ["/renewal/queue", "renewal-queue-and-at-risk-policies"],
@@ -114,7 +116,7 @@ export const HELP_ROUTES = [
   ["/accounts/period-end/recurring", "recurring-journals"],
   ["/incentive", "incentives"],
   ["/commission", "commission-to-agents-and-referrers"],
-  ["/reports", "reports-dashboards-schedules-and-notifications-reports"],
+  ["/reports", "reports-catalogue", "reports-dashboards-schedules-and-notifications-reports"],
   // master
   ["/master/generals/organization", "company-branches-and-the-letterhead"],
   ["/master/generals/insurancemanagement", "masters-that-work-the-same-way"],
@@ -134,13 +136,13 @@ export const HELP_ROUTES = [
   ["/master/finance/posting-rules", "posting-configuration-configuration-approvals-posting-rules-account-determination"],
   ["/master/finance/configuration-approvals", "posting-configuration-configuration-approvals-posting-rules-account-determination"],
   ["/master/finance/commission-rate-matrix", "commission-rate-matrix"],
-  ["/master/incentive", "incentive-programmes"],
+  ["/master/incentive", "incentive-programmes", "incentives"],
   ["/master/configuration/email-layout", "e-mail-layout"],
   ["/master/configuration/documents-layout", "documents-and-reports-layout"],
   ["/master/configuration/document-signatures", "document-signatures"],
   ["/master/configuration/settings", "configuration"],
   ["/master/configuration/document-numbering", "document-numbering"],
-  ["/master/configuration/schedules", "system-administrator-schedules"],
+  ["/master/configuration/schedules", "schedules", "system-administrator-schedules"],
   ["/master/configuration/audit-trail", "audit-trail"],
   ["/master/configuration/email-outbox", "e-mail-outbox"],
   ["/master/configuration/integrations", "integrations"],
@@ -150,9 +152,17 @@ export const HELP_ROUTES = [
   ["/master/finance/bank-file-layouts", "bank-file-layouts-and-payee-bank-accounts"],
   ["/accounts/bank-payment-files", "bank-payment-files"],
   ["/accounts/sap-gl-export", "sap-gl-export"],
-  // client onboarding (Operations chapter of the user manual)
+  // client onboarding
   ["/agent/client-onboarding", "onboard-a-client-before-the-first-policy"],
-  ["/product-configurator", "module-reference-product-configurator"],
+  ["/product-configurator", "product-configurator-dashboard", "module-reference-product-configurator"],
+  ["/product-configurator/templates", "product-templates", "module-reference-product-configurator"],
+  ["/product-configurator/coverages", "coverage-builder", "module-reference-product-configurator"],
+  ["/product-configurator/rating", "rating-engine", "module-reference-product-configurator"],
+  ["/product-configurator/underwriting", "acceptance-rules", "module-reference-product-configurator"],
+  ["/product-configurator/documents", "document-manager", "module-reference-product-configurator"],
+  ["/product-configurator/market-mapping", "market-mapping", "module-reference-product-configurator"],
+  ["/product-configurator/risk-mapping", "risk-mapping", "module-reference-product-configurator"],
+  ["/product-configurator/analytics", "product-analytics", "module-reference-product-configurator"],
   // distribution, programmes and products
   ["/sales/lead-assignment", "lead-assignment"],
   ["/master/insurance/channels", "distribution-channels"],
@@ -173,15 +183,20 @@ export const DEFAULT_SECTION = "the-screen-layout";
 
 const strip = (p) => String(p || "").replace(/\/\d+(?=\/|$)/g, "");
 
-/** The manual section of an address ({ id, matched }); `matched` is false when the default section is returned. */
-export const helpSectionFor = (pathname) => {
+/**
+ * The manual section of an address ({ id, matched }); `matched` is false when the default section is returned. With
+ * `known` (the heading ids of the published manual), the first id of the route that the manual has is taken.
+ */
+export const helpSectionFor = (pathname, known = null) => {
   const raw = String(pathname || "/");
   const path = strip(raw);
   let best = null;
-  for (const [prefix, id] of HELP_ROUTES) {
-    const hit = raw.startsWith(prefix) || path.startsWith(prefix);
-    if (hit && (!best || prefix.length > best[0].length)) best = [prefix, id];
+  for (const route of HELP_ROUTES) {
+    const hit = raw.startsWith(route[0]) || path.startsWith(route[0]);
+    if (hit && (!best || route[0].length > best[0].length)) best = route;
   }
   if (raw === "/" && !best) return { id: "dashboard", matched: true };
-  return best ? { id: best[1], matched: true } : { id: DEFAULT_SECTION, matched: false };
+  if (!best) return { id: DEFAULT_SECTION, matched: false };
+  const ids = best.slice(1);
+  return { id: (known && ids.find((id) => known.has(id))) || ids[0], matched: true };
 };

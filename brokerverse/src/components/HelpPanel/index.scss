@@ -75,6 +75,21 @@
     text-decoration: none;
   }
 
+  .bv-help__roles {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+
+    li {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 4px 12px;
+      padding: 4px 0;
+    }
+  }
+
   .bv-help__link,
   .bv-help__inline-link,
   .bv-help__inline-link .p-button-label {
