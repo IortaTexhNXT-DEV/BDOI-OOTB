@@ -77,7 +77,7 @@ describe('calculations', () => {
     expect((await ctx.api('post', `/incentive/calculations/${batchId}/submit`)).body.data.status).toBe('Pending Approval');
     expect((await ctx.api('post', `/incentive/calculations/${batchId}/approve`)).status).toBe(403);
     expect((await as(checkerTok, 'post', `/incentive/calculations/${batchId}/reject`).send({})).status).toBe(400);
-    expect((await as(checkerTok, 'post', `/incentive/calculations/${batchId}/reject`).send({ reason: 'Recheck' })).body.data.status).toBe('Rejected');
+    expect((await as(checkerTok, 'post', `/incentive/calculations/${batchId}/reject`).send({ reasonCode: 'IBR-DATA' })).body.data.status).toBe('Rejected');
     const again = await ctx.api('post', '/incentive/calculations').send({ period: '2026-09', selectedPrograms: ['INC-2026-002'] });
     expect(again.status).toBe(201);
     const b2 = again.body.data.batchId;

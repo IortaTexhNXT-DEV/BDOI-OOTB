@@ -1,4 +1,4 @@
-import { isAdmin } from '../../lib/auth.js';
+import { isAdmin, requireAuth, requirePermission } from '../../lib/auth.js';
 import { moduleRouter } from '../../lib/registry.js';
 import { audit } from '../../lib/audit.js';
 import { forbidden } from '../../lib/errors.js';
@@ -11,6 +11,8 @@ import * as svc from './service.js';
 const { router, define } = moduleRouter('Incentive', '/incentive');
 const read = canRead('incentive');
 const write = canWrite('incentive');
+// Approving or rejecting a batch (maker-checker: never its creator or submitter), apart from calculating it (migration 0387).
+const approve = [requireAuth, requirePermission('approve:incentive')];
 // Program set-up is master data (Master > Incentive Programs): the System Administrator, not the Accounting users who pay.
 const programWrite = canWrite('masters');
 // Producers (Sales & Marketing) see their own programs and statements with the profile permission; incentive readers may look up any agent.
@@ -80,10 +82,22 @@ define({
   method: 'POST', path: '/calculations/:batchId/submit', summary: 'Submit a batch for approval', screen: S('Calculations'), middleware: write, response: { success: true, data: { ...batch, status: 'Pending Approval' } },
   handler: async (req, res) => ok(res, await run(req, 'incentive_calculation', 'submit', () => svc.submitCalculation(req.params.batchId, req.user)), 'Submitted for approval'),
 });
+define({
+  method: 'GET', path: '/calculations/:batchId/activity', summary: 'Activity log of a batch, oldest first: action, user display name and roles, date and time, status from / to, remarks', screen: S('Calculations > Details; Approvals > Details'),
+  middleware: read,
+  response: { success: true, data: [{ id: '901', at: '2026-09-01T02:15:00.000Z', date: '01/09/2026', time: '10:15', actionCode: 'reject', actionLabel: 'Rejected',
+    user: { username: 'acct.head', displayName: 'Ana Reyes', roles: ['Accounting Manager'], role: 'Accounting Manager' }, fromStatus: 'Pending Approval', toStatus: 'Rejected',
+    remarks: 'Rates or targets to be corrected: tier 2 rate', changes: [] }] },
+  handler: async (req, res) => ok(res, await svc.calculationActivity(req.params.batchId, { viewer: req.user })),
+});
 for (const action of ['approve', 'reject']) {
   define({
-    method: 'POST', path: `/calculations/:batchId/${action}`, summary: `${action === 'approve' ? 'Approve' : 'Reject'} a batch (maker-checker: not the creator or submitter)`, screen: S('Approvals'), middleware: write,
-    request: action === 'reject' ? { reason: 'Targets not verified' } : {}, response: { success: true, data: { ...batch, status: action === 'approve' ? 'Approved' : 'Rejected' } },
+    method: 'POST', path: `/calculations/:batchId/${action}`, screen: S('Approvals; Calculations > Details'), middleware: approve,
+    summary: action === 'approve'
+      ? 'Approve a batch with optional remarks (approve:incentive; maker-checker: not the creator or submitter); posts the accrual'
+      : 'Reject a batch with a reason of the Reason Codes master (context incentive_batch_reject) and a note when the reason needs one (approve:incentive; maker-checker)',
+    request: action === 'reject' ? { reasonCode: 'IBR-RATES', note: 'Tier 2 rate' } : { remarks: 'Checked against the production report' },
+    response: { success: true, data: { ...batch, status: action === 'approve' ? 'Approved' : 'Rejected' } },
     handler: async (req, res) => ok(res, await run(req, 'incentive_calculation', action, () => svc.decideCalculation(req.params.batchId, action, req.body || {}, req.user)), `Batch ${action}d`),
   });
 }

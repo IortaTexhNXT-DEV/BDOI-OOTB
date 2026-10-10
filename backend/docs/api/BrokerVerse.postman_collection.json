@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1213 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1214 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -36541,6 +36541,73 @@
           ]
         },
         {
+          "name": "Activity log of a batch, oldest first: action, user display name and roles, date and time, status from / to, remarks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/incentive/calculations/:batchId/activity",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "incentive",
+                "calculations",
+                ":batchId",
+                "activity"
+              ],
+              "variable": [
+                {
+                  "key": "batchId",
+                  "value": "",
+                  "description": "batchId (path parameter)"
+                }
+              ]
+            },
+            "description": "Activity log of a batch, oldest first: action, user display name and roles, date and time, status from / to, remarks\n\nFront-end touchpoint: Accounts > Incentive > Calculations > Details; Approvals > Details\n\nAccess: read:incentive, write:incentive"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/incentive/calculations/:batchId/activity",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "incentive",
+                    "calculations",
+                    ":batchId",
+                    "activity"
+                  ],
+                  "variable": [
+                    {
+                      "key": "batchId",
+                      "value": "",
+                      "description": "batchId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Activity log of a batch, oldest first: action, user display name and roles, date and time, status from / to, remarks\n\nFront-end touchpoint: Accounts > Incentive > Calculations > Details; Approvals > Details\n\nAccess: read:incentive, write:incentive"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"901\",\n      \"at\": \"2026-09-01T02:15:00.000Z\",\n      \"date\": \"01/09/2026\",\n      \"time\": \"10:15\",\n      \"actionCode\": \"reject\",\n      \"actionLabel\": \"Rejected\",\n      \"user\": {\n        \"username\": \"acct.head\",\n        \"displayName\": \"Ana Reyes\",\n        \"roles\": [\n          \"Accounting Manager\"\n        ],\n        \"role\": \"Accounting Manager\"\n      },\n      \"fromStatus\": \"Pending Approval\",\n      \"toStatus\": \"Rejected\",\n      \"remarks\": \"Rates or targets to be corrected: tier 2 rate\",\n      \"changes\": []\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
           "name": "Adjust agent lines before submission (amount and reason per line)",
           "request": {
             "method": "POST",
@@ -36636,7 +36703,7 @@
           ]
         },
         {
-          "name": "Approve a batch (maker-checker: not the creator or submitter)",
+          "name": "Approve a batch with optional remarks (approve:incentive; maker-checker: not the creator or submitter); posts the accrual",
           "request": {
             "method": "POST",
             "header": [
@@ -36664,10 +36731,10 @@
                 }
               ]
             },
-            "description": "Approve a batch (maker-checker: not the creator or submitter)\n\nFront-end touchpoint: Accounts > Incentive > Approvals\n\nAccess: write:incentive",
+            "description": "Approve a batch with optional remarks (approve:incentive; maker-checker: not the creator or submitter); posts the accrual\n\nFront-end touchpoint: Accounts > Incentive > Approvals; Calculations > Details\n\nAccess: approve:incentive",
             "body": {
               "mode": "raw",
-              "raw": "{}",
+              "raw": "{\n  \"remarks\": \"Checked against the production report\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -36705,10 +36772,10 @@
                     }
                   ]
                 },
-                "description": "Approve a batch (maker-checker: not the creator or submitter)\n\nFront-end touchpoint: Accounts > Incentive > Approvals\n\nAccess: write:incentive",
+                "description": "Approve a batch with optional remarks (approve:incentive; maker-checker: not the creator or submitter); posts the accrual\n\nFront-end touchpoint: Accounts > Incentive > Approvals; Calculations > Details\n\nAccess: approve:incentive",
                 "body": {
                   "mode": "raw",
-                  "raw": "{}",
+                  "raw": "{\n  \"remarks\": \"Checked against the production report\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -36826,7 +36893,7 @@
           ]
         },
         {
-          "name": "Reject a batch (maker-checker: not the creator or submitter)",
+          "name": "Reject a batch with a reason of the Reason Codes master (context incentive_batch_reject) and a note when the reason needs one (approve:incentive; maker-checker)",
           "request": {
             "method": "POST",
             "header": [
@@ -36854,10 +36921,10 @@
                 }
               ]
             },
-            "description": "Reject a batch (maker-checker: not the creator or submitter)\n\nFront-end touchpoint: Accounts > Incentive > Approvals\n\nAccess: write:incentive",
+            "description": "Reject a batch with a reason of the Reason Codes master (context incentive_batch_reject) and a note when the reason needs one (approve:incentive; maker-checker)\n\nFront-end touchpoint: Accounts > Incentive > Approvals; Calculations > Details\n\nAccess: approve:incentive",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"Targets not verified\"\n}",
+              "raw": "{\n  \"reasonCode\": \"IBR-RATES\",\n  \"note\": \"Tier 2 rate\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -36895,10 +36962,10 @@
                     }
                   ]
                 },
-                "description": "Reject a batch (maker-checker: not the creator or submitter)\n\nFront-end touchpoint: Accounts > Incentive > Approvals\n\nAccess: write:incentive",
+                "description": "Reject a batch with a reason of the Reason Codes master (context incentive_batch_reject) and a note when the reason needs one (approve:incentive; maker-checker)\n\nFront-end touchpoint: Accounts > Incentive > Approvals; Calculations > Details\n\nAccess: approve:incentive",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"reason\": \"Targets not verified\"\n}",
+                  "raw": "{\n  \"reasonCode\": \"IBR-RATES\",\n  \"note\": \"Tier 2 rate\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"

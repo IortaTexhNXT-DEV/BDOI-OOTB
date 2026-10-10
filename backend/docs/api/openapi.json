@@ -59624,6 +59624,141 @@
         ]
       }
     },
+    "/incentive/calculations/{batchId}/activity": {
+      "get": {
+        "operationId": "getIncentiveCalculationsBatchIdActivity",
+        "summary": "Activity log of a batch, oldest first: action, user display name and roles, date and time, status from / to, remarks",
+        "tags": [
+          "Incentive"
+        ],
+        "description": "Front-end touchpoint: Accounts > Incentive > Calculations > Details; Approvals > Details\n\nAccess: read:incentive, write:incentive",
+        "parameters": [
+          {
+            "name": "batchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "at": {
+                            "type": "string"
+                          },
+                          "date": {
+                            "type": "string"
+                          },
+                          "time": {
+                            "type": "string"
+                          },
+                          "actionCode": {
+                            "type": "string"
+                          },
+                          "actionLabel": {
+                            "type": "string"
+                          },
+                          "user": {
+                            "type": "object",
+                            "properties": {
+                              "username": {
+                                "type": "string"
+                              },
+                              "displayName": {
+                                "type": "string"
+                              },
+                              "roles": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "role": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "fromStatus": {
+                            "type": "string"
+                          },
+                          "toStatus": {
+                            "type": "string"
+                          },
+                          "remarks": {
+                            "type": "string"
+                          },
+                          "changes": {
+                            "type": "array",
+                            "items": {}
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "901",
+                      "at": "2026-09-01T02:15:00.000Z",
+                      "date": "01/09/2026",
+                      "time": "10:15",
+                      "actionCode": "reject",
+                      "actionLabel": "Rejected",
+                      "user": {
+                        "username": "acct.head",
+                        "displayName": "Ana Reyes",
+                        "roles": [
+                          "Accounting Manager"
+                        ],
+                        "role": "Accounting Manager"
+                      },
+                      "fromStatus": "Pending Approval",
+                      "toStatus": "Rejected",
+                      "remarks": "Rates or targets to be corrected: tier 2 rate",
+                      "changes": []
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Incentive > Calculations > Details; Approvals > Details",
+        "x-permissions": [
+          "read:incentive",
+          "write:incentive"
+        ]
+      }
+    },
     "/incentive/calculations/{batchId}/adjust": {
       "post": {
         "operationId": "postIncentiveCalculationsBatchIdAdjust",
@@ -59806,11 +59941,11 @@
     "/incentive/calculations/{batchId}/approve": {
       "post": {
         "operationId": "postIncentiveCalculationsBatchIdApprove",
-        "summary": "Approve a batch (maker-checker: not the creator or submitter)",
+        "summary": "Approve a batch with optional remarks (approve:incentive; maker-checker: not the creator or submitter); posts the accrual",
         "tags": [
           "Incentive"
         ],
-        "description": "Front-end touchpoint: Accounts > Incentive > Approvals\n\nAccess: write:incentive",
+        "description": "Front-end touchpoint: Accounts > Incentive > Approvals; Calculations > Details\n\nAccess: approve:incentive",
         "parameters": [
           {
             "name": "batchId",
@@ -59938,9 +60073,9 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Accounts > Incentive > Approvals",
+        "x-screen": "Accounts > Incentive > Approvals; Calculations > Details",
         "x-permissions": [
-          "write:incentive"
+          "approve:incentive"
         ],
         "requestBody": {
           "required": true,
@@ -59948,9 +60083,15 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {}
+                "properties": {
+                  "remarks": {
+                    "type": "string"
+                  }
+                }
               },
-              "example": {}
+              "example": {
+                "remarks": "Checked against the production report"
+              }
             }
           }
         }
@@ -60122,11 +60263,11 @@
     "/incentive/calculations/{batchId}/reject": {
       "post": {
         "operationId": "postIncentiveCalculationsBatchIdReject",
-        "summary": "Reject a batch (maker-checker: not the creator or submitter)",
+        "summary": "Reject a batch with a reason of the Reason Codes master (context incentive_batch_reject) and a note when the reason needs one (approve:incentive; maker-checker)",
         "tags": [
           "Incentive"
         ],
-        "description": "Front-end touchpoint: Accounts > Incentive > Approvals\n\nAccess: write:incentive",
+        "description": "Front-end touchpoint: Accounts > Incentive > Approvals; Calculations > Details\n\nAccess: approve:incentive",
         "parameters": [
           {
             "name": "batchId",
@@ -60254,9 +60395,9 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Accounts > Incentive > Approvals",
+        "x-screen": "Accounts > Incentive > Approvals; Calculations > Details",
         "x-permissions": [
-          "write:incentive"
+          "approve:incentive"
         ],
         "requestBody": {
           "required": true,
@@ -60265,13 +60406,17 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "reason": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {
                     "type": "string"
                   }
                 }
               },
               "example": {
-                "reason": "Targets not verified"
+                "reasonCode": "IBR-RATES",
+                "note": "Tier 2 rate"
               }
             }
           }
