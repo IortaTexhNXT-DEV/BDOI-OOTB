@@ -32,7 +32,46 @@ To issue an official receipt, select **Receipt**:
 | **Receipt Mode** | Yes | **Dollar/Peso** (cash), **Cheque**, **Managers Check/Demand Draft**, **Direct Credit/Transfer to Account**, **Telegraphic Transfer**, **Authority to Debit**, **Online Banking** or **Credit Ticket-Inter Office** | A cheque asks for the cheque details; the mode gives the bank account debited |
 | **Remarks** | No | | |
 
-Select **Record payment**. The system issues the receipt number, posts the payment (cash in the bank account of the receipt mode against the premium receivable) and reduces the bill. When the bill is fully paid the policy's payment becomes **Completed**. Print the receipt or e-mail it to the client. A receipt issued in error is cancelled with a reason by CCD-Recon (Reconciliation and Reversals): the journal is reversed and the bill is open again. See [Collection by Cash Control](#process-collection).
+Select **Record payment**. The system issues the receipt number, posts the payment (cash in the bank account of the receipt mode against the premium receivable) and reduces the bill. When the bill is fully paid the policy's payment becomes **Completed**. Print the receipt or e-mail it to the client. A payment above what the policy owes is not billed again: the excess is held On Account on [Unapplied Collections](#unapplied-collections). See [Collection by Cash Control](#process-collection).
+
+A payment recorded on the policy carries its proof of payment (deposit slip, cheque image or transfer confirmation): the payment cannot be saved without it. The receipt page shows the proof under **Proof of payment**, where a receipting user attaches or replaces it, and **Paid to**: **TISPH**, or **Insurance company** for a payment made to the insurer.
+
+### Reverse a receipt {#reverse-a-receipt}
+
+A receipt issued in error, or paid by a cheque that bounced, is reversed from the receipt page, section **Reversal**. CCD-Recon selects **Reverse receipt**, chooses the reason (cheque returned DAIF, duplicate receipt, wrong amount, applied to the wrong policy or client, payment not received in the bank, other with a note) and sends it for approval. The receipt stays posted until another user approves: {{roles:approve:receipt-reversal}}, never the user who asked. On approval the receipt is cancelled, its journals are reversed, the bills it paid are open again and an amount it held On Account is taken back. The approver can instead **Return** the request with a reason; the receipt is unchanged. The request is on My Work of the approvers.
+
+### Bulk upload and receipt batches {#receipt-batches}
+
+**Bulk Upload** takes three files, each with its template:
+
+- **Official receipts**: each row pays a policy. On the receipt voucher file of TISPH a row can combine premium and commission: **Commission Amount** is the commission part of the **Amount**. The premium is receipted; the commission is kept apart on the batch for Finance & General Accounting to reconcile with the insurer.
+- **Bank payments (matched by reference)**: the bank's report of payments credited to TISPH (**Date**, **Reference**, **Amount**, **Bank Account**, **Payer**). Each line is matched by its reference (the 10-digit payment reference of the policy, its policy number or the bill number) to what the policy owes. Within one peso it is receipted in full; above it the receipt pays the bills and the excess is held On Account; below it the receipt pays part and the line is an insufficient payment; a reference that finds no policy is held as a floating payment.
+- **Payments made to the insurer**: payments the clients made directly to the insurance company (**Policy Number**, **Amount**, **Date Paid**, **Insurer Reference**). Each settles the policy's bills with a receipt marked paid to the insurance company: the premium payable to the insurer is reduced instead of the cash.
+
+Every upload is a receipt batch (RVB-YYYY-NNNNN). **Receipt batches** lists them with the file, the rows receipted, the premium and the commission kept apart. **Export commission** downloads the commission lines of a batch; **Export lines** downloads how each line of a bank payment file was matched.
+
+Each policy has a 10-digit payment reference, the number the client quotes at the bank. Search the open bills on Add Receipts by it, by the plate or chassis number of the vehicle, or by the client, policy or bill number; the bills show the vehicle.
+
+## Unapplied collections {#unapplied-collections}
+
+Accounts > Unapplied Collections lists the money received that no bill takes yet:
+
+- **Excess payment**: paid above what the policy owes, held On Account;
+- **Floating payment**: a bank credit whose client or bill is not yet known;
+- **Advance payment**: paid by a client before the bill exists.
+
+{{screen:/accounts/unapplied-collections}}
+
+Each is posted to the clients' deposits and unapplied collections account and must be allocated within two working days (**Allocate by**; past it, the row shows **Overdue** and the item is on My Work of Cash Control). The cards show the open items, the open amount and the items past their date. Filter by status and kind, or search by client, policy, receipt or reference.
+
+**Record payment** records a floating payment (amount, date received, reference, the payer if known) or an advance payment (with the client code). The actions of a row are:
+
+- **Allocate**: choose the open bills (the client's bills, or for a floating payment those found by client, policy or bill number) and the amount for each; the amounts cannot exceed what a bill owes nor what is left to allocate. The bills are paid as by a receipt; a floating payment takes the client of the bill.
+- **Refund**: with a reason (overpayment, paid twice, policy cancelled or not taken up, other with a note), the amount becomes a refund payable to the client, paid by disbursement.
+- **Reverse**: a floating or advance payment recorded in error, nothing allocated yet, is reversed with a reason.
+
+**View** shows the item with its allocations and its activity.
+
 
 ![Accounts > Receipts > Add Receipts](images/screens-accounts/add-receipts.png)
 
@@ -60,7 +99,7 @@ Select **View** to open an item. **Collection Details** shows the client and pol
 
 Changes on the Credit Control screens that need approval (a credit limit, a warranty extension) are approved by {{roles:approve:credit-control}}, a user other than the one who requested them.
 
-- **Instalment Plans** lists the open instalments of policies paid by instalment, with **Policy no.**, **Client**, the instalment number, **Due date**, **Outstanding**, **Days past due** and **Ageing**, and the totals per ageing bucket. **Overdue only** narrows the list.
+- **Instalment Plans** lists the open instalments of policies paid by instalment, with **Policy no.**, **Client**, the instalment number, **Due date**, **Outstanding**, **Days past due** and **Ageing**, and the totals per ageing bucket. **Overdue only** narrows the list. Instalments are monthly. A corporate client has 90 days to pay unless the insurer's premium warranty says otherwise; an individual client has 30.
 - **Premium Warranty Monitor** follows the premium payment warranty: the premium must be paid by the warranty deadline after inception, or the cover is at risk. The cards count the policies **Warranty breached** and **At risk** and the **Extensions to approve**. Each row shows the policy, client, insurer, **Inception**, **Warranty deadline**, **Days past deadline**, **Premium due** and **Status**. Request an extension from the row; the extension is approved by another user.
 - **Client Credit Limits** shows each client's **Credit limit** (or **No limit**), **Open premium**, **Available** and **Last changed**. Set or change a client's limit from the row. **Issued over the limit** lists the policies booked over a client's limit.
 - **Remittance Ageing** ages the premium collected and not yet remitted to each insurer, by the insurer's remittance terms (**Not yet due**, **1-30**, **31-60**, **61-90**, **Over 90**), with the detail by policy and receipt. **Excel** downloads it.
@@ -69,37 +108,24 @@ Changes on the Credit Control screens that need approval (a credit limit, a warr
 
 ## Post-dated cheques {#post-dated-cheques}
 
-Accounts > Post-Dated Cheques is the register of cheques received from clients before their date.
+Accounts > Post-Dated Cheques follows the cheques of clients paying by instalment, from receipt to collection.
 
 {{screen:/accounts/post-dated-cheques}}
 
-The cards show the cheques **On hand**, **Due for deposit** and **Bounced**. The tabs **Cheques** and **Deposit due** (cheques due within three days) list **PDC no.** (PDC-YYYY-NNNNN), **Client**, **Bill / policy**, **Drawee bank**, **Cheque no.**, **Cheque date**, **Amount**, **Kept in**, **Status** and **Receipt**. **Export to Excel** downloads the list.
+The tabs list the cheques **All open**, **At TIS**, **With partners**, **Awaiting confirmation** (the cheque date is past and the Insurance Partner has not advised), **Follow-up**, **Bounced**, **Cancellation pending**, **Deposit due**, **Closed** and the **Transmittals**. Each row shows the PDC number and its set, the client and policy, the bank and cheque number, the cheque date, the amount, the instalment ("1 of 4"), the custody, the status and the ageing of a cheque not yet confirmed. **Export** downloads the tab.
 
-To register a cheque, select **Register cheque**:
+To encode the cheques of a client, select **Encode PDCs**, enter the policy and the bill, and the payee: **Insurance Partner** (the cheques are forwarded for warehousing) or **TISPH** (kept and deposited by TISPH). One row is proposed per unpaid instalment; enter the bank, branch, account number, cheque number, cheque date and amount of each. The dates must fall near the instalment due dates and the amounts cannot exceed what the bill owes. **Save set** saves the set (PCS-YYYY-NNNNN) with its cheques **Received at TIS**; nothing is posted. **Print acknowledgement** on the set prints the acknowledgement receipt the client keeps.
 
-| Field | Required | What to enter |
-|---|---|---|
-| **Against** | Yes | **Bill number** (or the policy) |
-| **Reference** | Yes | The bill or policy number |
-| **Drawee bank** | Yes | From the bank list, or **Drawee bank (if not in the list)** |
-| **Cheque no.** | Yes | |
-| **Cheque date** | Yes | The date on the cheque, picked from the calendar |
-| **Amount** | Yes | |
-| **Kept in** | No | Where the cheque is kept, for example "Finance vault, drawer 2" |
-| **Remarks** | No | |
+Cheques payable to the Insurance Partner:
 
-The cheque is **On Hand**. Nothing is posted until it is deposited. The actions of a cheque are:
+- **Forward to Insurance Partner**: choose the cheques of one partner and send them with a transmittal (PT-YYYY-NNNNN): courier, messenger or hand-carry, with the courier reference. They are **Forwarded**.
+- **Partner received**: the partner's acknowledgement of the transmittal; the cheques are **Warehoused**.
+- **Partner cleared**: the partner's advice that the cheque was paid, with the collection date and the partner's reference. The acknowledgement receipt is posted against the premium payable to the partner and the instalment is paid.
+- **Partner bounced**: with the reason (DAIF, account closed, stop payment, signature differs, stale, other); the receipt of the cheque is cancelled and the instalment is open again for a replacement.
 
-- **Deposit**: choose the **Bank account** and the **Deposit date** and select **Deposit cheque**. An official receipt is created and posted to that bank account.
-- **Replace**: register the new cheque that replaces this one (for example after a bounce).
-- **Return**: give the cheque back to the client.
-- **Cancel**: remove a cheque registered in error.
+Cheques payable to TISPH are **Deposit**ed to the one collection account of TISPH (an official receipt is posted), then **Cleared** or **Bounced**.
 
-A cheque that bounces is recorded as bounced with the reason: its receipt is cancelled, the journal reversed and the bill is open again.
-
-![Register cheque with the bill, drawee bank, cheque number, date, amount and vault entered](images/role-tis-ccd-pdu/register-cheque.png)
-
-![Deposit a post-dated cheque: the official receipt is posted to the bank account chosen](images/screens-accounts/deposit-cheque.png)
+**Request cancellation** asks for the cancellation of a cheque with a reason (cash or cheque replacement, technical defect, policy cancelled, account paid off, encoded in error). Another user approves it: {{roles:approve:pdc}}, never the one who asked. A cheque the partner holds is pulled out on the next transmittal to that partner. **Replace** registers the cheque that replaces a bounced or cancelled one for the same instalment; **Return to client** gives back a cheque kept at TIS. The history of each cheque shows every step with its user.
 
 ## Claims settlements paid through the broker {#claims-settlements-paid-through-the-broker}
 
@@ -375,7 +401,10 @@ the amount if any and a note).
 {{screen:/finance/remittance/setup/schedules}}
 
 The weekly schedule **TIS-WEEKLY** runs every Monday at 06:15 for every active insurer and creates one draft per
-insurer and product line for the policies of the Monday to Friday before. The **Automation** chip shows whether the
+insurer and product line for the policies paid in full from the Monday to the Friday before (**Eligibility**: Fully
+paid in the window). With **Proof of payment required** a policy is remitted only when every receipt that paid it
+carries its proof; a policy without it is listed on Exceptions as **No proof of payment**. A schedule on **Inception
+date** remits by inception date instead. The **Automation** chip shows whether the
 daily remittance job is on; it is **Off** until TISPH switches it on.
 
 The row menu offers **View** (the schedule, its latest runs and its activity log) and, to TIS Finance & General
@@ -385,6 +414,15 @@ created; nothing is created until you select **Create n draft remittances**. A w
 again: a later catch-up goes through [Import policy list](#remittance-import-policy-list).
 
 ![Accounts > Remittance > Setup with the weekly schedule and Automation Off](images/screens-accounts/remittance-schedules.png)
+
+### Held policies {#remittance-held-policies}
+
+{{screen:/finance/remittance/held}}
+
+A part-paid policy on an instalment plan is not remitted until it is paid in full. **Held** lists these policies with the
+insurer, product line, plan, total premium, paid to date, balance, next due date and the cheques that bounced;
+**Released** lists those paid in full since, which go on the next weekly run with their full premium. The list is
+refreshed every morning and after each payment.
 
 ### Settlement {#remittance-settlement}
 
@@ -411,14 +449,14 @@ See [Remittance to the insurers](#process-remittance) for the order of the steps
 
 {{screen:/finance/remittance/billing}}
 
-For a direct-bill policy the client pays the insurer, and TISPH bills the insurer for its commission with a debit note. The cards show the **Unbilled commission**, **Billed, outstanding**, **Overdue** and **Receivable from insurers**. The screen has three tabs:
+For a direct-bill policy the client pays the insurer, and TISPH bills the insurer for its commission with a debit note. For the premium TISPH remits, the commission is billed to the insurer with a billing statement on the 15th and the 26th of the month. The cards show the **Unbilled commission**, **Billed, outstanding**, **Overdue** and **Receivable from insurers**. The screen has four tabs:
 
 1. **Raise debit note**: choose the **Insurer** (required), the issue dates (**Issued from**, **Issued to**), **Commission of** and the **Line of business**, and select **Load policies**. Tick the policies to bill: each shows the gross premium, rate, commission, VAT, **Total Due** and EWT. Raise the debit note.
-2. **Debit notes**: the debit notes issued, with their balance; record the insurer's payment against them.
-3. **Billing mode**: whether each insurer's policies are broker-billed or direct-billed.
+2. **Debit notes**: the debit notes and billing statements issued, with their balance, the line of business of a statement and **Overdue** past its due date; record the insurer's payment against them. A billing statement exports with its schedule to Excel or CSV.
+3. **Billing run**: the next billing dates and the runs made. On the 15th and the 26th (the working day before when that day is a Saturday, Sunday or holiday) the system drafts one billing statement per insurer and line of business from the remittances approved before the billing date and not yet billed: the commission, VAT on the commission (Gross Amount), the withholding tax and the Net Amount Payable, due 15 days after the billing date. **Run billing** drafts them now for a billing date and, if chosen, one insurer.
+4. **Billing mode**: whether each insurer's policies are broker-billed or direct-billed.
 
-A debit note is approved by another user than the one who raised or submitted it; that user reads why instead of
-**Approve** and **Reject**. **Reject** and **Cancel debit note** ask for the reason from the list.
+A debit note or billing statement is approved by another user than the one who raised or submitted it; that user reads why instead of **Approve** and **Reject**. A billing statement is approved by {{roles:approve:insurer-billing}}, and only when the insurer's TIN is on Master > Insurance Company. A statement on commission kept from the remittance is then **Settled by retention**. **Reject** and **Cancel debit note** ask for the reason from the list; a cancelled statement's lines are billed again on the next run.
 
 ![Accounts > Remittance > Insurer billing on the tab Raise debit note](images/screens-accounts/insurer-billing.png)
 
@@ -662,6 +700,8 @@ The fiscal year of TISPH runs from April to March. **Period Management** lists t
 | **Locked** | None |
 
 **Next fiscal year** creates the next year; **Import opening balances** loads the opening balances (validated first, then imported all or nothing).
+
+Operations close on the 26th: a premium booking dated from the 26th of a month is posted in the next period. Finance closes on the 29th, and the month-end close reminder counts down to it. Finance can still post its month-end adjustments into the period until the 6th working day of the next month (holidays of Master > Holiday excluded); the automatic soft-close, when it is switched on, waits until that day has passed.
 
 **Month-End Close** runs the close of a period:
 

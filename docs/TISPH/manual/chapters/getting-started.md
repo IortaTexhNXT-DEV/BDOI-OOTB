@@ -289,7 +289,7 @@ overdue or lost.
 
 A confirmation says in one sentence what is about to happen, lists the facts of the record it applies to (amounts in
 pesos on the right, dates as DD/MM/YYYY) and says what follows. The button names the action, for example
-**Submit 3 remittances**, **Register cheque** or **Escalate**; **Cancel** or the X closes the confirmation and
+**Submit 3 remittances**, **Send for approval** or **Escalate**; **Cancel** or the X closes the confirmation and
 changes nothing.
 
 - A rejection, return, reversal, cancellation or escalation asks for the **Reason**, chosen from the list of reasons

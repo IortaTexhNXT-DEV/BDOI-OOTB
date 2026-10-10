@@ -98,6 +98,11 @@ There is no scheduled or e-mailed report in the TISPH menus: run the reports whe
 | **Claims Ageing** | Open claims by ageing bucket (optionally per insurer or agent) with estimate and approved amounts |
 | **Co-insurance Register** | Co-insured policies incepted in the period: each participating insurer with its role, share, premium, commission, premium taxes and premium due |
 | **Remittance Summary**, **Broker Commission Statement** | The remittances and the commission of the period, for information |
+| **Net Remittance - Fully Paid**, **Net Remittance - Partially Paid** | Per insurer, the broker-billed policies paid in full (or paid in part) in the period: gross premium, commission, remitting rate, net remittance, taxes, paid to date, outstanding and the remittance that carries them |
+| **Premium Report by Payment Status** | Policies incepting in the period as fully paid, partially paid, cancelled or pending, with the official receipts and the remittance batch |
+| **Invoice Tracker** | The premium bills of the period not due, overdue, partially paid and paid, aged 1-15, 16-30, 31-60 and over 60 days overdue, with the count of overpayments held On Account |
+| **Statement of Account per Insurance Partner** | Per insurer, the policies incepting in the period in three sections: premium (gross, net, VAT, DST, LGT), remitting (net remitting, collected, remittance) and commission (commission, VAT, withholding tax) |
+| **Reconciliation Schedule** | Each line of the insurers' statements of the period against TISPH's records: gross premium, commission and amount paid on both sides, the differences and the match status |
 
 **Cash Control** (CCD-PDU (Post-Dated Cheques), CCD-PDC / CCD-ADA, CCD-BP / QRPh (Receipting), CCD-Recon (Reconciliation and Reversals)):
 
@@ -109,6 +114,10 @@ There is no scheduled or e-mailed report in the TISPH menus: run the reports whe
 | **Receipts Register** | Official receipts of the period with bill, policy, payment mode, bank and reference |
 | **Bank Reconciliation Statement**, **Outstanding Cheques**, **Deposits in Transit**, **Unmatched Bank Lines**, **Bank Book** | The bank reconciliation reports; see [Bank reconciliation](#bank-reconciliation) |
 | **Remittance Summary** | Premium remittances to insurers in the period: gross premium, commission retained and net due, by status |
+| **Payment Summary** | Payments received in the period by user or payment method: payment and posting dates, contract, reference, client, amount, bank, cheque, channel, receipt and posting status |
+| **Daily Reversals** | Receipts reversed and cheques bounced in the period, with sub-totals per bank account: reason, reversal and actual dates, contract, client, amount, cheque, method and user |
+| **PDC Encoded Summary**, **PDC Cancelled Summary**, **PDC Maturing**, **PDC Maturing by Product and Warehouse Bank**, **PDC History Log**, **Acknowledgement Receipts of Received PDCs** | The post-dated cheques encoded, cancelled (with the reason and the approver) and maturing in the period, by warehouse bank (the Insurance Partner holding them, or the TISPH account), every action on a cheque, and the sets received; see [Post-dated cheques](#post-dated-cheques) |
+| **Insufficient Payments**, **Overpayments** | Bank payments below what the policy owed (expected, paid, shortfall), and payments above it held On Account (excess, still held, allocated or refunded) |
 
 **Finance and Accounting** (TIS Finance & General Accounting):
 
@@ -120,6 +129,8 @@ There is no scheduled or e-mailed report in the TISPH menus: run the reports whe
 | **Journal Register**, **General Ledger Detail** | Journal lines of the period; every movement of an account with its running balance |
 | **Trial Balance**, **Trial Balance (Opening / Movement / Closing)** | Per account: opening balance, period debits and credits, closing balance |
 | **Income Statement**, **Balance Sheet** | The financial statements for the period and the fiscal year to date, with the prior year |
+| **Financial Statement by Version** | The trial balance grouped by the lines of a financial statement version (TIS01 local financial statements, TIS02 balance sheet and income statement, TIS03 budget), per line or per GL account: opening, movement, closing, year to date and the prior year to date; lines with nothing to show are left out. See [Financial statement versions](#financial-statement-versions) |
+| **Daily GL Balance** | Per GL account, grouped by the lines of the version: the beginning balance and the balance at the end of each day of the month from the From Date |
 | **Month-End Close Status** | The periods of the range with their status, the latest close run, failed checks, journals generated and who prepared and approved the close |
 | **VAT Summary**, **SAWT**, **QAP**, **SLSP Sales**, **SLSP Purchases** | The BIR working papers; see [Tax: BIR forms and returns](#tax-bir-forms-and-returns) |
 | Bank reconciliation reports | As for Cash Control |

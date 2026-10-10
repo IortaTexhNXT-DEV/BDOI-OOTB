@@ -36,6 +36,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Operations | Policy Cancellation | Create and edit |
 | Accounts | Receipts | View |
 | Accounts | Collections | View |
+| Accounts | Post-Dated Cheques | View |
 | Accounts > Payables | Supplier Invoices | Approve |
 | Accounts > Payables | Supplier Payments | Approve |
 | Accounts > Payables | AP Ageing | View |
@@ -93,7 +94,8 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Fleet schedules | Create and edit | Prepare and issue fleet schedules; add or delete vehicles by endorsement |  |
 | Operations | Marine open covers | View | See open covers, certificates and declarations; print certificates | Marine Open Covers |
 | Operations | Marine open covers | Create and edit | Set up open covers, issue certificates, submit and bill declarations |  |
-| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts |
+| Accounts | Receipts | View | See receipts | Receipts |
+| Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections |
 | Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement |
 | Accounts | Payables | View | See suppliers, supplier invoices and payments, AP ageing | Supplier Invoices, Supplier Payments, AP Ageing, Suppliers and Supplier 2307 |
