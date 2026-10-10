@@ -8,7 +8,7 @@
 import fs from 'node:fs';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs, remittanceBody } from './helpers.js';
+import { setup, loginAs, remittanceBody, delegateAuthority } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { requiredReason } from '../src/modules/ops-masters/records.js';
 import { actionTitle } from '../src/lib/auditLabels.js';
@@ -208,27 +208,25 @@ describe('approve:remittance and the approval limit', () => {
     const rej = await santos('post', `/remittance/remittances/${big.remittanceId}/reject`).send({ reasonCode: 'RRJ-OTHER', note: 'Rates of September' });
     expect(rej.status).toBe(200);
     expect(await lastEntry(big.id)).toMatchObject({ action: 'Rejected', by: santos.id, reasonCode: 'RRJ-OTHER', remarks: 'Other: Rates of September',
-      limitAtDecision: 1000000, limitSource: 'role accounting' });
+      limitAtDecision: 1000000, limitSource: 'role Accounting' });
 
     const gm = await submitted('EXT-AUTH-4', 1250000);
     expect((await unlimited('post', `/remittance/approvals/${gm.id}/approve`).send({ comments: 'Verified' })).status).toBe(200);
-    expect(await lastEntry(gm.id)).toMatchObject({ action: 'Approved', by: unlimited.id, limitAtDecision: null, limitSource: 'role tis-general-manager' });
+    expect(await lastEntry(gm.id)).toMatchObject({ action: 'Approved', by: unlimited.id, limitAtDecision: null, limitSource: 'role TIS General Manager' });
     const hist = (await ctx.api('get', '/remittance/approvals/history')).body.data.find((h) => h.referenceNo === gm.referenceNo && h.action === 'Approved');
-    expect(hist).toMatchObject({ limitAtDecision: null, limitSource: 'role tis-general-manager' });
+    expect(hist).toMatchObject({ limitAtDecision: null, limitSource: 'role TIS General Manager' });
     const audit = await q("SELECT after_data FROM audit_log WHERE entity = 'remittance_approval' AND entity_id = $1 AND action = 'approve'", [String(gm.id)]);
-    expect(audit[0].after_data).toMatchObject({ limitSource: 'role tis-general-manager' });
+    expect(audit[0].after_data).toMatchObject({ limitSource: 'role TIS General Manager' });
   });
 
   it('a delegate covering A. Santos decides with her limit, and the decision says so', async () => {
-    const r = await ctx.api('post', '/access-control/delegations').send({ delegatorId: santos.id, delegateId: cruz.id, transactionTypes: ['remittance'],
-      dateFrom: '2026-01-01', dateTo: '2099-12-31', reason: 'Annual leave' });
-    expect(r.status).toBe(201);
+    const r = await delegateAuthority(ctx, { delegatorId: santos.id, delegateId: cruz.id, transactionTypes: ['remittance'] });
     try {
       const a = await submitted('EXT-AUTH-5', 17000);
       expect((await cruz('post', `/remittance/approvals/${a.id}/approve`).send({ comments: 'Verified' })).status).toBe(200);
-      expect(await lastEntry(a.id)).toMatchObject({ action: 'Approved', by: cruz.id, limitAtDecision: 1000000, limitSource: 'delegated by A. Santos (role accounting)' });
+      expect(await lastEntry(a.id)).toMatchObject({ action: 'Approved', by: cruz.id, limitAtDecision: 1000000, limitSource: 'delegated by A. Santos (role Accounting)' });
     } finally {
-      await ctx.api('post', `/access-control/delegations/${r.body.data.id}/revoke`);
+      await ctx.api('post', `/access-control/delegations/${r.id}/end`).send({ reasonCode: 'DLE-RETURNED' });
     }
   });
 

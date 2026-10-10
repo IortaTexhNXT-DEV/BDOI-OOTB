@@ -208,3 +208,26 @@ export async function remittanceBody(body) {
   }
   return { ...body, lines };
 }
+const secondAdministrators = new WeakMap();
+/**
+ * A delegation of approval authority in force, as Access Control grants it: requested by the administrator of `ctx`
+ * for the next 30 days on annual leave (DLG-LEAVE) and approved by a second administrator, created once per app.
+ * `body` names the delegator, the delegate and the transaction types. Returns { id, dateTo } of the delegation.
+ */
+export async function delegateAuthority(ctx, body) {
+  const { addDays, today } = await import('../src/lib/dates.js');
+  if (!secondAdministrators.has(ctx.app)) {
+    await ctx.api('post', '/users').send({ username: 'test.admin2', password: 'Welcome@123', displayName: 'Second administrator', roles: ['system-admin'],
+      email: 'test.admin2@example.ph' });
+    const token = await loginAs(ctx.app, 'test.admin2', 'Welcome@123');
+    secondAdministrators.set(ctx.app, (m, p) => request(ctx.app)[m](`/api${p}`).set('Authorization', `Bearer ${token}`));
+  }
+  const day = await today();
+  const d = await ctx.api('post', '/access-control/delegations').send({ dateFrom: day, dateTo: addDays(day, 30), reasonCode: 'DLG-LEAVE', ...body });
+  if (d.status !== 201) throw new Error(`delegation: ${d.status} ${JSON.stringify(d.body)}`);
+  const approved = await secondAdministrators.get(ctx.app)('post', `/access-control/changes/${d.body.data.change.id}/decision`).send({ decision: 'approve' });
+  if (approved.status !== 200) throw new Error(`delegation approval: ${approved.status} ${JSON.stringify(approved.body)}`);
+  const { query } = await import('../src/db/pool.js');
+  const { rows: [delegation] } = await query('SELECT id FROM user_delegations WHERE change_id = $1', [d.body.data.change.id]);
+  return { id: Number(delegation.id), dateTo: addDays(day, 30) };
+}

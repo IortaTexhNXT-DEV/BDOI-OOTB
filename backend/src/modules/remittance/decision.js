@@ -106,7 +106,7 @@ export function clockText(ctx, at) {
 
 /** The user's own authority of an Authority Matrix type on the business date (effectiveAuthority, read once per request). */
 export async function myAuthority(ctx, type) {
-  if (!ctx.mine.has(type)) ctx.mine.set(type, await effectiveAuthority(ctx.db, ctx.user.id, type, ctx.onDate));
+  if (!ctx.mine.has(type)) ctx.mine.set(type, await effectiveAuthority(ctx.db, ctx.user.id, type, ctx.onDate, { requireLimit: ctx.requireLimit }));
   return ctx.mine.get(type);
 }
 
@@ -167,7 +167,7 @@ async function approverPool(ctx, type) {
   const names = await roleNames(ctx);
   const out = [];
   for (const u of rows.filter((x) => x.role)) {
-    const a = await effectiveAuthority(ctx.db, u.id, type, ctx.onDate);
+    const a = await effectiveAuthority(ctx.db, u.id, type, ctx.onDate, { requireLimit: ctx.requireLimit });
     if (!a.found && limitRequired(ctx)) continue;
     const covering = a.source ? /^delegated by (.+) \(/.exec(a.source)?.[1] || null : null;
     out.push({ id: u.id, name: u.name, role: u.role, limit: a.found && !a.unlimited ? a.limit : null, unlimited: !a.found || !!a.unlimited || !ctx.enforced,

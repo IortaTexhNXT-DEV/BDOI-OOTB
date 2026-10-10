@@ -94,7 +94,7 @@ async function withinAuthority(ctx, type, amountExpr, { requireLimit = false } =
   if (!enforced && !requireLimit) return 'TRUE';
   const exists = (await ctx.db.query("SELECT to_regclass('authority_limits') IS NOT NULL AS ok")).rows[0].ok;
   if (!exists) return 'TRUE';
-  const a = await effectiveAuthority(ctx.db, ctx.user.id, type, ctx.today);
+  const a = await effectiveAuthority(ctx.db, ctx.user.id, type, ctx.today, { requireLimit });
   if (!a.found) return requireLimit || String(await getSetting('access.authority_without_limit', 'allow')) === 'refuse' ? 'FALSE' : 'TRUE';
   if (!enforced) return 'TRUE';
   if (a.unlimited) return 'TRUE';

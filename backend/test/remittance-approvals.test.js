@@ -8,7 +8,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs, remittanceBody } from './helpers.js';
+import { setup, loginAs, remittanceBody, delegateAuthority } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { approvalInbox } from '../src/modules/remittance/approvals.js';
 import { decisionFor, eligibleApprovers, decisionContext } from '../src/modules/remittance/decision.js';
@@ -207,13 +207,11 @@ describe('deciding', () => {
     expect(n.title).toBe(`Insurer Remittance ${a.reference} returned`);
     expect(n.message).toBe('Returned by J. Cruz: Rates to be corrected: OD rate of September');
     const [h] = await q('SELECT history FROM remittance_approvals WHERE id = $1', [a.id]);
-    expect(h.history.at(-1)).toMatchObject({ action: 'Rejected', reasonCode: 'RRJ-RATES', limitAtDecision: 1000000, limitSource: 'role tis-finance' });
+    expect(h.history.at(-1)).toMatchObject({ action: 'Rejected', reasonCode: 'RRJ-RATES', limitAtDecision: 1000000, limitSource: 'role TIS Finance & General Accounting' });
   });
 
   it('a delegate covering J. Cruz decides with her limit; the decision keeps the delegation as its limit source', async () => {
-    const d = await ctx.api('post', '/access-control/delegations').send({ delegatorId: people.cruz.id, delegateId: people.nolimit.id, transactionTypes: ['remittance'],
-      dateFrom: '2026-01-01', dateTo: '2099-12-31', reason: 'Annual leave' });
-    expect(d.status).toBe(201);
+    const d = await delegateAuthority(ctx, { delegatorId: people.cruz.id, delegateId: people.nolimit.id, transactionTypes: ['remittance'] });
     try {
       const a = await submitted('EXT-RAP-D1', 6000);
       const row = rowOf(await inbox('nolimit', 'mine'), a.id);
@@ -221,12 +219,12 @@ describe('deciding', () => {
       expect(row.decision.eligibleApprovers.find((u) => u.name === 'N. Limit')).toMatchObject({ coveringFor: 'J. Cruz' });
       // the authority chips: the limit through the delegation and whom it covers, until when
       expect((await inbox('nolimit', 'mine')).authority).toMatchObject({ permission: true, canDecide: true, limit: 1000000,
-        limitSourceLabel: 'Delegation from J. Cruz (Role limit: TIS Finance & General Accounting)', covering: [{ name: 'J. Cruz', until: '2099-12-31' }] });
+        limitSourceLabel: 'Delegation from J. Cruz (Role limit: TIS Finance & General Accounting)', covering: [{ name: 'J. Cruz', until: d.dateTo }] });
       expect((await people.nolimit('post', `/remittance/approvals/${a.id}/approve`).send({ version: a.version })).status).toBe(200);
       const [h] = await q('SELECT history FROM remittance_approvals WHERE id = $1', [a.id]);
-      expect(h.history.at(-1)).toMatchObject({ by: people.nolimit.id, limitAtDecision: 1000000, limitSource: 'delegated by J. Cruz (role tis-finance)' });
+      expect(h.history.at(-1)).toMatchObject({ by: people.nolimit.id, limitAtDecision: 1000000, limitSource: 'delegated by J. Cruz (role TIS Finance & General Accounting)' });
     } finally {
-      await ctx.api('post', `/access-control/delegations/${d.body.data.id}/revoke`);
+      await ctx.api('post', `/access-control/delegations/${d.id}/end`).send({ reasonCode: 'DLE-RETURNED' });
     }
   });
 

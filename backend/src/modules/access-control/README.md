@@ -147,7 +147,11 @@ access of a role changes. The default access rules (seed `91_role_access.sql`) w
   `pending`, `rejected`, `withdrawn`. `GET /delegations?view=current|pending|ended|all`.
 - `POST /delegations/:id/end` (reason of `delegation_end`): stops at once, both people are told.
 - A delegation never lowers authority: under `access.authority_without_limit = allow` a person without a limit of his
-  or her own is not restricted and a delegated limit is not applied (`effectiveAuthority`).
+  or her own is not restricted and a delegated limit is not applied (`effectiveAuthority`). A step that refuses an
+  approver without a limit whatever that setting says (remittance approvals with `remittance.require_authority_limit`)
+  asks with `requireLimit`, and the delegated limit applies.
+- Remittance approvals (types `remittance` and `remittance_settlement`) are decided with `approve:remittance` on
+  Accounts > Remittance > Approvals, so the person covering needs that permission.
 
 ## Segregation of duties: conflicts and exceptions
 

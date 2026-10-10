@@ -183,12 +183,15 @@ export async function ownLimit(db, userId, type, onDate) {
 /**
  * Effective authority of a user for a transaction type on a date, delegations included. A delegation never lowers it:
  * a person with no limit of their own while access.authority_without_limit is allow is not restricted, so a delegated
- * limit is not applied to them.
+ * limit is not applied to them. `requireLimit`: the step refuses an approver without a limit whatever that setting
+ * says (remittance approvals with remittance.require_authority_limit), so a delegated limit applies.
  */
-export async function effectiveAuthority(db, userId, type, onDate = null) {
+export async function effectiveAuthority(db, userId, type, onDate = null, { requireLimit = false } = {}) {
   onDate = onDate || (await today());
   const own = await ownLimit(db, userId, type, onDate);
-  if (!own.found && String(await getSetting('access.authority_without_limit', 'allow')) !== 'refuse') return { found: false, limit: null, unlimited: false, source: null };
+  if (!own.found && !requireLimit && String(await getSetting('access.authority_without_limit', 'allow')) !== 'refuse') {
+    return { found: false, limit: null, unlimited: false, source: null };
+  }
   const candidates = [own];
   const { rows: dels } = await db.query(`SELECT d.delegator_id, u.display_name FROM user_delegations d JOIN users u ON u.id = d.delegator_id
     WHERE d.delegate_id = $1 AND d.status = 'active' AND $2::date BETWEEN d.date_from AND d.date_to

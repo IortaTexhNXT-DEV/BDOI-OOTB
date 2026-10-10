@@ -119,6 +119,7 @@ const PERMISSION_LIST = {
   'write:journal-vouchers': ['journal-vouchers', 'edit', 'Enter, correct and reverse journal vouchers; run the SAP GL export'],
   'read:remittance': ['remittance', 'view', 'See remittances to insurers and insurer statements'],
   'write:remittance': ['remittance', 'edit', 'Prepare remittances and insurer statement reconciliations'],
+  'approve:remittance': ['remittance', 'approve', 'Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter)'],
   'approve:insurer-reconciliation': ['remittance', 'approve', 'Approve insurer statement reconciliations and post their adjustments (not the preparer)'],
   'read:bank-reconciliation': ['bank-reconciliation', 'view', 'See bank reconciliations'],
   'write:bank-reconciliation': ['bank-reconciliation', 'edit', 'Prepare bank reconciliations'],
