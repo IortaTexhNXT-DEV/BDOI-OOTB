@@ -103,7 +103,7 @@ describe('No direct-paid path for policy editors', () => {
 describe('pending payment capture, verified by finance', () => {
   it('sales, underwriting and agents record a pending payment (no receipt, no journal); finance verifies it', async () => {
     const p = await billedPolicy(12000, ctx.userIds.agent);
-    const pay = (amount, ref) => ({ option: 'payment', paymentMode: 'bank-transfer', referenceNo: ref, amount, paymentDate: today });
+    const pay = (amount, ref) => ({ option: 'payment', paymentMode: 'bank-transfer', referenceNo: ref, amount, paymentDate: today, proofKey: 'payment-proofs/slip.jpg' });
     const jvBefore = (await q('SELECT count(*)::int AS n FROM journal_vouchers'))[0].n;
     const ids = [];
     for (const [who, ref] of [[ctx.as('sales'), 'SLS-1'], [uw, 'UW-1'], [ctx.as('agent'), 'AGT-1']]) {
@@ -158,7 +158,7 @@ describe('endorsement premium payment follows the pending flow', () => {
 
     // pending capture against the endorsement bill
     const receiptsBefore = await receiptCount('pol_sls_02');
-    const c = await cs('post', '/policies/pol_sls_02/payments').send({ option: 'payment', paymentMode: 'check', referenceNo: 'CHK-END-1', amount: delta, paymentDate: today, receivableId: rcv });
+    const c = await cs('post', '/policies/pol_sls_02/payments').send({ option: 'payment', paymentMode: 'check', referenceNo: 'CHK-END-1', amount: delta, paymentDate: today, receivableId: rcv, proofKey: 'payment-proofs/slip.jpg' });
     expect(c.status).toBe(201);
     expect(c.body.data).toMatchObject({ posted: false, receipt: null, capture: { status: 'submitted', receivableId: rcv } });
     expect(await balanceOf(rcv)).toBeCloseTo(delta, 2);

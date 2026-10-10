@@ -2,7 +2,7 @@
  * Policy premium payment capture (Policy > Payment screen).
  *
  * - "Pay later": nothing is posted; the receivable raised at issuance stays open.
- * - A payment (mode, reference, amount, date, optional proof) is recorded as a capture for finance to verify. It does
+ * - A payment (mode, reference, amount, date, proof: required with policy.payment_capture_proof_required) is recorded as a capture for finance to verify. It does
  *   not post a receipt or a journal unless the capturing user holds write:receipts (finance), in which case it is
  *   confirmed at once. Confirmation raises the official receipt through the receipts module (POST /receipts shape:
  *   receivableId + amount, balance enforced), which posts Dr Cash / Cr Premium Receivable.
@@ -40,7 +40,9 @@ export const CAPTURE_SQL = `SELECT pp.*, p.policy_number, r.bill_number, rc.rece
 export async function paymentSettings() {
   const modes = (await getSetting('policy.payment_capture_modes', DEFAULT_MODES)) || DEFAULT_MODES;
   const gatewayUrl = String((await getSetting('policy.payment_gateway_url', '')) || '');
-  return { modes: modes.map((m) => ({ value: m, label: MODE_LABELS[m] || m, referenceRequired: NEEDS_REFERENCE.includes(m) })), gateway: { enabled: Boolean(gatewayUrl), url: gatewayUrl || null } };
+  const proofRequired = Boolean(await getSetting('policy.payment_capture_proof_required', false));
+  return { modes: modes.map((m) => ({ value: m, label: MODE_LABELS[m] || m, referenceRequired: NEEDS_REFERENCE.includes(m) })), gateway: { enabled: Boolean(gatewayUrl), url: gatewayUrl || null },
+    proofRequired };
 }
 
 /** Open bills of a policy (the receivable raised at issuance, endorsement bills ...). */
@@ -89,7 +91,7 @@ export async function capturePayment(db, policy, body, user) {
     await syncPolicyPaymentStatus(db, policy.id, user.id);
     return { option: 'pay-later', capture: null, receipt: null, posted: false };
   }
-  const { modes } = await paymentSettings();
+  const { modes, proofRequired } = await paymentSettings();
   const mode = String(body.paymentMode || '').toLowerCase();
   const modeDef = modes.find((m) => m.value === mode);
   if (!modeDef) throw badRequest(`paymentMode must be one of ${modes.map((m) => m.value).join(', ')}`);
@@ -97,6 +99,7 @@ export async function capturePayment(db, policy, body, user) {
   if (modeDef.referenceRequired && !reference) throw badRequest(`A reference number is required for ${modeDef.label} (bank / cheque / transaction reference)`);
   const amount = round2(num(body.amount));
   if (!(amount > 0)) throw badRequest('Amount paid must be greater than zero');
+  if (proofRequired && !String(body.proofKey || '').trim()) throw badRequest('Attach the proof of payment (deposit slip, cheque image or transfer confirmation)');
   const paidOn = isoDate(body.paymentDate);
   if (!paidOn) throw badRequest('Payment date is required');
   if (paidOn > (await today())) throw badRequest('Payment date cannot be in the future');
