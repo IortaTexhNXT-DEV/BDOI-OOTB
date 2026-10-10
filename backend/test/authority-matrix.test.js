@@ -64,7 +64,9 @@ describe('the matrix', () => {
     expect(fin).toMatchObject({ department: 'Finance and Accounting', platform: false });
     expect(fin.approves).toEqual(expect.arrayContaining(['payment_voucher', 'journal_voucher', 'remittance', 'remittance_settlement']));
     expect(m.roles.find((r) => r.code === 'tis-sales-associate').approves).toEqual([]);
-    expect(m.roles.find((r) => r.code === 'processing').approves).toContain('underwriting_referral');
+    // the acceptance rules name the Operations Unit Head for referrals on a database with the TISPH roles (migration 0367)
+    expect(m.roles.find((r) => r.code === 'tis-ops-unit-head').approves).toContain('underwriting_referral');
+    expect(m.roles.find((r) => r.code === 'processing').approves).not.toContain('underwriting_referral');
     expect(m.roles.find((r) => r.code === 'accounting')).toMatchObject({ platform: true, department: null });
     expect(m.rows.find((r) => r.code === 'journal_voucher')).toMatchObject({ checked: true, step: 'Accounts > Journal Vouchers > Approve' });
     expect(m.rows.find((r) => r.code === 'quotation_discount')).toMatchObject({ checked: false, step: null });
