@@ -9,7 +9,7 @@
   "pdf": "TISPH_User_Manual.pdf",
   "word": "TISPH_User_Manual.docx"
  },
- "sourceHash": "a95fc9404d6e7e1953316c086ba4a7a86df48a2d612f620fba34a461f3b35905",
+ "sourceHash": "d25f7d5ddae3a4a3fb6e0455034626a3c47cc43397b7efbabde572505c421545",
  "roles": {
   "tis-sales-associate": {
    "id": "tis-sales-associate",
@@ -2791,6 +2791,13 @@
    "id": "reports-by-department",
    "number": "22.1.3",
    "title": "The reports of each department",
+   "level": 3,
+   "chapter": "Reports"
+  },
+  {
+   "id": "reports-sales",
+   "number": "22.1.4",
+   "title": "Sales reports",
    "level": 3,
    "chapter": "Reports"
   },

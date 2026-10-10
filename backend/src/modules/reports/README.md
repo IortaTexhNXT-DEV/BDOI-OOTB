@@ -12,7 +12,7 @@ its own permission and optional role list in `report_definitions`.
 | `router.js` | Catalogue, run, generate, generated files, schedules, agent filter options. |
 | `service.js` | Access check (`canAccess`), catalogue, runs, file generation, download tokens, schedules, `scheduledReport` job handler. |
 | `engine.js` | Reads the screen parameters (`FromDate`, `ReportCriteria`, `Agent` ... and their aliases), builds the SQL around the base query, applies filters, paging, totals and groups. |
-| `queries.js` | The base queries, keyed by `query_name`. Also merges `periodEndQueries.js` (ledger statements and BIR working papers; the balance sheet and the year-to-date columns of the income statement read the fiscal year's opening balances, as the trial balance does) and `bankRecQueries.js`. |
+| `queries.js` | The base queries, keyed by `query_name`. Also merges `periodEndQueries.js` (ledger statements and BIR working papers; the balance sheet and the year-to-date columns of the income statement read the fiscal year's opening balances, as the trial balance does), `bankRecQueries.js`, `channelQueries.js` (Dealer Production) and `salesQueries.js` (the sales reports of TISPH: APR Operation Report, Production per Product Line, Agent Policy Conversion, Renewal Notice Listing; definitions in migration 0462). |
 
 ## Main tables
 
@@ -35,7 +35,8 @@ permission, `query_name`), `report_schedules`, `generated_reports` (files produc
 `reports.default_format`, `reports.max_rows`, `reports.default_page_size`, `reports.default_range_days`,
 `reports.download_link_ttl_hours`, `reports.pdf_page_size`, `reports.retention_days`, `reports.email_subject` /
 `reports.email_body`, and the status lists and buckets used by individual queries (`reports.claim_*`,
-`reports.placement_*`, `reports.renewal_*`, `reports.lead_funnel_stages`, `reports.trial_balance_statuses`).
+`reports.placement_*`, `reports.renewal_*`, `reports.lead_funnel_stages`, `reports.trial_balance_statuses`,
+`reports.apr_home_brands`: the vehicle brands of the APR Operation Report that are not OEM).
 
 ## Adding a report
 

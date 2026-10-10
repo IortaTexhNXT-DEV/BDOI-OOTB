@@ -402,6 +402,42 @@
      ]
     },
     {
+     "section": "Reports > Operational Reports",
+     "screen": "APR Operation Report",
+     "path": "/reports/run/apr-operation",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Production per Product Line",
+     "path": "/reports/run/production-by-line",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Agent Policy Conversion",
+     "path": "/reports/run/agent-conversion",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Renewal Notice Listing",
+     "path": "/reports/run/renewal-notice-listing",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
      "section": "Reports",
      "screen": "Report Builder",
      "path": "/reports/builder",
@@ -1127,6 +1163,42 @@
      "section": "Reports > Operational Reports",
      "screen": "Dealer Production",
      "path": "/reports/run/dealer-production",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "APR Operation Report",
+     "path": "/reports/run/apr-operation",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Production per Product Line",
+     "path": "/reports/run/production-by-line",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Agent Policy Conversion",
+     "path": "/reports/run/agent-conversion",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Renewal Notice Listing",
+     "path": "/reports/run/renewal-notice-listing",
      "access": "View",
      "modules": [
       "Reports"
@@ -1994,6 +2066,42 @@
      ]
     },
     {
+     "section": "Reports > Operational Reports",
+     "screen": "APR Operation Report",
+     "path": "/reports/run/apr-operation",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Production per Product Line",
+     "path": "/reports/run/production-by-line",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Agent Policy Conversion",
+     "path": "/reports/run/agent-conversion",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Renewal Notice Listing",
+     "path": "/reports/run/renewal-notice-listing",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
      "section": "Reports",
      "screen": "Report Builder",
      "path": "/reports/builder",
@@ -2818,6 +2926,42 @@
      ]
     },
     {
+     "section": "Reports > Operational Reports",
+     "screen": "APR Operation Report",
+     "path": "/reports/run/apr-operation",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Production per Product Line",
+     "path": "/reports/run/production-by-line",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Agent Policy Conversion",
+     "path": "/reports/run/agent-conversion",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Renewal Notice Listing",
+     "path": "/reports/run/renewal-notice-listing",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
      "section": "Reports",
      "screen": "Report Builder",
      "path": "/reports/builder",
@@ -3613,6 +3757,42 @@
      "section": "Reports > Operational Reports",
      "screen": "Dealer Production",
      "path": "/reports/run/dealer-production",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "APR Operation Report",
+     "path": "/reports/run/apr-operation",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Production per Product Line",
+     "path": "/reports/run/production-by-line",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Agent Policy Conversion",
+     "path": "/reports/run/agent-conversion",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Renewal Notice Listing",
+     "path": "/reports/run/renewal-notice-listing",
      "access": "View",
      "modules": [
       "Reports"
@@ -4480,6 +4660,42 @@
      "section": "Reports > Operational Reports",
      "screen": "Dealer Production",
      "path": "/reports/run/dealer-production",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "APR Operation Report",
+     "path": "/reports/run/apr-operation",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Production per Product Line",
+     "path": "/reports/run/production-by-line",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Agent Policy Conversion",
+     "path": "/reports/run/agent-conversion",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Renewal Notice Listing",
+     "path": "/reports/run/renewal-notice-listing",
      "access": "View",
      "modules": [
       "Reports"
@@ -6711,6 +6927,42 @@
      ]
     },
     {
+     "section": "Reports > Operational Reports",
+     "screen": "APR Operation Report",
+     "path": "/reports/run/apr-operation",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Production per Product Line",
+     "path": "/reports/run/production-by-line",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Agent Policy Conversion",
+     "path": "/reports/run/agent-conversion",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Renewal Notice Listing",
+     "path": "/reports/run/renewal-notice-listing",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
      "section": "Reports > Financial Reports",
      "screen": "SOA/Premium Receivable",
      "path": "/reports/financialreports/soapremiumreceivable",
@@ -7869,6 +8121,42 @@
      "section": "Reports > Operational Reports",
      "screen": "Dealer Production",
      "path": "/reports/run/dealer-production",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "APR Operation Report",
+     "path": "/reports/run/apr-operation",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Production per Product Line",
+     "path": "/reports/run/production-by-line",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Agent Policy Conversion",
+     "path": "/reports/run/agent-conversion",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Renewal Notice Listing",
+     "path": "/reports/run/renewal-notice-listing",
      "access": "View",
      "modules": [
       "Reports"
@@ -9809,6 +10097,42 @@
      "section": "Reports > Operational Reports",
      "screen": "Dealer Production",
      "path": "/reports/run/dealer-production",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "APR Operation Report",
+     "path": "/reports/run/apr-operation",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Production per Product Line",
+     "path": "/reports/run/production-by-line",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Agent Policy Conversion",
+     "path": "/reports/run/agent-conversion",
+     "access": "View",
+     "modules": [
+      "Reports"
+     ]
+    },
+    {
+     "section": "Reports > Operational Reports",
+     "screen": "Renewal Notice Listing",
+     "path": "/reports/run/renewal-notice-listing",
      "access": "View",
      "modules": [
       "Reports"
@@ -13446,6 +13770,170 @@
     },
     {
      "role": "TIS Operations Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "View"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "View"
+    }
+   ]
+  },
+  "/reports/run/apr-operation": {
+   "menu": "Reports > Operational Reports > APR Operation Report",
+   "roles": [
+    {
+     "role": "TIS Sales Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "View"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "View"
+    }
+   ]
+  },
+  "/reports/run/production-by-line": {
+   "menu": "Reports > Operational Reports > Production per Product Line",
+   "roles": [
+    {
+     "role": "TIS Sales Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "View"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "View"
+    }
+   ]
+  },
+  "/reports/run/agent-conversion": {
+   "menu": "Reports > Operational Reports > Agent Policy Conversion",
+   "roles": [
+    {
+     "role": "TIS Sales Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
+     "access": "View"
+    },
+    {
+     "role": "TIS IT AppSupport / Admin",
+     "access": "View"
+    },
+    {
+     "role": "TIS General Manager",
+     "access": "View"
+    }
+   ]
+  },
+  "/reports/run/renewal-notice-listing": {
+   "menu": "Reports > Operational Reports > Renewal Notice Listing",
+   "roles": [
+    {
+     "role": "TIS Sales Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Sales Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Associate",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Officer",
+     "access": "View"
+    },
+    {
+     "role": "TIS Operations Unit Head",
+     "access": "View"
+    },
+    {
+     "role": "TIS Finance & General Accounting",
      "access": "View"
     },
     {

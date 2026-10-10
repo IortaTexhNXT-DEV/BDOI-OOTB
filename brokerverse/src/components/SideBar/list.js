@@ -806,6 +806,38 @@ export const menuList = [
             includes: ["/reports/run/dealer-production"],
             permissions: ["read:reports"],
           },
+          {
+            // policies written month or year to date per business category (TIS-BRD-RPT-SLS-01)
+            id: 7,
+            name: "APR Operation Report",
+            path: "/reports/run/apr-operation",
+            includes: ["/reports/run/apr-operation"],
+            permissions: ["read:reports"],
+          },
+          {
+            // policy count, sum insured, premium and commission per product line (TIS-BRD-RPT-SLS-02)
+            id: 8,
+            name: "Production per Product Line",
+            path: "/reports/run/production-by-line",
+            includes: ["/reports/run/production-by-line"],
+            permissions: ["read:reports"],
+          },
+          {
+            // prospects, quotations and policies per agent per month with the incentive (TIS-BRD-RPT-SLS-03)
+            id: 9,
+            name: "Agent Policy Conversion",
+            path: "/reports/run/agent-conversion",
+            includes: ["/reports/run/agent-conversion"],
+            permissions: ["read:reports"],
+          },
+          {
+            // policies expiring in 30/60/90 days with the calling template fields (TIS-BRD-RPT-SLS-04)
+            id: 10,
+            name: "Renewal Notice Listing",
+            path: "/reports/run/renewal-notice-listing",
+            includes: ["/reports/run/renewal-notice-listing"],
+            permissions: ["read:reports"],
+          },
         ],
       },
       {
