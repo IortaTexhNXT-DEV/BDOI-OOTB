@@ -670,6 +670,18 @@ const CARRY_KEYS = ['insuranceVehicleDetails', 'plateNumber', 'chassisNumber', '
   'fireRiskDetails'];
 /** The vehicle part of CARRY_KEYS, carried on motor renewals only. */
 const MOTOR_CARRY_KEYS = CARRY_KEYS.slice(0, CARRY_KEYS.indexOf('TNVS') + 1);
+/**
+ * Risk fields carried by line of business on top of CARRY_KEYS (the product columns of the migration policy sheets
+ * store them too, so a migrated policy renews with them). The dates of the expiring term (travel dates, loan release
+ * date) are never carried.
+ */
+const LINE_CARRY_KEYS = {
+  MOTOR: ['conductionSticker', 'loanReference', 'dealerCode'],
+  ACCIDENT: ['plan', 'beneficiary', 'occupationClass', 'destination'],
+  LIFE: ['loanReference', 'loanAmount', 'loanTermMonths'],
+  FIRE: ['riskAddress', 'occupancy', 'constructionClass'],
+  IAR: ['riskAddress', 'occupancy', 'constructionClass'],
+};
 const present = (v) => v !== undefined && v !== null && v !== '';
 const pickPresent = (src, keys) => Object.fromEntries(keys.filter((k) => present(src?.[k])).map((k) => [k, src[k]]));
 const hasReferrers = (d) => Boolean(d && [d.primary, ...(d.chain || [])].some((e) => e && e.referrerId && e.referrerId !== 'direct'));
@@ -717,7 +729,7 @@ export async function renewalPrefill(policyRef) {
   const capturedObject = open?.accessories && typeof open.accessories === 'object' && !Array.isArray(open.accessories);
   const accessorySource = capturedObject ? open.accessories : source;
   const accessories = isMotor ? Object.fromEntries(ACCESSORY_KEYS.map((k) => [k, present(accessorySource[k]) ? accessorySource[k] : ''])) : {};
-  const vehicle = pickPresent(source, isMotor ? CARRY_KEYS : CARRY_KEYS.filter((k) => !MOTOR_CARRY_KEYS.includes(k)));
+  const vehicle = pickPresent(source, [...(isMotor ? CARRY_KEYS : CARRY_KEYS.filter((k) => !MOTOR_CARRY_KEYS.includes(k))), ...(LINE_CARRY_KEYS[lob] || [])]);
   const coverageDetails = { ...coverage, ...captured };
   let seats = null;
   if (isMotor) {

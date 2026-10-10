@@ -119,3 +119,30 @@ export function amountValue(column, value, label, { positive = false } = {}) {
   if (positive ? !(n > 0) : n < 0) fail(column, `${label} must be ${positive ? 'greater than zero' : 'zero or more'}`);
   return n;
 }
+
+/** Whole centavos of an amount, or null when it has more than two decimals (the binary noise of a spreadsheet aside). */
+export function centavos(n) {
+  const c = Math.round(n * 100);
+  return Math.abs(n * 100 - c) > 1e-6 * Math.max(1, Math.abs(n)) ? null : c;
+}
+
+/**
+ * Peso amount column check: as amountValue, and never more than two decimals. The amount is not rounded, so the
+ * workbook total and the stored total are sums of the same values and agree to the centavo.
+ */
+export function pesoValue(column, value, label, options = {}) {
+  const n = amountValue(column, value, label, options);
+  if (n === null) return null;
+  if (centavos(n) === null) fail(column, `${label} has more than two decimals`);
+  return n;
+}
+
+/** Sum of peso cells in whole centavos (each cell rounded to the centavo, then added), as a peso amount. */
+export function pesoSum(values) {
+  let c = 0;
+  for (const v of values) {
+    const n = numberCell(v);
+    if (n !== null && !Number.isNaN(n)) c += Math.round(n * 100);
+  }
+  return c / 100;
+}

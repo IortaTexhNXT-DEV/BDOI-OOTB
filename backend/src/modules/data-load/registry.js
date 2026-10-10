@@ -13,17 +13,22 @@
  *   channels        where it may be used: setup, upload, promotion (configuration objects), migration
  *   promotable      false for the migration objects: an Environment Promotion package never carries business records
  *   origin          migration objects: { table, legacyNumberColumn } the records it creates are tagged in (lib/origin.js)
- *   duplicateRules  migration objects: duplicate checks that apply to it (setting migration.duplicate_rules)
- * Objects of the same kit with no dependency between them keep the order they are declared in below.
+ *   duplicateRules  duplicate checks that apply to it (duplicates.js; setting migration.duplicate_rules)
+ *   productLines    policy sheets: the lines of business of the products it holds (products.js)
+ *   present         when given: whether the object is in this environment's workbook (the Fire sheet only with an
+ *                   active fire product)
+ * Objects of the same kit with no dependency between them keep the order they are declared in below. The single
+ * Policies sheet of the earlier layout stays readable (legacyLayout): it is never in a downloaded template.
  */
 import { badRequest } from '../../lib/errors.js';
 import { CONFIGURATION_SHEETS, masterSheet } from './configuration.js';
 import { MIGRATION_SHEETS } from './migration.js';
+import { POLICY_KINDS, presentKinds } from './products.js';
 
 const CONFIGURATION_CHANNELS = ['setup', 'upload', 'promotion'];
 const MIGRATION_CHANNELS = ['migration'];
 
-const master = (code, dependsOn = []) => ({ key: `master:${code}`, module: 'masters', dependsOn, build: () => masterSheet(code) });
+const master = (code, dependsOn = []) => ({ key: `master:${code}`, module: 'masters', dependsOn, duplicateRules: ['master-name'], build: () => masterSheet(code) });
 const own = (key, module, dependsOn = []) => ({ key, module, dependsOn, build: async () => CONFIGURATION_SHEETS[key]() });
 
 /** Configuration kit: everything needed to run new business. */
@@ -47,24 +52,34 @@ const CONFIGURATION = [
   own('coc-series', 'integrations', ['master:insurance-company', 'master:branch']),
 ].map((e) => ({ ...e, kit: 'configuration', channels: CONFIGURATION_CHANNELS, promotable: true }));
 
-const migrated = (key, module, dependsOn, origin, duplicateRules = []) => ({
-  key, module, dependsOn, origin, duplicateRules, kit: 'migration', channels: MIGRATION_CHANNELS, promotable: false, build: async () => MIGRATION_SHEETS[key](),
+const migrated = (key, module, dependsOn, origin, duplicateRules = [], extra = {}) => ({
+  key, module, dependsOn, origin, duplicateRules, kit: 'migration', channels: MIGRATION_CHANNELS, promotable: false, build: async () => MIGRATION_SHEETS[key](), ...extra,
 });
+
+const POLICY_ORIGIN = { table: 'policies', legacyNumberColumn: 'policy_number' };
+const POLICY_DEPENDS = ['clients', 'master:insurance-company', 'master:product', 'users', 'master:branch'];
+const POLICY_RULES = { motor: ['vehicle'], ctpl: ['vehicle', 'coc'] };
+const POLICY_KEYS = [...POLICY_KINDS.map((k) => k.key), 'policies'];
 
 /** Migration kit: the open business of the legacy system at cutover. */
 const MIGRATION = [
   migrated('clients', 'clients', ['master:branch', 'users'], { table: 'clients', legacyNumberColumn: 'client_code' }, ['tin', 'name-birth-date', 'company-name']),
-  migrated('policies', 'policies', ['clients', 'master:insurance-company', 'master:product', 'users', 'master:branch'], { table: 'policies', legacyNumberColumn: 'policy_number' },
-    ['vehicle', 'coc', 'policy-number', 'insurer-variant']),
-  migrated('open-items', 'receipts', ['policies'], { table: 'receivables', legacyNumberColumn: 'reference' }),
-  migrated('claims', 'claims', ['policies', 'users'], { table: 'claims', legacyNumberColumn: 'claim_number' }),
+  ...POLICY_KINDS.map((k) => migrated(k.key, 'policies', POLICY_DEPENDS, POLICY_ORIGIN, [...(POLICY_RULES[k.kind] || []), 'policy-number', 'insurer-variant'],
+    { productLines: k.lines, ...(k.activeOnly ? { present: async () => (await presentKinds()).includes(k.kind) } : {}) })),
+  migrated('policies', 'policies', POLICY_DEPENDS, POLICY_ORIGIN, ['policy-number', 'insurer-variant'], { productLines: [], legacyLayout: true }),
+  migrated('open-items', 'receipts', POLICY_KEYS, { table: 'receivables', legacyNumberColumn: 'reference' }),
+  migrated('post-dated-cheques', 'pdc', ['open-items', 'master:bank'], { table: 'post_dated_cheques', legacyNumberColumn: 'cheque_number' }),
+  migrated('claims', 'claims', [...POLICY_KEYS, 'users'], { table: 'claims', legacyNumberColumn: 'claim_number' }),
   migrated('opening-balances', 'period-end', ['chart-of-accounts'], { table: 'opening_balances', legacyNumberColumn: null }),
+  // never loaded: the legacy figures of the reconciliation
+  migrated('control-totals', 'data-load', [], null),
 ];
 
 const ENTRIES = [...CONFIGURATION, ...MIGRATION];
 
-/** Registry entries without their sheets (key, module, dependsOn, kit, channels, promotable, origin, duplicateRules). */
-export const registryEntries = () => ENTRIES.map((e) => Object.fromEntries(Object.entries(e).filter(([k]) => k !== 'build')));
+const FUNCTIONS = new Set(['build', 'present']);
+/** Registry entries without their sheets (key, module, dependsOn, kit, channels, promotable, origin, duplicateRules ...). */
+export const registryEntries = () => ENTRIES.map((e) => Object.fromEntries(Object.entries(e).filter(([k]) => !FUNCTIONS.has(k))));
 
 /**
  * Keys in load order: a topological sort on dependsOn inside the given entries (dependencies outside them are loaded
@@ -85,15 +100,20 @@ export function loadOrder(entries) {
   return out;
 }
 
-/** The objects of a kit (or of a channel), with their sheets, in load order. */
+/** The objects of a kit (or of a channel), with their sheets, in load order; objects not present here are left out. */
 export async function objects({ kit = null, channel = null } = {}) {
-  const chosen = ENTRIES.filter((e) => (!kit || e.kit === kit) && (!channel || e.channels.includes(channel)));
+  const chosen = [];
+  for (const e of ENTRIES) {
+    if ((kit && e.kit !== kit) || (channel && !e.channels.includes(channel))) continue;
+    if (e.present && !(await e.present())) continue;
+    chosen.push(e);
+  }
   const byKey = new Map(chosen.map((e) => [e.key, e]));
   const out = [];
   for (const key of loadOrder(chosen)) {
     const entry = byKey.get(key);
     const sheet = await entry.build();
-    const meta = Object.fromEntries(Object.entries(entry).filter(([k]) => k !== 'build'));
+    const meta = Object.fromEntries(Object.entries(entry).filter(([k]) => !FUNCTIONS.has(k)));
     out.push({ ...sheet, ...meta, label: sheet.name });
   }
   return out;

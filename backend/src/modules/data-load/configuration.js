@@ -69,6 +69,8 @@ export async function masterSheet(code) {
   const keyOf = (v) => keyText(...key.map((k) => v[k]));
   return {
     key: `master:${code}`, name: MASTER_SHEETS[code], aliases: SHEET_ALIASES[code] || [], menu: info.menu || `Master > ${t.label}`, columns, keyColumns: key, keyOf,
+    // the name a new record must not share with another record of the master (duplicate rule master-name)
+    nameColumn: t.label_field && !key.includes(t.label_field) && columns.some((c) => c.key === t.label_field) ? t.label_field : null,
     sample: info.samples?.[0] || {},
     async exportRows() {
       const { rows } = await masters.listRecords(t, { sortBy: t.code_field || t.label_field }, { limit: 1000000, offset: 0 });

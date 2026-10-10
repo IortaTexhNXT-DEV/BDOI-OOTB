@@ -97,8 +97,12 @@ async function targetOf(db, b) {
   throw badRequest('Validation failed', [{ path: 'receivableId', message: 'Give the bill (receivableId) or the policy (policyId) the cheque pays' }]);
 }
 
-/** Register a cheque on hand. b: { receivableId | policyId, bankId | draweeBank, branch, chequeNumber, chequeDate, amount, receivedDate, storageLocation, remarks, replacesId }. */
-export async function registerPdc(db, b, user) {
+/**
+ * Register a cheque on hand. b: { receivableId | policyId, bankId | draweeBank, branch, chequeNumber, chequeDate, amount, receivedDate, storageLocation, remarks, replacesId }.
+ * migration: { legacySystem, batchId, migratedBy } for a cheque on hand at go-live loaded by a migration load (origin
+ * migrated, legacy number = the cheque number); nothing is posted, as for a cheque registered on screen.
+ */
+export async function registerPdc(db, b, user, { migration = null } = {}) {
   const t = await targetOf(db, b);
   const amount = round2(b.amount);
   if (!(amount > 0)) throw badRequest('Validation failed', [{ path: 'amount', message: 'Amount must be greater than zero' }]);
@@ -115,6 +119,10 @@ export async function registerPdc(db, b, user) {
   [number, t.clientId, t.policyId, t.receivable?.id || null, b.bankId || null, b.draweeBank || null, b.branch || null, String(b.chequeNumber).trim(), isoDate(b.chequeDate), amount,
     isoDate(b.receivedDate) || (await today()), b.storageLocation || null, b.remarks || null, b.replacesId || null, user?.id ?? null])).rows[0]
     .id;
+  if (migration) {
+    await db.query(`UPDATE post_dated_cheques SET origin = 'migrated', legacy_system = $2, legacy_number = cheque_number, migrated_at = now(), migrated_by = $3, load_batch_id = $4
+      WHERE id = $1`, [r, migration.legacySystem, migration.migratedBy || user?.id || null, migration.batchId ?? null]);
+  }
   return getPdc(db, r);
 }
 
