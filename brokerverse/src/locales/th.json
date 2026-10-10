@@ -1890,7 +1890,11 @@
     "accountCode": "รหัสบัญชี",
     "bankAccountsOf_one": "บัญชีของบริษัทที่ธนาคารนี้ ({{count}})",
     "bankAccountsOf_other": "บัญชีของบริษัทที่ธนาคารนี้ ({{count}})",
-    "noBankAccounts": "ไม่มีบัญชีของบริษัทที่ธนาคารนี้"
+    "noBankAccounts": "ไม่มีบัญชีของบริษัทที่ธนาคารนี้",
+    "editAccountCategory": "แก้ไขหมวดบัญชี",
+    "addAccountCategory": "เพิ่มหมวดบัญชี",
+    "saveChanges": "บันทึกการเปลี่ยนแปลง",
+    "cancel": "ยกเลิก"
   },
   "automatedRemittance": {
     "pageTitle": "หลักการโอนเงินอัตโนมัติ",
@@ -2223,7 +2227,9 @@
     "departmentDetails": "แผนก",
     "departmentName": "ชื่อแผนก",
     "branchAndDepartment": "สาขาและแผนก",
-    "userGroupAccess": "สิทธิ์กลุ่มผู้ใช้"
+    "userGroupAccess": "สิทธิ์กลุ่มผู้ใช้",
+    "primaryCompany": "บริษัทหลัก",
+    "address": "ที่อยู่"
   },
   "agent": {
     "createQuote": "สร้างใบเสนอราคา",
@@ -6397,7 +6403,9 @@
       "friday": "ศุกร์",
       "saturday": "เสาร์"
     },
-    "outputCount": "{{what}} {{count}}"
+    "outputCount": "{{what}} {{count}}",
+    "switchedOn": "เปิดใช้งาน",
+    "neverRun": "ยังไม่เคยทำงาน"
   },
   "configuration": {
     "leaveTitle": "ออกโดยไม่บันทึก",

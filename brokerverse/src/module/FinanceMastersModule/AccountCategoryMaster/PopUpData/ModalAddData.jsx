@@ -57,82 +57,56 @@ const ModalAddData = ({
   });
   return (
     <Dialog
-      header={"Add Account Category"}
+      header={t("financeMasters.addAccountCategory")}
       visible={visible}
-      className="account__category__jv__Edit__modal__container master__flow__common__dialog__container"
+      className="account__category__jv__Edit__modal__container master__flow__common__dialog__container bv-centered"
+      style={{ width: "min(640px, 95vw)" }}
       onHide={() => setVisible(false)}
-      dismissableMask={true}
-      style={{ boxShadow: "none" }} 
+      footer={(
+        <div className="flex justify-content-end gap-2">
+          <Button label={t("financeMasters.cancel")} outlined onClick={() => setVisible(false)} />
+          <Button label={t("financeMasters.save")} icon="pi pi-check" disabled={!formik.isValid} onClick={formik.handleSubmit} />
+        </div>
+      )}
     >
       <Toast ref={toastRef} />
       <div className="form__container">
-        <div className="grid m-0 p-0">
-          <div className="col-12 md:col-12 lg:col-4 xl:col-4 ">
+        <div className="grid">
+          <div className="col-12 md:col-4">
             <InputField
               classNames="input__field__corrections"
               className="input__label__corrections"
-              label="Account Category Code"
-              placeholder="enter"
+              label={t("financeMasters.accountCategoryCodeHeader")}
               value={formik.values.categoryCode}
-              onChange={(e) =>
-                formik.setFieldValue("categoryCode", e.target.value)
-              }
+              onChange={(e) => formik.setFieldValue("categoryCode", e.target.value)}
             />
             {formik.touched.categoryCode && formik.errors.categoryCode && (
-              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
-                {formik.errors.categoryCode}
-              </div>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors.categoryCode}</div>
             )}
           </div>
-          <div className="col-12 md:col-12 lg:col-8 xl:col-8 ">
+          <div className="col-12 md:col-8">
             <InputField
               classNames="input__field__corrections"
               className="input__label__corrections"
-              label="Account Category Name"
-              placeholder="enter"
+              label={t("financeMasters.accountCategoryNameHeader")}
               value={formik.values.categoryName}
-              onChange={(e) =>
-                formik.setFieldValue("categoryName", e.target.value)
-              }
+              onChange={(e) => formik.setFieldValue("categoryName", e.target.value)}
             />
             {formik.touched.categoryName && formik.errors.categoryName && (
-              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
-                {formik.errors.categoryName}
-              </div>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors.categoryName}</div>
             )}
           </div>
-          <div className="col-12 md:col-12 lg:col-8 xl:col-8 ">
+          <div className="col-12 ">
             <InputField
               classNames="input__field__corrections"
               className="input__label__corrections"
-              label="Description"
-              placeholder="enter"
+              label={t("financeMasters.description")}
               value={formik.values.description}
-              onChange={(e) =>
-                formik.setFieldValue("description", e.target.value)
-              }
+              onChange={(e) => formik.setFieldValue("description", e.target.value)}
             />
             {formik.touched.description && formik.errors.description && (
-              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
-                {formik.errors.description}
-              </div>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors.description}</div>
             )}
-          </div>
-
-          <div
-            className="col-12 save__popup__correction"
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              alignItems: "flex-end",
-            }}
-          >
-            <Button
-              label={t("financeMasters.save")}
-              className="correction__btn__reversal"
-              disabled={!formik.isValid}
-              onClick={formik.handleSubmit}
-            />
           </div>
         </div>
       </div>

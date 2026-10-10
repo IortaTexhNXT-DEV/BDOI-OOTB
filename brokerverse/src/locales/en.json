@@ -2320,7 +2320,11 @@
     "accountCode": "Account code",
     "bankAccountsOf_one": "Company account at this bank ({{count}})",
     "bankAccountsOf_other": "Company accounts at this bank ({{count}})",
-    "noBankAccounts": "No company account is held at this bank."
+    "noBankAccounts": "No company account is held at this bank.",
+    "editAccountCategory": "Edit account category",
+    "addAccountCategory": "Add account category",
+    "saveChanges": "Save changes",
+    "cancel": "Cancel"
   },
   "automatedRemittance": {
     "pageTitle": "Automated Remittance Master",
@@ -2675,7 +2679,9 @@
     "departmentDetails": "Department",
     "departmentName": "Department Name",
     "branchAndDepartment": "Branch and department",
-    "userGroupAccess": "User group access"
+    "userGroupAccess": "User group access",
+    "primaryCompany": "Primary company",
+    "address": "Address"
   },
   "agent": {
     "createQuote": "Create Quote",
@@ -12227,7 +12233,9 @@
       "friday": "Friday",
       "saturday": "Saturday"
     },
-    "outputCount": "{{count}} {{what}}"
+    "outputCount": "{{count}} {{what}}",
+    "switchedOn": "Switched on",
+    "neverRun": "Not run yet"
   },
   "configuration": {
     "leaveTitle": "Leave without saving",

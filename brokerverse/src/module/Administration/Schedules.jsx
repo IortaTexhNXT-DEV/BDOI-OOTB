@@ -90,11 +90,11 @@ const Schedules = () => {
       facts: [
         { label: t("schedules.job"), value: job.name },
         { label: t("schedules.whatItDoes"), value: job.description, hidden: !job.description },
+        { label: t("schedules.status"), value: job.enabled ? t("schedules.switchedOn") : t("schedules.switchedOff") },
         { label: t("schedules.schedule"), value: describeCron(job.cron) },
-        { label: t("schedules.lastRun"), value: job.lastRunAt, type: "datetime" },
-        { label: t("schedules.nextRun"), value: job.enabled ? job.nextRunAt : null, type: "datetime" },
+        { label: t("schedules.lastRun"), value: job.lastRunAt || t("schedules.neverRun"), type: job.lastRunAt ? "datetime" : undefined },
+        { label: t("schedules.nextRun"), value: job.nextRunAt, type: "datetime", hidden: !job.enabled || !job.nextRunAt },
       ],
-      note: t("schedules.runNote"),
       confirmLabel: t("schedules.runAction"),
       onConfirm: async () => {
         r = await adminService.runSchedule(job.code);
@@ -128,7 +128,14 @@ const Schedules = () => {
   };
 
   // what each run did, in words: the job's result, or its error
-  const runEntries = (rows) => fromJobRuns(rows).map((entry, i) => ({ ...entry, remarks: entry.remarks || describeOutput(rows[i].output) || null }));
+  // what a run did, counted by kind ("Updated 5", "Notifications 3"), under What changed; a text result stays a remark
+  const runEntries = (rows) => fromJobRuns(rows).map((entry, i) => {
+    const out = rows[i].output;
+    if (!out || typeof out !== "object" || Array.isArray(out)) return { ...entry, remarks: entry.remarks || describeOutput(out) || null };
+    const changes = Object.entries(out).filter(([, v]) => v !== null && v !== undefined && typeof v !== "object")
+      .map(([k, v]) => ({ field: k, label: humanize(k), before: null, after: String(v) }));
+    return { ...entry, changes };
+  });
 
   const actions = (job) => (
     <div className="admin__actions">
