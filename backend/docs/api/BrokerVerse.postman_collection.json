@@ -3745,7 +3745,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-12\",\n    \"lines\": [\n      {\n        \"transactionType\": \"journal_voucher\",\n        \"name\": \"Journal voucher approval\",\n        \"canApprove\": true,\n        \"set\": true,\n        \"limit\": 750000,\n        \"unlimited\": false,\n        \"source\": \"delegated by Mariela S. Valentino (user limit)\"\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-12\",\n    \"lines\": [\n      {\n        \"transactionType\": \"journal_voucher\",\n        \"name\": \"Journal voucher approval\",\n        \"canApprove\": true,\n        \"set\": true,\n        \"limit\": 750000,\n        \"unlimited\": false,\n        \"source\": \"delegated by Mariela S. Valentino (personal limit)\"\n      }\n    ]\n  }\n}"
             }
           ]
         },

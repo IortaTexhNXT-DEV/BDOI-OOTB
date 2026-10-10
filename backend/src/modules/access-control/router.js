@@ -500,7 +500,7 @@ define({
   method: 'GET', path: '/users/:id/authority', summary: 'The approval authority of a person on a date (?date, default today) for every transaction an approval step checks, delegations included, and whether he or she reaches the step',
   screen: `${S} > Delegations`, middleware: read, query: { date: '2026-10-12' },
   response: { success: true, data: { asOf: '2026-10-12', lines: [{ transactionType: 'journal_voucher', name: 'Journal voucher approval', canApprove: true, set: true, limit: 750000,
-    unlimited: false, source: 'delegated by Mariela S. Valentino (user limit)' }] } },
+    unlimited: false, source: 'delegated by Mariela S. Valentino (personal limit)' }] } },
   handler: async (req, res) => ok(res, await delegations.userAuthority(pool, req.params.id, req.query.date || null)),
 });
 
