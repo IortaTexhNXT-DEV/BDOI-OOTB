@@ -116,6 +116,40 @@ describe('who may decide, and why not', () => {
     expect((await people.recon('post', '/remittance/approvals/decide').send({ items: [{ id: small.id }], action: 'approve' })).status).toBe(403);
   });
 
+  it('the authority chips: a limit, no limit while one is required, or no approve:remittance', async () => {
+    expect((await inbox('cruz', 'all')).authority).toEqual({ permission: true, canDecide: true, limit: 1000000, unlimited: false,
+      limitSourceLabel: 'Role limit: TIS Finance & General Accounting', covering: [] });
+    expect((await inbox('tan', 'all')).authority).toMatchObject({ permission: true, canDecide: true, limit: null, unlimited: true });
+    expect((await inbox('nolimit', 'all')).authority).toMatchObject({ permission: true, canDecide: false, limit: null, unlimited: false, covering: [] });
+    expect((await inbox('recon', 'all')).authority).toMatchObject({ permission: false, canDecide: false });
+  });
+
+  it('the record page carries its approval: no decision for the submitter, Remind instead; the checker may approve or reject', async () => {
+    const mine = (await people.maker('get', `/remittance/remittances/${small.remittanceId}`)).body.data.approval;
+    expect(mine).toMatchObject({ id: small.id, status: 'Pending', level: { label: '1 of 1' }, submittedBy: { name: 'M. Reyes' }, outcome: null, contentUnchanged: true });
+    expect(mine.actions.find((x) => x.code === 'approve')).toMatchObject({ allowed: false, blockedCode: 'SUBMITTER' });
+    expect(mine.actions.find((x) => x.code === 'reject')).toMatchObject({ allowed: false });
+    expect(mine.actions.find((x) => x.code === 'remind')).toMatchObject({ allowed: true });
+    expect(mine.checks.map((c) => c.code)).toEqual(['content-unchanged', 'period-open']);
+    const checker = (await people.cruz('get', `/remittance/remittances/${small.remittanceId}`)).body.data.approval;
+    expect(checker.actions.find((x) => x.code === 'approve')).toMatchObject({ allowed: true });
+    expect(checker.actions.find((x) => x.code === 'remind')).toMatchObject({ allowed: false });
+    const draft = await people.maker('post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', period: '2026-09', lines: [{ policyNo: 'EXT-RAP-R0', premium: 2000, commission: 100, tax: 0 }] });
+    expect((await people.maker('get', `/remittance/remittances/${draft.body.data.id}`)).body.data.approval).toBeNull();
+  });
+
+  it('Export XLSX holds every row of the view', async () => {
+    const r = await people.cruz('get', '/remittance/approvals/export.xlsx?view=all').buffer(true).parse((res, cb) => {
+      const chunks = [];
+      res.on('data', (c) => chunks.push(c));
+      res.on('end', () => cb(null, Buffer.concat(chunks)));
+    });
+    expect(r.status).toBe(200);
+    expect(r.headers['content-type']).toMatch(/spreadsheetml/);
+    expect(r.headers['content-disposition']).toContain('approvals-all.xlsx');
+    expect(r.body.subarray(0, 2).toString()).toBe('PK');
+  });
+
   it('decisionFor and eligibleApprovers are the same rules for other callers', async () => {
     const [a] = await q("SELECT a.*, r.created_by AS maker_id FROM remittance_approvals a JOIN remittances r ON r.id = a.entity_id WHERE a.id = $1", [big.id]);
     const c = await decisionContext(people.cruz.user);
@@ -185,6 +219,9 @@ describe('deciding', () => {
       const row = rowOf(await inbox('nolimit', 'mine'), a.id);
       expect(row.decision).toMatchObject({ canDecide: true, myLimit: 1000000, limitSourceLabel: 'Delegation from J. Cruz (Role limit: TIS Finance & General Accounting)' });
       expect(row.decision.eligibleApprovers.find((u) => u.name === 'N. Limit')).toMatchObject({ coveringFor: 'J. Cruz' });
+      // the authority chips: the limit through the delegation and whom it covers, until when
+      expect((await inbox('nolimit', 'mine')).authority).toMatchObject({ permission: true, canDecide: true, limit: 1000000,
+        limitSourceLabel: 'Delegation from J. Cruz (Role limit: TIS Finance & General Accounting)', covering: [{ name: 'J. Cruz', until: '2099-12-31' }] });
       expect((await people.nolimit('post', `/remittance/approvals/${a.id}/approve`).send({ version: a.version })).status).toBe(200);
       const [h] = await q('SELECT history FROM remittance_approvals WHERE id = $1', [a.id]);
       expect(h.history.at(-1)).toMatchObject({ by: people.nolimit.id, limitAtDecision: 1000000, limitSource: 'delegated by J. Cruz (role tis-finance)' });
@@ -227,7 +264,7 @@ describe('notifications and reminders', () => {
     const again = await people.maker('post', `/remittance/approvals/${a.id}/remind`);
     expect(again.status).toBe(409);
     expect(again.body.errors[0].code).toBe('REMINDED');
-    expect(again.body.message).toMatch(/^Reminded at \d{2}:\d{2} · next (at|on) /);
+    expect(again.body.message).toMatch(/^Reminded (\d{2}\/\d{2}\/\d{4} )?\d{2}:\d{2} · next from (\d{2}\/\d{2}\/\d{4} )?\d{2}:\d{2}$/);
     const row = rowOf(await inbox('maker', 'submitted'), a.id);
     expect(row.actions.find((x) => x.code === 'remind')).toMatchObject({ allowed: false });
     expect(await q("SELECT title, link FROM notifications WHERE user_id = $1 AND title LIKE 'Reminder:%' AND entity_id = $2", [people.cruz.id, a.remittanceId]))

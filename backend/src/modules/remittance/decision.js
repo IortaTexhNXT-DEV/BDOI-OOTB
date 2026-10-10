@@ -92,10 +92,21 @@ export function whenText(ctx, at) {
   return i.day === ctx.onDate ? `at ${i.time}` : `on ${i.text}`;
 }
 
-async function myAuthority(ctx, type) {
+/** "10:32" for an instant of today (business time zone), else "12/10/2026 10:32". */
+export function clockText(ctx, at) {
+  const i = at ? instant(at, ctx.fmt) : null;
+  if (!i) return '';
+  return i.day === ctx.onDate ? i.time : i.text;
+}
+
+/** The user's own authority of an Authority Matrix type on the business date (effectiveAuthority, read once per request). */
+export async function myAuthority(ctx, type) {
   if (!ctx.mine.has(type)) ctx.mine.set(type, await effectiveAuthority(ctx.db, ctx.user.id, type, ctx.onDate));
   return ctx.mine.get(type);
 }
+
+/** True when a user without an Authority Matrix limit is refused (remittance.require_authority_limit, or the access rule). */
+export const limitRequired = (ctx) => ctx.requireLimit || (ctx.enforced && ctx.refuseWithoutLimit);
 
 /** The level an earlier approval of the user was given at; null when the user approved no level. */
 const myEarlierLevel = (a, userId) => (a.history || []).find((h) => h.action === 'Approved' && h.by === userId)?.level ?? null;
@@ -124,7 +135,7 @@ export async function decisionFor(a, user, ctx = null, { action = 'approve' } = 
   const auth = await myAuthority(ctx, type);
   const limits = { myLimit: auth.found && !auth.unlimited ? auth.limit : null, unlimited: !!auth.unlimited, limitSource: auth.source,
     limitSourceLabel: limitSourceLabel(auth.source, await roleNames(ctx)) };
-  if (!auth.found && (ctx.requireLimit || (ctx.enforced && ctx.refuseWithoutLimit))) return blocked('NO_AUTHORITY', { type: await typeName(ctx, type) }, limits);
+  if (!auth.found && limitRequired(ctx)) return blocked('NO_AUTHORITY', { type: await typeName(ctx, type) }, limits);
   if (action === 'approve' && ctx.enforced && auth.found && !auth.unlimited && base.amount > auth.limit) {
     return blocked('ABOVE_LIMIT', { amount: amountText(ctx, base.amount), limit: amountText(ctx, auth.limit) }, limits);
   }
@@ -147,7 +158,7 @@ async function approverPool(ctx, type) {
   const out = [];
   for (const u of rows.filter((x) => x.role)) {
     const a = await effectiveAuthority(ctx.db, u.id, type, ctx.onDate);
-    if (!a.found && (ctx.requireLimit || (ctx.enforced && ctx.refuseWithoutLimit))) continue;
+    if (!a.found && limitRequired(ctx)) continue;
     const covering = a.source ? /^delegated by (.+) \(/.exec(a.source)?.[1] || null : null;
     out.push({ id: u.id, name: u.name, role: u.role, limit: a.found && !a.unlimited ? a.limit : null, unlimited: !a.found || !!a.unlimited || !ctx.enforced,
       limitSource: a.source, limitSourceLabel: limitSourceLabel(a.source, names), coveringFor: covering });

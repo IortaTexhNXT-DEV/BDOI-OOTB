@@ -128,13 +128,21 @@ const activity = {
 };
 define({
   method: 'GET', path: '/remittances/:id',
-  summary: 'Remittance record: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, the activity log (as GET /remittances/:id/activity) and, for a direct-bill remittance, the register row (status label, flags, source and import, off-cycle reason, coverage week, basis, actions), the lines with the expected amount and variance of an import, the payment through the settlement voucher and the downloads',
+  summary: 'Remittance record: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, the activity log (as GET /remittances/:id/activity) and, for a direct-bill remittance, the register row (status label, flags, source and import, off-cycle reason, coverage week, basis, actions), the lines with the expected amount and variance of an import, the payment through the settlement voucher and the downloads, and the approval of the record page (level, SLA, reminder, outcome with the limit at decision and its source, the checks while pending, approve / reject / remind)',
   screen: `${S('Remittances > Record')}; ${S('Tracking > View')}`, middleware: read,
   response: { success: true, data: { ...rem, ...regRow, statusCode: 'for-approval', insurerDetails: { code: 'MALAYAN', name: 'Malayan Insurance Co., Inc.' },
     policies: [{ policyNo: 'POL-2026-00001', premium: 15000, commission: 2250 }],
     lines: [{ id: 1, policyNo: 'TISPH-PC-0001234', insuredName: 'J. Santos', premium: 64159.68, commission: 24022.5, tax: 0, netAmount: 40137.18, expectedDue: 40191.18, variance: -54, insurerReference: 'SOA-2026-10-001', remark: null }],
-    payment: null, downloads: [{ code: 'schedule-xlsx', label: 'schedule (XLSX)', href: '/remittance/remittances/rm_21/schedule.xlsx' }], activityLog: [activity] } },
-  handler: async (req, res) => ok(res, await register.remittanceRecord(req.params.id, req.user)),
+    payment: null, downloads: [{ code: 'schedule-xlsx', label: 'schedule (XLSX)', href: '/remittance/remittances/rm_21/schedule.xlsx' }], activityLog: [activity],
+    approval: { id: 21, version: 1, status: 'Pending', level: { current: 1, required: 1, label: '1 of 1' }, submittedBy: { id: 'usr_4', name: 'M. Reyes' }, submittedAt: '2026-10-06T02:12:00.000Z',
+      sla: { hours: 24, dueAt: '2026-10-07T02:12:00.000Z', ageHours: 6.5, overdue: false, label: 'Due in 18 h' }, reminder: { remindedAt: null, nextAt: null, allowed: true }, outcome: null,
+      authorityType: 'Remittance', amount: 409141.43, contentVersion: 3, submittedVersion: 3, contentUnchanged: true,
+      checks: [{ code: 'content-unchanged', label: 'Content unchanged since submission', result: 'pass', detail: 'v3 · unchanged since submission' }],
+      actions: [{ code: 'approve', label: 'Approve', allowed: false, blockedCode: 'SUBMITTER' }, { code: 'reject', label: 'Reject', allowed: false }, { code: 'remind', label: 'Remind approver', allowed: true }] } } },
+  handler: async (req, res) => {
+    const r = await register.remittanceRecord(req.params.id, req.user);
+    ok(res, { ...r, approval: await approvals.recordApproval(r.id, req.user) });
+  },
 });
 define({
   method: 'GET', path: '/remittances/:id/activity',
@@ -440,16 +448,27 @@ const inboxRow = { id: 21, version: 1, type: 'remittance', typeLabel: 'Remittanc
   actions: [{ code: 'view', label: 'View', allowed: true }, { code: 'approve', label: 'Approve', allowed: false, blockedCode: 'SUBMITTER' }, { code: 'remind', label: 'Remind approver', allowed: true }] };
 define({
   method: 'GET', path: '/approvals',
-  summary: 'Approvals. With view=mine|submitted|all|decided (type=remittance|settlement|adjustment|transfer, insurerId, q, page, perPage): the inbox rows with the decision block, next step, SLA and level, server totals and the KPI figures (awaiting my decision, past SLA, submitted by me, decided by me today in the business time zone); decided covers the last 30 days. Without view: the legacy queue (status=Pending by default; filter transactionType, priority)',
+  summary: 'Approvals. With view=mine|submitted|all|decided (type=remittance|settlement|adjustment|transfer, insurerId, q, page, perPage): the inbox rows with the decision block, next step, SLA and level, server totals, the KPI figures (awaiting my decision, past SLA, submitted by me, decided by me today in the business time zone) and the authority chips (limit and its source, the people covered for through a dated delegation and until when); decided covers the last 30 days. Without view: the legacy queue (status=Pending by default; filter transactionType, priority)',
   screen: `${S('Approvals')}; ${S('Approval')}`, middleware: read,
   query: { view: 'mine', type: 'remittance', insurerId: 3, q: 'REM-2026', page: 1, perPage: 50 },
   response: { success: true, data: [inboxRow], total: 1, page: 1, perPage: 50, totalPages: 1, view: 'mine', totals: { count: 1, amount: 409141.43 },
-    kpis: { awaitingMine: { count: 1, amount: 409141.43 }, pastSla: { count: 0, oldestHours: 0 }, submittedByMe: { count: 0 }, decidedByMeToday: { count: 2, approved: 2, rejected: 0 } } },
+    kpis: { awaitingMine: { count: 1, amount: 409141.43 }, pastSla: { count: 0, oldestHours: 0 }, submittedByMe: { count: 0 }, decidedByMeToday: { count: 2, approved: 2, rejected: 0 } },
+    authority: { permission: true, canDecide: true, limit: 1000000, unlimited: false, limitSourceLabel: 'Delegation from A. Santos (Role limit: TIS Finance & General Accounting)',
+      covering: [{ name: 'A. Santos', until: '2026-10-16' }] } },
   handler: async (req, res) => {
     if (!req.query.view) return ok(res, await svc.listApprovals(req.query));
     const pg = paging(req.query, { page: 1, perPage: 50 });
     const r = await approvals.approvalInbox(req.query, req.user, pg);
-    return sendList(res, r.rows, r.total, pg, { view: r.view, totals: r.totals, kpis: r.kpis });
+    return sendList(res, r.rows, r.total, pg, { view: r.view, totals: r.totals, kpis: r.kpis, authority: r.authority });
+  },
+});
+define({
+  method: 'GET', path: '/approvals/export.xlsx',
+  summary: 'Approvals > Export XLSX: every row of the view and filters of GET /approvals (not one page), with "Can I decide?", the next step and, on Decided, the decision, reason and limit at decision',
+  screen: S('Approvals > Export XLSX'), middleware: read, query: { view: 'all', type: 'remittance', insurerId: 3 }, response: '(xlsx file)',
+  handler: async (req, res) => {
+    const r = await approvals.approvalExport(req.query, req.user);
+    return sendTable(res, { header: approvals.EXPORT_HEADER, rows: r.rows, fileBase: `approvals-${r.view}`, format: 'xlsx', sheetName: 'Approvals' });
   },
 });
 define({
@@ -487,7 +506,7 @@ define({
 });
 define({
   method: 'POST', path: '/approvals/:id/remind',
-  summary: 'Remind the eligible approvers of a pending approval (its submitter; at most once per remittance.reminder_interval_hours, 409 REMINDED "Reminded 10:15 · next at 14:15"; 409 NO_ELIGIBLE_APPROVER)',
+  summary: 'Remind the eligible approvers of a pending approval (its submitter; at most once per remittance.reminder_interval_hours, 409 REMINDED "Reminded 10:15 · next from 14:15"; 409 NO_ELIGIBLE_APPROVER)',
   screen: S('Approvals > Remind approver'), middleware: write,
   response: { success: true, data: { id: 21, sentTo: [{ id: 'usr_9', name: 'J. Cruz' }], remindedAt: '2026-10-06T02:15:00.000Z', nextReminderAt: '2026-10-06T06:15:00.000Z', message: 'Reminder sent to J. Cruz.' } },
   handler: async (req, res) => {

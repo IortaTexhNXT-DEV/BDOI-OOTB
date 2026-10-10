@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1272 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1273 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -79014,7 +79014,7 @@
           ]
         },
         {
-          "name": "Approvals. With view=mine|submitted|all|decided (type=remittance|settlement|adjustment|transfer, insurerId, q, page, perPage): the inbox rows with the decision block, next step, SLA and level, server totals and the KPI figures (awaiting my decision, past SLA, submitted by me, decided by me today in the business time zone); decided covers the last 30 days. Without view: the legacy queue (status=Pending by default; filter transactionType, priority)",
+          "name": "Approvals. With view=mine|submitted|all|decided (type=remittance|settlement|adjustment|transfer, insurerId, q, page, perPage): the inbox rows with the decision block, next step, SLA and level, server totals, the KPI figures (awaiting my decision, past SLA, submitted by me, decided by me today in the business time zone) and the authority chips (limit and its source, the people covered for through a dated delegation and until when); decided covers the last 30 days. Without view: the legacy queue (status=Pending by default; filter transactionType, priority)",
           "request": {
             "method": "GET",
             "header": [],
@@ -79054,7 +79054,7 @@
                 }
               ]
             },
-            "description": "Approvals. With view=mine|submitted|all|decided (type=remittance|settlement|adjustment|transfer, insurerId, q, page, perPage): the inbox rows with the decision block, next step, SLA and level, server totals and the KPI figures (awaiting my decision, past SLA, submitted by me, decided by me today in the business time zone); decided covers the last 30 days. Without view: the legacy queue (status=Pending by default; filter transactionType, priority)\n\nFront-end touchpoint: Accounts > Remittance > Approvals; Accounts > Remittance > Approval\n\nAccess: read:remittance, write:remittance"
+            "description": "Approvals. With view=mine|submitted|all|decided (type=remittance|settlement|adjustment|transfer, insurerId, q, page, perPage): the inbox rows with the decision block, next step, SLA and level, server totals, the KPI figures (awaiting my decision, past SLA, submitted by me, decided by me today in the business time zone) and the authority chips (limit and its source, the people covered for through a dated delegation and until when); decided covers the last 30 days. Without view: the legacy queue (status=Pending by default; filter transactionType, priority)\n\nFront-end touchpoint: Accounts > Remittance > Approvals; Accounts > Remittance > Approval\n\nAccess: read:remittance, write:remittance"
           },
           "response": [
             {
@@ -79098,7 +79098,7 @@
                     }
                   ]
                 },
-                "description": "Approvals. With view=mine|submitted|all|decided (type=remittance|settlement|adjustment|transfer, insurerId, q, page, perPage): the inbox rows with the decision block, next step, SLA and level, server totals and the KPI figures (awaiting my decision, past SLA, submitted by me, decided by me today in the business time zone); decided covers the last 30 days. Without view: the legacy queue (status=Pending by default; filter transactionType, priority)\n\nFront-end touchpoint: Accounts > Remittance > Approvals; Accounts > Remittance > Approval\n\nAccess: read:remittance, write:remittance"
+                "description": "Approvals. With view=mine|submitted|all|decided (type=remittance|settlement|adjustment|transfer, insurerId, q, page, perPage): the inbox rows with the decision block, next step, SLA and level, server totals, the KPI figures (awaiting my decision, past SLA, submitted by me, decided by me today in the business time zone) and the authority chips (limit and its source, the people covered for through a dated delegation and until when); decided covers the last 30 days. Without view: the legacy queue (status=Pending by default; filter transactionType, priority)\n\nFront-end touchpoint: Accounts > Remittance > Approvals; Accounts > Remittance > Approval\n\nAccess: read:remittance, write:remittance"
               },
               "status": "OK",
               "code": 200,
@@ -79110,7 +79110,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 21,\n      \"version\": 1,\n      \"type\": \"remittance\",\n      \"typeLabel\": \"Remittance\",\n      \"reference\": \"REM-2026-00021\",\n      \"entity\": \"remittance\",\n      \"entityId\": \"rm_21\",\n      \"recordLink\": \"/finance/remittance/remittances/rm_21\",\n      \"insurer\": {\n        \"id\": 3,\n        \"name\": \"Pioneer Insurance\"\n      },\n      \"productLine\": \"Motor\",\n      \"amount\": 409141.43,\n      \"submittedBy\": {\n        \"id\": \"usr_4\",\n        \"name\": \"M. Reyes\"\n      },\n      \"submittedAt\": \"2026-10-06T02:12:00.000Z\",\n      \"status\": \"Pending\",\n      \"statusLabel\": \"Pending Approval\",\n      \"level\": {\n        \"current\": 1,\n        \"required\": 1,\n        \"label\": \"1 of 1\"\n      },\n      \"sla\": {\n        \"hours\": 24,\n        \"dueAt\": \"2026-10-07T02:12:00.000Z\",\n        \"ageHours\": 6.5,\n        \"overdue\": false,\n        \"label\": \"Due in 18 h\"\n      },\n      \"decision\": {\n        \"canDecide\": false,\n        \"blockedCode\": \"SUBMITTER\",\n        \"blockedReason\": \"You submitted this remittance. Another user with remittance authority must approve it.\",\n        \"level\": {\n          \"current\": 1,\n          \"required\": 1\n        },\n        \"amount\": 409141.43,\n        \"myLimit\": null,\n        \"unlimited\": false,\n        \"limitSource\": null,\n        \"limitSourceLabel\": null,\n        \"eligibleApprovers\": [\n          {\n            \"id\": \"usr_9\",\n            \"name\": \"J. Cruz\",\n            \"role\": \"TIS Finance & General Accounting\",\n            \"limit\": 1000000,\n            \"limitSourceLabel\": \"Role limit: TIS Finance & General Accounting\",\n            \"coveringFor\": null\n          }\n        ]\n      },\n      \"nextStep\": {\n        \"code\": \"approve\",\n        \"label\": \"Awaiting remittance approver: J. Cruz\",\n        \"actor\": {\n          \"type\": \"user\",\n          \"id\": \"usr_9\",\n          \"name\": \"J. Cruz\"\n        },\n        \"dueAt\": \"2026-10-07T02:12:00.000Z\"\n      },\n      \"reminder\": {\n        \"remindedAt\": null,\n        \"nextAt\": null,\n        \"allowed\": true\n      },\n      \"outcome\": null,\n      \"actions\": [\n        {\n          \"code\": \"view\",\n          \"label\": \"View\",\n          \"allowed\": true\n        },\n        {\n          \"code\": \"approve\",\n          \"label\": \"Approve\",\n          \"allowed\": false,\n          \"blockedCode\": \"SUBMITTER\"\n        },\n        {\n          \"code\": \"remind\",\n          \"label\": \"Remind approver\",\n          \"allowed\": true\n        }\n      ]\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 50,\n  \"totalPages\": 1,\n  \"view\": \"mine\",\n  \"totals\": {\n    \"count\": 1,\n    \"amount\": 409141.43\n  },\n  \"kpis\": {\n    \"awaitingMine\": {\n      \"count\": 1,\n      \"amount\": 409141.43\n    },\n    \"pastSla\": {\n      \"count\": 0,\n      \"oldestHours\": 0\n    },\n    \"submittedByMe\": {\n      \"count\": 0\n    },\n    \"decidedByMeToday\": {\n      \"count\": 2,\n      \"approved\": 2,\n      \"rejected\": 0\n    }\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 21,\n      \"version\": 1,\n      \"type\": \"remittance\",\n      \"typeLabel\": \"Remittance\",\n      \"reference\": \"REM-2026-00021\",\n      \"entity\": \"remittance\",\n      \"entityId\": \"rm_21\",\n      \"recordLink\": \"/finance/remittance/remittances/rm_21\",\n      \"insurer\": {\n        \"id\": 3,\n        \"name\": \"Pioneer Insurance\"\n      },\n      \"productLine\": \"Motor\",\n      \"amount\": 409141.43,\n      \"submittedBy\": {\n        \"id\": \"usr_4\",\n        \"name\": \"M. Reyes\"\n      },\n      \"submittedAt\": \"2026-10-06T02:12:00.000Z\",\n      \"status\": \"Pending\",\n      \"statusLabel\": \"Pending Approval\",\n      \"level\": {\n        \"current\": 1,\n        \"required\": 1,\n        \"label\": \"1 of 1\"\n      },\n      \"sla\": {\n        \"hours\": 24,\n        \"dueAt\": \"2026-10-07T02:12:00.000Z\",\n        \"ageHours\": 6.5,\n        \"overdue\": false,\n        \"label\": \"Due in 18 h\"\n      },\n      \"decision\": {\n        \"canDecide\": false,\n        \"blockedCode\": \"SUBMITTER\",\n        \"blockedReason\": \"You submitted this remittance. Another user with remittance authority must approve it.\",\n        \"level\": {\n          \"current\": 1,\n          \"required\": 1\n        },\n        \"amount\": 409141.43,\n        \"myLimit\": null,\n        \"unlimited\": false,\n        \"limitSource\": null,\n        \"limitSourceLabel\": null,\n        \"eligibleApprovers\": [\n          {\n            \"id\": \"usr_9\",\n            \"name\": \"J. Cruz\",\n            \"role\": \"TIS Finance & General Accounting\",\n            \"limit\": 1000000,\n            \"limitSourceLabel\": \"Role limit: TIS Finance & General Accounting\",\n            \"coveringFor\": null\n          }\n        ]\n      },\n      \"nextStep\": {\n        \"code\": \"approve\",\n        \"label\": \"Awaiting remittance approver: J. Cruz\",\n        \"actor\": {\n          \"type\": \"user\",\n          \"id\": \"usr_9\",\n          \"name\": \"J. Cruz\"\n        },\n        \"dueAt\": \"2026-10-07T02:12:00.000Z\"\n      },\n      \"reminder\": {\n        \"remindedAt\": null,\n        \"nextAt\": null,\n        \"allowed\": true\n      },\n      \"outcome\": null,\n      \"actions\": [\n        {\n          \"code\": \"view\",\n          \"label\": \"View\",\n          \"allowed\": true\n        },\n        {\n          \"code\": \"approve\",\n          \"label\": \"Approve\",\n          \"allowed\": false,\n          \"blockedCode\": \"SUBMITTER\"\n        },\n        {\n          \"code\": \"remind\",\n          \"label\": \"Remind approver\",\n          \"allowed\": true\n        }\n      ]\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 50,\n  \"totalPages\": 1,\n  \"view\": \"mine\",\n  \"totals\": {\n    \"count\": 1,\n    \"amount\": 409141.43\n  },\n  \"kpis\": {\n    \"awaitingMine\": {\n      \"count\": 1,\n      \"amount\": 409141.43\n    },\n    \"pastSla\": {\n      \"count\": 0,\n      \"oldestHours\": 0\n    },\n    \"submittedByMe\": {\n      \"count\": 0\n    },\n    \"decidedByMeToday\": {\n      \"count\": 2,\n      \"approved\": 2,\n      \"rejected\": 0\n    }\n  },\n  \"authority\": {\n    \"permission\": true,\n    \"canDecide\": true,\n    \"limit\": 1000000,\n    \"unlimited\": false,\n    \"limitSourceLabel\": \"Delegation from A. Santos (Role limit: TIS Finance & General Accounting)\",\n    \"covering\": [\n      {\n        \"name\": \"A. Santos\",\n        \"until\": \"2026-10-16\"\n      }\n    ]\n  }\n}"
             }
           ]
         },
@@ -79465,7 +79465,7 @@
           ]
         },
         {
-          "name": "Remind the eligible approvers of a pending approval (its submitter; at most once per remittance.reminder_interval_hours, 409 REMINDED \"Reminded 10:15 · next at 14:15\"; 409 NO_ELIGIBLE_APPROVER)",
+          "name": "Remind the eligible approvers of a pending approval (its submitter; at most once per remittance.reminder_interval_hours, 409 REMINDED \"Reminded 10:15 · next from 14:15\"; 409 NO_ELIGIBLE_APPROVER)",
           "request": {
             "method": "POST",
             "header": [],
@@ -79488,7 +79488,7 @@
                 }
               ]
             },
-            "description": "Remind the eligible approvers of a pending approval (its submitter; at most once per remittance.reminder_interval_hours, 409 REMINDED \"Reminded 10:15 · next at 14:15\"; 409 NO_ELIGIBLE_APPROVER)\n\nFront-end touchpoint: Accounts > Remittance > Approvals > Remind approver\n\nAccess: write:remittance"
+            "description": "Remind the eligible approvers of a pending approval (its submitter; at most once per remittance.reminder_interval_hours, 409 REMINDED \"Reminded 10:15 · next from 14:15\"; 409 NO_ELIGIBLE_APPROVER)\n\nFront-end touchpoint: Accounts > Remittance > Approvals > Remind approver\n\nAccess: write:remittance"
           },
           "response": [
             {
@@ -79515,7 +79515,7 @@
                     }
                   ]
                 },
-                "description": "Remind the eligible approvers of a pending approval (its submitter; at most once per remittance.reminder_interval_hours, 409 REMINDED \"Reminded 10:15 · next at 14:15\"; 409 NO_ELIGIBLE_APPROVER)\n\nFront-end touchpoint: Accounts > Remittance > Approvals > Remind approver\n\nAccess: write:remittance"
+                "description": "Remind the eligible approvers of a pending approval (its submitter; at most once per remittance.reminder_interval_hours, 409 REMINDED \"Reminded 10:15 · next from 14:15\"; 409 NO_ELIGIBLE_APPROVER)\n\nFront-end touchpoint: Accounts > Remittance > Approvals > Remind approver\n\nAccess: write:remittance"
               },
               "status": "OK",
               "code": 200,
@@ -79658,6 +79658,85 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"action\": \"approve\",\n    \"decided\": 1,\n    \"refused\": 1,\n    \"results\": [\n      {\n        \"id\": 21,\n        \"reference\": \"REM-2026-00021\",\n        \"ok\": true,\n        \"status\": \"Approved\",\n        \"message\": \"Approved\"\n      },\n      {\n        \"id\": 22,\n        \"ok\": false,\n        \"code\": \"ALREADY_DECIDED\",\n        \"message\": \"Already approved by J. Cruz at 10:32.\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approvals > Export XLSX: every row of the view and filters of GET /approvals (not one page), with \"Can I decide?\", the next step and, on Decided, the decision, reason and limit at decision",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/approvals/export.xlsx?view=all&type=remittance&insurerId=3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "approvals",
+                "export.xlsx"
+              ],
+              "query": [
+                {
+                  "key": "view",
+                  "value": "all"
+                },
+                {
+                  "key": "type",
+                  "value": "remittance"
+                },
+                {
+                  "key": "insurerId",
+                  "value": "3"
+                }
+              ]
+            },
+            "description": "Approvals > Export XLSX: every row of the view and filters of GET /approvals (not one page), with \"Can I decide?\", the next step and, on Decided, the decision, reason and limit at decision\n\nFront-end touchpoint: Accounts > Remittance > Approvals > Export XLSX\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/approvals/export.xlsx?view=all&type=remittance&insurerId=3",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "approvals",
+                    "export.xlsx"
+                  ],
+                  "query": [
+                    {
+                      "key": "view",
+                      "value": "all"
+                    },
+                    {
+                      "key": "type",
+                      "value": "remittance"
+                    },
+                    {
+                      "key": "insurerId",
+                      "value": "3"
+                    }
+                  ]
+                },
+                "description": "Approvals > Export XLSX: every row of the view and filters of GET /approvals (not one page), with \"Can I decide?\", the next step and, on Decided, the decision, reason and limit at decision\n\nFront-end touchpoint: Accounts > Remittance > Approvals > Export XLSX\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
             }
           ]
         },
@@ -84330,7 +84409,7 @@
           ]
         },
         {
-          "name": "Remittance record: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, the activity log (as GET /remittances/:id/activity) and, for a direct-bill remittance, the register row (status label, flags, source and import, off-cycle reason, coverage week, basis, actions), the lines with the expected amount and variance of an import, the payment through the settlement voucher and the downloads",
+          "name": "Remittance record: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, the activity log (as GET /remittances/:id/activity) and, for a direct-bill remittance, the register row (status label, flags, source and import, off-cycle reason, coverage week, basis, actions), the lines with the expected amount and variance of an import, the payment through the settlement voucher and the downloads, and the approval of the record page (level, SLA, reminder, outcome with the limit at decision and its source, the checks while pending, approve / reject / remind)",
           "request": {
             "method": "GET",
             "header": [],
@@ -84352,7 +84431,7 @@
                 }
               ]
             },
-            "description": "Remittance record: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, the activity log (as GET /remittances/:id/activity) and, for a direct-bill remittance, the register row (status label, flags, source and import, off-cycle reason, coverage week, basis, actions), the lines with the expected amount and variance of an import, the payment through the settlement voucher and the downloads\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Record; Accounts > Remittance > Tracking > View\n\nAccess: read:remittance, write:remittance"
+            "description": "Remittance record: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, the activity log (as GET /remittances/:id/activity) and, for a direct-bill remittance, the register row (status label, flags, source and import, off-cycle reason, coverage week, basis, actions), the lines with the expected amount and variance of an import, the payment through the settlement voucher and the downloads, and the approval of the record page (level, SLA, reminder, outcome with the limit at decision and its source, the checks while pending, approve / reject / remind)\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Record; Accounts > Remittance > Tracking > View\n\nAccess: read:remittance, write:remittance"
           },
           "response": [
             {
@@ -84378,7 +84457,7 @@
                     }
                   ]
                 },
-                "description": "Remittance record: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, the activity log (as GET /remittances/:id/activity) and, for a direct-bill remittance, the register row (status label, flags, source and import, off-cycle reason, coverage week, basis, actions), the lines with the expected amount and variance of an import, the payment through the settlement voucher and the downloads\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Record; Accounts > Remittance > Tracking > View\n\nAccess: read:remittance, write:remittance"
+                "description": "Remittance record: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, the activity log (as GET /remittances/:id/activity) and, for a direct-bill remittance, the register row (status label, flags, source and import, off-cycle reason, coverage week, basis, actions), the lines with the expected amount and variance of an import, the payment through the settlement voucher and the downloads, and the approval of the record page (level, SLA, reminder, outcome with the limit at decision and its source, the checks while pending, approve / reject / remind)\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Record; Accounts > Remittance > Tracking > View\n\nAccess: read:remittance, write:remittance"
               },
               "status": "OK",
               "code": 200,
@@ -84390,7 +84469,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rm_21\",\n    \"remittanceNo\": \"REM-2026-00021\",\n    \"remittanceDate\": \"2026-10-12\",\n    \"insurerCode\": \"MALAYAN\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"policyCount\": 12,\n    \"grossAmount\": 45000,\n    \"commission\": 98000,\n    \"tax\": 12858.57,\n    \"netAmount\": 38250,\n    \"status\": \"for-approval\",\n    \"statusCode\": \"for-approval\",\n    \"kind\": \"direct-bill\",\n    \"statusLabel\": \"Pending Approval\",\n    \"insurer\": {\n      \"id\": 3,\n      \"code\": \"PIONEER\",\n      \"name\": \"Pioneer Insurance & Surety Corp.\",\n      \"shortName\": \"Pioneer\"\n    },\n    \"productLine\": \"Motor\",\n    \"basis\": \"net\",\n    \"basisLabel\": \"Net\",\n    \"coverageWeek\": {\n      \"from\": \"2026-10-05\",\n      \"to\": \"2026-10-09\"\n    },\n    \"source\": {\n      \"code\": \"import\",\n      \"label\": \"Import IMP-2026-0004\",\n      \"importId\": \"imp_1\",\n      \"importNo\": \"IMP-2026-0004\"\n    },\n    \"offCycleReason\": {\n      \"code\": \"ROC-GOLIVE\",\n      \"name\": \"Go-live opening\",\n      \"note\": null,\n      \"text\": \"Go-live opening\"\n    },\n    \"heldCount\": null,\n    \"premium\": 520000,\n    \"adjustments\": 0,\n    \"dueToInsurer\": 409141.43,\n    \"currency\": \"PHP\",\n    \"dueDate\": \"2026-10-16\",\n    \"overdue\": false,\n    \"flags\": {\n      \"offCycle\": true,\n      \"offCycleReason\": \"Go-live opening\",\n      \"overdue\": false,\n      \"adviceSent\": false,\n      \"bankMatched\": false,\n      \"openExceptions\": 0\n    },\n    \"nextStep\": {\n      \"code\": \"approve\",\n      \"label\": \"Awaiting remittance approver (2)\",\n      \"actor\": {\n        \"type\": \"users\",\n        \"ids\": [\n          \"usr_9\",\n          \"usr_12\"\n        ],\n        \"name\": \"J. Cruz, A. Tan\"\n      },\n      \"dueAt\": \"2026-10-13T02:12:00.000Z\"\n    },\n    \"decision\": {\n      \"canDecide\": false,\n      \"blockedCode\": \"SUBMITTER\",\n      \"blockedReason\": \"You submitted this remittance. Another user with remittance authority must approve it.\"\n    },\n    \"approvalId\": 21,\n    \"approvalVersion\": 1,\n    \"actions\": [\n      {\n        \"code\": \"view\",\n        \"label\": \"View\",\n        \"allowed\": true,\n        \"link\": \"/finance/remittance/remittances/rm_21\"\n      },\n      {\n        \"code\": \"download-schedule-xlsx\",\n        \"label\": \"Download schedule (XLSX)\",\n        \"allowed\": true,\n        \"href\": \"/remittance/remittances/rm_21/schedule.xlsx\"\n      },\n      {\n        \"code\": \"download-schedule-pdf\",\n        \"label\": \"Download schedule (PDF)\",\n        \"allowed\": true,\n        \"href\": \"/remittance/remittances/rm_21/schedule.pdf\"\n      }\n    ],\n    \"version\": 3,\n    \"voucher\": null,\n    \"paidOn\": null,\n    \"bankReference\": null,\n    \"submittedBy\": {\n      \"id\": \"usr_4\",\n      \"name\": \"M. Reyes\"\n    },\n    \"submittedAt\": \"2026-10-12T02:12:00.000Z\",\n    \"createdBy\": {\n      \"id\": \"usr_4\",\n      \"name\": \"M. Reyes\"\n    },\n    \"createdAt\": \"2026-10-12T01:40:00.000Z\",\n    \"link\": \"/finance/remittance/remittances/rm_21\",\n    \"insurerDetails\": {\n      \"code\": \"MALAYAN\",\n      \"name\": \"Malayan Insurance Co., Inc.\"\n    },\n    \"policies\": [\n      {\n        \"policyNo\": \"POL-2026-00001\",\n        \"premium\": 15000,\n        \"commission\": 2250\n      }\n    ],\n    \"lines\": [\n      {\n        \"id\": 1,\n        \"policyNo\": \"TISPH-PC-0001234\",\n        \"insuredName\": \"J. Santos\",\n        \"premium\": 64159.68,\n        \"commission\": 24022.5,\n        \"tax\": 0,\n        \"netAmount\": 40137.18,\n        \"expectedDue\": 40191.18,\n        \"variance\": -54,\n        \"insurerReference\": \"SOA-2026-10-001\",\n        \"remark\": null\n      }\n    ],\n    \"payment\": null,\n    \"downloads\": [\n      {\n        \"code\": \"schedule-xlsx\",\n        \"label\": \"schedule (XLSX)\",\n        \"href\": \"/remittance/remittances/rm_21/schedule.xlsx\"\n      }\n    ],\n    \"activityLog\": [\n      {\n        \"action\": \"submit\",\n        \"by\": \"r.finance\",\n        \"at\": \"2026-10-10T01:03:00.000Z\",\n        \"notes\": null,\n        \"id\": \"812\",\n        \"day\": \"2026-10-10\",\n        \"date\": \"10/10/2026\",\n        \"time\": \"09:03\",\n        \"atText\": \"10/10/2026 09:03\",\n        \"actionCode\": \"submit\",\n        \"actionLabel\": \"Remittance submitted\",\n        \"user\": {\n          \"username\": \"r.finance\",\n          \"displayName\": \"Rosa Finance\",\n          \"roles\": [\n            \"Finance Officer\"\n          ],\n          \"role\": \"Finance Officer\"\n        },\n        \"fromStatus\": \"Draft\",\n        \"toStatus\": \"Pending Approval\",\n        \"remarks\": null,\n        \"changes\": [\n          {\n            \"field\": \"batchId\",\n            \"label\": \"Batch ID\",\n            \"before\": null,\n            \"after\": \"BLK-2026-00001\"\n          }\n        ],\n        \"source\": {\n          \"channel\": \"screen\",\n          \"label\": \"Screen\",\n          \"name\": \"Accounts > Remittance > Tracking\"\n        }\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rm_21\",\n    \"remittanceNo\": \"REM-2026-00021\",\n    \"remittanceDate\": \"2026-10-12\",\n    \"insurerCode\": \"MALAYAN\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"policyCount\": 12,\n    \"grossAmount\": 45000,\n    \"commission\": 98000,\n    \"tax\": 12858.57,\n    \"netAmount\": 38250,\n    \"status\": \"for-approval\",\n    \"statusCode\": \"for-approval\",\n    \"kind\": \"direct-bill\",\n    \"statusLabel\": \"Pending Approval\",\n    \"insurer\": {\n      \"id\": 3,\n      \"code\": \"PIONEER\",\n      \"name\": \"Pioneer Insurance & Surety Corp.\",\n      \"shortName\": \"Pioneer\"\n    },\n    \"productLine\": \"Motor\",\n    \"basis\": \"net\",\n    \"basisLabel\": \"Net\",\n    \"coverageWeek\": {\n      \"from\": \"2026-10-05\",\n      \"to\": \"2026-10-09\"\n    },\n    \"source\": {\n      \"code\": \"import\",\n      \"label\": \"Import IMP-2026-0004\",\n      \"importId\": \"imp_1\",\n      \"importNo\": \"IMP-2026-0004\"\n    },\n    \"offCycleReason\": {\n      \"code\": \"ROC-GOLIVE\",\n      \"name\": \"Go-live opening\",\n      \"note\": null,\n      \"text\": \"Go-live opening\"\n    },\n    \"heldCount\": null,\n    \"premium\": 520000,\n    \"adjustments\": 0,\n    \"dueToInsurer\": 409141.43,\n    \"currency\": \"PHP\",\n    \"dueDate\": \"2026-10-16\",\n    \"overdue\": false,\n    \"flags\": {\n      \"offCycle\": true,\n      \"offCycleReason\": \"Go-live opening\",\n      \"overdue\": false,\n      \"adviceSent\": false,\n      \"bankMatched\": false,\n      \"openExceptions\": 0\n    },\n    \"nextStep\": {\n      \"code\": \"approve\",\n      \"label\": \"Awaiting remittance approver (2)\",\n      \"actor\": {\n        \"type\": \"users\",\n        \"ids\": [\n          \"usr_9\",\n          \"usr_12\"\n        ],\n        \"name\": \"J. Cruz, A. Tan\"\n      },\n      \"dueAt\": \"2026-10-13T02:12:00.000Z\"\n    },\n    \"decision\": {\n      \"canDecide\": false,\n      \"blockedCode\": \"SUBMITTER\",\n      \"blockedReason\": \"You submitted this remittance. Another user with remittance authority must approve it.\"\n    },\n    \"approvalId\": 21,\n    \"approvalVersion\": 1,\n    \"actions\": [\n      {\n        \"code\": \"view\",\n        \"label\": \"View\",\n        \"allowed\": true,\n        \"link\": \"/finance/remittance/remittances/rm_21\"\n      },\n      {\n        \"code\": \"download-schedule-xlsx\",\n        \"label\": \"Download schedule (XLSX)\",\n        \"allowed\": true,\n        \"href\": \"/remittance/remittances/rm_21/schedule.xlsx\"\n      },\n      {\n        \"code\": \"download-schedule-pdf\",\n        \"label\": \"Download schedule (PDF)\",\n        \"allowed\": true,\n        \"href\": \"/remittance/remittances/rm_21/schedule.pdf\"\n      }\n    ],\n    \"version\": 3,\n    \"voucher\": null,\n    \"paidOn\": null,\n    \"bankReference\": null,\n    \"submittedBy\": {\n      \"id\": \"usr_4\",\n      \"name\": \"M. Reyes\"\n    },\n    \"submittedAt\": \"2026-10-12T02:12:00.000Z\",\n    \"createdBy\": {\n      \"id\": \"usr_4\",\n      \"name\": \"M. Reyes\"\n    },\n    \"createdAt\": \"2026-10-12T01:40:00.000Z\",\n    \"link\": \"/finance/remittance/remittances/rm_21\",\n    \"insurerDetails\": {\n      \"code\": \"MALAYAN\",\n      \"name\": \"Malayan Insurance Co., Inc.\"\n    },\n    \"policies\": [\n      {\n        \"policyNo\": \"POL-2026-00001\",\n        \"premium\": 15000,\n        \"commission\": 2250\n      }\n    ],\n    \"lines\": [\n      {\n        \"id\": 1,\n        \"policyNo\": \"TISPH-PC-0001234\",\n        \"insuredName\": \"J. Santos\",\n        \"premium\": 64159.68,\n        \"commission\": 24022.5,\n        \"tax\": 0,\n        \"netAmount\": 40137.18,\n        \"expectedDue\": 40191.18,\n        \"variance\": -54,\n        \"insurerReference\": \"SOA-2026-10-001\",\n        \"remark\": null\n      }\n    ],\n    \"payment\": null,\n    \"downloads\": [\n      {\n        \"code\": \"schedule-xlsx\",\n        \"label\": \"schedule (XLSX)\",\n        \"href\": \"/remittance/remittances/rm_21/schedule.xlsx\"\n      }\n    ],\n    \"activityLog\": [\n      {\n        \"action\": \"submit\",\n        \"by\": \"r.finance\",\n        \"at\": \"2026-10-10T01:03:00.000Z\",\n        \"notes\": null,\n        \"id\": \"812\",\n        \"day\": \"2026-10-10\",\n        \"date\": \"10/10/2026\",\n        \"time\": \"09:03\",\n        \"atText\": \"10/10/2026 09:03\",\n        \"actionCode\": \"submit\",\n        \"actionLabel\": \"Remittance submitted\",\n        \"user\": {\n          \"username\": \"r.finance\",\n          \"displayName\": \"Rosa Finance\",\n          \"roles\": [\n            \"Finance Officer\"\n          ],\n          \"role\": \"Finance Officer\"\n        },\n        \"fromStatus\": \"Draft\",\n        \"toStatus\": \"Pending Approval\",\n        \"remarks\": null,\n        \"changes\": [\n          {\n            \"field\": \"batchId\",\n            \"label\": \"Batch ID\",\n            \"before\": null,\n            \"after\": \"BLK-2026-00001\"\n          }\n        ],\n        \"source\": {\n          \"channel\": \"screen\",\n          \"label\": \"Screen\",\n          \"name\": \"Accounts > Remittance > Tracking\"\n        }\n      }\n    ],\n    \"approval\": {\n      \"id\": 21,\n      \"version\": 1,\n      \"status\": \"Pending\",\n      \"level\": {\n        \"current\": 1,\n        \"required\": 1,\n        \"label\": \"1 of 1\"\n      },\n      \"submittedBy\": {\n        \"id\": \"usr_4\",\n        \"name\": \"M. Reyes\"\n      },\n      \"submittedAt\": \"2026-10-06T02:12:00.000Z\",\n      \"sla\": {\n        \"hours\": 24,\n        \"dueAt\": \"2026-10-07T02:12:00.000Z\",\n        \"ageHours\": 6.5,\n        \"overdue\": false,\n        \"label\": \"Due in 18 h\"\n      },\n      \"reminder\": {\n        \"remindedAt\": null,\n        \"nextAt\": null,\n        \"allowed\": true\n      },\n      \"outcome\": null,\n      \"authorityType\": \"Remittance\",\n      \"amount\": 409141.43,\n      \"contentVersion\": 3,\n      \"submittedVersion\": 3,\n      \"contentUnchanged\": true,\n      \"checks\": [\n        {\n          \"code\": \"content-unchanged\",\n          \"label\": \"Content unchanged since submission\",\n          \"result\": \"pass\",\n          \"detail\": \"v3 · unchanged since submission\"\n        }\n      ],\n      \"actions\": [\n        {\n          \"code\": \"approve\",\n          \"label\": \"Approve\",\n          \"allowed\": false,\n          \"blockedCode\": \"SUBMITTER\"\n        },\n        {\n          \"code\": \"reject\",\n          \"label\": \"Reject\",\n          \"allowed\": false\n        },\n        {\n          \"code\": \"remind\",\n          \"label\": \"Remind approver\",\n          \"allowed\": true\n        }\n      ]\n    }\n  }\n}"
             }
           ]
         },

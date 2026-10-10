@@ -13,14 +13,15 @@
 import { many, one, pool } from '../../db/pool.js';
 import { HttpError, badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
-import { isAdmin } from '../../lib/auth.js';
+import { hasPermission, isAdmin } from '../../lib/auth.js';
+import { isoDate } from '../../lib/dates.js';
 import { audit } from '../../lib/audit.js';
 import { round2 } from '../masters/helpers.js';
 import { requiredReason } from '../ops-masters/records.js';
 import { notifyApprovers } from '../notifications/approvals.js';
-import { activityEntries } from '../../lib/auditEvents.js';
+import { activityEntries, instant } from '../../lib/auditEvents.js';
 import { APPROVAL_SELECT, approvalLink, decide, refusal, remittanceLink, statusLabels } from './service.js';
-import { approversFor, decisionBlock, decisionContext, limitSourceLabel, nextStepFor, roleNames, whenText } from './decision.js';
+import { approversFor, clockText, decisionBlock, decisionContext, limitRequired, limitSourceLabel, myAuthority, nextStepFor, roleNames } from './decision.js';
 import { remittanceActivity } from './activity.js';
 import { SOURCES } from './register.js';
 
@@ -71,6 +72,9 @@ function reminderOf(a, ctx, hours) {
   return { remindedAt: new Date(a.reminded_at).toISOString(), remindedBy: a.reminded_by_name || null, nextAt: nextAt.toISOString(), allowed: nextAt <= ctx.now };
 }
 
+/** "Reminded 10:15 · next from 14:15" (with the date when not today). */
+const remindedText = (ctx, reminder) => `Reminded ${clockText(ctx, reminder.remindedAt)} · next from ${clockText(ctx, reminder.nextAt)}`;
+
 /** The decision recorded on a decided approval (last history entry), in words: no reason or role codes. */
 async function outcomeOf(a, ctx) {
   const h = [...(a.history || [])].reverse().find((x) => x.action === a.status) || {};
@@ -100,7 +104,7 @@ async function rowOut(a, user, ctx, { labels, reminderHours }) {
       { code: 'approve', label: 'Approve', allowed: decision.canDecide, ...(decision.canDecide ? {} : { blockedCode: decision.blockedCode, blockedReason: decision.blockedReason }) },
       { code: 'reject', label: 'Reject', allowed: decision.canDecide || decision.blockedCode === 'ABOVE_LIMIT' },
       { code: 'remind', label: 'Remind approver', allowed: pending && mineSubmitted && reminder.allowed && decision.eligibleApprovers.length > 0,
-        ...(pending && mineSubmitted && !reminder.allowed ? { blockedReason: `Reminded ${whenText(ctx, reminder.remindedAt)} · next ${whenText(ctx, reminder.nextAt)}` } : {}) },
+        ...(pending && mineSubmitted && !reminder.allowed ? { blockedReason: remindedText(ctx, reminder) } : {}) },
     ],
   };
 }
@@ -157,7 +161,59 @@ export async function approvalInbox(qs, user, pg, { now = new Date() } = {}) {
     amount = round2(inView.reduce((s, r) => s + r.amount, 0));
     rows = inView.slice(pg.offset, pg.offset + pg.limit);
   }
-  return { view, rows, total, totals: { count: total, amount }, kpis: summary };
+  return { view, rows, total, totals: { count: total, amount }, kpis: summary, authority: await authorityOf(ctx) };
+}
+
+/**
+ * The authority chips of the inbox: whether the user may decide remittance approvals at all (approve:remittance and,
+ * where one is required, an Authority Matrix limit), the limit and its source, and the people the user covers for
+ * today through a dated delegation (Master > User Management > Delegations) with its last day.
+ */
+export async function authorityOf(ctx) {
+  const permission = hasPermission(ctx.user, 'approve:remittance');
+  const a = await myAuthority(ctx, 'remittance');
+  const covering = await many(`SELECT u.display_name AS name, d.date_to FROM user_delegations d JOIN users u ON u.id = d.delegator_id
+    WHERE d.delegate_id = $1 AND d.status = 'active' AND $2::date BETWEEN d.date_from AND d.date_to
+      AND (cardinality(d.transaction_types) = 0 OR 'remittance' = ANY(d.transaction_types)) AND u.status = 'active' ORDER BY d.date_to, u.display_name`, [ctx.user.id, ctx.onDate]);
+  return {
+    permission, canDecide: permission && (a.found || !limitRequired(ctx)), limit: a.found && !a.unlimited ? a.limit : null, unlimited: permission && (!!a.unlimited || (!a.found && !limitRequired(ctx))),
+    limitSourceLabel: limitSourceLabel(a.source, await roleNames(ctx)), covering: covering.map((c) => ({ name: c.name, until: isoDate(c.date_to) })),
+  };
+}
+
+export const EXPORT_HEADER = ['Reference', 'Type', 'Insurer', 'Product line', 'Amount', 'Submitted by', 'Submitted on', 'SLA', 'Level', 'Can I decide?', 'Next step',
+  'Decision', 'By', 'Reason', 'Limit at decision', 'Decided on'];
+
+/** The rows of Export XLSX: every row of the view and filters (not one page), with the instants in the business time zone. */
+export async function approvalExport(qs, user) {
+  const r = await approvalInbox(qs, user, { limit: 100000, offset: 0 });
+  const ctx = await decisionContext(user);
+  const at = (v) => (v ? instant(v, ctx.fmt)?.text || '' : '');
+  const rows = r.rows.map((x) => [x.reference, x.typeLabel, x.insurer?.name || '', x.productLine || '', x.amount, x.submittedBy?.name || '', at(x.submittedAt),
+    x.sla?.label || '', x.level.label, x.decision.canDecide ? 'Yes' : `No · ${x.decision.blockedReason || ''}`.trim(), x.nextStep?.label || '',
+    x.outcome?.action || '', x.outcome?.by?.name || '', x.outcome?.reason || '', x.outcome?.limitAtDecision ?? '', at(x.outcome?.decidedAt)]);
+  return { view: r.view, rows };
+}
+
+/**
+ * The approval of a remittance for its record page: the pending approval, else the latest decided one, as the inbox
+ * row (decision block, level, SLA, reminder, outcome with the limit at decision and its source) with the checks while
+ * it is pending and its actions (approve, reject, remind). null when the remittance was never submitted.
+ */
+export async function recordApproval(remittanceId, user) {
+  const a = await one(`${LIST_SELECT} WHERE a.entity = 'remittance' AND a.entity_id = $1 ORDER BY (a.status = 'Pending') DESC, a.created_at DESC, a.id DESC LIMIT 1`, [remittanceId]);
+  if (!a) return null;
+  const ctx = await decisionContext(user);
+  const row = await rowOut(a, user, ctx, { labels: await statusLabels(), reminderHours: Math.max(1, Number(await getSetting('remittance.reminder_interval_hours', 4)) || 4) });
+  const pending = a.status === 'Pending';
+  const submitted = a.entity_version === null || a.entity_version === undefined ? null : a.entity_version;
+  const checks = pending ? await checksOf(a, { contentUnchanged: submitted === null ? null : submitted === a.record_version, contentVersion: a.record_version }, ctx) : [];
+  return {
+    id: row.id, version: row.version, status: row.status, level: row.level, submittedBy: row.submittedBy, submittedAt: row.submittedAt, sla: row.sla,
+    reminder: row.reminder, outcome: row.outcome, nextStep: row.nextStep, authorityType: 'Remittance', amount: row.amount,
+    contentVersion: a.record_version, submittedVersion: submitted, contentUnchanged: pending && submitted !== null ? submitted === a.record_version : null,
+    checks, actions: row.actions.filter((x) => x.code !== 'view'),
+  };
 }
 
 /** Source and off-cycle reason of a remittance (remittances.data until the Phase 2 columns): an import or Run now is off-cycle. */
@@ -310,7 +366,7 @@ export async function remindApprovers(id, user, req) {
   const hours = Math.max(1, Number(await getSetting('remittance.reminder_interval_hours', 4)) || 4);
   const reminder = reminderOf(a, ctx, hours);
   if (!reminder.allowed) {
-    const message = `Reminded ${whenText(ctx, reminder.remindedAt)} · next ${whenText(ctx, reminder.nextAt)}`;
+    const message = remindedText(ctx, reminder);
     throw new HttpError(409, message, [{ path: 'approval', code: 'REMINDED', message }]);
   }
   const approvers = await approversFor(a, ctx);

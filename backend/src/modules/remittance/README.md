@@ -96,14 +96,17 @@ covered by a dated delegation. The `remittance_delegations` table of earlier rel
 
 Approvals inbox (`approvals.js`): `GET /approvals?view=mine|submitted|all|decided` (`type`, `insurerId`, `q`, paging)
 answers rows with the decision block, next step, SLA ("Due in 6 h" / "Overdue 2 h"), level and reminder state, server
-totals and the KPI figures (awaiting my decision, past SLA, submitted by me, decided by me today). Decided covers the
-last 30 days. Without `view` the legacy queue of the Approval Workflow screen is answered. `GET /approvals/:id` (or
+totals, the KPI figures (awaiting my decision, past SLA, submitted by me, decided by me today) and `authority`, the
+chips of the page (`permission`, `canDecide`, the remittance limit and its source, and `covering`: the people the user
+covers for today through a dated delegation, with its last day). Decided covers the last 30 days. `GET
+/approvals/export.xlsx` writes every row of the view and filters. Without `view` the legacy queue of the Approval Workflow screen is answered. `GET /approvals/:id` (or
 `remittance:<id>`) is the review panel: header, totals, first 10 lines, the previous remittance of the insurer with
 the change in %, the checks R1 can answer (content unchanged since submission, from `remittances.version` against the
 version kept at submission; today's accounting period, as information), open exceptions and the latest activity.
 `POST /approvals/decide {items:[{id,version}], action, reasonCode, note}` decides each item on its own and answers a
 result per item ("Approved", "Already approved by J. Cruz at 10:32."). `POST /approvals/:id/remind` lets the submitter
-remind the eligible approvers once per `remittance.reminder_interval_hours` (4). Instants are ISO (UTC); "today" and
+remind the eligible approvers once per `remittance.reminder_interval_hours` (4); a second reminder too early answers
+409 `REMINDED` "Reminded 10:15 · next from 14:15" (with the date when it is not today). Instants are ISO (UTC); "today" and
 the SLA ages are taken in the business time zone (`general.timezone`). Agency bills are not on the inbox.
 
 Activity log and print: `activity.js#remittanceActivity` builds the log of a remittance, oldest first, from its audit
@@ -115,8 +118,8 @@ carries the action code and label, the user's display name and roles, the status
 `remittance.status_labels`), the remarks and the other changed fields (`lib/auditEvents.js#activityEntries`); the
 fields of earlier releases (`action`, `by`, `at`, `notes`) are kept. GET `/remittance/remittances/:id/activity` answers
 it (`format=xlsx`: Download log), and GET `/remittance/remittances/:id` returns it as `activityLog` with the record's
-`version`, `decision` and `nextStep`. The print icon of Tracking prints GET `/remittance/remittances/:id/pdf`, the
-remittance advice on the broker letterhead (`documents/templates.js#remittanceAdviceDoc`, signature slots of document
+`version`, `decision` and `nextStep`. GET `/remittance/remittances/:id/pdf` is the remittance advice of earlier
+releases on the broker letterhead (`documents/templates.js#remittanceAdviceDoc`, signature slots of document
 type `remittance-advice`); an agency bill prints with its own title.
 
 Remittances register (`register.js`): `GET /remittances?segment=my-work|drafts|in-approval|in-payment|all` lists
@@ -136,7 +139,9 @@ decision block's. The answer carries `totals` of the filtered set, the four KPI 
 approved not paid with the oldest days, overdue) and the segment counts over the filters, all in SQL. Without
 `segment` the route answers the list of the earlier screens. `GET /remittances/:id` adds to the details the register
 row, the lines with the values of an import, the payment through the settlement voucher (voucher, method, value date,
-bank reference, settlement) and the downloads; its `status` stays the label of the earlier screens (`statusCode`,
+bank reference, settlement), the downloads and `approval` (`approvals.js#recordApproval`: the pending approval, else
+the latest decided one, with its level, SLA, reminder state, outcome with the limit at decision and its source, the
+checks while pending and the approve / reject / remind actions; null before the first submission); its `status` stays the label of the earlier screens (`statusCode`,
 `statusLabel` are the contract). `POST /remittances/submit {items:[{id,version}]}` checks each draft on its own (version,
 status, guards) and submits the ready ones as one processing batch; the result per item is "Submitted" or the reason
 (`ALREADY_SUBMITTED` "REM-2026-00021 was submitted by J. Cruz at 10:12.", `STALE`, `WRONG_STATUS`, `INVALID`).

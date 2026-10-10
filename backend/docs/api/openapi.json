@@ -128404,7 +128404,7 @@
     "/remittance/approvals": {
       "get": {
         "operationId": "getRemittanceApprovals",
-        "summary": "Approvals. With view=mine|submitted|all|decided (type=remittance|settlement|adjustment|transfer, insurerId, q, page, perPage): the inbox rows with the decision block, next step, SLA and level, server totals and the KPI figures (awaiting my decision, past SLA, submitted by me, decided by me today in the business time zone); decided covers the last 30 days. Without view: the legacy queue (status=Pending by default; filter transactionType, priority)",
+        "summary": "Approvals. With view=mine|submitted|all|decided (type=remittance|settlement|adjustment|transfer, insurerId, q, page, perPage): the inbox rows with the decision block, next step, SLA and level, server totals, the KPI figures (awaiting my decision, past SLA, submitted by me, decided by me today in the business time zone) and the authority chips (limit and its source, the people covered for through a dated delegation and until when); decided covers the last 30 days. Without view: the legacy queue (status=Pending by default; filter transactionType, priority)",
         "tags": [
           "Remittance"
         ],
@@ -128767,6 +128767,40 @@
                           }
                         }
                       }
+                    },
+                    "authority": {
+                      "type": "object",
+                      "properties": {
+                        "permission": {
+                          "type": "boolean"
+                        },
+                        "canDecide": {
+                          "type": "boolean"
+                        },
+                        "limit": {
+                          "type": "integer"
+                        },
+                        "unlimited": {
+                          "type": "boolean"
+                        },
+                        "limitSourceLabel": {
+                          "type": "string"
+                        },
+                        "covering": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "until": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
                     }
                   }
                 },
@@ -128893,6 +128927,19 @@
                       "approved": 2,
                       "rejected": 0
                     }
+                  },
+                  "authority": {
+                    "permission": true,
+                    "canDecide": true,
+                    "limit": 1000000,
+                    "unlimited": false,
+                    "limitSourceLabel": "Delegation from A. Santos (Role limit: TIS Finance & General Accounting)",
+                    "covering": [
+                      {
+                        "name": "A. Santos",
+                        "until": "2026-10-16"
+                      }
+                    ]
                   }
                 }
               }
@@ -129864,7 +129911,7 @@
     "/remittance/approvals/{id}/remind": {
       "post": {
         "operationId": "postRemittanceApprovalsIdRemind",
-        "summary": "Remind the eligible approvers of a pending approval (its submitter; at most once per remittance.reminder_interval_hours, 409 REMINDED \"Reminded 10:15 · next at 14:15\"; 409 NO_ELIGIBLE_APPROVER)",
+        "summary": "Remind the eligible approvers of a pending approval (its submitter; at most once per remittance.reminder_interval_hours, 409 REMINDED \"Reminded 10:15 · next from 14:15\"; 409 NO_ELIGIBLE_APPROVER)",
         "tags": [
           "Remittance"
         ],
@@ -130168,6 +130215,72 @@
             }
           }
         }
+      }
+    },
+    "/remittance/approvals/export.xlsx": {
+      "get": {
+        "operationId": "getRemittanceApprovalsExport.xlsx",
+        "summary": "Approvals > Export XLSX: every row of the view and filters of GET /approvals (not one page), with \"Can I decide?\", the next step and, on Decided, the decision, reason and limit at decision",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Approvals > Export XLSX\n\nAccess: read:remittance, write:remittance",
+        "parameters": [
+          {
+            "name": "view",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "all"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "remittance"
+          },
+          {
+            "name": "insurerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Approvals > Export XLSX",
+        "x-permissions": [
+          "read:remittance",
+          "write:remittance"
+        ]
       }
     },
     "/remittance/approvals/history": {
@@ -139402,7 +139515,7 @@
     "/remittance/remittances/{id}": {
       "get": {
         "operationId": "getRemittanceRemittancesId",
-        "summary": "Remittance record: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, the activity log (as GET /remittances/:id/activity) and, for a direct-bill remittance, the register row (status label, flags, source and import, off-cycle reason, coverage week, basis, actions), the lines with the expected amount and variance of an import, the payment through the settlement voucher and the downloads",
+        "summary": "Remittance record: insurer, policies, documents, version, the decision block of its approval for the caller (canDecide, blockedCode / blockedReason, eligible approvers) with the next step, the activity log (as GET /remittances/:id/activity) and, for a direct-bill remittance, the register row (status label, flags, source and import, off-cycle reason, coverage week, basis, actions), the lines with the expected amount and variance of an import, the payment through the settlement voucher and the downloads, and the approval of the record page (level, SLA, reminder, outcome with the limit at decision and its source, the checks while pending, approve / reject / remind)",
         "tags": [
           "Remittance"
         ],
@@ -139874,6 +139987,134 @@
                               }
                             }
                           }
+                        },
+                        "approval": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "version": {
+                              "type": "integer"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "level": {
+                              "type": "object",
+                              "properties": {
+                                "current": {
+                                  "type": "integer"
+                                },
+                                "required": {
+                                  "type": "integer"
+                                },
+                                "label": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "submittedBy": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "submittedAt": {
+                              "type": "string"
+                            },
+                            "sla": {
+                              "type": "object",
+                              "properties": {
+                                "hours": {
+                                  "type": "integer"
+                                },
+                                "dueAt": {
+                                  "type": "string"
+                                },
+                                "ageHours": {
+                                  "type": "number"
+                                },
+                                "overdue": {
+                                  "type": "boolean"
+                                },
+                                "label": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "reminder": {
+                              "type": "object",
+                              "properties": {
+                                "remindedAt": {},
+                                "nextAt": {},
+                                "allowed": {
+                                  "type": "boolean"
+                                }
+                              }
+                            },
+                            "outcome": {},
+                            "authorityType": {
+                              "type": "string"
+                            },
+                            "amount": {
+                              "type": "number"
+                            },
+                            "contentVersion": {
+                              "type": "integer"
+                            },
+                            "submittedVersion": {
+                              "type": "integer"
+                            },
+                            "contentUnchanged": {
+                              "type": "boolean"
+                            },
+                            "checks": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "code": {
+                                    "type": "string"
+                                  },
+                                  "label": {
+                                    "type": "string"
+                                  },
+                                  "result": {
+                                    "type": "string"
+                                  },
+                                  "detail": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            },
+                            "actions": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "code": {
+                                    "type": "string"
+                                  },
+                                  "label": {
+                                    "type": "string"
+                                  },
+                                  "allowed": {
+                                    "type": "boolean"
+                                  },
+                                  "blockedCode": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -140063,7 +140304,66 @@
                           "name": "Accounts > Remittance > Tracking"
                         }
                       }
-                    ]
+                    ],
+                    "approval": {
+                      "id": 21,
+                      "version": 1,
+                      "status": "Pending",
+                      "level": {
+                        "current": 1,
+                        "required": 1,
+                        "label": "1 of 1"
+                      },
+                      "submittedBy": {
+                        "id": "usr_4",
+                        "name": "M. Reyes"
+                      },
+                      "submittedAt": "2026-10-06T02:12:00.000Z",
+                      "sla": {
+                        "hours": 24,
+                        "dueAt": "2026-10-07T02:12:00.000Z",
+                        "ageHours": 6.5,
+                        "overdue": false,
+                        "label": "Due in 18 h"
+                      },
+                      "reminder": {
+                        "remindedAt": null,
+                        "nextAt": null,
+                        "allowed": true
+                      },
+                      "outcome": null,
+                      "authorityType": "Remittance",
+                      "amount": 409141.43,
+                      "contentVersion": 3,
+                      "submittedVersion": 3,
+                      "contentUnchanged": true,
+                      "checks": [
+                        {
+                          "code": "content-unchanged",
+                          "label": "Content unchanged since submission",
+                          "result": "pass",
+                          "detail": "v3 · unchanged since submission"
+                        }
+                      ],
+                      "actions": [
+                        {
+                          "code": "approve",
+                          "label": "Approve",
+                          "allowed": false,
+                          "blockedCode": "SUBMITTER"
+                        },
+                        {
+                          "code": "reject",
+                          "label": "Reject",
+                          "allowed": false
+                        },
+                        {
+                          "code": "remind",
+                          "label": "Remind approver",
+                          "allowed": true
+                        }
+                      ]
+                    }
                   }
                 }
               }
