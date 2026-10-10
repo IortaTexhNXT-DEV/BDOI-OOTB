@@ -224,13 +224,14 @@ const CasDocumentDialog = ({ slug, onHide, onChanged }) => {
     setSubmitting(true);
   };
   const approve = () => openConfirm({
-    title: t("birTax.casDoc.approveTitle"), message: t("birTax.casDoc.approveMessage", { version: open.version }), confirmLabel: t("birTax.casDoc.approveVersion"),
-    facts: [{ label: t("birTax.casDoc.changeNote"), value: open.changeNote }, { label: t("birTax.reason"), value: open.reason }, { label: t("birTax.casDoc.submittedBy"), value: open.submittedByName }],
+    title: t("birTax.casDoc.approveTitle"), confirmLabel: t("birTax.casDoc.approveVersion"),
+    facts: [{ label: t("birTax.casDoc.version"), value: String(open.version) }, { label: t("birTax.casDoc.changeNote"), value: open.changeNote }, { label: t("birTax.reason"), value: open.reason }, { label: t("birTax.casDoc.submittedBy"), value: open.submittedByName }],
     input: { type: "textarea", label: t("birTax.casDoc.remarks"), maxLength: 1000 },
     onConfirm: async (remarks) => { setData(await birTaxService.approveCasDraft(slug, remarks)); onChanged(); },
   });
   const reject = () => openConfirm({
-    title: t("birTax.casDoc.rejectTitle"), severity: "warning", message: t("birTax.casDoc.rejectMessage", { version: open.version }), confirmLabel: t("birTax.casDoc.returnToPreparer"),
+    title: t("birTax.casDoc.rejectTitle"), severity: "warning", confirmLabel: t("birTax.casDoc.returnToPreparer"),
+    facts: [{ label: t("birTax.casDoc.version"), value: String(open.version) }, { label: t("birTax.casDoc.submittedBy"), value: open.submittedByName }],
     input: { type: "textarea", label: t("birTax.casDoc.remarks"), required: true, maxLength: 1000 },
     onConfirm: async (remarks) => { setData(await birTaxService.rejectCasDraft(slug, remarks)); onChanged(); },
   });
