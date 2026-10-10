@@ -85,7 +85,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Remittance | View |
 | Reports > Operational Reports | Broker Commission | View |
 | Reports > Operational Reports | APR Operation Report | View |
-| Reports > Operational Reports | Production per Product Line | View |
+| Reports > Operational Reports | Production per Line | View |
 | Reports > Operational Reports | Agent Policy Conversion | View |
 | Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
@@ -157,7 +157,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs, Calculations, Approvals, Statement and Reports |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard, Agents/Referrer Accounts, Agreements and Computations |
 | Commission | Commission | Create and edit | Process commission and insurer overrides |  |
-| Reports | Reports | View | Run and download reports | Remittance, Broker Commission, APR Operation Report, Production per Product Line, Agent Policy Conversion, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status, Co-insurance Register, Due to Insurers and Report Builder |
+| Reports | Reports | View | Run and download reports | Remittance, Broker Commission, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status, Co-insurance Register, Due to Insurers and Report Builder |
 | Product Configurator | Products | View | See products and product templates | No screen of its own |
 | Master data and configuration | Reference masters | View | See reference masters | Accounting Flow, Payment Gateways, Taxation, Close Checklist, Asset Classes, Cost Centres, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats and Bank File Layouts |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | No screen of its own |

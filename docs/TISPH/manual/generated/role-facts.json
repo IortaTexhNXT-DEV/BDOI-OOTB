@@ -412,7 +412,7 @@
     },
     {
      "section": "Reports > Operational Reports",
-     "screen": "Production per Product Line",
+     "screen": "Production per Line",
      "path": "/reports/run/production-by-line",
      "access": "View",
      "modules": [
@@ -1179,7 +1179,7 @@
     },
     {
      "section": "Reports > Operational Reports",
-     "screen": "Production per Product Line",
+     "screen": "Production per Line",
      "path": "/reports/run/production-by-line",
      "access": "View",
      "modules": [
@@ -2076,7 +2076,7 @@
     },
     {
      "section": "Reports > Operational Reports",
-     "screen": "Production per Product Line",
+     "screen": "Production per Line",
      "path": "/reports/run/production-by-line",
      "access": "View",
      "modules": [
@@ -2936,7 +2936,7 @@
     },
     {
      "section": "Reports > Operational Reports",
-     "screen": "Production per Product Line",
+     "screen": "Production per Line",
      "path": "/reports/run/production-by-line",
      "access": "View",
      "modules": [
@@ -3773,7 +3773,7 @@
     },
     {
      "section": "Reports > Operational Reports",
-     "screen": "Production per Product Line",
+     "screen": "Production per Line",
      "path": "/reports/run/production-by-line",
      "access": "View",
      "modules": [
@@ -4676,7 +4676,7 @@
     },
     {
      "section": "Reports > Operational Reports",
-     "screen": "Production per Product Line",
+     "screen": "Production per Line",
      "path": "/reports/run/production-by-line",
      "access": "View",
      "modules": [
@@ -6937,7 +6937,7 @@
     },
     {
      "section": "Reports > Operational Reports",
-     "screen": "Production per Product Line",
+     "screen": "Production per Line",
      "path": "/reports/run/production-by-line",
      "access": "View",
      "modules": [
@@ -8137,7 +8137,7 @@
     },
     {
      "section": "Reports > Operational Reports",
-     "screen": "Production per Product Line",
+     "screen": "Production per Line",
      "path": "/reports/run/production-by-line",
      "access": "View",
      "modules": [
@@ -10113,7 +10113,7 @@
     },
     {
      "section": "Reports > Operational Reports",
-     "screen": "Production per Product Line",
+     "screen": "Production per Line",
      "path": "/reports/run/production-by-line",
      "access": "View",
      "modules": [
@@ -13824,7 +13824,7 @@
    ]
   },
   "/reports/run/production-by-line": {
-   "menu": "Reports > Operational Reports > Production per Product Line",
+   "menu": "Reports > Operational Reports > Production per Line",
    "roles": [
     {
      "role": "TIS Sales Associate",

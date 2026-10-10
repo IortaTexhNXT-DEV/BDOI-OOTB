@@ -57,7 +57,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Broker Commission | View |
 | Reports > Operational Reports | Dealer Production | View |
 | Reports > Operational Reports | APR Operation Report | View |
-| Reports > Operational Reports | Production per Product Line | View |
+| Reports > Operational Reports | Production per Line | View |
 | Reports > Operational Reports | Agent Policy Conversion | View |
 | Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
@@ -156,7 +156,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Insurer billing, Setup and Settlement |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | No screen of its own |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Product Line, Agent Policy Conversion, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status, Co-insurance Register and Due to Insurers |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status, Co-insurance Register and Due to Insurers |
 | Product Configurator | Products | View | See products and product templates | Dashboard, Product Templates, Coverage Builder, Rating Engine, Acceptance Rules, Document Manager, Market Mapping, Risk Mapping and Product Analytics |
 | Product Configurator | Products | Create and edit | Configure products, covers, rating and rules |  |
 | Master data and configuration | Reference masters | View | See reference masters | Company, Branch, Sales Activity Types, Sales Activity Outcomes, Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Short-Period Rates, Cancellation Reasons, Claim Document Checklist, Repair Shops, Lead Sources, Reason Codes, Country, Province, City / Municipality, Hierarchy, Designation, Package Bundles, Insurer Rate Tables, Commission Rate Matrix, Transaction Code, Currency, Exchange Rate, Bank, E-mail Layout, Documents and Reports Layout, Document Signatures, Document Numbering and E-mail Outbox |

@@ -57,7 +57,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Broker Commission | View |
 | Reports > Operational Reports | Dealer Production | View |
 | Reports > Operational Reports | APR Operation Report | View |
-| Reports > Operational Reports | Production per Product Line | View |
+| Reports > Operational Reports | Production per Line | View |
 | Reports > Operational Reports | Agent Policy Conversion | View |
 | Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports | Report Builder | View |
@@ -111,7 +111,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Incentives | Create and edit | Calculate, submit and pay incentives |  |
 | Accounts | Incentives | Approve | Approve or reject an incentive calculation batch submitted by another user |  |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Product Line, Agent Policy Conversion, Renewal Notice Listing and Report Builder |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing and Report Builder |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |

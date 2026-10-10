@@ -119,7 +119,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Reports > Operational Reports | Broker Commission | View |
 | Reports > Operational Reports | Dealer Production | View |
 | Reports > Operational Reports | APR Operation Report | View |
-| Reports > Operational Reports | Production per Product Line | View |
+| Reports > Operational Reports | Production per Line | View |
 | Reports > Operational Reports | Agent Policy Conversion | View |
 | Reports > Operational Reports | Renewal Notice Listing | View |
 | Reports > Financial Reports | SOA/Premium Receivable | View |
@@ -197,7 +197,7 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Period end and tax | View | See period status, the close checklist and BIR tax | BIR Form 2307, VAT Summary, SAWT, QAP, SLSP Sales, SLSP Purchases, Withholding Returns, Annual Alphalist 1604-E, Percentage Tax 2551Q, BIR DAT Files, Sales Invoices, E-Invoicing (EIS), CAS Books and Documents, Period Management, Month-End Close, Year-End Close, Recurring Journals and Financial Statements |
 | Accounts | Incentives | View | See incentive programmes, calculations and statements | My Programs, Calculations, Approvals, Statement and Reports |
 | Commission | Commission | View | See commission, referrer accounts and insurer overrides | Commission Dashboard, Agents/Referrer Accounts, Agreements and Computations |
-| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Product Line, Agent Policy Conversion, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status, Co-insurance Register and Due to Insurers |
+| Reports | Reports | View | Run and download reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production, APR Operation Report, Production per Line, Agent Policy Conversion, Renewal Notice Listing, SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status, Co-insurance Register and Due to Insurers |
 | Product Configurator | Products | View | See products and product templates | Dashboard and Product Templates |
 | Master data and configuration | Reference masters | View | See reference masters | No screen of its own |
 | Master data and configuration | Distribution channels | View | See dealers, financing banks, affinity partners and their production | Distribution Channels |
