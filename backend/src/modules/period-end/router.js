@@ -8,6 +8,7 @@ import { moduleRouter } from '../../lib/registry.js';
 import { requireAuth, requirePermission } from '../../lib/auth.js';
 import { validate, z } from '../../lib/validate.js';
 import { pool, withTransaction } from '../../db/pool.js';
+import { formatMoney } from '../../lib/money.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created } from '../../lib/respond.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
@@ -70,7 +71,7 @@ define({
     const out = await tx((db) => importOpeningBalances(db, rows, { goLiveDate: String(req.body?.goLiveDate || '').slice(0, 10) }));
     await audit(req, { entity: 'opening_balances', entityId: out.fiscalYear, action: 'go-live-import', after: out });
     const zero = out.ignored.length ? `; ${out.ignored.length} row(s) with no debit or credit (zero balance) ignored: ${out.ignored.map((x) => x.accountCode).join(', ')}` : '';
-    ok(res, out, `Opening balances of ${out.fiscalYear} loaded: ${out.accounts} accounts, debits = credits = ${out.totalDebit.toFixed(2)}${zero}`);
+    ok(res, out, `Opening balances of ${out.fiscalYear} loaded: ${out.accounts} accounts, debits and credits ${await formatMoney(out.totalDebit)} each${zero}`);
   },
 });
 
