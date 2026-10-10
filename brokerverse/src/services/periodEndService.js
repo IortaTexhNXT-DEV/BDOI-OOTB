@@ -23,6 +23,16 @@ const request = async (path, options = {}) => {
   }
   return body.data;
 };
+/** GET a file with the session token: { blob, fileName }. */
+const file = async (path) => {
+  const response = await fetch(`${BASE_URL}${path}`, { headers: { ...authService.getAuthHeader() } });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || `Could not create the file (${response.status})`);
+  }
+  const name = /filename="?([^";]+)"?/i.exec(response.headers.get("Content-Disposition") || "");
+  return { blob: await response.blob(), fileName: name ? name[1] : "download" };
+};
 const post = (path, payload = {}) => request(path, { method: "POST", body: JSON.stringify(payload) });
 const put = (path, payload = {}) => request(path, { method: "PUT", body: JSON.stringify(payload) });
 const del = (path) => request(path, { method: "DELETE" });
@@ -32,7 +42,9 @@ const periodEndService = {
   fiscalYears: () => request("/period-end/fiscal-years"),
   fiscalYear: (code) => request(`/period-end/fiscal-years/${code}`),
   createFiscalYear: (startDate) => post("/period-end/fiscal-years", startDate ? { startDate } : {}),
-  setPeriodStatus: (period, status, remarks) => post(`/period-end/periods/${period}/status`, { status, remarks: remarks || undefined }),
+  /** reason: { reasonCode, note } (components/ReasonPicker reasonPayload) */
+  setPeriodStatus: (period, status, reason) => post(`/period-end/periods/${period}/status`, { status, ...reason }),
+  statusPreview: (period, status) => request(`/period-end/periods/${period}/status-preview${qs({ status })}`),
   periodHistory: (period) => request(`/period-end/periods/${period}/history`),
   periodChecks: (period) => request(`/period-end/periods/${period}/checks`),
 
@@ -63,16 +75,22 @@ const periodEndService = {
 
   // year-end
   yearEnd: () => request("/period-end/year-end"),
+  yearEndOverview: (fiscalYear) => request(`/period-end/year-end/overview${qs({ fiscalYear })}`),
   yearEndRun: (id) => request(`/period-end/year-end/${id}`),
   createYearEnd: (fiscalYear) => post("/period-end/year-end", { fiscalYear }),
   checkYearEnd: (id) => post(`/period-end/year-end/${id}/check`),
-  closeYearEnd: (id) => post(`/period-end/year-end/${id}/close`),
-  reverseYearEnd: (id, reason) => post(`/period-end/year-end/${id}/reverse`, { reason }),
+  closeYearEnd: (id, remarks) => post(`/period-end/year-end/${id}/close`, { remarks: remarks || undefined }),
+  requestYearEndReversal: (id, reason) => post(`/period-end/year-end/${id}/reverse-request`, reason),
+  withdrawYearEndReversal: (id) => post(`/period-end/year-end/${id}/reverse-request/withdraw`),
+  reverseYearEnd: (id, remarks) => post(`/period-end/year-end/${id}/reverse`, { remarks: remarks || undefined }),
   cancelYearEnd: (id) => post(`/period-end/year-end/${id}/cancel`),
   createAdjustment: (body) => post("/period-end/adjustments", body),
 
   // statements and journals
+  statementPeriods: () => request("/period-end/statements/periods"),
   statement: (type, params) => request(`/period-end/statements/${type}${qs(params)}`),
+  /** Statement file (format xlsx or pdf): { blob, fileName }. */
+  statementFile: (type, params, format) => file(`/period-end/statements/${type}/export${qs({ ...params, format })}`),
   journalLines: (jvNumber) => request(`/accounting/entries/search${qs({ transactionCode: jvNumber, pageSize: 200 })}`),
   accounts: () => request("/accounting/accounts?status=active"),
 

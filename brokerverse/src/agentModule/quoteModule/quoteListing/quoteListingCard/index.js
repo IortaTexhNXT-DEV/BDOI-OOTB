@@ -7,7 +7,6 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { Checkbox } from "primereact/checkbox";
 import { Dropdown } from "primereact/dropdown";
 import SvgDownArrow from "../../../../assets/agentIcon/SvgDownArrow";
 import SvgEdit from "../../../../assets/icons/SvgEdits";
@@ -18,7 +17,6 @@ import { getQuoteSearchDataMiddleWare } from "../quoteListingCard/store/quoteMid
 import {
   getQuotationsMiddleware,
   getQuotationByIdMiddleware,
-  deleteQuotationMiddleware,
 } from "../../Store/quotationMiddleware";
 import {
   loadQuotationForEdit,
@@ -31,11 +29,24 @@ import {
 import StatusBadge from "../../../../components/StatusBadge";
 import "./index.scss";
 import { formatDate as formatConfiguredDate } from "../../../../utility/dateFormat";
-import { confirmAction, notifyError, notifySuccess } from "../../../../utility/dialogs";
+import { notifyError } from "../../../../utility/dialogs";
+import { openConfirm } from "../../../../components/ConfirmDialog";
 import { RFQ_PATH, entryOf, isUntagged, rfqState } from "../../../../module/Sales/salesProducts";
 import { ProductPickerDialog } from "../../../../module/Sales/ProductPicker";
 import leadService from "../../../../services/leadService";
 import { getLeadByIdMiddleware } from "../../../leadModule/Store/leadMiddleware";
+// gross premium of a quotation row: the stored total, else the sum of the motor cover premiums
+const premiumOf = (rowData) => {
+  if (rowData.grossPremium) return rowData.grossPremium;
+  return (
+    (parseFloat(rowData.lossAndDamageCoveragePremium) || 0) +
+    (parseFloat(rowData.actsOfNaturePremium) || 0) +
+    (parseFloat(rowData.bodilyInjuryCoveragePremium) || 0) +
+    (parseFloat(rowData.propertyDamageCoveragePremium) || 0) +
+    (parseFloat(rowData.APPAcoveragePremium) || 0)
+  );
+};
+
 const QuoteListingCard = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -63,7 +74,6 @@ const QuoteListingCard = () => {
       };
     }
   );
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [globalFilter, setGlobalFilter] = useState("Company");
@@ -130,41 +140,6 @@ const QuoteListingCard = () => {
     },
   };
 
-  const handleDelete = async () => {
-    if (selectedProducts.length === 0) return;
-
-    const confirmDelete = await confirmAction(
-      `Are you sure you want to delete ${selectedProducts.length} quotation(s)?`
-    );
-
-    if (!confirmDelete) return;
-
-    try {
-      // Delete all selected quotations
-      await Promise.all(
-        selectedProducts.map((product) =>
-          dispatch(deleteQuotationMiddleware(product.quotationId)).unwrap()
-        )
-      );
-
-      // Clear selection after deletion
-      setSelectedProducts([]);
-
-      notifySuccess(t("quoteListing.quotationsDeletedSuccess"));
-
-      // Refresh the list
-      dispatch(
-        getQuotationsMiddleware({
-          page: currentPageState,
-          pageSize: rowsPerPage,
-          leadRefId: leadRefId,
-        })
-      );
-    } catch (error) {
-      notifyError(t("quoteListing.failedToDeleteQuotations", { error: error?.message || error }));
-    }
-  };
-
   const rendercheckedHeader = (value) => value;
 
   const renderUncheckedHeader = (value) => value;
@@ -179,50 +154,6 @@ const QuoteListingCard = () => {
         lead: currentLeadDetails,
       },
     });
-  };
-
-  const ViewheaderStyle = {
-    justifyContent: "center",
-    // textalign: center,
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    color: "#000",
-    border: " none",
-    display: "flex",
-    alignItem: "center",
-    height: "56px",
-  };
-
-  const headerStyle = {
-    textalign: "center",
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    color: "#000",
-    border: " none",
-  };
-
-  const headeraction = {
-    textalign: "center",
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    color: "#000",
-    border: " none",
-    // display: "flex",
-    justifyContent: "center",
-    alignItem: "center",
-  };
-
-  const checkboxheaderStyle = {
-    textalign: "center",
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    color: "#000",
-    border: " none",
-    width: "3rem",
   };
 
   const renderCompany = (rowData) => {
@@ -250,19 +181,7 @@ const QuoteListingCard = () => {
   };
 
   const renderGrosspremium = (rowData) => {
-    // Use grossPremium if available, otherwise calculate from individual premiums
-    let totalPremium;
-    if (rowData.grossPremium) {
-      totalPremium = rowData.grossPremium;
-    } else {
-      totalPremium =
-        (parseFloat(rowData.lossAndDamageCoveragePremium) || 0) +
-        (parseFloat(rowData.actsOfNaturePremium) || 0) +
-        (parseFloat(rowData.bodilyInjuryCoveragePremium) || 0) +
-        (parseFloat(rowData.propertyDamageCoveragePremium) || 0) +
-        (parseFloat(rowData.APPAcoveragePremium) || 0);
-    }
-
+    const totalPremium = premiumOf(rowData);
     return (
       <div>
         <div className="company__policy__type">
@@ -375,11 +294,10 @@ const QuoteListingCard = () => {
         {canConvert && (
           <Button
             label={t("quoteListing.convert")}
-            className="p-button-sm"
+            size="small"
             onClick={() => handleConvertToPolicy(rowData)}
             tooltip={t("quoteListing.convertToPolicy")}
             tooltipOptions={{ position: "top" }}
-            style={{ fontSize: "12px", padding: "6px 12px" }}
           />
         )}
 
@@ -441,10 +359,17 @@ const QuoteListingCard = () => {
 
   const handleConvertToPolicy = async (rowData) => {
     try {
-      // Confirm conversion
-      const confirmConvert = await confirmAction(
-        `Are you sure you want to convert quotation ${rowData.quotationNumber} to a policy?`
-      );
+      const confirmConvert = await openConfirm({
+        title: t("quoteListing.convertTitle"),
+        message: t("quoteListing.convertMessage"),
+        facts: [
+          { label: t("quoteListing.quoteId"), value: rowData.quotationNumber },
+          { label: t("quoteListing.insurer"), value: rowData.participantDetails?.[0]?.insuranceCompanyName },
+          { label: t("quoteListing.product"), value: [rowData.insurancePolicyType, rowData.productType].filter(Boolean).join(" - ") },
+          { label: t("quoteListing.grossPremium"), value: premiumOf(rowData), type: "amount" },
+        ],
+        confirmLabel: t("quoteListing.convertToPolicy"),
+      });
 
       if (!confirmConvert) return;
 
@@ -627,44 +552,32 @@ const QuoteListingCard = () => {
             scrollHeight="60vh"
           >
             <Column
-              body={(rowData) => (
-                <Checkbox
-                  checked={selectedProducts.includes(rowData)}
-                  onChange={() => {}}
-                />
-              )}
-              headerStyle={checkboxheaderStyle}
-            ></Column>
-            <Column
               body={renderCompany}
               header={rendercheckedHeader(t("quoteListing.company"))}
-              headerStyle={headerStyle}
             ></Column>
             <Column
               body={renderPolicyType}
               header={renderUncheckedHeader(t("quoteListing.policyType"))}
-              headerStyle={headerStyle}
             ></Column>
             <Column
               body={renderGrosspremium}
               header={renderUncheckedHeader(t("quoteListing.grossPremium"))}
-              headerStyle={headerStyle}
             ></Column>
             <Column
               body={renderDate}
               header={renderUncheckedHeader(t("quoteListing.date"))}
-              headerStyle={headerStyle}
             ></Column>
             <Column
               body={renderStatus}
               header={renderUncheckedHeader(t("quoteListing.status"))}
-              headerStyle={{ ...headeraction, minWidth: "150px" }}
+              alignHeader="center"
+              headerStyle={{ minWidth: "150px" }}
               style={{ textAlign: "center", minWidth: "150px" }}
             ></Column>
             <Column
               body={renderViewEditButton}
               header={renderUncheckedHeader(t("quoteListing.actions"))}
-              headerStyle={ViewheaderStyle}
+              alignHeader="center"
             ></Column>
           </DataTable>
         </div>

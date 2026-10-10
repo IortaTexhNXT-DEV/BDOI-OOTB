@@ -111,6 +111,7 @@
   }
   // secondary header actions (bulk print, bulk upload, bulk disburse): outlined; Create stays the one filled button
   .bulk_button_container {
+    font: inherit;
     background-color: $color-surface;
     border: 1px solid $brand-blue;
     border-radius: 6px;

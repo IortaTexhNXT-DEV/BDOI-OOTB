@@ -1,445 +1,228 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { BreadCrumb } from "primereact/breadcrumb";
-import { Card } from "primereact/card";
-import { Toast } from "primereact/toast";
 import { Chart } from "primereact/chart";
+import { Column } from "primereact/column";
+import { DataTable } from "primereact/datatable";
 import { Dropdown } from "primereact/dropdown";
-import { Badge } from "primereact/badge";
-import { Divider } from "primereact/divider";
-import SvgDot from "../../../assets/icons/SvgDot";
+import { Toast } from "primereact/toast";
+import DetailSection from "../../../components/DetailSection";
+import FieldError from "../../../components/FieldError";
+import KeyValueGrid from "../../../components/KeyValueGrid";
+import LoadingBar from "../../../components/LoadingBar";
+import { PrintableDocument, printView } from "../../../components/Print";
+import StatCards from "../../../components/StatCards";
+import StatusChip from "../../../components/StatusChip";
+import { useStableLoad } from "../../../hooks/useStableLoad";
 import incentiveService from "../../../services/incentiveService";
-import { downloadCsv, showError } from "../../Remittance/shared";
-import { formatDate as formatAppDate } from "../../../utility/dateFormat";
-import "./index.scss";
 import { useChartTheme } from "../../../theme/chartTheme";
+import { formatCurrency } from "../../../utility/currencyConverter";
+import { formatDate } from "../../../utility/dateFormat";
+import { formatPercent } from "../../../utility/numberFormat";
+import { hasPermission } from "../../../utils/canOpen";
+import { downloadCsv, showError } from "../../Remittance/shared";
+import { IncentiveHeader, formatMeasure, monthOptions } from "../common";
 
-const emptyStatement = { agentName: "", agentCode: "", period: "", statementDate: null, totalEarnings: 0, ytdEarnings: 0, pendingPayment: 0, lastPayment: 0, lastPaymentDate: null, lastPaymentPeriods: [], pendingPeriods: [], programBreakdown: [], monthlyTrend: [], contact: null };
+/** Facts at the head of a statement. */
+const statementFacts = (s, t) => [
+  { label: t("incentive.stmt.agent"), value: s.agentName },
+  { label: t("incentive.stmt.agentCode"), value: s.agentCode },
+  { label: t("incentive.stmt.branch"), value: s.branch },
+  { label: t("incentive.stmt.period"), value: s.period },
+  { label: t("incentive.stmt.statementDate"), value: s.statementDate, type: "date" },
+];
 
-/** Last 12 calendar months as { label: "September 2026", value: "2026-09" }. */
-const recentMonths = () => {
-  const now = new Date();
-  return Array.from({ length: 12 }, (_, i) => {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    return { label: d.toLocaleDateString("en-US", { month: "long", year: "numeric" }), value: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}` };
-  });
+/** The statement as a printed document: facts, totals, programme breakdown and payment history. */
+export const PrintedStatement = ({ statement: s }) => {
+  const { t } = useTranslation();
+  return (
+    <PrintableDocument title={t("incentive.stmt.printTitle")} number={s.period}>
+      <KeyValueGrid columns={3} items={statementFacts(s, t)} />
+      <KeyValueGrid columns={4} items={[
+        { label: t("incentive.stmt.earned"), value: s.totalEarnings, type: "amount" },
+        { label: t("incentive.stmt.ytd"), value: s.ytdEarnings, type: "amount" },
+        { label: t("incentive.stmt.pending"), value: s.pendingPayment, type: "amount" },
+        { label: t("incentive.stmt.lastPayment"), value: s.lastPayment, type: "amount" },
+      ]} />
+      <h2>{t("incentive.stmt.breakdown")}</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>{t("incentive.stmt.program")}</th>
+            <th className="inc-num">{t("incentive.stmt.target")}</th>
+            <th className="inc-num">{t("incentive.stmt.achieved")}</th>
+            <th className="inc-num">{t("incentive.stmt.achievementPct")}</th>
+            <th>{t("incentive.stmt.tier")}</th>
+            <th className="inc-num">{t("incentive.stmt.earnedAmount")}</th>
+            <th>{t("incentive.stmt.status")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {s.programBreakdown.map((r) => (
+            <tr key={`${r.program}-${r.status}`}>
+              <td>{r.program}</td>
+              <td className="inc-num">{formatMeasure(r.target, r.metric)}</td>
+              <td className="inc-num">{formatMeasure(r.achievement, r.metric)}</td>
+              <td className="inc-num">{formatPercent(r.achievementPercent, { decimals: 2 })}</td>
+              <td>{r.rate}</td>
+              <td className="inc-num">{formatCurrency(r.earnedAmount)}</td>
+              <td>{r.status}</td>
+            </tr>
+          ))}
+          <tr>
+            <th colSpan={5}>{t("incentive.stmt.total")}</th>
+            <th className="inc-num">{formatCurrency(s.totalEarnings)}</th>
+            <th />
+          </tr>
+        </tbody>
+      </table>
+      <h2>{t("incentive.stmt.payments")}</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>{t("incentive.stmt.period")}</th>
+            <th>{t("incentive.stmt.programs")}</th>
+            <th className="inc-num">{t("incentive.stmt.amount")}</th>
+            <th>{t("incentive.stmt.status")}</th>
+            <th>{t("incentive.stmt.paidOn")}</th>
+            <th>{t("incentive.stmt.paymentReference")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {(s.paymentHistory || []).length ? s.paymentHistory.map((h) => (
+            <tr key={`${h.batchId}-${h.periodKey}`}>
+              <td>{h.period}</td>
+              <td>{(h.programs || []).join(", ")}</td>
+              <td className="inc-num">{formatCurrency(h.amount)}</td>
+              <td>{h.status}</td>
+              <td>{formatDate(h.paymentDate)}</td>
+              <td>{h.paymentReference || "-"}</td>
+            </tr>
+          )) : (
+            <tr><td colSpan={6}>{t("incentive.stmt.noPayments")}</td></tr>
+          )}
+        </tbody>
+      </table>
+    </PrintableDocument>
+  );
 };
+
+PrintedStatement.propTypes = { statement: PropTypes.object.isRequired };
 
 const Statement = () => {
   const { t } = useTranslation();
   const chart = useChartTheme();
-  const { formatCurrency } = useFormatCurrency();
   const toast = useRef(null);
-  const periodOptions = recentMonths();
-
-  // State management
-  const [statementData, setStatementData] = useState(emptyStatement);
-  const [selectedPeriod, setSelectedPeriod] = useState(periodOptions[0].value);
+  const months = useMemo(() => monthOptions(12), []);
+  const reader = hasPermission("read:incentive");
+  const [period, setPeriod] = useState(months[0].value);
   const [agentId, setAgentId] = useState(null);
-  const [agentOptions, setAgentOptions] = useState([]);
-  const [loading, setLoading] = useState(false);
 
-  // Chart data
-  const [chartData, setChartData] = useState({});
-  const [chartOptions, setChartOptions] = useState({});
+  const loader = useCallback(() => incentiveService.statement({ agentId: agentId || undefined, period }), [agentId, period]);
+  const { data, loading, refreshing, error } = useStableLoad(loader);
+  const notAgent = data && data.eligible === false && !agentId;
+  const agentsLoader = useCallback(() => incentiveService.agents(), []);
+  const agents = useStableLoad(agentsLoader, { enabled: reader, initialData: [] });
 
-  // Breadcrumb items
-  const items = [
-    { label: t("incentive.incentive") },
-    { label: t("incentive.statement", { defaultValue: "Statement" }), url: "/incentive/statement" }
-  ];
-
-  const home = { label: t("sidebar.Accounts") };
-
-  // Users who are not agents (managers) pick an agent; agents see their own statement.
-  const loadAgentChoices = async () => {
-    const agents = await incentiveService.agents();
-    setAgentOptions(agents.map((a) => ({ label: `${a.name} (${a.code})`, value: a.id })));
-    return agents[0]?.id || null;
-  };
-
-  const loadStatement = async () => {
-    setLoading(true);
-    try {
-      const data = await incentiveService.statement({ agentId: agentId || undefined, period: selectedPeriod });
-      // A manager who is not an agent gets eligible: false; offer the agents and show the first one's statement.
-      if (!agentId && data?.eligible === false) {
-        const firstAgent = data.selectAgent ? await loadAgentChoices() : null;
-        if (firstAgent) {
-          setAgentId(firstAgent);
-          return;
-        }
-      }
-      setStatementData({ ...emptyStatement, ...data });
-      initializeChart(data);
-    } catch (error) {
-      showError(toast, error, t('incentive.failedToLoadStatement'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Initialize data and charts
+  // a manager who is not an agent sees the first eligible agent's statement, and may choose another
   useEffect(() => {
-    loadStatement();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedPeriod, agentId]);
+    if (notAgent && agents.data?.length) setAgentId(agents.data[0].id);
+  }, [notAgent, agents.data]);
 
-  const initializeChart = (statement) => {
-    // Monthly trend chart
-    const data = {
-      labels: statement.monthlyTrend.map(item => item.month),
-      datasets: [
-        {
-          label: 'Monthly Earnings',
-          data: statement.monthlyTrend.map(item => item.earnings),
-          fill: false,
-          backgroundColor: chart.alpha(chart.primary, 0.1),
-          borderColor: chart.primary,
-          tension: 0
-        }
-      ]
-    };
+  const s = data && !notAgent ? data : null;
+  const breakdown = s?.programBreakdown || [];
+  const trend = useMemo(() => s?.monthlyTrend || [], [s]);
+  const anyEarnings = trend.some((m) => Number(m.earnings) > 0);
 
-    const options = chart.options({
-      maintainAspectRatio: false,
-      aspectRatio: 0.6,
-      plugins: {
-        legend: {
-          labels: {
-            usePointStyle: true
-          }
-        }
-      },
-      scales: {
-        x: {},
-        y: {
-          ticks: {
-            callback: function(value) {
-              return formatCurrency(value);
-            }
-          }
-        }
-      }
-    });
+  const chartData = useMemo(() => ({
+    labels: trend.map((m) => m.month),
+    datasets: [{ label: t("incentive.stmt.earnings"), data: trend.map((m) => m.earnings), backgroundColor: chart.primary, borderWidth: 0, maxBarThickness: 28 }],
+  }), [trend, chart.primary, t]);
+  const chartOptions = useMemo(() => chart.options({
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true, ticks: { callback: (v) => formatCurrency(v) } } },
+  }), [chart]);
 
-    setChartData(data);
-    setChartOptions(options);
-  };
+  const print = () => printView(<PrintedStatement statement={s} />, { title: `${t("incentive.stmt.printTitle")} ${s.agentCode} ${s.period}` })
+    .catch((e) => showError(toast, e));
+  const exportCsv = () => downloadCsv(`incentive_statement_${s.agentCode}_${period}.csv`, breakdown, [
+    { field: () => s.agentName, header: t("incentive.stmt.agent") },
+    { field: () => s.period, header: t("incentive.stmt.period") },
+    { field: "program", header: t("incentive.stmt.program") },
+    { field: "target", header: t("incentive.stmt.target") },
+    { field: "achievement", header: t("incentive.stmt.achieved") },
+    { field: "achievementPercent", header: t("incentive.stmt.achievementPct") },
+    { field: "rate", header: t("incentive.stmt.tier") },
+    { field: "earnedAmount", header: t("incentive.stmt.earnedAmount") },
+    { field: "status", header: t("incentive.stmt.status") },
+  ]);
 
-  // Handle period change
-  const handlePeriodChange = (period) => {
-    setSelectedPeriod(period);
-  };
-
-  // Handle print statement
-  const handlePrintStatement = () => {
-    window.print();
-  };
-
-  // Handle export statement
-  const handleExportStatement = () => {
-    downloadCsv(`incentive_statement_${statementData.agentCode}_${selectedPeriod}.csv`, statementData.programBreakdown, [
-      { field: () => statementData.agentName, header: "Sales person" },
-      { field: () => statementData.period, header: "Period" },
-      { field: "program", header: "Program" },
-      { field: "target", header: "Target" },
-      { field: "achievement", header: "Achievement" },
-      { field: "achievementPercent", header: "Achievement %" },
-      { field: "rate", header: "Tier" },
-      { field: "earnedAmount", header: "Earned Amount" },
-      { field: "status", header: "Status" }
-    ]);
-  };
-
-  // Template functions
-  const achievementBodyTemplate = (rowData) => {
-    if (typeof rowData.achievement === 'string') {
-      return rowData.achievement;
-    }
-    return formatCurrency(rowData.achievement);
-  };
-
-  const targetBodyTemplate = (rowData) => {
-    if (typeof rowData.target === 'string') {
-      return rowData.target;
-    }
-    return formatCurrency(rowData.target);
-  };
-
-  const earnedAmountBodyTemplate = (rowData) => {
-    return formatCurrency(rowData.earnedAmount);
-  };
+  const actions = (
+    <>
+      {reader && agents.data?.length && (agentId || notAgent) ? (
+        <Dropdown value={agentId} options={agents.data.map((a) => ({ label: `${a.name} (${a.code})`, value: a.id }))} onChange={(e) => setAgentId(e.value)} filter
+          aria-label={t("incentive.stmt.agent")} className="inc-header-field" />
+      ) : null}
+      <Dropdown value={period} options={months} onChange={(e) => setPeriod(e.value)} aria-label={t("incentive.stmt.period")} className="inc-header-field" />
+      <Button type="button" label={t("incentive.stmt.print")} icon="pi pi-print" outlined onClick={print} disabled={!s} />
+      <Button type="button" label={t("incentive.stmt.export")} icon="pi pi-download" outlined onClick={exportCsv} disabled={!s} />
+    </>
+  );
 
   return (
-    <div className="container__statement">
+    <div className="inc-page">
       <Toast ref={toast} />
+      <IncentiveHeader title={t("incentive.incentiveStatement")} help={t("incentive.help.statement")} actions={actions} />
+      {error ? <FieldError error={error} /> : null}
 
-      {/* Header */}
-      <div className="top__container">
-        <div className="page__title">{t("incentive.incentiveStatement")}</div>
-        <div className="header-actions">
-          {agentOptions.length > 0 && (
-            <Dropdown
-              value={agentId}
-              options={agentOptions}
-              onChange={(e) => setAgentId(e.value)}
-              filter
-              className="period-selector"
-            />
-          )}
-          <Dropdown
-            value={selectedPeriod}
-            options={periodOptions}
-            onChange={(e) => handlePeriodChange(e.value)}
-            className="period-selector"
-          />
-          <Button
-            icon="pi pi-print"
-            className="p-button-outlined"
-            onClick={handlePrintStatement}
-            tooltip="Print Statement" aria-label="Print Statement"
-          />
-          <Button
-            icon="pi pi-download"
-            className="p-button-outlined"
-            onClick={handleExportStatement}
-            tooltip="Export to CSV" aria-label="Export to CSV"
-          />
-        </div>
-        <BreadCrumb
-          home={home}
-          className="breadCrums__view__reversal"
-          model={items}
-          separatorIcon={<SvgDot color={"#000"} />}
-        />
+      <DetailSection className="bv-loading-host">
+        <LoadingBar active={refreshing} />
+        <KeyValueGrid columns={4} items={s ? statementFacts(s, t) : statementFacts({}, t)} />
+      </DetailSection>
+
+      <StatCards items={[
+        { key: "earned", label: t("incentive.stmt.earned"), value: s ? formatCurrency(s.totalEarnings) : null },
+        { key: "ytd", label: t("incentive.stmt.ytd"), value: s ? formatCurrency(s.ytdEarnings) : null },
+        { key: "pending", label: t("incentive.stmt.pending"), value: s ? formatCurrency(s.pendingPayment) : null },
+        { key: "last", label: t("incentive.stmt.lastPayment"), value: s ? formatCurrency(s.lastPayment) : null,
+          note: s?.lastPaymentDate ? t("incentive.stmt.paidOnDate", { date: formatDate(s.lastPaymentDate) }) : null },
+      ]} />
+
+      <div className="inc-grid">
+        <DetailSection title={t("incentive.stmt.breakdown")} flush>
+          <DataTable value={breakdown} loading={loading} size="small" className="inc-table" emptyMessage={t("incentive.stmt.noPrograms")}
+            footer={breakdown.length ? (
+              <div className="inc-total"><span>{t("incentive.stmt.total")}</span><span>{formatCurrency(s.totalEarnings)}</span></div>
+            ) : null}>
+            <Column header={t("incentive.stmt.program")} field="program" />
+            <Column header={t("incentive.stmt.target")} body={(r) => formatMeasure(r.target, r.metric)} className="inc-num" headerClassName="inc-num" />
+            <Column header={t("incentive.stmt.achieved")} body={(r) => formatMeasure(r.achievement, r.metric)} className="inc-num" headerClassName="inc-num" />
+            <Column header={t("incentive.stmt.achievementPct")} body={(r) => formatPercent(r.achievementPercent, { decimals: 2 })} className="inc-num" headerClassName="inc-num" />
+            <Column header={t("incentive.stmt.tier")} field="rate" />
+            <Column header={t("incentive.stmt.earnedAmount")} body={(r) => formatCurrency(r.earnedAmount)} className="inc-num" headerClassName="inc-num" />
+            <Column header={t("incentive.stmt.status")} body={(r) => <StatusChip label={r.status} />} />
+          </DataTable>
+        </DetailSection>
+        <DetailSection title={t("incentive.stmt.trend")}>
+          {anyEarnings
+            ? <Chart type="bar" data={chartData} options={chartOptions} height="260px" />
+            : <p className="inc-empty">{t("incentive.stmt.noEarnings")}</p>}
+        </DetailSection>
       </div>
 
-      {/* Content */}
-      <div className="content-container">
-        {/* Statement Header */}
-        <Card className="statement-header">
-          <div className="header-grid">
-            <div className="agent-info">
-              <h2>{statementData.agentName}</h2>
-              <p className="agent-code">Agent Code: {statementData.agentCode}</p>
-            </div>
-            <div className="period-info">
-              <h3>{statementData.period}</h3>
-              <p className="statement-date">Statement Date: {formatAppDate(statementData.statementDate)}</p>
-            </div>
-          </div>
-        </Card>
-
-        {/* Summary Cards */}
-        <div className="summary-section">
-          <div className="summary-cards">
-            <Card className="summary-card total-earnings">
-              <div className="card-content">
-                <div className="card-icon">
-                  <i className="pi pi-wallet"></i>
-                </div>
-                <div className="card-info">
-                  <span className="card-label">Total Earnings</span>
-                  <span className="card-value">
-                    {formatCurrency(statementData.totalEarnings)}
-                  </span>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="summary-card ytd-earnings">
-              <div className="card-content">
-                <div className="card-icon">
-                  <i className="pi pi-chart-line"></i>
-                </div>
-                <div className="card-info">
-                  <span className="card-label">YTD Earnings</span>
-                  <span className="card-value">
-                    {formatCurrency(statementData.ytdEarnings)}
-                  </span>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="summary-card pending-payment">
-              <div className="card-content">
-                <div className="card-icon">
-                  <i className="pi pi-clock"></i>
-                </div>
-                <div className="card-info">
-                  <span className="card-label">Pending Payment</span>
-                  <span className="card-value">
-                    {formatCurrency(statementData.pendingPayment)}
-                  </span>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="summary-card last-payment">
-              <div className="card-content">
-                <div className="card-icon">
-                  <i className="pi pi-check-circle"></i>
-                </div>
-                <div className="card-info">
-                  <span className="card-label">Last Payment</span>
-                  <span className="card-value">
-                    {formatCurrency(statementData.lastPayment)}
-                  </span>
-                  <span className="card-date">{formatAppDate(statementData.lastPaymentDate)}</span>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="main-content-grid">
-          {/* Program Breakdown */}
-          <div className="programs-section">
-            <Card>
-              <div className="section-header">
-                <h3>Program Breakdown</h3>
-                <Badge
-                  value={statementData.programBreakdown.length}
-                  severity="info"
-                />
-              </div>
-
-              <DataTable
-                value={statementData.programBreakdown}
-                className="programs-table"
-                stripedRows
-                loading={loading}
-                emptyMessage="No program data available"
-              >
-                <Column field="program" header="Program" style={{ width: "30%" }} />
-                <Column
-                  body={targetBodyTemplate}
-                  header="Target"
-                  style={{ width: "15%", textAlign: "right" }}
-                />
-                <Column
-                  body={achievementBodyTemplate}
-                  header="Achievement"
-                  style={{ width: "15%", textAlign: "right" }}
-                />
-                <Column field="rate" header="Rate" style={{ width: "15%" }} />
-                <Column
-                  body={earnedAmountBodyTemplate}
-                  header="Earned Amount"
-                  style={{ width: "20%", textAlign: "right" }}
-                />
-              </DataTable>
-
-              <Divider />
-
-              <div className="total-row">
-                <span className="total-label">Total Earnings:</span>
-                <span className="total-amount">
-                  {formatCurrency(statementData.totalEarnings)}
-                </span>
-              </div>
-            </Card>
-          </div>
-
-          {/* Trend Chart */}
-          <div className="chart-section">
-            <Card>
-              <div className="section-header">
-                <h3>Earnings Trend (Last 13 Months)</h3>
-              </div>
-              <Chart
-                type="line"
-                data={chartData}
-                options={chartOptions}
-                height="300px"
-              />
-            </Card>
-          </div>
-        </div>
-
-        {/* Payment History */}
-        <div className="payment-history-section">
-          <Card>
-            <div className="section-header">
-              <h3>Recent Payment History</h3>
-            </div>
-
-            {/* From the statement data: the last payment and the approved results not paid yet (no sample dates) */}
-            <div className="payment-history">
-              {!statementData.lastPaymentDate && !(statementData.pendingPayment > 0) && (
-                <div className="payment-item">
-                  <div className="payment-details">
-                    <div className="payment-description">{t("followUps.noIncentivePayments", "No incentive payments yet")}</div>
-                  </div>
-                </div>
-              )}
-              {statementData.lastPaymentDate && (
-                <div className="payment-item">
-                  <div className="payment-date">
-                    <span className="date">{formatAppDate(statementData.lastPaymentDate)}</span>
-                    <span className="status paid">Paid</span>
-                  </div>
-                  <div className="payment-details">
-                    <div className="payment-description">
-                      {t("followUps.incentivePaymentFor", "Incentive payment: {{periods}}", { periods: (statementData.lastPaymentPeriods || []).join(", ") || "-" })}
-                    </div>
-                    <div className="payment-amount">
-                      {formatCurrency(statementData.lastPayment)}
-                    </div>
-                  </div>
-                </div>
-              )}
-              {statementData.pendingPayment > 0 && (
-                <div className="payment-item">
-                  <div className="payment-date">
-                    <span className="date">{t("followUps.approvedNotPaid", "Approved, not yet paid")}</span>
-                    <span className="status pending">Pending</span>
-                  </div>
-                  <div className="payment-details">
-                    <div className="payment-description">
-                      {t("followUps.incentivePaymentFor", "Incentive payment: {{periods}}", { periods: (statementData.pendingPeriods || []).join(", ") || "-" })}
-                    </div>
-                    <div className="payment-amount">
-                      {formatCurrency(statementData.pendingPayment)}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </Card>
-        </div>
-
-        {/* Statement Footer */}
-        <Card className="statement-footer">
-          <div className="footer-content">
-            <div className="footer-section">
-              <h4>Important Notes:</h4>
-              <ul>
-                <li>Incentive payments are processed monthly on the 15th of the following month</li>
-                <li>Earnings are calculated based on achievement levels and program terms</li>
-                <li>Contact your supervisor for any discrepancies in calculations</li>
-                <li>This statement is generated automatically and serves as an official record</li>
-              </ul>
-            </div>
-            <div className="footer-section">
-              <h4>Contact Information:</h4>
-              {/* The letterhead company (Company master); lines without a value are left out */}
-              <p>
-                {statementData.contact?.companyName && (<><strong>{statementData.contact.companyName}</strong><br /></>)}
-                {statementData.contact?.email && (<>Email: {statementData.contact.email}<br /></>)}
-                {statementData.contact?.phone && (<>Phone: {statementData.contact.phone}<br /></>)}
-                {!statementData.contact?.email && !statementData.contact?.phone && t("followUps.contactSupervisor", "Contact your supervisor or the finance team.")}
-              </p>
-            </div>
-          </div>
-        </Card>
-      </div>
+      <DetailSection title={t("incentive.stmt.payments")} flush>
+        <DataTable value={s?.paymentHistory || []} size="small" className="inc-table" emptyMessage={t("incentive.stmt.noPayments")}>
+          <Column header={t("incentive.stmt.period")} field="period" />
+          <Column header={t("incentive.stmt.programs")} body={(h) => (h.programs || []).join(", ")} />
+          <Column header={t("incentive.stmt.amount")} body={(h) => formatCurrency(h.amount)} className="inc-num" headerClassName="inc-num" />
+          <Column header={t("incentive.stmt.status")} body={(h) => <StatusChip label={h.status} />} />
+          <Column header={t("incentive.stmt.paidOn")} body={(h) => formatDate(h.paymentDate)} />
+          <Column header={t("incentive.stmt.paymentReference")} body={(h) => h.paymentReference || "-"} />
+          <Column header={t("incentive.batch.batch")} field="batchId" />
+        </DataTable>
+      </DetailSection>
     </div>
   );
 };

@@ -172,12 +172,11 @@ const S3FileUpload = ({
         {notUploaded > 0 && (
           <Button
             type="button"
-            label={autoUpload ? `Retry ${notUploaded} File(s)` : `Upload ${notUploaded} File(s)`}
+            label={autoUpload ? t("s3Upload.retryFiles", { count: notUploaded }) : t("s3Upload.uploadFiles", { count: notUploaded })}
             icon="pi pi-upload"
             onClick={handleUpload}
             disabled={isUploading}
             loading={isUploading}
-            className="p-button-success"
           />
         )}
       </div>

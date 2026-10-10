@@ -8,6 +8,8 @@ import SvgTable from "../../../../../../assets/icons/SvgTable";
 import { Button } from "primereact/button";
 import SvgAdd from "../../../../../../assets/icons/SvgAdd";
 import { Dialog } from "primereact/dialog";
+import DetailDialog from "../../../../../../components/DetailDialog";
+import KeyValueGrid from "../../../../../../components/KeyValueGrid";
 import InputField from "../../../../../../components/InputField";
 import DropDowns from "../../../../../../components/DropDowns";
 import SvgDropdown from "../../../../../../assets/icons/SvgDropdown";
@@ -289,54 +291,13 @@ const UserGroupAccess = () => {
           />
         </div>
       </Dialog>
-      <Dialog
-        header=" User Group Access"
-        visible={showView}
-        style={{ width: "50vw", boxShadow: "none" }}
-        onHide={() => setShowView(false)}
-        className="master__flow__common__dialog__container"
-      >
-        <div className="grid mt-1">
-          <div className=" col-12 md:col-6 lg-col-6 ">
-            <DropDowns
-              value={mainAdditionalViewData.RoleCode}
-              onChange={formik.handleChange("RoleCode")}
-              className="inputdialog__fieled"
-              label={t("generalMasters.roleCode")}
-              classNames="label__sub__add"
-              placeholder={"Select"}
-              options={item}
-              optionLabel="label"
-              optionValue={"label"}
-              dropdownIcon={<SvgDropdown color={"#000"} />}
-            />
-          </div>
-          <div className=" col-12 md:col-6 lg-col-6 ">
-            <InputField
-              classNames="input__filed"
-              value={mainAdditionalViewData.RoleName}
-              onChange={formik.handleChange("RoleName")}
-              label={t("generalMasters.roleName")}
-              placeholder={t("generalMasters.enter")}
-              textColor={"#111927"}
-              textSize={"16"}
-              textWeight={500}
-            />
-          </div>
-          <div className=" col-12 md:col-6 lg-col-6 ">
-            <InputField
-              classNames="input__filed"
-              value={mainAdditionalViewData.ActiveHours}
-              onChange={formik.handleChange("ActiveHours")}
-              label={t("generalMasters.activeHours")}
-              placeholder={t("generalMasters.enter")}
-              textColor={"#111927"}
-              textSize={"16"}
-              textWeight={500}
-            />
-          </div>
-        </div>
-      </Dialog>
+      <DetailDialog visible={showView} onHide={() => setShowView(false)} header={t("generalMasters.userGroupAccess")} size="md">
+        <KeyValueGrid columns={3} items={[
+          { label: t("generalMasters.roleCode"), value: mainAdditionalViewData?.RoleCode },
+          { label: t("generalMasters.roleName"), value: mainAdditionalViewData?.RoleName },
+          { label: t("generalMasters.activeHours"), value: mainAdditionalViewData?.ActiveHours },
+        ]} />
+      </DetailDialog>
       {/* </Card> */}
     </div>
   );

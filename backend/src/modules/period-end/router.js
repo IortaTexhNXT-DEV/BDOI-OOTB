@@ -18,11 +18,15 @@ import * as fiscal from './fiscal.js';
 import * as close from './close.js';
 import * as ye from './yearend.js';
 import * as tax from './tax.js';
-import { AUTO_CHECKS, blockingFailures, checklistItems, runChecks } from './checks.js';
+import { AUTO_CHECKS, blockingChecks, blockingFailures, checklistItems, runChecks } from './checks.js';
 import { generateDue, rjRow, saveRecurring } from './journals.js';
-import { importOpeningBalances, listOpeningBalances, OPENING_BALANCE_COLUMNS } from './opening.js';
+import { importOpeningBalances, listOpeningBalances, OPENING_BALANCE_COLUMNS, validateOpeningBalances } from './opening.js';
 import { mapColumns, parseUploadedRows, uploadFile } from '../documents/tabular.js';
 import { sendTemplate } from '../documents/uploadTemplates.js';
+import { buildPdf, printContext, sendPdf } from '../../lib/pdf/index.js';
+import { writeXlsx } from '../../lib/xlsx.js';
+import { companyName } from '../../lib/letterhead.js';
+import * as st from './statements.js';
 
 const { router, define } = moduleRouter('Period End', '/period-end');
 const read = [requireAuth, requirePermission('read:period-end', 'read:journal-vouchers')];
@@ -45,12 +49,24 @@ define({
   method: 'GET', path: '/opening-balances/template', summary: 'Opening balances upload template (XLSX)', screen: `${S} > Period Management > Import opening balances`,
   middleware: read, response: '(xlsx file)', handler: async (_req, res) => sendTemplate(res, 'opening-balances'),
 });
+const openingRows = (req) => parseUploadedRows(req.file).map((r) => mapColumns(r, OPENING_BALANCE_COLUMNS));
+define({
+  method: 'POST', path: '/opening-balances/validate', summary: 'Go-live: check the old system\'s trial balance (multipart "file" + goLiveDate) without loading it: rows, accounts, total debit and credit, difference, every error with its row and column, and the earlier load of the fiscal year that a load would replace',
+  screen: `${S} > Period Management > Import opening balances`, middleware: [...write, uploadFile], request: { goLiveDate: '2026-10-01', file: '(multipart) Opening_Balances_Upload_Template.xlsx' },
+  response: { success: true, data: { valid: false, fiscalYear: 'FY2026', goLiveDate: '2026-10-01', asAt: '2026-09-30', rows: 8, accounts: 7, totalDebit: 2102400, totalCredit: 2102300, difference: 100,
+    ignored: [{ row: 9, accountCode: '1301001' }], errors: [{ row: 4, column: 'Account Code', message: 'Account 9999999 is not in the chart of accounts' }],
+    previous: { goLiveDate: '2026-10-01', accounts: 7, loadedAt: '2026-10-02T03:00:00Z', loadedBy: 'Ana Santos' } } },
+  handler: async (req, res) => {
+    const rows = openingRows(req);
+    ok(res, await tx((db) => validateOpeningBalances(db, rows, { goLiveDate: String(req.body?.goLiveDate || '').slice(0, 10) })));
+  },
+});
 define({
   method: 'POST', path: '/opening-balances/import', summary: 'Go-live: load the old system\'s trial balance (multipart "file" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces it',
   screen: `${S} > Period Management > Import opening balances`, middleware: [...write, uploadFile], request: { goLiveDate: '2026-10-01', file: '(multipart) Opening_Balances_Upload_Template.xlsx' },
   response: { success: true, data: { fiscalYear: 'FY2026', goLiveDate: '2026-10-01', asAt: '2026-09-30', accounts: 7, totalDebit: 2102400, totalCredit: 2102400, replaced: 0, ignored: [{ row: 9, accountCode: '1301001' }] } },
   handler: async (req, res) => {
-    const rows = parseUploadedRows(req.file).map((r) => mapColumns(r, OPENING_BALANCE_COLUMNS));
+    const rows = openingRows(req);
     const out = await tx((db) => importOpeningBalances(db, rows, { goLiveDate: String(req.body?.goLiveDate || '').slice(0, 10) }));
     await audit(req, { entity: 'opening_balances', entityId: out.fiscalYear, action: 'go-live-import', after: out });
     const zero = out.ignored.length ? `; ${out.ignored.length} row(s) with no debit or credit (zero balance) ignored: ${out.ignored.map((x) => x.accountCode).join(', ')}` : '';
@@ -77,35 +93,96 @@ define({
     created(res, fiscal.fyRow(f));
   },
 });
+// latest status change of each period of a fiscal year: who, when, why
+const lastChanges = async (fiscalYear) => new Map((await pool.query(`SELECT DISTINCT ON (h.period) h.period, h.to_status, h.changed_at, h.remarks, h.source, h.reason_code,
+    COALESCE(u.display_name, u.username) AS name, r.name AS reason_name
+  FROM period_status_history h LEFT JOIN users u ON u.id = h.changed_by
+    LEFT JOIN master_records r ON r.type_code = 'reason-code' AND lower(r.code) = lower(h.reason_code)
+  WHERE h.fiscal_year = $1 ORDER BY h.period, h.changed_at DESC, h.id DESC`, [fiscalYear])).rows
+  .map((h) => [h.period, { to: h.to_status, at: h.changed_at, byName: h.name || null, reasonCode: h.reason_code, reasonName: h.reason_name, remarks: h.remarks, source: h.source }]));
+
+// the status moves Period Management offers on a period, each { allowed, reason, message } for the signed-in user
+const ACTION_TARGETS = { softClose: 'soft_closed', close: 'closed', reopen: 'open' };
+async function periodActions(db, p, user) {
+  const offered = {
+    softClose: p.status === 'open' && !p.is_adjustment, close: ['open', 'soft_closed'].includes(p.status), reopen: ['soft_closed', 'closed', 'locked'].includes(p.status),
+  };
+  const out = {};
+  for (const [action, to] of Object.entries(ACTION_TARGETS)) {
+    if (!offered[action]) continue;
+    const problem = await fiscal.transitionProblem(db, p, to, user);
+    out[action] = problem ? { allowed: false, reason: problem.code, message: problem.message } : { allowed: true };
+  }
+  return out;
+}
+
 define({
-  method: 'GET', path: '/fiscal-years/:code', summary: 'A fiscal year with its periods', screen: `${S} > Period Management`, middleware: read,
-  response: { success: true, data: { code: 'FY2026', periods: [{ period: '2026-01', periodNo: 1, status: 'closed' }] } },
+  method: 'GET', path: '/fiscal-years/:code', summary: 'A fiscal year with its periods, the latest status change of each period and the status moves the user may make',
+  screen: `${S} > Period Management`, middleware: read,
+  response: { success: true, data: { code: 'FY2026', periods: [{ period: '2026-01', periodNo: 1, status: 'closed',
+    lastChange: { to: 'closed', at: '2026-02-05T02:00:00Z', byName: 'Ana Santos', reasonCode: 'PCL-MONTHEND', reasonName: 'Month-end close completed', remarks: 'Month-end close completed', source: 'manual' },
+    actions: { reopen: { allowed: false, reason: 'permission', message: 'Reopening a period requires permission approve:period-end' } } }] } },
   handler: async (req, res) => {
     const f = await tx(async (db) => { await fiscal.ensureCalendar(db); return fiscal.getFiscalYear(db, req.params.code); });
     const periods = await fiscal.periodsOf(pool, f.code);
     const runs = (await pool.query('SELECT DISTINCT ON (period) period, run_number, status, id FROM period_close_runs WHERE fiscal_year = $1 ORDER BY period, created_at DESC', [f.code])).rows;
     const runOf = new Map(runs.map((r) => [r.period, r]));
-    ok(res, { ...fiscal.fyRow(f), periods: periods.map((p) => ({ ...fiscal.periodRow(p), closeRun: runOf.get(p.period) ? { id: runOf.get(p.period).id, runNumber: runOf.get(p.period).run_number, status: runOf.get(p.period).status } : null })) });
+    const changes = await lastChanges(f.code);
+    const rows = [];
+    for (const p of periods) {
+      const run = runOf.get(p.period);
+      rows.push({ ...fiscal.periodRow(p), closeRun: run ? { id: run.id, runNumber: run.run_number, status: run.status } : null,
+        lastChange: changes.get(p.period) || null, actions: await periodActions(pool, p, req.user) });
+    }
+    ok(res, { ...fiscal.fyRow(f), periods: rows });
+  },
+});
+const statusSchema = z.object({ status: z.enum(['open', 'soft_closed', 'closed']), reasonCode: z.string().trim().max(60).optional(), note: z.string().trim().max(1000).optional() });
+define({
+  method: 'GET', path: '/periods/:period/status-preview', summary: 'Before a status change (read-only): whether the user may make it and why not, the reason context to choose from, and the blocking month-end checks a soft-close or close runs first',
+  screen: `${S} > Period Management`, middleware: read, query: { status: 'soft_closed' },
+  response: { success: true, data: { period: '2026-08', fiscalYear: 'FY2026', from: 'open', to: 'soft_closed', allowed: false, reason: 'checks', message: null, reasonContext: 'period_close',
+    checks: [{ code: 'unposted_journals', label: 'No unposted or pending journals in the period', severity: 'blocking', status: 'failed', count: 2, amount: null }] } },
+  handler: async (req, res) => {
+    const to = String(req.query.status || '');
+    if (!['open', 'soft_closed', 'closed'].includes(to)) throw badRequest('status must be open, soft_closed or closed');
+    const p = await fiscal.getPeriod(pool, req.params.period);
+    const problem = await fiscal.transitionProblem(pool, p, to, req.user);
+    const context = fiscal.reasonContextOf(p.status, to);
+    const checks = !problem && context === 'period_close' ? await blockingChecks(pool, p) : [];
+    const failed = checks.some((c) => c.status === 'failed');
+    ok(res, {
+      period: p.period, fiscalYear: p.fiscal_year, from: p.status, to, reasonContext: context, allowed: !problem && !failed,
+      reason: problem ? problem.code : (failed ? 'checks' : null), message: problem ? problem.message : null,
+      checks: checks.map((c) => ({ code: c.code, label: c.label, severity: c.severity, status: c.status, count: c.count ?? 0, amount: c.amount ?? null })),
+    });
   },
 });
 define({
-  method: 'POST', path: '/periods/:period/status', summary: 'Open, soft-close or close a period (closing runs the blocking checks; reopening needs approve:period-end and remarks; locked periods cannot change)',
-  screen: `${S} > Period Management`, middleware: [...write, validate(z.object({ status: z.enum(['open', 'soft_closed', 'closed']), remarks: z.string().max(1000).optional() }))],
-  request: { status: 'soft_closed', remarks: 'Pending insurer statements' }, response: { success: true, data: { period: '2026-08', status: 'soft_closed' } },
+  method: 'POST', path: '/periods/:period/status', summary: 'Open, soft-close or close a period with a reason of the Reason Codes master (period_close to soft-close or close, period_reopen to reopen; note when the reason asks for one). Closing runs the blocking checks; reopening needs approve:period-end; locked periods cannot change',
+  screen: `${S} > Period Management`, middleware: [...write, validate(statusSchema)],
+  request: { status: 'soft_closed', reasonCode: 'PCL-MONTHEND', note: 'Insurer statements pending' }, response: { success: true, data: { period: '2026-08', status: 'soft_closed' } },
   handler: async (req, res) => {
     const before = (await pool.query('SELECT * FROM accounting_periods WHERE period = $1', [req.params.period])).rows[0];
-    const p = await tx((db) => fiscal.changePeriodStatus(db, req.params.period, req.body.status, { remarks: req.body.remarks, user: req.user, runBlockingChecks: blockingFailures }));
-    await audit(req, { entity: 'accounting_period', entityId: req.params.period, action: `status:${req.body.status}`, before: before && fiscal.periodRow(before), after: fiscal.periodRow(p) });
+    const { row: p, reason } = await tx((db) => fiscal.changePeriodStatus(db, req.params.period, req.body.status,
+      { reasonCode: req.body.reasonCode, note: req.body.note, user: req.user, runBlockingChecks: blockingFailures }));
+    await audit(req, { entity: 'accounting_period', entityId: req.params.period, action: `status:${req.body.status}`, before: before && fiscal.periodRow(before),
+      after: { ...fiscal.periodRow(p), reasonCode: reason.code, note: reason.note } });
     ok(res, fiscal.periodRow(p), `Period ${req.params.period} is ${req.body.status.replace('_', '-')}`);
   },
 });
 define({
-  method: 'GET', path: '/periods/:period/history', summary: 'Status history of a period (who opened, soft-closed, closed, reopened or locked it and why)', screen: `${S} > Period Management`, middleware: read,
-  response: { success: true, data: [{ from: 'open', to: 'closed', remarks: 'August closed', changedBy: 'Finance Manager', changedAt: '2026-09-05T02:00:00Z' }] },
+  method: 'GET', path: '/periods/:period/history', summary: 'Status history of a period (who opened, soft-closed, closed, reopened or locked it, with their roles, and why)', screen: `${S} > Period Management`, middleware: read,
+  response: { success: true, data: [{ id: 12, from: 'open', to: 'closed', remarks: 'Month-end close completed', reasonCode: 'PCL-MONTHEND', reasonName: 'Month-end close completed', source: 'manual',
+    changedBy: 'Finance Manager', changedByName: 'Finance Manager', changedByRoles: ['Accounting Manager'], changedAt: '2026-09-05T02:00:00Z' }] },
   handler: async (req, res) => {
-    const rows = (await pool.query(`SELECT h.*, COALESCE(u.display_name, u.username) AS name FROM period_status_history h LEFT JOIN users u ON u.id = h.changed_by
+    const rows = (await pool.query(`SELECT h.*, COALESCE(u.display_name, u.username) AS name, r.name AS reason_name,
+        COALESCE((SELECT array_agg(ro.name ORDER BY ro.name) FROM user_roles ur JOIN roles ro ON ro.id = ur.role_id WHERE ur.user_id = u.id), '{}') AS role_names
+      FROM period_status_history h LEFT JOIN users u ON u.id = h.changed_by
+        LEFT JOIN master_records r ON r.type_code = 'reason-code' AND lower(r.code) = lower(h.reason_code)
       WHERE h.period = $1 ORDER BY h.changed_at DESC, h.id DESC`, [req.params.period])).rows;
-    ok(res, rows.map((h) => ({ from: h.from_status, to: h.to_status, remarks: h.remarks, source: h.source, referenceId: h.reference_id, changedBy: h.name || (h.changed_by ? h.changed_by : 'system'), changedAt: h.changed_at })));
+    ok(res, rows.map((h) => ({ id: h.id, from: h.from_status, to: h.to_status, remarks: h.remarks, reasonCode: h.reason_code, reasonName: h.reason_name, source: h.source,
+      referenceId: h.reference_id, changedBy: h.name || (h.changed_by ? h.changed_by : 'system'), changedByName: h.name || null, changedByRoles: h.role_names, changedAt: h.changed_at })));
   },
 });
 define({
@@ -279,16 +356,29 @@ define({
 
 // ---------- year-end close ----------
 const yeExample = { id: 'yec_1', runNumber: 'YEC-2026-00001', fiscalYear: 'FY2025', status: 'closed', netIncome: 1250000, nextFiscalYear: 'FY2026' };
+const yeLink = (fiscalYear) => `/accounts/period-end/year-end?fiscalYear=${fiscalYear}`;
 define({
   method: 'GET', path: '/year-end', summary: 'Fiscal years with their year-end close runs', screen: `${S} > Year-End Close`, middleware: read,
   response: { success: true, data: [{ code: 'FY2025', status: 'closed', runs: [yeExample] }] }, handler: async (_req, res) => ok(res, await tx((db) => ye.listYearEnd(db))),
 });
 define({
-  method: 'POST', path: '/year-end', summary: 'Start the year-end close of a fiscal year (the year becomes "closing")', screen: `${S} > Year-End Close`,
+  method: 'GET', path: '/year-end/overview', summary: 'The Year-End Close screen of a fiscal year (default: the year being closed, else the oldest open year): run, the five steps with their checks, adjustment journals, closing entries and opening balances (previewed until the close), history of the runs and the actions the user may take with the reason when not',
+  screen: `${S} > Year-End Close`, middleware: read, query: { fiscalYear: 'FY2026' },
+  response: { success: true, data: { fiscalYear: { code: 'FY2026', status: 'closing', adjustmentPeriod: '2026-13' }, run: { ...yeExample, status: 'checked', preparedByName: 'Ana Santos' },
+    steps: [{ key: 'prerequisites', status: 'passed' }, { key: 'adjustments', status: 'passed' }, { key: 'closing', status: 'pending' }, { key: 'approval', status: 'pending-approval' }, { key: 'opening', status: 'pending' }],
+    currentStep: 'approval', checks: [{ code: 'periods_closed', step: 'prerequisites', status: 'passed', data: { total: 12, closed: 12 } }],
+    closing: { source: 'preview', netIncome: 1250000, lines: [{ accountCode: '3201001', accountType: 'income', balance: -1800000, debit: 1800000, credit: 0 }] },
+    opening: { source: 'preview', fiscalYear: 'FY2027', totalDebit: 2102400, totalCredit: 2102400, lines: [] },
+    actions: { close: { allowed: false, reason: 'maker-checker' } } } },
+  handler: async (req, res) => ok(res, await tx((db) => ye.yearEndOverview(db, req.query.fiscalYear ? String(req.query.fiscalYear) : null, req.user))),
+});
+define({
+  method: 'POST', path: '/year-end', summary: 'Start the year-end close of a fiscal year (the year becomes "closing"); the pre-checks run at once (status checked when they all pass)', screen: `${S} > Year-End Close`,
   middleware: [...write, validate(z.object({ fiscalYear: z.string().regex(/^FY\d{4}$/) }))], request: { fiscalYear: 'FY2025' }, response: { success: true, data: yeExample },
   handler: async (req, res) => {
     const r = await tx((db) => ye.createYearEnd(db, req.body.fiscalYear, req.user));
-    await audit(req, { entity: 'year_end_run', entityId: r.id, action: 'create', after: { runNumber: r.run_number, fiscalYear: r.fiscal_year } });
+    await audit(req, { entity: 'year_end_run', entityId: r.id, action: 'create', after: { runNumber: r.run_number, fiscalYear: r.fiscal_year, status: r.status } });
+    if (r.status === 'checked') await notifyYearEnd('ready', { id: r.id, runNumber: r.run_number, fiscalYear: r.fiscal_year }, req);
     created(res, await ye.getYearEnd(pool, r.id));
   },
 });
@@ -296,20 +386,46 @@ define({
   method: 'GET', path: '/year-end/:id', summary: 'A year-end close run with its checks, closing journals and opening balances', screen: `${S} > Year-End Close`, middleware: read,
   response: { success: true, data: yeExample }, handler: async (req, res) => ok(res, await ye.getYearEnd(pool, req.params.id)),
 });
-const yeAction = (path, summary, schema, fn, action, mw = write) => define({
-  method: 'POST', path, summary, screen: `${S} > Year-End Close`, middleware: [...mw, validate(schema)], request: {}, response: { success: true, data: yeExample },
+// Approval notifications: a run ready to close and a reversal request go to approve:period-end, the decisions to the maker.
+async function notifyYearEnd(event, r, req, before = {}) {
+  const base = { document: 'Year-end close', number: r.runNumber, link: yeLink(r.fiscalYear), entity: 'year_end_run', entityId: r.id };
+  if (event === 'ready') {
+    await notifyApprovers({ ...base, audience: APPROVE, by: req.user.username, message: `${r.runNumber}: fiscal year ${r.fiscalYear} is ready to close (started by ${req.user.username})` });
+  } else if (event === 'reverse-request') {
+    await notifyApprovers({ ...base, audience: APPROVE, by: req.user.username, title: `Reversal of year-end close ${r.runNumber} awaiting approval`,
+      message: `${req.user.username} requested the reversal of the close of ${r.fiscalYear}: ${r.reverseReason}` });
+  } else if (event === 'close') {
+    await notifyDecision({ ...base, userId: r.preparedBy, decidedBy: req.user.id, approved: true, status: 'closed', by: req.user.username,
+      message: `Fiscal year ${r.fiscalYear} closed by ${req.user.username}` });
+  } else if (event === 'reverse') {
+    await notifyDecision({ ...base, userId: before.reverseRequestedBy, decidedBy: req.user.id, approved: true, status: 'reversed', by: req.user.username,
+      message: `The close of ${r.fiscalYear} was reversed; approved by ${req.user.username}` });
+  }
+}
+const yeAction = (path, summary, schema, fn, action, mw = write, request = {}) => define({
+  method: 'POST', path, summary, screen: `${S} > Year-End Close`, middleware: [...mw, validate(schema)], request, response: { success: true, data: yeExample },
   handler: async (req, res) => {
+    const before = (await pool.query('SELECT status, reverse_requested_by FROM year_end_runs WHERE id = $1 OR run_number = $1', [req.params.id])).rows[0] || {};
     const r = await tx((db) => fn(db, req));
-    await audit(req, { entity: 'year_end_run', entityId: r.id, action, after: { runNumber: r.runNumber, status: r.status, fiscalYear: r.fiscalYear, netIncome: r.netIncome, ...req.body } });
+    await audit(req, { entity: 'year_end_run', entityId: r.id, action, before: { status: before.status },
+      after: { runNumber: r.runNumber, status: r.status, fiscalYear: r.fiscalYear, netIncome: r.netIncome, reverseReasonCode: r.reverseReasonCode, ...req.body } });
+    if (action === 'check' && before.status === 'draft' && r.status === 'checked') await notifyYearEnd('ready', r, req);
+    if (['close', 'reverse-request', 'reverse'].includes(action)) await notifyYearEnd(action, r, req, { reverseRequestedBy: before.reverse_requested_by });
     ok(res, r);
   },
 });
-yeAction('/year-end/:id/check', 'Run the year-end pre-checks', z.object({}).passthrough(), (db, req) => ye.checkYearEnd(db, req.params.id), 'check');
-yeAction('/year-end/:id/close', 'Close the fiscal year: closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year (approve:period-end)',
-  z.object({}).passthrough(), (db, req) => ye.closeYearEnd(db, req.params.id, req.user), 'close', approve);
-yeAction('/year-end/:id/reverse', 'Reverse a year-end close until the first period of the next year is closed (approve:period-end; reason required)', z.object({ reason: z.string().min(1).max(1000) }),
-  (db, req) => ye.reverseYearEnd(db, req.params.id, req.user, req.body), 'reverse', approve);
-yeAction('/year-end/:id/cancel', 'Cancel a year-end close run that has not closed the year', z.object({}).passthrough(), (db, req) => ye.cancelYearEnd(db, req.params.id), 'cancel');
+const remarks = z.object({ remarks: z.string().trim().max(1000).optional() });
+yeAction('/year-end/:id/check', 'Run the year-end pre-checks again and keep the result on the run', z.object({}).passthrough(), (db, req) => ye.checkYearEnd(db, req.params.id, req.user), 'check');
+yeAction('/year-end/:id/close', 'Close the fiscal year (approve:period-end; maker-checker: not the user who started the run): closing entries (P&L to current year P/L to retained earnings), opening balances of the next year, lock the periods, create the next year',
+  remarks, (db, req) => ye.closeYearEnd(db, req.params.id, req.user, req.body), 'close', approve, { remarks: 'Audit adjustments reviewed' });
+yeAction('/year-end/:id/reverse-request', 'Request the reversal of a closed year with a reason (Reason Codes master, context year_end_reverse); possible until the first period of the next year is closed',
+  z.object({ reasonCode: z.string().trim().min(1).max(60), note: z.string().trim().max(1000).optional() }), (db, req) => ye.requestReversal(db, req.params.id, req.user, req.body), 'reverse-request', write,
+  { reasonCode: 'YER-AUDITADJ', note: 'Adjustments of the external auditor' });
+yeAction('/year-end/:id/reverse-request/withdraw', 'Withdraw a reversal request (the requester, or a user with approve:period-end)', z.object({}).passthrough(),
+  (db, req) => ye.withdrawReversal(db, req.params.id, req.user), 'reverse-withdraw', [requireAuth, requirePermission('write:period-end', APPROVE)]);
+yeAction('/year-end/:id/reverse', 'Approve the requested reversal and reverse the close (approve:period-end; maker-checker: not the requester): closing entries reversed, opening balances removed, periods unlocked',
+  remarks, (db, req) => ye.reverseYearEnd(db, req.params.id, req.user, req.body), 'reverse', approve, { remarks: 'Reversal agreed with the external auditor' });
+yeAction('/year-end/:id/cancel', 'Cancel a year-end close run that has not closed the year', z.object({}).passthrough(), (db, req) => ye.cancelYearEnd(db, req.params.id, req.user), 'cancel');
 define({
   method: 'POST', path: '/adjustments', summary: 'Year-end adjustment journal in adjustment period 13 (pending; approved and posted by a second user through POST /accounting/transactions/:id/post)',
   screen: `${S} > Year-End Close`, middleware: [...write, validate(z.object({ fiscalYear: z.string(), description: z.string().min(2).max(500), lines: z.array(lineSchema).min(2) }))],
@@ -327,17 +443,73 @@ define({
 });
 
 // ---------- financial statements (catalogue reports shaped for the statement screens) ----------
-const STATEMENTS = { 'income-statement': 'income-statement', 'balance-sheet': 'balance-sheet', 'trial-balance': 'trial-balance-ocm', 'gl-detail': 'gl-detail' };
+const readStatements = [requireAuth, requirePermission('read:period-end', 'read:journal-vouchers', 'read:reports')];
+const FS = 'Accounts > Period End > Financial Statements';
+const XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'date must be YYYY-MM-DD');
+const statementFields = { FromDate: day.optional(), ToDate: day.optional(), Account: z.string().trim().max(20).optional(), ReportCriteria: z.string().max(40).optional() };
+const fromBeforeTo = (q) => !q.FromDate || !q.ToDate || q.FromDate <= q.ToDate;
+const rangeError = { message: 'From date must be on or before To date', path: ['ToDate'] };
+const statementQuery = z.object(statementFields).refine(fromBeforeTo, rangeError);
+const exportQuery = z.object({ ...statementFields, format: z.enum(['xlsx', 'pdf']).default('xlsx') }).refine(fromBeforeTo, rangeError);
+const statementType = (type) => {
+  if (!st.STATEMENT_TYPES[type]) throw notFound('Unknown statement');
+  return st.STATEMENT_TYPES[type];
+};
+
+/** Run the catalogue report of a statement and lay it out (statements.js). */
+async function loadStatement(type, q, user) {
+  const def = statementType(type);
+  const { runReport } = await import('../reports/service.js');
+  const r = await runReport(def.report, { ...q, ReportCriteria: def.criteria }, { user, page: 1, perPage: 5000 });
+  const ranges = await st.statementRanges(pool, r.params.from, r.params.to);
+  return { report: r, statement: st.buildStatement(type, r, ranges) };
+}
+
 define({
-  method: 'GET', path: '/statements/:type', summary: 'Financial statement (income-statement, balance-sheet, trial-balance, gl-detail) for FromDate / ToDate, from the report catalogue',
-  screen: 'Accounts > Period End > Financial Statements', middleware: [requireAuth, requirePermission('read:period-end', 'read:journal-vouchers', 'read:reports')], query: { FromDate: '2026-01-01', ToDate: '2026-09-30' },
-  response: { success: true, data: { rows: [{ accountType: 'income', fsGroup: 'Revenue', accountCode: '3201001', currentPeriod: 183803.75 }], summary: { netIncome: 120000 } } },
+  method: 'GET', path: '/statements/periods', summary: 'Fiscal years with their twelve periods for the period choice of the financial statements, and the default period (the one containing today)',
+  screen: FS, middleware: readStatements,
+  response: { success: true, data: { today: '2026-10-09', current: { fiscalYear: 'FY2027', period: '2026-10' }, fiscalYears: [{ code: 'FY2027', startDate: '2026-04-01', endDate: '2027-03-31', status: 'open', periods: [{ period: '2026-10', periodNo: 7, startDate: '2026-10-01', endDate: '2026-10-31', status: 'open' }] }] } },
+  handler: async (_req, res) => ok(res, await tx((db) => st.statementCalendar(db))),
+});
+define({
+  method: 'GET', path: '/statements/:type', summary: 'Financial statement (income-statement, balance-sheet, trial-balance; gl-detail: postings of an Account with the opening and running balance) for FromDate / ToDate, from the report catalogue; statement: the layout (sections, groups, lines, totals, the date range of each column, the card figures)',
+  screen: FS, middleware: [...readStatements, validate(statementQuery, 'query')], query: { FromDate: '2026-10-01', ToDate: '2026-10-31' },
+  response: { success: true, data: { rows: [{ accountType: 'income', fsGroup: 'Revenue', accountCode: '3201001', currentPeriod: 183803.75 }], summary: { netIncome: 120000 },
+    statement: { type: 'income-statement', title: 'Income Statement', from: '2026-10-01', to: '2026-10-31', measures: [{ key: 'currentPeriod', label: 'This period', from: '2026-10-01', to: '2026-10-31' }],
+      sections: [{ key: 'income', label: 'Income', groups: [{ label: 'Revenue', lines: [{ accountCode: '3201001', accountName: 'Brokerage Commission Income', values: { currentPeriod: 183803.75 }, drill: true }], total: { currentPeriod: 183803.75 } }] }],
+      result: { key: 'netIncome', label: 'Net income (loss)', values: { currentPeriod: 120000 } }, cards: { totalIncome: 183803.75, totalExpense: 63803.75, netIncome: 120000 } } } },
   handler: async (req, res) => {
-    const code = STATEMENTS[req.params.type];
-    if (!code) throw notFound('Unknown statement');
-    const { runReport } = await import('../reports/service.js');
-    const r = await runReport(code, req.query, { user: req.user, page: 1, perPage: 5000 });
-    ok(res, { report: r.report, columns: r.columns, rows: r.rows, totals: r.totals, summary: r.summary, params: r.params, total: r.total });
+    if (req.params.type === 'gl-detail') {
+      const { runReport } = await import('../reports/service.js');
+      const r = await runReport('gl-detail', { ...req.query, ReportCriteria: 'Account' }, { user: req.user, page: 1, perPage: 5000 });
+      return ok(res, { report: r.report, columns: r.columns, rows: r.rows, totals: r.totals, summary: r.summary, params: r.params, total: r.total });
+    }
+    const { report: r, statement } = await loadStatement(req.params.type, req.query, req.user);
+    return ok(res, { report: r.report, columns: r.columns, rows: r.rows, totals: r.totals, summary: r.summary, params: r.params, total: r.total, statement });
+  },
+});
+define({
+  method: 'GET', path: '/statements/:type/export', summary: 'Financial statement file: format=xlsx (default) or pdf, with the company, the statement title, the period, printed by / at and the currency',
+  screen: `${FS} > Export, Print`, middleware: [...readStatements, validate(exportQuery, 'query')],
+  query: { FromDate: '2026-10-01', ToDate: '2026-10-31', format: 'pdf' }, response: '(application/pdf | application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)',
+  handler: async (req, res) => {
+    const { format, ...q } = req.query;
+    const { statement } = await loadStatement(req.params.type, q, req.user);
+    const print = await printContext({ user: req.user });
+    const currency = (await getSetting('currency.default', 'PHP')) || 'PHP';
+    const name = `${req.params.type}_${statement.from || statement.to}_${statement.to}`;
+    await audit(req, { entity: 'financial_statement', entityId: req.params.type, action: 'export', after: { format, from: statement.from, to: statement.to } });
+    if (format === 'pdf') {
+      sendPdf(res, buildPdf({ ...print, ...st.statementPdfSpec(statement, { ...print, currency }) }), `${name}.pdf`, 'attachment');
+      return;
+    }
+    const { excelBrand } = await import('../reports/service.js');
+    const sheet = st.statementSheet(statement, { companyName: print.letterhead?.name || (await companyName()), generatedBy: print.generatedBy, generatedAt: print.generatedAt,
+      currency, format: print.format, logo: !!print.brand?.excel?.logo });
+    res.setHeader('Content-Type', XLSX);
+    res.setHeader('Content-Disposition', `attachment; filename="${name}.xlsx"`);
+    res.send(writeXlsx({ sheets: [sheet], title: statement.title, brand: excelBrand(print) }));
   },
 });
 

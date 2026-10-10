@@ -35,7 +35,7 @@ export const TRANSACTION_TABLES = [
   // the ledger and period-end processing: journals, periods and fiscal years (regenerated open on demand), closes
   'journal_vouchers', 'journal_lines', 'accounting_periods', 'fiscal_years',
   'period_status_history', 'period_close_runs', 'period_close_run_checks', 'period_close_entries',
-  'recurring_journals', 'recurring_journal_runs', 'year_end_runs', 'bir_2307_certificates',
+  'recurring_journals', 'recurring_journal_runs', 'year_end_runs', 'year_end_run_history', 'bir_2307_certificates',
   // bank reconciliation (statement formats, transaction types and match rules are configuration)
   'bank_statements', 'bank_statement_lines', 'bank_rec_matches', 'bank_rec_match_items', 'bank_reconciliations', 'bank_reconciliation_history',
   // comsub adjustments on return premium, claim settlement cash, refunds due from insurers, direct-bill client payments
@@ -54,8 +54,9 @@ export const TRANSACTION_TABLES = [
   'work_tasks',
   // integrations: CTPL authentication of each cover, bank payment batches and their lines
   'ctpl_authentications', 'bank_payment_batches', 'bank_payment_batch_lines',
-  // BIR forms and invoicing: return filing records, sales invoices and their payments, EIS outbox, loose-leaf book prints
-  'bir_return_filings', 'sales_invoices', 'sales_invoice_lines', 'sales_invoice_payments', 'eis_submissions', 'cas_book_prints',
+  // BIR forms and invoicing: return filing records, generated DAT files, sales invoices and their payments, EIS outbox,
+  // loose-leaf book prints
+  'bir_return_filings', 'bir_dat_files', 'sales_invoices', 'sales_invoice_lines', 'sales_invoice_payments', 'eis_submissions', 'cas_book_prints',
   // overriding commission from insurers: computations and settlements (the agreements are configuration)
   'override_computations', 'override_settlements',
   // due diligence of the clients: signatories, beneficial owners, KYC documents
@@ -134,6 +135,8 @@ export const MASTER_CONFIG_TABLES = [
   // distribution and reporting configuration: lead assignment rules, distribution channels, brand-new vehicle
   // programmes, campaign segments and templates, Report Builder saved reports
   'lead_assignment_rules', 'distribution_channels', 'motor_programmes', 'campaign_segments', 'campaign_templates', 'report_builder_reports',
+  // CAS registration documents (system description, backup procedure): approved versions kept as the system's documentation
+  'cas_documents',
 ];
 
 /**

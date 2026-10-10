@@ -1,18 +1,13 @@
 /**
- * In-app replacements for the browser's native window.alert / window.confirm.
+ * In-app replacements for the browser's native window.alert / window.confirm / window.prompt.
  *
- * <AppDialogs /> (components/AppDialogs, mounted once in App.js) registers the application toast and renders the shared
- * PrimeReact <ConfirmDialog tagKey={APP_DIALOG_TAG} />. Screens that mount their own <ConfirmDialog /> (no tagKey) are not
- * affected: PrimeReact only opens the dialog whose tagKey matches the confirmDialog() call.
+ * <AppDialogs /> (components/AppDialogs, mounted once in App.js) registers the application toast and the host of the
+ * shared confirmation dialog (components/ConfirmDialog), in which confirmAction and promptText ask their question.
  */
-import { confirmDialog } from "primereact/confirmdialog";
-import { InputText } from "primereact/inputtext";
-import { InputTextarea } from "primereact/inputtextarea";
 import i18n from "../i18n";
+import { openConfirm } from "../components/ConfirmDialog/openConfirm";
 import logger from "./logger";
 import { readableError } from "./apiError";
-
-export const APP_DIALOG_TAG = "app-dialog";
 
 let toastRef = null;
 
@@ -62,75 +57,58 @@ export const notifyWarn = (message) => notify("warn", message);
 export const notifyInfo = (message) => notify("info", message);
 
 /**
- * In-app text prompt (in place of window.prompt): a dialog with a text box. Resolves the text entered (trimmed) when the
- * user presses OK, null when they cancel or close the dialog, so `const reason = await promptText(msg); if (!reason)
- * return;` keeps the native behaviour.
- * @param {string} message label shown above the box
+ * In-app text prompt (in place of window.prompt), shown in the shared confirmation dialog (components/ConfirmDialog) with
+ * a text box. Resolves the text entered (trimmed) when the user confirms, null when they cancel or close the dialog, so
+ * `const reason = await promptText(msg); if (!reason) return;` keeps the native behaviour.
+ * @param {string} message label of the box
  * @param {string} [defaultValue]
- * @param {{ header?: string, acceptLabel?: string, rejectLabel?: string, multiline?: boolean }} [options]
+ * @param {{ header?: string, title?: string, acceptLabel?: string, rejectLabel?: string, multiline?: boolean,
+ *   required?: boolean, minLength?: number, maxLength?: number, message?: string, facts?: Array, note?: string,
+ *   severity?: "neutral"|"warning"|"danger" }} [options] the summary of what is decided (message, facts) is shown above the box
  * @returns {Promise<string|null>}
  */
-export const promptText = (message, defaultValue = "", { header, acceptLabel, rejectLabel, multiline = true } = {}) =>
-  new Promise((resolve) => {
-    let settled = false;
-    let current = defaultValue === null || defaultValue === undefined ? "" : String(defaultValue);
-    const done = (value) => {
-      if (!settled) {
-        settled = true;
-        resolve(value);
-      }
-    };
-    const onChange = (e) => {
-      current = e.target.value;
-    };
-    const box = multiline ? (
-      <InputTextarea id="app-prompt-text" defaultValue={current} rows={3} autoResize autoFocus onChange={onChange} />
-    ) : (
-      <InputText id="app-prompt-text" defaultValue={current} autoFocus onChange={onChange} />
-    );
-    confirmDialog({
-      tagKey: APP_DIALOG_TAG,
-      message: (
-        <div className="app-prompt" style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: "min(28rem, 80vw)" }}>
-          <label htmlFor="app-prompt-text">{text(message)}</label>
-          {box}
-        </div>
-      ),
-      header: header || tr("common.enterDetails", "Enter details"),
-      acceptLabel: acceptLabel || tr("common.ok", "OK"),
-      rejectLabel: rejectLabel || tr("common.cancel", "Cancel"),
-      accept: () => done(current.trim()),
-      reject: () => done(null),
-      onHide: () => done(null),
-    });
+export const promptText = async (
+  message,
+  defaultValue = "",
+  { header, title, acceptLabel, rejectLabel, multiline = true, required = true, minLength, maxLength, facts, note, severity = "neutral", message: summary } = {}
+) => {
+  const value = await openConfirm({
+    title: title || header || tr("common.enterDetails", "Enter details"),
+    severity,
+    message: summary,
+    facts,
+    note,
+    input: {
+      type: multiline ? "textarea" : "text",
+      label: text(message),
+      required,
+      minLength,
+      maxLength,
+      defaultValue: defaultValue === null || defaultValue === undefined ? "" : String(defaultValue),
+    },
+    confirmLabel: acceptLabel || tr("confirmDialog.confirm", "Confirm"),
+    cancelLabel: rejectLabel,
   });
+  return value === null || value === undefined || value === "" ? null : value;
+};
 
 /**
- * In-app confirmation (in place of window.confirm). Resolves true when the user accepts, false when they cancel or close
- * the dialog, so `if (!(await confirmAction(msg))) return;` keeps the native behaviour.
- * @param {string} message
- * @param {{ header?: string, acceptLabel?: string, rejectLabel?: string, danger?: boolean }} [options]
+ * In-app confirmation (in place of window.confirm), shown in the shared confirmation dialog (components/ConfirmDialog).
+ * Resolves true when the user confirms, false when they cancel or close the dialog, so
+ * `if (!(await confirmAction(msg, { header, acceptLabel }))) return;` keeps the native behaviour. Give the action as a
+ * verb (acceptLabel "Delete template") and the record it applies to as facts ([{ label, value, type }]).
+ * @param {string} message one sentence: what is about to happen
+ * @param {{ header?: string, title?: string, acceptLabel?: string, rejectLabel?: string, danger?: boolean,
+ *   severity?: "neutral"|"warning"|"danger", facts?: Array, note?: string }} [options]
  * @returns {Promise<boolean>}
  */
-export const confirmAction = (message, { header, acceptLabel, rejectLabel, danger = false } = {}) =>
-  new Promise((resolve) => {
-    let settled = false;
-    const done = (value) => {
-      if (!settled) {
-        settled = true;
-        resolve(value);
-      }
-    };
-    confirmDialog({
-      tagKey: APP_DIALOG_TAG,
-      message: text(message),
-      header: header || tr("common.confirm", "Confirm"),
-      icon: "pi pi-exclamation-triangle",
-      acceptLabel: acceptLabel || tr("common.yes", "Yes"),
-      rejectLabel: rejectLabel || tr("common.no", "No"),
-      acceptClassName: danger ? "p-button-danger" : undefined,
-      accept: () => done(true),
-      reject: () => done(false),
-      onHide: () => done(false),
-    });
+export const confirmAction = (message, { header, title, acceptLabel, rejectLabel, danger = false, severity, facts, note } = {}) =>
+  openConfirm({
+    title: title || header || tr("common.confirm", "Confirm"),
+    severity: severity || (danger ? "danger" : "warning"),
+    message: text(message),
+    facts,
+    note,
+    confirmLabel: acceptLabel || tr("confirmDialog.confirm", "Confirm"),
+    cancelLabel: rejectLabel,
   });

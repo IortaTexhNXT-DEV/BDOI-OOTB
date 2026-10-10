@@ -4,7 +4,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { Message } from "primereact/message";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import productConfiguratorService from "../../../services/productConfiguratorService";
 import IarRiskSectionsEditor from "./IarRiskSectionsEditor";
 import GenericRiskConfigPlaceholder from "./GenericRiskConfigPlaceholder";
@@ -76,7 +75,6 @@ const RiskMappingDetail = () => {
   return (
     <ConfiguratorPage screen="riskMapping" actions={back}>
       <Toast ref={toast} />
-      <ConfirmDialog />
       <div className="flex align-items-center gap-2 mb-2 flex-wrap">
         <h2 className="m-0">{mapping.productCode} · {mapping.productName}</h2>
         <StatusTag status={mapping.status} />
@@ -85,7 +83,7 @@ const RiskMappingDetail = () => {
         {mapping.lineOfBusiness || mapping.lobCode} · {t("productRiskMapping.definedBy")} {(mapping.definitionLabel || "").toLowerCase()}.
       </p>
       {isIar ? (
-        <IarRiskSectionsEditor mapping={mapping} onReload={load} toastRef={toast} confirmDialog={confirmDialog} />
+        <IarRiskSectionsEditor mapping={mapping} onReload={load} toastRef={toast} />
       ) : (
         <GenericRiskConfigPlaceholder mapping={mapping} onSave={handleUpdateMapping} />
       )}

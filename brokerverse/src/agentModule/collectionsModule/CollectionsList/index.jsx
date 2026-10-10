@@ -15,6 +15,7 @@ import "./index.scss";
 import logger from "../../../utility/logger";
 import ImportDialog from "../../../components/ImportDialog";
 import { hasPermission } from "../../../utils/canOpen";
+import { openConfirm } from "../../../components/ConfirmDialog";
 
 const OPEN_ITEMS_UPLOAD = [{ label: "Open items", templatePath: "/receipts/opening-items/template", uploadPath: "/receipts/opening-items/import" }];
 
@@ -226,30 +227,34 @@ const CollectionsList = () => {
     );
   };
 
+  // the e-mails go out inside the confirmation (an error stays there); the toast follows once they are sent
   const handleSendDueDateReminders = async () => {
-    setSendingReminders(true);
-    try {
-      const result = await collectionService.sendDueDateReminders();
-      if (result.success) {
-        toast.current?.show({
-          severity: "success",
-          summary: "Success",
-          detail: result.message || "Due date reminders sent successfully",
-          life: 3000,
-        });
-      }
-    } catch (error) {
-      logger.error("Send reminders error:", error);
-      toast.current?.show({
-        severity: "error",
-        summary: "Error",
-        detail:
-          error.response?.data?.message || "Failed to send due date reminders",
-        life: 3000,
-      });
-    } finally {
-      setSendingReminders(false);
-    }
+    let result;
+    const sent = await openConfirm({
+      title: t("collectionsList.remindersTitle"),
+      message: t("collectionsList.remindersMessage"),
+      note: t("collectionsList.remindersNote"),
+      confirmLabel: t("collectionsList.sendReminders"),
+      confirmIcon: "pi pi-send",
+      onConfirm: async () => {
+        setSendingReminders(true);
+        try {
+          result = await collectionService.sendDueDateReminders();
+        } catch (error) {
+          logger.error("Send reminders error:", error);
+          throw new Error(error.response?.data?.message || t("collectionsList.remindersFailed"));
+        } finally {
+          setSendingReminders(false);
+        }
+      },
+    });
+    if (!sent || !result?.success) return;
+    toast.current?.show({
+      severity: "success",
+      summary: t("collectionsList.remindersSentTitle"),
+      detail: result.message || t("collectionsList.remindersSent"),
+      life: 3000,
+    });
   };
 
   return (
@@ -266,7 +271,7 @@ const CollectionsList = () => {
           tooltipOptions={{ position: "top" }}
         />
         {hasPermission("write:receipts") && (
-          <Button label="Import open items" icon="pi pi-upload" className="p-button-outlined p-button-rounded ml-2" onClick={() => setShowOpenItems(true)} />
+          <Button label={t("collectionsList.importOpenItems")} icon="pi pi-upload" className="p-button-outlined p-button-rounded ml-2" onClick={() => setShowOpenItems(true)} />
         )}
       </div>
       <ImportDialog visible={showOpenItems} onHide={() => setShowOpenItems(false)} title="Import open items (go-live)" targets={OPEN_ITEMS_UPLOAD} goLiveDate onDone={() => loadCollections()}

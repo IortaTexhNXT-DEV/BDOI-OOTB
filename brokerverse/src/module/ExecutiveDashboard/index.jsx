@@ -100,7 +100,16 @@ const ExecutiveDashboard = () => {
         FromDate: from ? toIsoDate(from) : "",
         ToDate: to ? toIsoDate(to) : "",
       });
-      window.open(report.downloadUrl, "_blank", "noopener");
+      // a link clicked once the report file is ready: a window opened at this point would be blocked as a pop-up
+      if (report.downloadUrl) {
+        const link = document.createElement("a");
+        link.href = report.downloadUrl;
+        link.download = report.fileName || "";
+        link.rel = "noopener";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
     } catch (error) {
       showError(error);
     }

@@ -516,3 +516,41 @@
     }
   }
 }
+
+// line of business choice of the policy list (drop-down items are rendered in an overlay)
+.policy-lob-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  &__label {
+    width: 100%;
+    color: $color-heading;
+    font-size: 16px;
+  }
+}
+
+// types of an endorsement chosen before it starts (policy list and policy detail)
+.endorsement-types {
+  margin: 0;
+  padding: 0;
+  border: 0;
+
+  legend {
+    margin-bottom: 0.5rem;
+    color: $color-heading;
+    font-weight: 600;
+  }
+
+  &__option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    border-top: 1px solid $color-border;
+
+    label {
+      cursor: pointer;
+    }
+  }
+}

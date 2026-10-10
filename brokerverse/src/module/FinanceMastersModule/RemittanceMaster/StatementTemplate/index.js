@@ -12,9 +12,8 @@ import { PickList } from "primereact/picklist";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
 import { Toast } from "primereact/toast";
-import { deleteAndReturn, saveAndReturn } from "../masterRecord";
+import { confirmDeleteAndReturn, saveAndReturn } from "../masterRecord";
 import "./index.scss";
-import { confirmAction } from "../../../../utility/dialogs";
 
 const ALL_COLUMNS = [
   { name: "Policy Number", code: "policyNo" },
@@ -127,9 +126,17 @@ const StatementTemplateMaster = () => {
   });
 
   const handleDelete = async () => {
-    if (await confirmAction("Are you sure you want to delete this statement template?", { danger: true })) {
-      deleteAndReturn({ type: TYPE, id: data?.id, toast, navigate });
-    }
+    await confirmDeleteAndReturn({
+      type: TYPE,
+      id: data?.id,
+      kind: "statementTemplate",
+      facts: [
+        { label: t("remittanceMasters.code"), value: formData.templateCode },
+        { label: t("remittanceMasters.name"), value: formData.templateName },
+      ],
+      toast,
+      navigate,
+    });
   };
 
   const handleClose = () => {

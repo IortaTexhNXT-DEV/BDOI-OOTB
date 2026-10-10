@@ -634,7 +634,102 @@
       "messageContent": "Message Content",
       "rowCount": "Row count :",
       "rejectReason": "Reason",
-      "print": "Print"
+      "print": "Print",
+      "statuses": {
+        "draft": "Draft",
+        "for-approval": "Pending approval",
+        "posted": "Posted",
+        "rejected": "Rejected",
+        "reversed": "Reversed",
+        "cancelled": "Cancelled"
+      },
+      "kinds": {
+        "standard": "Standard",
+        "reversal": "Reversal",
+        "correction": "Correction"
+      },
+      "sources": {
+        "manual": "Manual entry",
+        "correction": "Correction JV",
+        "reversal": "Reversal JV",
+        "upload": "Upload"
+      },
+      "confirm": {
+        "approveTitle": "Approve journal voucher {{number}}",
+        "approveMessage": "The voucher is posted to the general ledger.",
+        "approve": "Approve and post",
+        "rejectTitle": "Reject journal voucher {{number}}",
+        "rejectMessage": "The voucher is not posted and returns to the preparer with your reason.",
+        "reject": "Reject voucher",
+        "rejectedBecause": "Rejected: {{reason}}",
+        "details": "Voucher details",
+        "kind": "Kind",
+        "source": "Source",
+        "createdAt": "Prepared on",
+        "postedAt": "Posted on",
+        "reversalOf": "Reversal of",
+        "correctionOf": "Correction of",
+        "reversedBy": "Reversed by",
+        "lines": "Entries",
+        "activity": "Activity"
+      }
+    },
+    "receiptDialogs": {
+      "recordPaymentMessage": "An official receipt is issued for the payment.",
+      "balanceAfter": "Balance after payment",
+      "recordAmount": "Record {{amount}}",
+      "approveTitle": "Approve receipt",
+      "approveMessage_one": "The payment on {{count}} policy line is posted.",
+      "approveMessage_other": "The payments on {{count}} policy lines are posted.",
+      "amountApplied": "Amount applied",
+      "approveReceipt": "Approve receipt",
+      "approve": "Approve",
+      "print": "Print",
+      "approvedDone": "Receipt approved",
+      "printedDone": "Receipt printed",
+      "activity": "Activity"
+    },
+    "openEntryDialogs": {
+      "matchTitle": "Match open entries",
+      "matchMessage_one": "{{count}} debit and credit pair is matched.",
+      "matchMessage_other": "{{count}} debit and credit pairs are matched.",
+      "debitsSelected": "Debits selected",
+      "debitTotal": "Debit total",
+      "creditsSelected": "Credits selected",
+      "creditTotal": "Credit total",
+      "difference": "Difference",
+      "writeOffAmount": "Write-off amount",
+      "matchEntries_one": "Match {{count}} pair",
+      "matchEntries_other": "Match {{count}} pairs",
+      "unmatchTitle": "Unmatch entries",
+      "unmatchMessage_one": "{{count}} match is undone and its entries are open again.",
+      "unmatchMessage_other": "{{count}} matches are undone and their entries are open again.",
+      "unmatchEntries_one": "Unmatch {{count}} match",
+      "unmatchEntries_other": "Unmatch {{count}} matches"
+    },
+    "addJournalVoucherForm": {
+      "submitForApproval": "Submit for approval",
+      "unbalanced": "Debits and credits must be equal before the voucher can be submitted."
+    },
+    "correctionJVForm": {
+      "submitTitle": "Submit correction of {{number}}",
+      "submitMessage": "A correction voucher is created that reverses the original voucher and posts the corrected entries.",
+      "submitNote": "The voucher is posted once a second user approves it.",
+      "submit": "Submit correction",
+      "reverseTitle": "Submit reversal of {{number}}",
+      "reverseMessage": "A reversal voucher is created with the entries of the original voucher reversed.",
+      "reverse": "Submit reversal",
+      "originalVoucher": "Original voucher",
+      "voucherDate": "Voucher date",
+      "correctionCode": "Correction transaction code",
+      "reversalCode": "Reversal transaction code",
+      "entries": "Entries",
+      "amount": "Amount",
+      "totalDebit": "Total debit",
+      "totalCredit": "Total credit",
+      "new": "New correction",
+      "newReversal": "New reversal",
+      "print": "Print {{number}}"
     }
   },
   "renewalWaiting": {
@@ -798,7 +893,43 @@
     "paymentLines": "Payment lines",
     "reference": "Reference",
     "description": "Description",
-    "noChequeIssued": "No cheque has been issued on this voucher"
+    "noChequeIssued": "No cheque has been issued on this voucher",
+    "bulkDisburse": {
+      "title": "Bulk Disburse",
+      "loadFailed": "The agents with approved commission could not be loaded.",
+      "confirmTitle": "Create commission payout vouchers",
+      "confirmMessage": "One payout voucher is created for each selected agent from their approved commission lines.",
+      "confirmNote": "Each voucher goes for approval before it is paid.",
+      "create_one": "Create {{count}} voucher",
+      "create_other": "Create {{count}} vouchers",
+      "created_one": "{{count}} voucher created",
+      "created_other": "{{count}} vouchers created",
+      "createdWithErrors": "{{count}} voucher(s) created, {{failed}} failed",
+      "failed": "Bulk disburse failed",
+      "agents": "Agents",
+      "agent": "Agent / Referrer",
+      "type": "Type",
+      "level": "Level",
+      "approvedLines": "Approved lines",
+      "gross": "Commission (gross)",
+      "net": "Net payable",
+      "bankAccount": "Bank account",
+      "empty": "No agents with approved commission",
+      "disburse": "Disburse selected ({{count}})"
+    },
+    "confirm": {
+      "printTitle": "Print cheque {{number}}",
+      "printMessage": "The cheque is marked as printed and the voucher as paid. This cannot be undone.",
+      "print": "Print cheque",
+      "approveTitle": "Approve cheque {{number}}",
+      "approveMessage": "The cheque is approved for printing.",
+      "approve": "Approve cheque",
+      "payoutTitle": "Record agent payout",
+      "payoutMessage": "The selected commission lines are marked as paid with this voucher, net of withholding tax.",
+      "payout": "Record payout",
+      "commissionLines": "Commission lines",
+      "activity": "Activity"
+    }
   },
   "renewal": {
     "renewals": "Renewals",
@@ -1190,7 +1321,48 @@
     "receiptRecorded": "Petty cash receipt recorded",
     "replenishmentRecorded": "Petty cash replenishment recorded",
     "pettyCashSizeRequired": "Petty Cash Size must be greater than zero",
-    "pettyCashCodeAuto": "Leave empty for the next code"
+    "pettyCashCodeAuto": "Leave empty for the next code",
+    "confirm": {
+      "submitTitle": "Submit petty cash request {{number}}",
+      "submitNewTitle": "Submit petty cash request",
+      "submitMessage": "The request goes to a second user for approval.",
+      "submit": "Submit for approval",
+      "submitDone": "Request submitted for approval",
+      "approveTitle": "Approve petty cash request {{number}}",
+      "approveMessage": "The request is approved and can be disbursed from the fund.",
+      "approve": "Approve request",
+      "approveDone": "Request approved",
+      "rejectTitle": "Reject petty cash request {{number}}",
+      "rejectMessage": "The request returns to the requester with your reason.",
+      "reject": "Reject request",
+      "rejectDone": "Request rejected",
+      "lines": "Lines",
+      "fund": "Petty cash fund",
+      "approval": "Approval and activity",
+      "status": "Status",
+      "approvedAt": "Approved on",
+      "statuses": {
+        "draft": "Draft",
+        "submitted": "Pending approval",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "disbursed": "Disbursed",
+        "cancelled": "Cancelled"
+      },
+      "receiptsTitle": "Record petty cash receipts",
+      "receiptsMessage": "The selected receipts are posted and the fund balance is updated.",
+      "recordReceipts": "Record receipts",
+      "replenishTitle": "Record fund replenishment",
+      "replenishMessage": "The replenishment is posted and the fund is topped up by the amount below.",
+      "availableCash": "Available cash",
+      "replenishAmount": "Replenishment amount",
+      "recordReplenishment": "Record replenishment",
+      "disbursementsTitle": "Record petty cash disbursements",
+      "disbursementsMessage": "The disbursements are posted against the fund.",
+      "wht": "Withholding tax",
+      "netAmount": "Net amount",
+      "recordDisbursements": "Record disbursements"
+    }
   },
   "employeeBenefit": {
     "lead": "Prospect",
@@ -1717,7 +1889,239 @@
     "incentiveReports": "Incentive Reports",
     "incentiveApprovals": "Incentive Approvals",
     "approve": "Approve",
-    "currentPeriod": "Current period"
+    "currentPeriod": "Current period",
+    "help": {
+      "myPrograms": "Your progress in each running program for its current calculation period, and the payout it gives at the tier reached.",
+      "calculations": "Run the calculation of a month for the active programs, adjust agent lines, and submit the batch for approval.",
+      "approvals": "Batches submitted for approval. A batch is approved or rejected by a user other than the one who ran or submitted it.",
+      "statement": "Earnings of an agent for a month: programs, totals, trend and payments.",
+      "reports": "Incentive reports from the report templates, as CSV files."
+    },
+    "filters": {
+      "search": "Search",
+      "searchBatches": "Batch, period or user",
+      "searchApprovals": "Batch, period or submitter",
+      "status": "Status",
+      "allStatuses": "All statuses",
+      "period": "Period",
+      "allPeriods": "All periods"
+    },
+    "batch": {
+      "title": "Calculation batch",
+      "batch": "Batch",
+      "period": "Period",
+      "periodDates": "Period dates",
+      "programs": "Programs",
+      "agents": "Agents",
+      "totalPayout": "Total payout",
+      "status": "Status",
+      "actions": "Actions",
+      "summary": "Summary",
+      "agentResults": "Agent results",
+      "activity": "Activity",
+      "calculatedOn": "Calculated on",
+      "createdBy": "Calculated by",
+      "submittedBy": "Submitted by",
+      "submittedOn": "Submitted on",
+      "approvedBy": "Approved by",
+      "approvedOn": "Approved on",
+      "approvalRemarks": "Approval remarks",
+      "rejectedBy": "Rejected by",
+      "rejectedOn": "Rejected on",
+      "rejectionReason": "Rejection reason",
+      "paidOn": "Paid on",
+      "paymentReference": "Payment reference",
+      "agent": "Agent",
+      "program": "Program",
+      "achieved": "Achieved",
+      "achievementPct": "Achievement %",
+      "tier": "Tier",
+      "adjustment": "Adjustment",
+      "baseIncentive": "Base incentive",
+      "payout": "Payout",
+      "noResults": "No agent reached the programs in this period.",
+      "noBatches": "No calculation batches.",
+      "submitForApproval": "Submit for approval",
+      "submitTitle": "Submit batch for approval",
+      "submitMessage": "The batch is sent to the approvers and can no longer be adjusted.",
+      "submitted": "{{batchId}} submitted for approval",
+      "reject": "Reject",
+      "rejectBatch": "Reject batch",
+      "rejectTitle": "Reject calculation batch",
+      "rejected": "{{batchId}} rejected",
+      "approveBatch": "Approve batch",
+      "approveTitle": "Approve calculation batch",
+      "approveMessage": "Approve the incentives of this batch.",
+      "approveNote": "The incentives are accrued in the books and the batch can be paid.",
+      "remarks": "Remarks",
+      "approved": "{{batchId}} approved",
+      "markPaid": "Mark as paid",
+      "payTitle": "Mark batch as paid",
+      "payMessage": "Record the payment of the incentives of this batch, dated today.",
+      "paid": "{{batchId}} marked as paid",
+      "adjust": "Adjust",
+      "adjustTitle": "Adjust agent line",
+      "adjustmentReason": "Reason",
+      "adjustmentReasonRequired": "Enter the reason for the adjustment.",
+      "saveAdjustment": "Save adjustment",
+      "adjusted": "Line of {{name}} adjusted",
+      "noApprovePermission": "Approving incentive batches needs the incentive approval permission.",
+      "ownBatch": "You ran or submitted this batch. A different user must approve or reject it."
+    },
+    "board": {
+      "pending": "Pending approval",
+      "pendingAmount": "Pending amount",
+      "approvedToday": "Approved today",
+      "rejectedToday": "Rejected today",
+      "waiting": "Waiting",
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days"
+    },
+    "wizard": {
+      "title": "New incentive calculation",
+      "steps": {
+        "period": "Period",
+        "programs": "Programs",
+        "review": "Review"
+      },
+      "period": "Period",
+      "choosePeriod": "Choose the month",
+      "description": "Description",
+      "program": "Program",
+      "programPeriod": "Program period",
+      "measure": "Measure",
+      "frequency": "Frequency",
+      "eligibleAgents": "Eligible agents",
+      "programs": "Programs",
+      "from": "From",
+      "to": "To",
+      "noPrograms": "No active program runs in {{period}}.",
+      "run": "Run calculation",
+      "doneTitle": "Calculation complete",
+      "done": "{{batchId}}: {{agents}} agents, {{amount}}"
+    },
+    "mine": {
+      "title": "My Incentive Programs",
+      "agent": "Agent",
+      "programs": "Programs",
+      "running": "Running",
+      "estimatedPayout": "Estimated payout",
+      "averageAchievement": "Average achievement",
+      "programsTitle": "Programs",
+      "program": "Program",
+      "period": "Period",
+      "target": "Target",
+      "achieved": "Achieved",
+      "achievement": "Achievement",
+      "status": "Status",
+      "daysLeft_one": "{{count}} day left",
+      "daysLeft_other": "{{count}} days left",
+      "ended": "Ended {{date}}",
+      "noPrograms": "No incentive programs.",
+      "chartTitle": "Achievement by program",
+      "noAchievement": "No achievement recorded yet in the current periods.",
+      "activityTitle": "Recent activity",
+      "noActivity": "No incentive activity yet.",
+      "date": "Date",
+      "event": "Event",
+      "amount": "Amount",
+      "events": {
+        "calculated": "Calculated",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "paid": "Paid"
+      },
+      "programTitle": "Program details",
+      "measure": "Measure",
+      "programPeriod": "Program period",
+      "currentPeriod": "Current period",
+      "frequency": "Calculation frequency",
+      "eligibility": "Eligibility",
+      "programType": "Program type",
+      "code": "Program code",
+      "name": "Program name",
+      "tiers": "Tiers",
+      "tier": "Tier",
+      "band": "Achievement band",
+      "payout": "Payout",
+      "noTiers": "The program has no tiers.",
+      "performance": "My performance",
+      "currentTier": "Current tier",
+      "nextTier": "Next tier",
+      "nextTierNeeded": "{{needed}} more to reach {{tier}}",
+      "topTier": "Highest tier reached",
+      "payPercentAchieved": "{{rate}} of premium achieved",
+      "payPercentTarget": "{{rate}} of target",
+      "payPerPolicy": "{{amount}} per policy",
+      "payMaximum": "{{payout}}, maximum {{max}}"
+    },
+    "stmt": {
+      "agent": "Agent",
+      "agentCode": "Agent code",
+      "branch": "Branch",
+      "period": "Period",
+      "statementDate": "Statement date",
+      "earned": "Earned this period",
+      "ytd": "Year to date",
+      "pending": "Approved, not paid",
+      "lastPayment": "Last payment",
+      "paidOnDate": "Paid on {{date}}",
+      "breakdown": "Program breakdown",
+      "program": "Program",
+      "target": "Target",
+      "achieved": "Achieved",
+      "achievementPct": "Achievement %",
+      "tier": "Tier",
+      "earnedAmount": "Earned",
+      "status": "Status",
+      "total": "Total",
+      "noPrograms": "No program earnings in this period.",
+      "trend": "Earnings, last 13 months",
+      "earnings": "Earnings",
+      "noEarnings": "No earnings in the last 13 months.",
+      "payments": "Payment history",
+      "programs": "Programs",
+      "amount": "Amount",
+      "paidOn": "Paid on",
+      "paymentReference": "Payment reference",
+      "noPayments": "No approved or paid incentives.",
+      "print": "Print",
+      "export": "Export CSV",
+      "printTitle": "Incentive statement"
+    },
+    "rpt": {
+      "generateReport": "Generate report",
+      "generateTitle": "Generate incentive report",
+      "generate": "Generate report",
+      "templates": "Report templates",
+      "history": "Generated reports",
+      "report": "Report",
+      "category": "Category",
+      "description": "Description",
+      "parameters": "Parameters",
+      "format": "Format",
+      "generatedOn": "Generated on",
+      "generatedBy": "Generated by",
+      "rows": "Rows",
+      "completed": "Completed",
+      "download": "Download",
+      "noTemplates": "No report templates.",
+      "noReports": "No reports generated yet.",
+      "all": "All",
+      "from": "From",
+      "to": "To",
+      "params": {
+        "period": "Period",
+        "program": "Program",
+        "agent": "Agent",
+        "branch": "Branch",
+        "minAchievement": "Minimum achievement %",
+        "topN": "Top performers"
+      },
+      "readyTitle": "Report ready",
+      "ready_one": "{{report}}: {{count}} row",
+      "ready_other": "{{report}}: {{count}} rows"
+    }
   },
   "openEntryUnmatching": {
     "title": "Open Entry Unmatching",
@@ -2102,7 +2506,10 @@
     "accountCategoryCodeHeader": "Account Category Code",
     "accountCategoryNameHeader": "Account Category Name",
     "remittanceMasterNote": "Approval limits, schedules and remittance settings are kept on their own screens:",
-    "configurationSettings": "Configuration (remittance settings)"
+    "configurationSettings": "Configuration (remittance settings)",
+    "address": "Address",
+    "contact": "Contact",
+    "accountCategoryDetail": "Account category"
   },
   "automatedRemittance": {
     "pageTitle": "Automated Remittance Master",
@@ -2174,7 +2581,43 @@
     "addProgram": "Add Program",
     "createIncentiveProgram": "Create Incentive Program",
     "editIncentiveProgram": "Edit Incentive Program",
-    "viewIncentiveProgram": "View Incentive Program"
+    "viewIncentiveProgram": "View Incentive Program",
+    "programCode": "Program code",
+    "programName": "Program name",
+    "description": "Description",
+    "programType": "Program type",
+    "applicableTo": "Applicable to",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "status": "Status",
+    "currency": "Currency",
+    "targetMetric": "Target metric",
+    "frequency": "Calculation frequency",
+    "baseTarget": "Base target",
+    "stretchTarget": "Stretch target",
+    "programSection": "Program",
+    "targetsSection": "Targets",
+    "structureSection": "Incentive structure",
+    "achievementLevel": "Achievement level",
+    "incentiveType": "Incentive type",
+    "rateOrAmount": "Rate or amount",
+    "maxPayout": "Maximum payout",
+    "viewDetails": "View details",
+    "edit": "Edit",
+    "close": "Close",
+    "cancel": "Cancel",
+    "createProgram": "Create program",
+    "saveProgram": "Save program",
+    "activateTitle": "Activate incentive program",
+    "activateMessage": "The program below becomes active and is included in incentive calculations.",
+    "activateAction": "Activate program",
+    "deactivateTitle": "Deactivate incentive program",
+    "deactivateMessage": "The program below becomes inactive.",
+    "deactivateNote": "Calculations not yet run do not include it. Calculations already approved are not changed.",
+    "deactivateAction": "Deactivate program",
+    "activated": "Program {{code}} activated",
+    "deactivated": "Program {{code}} deactivated",
+    "codeWhenBlank": "Assigned automatically when left blank"
   },
   "generalMasters": {
     "organization": "Organization",
@@ -2417,7 +2860,11 @@
     "uploadProvinces": "Upload provinces",
     "provinceAdded": "Province added",
     "tinInvalid": "Enter the TIN as 000-000-000 or 000-000-000-00000",
-    "tin": "TIN"
+    "tin": "TIN",
+    "departmentDetails": "Department",
+    "departmentName": "Department Name",
+    "branchAndDepartment": "Branch and department",
+    "userGroupAccess": "User group access"
   },
   "agent": {
     "createQuote": "Create Quote",
@@ -2731,7 +3178,9 @@
       "Commercial": "Commercial",
       "PUV": "Public utility vehicle (PUV)",
       "TNVS": "TNVS (ride-hailing)"
-    }
+    },
+    "removeCoInsurerMessage": "The insurer is removed from the co-insurance participants of this quotation.",
+    "uploaded": "Uploaded"
   },
   "commission": {
     "addCommissions": "Add Commissions",
@@ -2769,7 +3218,12 @@
     "minutesAgo": "{{count}}m ago",
     "hoursAgo": "{{count}}h ago",
     "daysAgo": "{{count}}d ago",
-    "viewAll": "View All"
+    "viewAll": "View All",
+    "deleteTitle": "Delete notification",
+    "deleteMessage": "The notification below is removed from your list.",
+    "deleteAction": "Delete notification",
+    "notification": "Notification",
+    "received": "Received"
   },
   "dashboard": {
     "Motor": "Motor",
@@ -2904,7 +3358,9 @@
     "searchBy": "Search by",
     "search": "Search",
     "totalPremium": "Total Premium",
-    "endorsementNumber": "Endorsement Number"
+    "endorsementNumber": "Endorsement Number",
+    "participantRequired": "Select the participant.",
+    "shareRange": "Enter a share between 0 and 100."
   },
   "messages": {
     "success": "Operation completed successfully",
@@ -3063,7 +3519,11 @@
     "delete": "Delete",
     "allCountries": "All countries",
     "allProvinces": "All provinces",
-    "allCities": "All cities"
+    "allCities": "All cities",
+    "deleteTitle": "Delete prospect",
+    "deleteMessage": "The prospect is removed from the prospect list.",
+    "deleteNote": "A prospect with an issued policy cannot be deleted.",
+    "deleteAction": "Delete prospect"
   },
   "quotes": {
     "title": "Quotations",
@@ -3576,7 +4036,10 @@
     "valueAddedTaxRate": "Value Added Tax ({{rate}})",
     "localGovernmentTaxRate": "Local Government Tax ({{rate}})",
     "directBill": "Direct bill",
-    "directBillDescription": "The client pays the premium directly to the insurer. No premium payment is collected by the broker; the broker bills the insurer for its commission."
+    "directBillDescription": "The client pays the premium directly to the insurer. No premium payment is collected by the broker; the broker bills the insurer for its commission.",
+    "print": "Print",
+    "close": "Close",
+    "download": "Download"
   },
   "uploadPolicy": {
     "title": "Prospects",
@@ -3899,7 +4362,11 @@
     "usage": "The IAR risk sections are used by the IAR prospect and quotation screens: only the active sections are offered, with their default rates. The other definitions are kept for reference and are not read by the quotation screens yet.",
     "usedBy": "Used by",
     "usedByIar": "IAR prospect and quotation",
-    "referenceOnly": "Reference only"
+    "referenceOnly": "Reference only",
+    "removeTitle": "Remove risk section",
+    "removeMessage": "The risk section below is removed from the product.",
+    "removeNote": "New prospects and quotations no longer offer it. Quotations that already use it keep it.",
+    "removeAction": "Remove section"
   },
   "coverageBuilder": {
     "addCoverage": "Add Coverage",
@@ -4222,7 +4689,84 @@
     "listFailed": "The policy list could not be generated",
     "noRenewablePolicies": "No renewable policy matches these criteria. Widen the expiry dates or clear a filter.",
     "expiryDate": "Expiry date",
-    "renewalState": "Renewal state"
+    "renewalState": "Renewal state",
+    "deleteTitle": "Delete renewal batch",
+    "deleteMessage": "The batch and its policy list are deleted. The policies stay due for renewal.",
+    "deleteNote": "A batch that has sent or queued notices cannot be deleted; cancel it instead.",
+    "deleteAction": "Delete batch",
+    "deleted": "Renewal batch {{id}} deleted",
+    "batchId": "Batch ID",
+    "status": "Status",
+    "totalPolicies": "Total policies",
+    "createdDate": "Created on",
+    "createdBy": "Created by",
+    "actions": "Actions",
+    "viewDetails": "View details",
+    "noBatches": "No batches found",
+    "countOf": "{{count}} of {{total}}",
+    "partiallyCompleted": "Partially completed ({{processed}}/{{total}})",
+    "batchStatus": {
+      "Draft": "Draft",
+      "Scheduled": "Scheduled",
+      "Processing": "Processing",
+      "Completed": "Completed",
+      "Cancelled": "Cancelled"
+    },
+    "minimumPremium": "Minimum premium",
+    "maximumPremium": "Maximum premium",
+    "minPremiumIn": "Min premium ({{currency}})",
+    "maxPremiumIn": "Max premium ({{currency}})",
+    "notice": {
+      "NotSent": "Not sent",
+      "Queued": "Queued",
+      "Sent": "Sent",
+      "Failed": "Failed"
+    },
+    "batchDetails": "Renewal batch",
+    "close": "Close",
+    "retryFailed": "Retry failed notices",
+    "sendNotices": "Send renewal notices",
+    "generateReport": "Download report",
+    "sendingNotices": "Sending renewal notices",
+    "selectedCount": "{{count}} selected",
+    "noPolicies": "No policies found",
+    "policyNumber": "Policy number",
+    "noticeStatus": "Notice status",
+    "noticeSentAt": "Notice sent",
+    "addedDate": "Added on",
+    "premium": "Premium",
+    "enterClientName": "Enter client name",
+    "selectStatus": "Select status",
+    "clear": "Clear",
+    "selectOnePolicy": "Select at least one policy for the batch.",
+    "created": "Renewal batch {{id}} created",
+    "createFailed": "The renewal batch could not be created.",
+    "toast": {
+      "noticesSent": "Notices sent",
+      "noticesSentDetail": "{{count}} of {{total}} renewal notices sent.",
+      "sendingFailed": "Sending failed",
+      "sendingFailedDetail": "The renewal notices could not be sent. Try again.",
+      "processingComplete": "Processing complete",
+      "processingCompleteDetail": "The renewal notices were processed.",
+      "noPoliciesSelected": "No policies selected",
+      "noPoliciesSelectedDetail": "Select at least one policy to send renewal notices.",
+      "queued": "Notices queued",
+      "queuedDetail": "{{count}} renewal notices queued.",
+      "queueFailed": "Notices not queued",
+      "queueFailedDetail": "The renewal notices could not be queued.",
+      "noFailedNotices": "No failed notices",
+      "noFailedNoticesDetail": "There are no failed notices to retry.",
+      "retrying": "Retrying failed notices",
+      "retryingDetail": "Retrying {{count}} failed notices.",
+      "retryFailed": "Retry failed",
+      "retryFailedDetail": "The failed notices could not be retried.",
+      "noBatch": "No batch selected.",
+      "generatingReport": "Preparing report",
+      "generatingReportDetail": "The batch report is being prepared.",
+      "reportFailed": "The report could not be prepared. Try again.",
+      "reportDownloaded": "Report downloaded",
+      "reportDownloadedDetail": "The batch report was downloaded."
+    }
   },
   "shareOption": {
     "email": "Email",
@@ -4259,7 +4803,27 @@
     "emailContentHtml": "Email content (HTML)",
     "suggestedContentEditHint": "You can edit the subject and content before sending.",
     "usingSuggestedContent": "Using the suggested content",
-    "sentToRecipient": "Quote sent to {{to}}"
+    "sentToRecipient": "Quote sent to {{to}}",
+    "title": "Share quotation",
+    "emailTitle": "E-mail quotation",
+    "print": "Print",
+    "quotationMissing": "The quotation is not saved yet; its document cannot be prepared.",
+    "quoteMissing": "The quotation is not loaded.",
+    "downloadFailed": "The quotation document could not be prepared.",
+    "emailRequired": "Enter the e-mail address.",
+    "emailInvalid": "Enter a valid e-mail address.",
+    "sendFailed": "The e-mail could not be sent.",
+    "recipientEmail": "Recipient e-mail",
+    "customMessage": "Message",
+    "quotationNumber": "Quotation",
+    "product": "Product",
+    "insuranceCompany": "Insurance company",
+    "totalPremium": "Total premium",
+    "totalSumInsured": "Total sum insured",
+    "sendEmail": "Send e-mail",
+    "whatsAppTitle": "Insurance quotation {{number}}",
+    "whatsAppFireTitle": "Fire and Allied Perils quotation {{number}}",
+    "whatsAppContact": "Contact your account executive for the full details."
   },
   "fireLead": {
     "selectCategory": "Select Category",
@@ -4660,7 +5224,25 @@
     "localGovtTax": "Local Gov’t Tax",
     "invalidContact": "Enter a valid mobile number",
     "invalidZip": "ZIP code is 4 digits",
-    "print": "Print endorsement"
+    "print": "Print endorsement",
+    "effectiveDate": "Effective date",
+    "history": "History",
+    "endorsementTypeLabel": "Endorsement type",
+    "premiumEffectLabel": "Premium effect",
+    "premiumEffect": {
+      "additional": "Additional premium due from the client",
+      "return": "Return premium, refunded by accounting",
+      "none": "No premium change"
+    },
+    "cancellationReasonLabel": "Cancellation reason",
+    "remarksLabel": "Remarks",
+    "status": {
+      "Draft": "Draft",
+      "Submitted": "Submitted",
+      "InitiateCancel": "Cancellation initiated",
+      "Completed": "Completed",
+      "Cancelled": "Cancelled"
+    }
   },
   "endorsementSummary": {
     "leads": "Prospects",
@@ -4713,7 +5295,14 @@
     "sendToInsuranceCompany": "Send to Insurance Company",
     "additionalPremium": "Additional premium",
     "returnPremium": "Return premium",
-    "premiumChange": "Premium change"
+    "premiumChange": "Premium change",
+    "sendTitle": "Send endorsement to insurer",
+    "sendMessage": "The endorsement is sent to the insurance company for processing.",
+    "sendCancellationMessage": "The policy cancellation is sent to the insurance company for processing.",
+    "endorsementNo": "Endorsement no.",
+    "policyNo": "Policy no.",
+    "endorsementType": "Endorsement type",
+    "sendToInsurer": "Send to insurer"
   },
   "coverageDetailsReview": {
     "pageTitle": "Coverage Details Review",
@@ -4801,7 +5390,12 @@
     "viewDocument": "View Document",
     "billingMode": "Billing",
     "brokerBilled": "Broker billed: the client pays the premium to the broker, who remits it to the insurer net of commission",
-    "directBilled": "Direct bill: the client pays the premium to the insurer; the broker raises a commission debit note to the insurer"
+    "directBilled": "Direct bill: the client pays the premium to the insurer; the broker raises a commission debit note to the insurer",
+    "cancel": "Cancel",
+    "createPlacementSlip": "Create placement slip",
+    "issuePolicy": "Issue policy",
+    "quotation": "Quotation",
+    "insurer": "Insurer"
   },
   "coverageDetailsCard": {
     "renewalDetails": "Renewal Details",
@@ -4899,7 +5493,11 @@
     "afterDays": "{{count}} days",
     "leadName": "Prospect Name",
     "unknownLead": "Unknown Prospect",
-    "editQuotation": "Edit Quotation"
+    "editQuotation": "Edit Quotation",
+    "convertTitle": "Convert quotation to policy",
+    "convertMessage": "A policy is started from this quotation; its customer details are entered next.",
+    "insurer": "Insurer",
+    "product": "Product"
   },
   "quotationPage": {
     "title": "Quotation",
@@ -5051,9 +5649,7 @@
     "renewal": "Renewal",
     "viewPolicy": "View policy",
     "moreActions": "More actions",
-    "expired": "Expired",
-    "expiresInDays_one": "Expires in {{count}} day",
-    "expiresInDays_other": "Expires in {{count}} days"
+    "expired": "Expired"
   },
   "approveQuote": {
     "invalidLink": "Invalid approval link",
@@ -5135,7 +5731,8 @@
     "taxInfoNumber": "Tax Information Number:",
     "createdDate": "Created Date:",
     "lastUpdated": "Last Updated:",
-    "numberOfQuotes": "Number of Quotes:"
+    "numberOfQuotes": "Number of Quotes:",
+    "history": "History"
   },
   "leadCreation": {
     "source": "Source",
@@ -5679,7 +6276,21 @@
     "yesterday": "Yesterday",
     "today": "Today",
     "hoursAgo": "hours ago",
-    "justNow": "Just now"
+    "justNow": "Just now",
+    "statusValue": {
+      "Draft": "Draft",
+      "PendingCustomer": "Pending customer",
+      "CustomerAccepted": "Customer accepted",
+      "SubmittedToInsurer": "Submitted to insurer",
+      "Approved": "Approved",
+      "Rejected": "Rejected"
+    },
+    "priorityValue": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "riskScoreOf": "{{score}} of 100"
   },
   "policyTable": {
     "search": "Search",
@@ -5714,7 +6325,11 @@
     "actions": "Actions",
     "proceed": "Proceed",
     "grossPremiumHeader": "Gross Premium",
-    "status": "Status"
+    "status": "Status",
+    "cancel": "Cancel",
+    "insured": "Insured",
+    "startEndorsement": "Start endorsement",
+    "endorsementTypes": "Endorsement types"
   },
   "collectionsList": {
     "view": "View",
@@ -5729,7 +6344,15 @@
     "partiallyPaid": "Partially Paid",
     "committed": "Committed",
     "escalated": "Escalated",
-    "sendPaymentRemindersNow": "Send Payment Reminders Now"
+    "sendPaymentRemindersNow": "Send Payment Reminders Now",
+    "remindersTitle": "Send payment reminders",
+    "remindersMessage": "A payment reminder is e-mailed to every client with a premium due or overdue.",
+    "remindersNote": "Each reminder is recorded in the follow-up history of its collection.",
+    "sendReminders": "Send reminders",
+    "remindersFailed": "The payment reminders could not be sent",
+    "remindersSentTitle": "Reminders sent",
+    "remindersSent": "The payment reminders were sent.",
+    "importOpenItems": "Import open items"
   },
   "iarLead": {
     "lead": "Prospect",
@@ -6103,6 +6726,23 @@
       "password-change-required": "Password change required",
       "password-expired": "Password expired",
       "refresh-token-reuse": "Session ended (token reuse)"
+    },
+    "user": "User",
+    "userName": "User name",
+    "roles": "Roles",
+    "unlockTitle": "Unlock account",
+    "unlockAction": "Unlock account",
+    "unlockMessage": "The account below is unlocked and its failed sign-in attempts are cleared.",
+    "resetMessage": "The account below receives a temporary password, shown once.",
+    "resetNote": "The user's sessions end and the user must choose a new password at the next sign-in.",
+    "turnOffAction": "Turn off two-step verification",
+    "turnOff2faMessage": "Two-step verification is turned off for the account below (for example after a lost phone).",
+    "turnOff2faNote": "The user signs in with the password alone until two-step verification is set up again.",
+    "methods": {
+      "password": "Password",
+      "sso": "Single sign-on",
+      "refresh": "Session renewed",
+      "2fa": "Two-step verification"
     }
   },
   "numberingMasters": {
@@ -6237,7 +6877,10 @@
         "matrix": "Commission Rate Matrix",
         "insurer": "Insurer default rate",
         "default": "System default rate"
-      }
+      },
+      "deleteTitle": "Delete commission rate",
+      "deleteAction": "Delete rate",
+      "deleteMessage": "The commission rate below will be deleted."
     },
     "creditTerms": {
       "title": "Credit terms",
@@ -6249,6 +6892,178 @@
       "broker": "Broker billed",
       "direct": "Direct billed",
       "daysInvalid": "Enter a whole number of days"
+    }
+  },
+  "yearEndClose": {
+    "help": "Closes the fiscal year in five steps: prerequisites, adjustments, closing entries, the close by an Accounting Manager and the opening balances of the next year. The user who starts the close cannot close the year.",
+    "stepsLabel": "Year-end close steps",
+    "step": {
+      "prerequisites": "Prerequisites",
+      "adjustments": "Year-end adjustments",
+      "closing": "Closing entries",
+      "approval": "Close the year",
+      "opening": "Opening balances"
+    },
+    "summary": "Year-end close summary",
+    "run": "Run",
+    "runChecks": "Run checks again",
+    "remark": "Remark",
+    "empty": "No year-end close has been started for {{fiscalYear}} ({{from}} – {{to}}).",
+    "start": "Start year-end close",
+    "previous": "Previous step",
+    "next": "Next step",
+    "none": "None",
+    "nil": "Nil",
+    "more": "and {{count}} more",
+    "more_one": "and {{count}} more",
+    "more_other": "and {{count}} more",
+    "total": "Total",
+    "accountTypeLabel": "Type",
+    "accountType": {
+      "income": "Income",
+      "expense": "Expense",
+      "asset": "Asset",
+      "liability": "Liability",
+      "equity": "Equity"
+    },
+    "check": {
+      "periods_closed": {
+        "label": "Periods 1 to 12 closed",
+        "labelSoft": "Periods 1 to 12 soft-closed or closed",
+        "count": "{{closed}} of {{total}} closed",
+        "open": "not closed: {{list}}"
+      },
+      "unposted_journals": {
+        "label": "No unposted journals in the year",
+        "count": "{{count}} journals not posted",
+        "count_one": "{{count}} journal not posted",
+        "count_other": "{{count}} journals not posted"
+      },
+      "suspense_balance": {
+        "label": "Suspense account nil",
+        "notSet": "No suspense account is set up"
+      },
+      "trial_balance": {
+        "label": "Trial balance balanced at the year end",
+        "result": "Debits {{debit}}, credits {{credit}}",
+        "difference": "difference {{amount}}"
+      },
+      "closing_accounts": {
+        "label": "Closing accounts set up",
+        "result": "Current year P/L {{currentYearPl}}; retained earnings {{retainedEarnings}}",
+        "failed": "Current year P/L and retained earnings must be active equity accounts"
+      },
+      "previous_year": {
+        "label": "Previous fiscal year closed",
+        "first": "First fiscal year",
+        "result": "{{fiscalYear}}: {{status}}"
+      },
+      "adjustment_period": {
+        "label": "Adjustment period open",
+        "missing": "Adjustment period {{period}} does not exist"
+      },
+      "adjustments_posted": {
+        "label": "Adjustment journals posted",
+        "none": "All posted",
+        "count": "{{count}} journals awaiting approval",
+        "count_one": "{{count}} journal awaiting approval",
+        "count_other": "{{count}} journals awaiting approval"
+      }
+    },
+    "link": {
+      "periods": "Period Management",
+      "journals": "Journal Voucher",
+      "accountingQuery": "Accounting Query",
+      "statements": "Financial Statements",
+      "openYear": "Open {{fiscalYear}}",
+      "configure": "Configure"
+    },
+    "adjustments": {
+      "title": "Adjustment journals",
+      "empty": "No adjustment journals",
+      "preparedBy": "Prepared by",
+      "open": "Open journal voucher",
+      "add": "Add adjustment"
+    },
+    "closing": {
+      "journalDate": "Journal date",
+      "totalIncome": "Total income",
+      "totalExpense": "Total expense",
+      "journals": "Closing journals",
+      "toCurrentYear": "Income and expense to current year P/L",
+      "toRetainedEarnings": "Current year P/L to retained earnings",
+      "empty": "No income or expense balances",
+      "netToCurrentYear": "Net result"
+    },
+    "approval": {
+      "preparedBy": "Prepared by",
+      "approver": "Approver",
+      "accountingManager": "Accounting Manager",
+      "checks": "Checks",
+      "close": "Close fiscal year",
+      "closedBy": "Closed by",
+      "remark": "Remark"
+    },
+    "reason": {
+      "closePermission": "Closing the year needs an Accounting Manager.",
+      "closeMaker": "You started this year-end close; another Accounting Manager closes the year.",
+      "closeChecks": "Resolve the failed checks of steps 1 and 2 first.",
+      "nextPeriod": "No longer possible: period {{period}} of {{fiscalYear}} is not open.",
+      "nextYear": "No longer possible: {{fiscalYear}} is closed.",
+      "reversePermission": "Approving a reversal needs an Accounting Manager.",
+      "reverseMaker": "You requested this reversal; another Accounting Manager approves it."
+    },
+    "reversal": {
+      "pending": "Reversal requested",
+      "requestedBy": "Requested by",
+      "reason": "Reason",
+      "approve": "Reverse close",
+      "withdraw": "Withdraw request",
+      "request": "Request reversal"
+    },
+    "opening": {
+      "accounts": "Accounts carried forward",
+      "totalDebit": "Total debit",
+      "totalCredit": "Total credit",
+      "empty": "No balance-sheet balances"
+    },
+    "activity": {
+      "title": "Activity"
+    },
+    "action": {
+      "start": "Year-end close started",
+      "check": "Checks run",
+      "close": "Fiscal year closed",
+      "reverse-request": "Reversal requested",
+      "reverse-withdraw": "Reversal request withdrawn",
+      "reverse": "Close reversed",
+      "cancel": "Run cancelled"
+    },
+    "dialog": {
+      "closeMessage": "The closing entries are posted in {{period}}, dated {{date}}, and the balances are carried into {{fiscalYear}}.",
+      "reverseMessage": "The close of {{fiscalYear}} is reversed with the reason of the request.",
+      "withdrawMessage": "The reversal request is withdrawn; {{fiscalYear}} stays closed.",
+      "cancelMessage": "Run {{runNumber}} is cancelled.",
+      "closeTitle": "Close fiscal year {{fiscalYear}}",
+      "closeConsequence": "The periods of {{fiscalYear}} are locked; no journal can be posted in them until the close is reversed.",
+      "requestTitle": "Request reversal of the {{fiscalYear}} close",
+      "requestConsequence": "Another Accounting Manager approves the reversal.",
+      "reverseTitle": "Reverse the {{fiscalYear}} close",
+      "reverseConsequence": "The closing entries are reversed, the opening balances of {{fiscalYear}} removed and the periods unlocked.",
+      "withdrawTitle": "Withdraw reversal request",
+      "keepRequest": "Keep request",
+      "cancelTitle": "Cancel run {{runNumber}}",
+      "cancelConsequence": "{{fiscalYear}} returns to Open.",
+      "keepRun": "Keep run",
+      "adjustmentTitle": "Adjustment journal {{fiscalYear}}",
+      "adjustmentConsequence": "Posted in the adjustment period after approval by a second user.",
+      "submitAdjustment": "Submit for approval"
+    },
+    "toast": {
+      "checked": "Checks run",
+      "reversalRequested": "Reversal requested; awaiting approval",
+      "reversalWithdrawn": "Reversal request withdrawn",
+      "cancelled": "Year-end close run cancelled"
     }
   },
   "periodEnd": {
@@ -6564,6 +7379,151 @@
       "inactive": "Inactive",
       "completed": "Completed",
       "issued": "Issued"
+    },
+    "runActivity": "Run activity",
+    "confirmations": {
+      "submitTitle": "Submit the close of {{period}}",
+      "submitMessage": "The period is closed once the close is approved. After that no postings are accepted.",
+      "submit": "Submit close",
+      "submitSoftTitle": "Submit the soft close of {{period}}",
+      "submitSoftMessage": "Once approved, the period accepts postings from Accounting Managers only.",
+      "submitSoft": "Submit soft close",
+      "approveTitle": "Approve the close of {{period}}",
+      "approveMessage": "The period status changes as submitted and the run is completed.",
+      "approve": "Approve close",
+      "rejectTitle": "Return the close of {{period}}",
+      "rejectMessage": "The run goes back to the preparer with your reason.",
+      "reject": "Return to preparer",
+      "cancelTitle": "Cancel the close run of {{period}}",
+      "cancelMessage": "The run is cancelled and the journals it posted are reversed.",
+      "cancel": "Cancel run",
+      "keepRun": "Keep run",
+      "runTitle": "Run the month-end steps for {{period}}",
+      "rerunTitle": "Rerun the month-end steps for {{period}}",
+      "runMessage": "Accrual, recurring, commission deferral, FX revaluation and depreciation journals are posted for the period and the checklist is run.",
+      "rerunNote": "The accrual, deferral and FX journals of the previous execution are reversed before the new ones are posted.",
+      "signTitle": "Sign off checklist item",
+      "withdrawTitle": "Withdraw sign-off",
+      "sign": "Sign off item",
+      "withdraw": "Withdraw sign-off",
+      "postDueTitle": "Post due recurring journals",
+      "postTemplateTitle": "Post recurring journal {{code}}",
+      "postDueMessage": "A journal is generated for every occurrence due up to today.",
+      "postDueNote": "Templates without auto-post create journals pending approval.",
+      "postDue": "Post due journals",
+      "dueTemplates": "Templates due",
+      "templateHeader": "Recurring journal template",
+      "activity": "Activity",
+      "lines": "Journal lines",
+      "deleteItemTitle": "Delete checklist item",
+      "deleteItemMessage": "The item is no longer copied to new month-end close runs. Runs already started keep it.",
+      "deleteItem": "Delete item",
+      "issue2307Title": "Issue BIR Form 2307",
+      "issue2307Message": "The next CWT certificate number is assigned to this payee and quarter.",
+      "issue2307": "Issue certificate",
+      "issueAllTitle": "Issue all 2307 certificates for {{quarter}}",
+      "issueAllMessage": "Sequential CWT certificate numbers are assigned to every payee without a certificate.",
+      "issueAll_one": "Issue {{count}} certificate",
+      "issueAll_other": "Issue {{count}} certificates",
+      "quarter": "Quarter",
+      "certificates": "Certificates to issue"
+    }
+  },
+  "importDialog": {
+    "about": "About this upload",
+    "uploadInto": "Upload into",
+    "template": "Template",
+    "downloadTemplate": "Download template",
+    "goLiveDate": "Go-live date",
+    "file": "File",
+    "chooseFile": "Choose file",
+    "fileTypes": "XLSX or CSV",
+    "removeFile": "Remove {{name}}",
+    "close": "Close",
+    "validate": "Validate",
+    "validating": "Validating...",
+    "upload": "Upload",
+    "uploading": "Uploading...",
+    "validationResult": "Validation result",
+    "uploadResult": "Upload result",
+    "valid": "Valid",
+    "invalid": "Errors found",
+    "rows": "Rows",
+    "errors": "Errors",
+    "row": "Row",
+    "column": "Column",
+    "message": "Message"
+  },
+  "periodManagement": {
+    "help": "Soft-closed periods take postings from Accounting Managers only; closed periods take none.",
+    "importOpening": "Import opening balances",
+    "panelTitle": "{{action}} {{period}}",
+    "action": {
+      "softClose": "Soft-close period",
+      "close": "Close period",
+      "reopen": "Reopen period"
+    },
+    "button": {
+      "softClose": "Soft-close",
+      "close": "Close",
+      "reopen": "Reopen"
+    },
+    "dates": "Dates",
+    "currentStatus": "Current status",
+    "newStatus": "New status",
+    "blockingChecks": "Blocking checks",
+    "recheck": "Run the checks again",
+    "check": "Check",
+    "countOrAmount": "Count or amount",
+    "resolve": "Resolve",
+    "noBlockingChecks": "No blocking checks",
+    "notAllowed": {
+      "checks": "A blocking check failed.",
+      "permission": "Reopening needs the approval permission.",
+      "locked": "Locked by the year-end close.",
+      "unchanged": "The period already has this status.",
+      "year-closed": "The fiscal year is closed.",
+      "year-end-closed": "The fiscal year is closed by a year-end close run.",
+      "adjustment-disabled": "The adjustment period is switched off."
+    },
+    "done": "Period {{period}}: {{status}}",
+    "system": "System",
+    "historyTitle": "History of period {{period}}",
+    "noHistory": "No status changes",
+    "historyAction": {
+      "reopened": "Reopened",
+      "softClosed": "Soft-closed",
+      "closed": "Closed",
+      "locked": "Locked",
+      "changed": "Status changed"
+    },
+    "source": {
+      "manual": "Period Management",
+      "close-run": "Month-end close",
+      "job": "Scheduled job",
+      "year-end": "Year-end close"
+    },
+    "createYear": "Create fiscal year",
+    "createYearTitle": "Create fiscal year {{code}}",
+    "createYearMessage": "Fiscal year {{code}} is added with its periods, all open.",
+    "createYearPeriods": "12 months and adjustment period 13",
+    "yearCreated": "Fiscal year {{code}} created",
+    "opening": {
+      "help": "Trial balance of the old system at the end of the day before the go-live date.",
+      "fiscalYear": "Fiscal year",
+      "asAt": "Balances as at",
+      "rows": "Rows",
+      "accounts": "Accounts",
+      "noBalanceRows": "Rows with no balance",
+      "totalDebit": "Total debit",
+      "totalCredit": "Total credit",
+      "difference": "Difference",
+      "goLiveDate": "Go-live date",
+      "load": "Load opening balances",
+      "confirmTitle": "Load opening balances",
+      "confirmMessage": "The opening balances of {{fiscalYear}} are loaded for go-live date {{date}}.",
+      "replaces": "This load replaces the earlier load for the same go-live date ({{accounts}} accounts, loaded by {{by}} on {{at}}).",
+      "replaceRule": "Loading again for the same go-live date replaces this load."
     }
   },
   "pageHeader": {
@@ -6627,7 +7587,9 @@
       "confirmation_difference": "Insurer confirmation difference",
       "payment_duplicate_override": "Possible duplicate payment",
       "billing_reject": "Insurer billing rejection",
-      "billing_cancel": "Insurer billing cancellation"
+      "billing_cancel": "Insurer billing cancellation",
+      "sales_invoice_cancel": "Sales invoice cancellation",
+      "invoice_payment_cancel": "Invoice payment cancellation"
     }
   },
   "birTax": {
@@ -6639,7 +7601,7 @@
     "percentageTaxHelp": "Working paper of the quarterly percentage tax return of a non-VAT registered broker or agent: gross sales per month from the ledger revenue accounts at the rate in bir.percentage_tax_rate.",
     "vatRegisteredNote": "The broker is set up as VAT registered (direct_bill.broker_vat_registered). Percentage tax applies to a non-VAT registered broker or agent: confirm with the tax adviser before filing a 2551Q.",
     "datFiles": "BIR DAT Files",
-    "datFilesHelp": "Validation data files of the QAP, the SAWT, the summary list of sales and of purchases and the 1604-E alphalist, built from the same rows as the reports. Validate them with the current BIR module before submission.",
+    "datFilesHelp": "Files are generated from the QAP, SAWT, SLSP and 1604-E reports and checked against them before download.",
     "datType": {
       "qap": "QAP (1601-EQ)",
       "sawt": "SAWT",
@@ -6652,8 +7614,6 @@
     "layoutVersion": "Layout version",
     "fileName": "File name",
     "records": "Records",
-    "detailRows": "Detail rows",
-    "warnings": "Warnings",
     "recordLayout": "Record layout",
     "fileContent": "File content",
     "download": "Download",
@@ -6666,7 +7626,7 @@
       "inputTax": "Input tax"
     },
     "salesInvoices": "Sales Invoices",
-    "salesInvoicesHelp": "The sales invoice is the primary document of the broker's sale of services (EOPT Act, RR 7-2024): commission debit notes, overriding commission, broker-billed commission and fees. Numbers are sequential; an invoice is cancelled with a reason, never deleted; payments are acknowledged with a supplementary document.",
+    "salesInvoicesHelp": "Sales invoices of the broker's services, numbered in sequence; a cancelled invoice keeps its number.",
     "salesInvoice": "Sales invoice",
     "newInvoice": "New invoice",
     "issueInvoice": "Issue invoice",
@@ -6704,14 +7664,12 @@
     "removeLine": "Remove line",
     "salesNetOfVat": "Sales net of VAT",
     "expectedEwt": "Expected withholding",
-    "sellerTinMissing": "The broker's TIN is missing: fill it in on Master > Company before issuing invoices.",
-    "permitMissing": "No ATP or CAS acknowledgement number is set (invoice.atp_number / invoice.cas_permit_number in Master > Configuration, Sales invoices).",
+    "sellerTinMissing": "The company TIN is missing on the Company master.",
+    "permitMissing": "No ATP or CAS permit number is set up for the invoices.",
     "invoiceNumber": "Invoice no.",
     "invoiceDate": "Invoice date",
     "searchInvoice": "Invoice no., buyer or reference",
-    "allSources": "All documents",
     "allStatuses": "All statuses",
-    "invoicesIssued": "Invoices issued",
     "totalSales": "Total sales",
     "totalAmount": "Total amount due",
     "balance": "Balance",
@@ -6719,9 +7677,6 @@
     "soldTo": "Sold to",
     "vatReg": "VAT registered",
     "nonVatReg": "Non-VAT registered",
-    "notSet": "not set",
-    "set": "set",
-    "serialRange": "serial range",
     "reference": "Reference",
     "payments": "Payments",
     "noPayments": "No payments recorded",
@@ -6739,13 +7694,10 @@
     "cancelled": "Cancelled",
     "confirm": "Confirm",
     "eis": "E-Invoicing (EIS)",
-    "eisHelp": "Outbox of e-invoices for the BIR Electronic Invoicing System: each sales invoice and cancellation is queued, sent, acknowledged or retried. While the broker's EIS certification is pending, export the payloads for a manual upload and record the reference.",
-    "eisOn": "The connector is on. Mode: {{mode}}. Endpoint: {{endpoint}}. Credentials: {{creds}}.",
-    "eisOff": "The EIS connector is switched off (eis.enabled in Master > Configuration, EIS). Invoices are not queued until it is switched on.",
+    "eisHelp": "E-invoices queued for the BIR Electronic Invoicing System, with their status and retries.",
     "sendNow": "Send now",
     "sentMsg": "Sent {{sent}}: accepted {{accepted}}, rejected {{rejected}}, failed {{failed}}",
     "queueBacklog": "Queue earlier invoices",
-    "queue": "Queue",
     "queuedMsg": "{{queued}} invoices queued",
     "exportPayloads": "Export payloads",
     "kind": "Kind",
@@ -6760,15 +7712,125 @@
     "lastError": "Last error",
     "retry": "Retry",
     "requeued": "Queued again",
-    "manualUpload": "Uploaded manually",
-    "manualUploadNote": "Use this after uploading the exported payload outside the system: the reference the BIR gave is kept on the submission.",
     "payload": "Payload",
     "response": "Response",
-    "signature": "Signature",
-    "remainingWithBir": "What remains with the BIR",
-    "eisSettingsNote": "Credentials are read from the environment variables {{id}} and {{secret}}; payloads are signed with the key in {{key}}. Their values are never stored in the system.",
     "cas": "CAS Books and Documents",
-    "casHelp": "Registration pack of the computerized accounting system: loose-leaf books per month with page numbers that run on through the year, the system description and controls, the backup procedure and the audit trail extract.",
+    "casHelp": "Registration pack of the computerized accounting system. Books print per month with page numbers that run on through the year; the documents print their approved version.",
+    "pageRange": "{{first}} to {{last}}",
+    "pdf": "PDF",
+    "casReadiness": {
+      "count": "{{complete}} of {{total}} complete",
+      "complete": "Complete",
+      "missing": "Missing",
+      "openCompany": "Open Company master",
+      "openDocument": "Open document",
+      "goToBooks": "Go to books",
+      "enter": {
+        "permit": "Enter permit",
+        "atp": "Enter ATP",
+        "custodian": "Name custodian",
+        "contact": "Name contact"
+      },
+      "item": {
+        "company": "Taxpayer name, TIN and registered address",
+        "rdo": "RDO code",
+        "permit": "CAS permit or acknowledgement number and date",
+        "atp": "Invoice ATP or acknowledgement",
+        "custodian": "Backup custodian",
+        "contact": "System contact person",
+        "systemDescription": "System description approved",
+        "backupProcedure": "Backup procedure approved",
+        "books": "Books printed at least once"
+      }
+    },
+    "casReg": {
+      "title": {
+        "permit": "CAS permit",
+        "atp": "Invoice ATP or acknowledgement",
+        "custodian": "Backup custodian",
+        "contact": "System contact person"
+      },
+      "number": {
+        "permit": "Permit or acknowledgement number",
+        "atp": "ATP or acknowledgement number"
+      },
+      "date": {
+        "permit": "Date issued",
+        "atp": "Date issued"
+      },
+      "user": {
+        "custodian": "Custodian",
+        "contact": "Contact person"
+      },
+      "position": "Position",
+      "chooseUser": "Choose a user",
+      "save": "Save",
+      "required": "Required"
+    },
+    "casDoc": {
+      "documents": "Documents",
+      "document": "Document",
+      "title": {
+        "system_description": "System Description and Controls",
+        "backup_procedure": "Backup and Restore Procedure"
+      },
+      "approvedVersion": "Approved version",
+      "approvedAt": "Approved on",
+      "approvedBy": "Approved by",
+      "inProgress": "In progress",
+      "content": "Content",
+      "versions": "Versions",
+      "activity": "Activity",
+      "version": "Version",
+      "preparedBy": "Prepared by",
+      "updatedAt": "Last changed",
+      "submittedBy": "Submitted by",
+      "submittedAt": "Submitted on",
+      "changeNote": "Change note",
+      "returnedWith": "Returned with",
+      "standardText": "Standard text (not approved)",
+      "remarks": "Remarks",
+      "heading": "Section heading",
+      "text": "Section text",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "removeSection": "Remove section",
+      "insertField": "Insert field",
+      "addSection": "Add section",
+      "liveFields": "Live fields",
+      "edit": "Edit document",
+      "saveDraft": "Save draft",
+      "discard": "Discard draft",
+      "printDraft": "Print draft",
+      "printVersion": "Print version {{version}}",
+      "compare": "Compare versions",
+      "selectedCount": "{{count}} of 2 selected",
+      "noVersions": "No versions yet",
+      "compareHead": "Version {{from}} compared with version {{to}}",
+      "compareSummary": "Changed {{changed}}, added {{added}}, removed {{removed}}",
+      "change": {
+        "added": "Added",
+        "removed": "Removed",
+        "changed": "Changed",
+        "same": "Unchanged"
+      },
+      "line": {
+        "added": "Added line",
+        "removed": "Removed line"
+      },
+      "submitTitle": "Submit for approval",
+      "approveTitle": "Approve document version",
+      "approveMessage": "Version {{version}} becomes the approved document; the previous approved version is superseded.",
+      "approveVersion": "Approve version",
+      "rejectTitle": "Return to preparer",
+      "rejectMessage": "Version {{version}} returns to its preparer as a draft.",
+      "returnToPreparer": "Return to preparer",
+      "discardTitle": "Discard draft",
+      "discardMessage": "Draft version {{version}} is cancelled; the approved version stays in force.",
+      "unsavedTitle": "Unsaved changes",
+      "unsavedMessage": "The changes to the draft are not saved.",
+      "closeWithoutSaving": "Close without saving"
+    },
     "systemDescription": "System description",
     "backupProcedure": "Backup procedure",
     "readiness": "Readiness",
@@ -6956,6 +8018,141 @@
       "settled": "Settled",
       "active": "Active",
       "inactive": "Inactive"
+    },
+    "acceptedAt": "Accepted on",
+    "all": "All",
+    "amounts": "Amounts",
+    "cancelPaymentNote": "The payment acknowledgement keeps its number and is printed CANCELLED; its journal is reversed and the invoice balance is restored.",
+    "cancellation": "Cancellation",
+    "cancelledAt": "Cancelled on",
+    "checksAgainstReport": "Checks against the report",
+    "detailRecords": "Detail records",
+    "eisConnection": "E-invoicing connection",
+    "eisOffMsg": "The e-invoicing connection is off: nothing was sent.",
+    "eisStatus": "EIS",
+    "eisSubmission": "E-invoice",
+    "errors": "Errors",
+    "expectedEwtAmount": "Expected withholding",
+    "file": "File",
+    "generateFile": "Generate file",
+    "generatedAt": "Generated on",
+    "generatedBy": "Generated by",
+    "generatedFiles": "Generated files",
+    "generatedMsg": "{{fileName}} generated",
+    "invoicingSetup": "Invoicing setup",
+    "lastSent": "Last sent",
+    "lines": "Lines",
+    "noErrors": "No errors",
+    "noFileSelected": "No file generated yet",
+    "noGeneratedFiles": "No files generated for this year",
+    "noInvoices": "No invoices found",
+    "outbox": "Outbox",
+    "outboxEmpty": "No e-invoices in the outbox",
+    "parties": "Seller and buyer",
+    "payloadHash": "Payload hash and signature",
+    "printCount": "Times printed",
+    "problem": "Problem",
+    "quarter": "Quarter",
+    "queueInvoices": "Queue invoices",
+    "queuedAt": "Queued on",
+    "recordManualUpload": "Record manual upload",
+    "recordNo": "Record no.",
+    "report": "Report",
+    "search": "Search",
+    "sellerTin": "Seller TIN",
+    "serialFromTo": "{{from}} to {{to}}",
+    "serialRangeLabel": "Serial range",
+    "submittedAt": "Sent on",
+    "tin": "TIN",
+    "totalIssued": "Total issued",
+    "validation": "Validation",
+    "vatAmount": "VAT",
+    "vatStatus": "VAT status",
+    "year": "Year",
+    "datCheck": {
+      "detailSum": "{{name}}: detail records against the control record",
+      "exempt": "{{name}}, exempt payees",
+      "records": "Detail records",
+      "incomePayment": "Income payment",
+      "taxWithheld": "Tax withheld",
+      "exemptSales": "Exempt sales",
+      "zeroRatedSales": "Zero-rated sales",
+      "taxableSales": "Taxable sales",
+      "outputTax": "Output tax",
+      "exemptPurchases": "Exempt purchases",
+      "zeroRatedPurchases": "Zero-rated purchases",
+      "purchaseOfServices": "Purchase of services",
+      "purchaseOfCapitalGoods": "Purchase of capital goods",
+      "purchaseOfOtherGoods": "Purchase of other goods",
+      "inputTax": "Input tax"
+    },
+    "datError": {
+      "tinMissing": "TIN missing",
+      "nameMissing": "Name missing",
+      "atcMissing": "ATC missing",
+      "negativeAmount": "Negative amount"
+    },
+    "datResult": {
+      "valid": "Valid",
+      "invalid": "With errors",
+      "agrees": "Agrees",
+      "differs": "Differs"
+    },
+    "setupMissing": {
+      "tin": "Company TIN",
+      "address": "Registered address",
+      "permit": "ATP or CAS permit number",
+      "permitDate": "ATP or CAS permit date",
+      "serialRange": "Registered serial range"
+    },
+    "eisMissing": {
+      "accreditationId": "Accreditation ID",
+      "endpoint": "Submission address",
+      "credentials": "Client credentials",
+      "signingKey": "Signing key"
+    },
+    "eisMode": {
+      "test": "Test",
+      "live": "Live",
+      "manual": "Manual"
+    },
+    "paymentModes": {
+      "bank-transfer": "Bank transfer",
+      "check": "Cheque",
+      "cash": "Cash",
+      "online": "Online payment"
+    },
+    "confirmations": {
+      "cancelFilingTitle": "Cancel the filing record of {{form}}",
+      "keepFiling": "Keep filing",
+      "form": "Return",
+      "recordedOn": "Recorded",
+      "cancelledOn": "Cancelled {{date}}",
+      "computationHeader": "Override computation",
+      "computationFigures": "Computation",
+      "overrideType": "Commission type",
+      "basis": "Basis",
+      "claimsSource": "Claims figure from",
+      "rejectedBecause": "Rejected",
+      "cancelledBecause": "Cancelled",
+      "activity": "Activity",
+      "keepComputation": "Keep computation",
+      "recordSettlement": "Record settlement",
+      "submitOverrideTitle": "Submit computation {{number}}",
+      "submitOverrideMessage": "The computation goes to a second user for approval.",
+      "submitOverride": "Submit for approval",
+      "approveOverrideTitle": "Approve computation {{number}}",
+      "approveOverrideMessage": "The override commission receivable journal is posted to the ledger.",
+      "approveOverride": "Approve and post",
+      "rejectOverrideTitle": "Reject computation {{number}}",
+      "rejectOverrideMessage": "The computation is rejected with your reason; nothing is posted.",
+      "rejectOverride": "Reject computation",
+      "cancelOverrideTitle": "Cancel computation {{number}}",
+      "cancelOverrideMessage": "The computation is cancelled. A posted receivable journal is reversed.",
+      "cancelOverride": "Cancel computation",
+      "invoiceOverrideTitle": "Issue sales invoice for {{number}}",
+      "invoiceOverrideMessage": "A sales invoice with the next serial number is issued to the insurer for the receivable.",
+      "invoiceOverride": "Issue invoice"
     }
   },
   "placement": {
@@ -7055,7 +8252,8 @@
       "acknowledge": "Record acknowledgement",
       "uploadEpolicy": "Upload e-policy",
       "checkAgainstSlip": "Check against slip",
-      "book": "Book (Insurer issued)"
+      "book": "Book (Insurer issued)",
+      "printSlip": "Print slip"
     },
     "brokerSlip": {
       "title": "Request for Quotation (Broker Slip)",
@@ -7068,7 +8266,13 @@
       "tabResponses": "Market responses ({{count}})",
       "tabCompare": "Compare offers",
       "tabRisk": "Risk and covers",
-      "closeTitle": "Cancel or close the broker slip"
+      "closeTitle": "Cancel or close the broker slip",
+      "tabResponsesTitle": "Market responses",
+      "cancelTitle": "Cancel request for quotation",
+      "cancelMessage": "The request is withdrawn from the insurers. No quotation slip can be prepared from it.",
+      "closeTitleShort": "Close request for quotation",
+      "closeMessage": "The request is closed as not taken up. The insurers' offers stay on record.",
+      "offers": "Offers received"
     },
     "placementSlip": {
       "title": "Placement Slip",
@@ -7096,7 +8300,8 @@
       "premium": "Premium",
       "summary": "Summary",
       "terms": "Period and premium",
-      "epolicy": "e-Policy"
+      "epolicy": "e-Policy",
+      "history": "History"
     },
     "fields": {
       "slipNumber": "Slip No.",
@@ -7240,7 +8445,10 @@
       "valuePlaceholder": "Value"
     },
     "decline": {
-      "title": "{{insurer}} declined"
+      "title": "{{insurer}} declined",
+      "message": "The insurer's decline is recorded on the slip. Its share has to be placed with another insurer.",
+      "insurer": "Insurer",
+      "share": "Share"
     },
     "validation": {
       "title": "Check the form",
@@ -7282,7 +8490,8 @@
     "acknowledge": {
       "title": "Insurer acknowledgement",
       "note": "Record that the insurer confirmed receipt of the firm order.",
-      "reference": "Insurer acknowledgement reference"
+      "reference": "Insurer acknowledgement reference",
+      "insurers": "Insurers"
     },
     "epolicy": {
       "title": "e-Policy received - {{number}}",
@@ -7367,17 +8576,22 @@
       "confirm": "Confirm check",
       "acceptDifferences": "Accept differences",
       "returnToInsurer": "Return to insurer",
-      "decidedBy": "Checked by"
+      "decidedBy": "Checked by",
+      "differences": "Differences"
     },
     "book": {
       "title": "Book the policy (Insurer issued)",
       "note": "The insurer issued e-policy {{number}} and it was checked against the slip. Booking creates the policy, the bill or direct-bill commission, the journal and the commission, ends the cover notes and e-mails the policy schedule to the client.",
-      "verifyNote": "The ID details below come from the client and the quotation. Check them before booking."
+      "verifyNote": "The ID details below come from the client and the quotation. Check them before booking.",
+      "consequence": "Booking creates the policy, the bill or direct-bill commission, the journal and the commission, ends the cover notes and e-mails the policy schedule to the client."
     },
     "recordEpolicy": {
       "title": "Record e-Policy",
       "subtitle": "Placement slips sent to the insurer and waiting for the e-policy. Select one to record the e-policy the insurer sent.",
       "empty": "No placement slip is waiting for an e-policy"
+    },
+    "cancel": {
+      "message": "The placement slip is cancelled. The insurers are not told automatically."
     }
   },
   "postingRules": {
@@ -7529,7 +8743,34 @@
       "perInsurer": "per insurer",
       "decidedAtPosting": "Decided when posting",
       "else": "else"
-    }
+    },
+    "requestedBy": "Requested by",
+    "requestedAt": "Requested on",
+    "decided": "Decision",
+    "decidedBy": "Decided by",
+    "decidedAt": "Decided on",
+    "decisionRemarks": "Decision remarks",
+    "accountSource": "Account from",
+    "confirm": {
+      "approveTitle": "Approve configuration change",
+      "approveMessage": "The change below takes effect for posting once approved.",
+      "approveNote": "Journals posted after approval use the new configuration.",
+      "approveAction": "Approve change",
+      "rejectTitle": "Reject configuration change",
+      "rejectMessage": "The change below will not be applied. The requester sees the reason.",
+      "rejectAction": "Reject change",
+      "withdrawTitle": "Withdraw configuration change",
+      "withdrawMessage": "The change below is withdrawn and no longer waits for approval.",
+      "withdrawAction": "Withdraw change",
+      "activateTitle": "Activate posting rule",
+      "activateMessage": "The posting rule version below is used for posting from its effective date.",
+      "activateAction": "Activate rule",
+      "deactivateTitle": "Deactivate posting rule",
+      "deactivateMessage": "The posting rule version below is no longer used for posting.",
+      "deactivateAction": "Deactivate rule",
+      "approvalNote": "Where configuration changes need a second user, the change waits in Configuration Approvals."
+    },
+    "historyOf": "History: {{event}}"
   },
   "bankReconciliation": {
     "downloadTemplate": "Download template (GENERIC format)",
@@ -7801,6 +9042,27 @@
       "stale": "Stale",
       "duplicate": "Duplicate",
       "new": "New"
+    },
+    "confirmations": {
+      "asOfDate": "As of date",
+      "prepare": "Prepare reconciliation",
+      "approve": "Approve reconciliation",
+      "reopen": "Reopen reconciliation",
+      "cancel": "Cancel reconciliation",
+      "keep": "Keep reconciliation",
+      "cancelChequeTitle": "Cancel stale cheque {{cheque}}",
+      "keepCheque": "Keep cheque",
+      "approveAdjustmentMessage": "Adjustment journal {{journal}} is approved and posted to the general ledger.",
+      "approveAndPost": "Approve and post",
+      "unmatchMessage": "The match cleared on {{date}} is undone; both sides return to unmatched.",
+      "notes": {
+        "prepare": "The statement figures are frozen and the reconciliation goes for approval.",
+        "approve": "Every match cleared up to the period end is locked.",
+        "reopen": "The reconciliation returns to draft and its matches are unlocked.",
+        "cancel": "The draft reconciliation is cancelled. Matches are kept.",
+        "cancelCheque": "The payment journal is reversed and the payable is re-opened.",
+        "flag": "The line becomes a reconciling item on the bank side. No journal is posted."
+      }
     }
   },
   "followUps": {
@@ -7906,7 +9168,37 @@
     "activated": "Activated",
     "deactivated": "Deactivated",
     "notApplied": "Template not in use",
-    "notAppliedHelp": "Another template is in use for this product (Product Templates > In use): this entry is not applied to quotations until its template is the one in use."
+    "notAppliedHelp": "Another template is in use for this product (Product Templates > In use): this entry is not applied to quotations until its template is the one in use.",
+    "close": "Close",
+    "view": {
+      "template": "Product template",
+      "coverage": "Coverage",
+      "rule": "Acceptance rule",
+      "mapping": "Market mapping"
+    },
+    "kinds": {
+      "template": "Product template",
+      "coverages": "Coverage",
+      "rating-factors": "Rating factor",
+      "underwriting-rules": "Acceptance rule",
+      "market-mappings": "Market mapping",
+      "documents": "Document",
+      "risk-mapping": "Risk mapping"
+    },
+    "status": {
+      "recordType": "Record type",
+      "code": "Code",
+      "name": "Name",
+      "activateTitle": "Activate {{kind}}",
+      "deactivateTitle": "Deactivate {{kind}}",
+      "activateMessage": "The record below becomes active and applies to new quotations.",
+      "deactivateMessage": "The record below becomes inactive.",
+      "deactivateNote": "New quotations no longer use it. Quotations already issued are not changed.",
+      "retireMessage": "The product template below is retired.",
+      "retireNote": "It is no longer applied to new business. Policies already issued keep it.",
+      "retireAction": "Retire template",
+      "activateTemplateAction": "Activate template"
+    }
   },
   "customerResponse": {
     "waiting": "Waiting for customer approval",
@@ -8166,6 +9458,23 @@
       "missingInBroker": "Not found at the broker",
       "missingInInsurer": "Missing on the insurer statement",
       "all": "All lines"
+    },
+    "confirmations": {
+      "submitTitle": "Submit reconciliation for approval",
+      "submitMessage": "Statement {{number}} is sent for approval.",
+      "approveTitle": "Approve reconciliation",
+      "rejectTitle": "Reject reconciliation",
+      "approveMessage": "The reconciliation of statement {{number}} is approved.",
+      "rejectMessage": "Statement {{number}} returns to draft.",
+      "approveNote": "The adjustment journals are posted on approval.",
+      "approve": "Approve reconciliation",
+      "reject": "Reject reconciliation",
+      "cancelTitle": "Cancel statement",
+      "cancelMessage": "Statement {{number}} is cancelled and can no longer be reconciled.",
+      "keepStatement": "Keep statement",
+      "unmatchMessage": "Line {{line}} returns to the lines not found at the broker.",
+      "removeResolutionMessage": "The resolution of {{policy}} is removed and the difference is unresolved again.",
+      "activity": "Activity"
     }
   },
   "creditControl": {
@@ -8306,7 +9615,147 @@
     "collectedOn": "Collected on",
     "remitBy": "Remit by (terms)",
     "daysOverdue": "Days overdue",
-    "amountDue": "Amount due"
+    "amountDue": "Amount due",
+    "confirmations": {
+      "remindTitle": "Send premium reminder",
+      "remindMessage": "A premium reminder is e-mailed to the client.",
+      "reminderMessage": "Message to the client",
+      "reminderTemplate": "Without a message, the collection reminder template is sent.",
+      "cancellationTitle": "Request cancellation for non-payment",
+      "cancellationMessage": "A draft cancellation endorsement is raised for Operations.",
+      "notesForOperations": "Notes for Operations",
+      "cancellationNote": "The policy stays in force until Operations issues the endorsement.",
+      "requestCancellation": "Request cancellation",
+      "approveExtensionTitle": "Approve warranty extension",
+      "rejectExtensionTitle": "Reject warranty extension",
+      "approveExtension": "Approve extension",
+      "rejectExtension": "Reject extension",
+      "historyTitle": "Premium warranty history",
+      "activity": "Activity",
+      "cancelPlanTitle": "Cancel instalment plan",
+      "cancelPlanMessage": "The instalment plan of bill {{bill}} is cancelled.",
+      "cancelPlanNote": "The bill stays open, due on the date of its first unpaid instalment.",
+      "keepPlan": "Keep plan",
+      "invoicePlanMessage": "Bill {{bill}} is cancelled and replaced by {{count}} instalment invoices, each with its own due date.",
+      "invoicePlanNote": "The booking journal of the bill is reversed and each invoice is booked on its own.",
+      "issueInvoices": "Issue {{count}} invoices",
+      "removeInstalment": "Remove instalment",
+      "acknowledgeTitle": "Acknowledge credit limit exception",
+      "acknowledgeMessage": "The policy issued over the credit limit of {{client}} is marked as acknowledged.",
+      "acknowledgeException": "Acknowledge exception"
+    }
+  },
+  "financialStatements": {
+    "title": "Financial Statements",
+    "help": "Statements from posted journals for a fiscal period or a date range. Select an account to see its postings.",
+    "statement": {
+      "income-statement": "Income Statement",
+      "balance-sheet": "Balance Sheet",
+      "trial-balance": "Trial Balance"
+    },
+    "fiscalYear": "Fiscal year",
+    "period": "Period",
+    "view": "View",
+    "views": {
+      "month": "Month",
+      "quarter": "Quarter",
+      "ytd": "Year to date",
+      "custom": "Custom range",
+      "periodEnd": "Period end",
+      "customDate": "Custom date"
+    },
+    "from": "From",
+    "to": "To",
+    "asOf": "As of",
+    "label": {
+      "quarter": "Quarter {{quarter}}, {{fiscalYear}}",
+      "ytd": "Year to date, {{fiscalYear}}",
+      "asOf": "As of {{date}}"
+    },
+    "amountsIn": "Amounts in {{currency}}",
+    "refresh": "Refresh",
+    "export": "Export",
+    "excel": "Excel workbook",
+    "pdf": "PDF document",
+    "print": "Print",
+    "account": "Account",
+    "measure": {
+      "currentPeriod": "This period",
+      "yearToDate": "Year to date",
+      "priorPeriod": "Same period last year",
+      "priorYearToDate": "Last year to date",
+      "balance": "As of",
+      "priorYearEnd": "Previous year end"
+    },
+    "tb": {
+      "opening": "Opening",
+      "movement": "Movement",
+      "closing": "Closing",
+      "debit": "Debit",
+      "credit": "Credit"
+    },
+    "section": {
+      "income": "Income",
+      "expense": "Expenses",
+      "asset": "Assets",
+      "liability": "Liabilities",
+      "equity": "Equity"
+    },
+    "total": "Total {{label}}",
+    "result": {
+      "netIncome": "Net income (loss)",
+      "liabilitiesAndEquity": "Total liabilities and equity",
+      "total": "Total"
+    },
+    "earnings": {
+      "CYE": "Current year earnings",
+      "PYE": "Earnings of prior years not yet closed"
+    },
+    "noLines": "No postings in this period",
+    "cards": {
+      "totalIncome": "Total income",
+      "totalExpense": "Total expenses",
+      "netIncome": "Net income",
+      "netLoss": "Net loss",
+      "netIncomeYtd": "Net income, year to date",
+      "netLossYtd": "Net loss, year to date",
+      "totalAssets": "Total assets",
+      "totalLiabilities": "Total liabilities",
+      "totalEquity": "Total equity",
+      "withEarnings": "With current year earnings",
+      "balanceCheck": "Balance check",
+      "totalDebit": "Total debits",
+      "totalCredit": "Total credits",
+      "difference": "Difference",
+      "closingAt": "Closing balances at {{date}}"
+    },
+    "status": {
+      "balanced": "Balanced",
+      "outOfBalance": "Out of balance"
+    },
+    "errors": {
+      "required": "Enter the date",
+      "range": "The to date is before the from date"
+    },
+    "ledger": {
+      "title": "General ledger",
+      "account": "Account",
+      "period": "Period",
+      "opening": "Opening balance",
+      "debits": "Debits",
+      "credits": "Credits",
+      "closing": "Closing balance",
+      "date": "Date",
+      "journal": "Journal",
+      "description": "Description",
+      "source": "Source",
+      "debit": "Debit",
+      "credit": "Credit",
+      "balance": "Balance",
+      "dr": "Dr",
+      "cr": "Cr",
+      "none": "No postings in this period"
+    }
   },
   "packagedProducts": {
     "active": "Active",
@@ -8396,7 +9845,10 @@
       "deductibleAmount": "Deductible amount",
       "effectiveFrom": "Effective from",
       "effectiveTo": "Effective to",
-      "benefitsHelp": "One benefit per line; shown to the client on the comparison"
+      "benefitsHelp": "One benefit per line; shown to the client on the comparison",
+      "deleteTitle": "Delete rate table",
+      "deleteMessage": "New quotations no longer use this rate. Quotations already priced keep their premium.",
+      "deleted": "Rate table deleted"
     },
     "taxes": {
       "saved": "Saved",
@@ -8443,7 +9895,13 @@
       "result": "Breakdown",
       "flatAmount": "Flat amount (PHP)",
       "fractionRule": "Part of a unit counts as a full unit",
-      "minimumAmount": "Minimum amount (PHP)"
+      "minimumAmount": "Minimum amount (PHP)",
+      "deleteLguTitle": "Delete local tax rate",
+      "deleteLguMessage": "The local government tax of the city or municipality is no longer charged on new premiums.",
+      "lguDeleted": "Local tax rate deleted",
+      "deleteRuleTitle": "Delete tax rule",
+      "deleteRuleMessage": "The tax is no longer charged on new premiums. Premiums already computed keep their taxes.",
+      "ruleDeleted": "Tax rule deleted"
     },
     "bundles": {
       "propertyAuto": "Fire service tax applies",
@@ -8476,7 +9934,9 @@
       "benefits": "Benefits",
       "addSection": "Add section",
       "removeSection": "Remove",
-      "insurersHelp": "Insurers that can carry this section; the first one is proposed"
+      "insurersHelp": "Insurers that can carry this section; the first one is proposed",
+      "deleteTitle": "Delete bundle",
+      "deleteMessage": "The bundle is deleted. A bundle with quotations is switched off instead."
     },
     "gateways": {
       "saved": "{{name}} saved",
@@ -8836,11 +10296,11 @@
   },
   "renewalPolicy": {
     "expiresIn": "Expires in {{count}} days",
-    "expiresIn_one": "Expires in {{count}} day",
-    "expiresIn_other": "Expires in {{count}} days",
+    "expiresIn_one": "In {{count}} day",
+    "expiresIn_other": "In {{count}} days",
     "expiredAgo": "Expired {{count}} days ago",
-    "expiredAgo_one": "Expired {{count}} day ago",
-    "expiredAgo_other": "Expired {{count}} days ago",
+    "expiredAgo_one": "{{count}} day ago",
+    "expiredAgo_other": "{{count}} days ago",
     "expiryFrom": "Expiry from",
     "expiryTo": "Expiry to",
     "state": "Renewal state",
@@ -8859,10 +10319,6 @@
     "premium": "Premium",
     "payment": "Payment",
     "expiresToday": "Today",
-    "expiresIn_one": "In {{count}} day",
-    "expiresIn_other": "In {{count}} days",
-    "expiredAgo_one": "{{count}} day ago",
-    "expiredAgo_other": "{{count}} days ago",
     "renew": "Renew",
     "continue": "Continue renewal",
     "openNewPolicy": "Open {{number}}",
@@ -8968,7 +10424,16 @@
     "remarks": "Remarks",
     "approved": "Referral approved",
     "declined": "Referral declined: the quotation is rejected",
-    "loadings": "Loadings added by the acceptance rules"
+    "loadings": "Loadings added by the acceptance rules",
+    "statusLabel": "Status",
+    "requestedAt": "Referred on",
+    "authority": "Approval by",
+    "sumInsured": "Sum insured",
+    "decidedByLabel": "Decided by",
+    "decidedAt": "Decided on",
+    "reasons": "Referral reasons",
+    "quotation": "Quotation",
+    "cancel": "Cancel"
   },
   "myWork": {
     "loadFailed": "My Work could not be loaded",
@@ -9012,7 +10477,8 @@
       "titleRequired": "Enter what is to be done",
       "dueDateRequired": "Choose the due date",
       "timeInvalid": "Use HH:MM",
-      "recordRequired": "Choose the record"
+      "recordRequired": "Choose the record",
+      "deleteMessage": "The task below will be deleted and its reminder cancelled."
     },
     "items": {
       "empty": "Nothing waiting here"
@@ -9568,6 +11034,86 @@
       "batch.count": "Batch: number of payments",
       "batch.channel": "Batch: channel",
       "batch.createdDate": "Batch: created on"
+    },
+    "batchDetail": "Bank payment batch",
+    "batchFacts": "Batch",
+    "totalAmount": "Total amount",
+    "createdBy": "Created by",
+    "createdAt": "Created on",
+    "approvedBy": "Approved by",
+    "approvedAt": "Approved on",
+    "fileWrittenAt": "File written on",
+    "uploadedAt": "Uploaded on",
+    "returnedReason": "Reason returned",
+    "activity": "Activity",
+    "saveResult": "Save result",
+    "batchSteps": {
+      "submit": {
+        "title": "Submit batch for approval",
+        "message": "The batch below is sent to a second user for approval.",
+        "note": "The batch can no longer be changed while it waits for approval.",
+        "action": "Submit for approval"
+      },
+      "approve": {
+        "title": "Approve bank payment batch",
+        "message": "The payments below are approved for the bank file.",
+        "note": "The bank file can be written once the batch is approved.",
+        "action": "Approve batch"
+      },
+      "reject": {
+        "title": "Return bank payment batch",
+        "message": "The batch below goes back to its maker as a draft.",
+        "action": "Return batch"
+      },
+      "cancel": {
+        "title": "Cancel bank payment batch",
+        "message": "The batch below is cancelled and its vouchers can be paid again.",
+        "action": "Cancel batch"
+      },
+      "generate": {
+        "title": "Write bank file",
+        "message": "The upload file for the bank portal is written from the batch below.",
+        "action": "Write file"
+      },
+      "rewrite": {
+        "title": "Write bank file again",
+        "message": "The upload file of the batch below is written again.",
+        "note": "Upload only the new file to the bank portal; discard the earlier one.",
+        "action": "Write file again"
+      },
+      "sent": {
+        "title": "Mark batch as uploaded",
+        "message": "The file of the batch below has been uploaded to the bank portal.",
+        "action": "Mark as uploaded"
+      }
+    },
+    "messageDetail": "Outgoing message",
+    "inboxDetail": "Incoming message",
+    "messageFacts": "Message",
+    "content": "Content",
+    "record": "Record",
+    "sentAt": "Sent on",
+    "receivedBy": "Received by",
+    "processedAt": "Processed on",
+    "signature": "Signature valid",
+    "outboxSteps": {
+      "resend": {
+        "title": "Resend message",
+        "message": "The message below is queued again and sent to the provider.",
+        "action": "Resend message"
+      },
+      "cancel": {
+        "title": "Cancel message",
+        "message": "The message below is cancelled and is not sent.",
+        "action": "Cancel message"
+      }
+    },
+    "inboxSteps": {
+      "reprocess": {
+        "title": "Process message again",
+        "message": "The incoming message below is processed again.",
+        "action": "Process again"
+      }
     }
   },
   "onboarding": {
@@ -10240,6 +11786,77 @@
       "alreadyPosted": "Already posted",
       "journalDate": "Journal date",
       "nothingDue": "Nothing to depreciate for this period"
+    },
+    "confirmations": {
+      "activity": "Activity",
+      "amounts": "Amounts",
+      "lines": "Lines",
+      "journal": "Journal",
+      "preparedBy": "Prepared by",
+      "approvedBy": "Approved by",
+      "approvedAt": "Approved on",
+      "rejectedBecause": "Rejected: {{reason}}",
+      "cancelledBecause": "Cancelled: {{reason}}",
+      "keepDisposal": "Keep disposal",
+      "invoice": {
+        "header": "Supplier invoice",
+        "submitTitle": "Submit supplier invoice {{number}}",
+        "submitMessage": "The invoice goes to a second user for approval.",
+        "submit": "Submit for approval",
+        "approveTitle": "Approve supplier invoice {{number}}",
+        "approveMessage": "The AP journal is posted and the invoice becomes payable.",
+        "approve": "Approve and post",
+        "rejectTitle": "Reject supplier invoice {{number}}",
+        "rejectMessage": "The invoice returns to the preparer with your reason.",
+        "reject": "Reject invoice",
+        "cancelTitle": "Cancel supplier invoice {{number}}",
+        "cancelMessage": "The invoice is cancelled. A posted AP journal is reversed.",
+        "cancel": "Cancel invoice",
+        "keep": "Keep invoice"
+      },
+      "payment": {
+        "cancelTitle": "Cancel supplier payment {{number}}",
+        "cancelMessage": "The payment journal is reversed and the invoices it paid are open again.",
+        "cancel": "Cancel payment",
+        "keep": "Keep payment"
+      },
+      "pdc": {
+        "clearTitle": "Mark cheque {{number}} as cleared",
+        "clearMessage": "The bank has honoured the cheque.",
+        "clear": "Mark as cleared",
+        "depositMessage": "An official receipt is created and posted to the bank account below.",
+        "deposit": "Deposit cheque",
+        "bounce": "Mark as bounced",
+        "returnTitle": "Return cheque {{number}} to the client",
+        "returnMessage": "The cheque leaves the register as returned. The bill stays open.",
+        "return": "Return cheque",
+        "cancelTitle": "Cancel registration of cheque {{number}}",
+        "cancelMessage": "The cheque is removed from the register as cancelled.",
+        "cancel": "Cancel registration",
+        "keep": "Keep cheque"
+      },
+      "asset": {
+        "header": "Fixed asset",
+        "details": "Asset details",
+        "accounts": "GL accounts",
+        "assetAccount": "Asset account",
+        "accumulatedAccount": "Accumulated depreciation account",
+        "expenseAccount": "Depreciation expense account",
+        "schedule": "Depreciation schedule",
+        "lastPeriod": "Depreciated to",
+        "disposedOn": "Disposed on"
+      },
+      "depreciation": {
+        "title": "Post depreciation for {{period}}",
+        "message": "One depreciation journal per asset class is posted, dated the period end.",
+        "post": "Post depreciation"
+      },
+      "master": {
+        "deactivateTitle": "Deactivate {{name}} record",
+        "deactivateMessage": "The record is no longer offered for new transactions. Existing transactions keep it.",
+        "activateTitle": "Activate {{name}} record",
+        "activateMessage": "The record is offered again for new transactions."
+      }
     }
   },
   "distribution": {
@@ -10304,7 +11921,14 @@
         "both": "Clients and prospects",
         "client": "Clients",
         "lead": "Prospects"
-      }
+      },
+      "sendTitle": "Send campaign",
+      "sendMessage": "The e-mails are queued to the outbox for every recipient who agreed to receive offers.",
+      "sendAction": "Send campaign",
+      "cancelMessage": "The campaign is not sent. A cancelled campaign cannot be scheduled again.",
+      "sentAt": "Sent",
+      "conversionWindow": "Conversion window (days)",
+      "summary": "Summary"
     },
     "home": {
       "operations": "Operations",
@@ -10327,7 +11951,9 @@
       "yes": "Yes",
       "search": "Search",
       "delete": "Delete",
-      "back": "Back"
+      "back": "Back",
+      "history": "History",
+      "close": "Close"
     },
     "cr": {
       "clientReport": "Client comparison report",
@@ -10367,7 +11993,18 @@
       "needsOffers": "{{number}} has {{count}} insurer offer(s); a comparison needs at least two",
       "needsQuotes": "Choose at least two quotations",
       "searchQuotes": "Quotation number or customer",
-      "notYet": "A comparison report needs at least two insurer offers ({{count}} so far)"
+      "notYet": "A comparison report needs at least two insurer offers ({{count}} so far)",
+      "emailTitle": "E-mail comparison report",
+      "emailMessage": "The client report (PDF) is sent from the outbox.",
+      "emailAddress": "E-mail address",
+      "emailOnFile": "The client's e-mail on file",
+      "emailInvalid": "Enter a valid e-mail address.",
+      "emailAction": "Send e-mail",
+      "chosenTitle": "Record the client's choice",
+      "chosenMessage": "The report is closed with this option and can no longer be changed.",
+      "chosenAction": "Record choice",
+      "createdBy": "Prepared by",
+      "createdAt": "Prepared on"
     },
     "fl": {
       "sumInsured": "Sum insured",
@@ -10426,7 +12063,19 @@
         "vehicleType": "Vehicle class (CTPL tariff)",
         "usage": "Usage",
         "mortgagee": "Mortgagee"
-      }
+      },
+      "item": "Item",
+      "removeVehicleTitle": "Remove vehicle",
+      "removeVehicleMessage": "The vehicle is removed from the draft schedule.",
+      "removeVehicleAction": "Remove vehicle",
+      "printSchedule": "Print schedule",
+      "issueTitle": "Issue fleet policy",
+      "issueMessage": "One policy is issued for the vehicles on the schedule.",
+      "issueNote": "The total premium is billed to the client.",
+      "endorseDeleteAction": "Delete vehicle",
+      "returnHelp": "The return premium is the vehicle's annual premium for the days left in the period",
+      "deleteReasonLabel": "Reason",
+      "deleteReasonHint": "Vehicle sold, total loss ..."
     },
     "mp": {
       "freeYear": "First year free, paid by the {{payer}}",
@@ -10542,7 +12191,10 @@
         "financing_bank": "Financing bank",
         "bank_branch": "Bank branch",
         "affinity_partner": "Affinity partner"
-      }
+      },
+      "deleteTitle": "Remove distribution channel",
+      "deleteMessage": "The channel is removed. A channel with prospects or policies is made inactive instead.",
+      "deleteAction": "Remove channel"
     },
     "la": {
       "open": "open",
@@ -10656,7 +12308,13 @@
         "round_robin": "Each account executive in turn",
         "load": "The account executive with the fewest open prospects",
         "fixed": "Always the first account executive"
-      }
+      },
+      "deleteRuleTitle": "Remove assignment rule",
+      "deleteRuleMessage": "New prospects are no longer assigned by this rule. Prospects already assigned keep their account executive.",
+      "deleteRuleAction": "Remove rule",
+      "runMatched": "Matched by a rule",
+      "runUnmatched": "Staying in the queue",
+      "leads": "Prospects"
     },
     "oc": {
       "title": "Marine Open Covers",
@@ -10731,7 +12389,22 @@
         "billOfLading": "Bill of lading / airway bill",
         "consignee": "Consignee",
         "packing": "Packing"
-      }
+      },
+      "activateTitle": "Activate open cover",
+      "activateMessage": "The open policy is issued. Premium is billed on the declarations.",
+      "activateAction": "Activate open cover",
+      "cancelTitle": "Cancel open cover",
+      "cancelMessage": "No certificate can be issued on the cover after it is cancelled.",
+      "reason": "Reason",
+      "cancelCertMessage": "The certificate is cancelled and left out of the declaration of its period.",
+      "newDeclarationMessage": "The shipments of the period are attached to the declaration and priced with the premium taxes.",
+      "openDeclaration": "Open declaration",
+      "deleteDeclarationTitle": "Delete declaration",
+      "deleteDeclarationMessage": "The draft declaration is deleted. Its shipments stay on the cover for a new declaration of the period.",
+      "premium": "Premium",
+      "vat": "VAT",
+      "dst": "Documentary stamp tax",
+      "lgt": "Local government tax"
     },
     "rb": {
       "deleteConfirm": "Delete the saved report {{name}}?",
@@ -10792,7 +12465,9 @@
         "lt": "less than",
         "lte": "up to / at most",
         "between": "between"
-      }
+      },
+      "deleteTitle": "Delete saved report",
+      "deleteMessage": "The saved report is deleted for everyone it is shared with. Files already exported are kept."
     },
     "status": {
       "active": "Active",
@@ -10849,7 +12524,30 @@
     "reason": "Reason for the revocation",
     "confirmRevoke": "Revoke version",
     "mySignature": "My e-signature",
-    "mine": "my signature"
+    "mine": "my signature",
+    "signer": "Signer",
+    "version": "Version",
+    "versionNo": "Version {{version}}",
+    "effectiveTo": "Effective to",
+    "openEnded": "Until replaced",
+    "method": "Captured as",
+    "capturedBy": "Captured by",
+    "capturedAt": "Captured on",
+    "revokedBy": "Revoked by",
+    "revokedAt": "Revoked on",
+    "revokeReason": "Reason revoked",
+    "methods": {
+      "drawn": "Drawn on screen",
+      "uploaded": "Uploaded image"
+    },
+    "statuses": {
+      "active": "Active",
+      "revoked": "Revoked",
+      "replaced": "Replaced"
+    },
+    "revokeTitle": "Revoke signature version",
+    "revokeMessage": "The signature version below is revoked and no longer printed.",
+    "revokeNote": "Documents printed before keep the signature they were printed with."
   },
   "salesActivities": {
     "title": "Activities",
@@ -10923,7 +12621,11 @@
       "open": "Open",
       "done": "Done",
       "cancelled": "Cancelled"
-    }
+    },
+    "activity": "Activity",
+    "cancelMessage": "The activity below is kept on the record and marked as cancelled.",
+    "cancelNote": "Its open follow-up task in My Work is cancelled too.",
+    "byName": "by {{name}}"
   },
   "quoteSteps": {
     "label": "Steps of the quote",
@@ -11026,5 +12728,328 @@
     "saveAnyway": "Save anyway",
     "back": "Back to the form",
     "clientFailed": "The client could not be loaded"
+  },
+  "remittanceMasters": {
+    "code": "Code",
+    "name": "Name",
+    "kinds": {
+      "settlementParameter": "Settlement parameters",
+      "statementTemplate": "Statement template",
+      "automatedRule": "Remittance rule"
+    },
+    "delete": {
+      "title": "Delete {{what}}",
+      "message": "The {{what}} below will be deleted.",
+      "note": "Remittances already processed with it are not changed.",
+      "action": "Delete {{what}}",
+      "done": "{{what}} deleted"
+    },
+    "notifications": {
+      "view": "View",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteTitle": "Delete notification template",
+      "deleteMessage": "The notification template below will be deleted.",
+      "deleteNote": "Notifications already sent are not affected.",
+      "deleteAction": "Delete template",
+      "deleted": "{{name}} deleted",
+      "addTitle": "Add notification template",
+      "editTitle": "Edit notification template",
+      "templateTitle": "Notification template",
+      "ruleTitle": "Notification rule",
+      "templateName": "Template name",
+      "eventType": "Event",
+      "recipient": "Recipient",
+      "recipients": "Recipients",
+      "channel": "Channel",
+      "priority": "Priority",
+      "autoSend": "Sent automatically",
+      "subject": "Subject",
+      "message": "Message",
+      "body": "Body",
+      "delivery": "Delivery",
+      "active": "Active",
+      "inactive": "Inactive",
+      "condition": "Condition",
+      "frequency": "Frequency",
+      "escalationLevel": "Escalation level"
+    }
+  },
+  "s3Upload": {
+    "uploadFiles_one": "Upload {{count}} file",
+    "uploadFiles_other": "Upload {{count}} files",
+    "retryFiles_one": "Retry {{count}} file",
+    "retryFiles_other": "Retry {{count}} files"
+  },
+  "masterStatus": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "recordType": "Record type",
+    "name": "Name",
+    "code": "Code",
+    "deactivateTitle": "Deactivate {{kind}}",
+    "deactivateMessage": "The {{kind}} below will be set to inactive.",
+    "deactivateAction": "Deactivate {{kind}}",
+    "note": {
+      "default": "It is no longer offered on new transactions. Existing records keep it.",
+      "role": "Users who hold only this role lose access to the screens it grants.",
+      "user": "The user can no longer sign in."
+    },
+    "types": {
+      "hierarchy": "Hierarchy",
+      "designation": "Designation",
+      "role": "Role",
+      "user": "User",
+      "company": "Company",
+      "branch": "Branch",
+      "vehicle": "Vehicle",
+      "product": "Product",
+      "cover": "Cover",
+      "policy-type": "Policy type",
+      "signatory": "Signatory",
+      "line-of-business": "Line of business",
+      "insurance-company": "Insurance company",
+      "city": "City",
+      "country": "Country",
+      "state": "Province",
+      "exchange-rate": "Exchange rate",
+      "bank": "Bank",
+      "bank-account": "Bank account",
+      "department": "Department",
+      "account-category": "Account category",
+      "currency": "Currency",
+      "transaction-code": "Transaction code"
+    }
+  },
+  "schedules": {
+    "title": "Schedules",
+    "master": "Master",
+    "job": "Job",
+    "whatItDoes": "What it does",
+    "schedule": "Schedule",
+    "scheduleIn": "Schedule ({{zone}})",
+    "status": "Status",
+    "scheduled": "Scheduled",
+    "switchedOff": "Switched off",
+    "nextRun": "Next run",
+    "lastRun": "Last run",
+    "lastStatus": "Last status",
+    "runNow": "Run now",
+    "runHistory": "Run history",
+    "edit": "Edit schedule",
+    "editTitle": "Edit schedule: {{job}}",
+    "historyTitle": "Run history: {{job}}",
+    "noRuns": "No runs yet",
+    "saved": "Schedule saved",
+    "cancel": "Cancel",
+    "saveSchedule": "Save schedule",
+    "cronLabel": "Schedule (cron)",
+    "cronHelp": "minute hour day month weekday, for example 0 6 * * * runs daily at 06:00",
+    "cronHelpZone": "minute hour day month weekday, for example 0 6 * * * runs daily at 06:00 {{zone}} time",
+    "enabled": "Enabled",
+    "done": "Done",
+    "runTitle": "Run job now",
+    "runMessage": "The job below runs now, outside its schedule.",
+    "runNote": "What it sends or updates (notices, e-mails, balances) is sent or updated as on a scheduled run.",
+    "runAction": "Run job",
+    "runStatus": {
+      "success": "Completed",
+      "failed": "Failed",
+      "running": "Running"
+    },
+    "cron": {
+      "everyMinute": "Every minute",
+      "everyMinutes": "Every {{count}} minutes",
+      "hourly": "Hourly at :{{minute}}",
+      "daily": "Daily at {{at}}",
+      "weekdays": "Weekdays at {{at}}",
+      "weekly": "Every {{day}} at {{at}}",
+      "monthly": "Monthly on day {{day}} at {{at}}"
+    },
+    "days": {
+      "sunday": "Sunday",
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday"
+    }
+  },
+  "configuration": {
+    "leaveTitle": "Leave without saving",
+    "leaveMessage_one": "{{count}} setting has changed and is not saved.",
+    "leaveMessage_other": "{{count}} settings have changed and are not saved.",
+    "leaveMore": "And {{count}} more",
+    "notSaved": "Not saved",
+    "leaveAction": "Discard changes and leave",
+    "stay": "Stay on this page"
+  },
+  "paymentCapture": {
+    "mode": "Payment mode",
+    "reference": "Reference",
+    "paymentDate": "Payment date",
+    "bill": "Bill",
+    "acknowledgement": "Acknowledgement receipt no.",
+    "submittedBy": "Recorded by",
+    "amount": "Amount",
+    "confirmTitle": "Confirm payment",
+    "confirmMessage": "The payment below is verified against the bank or cashier records.",
+    "confirmNote": "The official receipt is issued and posted to the ledger.",
+    "confirmAction": "Confirm payment",
+    "confirmed": "Payment confirmed",
+    "rejectTitle": "Reject payment",
+    "rejectMessage": "The payment below is rejected and the bill stays open.",
+    "rejectReason": "Reason",
+    "rejectReasonHint": "For example: no matching credit in the bank statement",
+    "rejectAction": "Reject payment",
+    "rejected": "Payment rejected",
+    "printFailed": "Could not print the receipt",
+    "acknowledgementReceipt": "Acknowledgement receipt",
+    "officialReceipt": "Official receipt"
+  },
+  "paymentOptions": {
+    "shareTitle": "Share payment link"
+  },
+  "bulkUploadLeads": {
+    "invalidFile": "Invalid file",
+    "onlyExcelFiles": "Upload an Excel (.xlsx) or CSV (.csv) file.",
+    "fileTooLarge": "File too large",
+    "fileSizeLessThan10MB": "The file must be smaller than 10 MB.",
+    "noFileSelected": "No file selected",
+    "pleaseSelectFile": "Select the file to upload.",
+    "uploadStarted": "Upload started",
+    "uploadFailed": "Upload failed",
+    "instructions": "Instructions",
+    "downloadTemplate": "Download template",
+    "instruction1": "Download the template file",
+    "instruction3": "Upload the completed file (10 MB at most)",
+    "instruction4": "Only .xlsx and .csv files are accepted",
+    "chooseFile": "Choose file",
+    "selectExcelFile": "Select the Excel or CSV file to upload",
+    "maxFileSize": "Maximum file size: 10 MB",
+    "processingFile": "Processing the file...",
+    "cancel": "Cancel",
+    "upload": "Upload",
+    "processing": "Processing",
+    "close": "Close",
+    "uploadStartedDetail": "The prospect upload has started and runs in the background.",
+    "uploadFailedDetail": "The prospect file could not be uploaded.",
+    "header": "Bulk upload prospects",
+    "instruction2": "Enter the prospects in the file",
+    "fileBeingProcessed": "The file is being processed. The prospects are created as each row is read."
+  },
+  "bulkUploadPolicies": {
+    "invalidFile": "Invalid file",
+    "onlyExcelFiles": "Upload an Excel (.xlsx) or CSV (.csv) file.",
+    "fileTooLarge": "File too large",
+    "fileSizeLessThan10MB": "The file must be smaller than 10 MB.",
+    "noFileSelected": "No file selected",
+    "pleaseSelectFile": "Select the file to upload.",
+    "uploadStarted": "Upload started",
+    "uploadFailed": "Upload failed",
+    "instructions": "Instructions",
+    "downloadTemplate": "Download template",
+    "instruction1": "Download the template file",
+    "instruction3": "Upload the completed file (10 MB at most)",
+    "instruction4": "Only .xlsx and .csv files are accepted",
+    "chooseFile": "Choose file",
+    "selectExcelFile": "Select the Excel or CSV file to upload",
+    "maxFileSize": "Maximum file size: 10 MB",
+    "processingFile": "Processing the file...",
+    "cancel": "Cancel",
+    "upload": "Upload",
+    "processing": "Processing",
+    "close": "Close",
+    "uploadStartedDetail": "The policy upload has started and runs in the background.",
+    "uploadFailedDetail": "The policy file could not be uploaded.",
+    "header": "Bulk upload policies",
+    "instruction2": "Enter the policies in the file",
+    "fileBeingProcessed": "The file is being processed. The policies are created as each row is read.",
+    "goLive": "Existing policies (go-live): in-force policies of the old system, created without a bill, journal or commission. Their unpaid premiums are loaded with Import open items (Accounts > Collections)."
+  },
+  "commissionLine": {
+    "statuses": {
+      "Accrued": "Accrued",
+      "Eligible": "Eligible",
+      "Approved": "Approved",
+      "Paid": "Paid",
+      "Reversed": "Reversed"
+    },
+    "referrer": "Referrer",
+    "policy": "Policy",
+    "productInsurer": "Product / insurer",
+    "cycle": "Cycle",
+    "comsub": "Commission",
+    "wht": "Withholding tax",
+    "netPayable": "Net payable",
+    "status": "Status",
+    "receipt": "Receipt",
+    "voucher": "Voucher",
+    "calculation": "Calculation",
+    "activity": "Activity",
+    "grossPremium": "Gross premium",
+    "discount": "Discount ({{label}})",
+    "netPremium": "Net premium",
+    "brokerage": "Brokerage at {{pct}}%",
+    "comsubFormula": "Commission: {{fixed}} + {{pct}}% of net premium",
+    "whtAt": "Withholding tax at {{pct}}%",
+    "whtNotApplied": "Withholding tax (not applied)",
+    "netMargin": "Net margin",
+    "overrideRate": "Commission rate of this policy",
+    "fixed": "Fixed ({{symbol}})",
+    "rate": "Rate (%)",
+    "currentRate": "Current rate",
+    "newRate": "New rate",
+    "noLines": "No lines",
+    "notFound": "Referrer not found.",
+    "backToReferrers": "Referrers",
+    "bank": "Bank",
+    "notOnFile": "Not on file",
+    "policiesOnBook_one": "{{count}} policy on the book",
+    "policiesOnBook_other": "{{count}} policies on the book",
+    "applyWht": "Apply withholding tax",
+    "dueThisCycle": "Due this cycle ({{cycle}})",
+    "upcoming": "Upcoming (future)",
+    "paidToDate": "Paid to date",
+    "currentCycle": "Current cycle: {{cycle}} (due now)",
+    "futureCycles": "Future cycles (accrued, not yet payable)",
+    "past": "Past (paid history)",
+    "noPast": "No past payouts.",
+    "actionFailed": "The action could not be completed",
+    "whtFailed": "The withholding tax setting could not be updated",
+    "confirm": {
+      "eligibleTitle": "Mark commission on {{policy}} as eligible",
+      "eligibleMessage": "The line becomes payable in the current cycle.",
+      "eligible": "Mark eligible",
+      "approveTitle": "Approve commission on {{policy}}",
+      "approveMessage": "The line is approved for payout.",
+      "approve": "Approve commission",
+      "payTitle": "Pay commission on {{policy}}",
+      "payMessage": "A payout voucher is raised for the net payable amount.",
+      "pay": "Raise payout voucher",
+      "reverseTitle": "Reverse commission on {{policy}}",
+      "reverseMessage": "The commission is clawed back and the line is no longer payable.",
+      "reverse": "Reverse commission",
+      "rateTitle": "Change the commission rate of {{policy}}",
+      "rateMessage": "The commission, withholding tax and net payable of this line are recalculated.",
+      "rate": "Apply rate"
+    },
+    "bulk": {
+      "lines": "Lines",
+      "approveTitle": "Approve commission of {{name}}",
+      "approveMessage": "The eligible lines of the current cycle are approved for payout.",
+      "approve_one": "Approve {{count}} line",
+      "approve_other": "Approve {{count}} lines",
+      "payoutTitle": "Generate payout for {{name}}",
+      "payoutMessage": "A payout voucher is prepared from the approved lines of the current cycle.",
+      "payout_one": "Generate payout ({{count}} line)",
+      "payout_other": "Generate payout ({{count}} lines)",
+      "payoutFailed": "The payout could not be generated",
+      "eligibleTitle": "Mark commission of {{name}} as eligible",
+      "eligibleMessage": "The accrued lines whose premium has been collected become payable.",
+      "eligible_one": "Mark {{count}} line eligible",
+      "eligible_other": "Mark {{count}} lines eligible"
+    }
   }
 }

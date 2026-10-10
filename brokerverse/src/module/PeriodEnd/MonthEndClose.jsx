@@ -86,7 +86,7 @@ const MonthEndClose = () => {
         </DataTable>
       </div>
 
-      <Dialog className="pe-dialog" header={t("periodEnd.newCloseRun")} visible={!!creating} style={{ width: "min(480px, 95vw)" }} onHide={() => setCreating(null)}
+      <Dialog className="pe-dialog bv-centered" header={t("periodEnd.newCloseRun")} visible={!!creating} style={{ width: "min(480px, 95vw)" }} onHide={() => setCreating(null)}
         footer={(
           <div>
             <Button label={t("periodEnd.cancel")} text onClick={() => setCreating(null)} />

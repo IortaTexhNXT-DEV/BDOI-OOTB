@@ -267,7 +267,7 @@ const BulkProcessingMaster = () => {
             <Button
               label={t("financeMasters.save")}
               icon="pi pi-save"
-              className="p-button-sm p-button-success"
+              className="p-button-sm"
               onClick={handleSave}
               disabled={mode === "view"}
             />

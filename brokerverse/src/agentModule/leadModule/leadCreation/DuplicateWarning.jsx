@@ -13,11 +13,16 @@ const DuplicateWarning = ({ matches, forClient = false, onUseClient, onOpenProsp
   const { t } = useTranslation();
   const matched = (m) => m.matchedOn.filter((k) => k !== "client").map((k) => t(`prospectDuplicates.matchedOn.${k}`)).join(", ");
   return (
-    <Dialog header={t("prospectDuplicates.title")} visible={!!matches} onHide={onHide} style={{ width: "40rem" }} breakpoints={{ "640px": "95vw" }} className="prospect-duplicates"
+    <Dialog header={(
+      <span className="prospect-duplicates__title">
+        <i className="pi pi-exclamation-triangle" aria-hidden="true" />
+        <span>{t("prospectDuplicates.title")}</span>
+      </span>
+    )} visible={!!matches} onHide={onHide} style={{ width: "40rem" }} breakpoints={{ "640px": "95vw" }} className="prospect-duplicates bv-centered"
       footer={(
         <div className="flex justify-content-end gap-2">
           <Button type="button" label={t("prospectDuplicates.back")} text onClick={onHide} />
-          <Button type="button" label={t("prospectDuplicates.saveAnyway")} icon="pi pi-check" onClick={onSaveAnyway} loading={saving} />
+          <Button type="button" label={t("prospectDuplicates.saveAnyway")} outlined onClick={onSaveAnyway} loading={saving} />
         </div>
       )}>
       <p className="mt-0">{t(forClient ? "prospectDuplicates.clientIntro" : "prospectDuplicates.intro")}</p>

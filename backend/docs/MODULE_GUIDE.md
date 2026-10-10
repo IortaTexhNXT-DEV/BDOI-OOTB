@@ -51,7 +51,8 @@ minimal, clearly-correct front-end fix.
   context and the "requires note" flag and returns the code and the text to store. A decision that cannot be taken
   without a reason (period close and reopening, year-end reversal, void of a printed CAS book, change of a CAS
   document, incentive batch rejection: the contexts of seed `88_accounting_reasons.sql`; the remittance, exception,
-  insurer reconciliation and insurer billing decisions: the contexts of seed `89_remittance_reasons.sql`) takes `{ reasonCode, note }`
+  insurer reconciliation and insurer billing decisions: the contexts of seed `89_remittance_reasons.sql`; cancellation
+  of a sales invoice or a payment acknowledgement: seed `89_tax_invoice_reasons.sql`) takes `{ reasonCode, note }`
   and resolves it with `requiredReason(db, context, { reasonCode, note })` from the same file (the code is required;
   returns `{ code, name, note, text }`); store the code beside the reason text (migration 0380 adds the columns).
 - Record scoping: users whose roles are all in `security.scoped_roles` only see their own book. Use

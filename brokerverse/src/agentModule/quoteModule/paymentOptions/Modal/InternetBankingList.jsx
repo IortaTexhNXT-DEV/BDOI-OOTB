@@ -1,7 +1,9 @@
 import { Dialog } from "primereact/dialog";
+import { useTranslation } from "react-i18next";
 import "./index.scss";
 
 const InternetBankingList = ({ modalVisible, setModalVisible }) => {
+  const { t } = useTranslation();
   const bankNames = [
     "ABC Bank",
     "Metropolitan Bank",
@@ -18,8 +20,9 @@ const InternetBankingList = ({ modalVisible, setModalVisible }) => {
   return (
     <Dialog
       visible={modalVisible}
-      header="Internet Banking"
-      style={{ width: "40vw" }}
+      header={t("agent.internetBanking")}
+      style={{ width: "40rem" }}
+      breakpoints={{ "768px": "95vw" }}
       className="banking__list__dialog__container"
       onHide={() => setModalVisible(false)}
       dismissableMask={true}

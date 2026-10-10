@@ -45,6 +45,7 @@ export const FILE_ROUTES = [
   { module: 'receipts', method: 'POST', path: '/bulk-upload', templates: ['receipts'] },
   { module: 'disbursements', method: 'POST', path: '/bulk-upload', templates: ['disbursements'] },
   { module: 'period-end', method: 'POST', path: '/opening-balances/import', templates: ['opening-balances'] },
+  { module: 'period-end', method: 'POST', path: '/opening-balances/validate', templates: ['opening-balances'] },
   { module: 'receipts', method: 'POST', path: '/opening-items/import', templates: ['open-items'] },
   { module: 'bank-reconciliation', method: 'POST', path: '/statements/import', templates: ['bank-statement'] },
   { module: 'bank-reconciliation', method: 'POST', path: '/statements/preview', templates: ['bank-statement'] },

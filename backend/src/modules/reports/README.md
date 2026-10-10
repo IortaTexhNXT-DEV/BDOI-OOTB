@@ -12,7 +12,7 @@ its own permission and optional role list in `report_definitions`.
 | `router.js` | Catalogue, run, generate, generated files, schedules, agent filter options. |
 | `service.js` | Access check (`canAccess`), catalogue, runs, file generation, download tokens, schedules, `scheduledReport` job handler. |
 | `engine.js` | Reads the screen parameters (`FromDate`, `ReportCriteria`, `Agent` ... and their aliases), builds the SQL around the base query, applies filters, paging, totals and groups. |
-| `queries.js` | The base queries, keyed by `query_name`. Also merges `periodEndQueries.js` and `bankRecQueries.js`. |
+| `queries.js` | The base queries, keyed by `query_name`. Also merges `periodEndQueries.js` (ledger statements and BIR working papers; the balance sheet and the year-to-date columns of the income statement read the fiscal year's opening balances, as the trial balance does) and `bankRecQueries.js`. |
 
 ## Main tables
 

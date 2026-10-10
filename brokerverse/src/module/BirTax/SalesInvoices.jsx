@@ -11,9 +11,16 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Message } from "primereact/message";
 import { Toast } from "primereact/toast";
+import ConfigStatus from "../../components/ConfigStatus";
+import DateField from "../../components/DateField";
+import LoadingBar from "../../components/LoadingBar";
+import useStableLoad from "../../hooks/useStableLoad";
 import birTaxService from "../../services/birTaxService";
+import { hasPermission } from "../../utils/canOpen";
 import { calendarDateFormat, toIsoDate } from "../../utility/dateFormat";
-import { BirTag, Kpis, PageHeader, date, money, showError, showSuccess } from "./common";
+import { BirTag, PageHeader, date, money, showError, showSuccess } from "./common";
+import InvoiceDetail from "./InvoiceDetail";
+import "./tax.scss";
 
 const SOURCES = ["manual", "debit_note", "override_commission", "policy_commission"];
 const VAT_CLASSES = ["vatable", "exempt", "zero_rated"];
@@ -99,155 +106,106 @@ const NewInvoice = ({ seller, onHide, onIssued, toast }) => {
   );
 };
 
-/** Invoice detail: amounts, payments (payment acknowledgements), cancel. */
-const InvoiceDetail = ({ invoice, onHide, onChanged, toast }) => {
+/** Seller facts under the page header and the invoicing setup as a configuration chip. */
+const SellerFacts = ({ seller }) => {
   const { t } = useTranslation();
-  const [pay, setPay] = useState(null);
-  const [reason, setReason] = useState(null);
-  const run = async (fn, msg) => { try { await fn(); if (msg) showSuccess(toast, msg); onChanged(); } catch (e) { showError(toast, e); } };
-  const savePayment = () => run(async () => {
-    await birTaxService.recordPayment(invoice.id, { paymentDate: toIsoDate(pay.paymentDate), amount: Number(pay.amount || 0), ewtAmount: Number(pay.ewtAmount || 0), form2307No: pay.form2307No || undefined,
-      paymentMode: pay.paymentMode || undefined, referenceNo: pay.referenceNo || undefined });
-    setPay(null);
-  }, t("birTax.paymentSaved"));
-  const doCancel = () => run(async () => {
-    if (reason.paymentId) await birTaxService.cancelPayment(reason.paymentId, reason.text);
-    else await birTaxService.cancelInvoice(invoice.id, reason.text);
-    setReason(null);
-  }, t("birTax.cancelled"));
-  const s = invoice.seller || {};
+  const setup = seller.setup || { state: "ready", missing: [] };
+  const facts = [
+    { key: "name", label: t("birTax.seller"), value: seller.registeredName || "-" },
+    { key: "tin", label: t("birTax.tin"), value: seller.tinFormatted || "-" },
+    { key: "vat", label: t("birTax.vatStatus"), value: seller.vatRegistered ? t("birTax.vatReg") : t("birTax.nonVatReg") },
+    { key: "serial", label: t("birTax.serialRangeLabel"), value: t("birTax.serialFromTo", { from: seller.serialFrom, to: seller.serialTo }) },
+  ];
   return (
-    <Dialog className="pe-dialog" visible header={`${t("birTax.salesInvoice")} ${invoice.invoiceNumber}`} style={{ width: "min(1000px, 96vw)" }} onHide={onHide}
-      footer={(
-        <div>
-          <Button icon="pi pi-print" outlined label={t("birTax.print")} onClick={() => run(() => birTaxService.invoicePdf(invoice.id))} />
-          {invoice.status === "issued" && invoice.sourceType === "manual" && invoice.balance > 0 && (
-            <Button icon="pi pi-wallet" label={t("birTax.recordPayment")} onClick={() => setPay({ paymentDate: new Date(), amount: invoice.balance - invoice.withholdingTax, ewtAmount: invoice.withholdingTax, paymentMode: "bank-transfer" })} />
-          )}
-          {invoice.status === "issued" && <Button icon="pi pi-ban" severity="danger" outlined label={t("birTax.cancelInvoice")} onClick={() => setReason({ text: "" })} />}
-        </div>
-      )}>
-      <div className="grid">
-        <div className="col-12 md:col-6"><span className="pe-muted">{t("birTax.seller")}: </span><strong>{s.registeredName}</strong><br />{s.tinFormatted} · {s.address}<br />
-          {s.vatRegistered ? t("birTax.vatReg") : t("birTax.nonVatReg")}</div>
-        <div className="col-12 md:col-6"><span className="pe-muted">{t("birTax.soldTo")}: </span><strong>{invoice.buyerName}</strong><br />{invoice.buyerTin || "-"} · {invoice.buyerAddress || "-"}</div>
-        <div className="col-12 md:col-3"><span className="pe-muted">{t("birTax.invoiceDate")}: </span>{date(invoice.invoiceDate)}</div>
-        <div className="col-12 md:col-3"><span className="pe-muted">{t("birTax.reference")}: </span>{invoice.sourceReference || "-"}</div>
-        <div className="col-12 md:col-3"><span className="pe-muted">{t("birTax.statusLabel")}: </span><BirTag status={invoice.status} /></div>
-        <div className="col-12 md:col-3"><span className="pe-muted">EIS: </span>{invoice.eisStatus ? <BirTag status={invoice.eisStatus} /> : "-"}</div>
-      </div>
-      {invoice.cancelReason && <Message severity="warn" className="w-full mb-2" text={`${t("birTax.cancelled")}: ${invoice.cancelReason}`} />}
-      <DataTable value={invoice.lines} size="small" dataKey="lineNo">
-        <Column field="description" header={t("birTax.description")} />
-        <Column field="quantity" header={t("birTax.quantity")} className="bv-num" headerClassName="bv-num" />
-        <Column header={t("birTax.unitPrice")} body={(l) => money(l.unitPrice)} className="bv-num" headerClassName="bv-num" />
-        <Column header={t("birTax.vatClass")} body={(l) => t(`birTax.vat.${l.vatClass}`)} />
-        <Column header={t("birTax.amount")} body={(l) => money(l.amount)} className="bv-num" headerClassName="bv-num" />
-      </DataTable>
-      <Kpis items={[{ label: t("birTax.vat.vatable"), value: money(invoice.vatableSales) }, { label: t("birTax.vat.exempt"), value: money(invoice.vatExemptSales) },
-        { label: t("birTax.vat.zero_rated"), value: money(invoice.zeroRatedSales) }, { label: "VAT", value: money(invoice.vatAmount) }, { label: t("birTax.totalAmount"), value: money(invoice.totalAmount) },
-        { label: t("birTax.balance"), value: money(invoice.balance) }]} />
-      <h4>{t("birTax.payments")}</h4>
-      <DataTable value={invoice.payments} size="small" dataKey="id" emptyMessage={t("birTax.noPayments")}>
-        <Column field="ackNumber" header={t("birTax.ackNumber")} />
-        <Column header={t("birTax.paymentDate")} body={(p) => date(p.paymentDate)} />
-        <Column header={t("birTax.amountReceived")} body={(p) => money(p.amount)} className="bv-num" headerClassName="bv-num" />
-        <Column header={t("birTax.ewt")} body={(p) => money(p.ewtAmount)} className="bv-num" headerClassName="bv-num" />
-        <Column field="form2307No" header={t("birTax.form2307No")} />
-        <Column header={t("birTax.statusLabel")} body={(p) => <BirTag status={p.status} />} />
-        <Column body={(p) => (
-          <span className="flex gap-1">
-            <Button icon="pi pi-print" text size="small" aria-label={t("birTax.print")} onClick={() => run(() => birTaxService.paymentPdf(p.id))} />
-            {p.status === "posted" && <Button icon="pi pi-ban" text size="small" severity="danger" aria-label={t("birTax.cancelPayment")} onClick={() => setReason({ text: "", paymentId: p.id })} />}
-          </span>
-        )} />
-      </DataTable>
-      {pay && (
-        <Dialog className="pe-dialog" visible header={t("birTax.recordPayment")} style={{ width: "min(640px, 95vw)" }} onHide={() => setPay(null)}
-          footer={<div><Button label={t("periodEnd.cancel")} text onClick={() => setPay(null)} /><Button label={t("periodEnd.save")} icon="pi pi-save" onClick={savePayment} /></div>}>
-          <div className="grid">
-            <div className="col-12 md:col-6"><label>{t("birTax.paymentDate")}</label><Calendar value={pay.paymentDate} onChange={(e) => setPay({ ...pay, paymentDate: e.value })} dateFormat={calendarDateFormat()} showIcon className="w-full" /></div>
-            <div className="col-12 md:col-6"><label>{t("birTax.paymentMode")}</label><InputText value={pay.paymentMode} onChange={(e) => setPay({ ...pay, paymentMode: e.target.value })} className="w-full" /></div>
-            <div className="col-12 md:col-6"><label>{t("birTax.amountReceived")}</label><InputNumber value={pay.amount} onValueChange={(e) => setPay({ ...pay, amount: e.value })} minFractionDigits={2} className="w-full" /></div>
-            <div className="col-12 md:col-6"><label>{t("birTax.ewt")}</label><InputNumber value={pay.ewtAmount} onValueChange={(e) => setPay({ ...pay, ewtAmount: e.value })} minFractionDigits={2} className="w-full" /></div>
-            <div className="col-12 md:col-6"><label>{t("birTax.form2307No")}</label><InputText value={pay.form2307No || ""} onChange={(e) => setPay({ ...pay, form2307No: e.target.value })} className="w-full" /></div>
-            <div className="col-12 md:col-6"><label>{t("birTax.reference")}</label><InputText value={pay.referenceNo || ""} onChange={(e) => setPay({ ...pay, referenceNo: e.target.value })} className="w-full" /></div>
-          </div>
-        </Dialog>
-      )}
-      {reason && (
-        <Dialog className="pe-dialog" visible header={reason.paymentId ? t("birTax.cancelPayment") : t("birTax.cancelInvoice")} style={{ width: "min(520px, 95vw)" }} onHide={() => setReason(null)}
-          footer={<div><Button label={t("periodEnd.cancel")} text onClick={() => setReason(null)} /><Button label={t("birTax.confirm")} severity="danger" onClick={doCancel} disabled={reason.text.trim().length < 3} /></div>}>
-          <label>{t("birTax.reason")} *</label>
-          <InputTextarea value={reason.text} rows={3} onChange={(e) => setReason({ ...reason, text: e.target.value })} className="w-full" />
-          <p className="pe-muted">{t("birTax.cancelInvoiceNote")}</p>
-        </Dialog>
-      )}
-    </Dialog>
+    <div className="tax-facts">
+      {facts.map((f) => <span key={f.key}><span className="tax-fact__label">{f.label}</span><span className="tax-fact__value">{f.value}</span></span>)}
+      <ConfigStatus state={setup.state} feature={t("birTax.invoicingSetup")} missing={setup.missing.map((m) => t(`birTax.setupMissing.${m}`))} area="accounting" />
+    </div>
   );
 };
 
+const STATUSES = ["issued", "cancelled"];
+const EMPTY_FILTERS = { search: "", status: null, sourceType: null, from: "", to: "" };
+
 /**
- * Accounts > Tax > Sales Invoices: the broker's sales invoices under the EOPT Act (commission debit notes, overriding
- * commission, broker-billed commission, manual service invoices), with the BIR-required fields, sequential numbers,
- * cancellation with a reason and payment acknowledgements.
+ * Accounts > Tax > Sales Invoices: the register of the broker's sales invoices (commission debit notes, overriding
+ * commission, broker-billed commission, manual service invoices) with the seller facts and whether invoicing is set
+ * up, filters, totals of the issued invoices, the invoice detail with its payment acknowledgements, and cancellation
+ * with a coded reason.
  */
 const SalesInvoices = () => {
   const { t } = useTranslation();
   const toast = useRef(null);
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [filters, setFilters] = useState({ search: "", status: null, sourceType: null });
-  const [seller, setSeller] = useState(null);
+  const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [creating, setCreating] = useState(false);
   const [detail, setDetail] = useState(null);
+  const canWrite = hasPermission("write:period-end");
+  const set = (p) => setFilters((f) => ({ ...f, ...p }));
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      setRows(await birTaxService.invoices({ search: filters.search.trim(), status: filters.status, sourceType: filters.sourceType }));
-    } catch (e) {
-      showError(toast, e);
-    } finally {
-      setLoading(false);
-    }
-  }, [filters]);
-  useEffect(() => { const id = setTimeout(load, 250); return () => clearTimeout(id); }, [load]);
-  useEffect(() => { birTaxService.seller().then(setSeller).catch(() => {}); }, []);
+  const list = useStableLoad(useCallback(() => birTaxService.invoices({ search: filters.search.trim(), status: filters.status, sourceType: filters.sourceType,
+    from: filters.from, to: filters.to }), [filters]), { debounceMs: 300, initialData: [] });
+  const sellerLoad = useStableLoad(useCallback(() => birTaxService.seller(), []));
+  const seller = sellerLoad.data;
   const openDetail = async (id) => { try { setDetail(await birTaxService.invoice(id)); } catch (e) { showError(toast, e); } };
 
+  const rows = list.data || [];
   const issued = rows.filter((r) => r.status === "issued");
+  const total = (k) => money(issued.reduce((sum, r) => sum + Number(r[k] || 0), 0));
   return (
-    <div className="pe-page">
+    <div className="pe-page tax-page">
       <Toast ref={toast} />
       <PageHeader title={t("birTax.salesInvoices")} trail={[t("birTax.salesInvoices")]} subtitle={t("birTax.salesInvoicesHelp")}>
-        <span className="p-input-icon-left"><i className="pi pi-search" /><InputText value={filters.search} onChange={(e) => setFilters({ ...filters, search: e.target.value })} placeholder={t("birTax.searchInvoice")} /></span>
-        <Dropdown value={filters.sourceType} options={SOURCES.map((x) => ({ label: t(`birTax.source.${x}`), value: x }))} onChange={(e) => setFilters({ ...filters, sourceType: e.value })} placeholder={t("birTax.allSources")} showClear />
-        <Dropdown value={filters.status} options={["issued", "cancelled"].map((x) => ({ label: t(`birTax.status.${x}`), value: x }))} onChange={(e) => setFilters({ ...filters, status: e.value })} placeholder={t("birTax.allStatuses")} showClear />
-        <Button icon="pi pi-plus" label={t("birTax.newInvoice")} onClick={() => setCreating(true)} />
+        {canWrite && <Button icon="pi pi-plus" label={t("birTax.newInvoice")} onClick={() => setCreating(true)} />}
       </PageHeader>
-      {seller && (
-        <Message severity="info" className="w-full mb-2" text={`${seller.registeredName} · TIN ${seller.tinFormatted || "-"} · ${seller.vatRegistered ? t("birTax.vatReg") : t("birTax.nonVatReg")} · ATP / CAS ${seller.atpNumber || seller.casPermitNumber || t("birTax.notSet")} · ${t("birTax.serialRange")} ${seller.serialFrom} to ${seller.serialTo}`} />
-      )}
-      <Kpis items={[{ label: t("birTax.invoicesIssued"), value: issued.length }, { label: t("birTax.totalAmount"), value: money(issued.reduce((s, r) => s + r.totalAmount, 0)) },
-        { label: "VAT", value: money(issued.reduce((s, r) => s + r.vatAmount, 0)) }, { label: t("birTax.balance"), value: money(issued.reduce((s, r) => s + r.balance, 0)) }]} />
-      <div className="pe-card">
-        <DataTable value={rows} loading={loading} dataKey="id" size="small" stripedRows paginator rows={20} emptyMessage={t("birTax.noRows")}>
-          <Column field="invoiceNumber" header={t("birTax.invoiceNumber")} sortable body={(r) => <button type="button" className="pe-link" onClick={() => openDetail(r.id)}>{r.invoiceNumber}</button>} />
-          <Column header={t("birTax.invoiceDate")} body={(r) => date(r.invoiceDate)} sortable sortField="invoiceDate" />
-          <Column field="buyerName" header={t("birTax.buyerName")} />
-          <Column header={t("birTax.invoiceFor")} body={(r) => t(`birTax.source.${r.sourceType}`)} />
-          <Column field="sourceReference" header={t("birTax.reference")} />
-          <Column header={t("birTax.totalSales")} body={(r) => money(r.totalSales)} className="bv-num" headerClassName="bv-num" />
-          <Column header="VAT" body={(r) => money(r.vatAmount)} className="bv-num" headerClassName="bv-num" />
-          <Column header={t("birTax.totalAmount")} body={(r) => money(r.totalAmount)} className="bv-num" headerClassName="bv-num" />
-          <Column header={t("birTax.statusLabel")} body={(r) => <BirTag status={r.status} />} />
-          <Column header="EIS" body={(r) => (r.eisStatus ? <BirTag status={r.eisStatus} /> : "")} />
-          <Column body={(r) => <Button icon="pi pi-print" text size="small" aria-label={t("birTax.print")} onClick={() => birTaxService.invoicePdf(r.id).catch((e) => showError(toast, e))} />} />
-        </DataTable>
+      {seller && <SellerFacts seller={seller} />}
+
+      <div className="pe-card bv-loading-host">
+        <LoadingBar active={list.refreshing} />
+        <div className="tax-toolbar mb-3">
+          <div className="tax-field tax-field--search">
+            <label htmlFor="si-search">{t("birTax.search")}</label>
+            <span className="p-input-icon-left w-full"><i className="pi pi-search" />
+              <InputText id="si-search" value={filters.search} onChange={(e) => set({ search: e.target.value })} placeholder={t("birTax.searchInvoice")} className="w-full" /></span>
+          </div>
+          <div className="tax-field">
+            <label htmlFor="si-source">{t("birTax.invoiceFor")}</label>
+            <Dropdown inputId="si-source" value={filters.sourceType} options={SOURCES.map((x) => ({ label: t(`birTax.source.${x}`), value: x }))} onChange={(e) => set({ sourceType: e.value })}
+              placeholder={t("birTax.all")} showClear />
+          </div>
+          <div className="tax-field">
+            <label htmlFor="si-status">{t("birTax.statusLabel")}</label>
+            <Dropdown inputId="si-status" value={filters.status} options={STATUSES.map((x) => ({ label: t(`birTax.status.${x}`), value: x }))} onChange={(e) => set({ status: e.value })}
+              placeholder={t("birTax.all")} showClear />
+          </div>
+          <div className="tax-field">
+            <label htmlFor="si-from">{t("birTax.from")}</label>
+            <DateField id="si-from" value={filters.from} max={filters.to || undefined} onChange={(e) => set({ from: e.target.value })} />
+          </div>
+          <div className="tax-field">
+            <label htmlFor="si-to">{t("birTax.to")}</label>
+            <DateField id="si-to" value={filters.to} min={filters.from || undefined} onChange={(e) => set({ to: e.target.value })} />
+          </div>
+        </div>
+        <DataTable value={rows} loading={list.loading} dataKey="id" size="small" stripedRows paginator={rows.length > 20} rows={20} emptyMessage={t("birTax.noInvoices")}>
+            <Column field="invoiceNumber" header={t("birTax.invoiceNumber")} sortable footer={t("birTax.totalIssued")}
+              body={(r) => <button type="button" className="pe-link" onClick={() => openDetail(r.id)}>{r.invoiceNumber}</button>} />
+            <Column header={t("birTax.invoiceDate")} body={(r) => date(r.invoiceDate)} sortable sortField="invoiceDate" />
+            <Column field="buyerName" header={t("birTax.buyerName")} />
+            <Column header={t("birTax.invoiceFor")} body={(r) => t(`birTax.source.${r.sourceType}`, { defaultValue: r.sourceType })} />
+            <Column field="sourceReference" header={t("birTax.reference")} />
+            <Column header={t("birTax.totalSales")} body={(r) => money(r.totalSales)} footer={total("totalSales")} className="bv-num" headerClassName="bv-num" footerClassName="bv-num" />
+            <Column header={t("birTax.vatAmount")} body={(r) => money(r.vatAmount)} footer={total("vatAmount")} className="bv-num" headerClassName="bv-num" footerClassName="bv-num" />
+            <Column header={t("birTax.totalAmount")} body={(r) => money(r.totalAmount)} footer={total("totalAmount")} className="bv-num" headerClassName="bv-num" footerClassName="bv-num" />
+            <Column header={t("birTax.balance")} body={(r) => money(r.balance)} footer={total("balance")} className="bv-num" headerClassName="bv-num" footerClassName="bv-num" />
+            <Column header={t("birTax.statusLabel")} body={(r) => <BirTag status={r.status} />} />
+            <Column header={t("birTax.eisStatus")} body={(r) => (r.eisStatus ? <BirTag status={r.eisStatus} /> : "")} />
+            <Column style={{ width: "4rem" }} body={(r) => <Button icon="pi pi-print" text size="small" aria-label={t("birTax.print")} tooltip={t("birTax.print")}
+              onClick={() => birTaxService.invoicePdf(r.id).catch((e) => showError(toast, e))} />} />
+          </DataTable>
+        {list.error ? <div className="pe-error" role="alert">{list.error}</div> : null}
       </div>
-      {creating && <NewInvoice seller={seller} toast={toast} onHide={() => setCreating(false)} onIssued={(inv) => { setCreating(false); load(); openDetail(inv.id); }} />}
-      {detail && <InvoiceDetail invoice={detail} toast={toast} onHide={() => setDetail(null)} onChanged={() => { load(); openDetail(detail.id); }} />}
+      {creating && <NewInvoice seller={seller} toast={toast} onHide={() => setCreating(false)} onIssued={(inv) => { setCreating(false); list.reload(); openDetail(inv.id); }} />}
+      {detail && <InvoiceDetail invoice={detail} toast={toast} canWrite={canWrite} onHide={() => setDetail(null)} onChanged={() => { list.reload(); openDetail(detail.id); }} />}
     </div>
   );
 };

@@ -36,6 +36,7 @@ import { Tag } from "primereact/tag";
 import clientService from "../../../services/clientService";
 import ImportDialog from "../../../components/ImportDialog";
 import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
+import { printPdf } from "../../../components/Print";
 import logger from "../../../utility/logger";
 
 /** Bulk upload: template and importer of the API (Data, Columns and Instructions sheets; failed rows listed). */
@@ -216,9 +217,9 @@ const PolicyReceipts = () => {
     setRecorded(null);
     navigate(location.pathname + location.search, { replace: true, state: null });
   };
-  const printRecorded = async () => {
-    const r = await documentTemplateService.getReceiptPdf(recorded.receiptId, { fileName: `receipt-${recorded.receiptNumber}.pdf` });
-    if (!r.success) toast.current?.show({ severity: "error", summary: t("accounts.receipts.error"), detail: r.error });
+  const printRecorded = () => {
+    printPdf(documentTemplateService.receiptPdfPath(recorded.receiptId), { fileName: `receipt-${recorded.receiptNumber}.pdf` })
+      .catch((e) => toast.current?.show({ severity: "error", summary: t("accounts.receipts.error"), detail: e?.message }));
   };
 
   const [first, setFirst] = useState(0);
@@ -455,6 +456,7 @@ const PolicyReceipts = () => {
     const filters = {
       customerCodeFrom: customerCodeString,
       customerCodeTo: customerCodeToString,
+      // the calendar's own day (toISOString would give the day before in a time zone ahead of UTC)
       createdAtFrom: toIsoDate(dateFrom),
       createdAtTo: toIsoDate(dateTo),
     };
@@ -473,13 +475,8 @@ const PolicyReceipts = () => {
           life: 3000,
         });
 
-        // Download the file
-        const link = document.createElement("a");
-        link.href = result.data.url;
-        link.download = result.data.filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        printPdf(result.data.url, { fileName: result.data.filename })
+          .catch((e) => toast.current?.show({ severity: "error", summary: t("accounts.receipts.error"), detail: e?.message, life: 3000 }));
 
         // Close the modal
         setVisiblePopup(false);
@@ -908,10 +905,18 @@ const PolicyReceipts = () => {
       <div className="col-12">
         <Dialog
           visible={visiblePopup}
-          className="dialog_fields"
+          header={t("accounts.receipts.bulkPrint")}
+          className="dialog_fields bv-centered"
+          style={{ width: "min(720px, 95vw)" }}
           onHide={() => {
             setVisiblePopup(false);
           }}
+          footer={
+            <div className="flex justify-content-end gap-2">
+              <Button type="button" label={t("accounts.addReceipts.cancel")} text onClick={() => setVisiblePopup(false)} />
+              <Button type="button" icon="pi pi-print" label={t("accounts.receipts.generate")} loading={bulkPrintLoading} onClick={handleBulkPrint} />
+            </div>
+          }
         >
           {/* Division Code From and To */}
           <div className="grid">
@@ -1067,17 +1072,6 @@ const PolicyReceipts = () => {
             </div>
           </div>
 
-          <div className="update_btn">
-            <div
-              className="cursor-pointer"
-              onClick={handleBulkPrint}
-              disabled={bulkPrintLoading}
-            >
-              <div className="update_btnlabel">
-                {bulkPrintLoading ? t("accounts.receipts.generating") : t("accounts.receipts.generate")}
-              </div>
-            </div>
-          </div>
         </Dialog>
       </div>
 

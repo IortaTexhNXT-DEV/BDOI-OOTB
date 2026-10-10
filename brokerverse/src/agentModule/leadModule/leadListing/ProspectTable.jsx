@@ -9,7 +9,6 @@ import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { TabView, TabPanel } from "primereact/tabview";
 import leadService from "../../../services/leadService";
 import { getLeadByIdMiddleware, deleteLeadMiddleware } from "../Store/leadMiddleware";
@@ -21,6 +20,7 @@ import { statusLabel, statusSeverity } from "../../../utils/statusSeverity";
 import logger from "../../../utility/logger";
 import { useSalesProducts } from "../../../module/Sales/salesProducts";
 import TagProductDialog from "./TagProductDialog";
+import confirmDeleteProspect from "../confirmDeleteProspect";
 
 /** lob filter (and tab) of the prospects whose product is not yet tagged. */
 const UNTAGGED = "none";
@@ -101,23 +101,18 @@ const ProspectTable = () => {
     return navigate(`/agent/leadedit/${leadId}`);
   };
 
-  const removeLead = (lead) => {
+  const removeLead = async (lead) => {
     const leadId = lead.leadId || lead.id;
-    confirmDialog({
-      message: t("leads.deleteConfirmMessage", { name: lead.fullName || `${lead.firstName || ""} ${lead.lastName || ""}`.trim() || lead.generatedLeadId }),
-      header: t("leads.confirmation"),
-      icon: "pi pi-exclamation-triangle",
-      acceptClassName: "p-button-danger",
-      accept: async () => {
-        try {
-          await dispatch(deleteLeadMiddleware(leadId)).unwrap();
-          toast.current?.show({ severity: "success", summary: t("common.success"), detail: t("leads.leadDeletedSuccess"), life: 3000 });
-          list.reload();
-        } catch {
-          toast.current?.show({ severity: "error", summary: t("common.error"), detail: t("leads.failedToDeleteLead"), life: 4000 });
-        }
-      },
-    });
+    const deleted = await confirmDeleteProspect(lead, async () => {
+      try {
+        await dispatch(deleteLeadMiddleware(leadId)).unwrap();
+      } catch (e) {
+        throw new Error((typeof e === "string" && e) || e?.message || t("leads.failedToDeleteLead"));
+      }
+    }, t);
+    if (!deleted) return;
+    toast.current?.show({ severity: "success", summary: t("common.success"), detail: t("leads.leadDeletedSuccess"), life: 3000 });
+    list.reload();
   };
 
   const nameOf = (r) => r.fullName || [r.firstName, r.lastName].filter(Boolean).join(" ") || r.companyName || "-";
@@ -152,7 +147,6 @@ const ProspectTable = () => {
   return (
     <div className="lead__listing__card__container mt-3">
       <Toast ref={toast} />
-      <ConfirmDialog />
       <div className="prospect-list-card">
         <TabView className="bv-tabbar" activeIndex={state.tab} onTabChange={(e) => patch({ tab: e.index })}>
           {lobs.map((l) => <TabPanel key={l} header={lobName(l)} />)}

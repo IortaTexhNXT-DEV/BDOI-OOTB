@@ -602,9 +602,9 @@ const CustomerInfo = ({ action }) => {
                     </div>
                   ) : (
                     formik.values.IdCardImage && (
-                      <span className="text-sm text-green-600">
-                        <i className="pi pi-check-circle mr-1" />
-                        Uploaded
+                      <span className="text-sm upload-done">
+                        <i className="pi pi-check-circle mr-1" aria-hidden="true" />
+                        {t("agent.uploaded")}
                       </span>
                     )
                   )}

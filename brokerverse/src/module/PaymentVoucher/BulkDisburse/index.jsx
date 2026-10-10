@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Card } from "primereact/card";
@@ -13,8 +14,10 @@ import disbursementService from "../../../services/disbursementService";
 import { formatAmount } from "../../Commission/utils/formatAmount";
 import "./index.scss";
 import logger from "../../../utility/logger";
+import { openConfirm } from "../../../components/ConfirmDialog";
 
 const BulkDisburse = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const toast = useRef(null);
   const [loading, setLoading] = useState(true);
@@ -23,16 +26,16 @@ const BulkDisburse = () => {
   const [summary, setSummary] = useState(null);
   const [selected, setSelected] = useState([]);
 
-  const home = { label: "Accounts" };
+  const home = { label: t("paymentVoucher.accounts") };
   const items = [
     {
-      label: "Payment Voucher",
+      label: t("paymentVoucher.title"),
       command: () => navigate("/accounts/paymentvoucher"),
     },
-    { label: "Bulk Disburse" },
+    { label: t("paymentVoucher.bulkDisburse.title") },
   ];
 
-  const loadAgents = async () => {
+  const loadAgents = useCallback(async () => {
     setLoading(true);
     try {
       const res = await CommissionService.getAgentsReadyToPay();
@@ -45,47 +48,60 @@ const BulkDisburse = () => {
       setAgents([]);
       toast.current?.show({
         severity: "error",
-        summary: "Error",
-        detail: "Failed to load agents with approved commission",
+        summary: t("common.error"),
+        detail: t("paymentVoucher.bulkDisburse.loadFailed"),
         life: 4000,
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     loadAgents();
-  }, []);
+  }, [loadAgents]);
 
   const handleDisburse = async () => {
     if (!selected.length) return;
+    const sum = (key) => selected.reduce((total, a) => total + (Number(a[key]) || 0), 0);
+    const ok = await openConfirm({
+      title: t("paymentVoucher.bulkDisburse.confirmTitle"),
+      message: t("paymentVoucher.bulkDisburse.confirmMessage"),
+      facts: [
+        { label: t("paymentVoucher.bulkDisburse.agents"), value: selected.length, type: "number" },
+        { label: t("paymentVoucher.bulkDisburse.approvedLines"), value: sum("approvedLineCount"), type: "number" },
+        { label: t("paymentVoucher.bulkDisburse.gross"), value: sum("comsubGross"), type: "amount" },
+        { label: t("paymentVoucher.bulkDisburse.net"), value: sum("netPayable"), type: "amount", emphasis: true },
+      ],
+      note: t("paymentVoucher.bulkDisburse.confirmNote"),
+      confirmLabel: t("paymentVoucher.bulkDisburse.create", { count: selected.length }),
+    });
+    if (!ok) return;
     setSubmitting(true);
     try {
       const result = await disbursementService.bulkAgentDisburse({
         referrerIds: selected.map((a) => a.id),
-        transactionCode: "COMSUB",
       });
       if (!result.success) {
-        throw new Error(result.error || "Bulk disburse failed");
+        throw new Error(result.error || t("paymentVoucher.bulkDisburse.failed"));
       }
       const payload = result.data?.data || result.data;
       const vouchers = payload?.vouchers || [];
       const errors = payload?.errors || [];
       toast.current?.show({
         severity: vouchers.length ? "success" : "warn",
-        summary: "Bulk Disburse",
-        detail: `${vouchers.length} voucher(s) created${
-          errors.length ? `, ${errors.length} failed` : ""
-        }`,
+        summary: t("paymentVoucher.bulkDisburse.title"),
+        detail: errors.length
+          ? t("paymentVoucher.bulkDisburse.createdWithErrors", { count: vouchers.length, failed: errors.length })
+          : t("paymentVoucher.bulkDisburse.created", { count: vouchers.length }),
         life: 5000,
       });
       await loadAgents();
     } catch (err) {
       toast.current?.show({
         severity: "error",
-        summary: "Error",
-        detail: err.message || "Bulk disburse failed",
+        summary: t("common.error"),
+        detail: err.message || t("paymentVoucher.bulkDisburse.failed"),
         life: 5000,
       });
     } finally {
@@ -103,7 +119,7 @@ const BulkDisburse = () => {
         >
           <SvgBackicon />
         </span>
-        <label className="label_header">Bulk Disburse</label>
+        <label className="label_header">{t("paymentVoucher.bulkDisburse.title")}</label>
       </div>
       <BreadCrumb
         model={items}
@@ -116,13 +132,13 @@ const BulkDisburse = () => {
         {summary ? (
           <div className="bulk-disburse-summary">
             <span>
-              Agents: <strong>{summary.agentCount}</strong>
+              {t("paymentVoucher.bulkDisburse.agents")}: <strong>{summary.agentCount}</strong>
             </span>
             <span>
-              COMSUB (GROSS): <strong>{formatAmount(summary.totalComsubGross)}</strong>
+              {t("paymentVoucher.bulkDisburse.gross")}: <strong>{formatAmount(summary.totalComsubGross)}</strong>
             </span>
             <span>
-              Net payable: <strong>{formatAmount(summary.totalNet)}</strong>
+              {t("paymentVoucher.bulkDisburse.net")}: <strong>{formatAmount(summary.totalNet)}</strong>
             </span>
           </div>
         ) : null}
@@ -133,37 +149,34 @@ const BulkDisburse = () => {
           selection={selected}
           onSelectionChange={(e) => setSelected(e.value)}
           dataKey="id"
-          emptyMessage="No agents with approved commission"
+          emptyMessage={t("paymentVoucher.bulkDisburse.empty")}
           paginator={agents.length > 10}
           rows={20}
         >
           <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
-          <Column field="name" header="Agent / Referrer" />
-          <Column field="type" header="Type" />
-          <Column field="level" header="Level" />
-          <Column field="approvedLineCount" header="Approved lines" />
+          <Column field="name" header={t("paymentVoucher.bulkDisburse.agent")} />
+          <Column field="type" header={t("paymentVoucher.bulkDisburse.type")} />
+          <Column field="level" header={t("paymentVoucher.bulkDisburse.level")} />
+          <Column field="approvedLineCount" header={t("paymentVoucher.bulkDisburse.approvedLines")} />
           <Column
             field="comsubGross"
-            header="COMSUB (GROSS)"
+            header={t("paymentVoucher.bulkDisburse.gross")}
             body={(row) => formatAmount(row.comsubGross)}
           />
           <Column
             field="netPayable"
-            header="Net payable"
+            header={t("paymentVoucher.bulkDisburse.net")}
             body={(row) => formatAmount(row.netPayable)}
           />
-          <Column field="bankAccount" header="Bank account" />
+          <Column field="bankAccount" header={t("paymentVoucher.bulkDisburse.bankAccount")} />
         </DataTable>
       </Card>
 
       <div className="next_container">
         <Button
           className="submit_button p-0"
-          label={
-            submitting
-              ? "Disbursing…"
-              : `Disburse selected (${selected.length})`
-          }
+          label={t("paymentVoucher.bulkDisburse.disburse", { count: selected.length })}
+          loading={submitting}
           disabled={!selected.length || submitting}
           onClick={handleDisburse}
         />

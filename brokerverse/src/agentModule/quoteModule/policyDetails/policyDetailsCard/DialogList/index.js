@@ -45,17 +45,38 @@ const DialogList = ({ setVisible, visible }) => {
     dispatch(postModleDetailsMiddleware(valueWithId));
   };
 
+  const validate = (values) => {
+    const errors = {};
+    if (!values.ParticipantName) errors.ParticipantName = t("tables.participantRequired");
+    const share = Number(values.Sharepercentage);
+    if (values.Sharepercentage === "" || Number.isNaN(share) || share <= 0 || share > 100) errors.Sharepercentage = t("tables.shareRange");
+    return errors;
+  };
+
   const formik = useFormik({
     initialValues: initialValue,
-    // validate: customValidation,
+    validate,
+    validateOnChange: false,
     onSubmit: (values) => {
       handleclick(values);
     },
   });
 
+  const close = () => {
+    setVisible(false);
+    formik.resetForm();
+  };
+
+  const footer = (
+    <>
+      <Button type="button" label={t("common.cancel")} text onClick={close} />
+      <Button type="button" label={t("common.save")} onClick={() => formik.handleSubmit()} />
+    </>
+  );
+
   return (
     <div>
-      <Dialog header={t("tables.coInsuranceCompanyDetails")} visible={visible} style={{ width: '50vw' }} onHide={() => setVisible(false)}>
+      <Dialog header={t("tables.coInsuranceCompanyDetails")} visible={visible} style={{ width: '40rem' }} breakpoints={{ '960px': '90vw', '640px': '100vw' }} footer={footer} onHide={close}>
         <div className="grid mt-2">
           <div className="col-12 md:col-12 lg:col-12">
             <DropdownField
@@ -67,7 +88,7 @@ const DialogList = ({ setVisible, visible }) => {
               }}
               optionLabel="label"
             />
-
+            {formik.errors.ParticipantName && <small className="p-error">{formik.errors.ParticipantName}</small>}
           </div>
         </div>
 
@@ -103,18 +124,10 @@ const DialogList = ({ setVisible, visible }) => {
               label={t("tables.sharePercent")}
               value={formik.values.Sharepercentage}
               onChange={formik.handleChange("Sharepercentage")}
+              keyfilter="num"
+              error={formik.errors.Sharepercentage}
             />
           </div>
-        </div>
-        <div className="next__btn__container" style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
-          <Button
-            className="next__btn"
-            onClick={() => {
-              formik.handleSubmit();
-            }}
-          >
-            {t("common.save")}
-          </Button>
         </div>
 
       </Dialog>

@@ -21,7 +21,8 @@ const DocumentUpload = ({
     <Dialog
       visible={modalVisible}
       header={t("agent.uploadDocument")}
-      style={{ width: "80vw" }}
+      style={{ width: "60rem" }}
+      breakpoints={{ "1024px": "95vw" }}
       className="paymet__options__document__upload__container"
       onHide={() => setModalVisible(false)}
       dismissableMask={true}

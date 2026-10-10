@@ -20,6 +20,7 @@ const request = async (path, options = {}) => {
   if (!response.ok || body.success === false) {
     const error = new Error(body.message || `Request failed (${response.status})`);
     error.status = response.status;
+    error.errors = body.errors || [];
     throw error;
   }
   return body.data;
@@ -78,6 +79,10 @@ const birTaxService = {
   datLayout: () => request("/bir/dat-files/layout"),
   datPreview: (type, params) => request(`/bir/dat-files/${enc(type)}${qs(params)}`),
   datDownload: (type, params) => openFile(`/bir/dat-files/${enc(type)}/download${qs(params)}`, { fallbackName: `${type}.DAT` }),
+  datFiles: (params) => request(`/bir/dat-files${qs(params)}`),
+  generateDat: (type, body) => post(`/bir/dat-files/${enc(type)}/generate`, body),
+  datFile: (id) => request(`/bir/dat-files/generated/${enc(id)}`),
+  downloadDatFile: (id, fileName) => openFile(`/bir/dat-files/generated/${enc(id)}/download`, { fallbackName: fileName || "file.DAT" }),
 
   // sales invoices
   invoices: (params) => request(`/bir/invoices${qs(params)}`),
@@ -85,10 +90,10 @@ const birTaxService = {
   seller: () => request("/bir/invoices/seller"),
   invoiceCandidates: (type) => request(`/bir/invoices/candidates${qs({ type })}`),
   issueInvoice: (body) => post("/bir/invoices", body),
-  cancelInvoice: (id, reason) => post(`/bir/invoices/${enc(id)}/cancel`, { reason }),
+  cancelInvoice: (id, reason) => post(`/bir/invoices/${enc(id)}/cancel`, reason),
   invoicePdf: (id) => openFile(`/bir/invoices/${enc(id)}/pdf`),
   recordPayment: (id, body) => post(`/bir/invoices/${enc(id)}/payments`, body),
-  cancelPayment: (paymentId, reason) => post(`/bir/invoices/payments/${enc(paymentId)}/cancel`, { reason }),
+  cancelPayment: (paymentId, reason) => post(`/bir/invoices/payments/${enc(paymentId)}/cancel`, reason),
   paymentPdf: (paymentId) => openFile(`/bir/invoices/payments/${enc(paymentId)}/pdf`),
 
   // EIS outbox
@@ -108,9 +113,22 @@ const birTaxService = {
   printBook: (book, period) => postFile(`/bir/cas/books/${enc(book)}/print`, { period }),
   bookPrints: (params) => request(`/bir/cas/prints${qs(params)}`),
   reprintBook: (id) => openFile(`/bir/cas/prints/${enc(id)}/pdf`),
-  voidPrint: (id, reason) => post(`/bir/cas/prints/${enc(id)}/void`, { reason }),
-  systemDescription: () => openFile("/bir/cas/documents/system-description"),
-  backupProcedure: () => openFile("/bir/cas/documents/backup-procedure"),
+  voidPrint: (id, reason) => post(`/bir/cas/prints/${enc(id)}/void`, reason),
+  casRegistration: () => request("/bir/cas/registration"),
+  saveCasRegistration: (body) => put("/bir/cas/registration", body),
+
+  // CAS documents (system description, backup procedure): versions, draft, approval
+  casDocuments: () => request("/bir/cas/documents"),
+  casDocument: (slug) => request(`/bir/cas/documents/${enc(slug)}/versions`),
+  casDocumentVersion: (slug, version) => request(`/bir/cas/documents/${enc(slug)}/versions/${enc(version)}`),
+  compareCasDocument: (slug, from, to) => request(`/bir/cas/documents/${enc(slug)}/compare${qs({ from, to })}`),
+  casDocumentPdf: (slug, version) => openFile(`/bir/cas/documents/${enc(slug)}${qs({ version })}`),
+  startCasDraft: (slug) => post(`/bir/cas/documents/${enc(slug)}/draft`),
+  saveCasDraft: (slug, sections) => put(`/bir/cas/documents/${enc(slug)}/draft`, { sections }),
+  submitCasDraft: (slug, body) => post(`/bir/cas/documents/${enc(slug)}/draft/submit`, body),
+  approveCasDraft: (slug, remarks) => post(`/bir/cas/documents/${enc(slug)}/draft/approve`, remarks ? { remarks } : {}),
+  rejectCasDraft: (slug, remarks) => post(`/bir/cas/documents/${enc(slug)}/draft/reject`, { remarks }),
+  discardCasDraft: (slug) => post(`/bir/cas/documents/${enc(slug)}/draft/discard`),
   auditExtract: (from, to, format) => openFile(`/bir/cas/audit-extract${qs({ from, to, format })}`, { fallbackName: `audit-trail.${format}` }),
 
   // overriding commission from insurers

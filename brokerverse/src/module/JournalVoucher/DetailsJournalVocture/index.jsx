@@ -1,31 +1,25 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import { useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import DropDowns from "../../../components/DropDowns";
-import SvgDropdown from "../../../assets/icons/SvgDropdown";
-import InputField from "../../../components/InputField";
-import { Calendar } from "primereact/calendar";
-import LabelWrapper from "../../../components/LabelWrapper";
-import SvgDatePicker from "../../../assets/icons/SvgDatePicker";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "../DetailsJournalVocture/index.scss";
 import ArrowLeftIcon from "../../../assets/icons/ArrowLeftIcon";
 import { useNavigate, useParams } from "react-router-dom";
-import brandingService from "../../../services/brandingService";
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
-import { useFormik } from "formik";
 import ViewDataTabel from "./ViewDataTabel";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getJournalVoucherViewData,
-  getJournalVoucherDetails,
-} from "../store/journalVoucherMiddleware";
+import { getJournalVoucherDetails } from "../store/journalVoucherMiddleware";
 import journalVoucherService, {
   apiErrorMessage,
 } from "../../../services/journalVoucherService";
-import { calendarDateFormat } from "../../../utility/dateFormat";
+import { openConfirm } from "../../../components/ConfirmDialog";
+import DetailHeader from "../../../components/DetailHeader";
+import DetailSection from "../../../components/DetailSection";
+import KeyValueGrid from "../../../components/KeyValueGrid";
+import ApprovalActions from "../../../components/ApprovalActions";
+import { RecordActivityLog } from "../../../components/ActivityLog";
+import { printPdf } from "../../../components/Print";
 
 const AWAITING_APPROVAL = "for-approval";
 
@@ -37,14 +31,12 @@ const DetailsJournalVocture = () => {
   const dispatch = useDispatch();
 
   const {
-    journalVoucherView,
     loading,
     journalVoucherPostTabelData,
     journalVoucherDetailsPagination,
   } = useSelector(({ journalVoucherMainReducers }) => {
     return {
       loading: journalVoucherMainReducers?.loading,
-      journalVoucherView: journalVoucherMainReducers?.journalVoucherView,
       journalVoucherPostTabelData:
         journalVoucherMainReducers?.journalVoucherPostTabelData,
       journalVoucherDetailsPagination:
@@ -57,24 +49,6 @@ const DetailsJournalVocture = () => {
     };
   });
 
-  const totalCredit = journalVoucherPostTabelData.reduce((total, item) => {
-    if (item.entryType === "Credit") {
-      const localAmount = parseFloat(item.localAmount);
-      return !isNaN(localAmount) ? total + localAmount : total;
-    }
-    return total; // Important: Return the total for each iteration.
-  }, 0);
-
-  const totalDebit = journalVoucherPostTabelData.reduce((total, item) => {
-    if (item.entryType === "Debit") {
-      const localAmount = parseFloat(item.localAmount);
-      return !isNaN(localAmount) ? total + localAmount : total;
-    }
-    return total;
-  }, 0);
-
-  const [visiblePopup, setVisiblePopup] = useState(false);
-  const [date, setDate] = useState(new Date());
   const items = [
     {
       label: t("accounts.journalVoucherDetails.journalVoucher"),
@@ -105,6 +79,7 @@ const DetailsJournalVocture = () => {
       );
       isInitialMount.current = false;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, dispatch]);
 
   // Handle pagination changes
@@ -129,172 +104,81 @@ const DetailsJournalVocture = () => {
   };
 
   const toast = useRef(null);
-  const [voucherStatus, setVoucherStatus] = useState("");
-  const [rejectVisible, setRejectVisible] = useState(false);
-  const [rejectReason, setRejectReason] = useState("");
-  const [actionLoading, setActionLoading] = useState(false);
+  const [voucher, setVoucher] = useState(null);
+  const [activityKey, setActivityKey] = useState(0);
 
-  const loadVoucherStatus = async () => {
+  const showError = (error) =>
+    toast.current?.show({
+      severity: "error",
+      summary: t("common.error"),
+      detail: apiErrorMessage(error),
+      life: 4000,
+    });
+
+  const loadVoucher = useCallback(async () => {
     try {
-      const voucher = await journalVoucherService.getVoucher(id);
-      setVoucherStatus(voucher?.status || "");
+      setVoucher(await journalVoucherService.getVoucher(id));
     } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("common.error"),
-        detail: apiErrorMessage(error),
-        life: 3000,
-      });
+      showError(error);
     }
-  };
-
-  useEffect(() => {
-    if (id) loadVoucherStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const runVoucherAction = async (action) => {
-    setActionLoading(true);
-    try {
-      const result = await action();
-      toast.current?.show({
-        severity: "success",
-        summary: t("accounts.journalVoucherDetails.success"),
-        detail: result?.message,
-        life: 3000,
-      });
-      setRejectVisible(false);
-      setRejectReason("");
-      await loadVoucherStatus();
-    } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("common.error"),
-        detail: apiErrorMessage(error),
-        life: 4000,
-      });
-    } finally {
-      setActionLoading(false);
-    }
-  };
+  useEffect(() => {
+    if (id) loadVoucher();
+  }, [id, loadVoucher]);
 
-  const handleApprove = () =>
-    runVoucherAction(() => journalVoucherService.approve(id));
+  const number = voucher?.transactionNumber || id;
+  const statusLabel = (code) =>
+    t(`accounts.journalVoucherDetails.statuses.${code}`, { defaultValue: code });
 
-  const handleReject = () =>
-    runVoucherAction(() => journalVoucherService.reject(id, rejectReason.trim()));
-  const [newDataTable] = useState([]);
-  const [visible, setVisible] = useState(false);
-  const handleEdit = () => {
-    setVisible(true);
-  };
-
-  const customValidation = (values) => {
-    const errors = {};
-
-    if (!values.transactioncode) {
-      errors.transactioncode = t("accounts.journalVoucherDetails.mainAccountRequired");
-    }
-
-    return errors;
-  };
-
-  const handleSubmit = (values) => {
-    dispatch(getJournalVoucherViewData());
-    // Handle form submission
-  };
-  const mainAccountOptions = [
-    {
-      label:
-        journalVoucherView?.transationCode ||
-        journalVoucherView?.transactionCode ||
-        "",
-      value:
-        journalVoucherView?.transationCode ||
-        journalVoucherView?.transactionCode ||
-        "",
-    },
+  const voucherFacts = () => [
+    { label: t("accounts.journalVoucherDetails.transactionNumber"), value: number },
+    { label: t("accounts.journalVoucherDetails.date"), value: voucher?.date, type: "date" },
+    { label: t("accounts.journalVoucherDetails.transactionDescription"), value: voucher?.description },
+    { label: t("accounts.journalVoucherDetails.totalDebit"), value: voucher?.totalDebit, type: "amount" },
+    { label: t("accounts.journalVoucherDetails.totalCredit"), value: voucher?.totalCredit, type: "amount" },
   ];
-  const formik = useFormik({
-    initialValues: {
-      transactioncode:
-        journalVoucherView?.transationCode ||
-        journalVoucherView?.transactionCode ||
-        "",
-      transactionDescription:
-        journalVoucherView?.transationDescription ||
-        journalVoucherView?.transactionDescription ||
-        "",
-      transactionNumber:
-        journalVoucherView?.transactionNumber ||
-        journalVoucherView?.transationCode ||
-        "",
-      date: journalVoucherView?.date
-        ? new Date(journalVoucherView.date)
-        : new Date(),
-      totalCredit: totalCredit.toString(),
-      totalDebit: totalDebit.toString(),
-      net: (totalCredit - totalDebit).toFixed(2),
-    },
-    validate: customValidation,
-    onSubmit: handleSubmit,
-    enableReinitialize: true,
-  });
 
+  // approve posts the voucher to the ledger; reject returns it with the reason
+  const decide = async (action) => {
+    const reject = action === "reject";
+    let result;
+    const answer = await openConfirm({
+      title: t(`accounts.journalVoucherDetails.confirm.${action}Title`, { number }),
+      severity: reject ? "danger" : "neutral",
+      message: t(`accounts.journalVoucherDetails.confirm.${action}Message`),
+      facts: voucherFacts(),
+      input: reject
+        ? { type: "textarea", label: t("accounts.journalVoucherDetails.rejectReason"), required: true, minLength: 3, maxLength: 500 }
+        : undefined,
+      confirmLabel: t(`accounts.journalVoucherDetails.confirm.${action}`),
+      onConfirm: async (reason) => {
+        result = reject
+          ? await journalVoucherService.reject(voucher?.id || id, reason)
+          : await journalVoucherService.approve(voucher?.id || id);
+      },
+    });
+    if (answer === null || answer === false) return;
+    toast.current?.show({
+      severity: "success",
+      summary: t("accounts.journalVoucherDetails.success"),
+      detail: result?.message,
+      life: 3000,
+    });
+    setActivityKey((k) => k + 1);
+    await loadVoucher();
+  };
 
-  useEffect(() => {
-    const timerId = setTimeout(() => {
-      setVisiblePopup(false);
-    }, 2000);
+  const print = () =>
+    printPdf(`/journal-vouchers/${encodeURIComponent(voucher?.id || id)}/pdf`, { fileName: `${number}.pdf` })
+      .catch((error) => showError(error));
 
-    return () => clearTimeout(timerId);
-  }, [visiblePopup]);
-
-  // Update formik values when journalVoucherView changes (from API response)
-  useEffect(() => {
-    if (
-      journalVoucherView?.transationCode ||
-      journalVoucherView?.transactionCode
-    ) {
-      const transactionCode =
-        journalVoucherView?.transationCode ||
-        journalVoucherView?.transactionCode ||
-        "";
-      const transactionDescription =
-        journalVoucherView?.transationDescription ||
-        journalVoucherView?.transactionDescription ||
-        "";
-
-      if (formik.values.transactioncode !== transactionCode) {
-        formik.setFieldValue("transactioncode", transactionCode);
-      }
-      if (formik.values.transactionDescription !== transactionDescription) {
-        formik.setFieldValue("transactionDescription", transactionDescription);
-      }
-      if (
-        formik.values.transactionNumber !==
-        (journalVoucherView?.transactionNumber || transactionCode)
-      ) {
-        formik.setFieldValue(
-          "transactionNumber",
-          journalVoucherView?.transactionNumber || transactionCode
-        );
-      }
-
-      if (journalVoucherView?.date) {
-        const dateValue = new Date(journalVoucherView.date);
-        if (!date || date.getTime() !== dateValue.getTime()) {
-          setDate(dateValue);
-          formik.setFieldValue("date", dateValue);
-        }
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [journalVoucherView]);
   const handleGoback = () => {
     navigate("/accounts/journalvoucher");
   };
 
+  const kind = voucher?.kind;
 
   return (
     <div className="grid sub__add__container">
@@ -317,201 +201,74 @@ const DetailsJournalVocture = () => {
           />
         </div>
       </div>
-      <form onSubmit={formik.handleSubmit}>
-        <div className="col-12 m-0 ">
-          <div className="grid add__journal__vocture p-3 m-1">
-            <div class="sm-col-12  md:col-3 lg-col-4 ">
-              <DropDowns
-                className="dropdown__add__sub"
-                label={t("accounts.journalVoucherDetails.transactionCode")}
-                classNames="label__sub__add"
-                value={
-                  journalVoucherView?.transationCode ||
-                  journalVoucherView?.transactionCode ||
-                  ""
-                }
-                onChange={(e) =>
-                  formik.setFieldValue("transactioncode", e.target.value)
-                }
-                options={mainAccountOptions}
-                optionLabel="label"
-                defaultValue={formik.values.transactioncode}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-                disabled={true}
-              />
-            </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <InputField
-                label={t("accounts.journalVoucherDetails.transactionDescription")}
-                classNames="dropdown__add__sub"
-                className="label__sub__add"
-                placeholder={t("accounts.journalVoucherDetails.enter")}
-                value={
-                  formik.values.transactionDescription ||
-                  journalVoucherView?.transationDescription ||
-                  journalVoucherView?.transactionDescription ||
-                  ""
-                }
-                disabled={true}
-                onChange={(e) =>
-                  formik.setFieldValue("transactionDescription", e.target.value)
-                }
-              />
-            </div>
-            <div className="col-12 md:col-3 lg:col-3">
-              <InputField
-                label={t("accounts.journalVoucherDetails.transactionNumber")}
-                classNames="dropdown__add__sub"
-                className="label__sub__add"
-                value={journalVoucherView?.transactionNumber || ""}
-                onChange={(e) =>
-                  formik.setFieldValue("transactionNumber", e.target.value)
-                }
-                disabled={true}
-              />
-            </div>
-            <div className="col-12 md:col-3 lg-col-3 input__view__reversal">
-              <div class="calender_container_claim p-0">
-                <LabelWrapper
-                  label={t("accounts.journalVoucherDetails.date")}
-                  textSize={"16px"}
-                  textColor={"#000"}
-                  textWeight={"300"}
-                  classNames="label__sub__add"
-                >
-                  <Calendar
-                    dateFormat={calendarDateFormat()}
-                    value={
-                      date ||
-                      (journalVoucherView?.date
-                        ? new Date(journalVoucherView.date)
-                        : null) ||
-                      null
-                    }
-                    onChange={(e) => {
-                      setDate(e.value);
-                      formik.setFieldValue("date", e.value);
-                    }}
-                    showIcon
-                    className="calender_field_claim"
-                    disabled={true}
-                  />
-
-                  <div className="calender_icon_claim">
-                    <SvgDatePicker />
-                  </div>
-                </LabelWrapper>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-12 m-0 ">
-          <div className="sub__account__details__jV">
-            <div
-              className="col-12 md:col-12 lg-col-12"
-              style={{ maxWidth: "100%" }}
-            >
-              <div className="card">
-                <ViewDataTabel
-                  journalVoucherPostTabelData={journalVoucherPostTabelData}
-                  handleEdit={handleEdit}
-                  newDataTable={newDataTable}
-                  visible={visible}
-                  pagination={journalVoucherDetailsPagination}
-                  loading={loading}
-                  onPageChange={onPageChange}
-                  first={first}
-                  rowsPerPage={rowsPerPage}
+      <div className="col-12">
+        <DetailHeader
+          title={number}
+          subtitle={voucher?.description}
+          status={voucher?.status ? { code: voucher.status, label: statusLabel(voucher.status) } : null}
+          meta={[
+            { label: t("accounts.journalVoucherDetails.transactionCode"), value: voucher?.transactionCode },
+            { label: t("accounts.journalVoucherDetails.date"), value: voucher?.date, type: "date" },
+            { label: t("accounts.journalVoucherDetails.totalDebit"), value: voucher?.totalDebit, type: "amount" },
+            { label: t("accounts.journalVoucherDetails.totalCredit"), value: voucher?.totalCredit, type: "amount" },
+          ]}
+          actions={(
+            <>
+              <Button label={t("accounts.journalVoucherDetails.print")} icon="pi pi-print" outlined onClick={print} data-testid="print-jv" />
+              {voucher?.status === AWAITING_APPROVAL && (
+                <ApprovalActions
+                  initiator={{ id: voucher.createdBy }}
+                  approveLabel={t("accounts.journalVoucherDetails.confirm.approve")}
+                  rejectLabel={t("accounts.journalVoucherDetails.confirm.reject")}
+                  onApprove={() => decide("approve")}
+                  onReject={() => decide("reject")}
                 />
-              </div>
-            </div>
-          </div>
-          <div className="col-12 m-0 ">
-            <div className="grid add__journal__vocture__view p-3">
-              <div class="sm-col-12  md:col-3 lg-col-4 ">
-                <InputField
-                  label={t("accounts.journalVoucherDetails.totalCredit")}
-                  classNames="dropdown__add__sub"
-                  className="label__sub__add"
-                  placeholder={t("accounts.journalVoucherDetails.enter")}
-                  value={totalCredit}
-                  disabled={true}
-                  onChange={(e) =>
-                    formik.setFieldValue("totalCredit", e.target.value)
-                  }
-                />
-              </div>
-              <div className="col-12 md:col-3 lg:col-3">
-                <InputField
-                  label={t("accounts.journalVoucherDetails.totalDebit")}
-                  classNames="dropdown__add__sub"
-                  className="label__sub__add"
-                  placeholder={t("accounts.journalVoucherDetails.enter")}
-                  value={totalDebit}
-                  disabled={true}
-                  onChange={(e) =>
-                    formik.setFieldValue("totalDebit", e.target.value)
-                  }
-                />
-              </div>
-              <div className="col-12 md:col-3 lg-col-3 input__view__reversal">
-                <InputField
-                  label={t("accounts.journalVoucherDetails.net")}
-                  classNames="dropdown__add__sub"
-                  className="label__sub__add"
-                  placeholder={t("accounts.journalVoucherDetails.enter")}
-                  value={(totalCredit - totalDebit).toFixed(2)}
-                  disabled={true}
-                  onChange={(e) => formik.setFieldValue("net", e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </form>
-      <div className="col-12 btn__view__details__JV mt-2">
-        <Button label={t("accounts.journalVoucherDetails.print", "Print")} icon="pi pi-print" className="p-button-outlined"
-          onClick={() => brandingService.printJournalVoucher(id).catch(() => {})} data-testid="print-jv" />
+              )}
+            </>
+          )}
+        />
       </div>
-      {voucherStatus === AWAITING_APPROVAL && (
-        <div className="col-12 btn__view__details__JV mt-2">
-          <Button
-            label={t("common.reject")}
-            className="save__add__btn__JV"
-            outlined
-            onClick={() => setRejectVisible(true)}
-            disabled={actionLoading}
-          />
-          <Button
-            label={t("common.approve")}
-            className="save__add__btn__JV"
-            onClick={handleApprove}
-            disabled={actionLoading}
-          />
+      {voucher?.status === "rejected" && voucher.rejectionReason && (
+        <div className="col-12">
+          <p className="m-0 bv-jv-rejection">
+            {t("accounts.journalVoucherDetails.confirm.rejectedBecause", { reason: voucher.rejectionReason })}
+          </p>
         </div>
       )}
-      <Dialog
-        header={t("common.reject")}
-        visible={rejectVisible}
-        onHide={() => setRejectVisible(false)}
-        style={{ width: "30rem" }}
-      >
-        <InputField
-          label={t("accounts.journalVoucherDetails.rejectReason", "Reason")}
-          classNames="dropdown__add__sub"
-          className="label__sub__add"
-          value={rejectReason}
-          onChange={(e) => setRejectReason(e.target.value)}
-        />
-        <div className="btn__view__details__JV mt-3">
-          <Button
-            label={t("common.reject")}
-            className="save__add__btn__JV"
-            onClick={handleReject}
-            disabled={actionLoading || rejectReason.trim().length < 3}
+      <div className="col-12">
+        <DetailSection title={t("accounts.journalVoucherDetails.confirm.details")}>
+          <KeyValueGrid
+            columns={4}
+            items={[
+              { label: t("accounts.journalVoucherDetails.confirm.kind"), value: kind ? t(`accounts.journalVoucherDetails.kinds.${kind}`, { defaultValue: kind }) : null },
+              { label: t("accounts.journalVoucherDetails.confirm.source"), value: voucher?.source ? t(`accounts.journalVoucherDetails.sources.${voucher.source}`, { defaultValue: voucher.source }) : null },
+              { label: t("accounts.journalVoucherDetails.confirm.createdAt"), value: voucher?.createdAt, type: "datetime" },
+              { label: t("accounts.journalVoucherDetails.confirm.postedAt"), value: voucher?.postedAt, type: "datetime" },
+              { label: t("accounts.journalVoucherDetails.confirm.reversalOf"), value: voucher?.reversalOf, hidden: !voucher?.reversalOf },
+              { label: t("accounts.journalVoucherDetails.confirm.correctionOf"), value: voucher?.correctionOf, hidden: !voucher?.correctionOf },
+              { label: t("accounts.journalVoucherDetails.confirm.reversedBy"), value: voucher?.reversedBy, hidden: !voucher?.reversedBy },
+              { label: t("accounts.journalVoucherDetails.net"), value: Number(voucher?.totalCredit || 0) - Number(voucher?.totalDebit || 0), type: "amount" },
+            ]}
           />
-        </div>
-      </Dialog>
+        </DetailSection>
+      </div>
+      <div className="col-12">
+        <DetailSection title={t("accounts.journalVoucherDetails.confirm.lines")} flush>
+          <ViewDataTabel
+            journalVoucherPostTabelData={journalVoucherPostTabelData}
+            pagination={journalVoucherDetailsPagination}
+            loading={loading}
+            onPageChange={onPageChange}
+            first={first}
+            rowsPerPage={rowsPerPage}
+          />
+        </DetailSection>
+      </div>
+      <div className="col-12">
+        <DetailSection title={t("accounts.journalVoucherDetails.confirm.activity")}>
+          <RecordActivityLog key={activityKey} entity="journal_voucher" recordId={voucher?.id || id} />
+        </DetailSection>
+      </div>
     </div>
   );
 };

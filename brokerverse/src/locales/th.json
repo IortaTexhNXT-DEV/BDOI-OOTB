@@ -545,7 +545,102 @@
       "mainAccountRequired": "กรุณาเลือกบัญชีหลัก",
       "success": "สำเร็จ",
       "messageContent": "เนื้อหาข้อความ",
-      "rowCount": "จำนวนแถว :"
+      "rowCount": "จำนวนแถว :",
+      "statuses": {
+        "draft": "Draft",
+        "for-approval": "Pending approval",
+        "posted": "Posted",
+        "rejected": "Rejected",
+        "reversed": "Reversed",
+        "cancelled": "Cancelled"
+      },
+      "kinds": {
+        "standard": "Standard",
+        "reversal": "Reversal",
+        "correction": "Correction"
+      },
+      "sources": {
+        "manual": "Manual entry",
+        "correction": "Correction JV",
+        "reversal": "Reversal JV",
+        "upload": "Upload"
+      },
+      "confirm": {
+        "approveTitle": "Approve journal voucher {{number}}",
+        "approveMessage": "The voucher is posted to the general ledger.",
+        "approve": "Approve and post",
+        "rejectTitle": "Reject journal voucher {{number}}",
+        "rejectMessage": "The voucher is not posted and returns to the preparer with your reason.",
+        "reject": "Reject voucher",
+        "rejectedBecause": "Rejected: {{reason}}",
+        "details": "Voucher details",
+        "kind": "Kind",
+        "source": "Source",
+        "createdAt": "Prepared on",
+        "postedAt": "Posted on",
+        "reversalOf": "Reversal of",
+        "correctionOf": "Correction of",
+        "reversedBy": "Reversed by",
+        "lines": "Entries",
+        "activity": "Activity"
+      }
+    },
+    "receiptDialogs": {
+      "recordPaymentMessage": "ระบบจะออกใบเสร็จรับเงินสำหรับการชำระนี้",
+      "balanceAfter": "ยอดคงเหลือหลังชำระ",
+      "recordAmount": "บันทึก {{amount}}",
+      "approveTitle": "อนุมัติใบเสร็จ",
+      "approveMessage_one": "การชำระเงินของกรมธรรม์ {{count}} รายการจะถูกบันทึกบัญชี",
+      "approveMessage_other": "การชำระเงินของกรมธรรม์ {{count}} รายการจะถูกบันทึกบัญชี",
+      "amountApplied": "ยอดที่ตัดชำระ",
+      "approveReceipt": "อนุมัติใบเสร็จ",
+      "approve": "อนุมัติ",
+      "print": "พิมพ์",
+      "approvedDone": "อนุมัติใบเสร็จแล้ว",
+      "printedDone": "พิมพ์ใบเสร็จแล้ว",
+      "activity": "กิจกรรม"
+    },
+    "openEntryDialogs": {
+      "matchTitle": "จับคู่รายการค้าง",
+      "matchMessage_one": "รายการเดบิตและเครดิต {{count}} คู่จะถูกจับคู่",
+      "matchMessage_other": "รายการเดบิตและเครดิต {{count}} คู่จะถูกจับคู่",
+      "debitsSelected": "เดบิตที่เลือก",
+      "debitTotal": "ยอดรวมเดบิต",
+      "creditsSelected": "เครดิตที่เลือก",
+      "creditTotal": "ยอดรวมเครดิต",
+      "difference": "ผลต่าง",
+      "writeOffAmount": "ยอดตัดจำหน่าย",
+      "matchEntries_one": "จับคู่ {{count}} คู่",
+      "matchEntries_other": "จับคู่ {{count}} คู่",
+      "unmatchTitle": "ยกเลิกการจับคู่",
+      "unmatchMessage_one": "การจับคู่ {{count}} รายการจะถูกยกเลิกและรายการจะกลับเป็นค้าง",
+      "unmatchMessage_other": "การจับคู่ {{count}} รายการจะถูกยกเลิกและรายการจะกลับเป็นค้าง",
+      "unmatchEntries_one": "ยกเลิกการจับคู่ {{count}} รายการ",
+      "unmatchEntries_other": "ยกเลิกการจับคู่ {{count}} รายการ"
+    },
+    "addJournalVoucherForm": {
+      "submitForApproval": "Submit for approval",
+      "unbalanced": "Debits and credits must be equal before the voucher can be submitted."
+    },
+    "correctionJVForm": {
+      "submitTitle": "Submit correction of {{number}}",
+      "submitMessage": "A correction voucher is created that reverses the original voucher and posts the corrected entries.",
+      "submitNote": "The voucher is posted once a second user approves it.",
+      "submit": "Submit correction",
+      "reverseTitle": "Submit reversal of {{number}}",
+      "reverseMessage": "A reversal voucher is created with the entries of the original voucher reversed.",
+      "reverse": "Submit reversal",
+      "originalVoucher": "Original voucher",
+      "voucherDate": "Voucher date",
+      "correctionCode": "Correction transaction code",
+      "reversalCode": "Reversal transaction code",
+      "entries": "Entries",
+      "amount": "Amount",
+      "totalDebit": "Total debit",
+      "totalCredit": "Total credit",
+      "new": "New correction",
+      "newReversal": "New reversal",
+      "print": "Print {{number}}"
     }
   },
   "renewalWaiting": {
@@ -692,7 +787,43 @@
     "uploading": "กำลังอัปโหลด...",
     "upload": "อัปโหลด",
     "processing": "กำลังประมวลผล...",
-    "fileBeingProcessed": "ไฟล์ของคุณกำลังถูกประมวลผล จะสร้างการจ่ายเงินในไม่ช้า"
+    "fileBeingProcessed": "ไฟล์ของคุณกำลังถูกประมวลผล จะสร้างการจ่ายเงินในไม่ช้า",
+    "bulkDisburse": {
+      "title": "Bulk Disburse",
+      "loadFailed": "The agents with approved commission could not be loaded.",
+      "confirmTitle": "Create commission payout vouchers",
+      "confirmMessage": "One payout voucher is created for each selected agent from their approved commission lines.",
+      "confirmNote": "Each voucher goes for approval before it is paid.",
+      "create_one": "Create {{count}} voucher",
+      "create_other": "Create {{count}} vouchers",
+      "created_one": "{{count}} voucher created",
+      "created_other": "{{count}} vouchers created",
+      "createdWithErrors": "{{count}} voucher(s) created, {{failed}} failed",
+      "failed": "Bulk disburse failed",
+      "agents": "Agents",
+      "agent": "Agent / Referrer",
+      "type": "Type",
+      "level": "Level",
+      "approvedLines": "Approved lines",
+      "gross": "Commission (gross)",
+      "net": "Net payable",
+      "bankAccount": "Bank account",
+      "empty": "No agents with approved commission",
+      "disburse": "Disburse selected ({{count}})"
+    },
+    "confirm": {
+      "printTitle": "Print cheque {{number}}",
+      "printMessage": "The cheque is marked as printed and the voucher as paid. This cannot be undone.",
+      "print": "Print cheque",
+      "approveTitle": "Approve cheque {{number}}",
+      "approveMessage": "The cheque is approved for printing.",
+      "approve": "Approve cheque",
+      "payoutTitle": "Record agent payout",
+      "payoutMessage": "The selected commission lines are marked as paid with this voucher, net of withholding tax.",
+      "payout": "Record payout",
+      "commissionLines": "Commission lines",
+      "activity": "Activity"
+    }
   },
   "renewal": {
     "renewals": "การต่ออายุ",
@@ -1042,7 +1173,48 @@
     "currencyRequired": "กรุณาระบุสกุลเงิน",
     "narrationRequired": "กรุณาระบุคำอธิบาย",
     "amountRequired": "กรุณาระบุจำนวนเงิน",
-    "enter": "กรอก"
+    "enter": "กรอก",
+    "confirm": {
+      "submitTitle": "Submit petty cash request {{number}}",
+      "submitNewTitle": "Submit petty cash request",
+      "submitMessage": "The request goes to a second user for approval.",
+      "submit": "Submit for approval",
+      "submitDone": "Request submitted for approval",
+      "approveTitle": "Approve petty cash request {{number}}",
+      "approveMessage": "The request is approved and can be disbursed from the fund.",
+      "approve": "Approve request",
+      "approveDone": "Request approved",
+      "rejectTitle": "Reject petty cash request {{number}}",
+      "rejectMessage": "The request returns to the requester with your reason.",
+      "reject": "Reject request",
+      "rejectDone": "Request rejected",
+      "lines": "Lines",
+      "fund": "Petty cash fund",
+      "approval": "Approval and activity",
+      "status": "Status",
+      "approvedAt": "Approved on",
+      "statuses": {
+        "draft": "Draft",
+        "submitted": "Pending approval",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "disbursed": "Disbursed",
+        "cancelled": "Cancelled"
+      },
+      "receiptsTitle": "Record petty cash receipts",
+      "receiptsMessage": "The selected receipts are posted and the fund balance is updated.",
+      "recordReceipts": "Record receipts",
+      "replenishTitle": "Record fund replenishment",
+      "replenishMessage": "The replenishment is posted and the fund is topped up by the amount below.",
+      "availableCash": "Available cash",
+      "replenishAmount": "Replenishment amount",
+      "recordReplenishment": "Record replenishment",
+      "disbursementsTitle": "Record petty cash disbursements",
+      "disbursementsMessage": "The disbursements are posted against the fund.",
+      "wht": "Withholding tax",
+      "netAmount": "Net amount",
+      "recordDisbursements": "Record disbursements"
+    }
   },
   "employeeBenefit": {
     "lead": "ลีด",
@@ -1293,7 +1465,239 @@
     "incentiveStatement": "ใบแจ้งยอดสิ่งจูงใจ",
     "incentiveReports": "รายงานสิ่งจูงใจ",
     "incentiveApprovals": "การอนุมัติสิ่งจูงใจ",
-    "approve": "อนุมัติ"
+    "approve": "อนุมัติ",
+    "help": {
+      "myPrograms": "ความคืบหน้าของคุณในแต่ละโปรแกรมที่กำลังดำเนินอยู่สำหรับรอบการคำนวณปัจจุบัน และเงินรางวัลตามระดับที่ทำได้",
+      "calculations": "คำนวณรายเดือนสำหรับโปรแกรมที่ใช้งานอยู่ ปรับรายการของตัวแทน และส่งชุดการคำนวณเพื่ออนุมัติ",
+      "approvals": "ชุดการคำนวณที่ส่งเพื่ออนุมัติ ผู้อนุมัติหรือปฏิเสธต้องไม่ใช่ผู้คำนวณหรือผู้ส่ง",
+      "statement": "รายได้ของตัวแทนในเดือนที่เลือก: โปรแกรม ยอดรวม แนวโน้ม และการจ่ายเงิน",
+      "reports": "รายงานค่าตอบแทนจูงใจจากแม่แบบรายงาน ในรูปแบบไฟล์ CSV"
+    },
+    "filters": {
+      "search": "ค้นหา",
+      "searchBatches": "ชุด งวด หรือผู้ใช้",
+      "searchApprovals": "ชุด งวด หรือผู้ส่ง",
+      "status": "สถานะ",
+      "allStatuses": "ทุกสถานะ",
+      "period": "งวด",
+      "allPeriods": "ทุกงวด"
+    },
+    "batch": {
+      "title": "ชุดการคำนวณ",
+      "batch": "ชุด",
+      "period": "งวด",
+      "periodDates": "วันที่ของงวด",
+      "programs": "โปรแกรม",
+      "agents": "ตัวแทน",
+      "totalPayout": "ยอดจ่ายรวม",
+      "status": "สถานะ",
+      "actions": "การดำเนินการ",
+      "summary": "สรุป",
+      "agentResults": "ผลของตัวแทน",
+      "activity": "กิจกรรม",
+      "calculatedOn": "คำนวณเมื่อ",
+      "createdBy": "คำนวณโดย",
+      "submittedBy": "ส่งโดย",
+      "submittedOn": "ส่งเมื่อ",
+      "approvedBy": "อนุมัติโดย",
+      "approvedOn": "อนุมัติเมื่อ",
+      "approvalRemarks": "หมายเหตุการอนุมัติ",
+      "rejectedBy": "ปฏิเสธโดย",
+      "rejectedOn": "ปฏิเสธเมื่อ",
+      "rejectionReason": "เหตุผลที่ปฏิเสธ",
+      "paidOn": "จ่ายเมื่อ",
+      "paymentReference": "เลขอ้างอิงการจ่าย",
+      "agent": "ตัวแทน",
+      "program": "โปรแกรม",
+      "achieved": "ผลงาน",
+      "achievementPct": "% ความสำเร็จ",
+      "tier": "ระดับ",
+      "adjustment": "การปรับปรุง",
+      "baseIncentive": "ค่าตอบแทนพื้นฐาน",
+      "payout": "ยอดจ่าย",
+      "noResults": "ไม่มีตัวแทนที่มีผลงานในงวดนี้",
+      "noBatches": "ไม่มีชุดการคำนวณ",
+      "submitForApproval": "ส่งเพื่ออนุมัติ",
+      "submitTitle": "ส่งชุดการคำนวณเพื่ออนุมัติ",
+      "submitMessage": "ชุดการคำนวณจะถูกส่งให้ผู้อนุมัติและไม่สามารถปรับปรุงได้อีก",
+      "submitted": "ส่ง {{batchId}} เพื่ออนุมัติแล้ว",
+      "reject": "ปฏิเสธ",
+      "rejectBatch": "ปฏิเสธชุดการคำนวณ",
+      "rejectTitle": "ปฏิเสธชุดการคำนวณ",
+      "rejected": "ปฏิเสธ {{batchId}} แล้ว",
+      "approveBatch": "อนุมัติชุดการคำนวณ",
+      "approveTitle": "อนุมัติชุดการคำนวณ",
+      "approveMessage": "อนุมัติค่าตอบแทนจูงใจของชุดการคำนวณนี้",
+      "approveNote": "ค่าตอบแทนจะถูกตั้งค้างจ่ายในบัญชีและสามารถจ่ายชุดการคำนวณได้",
+      "remarks": "หมายเหตุ",
+      "approved": "อนุมัติ {{batchId}} แล้ว",
+      "markPaid": "บันทึกว่าจ่ายแล้ว",
+      "payTitle": "บันทึกการจ่ายชุดการคำนวณ",
+      "payMessage": "บันทึกการจ่ายค่าตอบแทนของชุดการคำนวณนี้ ลงวันที่วันนี้",
+      "paid": "บันทึก {{batchId}} ว่าจ่ายแล้ว",
+      "adjust": "ปรับปรุง",
+      "adjustTitle": "ปรับปรุงรายการของตัวแทน",
+      "adjustmentReason": "เหตุผล",
+      "adjustmentReasonRequired": "ระบุเหตุผลของการปรับปรุง",
+      "saveAdjustment": "บันทึกการปรับปรุง",
+      "adjusted": "ปรับปรุงรายการของ {{name}} แล้ว",
+      "noApprovePermission": "การอนุมัติชุดการคำนวณต้องมีสิทธิ์อนุมัติค่าตอบแทนจูงใจ",
+      "ownBatch": "คุณเป็นผู้คำนวณหรือผู้ส่งชุดนี้ ผู้ใช้อื่นต้องเป็นผู้อนุมัติหรือปฏิเสธ"
+    },
+    "board": {
+      "pending": "รออนุมัติ",
+      "pendingAmount": "ยอดรออนุมัติ",
+      "approvedToday": "อนุมัติวันนี้",
+      "rejectedToday": "ปฏิเสธวันนี้",
+      "waiting": "รอมาแล้ว",
+      "days_one": "{{count}} วัน",
+      "days_other": "{{count}} วัน"
+    },
+    "wizard": {
+      "title": "คำนวณค่าตอบแทนจูงใจใหม่",
+      "steps": {
+        "period": "งวด",
+        "programs": "โปรแกรม",
+        "review": "ตรวจสอบ"
+      },
+      "period": "งวด",
+      "choosePeriod": "เลือกเดือน",
+      "description": "คำอธิบาย",
+      "program": "โปรแกรม",
+      "programPeriod": "ระยะเวลาโปรแกรม",
+      "measure": "ตัวชี้วัด",
+      "frequency": "ความถี่",
+      "eligibleAgents": "ตัวแทนที่มีสิทธิ์",
+      "programs": "โปรแกรม",
+      "from": "ตั้งแต่",
+      "to": "ถึง",
+      "noPrograms": "ไม่มีโปรแกรมที่ใช้งานอยู่ใน {{period}}",
+      "run": "เริ่มคำนวณ",
+      "doneTitle": "คำนวณเสร็จแล้ว",
+      "done": "{{batchId}}: ตัวแทน {{agents}} ราย, {{amount}}"
+    },
+    "mine": {
+      "title": "โปรแกรมค่าตอบแทนจูงใจของฉัน",
+      "agent": "ตัวแทน",
+      "programs": "โปรแกรม",
+      "running": "กำลังดำเนินอยู่",
+      "estimatedPayout": "ยอดจ่ายโดยประมาณ",
+      "averageAchievement": "ความสำเร็จเฉลี่ย",
+      "programsTitle": "โปรแกรม",
+      "program": "โปรแกรม",
+      "period": "งวด",
+      "target": "เป้าหมาย",
+      "achieved": "ผลงาน",
+      "achievement": "ความสำเร็จ",
+      "status": "สถานะ",
+      "daysLeft_one": "เหลือ {{count}} วัน",
+      "daysLeft_other": "เหลือ {{count}} วัน",
+      "ended": "สิ้นสุด {{date}}",
+      "noPrograms": "ไม่มีโปรแกรมค่าตอบแทนจูงใจ",
+      "chartTitle": "ความสำเร็จตามโปรแกรม",
+      "noAchievement": "ยังไม่มีผลงานในงวดปัจจุบัน",
+      "activityTitle": "กิจกรรมล่าสุด",
+      "noActivity": "ยังไม่มีกิจกรรมค่าตอบแทนจูงใจ",
+      "date": "วันที่",
+      "event": "เหตุการณ์",
+      "amount": "จำนวนเงิน",
+      "events": {
+        "calculated": "คำนวณแล้ว",
+        "approved": "อนุมัติแล้ว",
+        "rejected": "ปฏิเสธแล้ว",
+        "paid": "จ่ายแล้ว"
+      },
+      "programTitle": "รายละเอียดโปรแกรม",
+      "measure": "ตัวชี้วัด",
+      "programPeriod": "ระยะเวลาโปรแกรม",
+      "currentPeriod": "งวดปัจจุบัน",
+      "frequency": "ความถี่การคำนวณ",
+      "eligibility": "คุณสมบัติผู้มีสิทธิ์",
+      "programType": "ประเภทโปรแกรม",
+      "code": "รหัสโปรแกรม",
+      "name": "ชื่อโปรแกรม",
+      "tiers": "ระดับ",
+      "tier": "ระดับ",
+      "band": "ช่วงความสำเร็จ",
+      "payout": "ยอดจ่าย",
+      "noTiers": "โปรแกรมนี้ไม่มีระดับ",
+      "performance": "ผลงานของฉัน",
+      "currentTier": "ระดับปัจจุบัน",
+      "nextTier": "ระดับถัดไป",
+      "nextTierNeeded": "ต้องการอีก {{needed}} เพื่อถึง {{tier}}",
+      "topTier": "ถึงระดับสูงสุดแล้ว",
+      "payPercentAchieved": "{{rate}} ของเบี้ยประกันที่ทำได้",
+      "payPercentTarget": "{{rate}} ของเป้าหมาย",
+      "payPerPolicy": "{{amount}} ต่อกรมธรรม์",
+      "payMaximum": "{{payout}} สูงสุด {{max}}"
+    },
+    "stmt": {
+      "agent": "ตัวแทน",
+      "agentCode": "รหัสตัวแทน",
+      "branch": "สาขา",
+      "period": "งวด",
+      "statementDate": "วันที่ออกรายงาน",
+      "earned": "รายได้งวดนี้",
+      "ytd": "ตั้งแต่ต้นปี",
+      "pending": "อนุมัติแล้ว ยังไม่จ่าย",
+      "lastPayment": "การจ่ายครั้งล่าสุด",
+      "paidOnDate": "จ่ายเมื่อ {{date}}",
+      "breakdown": "รายละเอียดตามโปรแกรม",
+      "program": "โปรแกรม",
+      "target": "เป้าหมาย",
+      "achieved": "ผลงาน",
+      "achievementPct": "% ความสำเร็จ",
+      "tier": "ระดับ",
+      "earnedAmount": "รายได้",
+      "status": "สถานะ",
+      "total": "รวม",
+      "noPrograms": "ไม่มีรายได้จากโปรแกรมในงวดนี้",
+      "trend": "รายได้ 13 เดือนล่าสุด",
+      "earnings": "รายได้",
+      "noEarnings": "ไม่มีรายได้ใน 13 เดือนล่าสุด",
+      "payments": "ประวัติการจ่าย",
+      "programs": "โปรแกรม",
+      "amount": "จำนวนเงิน",
+      "paidOn": "จ่ายเมื่อ",
+      "paymentReference": "เลขอ้างอิงการจ่าย",
+      "noPayments": "ไม่มีค่าตอบแทนที่อนุมัติหรือจ่ายแล้ว",
+      "print": "พิมพ์",
+      "export": "ส่งออก CSV",
+      "printTitle": "รายงานค่าตอบแทนจูงใจ"
+    },
+    "rpt": {
+      "generateReport": "สร้างรายงาน",
+      "generateTitle": "สร้างรายงานค่าตอบแทนจูงใจ",
+      "generate": "สร้างรายงาน",
+      "templates": "แม่แบบรายงาน",
+      "history": "รายงานที่สร้างแล้ว",
+      "report": "รายงาน",
+      "category": "หมวดหมู่",
+      "description": "คำอธิบาย",
+      "parameters": "พารามิเตอร์",
+      "format": "รูปแบบ",
+      "generatedOn": "สร้างเมื่อ",
+      "generatedBy": "สร้างโดย",
+      "rows": "จำนวนแถว",
+      "completed": "เสร็จสมบูรณ์",
+      "download": "ดาวน์โหลด",
+      "noTemplates": "ไม่มีแม่แบบรายงาน",
+      "noReports": "ยังไม่มีรายงานที่สร้าง",
+      "all": "ทั้งหมด",
+      "from": "ตั้งแต่",
+      "to": "ถึง",
+      "params": {
+        "period": "งวด",
+        "program": "โปรแกรม",
+        "agent": "ตัวแทน",
+        "branch": "สาขา",
+        "minAchievement": "% ความสำเร็จขั้นต่ำ",
+        "topN": "ผู้มีผลงานสูงสุด"
+      },
+      "readyTitle": "รายงานพร้อมแล้ว",
+      "ready_one": "{{report}}: {{count}} แถว",
+      "ready_other": "{{report}}: {{count}} แถว"
+    }
   },
   "openEntryUnmatching": {
     "title": "เปิดรายการไม่จับคู่",
@@ -1672,7 +2076,10 @@
     "pettyCashBreadcrumb": "เงินสดย่อย",
     "accountCategoryList": "รายการหมวดบัญชี",
     "accountCategoryCodeHeader": "รหัสหมวดบัญชี",
-    "accountCategoryNameHeader": "ชื่อหมวดบัญชี"
+    "accountCategoryNameHeader": "ชื่อหมวดบัญชี",
+    "address": "ที่อยู่",
+    "contact": "ข้อมูลติดต่อ",
+    "accountCategoryDetail": "หมวดบัญชี"
   },
   "automatedRemittance": {
     "pageTitle": "หลักการโอนเงินอัตโนมัติ",
@@ -1744,7 +2151,43 @@
     "addProgram": "เพิ่มโปรแกรม",
     "createIncentiveProgram": "สร้างโปรแกรมสิ่งจูงใจ",
     "editIncentiveProgram": "แก้ไขโปรแกรมสิ่งจูงใจ",
-    "viewIncentiveProgram": "ดูโปรแกรมสิ่งจูงใจ"
+    "viewIncentiveProgram": "ดูโปรแกรมสิ่งจูงใจ",
+    "programCode": "รหัสโปรแกรม",
+    "programName": "ชื่อโปรแกรม",
+    "description": "คำอธิบาย",
+    "programType": "ประเภทโปรแกรม",
+    "applicableTo": "ใช้กับ",
+    "startDate": "วันที่เริ่ม",
+    "endDate": "วันที่สิ้นสุด",
+    "status": "สถานะ",
+    "currency": "สกุลเงิน",
+    "targetMetric": "ตัวชี้วัดเป้าหมาย",
+    "frequency": "ความถี่ในการคำนวณ",
+    "baseTarget": "เป้าหมายพื้นฐาน",
+    "stretchTarget": "เป้าหมายขั้นสูง",
+    "programSection": "โปรแกรม",
+    "targetsSection": "เป้าหมาย",
+    "structureSection": "โครงสร้างค่าตอบแทนจูงใจ",
+    "achievementLevel": "ระดับความสำเร็จ",
+    "incentiveType": "ประเภทค่าตอบแทนจูงใจ",
+    "rateOrAmount": "อัตราหรือจำนวนเงิน",
+    "maxPayout": "การจ่ายสูงสุด",
+    "viewDetails": "ดูรายละเอียด",
+    "edit": "แก้ไข",
+    "close": "ปิด",
+    "cancel": "ยกเลิก",
+    "createProgram": "สร้างโปรแกรม",
+    "saveProgram": "บันทึกโปรแกรม",
+    "activateTitle": "เปิดใช้งานโปรแกรมค่าตอบแทนจูงใจ",
+    "activateMessage": "โปรแกรมด้านล่างจะเปิดใช้งานและรวมอยู่ในการคำนวณค่าตอบแทนจูงใจ",
+    "activateAction": "เปิดใช้งานโปรแกรม",
+    "deactivateTitle": "ปิดใช้งานโปรแกรมค่าตอบแทนจูงใจ",
+    "deactivateMessage": "โปรแกรมด้านล่างจะถูกปิดใช้งาน",
+    "deactivateNote": "การคำนวณที่ยังไม่ได้ดำเนินการจะไม่รวมโปรแกรมนี้ การคำนวณที่อนุมัติแล้วจะไม่เปลี่ยนแปลง",
+    "deactivateAction": "ปิดใช้งานโปรแกรม",
+    "activated": "เปิดใช้งานโปรแกรม {{code}} แล้ว",
+    "deactivated": "ปิดใช้งานโปรแกรม {{code}} แล้ว",
+    "codeWhenBlank": "สร้างอัตโนมัติเมื่อเว้นว่าง"
   },
   "generalMasters": {
     "organization": "องค์กร",
@@ -1965,7 +2408,11 @@
     "insuranceCompanyCode": "รหัสบริษัทประกัน",
     "insuranceCompanyName": "ชื่อบริษัทประกัน",
     "insuranceCompanyDescription": "คำอธิบายบริษัทประกัน",
-    "lineOfBusinessCode": "รหัสสายธุรกิจ"
+    "lineOfBusinessCode": "รหัสสายธุรกิจ",
+    "departmentDetails": "แผนก",
+    "departmentName": "ชื่อแผนก",
+    "branchAndDepartment": "สาขาและแผนก",
+    "userGroupAccess": "สิทธิ์กลุ่มผู้ใช้"
   },
   "agent": {
     "createQuote": "สร้างใบเสนอราคา",
@@ -2255,7 +2702,9 @@
     "completedQuote": "ใบเสนอราคาเสร็จสิ้น",
     "claimRequestRejected": "คำขอเคลมนี้ถูกปฏิเสธแล้ว",
     "claimRejectedViewInfo": "คุณยังสามารถดูข้อมูลทั้งหมดเพื่ออ้างอิงได้",
-    "detail": "รายละเอียด"
+    "detail": "รายละเอียด",
+    "removeCoInsurerMessage": "The insurer is removed from the co-insurance participants of this quotation.",
+    "uploaded": "Uploaded"
   },
   "commission": {
     "addCommissions": "เพิ่มคอมมิชชั่น",
@@ -2288,7 +2737,12 @@
     "minutesAgo": "{{count}} นาทีที่แล้ว",
     "hoursAgo": "{{count}} ชม. ที่แล้ว",
     "daysAgo": "{{count}} วันที่แล้ว",
-    "viewAll": "ดูทั้งหมด"
+    "viewAll": "ดูทั้งหมด",
+    "deleteTitle": "ลบการแจ้งเตือน",
+    "deleteMessage": "การแจ้งเตือนด้านล่างจะถูกลบออกจากรายการของคุณ",
+    "deleteAction": "ลบการแจ้งเตือน",
+    "notification": "การแจ้งเตือน",
+    "received": "ได้รับเมื่อ"
   },
   "dashboard": {
     "goodDay": "สวัสดีครับ/ค่ะ!",
@@ -2440,7 +2894,9 @@
     "searchBy": "ค้นหาตาม",
     "search": "ค้นหา",
     "totalPremium": "เบี้ยประกันรวม",
-    "endorsementNumber": "เลขการอนุมัติ"
+    "endorsementNumber": "เลขการอนุมัติ",
+    "participantRequired": "Select the participant.",
+    "shareRange": "Enter a share between 0 and 100."
   },
   "messages": {
     "success": "ดำเนินการสำเร็จ",
@@ -2581,7 +3037,11 @@
     "unexpectedError": "เกิดข้อผิดพลาดที่ไม่คาดคิด",
     "selectReportCategory": "เลือกหมวดหมู่รายงาน",
     "selectCategoryPlaceholder": "เลือกหมวดหมู่",
-    "reportCategoryHelp": "เลือกหมวดหมู่เพื่อกรองรายงาน หรือปล่อยเป็น \"ทุกหมวดหมู่\" สำหรับรายงานทั้งหมด"
+    "reportCategoryHelp": "เลือกหมวดหมู่เพื่อกรองรายงาน หรือปล่อยเป็น \"ทุกหมวดหมู่\" สำหรับรายงานทั้งหมด",
+    "deleteTitle": "Delete prospect",
+    "deleteMessage": "The prospect is removed from the prospect list.",
+    "deleteNote": "A prospect with an issued policy cannot be deleted.",
+    "deleteAction": "Delete prospect"
   },
   "quotes": {
     "title": "ใบเสนอราคา",
@@ -3035,7 +3495,10 @@
     "availableOnRequest": "มีให้ตามคำขอ",
     "relatedRecords": "บันทึกที่เกี่ยวข้อง",
     "documentPreview": "แสดงตัวอย่างเอกสาร",
-    "noDocumentToPreview": "ไม่มีเอกสารให้แสดงตัวอย่าง"
+    "noDocumentToPreview": "ไม่มีเอกสารให้แสดงตัวอย่าง",
+    "print": "Print",
+    "close": "Close",
+    "download": "Download"
   },
   "uploadPolicy": {
     "title": "ลีด",
@@ -3439,7 +3902,84 @@
     "selectCompany": "เลือกบริษัท",
     "selectProduct": "เลือกผลิตภัณฑ์",
     "insuranceCompany": "บริษัทประกัน",
-    "minPremium": "เบี้ยขั้นต่ำ (₱)"
+    "minPremium": "เบี้ยขั้นต่ำ (₱)",
+    "deleteTitle": "Delete renewal batch",
+    "deleteMessage": "The batch and its policy list are deleted. The policies stay due for renewal.",
+    "deleteNote": "A batch that has sent or queued notices cannot be deleted; cancel it instead.",
+    "deleteAction": "Delete batch",
+    "deleted": "Renewal batch {{id}} deleted",
+    "batchId": "Batch ID",
+    "status": "Status",
+    "totalPolicies": "Total policies",
+    "createdDate": "Created on",
+    "createdBy": "Created by",
+    "actions": "Actions",
+    "viewDetails": "View details",
+    "noBatches": "No batches found",
+    "countOf": "{{count}} of {{total}}",
+    "partiallyCompleted": "Partially completed ({{processed}}/{{total}})",
+    "batchStatus": {
+      "Draft": "Draft",
+      "Scheduled": "Scheduled",
+      "Processing": "Processing",
+      "Completed": "Completed",
+      "Cancelled": "Cancelled"
+    },
+    "minimumPremium": "Minimum premium",
+    "maximumPremium": "Maximum premium",
+    "minPremiumIn": "Min premium ({{currency}})",
+    "maxPremiumIn": "Max premium ({{currency}})",
+    "notice": {
+      "NotSent": "Not sent",
+      "Queued": "Queued",
+      "Sent": "Sent",
+      "Failed": "Failed"
+    },
+    "batchDetails": "Renewal batch",
+    "close": "Close",
+    "retryFailed": "Retry failed notices",
+    "sendNotices": "Send renewal notices",
+    "generateReport": "Download report",
+    "sendingNotices": "Sending renewal notices",
+    "selectedCount": "{{count}} selected",
+    "noPolicies": "No policies found",
+    "policyNumber": "Policy number",
+    "noticeStatus": "Notice status",
+    "noticeSentAt": "Notice sent",
+    "addedDate": "Added on",
+    "premium": "Premium",
+    "enterClientName": "Enter client name",
+    "selectStatus": "Select status",
+    "clear": "Clear",
+    "selectOnePolicy": "Select at least one policy for the batch.",
+    "created": "Renewal batch {{id}} created",
+    "createFailed": "The renewal batch could not be created.",
+    "toast": {
+      "noticesSent": "Notices sent",
+      "noticesSentDetail": "{{count}} of {{total}} renewal notices sent.",
+      "sendingFailed": "Sending failed",
+      "sendingFailedDetail": "The renewal notices could not be sent. Try again.",
+      "processingComplete": "Processing complete",
+      "processingCompleteDetail": "The renewal notices were processed.",
+      "noPoliciesSelected": "No policies selected",
+      "noPoliciesSelectedDetail": "Select at least one policy to send renewal notices.",
+      "queued": "Notices queued",
+      "queuedDetail": "{{count}} renewal notices queued.",
+      "queueFailed": "Notices not queued",
+      "queueFailedDetail": "The renewal notices could not be queued.",
+      "noFailedNotices": "No failed notices",
+      "noFailedNoticesDetail": "There are no failed notices to retry.",
+      "retrying": "Retrying failed notices",
+      "retryingDetail": "Retrying {{count}} failed notices.",
+      "retryFailed": "Retry failed",
+      "retryFailedDetail": "The failed notices could not be retried.",
+      "noBatch": "No batch selected.",
+      "generatingReport": "Preparing report",
+      "generatingReportDetail": "The batch report is being prepared.",
+      "reportFailed": "The report could not be prepared. Try again.",
+      "reportDownloaded": "Report downloaded",
+      "reportDownloadedDetail": "The batch report was downloaded."
+    }
   },
   "shareOption": {
     "email": "อีเมล",
@@ -3474,7 +4014,27 @@
     "emailContentHtml": "เนื้อหาอีเมล (HTML)",
     "suggestedContentEditHint": "คุณแก้ไขหัวเรื่องและเนื้อหาได้ก่อนส่ง",
     "usingSuggestedContent": "ใช้เนื้อหาที่แนะนำ",
-    "sentToRecipient": "Quote sent to {{to}}"
+    "sentToRecipient": "Quote sent to {{to}}",
+    "title": "Share quotation",
+    "emailTitle": "E-mail quotation",
+    "print": "Print",
+    "quotationMissing": "The quotation is not saved yet; its document cannot be prepared.",
+    "quoteMissing": "The quotation is not loaded.",
+    "downloadFailed": "The quotation document could not be prepared.",
+    "emailRequired": "Enter the e-mail address.",
+    "emailInvalid": "Enter a valid e-mail address.",
+    "sendFailed": "The e-mail could not be sent.",
+    "recipientEmail": "Recipient e-mail",
+    "customMessage": "Message",
+    "quotationNumber": "Quotation",
+    "product": "Product",
+    "insuranceCompany": "Insurance company",
+    "totalPremium": "Total premium",
+    "totalSumInsured": "Total sum insured",
+    "sendEmail": "Send e-mail",
+    "whatsAppTitle": "Insurance quotation {{number}}",
+    "whatsAppFireTitle": "Fire and Allied Perils quotation {{number}}",
+    "whatsAppContact": "Contact your account executive for the full details."
   },
   "fireLead": {
     "selectCategory": "เลือกหมวดหมู่",
@@ -3806,7 +4366,25 @@
       "invoiceListCreationFailed": "สร้างรายการบัญชีแล้ว แต่การสร้างรายการใบแจ้งหนี้ล้มเหลว",
       "refundProcessedSuccess": "ประมวลผลการคืนเงินสำเร็จ!"
     },
-    "paymentApprovalTitle": "การอนุมัติการชำระเงิน (Endorsement)"
+    "paymentApprovalTitle": "การอนุมัติการชำระเงิน (Endorsement)",
+    "effectiveDate": "Effective date",
+    "history": "History",
+    "endorsementTypeLabel": "Endorsement type",
+    "premiumEffectLabel": "Premium effect",
+    "premiumEffect": {
+      "additional": "Additional premium due from the client",
+      "return": "Return premium, refunded by accounting",
+      "none": "No premium change"
+    },
+    "cancellationReasonLabel": "Cancellation reason",
+    "remarksLabel": "Remarks",
+    "status": {
+      "Draft": "Draft",
+      "Submitted": "Submitted",
+      "InitiateCancel": "Cancellation initiated",
+      "Completed": "Completed",
+      "Cancelled": "Cancelled"
+    }
   },
   "endorsementSummary": {
     "leads": "ลีด",
@@ -3856,7 +4434,14 @@
     "others": "อื่นๆ",
     "discount": "ส่วนลด",
     "grossPremium": "เบี้ยรวม",
-    "sendToInsuranceCompany": "ส่งไปบริษัทประกัน"
+    "sendToInsuranceCompany": "ส่งไปบริษัทประกัน",
+    "sendTitle": "Send endorsement to insurer",
+    "sendMessage": "The endorsement is sent to the insurance company for processing.",
+    "sendCancellationMessage": "The policy cancellation is sent to the insurance company for processing.",
+    "endorsementNo": "Endorsement no.",
+    "policyNo": "Policy no.",
+    "endorsementType": "Endorsement type",
+    "sendToInsurer": "Send to insurer"
   },
   "coverageDetailsReview": {
     "pageTitle": "ตรวจสอบรายละเอียดความคุ้มครอง",
@@ -3941,7 +4526,12 @@
     "aircon": "แอร์",
     "stereo": "สเตอริโอ",
     "magWheels": "แม็กวีล",
-    "viewDocument": "ดูเอกสาร"
+    "viewDocument": "ดูเอกสาร",
+    "cancel": "Cancel",
+    "createPlacementSlip": "Create placement slip",
+    "issuePolicy": "Issue policy",
+    "quotation": "Quotation",
+    "insurer": "Insurer"
   },
   "coverageDetailsCard": {
     "renewalDetails": "รายละเอียดการต่ออายุ",
@@ -4031,7 +4621,11 @@
     "afterDays": "{{count}} วัน",
     "leadName": "ชื่อลีด",
     "unknownLead": "ไม่ทราบลีด",
-    "editQuotation": "แก้ไขใบเสนอราคา"
+    "editQuotation": "แก้ไขใบเสนอราคา",
+    "convertTitle": "Convert quotation to policy",
+    "convertMessage": "A policy is started from this quotation; its customer details are entered next.",
+    "insurer": "Insurer",
+    "product": "Product"
   },
   "quotationPage": {
     "title": "ใบเสนอราคา",
@@ -4256,7 +4850,8 @@
     "taxInfoNumber": "เลขประจำตัวผู้เสียภาษี:",
     "createdDate": "วันที่สร้าง:",
     "lastUpdated": "อัปเดตล่าสุด:",
-    "numberOfQuotes": "จำนวนใบเสนอราคา:"
+    "numberOfQuotes": "จำนวนใบเสนอราคา:",
+    "history": "History"
   },
   "leadCreation": {
     "source": "แหล่งที่มา",
@@ -4761,7 +5356,21 @@
     "yesterday": "เมื่อวาน",
     "today": "วันนี้",
     "hoursAgo": "ชั่วโมงที่แล้ว",
-    "justNow": "เมื่อสักครู่"
+    "justNow": "เมื่อสักครู่",
+    "statusValue": {
+      "Draft": "Draft",
+      "PendingCustomer": "Pending customer",
+      "CustomerAccepted": "Customer accepted",
+      "SubmittedToInsurer": "Submitted to insurer",
+      "Approved": "Approved",
+      "Rejected": "Rejected"
+    },
+    "priorityValue": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "riskScoreOf": "{{score}} of 100"
   },
   "policyTable": {
     "search": "ค้นหา",
@@ -4794,7 +5403,11 @@
     "productDescription": "รายละเอียดผลิตภัณฑ์",
     "payment": "การชำระเงิน",
     "actions": "การดำเนินการ",
-    "proceed": "ดำเนินการต่อ"
+    "proceed": "ดำเนินการต่อ",
+    "cancel": "Cancel",
+    "insured": "Insured",
+    "startEndorsement": "Start endorsement",
+    "endorsementTypes": "Endorsement types"
   },
   "collectionsList": {
     "view": "ดู",
@@ -4808,7 +5421,15 @@
     "overdue": "เกินกำหนด",
     "partiallyPaid": "ชำระบางส่วน",
     "committed": "ยืนยันแล้ว",
-    "escalated": "ยกระดับ"
+    "escalated": "ยกระดับ",
+    "remindersTitle": "ส่งการแจ้งเตือนการชำระเงิน",
+    "remindersMessage": "ระบบจะส่งอีเมลแจ้งเตือนการชำระเงินถึงลูกค้าทุกรายที่มีเบี้ยครบกำหนดหรือเกินกำหนด",
+    "remindersNote": "การแจ้งเตือนแต่ละรายการจะถูกบันทึกในประวัติการติดตามของรายการเรียกเก็บ",
+    "sendReminders": "ส่งการแจ้งเตือน",
+    "remindersFailed": "ไม่สามารถส่งการแจ้งเตือนการชำระเงินได้",
+    "remindersSentTitle": "ส่งการแจ้งเตือนแล้ว",
+    "remindersSent": "ส่งการแจ้งเตือนการชำระเงินแล้ว",
+    "importOpenItems": "นำเข้ารายการค้างชำระ"
   },
   "documentLayouts": {
     "master": "มาสเตอร์",
@@ -5140,10 +5761,87 @@
   },
   "opsAcc": {
     "masters": {
-      "costCentres": {
-        "title": "ศูนย์ต้นทุน",
-        "section": "การเงิน",
-        "intro": "ศูนย์ต้นทุนที่ระบุในรายการบัญชีและในไฟล์บัญชีแยกประเภทสำหรับ SAP ศูนย์ต้นทุนที่กำหนดเป็นค่าเริ่มต้นจะใช้กับทุกรายการที่ไม่ได้ระบุ (TISPH: 900901 Toyota Insurance Services)"
+      "allOf": "{{name}}: ทั้งหมด",
+      "leadSources": {
+        "title": "แหล่งที่มาของลีด",
+        "section": "การจัดการประกันภัย",
+        "intro": "แหล่งที่มาของผู้มุ่งหวัง: ช่องแหล่งที่มาในแบบฟอร์มและการอัปโหลดลีด และเงื่อนไขการมอบหมายลีด"
+      },
+      "reasonCodes": {
+        "title": "รหัสเหตุผล",
+        "section": "การจัดการประกันภัย",
+        "intro": "รหัสเหตุผลของการตัดสินใจ แยกตามการใช้งาน: ใบเสนอราคา สินไหม การต่ออายุ การโอนย้ายผู้มุ่งหวัง และการตัดสินใจทางบัญชี เหตุผลการยกเลิกและการตัดหนี้สูญมีข้อมูลหลักของตนเอง"
+      }
+    },
+    "confirmations": {
+      "activity": "Activity",
+      "amounts": "Amounts",
+      "lines": "Lines",
+      "journal": "Journal",
+      "preparedBy": "Prepared by",
+      "approvedBy": "Approved by",
+      "approvedAt": "Approved on",
+      "rejectedBecause": "Rejected: {{reason}}",
+      "cancelledBecause": "Cancelled: {{reason}}",
+      "keepDisposal": "Keep disposal",
+      "invoice": {
+        "header": "Supplier invoice",
+        "submitTitle": "Submit supplier invoice {{number}}",
+        "submitMessage": "The invoice goes to a second user for approval.",
+        "submit": "Submit for approval",
+        "approveTitle": "Approve supplier invoice {{number}}",
+        "approveMessage": "The AP journal is posted and the invoice becomes payable.",
+        "approve": "Approve and post",
+        "rejectTitle": "Reject supplier invoice {{number}}",
+        "rejectMessage": "The invoice returns to the preparer with your reason.",
+        "reject": "Reject invoice",
+        "cancelTitle": "Cancel supplier invoice {{number}}",
+        "cancelMessage": "The invoice is cancelled. A posted AP journal is reversed.",
+        "cancel": "Cancel invoice",
+        "keep": "Keep invoice"
+      },
+      "payment": {
+        "cancelTitle": "Cancel supplier payment {{number}}",
+        "cancelMessage": "The payment journal is reversed and the invoices it paid are open again.",
+        "cancel": "Cancel payment",
+        "keep": "Keep payment"
+      },
+      "pdc": {
+        "clearTitle": "Mark cheque {{number}} as cleared",
+        "clearMessage": "The bank has honoured the cheque.",
+        "clear": "Mark as cleared",
+        "depositMessage": "An official receipt is created and posted to the bank account below.",
+        "deposit": "Deposit cheque",
+        "bounce": "Mark as bounced",
+        "returnTitle": "Return cheque {{number}} to the client",
+        "returnMessage": "The cheque leaves the register as returned. The bill stays open.",
+        "return": "Return cheque",
+        "cancelTitle": "Cancel registration of cheque {{number}}",
+        "cancelMessage": "The cheque is removed from the register as cancelled.",
+        "cancel": "Cancel registration",
+        "keep": "Keep cheque"
+      },
+      "asset": {
+        "header": "Fixed asset",
+        "details": "Asset details",
+        "accounts": "GL accounts",
+        "assetAccount": "Asset account",
+        "accumulatedAccount": "Accumulated depreciation account",
+        "expenseAccount": "Depreciation expense account",
+        "schedule": "Depreciation schedule",
+        "lastPeriod": "Depreciated to",
+        "disposedOn": "Disposed on"
+      },
+      "depreciation": {
+        "title": "Post depreciation for {{period}}",
+        "message": "One depreciation journal per asset class is posted, dated the period end.",
+        "post": "Post depreciation"
+      },
+      "master": {
+        "deactivateTitle": "Deactivate {{name}} record",
+        "deactivateMessage": "The record is no longer offered for new transactions. Existing transactions keep it.",
+        "activateTitle": "Activate {{name}} record",
+        "activateMessage": "The record is offered again for new transactions."
       }
     }
   },
@@ -5154,7 +5852,13 @@
       "listSubtitle": "Non-package risks presented to several insurers: their offers and the comparison that leads to the Quotation Slip.",
       "new": "New Request for Quotation",
       "newTitle": "New Request for Quotation (Broker Slip)",
-      "newSubtitle": "Choose or add the prospect, describe the risk and choose the insurers to approach; each receives a request for quotation."
+      "newSubtitle": "Choose or add the prospect, describe the risk and choose the insurers to approach; each receives a request for quotation.",
+      "tabResponsesTitle": "Market responses",
+      "cancelTitle": "Cancel request for quotation",
+      "cancelMessage": "The request is withdrawn from the insurers. No quotation slip can be prepared from it.",
+      "closeTitleShort": "Close request for quotation",
+      "closeMessage": "The request is closed as not taken up. The insurers' offers stay on record.",
+      "offers": "Offers received"
     },
     "customer": {
       "lead": "Prospect",
@@ -5187,7 +5891,8 @@
       "acknowledge": "บันทึกการรับทราบ",
       "uploadEpolicy": "อัปโหลดกรมธรรม์อิเล็กทรอนิกส์",
       "checkAgainstSlip": "ตรวจสอบกับใบจัดวาง",
-      "book": "บันทึกกรมธรรม์ (บริษัทประกันออกแล้ว)"
+      "book": "บันทึกกรมธรรม์ (บริษัทประกันออกแล้ว)",
+      "printSlip": "Print slip"
     },
     "messages": {
       "acknowledged": "บันทึกการรับทราบของบริษัทประกันแล้ว",
@@ -5198,7 +5903,8 @@
     "acknowledge": {
       "title": "การรับทราบของบริษัทประกัน",
       "note": "บันทึกว่าบริษัทประกันยืนยันการรับคำสั่งจัดวางประกันแล้ว",
-      "reference": "เลขอ้างอิงการรับทราบของบริษัทประกัน"
+      "reference": "เลขอ้างอิงการรับทราบของบริษัทประกัน",
+      "insurers": "Insurers"
     },
     "epolicy": {
       "title": "ได้รับกรมธรรม์อิเล็กทรอนิกส์ - {{number}}",
@@ -5283,12 +5989,14 @@
       "confirm": "ยืนยันการตรวจสอบ",
       "acceptDifferences": "ยอมรับผลต่าง",
       "returnToInsurer": "ส่งคืนบริษัทประกัน",
-      "decidedBy": "ตรวจสอบโดย"
+      "decidedBy": "ตรวจสอบโดย",
+      "differences": "Differences"
     },
     "book": {
       "title": "บันทึกกรมธรรม์ (บริษัทประกันออกแล้ว)",
       "note": "บริษัทประกันออกกรมธรรม์อิเล็กทรอนิกส์ {{number}} และตรวจสอบกับใบจัดวางแล้ว การบันทึกจะสร้างกรมธรรม์ ใบแจ้งหนี้หรือค่าคอมมิชชั่นแบบเรียกเก็บตรง รายการบัญชี และค่าคอมมิชชั่น สิ้นสุดใบรับรองความคุ้มครองชั่วคราว และส่งตารางกรมธรรม์ทางอีเมลถึงลูกค้า",
-      "verifyNote": "ข้อมูลบัตรประจำตัวด้านล่างมาจากข้อมูลลูกค้าและใบเสนอราคา กรุณาตรวจสอบก่อนบันทึก"
+      "verifyNote": "ข้อมูลบัตรประจำตัวด้านล่างมาจากข้อมูลลูกค้าและใบเสนอราคา กรุณาตรวจสอบก่อนบันทึก",
+      "consequence": "Booking creates the policy, the bill or direct-bill commission, the journal and the commission, ends the cover notes and e-mails the policy schedule to the client."
     },
     "recordEpolicy": {
       "title": "บันทึกกรมธรรม์อิเล็กทรอนิกส์",
@@ -5305,10 +6013,131 @@
       "placementFile": "ไฟล์ใบจัดวาง"
     },
     "sections": {
-      "epolicy": "กรมธรรม์อิเล็กทรอนิกส์"
+      "epolicy": "กรมธรรม์อิเล็กทรอนิกส์",
+      "history": "History"
     },
     "validation": {
       "ltoDocument": "แนบเอกสาร LTO หรือใบเสร็จรับเงิน"
+    },
+    "decline": {
+      "message": "The insurer's decline is recorded on the slip. Its share has to be placed with another insurer.",
+      "insurer": "Insurer",
+      "share": "Share"
+    },
+    "cancel": {
+      "message": "The placement slip is cancelled. The insurers are not told automatically."
+    }
+  },
+  "financialStatements": {
+    "title": "งบการเงิน",
+    "help": "งบการเงินจากรายการบัญชีที่ผ่านรายการแล้ว ตามงวดบัญชีหรือช่วงวันที่ เลือกบัญชีเพื่อดูรายการเคลื่อนไหว",
+    "statement": {
+      "income-statement": "งบกำไรขาดทุน",
+      "balance-sheet": "งบแสดงฐานะการเงิน",
+      "trial-balance": "งบทดลอง"
+    },
+    "fiscalYear": "ปีบัญชี",
+    "period": "งวด",
+    "view": "มุมมอง",
+    "views": {
+      "month": "รายเดือน",
+      "quarter": "รายไตรมาส",
+      "ytd": "ตั้งแต่ต้นปี",
+      "custom": "กำหนดช่วงเอง",
+      "periodEnd": "ณ สิ้นงวด",
+      "customDate": "กำหนดวันที่เอง"
+    },
+    "from": "ตั้งแต่",
+    "to": "ถึง",
+    "asOf": "ณ วันที่",
+    "label": {
+      "quarter": "ไตรมาส {{quarter}}, {{fiscalYear}}",
+      "ytd": "ตั้งแต่ต้นปี, {{fiscalYear}}",
+      "asOf": "ณ วันที่ {{date}}"
+    },
+    "amountsIn": "จำนวนเงินเป็น {{currency}}",
+    "refresh": "รีเฟรช",
+    "export": "ส่งออก",
+    "excel": "ไฟล์ Excel",
+    "pdf": "ไฟล์ PDF",
+    "print": "พิมพ์",
+    "account": "บัญชี",
+    "measure": {
+      "currentPeriod": "งวดนี้",
+      "yearToDate": "ตั้งแต่ต้นปี",
+      "priorPeriod": "งวดเดียวกันปีก่อน",
+      "priorYearToDate": "ตั้งแต่ต้นปีก่อน",
+      "balance": "ณ วันที่",
+      "priorYearEnd": "สิ้นปีก่อน"
+    },
+    "tb": {
+      "opening": "ยอดยกมา",
+      "movement": "ระหว่างงวด",
+      "closing": "ยอดยกไป",
+      "debit": "เดบิต",
+      "credit": "เครดิต"
+    },
+    "section": {
+      "income": "รายได้",
+      "expense": "ค่าใช้จ่าย",
+      "asset": "สินทรัพย์",
+      "liability": "หนี้สิน",
+      "equity": "ส่วนของผู้ถือหุ้น"
+    },
+    "total": "รวม{{label}}",
+    "result": {
+      "netIncome": "กำไร (ขาดทุน) สุทธิ",
+      "liabilitiesAndEquity": "รวมหนี้สินและส่วนของผู้ถือหุ้น",
+      "total": "รวม"
+    },
+    "earnings": {
+      "CYE": "กำไรปีปัจจุบัน",
+      "PYE": "กำไรสะสมปีก่อนที่ยังไม่ปิดบัญชี"
+    },
+    "noLines": "ไม่มีรายการในงวดนี้",
+    "cards": {
+      "totalIncome": "รายได้รวม",
+      "totalExpense": "ค่าใช้จ่ายรวม",
+      "netIncome": "กำไรสุทธิ",
+      "netLoss": "ขาดทุนสุทธิ",
+      "netIncomeYtd": "กำไรสุทธิตั้งแต่ต้นปี",
+      "netLossYtd": "ขาดทุนสุทธิตั้งแต่ต้นปี",
+      "totalAssets": "สินทรัพย์รวม",
+      "totalLiabilities": "หนี้สินรวม",
+      "totalEquity": "ส่วนของผู้ถือหุ้นรวม",
+      "withEarnings": "รวมกำไรปีปัจจุบัน",
+      "balanceCheck": "ตรวจสอบความสมดุล",
+      "totalDebit": "เดบิตรวม",
+      "totalCredit": "เครดิตรวม",
+      "difference": "ผลต่าง",
+      "closingAt": "ยอดคงเหลือ ณ {{date}}"
+    },
+    "status": {
+      "balanced": "สมดุล",
+      "outOfBalance": "ไม่สมดุล"
+    },
+    "errors": {
+      "required": "กรุณาระบุวันที่",
+      "range": "วันที่สิ้นสุดอยู่ก่อนวันที่เริ่มต้น"
+    },
+    "ledger": {
+      "title": "บัญชีแยกประเภท",
+      "account": "บัญชี",
+      "period": "งวด",
+      "opening": "ยอดยกมา",
+      "debits": "เดบิต",
+      "credits": "เครดิต",
+      "closing": "ยอดยกไป",
+      "date": "วันที่",
+      "journal": "สมุดรายวัน",
+      "description": "รายละเอียด",
+      "source": "ที่มา",
+      "debit": "เดบิต",
+      "credit": "เครดิต",
+      "balance": "ยอดคงเหลือ",
+      "dr": "Dr",
+      "cr": "Cr",
+      "none": "ไม่มีรายการในงวดนี้"
     }
   },
   "salesMarketing": {
@@ -5361,6 +6190,178 @@
     "rejectReasonCodeNone": "ไม่มีรหัสเหตุผล (พิมพ์เหตุผล)",
     "rejectNote": "หมายเหตุ",
     "rejectNoteRequired": "เหตุผลนี้ต้องมีหมายเหตุ: กรอกรายละเอียด"
+  },
+  "yearEndClose": {
+    "help": "ปิดปีบัญชีในห้าขั้นตอน: เงื่อนไขก่อนปิด รายการปรับปรุง รายการปิดบัญชี การปิดปีโดยผู้จัดการฝ่ายบัญชี และยอดยกมาของปีถัดไป ผู้ที่เริ่มการปิดปีไม่สามารถปิดปีเองได้",
+    "stepsLabel": "ขั้นตอนการปิดปีบัญชี",
+    "step": {
+      "prerequisites": "เงื่อนไขก่อนปิด",
+      "adjustments": "รายการปรับปรุงสิ้นปี",
+      "closing": "รายการปิดบัญชี",
+      "approval": "ปิดปีบัญชี",
+      "opening": "ยอดยกมา"
+    },
+    "summary": "สรุปการปิดปีบัญชี",
+    "run": "รอบการปิด",
+    "runChecks": "ตรวจสอบอีกครั้ง",
+    "remark": "หมายเหตุ",
+    "empty": "ยังไม่ได้เริ่มการปิดปีบัญชี {{fiscalYear}} ({{from}} – {{to}})",
+    "start": "เริ่มการปิดปีบัญชี",
+    "previous": "ขั้นตอนก่อนหน้า",
+    "next": "ขั้นตอนถัดไป",
+    "none": "ไม่มี",
+    "nil": "เป็นศูนย์",
+    "more": "และอีก {{count}} รายการ",
+    "more_one": "และอีก {{count}} รายการ",
+    "more_other": "และอีก {{count}} รายการ",
+    "total": "รวม",
+    "accountTypeLabel": "ประเภท",
+    "accountType": {
+      "income": "รายได้",
+      "expense": "ค่าใช้จ่าย",
+      "asset": "สินทรัพย์",
+      "liability": "หนี้สิน",
+      "equity": "ส่วนของเจ้าของ"
+    },
+    "check": {
+      "periods_closed": {
+        "label": "งวด 1 ถึง 12 ปิดแล้ว",
+        "labelSoft": "งวด 1 ถึง 12 ปิดชั่วคราวหรือปิดแล้ว",
+        "count": "ปิดแล้ว {{closed}} จาก {{total}} งวด",
+        "open": "ยังไม่ปิด: {{list}}"
+      },
+      "unposted_journals": {
+        "label": "ไม่มีสมุดรายวันที่ยังไม่ผ่านรายการในปี",
+        "count": "สมุดรายวันยังไม่ผ่านรายการ {{count}} รายการ",
+        "count_one": "สมุดรายวันยังไม่ผ่านรายการ {{count}} รายการ",
+        "count_other": "สมุดรายวันยังไม่ผ่านรายการ {{count}} รายการ"
+      },
+      "suspense_balance": {
+        "label": "บัญชีพักเป็นศูนย์",
+        "notSet": "ยังไม่ได้กำหนดบัญชีพัก"
+      },
+      "trial_balance": {
+        "label": "งบทดลองสมดุล ณ วันสิ้นปี",
+        "result": "เดบิต {{debit}} เครดิต {{credit}}",
+        "difference": "ผลต่าง {{amount}}"
+      },
+      "closing_accounts": {
+        "label": "กำหนดบัญชีสำหรับการปิดบัญชีแล้ว",
+        "result": "กำไร (ขาดทุน) ปีปัจจุบัน {{currentYearPl}}; กำไรสะสม {{retainedEarnings}}",
+        "failed": "บัญชีกำไร (ขาดทุน) ปีปัจจุบันและกำไรสะสมต้องเป็นบัญชีส่วนของเจ้าของที่ใช้งานอยู่"
+      },
+      "previous_year": {
+        "label": "ปิดปีบัญชีก่อนหน้าแล้ว",
+        "first": "ปีบัญชีแรก",
+        "result": "{{fiscalYear}}: {{status}}"
+      },
+      "adjustment_period": {
+        "label": "งวดปรับปรุงเปิดอยู่",
+        "missing": "ไม่มีงวดปรับปรุง {{period}}"
+      },
+      "adjustments_posted": {
+        "label": "รายการปรับปรุงผ่านรายการแล้ว",
+        "none": "ผ่านรายการครบแล้ว",
+        "count": "รออนุมัติ {{count}} รายการ",
+        "count_one": "รออนุมัติ {{count}} รายการ",
+        "count_other": "รออนุมัติ {{count}} รายการ"
+      }
+    },
+    "link": {
+      "periods": "การจัดการงวดบัญชี",
+      "journals": "ใบสำคัญรายวัน",
+      "accountingQuery": "สอบถามข้อมูลบัญชี",
+      "statements": "งบการเงิน",
+      "openYear": "เปิด {{fiscalYear}}",
+      "configure": "ตั้งค่า"
+    },
+    "adjustments": {
+      "title": "รายการปรับปรุง",
+      "empty": "ไม่มีรายการปรับปรุง",
+      "preparedBy": "ผู้จัดทำ",
+      "open": "เปิดใบสำคัญรายวัน",
+      "add": "เพิ่มรายการปรับปรุง"
+    },
+    "closing": {
+      "journalDate": "วันที่รายการ",
+      "totalIncome": "รายได้รวม",
+      "totalExpense": "ค่าใช้จ่ายรวม",
+      "journals": "รายการปิดบัญชี",
+      "toCurrentYear": "ปิดรายได้และค่าใช้จ่ายเข้ากำไร (ขาดทุน) ปีปัจจุบัน",
+      "toRetainedEarnings": "โอนกำไร (ขาดทุน) ปีปัจจุบันเข้ากำไรสะสม",
+      "empty": "ไม่มียอดคงเหลือของรายได้หรือค่าใช้จ่าย",
+      "netToCurrentYear": "ผลการดำเนินงานสุทธิ"
+    },
+    "approval": {
+      "preparedBy": "ผู้จัดทำ",
+      "approver": "ผู้อนุมัติ",
+      "accountingManager": "ผู้จัดการฝ่ายบัญชี",
+      "checks": "การตรวจสอบ",
+      "close": "ปิดปีบัญชี",
+      "closedBy": "ปิดโดย",
+      "remark": "หมายเหตุ"
+    },
+    "reason": {
+      "closePermission": "การปิดปีต้องทำโดยผู้จัดการฝ่ายบัญชี",
+      "closeMaker": "คุณเป็นผู้เริ่มการปิดปีนี้ ผู้จัดการฝ่ายบัญชีคนอื่นต้องเป็นผู้ปิดปี",
+      "closeChecks": "แก้ไขรายการตรวจสอบที่ไม่ผ่านในขั้นตอนที่ 1 และ 2 ก่อน",
+      "nextPeriod": "ทำไม่ได้แล้ว: งวด {{period}} ของ {{fiscalYear}} ไม่ได้เปิดอยู่",
+      "nextYear": "ทำไม่ได้แล้ว: {{fiscalYear}} ปิดแล้ว",
+      "reversePermission": "การอนุมัติการยกเลิกการปิดปีต้องทำโดยผู้จัดการฝ่ายบัญชี",
+      "reverseMaker": "คุณเป็นผู้ขอยกเลิกการปิดปีนี้ ผู้จัดการฝ่ายบัญชีคนอื่นต้องเป็นผู้อนุมัติ"
+    },
+    "reversal": {
+      "pending": "ขอยกเลิกการปิดปีแล้ว",
+      "requestedBy": "ผู้ขอ",
+      "reason": "เหตุผล",
+      "approve": "ยกเลิกการปิดปี",
+      "withdraw": "ถอนคำขอ",
+      "request": "ขอยกเลิกการปิดปี"
+    },
+    "opening": {
+      "accounts": "จำนวนบัญชีที่ยกไป",
+      "totalDebit": "เดบิตรวม",
+      "totalCredit": "เครดิตรวม",
+      "empty": "ไม่มียอดคงเหลือในงบแสดงฐานะการเงิน"
+    },
+    "activity": {
+      "title": "ประวัติการดำเนินการ"
+    },
+    "action": {
+      "start": "เริ่มการปิดปีบัญชี",
+      "check": "ตรวจสอบ",
+      "close": "ปิดปีบัญชี",
+      "reverse-request": "ขอยกเลิกการปิดปี",
+      "reverse-withdraw": "ถอนคำขอยกเลิกการปิดปี",
+      "reverse": "ยกเลิกการปิดปี",
+      "cancel": "ยกเลิกรอบการปิด"
+    },
+    "dialog": {
+      "closeMessage": "ผ่านรายการปิดบัญชีในงวด {{period}} ลงวันที่ {{date}} และยกยอดคงเหลือไปยัง {{fiscalYear}}",
+      "reverseMessage": "ยกเลิกการปิดปี {{fiscalYear}} ตามเหตุผลของคำขอ",
+      "withdrawMessage": "ถอนคำขอยกเลิกการปิดปี {{fiscalYear}} ยังคงปิดอยู่",
+      "cancelMessage": "ยกเลิกรอบการปิด {{runNumber}}",
+      "closeTitle": "ปิดปีบัญชี {{fiscalYear}}",
+      "closeConsequence": "งวดบัญชีของ {{fiscalYear}} จะถูกล็อก และไม่สามารถผ่านรายการได้จนกว่าจะยกเลิกการปิดปี",
+      "requestTitle": "ขอยกเลิกการปิดปี {{fiscalYear}}",
+      "requestConsequence": "ผู้จัดการฝ่ายบัญชีคนอื่นเป็นผู้อนุมัติการยกเลิก",
+      "reverseTitle": "ยกเลิกการปิดปี {{fiscalYear}}",
+      "reverseConsequence": "รายการปิดบัญชีจะถูกกลับรายการ ยอดยกมาของ {{fiscalYear}} จะถูกลบ และงวดบัญชีจะถูกปลดล็อก",
+      "withdrawTitle": "ถอนคำขอยกเลิกการปิดปี",
+      "keepRequest": "เก็บคำขอไว้",
+      "cancelTitle": "ยกเลิกรอบการปิด {{runNumber}}",
+      "cancelConsequence": "{{fiscalYear}} จะกลับเป็นสถานะเปิด",
+      "keepRun": "เก็บรอบการปิดไว้",
+      "adjustmentTitle": "รายการปรับปรุง {{fiscalYear}}",
+      "adjustmentConsequence": "ผ่านรายการในงวดปรับปรุงหลังจากผู้ใช้คนที่สองอนุมัติ",
+      "submitAdjustment": "ส่งเพื่ออนุมัติ"
+    },
+    "toast": {
+      "checked": "ตรวจสอบแล้ว",
+      "reversalRequested": "ส่งคำขอยกเลิกการปิดปีแล้ว รอการอนุมัติ",
+      "reversalWithdrawn": "ถอนคำขอยกเลิกการปิดปีแล้ว",
+      "cancelled": "ยกเลิกรอบการปิดปีบัญชีแล้ว"
+    }
   },
   "pageHeader": {
     "help": "เกี่ยวกับหน้านี้",
@@ -5423,22 +6424,1129 @@
       "confirmation_difference": "ผลต่างจากการยืนยันของบริษัทประกัน",
       "payment_duplicate_override": "การชำระเงินที่อาจซ้ำ",
       "billing_reject": "การปฏิเสธใบแจ้งหนี้ถึงบริษัทประกัน",
-      "billing_cancel": "การยกเลิกใบแจ้งหนี้ถึงบริษัทประกัน"
+      "billing_cancel": "การยกเลิกใบแจ้งหนี้ถึงบริษัทประกัน",
+      "sales_invoice_cancel": "การยกเลิกใบกำกับภาษีขาย",
+      "invoice_payment_cancel": "การยกเลิกการรับชำระตามใบกำกับภาษี"
     }
   },
-  "opsAcc": {
-    "masters": {
-      "allOf": "{{name}}: ทั้งหมด",
-      "leadSources": {
-        "title": "แหล่งที่มาของลีด",
-        "section": "การจัดการประกันภัย",
-        "intro": "แหล่งที่มาของผู้มุ่งหวัง: ช่องแหล่งที่มาในแบบฟอร์มและการอัปโหลดลีด และเงื่อนไขการมอบหมายลีด"
+  "birTax": {
+    "casHelp": "ชุดเอกสารจดทะเบียนระบบบัญชีคอมพิวเตอร์ สมุดบัญชีพิมพ์รายเดือนโดยเลขหน้าต่อเนื่องตลอดปี และเอกสารพิมพ์ฉบับที่อนุมัติ",
+    "pageRange": "{{first}} ถึง {{last}}",
+    "pdf": "PDF",
+    "casReadiness": {
+      "count": "ครบ {{complete}} จาก {{total}}",
+      "complete": "ครบถ้วน",
+      "missing": "ยังไม่มี",
+      "openCompany": "เปิดข้อมูลบริษัท",
+      "openDocument": "เปิดเอกสาร",
+      "goToBooks": "ไปที่สมุดบัญชี",
+      "enter": {
+        "permit": "บันทึกใบอนุญาต",
+        "atp": "บันทึก ATP",
+        "custodian": "ระบุผู้ดูแล",
+        "contact": "ระบุผู้ติดต่อ"
       },
-      "reasonCodes": {
-        "title": "รหัสเหตุผล",
-        "section": "การจัดการประกันภัย",
-        "intro": "รหัสเหตุผลของการตัดสินใจ แยกตามการใช้งาน: ใบเสนอราคา สินไหม การต่ออายุ การโอนย้ายผู้มุ่งหวัง และการตัดสินใจทางบัญชี เหตุผลการยกเลิกและการตัดหนี้สูญมีข้อมูลหลักของตนเอง"
+      "item": {
+        "company": "ชื่อผู้เสียภาษี TIN และที่อยู่จดทะเบียน",
+        "rdo": "รหัส RDO",
+        "permit": "เลขที่และวันที่ใบอนุญาตหรือหนังสือรับรอง CAS",
+        "atp": "ATP หรือหนังสือรับรองของใบกำกับ",
+        "custodian": "ผู้ดูแลการสำรองข้อมูล",
+        "contact": "ผู้ติดต่อของระบบ",
+        "systemDescription": "คำอธิบายระบบได้รับอนุมัติ",
+        "backupProcedure": "ขั้นตอนการสำรองข้อมูลได้รับอนุมัติ",
+        "books": "พิมพ์สมุดบัญชีอย่างน้อยหนึ่งครั้ง"
       }
+    },
+    "casReg": {
+      "title": {
+        "permit": "ใบอนุญาต CAS",
+        "atp": "ATP หรือหนังสือรับรองของใบกำกับ",
+        "custodian": "ผู้ดูแลการสำรองข้อมูล",
+        "contact": "ผู้ติดต่อของระบบ"
+      },
+      "number": {
+        "permit": "เลขที่ใบอนุญาตหรือหนังสือรับรอง",
+        "atp": "เลขที่ ATP หรือหนังสือรับรอง"
+      },
+      "date": {
+        "permit": "วันที่ออก",
+        "atp": "วันที่ออก"
+      },
+      "user": {
+        "custodian": "ผู้ดูแล",
+        "contact": "ผู้ติดต่อ"
+      },
+      "position": "ตำแหน่ง",
+      "chooseUser": "เลือกผู้ใช้",
+      "save": "บันทึก",
+      "required": "จำเป็นต้องระบุ"
+    },
+    "casDoc": {
+      "documents": "เอกสาร",
+      "document": "เอกสาร",
+      "title": {
+        "system_description": "คำอธิบายระบบและการควบคุม",
+        "backup_procedure": "ขั้นตอนการสำรองและกู้คืนข้อมูล"
+      },
+      "approvedVersion": "ฉบับที่อนุมัติ",
+      "approvedAt": "วันที่อนุมัติ",
+      "approvedBy": "อนุมัติโดย",
+      "inProgress": "ระหว่างดำเนินการ",
+      "content": "เนื้อหา",
+      "versions": "ฉบับ",
+      "activity": "กิจกรรม",
+      "version": "ฉบับที่",
+      "preparedBy": "จัดทำโดย",
+      "updatedAt": "แก้ไขล่าสุด",
+      "submittedBy": "ส่งโดย",
+      "submittedAt": "วันที่ส่ง",
+      "changeNote": "บันทึกการเปลี่ยนแปลง",
+      "returnedWith": "ส่งคืนพร้อมหมายเหตุ",
+      "standardText": "ข้อความมาตรฐาน (ยังไม่อนุมัติ)",
+      "remarks": "หมายเหตุ",
+      "heading": "หัวข้อส่วน",
+      "text": "ข้อความของส่วน",
+      "moveUp": "เลื่อนขึ้น",
+      "moveDown": "เลื่อนลง",
+      "removeSection": "ลบส่วน",
+      "insertField": "แทรกข้อมูล",
+      "addSection": "เพิ่มส่วน",
+      "liveFields": "ข้อมูลจากระบบ",
+      "edit": "แก้ไขเอกสาร",
+      "saveDraft": "บันทึกฉบับร่าง",
+      "discard": "ยกเลิกฉบับร่าง",
+      "printDraft": "พิมพ์ฉบับร่าง",
+      "printVersion": "พิมพ์ฉบับที่ {{version}}",
+      "compare": "เปรียบเทียบฉบับ",
+      "selectedCount": "เลือก {{count}} จาก 2",
+      "noVersions": "ยังไม่มีฉบับ",
+      "compareHead": "ฉบับที่ {{from}} เทียบกับฉบับที่ {{to}}",
+      "compareSummary": "เปลี่ยน {{changed}} เพิ่ม {{added}} ลบ {{removed}}",
+      "change": {
+        "added": "เพิ่ม",
+        "removed": "ลบ",
+        "changed": "เปลี่ยน",
+        "same": "ไม่เปลี่ยน"
+      },
+      "line": {
+        "added": "บรรทัดที่เพิ่ม",
+        "removed": "บรรทัดที่ลบ"
+      },
+      "submitTitle": "ส่งขออนุมัติ",
+      "approveTitle": "อนุมัติฉบับเอกสาร",
+      "approveMessage": "ฉบับที่ {{version}} จะเป็นเอกสารที่อนุมัติ และฉบับที่อนุมัติก่อนหน้าจะถูกแทนที่",
+      "approveVersion": "อนุมัติฉบับ",
+      "rejectTitle": "ส่งคืนผู้จัดทำ",
+      "rejectMessage": "ฉบับที่ {{version}} จะกลับไปเป็นฉบับร่างของผู้จัดทำ",
+      "returnToPreparer": "ส่งคืนผู้จัดทำ",
+      "discardTitle": "ยกเลิกฉบับร่าง",
+      "discardMessage": "ฉบับร่างที่ {{version}} จะถูกยกเลิก และฉบับที่อนุมัติยังคงใช้อยู่",
+      "unsavedTitle": "มีการแก้ไขที่ยังไม่บันทึก",
+      "unsavedMessage": "การแก้ไขฉบับร่างยังไม่ได้บันทึก",
+      "closeWithoutSaving": "ปิดโดยไม่บันทึก"
+    },
+    "datFilesHelp": "สร้างไฟล์จากรายงาน QAP, SAWT, SLSP และ 1604-E และตรวจสอบกับรายงานก่อนดาวน์โหลด",
+    "salesInvoicesHelp": "ใบกำกับภาษีขายของบริการนายหน้า เลขที่เรียงตามลำดับ ใบที่ยกเลิกยังคงเลขที่เดิม",
+    "eisHelp": "ใบกำกับภาษีอิเล็กทรอนิกส์ที่รอส่งระบบ EIS ของกรมสรรพากร พร้อมสถานะและการส่งซ้ำ",
+    "permitMissing": "ยังไม่ได้ตั้งค่าเลขที่ ATP หรือใบอนุญาต CAS สำหรับใบกำกับภาษี",
+    "sellerTinMissing": "ยังไม่มีเลขประจำตัวผู้เสียภาษีของบริษัทในข้อมูลบริษัท",
+    "datFiles": "ไฟล์ DAT ของกรมสรรพากร",
+    "salesInvoices": "ใบกำกับภาษีขาย",
+    "eis": "ใบกำกับภาษีอิเล็กทรอนิกส์ (EIS)",
+    "acceptedAt": "รับเมื่อ",
+    "all": "ทั้งหมด",
+    "amounts": "จำนวนเงิน",
+    "cancelPaymentNote": "ใบรับชำระยังคงเลขที่เดิมและพิมพ์ว่ายกเลิก รายการบัญชีถูกกลับรายการและยอดคงค้างของใบกำกับภาษีกลับคืน",
+    "cancellation": "การยกเลิก",
+    "cancelledAt": "ยกเลิกเมื่อ",
+    "checksAgainstReport": "การตรวจสอบกับรายงาน",
+    "detailRecords": "จำนวนรายการรายละเอียด",
+    "eisConnection": "การเชื่อมต่อ e-Invoicing",
+    "eisOffMsg": "การเชื่อมต่อ e-Invoicing ปิดอยู่ ไม่มีรายการถูกส่ง",
+    "eisStatus": "EIS",
+    "eisSubmission": "ใบกำกับภาษีอิเล็กทรอนิกส์",
+    "errors": "ข้อผิดพลาด",
+    "expectedEwtAmount": "ภาษีหัก ณ ที่จ่ายที่คาดไว้",
+    "file": "ไฟล์",
+    "generateFile": "สร้างไฟล์",
+    "generatedAt": "สร้างเมื่อ",
+    "generatedBy": "สร้างโดย",
+    "generatedFiles": "ไฟล์ที่สร้างแล้ว",
+    "generatedMsg": "สร้าง {{fileName}} แล้ว",
+    "invoicingSetup": "การตั้งค่าใบกำกับภาษี",
+    "lastSent": "ส่งล่าสุด",
+    "lines": "รายการ",
+    "noErrors": "ไม่มีข้อผิดพลาด",
+    "noFileSelected": "ยังไม่มีไฟล์ที่สร้าง",
+    "noGeneratedFiles": "ไม่มีไฟล์ที่สร้างในปีนี้",
+    "noInvoices": "ไม่พบใบกำกับภาษี",
+    "outbox": "รายการรอส่ง",
+    "outboxEmpty": "ไม่มีใบกำกับภาษีอิเล็กทรอนิกส์รอส่ง",
+    "parties": "ผู้ขายและผู้ซื้อ",
+    "payloadHash": "ค่าแฮชและลายมือชื่อของข้อมูล",
+    "printCount": "จำนวนครั้งที่พิมพ์",
+    "problem": "ปัญหา",
+    "quarter": "ไตรมาส",
+    "queueInvoices": "เข้าคิวใบกำกับภาษี",
+    "queuedAt": "เข้าคิวเมื่อ",
+    "recordManualUpload": "บันทึกการอัปโหลดด้วยตนเอง",
+    "recordNo": "ลำดับรายการ",
+    "report": "รายงาน",
+    "search": "ค้นหา",
+    "sellerTin": "เลขประจำตัวผู้เสียภาษีผู้ขาย",
+    "serialFromTo": "{{from}} ถึง {{to}}",
+    "serialRangeLabel": "ช่วงเลขที่",
+    "submittedAt": "ส่งเมื่อ",
+    "tin": "เลขประจำตัวผู้เสียภาษี",
+    "totalIssued": "รวมที่ออกแล้ว",
+    "validation": "การตรวจสอบ",
+    "vatAmount": "ภาษีมูลค่าเพิ่ม",
+    "vatStatus": "สถานะภาษีมูลค่าเพิ่ม",
+    "year": "ปี",
+    "datCheck": {
+      "detailSum": "{{name}}: รายการรายละเอียดเทียบกับรายการควบคุม",
+      "exempt": "{{name}} ผู้รับเงินที่ได้รับยกเว้น",
+      "records": "จำนวนรายการรายละเอียด",
+      "incomePayment": "เงินได้ที่จ่าย",
+      "taxWithheld": "ภาษีที่หักไว้",
+      "exemptSales": "ยอดขายที่ได้รับยกเว้น",
+      "zeroRatedSales": "ยอดขายอัตราศูนย์",
+      "taxableSales": "ยอดขายที่ต้องเสียภาษี",
+      "outputTax": "ภาษีขาย",
+      "exemptPurchases": "ยอดซื้อที่ได้รับยกเว้น",
+      "zeroRatedPurchases": "ยอดซื้ออัตราศูนย์",
+      "purchaseOfServices": "ซื้อบริการ",
+      "purchaseOfCapitalGoods": "ซื้อสินค้าทุน",
+      "purchaseOfOtherGoods": "ซื้อสินค้าอื่น",
+      "inputTax": "ภาษีซื้อ"
+    },
+    "datError": {
+      "tinMissing": "ไม่มีเลขประจำตัวผู้เสียภาษี",
+      "nameMissing": "ไม่มีชื่อ",
+      "atcMissing": "ไม่มีรหัส ATC",
+      "negativeAmount": "จำนวนเงินติดลบ"
+    },
+    "datResult": {
+      "valid": "ถูกต้อง",
+      "invalid": "มีข้อผิดพลาด",
+      "agrees": "ตรงกัน",
+      "differs": "ไม่ตรงกัน"
+    },
+    "setupMissing": {
+      "tin": "เลขประจำตัวผู้เสียภาษีของบริษัท",
+      "address": "ที่อยู่จดทะเบียน",
+      "permit": "เลขที่ ATP หรือใบอนุญาต CAS",
+      "permitDate": "วันที่ ATP หรือใบอนุญาต CAS",
+      "serialRange": "ช่วงเลขที่ที่จดทะเบียน"
+    },
+    "eisMissing": {
+      "accreditationId": "รหัสการรับรอง",
+      "endpoint": "ที่อยู่สำหรับส่งข้อมูล",
+      "credentials": "ข้อมูลรับรองของระบบ",
+      "signingKey": "กุญแจลงนาม"
+    },
+    "eisMode": {
+      "test": "ทดสอบ",
+      "live": "ใช้งานจริง",
+      "manual": "ด้วยตนเอง"
+    },
+    "paymentModes": {
+      "bank-transfer": "โอนผ่านธนาคาร",
+      "check": "เช็ค",
+      "cash": "เงินสด",
+      "online": "ชำระออนไลน์"
+    },
+    "confirmations": {
+      "cancelFilingTitle": "Cancel the filing record of {{form}}",
+      "keepFiling": "Keep filing",
+      "form": "Return",
+      "recordedOn": "Recorded",
+      "cancelledOn": "Cancelled {{date}}",
+      "computationHeader": "Override computation",
+      "computationFigures": "Computation",
+      "overrideType": "Commission type",
+      "basis": "Basis",
+      "claimsSource": "Claims figure from",
+      "rejectedBecause": "Rejected",
+      "cancelledBecause": "Cancelled",
+      "activity": "Activity",
+      "keepComputation": "Keep computation",
+      "recordSettlement": "Record settlement",
+      "submitOverrideTitle": "Submit computation {{number}}",
+      "submitOverrideMessage": "The computation goes to a second user for approval.",
+      "submitOverride": "Submit for approval",
+      "approveOverrideTitle": "Approve computation {{number}}",
+      "approveOverrideMessage": "The override commission receivable journal is posted to the ledger.",
+      "approveOverride": "Approve and post",
+      "rejectOverrideTitle": "Reject computation {{number}}",
+      "rejectOverrideMessage": "The computation is rejected with your reason; nothing is posted.",
+      "rejectOverride": "Reject computation",
+      "cancelOverrideTitle": "Cancel computation {{number}}",
+      "cancelOverrideMessage": "The computation is cancelled. A posted receivable journal is reversed.",
+      "cancelOverride": "Cancel computation",
+      "invoiceOverrideTitle": "Issue sales invoice for {{number}}",
+      "invoiceOverrideMessage": "A sales invoice with the next serial number is issued to the insurer for the receivable.",
+      "invoiceOverride": "Issue invoice"
+    }
+  },
+  "importDialog": {
+    "about": "เกี่ยวกับการอัปโหลดนี้",
+    "uploadInto": "อัปโหลดไปยัง",
+    "template": "แม่แบบ",
+    "downloadTemplate": "ดาวน์โหลดแม่แบบ",
+    "goLiveDate": "วันที่เริ่มใช้งานระบบ",
+    "file": "ไฟล์",
+    "chooseFile": "เลือกไฟล์",
+    "fileTypes": "XLSX หรือ CSV",
+    "removeFile": "นำ {{name}} ออก",
+    "close": "ปิด",
+    "validate": "ตรวจสอบ",
+    "validating": "กำลังตรวจสอบ...",
+    "upload": "อัปโหลด",
+    "uploading": "กำลังอัปโหลด...",
+    "validationResult": "ผลการตรวจสอบ",
+    "uploadResult": "ผลการอัปโหลด",
+    "valid": "ถูกต้อง",
+    "invalid": "พบข้อผิดพลาด",
+    "rows": "จำนวนแถว",
+    "errors": "ข้อผิดพลาด",
+    "row": "แถว",
+    "column": "คอลัมน์",
+    "message": "ข้อความ"
+  },
+  "periodManagement": {
+    "help": "งวดที่ปิดชั่วคราวรับการบันทึกบัญชีจากผู้จัดการฝ่ายบัญชีเท่านั้น งวดที่ปิดแล้วไม่รับการบันทึก",
+    "importOpening": "นำเข้ายอดยกมา",
+    "panelTitle": "{{action}} {{period}}",
+    "action": {
+      "softClose": "ปิดงวดชั่วคราว",
+      "close": "ปิดงวด",
+      "reopen": "เปิดงวดอีกครั้ง"
+    },
+    "button": {
+      "softClose": "ปิดชั่วคราว",
+      "close": "ปิด",
+      "reopen": "เปิดอีกครั้ง"
+    },
+    "dates": "ช่วงวันที่",
+    "currentStatus": "สถานะปัจจุบัน",
+    "newStatus": "สถานะใหม่",
+    "blockingChecks": "การตรวจสอบที่ต้องผ่าน",
+    "recheck": "ตรวจสอบอีกครั้ง",
+    "check": "รายการตรวจสอบ",
+    "countOrAmount": "จำนวนหรือยอดเงิน",
+    "resolve": "แก้ไข",
+    "noBlockingChecks": "ไม่มีการตรวจสอบที่ต้องผ่าน",
+    "notAllowed": {
+      "checks": "มีการตรวจสอบที่ไม่ผ่าน",
+      "permission": "การเปิดงวดอีกครั้งต้องมีสิทธิ์อนุมัติ",
+      "locked": "ถูกล็อกโดยการปิดบัญชีสิ้นปี",
+      "unchanged": "งวดมีสถานะนี้อยู่แล้ว",
+      "year-closed": "ปีบัญชีปิดแล้ว",
+      "year-end-closed": "ปีบัญชีถูกปิดโดยรายการปิดบัญชีสิ้นปี",
+      "adjustment-disabled": "งวดปรับปรุงถูกปิดการใช้งาน"
+    },
+    "done": "งวด {{period}}: {{status}}",
+    "system": "ระบบ",
+    "historyTitle": "ประวัติของงวด {{period}}",
+    "noHistory": "ไม่มีการเปลี่ยนสถานะ",
+    "historyAction": {
+      "reopened": "เปิดอีกครั้ง",
+      "softClosed": "ปิดชั่วคราว",
+      "closed": "ปิดแล้ว",
+      "locked": "ล็อก",
+      "changed": "เปลี่ยนสถานะ"
+    },
+    "source": {
+      "manual": "การจัดการงวดบัญชี",
+      "close-run": "การปิดบัญชีสิ้นเดือน",
+      "job": "งานตามกำหนดเวลา",
+      "year-end": "การปิดบัญชีสิ้นปี"
+    },
+    "createYear": "สร้างปีบัญชี",
+    "createYearTitle": "สร้างปีบัญชี {{code}}",
+    "createYearMessage": "เพิ่มปีบัญชี {{code}} พร้อมงวดทั้งหมดในสถานะเปิด",
+    "createYearPeriods": "12 เดือนและงวดปรับปรุงที่ 13",
+    "yearCreated": "สร้างปีบัญชี {{code}} แล้ว",
+    "opening": {
+      "help": "งบทดลองของระบบเดิม ณ สิ้นวันก่อนวันที่เริ่มใช้งานระบบ",
+      "fiscalYear": "ปีบัญชี",
+      "asAt": "ยอด ณ วันที่",
+      "rows": "จำนวนแถว",
+      "accounts": "จำนวนบัญชี",
+      "noBalanceRows": "แถวที่ไม่มียอด",
+      "totalDebit": "รวมเดบิต",
+      "totalCredit": "รวมเครดิต",
+      "difference": "ผลต่าง",
+      "goLiveDate": "วันที่เริ่มใช้งานระบบ",
+      "load": "โหลดยอดยกมา",
+      "confirmTitle": "โหลดยอดยกมา",
+      "confirmMessage": "ยอดยกมาของ {{fiscalYear}} จะถูกโหลดสำหรับวันที่เริ่มใช้งานระบบ {{date}}",
+      "replaces": "การโหลดนี้แทนที่การโหลดครั้งก่อนของวันที่เริ่มใช้งานเดียวกัน ({{accounts}} บัญชี โหลดโดย {{by}} เมื่อ {{at}})",
+      "replaceRule": "การโหลดอีกครั้งสำหรับวันที่เริ่มใช้งานเดียวกันจะแทนที่การโหลดนี้"
+    }
+  },
+  "numberingMasters": {
+    "commissionRates": {
+      "deleteTitle": "ลบอัตราค่านายหน้า",
+      "deleteAction": "ลบอัตรา",
+      "deleteMessage": "อัตราค่านายหน้าด้านล่างจะถูกลบ"
+    }
+  },
+  "postingRules": {
+    "requestedBy": "ผู้ขอ",
+    "requestedAt": "วันที่ขอ",
+    "decided": "การตัดสิน",
+    "decidedBy": "ผู้ตัดสิน",
+    "decidedAt": "วันที่ตัดสิน",
+    "decisionRemarks": "หมายเหตุการตัดสิน",
+    "accountSource": "บัญชีจาก",
+    "confirm": {
+      "approveTitle": "อนุมัติการเปลี่ยนแปลงการตั้งค่า",
+      "approveMessage": "การเปลี่ยนแปลงด้านล่างจะมีผลกับการบันทึกบัญชีเมื่ออนุมัติ",
+      "approveNote": "รายการบันทึกบัญชีหลังการอนุมัติจะใช้การตั้งค่าใหม่",
+      "approveAction": "อนุมัติการเปลี่ยนแปลง",
+      "rejectTitle": "ปฏิเสธการเปลี่ยนแปลงการตั้งค่า",
+      "rejectMessage": "การเปลี่ยนแปลงด้านล่างจะไม่ถูกนำไปใช้ ผู้ขอจะเห็นเหตุผล",
+      "rejectAction": "ปฏิเสธการเปลี่ยนแปลง",
+      "withdrawTitle": "ถอนการเปลี่ยนแปลงการตั้งค่า",
+      "withdrawMessage": "การเปลี่ยนแปลงด้านล่างจะถูกถอนและไม่รอการอนุมัติอีกต่อไป",
+      "withdrawAction": "ถอนการเปลี่ยนแปลง",
+      "activateTitle": "เปิดใช้งานกฎการบันทึกบัญชี",
+      "activateMessage": "กฎการบันทึกบัญชีเวอร์ชันด้านล่างจะถูกใช้ตั้งแต่วันที่มีผล",
+      "activateAction": "เปิดใช้งานกฎ",
+      "deactivateTitle": "ปิดใช้งานกฎการบันทึกบัญชี",
+      "deactivateMessage": "กฎการบันทึกบัญชีเวอร์ชันด้านล่างจะไม่ถูกใช้อีกต่อไป",
+      "deactivateAction": "ปิดใช้งานกฎ",
+      "approvalNote": "หากการเปลี่ยนแปลงการตั้งค่าต้องให้ผู้ใช้อีกคนอนุมัติ การเปลี่ยนแปลงจะรออยู่ในหน้าการอนุมัติการตั้งค่า"
+    },
+    "historyOf": "ประวัติ: {{event}}"
+  },
+  "remittanceMasters": {
+    "code": "รหัส",
+    "name": "ชื่อ",
+    "kinds": {
+      "settlementParameter": "พารามิเตอร์การชำระ",
+      "statementTemplate": "แม่แบบใบแจ้งยอด",
+      "automatedRule": "กฎการนำส่งเงิน"
+    },
+    "delete": {
+      "title": "ลบ{{what}}",
+      "message": "{{what}}ด้านล่างจะถูกลบ",
+      "note": "รายการนำส่งที่ดำเนินการแล้วจะไม่เปลี่ยนแปลง",
+      "action": "ลบ{{what}}",
+      "done": "ลบ{{what}}แล้ว"
+    },
+    "notifications": {
+      "view": "ดู",
+      "edit": "แก้ไข",
+      "delete": "ลบ",
+      "deleteTitle": "ลบแม่แบบการแจ้งเตือน",
+      "deleteMessage": "แม่แบบการแจ้งเตือนด้านล่างจะถูกลบ",
+      "deleteNote": "การแจ้งเตือนที่ส่งแล้วจะไม่ได้รับผลกระทบ",
+      "deleteAction": "ลบแม่แบบ",
+      "deleted": "ลบ {{name}} แล้ว",
+      "addTitle": "เพิ่มแม่แบบการแจ้งเตือน",
+      "editTitle": "แก้ไขแม่แบบการแจ้งเตือน",
+      "templateTitle": "แม่แบบการแจ้งเตือน",
+      "ruleTitle": "กฎการแจ้งเตือน",
+      "templateName": "ชื่อแม่แบบ",
+      "eventType": "เหตุการณ์",
+      "recipient": "ผู้รับ",
+      "recipients": "ผู้รับ",
+      "channel": "ช่องทาง",
+      "priority": "ลำดับความสำคัญ",
+      "autoSend": "ส่งอัตโนมัติ",
+      "subject": "หัวเรื่อง",
+      "message": "ข้อความ",
+      "body": "เนื้อหา",
+      "delivery": "การส่ง",
+      "active": "ใช้งาน",
+      "inactive": "ไม่ใช้งาน",
+      "condition": "เงื่อนไข",
+      "frequency": "ความถี่",
+      "escalationLevel": "ระดับการยกระดับ"
+    }
+  },
+  "s3Upload": {
+    "uploadFiles_one": "อัปโหลด {{count}} ไฟล์",
+    "uploadFiles_other": "อัปโหลด {{count}} ไฟล์",
+    "retryFiles_one": "ลองใหม่ {{count}} ไฟล์",
+    "retryFiles_other": "ลองใหม่ {{count}} ไฟล์"
+  },
+  "masterStatus": {
+    "active": "ใช้งาน",
+    "inactive": "ไม่ใช้งาน",
+    "recordType": "ประเภทข้อมูล",
+    "name": "ชื่อ",
+    "code": "รหัส",
+    "deactivateTitle": "ปิดใช้งาน{{kind}}",
+    "deactivateMessage": "{{kind}}ด้านล่างจะถูกตั้งเป็นไม่ใช้งาน",
+    "deactivateAction": "ปิดใช้งาน{{kind}}",
+    "note": {
+      "default": "จะไม่ถูกเสนอในรายการใหม่อีกต่อไป ข้อมูลที่มีอยู่ยังคงใช้ค่านี้",
+      "role": "ผู้ใช้ที่มีเฉพาะบทบาทนี้จะสูญเสียการเข้าถึงหน้าจอที่บทบาทนี้ให้สิทธิ์",
+      "user": "ผู้ใช้จะไม่สามารถเข้าสู่ระบบได้อีก"
+    },
+    "types": {
+      "hierarchy": "ลำดับชั้น",
+      "designation": "ตำแหน่ง",
+      "role": "บทบาท",
+      "user": "ผู้ใช้",
+      "company": "บริษัท",
+      "branch": "สาขา",
+      "vehicle": "ยานพาหนะ",
+      "product": "ผลิตภัณฑ์",
+      "cover": "ความคุ้มครอง",
+      "policy-type": "ประเภทกรมธรรม์",
+      "signatory": "ผู้ลงนาม",
+      "line-of-business": "สายธุรกิจ",
+      "insurance-company": "บริษัทประกันภัย",
+      "city": "เมือง",
+      "country": "ประเทศ",
+      "state": "จังหวัด",
+      "exchange-rate": "อัตราแลกเปลี่ยน",
+      "bank": "ธนาคาร",
+      "bank-account": "บัญชีธนาคาร",
+      "department": "แผนก",
+      "account-category": "หมวดบัญชี",
+      "currency": "สกุลเงิน",
+      "transaction-code": "รหัสรายการ"
+    }
+  },
+  "security": {
+    "user": "ผู้ใช้",
+    "userName": "ชื่อผู้ใช้",
+    "roles": "บทบาท",
+    "unlockTitle": "ปลดล็อกบัญชี",
+    "unlockAction": "ปลดล็อกบัญชี",
+    "unlockMessage": "บัญชีด้านล่างจะถูกปลดล็อกและล้างจำนวนครั้งที่เข้าสู่ระบบไม่สำเร็จ",
+    "resetMessage": "ระบบจะสร้างรหัสผ่านชั่วคราวสำหรับบัญชีด้านล่างและแสดงเพียงครั้งเดียว",
+    "resetNote": "เซสชันของผู้ใช้จะสิ้นสุด และผู้ใช้ต้องตั้งรหัสผ่านใหม่เมื่อเข้าสู่ระบบครั้งถัดไป",
+    "turnOffAction": "ปิดการยืนยันสองขั้นตอน",
+    "turnOff2faMessage": "การยืนยันสองขั้นตอนของบัญชีด้านล่างจะถูกปิด (เช่น เมื่อทำโทรศัพท์หาย)",
+    "turnOff2faNote": "ผู้ใช้จะเข้าสู่ระบบด้วยรหัสผ่านเพียงอย่างเดียวจนกว่าจะตั้งค่าการยืนยันสองขั้นตอนอีกครั้ง",
+    "methods": {
+      "password": "รหัสผ่าน",
+      "sso": "การลงชื่อเข้าใช้ครั้งเดียว",
+      "refresh": "ต่ออายุเซสชัน",
+      "2fa": "การยืนยันสองขั้นตอน"
+    }
+  },
+  "productConfigurator": {
+    "close": "ปิด",
+    "view": {
+      "template": "แม่แบบผลิตภัณฑ์",
+      "coverage": "ความคุ้มครอง",
+      "rule": "กฎการรับประกัน",
+      "mapping": "การจับคู่ตลาด"
+    },
+    "kinds": {
+      "template": "แม่แบบผลิตภัณฑ์",
+      "coverages": "ความคุ้มครอง",
+      "rating-factors": "ปัจจัยการคำนวณเบี้ย",
+      "underwriting-rules": "กฎการรับประกัน",
+      "market-mappings": "การจับคู่ตลาด",
+      "documents": "เอกสาร",
+      "risk-mapping": "การจับคู่ความเสี่ยง"
+    },
+    "status": {
+      "recordType": "ประเภทข้อมูล",
+      "code": "รหัส",
+      "name": "ชื่อ",
+      "activateTitle": "เปิดใช้งาน{{kind}}",
+      "deactivateTitle": "ปิดใช้งาน{{kind}}",
+      "activateMessage": "ข้อมูลด้านล่างจะเปิดใช้งานและมีผลกับใบเสนอราคาใหม่",
+      "deactivateMessage": "ข้อมูลด้านล่างจะถูกปิดใช้งาน",
+      "deactivateNote": "ใบเสนอราคาใหม่จะไม่ใช้ข้อมูลนี้ ใบเสนอราคาที่ออกแล้วจะไม่เปลี่ยนแปลง",
+      "retireMessage": "แม่แบบผลิตภัณฑ์ด้านล่างจะถูกเลิกใช้",
+      "retireNote": "จะไม่ถูกใช้กับธุรกิจใหม่ กรมธรรม์ที่ออกแล้วยังคงใช้แม่แบบนี้",
+      "retireAction": "เลิกใช้แม่แบบ",
+      "activateTemplateAction": "เปิดใช้งานแม่แบบ"
+    }
+  },
+  "productRiskMapping": {
+    "removeTitle": "ลบส่วนความเสี่ยง",
+    "removeMessage": "ส่วนความเสี่ยงด้านล่างจะถูกลบออกจากผลิตภัณฑ์",
+    "removeNote": "ผู้มุ่งหวังและใบเสนอราคาใหม่จะไม่แสดงส่วนนี้ ใบเสนอราคาที่ใช้อยู่แล้วยังคงเดิม",
+    "removeAction": "ลบส่วน"
+  },
+  "integrations": {
+    "batchDetail": "ชุดการจ่ายเงินผ่านธนาคาร",
+    "batchFacts": "ชุดรายการ",
+    "totalAmount": "จำนวนเงินรวม",
+    "createdBy": "สร้างโดย",
+    "createdAt": "สร้างเมื่อ",
+    "approvedBy": "อนุมัติโดย",
+    "approvedAt": "อนุมัติเมื่อ",
+    "fileWrittenAt": "เขียนไฟล์เมื่อ",
+    "uploadedAt": "อัปโหลดเมื่อ",
+    "returnedReason": "เหตุผลที่ส่งคืน",
+    "activity": "กิจกรรม",
+    "saveResult": "บันทึกผล",
+    "batchSteps": {
+      "submit": {
+        "title": "ส่งชุดรายการเพื่อขออนุมัติ",
+        "message": "ชุดรายการด้านล่างจะถูกส่งให้ผู้ใช้อีกคนอนุมัติ",
+        "note": "ไม่สามารถแก้ไขชุดรายการได้ระหว่างรอการอนุมัติ",
+        "action": "ส่งขออนุมัติ"
+      },
+      "approve": {
+        "title": "อนุมัติชุดการจ่ายเงินผ่านธนาคาร",
+        "message": "การจ่ายเงินด้านล่างได้รับอนุมัติสำหรับไฟล์ธนาคาร",
+        "note": "สามารถเขียนไฟล์ธนาคารได้เมื่อชุดรายการได้รับอนุมัติ",
+        "action": "อนุมัติชุดรายการ"
+      },
+      "reject": {
+        "title": "ส่งคืนชุดการจ่ายเงินผ่านธนาคาร",
+        "message": "ชุดรายการด้านล่างจะถูกส่งคืนผู้จัดทำเป็นฉบับร่าง",
+        "action": "ส่งคืนชุดรายการ"
+      },
+      "cancel": {
+        "title": "ยกเลิกชุดการจ่ายเงินผ่านธนาคาร",
+        "message": "ชุดรายการด้านล่างจะถูกยกเลิกและสามารถจ่ายใบสำคัญได้อีกครั้ง",
+        "action": "ยกเลิกชุดรายการ"
+      },
+      "generate": {
+        "title": "เขียนไฟล์ธนาคาร",
+        "message": "ไฟล์สำหรับอัปโหลดไปยังพอร์ทัลธนาคารจะถูกเขียนจากชุดรายการด้านล่าง",
+        "action": "เขียนไฟล์"
+      },
+      "rewrite": {
+        "title": "เขียนไฟล์ธนาคารอีกครั้ง",
+        "message": "ไฟล์อัปโหลดของชุดรายการด้านล่างจะถูกเขียนใหม่",
+        "note": "อัปโหลดเฉพาะไฟล์ใหม่ไปยังพอร์ทัลธนาคาร และทิ้งไฟล์เดิม",
+        "action": "เขียนไฟล์อีกครั้ง"
+      },
+      "sent": {
+        "title": "ทำเครื่องหมายว่าอัปโหลดแล้ว",
+        "message": "ไฟล์ของชุดรายการด้านล่างได้อัปโหลดไปยังพอร์ทัลธนาคารแล้ว",
+        "action": "ทำเครื่องหมายว่าอัปโหลดแล้ว"
+      }
+    },
+    "messageDetail": "ข้อความขาออก",
+    "inboxDetail": "ข้อความขาเข้า",
+    "messageFacts": "ข้อความ",
+    "content": "เนื้อหา",
+    "record": "ข้อมูลอ้างอิง",
+    "sentAt": "ส่งเมื่อ",
+    "receivedBy": "รับโดย",
+    "processedAt": "ประมวลผลเมื่อ",
+    "signature": "ลายเซ็นถูกต้อง",
+    "outboxSteps": {
+      "resend": {
+        "title": "ส่งข้อความอีกครั้ง",
+        "message": "ข้อความด้านล่างจะเข้าคิวอีกครั้งและส่งไปยังผู้ให้บริการ",
+        "action": "ส่งข้อความอีกครั้ง"
+      },
+      "cancel": {
+        "title": "ยกเลิกข้อความ",
+        "message": "ข้อความด้านล่างจะถูกยกเลิกและไม่ถูกส่ง",
+        "action": "ยกเลิกข้อความ"
+      }
+    },
+    "inboxSteps": {
+      "reprocess": {
+        "title": "ประมวลผลข้อความอีกครั้ง",
+        "message": "ข้อความขาเข้าด้านล่างจะถูกประมวลผลอีกครั้ง",
+        "action": "ประมวลผลอีกครั้ง"
+      }
+    }
+  },
+  "schedules": {
+    "title": "กำหนดการ",
+    "master": "ข้อมูลหลัก",
+    "job": "งาน",
+    "whatItDoes": "หน้าที่",
+    "schedule": "กำหนดการ",
+    "scheduleIn": "กำหนดการ ({{zone}})",
+    "status": "สถานะ",
+    "scheduled": "ตั้งเวลาแล้ว",
+    "switchedOff": "ปิดอยู่",
+    "nextRun": "รอบถัดไป",
+    "lastRun": "รอบล่าสุด",
+    "lastStatus": "สถานะล่าสุด",
+    "runNow": "เรียกใช้ทันที",
+    "runHistory": "ประวัติการทำงาน",
+    "edit": "แก้ไขกำหนดการ",
+    "editTitle": "แก้ไขกำหนดการ: {{job}}",
+    "historyTitle": "ประวัติการทำงาน: {{job}}",
+    "noRuns": "ยังไม่มีการทำงาน",
+    "saved": "บันทึกกำหนดการแล้ว",
+    "cancel": "ยกเลิก",
+    "saveSchedule": "บันทึกกำหนดการ",
+    "cronLabel": "กำหนดการ (cron)",
+    "cronHelp": "นาที ชั่วโมง วัน เดือน วันในสัปดาห์ เช่น 0 6 * * * ทำงานทุกวันเวลา 06:00",
+    "cronHelpZone": "นาที ชั่วโมง วัน เดือน วันในสัปดาห์ เช่น 0 6 * * * ทำงานทุกวันเวลา 06:00 ตามเวลา {{zone}}",
+    "enabled": "เปิดใช้งาน",
+    "done": "เสร็จสิ้น",
+    "runTitle": "เรียกใช้งานทันที",
+    "runMessage": "งานด้านล่างจะทำงานทันทีนอกกำหนดการ",
+    "runNote": "สิ่งที่งานส่งหรือปรับปรุง (หนังสือแจ้ง อีเมล ยอดคงเหลือ) จะดำเนินการเหมือนการทำงานตามกำหนดการ",
+    "runAction": "เรียกใช้งาน",
+    "runStatus": {
+      "success": "เสร็จสมบูรณ์",
+      "failed": "ล้มเหลว",
+      "running": "กำลังทำงาน"
+    },
+    "cron": {
+      "everyMinute": "ทุกนาที",
+      "everyMinutes": "ทุก {{count}} นาที",
+      "hourly": "ทุกชั่วโมงที่นาที :{{minute}}",
+      "daily": "ทุกวันเวลา {{at}}",
+      "weekdays": "วันทำการเวลา {{at}}",
+      "weekly": "ทุกวัน{{day}}เวลา {{at}}",
+      "monthly": "ทุกเดือนวันที่ {{day}} เวลา {{at}}"
+    },
+    "days": {
+      "sunday": "อาทิตย์",
+      "monday": "จันทร์",
+      "tuesday": "อังคาร",
+      "wednesday": "พุธ",
+      "thursday": "พฤหัสบดี",
+      "friday": "ศุกร์",
+      "saturday": "เสาร์"
+    }
+  },
+  "configuration": {
+    "leaveTitle": "ออกโดยไม่บันทึก",
+    "leaveMessage_one": "มีการตั้งค่า {{count}} รายการที่เปลี่ยนแปลงและยังไม่ได้บันทึก",
+    "leaveMessage_other": "มีการตั้งค่า {{count}} รายการที่เปลี่ยนแปลงและยังไม่ได้บันทึก",
+    "leaveMore": "และอีก {{count}} รายการ",
+    "notSaved": "ยังไม่บันทึก",
+    "leaveAction": "ยกเลิกการเปลี่ยนแปลงและออก",
+    "stay": "อยู่ในหน้านี้ต่อ"
+  },
+  "myWork": {
+    "task": {
+      "deleteMessage": "งานด้านล่างจะถูกลบและยกเลิกการแจ้งเตือน"
+    }
+  },
+  "paymentCapture": {
+    "mode": "วิธีชำระเงิน",
+    "reference": "เลขอ้างอิง",
+    "paymentDate": "วันที่ชำระ",
+    "bill": "ใบแจ้งหนี้",
+    "acknowledgement": "เลขที่ใบรับเงินชั่วคราว",
+    "submittedBy": "บันทึกโดย",
+    "amount": "จำนวนเงิน",
+    "confirmTitle": "ยืนยันการชำระเงิน",
+    "confirmMessage": "การชำระเงินด้านล่างได้รับการตรวจสอบกับรายการของธนาคารหรือแคชเชียร์แล้ว",
+    "confirmNote": "ใบเสร็จรับเงินจะถูกออกและบันทึกบัญชี",
+    "confirmAction": "ยืนยันการชำระเงิน",
+    "confirmed": "ยืนยันการชำระเงินแล้ว",
+    "rejectTitle": "ปฏิเสธการชำระเงิน",
+    "rejectMessage": "การชำระเงินด้านล่างจะถูกปฏิเสธและใบแจ้งหนี้ยังคงค้างชำระ",
+    "rejectReason": "เหตุผล",
+    "rejectReasonHint": "เช่น ไม่พบยอดเงินเข้าที่ตรงกันในรายการเดินบัญชีธนาคาร",
+    "rejectAction": "ปฏิเสธการชำระเงิน",
+    "rejected": "ปฏิเสธการชำระเงินแล้ว",
+    "printFailed": "ไม่สามารถพิมพ์ใบเสร็จได้",
+    "acknowledgementReceipt": "ใบรับเงินชั่วคราว",
+    "officialReceipt": "ใบเสร็จรับเงิน"
+  },
+  "salesActivities": {
+    "activity": "กิจกรรม",
+    "cancelMessage": "กิจกรรมด้านล่างจะยังคงอยู่ในประวัติและถูกทำเครื่องหมายว่ายกเลิก",
+    "cancelNote": "งานติดตามที่ยังเปิดอยู่ในงานของฉันจะถูกยกเลิกด้วย",
+    "byName": "โดย {{name}}"
+  },
+  "signature": {
+    "signer": "ผู้ลงนาม",
+    "version": "เวอร์ชัน",
+    "versionNo": "เวอร์ชัน {{version}}",
+    "effectiveTo": "มีผลถึง",
+    "openEnded": "จนกว่าจะมีการแทนที่",
+    "method": "วิธีบันทึก",
+    "capturedBy": "บันทึกโดย",
+    "capturedAt": "บันทึกเมื่อ",
+    "revokedBy": "เพิกถอนโดย",
+    "revokedAt": "เพิกถอนเมื่อ",
+    "revokeReason": "เหตุผลที่เพิกถอน",
+    "methods": {
+      "drawn": "วาดบนหน้าจอ",
+      "uploaded": "อัปโหลดรูปภาพ"
+    },
+    "statuses": {
+      "active": "ใช้งาน",
+      "revoked": "เพิกถอนแล้ว",
+      "replaced": "ถูกแทนที่"
+    },
+    "revokeTitle": "เพิกถอนลายเซ็นเวอร์ชันนี้",
+    "revokeMessage": "ลายเซ็นเวอร์ชันด้านล่างจะถูกเพิกถอนและไม่ถูกพิมพ์อีก",
+    "revokeNote": "เอกสารที่พิมพ์ไปแล้วยังคงมีลายเซ็นเดิม"
+  },
+  "distribution": {
+    "common": {
+      "history": "History",
+      "close": "Close"
+    },
+    "fl": {
+      "item": "Item",
+      "removeVehicleTitle": "Remove vehicle",
+      "removeVehicleMessage": "The vehicle is removed from the draft schedule.",
+      "removeVehicleAction": "Remove vehicle",
+      "printSchedule": "Print schedule",
+      "issueTitle": "Issue fleet policy",
+      "issueMessage": "One policy is issued for the vehicles on the schedule.",
+      "issueNote": "The total premium is billed to the client.",
+      "endorseDeleteAction": "Delete vehicle",
+      "returnHelp": "The return premium is the vehicle's annual premium for the days left in the period",
+      "deleteReasonLabel": "Reason",
+      "deleteReasonHint": "Vehicle sold, total loss ..."
+    },
+    "oc": {
+      "activateTitle": "Activate open cover",
+      "activateMessage": "The open policy is issued. Premium is billed on the declarations.",
+      "activateAction": "Activate open cover",
+      "cancelTitle": "Cancel open cover",
+      "cancelMessage": "No certificate can be issued on the cover after it is cancelled.",
+      "reason": "Reason",
+      "cancelCertMessage": "The certificate is cancelled and left out of the declaration of its period.",
+      "newDeclarationMessage": "The shipments of the period are attached to the declaration and priced with the premium taxes.",
+      "openDeclaration": "Open declaration",
+      "deleteDeclarationTitle": "Delete declaration",
+      "deleteDeclarationMessage": "The draft declaration is deleted. Its shipments stay on the cover for a new declaration of the period.",
+      "premium": "Premium",
+      "vat": "VAT",
+      "dst": "Documentary stamp tax",
+      "lgt": "Local government tax"
+    },
+    "cp": {
+      "sendTitle": "Send campaign",
+      "sendMessage": "The e-mails are queued to the outbox for every recipient who agreed to receive offers.",
+      "sendAction": "Send campaign",
+      "cancelMessage": "The campaign is not sent. A cancelled campaign cannot be scheduled again.",
+      "sentAt": "Sent",
+      "conversionWindow": "Conversion window (days)",
+      "summary": "Summary"
+    },
+    "ch": {
+      "deleteTitle": "Remove distribution channel",
+      "deleteMessage": "The channel is removed. A channel with prospects or policies is made inactive instead.",
+      "deleteAction": "Remove channel"
+    },
+    "rb": {
+      "deleteTitle": "Delete saved report",
+      "deleteMessage": "The saved report is deleted for everyone it is shared with. Files already exported are kept."
+    },
+    "la": {
+      "deleteRuleTitle": "Remove assignment rule",
+      "deleteRuleMessage": "New prospects are no longer assigned by this rule. Prospects already assigned keep their account executive.",
+      "deleteRuleAction": "Remove rule",
+      "runMatched": "Matched by a rule",
+      "runUnmatched": "Staying in the queue",
+      "leads": "Prospects"
+    },
+    "cr": {
+      "emailTitle": "E-mail comparison report",
+      "emailMessage": "The client report (PDF) is sent from the outbox.",
+      "emailAddress": "E-mail address",
+      "emailOnFile": "The client's e-mail on file",
+      "emailInvalid": "Enter a valid e-mail address.",
+      "emailAction": "Send e-mail",
+      "chosenTitle": "Record the client's choice",
+      "chosenMessage": "The report is closed with this option and can no longer be changed.",
+      "chosenAction": "Record choice",
+      "createdBy": "Prepared by",
+      "createdAt": "Prepared on"
+    }
+  },
+  "packagedProducts": {
+    "bundles": {
+      "deleteTitle": "Delete bundle",
+      "deleteMessage": "The bundle is deleted. A bundle with quotations is switched off instead."
+    },
+    "rates": {
+      "deleteTitle": "Delete rate table",
+      "deleteMessage": "New quotations no longer use this rate. Quotations already priced keep their premium.",
+      "deleted": "Rate table deleted"
+    },
+    "taxes": {
+      "deleteLguTitle": "Delete local tax rate",
+      "deleteLguMessage": "The local government tax of the city or municipality is no longer charged on new premiums.",
+      "lguDeleted": "Local tax rate deleted",
+      "deleteRuleTitle": "Delete tax rule",
+      "deleteRuleMessage": "The tax is no longer charged on new premiums. Premiums already computed keep their taxes.",
+      "ruleDeleted": "Tax rule deleted"
+    }
+  },
+  "underwritingReferral": {
+    "statusLabel": "Status",
+    "requestedAt": "Referred on",
+    "authority": "Approval by",
+    "sumInsured": "Sum insured",
+    "decidedByLabel": "Decided by",
+    "decidedAt": "Decided on",
+    "reasons": "Referral reasons",
+    "quotation": "Quotation",
+    "cancel": "Cancel"
+  },
+  "paymentOptions": {
+    "shareTitle": "Share payment link"
+  },
+  "bulkUploadLeads": {
+    "invalidFile": "Invalid file",
+    "onlyExcelFiles": "Upload an Excel (.xlsx) or CSV (.csv) file.",
+    "fileTooLarge": "File too large",
+    "fileSizeLessThan10MB": "The file must be smaller than 10 MB.",
+    "noFileSelected": "No file selected",
+    "pleaseSelectFile": "Select the file to upload.",
+    "uploadStarted": "Upload started",
+    "uploadFailed": "Upload failed",
+    "instructions": "Instructions",
+    "downloadTemplate": "Download template",
+    "instruction1": "Download the template file",
+    "instruction3": "Upload the completed file (10 MB at most)",
+    "instruction4": "Only .xlsx and .csv files are accepted",
+    "chooseFile": "Choose file",
+    "selectExcelFile": "Select the Excel or CSV file to upload",
+    "maxFileSize": "Maximum file size: 10 MB",
+    "processingFile": "Processing the file...",
+    "cancel": "Cancel",
+    "upload": "Upload",
+    "processing": "Processing",
+    "close": "Close",
+    "uploadStartedDetail": "The prospect upload has started and runs in the background.",
+    "uploadFailedDetail": "The prospect file could not be uploaded.",
+    "header": "Bulk upload prospects",
+    "instruction2": "Enter the prospects in the file",
+    "fileBeingProcessed": "The file is being processed. The prospects are created as each row is read."
+  },
+  "bulkUploadPolicies": {
+    "invalidFile": "Invalid file",
+    "onlyExcelFiles": "Upload an Excel (.xlsx) or CSV (.csv) file.",
+    "fileTooLarge": "File too large",
+    "fileSizeLessThan10MB": "The file must be smaller than 10 MB.",
+    "noFileSelected": "No file selected",
+    "pleaseSelectFile": "Select the file to upload.",
+    "uploadStarted": "Upload started",
+    "uploadFailed": "Upload failed",
+    "instructions": "Instructions",
+    "downloadTemplate": "Download template",
+    "instruction1": "Download the template file",
+    "instruction3": "Upload the completed file (10 MB at most)",
+    "instruction4": "Only .xlsx and .csv files are accepted",
+    "chooseFile": "Choose file",
+    "selectExcelFile": "Select the Excel or CSV file to upload",
+    "maxFileSize": "Maximum file size: 10 MB",
+    "processingFile": "Processing the file...",
+    "cancel": "Cancel",
+    "upload": "Upload",
+    "processing": "Processing",
+    "close": "Close",
+    "uploadStartedDetail": "The policy upload has started and runs in the background.",
+    "uploadFailedDetail": "The policy file could not be uploaded.",
+    "header": "Bulk upload policies",
+    "instruction2": "Enter the policies in the file",
+    "fileBeingProcessed": "The file is being processed. The policies are created as each row is read.",
+    "goLive": "Existing policies (go-live): in-force policies of the old system, created without a bill, journal or commission. Their unpaid premiums are loaded with Import open items (Accounts > Collections)."
+  },
+  "creditControl": {
+    "confirmations": {
+      "remindTitle": "ส่งการแจ้งเตือนเบี้ยประกัน",
+      "remindMessage": "ระบบจะส่งอีเมลแจ้งเตือนเบี้ยประกันถึงลูกค้า",
+      "reminderMessage": "ข้อความถึงลูกค้า",
+      "reminderTemplate": "หากไม่ระบุข้อความ ระบบจะส่งแม่แบบแจ้งเตือนการเรียกเก็บเงิน",
+      "cancellationTitle": "ขอยกเลิกกรมธรรม์เนื่องจากไม่ชำระเบี้ย",
+      "cancellationMessage": "ระบบจะสร้างร่างสลักหลังยกเลิกกรมธรรม์ให้ฝ่ายปฏิบัติการ",
+      "notesForOperations": "หมายเหตุถึงฝ่ายปฏิบัติการ",
+      "cancellationNote": "กรมธรรม์ยังมีผลคุ้มครองจนกว่าฝ่ายปฏิบัติการจะออกสลักหลัง",
+      "requestCancellation": "ขอยกเลิก",
+      "approveExtensionTitle": "อนุมัติการขยายระยะเวลาชำระเบี้ย",
+      "rejectExtensionTitle": "ปฏิเสธการขยายระยะเวลาชำระเบี้ย",
+      "approveExtension": "อนุมัติการขยาย",
+      "rejectExtension": "ปฏิเสธการขยาย",
+      "historyTitle": "ประวัติการติดตามเบี้ยประกัน",
+      "activity": "กิจกรรม",
+      "cancelPlanTitle": "ยกเลิกแผนผ่อนชำระ",
+      "cancelPlanMessage": "แผนผ่อนชำระของใบแจ้งหนี้ {{bill}} จะถูกยกเลิก",
+      "cancelPlanNote": "ใบแจ้งหนี้ยังคงค้างชำระ โดยครบกำหนดตามวันที่ของงวดแรกที่ยังไม่ชำระ",
+      "keepPlan": "เก็บแผนไว้",
+      "invoicePlanMessage": "ใบแจ้งหนี้ {{bill}} จะถูกยกเลิกและแทนที่ด้วยใบแจ้งหนี้รายงวด {{count}} ฉบับ แต่ละฉบับมีวันครบกำหนดของตนเอง",
+      "invoicePlanNote": "รายการบันทึกบัญชีของใบแจ้งหนี้จะถูกกลับรายการ และบันทึกบัญชีแยกตามใบแจ้งหนี้แต่ละฉบับ",
+      "issueInvoices": "ออกใบแจ้งหนี้ {{count}} ฉบับ",
+      "removeInstalment": "ลบงวด",
+      "acknowledgeTitle": "รับทราบรายการเกินวงเงินเครดิต",
+      "acknowledgeMessage": "กรมธรรม์ที่ออกเกินวงเงินเครดิตของ {{client}} จะถูกบันทึกว่ารับทราบแล้ว",
+      "acknowledgeException": "รับทราบรายการ"
+    }
+  },
+  "insurerRec": {
+    "confirmations": {
+      "submitTitle": "ส่งการกระทบยอดเพื่อขออนุมัติ",
+      "submitMessage": "รายการเดินบัญชี {{number}} จะถูกส่งเพื่อขออนุมัติ",
+      "approveTitle": "อนุมัติการกระทบยอด",
+      "rejectTitle": "ปฏิเสธการกระทบยอด",
+      "approveMessage": "การกระทบยอดของรายการเดินบัญชี {{number}} จะได้รับการอนุมัติ",
+      "rejectMessage": "รายการเดินบัญชี {{number}} จะกลับสู่สถานะร่าง",
+      "approveNote": "รายการปรับปรุงบัญชีจะถูกบันทึกเมื่ออนุมัติ",
+      "approve": "อนุมัติการกระทบยอด",
+      "reject": "ปฏิเสธการกระทบยอด",
+      "cancelTitle": "ยกเลิกรายการเดินบัญชี",
+      "cancelMessage": "รายการเดินบัญชี {{number}} จะถูกยกเลิกและไม่สามารถกระทบยอดได้อีก",
+      "keepStatement": "เก็บรายการเดินบัญชีไว้",
+      "unmatchMessage": "บรรทัด {{line}} จะกลับไปอยู่ในรายการที่ไม่พบในข้อมูลของนายหน้า",
+      "removeResolutionMessage": "การแก้ไขผลต่างของ {{policy}} จะถูกลบ และผลต่างจะกลับเป็นยังไม่ได้แก้ไข",
+      "activity": "กิจกรรม"
+    }
+  },
+  "bankReconciliation": {
+    "confirmations": {
+      "asOfDate": "ณ วันที่",
+      "prepare": "จัดทำการกระทบยอด",
+      "approve": "อนุมัติการกระทบยอด",
+      "reopen": "เปิดการกระทบยอดอีกครั้ง",
+      "cancel": "ยกเลิกการกระทบยอด",
+      "keep": "เก็บการกระทบยอดไว้",
+      "cancelChequeTitle": "ยกเลิกเช็คค้างจ่าย {{cheque}}",
+      "keepCheque": "เก็บเช็คไว้",
+      "approveAdjustmentMessage": "รายการปรับปรุง {{journal}} จะได้รับการอนุมัติและบันทึกเข้าบัญชีแยกประเภท",
+      "approveAndPost": "อนุมัติและบันทึกบัญชี",
+      "unmatchMessage": "การจับคู่ที่เคลียร์เมื่อ {{date}} จะถูกยกเลิก และทั้งสองฝั่งจะกลับเป็นยังไม่จับคู่",
+      "notes": {
+        "prepare": "ตัวเลขในรายงานจะถูกล็อกและส่งการกระทบยอดเพื่อขออนุมัติ",
+        "approve": "การจับคู่ทั้งหมดที่เคลียร์ถึงสิ้นงวดจะถูกล็อก",
+        "reopen": "การกระทบยอดจะกลับสู่สถานะร่างและปลดล็อกการจับคู่",
+        "cancel": "การกระทบยอดฉบับร่างจะถูกยกเลิก โดยการจับคู่ยังคงอยู่",
+        "cancelCheque": "รายการจ่ายเงินจะถูกกลับรายการและเจ้าหนี้จะถูกเปิดใหม่",
+        "flag": "บรรทัดนี้จะเป็นรายการกระทบยอดฝั่งธนาคาร โดยไม่มีการบันทึกบัญชี"
+      }
+    }
+  },
+  "periodEnd": {
+    "runActivity": "Run activity",
+    "confirmations": {
+      "submitTitle": "Submit the close of {{period}}",
+      "submitMessage": "The period is closed once the close is approved. After that no postings are accepted.",
+      "submit": "Submit close",
+      "submitSoftTitle": "Submit the soft close of {{period}}",
+      "submitSoftMessage": "Once approved, the period accepts postings from Accounting Managers only.",
+      "submitSoft": "Submit soft close",
+      "approveTitle": "Approve the close of {{period}}",
+      "approveMessage": "The period status changes as submitted and the run is completed.",
+      "approve": "Approve close",
+      "rejectTitle": "Return the close of {{period}}",
+      "rejectMessage": "The run goes back to the preparer with your reason.",
+      "reject": "Return to preparer",
+      "cancelTitle": "Cancel the close run of {{period}}",
+      "cancelMessage": "The run is cancelled and the journals it posted are reversed.",
+      "cancel": "Cancel run",
+      "keepRun": "Keep run",
+      "runTitle": "Run the month-end steps for {{period}}",
+      "rerunTitle": "Rerun the month-end steps for {{period}}",
+      "runMessage": "Accrual, recurring, commission deferral, FX revaluation and depreciation journals are posted for the period and the checklist is run.",
+      "rerunNote": "The accrual, deferral and FX journals of the previous execution are reversed before the new ones are posted.",
+      "signTitle": "Sign off checklist item",
+      "withdrawTitle": "Withdraw sign-off",
+      "sign": "Sign off item",
+      "withdraw": "Withdraw sign-off",
+      "postDueTitle": "Post due recurring journals",
+      "postTemplateTitle": "Post recurring journal {{code}}",
+      "postDueMessage": "A journal is generated for every occurrence due up to today.",
+      "postDueNote": "Templates without auto-post create journals pending approval.",
+      "postDue": "Post due journals",
+      "dueTemplates": "Templates due",
+      "templateHeader": "Recurring journal template",
+      "activity": "Activity",
+      "lines": "Journal lines",
+      "deleteItemTitle": "Delete checklist item",
+      "deleteItemMessage": "The item is no longer copied to new month-end close runs. Runs already started keep it.",
+      "deleteItem": "Delete item",
+      "issue2307Title": "Issue BIR Form 2307",
+      "issue2307Message": "The next CWT certificate number is assigned to this payee and quarter.",
+      "issue2307": "Issue certificate",
+      "issueAllTitle": "Issue all 2307 certificates for {{quarter}}",
+      "issueAllMessage": "Sequential CWT certificate numbers are assigned to every payee without a certificate.",
+      "issueAll_one": "Issue {{count}} certificate",
+      "issueAll_other": "Issue {{count}} certificates",
+      "quarter": "Quarter",
+      "certificates": "Certificates to issue"
+    }
+  },
+  "commissionLine": {
+    "statuses": {
+      "Accrued": "Accrued",
+      "Eligible": "Eligible",
+      "Approved": "Approved",
+      "Paid": "Paid",
+      "Reversed": "Reversed"
+    },
+    "referrer": "Referrer",
+    "policy": "Policy",
+    "productInsurer": "Product / insurer",
+    "cycle": "Cycle",
+    "comsub": "Commission",
+    "wht": "Withholding tax",
+    "netPayable": "Net payable",
+    "status": "Status",
+    "receipt": "Receipt",
+    "voucher": "Voucher",
+    "calculation": "Calculation",
+    "activity": "Activity",
+    "grossPremium": "Gross premium",
+    "discount": "Discount ({{label}})",
+    "netPremium": "Net premium",
+    "brokerage": "Brokerage at {{pct}}%",
+    "comsubFormula": "Commission: {{fixed}} + {{pct}}% of net premium",
+    "whtAt": "Withholding tax at {{pct}}%",
+    "whtNotApplied": "Withholding tax (not applied)",
+    "netMargin": "Net margin",
+    "overrideRate": "Commission rate of this policy",
+    "fixed": "Fixed ({{symbol}})",
+    "rate": "Rate (%)",
+    "currentRate": "Current rate",
+    "newRate": "New rate",
+    "noLines": "No lines",
+    "notFound": "Referrer not found.",
+    "backToReferrers": "Referrers",
+    "bank": "Bank",
+    "notOnFile": "Not on file",
+    "policiesOnBook_one": "{{count}} policy on the book",
+    "policiesOnBook_other": "{{count}} policies on the book",
+    "applyWht": "Apply withholding tax",
+    "dueThisCycle": "Due this cycle ({{cycle}})",
+    "upcoming": "Upcoming (future)",
+    "paidToDate": "Paid to date",
+    "currentCycle": "Current cycle: {{cycle}} (due now)",
+    "futureCycles": "Future cycles (accrued, not yet payable)",
+    "past": "Past (paid history)",
+    "noPast": "No past payouts.",
+    "actionFailed": "The action could not be completed",
+    "whtFailed": "The withholding tax setting could not be updated",
+    "confirm": {
+      "eligibleTitle": "Mark commission on {{policy}} as eligible",
+      "eligibleMessage": "The line becomes payable in the current cycle.",
+      "eligible": "Mark eligible",
+      "approveTitle": "Approve commission on {{policy}}",
+      "approveMessage": "The line is approved for payout.",
+      "approve": "Approve commission",
+      "payTitle": "Pay commission on {{policy}}",
+      "payMessage": "A payout voucher is raised for the net payable amount.",
+      "pay": "Raise payout voucher",
+      "reverseTitle": "Reverse commission on {{policy}}",
+      "reverseMessage": "The commission is clawed back and the line is no longer payable.",
+      "reverse": "Reverse commission",
+      "rateTitle": "Change the commission rate of {{policy}}",
+      "rateMessage": "The commission, withholding tax and net payable of this line are recalculated.",
+      "rate": "Apply rate"
+    },
+    "bulk": {
+      "lines": "Lines",
+      "approveTitle": "Approve commission of {{name}}",
+      "approveMessage": "The eligible lines of the current cycle are approved for payout.",
+      "approve_one": "Approve {{count}} line",
+      "approve_other": "Approve {{count}} lines",
+      "payoutTitle": "Generate payout for {{name}}",
+      "payoutMessage": "A payout voucher is prepared from the approved lines of the current cycle.",
+      "payout_one": "Generate payout ({{count}} line)",
+      "payout_other": "Generate payout ({{count}} lines)",
+      "payoutFailed": "The payout could not be generated",
+      "eligibleTitle": "Mark commission of {{name}} as eligible",
+      "eligibleMessage": "The accrued lines whose premium has been collected become payable.",
+      "eligible_one": "Mark {{count}} line eligible",
+      "eligible_other": "Mark {{count}} lines eligible"
     }
   }
 }

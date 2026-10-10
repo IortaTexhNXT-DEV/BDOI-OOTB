@@ -240,24 +240,6 @@
                 }
               }
 
-              // Success button (Export)
-              &.p-button-success,
-              &.export-button {
-                background: #28a745;
-                border-color: #28a745;
-                color: white;
-
-                &:hover:not(:disabled) {
-                  background: #218838;
-                  border-color: #218838;
-                }
-
-                &:active:not(:disabled) {
-                  background: #1e7e34;
-                  border-color: #1e7e34;
-                }
-              }
-
               // Secondary button (Reset)
               &.p-button-secondary,
               &.p-button-outlined {

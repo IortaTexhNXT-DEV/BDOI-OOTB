@@ -1347,7 +1347,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
                 "Send for Customer Approval"
               )}
               icon="pi pi-send"
-              className="p-button-success fire-preview-btn"
+              className="fire-preview-btn"
               loading={isSending}
               disabled={quotationStatus !== "Draft" || !createdQuotationId}
               onClick={handleSendToCustomer}

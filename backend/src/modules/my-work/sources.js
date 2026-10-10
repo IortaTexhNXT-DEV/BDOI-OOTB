@@ -312,10 +312,11 @@ async function approvals(ctx) {
       FROM premium_warranty_extensions wx JOIN policies p ON p.id = wx.policy_id LEFT JOIN clients c ON c.id = p.client_id
       WHERE wx.status = 'pending' AND ${notMine(ctx, 'wx.requested_by')}`);
   }
-  if (ctx.can('write:incentive') && await has('incentive_calculations')) {
+  // incentive batches: decided by the holders of approve:incentive, never by the user who ran or submitted the batch
+  if (ctx.can('approve:incentive') && await has('incentive_calculations')) {
     out.push(`SELECT ${select({ ...base, kind: "'Incentive calculation'", id: 'ic.batch_id', ref: 'ic.batch_id', title: "'Incentives of ' || ic.period", due_date: due('COALESCE(ic.submitted_date, ic.created_at)'),
       status: 'ic.status', link: "'/incentive/approvals'", amount: 'ic.total_amount', created_at: 'ic.created_at' })}
-      FROM incentive_calculations ic WHERE ic.status = 'Pending Approval' AND ${notMine(ctx, 'ic.submitted_by')}`);
+      FROM incentive_calculations ic WHERE ic.status = 'Pending Approval' AND ${notMine(ctx, 'ic.submitted_by')} AND ${notMine(ctx, 'ic.created_by')}`);
   }
   // claim settlements: decided by the holders of approve:claims (claims/service.js), never by the officer who requested them
   if (ctx.can('write:claims') && ctx.can('approve:claims')) {

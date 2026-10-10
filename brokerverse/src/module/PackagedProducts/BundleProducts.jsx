@@ -14,7 +14,8 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { MultiSelect } from "primereact/multiselect";
 import { Tag } from "primereact/tag";
 import packagesService from "../../services/packagesService";
-import { confirmAction, notifyError, notifySuccess } from "../../utility/dialogs";
+import { notifyError, notifySuccess } from "../../utility/dialogs";
+import { openConfirm } from "../../components/ConfirmDialog";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import { PageHeader } from "../Placement/shared";
 import { usePackageOptions } from "./common";
@@ -71,8 +72,22 @@ const BundleProducts = () => {
     }
   };
   const remove = async (b) => {
-    if (!(await confirmAction(k("deleteConfirm", { name: b.name }), { danger: true }))) return;
-    packagesService.deleteBundle(b.id).then((r) => { notifySuccess(r.deactivated ? k("deactivated") : k("deleted")); load(); }).catch((e) => notifyError(e.message));
+    let result = null;
+    const done = await openConfirm({
+      title: k("deleteTitle"),
+      severity: "danger",
+      message: k("deleteMessage"),
+      facts: [
+        { label: k("code"), value: b.code },
+        { label: k("name"), value: b.name },
+        { label: k("segment"), value: t(`packagedProducts.segments.${b.customerSegment}`, { defaultValue: b.customerSegment }) },
+      ],
+      confirmLabel: k("deleteTitle"),
+      onConfirm: async () => { result = await packagesService.deleteBundle(b.id); },
+    });
+    if (!done) return;
+    notifySuccess(result?.deactivated ? k("deactivated") : k("deleted"));
+    load();
   };
 
   return (
@@ -87,7 +102,7 @@ const BundleProducts = () => {
         <Column header={k("sections")} body={(b) => b.sections.map((s) => `${s.name}${s.optional ? ` (${k("optional").toLowerCase()})` : ""}`).join(" + ")} />
         <Column header={k("discount")} body={(b) => `${b.discountPercent}%`} className="num" headerClassName="num" />
         <Column header={k("defaultSumInsured")} body={(b) => formatCurrency(b.sections.filter((s) => !s.optional).reduce((a, s) => a + s.defaultSumInsured, 0))} className="num" headerClassName="num" />
-        <Column header={k("status")} body={(b) => <Tag value={t(`packagedProducts.${b.status}`)} severity={b.status === "active" ? "success" : "danger"} />} />
+        <Column header={k("status")} body={(b) => <Tag value={t(`packagedProducts.${b.status}`)} severity={b.status === "active" ? "success" : "secondary"} />} />
         <Column body={(b) => (
           <div className="admin__actions">
             <Button icon="pi pi-pencil" rounded text aria-label={t("common.edit")} onClick={() => setEdit(JSON.parse(JSON.stringify({ ...b, description: b.description || "" })))} tooltip={t("common.edit")} tooltipOptions={{ position: "top" }} />

@@ -10,6 +10,12 @@ import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
 import service from "../../services/opsAccountingService";
+import { openConfirm } from "../../components/ConfirmDialog";
+import DetailDialog from "../../components/DetailDialog";
+import DetailHeader from "../../components/DetailHeader";
+import DetailSection from "../../components/DetailSection";
+import KeyValueGrid from "../../components/KeyValueGrid";
+import { RecordActivityLog } from "../../components/ActivityLog";
 import { Field, OpsTag, PageHeader, date, isoOf, money, numericColumn, showError, showSuccess } from "./common";
 import { DisposeAssetDialog } from "./AssetDisposals";
 import { hasPermission } from "../../utils/canOpen";
@@ -89,26 +95,63 @@ export const AssetRegister = () => {
           <Column header={t("opsAcc.statusLabel")} body={(r) => <OpsTag status={r.status} />} />
         </DataTable>
       </div>
-      <Dialog className="pe-dialog" header={view ? `${view.assetNumber} · ${view.name}` : ""} visible={!!view} style={{ width: "min(860px, 96vw)" }} onHide={() => setView(null)}
-        footer={view && view.status !== "disposed" && hasPermission("write:fixed-assets") ? (
-          <div><Button icon="pi pi-sign-out" label={t("assetDisposal.dispose")} severity="warning" outlined onClick={() => { setDisposing(view); setView(null); }} /></div>
-        ) : null}>
+      <DetailDialog header={t("opsAcc.confirmations.asset.header")} visible={!!view} onHide={() => setView(null)} size="lg"
+        footer={view && (
+          <>
+            <Button label={t("detailView.close")} outlined onClick={() => setView(null)} />
+            {view.status !== "disposed" && hasPermission("write:fixed-assets") && (
+              <Button icon="pi pi-sign-out" label={t("assetDisposal.dispose")} severity="danger" outlined onClick={() => { setDisposing(view); setView(null); }} />
+            )}
+          </>
+        )}>
         {view && (
           <>
-            <p className="mt-0">{view.className || view.classCode} · {t("opsAcc.fa.life", { months: view.usefulLifeMonths })} · {view.assetAccount} / {view.accumulatedAccount} / {view.expenseAccount}
-              {view.supplierInvoiceVoucher ? ` · ${view.supplierInvoiceVoucher}` : ""}</p>
-            {view.status === "disposed" && <p className="mt-0"><OpsTag status="disposed" /> {date(view.disposedOn)}</p>}
-            <DataTable value={view.schedule} dataKey="period" size="small" stripedRows scrollable scrollHeight="420px">
-              <Column field="period" header={t("opsAcc.period")} />
-              <Column header={t("opsAcc.amount")} body={(r) => money(r.amount)} {...numericColumn} />
-              <Column header={t("opsAcc.fa.accumulated")} body={(r) => money(r.accumulated)} {...numericColumn} />
-              <Column header={t("opsAcc.fa.bookValue")} body={(r) => money(r.bookValue)} {...numericColumn} />
-              <Column header={t("opsAcc.statusLabel")} body={(r) => <OpsTag status={r.status} />} />
-              <Column field="journalNumber" header={t("opsAcc.journal")} />
-            </DataTable>
+            <DetailHeader title={view.assetNumber} subtitle={view.name} status={{ code: view.status, label: t(`opsAcc.status.${view.status}`, { defaultValue: view.status }) }}
+              meta={[
+                { label: t("opsAcc.fa.cost"), value: view.cost, type: "amount" },
+                { label: t("opsAcc.fa.accumulated"), value: view.accumulatedDepreciation, type: "amount" },
+                { label: t("opsAcc.fa.bookValue"), value: view.bookValue, type: "amount" },
+                { label: t("opsAcc.confirmations.asset.disposedOn"), value: view.disposedOn, type: "date", hidden: view.status !== "disposed" },
+              ]} />
+            <DetailSection title={t("opsAcc.confirmations.asset.details")}>
+              <KeyValueGrid columns={3} items={[
+                { label: t("opsAcc.fa.class"), value: view.className || view.classCode },
+                { label: t("opsAcc.fa.acquired"), value: view.acquisitionDate, type: "date" },
+                { label: t("opsAcc.fa.inService"), value: view.inServiceDate, type: "date" },
+                { label: t("opsAcc.fa.lifeMonths"), value: view.usefulLifeMonths, type: "number", decimals: 0 },
+                { label: t("opsAcc.fa.salvage"), value: view.salvageValue, type: "amount" },
+                { label: t("opsAcc.confirmations.asset.lastPeriod"), value: view.lastPeriod },
+                { label: t("opsAcc.fa.serial"), value: view.serialNumber },
+                { label: t("opsAcc.fa.location"), value: view.location },
+                { label: t("opsAcc.fa.custodian"), value: view.custodian },
+                { label: t("opsAcc.ap.supplier"), value: view.supplierName },
+                { label: t("opsAcc.ap.voucher"), value: view.supplierInvoiceVoucher },
+                { label: t("opsAcc.description"), value: view.description, span: "full", hidden: !view.description },
+              ]} />
+            </DetailSection>
+            <DetailSection title={t("opsAcc.confirmations.asset.accounts")}>
+              <KeyValueGrid columns={3} items={[
+                { label: t("opsAcc.confirmations.asset.assetAccount"), value: view.assetAccount },
+                { label: t("opsAcc.confirmations.asset.accumulatedAccount"), value: view.accumulatedAccount },
+                { label: t("opsAcc.confirmations.asset.expenseAccount"), value: view.expenseAccount },
+              ]} />
+            </DetailSection>
+            <DetailSection title={t("opsAcc.confirmations.asset.schedule")} flush>
+              <DataTable value={view.schedule} dataKey="period" size="small" stripedRows scrollable scrollHeight="320px">
+                <Column field="period" header={t("opsAcc.period")} />
+                <Column header={t("opsAcc.amount")} body={(r) => money(r.amount)} {...numericColumn} />
+                <Column header={t("opsAcc.fa.accumulated")} body={(r) => money(r.accumulated)} {...numericColumn} />
+                <Column header={t("opsAcc.fa.bookValue")} body={(r) => money(r.bookValue)} {...numericColumn} />
+                <Column header={t("opsAcc.statusLabel")} body={(r) => <OpsTag status={r.status} />} />
+                <Column field="journalNumber" header={t("opsAcc.journal")} />
+              </DataTable>
+            </DetailSection>
+            <DetailSection title={t("opsAcc.confirmations.activity")}>
+              <RecordActivityLog entity="fixed_asset" recordId={view.id} />
+            </DetailSection>
           </>
         )}
-      </Dialog>
+      </DetailDialog>
       <DisposeAssetDialog asset={disposing} onHide={() => setDisposing(null)} onDisposed={() => { setDisposing(null); load(); }} />
       <Dialog className="pe-dialog" header={t("opsAcc.fa.newAsset")} visible={!!form} style={{ width: "min(780px, 96vw)" }} onHide={() => setForm(null)}
         footer={<div><Button label={t("opsAcc.cancel")} text onClick={() => setForm(null)} /><Button label={t("opsAcc.save")} icon="pi pi-save" onClick={save} /></div>}>
@@ -143,6 +186,18 @@ export const DepreciationRun = () => {
   const load = useCallback(() => service.depreciationPreview(key).then(setData).catch((e) => showError(toast, e)), [key]);
   useEffect(() => { load(); }, [load]);
   const run = async () => {
+    const ok = await openConfirm({
+      title: t("opsAcc.confirmations.depreciation.title", { period: key }),
+      message: t("opsAcc.confirmations.depreciation.message"),
+      facts: [
+        { label: t("opsAcc.period"), value: key },
+        { label: t("opsAcc.fa.journalDate"), value: data.date, type: "date" },
+        { label: t("opsAcc.fa.assets"), value: data.due.length, type: "number" },
+        { label: t("opsAcc.amount"), value: data.total, type: "amount", emphasis: true },
+      ],
+      confirmLabel: t("opsAcc.confirmations.depreciation.post"),
+    });
+    if (!ok) return;
     try {
       const r = await service.runDepreciation(key);
       showSuccess(toast, t("opsAcc.fa.posted", { period: r.period, amount: money(r.amount), assets: r.assets }));

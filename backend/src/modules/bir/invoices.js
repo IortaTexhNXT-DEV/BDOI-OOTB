@@ -48,6 +48,20 @@ export async function sellerSnapshot() {
   };
 }
 
+/**
+ * Whether invoicing is set up, for the screen: { state: ready | incomplete, missing: [codes] }. Codes: tin and address
+ * (Company master), permit (ATP or CAS acknowledgement number), permitDate (its date), serialRange (from above to).
+ */
+export function invoicingSetup(seller) {
+  const missing = [];
+  if (!seller.tin) missing.push('tin');
+  if (!seller.address) missing.push('address');
+  if (!seller.atpNumber && !seller.casPermitNumber) missing.push('permit');
+  else if (!(seller.casPermitNumber ? seller.casPermitDate : seller.atpDateIssued)) missing.push('permitDate');
+  if (!(seller.serialFrom >= 1) || !(seller.serialTo > seller.serialFrom)) missing.push('serialRange');
+  return { state: missing.length ? 'incomplete' : 'ready', missing };
+}
+
 const lineRow = (l) => ({ lineNo: l.line_no, description: l.description, quantity: Number(l.quantity), unitPrice: Number(l.unit_price), amount: Number(l.amount),
   vatClass: l.vat_class, vatAmount: Number(l.vat_amount), glAccount: l.gl_account, policyNumber: l.policy_number, reference: l.reference });
 export const invoiceRow = (i, lines = null, payments = null) => i && ({
@@ -57,13 +71,13 @@ export const invoiceRow = (i, lines = null, payments = null) => i && ({
   vatableSales: Number(i.vatable_sales), vatExemptSales: Number(i.vat_exempt_sales), zeroRatedSales: Number(i.zero_rated_sales), vatAmount: Number(i.vat_amount),
   totalSales: Number(i.total_sales), totalAmount: Number(i.total_amount), withholdingTax: Number(i.withholding_tax), amountPaid: Number(i.amount_paid), balance: Number(i.balance),
   paymentTerms: i.payment_terms, dueDate: i.due_date ? iso(i.due_date) : null, remarks: i.remarks, status: i.status, journalId: i.journal_id, cancelJournalId: i.cancel_journal_id,
-  cancelReason: i.cancel_reason, cancelledAt: i.cancelled_at, printCount: i.print_count, createdBy: i.created_by, createdAt: i.created_at,
+  cancelReason: i.cancel_reason, cancelReasonCode: i.cancel_reason_code ?? null, cancelledBy: i.cancelled_by, cancelledAt: i.cancelled_at, printCount: i.print_count, createdBy: i.created_by, createdAt: i.created_at,
   eisStatus: i.eis_status ?? null,
   ...(lines ? { lines: lines.map(lineRow) } : {}), ...(payments ? { payments: payments.map(paymentRow) } : {}),
 });
 export const paymentRow = (p) => p && ({ id: p.id, invoiceId: p.invoice_id, ackNumber: p.ack_number, paymentDate: iso(p.payment_date), amount: Number(p.amount),
   ewtAmount: Number(p.ewt_amount), form2307No: p.form_2307_no, paymentMode: p.payment_mode, bankAccount: p.bank_account, referenceNo: p.reference_no,
-  journalId: p.journal_id, status: p.status, cancelReason: p.cancel_reason, createdAt: p.created_at });
+  journalId: p.journal_id, status: p.status, cancelReason: p.cancel_reason, cancelReasonCode: p.cancel_reason_code ?? null, createdAt: p.created_at });
 
 async function vatRate(db) {
   return (await taxCodeRate(db, await getSetting('direct_bill.commission_vat_code', 'VAT12-OUT'))).rate;
@@ -237,8 +251,11 @@ export async function listInvoices(db, q = {}) {
   return rows.map((r) => invoiceRow(r));
 }
 
-/** Cancel an invoice with a reason: kept with its number, the manual invoice's journal reversed, the EIS told. */
-export async function cancelInvoice(db, id, reason, user) {
+/**
+ * Cancel an invoice with a reason: kept with its number, the manual invoice's journal reversed, the EIS told. reason is
+ * the text kept and printed; reasonCode the code of the Reason Codes master (context sales_invoice_cancel) when chosen.
+ */
+export async function cancelInvoice(db, id, reason, user, { reasonCode = null } = {}) {
   const inv = (await db.query('SELECT * FROM sales_invoices WHERE id = $1 FOR UPDATE', [id])).rows[0];
   if (!inv) throw notFound('Sales invoice not found');
   if (inv.status !== 'issued') throw conflict(`Invoice ${inv.invoice_number} is ${inv.status}`);
@@ -246,8 +263,8 @@ export async function cancelInvoice(db, id, reason, user) {
   if (paid) throw conflict(`Invoice ${inv.invoice_number} has payments: cancel the payment acknowledgements first`);
   let rev = null;
   if (inv.journal_id) rev = await reverseJournal(db, inv.journal_id, user, { description: `Cancellation of sales invoice ${inv.invoice_number}: ${reason}` });
-  await db.query(`UPDATE sales_invoices SET status = 'cancelled', cancel_reason = $2, cancelled_by = $3, cancelled_at = now(), cancel_journal_id = $4, balance = 0, updated_at = now() WHERE id = $1`,
-    [id, reason, user?.id ?? null, rev?.id || null]);
+  await db.query(`UPDATE sales_invoices SET status = 'cancelled', cancel_reason = $2, cancel_reason_code = $5, cancelled_by = $3, cancelled_at = now(), cancel_journal_id = $4, balance = 0,
+    updated_at = now() WHERE id = $1`, [id, reason, user?.id ?? null, rev?.id || null, reasonCode]);
   await enqueueInvoice(db, id, 'cancellation', user);
   return getInvoice(db, id);
 }
@@ -274,16 +291,17 @@ export async function recordPayment(db, id, b, user) {
   return paymentRow(p);
 }
 
-export async function cancelPayment(db, paymentId, reason, user) {
+/** Cancel a payment acknowledgement (reasonCode: context invoice_payment_cancel): journal reversed, balance restored. */
+export async function cancelPayment(db, paymentId, reason, user, { reasonCode = null } = {}) {
   const p = (await db.query('SELECT * FROM sales_invoice_payments WHERE id = $1 FOR UPDATE', [paymentId])).rows[0];
   if (!p) throw notFound('Payment not found');
   if (p.status !== 'posted') throw conflict(`Payment ${p.ack_number} is ${p.status}`);
   const rev = p.journal_id ? await reverseJournal(db, p.journal_id, user, { description: `Cancellation of payment ${p.ack_number}: ${reason}` }) : null;
-  await db.query('UPDATE sales_invoice_payments SET status = \'cancelled\', cancel_reason = $2, cancelled_by = $3, cancelled_at = now(), cancel_journal_id = $4 WHERE id = $1',
-    [paymentId, reason, user?.id ?? null, rev?.id || null]);
+  await db.query(`UPDATE sales_invoice_payments SET status = 'cancelled', cancel_reason = $2, cancel_reason_code = $5, cancelled_by = $3, cancelled_at = now(), cancel_journal_id = $4
+    WHERE id = $1`, [paymentId, reason, user?.id ?? null, rev?.id || null, reasonCode]);
   const applied = round2(Number(p.amount) + Number(p.ewt_amount));
   await db.query('UPDATE sales_invoices SET amount_paid = amount_paid - $2, balance = balance + $2, updated_at = now() WHERE id = $1', [p.invoice_id, applied]);
-  return paymentRow({ ...p, status: 'cancelled', cancel_reason: reason });
+  return paymentRow({ ...p, status: 'cancelled', cancel_reason: reason, cancel_reason_code: reasonCode });
 }
 
 const m2 = (v) => round2(v).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });

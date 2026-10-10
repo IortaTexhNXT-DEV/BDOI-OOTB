@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
@@ -16,6 +15,7 @@ import { Toast } from "primereact/toast";
 import numberingService from "../../../services/numberingService";
 import { formatDate } from "../../../utility/dateFormat";
 import DateField from "../../../components/DateField";
+import { openConfirm } from "../../../components/ConfirmDialog";
 import "../../Administration/index.scss";
 
 const POLICY_TYPES = ["any", "new", "renewal"];
@@ -127,22 +127,26 @@ const CommissionRateMatrix = () => {
     }
   };
 
-  const remove = (r) =>
-    confirmDialog({
-      message: k("deleteConfirm"),
-      header: k("title"),
-      icon: "pi pi-exclamation-triangle",
-      acceptClassName: "p-button-danger",
-      accept: async () => {
-        try {
-          await numberingService.deleteRate(r.id);
-          toast.current?.show({ severity: "success", summary: k("title"), detail: k("deleted") });
-          load();
-        } catch (err) {
-          error(err);
-        }
-      },
+  const remove = async (r) => {
+    const deleted = await openConfirm({
+      title: k("deleteTitle"),
+      severity: "danger",
+      message: k("deleteMessage"),
+      facts: [
+        { label: k("insurer"), value: r.insurerName || k("anyInsurer") },
+        { label: k("product"), value: r.productName || k("anyProduct") },
+        { label: k("lob"), value: r.lineOfBusiness ? lobLabel(r.lineOfBusiness) : k("anyLob") },
+        { label: k("policyType"), value: k(`policyTypes.${r.policyType}`) },
+        { label: k("rate"), value: pct(r.rate) },
+        { label: k("effectiveFrom"), value: r.effectiveFrom, type: "date" },
+      ],
+      confirmLabel: k("deleteAction"),
+      onConfirm: () => numberingService.deleteRate(r.id),
     });
+    if (!deleted) return;
+    toast.current?.show({ severity: "success", summary: k("title"), detail: k("deleted") });
+    load();
+  };
 
   const runTest = async () => {
     try {
@@ -163,7 +167,6 @@ const CommissionRateMatrix = () => {
   return (
     <div className="admin__page dn__page">
       <Toast ref={toast} />
-      <ConfirmDialog />
       <BreadCrumb
         model={[{ label: t("numberingMasters.finance") }, { label: k("title") }]}
         home={{ label: t("numberingMasters.master") }}
