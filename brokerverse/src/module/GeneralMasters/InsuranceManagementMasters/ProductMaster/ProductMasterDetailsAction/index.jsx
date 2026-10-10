@@ -17,12 +17,14 @@ import {
 } from "../store/insuranceProductMiddleware";
 import mastersService from "../../../../../services/mastersService";
 import useMasterOptions from "../../../common/useMasterOptions";
+import { RecordValue, useRecordView } from "../../../../../components/RecordView";
 
 const BUSINESS_TYPES = ["package", "non_package"];
 const CUSTOMER_SEGMENTS = ["retail", "corporate", "both"];
 
 const ProductMatserDetailsAction = ({ action }) => {
   const { t } = useTranslation();
+  const readOnly = useRecordView();
   const dispatch = useDispatch();
   const { id } = useParams();
   const toastRef = useRef(null);
@@ -229,7 +231,10 @@ const ProductMatserDetailsAction = ({ action }) => {
                 </div>
               )}
           </div>
-          <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
+          <div className="col-12 md:col-4 lg:col-4 xl:col-4 ">
+            {readOnly ? (
+              <RecordValue label={t("generalMasters.lineOfBusiness")} value={lobOptions.find((o) => o.value === formik.values.lineofBusiness)?.label || formik.values.lineofBusiness} />
+            ) : (<>
             <label className="input__label__corrections block mb-1" htmlFor="lineofBusiness">{t("generalMasters.lineOfBusiness")}</label>
             <Dropdown
               inputId="lineofBusiness"
@@ -249,13 +254,17 @@ const ProductMatserDetailsAction = ({ action }) => {
                 {formik.errors.lineofBusiness}
               </div>
             )}
+            </>)}
           </div>
           {/* Package: tariff products sold quickly (quick quote); non-package: placed per risk through the slips */}
           {[
             { name: "businessType", options: BUSINESS_TYPES, label: t("productClassification.businessType"), prefix: "productClassification.businessTypes" },
             { name: "customerSegment", options: CUSTOMER_SEGMENTS, label: t("productClassification.customerSegment"), prefix: "productClassification.segments" },
           ].map((f) => (
-            <div key={f.name} className="col-12 md:col-3 lg:col-3 xl:col-3 ">
+            <div key={f.name} className="col-12 md:col-4 lg:col-4 xl:col-4 ">
+              {readOnly ? (
+                <RecordValue label={f.label} value={formik.values[f.name] ? t(`${f.prefix}.${formik.values[f.name]}`) : null} />
+              ) : (<>
               <label className="input__label__corrections block mb-1" htmlFor={f.name}>{f.label}</label>
               <Dropdown
                 inputId={f.name}
@@ -269,6 +278,7 @@ const ProductMatserDetailsAction = ({ action }) => {
               {formik.touched[f.name] && formik.errors[f.name] && (
                 <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors[f.name]}</div>
               )}
+              </>)}
             </div>
           ))}
           {action !== "add" && (<>
