@@ -89,7 +89,7 @@ const StatementFormats = () => {
         </DataTable>
       </div>
 
-      <Dialog className="pe-dialog" header={editing ? (editing.isNew ? t("bankReconciliation.addFormat") : v.code) : ""} visible={!!editing} style={{ width: "min(860px, 96vw)" }} onHide={() => setEditing(null)}
+      <Dialog className="pe-dialog" header={editing ? (editing.isNew ? t("bankReconciliation.addFormat") : t("bankReconciliation.editFormat", { name: v.name || v.code })) : ""} visible={!!editing} style={{ width: "min(860px, 96vw)" }} onHide={() => setEditing(null)}
         footer={(
           <div>
             <Button label={t("bankReconciliation.cancel")} text onClick={() => setEditing(null)} />

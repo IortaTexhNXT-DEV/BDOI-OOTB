@@ -19,7 +19,7 @@ export const fundRow = (f) => ({ id: f.id, code: f.code, pettyCashCode: f.code, 
   departmentCode: f.department_code, custodianUserId: f.custodian_user_id, status: f.status, journalId: f.journal_id, createdAt: f.created_at });
 export const requestRow = (r, lines = []) => ({ id: r.id, requestNumber: r.request_number, fundId: r.fund_id, pettyCashCode: r.fund_code, requesterName: r.requester_name,
   requestDate: r.request_date, departmentCode: r.department_code, branchCode: r.branch_code, purpose: r.purpose, totalAmount: Number(r.total_amount), status: r.status,
-  approvedBy: r.approved_by, approvedAt: r.approved_at, rejectionReason: r.rejection_reason, createdBy: r.created_by, createdAt: r.created_at,
+  approvedBy: r.approved_by, approvedByName: r.approved_by_name || null, approvedAt: r.approved_at, rejectionReason: r.rejection_reason, createdBy: r.created_by, createdAt: r.created_at,
   lines: lines.map((l) => ({ id: l.id, narration: l.narration, amount: Number(l.amount), expenseAccount: l.expense_account })) });
 export const disbursementRow = (d) => ({ id: d.id, transactionNumber: d.transaction_number, transactionCode: d.transaction_code, fundId: d.fund_id, pettyCashCode: d.fund_code,
   requestId: d.request_id, requestNumber: d.request_number, criteria: d.criteria, expenseAccount: d.expense_account, amount: Number(d.amount), vat: Number(d.vat), wht: Number(d.wht),
@@ -69,7 +69,8 @@ export async function updateFund(db, id, b) {
     str(b.branchCode), str(b.departmentCode), b.custodianUserId || null, b.status || null])).rows[0];
 }
 
-const REQ_SQL = 'SELECT r.*, f.code AS fund_code FROM petty_cash_requests r JOIN petty_cash_funds f ON f.id = r.fund_id';
+const REQ_SQL = `SELECT r.*, f.code AS fund_code, COALESCE(au.display_name, au.username) AS approved_by_name
+  FROM petty_cash_requests r JOIN petty_cash_funds f ON f.id = r.fund_id LEFT JOIN users au ON au.id = r.approved_by`;
 export async function getRequest(db, id) {
   const r = (await db.query(`${REQ_SQL} WHERE r.id = $1 OR r.request_number = $1`, [id])).rows[0];
   if (!r) throw notFound('Petty cash request not found');

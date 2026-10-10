@@ -436,10 +436,10 @@ function Detailview() {
             : `${actionToast} successfully`
         }
       />
-      <div>
-        <span onClick={() => Navigate(-1)}>
+      <div className="flex align-items-center gap-2">
+        <button type="button" className="p-link" onClick={() => Navigate(-1)} aria-label={t("common.back")}>
           <SvgBackicon />
-        </span>
+        </button>
 
         <label className="label_header">
           {t("paymentVoucher.disbursementDetails")}

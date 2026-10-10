@@ -74,9 +74,7 @@ const AuditTimeline = ({ entity, recordId, emptyText, limit }) => {
   return (
     <div className="bv-audit-timeline">
       <div className="bv-audit-timeline__bar">
-        <span className="bv-audit-count">
-          {state.error ? state.error : t("auditTrail.eventCount", { count: state.events.length, defaultValue: state.events.length === 1 ? "1 event" : `${state.events.length} events` })}
-        </span>
+        <span className="bv-audit-count">{state.error || null}</span>
         <Button icon="pi pi-refresh" text rounded size="small" className="bv-audit-icon-btn" onClick={load} loading={state.loading}
           aria-label={t("auditTrail.refresh", { defaultValue: "Refresh" })} tooltip={t("auditTrail.refresh", { defaultValue: "Refresh" })} tooltipOptions={{ position: "top" }} />
       </div>

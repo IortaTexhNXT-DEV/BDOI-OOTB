@@ -11,6 +11,9 @@ import { Toast } from "primereact/toast";
 import periodEndService from "../../services/periodEndService";
 import { PageHeader, StatusTag, dateTime, previousPeriod, showError } from "./common";
 
+/** "Name, dd/mm/yyyy HH:mm" of a step, the name alone when its time is not kept; an em dash before it happens. */
+const byOn = (name, at) => (name ? [name, at ? dateTime(at) : null].filter(Boolean).join(", ") : "—");
+
 /** Accounts > Period End > Month-End Close: close runs per period (MEC numbers) and a new run for an open period. */
 const MonthEndClose = () => {
   const { t } = useTranslation();
@@ -81,8 +84,8 @@ const MonthEndClose = () => {
           <Column field="failedChecks" header={t("periodEnd.blockingFailures")} className="bv-num" headerClassName="bv-num" />
           <Column field="warnings" header={t("periodEnd.warnings")} className="bv-num" headerClassName="bv-num" />
           <Column field="journalCount" header={t("periodEnd.journals")} className="bv-num" headerClassName="bv-num" />
-          <Column header={t("periodEnd.preparedBy")} body={(r) => (r.preparedByName ? `${r.preparedByName}, ${dateTime(r.preparedAt)}` : "-")} />
-          <Column header={t("periodEnd.approvedBy")} body={(r) => (r.approvedByName ? `${r.approvedByName}, ${dateTime(r.approvedAt)}` : "-")} />
+          <Column header={t("periodEnd.preparedBy")} body={(r) => byOn(r.preparedByName, r.preparedAt || r.openedAt)} />
+          <Column header={t("periodEnd.approvedBy")} body={(r) => byOn(r.approvedByName, r.approvedAt)} />
         </DataTable>
       </div>
 

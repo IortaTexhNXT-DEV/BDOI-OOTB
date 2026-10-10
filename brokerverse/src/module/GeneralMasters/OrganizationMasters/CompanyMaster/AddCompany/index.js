@@ -23,6 +23,10 @@ import {
 import useMasterOptions from "../../../common/useMasterOptions";
 import { phoneCountryCode } from "../../../../../utility/phoneFormat";
 import { Checkbox } from "primereact/checkbox";
+import DetailHeader from "../../../../../components/DetailHeader";
+import DetailSection from "../../../../../components/DetailSection";
+import KeyValueGrid from "../../../../../components/KeyValueGrid";
+import { RecordActivityLog } from "../../../../../components/ActivityLog";
 import { BASE_URL } from "../../../../../utility/constant";
 import authService from "../../../../../services/authService";
 
@@ -208,6 +212,44 @@ function AddCompany({ action }) {
   };
   const view = action === "view";
   const record = action === "view" ? companyView || {} : formik.values;
+
+  // the company as a record: its facts (empty ones as a dash, the phone written once) and its history
+  if (view) {
+    const c = companyView || {};
+    const address = [c.AddressLine1, c.AddressLine2, c.AddressLine3, [c.City, c.State, c.PinCode].filter(Boolean).join(", "), c.Country].filter(Boolean).join("\n");
+    return (
+      <div className="overall__addcompany__container">
+        <div className="flex align-items-center gap-2">
+          <button type="button" className="p-link" onClick={() => Navigate(-1)} aria-label={t("common.back")}><SvgBackicon /></button>
+          <label className="label_header">{t("generalMasters.companyDetails")}</label>
+        </div>
+        <BreadCrumb model={items} home={home} className="breadcrumbs_container" separatorIcon={<SvgDot color="currentColor" />} />
+        <Card style={{ marginTop: "20px" }}>
+          <DetailHeader title={c.CompanyName || c.CompanyCode || ""} subtitle={c.CompanyCode}
+            status={c.IsPrimary === true || c.IsPrimary === "true" ? { code: "active", label: t("generalMasters.primaryCompany") } : null}
+            actions={(logoPreview || c.Logo) ? <img src={logoPreview || c.Logo} alt="" style={{ maxHeight: 40, maxWidth: 160 }} onError={(e) => { e.currentTarget.style.display = "none"; }} /> : null} />
+          <DetailSection title={t("generalMasters.companyDetails")}>
+            <KeyValueGrid columns={3} items={[
+              { label: t("generalMasters.licenseNumber"), value: c.LicenseNumber },
+              { label: "TIN", value: c.TIN },
+              { label: "RDO", value: c.RDOCode },
+              { label: t("generalMasters.emailId"), value: c.EmailID },
+              { label: t("generalMasters.phoneNumber"), value: c.PhoneNumber },
+              { label: t("generalMasters.fax"), value: c.Fax },
+              { label: t("generalMasters.websiteLink"), value: c.Websitelink },
+              { label: t("generalMasters.address"), value: address, span: 2 },
+              { label: t("generalMasters.description"), value: c.Description, span: "full", hidden: !c.Description },
+            ]} />
+          </DetailSection>
+          {c.id ? (
+            <DetailSection title={t("detailView.activity")}>
+              <RecordActivityLog entity="master:company" recordId={c.id} />
+            </DetailSection>
+          ) : null}
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="overall__addcompany__container">

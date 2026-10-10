@@ -162,8 +162,8 @@ const ReconciliationRun = () => {
           <div className="pe-muted">{agree ? t("bankReconciliation.balancesAgree") : t("bankReconciliation.balancesDiffer")}</div></div>
         <div className="pe-kpi"><div className="pe-kpi-label">{t("bankReconciliation.unmatched")}</div><div className="pe-kpi-value">{s.unmatchedBankLines ?? 0} / {s.unmatchedBookLines ?? 0}</div>
           <div className="pe-muted">{t("bankReconciliation.bankSlashBook")}</div></div>
-        <div className="pe-kpi"><div className="pe-kpi-label">{t("bankReconciliation.preparedBy")}</div><div className="pe-kpi-value" style={{ fontSize: "1rem" }}>{rec.preparedByName || "-"}</div><div className="pe-muted">{dateTime(rec.preparedAt)}</div></div>
-        <div className="pe-kpi"><div className="pe-kpi-label">{t("bankReconciliation.approvedBy")}</div><div className="pe-kpi-value" style={{ fontSize: "1rem" }}>{rec.approvedByName || "-"}</div><div className="pe-muted">{dateTime(rec.approvedAt)}</div></div>
+        <div className="pe-kpi"><div className="pe-kpi-label">{t("bankReconciliation.preparedBy")}</div><div className="pe-kpi-value" style={{ fontSize: "1rem" }}>{rec.preparedByName || t("bankReconciliation.notYetPrepared")}</div><div className="pe-muted">{rec.preparedAt ? dateTime(rec.preparedAt) : null}</div></div>
+        <div className="pe-kpi"><div className="pe-kpi-label">{t("bankReconciliation.approvedBy")}</div><div className="pe-kpi-value" style={{ fontSize: "1rem" }}>{rec.approvedByName || t("bankReconciliation.notYetApproved")}</div><div className="pe-muted">{rec.approvedAt ? dateTime(rec.approvedAt) : null}</div></div>
       </div>
       {s.noStatement && <div className="br-notice br-notice-bad mt-3">{t("bankReconciliation.noStatementHelp")}</div>}
       {rec.reopenRemarks && rec.status === "draft" && <div className="br-notice mt-3"><b>{t("bankReconciliation.reopenedBy", { name: rec.reopenedByName || "" })}</b> {rec.reopenRemarks}</div>}

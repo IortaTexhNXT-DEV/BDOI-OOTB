@@ -177,16 +177,15 @@ const BrokerSlipDetail = () => {
       <PageHeader title={`${t("placement.brokerSlip.title")} ${slip.slipNumber}`} subtitle={`${slip.insuredName || slip.customerName} - ${slip.productType || ""}`} onBack={() => navigate("/placement/broker-slips")}>
         <StatusTag status={slip.status} />
         <Button label={t("placement.actions.printSlip")} icon="pi pi-print" severity="secondary" outlined onClick={() => printSlip()} className="ml-2" />
-        {!["draft", "cancelled"].includes(slip.status) && canOpen("/sales/comparison-reports") && (
+        {/* a comparison needs two offers; until then the report is not offered */}
+        {!["draft", "cancelled"].includes(slip.status) && offered.length >= 2 && canOpen("/sales/comparison-reports") && (
           <Button label={t("distribution.cr.clientReport", "Client comparison report")} icon="pi pi-star" severity="secondary" outlined className="ml-2"
-            disabled={offered.length < 2} tooltip={offered.length < 2 ? t("distribution.cr.notYet", { count: offered.length }) : undefined}
-            tooltipOptions={{ showOnDisabled: true, position: "bottom" }}
             onClick={() => navigate(`/sales/comparison-reports?brokerSlipId=${encodeURIComponent(slip.id)}&slipNumber=${encodeURIComponent(slip.slipNumber)}`)} />
         )}
         {OPEN.includes(slip.status) && <Button label={t("placement.actions.addInsurer")} icon="pi pi-plus" severity="secondary" outlined onClick={() => setAddInsurer({ insurer: null })} className="ml-2" />}
         {slip.status === "draft" && <Button label={t("placement.actions.submitToMarket")} icon="pi pi-send" onClick={() => act(() => placementService.submitSlip(slip.id), (r) => withQueuedNotice(t("placement.messages.submitted", { count: r.sent?.length || 0 }), emailSending))} loading={busy} className="ml-2" />}
-        {OPEN.includes(slip.status) && <Button label={t("placement.actions.closeSlip")} icon="pi pi-lock" severity="secondary" text onClick={() => endSlip("closed")} className="ml-2" />}
-        {OPEN.includes(slip.status) && <Button label={t("placement.actions.cancelSlip")} icon="pi pi-times" severity="danger" text onClick={() => endSlip("cancelled")} className="ml-2" />}
+        {OPEN.includes(slip.status) && <Button label={t("placement.actions.closeSlip")} icon="pi pi-check-square" severity="secondary" outlined onClick={() => endSlip("closed")} className="ml-2" />}
+        {OPEN.includes(slip.status) && <Button label={t("placement.actions.cancelSlip")} icon="pi pi-times" severity="danger" outlined onClick={() => endSlip("cancelled")} className="ml-2" />}
       </PageHeader>
 
       <div className="placement-card"><JourneyTimeline steps={steps} /></div>
@@ -230,36 +229,46 @@ const BrokerSlipDetail = () => {
                 {offered.length ? (
                   <div className="table-scroll"><table className="participant-table compare">
                     <thead><tr>
-                      <th className="center">{t("placement.compare.select")}</th><th className="center">{t("placement.participants.lead")}</th><th>#</th><th>{t("placement.fields.insurer")}</th>
+                      <th className="center">{t("placement.compare.select")}</th><th className="center">{t("placement.participants.lead")}</th><th>{t("placement.fields.insurer")}</th>
                       <th className="num">{t("placement.fields.grossPremium")}</th><th className="num">{t("placement.compare.vsBest")}</th><th className="num">{t("placement.fields.rate")}</th>
-                      <th>{t("placement.fields.deductibles")}</th><th>{t("placement.fields.terms")}</th><th className="num">{t("placement.fields.line")}</th><th className="num">{t("placement.compare.shareTaken")}</th>
+                      <th>{t("placement.compare.deductiblesTerms")}</th><th className="num">{t("placement.fields.line")}</th><th className="num">{t("placement.compare.shareTaken")}</th>
                     </tr></thead>
                     <tbody>
                       {offered.map((o) => (
                         <tr key={o.id} className={o.isBest ? "best-row" : ""}>
                           <td className="center"><Checkbox checked={selected.includes(o.id)} disabled={!canSelect} onChange={(e) => setSelected(e.checked ? [...selected, o.id] : selected.filter((x) => x !== o.id))} aria-label={o.insuranceCompanyName} /></td>
                           <td className="center"><RadioButton checked={lead?.id === o.id && selected.includes(o.id)} disabled={!selected.includes(o.id)} onChange={() => setLeadOfferId(o.id)} aria-label={t("placement.participants.lead")} /></td>
-                          <td>{o.rank}{o.isBest && <Tag value={t("placement.compare.best")} severity="success" className="ml-2" />}</td>
-                          <td>{o.insuranceCompanyName}</td>
+                          <td className="insurer-cell">
+                            <span className="rank">{o.rank}.</span> {o.insuranceCompanyName}
+                            {o.isBest && <Tag value={t("placement.compare.best")} severity="success" className="ml-2" />}
+                          </td>
                           <td className="num"><strong>{formatCurrency(o.premiumTotal)}</strong></td>
-                          <td className="num">{o.differenceFromBest ? `+${formatCurrency(o.differenceFromBest)}` : "-"}</td>
-                          <td className="num">{o.rate == null ? "-" : `${o.rate}%`}</td>
-                          <td>{o.deductibles || "-"}</td>
-                          <td>{o.terms || "-"}</td>
+                          <td className="num">{o.differenceFromBest ? `+${formatCurrency(o.differenceFromBest)}` : "—"}</td>
+                          <td className="num">{o.rate == null ? "—" : `${o.rate}%`}</td>
+                          <td className="terms-cell">
+                            {o.deductibles || o.terms ? (
+                              <>
+                                {o.deductibles ? <span>{o.deductibles}</span> : null}
+                                {o.terms ? <span className="muted">{o.terms}</span> : null}
+                              </>
+                            ) : "—"}
+                          </td>
                           <td className="num">{o.offeredShare}%</td>
-                          <td className="num" style={{ width: "8rem" }}>
+                          <td className="num share-cell">
                             <InputNumber value={shareOf(o)} onValueChange={(e) => setShares({ ...shares, [o.id]: e.value })} suffix="%" min={0} max={100} maxFractionDigits={4} disabled={!selected.includes(o.id)} inputClassName="w-full text-right" />
                           </td>
                         </tr>
                       ))}
                     </tbody>
-                    <tfoot><tr><td colSpan={10} className="num">{t("placement.compare.selectedTotal")}</td>
+                    <tfoot><tr><td colSpan={8} className="num">{t("placement.compare.selectedTotal")}</td>
                       <td className="num"><strong className={Math.abs(selectedTotal - 100) < 0.0001 ? "total-ok" : "total-bad"}>{selectedTotal}%</strong></td></tr></tfoot>
                   </table></div>
                 ) : <div className="empty-note">{t("placement.compare.noOffers")}</div>}
                 {canSelect && (
                   <div className="form-actions">
                     {chosen.length > 1 && lead ? <span className="muted">{t("placement.compare.leadIs", { lead: lead.insuranceCompanyName })}</span> : null}
+                    {!chosen.length ? <span className="muted">{t("placement.compare.selectFirst")}</span> : null}
+                    {chosen.length > 0 && Math.abs(selectedTotal - 100) > 0.0001 ? <span className="muted">{t("placement.compare.sharesMustTotal", { total: selectedTotal })}</span> : null}
                     {journey.quotationSlip !== "skip" && <Button label={t("placement.actions.prepareQuotation")} icon="pi pi-file-edit" disabled={!chosen.length || Math.abs(selectedTotal - 100) > 0.0001} loading={busy} onClick={() => next("quotation")} />}
                     {journey.quotationSlip !== "required" && journey.placementSlip !== "skip" && (
                       <Button label={t("placement.actions.preparePlacement")} icon="pi pi-briefcase" severity={journey.quotationSlip === "skip" ? undefined : "secondary"} outlined={journey.quotationSlip !== "skip"}

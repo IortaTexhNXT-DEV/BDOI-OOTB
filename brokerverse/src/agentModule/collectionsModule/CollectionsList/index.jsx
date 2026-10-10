@@ -43,6 +43,7 @@ const CollectionsList = () => {
   const navigate = useNavigate();
   const [sendingReminders, setSendingReminders] = useState(false);
   const [showOpenItems, setShowOpenItems] = useState(false);
+  const [levelBands, setLevelBands] = useState([30, 60]);
 
   const statusOptions = [
     { label: t("collectionsList.allStatus"), value: "" },
@@ -54,11 +55,13 @@ const CollectionsList = () => {
     { label: t("collectionsList.escalated"), value: "Escalated" },
   ];
 
+  // the day bands come from the collections.overdue_levels setting, as the server applies them
+  const [l1, l2] = levelBands;
   const overdueLevelOptions = [
-    { label: "All Levels", value: "" },
-    { label: "Level 1 (1-30 days)", value: "1" },
-    { label: "Level 2 (31-60 days)", value: "2" },
-    { label: "Level 3 (60+ days)", value: "3" },
+    { label: t("collectionsList.allLevels"), value: "" },
+    { label: t("collectionsList.levelBand", { level: 1, from: 1, to: l1 }), value: "1" },
+    { label: t("collectionsList.levelBand", { level: 2, from: l1 + 1, to: l2 }), value: "2" },
+    { label: t("collectionsList.levelBeyond", { level: 3, from: l2 + 1 }), value: "3" },
   ];
 
   useEffect(() => {
@@ -90,6 +93,7 @@ const CollectionsList = () => {
       if (result.success) {
         setCollections(result.data);
         setTotalRecords(result.pagination.total);
+        if (Array.isArray(result.overdueLevels) && result.overdueLevels.length === 2) setLevelBands(result.overdueLevels.map(Number));
       }
     } catch (error) {
       logger.error("Load collections error:", error);

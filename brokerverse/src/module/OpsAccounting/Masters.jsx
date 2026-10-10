@@ -11,7 +11,7 @@ const page = (type, key, group, columns, extra) => {
   const Screen = () => {
     const { t } = useTranslation();
     const more = useMemo(() => (extra ? extra(t) : {}), [t]);
-    return <MasterRecordsPage type={type} title={t(`opsAcc.masters.${key}.title`)} intro={t(`opsAcc.masters.${key}.intro`)} group={t(group)} section={t(`opsAcc.masters.${key}.section`)} columns={columns} {...more} />;
+    return <MasterRecordsPage type={type} title={t(`opsAcc.masters.${key}.title`)} item={t(`opsAcc.masters.${key}.item`)} intro={t(`opsAcc.masters.${key}.intro`)} group={t(group)} section={t(`opsAcc.masters.${key}.section`)} columns={columns} {...more} />;
   };
   Screen.displayName = `Master_${key}`;
   return Screen;

@@ -63,6 +63,9 @@ export const toIsoDate = (value) => {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 };
 
+/** Business time zone (System Settings general.timezone, e.g. "Asia/Manila"); null: the browser's own. */
+let activeTimeZone = null;
+
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 /**
@@ -75,6 +78,13 @@ const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 export const formatDate = (value, { withTime = false, empty = "-" } = {}) => {
   const date = toDate(value);
   if (!date) return typeof value === "string" && value.trim() ? value : empty;
+  // an instant (a time stamp from the API, or any value shown with its time) is read in the business time zone
+  const calendarDay = typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value.trim());
+  const instant = !calendarDay && (withTime || typeof value === "number" || (typeof value === "string" && /\d{2}:\d{2}/.test(value)));
+  if (instant && activeTimeZone) {
+    const parts = instantParts(date);
+    return withTime ? parts.text : parts.date;
+  }
   const pad = (n) => String(n).padStart(2, "0");
   const text = activeDateFormat
     .replace("YYYY", String(date.getFullYear()))
@@ -85,8 +95,6 @@ export const formatDate = (value, { withTime = false, empty = "-" } = {}) => {
   return withTime ? `${text} ${pad(date.getHours())}:${pad(date.getMinutes())}` : text;
 };
 
-/** Business time zone (System Settings general.timezone, e.g. "Asia/Manila"); null: the browser's own. */
-let activeTimeZone = null;
 
 const validZone = (zone) => {
   try {

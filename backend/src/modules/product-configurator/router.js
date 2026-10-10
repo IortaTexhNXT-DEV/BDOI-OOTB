@@ -85,8 +85,10 @@ define({
   method: 'POST', path: '/products/:id/versions', summary: 'Create the next draft version (clones configuration and components)', screen: 'Product Configurator > Template > New Version',
   middleware: write, request: { version: 'v4', effectiveDate: '2027-01-01' }, response: { success: true, data: { ...tpl, status: 'Draft', version: 'v4' } },
   handler: async (req, res) => {
+    // the version it was copied from is the "before" of the new one, so its history says what differs
+    const source = svc.templateOut(await svc.getTemplateRow({ id: req.params.id }));
     const t = await svc.newVersion(req.params.id, req.body || {}, req.user);
-    await audit(req, { entity: 'product_template', entityId: t.id, action: 'new-version', after: t });
+    await audit(req, { entity: 'product_template', entityId: t.id, action: 'new-version', before: source, after: t });
     created(res, t, 'New version created');
   },
 });

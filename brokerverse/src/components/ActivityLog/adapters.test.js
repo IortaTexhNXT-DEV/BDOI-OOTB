@@ -66,6 +66,10 @@ describe("activity log adapters", () => {
     const [w] = fromWarrantyActions([{ id: 2, action: "request-cancellation", notes: "Unpaid", endorsementNumber: "END-1", createdBy: "Rosa Finance", createdAt: "2026-10-01T00:00:00Z" }],
       { actionLabels: { "request-cancellation": "Cancellation requested" } });
     expect(w).toMatchObject({ actionLabel: "Cancellation requested", user: { displayName: "Rosa Finance" }, remarks: "Unpaid" });
+    const [sms] = fromWarrantyActions([{ id: "col-4", action: "collection-sms", createdBy: "Rosa Finance", createdByRoles: ["Accounting", "Collections"],
+      commitmentDate: "2026-10-20", createdAt: "2026-10-02T00:00:00Z" }]);
+    expect(sms).toMatchObject({ user: { displayName: "Rosa Finance", role: "Accounting, Collections" } });
+    expect(sms.changes.map((c) => c.after)).toEqual(["20/10/2026"]);
     const [f] = fromCollectionActions([{ id: 3, actionType: "Call", actionDate: "2026-10-01T03:00:00Z", actionBy: "c.agent", actionByName: "Carla Agent", actionByRoles: ["Collections"],
       callOutcome: "WrongNumber", notes: "No answer", commitmentDate: "2026-10-15" }]);
     expect(f).toMatchObject({ actionCode: "Call", user: { displayName: "Carla Agent", username: "c.agent", role: "Collections" } });

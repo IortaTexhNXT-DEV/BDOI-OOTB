@@ -20,6 +20,8 @@ import { companyName } from '../../lib/letterhead.js';
 import { registerMessageType } from './framework/registry.js';
 import { enqueue, processOutbox } from './framework/outbox.js';
 import { formatNumber } from './adapters/http.js';
+import { printFormat } from '../../lib/pdf/index.js';
+import { DEFAULT_FORMAT, formatDate } from '../../lib/pdf/format.js';
 
 export const EVENTS = ['renewal_notice', 'payment_reminder', 'claim_update', 'ctpl_authenticated', 'general'];
 export const CHANNELS = ['sms', 'viber'];
@@ -31,10 +33,21 @@ registerMessageType({ type: 'viber.send', kind: 'messaging', label: 'Viber busin
 
 /** Placeholders a template may use, with an example (shown on the template screen). */
 export const PLACEHOLDERS = {
-  clientName: 'Maria Santos', companyName: 'iorta TechNXT Corp.', policyNumber: 'PC-MLY-2026-000101', insurer: 'Malayan Insurance Co., Inc.', expiryDate: '2026-11-03',
+  clientName: 'Maria Santos', companyName: 'Insurance Broker Inc.', policyNumber: 'PC-MLY-2026-000101', insurer: 'Malayan Insurance Co., Inc.', expiryDate: '2026-11-03',
   daysToExpiry: '30', billNumber: 'BILL-2026-00012', amountDue: '12,450.00', dueDate: '2026-10-10', claimNumber: 'CLM-2026-00031', claimStatus: 'In review',
   cocNumber: 'MIC-00012345', authCode: 'A1B2C3D4E5F6',
 };
+
+/**
+ * The examples as a message would read them here: the company of the letterhead and the dates in the configured
+ * date format, a month and a day from today.
+ */
+export async function placeholderExamples() {
+  const fmt = await printFormat().catch(() => DEFAULT_FORMAT);
+  const day = await today();
+  return { ...PLACEHOLDERS, companyName: (await companyName().catch(() => null)) || PLACEHOLDERS.companyName,
+    expiryDate: formatDate(addDays(day, Number(PLACEHOLDERS.daysToExpiry)), fmt), dueDate: formatDate(addDays(day, 7), fmt) };
+}
 
 export const toTemplate = (t) => ({
   code: t.code, name: t.name, channel: t.channel, event: t.event, body: t.body, consentPurpose: t.consent_purpose, connectorCode: t.connector_code, active: t.active,

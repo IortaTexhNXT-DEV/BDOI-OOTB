@@ -105,7 +105,7 @@ const TransactionTypes = () => {
         </DataTable>
       </div>}
 
-      <Dialog className="pe-dialog" header={editing ? (editing.isNew ? t("bankReconciliation.addType") : v.code) : ""} visible={!!editing} style={{ width: "min(720px, 96vw)" }} onHide={() => setEditing(null)}
+      <Dialog className="pe-dialog" header={editing ? (editing.isNew ? t("bankReconciliation.addType") : t("bankReconciliation.editType", { name: v.name || v.code })) : ""} visible={!!editing} style={{ width: "min(720px, 96vw)" }} onHide={() => setEditing(null)}
         footer={(
           <div>
             <Button label={t("bankReconciliation.cancel")} text onClick={() => setEditing(null)} />

@@ -135,13 +135,15 @@ async function renderFile(format, def, result, meta) {
   if (format === 'csv') return Buffer.from(toCsv(columns, totalRow ? [...rows, totalRow] : rows), 'utf8');
   if (format === 'pdf') {
     const ctx = meta.print;
+    // columns marked pdf: false (detail that does not fit a printed page) stay in the Excel and CSV files only
+    const printed = columns.filter((c) => c.pdf !== false);
     const params = `${describeParams(result.params, ctx.format)}   |   Currency ${meta.currency}   |   ${result.total} row${result.total === 1 ? '' : 's'}`;
     // the report's summary figures (net income, totals, counts) under the table
     const AMOUNT = /amount|premium|income|expense|total|balance|commission|due|assets|liabilities|equity|net|vat|tax|payable|receivable|remitted|outstanding/i;
     const summary = Object.entries(result.summary || {}).filter(([, v]) => v !== null && v !== undefined && v !== '' && typeof v !== 'object')
       .map(([k, v]) => [humanize(k), Number.isFinite(Number(v)) ? formatAmount(Number(v), AMOUNT.test(k) || !Number.isInteger(Number(v)) ? ctx.format?.decimals ?? 2 : 0) : String(v)]);
     const sections = summary.length ? [{ heading: 'Summary', table: { columns: ['Item', { label: 'Value', align: 'right' }], widths: [300, 160], rows: summary } }] : [];
-    return buildReportPdf({ ...ctx, title: def.name, params, columns, rows, totals: Object.keys(totals).length ? totals : null, pageSize: meta.pageSize, sections,
+    return buildReportPdf({ ...ctx, title: def.name, params, columns: printed, rows, totals: Object.keys(totals).length ? totals : null, pageSize: meta.pageSize, sections,
       footerNote: ctx.brand?.reportFooterText || undefined });
   }
   const width = (c) => ({ money: 16, number: 12, integer: 10, date: 12 }[c.type] || Math.min(40, Math.max(12, String(c.label).length + 4)));

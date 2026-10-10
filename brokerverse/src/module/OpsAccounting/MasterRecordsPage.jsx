@@ -16,9 +16,12 @@ import { humanize } from "../../components/ActivityLog";
 import { Field, OpsTag, PageHeader, showError, showSuccess } from "./common";
 
 const HIDDEN = ["audit-user", "audit-date"];
+// whole numbers of days: payment terms, follow-up days, maximum days in force
+const DAY_FIELDS = /Days$/;
 const display = (f, v, t) => {
   if (v === null || v === undefined || v === "") return "";
   if (f.type === "boolean") return v === true || v === "true" ? t("detailView.yes") : t("detailView.no");
+  if (DAY_FIELDS.test(f.name) && Number.isFinite(Number(v))) return t("opsAcc.masters.days", { count: Number(v) });
   // "*" matches every line of business or claim type
   if (v === "*") return t("opsAcc.masters.anyValue");
   if (f.type === "select" && Array.isArray(f.options)) {
@@ -42,15 +45,23 @@ const recordName = (r, fields) => {
   const name = nameField ? String(r[nameField.name]) : "";
   return [code, name].filter(Boolean).join(" ") || String(r.id);
 };
+// the record as people call it: its name, else its code
+const shortName = (r, fields) => {
+  const nameField = fields.find((f) => NAME_FIELDS.test(f.name) && r[f.name]);
+  return nameField ? String(r[nameField.name]) : String(r.code || r.id || "");
+};
+// select options as the list shows them: a plain code is put in words, a { label, value } option keeps its label
+const optionsOf = (options) => options.map((o) => (o && typeof o === "object" ? o : { label: humanize(String(o)), value: o }));
 
 /**
  * A master kept on the generic master store and maintained by the team that uses it (Repair Shops, Suppliers, Asset
  * Classes, Short-Period Rates, Cancellation Reasons, Claim Document Checklist): list, add, edit, activate / deactivate.
- * The fields come from the master type definition, so a field added on Master > Configuration shows here too.
+ * The fields come from the master type definition, so a field added on Master > Configuration shows here too. `item`
+ * names one record of the master ("supplier") for the titles of the add and edit panels.
  * `optionLabels` gives the business labels of the values of a select field ({ field: (value) => label }); `filterBy`
  * names a select field offered as a filter above the list.
  */
-const MasterRecordsPage = ({ type, title, group, section, intro, columns, optionLabels, filterBy }) => {
+const MasterRecordsPage = ({ type, title, item, group, section, intro, columns, optionLabels, filterBy }) => {
   const { t } = useTranslation();
   const toast = useRef(null);
   const [rows, setRows] = useState([]);
@@ -97,7 +108,6 @@ const MasterRecordsPage = ({ type, title, group, section, intro, columns, option
       severity: r.isActive ? "warning" : "neutral",
       message: t(`opsAcc.confirmations.master.${action}Message`),
       facts: [
-        { label: t("opsAcc.masters.list"), value: title },
         ...shown.filter((f) => !named.includes(f.name) && f.type !== "text").slice(0, 4)
           .map((f) => ({ label: plainLabel(f.label), value: display(f, r[f.name], t), hidden: display(f, r[f.name], t) === "" })),
       ],
@@ -115,7 +125,7 @@ const MasterRecordsPage = ({ type, title, group, section, intro, columns, option
   const input = (f) => {
     const v = edit.values[f.name];
     if (f.type === "boolean") return <Checkbox inputId={`f-${f.name}`} checked={v === true || v === "true"} onChange={(e) => set(f.name, e.checked)} />;
-    if (f.type === "select" && Array.isArray(f.options)) return <Dropdown value={v ?? null} options={f.options} onChange={(e) => set(f.name, e.value)} className="w-full" showClear />;
+    if (f.type === "select" && Array.isArray(f.options)) return <Dropdown value={v ?? null} options={optionsOf(f.options)} optionLabel="label" optionValue="value" onChange={(e) => set(f.name, e.value)} className="w-full" showClear />;
     if (f.type === "number" || f.type === "integer") {
       return <InputNumber value={v === null || v === undefined || v === "" ? null : Number(v)} onValueChange={(e) => set(f.name, e.value)} className="w-full"
         mode="decimal" maxFractionDigits={f.type === "integer" ? 0 : 4} useGrouping={false} />;
@@ -150,8 +160,8 @@ const MasterRecordsPage = ({ type, title, group, section, intro, columns, option
           )} />
         </DataTable>
       </div>
-      <Dialog className="pe-dialog" header={edit?.id ? t("opsAcc.masters.edit", { name: recordName(edit.values, fields) }) : t("opsAcc.masters.new", { name: title })} visible={!!edit} style={{ width: "min(720px, 96vw)" }}
-        onHide={() => setEdit(null)} footer={<div><Button label={t("opsAcc.cancel")} text onClick={() => setEdit(null)} /><Button label={t("opsAcc.save")} icon="pi pi-save" onClick={save} /></div>}>
+      <Dialog className="pe-dialog" header={edit?.id ? t("opsAcc.masters.editItem", { item: item || title, name: shortName(edit.values, fields) }) : t("opsAcc.masters.newItem", { item: item || title })} visible={!!edit} style={{ width: "min(720px, 96vw)" }}
+        onHide={() => setEdit(null)} footer={<div><Button label={t("opsAcc.cancel")} outlined onClick={() => setEdit(null)} /><Button label={t("opsAcc.save")} icon="pi pi-save" onClick={save} /></div>}>
         {edit && <div className="grid">{fields.map((f) => <Field key={f.name} label={f.label} required={f.required}>{input(f)}</Field>)}</div>}
       </Dialog>
     </div>

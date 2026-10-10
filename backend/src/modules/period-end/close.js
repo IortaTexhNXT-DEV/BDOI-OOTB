@@ -43,6 +43,14 @@ async function userNames(db, ids) {
   return new Map((await db.query('SELECT id, COALESCE(display_name, username) AS n FROM users WHERE id = ANY($1)', [list])).rows.map((u) => [u.id, u.n]));
 }
 
+/** Role names of users by id, for the history entries (who acted, in which role). */
+async function userRoles(db, ids) {
+  const list = [...new Set(ids.filter(Boolean))];
+  if (!list.length) return new Map();
+  return new Map((await db.query(`SELECT ur.user_id AS id, array_agg(r.name ORDER BY r.name) AS roles FROM user_roles ur JOIN roles r ON r.id = ur.role_id
+    WHERE ur.user_id = ANY($1) GROUP BY ur.user_id`, [list])).rows.map((u) => [u.id, u.roles]));
+}
+
 async function lockRun(db, id) {
   const r = (await db.query('SELECT * FROM period_close_runs WHERE id = $1 OR run_number = $1 FOR UPDATE', [id])).rows[0];
   if (!r) throw notFound('Month-end close run not found');
@@ -93,6 +101,7 @@ export async function getRun(db, id) {
   const period = (await db.query('SELECT * FROM accounting_periods WHERE period = $1', [r.period])).rows[0];
   const history = (await db.query('SELECT * FROM period_status_history WHERE period = $1 ORDER BY changed_at DESC LIMIT 50', [r.period])).rows;
   const users = await userNames(db, [r.prepared_by, r.created_by, r.submitted_by, r.approved_by, r.rejected_by, ...checks.map((c) => c.signed_by), ...history.map((h) => h.changed_by)]);
+  const roles = await userRoles(db, history.map((h) => h.changed_by));
   return {
     ...runRow(r, users), period: r.period, periodInfo: periodRow(period),
     checks: checks.map((c) => checkRow(c, users)),
@@ -104,7 +113,8 @@ export async function getRun(db, id) {
       ...recurring.map((x) => ({ entryId: `rj-${x.id}`, step: 'recurring', journalId: x.jv_id, journalNumber: x.jv_number, date: iso(x.occurrence_date), journalStatus: x.jv_status,
         amount: Number(x.total_debit || 0), description: `${x.code} ${x.name}`, status: x.status === 'undone' ? 'undone' : 'active' })),
     ],
-    history: history.map((h) => ({ from: h.from_status, to: h.to_status, remarks: h.remarks, source: h.source, changedBy: users.get(h.changed_by) || h.changed_by, changedAt: h.changed_at })),
+    history: history.map((h) => ({ from: h.from_status, to: h.to_status, remarks: h.remarks, source: h.source, changedBy: users.get(h.changed_by) || h.changed_by,
+      changedByRoles: roles.get(h.changed_by) || [], changedAt: h.changed_at })),
   };
 }
 

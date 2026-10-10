@@ -379,7 +379,7 @@
     "netPremium": "Net Premium",
     "paid": "Paid",
     "balance": "Balance",
-    "unpaid": "UnPaid",
+    "unpaid": "Unpaid",
     "discounts": "Discounts",
     "others": "Others",
     "receiptDetailView": "Receipt Detail View",
@@ -503,7 +503,7 @@
       "failedToLoadReceiptDetails": "Failed to load receipt details. Please try again.",
       "amountReceived": "Amount received",
       "back": "Back",
-      "balanceHint": "Outstanding balance: {{balance}}. A partial payment leaves the rest open.",
+      "balanceHint": "Outstanding balance: {{balance}}",
       "billAmount": "Bill amount",
       "billBalance": "Balance",
       "billDueDate": "Due date",
@@ -693,12 +693,15 @@
       "customerCode": "Customer code",
       "paymentMode": "Mode of payment",
       "reference": "Reference",
-      "amount": "Amount received"
+      "amount": "Amount received",
+      "customer": "Customer",
+      "policyNumber": "Policy number",
+      "branch": "Branch"
     },
     "openEntryDialogs": {
       "matchTitle": "Match open entries",
-      "matchMessage_one": "{{count}} debit and credit pair is matched.",
-      "matchMessage_other": "{{count}} debit and credit pairs are matched.",
+      "matchMessage_one": "Match {{count}} debit and credit pair?",
+      "matchMessage_other": "Match {{count}} debit and credit pairs?",
       "debitsSelected": "Debits selected",
       "debitTotal": "Debit total",
       "creditsSelected": "Credits selected",
@@ -736,7 +739,8 @@
       "new": "New correction",
       "newReversal": "New reversal",
       "print": "Print {{number}}"
-    }
+    },
+    "appliedPolicies": "Policies paid by this receipt"
   },
   "renewalWaiting": {
     "clients": "Clients",
@@ -869,7 +873,7 @@
     "failedToUploadDisbursements": "Failed to upload disbursements file",
     "bulkUploadDisbursements": "Bulk Upload Disbursements",
     "instructions": "Instructions:",
-    "downloadTemplate": "Download Template",
+    "downloadTemplate": "Download template",
     "instruction1": "Download the sample template file",
     "instruction2": "Fill in the disbursement details, one row per voucher",
     "instruction3": "Upload the completed file (max 10MB)",
@@ -951,7 +955,8 @@
         "bank_transfer": "Bank transfer",
         "online": "Online transfer"
       }
-    }
+    },
+    "bulkUploadTitle": "Bulk upload disbursements"
   },
   "renewal": {
     "renewals": "Renewals",
@@ -1267,7 +1272,8 @@
       "narration": "Narration",
       "purpose": "Purpose",
       "fund": "Fund",
-      "accounts": "Bank and accounts"
+      "accounts": "Bank and accounts",
+      "printVoucher": "Print voucher"
     },
     "delete": "Delete",
     "search": "Search",
@@ -1374,7 +1380,7 @@
       "rejectDone": "Request rejected",
       "lines": "Lines",
       "fund": "Petty cash fund",
-      "approval": "Approval and activity",
+      "approval": "Approval",
       "status": "Status",
       "approvedAt": "Approved on",
       "statuses": {
@@ -1397,7 +1403,9 @@
       "disbursementsMessage": "The disbursements are posted against the fund.",
       "wht": "Withholding tax",
       "netAmount": "Net amount",
-      "recordDisbursements": "Record disbursements"
+      "recordDisbursements": "Record disbursements",
+      "approvedBy": "Approved by",
+      "activity": "Activity"
     }
   },
   "employeeBenefit": {
@@ -3227,7 +3235,11 @@
     "accountCode": "Account code",
     "bankAccountsOf_one": "Company account at this bank ({{count}})",
     "bankAccountsOf_other": "Company accounts at this bank ({{count}})",
-    "noBankAccounts": "No company account is held at this bank."
+    "noBankAccounts": "No company account is held at this bank.",
+    "editAccountCategory": "Edit account category",
+    "addAccountCategory": "Add account category",
+    "saveChanges": "Save changes",
+    "cancel": "Cancel"
   },
   "automatedRemittance": {
     "pageTitle": "Automated Remittance Master",
@@ -3616,7 +3628,9 @@
     "departmentDetails": "Department",
     "departmentName": "Department Name",
     "branchAndDepartment": "Branch and department",
-    "userGroupAccess": "User group access"
+    "userGroupAccess": "User group access",
+    "primaryCompany": "Primary company",
+    "address": "Address"
   },
   "agent": {
     "createQuote": "Create Quote",
@@ -4984,7 +4998,13 @@
     "property": "Property",
     "travel": "Travel",
     "marine": "Marine",
-    "rulesInForce": "Acceptance rules in force"
+    "rulesInForce": "Acceptance rules in force",
+    "cloneTitle": "New version of {{code}}",
+    "cloneMessage": "A draft version is created as a copy of this template.",
+    "copiedFrom": "Copied from",
+    "newVersion": "New version",
+    "openDrafts": "Draft versions already open",
+    "cloneAction": "Create draft version"
   },
   "productTemplateManager": {
     "createTemplate": "Create Template",
@@ -5114,7 +5134,7 @@
     "usage": "The IAR risk sections are used by the IAR prospect and quotation screens: only the active sections are offered, with their default rates. The other definitions are kept for reference and are not read by the quotation screens yet.",
     "usedBy": "Used by",
     "usedByIar": "IAR prospect and quotation",
-    "referenceOnly": "Reference only",
+    "referenceOnly": "Reference only (not read by the prospect or quotation screens)",
     "removeTitle": "Remove risk section",
     "removeMessage": "The risk section below is removed from the product.",
     "removeNote": "New prospects and quotations no longer offer it. Quotations that already use it keep it.",
@@ -5328,7 +5348,9 @@
     "specialTerms": "Special terms",
     "policies": "policies",
     "ofTargetValue": "{{percent}}% of target",
-    "ofTargetAria": "{{percent}} percent of target"
+    "ofTargetAria": "{{percent}} percent of target",
+    "policyCount_one": "{{count}} policy",
+    "policyCount_other": "{{count}} policies"
   },
   "documentManager": {
     "format": "Format",
@@ -7152,7 +7174,10 @@
     "remindLevel": "{{level}}",
     "remindNoEmail": "Clients without an e-mail address (not sent)",
     "noneToRemind": "No premium is due or overdue for a reminder now.",
-    "notYetOverdue": "Due, not yet overdue"
+    "notYetOverdue": "Due, not yet overdue",
+    "allLevels": "All levels",
+    "levelBand": "Level {{level}} ({{from}}–{{to}} days)",
+    "levelBeyond": "Level {{level}} ({{from}}+ days)"
   },
   "iarLead": {
     "lead": "Prospect",
@@ -8230,7 +8255,9 @@
       "certificates": "Certificates to issue"
     },
     "nothingDue": "No recurring journal is due today",
-    "notDueYet": "Not due yet"
+    "notDueYet": "Not due yet",
+    "editItem": "Edit checklist item: {{name}}",
+    "editTaxCode": "Edit tax code: {{name}}"
   },
   "importDialog": {
     "about": "About this upload",
@@ -8407,7 +8434,7 @@
     "alphalist1604e": "Annual Alphalist 1604-E",
     "alphalist1604eHelp": "Annual information return of creditable income taxes withheld (expanded): remittances per month from the filing records and the alphalist of payees (schedule 3 subject to withholding, schedule 4 exempt).",
     "percentageTax": "Percentage Tax 2551Q",
-    "percentageTaxHelp": "Working paper of the quarterly percentage tax return of a non-VAT registered broker or agent: gross sales per month from the ledger revenue accounts at the rate in bir.percentage_tax_rate.",
+    "percentageTaxHelp": "Quarterly percentage tax return (BIR Form 2551Q): gross sales per month from the revenue accounts at the configured rate",
     "vatRegisteredNote": "The broker is set up as VAT registered (direct_bill.broker_vat_registered). Percentage tax applies to a non-VAT registered broker or agent: confirm with the tax adviser before filing a 2551Q.",
     "datFiles": "BIR DAT Files",
     "datFilesHelp": "Files are generated from the QAP, SAWT, SLSP and 1604-E reports and checked against them before download.",
@@ -8965,7 +8992,10 @@
       "invoiceOverride": "Issue invoice"
     },
     "previewFigures": "Figures of the period",
-    "claimsFromSystem": "Claims recorded in the system"
+    "claimsFromSystem": "Claims recorded in the system",
+    "recordAmended": "Record amended return",
+    "paymentChannelPlaceholder": "e.g. eFPS, eBIRForms, LANDBANK Link.BizPortal",
+    "vatRegistered": "VAT registered"
   },
   "placement": {
     "status": {
@@ -9196,7 +9226,10 @@
       "noOffers": "No insurer has made an offer yet.",
       "coNote": "Several offers make a co-insurance led by {{lead}}; the premium follows the lead's terms.",
       "singleNote": "Select the offer(s) to place; the shares must total exactly 100%.",
-      "leadIs": "Lead insurer: {{lead}}"
+      "leadIs": "Lead insurer: {{lead}}",
+      "deductiblesTerms": "Deductibles and terms",
+      "selectFirst": "Select at least one offer to prepare a slip",
+      "sharesMustTotal": "Selected shares total {{total}}%; they must total 100%"
     },
     "offer": {
       "dialogTitle": "Response of {{insurer}}",
@@ -9894,7 +9927,11 @@
     "autoMatchTitle": "Auto-match the statement lines",
     "autoMatchMessage": "The matching rules pair the unmatched bank lines with the book entries and record the matches.",
     "autoMatched_one": "{{count}} match found",
-    "autoMatched_other": "{{count}} matches found"
+    "autoMatched_other": "{{count}} matches found",
+    "notYetPrepared": "Not yet prepared",
+    "notYetApproved": "Not yet approved",
+    "editFormat": "Edit statement format: {{name}}",
+    "editType": "Edit transaction type: {{name}}"
   },
   "followUps": {
     "adviceReference": "Remittance advice / reference",
@@ -10085,7 +10122,10 @@
     "emailReceipt": "E-mail receipt",
     "emailReceiptTitle": "E-mail receipt {{number}}",
     "emailInvoice": "E-mail invoice",
-    "emailInvoiceTitle": "E-mail invoice {{number}}"
+    "emailInvoiceTitle": "E-mail invoice {{number}}",
+    "sendEmail": "Send e-mail",
+    "ccOptional": "Cc (optional)",
+    "ccPlaceholder": "name@example.com, name2@example.com"
   },
   "emailOutbox": {
     "title": "E-mail Outbox",
@@ -10307,7 +10347,8 @@
       "removeResolutionMessage": "The resolution of {{policy}} is removed and the difference is unresolved again.",
       "activity": "Activity"
     },
-    "lineActions": "Actions for {{line}}"
+    "lineActions": "Actions for {{line}}",
+    "editFormat": "Edit statement format: {{name}}"
   },
   "creditControl": {
     "menu": "Credit Control",
@@ -10420,7 +10461,10 @@
       "collection-reminder": "Payment reminder e-mailed",
       "collection-call": "Collection call",
       "collection-note": "Collection note",
-      "collection-commitment": "Payment commitment"
+      "collection-commitment": "Payment commitment",
+      "collection-sms": "Payment reminder sent by SMS",
+      "collection-visit": "Collection visit",
+      "collection-escalation": "Collection escalated"
     },
     "cancel": "Cancel",
     "send": "Send",
@@ -11958,7 +12002,11 @@
         "action": "Process again"
       }
     },
-    "layoutChannels": "Channels"
+    "layoutChannels": "Channels",
+    "editLayout": "Edit bank file layout: {{name}}",
+    "editTemplate": "Edit message template: {{name}}",
+    "credentialSet": "Set on the server",
+    "credentialNotSet": "Not set on the server"
   },
   "onboarding": {
     "title": "Onboard client",
@@ -12263,60 +12311,75 @@
       "shortPeriod": {
         "title": "Short-Period Rates",
         "section": "Insurance Management",
-        "intro": "Premium the insurer keeps when the insured cancels, by the days the policy was in force. Used by Operations > Policy Cancellation."
+        "intro": "Premium the insurer keeps when the insured cancels, by the days the policy was in force. Used by Operations > Policy Cancellation.",
+        "item": "short-period rate"
       },
       "cancellationReasons": {
         "title": "Cancellation Reasons",
         "section": "Insurance Management",
-        "intro": "Why a policy is cancelled, who initiates it (insured: short-period scale; insurer: pro-rata) and the return premium method."
+        "intro": "Why a policy is cancelled, who initiates it (insured: short-period scale; insurer: pro-rata) and the return premium method.",
+        "item": "cancellation reason"
       },
       "claimChecklist": {
         "title": "Claim Document Checklist",
         "section": "Insurance Management",
-        "intro": "Documents a claim needs by line of business and claim type (* = all), required or optional. Copied onto each claim."
+        "intro": "Documents a claim needs by line of business and claim type (* = all), required or optional. Copied onto each claim.",
+        "item": "claim document"
       },
       "repairShops": {
         "title": "Repair Shops",
         "section": "Insurance Management",
-        "intro": "Repair shops that may take motor claim estimates; only accredited shops are offered."
+        "intro": "Repair shops that may take motor claim estimates; only accredited shops are offered.",
+        "item": "repair shop"
       },
       "suppliers": {
         "title": "Suppliers",
         "section": "Payables",
-        "intro": "Suppliers of goods and services: TIN, VAT registration, EWT tax code withheld, payment terms and default expense account."
+        "intro": "Suppliers of goods and services: TIN, VAT registration, EWT tax code withheld, payment terms and default expense account.",
+        "item": "supplier"
       },
       "assetClasses": {
         "title": "Asset Classes",
         "section": "Finance",
-        "intro": "Useful life (months) and the asset, accumulated depreciation and depreciation expense accounts of each class of fixed asset."
+        "intro": "Useful life (months) and the asset, accumulated depreciation and depreciation expense accounts of each class of fixed asset.",
+        "item": "asset class"
       },
       "costCentres": {
         "title": "Cost Centres",
         "section": "Finance",
-        "intro": "Cost centres tagged on journal lines and in the SAP GL file. The one marked Default is stamped on every line that names none (TISPH: 900901 Toyota Insurance Services)."
+        "intro": "Cost centres tagged on journal lines and in the SAP GL file. The one marked Default is stamped on every line that names none (TISPH: 900901 Toyota Insurance Services).",
+        "item": "cost centre"
       },
       "salesActivityTypes": {
         "title": "Sales Activity Types",
         "section": "Organization",
-        "intro": "Kinds of sales activity account executives log (call, meeting, e-mail, visit...), their channel and the default days to the next step."
+        "intro": "Kinds of sales activity account executives log (call, meeting, e-mail, visit...), their channel and the default days to the next step.",
+        "item": "sales activity type"
       },
       "salesActivityOutcomes": {
         "title": "Sales Activity Outcomes",
         "section": "Organization",
-        "intro": "Outcomes of a sales activity and whether each is positive, neutral or negative for the activity report."
+        "intro": "Outcomes of a sales activity and whether each is positive, neutral or negative for the activity report.",
+        "item": "sales activity outcome"
       },
       "leadSources": {
         "title": "Lead Sources",
         "section": "Insurance Management",
-        "intro": "Where prospects come from: the Source of the prospect form and of the lead upload, and a lead assignment condition."
+        "intro": "Where prospects come from: the Source of the prospect form and of the lead upload, and a lead assignment condition.",
+        "item": "lead source"
       },
       "reasonCodes": {
         "title": "Reason Codes",
         "section": "Insurance Management",
-        "intro": "Coded reasons of decisions, by what they are used for: quotations, claims, renewals, prospect reassignment and the accounting decisions. Cancellation and write-off reasons have their own masters."
+        "intro": "Coded reasons of decisions, by what they are used for: quotations, claims, renewals, prospect reassignment and the accounting decisions. Cancellation and write-off reasons have their own masters.",
+        "item": "reason code"
       },
       "anyValue": "All",
-      "list": "Master"
+      "list": "Master",
+      "newItem": "New {{item}}",
+      "editItem": "Edit {{item}}: {{name}}",
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days"
     },
     "instalments": {
       "issueInvoices": "Issue instalment invoices",
@@ -13750,7 +13813,9 @@
       "friday": "Friday",
       "saturday": "Saturday"
     },
-    "outputCount": "{{count}} {{what}}"
+    "outputCount": "{{count}} {{what}}",
+    "switchedOn": "Switched on",
+    "neverRun": "Not run yet"
   },
   "configuration": {
     "leaveTitle": "Leave without saving",
@@ -13842,7 +13907,7 @@
     "header": "Bulk upload policies",
     "instruction2": "Enter the policies in the file",
     "fileBeingProcessed": "The file is being processed. The policies are created as each row is read.",
-    "goLive": "Existing policies (go-live): in-force policies of the old system, created without a bill, journal or commission. Their unpaid premiums are loaded with Import open items (Accounts > Collections)."
+    "goLive": "Existing in-force policies (go-live load: no bill, journal or commission)"
   },
   "commissionLine": {
     "statuses": {

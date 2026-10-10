@@ -8,6 +8,7 @@ import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import * as svc from './service.js';
 import { accountingFlow } from './flow.js';
 import { actionText } from '../../lib/auditLabels.js';
+import { humanize } from '../../lib/pdf/format.js';
 
 const { router, define } = moduleRouter('Posting Rules', '/posting-rules');
 const ad = moduleRouter('Account Determination', '/account-determination');
@@ -148,6 +149,24 @@ define({
     for (const v of versions.filter((x) => !told.has(Number(x.version)))) {
       out.push({ action: 'create-version', actionLabel: actionText('create-version'), username: v.username || null, displayName: v.display_name || 'System', roles: v.roles || [],
         at: v.created_at, version: Number(v.version), changeNote: v.change_note, ruleId: Number(v.id) });
+    }
+    // what a new version changed against the one before it: the lines added and removed (side, account, amount)
+    const lines = (await pool.query(`SELECT p.version, l.side, l.account_type, l.account, l.fallback_role, l.amount_key FROM posting_rule_lines l
+      JOIN posting_rules p ON p.id = l.rule_id WHERE p.event_code = $1 ORDER BY l.line_no`, [r.eventCode])).rows;
+    const lineText = (l) => `${l.side} ${l.account || humanize(l.fallback_role || l.account_type || '')} · ${humanize(l.amount_key || '')}`;
+    const linesOf = (v) => lines.filter((l) => Number(l.version) === v).map(lineText);
+    for (const x of out) {
+      if (!x.version || x.action !== 'create-version') continue;
+      if (x.version === 1) {
+        x.actionLabel = 'Rule created (version 1)';
+        continue;
+      }
+      const now = linesOf(x.version);
+      const before = linesOf(x.version - 1);
+      x.actionLabel = `Version ${x.version} replaced version ${x.version - 1}`;
+      x.changes = [{ field: 'version', label: 'Version', from: String(x.version - 1), to: String(x.version) },
+        ...now.filter((l) => !before.includes(l)).map((l) => ({ field: 'line', label: 'Line added', from: null, to: l })),
+        ...before.filter((l) => !now.includes(l)).map((l) => ({ field: 'line', label: 'Line removed', from: l, to: null }))];
     }
     out.sort((a, b) => new Date(b.at) - new Date(a.at) || (b.version || 0) - (a.version || 0));
     ok(res, out);

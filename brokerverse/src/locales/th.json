@@ -300,7 +300,7 @@
     "netPremium": "เบี้ยสุทธิ",
     "paid": "ชำระแล้ว",
     "balance": "ยอดคงเหลือ",
-    "unpaid": "ยังไม่ชำระ",
+    "unpaid": "ค้างชำระ",
     "discounts": "ส่วนลด",
     "others": "อื่นๆ",
     "receiptDetailView": "รายละเอียดใบเสร็จ",
@@ -418,7 +418,7 @@
       "failedToLoadReceiptDetails": "โหลดรายละเอียดใบเสร็จไม่สำเร็จ กรุณาลองอีกครั้ง",
       "amountReceived": "จำนวนเงินที่ได้รับ",
       "back": "ย้อนกลับ",
-      "balanceHint": "ยอดค้างชำระ: {{balance}} การชำระบางส่วนจะคงยอดที่เหลือไว้",
+      "balanceHint": "ยอดค้างชำระ: {{balance}}",
       "billAmount": "ยอดใบแจ้งหนี้",
       "billBalance": "ยอดคงเหลือ",
       "billDueDate": "วันครบกำหนด",
@@ -604,12 +604,15 @@
       "customerCode": "รหัสลูกค้า",
       "paymentMode": "วิธีการชำระ",
       "reference": "เลขที่อ้างอิง",
-      "amount": "จำนวนเงินที่รับ"
+      "amount": "จำนวนเงินที่รับ",
+      "customer": "ลูกค้า",
+      "policyNumber": "เลขที่กรมธรรม์",
+      "branch": "สาขา"
     },
     "openEntryDialogs": {
       "matchTitle": "จับคู่รายการค้าง",
-      "matchMessage_one": "รายการเดบิตและเครดิต {{count}} คู่จะถูกจับคู่",
-      "matchMessage_other": "รายการเดบิตและเครดิต {{count}} คู่จะถูกจับคู่",
+      "matchMessage_one": "จับคู่รายการเดบิตและเครดิต {{count}} คู่หรือไม่",
+      "matchMessage_other": "จับคู่รายการเดบิตและเครดิต {{count}} คู่หรือไม่",
       "debitsSelected": "เดบิตที่เลือก",
       "debitTotal": "ยอดรวมเดบิต",
       "creditsSelected": "เครดิตที่เลือก",
@@ -647,7 +650,8 @@
       "new": "New correction",
       "newReversal": "New reversal",
       "print": "Print {{number}}"
-    }
+    },
+    "appliedPolicies": "กรมธรรม์ที่ชำระด้วยใบเสร็จนี้"
   },
   "renewalWaiting": {
     "clients": "ลูกค้า",
@@ -780,7 +784,7 @@
     "failedToUploadDisbursements": "อัปโหลดไฟล์การจ่ายเงินไม่สำเร็จ",
     "bulkUploadDisbursements": "อัปโหลดการจ่ายเงินแบบกลุ่ม",
     "instructions": "คำแนะนำ:",
-    "downloadTemplate": "ดาวน์โหลดเทมเพลต",
+    "downloadTemplate": "ดาวน์โหลดแม่แบบ",
     "instruction1": "ดาวน์โหลดไฟล์เทมเพลตตัวอย่าง",
     "instruction2": "กรอกรายละเอียดการจ่ายเงิน หนึ่งแถวต่อหนึ่งใบสำคัญ",
     "instruction3": "อัปโหลดไฟล์ที่กรอกเสร็จแล้ว (สูงสุด 10MB)",
@@ -845,7 +849,8 @@
         "bank_transfer": "โอนเงินผ่านธนาคาร",
         "online": "โอนเงินออนไลน์"
       }
-    }
+    },
+    "bulkUploadTitle": "อัปโหลดการจ่ายเงินหลายรายการ"
   },
   "renewal": {
     "renewals": "การต่ออายุ",
@@ -1125,7 +1130,8 @@
       "narration": "คำอธิบาย",
       "purpose": "วัตถุประสงค์",
       "fund": "กองทุน",
-      "accounts": "ธนาคารและบัญชี"
+      "accounts": "ธนาคารและบัญชี",
+      "printVoucher": "พิมพ์ใบสำคัญจ่าย"
     },
     "delete": "ลบ",
     "search": "ค้นหา",
@@ -1226,7 +1232,7 @@
       "rejectDone": "Request rejected",
       "lines": "Lines",
       "fund": "Petty cash fund",
-      "approval": "Approval and activity",
+      "approval": "การอนุมัติ",
       "status": "Status",
       "approvedAt": "Approved on",
       "statuses": {
@@ -1249,7 +1255,9 @@
       "disbursementsMessage": "The disbursements are posted against the fund.",
       "wht": "Withholding tax",
       "netAmount": "Net amount",
-      "recordDisbursements": "Record disbursements"
+      "recordDisbursements": "Record disbursements",
+      "approvedBy": "อนุมัติโดย",
+      "activity": "ประวัติการดำเนินการ"
     }
   },
   "employeeBenefit": {
@@ -3012,7 +3020,11 @@
     "accountCode": "รหัสบัญชี",
     "bankAccountsOf_one": "บัญชีของบริษัทที่ธนาคารนี้ ({{count}})",
     "bankAccountsOf_other": "บัญชีของบริษัทที่ธนาคารนี้ ({{count}})",
-    "noBankAccounts": "ไม่มีบัญชีของบริษัทที่ธนาคารนี้"
+    "noBankAccounts": "ไม่มีบัญชีของบริษัทที่ธนาคารนี้",
+    "editAccountCategory": "แก้ไขหมวดบัญชี",
+    "addAccountCategory": "เพิ่มหมวดบัญชี",
+    "saveChanges": "บันทึกการเปลี่ยนแปลง",
+    "cancel": "ยกเลิก"
   },
   "automatedRemittance": {
     "pageTitle": "หลักการโอนเงินอัตโนมัติ",
@@ -3379,7 +3391,9 @@
     "departmentDetails": "แผนก",
     "departmentName": "ชื่อแผนก",
     "branchAndDepartment": "สาขาและแผนก",
-    "userGroupAccess": "สิทธิ์กลุ่มผู้ใช้"
+    "userGroupAccess": "สิทธิ์กลุ่มผู้ใช้",
+    "primaryCompany": "บริษัทหลัก",
+    "address": "ที่อยู่"
   },
   "agent": {
     "createQuote": "สร้างใบเสนอราคา",
@@ -4651,7 +4665,13 @@
     "health": "สุขภาพ",
     "property": "ทรัพย์สิน",
     "travel": "การเดินทาง",
-    "marine": "ทะเล"
+    "marine": "ทะเล",
+    "cloneTitle": "เวอร์ชันใหม่ของ {{code}}",
+    "cloneMessage": "ระบบจะสร้างเวอร์ชันร่างโดยคัดลอกจากแม่แบบนี้",
+    "copiedFrom": "คัดลอกจาก",
+    "newVersion": "เวอร์ชันใหม่",
+    "openDrafts": "เวอร์ชันร่างที่มีอยู่แล้ว",
+    "cloneAction": "สร้างเวอร์ชันร่าง"
   },
   "productTemplateManager": {
     "cardTitle": "การกำหนดค่าเทมเพลตผลิตภัณฑ์",
@@ -4797,7 +4817,9 @@
     "ofTarget": "ของเป้าหมาย",
     "status": "สถานะ",
     "error": "ข้อผิดพลาด",
-    "failedToLoad": "โหลดการแมปตลาดไม่สำเร็จ"
+    "failedToLoad": "โหลดการแมปตลาดไม่สำเร็จ",
+    "policyCount_one": "{{count}} กรมธรรม์",
+    "policyCount_other": "{{count}} กรมธรรม์"
   },
   "documentManager": {
     "cardTitle": "ตัวจัดการเทมเพลตเอกสาร",
@@ -6444,7 +6466,10 @@
     "remindLevel": "{{level}}",
     "remindNoEmail": "ลูกค้าที่ไม่มีอีเมล (ไม่ได้ส่ง)",
     "noneToRemind": "ขณะนี้ไม่มีเบี้ยที่ถึงกำหนดหรือเกินกำหนดที่ต้องแจ้งเตือน",
-    "notYetOverdue": "ถึงกำหนด ยังไม่เกินกำหนด"
+    "notYetOverdue": "ถึงกำหนด ยังไม่เกินกำหนด",
+    "allLevels": "ทุกระดับ",
+    "levelBand": "ระดับ {{level}} ({{from}}–{{to}} วัน)",
+    "levelBeyond": "ระดับ {{level}} ({{from}} วันขึ้นไป)"
   },
   "documentLayouts": {
     "master": "มาสเตอร์",
@@ -6802,16 +6827,52 @@
       "leadSources": {
         "title": "แหล่งที่มาของลีด",
         "section": "การจัดการประกันภัย",
-        "intro": "แหล่งที่มาของผู้มุ่งหวัง: ช่องแหล่งที่มาในแบบฟอร์มและการอัปโหลดลีด และเงื่อนไขการมอบหมายลีด"
+        "intro": "แหล่งที่มาของผู้มุ่งหวัง: ช่องแหล่งที่มาในแบบฟอร์มและการอัปโหลดลีด และเงื่อนไขการมอบหมายลีด",
+        "item": "แหล่งที่มาของลูกค้าเป้าหมาย"
       },
       "reasonCodes": {
         "title": "รหัสเหตุผล",
         "section": "การจัดการประกันภัย",
-        "intro": "รหัสเหตุผลของการตัดสินใจ แยกตามการใช้งาน: ใบเสนอราคา สินไหม การต่ออายุ การโอนย้ายผู้มุ่งหวัง และการตัดสินใจทางบัญชี เหตุผลการยกเลิกและการตัดหนี้สูญมีข้อมูลหลักของตนเอง"
+        "intro": "รหัสเหตุผลของการตัดสินใจ แยกตามการใช้งาน: ใบเสนอราคา สินไหม การต่ออายุ การโอนย้ายผู้มุ่งหวัง และการตัดสินใจทางบัญชี เหตุผลการยกเลิกและการตัดหนี้สูญมีข้อมูลหลักของตนเอง",
+        "item": "รหัสเหตุผล"
       },
       "new": "รายการใหม่: {{name}}",
       "anyValue": "ทั้งหมด",
-      "list": "ข้อมูลหลัก"
+      "list": "ข้อมูลหลัก",
+      "costCentres": {
+        "title": "ศูนย์ต้นทุน",
+        "section": "การเงิน",
+        "intro": "ศูนย์ต้นทุนที่ระบุในรายการบัญชีและในไฟล์บัญชีแยกประเภทสำหรับ SAP ศูนย์ต้นทุนที่กำหนดเป็นค่าเริ่มต้นจะใช้กับทุกรายการที่ไม่ได้ระบุ (TISPH: 900901 Toyota Insurance Services)",
+        "item": "ศูนย์ต้นทุน"
+      },
+      "newItem": "เพิ่ม{{item}}",
+      "editItem": "แก้ไข{{item}}: {{name}}",
+      "days_one": "{{count}} วัน",
+      "days_other": "{{count}} วัน",
+      "shortPeriod": {
+        "item": "อัตราระยะสั้น"
+      },
+      "cancellationReasons": {
+        "item": "เหตุผลการยกเลิก"
+      },
+      "claimChecklist": {
+        "item": "เอกสารเคลม"
+      },
+      "repairShops": {
+        "item": "อู่ซ่อม"
+      },
+      "suppliers": {
+        "item": "ผู้ขาย"
+      },
+      "assetClasses": {
+        "item": "ประเภทสินทรัพย์"
+      },
+      "salesActivityTypes": {
+        "item": "ประเภทกิจกรรมการขาย"
+      },
+      "salesActivityOutcomes": {
+        "item": "ผลลัพธ์กิจกรรมการขาย"
+      }
     },
     "confirmations": {
       "activity": "Activity",
@@ -7080,7 +7141,10 @@
       "coInsurer": "ผู้ร่วมรับประกัน"
     },
     "compare": {
-      "leadIs": "ผู้รับประกันหลัก: {{lead}}"
+      "leadIs": "ผู้รับประกันหลัก: {{lead}}",
+      "deductiblesTerms": "ค่าเสียหายส่วนแรกและเงื่อนไข",
+      "selectFirst": "เลือกข้อเสนออย่างน้อยหนึ่งรายการเพื่อจัดทำสลิป",
+      "sharesMustTotal": "สัดส่วนที่เลือกรวม {{total}}% ต้องรวมเป็น 100%"
     },
     "addInsurer": {
       "invited": "บริษัทประกันที่เชิญแล้ว"
@@ -7744,7 +7808,11 @@
       "invoiceOverride": "Issue invoice"
     },
     "previewFigures": "ตัวเลขของงวด",
-    "claimsFromSystem": "ค่าสินไหมที่บันทึกในระบบ"
+    "claimsFromSystem": "ค่าสินไหมที่บันทึกในระบบ",
+    "recordAmended": "บันทึกแบบแก้ไขเพิ่มเติม",
+    "paymentChannelPlaceholder": "เช่น eFPS, eBIRForms, LANDBANK Link.BizPortal",
+    "vatRegistered": "จดทะเบียนภาษีมูลค่าเพิ่ม",
+    "percentageTaxHelp": "แบบแสดงรายการภาษีธุรกิจเฉพาะรายไตรมาส (BIR Form 2551Q): ยอดขายรวมรายเดือนจากบัญชีรายได้ตามอัตราที่กำหนด"
   },
   "importDialog": {
     "about": "เกี่ยวกับการอัปโหลดนี้",
@@ -8046,7 +8114,10 @@
     "removeTitle": "ลบส่วนความเสี่ยง",
     "removeMessage": "ส่วนความเสี่ยงด้านล่างจะถูกลบออกจากผลิตภัณฑ์",
     "removeNote": "ผู้มุ่งหวังและใบเสนอราคาใหม่จะไม่แสดงส่วนนี้ ใบเสนอราคาที่ใช้อยู่แล้วยังคงเดิม",
-    "removeAction": "ลบส่วน"
+    "removeAction": "ลบส่วน",
+    "definition": "คำจำกัดความ",
+    "usedBy": "ใช้โดย",
+    "referenceOnly": "ใช้อ้างอิงเท่านั้น (หน้าลูกค้าเป้าหมายและใบเสนอราคาไม่ได้อ่านค่านี้)"
   },
   "integrations": {
     "batchDetail": "ชุดการจ่ายเงินผ่านธนาคาร",
@@ -8129,7 +8200,11 @@
         "action": "ประมวลผลอีกครั้ง"
       }
     },
-    "layoutChannels": "ช่องทาง"
+    "layoutChannels": "ช่องทาง",
+    "editLayout": "แก้ไขรูปแบบไฟล์ธนาคาร: {{name}}",
+    "editTemplate": "แก้ไขแม่แบบข้อความ: {{name}}",
+    "credentialSet": "ตั้งค่าบนเซิร์ฟเวอร์แล้ว",
+    "credentialNotSet": "ยังไม่ได้ตั้งค่าบนเซิร์ฟเวอร์"
   },
   "schedules": {
     "title": "กำหนดการ",
@@ -8185,7 +8260,9 @@
       "friday": "ศุกร์",
       "saturday": "เสาร์"
     },
-    "outputCount": "{{what}} {{count}}"
+    "outputCount": "{{what}} {{count}}",
+    "switchedOn": "เปิดใช้งาน",
+    "neverRun": "ยังไม่เคยทำงาน"
   },
   "configuration": {
     "leaveTitle": "ออกโดยไม่บันทึก",
@@ -8423,7 +8500,7 @@
     "header": "Bulk upload policies",
     "instruction2": "Enter the policies in the file",
     "fileBeingProcessed": "The file is being processed. The policies are created as each row is read.",
-    "goLive": "Existing policies (go-live): in-force policies of the old system, created without a bill, journal or commission. Their unpaid premiums are loaded with Import open items (Accounts > Collections)."
+    "goLive": "กรมธรรม์ที่มีผลบังคับอยู่แล้ว (นำเข้าเมื่อเริ่มใช้ระบบ: ไม่สร้างใบแจ้งหนี้ บัญชี หรือคอมมิชชั่น)"
   },
   "creditControl": {
     "confirmations": {
@@ -8460,7 +8537,10 @@
       "collection-reminder": "ส่งอีเมลแจ้งเตือนการชำระเงิน",
       "collection-call": "โทรติดตามหนี้",
       "collection-note": "บันทึกการติดตามหนี้",
-      "collection-commitment": "ลูกค้ารับว่าจะชำระ"
+      "collection-commitment": "ลูกค้ารับว่าจะชำระ",
+      "collection-sms": "ส่งการแจ้งเตือนชำระเงินทาง SMS",
+      "collection-visit": "เข้าพบเพื่อติดตามการชำระเงิน",
+      "collection-escalation": "ส่งเรื่องติดตามการชำระเงินต่อ"
     },
     "currentLimit": "วงเงินปัจจุบัน",
     "lastChanged": "แก้ไขล่าสุด",
@@ -8486,7 +8566,8 @@
       "removeResolutionMessage": "การแก้ไขผลต่างของ {{policy}} จะถูกลบ และผลต่างจะกลับเป็นยังไม่ได้แก้ไข",
       "activity": "กิจกรรม"
     },
-    "lineActions": "การดำเนินการของ {{line}}"
+    "lineActions": "การดำเนินการของ {{line}}",
+    "editFormat": "แก้ไขรูปแบบใบแจ้งยอด: {{name}}"
   },
   "bankReconciliation": {
     "confirmations": {
@@ -8517,7 +8598,11 @@
     "autoMatchMessage": "กฎการจับคู่จะจับคู่รายการธนาคารที่ยังไม่จับคู่กับรายการในบัญชี และบันทึกการจับคู่",
     "autoMatched_one": "พบการจับคู่ {{count}} รายการ",
     "autoMatched_other": "พบการจับคู่ {{count}} รายการ",
-    "autoMatched": "พบการจับคู่ {{count}} รายการ"
+    "autoMatched": "พบการจับคู่ {{count}} รายการ",
+    "notYetPrepared": "ยังไม่ได้จัดทำ",
+    "notYetApproved": "ยังไม่ได้อนุมัติ",
+    "editFormat": "แก้ไขรูปแบบรายการเดินบัญชี: {{name}}",
+    "editType": "แก้ไขประเภทรายการ: {{name}}"
   },
   "periodEnd": {
     "runActivity": "Run activity",
@@ -8577,7 +8662,9 @@
       "depreciation": "ค่าเสื่อมราคาของทะเบียนสินทรัพย์ถาวรสำหรับงวด"
     },
     "nothingDue": "ไม่มีรายการบัญชีประจำที่ถึงกำหนดวันนี้",
-    "notDueYet": "ยังไม่ถึงกำหนด"
+    "notDueYet": "ยังไม่ถึงกำหนด",
+    "editItem": "แก้ไขรายการตรวจสอบ: {{name}}",
+    "editTaxCode": "แก้ไขรหัสภาษี: {{name}}"
   },
   "commissionLine": {
     "statuses": {
@@ -8719,5 +8806,10 @@
     "cancel": "ยกเลิก",
     "create_one": "สร้างชุดการจ่าย {{count}} รายการ",
     "create_other": "สร้างชุดการจ่าย {{count}} รายการ"
+  },
+  "emailDocument": {
+    "sendEmail": "ส่งอีเมล",
+    "ccOptional": "สำเนาถึง (ไม่บังคับ)",
+    "ccPlaceholder": "name@example.com, name2@example.com"
   }
 }

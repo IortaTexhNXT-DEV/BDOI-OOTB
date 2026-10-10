@@ -18,7 +18,7 @@ define({
   method: 'GET', path: '/', summary: 'Collections register with ageing buckets (filter status, overdueLevel, clientId, search; sortField, sortOrder; paging)', screen: SCREEN, middleware: read,
   query: { page: 1, pageSize: 10, status: 'Overdue', overdueLevel: '1', search: 'Santos', sortField: 'dueDate', sortOrder: 'asc' },
   response: { success: true, data: [item], pagination: { page: 1, pageSize: 10, total: 1, totalPages: 1 } },
-  handler: async (req, res) => { const pg = pageParams(req.query); const r = await svc.listCollections(pool, req.query, pg); sendList(res, r.rows, r.total, pg); },
+  handler: async (req, res) => { const pg = pageParams(req.query); const r = await svc.listCollections(pool, req.query, pg); sendList(res, r.rows, r.total, pg, { overdueLevels: r.overdueLevels }); },
 });
 define({
   method: 'GET', path: '/aging-report', summary: 'Ageing report: bucket totals, percentages and open items', screen: `${SCREEN} > Aging report`, middleware: read, query: { clientId: 'cl_1' },

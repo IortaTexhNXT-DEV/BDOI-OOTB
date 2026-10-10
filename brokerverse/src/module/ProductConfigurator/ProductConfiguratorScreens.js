@@ -445,7 +445,7 @@ export const CoverageBuilder = () => {
               </div>
               <div className="field col-12 md:col-6"><StatusField value={selected.status} onChange={(status) => setSelected({ ...selected, status })} /></div>
             </div>
-            <div className="flex justify-content-end"><Button label={t("coverageBuilder.saveCoverage")} icon="pi pi-check" onClick={save} className="w-auto" /></div>
+            <div className="flex justify-content-end gap-2"><Button label={t("common.cancel")} outlined onClick={() => setSelected(null)} className="w-auto" /><Button label={t("coverageBuilder.saveCoverage")} icon="pi pi-check" onClick={save} className="w-auto" /></div>
           </div>
         )}
       </Dialog>
@@ -662,7 +662,7 @@ export const RatingEngine = () => {
             <FieldError error={errors.rules} />
             <Button label={t("ratingEngine.addBand")} icon="pi pi-plus" className="p-button-text w-auto mb-3" onClick={() => setSelected({ ...selected, rules: [...(selected.rules || []), { condition: "", factor: 1 }] })} />
             <div className="formgrid grid"><div className="field col-12 md:col-6"><StatusField value={selected.status} onChange={(status) => setSelected({ ...selected, status })} /></div></div>
-            <div className="flex justify-content-end"><Button label={t("ratingEngine.saveFactor")} icon="pi pi-check" onClick={save} className="w-auto" /></div>
+            <div className="flex justify-content-end gap-2"><Button label={t("common.cancel")} outlined onClick={() => setSelected(null)} className="w-auto" /><Button label={t("ratingEngine.saveFactor")} icon="pi pi-check" onClick={save} className="w-auto" /></div>
           </div>
         )}
       </Dialog>
@@ -840,7 +840,7 @@ export const UnderwritingRules = () => {
               <div className="field col-12 md:col-6"><StatusField value={selected.status} onChange={(status) => setSelected({ ...selected, status })} /></div>
             </div>
             <p className="pc-muted">{t("underwritingRules.preview")}: {conditionText(selected, uw.fields) || "—"} → {outcomeText(selected, t)}</p>
-            <div className="flex justify-content-end"><Button label={t("underwritingRules.saveRule")} icon="pi pi-check" onClick={save} className="w-auto" /></div>
+            <div className="flex justify-content-end gap-2"><Button label={t("common.cancel")} outlined onClick={() => setSelected(null)} className="w-auto" /><Button label={t("underwritingRules.saveRule")} icon="pi pi-check" onClick={save} className="w-auto" /></div>
           </div>
         )}
       </Dialog>
@@ -912,7 +912,7 @@ export const MarketMapping = () => {
         [t("marketMapping.overridePercent"), s.viewing.overrideRate == null ? null : `${s.viewing.overrideRate}%`],
         [t("marketMapping.profitShare"), s.viewing.profitShare == null ? null : `${s.viewing.profitShare}%`],
         [t("marketMapping.target"), s.viewing.targetPremium || null, { type: "amount" }],
-        [t("marketMapping.ytdPerformance"), `${formatCurrency(s.viewing.ytdPremium ?? 0)} (${s.viewing.ytdPolicies ?? 0} ${t("marketMapping.policies")})`],
+        [t("marketMapping.ytdPerformance"), `${formatCurrency(s.viewing.ytdPremium ?? 0)} (${t("marketMapping.policyCount", { count: Number(s.viewing.ytdPolicies ?? 0) })})`],
         [t("marketMapping.valid"), `${formatDate(s.viewing.validFrom)} – ${formatDate(s.viewing.validTo)}`],
         [t("marketMapping.specialTerms"), s.viewing.specialTerms, { span: "full" }],
       ] : []} />
@@ -951,7 +951,7 @@ export const MarketMapping = () => {
               <div className="field col-12 md:col-6"><StatusField value={selected.status} onChange={(status) => setSelected({ ...selected, status })} /></div>
             </div>
             <small className="block mb-3 pc-muted">{t("marketMapping.commissionNote")}</small>
-            <div className="flex justify-content-end"><Button label={t("common.save")} icon="pi pi-check" onClick={save} className="w-auto" /></div>
+            <div className="flex justify-content-end gap-2"><Button label={t("common.cancel")} outlined onClick={() => setSelected(null)} className="w-auto" /><Button label={t("common.save")} icon="pi pi-check" onClick={save} className="w-auto" /></div>
           </div>
         )}
       </Dialog>
@@ -1102,7 +1102,7 @@ export const DocumentManager = () => {
                 {used.length > 0 && <small className="block mt-1">{t("documentManager.fieldsUsed", { fields: used.join(", ") })}</small>}
               </div>
             </div>
-            <div className="flex justify-content-end"><Button label={t("common.save")} icon="pi pi-check" onClick={save} className="w-auto" /></div>
+            <div className="flex justify-content-end gap-2"><Button label={t("common.cancel")} outlined onClick={() => setSelected(null)} className="w-auto" /><Button label={t("common.save")} icon="pi pi-check" onClick={save} className="w-auto" /></div>
           </div>
         )}
       </Dialog>

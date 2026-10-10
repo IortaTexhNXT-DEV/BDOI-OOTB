@@ -15,7 +15,7 @@ import { formatDate, formatDateTime, printFormat } from '../../lib/pdf/index.js'
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { hasPermission } from '../../lib/auth.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
-import { APPROVE, addDays, iso, isPeriod, linkedAccount, periodEnd, periodStart, round2, userNames } from './common.js';
+import { APPROVE, addDays, iso, isPeriod, linkedAccount, periodEnd, periodStart, round2, userNames, userRoles } from './common.js';
 import { bankLineRow, bookLineRow } from './matching.js';
 
 /** Balance per bank statement as of a date (null when the account has no statement starting on or before it). */
@@ -148,8 +148,10 @@ export async function getRec(db, id, { live = false } = {}) {
   } else statement = r.snapshot;
   const hist = (await db.query('SELECT * FROM bank_reconciliation_history WHERE rec_id = $1 ORDER BY changed_at DESC, id DESC', [r.id])).rows;
   const users = await userNames(db, [r.prepared_by, r.approved_by, r.reopened_by, ...hist.map((h) => h.changed_by)]);
+  const roles = await userRoles(db, hist.map((h) => h.changed_by));
   return { ...recRow(r, users), periodFrom: periodStart(r.period), statement,
-    history: hist.map((h) => ({ from: h.from_status, to: h.to_status, remarks: h.remarks, changedBy: users.get(h.changed_by) || h.changed_by || 'system', changedAt: h.changed_at })) };
+    history: hist.map((h) => ({ from: h.from_status, to: h.to_status, remarks: h.remarks, changedBy: users.get(h.changed_by) || h.changed_by || 'system',
+      changedByRoles: roles.get(h.changed_by) || [], changedAt: h.changed_at })) };
 }
 
 export async function prepareRec(db, id, user, { remarks = null } = {}) {

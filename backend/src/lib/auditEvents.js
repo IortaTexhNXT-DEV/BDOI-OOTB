@@ -113,7 +113,21 @@ function dateTimeText(v, fmt, dateKey) {
 const isNumeric = (v) => (typeof v === 'number' && Number.isFinite(v)) || (typeof v === 'string' && /^-?\d+(\.\d+)?$/.test(v.trim()));
 
 /** "PHP 85,000.00" (currency of the record when known, else the configured currency). */
-export const moneyText = (v, fmt = DEFAULT_FORMAT, currency) => `${String(currency || fmt.currency || 'PHP').toUpperCase()} ${formatAmount(v, fmt.decimals ?? 2)}`;
+/** The symbol of the home currency as the screens show it (PHP -> ₱); the code itself when the currency has none. */
+const currencySymbol = (code) => {
+  try {
+    return new Intl.NumberFormat('en', { style: 'currency', currency: code, currencyDisplay: 'narrowSymbol' }).formatToParts(0).find((p) => p.type === 'currency')?.value || code;
+  } catch {
+    return code;
+  }
+};
+export const moneyText = (v, fmt = DEFAULT_FORMAT, currency) => {
+  const home = String(fmt.currency || 'PHP').toUpperCase();
+  const code = String(currency || home).toUpperCase();
+  // a foreign amount keeps its code, so that $ is never read as another dollar
+  const symbol = code === home ? currencySymbol(code) : code;
+  return symbol === code ? `${code} ${formatAmount(v, fmt.decimals ?? 2)}` : `${symbol}${formatAmount(v, fmt.decimals ?? 2)}`;
+};
 
 const maskTail = (v) => {
   const s = String(v);
@@ -188,7 +202,9 @@ const isInternalId = (v) => typeof v === 'number' || (typeof v === 'string' && (
 /** The order of the facts of a created record: its number, the parties, status and type, dates, amounts, then the rest. */
 const factRank = (path) => {
   const k = norm(leaf(path));
-  if (/(number|no|code)$/.test(k)) return 0;
+  // the record's own number or code first; a code that classifies it (EWT code, transaction code) reads with the types
+  if (/(number|no)$/.test(k) || k === 'code') return 0;
+  if (/code$/.test(k)) return 3;
   if (/name$/.test(k) || /^(client|insurer|insured|supplier|product)/.test(k)) return 1;
   if (STATUS.test(k)) return 2;
   if (ENUM.test(k)) return 3;
@@ -255,6 +271,8 @@ export function sourceOf(row) {
   if (s?.channel === 'screen') return { channel: 'screen', label: 'Screen', name: s.name ? String(s.name).replace(/\s*>?\s*\(any [^)]*\)/i, '') : null };
   if (s?.channel === 'api') return { channel: 'api', label: 'API', name: s.name || null };
   if (s?.channel === 'job') return { channel: 'job', label: 'System job', name: s.name || null };
+  // a step read from the record's own columns: who did it is not always kept, which does not make it a job
+  if (s?.channel === 'record') return { channel: 'application', label: 'Application', name: null };
   const action = String(row.action || '');
   const username = String(row.username || '');
   if (username.startsWith('customer:')) return { channel: 'portal', label: 'Customer portal', name: null };

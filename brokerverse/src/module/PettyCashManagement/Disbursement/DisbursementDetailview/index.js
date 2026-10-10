@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -12,8 +12,15 @@ import DetailHeader from "../../../../components/DetailHeader";
 import DetailSection from "../../../../components/DetailSection";
 import KeyValueGrid, { formatValue } from "../../../../components/KeyValueGrid";
 import { statusLabel } from "../../../../utils/statusSeverity";
+import { Button } from "primereact/button";
+import { printPdf } from "../../../../components/Print";
+import { RecordActivityLog } from "../../../../components/ActivityLog";
+import { showErrorMessage } from "../../../../utility/toastUtils";
 
-/** A posted petty cash disbursement, read only: its facts, the accounts it posted to and the request line it paid. */
+/**
+ * A posted petty cash disbursement, read only: its facts, the accounts it posted to, the request line it paid, its
+ * activity and the printed petty cash voucher.
+ */
 const DisbursementDetailview = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -29,6 +36,13 @@ const DisbursementDetailview = () => {
   const home = { label: t("pettyCash.accounts") };
   const line = lines[0] || {};
   const amount = (v) => formatValue(v === "" ? null : v, { type: "amount" });
+  const [printing, setPrinting] = useState(false);
+  const print = () => {
+    setPrinting(true);
+    printPdf(`/petty-cash/disbursements/${encodeURIComponent(view.id)}/pdf`, { fileName: `petty-cash-voucher-${view.TransactionNumber || view.id}.pdf` })
+      .catch((e) => showErrorMessage(e?.message || t("print.failed"), t("common.error")))
+      .finally(() => setPrinting(false));
+  };
 
   return (
     <div className="add__disbursement__view__container">
@@ -54,6 +68,7 @@ const DisbursementDetailview = () => {
           { label: t("pettyCash.requestNumber"), value: line.RequestNumber },
           { label: t("pettyCash.view.netAmount"), value: line.NetAmount, type: "amount" },
         ]}
+        actions={view.id ? <Button label={t("pettyCash.view.printVoucher")} icon="pi pi-print" outlined onClick={print} loading={printing} /> : null}
       />
 
       <DetailSection title={t("pettyCash.view.posting")}>
@@ -77,6 +92,12 @@ const DisbursementDetailview = () => {
           <Column header={t("pettyCash.view.netAmount")} body={(r) => amount(r.NetAmount)} bodyClassName="bv-num" headerClassName="bv-num" />
         </DataTable>
       </DetailSection>
+
+      {view.id ? (
+        <DetailSection title={t("detailView.activity")}>
+          <RecordActivityLog entity="petty_cash_disbursement" recordId={view.id} />
+        </DetailSection>
+      ) : null}
     </div>
   );
 };

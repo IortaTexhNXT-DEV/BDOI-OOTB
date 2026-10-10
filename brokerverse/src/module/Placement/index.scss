@@ -217,11 +217,21 @@
   td { white-space: nowrap; }
 }
 
-.participant-table.offers, .participant-table.compare {
+.participant-table.offers {
   min-width: 68rem;
 
   td:first-child strong, td:nth-child(4) { white-space: nowrap; }
   td:nth-child(8), td:nth-child(9) { min-width: 11rem; }
+}
+
+// the comparison fits its card: deductibles and terms share one wrapping column, the rank sits with the insurer
+.participant-table.compare {
+  .insurer-cell { min-width: 12rem; }
+  .insurer-cell .rank { color: $color-text-muted; }
+  .terms-cell { min-width: 12rem; max-width: 22rem; white-space: normal; }
+  .terms-cell span { display: block; }
+  .terms-cell .muted { color: $color-text-muted; font-size: 0.8125rem; }
+  .share-cell { width: 8rem; }
 }
 
 .participant-table.readonly td:first-child { min-width: 12rem; }

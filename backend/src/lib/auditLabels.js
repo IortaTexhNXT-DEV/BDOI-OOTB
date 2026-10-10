@@ -43,7 +43,7 @@ export const ENTITY_LABELS = {
   remittance_batch: 'Remittance batch', remittance_import: 'Remittance import', remittance_statement: 'Remittance statement', data_subject_request: 'Data subject request',
   privacy_consent: 'Privacy consent', 'system-settings': 'System setting', settings: 'Configuration', risk_mapping: 'Risk mapping',
   product_template: 'Product template', checkbook: 'Checkbook', authority_limit: 'Authority limit', report_schedule: 'Report schedule',
-  premium_warranty_extension: 'Premium warranty extension', petty_cash_request: 'Petty cash request', petty_cash_fund: 'Petty cash fund',
+  premium_warranty_extension: 'Premium warranty extension', petty_cash_request: 'Petty cash request', petty_cash_fund: 'Petty cash fund', petty_cash_disbursement: 'Petty cash disbursement',
   payment_link: 'Payment link', package_quote: 'Package quotation', package_bundle: 'Package', data_load_batch: 'Data load batch',
   bank_reconciliation: 'Bank reconciliation', accounting_config_change: 'Accounting configuration change', sod_rule: 'Segregation of duties rule',
   recurring_journal: 'Recurring journal', receivable: 'Receivable', premium_charge_rule: 'Premium charge rule', period_close_run: 'Month-end close',
@@ -81,7 +81,7 @@ const ACTION_VERBS = {
   'record-confirmation': 'confirmation recorded', 'create-agency-bill': 'agency bill created', 'send-bill': 'bill sent',
   accrue: 'accrued', 'mark-eligible': 'marked eligible',
   acknowledge: 'acknowledged by the insurer', 'record-epolicy': 'e-policy recorded', check: 'checked against the slip', book: 'booked',
-  'send-for-approval': 'sent for approval', 'customer-accept': 'accepted by the customer',
+  'send-for-approval': 'sent for approval', 'customer-accept': 'accepted by the customer', 'convert-to-policy': 'converted to a policy', disburse: 'disbursed',
 };
 
 /**
@@ -179,6 +179,10 @@ const COMMON = {
 
 /** Labels of one record type (override COMMON). */
 const BY_ENTITY = {
+  supplier_invoice: {
+    supplierInvoiceNo: 'Supplier invoice no.', voucherNumber: 'Voucher number', ewtCode: 'EWT code', ewtRate: 'EWT rate', ewtAmount: 'EWT',
+    inputVat: 'Input VAT', payableAmount: 'Payable to supplier',
+  },
   claim: {
     claimStatus: 'Claim status', insuranceCompanyClaimNumber: 'Insurer claim number', insurerClaimNumber: 'Insurer claim number',
     dateOfIncident: 'Date of loss', timeOfIncident: 'Time of loss', addressOfIncident: 'Place of loss', cityOfIncident: 'City / municipality of loss',
