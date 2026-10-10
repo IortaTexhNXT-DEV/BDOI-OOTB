@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1240 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1249 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -6452,7 +6452,7 @@
           ]
         },
         {
-          "name": "Bank payment batches (status (comma-separated), search on batch, voucher or payee; paging)",
+          "name": "Bank payment batches (status (comma-separated), search on batch, voucher or payee; paging), each with the caller's decision block (canDecide, blockedCode, blockedReason)",
           "request": {
             "method": "GET",
             "header": [],
@@ -6472,7 +6472,7 @@
                 }
               ]
             },
-            "description": "Bank payment batches (status (comma-separated), search on batch, voucher or payee; paging)\n\nFront-end touchpoint: Accounts > Bank Payment Files\n\nAccess: read:disbursements"
+            "description": "Bank payment batches (status (comma-separated), search on batch, voucher or payee; paging), each with the caller's decision block (canDecide, blockedCode, blockedReason)\n\nFront-end touchpoint: Accounts > Bank Payment Files\n\nAccess: read:disbursements"
           },
           "response": [
             {
@@ -6496,7 +6496,7 @@
                     }
                   ]
                 },
-                "description": "Bank payment batches (status (comma-separated), search on batch, voucher or payee; paging)\n\nFront-end touchpoint: Accounts > Bank Payment Files\n\nAccess: read:disbursements"
+                "description": "Bank payment batches (status (comma-separated), search on batch, voucher or payee; paging), each with the caller's decision block (canDecide, blockedCode, blockedReason)\n\nFront-end touchpoint: Accounts > Bank Payment Files\n\nAccess: read:disbursements"
               },
               "status": "OK",
               "code": 200,
@@ -6508,7 +6508,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"bpb_0123456789abcdef\",\n      \"batchNumber\": \"BPB-2026-00001\",\n      \"layoutCode\": \"BDO-BULK\",\n      \"bankAccountCode\": \"ACC-BDO-001\",\n      \"channel\": \"pesonet\",\n      \"valueDate\": \"2026-10-05\",\n      \"status\": \"file-generated\",\n      \"lineCount\": 2,\n      \"totalAmount\": 153250.5,\n      \"paidCount\": 0,\n      \"rejectedCount\": 0,\n      \"pendingCount\": 2,\n      \"fileName\": \"BDO_BPB-2026-00001_20261005.csv\",\n      \"lines\": [\n        {\n          \"id\": 1,\n          \"seq\": 1,\n          \"voucherNumber\": \"PV-2026-00011\",\n          \"payeeName\": \"Malayan Insurance Co., Inc.\",\n          \"bankCode\": \"MBT\",\n          \"accountNumber\": \"0012345678\",\n          \"amount\": 125000,\n          \"status\": \"pending\"\n        }\n      ]\n    }\n  ],\n  \"total\": 1\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"bpb_0123456789abcdef\",\n      \"batchNumber\": \"BPB-2026-00001\",\n      \"layoutCode\": \"BDO-BULK\",\n      \"bankAccountCode\": \"ACC-BDO-001\",\n      \"channel\": \"pesonet\",\n      \"valueDate\": \"2026-10-05\",\n      \"status\": \"file-generated\",\n      \"lineCount\": 2,\n      \"totalAmount\": 153250.5,\n      \"paidCount\": 0,\n      \"rejectedCount\": 0,\n      \"pendingCount\": 2,\n      \"fileName\": \"BDO_BPB-2026-00001_20261005.csv\",\n      \"lines\": [\n        {\n          \"id\": 1,\n          \"seq\": 1,\n          \"voucherNumber\": \"PV-2026-00011\",\n          \"payeeName\": \"Malayan Insurance Co., Inc.\",\n          \"bankCode\": \"MBT\",\n          \"accountNumber\": \"0012345678\",\n          \"amount\": 125000,\n          \"status\": \"pending\"\n        }\n      ],\n      \"decision\": {\n        \"canDecide\": false,\n        \"blockedCode\": \"SUBMITTER\",\n        \"blockedReason\": \"You submitted this batch. Another user must approve it.\"\n      }\n    }\n  ],\n  \"total\": 1\n}"
             }
           ]
         },
@@ -6590,7 +6590,7 @@
           ]
         },
         {
-          "name": "One batch with its lines",
+          "name": "One batch with its lines and the caller's decision block: Approve and Reject are offered only when canDecide; otherwise blockedCode (MAKER, SUBMITTER, VOUCHER_MAKER, NO_AUTHORITY, ABOVE_LIMIT, NO_PERMISSION, WRONG_STATUS) and the reason",
           "request": {
             "method": "GET",
             "header": [],
@@ -6612,7 +6612,7 @@
                 }
               ]
             },
-            "description": "One batch with its lines\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch\n\nAccess: read:disbursements"
+            "description": "One batch with its lines and the caller's decision block: Approve and Reject are offered only when canDecide; otherwise blockedCode (MAKER, SUBMITTER, VOUCHER_MAKER, NO_AUTHORITY, ABOVE_LIMIT, NO_PERMISSION, WRONG_STATUS) and the reason\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch\n\nAccess: read:disbursements"
           },
           "response": [
             {
@@ -6638,7 +6638,7 @@
                     }
                   ]
                 },
-                "description": "One batch with its lines\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch\n\nAccess: read:disbursements"
+                "description": "One batch with its lines and the caller's decision block: Approve and Reject are offered only when canDecide; otherwise blockedCode (MAKER, SUBMITTER, VOUCHER_MAKER, NO_AUTHORITY, ABOVE_LIMIT, NO_PERMISSION, WRONG_STATUS) and the reason\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch\n\nAccess: read:disbursements"
               },
               "status": "OK",
               "code": 200,
@@ -6650,7 +6650,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"bpb_0123456789abcdef\",\n    \"batchNumber\": \"BPB-2026-00001\",\n    \"layoutCode\": \"BDO-BULK\",\n    \"bankAccountCode\": \"ACC-BDO-001\",\n    \"channel\": \"pesonet\",\n    \"valueDate\": \"2026-10-05\",\n    \"status\": \"file-generated\",\n    \"lineCount\": 2,\n    \"totalAmount\": 153250.5,\n    \"paidCount\": 0,\n    \"rejectedCount\": 0,\n    \"pendingCount\": 2,\n    \"fileName\": \"BDO_BPB-2026-00001_20261005.csv\",\n    \"lines\": [\n      {\n        \"id\": 1,\n        \"seq\": 1,\n        \"voucherNumber\": \"PV-2026-00011\",\n        \"payeeName\": \"Malayan Insurance Co., Inc.\",\n        \"bankCode\": \"MBT\",\n        \"accountNumber\": \"0012345678\",\n        \"amount\": 125000,\n        \"status\": \"pending\"\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"bpb_0123456789abcdef\",\n    \"batchNumber\": \"BPB-2026-00001\",\n    \"layoutCode\": \"BDO-BULK\",\n    \"bankAccountCode\": \"ACC-BDO-001\",\n    \"channel\": \"pesonet\",\n    \"valueDate\": \"2026-10-05\",\n    \"status\": \"file-generated\",\n    \"lineCount\": 2,\n    \"totalAmount\": 153250.5,\n    \"paidCount\": 0,\n    \"rejectedCount\": 0,\n    \"pendingCount\": 2,\n    \"fileName\": \"BDO_BPB-2026-00001_20261005.csv\",\n    \"lines\": [\n      {\n        \"id\": 1,\n        \"seq\": 1,\n        \"voucherNumber\": \"PV-2026-00011\",\n        \"payeeName\": \"Malayan Insurance Co., Inc.\",\n        \"bankCode\": \"MBT\",\n        \"accountNumber\": \"0012345678\",\n        \"amount\": 125000,\n        \"status\": \"pending\"\n      }\n    ],\n    \"decision\": {\n      \"canDecide\": false,\n      \"blockedCode\": \"SUBMITTER\",\n      \"blockedReason\": \"You submitted this batch. Another user must approve it.\"\n    }\n  }\n}"
             }
           ]
         },
@@ -78733,7 +78733,7 @@
           ]
         },
         {
-          "name": "Commission debit notes (insurerCode, status code or label, from / to, search, paging)",
+          "name": "Commission debit notes (insurerCode, status code or label, from / to, search, attention=mine: my drafts and the notes overdue with a balance; paging)",
           "request": {
             "method": "GET",
             "header": [],
@@ -78765,7 +78765,7 @@
                 }
               ]
             },
-            "description": "Commission debit notes (insurerCode, status code or label, from / to, search, paging)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: read:remittance, write:remittance"
+            "description": "Commission debit notes (insurerCode, status code or label, from / to, search, attention=mine: my drafts and the notes overdue with a balance; paging)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: read:remittance, write:remittance"
           },
           "response": [
             {
@@ -78801,7 +78801,7 @@
                     }
                   ]
                 },
-                "description": "Commission debit notes (insurerCode, status code or label, from / to, search, paging)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: read:remittance, write:remittance"
+                "description": "Commission debit notes (insurerCode, status code or label, from / to, search, attention=mine: my drafts and the notes overdue with a balance; paging)\n\nFront-end touchpoint: Accounts > Remittance > Direct Bill Processing > Debit Notes\n\nAccess: read:remittance, write:remittance"
               },
               "status": "OK",
               "code": 200,
@@ -80249,21 +80249,31 @@
           ]
         },
         {
-          "name": "Remittance exceptions (status: Open, In Progress, Escalated, Resolved)",
+          "name": "Remittance exceptions (status: Open, In Progress, Escalated, Resolved; assignedTo=me: assigned to the caller)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/remittance/exceptions",
+              "raw": "{{baseUrl}}/remittance/exceptions?status=Open,In Progress,Escalated&assignedTo=me",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "remittance",
                 "exceptions"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "Open,In Progress,Escalated"
+                },
+                {
+                  "key": "assignedTo",
+                  "value": "me"
+                }
               ]
             },
-            "description": "Remittance exceptions (status: Open, In Progress, Escalated, Resolved)\n\nFront-end touchpoint: Accounts > Remittance > Exceptions\n\nAccess: read:remittance, write:remittance"
+            "description": "Remittance exceptions (status: Open, In Progress, Escalated, Resolved; assignedTo=me: assigned to the caller)\n\nFront-end touchpoint: Accounts > Remittance > Exceptions\n\nAccess: read:remittance, write:remittance"
           },
           "response": [
             {
@@ -80272,16 +80282,26 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/remittance/exceptions",
+                  "raw": "{{baseUrl}}/remittance/exceptions?status=Open,In Progress,Escalated&assignedTo=me",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "remittance",
                     "exceptions"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "Open,In Progress,Escalated"
+                    },
+                    {
+                      "key": "assignedTo",
+                      "value": "me"
+                    }
                   ]
                 },
-                "description": "Remittance exceptions (status: Open, In Progress, Escalated, Resolved)\n\nFront-end touchpoint: Accounts > Remittance > Exceptions\n\nAccess: read:remittance, write:remittance"
+                "description": "Remittance exceptions (status: Open, In Progress, Escalated, Resolved; assignedTo=me: assigned to the caller)\n\nFront-end touchpoint: Accounts > Remittance > Exceptions\n\nAccess: read:remittance, write:remittance"
               },
               "status": "OK",
               "code": 200,
@@ -81854,6 +81874,255 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"code\": \"NTF-001\",\n      \"name\": \"Payment Due Reminder\",\n      \"channel\": \"Email\",\n      \"status\": \"Active\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Insurer payments (read:remittance or read:disbursements): the payment vouchers of insurer remittances with segment=to-pay|in-payment|paid|failed|all (a draft voucher is To pay, next step \"Submit voucher (Disbursement)\"), insurerId, from / to (value date), method fund-transfer|cheque, q (PV, REM, batch or bank ref.), paging: rows with state, masked payee account, method, batch, next step, selectable and actions; totals of the filtered set, the 4 KPI figures and segment counts over the filters, batching { allowed, code, reason } (NO_LAYOUT \"No Metrobank layout configured. Pay by cheque or ask the administrator.\", NO_PERMISSION) and the count of legacy transfers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/payments?segment=to-pay&insurerId=3&from=2026-10-01&to=2026-10-31&method=fund-transfer&q=PV-2026&page=1&perPage=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "payments"
+              ],
+              "query": [
+                {
+                  "key": "segment",
+                  "value": "to-pay"
+                },
+                {
+                  "key": "insurerId",
+                  "value": "3"
+                },
+                {
+                  "key": "from",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-10-31"
+                },
+                {
+                  "key": "method",
+                  "value": "fund-transfer"
+                },
+                {
+                  "key": "q",
+                  "value": "PV-2026"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "Insurer payments (read:remittance or read:disbursements): the payment vouchers of insurer remittances with segment=to-pay|in-payment|paid|failed|all (a draft voucher is To pay, next step \"Submit voucher (Disbursement)\"), insurerId, from / to (value date), method fund-transfer|cheque, q (PV, REM, batch or bank ref.), paging: rows with state, masked payee account, method, batch, next step, selectable and actions; totals of the filtered set, the 4 KPI figures and segment counts over the filters, batching { allowed, code, reason } (NO_LAYOUT \"No Metrobank layout configured. Pay by cheque or ask the administrator.\", NO_PERMISSION) and the count of legacy transfers\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/payments?segment=to-pay&insurerId=3&from=2026-10-01&to=2026-10-31&method=fund-transfer&q=PV-2026&page=1&perPage=50",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "payments"
+                  ],
+                  "query": [
+                    {
+                      "key": "segment",
+                      "value": "to-pay"
+                    },
+                    {
+                      "key": "insurerId",
+                      "value": "3"
+                    },
+                    {
+                      "key": "from",
+                      "value": "2026-10-01"
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-10-31"
+                    },
+                    {
+                      "key": "method",
+                      "value": "fund-transfer"
+                    },
+                    {
+                      "key": "q",
+                      "value": "PV-2026"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "perPage",
+                      "value": "50"
+                    }
+                  ]
+                },
+                "description": "Insurer payments (read:remittance or read:disbursements): the payment vouchers of insurer remittances with segment=to-pay|in-payment|paid|failed|all (a draft voucher is To pay, next step \"Submit voucher (Disbursement)\"), insurerId, from / to (value date), method fund-transfer|cheque, q (PV, REM, batch or bank ref.), paging: rows with state, masked payee account, method, batch, next step, selectable and actions; totals of the filtered set, the 4 KPI figures and segment counts over the filters, batching { allowed, code, reason } (NO_LAYOUT \"No Metrobank layout configured. Pay by cheque or ask the administrator.\", NO_PERMISSION) and the count of legacy transfers\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"pv_102\",\n      \"voucherNo\": \"PV-2026-00102\",\n      \"voucherStatus\": \"for-approval\",\n      \"voucherStatusLabel\": \"Submitted\",\n      \"state\": \"to-pay\",\n      \"stateLabel\": \"To pay\",\n      \"amount\": 409141.43,\n      \"currency\": \"PHP\",\n      \"insurer\": {\n        \"id\": 3,\n        \"code\": \"PIONEER\",\n        \"name\": \"Pioneer Insurance & Surety Corp.\",\n        \"shortName\": \"Pioneer\"\n      },\n      \"remittance\": {\n        \"id\": \"rm_21\",\n        \"remittanceNo\": \"REM-2026-00021\",\n        \"dueToInsurer\": 409141.43,\n        \"link\": \"/finance/remittance/remittances/rm_21\"\n      },\n      \"remittances\": [],\n      \"settlement\": {\n        \"id\": \"rmi_5\",\n        \"reference\": \"SET-2026-00005\"\n      },\n      \"payee\": {\n        \"bank\": {\n          \"code\": \"MBT\",\n          \"name\": \"Metropolitan Bank and Trust Company\"\n        },\n        \"accountMasked\": \"···4821\",\n        \"accountName\": \"Pioneer Insurance & Surety Corp.\",\n        \"label\": \"Metropolitan Bank and Trust Company ···4821\",\n        \"chip\": {\n          \"code\": \"on-file\",\n          \"label\": \"On file\"\n        }\n      },\n      \"method\": null,\n      \"batch\": null,\n      \"cheque\": null,\n      \"valueDate\": \"2026-10-12\",\n      \"bankReference\": null,\n      \"paidOn\": null,\n      \"failureReason\": null,\n      \"nextStep\": {\n        \"code\": \"create-batch\",\n        \"label\": \"Create batch\",\n        \"actor\": {\n          \"type\": \"permission\",\n          \"name\": \"Bank Payment Files\"\n        }\n      },\n      \"selectable\": true,\n      \"actions\": [\n        {\n          \"code\": \"view\",\n          \"label\": \"View payment\",\n          \"allowed\": true,\n          \"link\": \"/finance/remittance/payments?payment=PV-2026-00102\"\n        },\n        {\n          \"code\": \"open-remittance\",\n          \"label\": \"Open remittance\",\n          \"allowed\": true,\n          \"link\": \"/finance/remittance/remittances/rm_21\"\n        },\n        {\n          \"code\": \"pay-by-cheque\",\n          \"label\": \"Pay by cheque\",\n          \"allowed\": true,\n          \"link\": \"/accounts/paymentvoucher/detailview/pv_102\"\n        }\n      ],\n      \"link\": \"/finance/remittance/payments?payment=PV-2026-00102\",\n      \"voucherLink\": \"/accounts/paymentvoucher/detailview/pv_102\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 50,\n  \"totalPages\": 1,\n  \"segment\": \"to-pay\",\n  \"totals\": {\n    \"count\": 1,\n    \"amount\": 409141.43\n  },\n  \"kpis\": {\n    \"toPay\": {\n      \"count\": 1,\n      \"amount\": 409141.43\n    },\n    \"inPayment\": {\n      \"count\": 0,\n      \"amount\": 0\n    },\n    \"paidThisWeek\": {\n      \"count\": 0,\n      \"amount\": 0\n    },\n    \"failed\": {\n      \"count\": 0,\n      \"amount\": 0\n    }\n  },\n  \"segments\": {\n    \"to-pay\": 1,\n    \"in-payment\": 0,\n    \"paid\": 0,\n    \"failed\": 0,\n    \"all\": 1\n  },\n  \"batching\": {\n    \"allowed\": false,\n    \"code\": \"NO_LAYOUT\",\n    \"reason\": \"No Metrobank layout configured. Pay by cheque or ask the administrator.\",\n    \"bankCode\": \"MBT\",\n    \"layout\": null,\n    \"chequeAllowed\": true\n  },\n  \"legacyTransfers\": 4\n}"
+            }
+          ]
+        },
+        {
+          "name": "Payment record (voucher id or no.): the row with the sections Payee (masked account, canReveal), Payment (method, value date, debit account, bank reference, paid on, failure reason), Amounts (due to insurer, refund credits netted, voucher and bank amount, check Pass / Difference), Links (remittances and schedules, voucher, batch, bank file, status file, cheque, journal), Approvals (remittance approvals with limit, voucher maker, batch created / approved, file generated, result imported), the timeline and the activity of the voucher, its batch and cheques",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/payments/:voucherId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "payments",
+                ":voucherId"
+              ],
+              "variable": [
+                {
+                  "key": "voucherId",
+                  "value": "",
+                  "description": "voucherId (path parameter)"
+                }
+              ]
+            },
+            "description": "Payment record (voucher id or no.): the row with the sections Payee (masked account, canReveal), Payment (method, value date, debit account, bank reference, paid on, failure reason), Amounts (due to insurer, refund credits netted, voucher and bank amount, check Pass / Difference), Links (remittances and schedules, voucher, batch, bank file, status file, cheque, journal), Approvals (remittance approvals with limit, voucher maker, batch created / approved, file generated, result imported), the timeline and the activity of the voucher, its batch and cheques\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments > View payment\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/payments/:voucherId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "payments",
+                    ":voucherId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "voucherId",
+                      "value": "",
+                      "description": "voucherId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Payment record (voucher id or no.): the row with the sections Payee (masked account, canReveal), Payment (method, value date, debit account, bank reference, paid on, failure reason), Amounts (due to insurer, refund credits netted, voucher and bank amount, check Pass / Difference), Links (remittances and schedules, voucher, batch, bank file, status file, cheque, journal), Approvals (remittance approvals with limit, voucher maker, batch created / approved, file generated, result imported), the timeline and the activity of the voucher, its batch and cheques\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments > View payment\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pv_102\",\n    \"voucherNo\": \"PV-2026-00102\",\n    \"voucherStatus\": \"for-approval\",\n    \"voucherStatusLabel\": \"Submitted\",\n    \"state\": \"to-pay\",\n    \"stateLabel\": \"To pay\",\n    \"amount\": 409141.43,\n    \"currency\": \"PHP\",\n    \"insurer\": {\n      \"id\": 3,\n      \"code\": \"PIONEER\",\n      \"name\": \"Pioneer Insurance & Surety Corp.\",\n      \"shortName\": \"Pioneer\"\n    },\n    \"remittance\": {\n      \"id\": \"rm_21\",\n      \"remittanceNo\": \"REM-2026-00021\",\n      \"dueToInsurer\": 409141.43,\n      \"link\": \"/finance/remittance/remittances/rm_21\"\n    },\n    \"remittances\": [],\n    \"settlement\": {\n      \"id\": \"rmi_5\",\n      \"reference\": \"SET-2026-00005\"\n    },\n    \"payee\": {\n      \"bank\": {\n        \"code\": \"MBT\",\n        \"name\": \"Metropolitan Bank and Trust Company\"\n      },\n      \"accountMasked\": \"···4821\",\n      \"accountName\": \"Pioneer Insurance & Surety Corp.\",\n      \"label\": \"Metropolitan Bank and Trust Company ···4821\",\n      \"chip\": {\n        \"code\": \"on-file\",\n        \"label\": \"On file\"\n      },\n      \"canReveal\": true,\n      \"verification\": {\n        \"code\": \"on-file\",\n        \"label\": \"On file\"\n      }\n    },\n    \"method\": null,\n    \"batch\": null,\n    \"cheque\": null,\n    \"valueDate\": \"2026-10-12\",\n    \"bankReference\": null,\n    \"paidOn\": null,\n    \"failureReason\": null,\n    \"nextStep\": {\n      \"code\": \"create-batch\",\n      \"label\": \"Create batch\",\n      \"actor\": {\n        \"type\": \"permission\",\n        \"name\": \"Bank Payment Files\"\n      }\n    },\n    \"selectable\": true,\n    \"actions\": [\n      {\n        \"code\": \"view\",\n        \"label\": \"View payment\",\n        \"allowed\": true,\n        \"link\": \"/finance/remittance/payments?payment=PV-2026-00102\"\n      },\n      {\n        \"code\": \"open-remittance\",\n        \"label\": \"Open remittance\",\n        \"allowed\": true,\n        \"link\": \"/finance/remittance/remittances/rm_21\"\n      },\n      {\n        \"code\": \"pay-by-cheque\",\n        \"label\": \"Pay by cheque\",\n        \"allowed\": true,\n        \"link\": \"/accounts/paymentvoucher/detailview/pv_102\"\n      }\n    ],\n    \"link\": \"/finance/remittance/payments?payment=PV-2026-00102\",\n    \"voucherLink\": \"/accounts/paymentvoucher/detailview/pv_102\",\n    \"payment\": {\n      \"method\": null,\n      \"amount\": 409141.43,\n      \"valueDate\": \"2026-10-12\",\n      \"debitAccount\": null,\n      \"bankReference\": null,\n      \"paidOn\": null,\n      \"failureReason\": null\n    },\n    \"amounts\": {\n      \"dueToInsurer\": 409141.43,\n      \"refundCredits\": 0,\n      \"voucherAmount\": 409141.43,\n      \"bankAmount\": null,\n      \"check\": {\n        \"code\": \"pass\",\n        \"label\": \"Pass\",\n        \"difference\": 0\n      }\n    },\n    \"links\": {\n      \"remittances\": [\n        {\n          \"remittanceNo\": \"REM-2026-00021\",\n          \"link\": \"/finance/remittance/remittances/rm_21\",\n          \"schedule\": \"/remittance/remittances/rm_21/schedule.xlsx\"\n        }\n      ],\n      \"voucher\": {\n        \"number\": \"PV-2026-00102\",\n        \"link\": \"/accounts/paymentvoucher/detailview/pv_102\"\n      },\n      \"batch\": null,\n      \"bankFile\": null,\n      \"statusFile\": null,\n      \"cheque\": null,\n      \"journal\": null,\n      \"bankReconciliation\": null\n    },\n    \"approvals\": {\n      \"remittances\": [\n        {\n          \"remittanceNo\": \"REM-2026-00021\",\n          \"by\": \"J. Cruz\",\n          \"at\": \"2026-10-12T02:32:00.000Z\",\n          \"limitAtDecision\": 1000000,\n          \"limitSourceLabel\": \"Role limit: TIS Finance & General Accounting\"\n        }\n      ],\n      \"voucherMaker\": {\n        \"name\": \"M. Reyes\",\n        \"at\": \"2026-10-12T03:00:00.000Z\"\n      },\n      \"batchCreatedBy\": null,\n      \"batchApprovedBy\": null,\n      \"fileGeneratedBy\": null,\n      \"resultImportedBy\": null\n    },\n    \"timeline\": [\n      {\n        \"code\": \"voucher-raised\",\n        \"label\": \"Voucher raised\",\n        \"done\": true,\n        \"at\": \"2026-10-12T03:00:00.000Z\",\n        \"by\": \"M. Reyes\"\n      }\n    ],\n    \"activity\": [],\n    \"batching\": {\n      \"allowed\": false,\n      \"code\": \"NO_LAYOUT\",\n      \"reason\": \"No Metrobank layout configured. Pay by cheque or ask the administrator.\",\n      \"bankCode\": \"MBT\",\n      \"layout\": null,\n      \"chequeAllowed\": true\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Show full number: the insurer's bank account number of a payment in full (write:disbursements; every reveal is audited)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/payments/:voucherId/account",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "payments",
+                ":voucherId",
+                "account"
+              ],
+              "variable": [
+                {
+                  "key": "voucherId",
+                  "value": "",
+                  "description": "voucherId (path parameter)"
+                }
+              ]
+            },
+            "description": "Show full number: the insurer's bank account number of a payment in full (write:disbursements; every reveal is audited)\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments > View payment > Show full number\n\nAccess: write:disbursements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/payments/:voucherId/account",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "payments",
+                    ":voucherId",
+                    "account"
+                  ],
+                  "variable": [
+                    {
+                      "key": "voucherId",
+                      "value": "",
+                      "description": "voucherId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Show full number: the insurer's bank account number of a payment in full (write:disbursements; every reveal is audited)\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments > View payment > Show full number\n\nAccess: write:disbursements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"voucherId\": \"pv_102\",\n    \"voucherNo\": \"PV-2026-00102\",\n    \"bank\": \"Metropolitan Bank and Trust Company\",\n    \"accountNumber\": \"0071-5566-4821\",\n    \"accountName\": \"Pioneer Insurance & Surety Corp.\"\n  }\n}"
             }
           ]
         },
@@ -83572,7 +83841,7 @@
           ]
         },
         {
-          "name": "Remittance schedules (remittance-schedule master), upcoming run dates and the Master > Schedules job that runs them",
+          "name": "Remittance schedules (Setup > Schedules): the automation state (jobEnabled, checked daily at, time zone, last check and its status; the cron and the job link for administrators only) and per schedule its kind, the insurers it covers, frequency, payment window, grouping, runs (\"Mondays 06:15\"), next run (none while paused), last run (time, result, counts, message, trigger) and status; scheduledJobs, upcomingEvents and job for the Scheduling screen of earlier releases",
           "request": {
             "method": "GET",
             "header": [],
@@ -83586,7 +83855,7 @@
                 "schedules"
               ]
             },
-            "description": "Remittance schedules (remittance-schedule master), upcoming run dates and the Master > Schedules job that runs them\n\nFront-end touchpoint: Accounts > Remittance > Scheduling\n\nAccess: read:remittance, write:remittance"
+            "description": "Remittance schedules (Setup > Schedules): the automation state (jobEnabled, checked daily at, time zone, last check and its status; the cron and the job link for administrators only) and per schedule its kind, the insurers it covers, frequency, payment window, grouping, runs (\"Mondays 06:15\"), next run (none while paused), last run (time, result, counts, message, trigger) and status; scheduledJobs, upcomingEvents and job for the Scheduling screen of earlier releases\n\nFront-end touchpoint: Accounts > Remittance > Setup > Schedules; Accounts > Remittance > Scheduling\n\nAccess: read:remittance, write:remittance"
           },
           "response": [
             {
@@ -83604,7 +83873,7 @@
                     "schedules"
                   ]
                 },
-                "description": "Remittance schedules (remittance-schedule master), upcoming run dates and the Master > Schedules job that runs them\n\nFront-end touchpoint: Accounts > Remittance > Scheduling\n\nAccess: read:remittance, write:remittance"
+                "description": "Remittance schedules (Setup > Schedules): the automation state (jobEnabled, checked daily at, time zone, last check and its status; the cron and the job link for administrators only) and per schedule its kind, the insurers it covers, frequency, payment window, grouping, runs (\"Mondays 06:15\"), next run (none while paused), last run (time, result, counts, message, trigger) and status; scheduledJobs, upcomingEvents and job for the Scheduling screen of earlier releases\n\nFront-end touchpoint: Accounts > Remittance > Setup > Schedules; Accounts > Remittance > Scheduling\n\nAccess: read:remittance, write:remittance"
               },
               "status": "OK",
               "code": 200,
@@ -83616,12 +83885,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"scheduledJobs\": [\n      {\n        \"id\": 1,\n        \"code\": \"SCH-001\",\n        \"name\": \"Monthly remittance - Malayan\",\n        \"insurers\": [\n          \"MALAYAN\"\n        ],\n        \"cutOffDays\": 5,\n        \"nextRun\": \"2026-10-01\",\n        \"frequency\": \"Monthly\",\n        \"status\": \"Active\"\n      }\n    ],\n    \"upcomingEvents\": [\n      {\n        \"status\": \"2026-10-01\",\n        \"date\": \"2026-10-01\",\n        \"content\": \"Monthly remittance - Malayan\"\n      }\n    ],\n    \"timeZone\": \"Asia/Manila\",\n    \"job\": {\n      \"code\": \"remittance-schedules\",\n      \"cron\": \"15 6 * * *\",\n      \"enabled\": false\n    }\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"automation\": {\n      \"jobEnabled\": false,\n      \"checkedDaily\": \"06:15\",\n      \"timeZone\": \"Asia/Manila\",\n      \"lastCheckAt\": null,\n      \"lastStatus\": null,\n      \"cron\": \"15 6 * * *\",\n      \"jobCode\": \"remittance-schedules\",\n      \"link\": \"/master/configuration/schedules\"\n    },\n    \"schedules\": [\n      {\n        \"id\": 7,\n        \"code\": \"TIS-WEEKLY\",\n        \"name\": \"Weekly remittance\",\n        \"kind\": \"Remittance run\",\n        \"frequency\": \"Weekly\",\n        \"paymentWindow\": \"Previous Monday to Friday\",\n        \"cutOffDays\": 0,\n        \"groupBy\": \"Insurer and product line\",\n        \"runTime\": \"06:15\",\n        \"allInsurers\": true,\n        \"insurers\": [],\n        \"covers\": {\n          \"allActive\": true,\n          \"count\": 4,\n          \"insurers\": [\n            {\n              \"id\": 3,\n              \"code\": \"PIONEER\",\n              \"name\": \"Pioneer Insurance & Surety Corp.\"\n            }\n          ],\n          \"label\": \"All active (4)\"\n        },\n        \"runs\": \"Mondays 06:15\",\n        \"nextRun\": \"2026-10-19\",\n        \"nextRunText\": \"Mon 19/10/2026 06:15\",\n        \"lastRun\": {\n          \"id\": \"run_0123456789abcdef\",\n          \"at\": \"2026-10-12T22:15:00.000Z\",\n          \"text\": \"12/10/2026 06:15\",\n          \"result\": \"success\",\n          \"resultLabel\": \"Success\",\n          \"counts\": {\n            \"scanned\": 14,\n            \"ready\": 14,\n            \"held\": 0,\n            \"exceptions\": 0,\n            \"created\": 3\n          },\n          \"message\": \"Weekly run done: 3 remittance(s) created, 0 policies held, 0 exceptions.\",\n          \"trigger\": {\n            \"code\": \"user\",\n            \"label\": \"Run now · M. Reyes\",\n            \"user\": {\n              \"id\": \"usr_4\",\n              \"name\": \"M. Reyes\"\n            }\n          }\n        },\n        \"status\": \"Active\",\n        \"isActive\": true,\n        \"timeZone\": \"Asia/Manila\"\n      }\n    ],\n    \"timeZone\": \"Asia/Manila\",\n    \"job\": {\n      \"code\": \"remittance-schedules\",\n      \"enabled\": false\n    }\n  }\n}"
             }
           ]
         },
         {
-          "name": "New remittance schedule: insurers, cut-off days, frequency and next run date (stored in the remittance-schedule master)",
+          "name": "New remittance schedule (write:remittance): kind, insurers or all active insurers, frequency, payment window, grouping, run time, next run date; the code comes from the remittance_schedule series (SCH-003) when none is given. The window \"Previous Monday to Friday\" needs the frequency Weekly (400, errors[0].code MSG-RMT-007) and a Monday as next run",
           "request": {
             "method": "POST",
             "header": [
@@ -83640,10 +83909,10 @@
                 "schedules"
               ]
             },
-            "description": "New remittance schedule: insurers, cut-off days, frequency and next run date (stored in the remittance-schedule master)\n\nFront-end touchpoint: Accounts > Remittance > Scheduling > New Schedule\n\nAccess: write:remittance",
+            "description": "New remittance schedule (write:remittance): kind, insurers or all active insurers, frequency, payment window, grouping, run time, next run date; the code comes from the remittance_schedule series (SCH-003) when none is given. The window \"Previous Monday to Friday\" needs the frequency Weekly (400, errors[0].code MSG-RMT-007) and a Monday as next run\n\nFront-end touchpoint: Accounts > Remittance > Setup > Schedules > New schedule\n\nAccess: write:remittance",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"code\": \"SCH-0003\",\n  \"name\": \"Weekly remittance - Pioneer\",\n  \"insurers\": [\n    \"PIONEER\"\n  ],\n  \"cutOffDays\": 3,\n  \"frequency\": \"Weekly\",\n  \"nextRun\": \"2026-10-05\"\n}",
+              "raw": "{\n  \"name\": \"Weekly remittance\",\n  \"kind\": \"Remittance run\",\n  \"allInsurers\": true,\n  \"frequency\": \"Weekly\",\n  \"paymentWindow\": \"Previous Monday to Friday\",\n  \"groupBy\": \"Insurer and product line\",\n  \"runTime\": \"06:15\",\n  \"nextRun\": \"2026-10-19\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -83672,10 +83941,10 @@
                     "schedules"
                   ]
                 },
-                "description": "New remittance schedule: insurers, cut-off days, frequency and next run date (stored in the remittance-schedule master)\n\nFront-end touchpoint: Accounts > Remittance > Scheduling > New Schedule\n\nAccess: write:remittance",
+                "description": "New remittance schedule (write:remittance): kind, insurers or all active insurers, frequency, payment window, grouping, run time, next run date; the code comes from the remittance_schedule series (SCH-003) when none is given. The window \"Previous Monday to Friday\" needs the frequency Weekly (400, errors[0].code MSG-RMT-007) and a Monday as next run\n\nFront-end touchpoint: Accounts > Remittance > Setup > Schedules > New schedule\n\nAccess: write:remittance",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"code\": \"SCH-0003\",\n  \"name\": \"Weekly remittance - Pioneer\",\n  \"insurers\": [\n    \"PIONEER\"\n  ],\n  \"cutOffDays\": 3,\n  \"frequency\": \"Weekly\",\n  \"nextRun\": \"2026-10-05\"\n}",
+                  "raw": "{\n  \"name\": \"Weekly remittance\",\n  \"kind\": \"Remittance run\",\n  \"allInsurers\": true,\n  \"frequency\": \"Weekly\",\n  \"paymentWindow\": \"Previous Monday to Friday\",\n  \"groupBy\": \"Insurer and product line\",\n  \"runTime\": \"06:15\",\n  \"nextRun\": \"2026-10-19\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -83693,12 +83962,77 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"code\": \"SCH-0003\",\n    \"status\": \"Active\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 9,\n    \"code\": \"SCH-003\",\n    \"status\": \"Active\"\n  }\n}"
             }
           ]
         },
         {
-          "name": "Change a remittance schedule (insurers, cut-off days, frequency, next run date)",
+          "name": "One remittance schedule as listed on Setup > Schedules",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/schedules/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "schedules",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One remittance schedule as listed on Setup > Schedules\n\nFront-end touchpoint: Accounts > Remittance > Setup > Schedules > View\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/schedules/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "schedules",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One remittance schedule as listed on Setup > Schedules\n\nFront-end touchpoint: Accounts > Remittance > Setup > Schedules > View\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 7,\n    \"code\": \"TIS-WEEKLY\",\n    \"name\": \"Weekly remittance\",\n    \"kind\": \"Remittance run\",\n    \"frequency\": \"Weekly\",\n    \"paymentWindow\": \"Previous Monday to Friday\",\n    \"cutOffDays\": 0,\n    \"groupBy\": \"Insurer and product line\",\n    \"runTime\": \"06:15\",\n    \"allInsurers\": true,\n    \"insurers\": [],\n    \"covers\": {\n      \"allActive\": true,\n      \"count\": 4,\n      \"insurers\": [\n        {\n          \"id\": 3,\n          \"code\": \"PIONEER\",\n          \"name\": \"Pioneer Insurance & Surety Corp.\"\n        }\n      ],\n      \"label\": \"All active (4)\"\n    },\n    \"runs\": \"Mondays 06:15\",\n    \"nextRun\": \"2026-10-19\",\n    \"nextRunText\": \"Mon 19/10/2026 06:15\",\n    \"lastRun\": {\n      \"id\": \"run_0123456789abcdef\",\n      \"at\": \"2026-10-12T22:15:00.000Z\",\n      \"text\": \"12/10/2026 06:15\",\n      \"result\": \"success\",\n      \"resultLabel\": \"Success\",\n      \"counts\": {\n        \"scanned\": 14,\n        \"ready\": 14,\n        \"held\": 0,\n        \"exceptions\": 0,\n        \"created\": 3\n      },\n      \"message\": \"Weekly run done: 3 remittance(s) created, 0 policies held, 0 exceptions.\",\n      \"trigger\": {\n        \"code\": \"user\",\n        \"label\": \"Run now · M. Reyes\",\n        \"user\": {\n          \"id\": \"usr_4\",\n          \"name\": \"M. Reyes\"\n        }\n      }\n    },\n    \"status\": \"Active\",\n    \"isActive\": true,\n    \"timeZone\": \"Asia/Manila\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a remittance schedule (write:remittance; checked as it will be saved, MSG-RMT-007 for a window that needs a weekly schedule; audited with before and after)",
           "request": {
             "method": "PUT",
             "header": [
@@ -83725,10 +84059,10 @@
                 }
               ]
             },
-            "description": "Change a remittance schedule (insurers, cut-off days, frequency, next run date)\n\nFront-end touchpoint: Accounts > Remittance > Scheduling > Edit Schedule\n\nAccess: write:remittance",
+            "description": "Change a remittance schedule (write:remittance; checked as it will be saved, MSG-RMT-007 for a window that needs a weekly schedule; audited with before and after)\n\nFront-end touchpoint: Accounts > Remittance > Setup > Schedules > Edit\n\nAccess: write:remittance",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"insurers\": [\n    \"PIONEER\",\n    \"MALAYAN\"\n  ],\n  \"cutOffDays\": 5,\n  \"nextRun\": \"2026-10-12\"\n}",
+              "raw": "{\n  \"frequency\": \"Monthly\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -83765,10 +84099,10 @@
                     }
                   ]
                 },
-                "description": "Change a remittance schedule (insurers, cut-off days, frequency, next run date)\n\nFront-end touchpoint: Accounts > Remittance > Scheduling > Edit Schedule\n\nAccess: write:remittance",
+                "description": "Change a remittance schedule (write:remittance; checked as it will be saved, MSG-RMT-007 for a window that needs a weekly schedule; audited with before and after)\n\nFront-end touchpoint: Accounts > Remittance > Setup > Schedules > Edit\n\nAccess: write:remittance",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"insurers\": [\n    \"PIONEER\",\n    \"MALAYAN\"\n  ],\n  \"cutOffDays\": 5,\n  \"nextRun\": \"2026-10-12\"\n}",
+                  "raw": "{\n  \"frequency\": \"Monthly\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -83786,15 +84120,154 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"code\": \"SCH-0003\",\n    \"status\": \"Active\"\n  }\n}"
+              "body": "{\n  \"success\": false,\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    {\n      \"path\": \"frequency\",\n      \"code\": \"MSG-RMT-007\",\n      \"message\": \"The payment window \\\"Previous Monday to Friday\\\" needs a weekly schedule. Choose Weekly, or the window \\\"Cut-off days\\\".\"\n    }\n  ]\n}"
             }
           ]
         },
         {
-          "name": "Run a schedule now: draft remittances for its insurers up to the cut-off date (or its linked automated remittance)",
+          "name": "Activity log of a schedule: its changes (before and after) and its runs, oldest first",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/schedules/:id/activity",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "schedules",
+                ":id",
+                "activity"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Activity log of a schedule: its changes (before and after) and its runs, oldest first\n\nFront-end touchpoint: Accounts > Remittance > Setup > Schedules > View\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/schedules/:id/activity",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "schedules",
+                    ":id",
+                    "activity"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Activity log of a schedule: its changes (before and after) and its runs, oldest first\n\nFront-end touchpoint: Accounts > Remittance > Setup > Schedules > View\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"action\": \"submit\",\n      \"by\": \"r.finance\",\n      \"at\": \"2026-10-10T01:03:00.000Z\",\n      \"notes\": null,\n      \"id\": \"812\",\n      \"day\": \"2026-10-10\",\n      \"date\": \"10/10/2026\",\n      \"time\": \"09:03\",\n      \"atText\": \"10/10/2026 09:03\",\n      \"actionCode\": \"run\",\n      \"actionLabel\": \"Run now: Weekly run done: 3 remittance(s) created, 0 policies held, 0 exceptions.\",\n      \"user\": {\n        \"username\": \"r.finance\",\n        \"displayName\": \"Rosa Finance\",\n        \"roles\": [\n          \"Finance Officer\"\n        ],\n        \"role\": \"Finance Officer\"\n      },\n      \"fromStatus\": \"Draft\",\n      \"toStatus\": \"Pending Approval\",\n      \"remarks\": \"Off-cycle: Missed run\",\n      \"changes\": [\n        {\n          \"field\": \"batchId\",\n          \"label\": \"Batch ID\",\n          \"before\": null,\n          \"after\": \"BLK-2026-00001\"\n        }\n      ],\n      \"source\": {\n        \"channel\": \"screen\",\n        \"label\": \"Screen\",\n        \"name\": \"Accounts > Remittance > Tracking\"\n      }\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Preview a run (dry run, writes nothing): the window, per insurer the policies ready, the product lines, basis and due to insurer, and \"Draft will be created\" or \"Nothing to remit\", the totals and the verb; windowDone with the reason when the window already has a run",
           "request": {
             "method": "POST",
             "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/schedules/:id/preview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "schedules",
+                ":id",
+                "preview"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Preview a run (dry run, writes nothing): the window, per insurer the policies ready, the product lines, basis and due to insurer, and \"Draft will be created\" or \"Nothing to remit\", the totals and the verb; windowDone with the reason when the window already has a run\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Run now; Accounts > Remittance > Setup > Schedules > Preview run\n\nAccess: write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/schedules/:id/preview",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "schedules",
+                    ":id",
+                    "preview"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Preview a run (dry run, writes nothing): the window, per insurer the policies ready, the product lines, basis and due to insurer, and \"Draft will be created\" or \"Nothing to remit\", the totals and the verb; windowDone with the reason when the window already has a run\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Run now; Accounts > Remittance > Setup > Schedules > Preview run\n\nAccess: write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"schedule\": {\n      \"id\": 7,\n      \"code\": \"TIS-WEEKLY\",\n      \"name\": \"Weekly remittance\"\n    },\n    \"runDate\": \"2026-10-12\",\n    \"window\": {\n      \"from\": \"2026-10-05\",\n      \"to\": \"2026-10-09\",\n      \"catchUpFrom\": null,\n      \"text\": \"05/10/2026 – 09/10/2026\"\n    },\n    \"windowDone\": {\n      \"done\": false\n    },\n    \"paused\": false,\n    \"rows\": [\n      {\n        \"insurer\": {\n          \"id\": 3,\n          \"code\": \"PIONEER\",\n          \"name\": \"Pioneer Insurance & Surety Corp.\"\n        },\n        \"productLine\": \"Motor\",\n        \"basis\": \"Net\",\n        \"ready\": 12,\n        \"held\": 0,\n        \"exceptions\": 0,\n        \"dueToInsurer\": 409141.43,\n        \"result\": {\n          \"code\": \"draft\",\n          \"label\": \"Draft will be created\"\n        }\n      }\n    ],\n    \"totals\": {\n      \"insurers\": 1,\n      \"drafts\": 1,\n      \"ready\": 12,\n      \"held\": 0,\n      \"exceptions\": 0,\n      \"dueToInsurer\": 409141.43\n    },\n    \"verb\": \"Create 1 draft remittance\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Run now (write:remittance): an off-cycle run of the schedule's window with a remittance_off_cycle reason (reasonCode, note when the reason needs one); drafts per insurer, recorded in the run history. 409 WINDOW_DONE \"This week's run is done (12/10/2026 06:15). Next run Mon 19/10/2026 06:15.\" when the window already has a run, 409 PAUSED. The message is MSG-RMT-008",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/remittance/schedules/:id/run",
               "host": [
@@ -83814,14 +84287,28 @@
                 }
               ]
             },
-            "description": "Run a schedule now: draft remittances for its insurers up to the cut-off date (or its linked automated remittance)\n\nFront-end touchpoint: Accounts > Remittance > Scheduling > Run Now\n\nAccess: write:remittance"
+            "description": "Run now (write:remittance): an off-cycle run of the schedule's window with a remittance_off_cycle reason (reasonCode, note when the reason needs one); drafts per insurer, recorded in the run history. 409 WINDOW_DONE \"This week's run is done (12/10/2026 06:15). Next run Mon 19/10/2026 06:15.\" when the window already has a run, 409 PAUSED. The message is MSG-RMT-008\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Run now; Accounts > Remittance > Setup > Schedules > Run now\n\nAccess: write:remittance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reasonCode\": \"ROC-MISSED\",\n  \"note\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
           },
           "response": [
             {
               "name": "Example response",
               "originalRequest": {
                 "method": "POST",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/remittance/schedules/:id/run",
                   "host": [
@@ -83841,7 +84328,16 @@
                     }
                   ]
                 },
-                "description": "Run a schedule now: draft remittances for its insurers up to the cut-off date (or its linked automated remittance)\n\nFront-end touchpoint: Accounts > Remittance > Scheduling > Run Now\n\nAccess: write:remittance"
+                "description": "Run now (write:remittance): an off-cycle run of the schedule's window with a remittance_off_cycle reason (reasonCode, note when the reason needs one); drafts per insurer, recorded in the run history. 409 WINDOW_DONE \"This week's run is done (12/10/2026 06:15). Next run Mon 19/10/2026 06:15.\" when the window already has a run, 409 PAUSED. The message is MSG-RMT-008\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Run now; Accounts > Remittance > Setup > Schedules > Run now\n\nAccess: write:remittance",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reasonCode\": \"ROC-MISSED\",\n  \"note\": null\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
               },
               "status": "OK",
               "code": 200,
@@ -83853,12 +84349,99 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"schedule\": {\n      \"id\": 1\n    },\n    \"execution\": {\n      \"executionId\": \"BLK-2026-00003\",\n      \"remittances\": []\n    }\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Weekly run done: 3 remittance(s) created, 0 policies held, 0 exceptions.\",\n  \"data\": {\n    \"run\": {\n      \"id\": \"run_0123456789abcdef\",\n      \"scheduleCode\": \"TIS-WEEKLY\",\n      \"startedAt\": \"2026-10-12T22:15:00.000Z\",\n      \"startedText\": \"13/10/2026 06:15\",\n      \"finishedAt\": \"2026-10-12T22:15:04.000Z\",\n      \"trigger\": {\n        \"code\": \"user\",\n        \"label\": \"Run now · M. Reyes\",\n        \"user\": {\n          \"id\": \"usr_4\",\n          \"name\": \"M. Reyes\"\n        }\n      },\n      \"reason\": {\n        \"code\": \"ROC-MISSED\",\n        \"text\": \"Missed run\"\n      },\n      \"window\": {\n        \"from\": \"2026-10-05\",\n        \"to\": \"2026-10-09\",\n        \"catchUpFrom\": null,\n        \"text\": \"05/10/2026 – 09/10/2026\"\n      },\n      \"counts\": {\n        \"scanned\": 14,\n        \"ready\": 14,\n        \"held\": 0,\n        \"exceptions\": 0,\n        \"created\": 3\n      },\n      \"dueToInsurer\": 1234567.89,\n      \"drafts\": [\n        {\n          \"id\": \"rm_21\",\n          \"remittanceNo\": \"REM-2026-00021\",\n          \"link\": \"/finance/remittance/remittances/rm_21\"\n        }\n      ],\n      \"executionRef\": \"BLK-2026-00003\",\n      \"result\": {\n        \"code\": \"success\",\n        \"label\": \"Success\"\n      },\n      \"message\": \"Weekly run done: 3 remittance(s) created, 0 policies held, 0 exceptions.\"\n    },\n    \"message\": \"Weekly run done: 3 remittance(s) created, 0 policies held, 0 exceptions.\",\n    \"drafts\": [\n      {\n        \"id\": \"rm_21\",\n        \"remittanceNo\": \"REM-2026-00021\",\n        \"insurer\": \"Pioneer Insurance & Surety Corp.\",\n        \"policies\": 12,\n        \"dueToInsurer\": 409141.43,\n        \"link\": \"/finance/remittance/remittances/rm_21\"\n      }\n    ],\n    \"schedule\": {\n      \"id\": 7,\n      \"code\": \"TIS-WEEKLY\",\n      \"name\": \"Weekly remittance\",\n      \"kind\": \"Remittance run\",\n      \"frequency\": \"Weekly\",\n      \"paymentWindow\": \"Previous Monday to Friday\",\n      \"cutOffDays\": 0,\n      \"groupBy\": \"Insurer and product line\",\n      \"runTime\": \"06:15\",\n      \"allInsurers\": true,\n      \"insurers\": [],\n      \"covers\": {\n        \"allActive\": true,\n        \"count\": 4,\n        \"insurers\": [\n          {\n            \"id\": 3,\n            \"code\": \"PIONEER\",\n            \"name\": \"Pioneer Insurance & Surety Corp.\"\n          }\n        ],\n        \"label\": \"All active (4)\"\n      },\n      \"runs\": \"Mondays 06:15\",\n      \"nextRun\": \"2026-10-19\",\n      \"nextRunText\": \"Mon 19/10/2026 06:15\",\n      \"lastRun\": {\n        \"id\": \"run_0123456789abcdef\",\n        \"at\": \"2026-10-12T22:15:00.000Z\",\n        \"text\": \"12/10/2026 06:15\",\n        \"result\": \"success\",\n        \"resultLabel\": \"Success\",\n        \"counts\": {\n          \"scanned\": 14,\n          \"ready\": 14,\n          \"held\": 0,\n          \"exceptions\": 0,\n          \"created\": 3\n        },\n        \"message\": \"Weekly run done: 3 remittance(s) created, 0 policies held, 0 exceptions.\",\n        \"trigger\": {\n          \"code\": \"user\",\n          \"label\": \"Run now · M. Reyes\",\n          \"user\": {\n            \"id\": \"usr_4\",\n            \"name\": \"M. Reyes\"\n          }\n        }\n      },\n      \"status\": \"Active\",\n      \"isActive\": true,\n      \"timeZone\": \"Asia/Manila\"\n    }\n  }\n}"
             }
           ]
         },
         {
-          "name": "Pause / resume a schedule",
+          "name": "Run history of a schedule, newest first: started, trigger (Job, or Run now · user), reason, window, counts, drafts, result and message (paging)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/schedules/:id/runs?page=1&perPage=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "schedules",
+                ":id",
+                "runs"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "20"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Run history of a schedule, newest first: started, trigger (Job, or Run now · user), reason, window, counts, drafts, result and message (paging)\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Run history; Accounts > Remittance > Setup > Schedules > View\n\nAccess: read:remittance, write:remittance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/schedules/:id/runs?page=1&perPage=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "schedules",
+                    ":id",
+                    "runs"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "perPage",
+                      "value": "20"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Run history of a schedule, newest first: started, trigger (Job, or Run now · user), reason, window, counts, drafts, result and message (paging)\n\nFront-end touchpoint: Accounts > Remittance > Remittances > Run history; Accounts > Remittance > Setup > Schedules > View\n\nAccess: read:remittance, write:remittance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"run_0123456789abcdef\",\n      \"scheduleCode\": \"TIS-WEEKLY\",\n      \"startedAt\": \"2026-10-12T22:15:00.000Z\",\n      \"startedText\": \"13/10/2026 06:15\",\n      \"finishedAt\": \"2026-10-12T22:15:04.000Z\",\n      \"trigger\": {\n        \"code\": \"user\",\n        \"label\": \"Run now · M. Reyes\",\n        \"user\": {\n          \"id\": \"usr_4\",\n          \"name\": \"M. Reyes\"\n        }\n      },\n      \"reason\": {\n        \"code\": \"ROC-MISSED\",\n        \"text\": \"Missed run\"\n      },\n      \"window\": {\n        \"from\": \"2026-10-05\",\n        \"to\": \"2026-10-09\",\n        \"catchUpFrom\": null,\n        \"text\": \"05/10/2026 – 09/10/2026\"\n      },\n      \"counts\": {\n        \"scanned\": 14,\n        \"ready\": 14,\n        \"held\": 0,\n        \"exceptions\": 0,\n        \"created\": 3\n      },\n      \"dueToInsurer\": 1234567.89,\n      \"drafts\": [\n        {\n          \"id\": \"rm_21\",\n          \"remittanceNo\": \"REM-2026-00021\",\n          \"link\": \"/finance/remittance/remittances/rm_21\"\n        }\n      ],\n      \"executionRef\": \"BLK-2026-00003\",\n      \"result\": {\n        \"code\": \"success\",\n        \"label\": \"Success\"\n      },\n      \"message\": \"Weekly run done: 3 remittance(s) created, 0 policies held, 0 exceptions.\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 20,\n  \"totalPages\": 1,\n  \"schedule\": {\n    \"id\": 7,\n    \"code\": \"TIS-WEEKLY\",\n    \"name\": \"Weekly remittance\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Pause / resume a schedule (a paused schedule has no next run; audited)",
           "request": {
             "method": "PATCH",
             "header": [
@@ -83886,7 +84469,7 @@
                 }
               ]
             },
-            "description": "Pause / resume a schedule\n\nFront-end touchpoint: Accounts > Remittance > Scheduling\n\nAccess: write:remittance",
+            "description": "Pause / resume a schedule (a paused schedule has no next run; audited)\n\nFront-end touchpoint: Accounts > Remittance > Setup > Schedules > Pause schedule\n\nAccess: write:remittance",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"status\": \"Paused\"\n}",
@@ -83927,7 +84510,7 @@
                     }
                   ]
                 },
-                "description": "Pause / resume a schedule\n\nFront-end touchpoint: Accounts > Remittance > Scheduling\n\nAccess: write:remittance",
+                "description": "Pause / resume a schedule (a paused schedule has no next run; audited)\n\nFront-end touchpoint: Accounts > Remittance > Setup > Schedules > Pause schedule\n\nAccess: write:remittance",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"status\": \"Paused\"\n}",
@@ -84685,27 +85268,21 @@
           ]
         },
         {
-          "name": "Electronic transfers (status: Pending, Approved, Completed, Failed, Rejected)",
+          "name": "What Accounts > Remittance holds for the caller: counts per menu entry (remittances in my work, approvals awaiting my decision, insurer payments to pay (write:disbursements, else null), insurer statements to act on, exceptions assigned to me, my draft and overdue debit notes, setup), the entries with something overdue, the run strip (last run, next run, automation on or off) and the landing page",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/remittance/transfers?status=Pending,Approved",
+              "raw": "{{baseUrl}}/remittance/summary",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "remittance",
-                "transfers"
-              ],
-              "query": [
-                {
-                  "key": "status",
-                  "value": "Pending,Approved"
-                }
+                "summary"
               ]
             },
-            "description": "Electronic transfers (status: Pending, Approved, Completed, Failed, Rejected)\n\nFront-end touchpoint: Accounts > Remittance > Electronic Transfer\n\nAccess: read:remittance, write:remittance"
+            "description": "What Accounts > Remittance holds for the caller: counts per menu entry (remittances in my work, approvals awaiting my decision, insurer payments to pay (write:disbursements, else null), insurer statements to act on, exceptions assigned to me, my draft and overdue debit notes, setup), the entries with something overdue, the run strip (last run, next run, automation on or off) and the landing page\n\nFront-end touchpoint: Accounts > Remittance > Landing\n\nAccess: read:remittance, write:remittance"
           },
           "response": [
             {
@@ -84714,22 +85291,16 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/remittance/transfers?status=Pending,Approved",
+                  "raw": "{{baseUrl}}/remittance/summary",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "remittance",
-                    "transfers"
-                  ],
-                  "query": [
-                    {
-                      "key": "status",
-                      "value": "Pending,Approved"
-                    }
+                    "summary"
                   ]
                 },
-                "description": "Electronic transfers (status: Pending, Approved, Completed, Failed, Rejected)\n\nFront-end touchpoint: Accounts > Remittance > Electronic Transfer\n\nAccess: read:remittance, write:remittance"
+                "description": "What Accounts > Remittance holds for the caller: counts per menu entry (remittances in my work, approvals awaiting my decision, insurer payments to pay (write:disbursements, else null), insurer statements to act on, exceptions assigned to me, my draft and overdue debit notes, setup), the entries with something overdue, the run strip (last run, next run, automation on or off) and the landing page\n\nFront-end touchpoint: Accounts > Remittance > Landing\n\nAccess: read:remittance, write:remittance"
               },
               "status": "OK",
               "code": 200,
@@ -84741,12 +85312,81 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"rmi_3\",\n      \"reference\": \"TRF-2026-00001\",\n      \"beneficiary\": \"Malayan Insurance Co., Inc.\",\n      \"amount\": 125000,\n      \"method\": \"PESONet\",\n      \"status\": \"Pending\",\n      \"date\": \"2026-09-26\"\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"counts\": {\n      \"remittances\": 3,\n      \"approvals\": 1,\n      \"payments\": 2,\n      \"reconciliation\": 0,\n      \"exceptions\": 0,\n      \"billing\": 1,\n      \"setup\": 0\n    },\n    \"overdue\": {\n      \"remittances\": false,\n      \"approvals\": false,\n      \"payments\": false,\n      \"reconciliation\": false,\n      \"exceptions\": false,\n      \"billing\": true,\n      \"setup\": false\n    },\n    \"runStrip\": {\n      \"lastRun\": {\n        \"id\": \"run_0123456789abcdef\",\n        \"scheduleCode\": \"TIS-WEEKLY\",\n        \"at\": \"2026-10-11T22:15:00.000Z\",\n        \"text\": \"12/10/2026 06:15\",\n        \"result\": \"success\",\n        \"resultLabel\": \"Success\",\n        \"counts\": {\n          \"scanned\": 14,\n          \"ready\": 14,\n          \"held\": 0,\n          \"exceptions\": 0,\n          \"created\": 3\n        },\n        \"message\": \"Weekly run done: 3 remittance(s) created, 0 policies held, 0 exceptions.\",\n        \"failed\": false\n      },\n      \"nextRun\": {\n        \"scheduleCode\": \"TIS-WEEKLY\",\n        \"date\": \"2026-10-19\",\n        \"text\": \"Mon 19/10/2026 06:15\"\n      },\n      \"automation\": {\n        \"on\": false,\n        \"label\": \"Automation Off\",\n        \"checkedDaily\": \"06:15\",\n        \"timeZone\": \"Asia/Manila\"\n      }\n    },\n    \"landing\": {\n      \"code\": \"approvals\",\n      \"link\": \"/finance/remittance/approvals\"\n    }\n  }\n}"
             }
           ]
         },
         {
-          "name": "New electronic transfer (limit check, then approval)",
+          "name": "Electronic transfers (status: Pending, Approved, Completed, Failed, Rejected). legacy=1 (Insurer payments > Legacy transfers, read-only): the TRF- items with the masked account, approved by, the journal posted at approval and its reversal or \"Not reversed\", totals (status, q, paging)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/transfers?legacy=1&status=Pending,Approved",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "transfers"
+              ],
+              "query": [
+                {
+                  "key": "legacy",
+                  "value": "1"
+                },
+                {
+                  "key": "status",
+                  "value": "Pending,Approved"
+                }
+              ]
+            },
+            "description": "Electronic transfers (status: Pending, Approved, Completed, Failed, Rejected). legacy=1 (Insurer payments > Legacy transfers, read-only): the TRF- items with the masked account, approved by, the journal posted at approval and its reversal or \"Not reversed\", totals (status, q, paging)\n\nFront-end touchpoint: Accounts > Remittance > Electronic Transfer; Accounts > Remittance > Insurer payments > Legacy transfers\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/transfers?legacy=1&status=Pending,Approved",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "transfers"
+                  ],
+                  "query": [
+                    {
+                      "key": "legacy",
+                      "value": "1"
+                    },
+                    {
+                      "key": "status",
+                      "value": "Pending,Approved"
+                    }
+                  ]
+                },
+                "description": "Electronic transfers (status: Pending, Approved, Completed, Failed, Rejected). legacy=1 (Insurer payments > Legacy transfers, read-only): the TRF- items with the masked account, approved by, the journal posted at approval and its reversal or \"Not reversed\", totals (status, q, paging)\n\nFront-end touchpoint: Accounts > Remittance > Electronic Transfer; Accounts > Remittance > Insurer payments > Legacy transfers\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"rmi_3\",\n      \"reference\": \"TRF-2026-00001\",\n      \"beneficiary\": \"Malayan Insurance Co., Inc.\",\n      \"bank\": \"Metrobank\",\n      \"accountMasked\": \"···6612\",\n      \"amount\": 125000,\n      \"method\": \"PESONet\",\n      \"status\": \"Approved\",\n      \"approvedBy\": {\n        \"name\": \"Fe Approver\",\n        \"at\": \"2026-09-27T02:00:00.000Z\"\n      },\n      \"journal\": {\n        \"id\": \"jv_1\",\n        \"number\": \"JV-2026-00031\"\n      },\n      \"reversal\": {\n        \"reversed\": false,\n        \"number\": null,\n        \"date\": null,\n        \"label\": \"Not reversed\"\n      },\n      \"readOnly\": true,\n      \"chip\": {\n        \"code\": \"legacy\",\n        \"label\": \"Recorded outside a payment voucher\"\n      },\n      \"creationDisabled\": true,\n      \"date\": \"2026-09-26\"\n    }\n  ],\n  \"total\": 1,\n  \"totals\": {\n    \"count\": 1,\n    \"amount\": 125000\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "New electronic transfer (limit check, then approval); 409 TRANSFERS_OFF \"Electronic transfers are replaced by Insurer payments.\" while remittance.transfers_enabled is off",
           "request": {
             "method": "POST",
             "header": [
@@ -84765,7 +85405,7 @@
                 "transfers"
               ]
             },
-            "description": "New electronic transfer (limit check, then approval)\n\nFront-end touchpoint: Accounts > Remittance > Electronic Transfer > New Transfer\n\nAccess: write:remittance",
+            "description": "New electronic transfer (limit check, then approval); 409 TRANSFERS_OFF \"Electronic transfers are replaced by Insurer payments.\" while remittance.transfers_enabled is off\n\nFront-end touchpoint: Accounts > Remittance > Electronic Transfer > New Transfer\n\nAccess: write:remittance",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"beneficiary\": \"Malayan Insurance Co., Inc.\",\n  \"amount\": 125000,\n  \"method\": \"PESONet\",\n  \"accountNumber\": \"0012-3456-78\",\n  \"bankName\": \"BDO\",\n  \"purpose\": \"September premium remittance\",\n  \"remittanceNo\": \"REM-2026-00001\"\n}",
@@ -84797,7 +85437,7 @@
                     "transfers"
                   ]
                 },
-                "description": "New electronic transfer (limit check, then approval)\n\nFront-end touchpoint: Accounts > Remittance > Electronic Transfer > New Transfer\n\nAccess: write:remittance",
+                "description": "New electronic transfer (limit check, then approval); 409 TRANSFERS_OFF \"Electronic transfers are replaced by Insurer payments.\" while remittance.transfers_enabled is off\n\nFront-end touchpoint: Accounts > Remittance > Electronic Transfer > New Transfer\n\nAccess: write:remittance",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"beneficiary\": \"Malayan Insurance Co., Inc.\",\n  \"amount\": 125000,\n  \"method\": \"PESONet\",\n  \"accountNumber\": \"0012-3456-78\",\n  \"bankName\": \"BDO\",\n  \"purpose\": \"September premium remittance\",\n  \"remittanceNo\": \"REM-2026-00001\"\n}",
@@ -84823,7 +85463,72 @@
           ]
         },
         {
-          "name": "Record the bank result of an approved transfer (Completed / Failed)",
+          "name": "One electronic transfer (id or TRF no.), read-only: beneficiary, masked account, method, amount, status, the approval and its decisions, the journal posted at approval, its reversal, the activity",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/transfers/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "transfers",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One electronic transfer (id or TRF no.), read-only: beneficiary, masked account, method, amount, status, the approval and its decisions, the journal posted at approval, its reversal, the activity\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments > Legacy transfers > View\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/transfers/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "transfers",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One electronic transfer (id or TRF no.), read-only: beneficiary, masked account, method, amount, status, the approval and its decisions, the journal posted at approval, its reversal, the activity\n\nFront-end touchpoint: Accounts > Remittance > Insurer payments > Legacy transfers > View\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rmi_3\",\n    \"reference\": \"TRF-2026-00001\",\n    \"readOnly\": true,\n    \"chip\": {\n      \"code\": \"legacy\",\n      \"label\": \"Recorded outside a payment voucher\"\n    },\n    \"journal\": {\n      \"id\": \"jv_1\",\n      \"number\": \"JV-2026-00031\"\n    },\n    \"reversal\": {\n      \"reversed\": false,\n      \"label\": \"Not reversed\"\n    },\n    \"approval\": {\n      \"status\": \"Approved\",\n      \"decisions\": [\n        {\n          \"action\": \"Approved\",\n          \"by\": \"Fe Approver\",\n          \"at\": \"2026-09-27T02:00:00.000Z\",\n          \"remarks\": null\n        }\n      ]\n    },\n    \"activity\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record the bank result of an approved transfer (Completed / Failed); 409 TRANSFERS_OFF while remittance.transfers_enabled is off",
           "request": {
             "method": "POST",
             "header": [
@@ -84851,7 +85556,7 @@
                 }
               ]
             },
-            "description": "Record the bank result of an approved transfer (Completed / Failed)\n\nFront-end touchpoint: Accounts > Remittance > Electronic Transfer\n\nAccess: write:remittance",
+            "description": "Record the bank result of an approved transfer (Completed / Failed); 409 TRANSFERS_OFF while remittance.transfers_enabled is off\n\nFront-end touchpoint: Accounts > Remittance > Electronic Transfer\n\nAccess: write:remittance",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"status\": \"Completed\",\n  \"bankReference\": \"PSN-20260930-7781\"\n}",
@@ -84892,7 +85597,7 @@
                     }
                   ]
                 },
-                "description": "Record the bank result of an approved transfer (Completed / Failed)\n\nFront-end touchpoint: Accounts > Remittance > Electronic Transfer\n\nAccess: write:remittance",
+                "description": "Record the bank result of an approved transfer (Completed / Failed); 409 TRANSFERS_OFF while remittance.transfers_enabled is off\n\nFront-end touchpoint: Accounts > Remittance > Electronic Transfer\n\nAccess: write:remittance",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"status\": \"Completed\",\n  \"bankReference\": \"PSN-20260930-7781\"\n}",

@@ -36,7 +36,11 @@ minimal, clearly-correct front-end fix.
   explain a refused decision before anyone acts, the module answers a decision block with the shared codes
   (`canDecide`, `blockedCode` such as SUBMITTER, ABOVE_LIMIT, NO_AUTHORITY, ALREADY_DECIDED, and the sentence in
   `blockedReason`), refuses with the same code in `errors[0].code`, and takes the record `version` the screen showed
-  (409 when it moved on); `src/modules/remittance/decision.js` is the model. Which role holds which
+  (409 when it moved on); `src/modules/remittance/decision.js` is the model, and Bank Payment Files answers the same
+  block for a batch (`batchDecision` in `src/modules/integrations/bankfiles/batches.js`, read-only beside the rules
+  `approveBatch` enforces). A bank account number is masked in lists and records ("···4821"); the full number is a
+  route of its own behind the write permission, and each reveal is audited (`GET /remittance/payments/:id/account`).
+  Which role holds which
   permission is `ROLE_PERMS` in the same file (the broker roles and the TISPH roles `tis-*` of the RBAC v4 sheet); a
   role added there for databases in use also needs a migration, as `0348_tisph_roles.sql` does. Roles that include
   the System Administrator role through `roles.inherits` (SUPERID) are protected like it: `adminEquivalentRoles()` in

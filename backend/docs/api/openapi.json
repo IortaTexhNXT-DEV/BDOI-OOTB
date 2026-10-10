@@ -9123,7 +9123,7 @@
     "/bank-payments/batches": {
       "get": {
         "operationId": "getBankPaymentsBatches",
-        "summary": "Bank payment batches (status (comma-separated), search on batch, voucher or payee; paging)",
+        "summary": "Bank payment batches (status (comma-separated), search on batch, voucher or payee; paging), each with the caller's decision block (canDecide, blockedCode, blockedReason)",
         "tags": [
           "Bank Payment Files"
         ],
@@ -9225,6 +9225,20 @@
                                 }
                               }
                             }
+                          },
+                          "decision": {
+                            "type": "object",
+                            "properties": {
+                              "canDecide": {
+                                "type": "boolean"
+                              },
+                              "blockedCode": {
+                                "type": "string"
+                              },
+                              "blockedReason": {
+                                "type": "string"
+                              }
+                            }
                           }
                         }
                       }
@@ -9262,7 +9276,12 @@
                           "amount": 125000,
                           "status": "pending"
                         }
-                      ]
+                      ],
+                      "decision": {
+                        "canDecide": false,
+                        "blockedCode": "SUBMITTER",
+                        "blockedReason": "You submitted this batch. Another user must approve it."
+                      }
                     }
                   ],
                   "total": 1
@@ -9474,7 +9493,7 @@
     "/bank-payments/batches/{id}": {
       "get": {
         "operationId": "getBankPaymentsBatchesId",
-        "summary": "One batch with its lines",
+        "summary": "One batch with its lines and the caller's decision block: Approve and Reject are offered only when canDecide; otherwise blockedCode (MAKER, SUBMITTER, VOUCHER_MAKER, NO_AUTHORITY, ABOVE_LIMIT, NO_PERMISSION, WRONG_STATUS) and the reason",
         "tags": [
           "Bank Payment Files"
         ],
@@ -9573,6 +9592,20 @@
                               }
                             }
                           }
+                        },
+                        "decision": {
+                          "type": "object",
+                          "properties": {
+                            "canDecide": {
+                              "type": "boolean"
+                            },
+                            "blockedCode": {
+                              "type": "string"
+                            },
+                            "blockedReason": {
+                              "type": "string"
+                            }
+                          }
                         }
                       }
                     }
@@ -9605,7 +9638,12 @@
                         "amount": 125000,
                         "status": "pending"
                       }
-                    ]
+                    ],
+                    "decision": {
+                      "canDecide": false,
+                      "blockedCode": "SUBMITTER",
+                      "blockedReason": "You submitted this batch. Another user must approve it."
+                    }
                   }
                 }
               }
@@ -127753,7 +127791,7 @@
     "/remittance/direct-bill": {
       "get": {
         "operationId": "getRemittanceDirectBill",
-        "summary": "Commission debit notes (insurerCode, status code or label, from / to, search, paging)",
+        "summary": "Commission debit notes (insurerCode, status code or label, from / to, search, attention=mine: my drafts and the notes overdue with a balance; paging)",
         "tags": [
           "Remittance"
         ],
@@ -130436,12 +130474,31 @@
     "/remittance/exceptions": {
       "get": {
         "operationId": "getRemittanceExceptions",
-        "summary": "Remittance exceptions (status: Open, In Progress, Escalated, Resolved)",
+        "summary": "Remittance exceptions (status: Open, In Progress, Escalated, Resolved; assignedTo=me: assigned to the caller)",
         "tags": [
           "Remittance"
         ],
         "description": "Front-end touchpoint: Accounts > Remittance > Exceptions\n\nAccess: read:remittance, write:remittance",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Open,In Progress,Escalated"
+          },
+          {
+            "name": "assignedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "me"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success",
@@ -130508,6 +130565,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -133488,6 +133548,1203 @@
         "x-permissions": [
           "read:remittance",
           "write:remittance"
+        ]
+      }
+    },
+    "/remittance/payments": {
+      "get": {
+        "operationId": "getRemittancePayments",
+        "summary": "Insurer payments (read:remittance or read:disbursements): the payment vouchers of insurer remittances with segment=to-pay|in-payment|paid|failed|all (a draft voucher is To pay, next step \"Submit voucher (Disbursement)\"), insurerId, from / to (value date), method fund-transfer|cheque, q (PV, REM, batch or bank ref.), paging: rows with state, masked payee account, method, batch, next step, selectable and actions; totals of the filtered set, the 4 KPI figures and segment counts over the filters, batching { allowed, code, reason } (NO_LAYOUT \"No Metrobank layout configured. Pay by cheque or ask the administrator.\", NO_PERMISSION) and the count of legacy transfers",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Insurer payments\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements",
+        "parameters": [
+          {
+            "name": "segment",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "to-pay"
+          },
+          {
+            "name": "insurerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 3
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10-01"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10-31"
+          },
+          {
+            "name": "method",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "fund-transfer"
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "PV-2026"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 50
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "voucherNo": {
+                            "type": "string"
+                          },
+                          "voucherStatus": {
+                            "type": "string"
+                          },
+                          "voucherStatusLabel": {
+                            "type": "string"
+                          },
+                          "state": {
+                            "type": "string"
+                          },
+                          "stateLabel": {
+                            "type": "string"
+                          },
+                          "amount": {
+                            "type": "number"
+                          },
+                          "currency": {
+                            "type": "string"
+                          },
+                          "insurer": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "shortName": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "remittance": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "remittanceNo": {
+                                "type": "string"
+                              },
+                              "dueToInsurer": {
+                                "type": "number"
+                              },
+                              "link": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "remittances": {
+                            "type": "array",
+                            "items": {}
+                          },
+                          "settlement": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "reference": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "payee": {
+                            "type": "object",
+                            "properties": {
+                              "bank": {
+                                "type": "object",
+                                "properties": {
+                                  "code": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "accountMasked": {
+                                "type": "string"
+                              },
+                              "accountName": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "chip": {
+                                "type": "object",
+                                "properties": {
+                                  "code": {
+                                    "type": "string"
+                                  },
+                                  "label": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "method": {},
+                          "batch": {},
+                          "cheque": {},
+                          "valueDate": {
+                            "type": "string"
+                          },
+                          "bankReference": {},
+                          "paidOn": {},
+                          "failureReason": {},
+                          "nextStep": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "actor": {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "selectable": {
+                            "type": "boolean"
+                          },
+                          "actions": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "code": {
+                                  "type": "string"
+                                },
+                                "label": {
+                                  "type": "string"
+                                },
+                                "allowed": {
+                                  "type": "boolean"
+                                },
+                                "link": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "link": {
+                            "type": "string"
+                          },
+                          "voucherLink": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    },
+                    "totalPages": {
+                      "type": "integer"
+                    },
+                    "segment": {
+                      "type": "string"
+                    },
+                    "totals": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer"
+                        },
+                        "amount": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "kpis": {
+                      "type": "object",
+                      "properties": {
+                        "toPay": {
+                          "type": "object",
+                          "properties": {
+                            "count": {
+                              "type": "integer"
+                            },
+                            "amount": {
+                              "type": "number"
+                            }
+                          }
+                        },
+                        "inPayment": {
+                          "type": "object",
+                          "properties": {
+                            "count": {
+                              "type": "integer"
+                            },
+                            "amount": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "paidThisWeek": {
+                          "type": "object",
+                          "properties": {
+                            "count": {
+                              "type": "integer"
+                            },
+                            "amount": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "failed": {
+                          "type": "object",
+                          "properties": {
+                            "count": {
+                              "type": "integer"
+                            },
+                            "amount": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "segments": {
+                      "type": "object",
+                      "properties": {
+                        "to-pay": {
+                          "type": "integer"
+                        },
+                        "in-payment": {
+                          "type": "integer"
+                        },
+                        "paid": {
+                          "type": "integer"
+                        },
+                        "failed": {
+                          "type": "integer"
+                        },
+                        "all": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "batching": {
+                      "type": "object",
+                      "properties": {
+                        "allowed": {
+                          "type": "boolean"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
+                        "bankCode": {
+                          "type": "string"
+                        },
+                        "layout": {},
+                        "chequeAllowed": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "legacyTransfers": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "pv_102",
+                      "voucherNo": "PV-2026-00102",
+                      "voucherStatus": "for-approval",
+                      "voucherStatusLabel": "Submitted",
+                      "state": "to-pay",
+                      "stateLabel": "To pay",
+                      "amount": 409141.43,
+                      "currency": "PHP",
+                      "insurer": {
+                        "id": 3,
+                        "code": "PIONEER",
+                        "name": "Pioneer Insurance & Surety Corp.",
+                        "shortName": "Pioneer"
+                      },
+                      "remittance": {
+                        "id": "rm_21",
+                        "remittanceNo": "REM-2026-00021",
+                        "dueToInsurer": 409141.43,
+                        "link": "/finance/remittance/remittances/rm_21"
+                      },
+                      "remittances": [],
+                      "settlement": {
+                        "id": "rmi_5",
+                        "reference": "SET-2026-00005"
+                      },
+                      "payee": {
+                        "bank": {
+                          "code": "MBT",
+                          "name": "Metropolitan Bank and Trust Company"
+                        },
+                        "accountMasked": "···4821",
+                        "accountName": "Pioneer Insurance & Surety Corp.",
+                        "label": "Metropolitan Bank and Trust Company ···4821",
+                        "chip": {
+                          "code": "on-file",
+                          "label": "On file"
+                        }
+                      },
+                      "method": null,
+                      "batch": null,
+                      "cheque": null,
+                      "valueDate": "2026-10-12",
+                      "bankReference": null,
+                      "paidOn": null,
+                      "failureReason": null,
+                      "nextStep": {
+                        "code": "create-batch",
+                        "label": "Create batch",
+                        "actor": {
+                          "type": "permission",
+                          "name": "Bank Payment Files"
+                        }
+                      },
+                      "selectable": true,
+                      "actions": [
+                        {
+                          "code": "view",
+                          "label": "View payment",
+                          "allowed": true,
+                          "link": "/finance/remittance/payments?payment=PV-2026-00102"
+                        },
+                        {
+                          "code": "open-remittance",
+                          "label": "Open remittance",
+                          "allowed": true,
+                          "link": "/finance/remittance/remittances/rm_21"
+                        },
+                        {
+                          "code": "pay-by-cheque",
+                          "label": "Pay by cheque",
+                          "allowed": true,
+                          "link": "/accounts/paymentvoucher/detailview/pv_102"
+                        }
+                      ],
+                      "link": "/finance/remittance/payments?payment=PV-2026-00102",
+                      "voucherLink": "/accounts/paymentvoucher/detailview/pv_102"
+                    }
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "perPage": 50,
+                  "totalPages": 1,
+                  "segment": "to-pay",
+                  "totals": {
+                    "count": 1,
+                    "amount": 409141.43
+                  },
+                  "kpis": {
+                    "toPay": {
+                      "count": 1,
+                      "amount": 409141.43
+                    },
+                    "inPayment": {
+                      "count": 0,
+                      "amount": 0
+                    },
+                    "paidThisWeek": {
+                      "count": 0,
+                      "amount": 0
+                    },
+                    "failed": {
+                      "count": 0,
+                      "amount": 0
+                    }
+                  },
+                  "segments": {
+                    "to-pay": 1,
+                    "in-payment": 0,
+                    "paid": 0,
+                    "failed": 0,
+                    "all": 1
+                  },
+                  "batching": {
+                    "allowed": false,
+                    "code": "NO_LAYOUT",
+                    "reason": "No Metrobank layout configured. Pay by cheque or ask the administrator.",
+                    "bankCode": "MBT",
+                    "layout": null,
+                    "chequeAllowed": true
+                  },
+                  "legacyTransfers": 4
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Insurer payments",
+        "x-permissions": [
+          "read:remittance",
+          "write:remittance",
+          "read:disbursements",
+          "write:disbursements"
+        ]
+      }
+    },
+    "/remittance/payments/{voucherId}": {
+      "get": {
+        "operationId": "getRemittancePaymentsVoucherId",
+        "summary": "Payment record (voucher id or no.): the row with the sections Payee (masked account, canReveal), Payment (method, value date, debit account, bank reference, paid on, failure reason), Amounts (due to insurer, refund credits netted, voucher and bank amount, check Pass / Difference), Links (remittances and schedules, voucher, batch, bank file, status file, cheque, journal), Approvals (remittance approvals with limit, voucher maker, batch created / approved, file generated, result imported), the timeline and the activity of the voucher, its batch and cheques",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Insurer payments > View payment\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements",
+        "parameters": [
+          {
+            "name": "voucherId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "voucherNo": {
+                          "type": "string"
+                        },
+                        "voucherStatus": {
+                          "type": "string"
+                        },
+                        "voucherStatusLabel": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "stateLabel": {
+                          "type": "string"
+                        },
+                        "amount": {
+                          "type": "number"
+                        },
+                        "currency": {
+                          "type": "string"
+                        },
+                        "insurer": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "code": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "shortName": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "remittance": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "remittanceNo": {
+                              "type": "string"
+                            },
+                            "dueToInsurer": {
+                              "type": "number"
+                            },
+                            "link": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "remittances": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "settlement": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "reference": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "payee": {
+                          "type": "object",
+                          "properties": {
+                            "bank": {
+                              "type": "object",
+                              "properties": {
+                                "code": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "accountMasked": {
+                              "type": "string"
+                            },
+                            "accountName": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            },
+                            "chip": {
+                              "type": "object",
+                              "properties": {
+                                "code": {
+                                  "type": "string"
+                                },
+                                "label": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "canReveal": {
+                              "type": "boolean"
+                            },
+                            "verification": {
+                              "type": "object",
+                              "properties": {
+                                "code": {
+                                  "type": "string"
+                                },
+                                "label": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "method": {},
+                        "batch": {},
+                        "cheque": {},
+                        "valueDate": {
+                          "type": "string"
+                        },
+                        "bankReference": {},
+                        "paidOn": {},
+                        "failureReason": {},
+                        "nextStep": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            },
+                            "actor": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "selectable": {
+                          "type": "boolean"
+                        },
+                        "actions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "allowed": {
+                                "type": "boolean"
+                              },
+                              "link": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "link": {
+                          "type": "string"
+                        },
+                        "voucherLink": {
+                          "type": "string"
+                        },
+                        "payment": {
+                          "type": "object",
+                          "properties": {
+                            "method": {},
+                            "amount": {
+                              "type": "number"
+                            },
+                            "valueDate": {
+                              "type": "string"
+                            },
+                            "debitAccount": {},
+                            "bankReference": {},
+                            "paidOn": {},
+                            "failureReason": {}
+                          }
+                        },
+                        "amounts": {
+                          "type": "object",
+                          "properties": {
+                            "dueToInsurer": {
+                              "type": "number"
+                            },
+                            "refundCredits": {
+                              "type": "integer"
+                            },
+                            "voucherAmount": {
+                              "type": "number"
+                            },
+                            "bankAmount": {},
+                            "check": {
+                              "type": "object",
+                              "properties": {
+                                "code": {
+                                  "type": "string"
+                                },
+                                "label": {
+                                  "type": "string"
+                                },
+                                "difference": {
+                                  "type": "integer"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "links": {
+                          "type": "object",
+                          "properties": {
+                            "remittances": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "remittanceNo": {
+                                    "type": "string"
+                                  },
+                                  "link": {
+                                    "type": "string"
+                                  },
+                                  "schedule": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            },
+                            "voucher": {
+                              "type": "object",
+                              "properties": {
+                                "number": {
+                                  "type": "string"
+                                },
+                                "link": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "batch": {},
+                            "bankFile": {},
+                            "statusFile": {},
+                            "cheque": {},
+                            "journal": {},
+                            "bankReconciliation": {}
+                          }
+                        },
+                        "approvals": {
+                          "type": "object",
+                          "properties": {
+                            "remittances": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "remittanceNo": {
+                                    "type": "string"
+                                  },
+                                  "by": {
+                                    "type": "string"
+                                  },
+                                  "at": {
+                                    "type": "string"
+                                  },
+                                  "limitAtDecision": {
+                                    "type": "integer"
+                                  },
+                                  "limitSourceLabel": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            },
+                            "voucherMaker": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                },
+                                "at": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "batchCreatedBy": {},
+                            "batchApprovedBy": {},
+                            "fileGeneratedBy": {},
+                            "resultImportedBy": {}
+                          }
+                        },
+                        "timeline": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "done": {
+                                "type": "boolean"
+                              },
+                              "at": {
+                                "type": "string"
+                              },
+                              "by": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "activity": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "batching": {
+                          "type": "object",
+                          "properties": {
+                            "allowed": {
+                              "type": "boolean"
+                            },
+                            "code": {
+                              "type": "string"
+                            },
+                            "reason": {
+                              "type": "string"
+                            },
+                            "bankCode": {
+                              "type": "string"
+                            },
+                            "layout": {},
+                            "chequeAllowed": {
+                              "type": "boolean"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "pv_102",
+                    "voucherNo": "PV-2026-00102",
+                    "voucherStatus": "for-approval",
+                    "voucherStatusLabel": "Submitted",
+                    "state": "to-pay",
+                    "stateLabel": "To pay",
+                    "amount": 409141.43,
+                    "currency": "PHP",
+                    "insurer": {
+                      "id": 3,
+                      "code": "PIONEER",
+                      "name": "Pioneer Insurance & Surety Corp.",
+                      "shortName": "Pioneer"
+                    },
+                    "remittance": {
+                      "id": "rm_21",
+                      "remittanceNo": "REM-2026-00021",
+                      "dueToInsurer": 409141.43,
+                      "link": "/finance/remittance/remittances/rm_21"
+                    },
+                    "remittances": [],
+                    "settlement": {
+                      "id": "rmi_5",
+                      "reference": "SET-2026-00005"
+                    },
+                    "payee": {
+                      "bank": {
+                        "code": "MBT",
+                        "name": "Metropolitan Bank and Trust Company"
+                      },
+                      "accountMasked": "···4821",
+                      "accountName": "Pioneer Insurance & Surety Corp.",
+                      "label": "Metropolitan Bank and Trust Company ···4821",
+                      "chip": {
+                        "code": "on-file",
+                        "label": "On file"
+                      },
+                      "canReveal": true,
+                      "verification": {
+                        "code": "on-file",
+                        "label": "On file"
+                      }
+                    },
+                    "method": null,
+                    "batch": null,
+                    "cheque": null,
+                    "valueDate": "2026-10-12",
+                    "bankReference": null,
+                    "paidOn": null,
+                    "failureReason": null,
+                    "nextStep": {
+                      "code": "create-batch",
+                      "label": "Create batch",
+                      "actor": {
+                        "type": "permission",
+                        "name": "Bank Payment Files"
+                      }
+                    },
+                    "selectable": true,
+                    "actions": [
+                      {
+                        "code": "view",
+                        "label": "View payment",
+                        "allowed": true,
+                        "link": "/finance/remittance/payments?payment=PV-2026-00102"
+                      },
+                      {
+                        "code": "open-remittance",
+                        "label": "Open remittance",
+                        "allowed": true,
+                        "link": "/finance/remittance/remittances/rm_21"
+                      },
+                      {
+                        "code": "pay-by-cheque",
+                        "label": "Pay by cheque",
+                        "allowed": true,
+                        "link": "/accounts/paymentvoucher/detailview/pv_102"
+                      }
+                    ],
+                    "link": "/finance/remittance/payments?payment=PV-2026-00102",
+                    "voucherLink": "/accounts/paymentvoucher/detailview/pv_102",
+                    "payment": {
+                      "method": null,
+                      "amount": 409141.43,
+                      "valueDate": "2026-10-12",
+                      "debitAccount": null,
+                      "bankReference": null,
+                      "paidOn": null,
+                      "failureReason": null
+                    },
+                    "amounts": {
+                      "dueToInsurer": 409141.43,
+                      "refundCredits": 0,
+                      "voucherAmount": 409141.43,
+                      "bankAmount": null,
+                      "check": {
+                        "code": "pass",
+                        "label": "Pass",
+                        "difference": 0
+                      }
+                    },
+                    "links": {
+                      "remittances": [
+                        {
+                          "remittanceNo": "REM-2026-00021",
+                          "link": "/finance/remittance/remittances/rm_21",
+                          "schedule": "/remittance/remittances/rm_21/schedule.xlsx"
+                        }
+                      ],
+                      "voucher": {
+                        "number": "PV-2026-00102",
+                        "link": "/accounts/paymentvoucher/detailview/pv_102"
+                      },
+                      "batch": null,
+                      "bankFile": null,
+                      "statusFile": null,
+                      "cheque": null,
+                      "journal": null,
+                      "bankReconciliation": null
+                    },
+                    "approvals": {
+                      "remittances": [
+                        {
+                          "remittanceNo": "REM-2026-00021",
+                          "by": "J. Cruz",
+                          "at": "2026-10-12T02:32:00.000Z",
+                          "limitAtDecision": 1000000,
+                          "limitSourceLabel": "Role limit: TIS Finance & General Accounting"
+                        }
+                      ],
+                      "voucherMaker": {
+                        "name": "M. Reyes",
+                        "at": "2026-10-12T03:00:00.000Z"
+                      },
+                      "batchCreatedBy": null,
+                      "batchApprovedBy": null,
+                      "fileGeneratedBy": null,
+                      "resultImportedBy": null
+                    },
+                    "timeline": [
+                      {
+                        "code": "voucher-raised",
+                        "label": "Voucher raised",
+                        "done": true,
+                        "at": "2026-10-12T03:00:00.000Z",
+                        "by": "M. Reyes"
+                      }
+                    ],
+                    "activity": [],
+                    "batching": {
+                      "allowed": false,
+                      "code": "NO_LAYOUT",
+                      "reason": "No Metrobank layout configured. Pay by cheque or ask the administrator.",
+                      "bankCode": "MBT",
+                      "layout": null,
+                      "chequeAllowed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Insurer payments > View payment",
+        "x-permissions": [
+          "read:remittance",
+          "write:remittance",
+          "read:disbursements",
+          "write:disbursements"
+        ]
+      }
+    },
+    "/remittance/payments/{voucherId}/account": {
+      "get": {
+        "operationId": "getRemittancePaymentsVoucherIdAccount",
+        "summary": "Show full number: the insurer's bank account number of a payment in full (write:disbursements; every reveal is audited)",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Insurer payments > View payment > Show full number\n\nAccess: write:disbursements",
+        "parameters": [
+          {
+            "name": "voucherId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "voucherId": {
+                          "type": "string"
+                        },
+                        "voucherNo": {
+                          "type": "string"
+                        },
+                        "bank": {
+                          "type": "string"
+                        },
+                        "accountNumber": {
+                          "type": "string"
+                        },
+                        "accountName": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "voucherId": "pv_102",
+                    "voucherNo": "PV-2026-00102",
+                    "bank": "Metropolitan Bank and Trust Company",
+                    "accountNumber": "0071-5566-4821",
+                    "accountName": "Pioneer Insurance & Surety Corp."
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Insurer payments > View payment > Show full number",
+        "x-permissions": [
+          "write:disbursements"
         ]
       }
     },
@@ -136752,11 +138009,11 @@
     "/remittance/schedules": {
       "get": {
         "operationId": "getRemittanceSchedules",
-        "summary": "Remittance schedules (remittance-schedule master), upcoming run dates and the Master > Schedules job that runs them",
+        "summary": "Remittance schedules (Setup > Schedules): the automation state (jobEnabled, checked daily at, time zone, last check and its status; the cron and the job link for administrators only) and per schedule its kind, the insurers it covers, frequency, payment window, grouping, runs (\"Mondays 06:15\"), next run (none while paused), last run (time, result, counts, message, trigger) and status; scheduledJobs, upcomingEvents and job for the Scheduling screen of earlier releases",
         "tags": [
           "Remittance"
         ],
-        "description": "Front-end touchpoint: Accounts > Remittance > Scheduling\n\nAccess: read:remittance, write:remittance",
+        "description": "Front-end touchpoint: Accounts > Remittance > Setup > Schedules; Accounts > Remittance > Scheduling\n\nAccess: read:remittance, write:remittance",
         "parameters": [],
         "responses": {
           "200": {
@@ -136772,7 +138029,32 @@
                     "data": {
                       "type": "object",
                       "properties": {
-                        "scheduledJobs": {
+                        "automation": {
+                          "type": "object",
+                          "properties": {
+                            "jobEnabled": {
+                              "type": "boolean"
+                            },
+                            "checkedDaily": {
+                              "type": "string"
+                            },
+                            "timeZone": {
+                              "type": "string"
+                            },
+                            "lastCheckAt": {},
+                            "lastStatus": {},
+                            "cron": {
+                              "type": "string"
+                            },
+                            "jobCode": {
+                              "type": "string"
+                            },
+                            "link": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "schedules": {
                           "type": "array",
                           "items": {
                             "type": "object",
@@ -136786,39 +138068,143 @@
                               "name": {
                                 "type": "string"
                               },
-                              "insurers": {
-                                "type": "array",
-                                "items": {
-                                  "type": "string"
-                                }
-                              },
-                              "cutOffDays": {
-                                "type": "integer"
-                              },
-                              "nextRun": {
+                              "kind": {
                                 "type": "string"
                               },
                               "frequency": {
                                 "type": "string"
                               },
-                              "status": {
+                              "paymentWindow": {
                                 "type": "string"
-                              }
-                            }
-                          }
-                        },
-                        "upcomingEvents": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
+                              },
+                              "cutOffDays": {
+                                "type": "integer"
+                              },
+                              "groupBy": {
+                                "type": "string"
+                              },
+                              "runTime": {
+                                "type": "string"
+                              },
+                              "allInsurers": {
+                                "type": "boolean"
+                              },
+                              "insurers": {
+                                "type": "array",
+                                "items": {}
+                              },
+                              "covers": {
+                                "type": "object",
+                                "properties": {
+                                  "allActive": {
+                                    "type": "boolean"
+                                  },
+                                  "count": {
+                                    "type": "integer"
+                                  },
+                                  "insurers": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "id": {
+                                          "type": "integer"
+                                        },
+                                        "code": {
+                                          "type": "string"
+                                        },
+                                        "name": {
+                                          "type": "string"
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "label": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "runs": {
+                                "type": "string"
+                              },
+                              "nextRun": {
+                                "type": "string"
+                              },
+                              "nextRunText": {
+                                "type": "string"
+                              },
+                              "lastRun": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "at": {
+                                    "type": "string"
+                                  },
+                                  "text": {
+                                    "type": "string"
+                                  },
+                                  "result": {
+                                    "type": "string"
+                                  },
+                                  "resultLabel": {
+                                    "type": "string"
+                                  },
+                                  "counts": {
+                                    "type": "object",
+                                    "properties": {
+                                      "scanned": {
+                                        "type": "integer"
+                                      },
+                                      "ready": {
+                                        "type": "integer"
+                                      },
+                                      "held": {
+                                        "type": "integer"
+                                      },
+                                      "exceptions": {
+                                        "type": "integer"
+                                      },
+                                      "created": {
+                                        "type": "integer"
+                                      }
+                                    }
+                                  },
+                                  "message": {
+                                    "type": "string"
+                                  },
+                                  "trigger": {
+                                    "type": "object",
+                                    "properties": {
+                                      "code": {
+                                        "type": "string"
+                                      },
+                                      "label": {
+                                        "type": "string"
+                                      },
+                                      "user": {
+                                        "type": "object",
+                                        "properties": {
+                                          "id": {
+                                            "type": "string"
+                                          },
+                                          "name": {
+                                            "type": "string"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
                               "status": {
                                 "type": "string"
                               },
-                              "date": {
-                                "type": "string"
+                              "isActive": {
+                                "type": "boolean"
                               },
-                              "content": {
+                              "timeZone": {
                                 "type": "string"
                               }
                             }
@@ -136833,9 +138219,6 @@
                             "code": {
                               "type": "string"
                             },
-                            "cron": {
-                              "type": "string"
-                            },
                             "enabled": {
                               "type": "boolean"
                             }
@@ -136848,31 +138231,75 @@
                 "example": {
                   "success": true,
                   "data": {
-                    "scheduledJobs": [
+                    "automation": {
+                      "jobEnabled": false,
+                      "checkedDaily": "06:15",
+                      "timeZone": "Asia/Manila",
+                      "lastCheckAt": null,
+                      "lastStatus": null,
+                      "cron": "15 6 * * *",
+                      "jobCode": "remittance-schedules",
+                      "link": "/master/configuration/schedules"
+                    },
+                    "schedules": [
                       {
-                        "id": 1,
-                        "code": "SCH-001",
-                        "name": "Monthly remittance - Malayan",
-                        "insurers": [
-                          "MALAYAN"
-                        ],
-                        "cutOffDays": 5,
-                        "nextRun": "2026-10-01",
-                        "frequency": "Monthly",
-                        "status": "Active"
-                      }
-                    ],
-                    "upcomingEvents": [
-                      {
-                        "status": "2026-10-01",
-                        "date": "2026-10-01",
-                        "content": "Monthly remittance - Malayan"
+                        "id": 7,
+                        "code": "TIS-WEEKLY",
+                        "name": "Weekly remittance",
+                        "kind": "Remittance run",
+                        "frequency": "Weekly",
+                        "paymentWindow": "Previous Monday to Friday",
+                        "cutOffDays": 0,
+                        "groupBy": "Insurer and product line",
+                        "runTime": "06:15",
+                        "allInsurers": true,
+                        "insurers": [],
+                        "covers": {
+                          "allActive": true,
+                          "count": 4,
+                          "insurers": [
+                            {
+                              "id": 3,
+                              "code": "PIONEER",
+                              "name": "Pioneer Insurance & Surety Corp."
+                            }
+                          ],
+                          "label": "All active (4)"
+                        },
+                        "runs": "Mondays 06:15",
+                        "nextRun": "2026-10-19",
+                        "nextRunText": "Mon 19/10/2026 06:15",
+                        "lastRun": {
+                          "id": "run_0123456789abcdef",
+                          "at": "2026-10-12T22:15:00.000Z",
+                          "text": "12/10/2026 06:15",
+                          "result": "success",
+                          "resultLabel": "Success",
+                          "counts": {
+                            "scanned": 14,
+                            "ready": 14,
+                            "held": 0,
+                            "exceptions": 0,
+                            "created": 3
+                          },
+                          "message": "Weekly run done: 3 remittance(s) created, 0 policies held, 0 exceptions.",
+                          "trigger": {
+                            "code": "user",
+                            "label": "Run now · M. Reyes",
+                            "user": {
+                              "id": "usr_4",
+                              "name": "M. Reyes"
+                            }
+                          }
+                        },
+                        "status": "Active",
+                        "isActive": true,
+                        "timeZone": "Asia/Manila"
                       }
                     ],
                     "timeZone": "Asia/Manila",
                     "job": {
                       "code": "remittance-schedules",
-                      "cron": "15 6 * * *",
                       "enabled": false
                     }
                   }
@@ -136887,7 +138314,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Accounts > Remittance > Scheduling",
+        "x-screen": "Accounts > Remittance > Setup > Schedules; Accounts > Remittance > Scheduling",
         "x-permissions": [
           "read:remittance",
           "write:remittance"
@@ -136895,11 +138322,11 @@
       },
       "post": {
         "operationId": "postRemittanceSchedules",
-        "summary": "New remittance schedule: insurers, cut-off days, frequency and next run date (stored in the remittance-schedule master)",
+        "summary": "New remittance schedule (write:remittance): kind, insurers or all active insurers, frequency, payment window, grouping, run time, next run date; the code comes from the remittance_schedule series (SCH-003) when none is given. The window \"Previous Monday to Friday\" needs the frequency Weekly (400, errors[0].code MSG-RMT-007) and a Monday as next run",
         "tags": [
           "Remittance"
         ],
-        "description": "Front-end touchpoint: Accounts > Remittance > Scheduling > New Schedule\n\nAccess: write:remittance",
+        "description": "Front-end touchpoint: Accounts > Remittance > Setup > Schedules > New schedule\n\nAccess: write:remittance",
         "parameters": [],
         "responses": {
           "200": {
@@ -136931,8 +138358,8 @@
                 "example": {
                   "success": true,
                   "data": {
-                    "id": 3,
-                    "code": "SCH-0003",
+                    "id": 9,
+                    "code": "SCH-003",
                     "status": "Active"
                   }
                 }
@@ -136949,7 +138376,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Accounts > Remittance > Scheduling > New Schedule",
+        "x-screen": "Accounts > Remittance > Setup > Schedules > New schedule",
         "x-permissions": [
           "write:remittance"
         ],
@@ -136960,22 +138387,25 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "code": {
-                    "type": "string"
-                  },
                   "name": {
                     "type": "string"
                   },
-                  "insurers": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
+                  "kind": {
+                    "type": "string"
                   },
-                  "cutOffDays": {
-                    "type": "integer"
+                  "allInsurers": {
+                    "type": "boolean"
                   },
                   "frequency": {
+                    "type": "string"
+                  },
+                  "paymentWindow": {
+                    "type": "string"
+                  },
+                  "groupBy": {
+                    "type": "string"
+                  },
+                  "runTime": {
                     "type": "string"
                   },
                   "nextRun": {
@@ -136984,14 +138414,14 @@
                 }
               },
               "example": {
-                "code": "SCH-0003",
-                "name": "Weekly remittance - Pioneer",
-                "insurers": [
-                  "PIONEER"
-                ],
-                "cutOffDays": 3,
+                "name": "Weekly remittance",
+                "kind": "Remittance run",
+                "allInsurers": true,
                 "frequency": "Weekly",
-                "nextRun": "2026-10-05"
+                "paymentWindow": "Previous Monday to Friday",
+                "groupBy": "Insurer and product line",
+                "runTime": "06:15",
+                "nextRun": "2026-10-19"
               }
             }
           }
@@ -136999,13 +138429,13 @@
       }
     },
     "/remittance/schedules/{id}": {
-      "put": {
-        "operationId": "putRemittanceSchedulesId",
-        "summary": "Change a remittance schedule (insurers, cut-off days, frequency, next run date)",
+      "get": {
+        "operationId": "getRemittanceSchedulesId",
+        "summary": "One remittance schedule as listed on Setup > Schedules",
         "tags": [
           "Remittance"
         ],
-        "description": "Front-end touchpoint: Accounts > Remittance > Scheduling > Edit Schedule\n\nAccess: write:remittance",
+        "description": "Front-end touchpoint: Accounts > Remittance > Setup > Schedules > View\n\nAccess: read:remittance, write:remittance",
         "parameters": [
           {
             "name": "id",
@@ -137036,7 +138466,146 @@
                         "code": {
                           "type": "string"
                         },
+                        "name": {
+                          "type": "string"
+                        },
+                        "kind": {
+                          "type": "string"
+                        },
+                        "frequency": {
+                          "type": "string"
+                        },
+                        "paymentWindow": {
+                          "type": "string"
+                        },
+                        "cutOffDays": {
+                          "type": "integer"
+                        },
+                        "groupBy": {
+                          "type": "string"
+                        },
+                        "runTime": {
+                          "type": "string"
+                        },
+                        "allInsurers": {
+                          "type": "boolean"
+                        },
+                        "insurers": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "covers": {
+                          "type": "object",
+                          "properties": {
+                            "allActive": {
+                              "type": "boolean"
+                            },
+                            "count": {
+                              "type": "integer"
+                            },
+                            "insurers": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "integer"
+                                  },
+                                  "code": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            },
+                            "label": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "runs": {
+                          "type": "string"
+                        },
+                        "nextRun": {
+                          "type": "string"
+                        },
+                        "nextRunText": {
+                          "type": "string"
+                        },
+                        "lastRun": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "at": {
+                              "type": "string"
+                            },
+                            "text": {
+                              "type": "string"
+                            },
+                            "result": {
+                              "type": "string"
+                            },
+                            "resultLabel": {
+                              "type": "string"
+                            },
+                            "counts": {
+                              "type": "object",
+                              "properties": {
+                                "scanned": {
+                                  "type": "integer"
+                                },
+                                "ready": {
+                                  "type": "integer"
+                                },
+                                "held": {
+                                  "type": "integer"
+                                },
+                                "exceptions": {
+                                  "type": "integer"
+                                },
+                                "created": {
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "message": {
+                              "type": "string"
+                            },
+                            "trigger": {
+                              "type": "object",
+                              "properties": {
+                                "code": {
+                                  "type": "string"
+                                },
+                                "label": {
+                                  "type": "string"
+                                },
+                                "user": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
                         "status": {
+                          "type": "string"
+                        },
+                        "isActive": {
+                          "type": "boolean"
+                        },
+                        "timeZone": {
                           "type": "string"
                         }
                       }
@@ -137046,9 +138615,58 @@
                 "example": {
                   "success": true,
                   "data": {
-                    "id": 3,
-                    "code": "SCH-0003",
-                    "status": "Active"
+                    "id": 7,
+                    "code": "TIS-WEEKLY",
+                    "name": "Weekly remittance",
+                    "kind": "Remittance run",
+                    "frequency": "Weekly",
+                    "paymentWindow": "Previous Monday to Friday",
+                    "cutOffDays": 0,
+                    "groupBy": "Insurer and product line",
+                    "runTime": "06:15",
+                    "allInsurers": true,
+                    "insurers": [],
+                    "covers": {
+                      "allActive": true,
+                      "count": 4,
+                      "insurers": [
+                        {
+                          "id": 3,
+                          "code": "PIONEER",
+                          "name": "Pioneer Insurance & Surety Corp."
+                        }
+                      ],
+                      "label": "All active (4)"
+                    },
+                    "runs": "Mondays 06:15",
+                    "nextRun": "2026-10-19",
+                    "nextRunText": "Mon 19/10/2026 06:15",
+                    "lastRun": {
+                      "id": "run_0123456789abcdef",
+                      "at": "2026-10-12T22:15:00.000Z",
+                      "text": "12/10/2026 06:15",
+                      "result": "success",
+                      "resultLabel": "Success",
+                      "counts": {
+                        "scanned": 14,
+                        "ready": 14,
+                        "held": 0,
+                        "exceptions": 0,
+                        "created": 3
+                      },
+                      "message": "Weekly run done: 3 remittance(s) created, 0 policies held, 0 exceptions.",
+                      "trigger": {
+                        "code": "user",
+                        "label": "Run now · M. Reyes",
+                        "user": {
+                          "id": "usr_4",
+                          "name": "M. Reyes"
+                        }
+                      }
+                    },
+                    "status": "Active",
+                    "isActive": true,
+                    "timeZone": "Asia/Manila"
                   }
                 }
               }
@@ -137064,7 +138682,87 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Accounts > Remittance > Scheduling > Edit Schedule",
+        "x-screen": "Accounts > Remittance > Setup > Schedules > View",
+        "x-permissions": [
+          "read:remittance",
+          "write:remittance"
+        ]
+      },
+      "put": {
+        "operationId": "putRemittanceSchedulesId",
+        "summary": "Change a remittance schedule (write:remittance; checked as it will be saved, MSG-RMT-007 for a window that needs a weekly schedule; audited with before and after)",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Setup > Schedules > Edit\n\nAccess: write:remittance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": false,
+                  "message": "Validation failed",
+                  "errors": [
+                    {
+                      "path": "frequency",
+                      "code": "MSG-RMT-007",
+                      "message": "The payment window \"Previous Monday to Friday\" needs a weekly schedule. Choose Weekly, or the window \"Cut-off days\"."
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Setup > Schedules > Edit",
         "x-permissions": [
           "write:remittance"
         ],
@@ -137075,41 +138773,220 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "insurers": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "cutOffDays": {
-                    "type": "integer"
-                  },
-                  "nextRun": {
+                  "frequency": {
                     "type": "string"
                   }
                 }
               },
               "example": {
-                "insurers": [
-                  "PIONEER",
-                  "MALAYAN"
-                ],
-                "cutOffDays": 5,
-                "nextRun": "2026-10-12"
+                "frequency": "Monthly"
               }
             }
           }
         }
       }
     },
-    "/remittance/schedules/{id}/run": {
-      "post": {
-        "operationId": "postRemittanceSchedulesIdRun",
-        "summary": "Run a schedule now: draft remittances for its insurers up to the cut-off date (or its linked automated remittance)",
+    "/remittance/schedules/{id}/activity": {
+      "get": {
+        "operationId": "getRemittanceSchedulesIdActivity",
+        "summary": "Activity log of a schedule: its changes (before and after) and its runs, oldest first",
         "tags": [
           "Remittance"
         ],
-        "description": "Front-end touchpoint: Accounts > Remittance > Scheduling > Run Now\n\nAccess: write:remittance",
+        "description": "Front-end touchpoint: Accounts > Remittance > Setup > Schedules > View\n\nAccess: read:remittance, write:remittance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "action": {
+                            "type": "string"
+                          },
+                          "by": {
+                            "type": "string"
+                          },
+                          "at": {
+                            "type": "string"
+                          },
+                          "notes": {},
+                          "id": {
+                            "type": "string"
+                          },
+                          "day": {
+                            "type": "string"
+                          },
+                          "date": {
+                            "type": "string"
+                          },
+                          "time": {
+                            "type": "string"
+                          },
+                          "atText": {
+                            "type": "string"
+                          },
+                          "actionCode": {
+                            "type": "string"
+                          },
+                          "actionLabel": {
+                            "type": "string"
+                          },
+                          "user": {
+                            "type": "object",
+                            "properties": {
+                              "username": {
+                                "type": "string"
+                              },
+                              "displayName": {
+                                "type": "string"
+                              },
+                              "roles": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "role": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "fromStatus": {
+                            "type": "string"
+                          },
+                          "toStatus": {
+                            "type": "string"
+                          },
+                          "remarks": {
+                            "type": "string"
+                          },
+                          "changes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "field": {
+                                  "type": "string"
+                                },
+                                "label": {
+                                  "type": "string"
+                                },
+                                "before": {},
+                                "after": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "source": {
+                            "type": "object",
+                            "properties": {
+                              "channel": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "action": "submit",
+                      "by": "r.finance",
+                      "at": "2026-10-10T01:03:00.000Z",
+                      "notes": null,
+                      "id": "812",
+                      "day": "2026-10-10",
+                      "date": "10/10/2026",
+                      "time": "09:03",
+                      "atText": "10/10/2026 09:03",
+                      "actionCode": "run",
+                      "actionLabel": "Run now: Weekly run done: 3 remittance(s) created, 0 policies held, 0 exceptions.",
+                      "user": {
+                        "username": "r.finance",
+                        "displayName": "Rosa Finance",
+                        "roles": [
+                          "Finance Officer"
+                        ],
+                        "role": "Finance Officer"
+                      },
+                      "fromStatus": "Draft",
+                      "toStatus": "Pending Approval",
+                      "remarks": "Off-cycle: Missed run",
+                      "changes": [
+                        {
+                          "field": "batchId",
+                          "label": "Batch ID",
+                          "before": null,
+                          "after": "BLK-2026-00001"
+                        }
+                      ],
+                      "source": {
+                        "channel": "screen",
+                        "label": "Screen",
+                        "name": "Accounts > Remittance > Tracking"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Setup > Schedules > View",
+        "x-permissions": [
+          "read:remittance",
+          "write:remittance"
+        ]
+      }
+    },
+    "/remittance/schedules/{id}/preview": {
+      "post": {
+        "operationId": "postRemittanceSchedulesIdPreview",
+        "summary": "Preview a run (dry run, writes nothing): the window, per insurer the policies ready, the product lines, basis and due to insurer, and \"Draft will be created\" or \"Nothing to remit\", the totals and the verb; windowDone with the reason when the window already has a run",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Remittances > Run now; Accounts > Remittance > Setup > Schedules > Preview run\n\nAccess: write:remittance",
         "parameters": [
           {
             "name": "id",
@@ -137139,20 +139016,120 @@
                           "properties": {
                             "id": {
                               "type": "integer"
+                            },
+                            "code": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
                             }
                           }
                         },
-                        "execution": {
+                        "runDate": {
+                          "type": "string"
+                        },
+                        "window": {
                           "type": "object",
                           "properties": {
-                            "executionId": {
+                            "from": {
                               "type": "string"
                             },
-                            "remittances": {
-                              "type": "array",
-                              "items": {}
+                            "to": {
+                              "type": "string"
+                            },
+                            "catchUpFrom": {},
+                            "text": {
+                              "type": "string"
                             }
                           }
+                        },
+                        "windowDone": {
+                          "type": "object",
+                          "properties": {
+                            "done": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "paused": {
+                          "type": "boolean"
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "insurer": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "integer"
+                                  },
+                                  "code": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "productLine": {
+                                "type": "string"
+                              },
+                              "basis": {
+                                "type": "string"
+                              },
+                              "ready": {
+                                "type": "integer"
+                              },
+                              "held": {
+                                "type": "integer"
+                              },
+                              "exceptions": {
+                                "type": "integer"
+                              },
+                              "dueToInsurer": {
+                                "type": "number"
+                              },
+                              "result": {
+                                "type": "object",
+                                "properties": {
+                                  "code": {
+                                    "type": "string"
+                                  },
+                                  "label": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "totals": {
+                          "type": "object",
+                          "properties": {
+                            "insurers": {
+                              "type": "integer"
+                            },
+                            "drafts": {
+                              "type": "integer"
+                            },
+                            "ready": {
+                              "type": "integer"
+                            },
+                            "held": {
+                              "type": "integer"
+                            },
+                            "exceptions": {
+                              "type": "integer"
+                            },
+                            "dueToInsurer": {
+                              "type": "number"
+                            }
+                          }
+                        },
+                        "verb": {
+                          "type": "string"
                         }
                       }
                     }
@@ -137162,11 +139139,530 @@
                   "success": true,
                   "data": {
                     "schedule": {
-                      "id": 1
+                      "id": 7,
+                      "code": "TIS-WEEKLY",
+                      "name": "Weekly remittance"
                     },
-                    "execution": {
-                      "executionId": "BLK-2026-00003",
-                      "remittances": []
+                    "runDate": "2026-10-12",
+                    "window": {
+                      "from": "2026-10-05",
+                      "to": "2026-10-09",
+                      "catchUpFrom": null,
+                      "text": "05/10/2026 – 09/10/2026"
+                    },
+                    "windowDone": {
+                      "done": false
+                    },
+                    "paused": false,
+                    "rows": [
+                      {
+                        "insurer": {
+                          "id": 3,
+                          "code": "PIONEER",
+                          "name": "Pioneer Insurance & Surety Corp."
+                        },
+                        "productLine": "Motor",
+                        "basis": "Net",
+                        "ready": 12,
+                        "held": 0,
+                        "exceptions": 0,
+                        "dueToInsurer": 409141.43,
+                        "result": {
+                          "code": "draft",
+                          "label": "Draft will be created"
+                        }
+                      }
+                    ],
+                    "totals": {
+                      "insurers": 1,
+                      "drafts": 1,
+                      "ready": 12,
+                      "held": 0,
+                      "exceptions": 0,
+                      "dueToInsurer": 409141.43
+                    },
+                    "verb": "Create 1 draft remittance"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Remittances > Run now; Accounts > Remittance > Setup > Schedules > Preview run",
+        "x-permissions": [
+          "write:remittance"
+        ]
+      }
+    },
+    "/remittance/schedules/{id}/run": {
+      "post": {
+        "operationId": "postRemittanceSchedulesIdRun",
+        "summary": "Run now (write:remittance): an off-cycle run of the schedule's window with a remittance_off_cycle reason (reasonCode, note when the reason needs one); drafts per insurer, recorded in the run history. 409 WINDOW_DONE \"This week's run is done (12/10/2026 06:15). Next run Mon 19/10/2026 06:15.\" when the window already has a run, 409 PAUSED. The message is MSG-RMT-008",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Remittances > Run now; Accounts > Remittance > Setup > Schedules > Run now\n\nAccess: write:remittance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "run": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "scheduleCode": {
+                              "type": "string"
+                            },
+                            "startedAt": {
+                              "type": "string"
+                            },
+                            "startedText": {
+                              "type": "string"
+                            },
+                            "finishedAt": {
+                              "type": "string"
+                            },
+                            "trigger": {
+                              "type": "object",
+                              "properties": {
+                                "code": {
+                                  "type": "string"
+                                },
+                                "label": {
+                                  "type": "string"
+                                },
+                                "user": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "reason": {
+                              "type": "object",
+                              "properties": {
+                                "code": {
+                                  "type": "string"
+                                },
+                                "text": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "window": {
+                              "type": "object",
+                              "properties": {
+                                "from": {
+                                  "type": "string"
+                                },
+                                "to": {
+                                  "type": "string"
+                                },
+                                "catchUpFrom": {},
+                                "text": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "counts": {
+                              "type": "object",
+                              "properties": {
+                                "scanned": {
+                                  "type": "integer"
+                                },
+                                "ready": {
+                                  "type": "integer"
+                                },
+                                "held": {
+                                  "type": "integer"
+                                },
+                                "exceptions": {
+                                  "type": "integer"
+                                },
+                                "created": {
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "dueToInsurer": {
+                              "type": "number"
+                            },
+                            "drafts": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "remittanceNo": {
+                                    "type": "string"
+                                  },
+                                  "link": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            },
+                            "executionRef": {
+                              "type": "string"
+                            },
+                            "result": {
+                              "type": "object",
+                              "properties": {
+                                "code": {
+                                  "type": "string"
+                                },
+                                "label": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "message": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "drafts": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "remittanceNo": {
+                                "type": "string"
+                              },
+                              "insurer": {
+                                "type": "string"
+                              },
+                              "policies": {
+                                "type": "integer"
+                              },
+                              "dueToInsurer": {
+                                "type": "number"
+                              },
+                              "link": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "schedule": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "code": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "kind": {
+                              "type": "string"
+                            },
+                            "frequency": {
+                              "type": "string"
+                            },
+                            "paymentWindow": {
+                              "type": "string"
+                            },
+                            "cutOffDays": {
+                              "type": "integer"
+                            },
+                            "groupBy": {
+                              "type": "string"
+                            },
+                            "runTime": {
+                              "type": "string"
+                            },
+                            "allInsurers": {
+                              "type": "boolean"
+                            },
+                            "insurers": {
+                              "type": "array",
+                              "items": {}
+                            },
+                            "covers": {
+                              "type": "object",
+                              "properties": {
+                                "allActive": {
+                                  "type": "boolean"
+                                },
+                                "count": {
+                                  "type": "integer"
+                                },
+                                "insurers": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "type": "integer"
+                                      },
+                                      "code": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  }
+                                },
+                                "label": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "runs": {
+                              "type": "string"
+                            },
+                            "nextRun": {
+                              "type": "string"
+                            },
+                            "nextRunText": {
+                              "type": "string"
+                            },
+                            "lastRun": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "at": {
+                                  "type": "string"
+                                },
+                                "text": {
+                                  "type": "string"
+                                },
+                                "result": {
+                                  "type": "string"
+                                },
+                                "resultLabel": {
+                                  "type": "string"
+                                },
+                                "counts": {
+                                  "type": "object",
+                                  "properties": {
+                                    "scanned": {
+                                      "type": "integer"
+                                    },
+                                    "ready": {
+                                      "type": "integer"
+                                    },
+                                    "held": {
+                                      "type": "integer"
+                                    },
+                                    "exceptions": {
+                                      "type": "integer"
+                                    },
+                                    "created": {
+                                      "type": "integer"
+                                    }
+                                  }
+                                },
+                                "message": {
+                                  "type": "string"
+                                },
+                                "trigger": {
+                                  "type": "object",
+                                  "properties": {
+                                    "code": {
+                                      "type": "string"
+                                    },
+                                    "label": {
+                                      "type": "string"
+                                    },
+                                    "user": {
+                                      "type": "object",
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        },
+                                        "name": {
+                                          "type": "string"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "isActive": {
+                              "type": "boolean"
+                            },
+                            "timeZone": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Weekly run done: 3 remittance(s) created, 0 policies held, 0 exceptions.",
+                  "data": {
+                    "run": {
+                      "id": "run_0123456789abcdef",
+                      "scheduleCode": "TIS-WEEKLY",
+                      "startedAt": "2026-10-12T22:15:00.000Z",
+                      "startedText": "13/10/2026 06:15",
+                      "finishedAt": "2026-10-12T22:15:04.000Z",
+                      "trigger": {
+                        "code": "user",
+                        "label": "Run now · M. Reyes",
+                        "user": {
+                          "id": "usr_4",
+                          "name": "M. Reyes"
+                        }
+                      },
+                      "reason": {
+                        "code": "ROC-MISSED",
+                        "text": "Missed run"
+                      },
+                      "window": {
+                        "from": "2026-10-05",
+                        "to": "2026-10-09",
+                        "catchUpFrom": null,
+                        "text": "05/10/2026 – 09/10/2026"
+                      },
+                      "counts": {
+                        "scanned": 14,
+                        "ready": 14,
+                        "held": 0,
+                        "exceptions": 0,
+                        "created": 3
+                      },
+                      "dueToInsurer": 1234567.89,
+                      "drafts": [
+                        {
+                          "id": "rm_21",
+                          "remittanceNo": "REM-2026-00021",
+                          "link": "/finance/remittance/remittances/rm_21"
+                        }
+                      ],
+                      "executionRef": "BLK-2026-00003",
+                      "result": {
+                        "code": "success",
+                        "label": "Success"
+                      },
+                      "message": "Weekly run done: 3 remittance(s) created, 0 policies held, 0 exceptions."
+                    },
+                    "message": "Weekly run done: 3 remittance(s) created, 0 policies held, 0 exceptions.",
+                    "drafts": [
+                      {
+                        "id": "rm_21",
+                        "remittanceNo": "REM-2026-00021",
+                        "insurer": "Pioneer Insurance & Surety Corp.",
+                        "policies": 12,
+                        "dueToInsurer": 409141.43,
+                        "link": "/finance/remittance/remittances/rm_21"
+                      }
+                    ],
+                    "schedule": {
+                      "id": 7,
+                      "code": "TIS-WEEKLY",
+                      "name": "Weekly remittance",
+                      "kind": "Remittance run",
+                      "frequency": "Weekly",
+                      "paymentWindow": "Previous Monday to Friday",
+                      "cutOffDays": 0,
+                      "groupBy": "Insurer and product line",
+                      "runTime": "06:15",
+                      "allInsurers": true,
+                      "insurers": [],
+                      "covers": {
+                        "allActive": true,
+                        "count": 4,
+                        "insurers": [
+                          {
+                            "id": 3,
+                            "code": "PIONEER",
+                            "name": "Pioneer Insurance & Surety Corp."
+                          }
+                        ],
+                        "label": "All active (4)"
+                      },
+                      "runs": "Mondays 06:15",
+                      "nextRun": "2026-10-19",
+                      "nextRunText": "Mon 19/10/2026 06:15",
+                      "lastRun": {
+                        "id": "run_0123456789abcdef",
+                        "at": "2026-10-12T22:15:00.000Z",
+                        "text": "12/10/2026 06:15",
+                        "result": "success",
+                        "resultLabel": "Success",
+                        "counts": {
+                          "scanned": 14,
+                          "ready": 14,
+                          "held": 0,
+                          "exceptions": 0,
+                          "created": 3
+                        },
+                        "message": "Weekly run done: 3 remittance(s) created, 0 policies held, 0 exceptions.",
+                        "trigger": {
+                          "code": "user",
+                          "label": "Run now · M. Reyes",
+                          "user": {
+                            "id": "usr_4",
+                            "name": "M. Reyes"
+                          }
+                        }
+                      },
+                      "status": "Active",
+                      "isActive": true,
+                      "timeZone": "Asia/Manila"
                     }
                   }
                 }
@@ -137183,8 +139679,311 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Accounts > Remittance > Scheduling > Run Now",
+        "x-screen": "Accounts > Remittance > Remittances > Run now; Accounts > Remittance > Setup > Schedules > Run now",
         "x-permissions": [
+          "write:remittance"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reasonCode": {
+                    "type": "string"
+                  },
+                  "note": {}
+                }
+              },
+              "example": {
+                "reasonCode": "ROC-MISSED",
+                "note": null
+              }
+            }
+          }
+        }
+      }
+    },
+    "/remittance/schedules/{id}/runs": {
+      "get": {
+        "operationId": "getRemittanceSchedulesIdRuns",
+        "summary": "Run history of a schedule, newest first: started, trigger (Job, or Run now · user), reason, window, counts, drafts, result and message (paging)",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Remittances > Run history; Accounts > Remittance > Setup > Schedules > View\n\nAccess: read:remittance, write:remittance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 20
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "scheduleCode": {
+                            "type": "string"
+                          },
+                          "startedAt": {
+                            "type": "string"
+                          },
+                          "startedText": {
+                            "type": "string"
+                          },
+                          "finishedAt": {
+                            "type": "string"
+                          },
+                          "trigger": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "user": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "reason": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "text": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "window": {
+                            "type": "object",
+                            "properties": {
+                              "from": {
+                                "type": "string"
+                              },
+                              "to": {
+                                "type": "string"
+                              },
+                              "catchUpFrom": {},
+                              "text": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "counts": {
+                            "type": "object",
+                            "properties": {
+                              "scanned": {
+                                "type": "integer"
+                              },
+                              "ready": {
+                                "type": "integer"
+                              },
+                              "held": {
+                                "type": "integer"
+                              },
+                              "exceptions": {
+                                "type": "integer"
+                              },
+                              "created": {
+                                "type": "integer"
+                              }
+                            }
+                          },
+                          "dueToInsurer": {
+                            "type": "number"
+                          },
+                          "drafts": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "remittanceNo": {
+                                  "type": "string"
+                                },
+                                "link": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "executionRef": {
+                            "type": "string"
+                          },
+                          "result": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "message": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    },
+                    "totalPages": {
+                      "type": "integer"
+                    },
+                    "schedule": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "run_0123456789abcdef",
+                      "scheduleCode": "TIS-WEEKLY",
+                      "startedAt": "2026-10-12T22:15:00.000Z",
+                      "startedText": "13/10/2026 06:15",
+                      "finishedAt": "2026-10-12T22:15:04.000Z",
+                      "trigger": {
+                        "code": "user",
+                        "label": "Run now · M. Reyes",
+                        "user": {
+                          "id": "usr_4",
+                          "name": "M. Reyes"
+                        }
+                      },
+                      "reason": {
+                        "code": "ROC-MISSED",
+                        "text": "Missed run"
+                      },
+                      "window": {
+                        "from": "2026-10-05",
+                        "to": "2026-10-09",
+                        "catchUpFrom": null,
+                        "text": "05/10/2026 – 09/10/2026"
+                      },
+                      "counts": {
+                        "scanned": 14,
+                        "ready": 14,
+                        "held": 0,
+                        "exceptions": 0,
+                        "created": 3
+                      },
+                      "dueToInsurer": 1234567.89,
+                      "drafts": [
+                        {
+                          "id": "rm_21",
+                          "remittanceNo": "REM-2026-00021",
+                          "link": "/finance/remittance/remittances/rm_21"
+                        }
+                      ],
+                      "executionRef": "BLK-2026-00003",
+                      "result": {
+                        "code": "success",
+                        "label": "Success"
+                      },
+                      "message": "Weekly run done: 3 remittance(s) created, 0 policies held, 0 exceptions."
+                    }
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "perPage": 20,
+                  "totalPages": 1,
+                  "schedule": {
+                    "id": 7,
+                    "code": "TIS-WEEKLY",
+                    "name": "Weekly remittance"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Remittances > Run history; Accounts > Remittance > Setup > Schedules > View",
+        "x-permissions": [
+          "read:remittance",
           "write:remittance"
         ]
       }
@@ -137192,11 +139991,11 @@
     "/remittance/schedules/{id}/status": {
       "patch": {
         "operationId": "patchRemittanceSchedulesIdStatus",
-        "summary": "Pause / resume a schedule",
+        "summary": "Pause / resume a schedule (a paused schedule has no next run; audited)",
         "tags": [
           "Remittance"
         ],
-        "description": "Front-end touchpoint: Accounts > Remittance > Scheduling\n\nAccess: write:remittance",
+        "description": "Front-end touchpoint: Accounts > Remittance > Setup > Schedules > Pause schedule\n\nAccess: write:remittance",
         "parameters": [
           {
             "name": "id",
@@ -137247,7 +140046,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Accounts > Remittance > Scheduling",
+        "x-screen": "Accounts > Remittance > Setup > Schedules > Pause schedule",
         "x-permissions": [
           "write:remittance"
         ],
@@ -138255,15 +141054,273 @@
         ]
       }
     },
-    "/remittance/transfers": {
+    "/remittance/summary": {
       "get": {
-        "operationId": "getRemittanceTransfers",
-        "summary": "Electronic transfers (status: Pending, Approved, Completed, Failed, Rejected)",
+        "operationId": "getRemittanceSummary",
+        "summary": "What Accounts > Remittance holds for the caller: counts per menu entry (remittances in my work, approvals awaiting my decision, insurer payments to pay (write:disbursements, else null), insurer statements to act on, exceptions assigned to me, my draft and overdue debit notes, setup), the entries with something overdue, the run strip (last run, next run, automation on or off) and the landing page",
         "tags": [
           "Remittance"
         ],
-        "description": "Front-end touchpoint: Accounts > Remittance > Electronic Transfer\n\nAccess: read:remittance, write:remittance",
+        "description": "Front-end touchpoint: Accounts > Remittance > Landing\n\nAccess: read:remittance, write:remittance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "counts": {
+                          "type": "object",
+                          "properties": {
+                            "remittances": {
+                              "type": "integer"
+                            },
+                            "approvals": {
+                              "type": "integer"
+                            },
+                            "payments": {
+                              "type": "integer"
+                            },
+                            "reconciliation": {
+                              "type": "integer"
+                            },
+                            "exceptions": {
+                              "type": "integer"
+                            },
+                            "billing": {
+                              "type": "integer"
+                            },
+                            "setup": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "overdue": {
+                          "type": "object",
+                          "properties": {
+                            "remittances": {
+                              "type": "boolean"
+                            },
+                            "approvals": {
+                              "type": "boolean"
+                            },
+                            "payments": {
+                              "type": "boolean"
+                            },
+                            "reconciliation": {
+                              "type": "boolean"
+                            },
+                            "exceptions": {
+                              "type": "boolean"
+                            },
+                            "billing": {
+                              "type": "boolean"
+                            },
+                            "setup": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "runStrip": {
+                          "type": "object",
+                          "properties": {
+                            "lastRun": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "scheduleCode": {
+                                  "type": "string"
+                                },
+                                "at": {
+                                  "type": "string"
+                                },
+                                "text": {
+                                  "type": "string"
+                                },
+                                "result": {
+                                  "type": "string"
+                                },
+                                "resultLabel": {
+                                  "type": "string"
+                                },
+                                "counts": {
+                                  "type": "object",
+                                  "properties": {
+                                    "scanned": {
+                                      "type": "integer"
+                                    },
+                                    "ready": {
+                                      "type": "integer"
+                                    },
+                                    "held": {
+                                      "type": "integer"
+                                    },
+                                    "exceptions": {
+                                      "type": "integer"
+                                    },
+                                    "created": {
+                                      "type": "integer"
+                                    }
+                                  }
+                                },
+                                "message": {
+                                  "type": "string"
+                                },
+                                "failed": {
+                                  "type": "boolean"
+                                }
+                              }
+                            },
+                            "nextRun": {
+                              "type": "object",
+                              "properties": {
+                                "scheduleCode": {
+                                  "type": "string"
+                                },
+                                "date": {
+                                  "type": "string"
+                                },
+                                "text": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "automation": {
+                              "type": "object",
+                              "properties": {
+                                "on": {
+                                  "type": "boolean"
+                                },
+                                "label": {
+                                  "type": "string"
+                                },
+                                "checkedDaily": {
+                                  "type": "string"
+                                },
+                                "timeZone": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "landing": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "link": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "counts": {
+                      "remittances": 3,
+                      "approvals": 1,
+                      "payments": 2,
+                      "reconciliation": 0,
+                      "exceptions": 0,
+                      "billing": 1,
+                      "setup": 0
+                    },
+                    "overdue": {
+                      "remittances": false,
+                      "approvals": false,
+                      "payments": false,
+                      "reconciliation": false,
+                      "exceptions": false,
+                      "billing": true,
+                      "setup": false
+                    },
+                    "runStrip": {
+                      "lastRun": {
+                        "id": "run_0123456789abcdef",
+                        "scheduleCode": "TIS-WEEKLY",
+                        "at": "2026-10-11T22:15:00.000Z",
+                        "text": "12/10/2026 06:15",
+                        "result": "success",
+                        "resultLabel": "Success",
+                        "counts": {
+                          "scanned": 14,
+                          "ready": 14,
+                          "held": 0,
+                          "exceptions": 0,
+                          "created": 3
+                        },
+                        "message": "Weekly run done: 3 remittance(s) created, 0 policies held, 0 exceptions.",
+                        "failed": false
+                      },
+                      "nextRun": {
+                        "scheduleCode": "TIS-WEEKLY",
+                        "date": "2026-10-19",
+                        "text": "Mon 19/10/2026 06:15"
+                      },
+                      "automation": {
+                        "on": false,
+                        "label": "Automation Off",
+                        "checkedDaily": "06:15",
+                        "timeZone": "Asia/Manila"
+                      }
+                    },
+                    "landing": {
+                      "code": "approvals",
+                      "link": "/finance/remittance/approvals"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Landing",
+        "x-permissions": [
+          "read:remittance",
+          "write:remittance"
+        ]
+      }
+    },
+    "/remittance/transfers": {
+      "get": {
+        "operationId": "getRemittanceTransfers",
+        "summary": "Electronic transfers (status: Pending, Approved, Completed, Failed, Rejected). legacy=1 (Insurer payments > Legacy transfers, read-only): the TRF- items with the masked account, approved by, the journal posted at approval and its reversal or \"Not reversed\", totals (status, q, paging)",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Electronic Transfer; Accounts > Remittance > Insurer payments > Legacy transfers\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements",
         "parameters": [
+          {
+            "name": "legacy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
           {
             "name": "status",
             "in": "query",
@@ -138299,6 +141356,12 @@
                           "beneficiary": {
                             "type": "string"
                           },
+                          "bank": {
+                            "type": "string"
+                          },
+                          "accountMasked": {
+                            "type": "string"
+                          },
                           "amount": {
                             "type": "integer"
                           },
@@ -138308,9 +141371,75 @@
                           "status": {
                             "type": "string"
                           },
+                          "approvedBy": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "at": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "journal": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "number": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "reversal": {
+                            "type": "object",
+                            "properties": {
+                              "reversed": {
+                                "type": "boolean"
+                              },
+                              "number": {},
+                              "date": {},
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "readOnly": {
+                            "type": "boolean"
+                          },
+                          "chip": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "creationDisabled": {
+                            "type": "boolean"
+                          },
                           "date": {
                             "type": "string"
                           }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "totals": {
+                      "type": "object",
+                      "properties": {
+                        "count": {
+                          "type": "integer"
+                        },
+                        "amount": {
+                          "type": "integer"
                         }
                       }
                     }
@@ -138323,12 +141452,39 @@
                       "id": "rmi_3",
                       "reference": "TRF-2026-00001",
                       "beneficiary": "Malayan Insurance Co., Inc.",
+                      "bank": "Metrobank",
+                      "accountMasked": "···6612",
                       "amount": 125000,
                       "method": "PESONet",
-                      "status": "Pending",
+                      "status": "Approved",
+                      "approvedBy": {
+                        "name": "Fe Approver",
+                        "at": "2026-09-27T02:00:00.000Z"
+                      },
+                      "journal": {
+                        "id": "jv_1",
+                        "number": "JV-2026-00031"
+                      },
+                      "reversal": {
+                        "reversed": false,
+                        "number": null,
+                        "date": null,
+                        "label": "Not reversed"
+                      },
+                      "readOnly": true,
+                      "chip": {
+                        "code": "legacy",
+                        "label": "Recorded outside a payment voucher"
+                      },
+                      "creationDisabled": true,
                       "date": "2026-09-26"
                     }
-                  ]
+                  ],
+                  "total": 1,
+                  "totals": {
+                    "count": 1,
+                    "amount": 125000
+                  }
                 }
               }
             }
@@ -138343,15 +141499,17 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Accounts > Remittance > Electronic Transfer",
+        "x-screen": "Accounts > Remittance > Electronic Transfer; Accounts > Remittance > Insurer payments > Legacy transfers",
         "x-permissions": [
           "read:remittance",
-          "write:remittance"
+          "write:remittance",
+          "read:disbursements",
+          "write:disbursements"
         ]
       },
       "post": {
         "operationId": "postRemittanceTransfers",
-        "summary": "New electronic transfer (limit check, then approval)",
+        "summary": "New electronic transfer (limit check, then approval); 409 TRANSFERS_OFF \"Electronic transfers are replaced by Insurer payments.\" while remittance.transfers_enabled is off",
         "tags": [
           "Remittance"
         ],
@@ -138449,10 +141607,172 @@
         }
       }
     },
+    "/remittance/transfers/{id}": {
+      "get": {
+        "operationId": "getRemittanceTransfersId",
+        "summary": "One electronic transfer (id or TRF no.), read-only: beneficiary, masked account, method, amount, status, the approval and its decisions, the journal posted at approval, its reversal, the activity",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Insurer payments > Legacy transfers > View\n\nAccess: read:remittance, write:remittance, read:disbursements, write:disbursements",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "reference": {
+                          "type": "string"
+                        },
+                        "readOnly": {
+                          "type": "boolean"
+                        },
+                        "chip": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "journal": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "number": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "reversal": {
+                          "type": "object",
+                          "properties": {
+                            "reversed": {
+                              "type": "boolean"
+                            },
+                            "label": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "approval": {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string"
+                            },
+                            "decisions": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "action": {
+                                    "type": "string"
+                                  },
+                                  "by": {
+                                    "type": "string"
+                                  },
+                                  "at": {
+                                    "type": "string"
+                                  },
+                                  "remarks": {}
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "activity": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "rmi_3",
+                    "reference": "TRF-2026-00001",
+                    "readOnly": true,
+                    "chip": {
+                      "code": "legacy",
+                      "label": "Recorded outside a payment voucher"
+                    },
+                    "journal": {
+                      "id": "jv_1",
+                      "number": "JV-2026-00031"
+                    },
+                    "reversal": {
+                      "reversed": false,
+                      "label": "Not reversed"
+                    },
+                    "approval": {
+                      "status": "Approved",
+                      "decisions": [
+                        {
+                          "action": "Approved",
+                          "by": "Fe Approver",
+                          "at": "2026-09-27T02:00:00.000Z",
+                          "remarks": null
+                        }
+                      ]
+                    },
+                    "activity": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Insurer payments > Legacy transfers > View",
+        "x-permissions": [
+          "read:remittance",
+          "write:remittance",
+          "read:disbursements",
+          "write:disbursements"
+        ]
+      }
+    },
     "/remittance/transfers/{id}/execute": {
       "post": {
         "operationId": "postRemittanceTransfersIdExecute",
-        "summary": "Record the bank result of an approved transfer (Completed / Failed)",
+        "summary": "Record the bank result of an approved transfer (Completed / Failed); 409 TRANSFERS_OFF while remittance.transfers_enabled is off",
         "tags": [
           "Remittance"
         ],
