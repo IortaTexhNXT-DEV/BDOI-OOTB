@@ -22,7 +22,6 @@ import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import { Chips } from "primereact/chips";
 import { ProgressBar } from "primereact/progressbar";
-import { Chart } from "primereact/chart";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import FieldError from "../../components/FieldError";
 import productConfiguratorService from "../../services/productConfiguratorService";
@@ -36,6 +35,8 @@ import { calendarDateFormat, toIsoDate, formatDate } from "../../utility/dateFor
 import { requiredErrors, hasErrors, errorSummary } from "../../utility/requiredFields";
 import { statusLabel } from "../../utils/statusSeverity";
 import { useChartTheme } from "../../theme/chartTheme";
+import StatCards from "../../components/StatCards";
+import { ChartCard, ShareChart, ThemedChart, formatValue } from "../../components/Dashboard";
 import {
   ConfiguratorPage, FilterBar, HistoryDialog, RowActions, StatusTag, TemplateCell, ViewDialog, IconAction,
   pagingFor, templateText, productText, useComponentRows, useFilterOptions, toggleComponent,
@@ -1118,31 +1119,30 @@ export const ProductAnalytics = () => {
   const top = analytics?.topProducts || [];
   const trend = analytics?.performanceTrend || [];
   const hasData = top.length > 0;
-  const performanceChart = { labels: trend.map((tr) => tr.month), datasets: [{ label: t("productAnalytics.premiumPhpMillions"), data: trend.map((tr) => tr.premium / 1000000), backgroundColor: chart.alpha(chart.primary, 0.15), borderColor: chart.primary, tension: 0 }] };
-  const categories = Object.entries(analytics?.categoryBreakdown || {});
-  const categoryChart = { labels: categories.map(([k]) => k), datasets: [{ data: categories.map(([, c]) => c.premium / 1000000), backgroundColor: chart.series(categories.length), borderColor: chart.surface }] };
+  const performanceChart = { labels: trend.map((tr) => tr.month), datasets: [{ label: t("productAnalytics.premium"), data: trend.map((tr) => tr.premium), backgroundColor: chart.primary }] };
+  const categories = Object.entries(analytics?.categoryBreakdown || {}).map(([label, c]) => ({ label, amount: Number(c.premium) || 0 }));
 
   return (
     <ConfiguratorPage screen="analytics" usage={t("productConfigurator.usage.analytics")}>
       <Toast ref={toast} />
-      <div className="pc-kpis">
-        <div className="pc-kpi"><span>{t("productAnalytics.totalPremium")}</span><strong>{formatCurrency(analytics?.totals?.premium ?? 0)}</strong></div>
-        <div className="pc-kpi"><span>{t("productAnalytics.policies")}</span><strong>{(analytics?.totals?.policies ?? 0).toLocaleString(numberLocale())}</strong></div>
-        <div className="pc-kpi"><span>{t("productAnalytics.products")}</span><strong>{top.length}</strong></div>
-      </div>
+      <StatCards className="pc-stat-cards" items={[
+        { key: "premium", label: t("productAnalytics.totalPremium"), value: analytics ? formatValue("currency", analytics.totals?.premium ?? 0, { compact: true }) : null },
+        { key: "policies", label: t("productAnalytics.policies"), value: analytics ? analytics.totals?.policies ?? 0 : null },
+        { key: "products", label: t("productAnalytics.products"), value: analytics ? top.length : null },
+      ]} />
       {!loading && !hasData ? (
         <div className="pc-empty">{t("productAnalytics.noData")}</div>
       ) : (
         <>
-          <div className="grid">
-            <div className="col-12 lg:col-8">
-              <h3 className="mt-0">{t("productAnalytics.premiumTrend")}</h3>
-              <Chart type="line" data={performanceChart} options={chart.options({ scales: { x: {}, y: {} } })} aria-label={t("productAnalytics.premiumTrend")} />
-            </div>
-            <div className="col-12 lg:col-4">
-              <h3 className="mt-0">{t("productAnalytics.categoryDistribution")}</h3>
-              <Chart type="doughnut" data={categoryChart} options={chart.options({})} aria-label={t("productAnalytics.categoryDistribution")} />
-            </div>
+          <div className="bv-dash-grid pc-charts">
+            <ChartCard title={t("productAnalytics.premiumTrend")} exportName="product-premium-trend"
+              table={{ columns: [{ field: "month", header: t("productAnalytics.month") }, { field: "premium", header: t("productAnalytics.premium"), format: "currency" }], rows: trend }}>
+              <ThemedChart type="bar" data={performanceChart} format="currency" directLabels={false} height={260} ariaLabel={t("productAnalytics.premiumTrend")} />
+            </ChartCard>
+            <ChartCard title={t("productAnalytics.categoryDistribution")} exportName="product-premium-by-category"
+              table={{ columns: [{ field: "label", header: t("productAnalytics.category") }, { field: "amount", header: t("productAnalytics.premium"), format: "currency" }], rows: categories }}>
+              <ShareChart items={categories} dimension="lob" label={t("productAnalytics.premium")} />
+            </ChartCard>
           </div>
           <h3>{t("productAnalytics.topProductsPerformance")}</h3>
           <DataTable value={top} loading={loading} dataKey="productId" {...pagingFor(top.length)} size="small">

@@ -1,118 +1,23 @@
+// Sales Dashboard: the layout comes from the dashboard kit (components/Dashboard/index.scss).
 .sales-dashboard {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  padding: 1.5rem;
 
-  &__header {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 12px;
-
-    h1 {
-      margin: 0;
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--color-heading);
-    }
-
-    p {
-      margin: 4px 0 0;
-      color: var(--color-text-muted);
-      font-size: 14px;
-    }
+  @media (max-width: 768px) {
+    padding: 0.75rem;
   }
 
-  &__filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-
-    .p-dropdown,
-    .p-calendar {
-      min-width: 12rem;
-    }
+  &__kpis {
+    margin: 0;
   }
 
-  &__tiles {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
-  }
-
-  &__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
-    gap: 16px;
-  }
-
-  .p-card .p-card-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--color-heading);
-  }
-
-  .sales-tile {
-    .p-card-body {
-      padding: 14px 16px;
-    }
-
-    .p-card-content {
-      padding: 0;
-    }
-
-    &--link {
-      cursor: pointer;
-
-      &:hover {
-        border-color: var(--brand-blue);
-      }
-    }
-
-    &__label {
-      font-size: 13px;
-      color: var(--color-text-muted);
-    }
-
-    &__value {
-      margin-top: 6px;
-      min-height: 2rem;
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--brand-navy);
-      font-variant-numeric: tabular-nums;
-    }
-
-    &__note {
-      margin-top: 4px;
-      font-size: 12px;
-      color: var(--color-text-muted);
-    }
-  }
-
-  .sales-chart {
-    position: relative;
-    height: 18rem;
-  }
-
-  .sales-empty {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 18rem;
-    color: var(--color-text-muted);
+  &__scope {
+    margin: -8px 0 0;
+    font-size: 13px;
+    color: var(--bv-viz-ink-muted);
   }
 
   .text-right {
     text-align: right;
     font-variant-numeric: tabular-nums;
-  }
-}
-
-@media (max-width: 640px) {
-  .sales-dashboard__grid {
-    grid-template-columns: 1fr;
   }
 }

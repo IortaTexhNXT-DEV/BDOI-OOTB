@@ -14,9 +14,10 @@ const get = async (path) => {
 
 /** Dashboard KPIs; every amount is a raw number, formatted by the screen. */
 const dashboardService = {
-  getExecutive: (period = "month") => get(`/dashboard/executive?period=${encodeURIComponent(period)}`),
+  /** Executive Dashboard of a period (month / quarter / year to date) compared with the previous period or last year. */
+  getExecutive: (period = "month", compare = "previous") => get(`/dashboard/executive?period=${encodeURIComponent(period)}&compare=${encodeURIComponent(compare)}`),
   getSales: (scope = "mine") => get(`/dashboard/sales?scope=${encodeURIComponent(scope)}`),
-  /** Sales Dashboard: { period } or { from, to }, optional salesPerson (user id). */
+  /** Sales Dashboard: { period } or { from, to }, compare (previous / lastYear), optional salesPerson (user id). */
   getSalesOverview: (query = {}) => {
     const qs = new URLSearchParams(Object.entries(query).filter(([, v]) => v !== undefined && v !== null && v !== "")).toString();
     return get(`/dashboard/sales/overview${qs ? `?${qs}` : ""}`);

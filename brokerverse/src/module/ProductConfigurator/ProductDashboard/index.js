@@ -5,7 +5,6 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { TabView, TabPanel } from "primereact/tabview";
-import { Chart } from "primereact/chart";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
@@ -14,6 +13,8 @@ import { numberLocale } from "../../../utility/currencyConverter";
 import { formatPercent } from "../../../utility/numberFormat";
 import { ConfiguratorPage, FilterBar, RowActions, StatusTag, pagingFor, productText } from "../shared/ConfiguratorPage";
 import { useChartTheme } from "../../../theme/chartTheme";
+import StatCards from "../../../components/StatCards";
+import { ChartCard, ShareChart, ThemedChart, formatValue } from "../../../components/Dashboard";
 import "./style.scss";
 
 /** Product Configurator > Dashboard: templates, what is configured and in force, and the production of the products. */
@@ -68,22 +69,11 @@ const ProductDashboard = () => {
   const avgLossRatio = premium ? top.reduce((sum, p) => sum + (p.lossRatio || 0) * (p.totalPremium || 0), 0) / premium : 0;
   const components = summary?.components || {};
   const categories = Object.entries(analytics?.categoryBreakdown || {});
-  const performanceChart = {
-    labels: trend.map((tr) => tr.month),
-    datasets: [
-      { label: t("productConfiguratorDashboard.premiumMillions"), data: trend.map((tr) => tr.premium / 1000000), borderColor: chart.primary, backgroundColor: chart.primary, fill: false, yAxisID: "y1" },
-      { label: t("productConfiguratorDashboard.lossRatioPercent"), data: trend.map((tr) => tr.lossRatio), borderColor: chart.accent, backgroundColor: chart.accent, fill: false, yAxisID: "y2" },
-    ],
-  };
-  const chartOptions = chart.options({
-    responsive: true,
-    interaction: { mode: "index", intersect: false },
-    plugins: { legend: { position: "top" } },
-    scales: {
-      y1: { type: "linear", position: "left", title: { display: true, text: t("productConfiguratorDashboard.premiumPhpMillions") } },
-      y2: { type: "linear", position: "right", title: { display: true, text: t("productConfiguratorDashboard.lossRatioPercent") }, grid: { drawOnChartArea: false } },
-    },
-  });
+  // premium and loss ratio by month: two charts, never two scales on one plot
+  const premiumChart = { labels: trend.map((tr) => tr.month), datasets: [{ label: t("productConfiguratorDashboard.premium"), data: trend.map((tr) => tr.premium), backgroundColor: chart.primary }] };
+  const lossChart = { labels: trend.map((tr) => tr.month), datasets: [{ label: t("productConfiguratorDashboard.lossRatio"), data: trend.map((tr) => tr.lossRatio), borderColor: chart.primary, backgroundColor: chart.primary, pointBackgroundColor: chart.primary }] };
+  const trendTable = { columns: [{ field: "month", header: t("productConfiguratorDashboard.month") }, { field: "premium", header: t("productConfiguratorDashboard.premium"), format: "currency" }, { field: "lossRatio", header: t("productConfiguratorDashboard.lossRatio"), format: "percent" }], rows: trend };
+  const categoryItems = categories.map(([k, c]) => ({ label: k, amount: Number(c.percentage) || 0 }));
   const links = [
     ["templates", "pi pi-list", "/product-configurator/templates"], ["coverages", "pi pi-shield", "/product-configurator/coverages"], ["rating", "pi pi-calculator", "/product-configurator/rating"],
     ["underwriting", "pi pi-check-circle", "/product-configurator/underwriting"], ["documents", "pi pi-file", "/product-configurator/documents"],
@@ -93,12 +83,12 @@ const ProductDashboard = () => {
   return (
     <ConfiguratorPage screen="dashboard" actions={<Button label={t("productConfiguratorDashboard.createNewProduct")} icon="pi pi-plus" onClick={() => navigate("/product-configurator/create")} />}>
       <Toast ref={toast} />
-      <div className="pc-kpis">
-        <div className="pc-kpi"><span>{t("productConfiguratorDashboard.activeProducts")}</span><strong>{summary?.active ?? 0}</strong></div>
-        <div className="pc-kpi"><span>{t("productConfiguratorDashboard.rulesInForce")}</span><strong>{components["underwriting-rules"] ?? 0}</strong></div>
-        <div className="pc-kpi"><span>{t("productConfiguratorDashboard.totalPremium")}</span><strong>{formatCurrency(analytics?.totals?.premium ?? 0)}</strong></div>
-        <div className="pc-kpi"><span>{t("productConfiguratorDashboard.avgLossRatio")}</span><strong>{formatPercent(avgLossRatio)}</strong></div>
-      </div>
+      <StatCards className="pc-stat-cards" items={[
+        { key: "active", label: t("productConfiguratorDashboard.activeProducts"), value: summary ? summary.active ?? 0 : null, onClick: () => navigate("/product-configurator/templates") },
+        { key: "rules", label: t("productConfiguratorDashboard.rulesInForce"), value: summary ? components["underwriting-rules"] ?? 0 : null, onClick: () => navigate("/product-configurator/underwriting") },
+        { key: "premium", label: t("productConfiguratorDashboard.totalPremium"), value: analytics ? formatValue("currency", analytics.totals?.premium ?? 0, { compact: true }) : null },
+        { key: "loss", label: t("productConfiguratorDashboard.avgLossRatio"), value: analytics ? formatPercent(avgLossRatio) : null, note: t("productConfiguratorDashboard.premiumWeighted") },
+      ]} />
       <TabView className="pc-tabs">
         <TabPanel header={t("productConfiguratorDashboard.productTemplates")} leftIcon="pi pi-list mr-2">
           <FilterBar value={filters} onChange={setFilters} show={["lob", "status"]} options={{ lobs }} />
@@ -127,13 +117,17 @@ const ProductDashboard = () => {
             <div className="pc-empty">{t("productAnalytics.noData")}</div>
           ) : (
             <>
-              <div className="grid">
-                <div className="col-12 lg:col-8"><h3 className="mt-0">{t("productConfiguratorDashboard.premiumLossRatioTrend")}</h3><Chart type="line" data={performanceChart} options={chartOptions} /></div>
-                <div className="col-12 lg:col-4">
-                  <h3 className="mt-0">{t("productConfiguratorDashboard.categoryDistribution")}</h3>
-                  <Chart type="doughnut" data={{ labels: categories.map(([k]) => k), datasets: [{ data: categories.map(([, c]) => c.percentage), backgroundColor: chart.series(categories.length), borderColor: chart.surface }] }}
-                    options={chart.options({})} />
-                </div>
+              <div className="bv-dash-grid pc-charts">
+                <ChartCard title={t("productConfiguratorDashboard.premiumByMonth")} table={trendTable} exportName="product-premium-by-month">
+                  <ThemedChart type="bar" data={premiumChart} format="currency" directLabels={false} height={240} />
+                </ChartCard>
+                <ChartCard title={t("productConfiguratorDashboard.lossRatioByMonth")} table={trendTable} exportName="product-loss-ratio-by-month">
+                  <ThemedChart type="line" data={lossChart} format="percent" height={240} />
+                </ChartCard>
+                <ChartCard className="bv-dash-grid__wide" title={t("productConfiguratorDashboard.categoryDistribution")}
+                  table={{ columns: [{ field: "label", header: t("productConfiguratorDashboard.lineOfBusiness") }, { field: "amount", header: t("productConfiguratorDashboard.share"), format: "percent" }], rows: categoryItems }} exportName="product-categories">
+                  <ShareChart items={categoryItems} dimension="lob" label={t("productConfiguratorDashboard.share")} format="percent" />
+                </ChartCard>
               </div>
               <h3>{t("productConfiguratorDashboard.topPerformingProducts")}</h3>
               <DataTable value={top} dataKey="productId" {...pagingFor(top.length)} size="small">

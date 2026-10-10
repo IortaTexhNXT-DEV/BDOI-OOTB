@@ -1,7 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Chart } from "primereact/chart";
+import React, { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CommissionService from "../../../services/commissionService";
-import { formatAmount } from "../utils/formatAmount";
 import {
   getCommissionViewMode,
   setCommissionViewMode,
@@ -11,118 +10,51 @@ import { currencySymbol } from "../../../utility/currencyConverter";
 import { formatPercent } from "../../../utility/numberFormat";
 import logger from "../../../utility/logger";
 import { DetailPageSkeleton } from "../../../components/Skeletons";
+import StatCards from "../../../components/StatCards";
+import { ChartCard, DashboardToolbar, ShareChart, ThemedChart, formatValue } from "../../../components/Dashboard";
 import { useChartTheme } from "../../../theme/chartTheme";
 
+/** Lifecycle of a commission line, in the order it moves (the payable funnel follows this order). */
+const STAGES = ["Accrued", "Eligible", "Approved", "Paid"];
+const stageRank = (s) => { const i = STAGES.indexOf(s); return i < 0 ? STAGES.length : i; };
+const money = (v) => formatValue("currency", v, { compact: true });
+
+const shareTable = (items, header) => ({
+  columns: [{ field: "label", header }, { field: "amount", header: "Amount", format: "currency" }, { field: "pct", header: "Share", format: "percent" }],
+  rows: [...items].sort((a, b) => b.amount - a.amount),
+});
+
+/**
+ * Commission Dashboard: brokerage income, commission sharing (comsub) payable to referrers and the margin left, by
+ * referrer, product and insurer, by month, and the payable lines through their lifecycle. The whole book to date.
+ */
 const CommissionDashboard = () => {
   const chart = useChartTheme();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(null);
+  const [asOf, setAsOf] = useState(null);
   const [brokerageView, setBrokerageView] = useState("insurer");
   const [viewMode, setViewMode] = useState(() => getCommissionViewMode());
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const handleViewModeChange = (mode) => {
-    setViewMode(setCommissionViewMode(mode));
-  };
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const res = await CommissionService.getDashboard();
       setData(res?.data || res);
+      setAsOf(new Date());
     } catch (err) {
       logger.error("Failed to load commission dashboard", err);
       setData(null);
     } finally {
       setLoading(false);
     }
+  }, []);
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const handleViewModeChange = (mode) => {
+    setViewMode(setCommissionViewMode(mode));
   };
-
-  const maxReferrer = useMemo(() => {
-    if (!data?.comsubByReferrer?.length) return 1;
-    return Math.max(...data.comsubByReferrer.map((r) => r.amount), 1);
-  }, [data]);
-
-  const maxFunnel = useMemo(() => {
-    if (!data?.payableFunnel?.length) return 1;
-    return Math.max(...data.payableFunnel.map((r) => r.amount), 1);
-  }, [data]);
-
-  const trendChart = useMemo(() => {
-    if (!data?.monthlyTrend) return null;
-    const [income, comsub, margin] = chart.series(3);
-    return {
-      labels: data.monthlyTrend.map((m) => m.month),
-      datasets: [
-        {
-          label: "Brokerage income",
-          data: data.monthlyTrend.map((m) => m.brokerageIncome),
-          borderColor: income,
-          backgroundColor: income,
-          tension: 0,
-          fill: false,
-        },
-        {
-          label: "Comsub gross",
-          data: data.monthlyTrend.map((m) => m.comsubGross),
-          borderColor: comsub,
-          backgroundColor: comsub,
-          tension: 0,
-          fill: false,
-        },
-        {
-          label: "Net margin",
-          data: data.monthlyTrend.map((m) => m.netMargin),
-          borderColor: margin,
-          backgroundColor: margin,
-          tension: 0,
-          fill: false,
-        },
-      ],
-    };
-  }, [data, chart]);
-
-  const trendOptions = chart.options({
-    responsive: true,
-    maintainAspectRatio: false,
-    layout: {
-      padding: { top: 4, right: 8, bottom: 0, left: 0 },
-    },
-    plugins: {
-      legend: {
-        position: "bottom",
-        labels: {
-          usePointStyle: true,
-          boxWidth: 8,
-          padding: 12,
-        },
-      },
-    },
-    scales: {
-      y: {
-        ticks: {
-          callback: (v) => currencySymbol() + Math.round(v / 1000) + "k",
-        },
-      },
-      x: {
-        grid: { display: false },
-      },
-    },
-  });
-
-  const makeDonut = (items) => ({
-    labels: items.map((i) => i.label),
-    datasets: [
-      {
-        data: items.map((i) => i.amount),
-        backgroundColor: chart.series(items.length),
-        borderWidth: 0,
-      },
-    ],
-  });
 
   if (loading && !data) {
     return (
@@ -141,250 +73,88 @@ const CommissionDashboard = () => {
   }
 
   const { kpis } = data;
-  const brokerageItems =
-    brokerageView === "insurer"
-      ? data.brokerageByInsurer
-      : data.brokerageByProduct;
+  const brokerageItems = brokerageView === "insurer" ? data.brokerageByInsurer : data.brokerageByProduct;
+  const toAccounts = () => navigate("/commission/referrer-accounts");
+
+  const figures = [
+    { key: "income", label: "Brokerage income", value: money(kpis.brokerageIncome) },
+    { key: "comsub", label: "Comsub (gross)", value: money(kpis.comsubGross), onClick: toAccounts },
+    { key: "margin", label: "Net margin", value: money(kpis.netMargin), note: `Margin ${formatPercent(kpis.marginPct)}` },
+    { key: "payable", label: "Outstanding payable", value: money(kpis.outstandingPayable), note: "Eligible + approved, net of WHT", onClick: toAccounts },
+    { key: "wht", label: "WHT withheld (paid)", value: money(kpis.whtWithheldPaid) },
+    { key: "clawback", label: "Clawed back", value: money(data.clawback.amount), note: `${data.clawback.lines} line(s), excluded above` },
+  ];
+
+  const referrers = [...data.comsubByReferrer].sort((a, b) => b.amount - a.amount);
+  const referrerData = { labels: referrers.map((r) => r.name), datasets: [{ label: "Comsub (gross)", data: referrers.map((r) => r.amount), backgroundColor: chart.primary }] };
+
+  const [income, comsub, margin] = chart.series(3);
+  const line = (label, field, color) => ({ label, data: data.monthlyTrend.map((m) => m[field]), borderColor: color, backgroundColor: color, pointBackgroundColor: color });
+  const trendData = {
+    labels: data.monthlyTrend.map((m) => m.month),
+    datasets: [line("Brokerage income", "brokerageIncome", income), line("Comsub gross", "comsubGross", comsub), line("Net margin", "netMargin", margin)],
+  };
+
+  // the payable funnel: one ordinal ramp in lifecycle order, later stages darker
+  const funnel = [...data.payableFunnel].sort((a, b) => stageRank(a.status) - stageRank(b.status));
+  const funnelData = { labels: funnel.map((f) => f.status), datasets: [{ label: `Net payable (${currencySymbol()})`, data: funnel.map((f) => f.amount), backgroundColor: chart.sequential(funnel.length) }] };
+  const lines = [...data.linesByStatus].sort((a, b) => stageRank(a.status) - stageRank(b.status));
 
   return (
-    <div className="commission-dashboard-page">
-      <div className="page-header">
-        <div className="page-header-row">
-          <div className="page-header-text">
-            <h1>Commission Dashboard</h1>
-            {viewMode === "management" && <p><span className="readonly-note">read-only (management)</span></p>}
-          </div>
+    <div className="commission-dashboard-page bv-dash-page">
+      <DashboardToolbar title="Commission Dashboard" asOf={asOf} onRefresh={loadData} loading={loading}
+        actions={(
           <div className="view-mode-toggle" role="group" aria-label="View mode">
-            <button
-              type="button"
-              className={viewMode === "accounting" ? "active" : ""}
-              onClick={() => handleViewModeChange("accounting")}
-            >
+            <button type="button" className={viewMode === "accounting" ? "active" : ""} aria-pressed={viewMode === "accounting"} onClick={() => handleViewModeChange("accounting")}>
               Accounting
             </button>
-            <button
-              type="button"
-              className={viewMode === "management" ? "active" : ""}
-              onClick={() => handleViewModeChange("management")}
-            >
+            <button type="button" className={viewMode === "management" ? "active" : ""} aria-pressed={viewMode === "management"} onClick={() => handleViewModeChange("management")}>
               Management
             </button>
           </div>
-        </div>
-      </div>
+        )}>
+        <span className="commission-dashboard-page__scope">
+          Whole book to date
+          {viewMode === "management" ? <span className="readonly-note"> · read-only (management)</span> : null}
+        </span>
+      </DashboardToolbar>
 
-      <div className="kpi-row">
-        <div className="kpi-card">
-          <span className="label">Brokerage income</span>
-          <span className="value">{formatAmount(kpis.brokerageIncome)}</span>
-        </div>
-        <div className="kpi-card">
-          <span className="label">Comsub (gross)</span>
-          <span className="value">{formatAmount(kpis.comsubGross)}</span>
-        </div>
-        <div className="kpi-card">
-          <span className="label">Net margin</span>
-          <span className="value">{formatAmount(kpis.netMargin)}</span>
-        </div>
-        <div className="kpi-card">
-          <span className="label">Margin %</span>
-          <span className="value">{formatPercent(kpis.marginPct)}</span>
-        </div>
-        <div className="kpi-card">
-          <span className="label">Outstanding payable</span>
-          <span className="value">
-            {formatAmount(kpis.outstandingPayable)}
-          </span>
-        </div>
-        <div className="kpi-card">
-          <span className="label">WHT withheld (paid)</span>
-          <span className="value">
-            {formatAmount(kpis.whtWithheldPaid)}
-          </span>
-        </div>
-      </div>
+      <StatCards items={figures} className="bv-stat-cards--wide commission-kpis" />
 
-      <div className="two-col">
-        <div className="panel">
-          <h3>ComSub (gross) by referrer</h3>
-          <div className="hbar-list">
-            {data.comsubByReferrer.map((r) => (
-              <div className="hbar-row" key={r.name}>
-                <span className="hbar-label" title={r.name}>
-                  {r.name}
-                </span>
-                <div className="hbar-track">
-                  <div
-                    className="hbar-fill"
-                    style={{ width: `${(r.amount / maxReferrer) * 100}%` }}
-                  />
-                </div>
-                <span className="hbar-value">{formatAmount(r.amount)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+      <div className="bv-dash-grid">
+        <ChartCard className="bv-dash-grid__wide" title="Monthly trend: income, payable and margin"
+          table={{ columns: [{ field: "month", header: "Month" }, { field: "brokerageIncome", header: "Brokerage income", format: "currency" }, { field: "comsubGross", header: "Comsub gross", format: "currency" }, { field: "netMargin", header: "Net margin", format: "currency" }], rows: data.monthlyTrend }}
+          exportName="commission-monthly-trend">
+          <ThemedChart type="line" data={trendData} format="currency" height={260} />
+        </ChartCard>
 
-        <div className="panel">
-          <h3>Lines by status</h3>
-          <div className="status-list">
-            {data.linesByStatus.map((s) => (
-              <div className="status-row" key={s.status}>
-                {s.status === "Accrued" || s.status === "Paid" ? (
-                  <span
-                    className={`status-pill ${
-                      s.status === "Paid" ? "paid" : "accrued"
-                    }`}
-                  >
-                    {s.status}
-                  </span>
-                ) : (
-                  <span className="status-label">{s.status}</span>
-                )}
-                <div className="status-count-wrap">
-                  <span className="mini-bar" />
-                  <span className="status-count">{s.count}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-          <p className="clawback-note">
-            Reversed / clawback:{" "}
-            <strong className="claw-lines">
-              {data.clawback.lines} line(s)
-            </strong>{" "}
-            · {formatAmount(data.clawback.amount)} comsub clawed back (excluded
-            from the figures above).
-          </p>
-        </div>
-      </div>
+        <ChartCard title="ComSub (gross) by referrer" subtitle="Sorted by amount"
+          table={{ columns: [{ field: "name", header: "Referrer" }, { field: "amount", header: "Comsub (gross)", format: "currency" }], rows: referrers }} exportName="comsub-by-referrer">
+          <ThemedChart type="bar" data={referrerData} format="currency" options={{ indexAxis: "y" }} height={Math.max(160, referrers.length * 30 + 40)} />
+        </ChartCard>
 
-      <div className="panel trend-panel">
-        <h3>Monthly trend: income, payable and margin</h3>
-        <div className="chart-wrap">
-          {trendChart && (
-            <Chart
-              type="line"
-              data={trendChart}
-              options={trendOptions}
-              style={{ width: "100%", height: "100%" }}
-            />
-          )}
-        </div>
-      </div>
+        <ChartCard title="Payable funnel: net payable by lifecycle stage" subtitle="Outstanding (eligible + approved) is what accounting still owes referrers, net of WHT"
+          table={{ columns: [{ field: "status", header: "Stage" }, { field: "amount", header: "Net payable", format: "currency" }], rows: funnel }} exportName="payable-funnel">
+          <ThemedChart type="bar" data={funnelData} format="currency" options={{ indexAxis: "y" }} height={Math.max(160, funnel.length * 34 + 40)} />
+          <table className="bv-viz-table commission-lines">
+            <thead><tr><th scope="col">Stage</th><th scope="col" className="bv-num">Lines</th></tr></thead>
+            <tbody>{lines.map((s) => <tr key={s.status}><td>{s.status}</td><td className="bv-num">{s.count}</td></tr>)}</tbody>
+          </table>
+        </ChartCard>
 
-      <div className="two-col">
-        <div className="panel donut-panel">
-          <h3>ComSub (gross) by product</h3>
-          <div className="donut-body">
-            <div className="donut-chart-wrap">
-              <Chart
-                type="doughnut"
-                data={makeDonut(data.comsubByProduct)}
-                options={{
-                  cutout: "68%",
-                  plugins: { legend: { display: false } },
-                }}
-              />
-              <div className="donut-center">Comsub</div>
+        <ChartCard title="ComSub (gross) by product" table={shareTable(data.comsubByProduct, "Product")} exportName="comsub-by-product">
+          <ShareChart items={data.comsubByProduct} dimension="lob" label="Comsub (gross)" />
+        </ChartCard>
+
+        <ChartCard title={`Brokerage income by ${brokerageView}`} table={shareTable(brokerageItems, brokerageView === "insurer" ? "Insurer" : "Product")} exportName={`brokerage-by-${brokerageView}`}
+          actions={(
+            <div className="bv-viz-switch" role="group" aria-label="Brokerage income by">
+              <button type="button" className={brokerageView === "insurer" ? "active" : ""} aria-pressed={brokerageView === "insurer"} onClick={() => setBrokerageView("insurer")}>Insurer</button>
+              <button type="button" className={brokerageView === "product" ? "active" : ""} aria-pressed={brokerageView === "product"} onClick={() => setBrokerageView("product")}>Product</button>
             </div>
-            <ul className="legend-list">
-              {data.comsubByProduct.map((item, idx) => (
-                <li key={item.label}>
-                  <span
-                    className="dot"
-                    style={{ background: chart.series(idx + 1)[idx] }}
-                  />
-                  <span className="name">{item.label}</span>
-                  <span className="amt">
-                    {formatAmount(item.amount)} ({formatPercent(item.pct)})
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        <div className="panel donut-panel">
-          <div className="panel-head-row">
-            <h3>Brokerage income by {brokerageView}</h3>
-            <div className="toggle">
-              <button
-                type="button"
-                className={brokerageView === "insurer" ? "active" : ""}
-                onClick={() => setBrokerageView("insurer")}
-              >
-                Insurer
-              </button>
-              <button
-                type="button"
-                className={brokerageView === "product" ? "active" : ""}
-                onClick={() => setBrokerageView("product")}
-              >
-                Product
-              </button>
-            </div>
-          </div>
-          <div className="donut-body">
-            <div className="donut-chart-wrap">
-              <Chart
-                type="doughnut"
-                data={makeDonut(brokerageItems)}
-                options={{
-                  cutout: "68%",
-                  plugins: { legend: { display: false } },
-                }}
-              />
-              <div className="donut-center">Brokerage</div>
-            </div>
-            <ul className="legend-list">
-              {brokerageItems.map((item, idx) => (
-                <li key={item.label}>
-                  <span
-                    className="dot"
-                    style={{ background: chart.series(idx + 1)[idx] }}
-                  />
-                  <span className="name">{item.label}</span>
-                  <span className="amt">
-                    {formatAmount(item.amount)} ({formatPercent(item.pct)})
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div className="panel funnel-panel">
-        <h3>Payable funnel: net payable ({currencySymbol()}) by lifecycle stage</h3>
-        <div className="hbar-list funnel">
-          {data.payableFunnel.map((f) => (
-            <div className="hbar-row" key={f.status}>
-              {f.status === "Accrued" || f.status === "Paid" ? (
-                <span
-                  className={`status-pill funnel-label ${
-                    f.status === "Paid" ? "paid" : "accrued"
-                  }`}
-                >
-                  {f.status}
-                </span>
-              ) : (
-                <span className="hbar-label bold">{f.status}</span>
-              )}
-              <div className="hbar-track">
-                <div
-                  className="hbar-fill"
-                  style={{ width: `${(f.amount / maxFunnel) * 100}%` }}
-                />
-              </div>
-              <span className="hbar-value">{formatAmount(f.amount)}</span>
-            </div>
-          ))}
-        </div>
-        <p className="funnel-note">
-          Outstanding (Eligible + Approved) is what accounting still owes
-          referrers, net of WHT.
-        </p>
+          )}>
+          <ShareChart items={brokerageItems} dimension={brokerageView === "insurer" ? "insurer" : "lob"} label="Brokerage income" />
+        </ChartCard>
       </div>
     </div>
   );

@@ -1,401 +1,59 @@
 @import "../../../theme/bdoi/tokens";
 
+// Commission Dashboard: the layout comes from the dashboard kit (components/Dashboard/index.scss).
 .commission-dashboard-page {
   padding: 1.5rem 2rem 2.5rem;
-  background: $color-bg;
-  min-height: 100%;
+
+  @media (max-width: 768px) {
+    padding: 0.75rem;
+  }
 
   .loading-msg {
     color: $color-text-muted;
   }
 
-  .page-header {
-    margin-bottom: 1.25rem;
-
-    .page-header-row {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .page-header-text {
-      flex: 1;
-      min-width: 240px;
-    }
-
-    h1 {
-      margin: 0 0 0.35rem;
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: $color-heading;
-    }
-
-    p {
-      margin: 0;
-      color: $color-text-muted;
-      font-size: 0.9rem;
-      line-height: 1.5;
-    }
-
-    .readonly-note {
-      color: $color-warning;
-      font-weight: 600;
-    }
-
-    .view-mode-toggle {
-      display: flex;
-      flex-shrink: 0;
-      border: 1px solid $color-border;
-      border-radius: 9999px;
-      overflow: hidden;
-      background: $color-surface-muted;
-
-      button {
-        border: none;
-        background: transparent;
-        padding: 0.4rem 1rem;
-        font-size: 0.85rem;
-        font-weight: 500;
-        color: $color-text-muted;
-        cursor: pointer;
-        white-space: nowrap;
-
-        &.active {
-          background: $brand-blue;
-          color: var(--bv-primary-text, #ffffff);
-          font-weight: 600;
-        }
-      }
-    }
+  .commission-kpis {
+    margin: 0;
   }
 
-  .kpi-row {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-
-    @media (max-width: 1200px) {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
-    @media (max-width: 640px) {
-      grid-template-columns: 1fr 1fr;
-    }
+  &__scope {
+    font-size: 13px;
+    color: var(--bv-viz-ink-muted);
   }
 
-  .kpi-card {
-    background: #fff;
-    border: 1px solid $color-border;
-    border-radius: 10px;
-    padding: 0.85rem 1rem;
-    border-left: 4px solid $brand-blue;
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-
-    .label {
-      font-size: 0.78rem;
-      color: $color-text-muted;
-    }
-
-    .value {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: $color-heading;
-    }
-  }
-
-  .two-col {
-    display: grid;
-    grid-template-columns: 1.4fr 1fr;
-    gap: 1rem;
-    margin-bottom: 1rem;
-
-    @media (max-width: 960px) {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .panel {
-    background: #fff;
-    border: 1px solid $color-border;
-    border-radius: 12px;
-    padding: 1rem 1.15rem;
-
-    h3 {
-      margin: 0 0 0.85rem;
-      font-size: 0.72rem;
-      letter-spacing: 0.04em;
-      font-weight: 700;
-      color: $color-text-muted;
-    }
-  }
-
-  .panel-head-row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 0.75rem;
-    margin-bottom: 0.5rem;
-
-    h3 {
-      margin: 0;
-    }
-
-    .toggle {
-      display: flex;
-      border: 1px solid $color-border-strong;
-      border-radius: 9999px;
-      overflow: hidden;
-
-      button {
-        border: none;
-        background: transparent;
-        padding: 0.25rem 0.7rem;
-        font-size: 0.75rem;
-        color: $color-text-muted;
-        cursor: pointer;
-
-        &.active {
-          background: $brand-blue-050;
-          color: $brand-blue;
-          font-weight: 600;
-          box-shadow: inset 0 0 0 1px $brand-blue;
-        }
-      }
-    }
-  }
-
-  .hbar-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.55rem;
-
-    .hbar-row {
-      display: grid;
-      grid-template-columns: 140px 1fr 90px;
-      align-items: center;
-      gap: 0.65rem;
-
-      @media (max-width: 640px) {
-        grid-template-columns: 100px 1fr 70px;
-      }
-    }
-
-    .hbar-label {
-      font-size: 0.8rem;
-      color: $color-text;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-
-      &.bold {
-        font-weight: 700;
-        color: $color-heading;
-      }
-    }
-
-    .hbar-track {
-      height: 10px;
-      background: $color-surface-muted;
-      border-radius: 9999px;
-      overflow: hidden;
-    }
-
-    .hbar-fill {
-      height: 100%;
-      border-radius: 9999px;
-      background: $brand-blue;
-    }
-
-    .hbar-value {
-      text-align: right;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: $color-text;
-    }
-
-    &.funnel .hbar-row {
-      grid-template-columns: 100px 1fr 100px;
-    }
-  }
-
-  .status-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-
-    .status-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .status-label {
-      font-weight: 700;
-      color: $color-heading;
-      font-size: 0.9rem;
-    }
-
-    .status-count-wrap {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .mini-bar {
-      width: 18px;
-      height: 8px;
-      border-radius: 2px;
-      background: $brand-navy;
-    }
-
-    .status-count {
-      font-weight: 700;
-      min-width: 1.5rem;
-      text-align: right;
-      color: $color-heading;
-    }
-  }
-
-  .status-pill {
-    display: inline-block;
-    padding: 0.15rem 0.55rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
+  .readonly-note {
+    color: var(--bv-viz-warning-text);
     font-weight: 600;
-
-    &.accrued {
-      background: $color-surface-muted;
-      color: $color-text;
-    }
-
-    &.paid {
-      background: $color-success-050;
-      color: $color-success;
-    }
-
-    &.funnel-label {
-      text-align: center;
-    }
   }
 
-  .clawback-note {
-    margin: 1rem 0 0;
-    font-size: 0.78rem;
-    color: $color-text-muted;
-    line-height: 1.45;
+  .view-mode-toggle {
+    display: flex;
+    flex-shrink: 0;
+    border: 1px solid $color-border;
+    border-radius: 9999px;
+    overflow: hidden;
+    background: $color-surface;
 
-    .claw-lines {
-      color: $color-danger;
-    }
-  }
-
-  .trend-panel {
-    margin-bottom: 1rem;
-    padding-bottom: 0.75rem;
-
-    .chart-wrap {
-      height: 200px;
-      max-height: 200px;
-      overflow: hidden;
-      position: relative;
-
-      .p-chart {
-        display: block;
-        width: 100% !important;
-        height: 200px !important;
-      }
-
-      canvas {
-        width: 100% !important;
-        height: 200px !important;
-      }
-    }
-  }
-
-  .donut-panel {
-    .donut-body {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-
-      @media (max-width: 640px) {
-        flex-direction: column;
-      }
-    }
-
-    .donut-chart-wrap {
-      position: relative;
-      width: 160px;
-      height: 160px;
-      flex-shrink: 0;
-
-      .p-chart {
-        width: 160px !important;
-        height: 160px !important;
-      }
-
-      .donut-center {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: $color-text;
-        pointer-events: none;
-      }
-    }
-
-    .legend-list {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      flex: 1;
-      width: 100%;
-
-      li {
-        display: grid;
-        grid-template-columns: 12px 1fr auto;
-        gap: 0.5rem;
-        align-items: center;
-        padding: 0.35rem 0;
-        font-size: 0.82rem;
-        border-bottom: 1px solid $color-border;
-
-        &:last-child {
-          border-bottom: none;
-        }
-      }
-
-      .dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-      }
-
-      .name {
-        color: $color-text;
-      }
-
-      .amt {
-        color: $color-heading;
-        font-weight: 600;
-        white-space: nowrap;
-      }
-    }
-  }
-
-  .funnel-panel {
-    .funnel-note {
-      margin: 0.85rem 0 0;
-      font-size: 0.78rem;
+    button {
+      border: none;
+      background: transparent;
+      padding: 0.4rem 1rem;
+      font: inherit;
+      font-size: 0.85rem;
+      font-weight: 500;
       color: $color-text-muted;
+      cursor: pointer;
+      white-space: nowrap;
+
+      &.active {
+        background: $color-heading;
+        color: $color-surface;
+        font-weight: 600;
+      }
     }
+  }
+
+  .commission-lines {
+    margin-top: 12px;
   }
 }

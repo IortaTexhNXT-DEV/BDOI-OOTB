@@ -1,146 +1,106 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
-import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { Chart } from "primereact/chart";
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
 import { ProgressBar } from "primereact/progressbar";
-import { TabView, TabPanel } from "primereact/tabview";
-import { Dropdown } from "primereact/dropdown";
-import { Badge } from "primereact/badge";
 import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
 import dashboardService from "../../../services/dashboardService";
-import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import StatCards from "../../../components/StatCards";
+import { ChartCard, DashboardToolbar, LISTS, ThemedChart, drillDown, formatValue } from "../../../components/Dashboard";
+import { businessDate, formatDate as formatAppDate } from "../../../utility/dateFormat";
 import { useChartTheme } from "../../../theme/chartTheme";
+import { statusLabel } from "../../../utils/statusSeverity";
 import "./index.scss";
 
 const OPEN_TASK_LIMIT = 5;
+/** Stages of a submission in flight, in the order they are worked (the ordinal ramp follows this order). */
+const STAGES = ["PendingCustomer", "CustomerAccepted", "SubmittedToInsurer", "Approved"];
 
-const countBy = (rows, keyOf) =>
-  rows.reduce((acc, row) => {
-    const key = keyOf(row);
-    acc[key] = (acc[key] || 0) + 1;
-    return acc;
-  }, {});
-
-const isOverdue = (row) => row.requirementDue && new Date(row.requirementDue) < new Date();
-
+const isOverdue = (row, today) => row.requirementDue && String(row.requirementDue).slice(0, 10) < today;
 const monthKey = (date) => (date ? String(date).slice(0, 7) : "-");
+const stageRank = (s) => { const i = STAGES.indexOf(s); return i < 0 ? STAGES.length : i; };
 
-/** An alert count is coloured only while there is something to look at. */
-const alertSeverity = (count, severity) => (Number(count) > 0 ? severity : "secondary");
-
+/**
+ * Processing Workbench: the quotations waiting on the customer or the insurers right now (a snapshot, so no period),
+ * their age, cycle time and data-quality alerts, the workload per account executive by stage, what falls due by month
+ * and the volume by line of business.
+ */
 const UnderwritingDashboard = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const navigate = useNavigate();
   const chart = useChartTheme();
   const toast = useRef(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [selectedPeriod, setSelectedPeriod] = useState("week");
   const [dashboard, setDashboard] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
+  const load = useCallback(() => {
+    setLoading(true);
     dashboardService
       .getProcessing()
       .then(setDashboard)
-      .catch((error) =>
-        toast.current?.show({ severity: "error", summary: "Error", detail: error.message })
-      );
-  }, []);
+      .catch((error) => toast.current?.show({ severity: "error", summary: t("common.error", "Error"), detail: error.message }))
+      .finally(() => setLoading(false));
+  }, [t]);
+  useEffect(() => { load(); }, [load]);
 
-  const periodOptions = useMemo(
-    () => [
-      { label: t("underwritingDashboard.thisWeek"), value: "week" },
-      { label: t("underwritingDashboard.thisMonth"), value: "month" },
-      { label: t("underwritingDashboard.thisQuarter"), value: "quarter" },
-      { label: t("underwritingDashboard.thisYear"), value: "year" },
-    ],
-    [t]
-  );
-
-  // Workbench Metrics
-  const workbenchMetrics = dashboard?.workbenchMetrics || {
-    newSubmissions: 0,
-    olderSubmissions: 0,
-    avgCycleTime: "-",
-    openAlerts: { duplicateSubmission: 0, missingDates: 0, missingLOB: 0, totalAlerts: 0 },
-  };
-
-  // My Cases Data (quotations awaiting a decision)
+  const metrics = dashboard?.workbenchMetrics;
+  const alerts = metrics?.openAlerts || {};
   const myCases = useMemo(() => dashboard?.myCases || [], [dashboard]);
+  const today = businessDate();
+  const unassigned = myCases.filter((row) => !row.agent).length;
+  const openQuotations = () => drillDown(navigate, LISTS.quotations());
 
-  // Group Workload by Assignment: cases per agent, stacked by status
-  const workloadData = useMemo(() => {
-    const agents = Object.keys(countBy(myCases, (row) => row.agent || "-"));
-    const statuses = Object.keys(countBy(myCases, (row) => row.status));
-    const colors = chart.statuses(statuses);
+  const kpis = [
+    { key: "new", label: t("underwritingDashboard.newlyReceivedSubmissions"), value: metrics ? metrics.newSubmissions : null, note: t("underwritingDashboard.last7Days"), onClick: openQuotations },
+    { key: "older", label: t("underwritingDashboard.olderSubmissions"), value: metrics ? metrics.olderSubmissions : null, note: t("underwritingDashboard.olderThan7Days"),
+      status: metrics?.olderSubmissions > 0 ? { severity: "warning", label: t("underwritingDashboard.followUp") } : null, onClick: openQuotations },
+    { key: "cycle", label: t("underwritingDashboard.avgCycleTime"), value: metrics ? formatValue("hours", Math.round(Number(metrics.avgCycleHours) || 0)) : null, note: t("underwritingDashboard.cycleNote") },
+    { key: "unassigned", label: t("underwritingDashboard.unassigned"), value: dashboard ? unassigned : null, note: t("underwritingDashboard.ofInFlight", { count: myCases.length }) },
+    { key: "alerts", label: t("underwritingDashboard.openAlerts"), value: metrics ? alerts.totalAlerts : null,
+      note: metrics ? t("underwritingDashboard.alertsNote", { duplicates: alerts.duplicateSubmission || 0, dates: alerts.missingDates || 0, lob: alerts.missingLOB || 0 }) : null,
+      status: alerts.totalAlerts > 0 ? { severity: "warning", label: t("underwritingDashboard.needsAttention") } : null },
+  ];
+
+  // workload per account executive, stacked by stage in the order the stages are worked (one ordinal ramp)
+  const workload = useMemo(() => {
+    const agents = [...new Set(myCases.map((row) => row.agent || t("underwritingDashboard.unassigned")))];
+    const stages = [...new Set(myCases.map((row) => row.status))].sort((a, b) => stageRank(a) - stageRank(b));
+    const colors = chart.sequential(stages.length);
+    const count = (agent, stage) => myCases.filter((row) => (row.agent || t("underwritingDashboard.unassigned")) === agent && row.status === stage).length;
     return {
-      labels: agents,
-      datasets: statuses.map((status, index) => ({
-        label: status,
-        data: agents.map(
-          (agent) => myCases.filter((row) => (row.agent || "-") === agent && row.status === status).length
-        ),
-        backgroundColor: colors[index],
-      })),
+      data: {
+        labels: agents,
+        datasets: stages.map((stage, i) => ({ label: statusLabel(stage), data: agents.map((a) => count(a, stage)), backgroundColor: colors[i], borderColor: chart.surface, borderWidth: 2, borderRadius: 0, borderSkipped: false })),
+      },
+      rows: agents.map((agent) => Object.fromEntries([["agent", agent], ...stages.map((st) => [st, count(agent, st)])])),
+      stages,
     };
-  }, [myCases, chart]);
+  }, [myCases, chart, t]);
 
-  // In Progress vs Overdue Tasks by requirement due month
-  const tasksData = useMemo(() => {
-    const months = Object.keys(countBy(myCases, (row) => monthKey(row.requirementDue))).sort();
-    const countFor = (month, overdue) =>
-      myCases.filter((row) => monthKey(row.requirementDue) === month && isOverdue(row) === overdue).length;
+  // what falls due by month: overdue in the critical status colour, the rest in the neutral grey (emphasis)
+  const due = useMemo(() => {
+    const months = [...new Set(myCases.map((row) => monthKey(row.requirementDue)))].sort();
+    const countFor = (month, overdue) => myCases.filter((row) => monthKey(row.requirementDue) === month && !!isOverdue(row, today) === overdue).length;
+    const rows = months.map((month) => ({ month, onTime: countFor(month, false), overdue: countFor(month, true) }));
     return {
-      labels: months,
-      datasets: [
-        {
-          label: t("underwritingDashboard.inProgressTasks"),
-          data: months.map((month) => countFor(month, false)),
-          backgroundColor: chart.primary,
-          borderColor: chart.primary,
-          borderWidth: 1,
-        },
-        {
-          label: t("underwritingDashboard.overdueTasks"),
-          data: months.map((month) => countFor(month, true)),
-          backgroundColor: chart.danger,
-          borderColor: chart.danger,
-          borderWidth: 1,
-        },
-      ],
+      rows,
+      data: {
+        labels: months,
+        datasets: [
+          { label: t("underwritingDashboard.inProgressTasks"), data: rows.map((r) => r.onTime), backgroundColor: chart.other, borderColor: chart.surface, borderWidth: 2, borderRadius: 0, borderSkipped: false },
+          { label: t("underwritingDashboard.overdueTasks"), data: rows.map((r) => r.overdue), backgroundColor: chart.status("critical"), borderColor: chart.surface, borderWidth: 2, borderRadius: 0, borderSkipped: false },
+        ],
+      },
     };
-  }, [myCases, t, chart]);
+  }, [myCases, chart, t, today]);
 
-  // Volume by LOB Chart
-  const volumeByLOBData = {
-    labels: dashboard?.volumeByLOB?.labels || [],
-    datasets: [
-      {
-        data: dashboard?.volumeByLOB?.data || [],
-        backgroundColor: chart.series((dashboard?.volumeByLOB?.labels || []).length),
-        borderColor: chart.surface,
-      },
-    ],
-  };
-
-  // Submission Assignment Chart
-  const assignedCount = myCases.filter((row) => row.agent).length;
-  const submissionAssignmentData = {
-    labels: [t("underwritingDashboard.assignedToUw"), t("underwritingDashboard.unassigned")],
-    datasets: [
-      {
-        data: [assignedCount, myCases.length - assignedCount],
-        backgroundColor: chart.series(2),
-        borderColor: chart.surface,
-      },
-    ],
-  };
+  const lobRows = (dashboard?.volumeByLOB?.labels || []).map((label, i) => ({ label: label || "-", count: dashboard.volumeByLOB.data[i] })).sort((a, b) => b.count - a.count);
+  const lobData = { labels: lobRows.map((r) => r.label), datasets: [{ label: t("underwritingDashboard.submissions"), data: lobRows.map((r) => r.count), backgroundColor: chart.primary }] };
 
   const openTasks = [...myCases]
     .filter((row) => row.requirementDue)
@@ -150,42 +110,13 @@ const UnderwritingDashboard = () => {
   const openCase = (rowData) => navigate(`/agent/quotedetailview/${rowData.quotationId}`);
 
   const statusBodyTemplate = (rowData) => {
-    const getSeverity = (status) => {
-      switch (status) {
-        case "Approved":
-        case "CustomerAccepted":
-          return "success";
-        case "SubmittedToInsurer":
-          return "warning";
-        case "PendingCustomer":
-          return "info";
-        case "Rejected":
-          return "danger";
-        default:
-          return null;
-      }
-    };
-    return (
-      <Tag value={rowData.status} severity={getSeverity(rowData.status)} />
-    );
+    const severity = { Approved: "success", CustomerAccepted: "success", SubmittedToInsurer: "warning", PendingCustomer: "info", Rejected: "danger" }[rowData.status] || null;
+    return <Tag value={rowData.status} severity={severity} />;
   };
-
   const priorityBodyTemplate = (rowData) => {
-    const getPrioritySeverity = (priority) => {
-      switch (priority) {
-        case "high":
-          return "danger";
-        case "medium":
-          return "warning";
-        case "low":
-          return "success";
-        default:
-          return "secondary";
-      }
-    };
-    return <Tag value={String(rowData.priority || "-")} severity={getPrioritySeverity(rowData.priority)} />;
+    const severity = { high: "danger", medium: "warning", low: "success" }[rowData.priority] || "secondary";
+    return <Tag value={String(rowData.priority || "-")} severity={severity} />;
   };
-
   const riskScoreBodyTemplate = (rowData) => {
     if (rowData.riskScore === undefined || rowData.riskScore === null) return "-";
     return (
@@ -195,271 +126,74 @@ const UnderwritingDashboard = () => {
       </div>
     );
   };
-
   const actionBodyTemplate = (rowData) => (
-    <div className="flex gap-2">
-      <Button icon="pi pi-eye" rounded text onClick={() => openCase(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
-    </div>
+    <Button icon="pi pi-eye" rounded text onClick={() => openCase(rowData)} aria-label={t("common.view", "View")} tooltip={t("common.view", "View")} tooltipOptions={{ position: "top" }} />
   );
+  const stacked = { indexAxis: "y", scales: { x: { stacked: true }, y: { stacked: true } } };
 
   return (
-    <div className="underwriting-dashboard">
+    <div className="underwriting-dashboard bv-dash-page">
       <Toast ref={toast} />
-      <div className="dashboard-header">
-        <div className="header-left">
-          <h2>{t("underwritingDashboard.myWorkbench")}</h2>
-        </div>
-        <div className="header-right">
-          <Dropdown
-            value={selectedPeriod}
-            options={periodOptions}
-            onChange={(e) => setSelectedPeriod(e.value)}
-          />
-          <Button
-            label={t("underwritingDashboard.newSubmission")}
-            icon="pi pi-plus"
-            onClick={() => navigate("/agent/createlead")}
-          />
-        </div>
-        <div className="mobile-header-actions">
-          <Dropdown
-            value={selectedPeriod}
-            options={periodOptions}
-            onChange={(e) => setSelectedPeriod(e.value)}
-          />
-          <Button
-            label={t("underwritingDashboard.newSubmission")}
-            icon="pi pi-plus"
-            onClick={() => navigate("/agent/createlead")}
-          />
-        </div>
-      </div>
+      <DashboardToolbar title={t("underwritingDashboard.myWorkbench")} asOf={dashboard?.asOf} onRefresh={load} loading={loading}
+        actions={<Button label={t("underwritingDashboard.newSubmission")} icon="pi pi-plus" onClick={() => navigate("/agent/createlead")} />}>
+        <span className="underwriting-dashboard__snapshot">{t("underwritingDashboard.snapshot")}</span>
+      </DashboardToolbar>
 
-      {/* Workbench Metrics */}
-      <div className="metrics-row">
-        <div className="metrics-scroll-container">
-          <Card className="metric-card">
-            <div className="metric-content">
-              <span className="metric-label">{t("underwritingDashboard.newlyReceivedSubmissions")}</span>
-              <span className="metric-value">
-                {workbenchMetrics.newSubmissions}
-              </span>
-              <i className="pi pi-info-circle metric-info"></i>
-            </div>
-          </Card>
+      <StatCards items={kpis} className="bv-stat-cards--wide underwriting-dashboard__kpis" />
 
-          <Card className="metric-card">
-            <div className="metric-content">
-              <span className="metric-label">{t("underwritingDashboard.olderSubmissions")}</span>
-              <span className="metric-value">
-                {workbenchMetrics.olderSubmissions}
-              </span>
-              <i className="pi pi-info-circle metric-info"></i>
-            </div>
-          </Card>
+      <div className="bv-dash-grid">
+        <ChartCard title={t("underwritingDashboard.workloadMetrics")} subtitle={t("underwritingDashboard.workloadHint")}
+          table={{ columns: [{ field: "agent", header: t("underwritingDashboard.agent") }, ...workload.stages.map((st) => ({ field: st, header: statusLabel(st), format: "count" }))], rows: workload.rows }}
+          exportName="processing-workload">
+          <ThemedChart type="bar" data={workload.data} options={stacked} height={Math.max(180, workload.data.labels.length * 40 + 80)} directLabels={false} />
+        </ChartCard>
 
-          <Card className="metric-card">
-            <div className="metric-content">
-              <span className="metric-label">{t("underwritingDashboard.avgCycleTime")}</span>
-              <span className="metric-value">
-                {workbenchMetrics.avgCycleTime}
-              </span>
-              <i className="pi pi-info-circle metric-info"></i>
-            </div>
-          </Card>
+        <ChartCard title={t("underwritingDashboard.inProgressVsOverdue")} subtitle={t("underwritingDashboard.byDueMonth")}
+          table={{ columns: [{ field: "month", header: t("underwritingDashboard.dueMonth") }, { field: "onTime", header: t("underwritingDashboard.inProgressTasks"), format: "count" }, { field: "overdue", header: t("underwritingDashboard.overdueTasks"), format: "count" }], rows: due.rows }}
+          exportName="processing-due-by-month">
+          <ThemedChart type="bar" data={due.data} options={{ scales: { x: { stacked: true }, y: { stacked: true } } }} directLabels={false} height={240} />
+        </ChartCard>
 
-          <Card className="metric-card open-alerts">
-            <div className="metric-content">
-              <span className="metric-label">{t("underwritingDashboard.openAlerts")}</span>
-              <div className="alerts-breakdown">
-                <div className="alert-item">
-                  <span>{t("underwritingDashboard.duplicateSubmissionDetected")}</span>
-                  <Badge
-                    value={workbenchMetrics.openAlerts.duplicateSubmission}
-                    severity={alertSeverity(workbenchMetrics.openAlerts.duplicateSubmission, "danger")}
-                  />
-                </div>
-                <div className="alert-item">
-                  <span>{t("underwritingDashboard.missingTivAndDates")}</span>
-                  <Badge
-                    value={workbenchMetrics.openAlerts.missingDates}
-                    severity={alertSeverity(workbenchMetrics.openAlerts.missingDates, "warning")}
-                  />
-                </div>
-                <div className="alert-item">
-                  <span>{t("underwritingDashboard.missingLobTypeBroker")}</span>
-                  <Badge
-                    value={workbenchMetrics.openAlerts.missingLOB}
-                    severity={alertSeverity(workbenchMetrics.openAlerts.missingLOB, "warning")}
-                  />
-                </div>
-              </div>
-            </div>
-          </Card>
-        </div>
-      </div>
+        <ChartCard className="bv-dash-grid__wide" title={t("underwritingDashboard.volumeByLob")}
+          table={{ columns: [{ field: "label", header: t("underwritingDashboard.productType") }, { field: "count", header: t("underwritingDashboard.submissions"), format: "count" }], rows: lobRows }}
+          exportName="processing-volume-by-lob">
+          <ThemedChart type="bar" data={lobData} options={{ indexAxis: "y" }} height={Math.max(120, lobRows.length * 34 + 40)} />
+        </ChartCard>
 
-      {/* Main Content */}
-      <div className="dashboard-main">
-        {/* Workload Metrics Section */}
-        <Card title={t("underwritingDashboard.workloadMetrics")} className="workload-section">
-          <TabView
-            activeIndex={activeIndex}
-            onTabChange={(e) => setActiveIndex(e.index)}
-          >
-            <TabPanel header={t("underwritingDashboard.assignmentGroups")}>
-              <div className="workload-chart">
-                <Chart
-                  type="bar"
-                  data={workloadData}
-                  options={chart.options({
-                    indexAxis: "y",
-                    maintainAspectRatio: false,
-                    responsive: true,
-                    plugins: {
-                      legend: {
-                        position: "bottom",
-                      },
-                    },
-                    scales: {
-                      x: {
-                        stacked: true,
-                        beginAtZero: true,
-                      },
-                      y: {
-                        stacked: true,
-                      },
-                    },
-                  })}
-                  style={{ height: "300px" }}
-                />
-              </div>
-            </TabPanel>
-            <TabPanel header={t("underwritingDashboard.groupWorkloadTop5")}>
-              <div className="workload-chart">
-                <Chart
-                  type="bar"
-                  data={workloadData}
-                  options={chart.options({
-                    indexAxis: "y",
-                    maintainAspectRatio: false,
-                    responsive: true,
-                    plugins: {
-                      legend: {
-                        position: "bottom",
-                      },
-                    },
-                  })}
-                  style={{ height: "300px" }}
-                />
-              </div>
-            </TabPanel>
-          </TabView>
-        </Card>
-
-        {/* Submissions List */}
-        <Card title={t("underwritingDashboard.submissionsList")} className="submissions-section">
-          <DataTable
-            value={myCases}
-            paginator
-            rows={20}
-            rowsPerPageOptions={[20, 50, 100]}
-            className="submissions-table"
-          >
+        <ChartCard className="bv-dash-grid__wide" title={t("underwritingDashboard.submissionsList")}>
+          <DataTable value={myCases} paginator rows={20} rowsPerPageOptions={[20, 50, 100]} className="submissions-table" loading={!dashboard} size="small">
             <Column field="caseId" header={t("underwritingDashboard.caseId")} />
             <Column field="proposedInsured" header={t("underwritingDashboard.proposedInsured")} />
-            <Column field="agent" header={t("underwritingDashboard.agent")} />
-            <Column field="faceAmount" header={t("underwritingDashboard.faceAmount")} body={(row) => formatCurrency(row.faceAmount)} />
+            <Column field="agent" header={t("underwritingDashboard.agent")} body={(row) => row.agent || "-"} />
+            <Column field="faceAmount" header={t("underwritingDashboard.faceAmount")} body={(row) => formatCurrency(row.faceAmount)} className="bv-num" headerClassName="bv-num" />
             <Column field="productType" header={t("underwritingDashboard.productType")} />
             <Column body={riskScoreBodyTemplate} header={t("underwritingDashboard.riskScore")} />
             <Column field="requirementDue" header={t("underwritingDashboard.nextRequirementDue")} body={(row) => formatAppDate(row.requirementDue)} />
             <Column body={priorityBodyTemplate} header={t("underwritingDashboard.priority")} />
             <Column body={statusBodyTemplate} header={t("underwritingDashboard.status")} />
-            <Column
-              body={actionBodyTemplate}
-              header=""
-              style={{ width: "120px" }}
-            />
+            <Column body={actionBodyTemplate} header="" style={{ width: "4rem" }} />
           </DataTable>
-        </Card>
+        </ChartCard>
 
-        {/* Charts Row */}
-        <div className="charts-row">
-          <Card
-            title={t("underwritingDashboard.inProgressVsOverdue")}
-            className="chart-card"
-          >
-            <Chart
-              type="bar"
-              data={tasksData}
-              options={chart.options({
-                maintainAspectRatio: false,
-                responsive: true,
-                plugins: {
-                  legend: {
-                    position: "bottom",
-                  },
-                },
-              })}
-              style={{ height: "250px" }}
-            />
-          </Card>
-
-          <Card title={t("underwritingDashboard.volumeByLob")} className="chart-card">
-            <Chart
-              type="pie"
-              data={volumeByLOBData}
-              options={chart.options({
-                maintainAspectRatio: false,
-                responsive: true,
-                plugins: {
-                  legend: {
-                    position: "bottom",
-                  },
-                },
-              })}
-              style={{ height: "250px" }}
-            />
-          </Card>
-
-          <Card title={t("underwritingDashboard.submissionAssignment")} className="chart-card">
-            <Chart
-              type="doughnut"
-              data={submissionAssignmentData}
-              options={chart.options({
-                maintainAspectRatio: false,
-                responsive: true,
-                plugins: {
-                  legend: {
-                    position: "bottom",
-                  },
-                },
-              })}
-              style={{ height: "250px" }}
-            />
-          </Card>
-        </div>
-
-        {/* Open Tasks Section */}
-        <Card title={t("underwritingDashboard.openTasks")} className="tasks-section">
+        <ChartCard className="bv-dash-grid__wide" title={t("underwritingDashboard.openTasks")}>
           <div className="tasks-list">
             {openTasks.map((task) => (
               <div className="task-item" key={task.caseId}>
                 <div className="task-info">
-                  <i
-                    className={isOverdue(task) ? "pi pi-exclamation-triangle task-icon" : "pi pi-clock task-icon"}
-                    style={isOverdue(task) ? { color: "var(--color-warning)" } : undefined}
-                  ></i>
+                  <i className={isOverdue(task, today) ? "pi pi-exclamation-triangle task-icon task-icon--overdue" : "pi pi-clock task-icon"} aria-hidden="true" />
                   <div>
                     <span className="task-title">{`${task.proposedInsured || "-"} (${task.productType || "-"})`}</span>
-                    <span className="task-meta">{`${task.caseId} · ${formatAppDate(task.requirementDue)}`}</span>
+                    <span className="task-meta">
+                      {`${task.caseId} · ${formatAppDate(task.requirementDue)}`}
+                      {isOverdue(task, today) ? ` · ${t("underwritingDashboard.overdue")}` : ""}
+                    </span>
                   </div>
                 </div>
-                <Button icon="pi pi-eye" rounded text size="small" onClick={() => openCase(task)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
+                <Button icon="pi pi-eye" rounded text size="small" onClick={() => openCase(task)} aria-label={t("common.view", "View")} tooltip={t("common.view", "View")} tooltipOptions={{ position: "top" }} />
               </div>
             ))}
           </div>
-        </Card>
+        </ChartCard>
       </div>
     </div>
   );

@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
-import { Chart } from "primereact/chart";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Dropdown } from "primereact/dropdown";
@@ -16,6 +15,7 @@ import { EmptyState, FilterBar, SectionCard } from "../../../components/RecordPa
 import { calendarDateFormat, formatDate, toIsoDate } from "../../../utility/dateFormat";
 import { downloadCsv } from "../../../utility/csvExport";
 import { useChartTheme } from "../../../theme/chartTheme";
+import { DataAsOf, ThemedChart } from "../../../components/Dashboard";
 import { formatPercent, formatWithUnit } from "../../../utility/numberFormat";
 import { RenewalHeader } from "../shared";
 import "./index.scss";
@@ -41,6 +41,12 @@ const RetentionAnalytics = () => {
   const [data, setData] = useState({});
   const [open, setOpen] = useState([]);
   const [tab, setTab] = useState(0);
+  const [targets, setTargets] = useState({});
+  const [asOf, setAsOf] = useState(null);
+
+  useEffect(() => {
+    renewalsWorkspaceService.getSettings("renewals").then(setTargets).catch(() => setTargets({}));
+  }, []);
 
   const load = useCallback(async () => {
     if (period === "Custom Range" && !(range?.[0] && range?.[1])) return;
@@ -52,6 +58,7 @@ const RetentionAnalytics = () => {
       ]);
       setData(performance);
       setOpen(queue.items || []);
+      setAsOf(new Date());
     } catch (e) {
       toast.current?.show({ severity: "error", summary: t("common.error", "Error"), detail: e?.message, life: 5000 });
     } finally {
@@ -77,18 +84,21 @@ const RetentionAnalytics = () => {
     ];
   }, [open, t]);
 
+  const rateTarget = Number(targets["renewals.target_renewal_rate"] ?? 0);
   const figures = [
-    { key: "rate", label: t("retention.renewalRate"), value: formatPercent(overall.renewalRate ?? 0), note: t("retention.renewedLapsed", { renewed: overall.renewed ?? 0, lapsed: overall.lapsed ?? 0 }) },
+    { key: "rate", label: t("retention.renewalRate"), value: formatPercent(overall.renewalRate ?? 0), note: t("retention.renewedLapsed", { renewed: overall.renewed ?? 0, lapsed: overall.lapsed ?? 0 }),
+      status: rateTarget ? { severity: (overall.renewalRate ?? 0) >= rateTarget ? "good" : "warning", label: (overall.renewalRate ?? 0) >= rateTarget ? t("perf.met") : t("perf.notMet") } : null },
     { key: "retention", label: t("retention.premiumRetention"), value: formatPercent(overall.premiumRetention ?? 0), note: t("retention.retained", { amount: formatCurrency(overall.premiumRetained || 0) }) },
     { key: "cycle", label: t("retention.cycleTime"), value: formatWithUnit(overall.avgCycleTime ?? 0, t("perf.days")), note: t("retention.cycleNote") },
-    { key: "open", label: t("retention.openNow"), value: open.length, note: t("retention.openNote", { count: profile[0]?.count || 0 }) },
+    { key: "open", label: t("retention.openNow"), value: open.length, note: t("retention.openNote", { count: profile[0]?.count || 0 }), onClick: () => navigate("/renewal/queue") },
   ];
 
   const trendData = {
     labels: months.map((m) => m.label),
-    datasets: [{ label: t("retention.renewalRate"), data: months.map((m) => m.rate), borderColor: chart.primary, backgroundColor: chart.primary, tension: 0, fill: false }],
+    datasets: [{ label: t("retention.renewalRate"), data: months.map((m) => m.rate), borderColor: chart.primary, backgroundColor: chart.primary, pointBackgroundColor: chart.primary }],
   };
-  const trendOptions = chart.options({ maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 100, ticks: { callback: (v) => `${v}%` } } } });
+  // the target is a reference line, not a second series
+  const trendReference = rateTarget ? [{ value: rateTarget, label: t("perf.targetLine", { target: formatPercent(rateTarget) }) }] : null;
   const num = { className: "bv-num", headerClassName: "bv-num" };
   const empty = <EmptyState icon="pi-chart-line" title={t("perf.emptyTitle")} text={t("perf.emptyText")} />;
 
@@ -145,6 +155,7 @@ const RetentionAnalytics = () => {
         <Dropdown value={agent} onChange={(e) => setAgent(e.value || "")} filter aria-label={t("perf.col.agent")}
           options={[{ label: t("queue.allAgents"), value: "" }, ...(data.byAgent || []).map((a) => ({ label: a.agentName, value: a.agentName }))]} />
         {data.period ? <span className="bv-muted">{t("perf.periodText", { from: formatDate(data.period.from), to: formatDate(data.period.to) })}</span> : null}
+        <DataAsOf asOf={asOf} />
       </FilterBar>
       <StatCards items={figures} />
 
@@ -157,7 +168,7 @@ const RetentionAnalytics = () => {
 
       {tab === 0 ? (
         <SectionCard title={t("perf.tabs.trend")} hint={t("perf.trendHint")}>
-          {months.length ? <div className="retention-page__chart"><Chart type="line" data={trendData} options={trendOptions} /></div> : empty}
+          {months.length ? <ThemedChart type="line" data={trendData} format="percent" options={{ scales: { y: { max: 100 } } }} reference={trendReference} height={280} /> : empty}
           <DataTable value={months} dataKey="month" size="small" className={months.length ? "mt-3" : "hidden"}>
             <Column field="label" header={t("perf.col.month")} />
             <Column field="rate" header={t("retention.renewalRate")} body={(m) => formatPercent(m.rate)} {...num} />

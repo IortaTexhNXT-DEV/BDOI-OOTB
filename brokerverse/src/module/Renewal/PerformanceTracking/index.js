@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
-import { Chart } from "primereact/chart";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Dropdown } from "primereact/dropdown";
@@ -15,6 +14,7 @@ import { EmptyState, FilterBar, SectionCard, StatusChip } from "../../../compone
 import { calendarDateFormat, formatDate, toIsoDate } from "../../../utility/dateFormat";
 import { downloadCsv } from "../../../utility/csvExport";
 import { useChartTheme } from "../../../theme/chartTheme";
+import { DataAsOf, ThemedChart } from "../../../components/Dashboard";
 import { formatPercent, formatWithUnit } from "../../../utility/numberFormat";
 import { RenewalHeader } from "../shared";
 import "./index.scss";
@@ -40,6 +40,7 @@ const PerformanceTracking = () => {
   const [data, setData] = useState({});
   const [targets, setTargets] = useState({});
   const [tab, setTab] = useState(0);
+  const [asOf, setAsOf] = useState(null);
 
   useEffect(() => {
     renewalsWorkspaceService.getSettings("renewals").then(setTargets).catch(() => setTargets({}));
@@ -50,6 +51,7 @@ const PerformanceTracking = () => {
     setLoading(true);
     try {
       setData(await renewalsWorkspaceService.getPerformance(periodRange(period, range || [])));
+      setAsOf(new Date());
     } catch (e) {
       toast.current?.show({ severity: "error", summary: t("common.error", "Error"), detail: e?.message, life: 5000 });
     } finally {
@@ -73,20 +75,21 @@ const PerformanceTracking = () => {
   const months = (data.trends?.monthly || []).map((m) => ({ ...m, label: new Date(`${m.month}-01T00:00:00`).toLocaleDateString(undefined, { month: "short", year: "numeric" }) }));
 
   const figures = [
-    ...kpis.map((k) => ({ key: k.key, label: k.label, value: formatWithUnit(k.achieved, k.unit), note: t("perf.targetNote", { target: formatWithUnit(k.target, k.unit) }) })),
+    ...kpis.map((k) => ({
+      key: k.key, label: k.label, value: formatWithUnit(k.achieved, k.unit), note: t("perf.targetNote", { target: formatWithUnit(k.target, k.unit) }),
+      status: k.target ? { severity: k.met ? "good" : "warning", label: k.met ? t("perf.met") : t("perf.notMet") } : null,
+    })),
     { key: "renewed", label: t("perf.renewed"), value: overall.renewed ?? null, note: t("perf.ofDecided", { count: (overall.renewed || 0) + (overall.lapsed || 0) }) },
     { key: "open", label: t("perf.open"), value: overall.open ?? null, note: t("perf.dueInPeriod", { count: overall.total || 0 }) },
   ];
 
   const trendData = {
     labels: months.map((m) => m.label),
-    datasets: [{ label: t("perf.kpi.renewalRate"), data: months.map((m) => m.rate), borderColor: chart.primary, backgroundColor: chart.primary, tension: 0, fill: false }],
+    datasets: [{ label: t("perf.kpi.renewalRate"), data: months.map((m) => m.rate), borderColor: chart.primary, backgroundColor: chart.primary, pointBackgroundColor: chart.primary }],
   };
-  const trendOptions = chart.options({
-    maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: { y: { beginAtZero: true, max: 100, ticks: { callback: (v) => `${v}%` } } },
-  });
+  // the target is a reference line, not a second series
+  const rateTarget = kpis.find((k) => k.key === "renewalRate")?.target;
+  const trendReference = rateTarget ? [{ value: rateTarget, label: t("perf.targetLine", { target: formatPercent(rateTarget) }) }] : null;
 
   // the export of each tab: the rows the tab shows
   const tabExports = [
@@ -144,6 +147,7 @@ const PerformanceTracking = () => {
         <Dropdown value={line} onChange={(e) => setLine(e.value || "")} aria-label={t("perf.line")}
           options={[{ label: t("perf.allLines"), value: "" }, ...Object.keys(data.byProduct || {}).map((k) => ({ label: productLabel(k), value: k }))]} />
         {data.period ? <span className="bv-muted">{t("perf.periodText", { from: formatDate(data.period.from), to: formatDate(data.period.to) })}</span> : null}
+        <DataAsOf asOf={asOf} />
       </FilterBar>
       <StatCards items={figures} />
 
@@ -194,7 +198,7 @@ const PerformanceTracking = () => {
       {tab === 3 ? (
         <SectionCard title={t("perf.tabs.trend")} hint={t("perf.trendHint")}>
           {months.length ? (
-            <div className="performance-page__chart"><Chart type="line" data={trendData} options={trendOptions} /></div>
+            <ThemedChart type="line" data={trendData} format="percent" options={{ scales: { y: { max: 100 } } }} reference={trendReference} height={280} emptyText={t("perf.emptyTitle")} />
           ) : empty}
           <DataTable value={months} dataKey="month" size="small" className={months.length ? "mt-3" : "hidden"}>
             <Column field="label" header={t("perf.col.month")} />

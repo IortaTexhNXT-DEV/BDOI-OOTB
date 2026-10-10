@@ -4,7 +4,6 @@ import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
-import { Chart } from "primereact/chart";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { useNavigate } from "react-router-dom";
@@ -12,13 +11,15 @@ import collectionService from "../../../services/collectionService";
 import "./index.scss";
 import logger from "../../../utility/logger";
 import { useChartTheme } from "../../../theme/chartTheme";
-import { mix } from "../../../theme/runtime/themeEngine";
+import StatCards from "../../../components/StatCards";
+import { ChartCard, DataAsOf, ThemedChart, formatValue } from "../../../components/Dashboard";
 
 const AgingReport = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const [reportData, setReportData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [asOf, setAsOf] = useState(null);
   const toast = useRef(null);
   const navigate = useNavigate();
   const chart = useChartTheme();
@@ -33,6 +34,7 @@ const AgingReport = () => {
       const result = await collectionService.getAgingReport();
       if (result.success) {
         setReportData(result.data);
+        setAsOf(new Date());
       }
     } catch (error) {
       logger.error("Load aging report error:", error);
@@ -59,43 +61,23 @@ const AgingReport = () => {
 
   const { summary, collections } = reportData;
 
-  // Chart data
+  // ageing buckets are ordered: one ramp, older = darker (not the status colours: every bucket is money owed)
+  const buckets = [
+    { key: "current", label: t("agingReport.current"), amount: parseFloat(summary.totalCurrent), share: summary.percentages.current },
+    { key: "days1to30", label: t("agingReport.days1to30"), amount: parseFloat(summary.total1to30), share: summary.percentages.days1to30 },
+    { key: "days31to60", label: t("agingReport.days31to60"), amount: parseFloat(summary.total31to60), share: summary.percentages.days31to60 },
+    { key: "days61to90", label: t("agingReport.days61to90"), amount: parseFloat(summary.total61to90), share: summary.percentages.days61to90 },
+    { key: "over90", label: t("agingReport.over90Days"), amount: parseFloat(summary.totalOver90), share: summary.percentages.over90 },
+  ];
   const chartData = {
-    labels: [t("agingReport.current"), t("agingReport.days1to30"), t("agingReport.days31to60"), t("agingReport.days61to90"), t("agingReport.over90Days")],
-    datasets: [
-      {
-        label: t("agingReport.outstandingAmount"),
-        data: [
-          parseFloat(summary.totalCurrent),
-          parseFloat(summary.total1to30),
-          parseFloat(summary.total31to60),
-          parseFloat(summary.total61to90),
-          parseFloat(summary.totalOver90),
-        ],
-        // older buckets in the warning, then the danger colour
-        backgroundColor: [
-          chart.success,
-          mix(chart.warning, "#ffffff", 0.45),
-          chart.warning,
-          mix(chart.danger, "#ffffff", 0.35),
-          chart.danger,
-        ],
-      },
-    ],
+    labels: buckets.map((b) => b.label),
+    datasets: [{ label: t("agingReport.outstandingAmount"), data: buckets.map((b) => b.amount), backgroundColor: chart.sequential(buckets.length) }],
   };
-
-  const chartOptions = chart.options({
-    responsive: true,
-    plugins: {
-      legend: {
-        position: "bottom",
-      },
-      title: {
-        display: true,
-        text: "Collections Aging Distribution",
-      },
-    },
-  });
+  const money = (v) => formatValue("currency", v, { compact: true });
+  const figures = [
+    { key: "total", label: t("agingReport.totalOutstanding"), value: money(summary.totalOutstanding) },
+    ...buckets.map((b) => ({ key: b.key, label: b.label, value: money(b.amount), note: `${b.share}%` })),
+  ];
 
   const clientBodyTemplate = (rowData) => {
     const client = rowData.client;
@@ -121,60 +103,13 @@ const AgingReport = () => {
         <h2>{t("agingReport.title")}</h2>
       </div>
 
-      {/* Summary Cards */}
-      <div className="summary-cards">
-        <Card className="summary-card total">
-          <div className="card-content">
-            <h3>{t("agingReport.totalOutstanding")}</h3>
-            <p className="amount">{formatCurrency(summary.totalOutstanding)}</p>
-          </div>
-        </Card>
+      <div className="aging-report-asof"><DataAsOf asOf={asOf} /></div>
+      <StatCards items={figures} className="bv-stat-cards--wide" />
 
-        <Card className="summary-card current">
-          <div className="card-content">
-            <h3>{t("agingReport.current")}</h3>
-            <p className="amount">{formatCurrency(summary.totalCurrent)}</p>
-            <span className="percentage">{summary.percentages.current}%</span>
-          </div>
-        </Card>
-
-        <Card className="summary-card days-1-30">
-          <div className="card-content">
-            <h3>{t("agingReport.days1to30")}</h3>
-            <p className="amount">{formatCurrency(summary.total1to30)}</p>
-            <span className="percentage">{summary.percentages.days1to30}%</span>
-          </div>
-        </Card>
-
-        <Card className="summary-card days-31-60">
-          <div className="card-content">
-            <h3>{t("agingReport.days31to60")}</h3>
-            <p className="amount">{formatCurrency(summary.total31to60)}</p>
-            <span className="percentage">{summary.percentages.days31to60}%</span>
-          </div>
-        </Card>
-
-        <Card className="summary-card days-61-90">
-          <div className="card-content">
-            <h3>{t("agingReport.days61to90")}</h3>
-            <p className="amount">{formatCurrency(summary.total61to90)}</p>
-            <span className="percentage">{summary.percentages.days61to90}%</span>
-          </div>
-        </Card>
-
-        <Card className="summary-card over-90">
-          <div className="card-content">
-            <h3>{t("agingReport.over90Days")}</h3>
-            <p className="amount">{formatCurrency(summary.totalOver90)}</p>
-            <span className="percentage">{summary.percentages.over90}%</span>
-          </div>
-        </Card>
-      </div>
-
-      {/* Chart */}
-      <Card title={t("agingReport.agingDistributionChart")} className="chart-card">
-        <Chart type="pie" data={chartData} options={chartOptions} />
-      </Card>
+      <ChartCard title={t("agingReport.agingDistributionChart")} className="chart-card" exportName="collections-ageing"
+        table={{ columns: [{ field: "label", header: t("agingReport.bucket", "Age") }, { field: "amount", header: t("agingReport.outstandingAmount"), format: "currency" }, { field: "share", header: "%", format: "percent" }], rows: buckets }}>
+        <ThemedChart type="bar" data={chartData} format="currency" height={260} />
+      </ChartCard>
 
       {/* Detailed Table */}
       <Card title={t("agingReport.collectionsDetail")} className="table-card">

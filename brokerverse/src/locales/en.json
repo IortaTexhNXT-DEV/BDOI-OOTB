@@ -3437,7 +3437,18 @@
     "newQuote": "New Quote",
     "reports": "Reports",
     "policiesLabel": "Policies",
-    "analytics": "Analytics"
+    "analytics": "Analytics",
+    "premiumReceivable": "Premium receivable",
+    "overdueNote": "{{amount}} overdue",
+    "commissionReceivable": "Commission receivable",
+    "unbilledOverdueNote": "{{unbilled}} unbilled · {{overdue}} overdue",
+    "claimsCount": "Claims",
+    "premiumByMonth": "Premium written by month",
+    "last12Months": "Last 12 months",
+    "month": "Month",
+    "inForceBook": "Whole book, sorted by premium",
+    "claimsByStage": "Claims by stage, all open and closed",
+    "estimate": "Estimate"
   },
   "productConfiguratorDashboard": {
     "title": "Product Configurator Dashboard",
@@ -3492,7 +3503,12 @@
     "property": "Property",
     "travel": "Travel",
     "marine": "Marine",
-    "rulesInForce": "Acceptance rules in force"
+    "rulesInForce": "Acceptance rules in force",
+    "month": "Month",
+    "premiumWeighted": "Weighted by premium",
+    "premiumByMonth": "Premium by month",
+    "lossRatioByMonth": "Loss ratio by month",
+    "share": "Share"
   },
   "productTemplateManager": {
     "createTemplate": "Create Template",
@@ -3896,7 +3912,9 @@
     "totalPremium": "Premium written",
     "products": "Products with policies",
     "growth": "Growth (12 months)",
-    "noData": "No policies issued yet: analytics appear once policies are issued"
+    "noData": "No policies issued yet: analytics appear once policies are issued",
+    "month": "Month",
+    "category": "Category"
   },
   "remittanceReports": {
     "title": "Remittance Reports",
@@ -5362,7 +5380,8 @@
     "view": "View",
     "loadingAgingReport": "Loading aging report...",
     "noCollectionsFound": "No collections found",
-    "failedToLoadReport": "Failed to load aging report"
+    "failedToLoadReport": "Failed to load aging report",
+    "bucket": "Age"
   },
   "paymentDetails": {
     "policyDetails": "Policy details",
@@ -5457,7 +5476,27 @@
     "priority": "Priority",
     "status": "Status",
     "amount": "Amount",
-    "claims": "claims"
+    "claims": "claims",
+    "claimsReported": "Claims reported",
+    "todayNote": "{{count}} reported today",
+    "reportedInPeriod": "Of the claims reported in the period",
+    "pastDueDate": "Past due date",
+    "estimatedAmount": "Estimated amount",
+    "settledAmount": "Settled amount",
+    "openClaims": "Open claims",
+    "byReportedMonth": "By month reported",
+    "month": "Month",
+    "claimsByLob": "Claims by line of business",
+    "ageingOfOpenClaims": "Ageing of open claims",
+    "ageingHint": "Days since reported, in the bands of the claims ageing setting",
+    "age": "Age",
+    "claimsByStage": "Claims by stage",
+    "ageing": {
+      "recent": "Recent",
+      "moderate": "Ageing",
+      "high": "Old",
+      "critical": "Oldest"
+    }
   },
   "underwritingDashboard": {
     "myWorkbench": "Processing Workbench",
@@ -5508,7 +5547,20 @@
     "yesterday": "Yesterday",
     "today": "Today",
     "hoursAgo": "hours ago",
-    "justNow": "Just now"
+    "justNow": "Just now",
+    "last7Days": "Updated in the last 7 days",
+    "olderThan7Days": "Not updated for more than 7 days",
+    "followUp": "Follow up",
+    "cycleNote": "From entry to approval or acceptance",
+    "ofInFlight": "Of {{count}} in flight",
+    "alertsNote": "{{duplicates}} duplicate · {{dates}} missing dates · {{lob}} missing LOB",
+    "needsAttention": "Needs attention",
+    "submissions": "Submissions",
+    "snapshot": "Work in flight now",
+    "workloadHint": "Submissions per account executive, by stage",
+    "byDueMonth": "By month the next requirement is due",
+    "dueMonth": "Due month",
+    "overdue": "Overdue"
   },
   "policyTable": {
     "search": "Search",
@@ -8891,7 +8943,8 @@
     "met": "Met",
     "notMet": "Below target",
     "emptyTitle": "No renewals in the period",
-    "emptyText": "Choose a longer period to see results."
+    "emptyText": "Choose a longer period to see results.",
+    "targetLine": "Target {{target}}"
   },
   "lapse": {
     "title": "Lapse Management",
@@ -9281,7 +9334,11 @@
     "stage": "Stage",
     "count": "Count",
     "noRecords": "No records for the period",
-    "bySalesPerson": "By sales person"
+    "bySalesPerson": "By sales person",
+    "newProspects": "New prospects",
+    "totalProspects": "{{count}} prospects in all",
+    "premiumByMonth": "Premium by month",
+    "activityByMonth": "Prospects and quotations by month"
   },
   "listCommon": {
     "view": "View",
@@ -9595,7 +9652,8 @@
       "4": "Thu",
       "5": "Fri",
       "6": "Sat"
-    }
+    },
+    "myDashboard": "My dashboard"
   },
   "integrations": {
     "monitorTitle": "Integrations",
@@ -11460,5 +11518,56 @@
     "saveAnyway": "Save anyway",
     "back": "Back to the form",
     "clientFailed": "The client could not be loaded"
+  },
+  "dashboards": {
+    "noData": "No data for this period",
+    "onTarget": "On target",
+    "offTarget": "Off target",
+    "overdue": "Overdue items",
+    "targetNote": "Target {{target}} · {{achieved}} achieved",
+    "targetMax": "Target at most {{target}}",
+    "targetMin": "Target {{target}}",
+    "targetLine": "Target {{value}}",
+    "view": "View",
+    "chart": "Chart",
+    "table": "Table",
+    "patterns": "Patterns for colour-blind viewing and print",
+    "exportCsv": "Export CSV",
+    "asOf": "Data as of {{time}} ({{zone}})",
+    "range": "{{from}} to {{to}}",
+    "filters": "Dashboard filters",
+    "switch": "Dashboard",
+    "period": "Period",
+    "comparison": "Compare with",
+    "refresh": "Refresh",
+    "openList": "Open the list",
+    "names": {
+      "executive": "Executive Dashboard",
+      "sales": "Sales Dashboard",
+      "processing": "Processing Dashboard",
+      "claims": "Claims Dashboard",
+      "renewals": "Renewal Analytics",
+      "commission": "Commission Dashboard",
+      "collections": "Collections Ageing",
+      "remittance": "Remittance Analytics",
+      "products": "Product Dashboard"
+    },
+    "periods": {
+      "month": "This month",
+      "quarter": "This quarter",
+      "year": "This year"
+    },
+    "compare": {
+      "previous": "Previous period",
+      "lastYear": "Same period last year"
+    },
+    "vs": {
+      "previous": "vs previous period",
+      "lastYear": "vs same period last year"
+    },
+    "compareText": {
+      "previous": "compared with {{from}} to {{to}}",
+      "lastYear": "compared with {{from}} to {{to}} last year"
+    }
   }
 }

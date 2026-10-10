@@ -11,6 +11,7 @@ import { notifyError } from "../../utility/dialogs";
 import { formatDate } from "../../utility/dateFormat";
 import { numberLocale } from "../../utility/currencyConverter";
 import { getUserRoles } from "../../utils/menuPermissions";
+import { defaultDashboard } from "../../components/Dashboard/personas";
 import { PRESETS, TABS, figureText, isoToday, orderCategories, presetFor, tabFromSearch } from "./logic";
 import { fetchFigures } from "./figures";
 import MyItems from "./MyItems";
@@ -34,6 +35,7 @@ const MyWork = () => {
   const { formatCurrency } = useFormatCurrency();
   const presetCode = useMemo(() => presetFor(getUserRoles()), []);
   const preset = PRESETS[presetCode] || PRESETS.general;
+  const [dashboard] = useState(() => defaultDashboard());
   const [mine, setMine] = useState(null);
   const [scoped, setScoped] = useState(null);
   const [home, setHome] = useState(null);
@@ -125,6 +127,7 @@ const MyWork = () => {
         </div>
         <div className="mw-head__actions">
           <Button icon="pi pi-refresh" text rounded aria-label={t("myWork.refresh", "Refresh")} tooltip={t("myWork.refresh", "Refresh")} tooltipOptions={{ position: "bottom" }} onClick={refresh} />
+          {dashboard && <Button label={t("myWork.myDashboard", "My dashboard")} icon="pi pi-chart-bar" text onClick={() => navigate(dashboard.path)} />}
           <Button label={t("myWork.task.new", "New task")} icon="pi pi-plus" outlined onClick={() => setDialog({ visible: true, task: null })} />
           {action && <Button label={t(`myWork.home.action.${action.key}`, { defaultValue: action.key })} icon={action.category ? "pi pi-check-square" : "pi pi-arrow-right"} iconPos={action.category ? "left" : "right"} onClick={runAction} />}
         </div>

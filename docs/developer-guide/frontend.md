@@ -146,7 +146,7 @@ acceptable for data no other screen needs.
 | Record history | `components/AuditTrail/AuditTimeline` (business events of `GET /api/audit/records/:entity/:id`) |
 | Philippine address | `agentModule/component/PhAddressFields` (region, province, city or municipality, barangay, ZIP code) |
 | Colours and logo | the theme tokens; the saved theme is applied at run time by `theme/runtime/themeEngine.js` and `BrandingProvider`; never hard-code a brand colour |
-| Chart colours | `useChartTheme()` from `theme/chartTheme`: `series(n)` (primary, tints, accent once), `statuses(values)` for status charts, `options(o)` for axes and legends |
+| Charts, KPI cards and dashboards | `components/Dashboard` (toolbar with period, comparison and data as of; `ChartCard` with its table view and export; `ThemedChart`; `ShareChart`; drill-down) and the data colours of `useChartTheme()`; the rules are in [dashboards.md](dashboards.md) |
 | Buttons | the primary button, `outlined` or `text` for secondary actions, `severity="danger"` / `"warning"` only for destructive or cautionary actions; no `info` / `help` / `success` buttons |
 | Form fields and pickers | label above the field (`agentModule/component` fields and `components/LabelWrapper` follow `theme/bdoi/_fields.scss`); roles: `components/RoleChecklist`; shared patterns in `theme/bdoi/consistency.scss` |
 | Masked identifiers (package B) | `utility/piiReveal.js`: the "Show full identifiers" switch for holders of `view:pii` |

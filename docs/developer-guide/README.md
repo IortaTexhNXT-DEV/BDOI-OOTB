@@ -13,6 +13,7 @@ defects in production.
 |---|---|
 | [backend.md](backend.md) | The API and scheduled jobs (`backend/`): layout, running and testing, configuration, tracing a defect, logs, common production issues, how to add routes, settings, migrations, masters, posting rules, number series, reports and jobs. |
 | [frontend.md](frontend.md) | The React application (`brokerverse/`), written by the front-end team. |
+| [dashboards.md](dashboards.md) | The dashboard and chart standard: data colour tokens, chart forms, KPI cards, periods, drill-down and accessibility. |
 | Technical Reference (`docs/package/07_Technical/BrokerVerse_Technical_Reference.pdf`) | Module catalogue (purpose, routes, tables, jobs, posting events, settings of all 70 modules), the platform engines, and the chapter "How to review a change" used by code reviewers. |
 
 ## Repository layout

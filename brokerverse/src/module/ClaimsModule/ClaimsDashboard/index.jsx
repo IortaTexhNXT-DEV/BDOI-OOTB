@@ -1,537 +1,240 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { Chart } from "primereact/chart";
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
 import { ProgressBar } from "primereact/progressbar";
-import { Calendar } from "primereact/calendar";
 import { useNavigate } from "react-router-dom";
 import { Toast } from "primereact/toast";
 import authService from "../../../services/authService";
 import { BASE_URL } from "../../../utility/constant";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
-import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
-import "./index.scss";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import StatCards from "../../../components/StatCards";
+import { ChartCard, DashboardToolbar, LISTS, ShareChart, ThemedChart, changeOf, drillDown, formatValue, periodRange } from "../../../components/Dashboard";
 import { useChartTheme } from "../../../theme/chartTheme";
 import { formatPercent, progressValue } from "../../../utility/numberFormat";
+import "./index.scss";
 
-const pad = (n) => String(n).padStart(2, "0");
-const toIsoDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const APPROVED_STATUSES = ["Approved", "Settled", "Closed"];
+const AGEING = ["recent", "moderate", "high", "critical"];
 
 /** Claims per reported month (submitted / approved-or-settled / rejected) from the detailed rows. */
 const buildTrend = (claims) => {
-  const months = [...new Set(claims.map((c) => String(c.reportedDate || "").slice(0, 7)))]
-    .filter(Boolean)
-    .sort();
-  const count = (month, match) =>
-    claims.filter((c) => String(c.reportedDate || "").startsWith(month) && match(c)).length;
-  return {
-    labels: months,
-    submitted: months.map((m) => count(m, () => true)),
-    approved: months.map((m) => count(m, (c) => APPROVED_STATUSES.includes(c.claimStatus))),
-    rejected: months.map((m) => count(m, (c) => c.claimStatus === "Rejected")),
-  };
+  const months = [...new Set(claims.map((c) => String(c.reportedDate || "").slice(0, 7)))].filter(Boolean).sort();
+  const count = (month, match) => claims.filter((c) => String(c.reportedDate || "").startsWith(month) && match(c)).length;
+  return months.map((month) => ({
+    month,
+    submitted: count(month, () => true),
+    approved: count(month, (c) => APPROVED_STATUSES.includes(c.claimStatus)),
+    rejected: count(month, (c) => c.claimStatus === "Rejected"),
+  }));
 };
 
+const fetchReport = async ({ from, to }, includeData) => {
+  const response = await fetch(`${BASE_URL}/claims/report?startDate=${from}&endDate=${to}&includeData=${includeData}`, {
+    headers: { ...authService.getAuthHeader(), "Content-Type": "application/json" },
+  });
+  if (!response.ok) throw new Error("Failed to fetch dashboard data");
+  return (await response.json()).data;
+};
+
+/**
+ * Claims Dashboard: the claims reported in the period against the previous period or the same period last year, what
+ * is still open and past its due date, by month, line of business, stage and province, the ageing of the open claims
+ * and the latest claims. Each figure opens the claims register.
+ */
 const ClaimsDashboard = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const navigate = useNavigate();
   const chart = useChartTheme();
   const toast = useRef(null);
-  const [dateRange, setDateRange] = useState([
-    new Date(new Date().getFullYear(), 0, 1),
-    new Date(),
-  ]);
+  const [period, setPeriod] = useState("year");
+  const [compare, setCompare] = useState("previous");
   const [loading, setLoading] = useState(false);
-  const [dashboardData, setDashboardData] = useState(null);
+  const [data, setData] = useState(null);
+  const [previous, setPrevious] = useState(null);
+  const [asOf, setAsOf] = useState(null);
+  const range = periodRange(period, compare);
 
-  // Fetch dashboard data from API
-  const fetchDashboardData = async () => {
+  const load = useCallback(async () => {
+    const r = periodRange(period, compare);
     setLoading(true);
     try {
-      const startDate = dateRange?.[0] ? toIsoDate(dateRange[0]) : "";
-      const endDate = dateRange?.[1] ? toIsoDate(dateRange[1]) : "";
-
-      const response = await fetch(
-        `${BASE_URL}/claims/report?startDate=${startDate}&endDate=${endDate}&includeData=true`,
-        {
-          method: "GET",
-          headers: {
-            ...authService.getAuthHeader(),
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch dashboard data");
-      }
-
-      const result = await response.json();
-      setDashboardData(result.data);
-    } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("claimsDashboard.error"),
-        detail: t("claimsDashboard.failedToLoad"),
-      });
+      const [current, before] = await Promise.all([
+        fetchReport(r, true),
+        fetchReport({ from: r.previousFrom, to: r.previousTo }, false),
+      ]);
+      setData(current);
+      setPrevious(before);
+      setAsOf(new Date());
+    } catch {
+      toast.current?.show({ severity: "error", summary: t("claimsDashboard.error"), detail: t("claimsDashboard.failedToLoad") });
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchDashboardData();
-  }, [dateRange]);
+  }, [period, compare, t]);
+  useEffect(() => { load(); }, [load]);
 
   const handleExportReport = async () => {
     try {
-      const startDate = dateRange?.[0] ? toIsoDate(dateRange[0]) : "";
-      const endDate = dateRange?.[1] ? toIsoDate(dateRange[1]) : "";
-
-      const url = `${BASE_URL}/claims/report?startDate=${startDate}&endDate=${endDate}&includeData=true&format=excel`;
-
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          ...authService.getAuthHeader(),
-          "Content-Type": "application/json",
-        },
+      const response = await fetch(`${BASE_URL}/claims/report?startDate=${range.from}&endDate=${range.to}&includeData=true&format=excel`, {
+        headers: { ...authService.getAuthHeader(), "Content-Type": "application/json" },
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to export report");
-      }
-
+      if (!response.ok) throw new Error("Failed to export report");
       const blob = await response.blob();
       // eslint-disable-next-line no-undef
       const downloadUrl = globalThis.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = downloadUrl;
-      link.download = `claims-report-${startDate}-to-${endDate}.xlsx`;
+      link.download = `claims-report-${range.from}-to-${range.to}.xlsx`;
       document.body.appendChild(link);
       link.click();
       link.remove();
       // eslint-disable-next-line no-undef
       globalThis.URL.revokeObjectURL(downloadUrl);
-      toast.current?.show({
-        severity: "success",
-        summary: t("claimsDashboard.success"),
-        detail: t("claimsDashboard.excelDownloaded"),
-      });
-    } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("claimsDashboard.error"),
-        detail: t("claimsDashboard.failedToExport"),
-      });
+      toast.current?.show({ severity: "success", summary: t("claimsDashboard.success"), detail: t("claimsDashboard.excelDownloaded") });
+    } catch {
+      toast.current?.show({ severity: "error", summary: t("claimsDashboard.error"), detail: t("claimsDashboard.failedToExport") });
     }
   };
 
-  // KPI Data from API
-  const kpiData = dashboardData
-    ? {
-        totalOpenClaims: dashboardData.summary.totalOpenClaims,
-        claimsOverdue: dashboardData.summary.totalAgingClaims,
-        todaysClaims: dashboardData.summary.todaysClaims,
-        highestClaimsCategory: dashboardData.breakdown.byType[0]?.type || "N/A",
-        highestClaimsPercentage: dashboardData.breakdown.byType[0]
-          ? Math.round(
-              (dashboardData.breakdown.byType[0].count /
-                (dashboardData.summary.totalClaims || 1)) *
-                100
-            )
-          : 0,
-        maxClaimsByState:
-          dashboardData.summary.maxClaimsByState?.state || "N/A",
-        statePercentage:
-          dashboardData.summary.maxClaimsByState?.percentage || 0,
-      }
-    : {
-        totalOpenClaims: 0,
-        claimsOverdue: 0,
-        todaysClaims: 0,
-        highestClaimsCategory: "N/A",
-        highestClaimsPercentage: 0,
-        maxClaimsByState: "N/A",
-        statePercentage: 0,
-      };
+  const s = data?.summary || {};
+  const p = previous?.summary || {};
+  const comparison = t(`dashboards.vs.${compare}`);
+  const money = (v) => formatValue("currency", v, { compact: true });
+  const kpis = [
+    { key: "reported", label: t("claimsDashboard.claimsReported"), value: data ? s.totalClaims : null, change: changeOf(s.totalClaims, p.totalClaims), good: "down", comparison,
+      note: t("claimsDashboard.todayNote", { count: s.todaysClaims ?? 0 }), onClick: () => drillDown(navigate, LISTS.claims("")) },
+    { key: "open", label: t("claimsDashboard.totalOpenClaims"), value: data ? s.totalOpenClaims : null, note: t("claimsDashboard.reportedInPeriod"), onClick: () => drillDown(navigate, LISTS.claims("open")) },
+    { key: "overdue", label: t("claimsDashboard.claimsOverdue"), value: data ? s.totalAgingClaims : null,
+      status: s.totalAgingClaims > 0 ? { severity: "serious", label: t("claimsDashboard.pastDueDate") } : null, onClick: () => drillDown(navigate, LISTS.claims("open")) },
+    { key: "estimate", label: t("claimsDashboard.estimatedAmount"), value: data ? money(s.totalEstimatedAmount) : null, change: changeOf(s.totalEstimatedAmount, p.totalEstimatedAmount), good: "down", comparison },
+    { key: "settled", label: t("claimsDashboard.settledAmount"), value: data ? money(s.totalSettledAmount) : null, change: changeOf(s.totalSettledAmount, p.totalSettledAmount), good: "neutral", comparison,
+      onClick: () => drillDown(navigate, LISTS.claims("settled")) },
+  ];
 
-  // Recent Claims Data from API
-  const recentClaims =
-    dashboardData?.detailedClaims?.slice(0, 10).map((claim) => ({
-      claimId: claim.claimNumber,
-      lob: claim.lob,
-      customer: claim.customerName,
-      policy: claim.policyNumber,
-      lossDate: claim.dateOfIncident
-        ? formatAppDate(claim.dateOfIncident)
-        : "N/A",
-      reportedDate: formatAppDate(claim.reportedDate),
-      reporter: claim.reportedByName || claim.handlerName || "-",
-      priority: claim.claimPriority?.toLowerCase() || "low",
-      status: claim.claimStatus,
-      amount: claim.estimatedClaimAmount
-        ? formatCurrency(claim.estimatedClaimAmount)
-        : "N/A",
-    })) || [];
-
-  // Claims by State data from API
-  const claimsByState =
-    dashboardData?.breakdown?.byState?.map((state) => ({
-      state: state.state,
-      value: state.count,
-      percentage: state.percentage,
-    })) || [];
-
-  // Claims by Source Chart Data (using LOB data from API)
-  const claimsBySourceData = {
-    labels: dashboardData?.breakdown?.byLOB?.map((lob) => lob.lob) || [],
+  const detailed = data?.detailedClaims || [];
+  const trend = buildTrend(detailed);
+  const [cReported, cApproved, cRejected] = chart.series(3);
+  const line = (label, values, color) => ({ label, data: values, borderColor: color, backgroundColor: color, pointBackgroundColor: color });
+  const trendData = {
+    labels: trend.map((m) => m.month),
     datasets: [
-      {
-        data: dashboardData?.breakdown?.byLOB?.map((lob) => lob.count) || [],
-        backgroundColor: chart.series((dashboardData?.breakdown?.byLOB || []).length),
-        borderColor: chart.surface,
-      },
+      line(t("claimsDashboard.claimsSubmitted"), trend.map((m) => m.submitted), cReported),
+      line(t("claimsDashboard.claimsApproved"), trend.map((m) => m.approved), cApproved),
+      line(t("claimsDashboard.claimsRejected"), trend.map((m) => m.rejected), cRejected),
     ],
   };
 
-  // Claims Trend Chart Data
-  const trend = buildTrend(dashboardData?.detailedClaims || []);
-  const claimsTrendData = {
-    labels: trend.labels,
-    datasets: [
-      {
-        label: t("claimsDashboard.claimsSubmitted"),
-        data: trend.submitted,
-        borderColor: chart.primary,
-        backgroundColor: chart.alpha(chart.primary, 0.1),
-        tension: 0,
-      },
-      {
-        label: t("claimsDashboard.claimsApproved"),
-        data: trend.approved,
-        borderColor: chart.success,
-        backgroundColor: chart.alpha(chart.success, 0.1),
-        tension: 0,
-      },
-      {
-        label: t("claimsDashboard.claimsRejected"),
-        data: trend.rejected,
-        borderColor: chart.danger,
-        backgroundColor: chart.alpha(chart.danger, 0.1),
-        tension: 0,
-      },
-    ],
-  };
+  const byLob = data?.breakdown?.byLOB || [];
 
-  // Loss Ratio by Product (using status data from API)
-  const lossRatioData = {
-    labels:
-      dashboardData?.breakdown?.byStatus?.map((status) => status.status) || [],
-    datasets: [
-      {
-        label: t("claimsDashboard.claimsCount"),
-        data:
-          dashboardData?.breakdown?.byStatus?.map((status) => status.count) ||
-          [],
-        backgroundColor: chart.statuses((dashboardData?.breakdown?.byStatus || []).map((status) => status.status)),
-      },
-    ],
-  };
+  const byStatus = data?.breakdown?.byStatus || [];
+  const statusData = { labels: byStatus.map((r) => r.status), datasets: [{ label: t("claimsDashboard.claimsCount"), data: byStatus.map((r) => r.count), backgroundColor: chart.primary }] };
+
+  // ageing of the open claims (claims.aging_thresholds): ordered buckets on one ramp, older = darker
+  const ageing = data?.breakdown?.agingBreakdown || {};
+  const ageingRows = AGEING.map((key) => ({ key, label: t(`claimsDashboard.ageing.${key}`), count: ageing[key] || 0 }));
+  const ageingData = { labels: ageingRows.map((r) => r.label), datasets: [{ label: t("claimsDashboard.openClaims"), data: ageingRows.map((r) => r.count), backgroundColor: chart.sequential(AGEING.length) }] };
+
+  const claimsByState = (data?.breakdown?.byState || []).map((st) => ({ state: st.state, value: st.count, percentage: st.percentage }));
+
+  const recentClaims = detailed.slice(0, 10).map((claim) => ({
+    claimId: claim.claimNumber,
+    lob: claim.lob,
+    customer: claim.customerName,
+    policy: claim.policyNumber,
+    lossDate: claim.dateOfIncident,
+    reportedDate: claim.reportedDate,
+    reporter: claim.reportedByName || claim.handlerName || "-",
+    priority: claim.claimPriority?.toLowerCase() || "low",
+    status: claim.claimStatus,
+    amount: claim.estimatedClaimAmount,
+  }));
 
   const statusBodyTemplate = (rowData) => {
-    const getSeverity = (status) => {
-      switch (status) {
-        case "Closed":
-          return "success";
-        case "Settled":
-          return "success";
-        case "Approved":
-          return "info";
-        case "In Progress":
-          return "warning";
-        case "Pending":
-          return "warning";
-        case "Under Investigation":
-          return "warning";
-        case "Under Assessment":
-          return "warning";
-        case "Pending Approval":
-          return "warning";
-        case "Documents Required":
-          return "danger";
-        case "Rejected":
-          return "danger";
-        default:
-          return null;
-      }
-    };
-    return (
-      <Tag value={rowData.status} severity={getSeverity(rowData.status)} />
-    );
+    const severity = {
+      Closed: "success", Settled: "success", Approved: "info", "In Progress": "warning", Pending: "warning", "Under Investigation": "warning",
+      "Under Assessment": "warning", "Pending Approval": "warning", "Documents Required": "danger", Rejected: "danger",
+    }[rowData.status] || null;
+    return <Tag value={rowData.status} severity={severity} />;
   };
-
   const priorityBodyTemplate = (rowData) => {
-    const getPrioritySeverity = (priority) => {
-      switch (priority?.toLowerCase()) {
-        case "high":
-          return "danger";
-        case "medium":
-          return "warning";
-        case "low":
-          return "success";
-        default:
-          return "secondary";
-      }
-    };
     if (!rowData.priority) return "-";
-    return <Tag value={rowData.priority} severity={getPrioritySeverity(rowData.priority)} />;
+    const severity = { high: "danger", medium: "warning", low: "success" }[rowData.priority] || "secondary";
+    return <Tag value={rowData.priority} severity={severity} />;
   };
-
-  const actionBodyTemplate = (rowData) => {
-    return (
-      <div className="flex gap-2">
-        <Button
-          icon="pi pi-eye"
-          rounded
-          text
-          onClick={() => navigate(`/agent/claimdetail/${rowData.claimId}`)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
-        <Button
-          icon="pi pi-pencil"
-          rounded
-          text
-          onClick={() => navigate(`/agent/claimaudittrail/${rowData.claimId}`)} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
-      </div>
-    );
-  };
+  const actionBodyTemplate = (rowData) => (
+    <div className="flex gap-2">
+      <Button icon="pi pi-eye" rounded text onClick={() => navigate(`/agent/claimdetail/${rowData.claimId}`)} aria-label={t("common.view", "View")} tooltip={t("common.view", "View")} tooltipOptions={{ position: "top" }} />
+      <Button icon="pi pi-pencil" rounded text onClick={() => navigate(`/agent/claimaudittrail/${rowData.claimId}`)} aria-label={t("common.edit", "Edit")} tooltip={t("common.edit", "Edit")} tooltipOptions={{ position: "top" }} />
+    </div>
+  );
 
   return (
-    <div className="claims-dashboard">
+    <div className="claims-dashboard bv-dash-page">
       <Toast ref={toast} />
-      <div className="dashboard-header">
-        <div className="header-content">
-          <h2>{t("claimsDashboard.title")}</h2>
-          <div className="header-actions">
-            <Calendar
-              dateFormat={calendarDateFormat()}
-              value={dateRange}
-              onChange={(e) => setDateRange(e.value)}
-              selectionMode="range"
-              placeholder={t("claimsDashboard.selectDateRange")}
-            />
-            <Button
-              label={t("claimsDashboard.exportReport")}
-              icon="pi pi-download"
-              onClick={handleExportReport}
-            />
-          </div>
-        </div>
-        <div className="mobile-header-actions">
-          <Calendar
-            dateFormat={calendarDateFormat()}
-            value={dateRange}
-            onChange={(e) => setDateRange(e.value)}
-            selectionMode="range"
-            placeholder={t("claimsDashboard.selectDateRange")}
-          />
-          <Button
-            label={t("claimsDashboard.exportReport")}
-            icon="pi pi-download"
-            onClick={handleExportReport}
-          />
-        </div>
-      </div>
+      <DashboardToolbar title={t("claimsDashboard.title")} period={period} onPeriod={setPeriod} compare={compare} onCompare={setCompare} range={range}
+        asOf={asOf} onRefresh={load} loading={loading}
+        actions={<Button label={t("claimsDashboard.exportReport")} icon="pi pi-download" onClick={handleExportReport} />} />
 
-      {/* KPI Cards Row */}
-      <div className="kpi-row">
-        <div className="kpi-scroll-container">
-          <Card className="kpi-card">
-            <div className="kpi-content">
-              <i
-                className="pi pi-folder-open kpi-icon"
-              ></i>
-              <div className="kpi-details">
-                <span className="kpi-label">{t("claimsDashboard.totalOpenClaims")}</span>
-                <span className="kpi-value">{kpiData.totalOpenClaims}</span>
+      <StatCards items={kpis} className="bv-stat-cards--wide claims-dashboard__kpis" />
+
+      <div className="bv-dash-grid">
+        <ChartCard className="bv-dash-grid__wide" title={t("claimsDashboard.claimsTrendAnalysis")} subtitle={t("claimsDashboard.byReportedMonth")}
+          table={{ columns: [{ field: "month", header: t("claimsDashboard.month") }, { field: "submitted", header: t("claimsDashboard.claimsSubmitted"), format: "count" },
+            { field: "approved", header: t("claimsDashboard.claimsApproved"), format: "count" }, { field: "rejected", header: t("claimsDashboard.claimsRejected"), format: "count" }], rows: trend }}
+          exportName="claims-by-month">
+          <ThemedChart type="line" data={trendData} height={260} />
+        </ChartCard>
+
+        <ChartCard title={t("claimsDashboard.claimsByLob")}
+          table={{ columns: [{ field: "lob", header: t("claimsDashboard.lob") }, { field: "count", header: t("claimsDashboard.claimsCount"), format: "count" }], rows: byLob }} exportName="claims-by-lob">
+          <ShareChart items={byLob.map((r) => ({ label: r.lob, amount: r.count }))} dimension="lob" label={t("claimsDashboard.claimsCount")} format="count" />
+        </ChartCard>
+
+        <ChartCard title={t("claimsDashboard.ageingOfOpenClaims")} subtitle={t("claimsDashboard.ageingHint")}
+          table={{ columns: [{ field: "label", header: t("claimsDashboard.age") }, { field: "count", header: t("claimsDashboard.openClaims"), format: "count" }], rows: ageingRows }} exportName="claims-ageing">
+          <ThemedChart type="bar" data={ageingData} height={220} />
+        </ChartCard>
+
+        <ChartCard title={t("claimsDashboard.claimsByStage")}
+          table={{ columns: [{ field: "status", header: t("claimsDashboard.status") }, { field: "count", header: t("claimsDashboard.claimsCount"), format: "count" }], rows: byStatus }} exportName="claims-by-stage">
+          <ThemedChart type="bar" data={statusData} options={{ indexAxis: "y" }} height={Math.max(160, byStatus.length * 34 + 40)} />
+        </ChartCard>
+
+        <ChartCard title={t("claimsDashboard.claimsByState")}>
+          {claimsByState.length ? claimsByState.map((st) => (
+            <div key={st.state} className="state-item">
+              <div className="state-info">
+                <span className="state-name">{st.state}</span>
+                <span className="state-value">{`${st.value} ${t("claimsDashboard.claims")}`}</span>
+              </div>
+              <div className="bv-meter">
+                <ProgressBar value={progressValue(st.percentage)} showValue={false} />
+                <span className="bv-meter__value">{formatPercent(st.percentage)}</span>
               </div>
             </div>
-          </Card>
+          )) : <div className="bv-viz-empty" style={{ minHeight: 160 }}><span>{t("dashboards.noData")}</span></div>}
+        </ChartCard>
 
-          <Card className="kpi-card">
-            <div className="kpi-content">
-              <i
-                className="pi pi-exclamation-triangle kpi-icon"
-              ></i>
-              <div className="kpi-details">
-                <span className="kpi-label">{t("claimsDashboard.claimsOverdue")}</span>
-                <span className="kpi-value">{kpiData.claimsOverdue}</span>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="kpi-card">
-            <div className="kpi-content">
-              <i
-                className="pi pi-calendar kpi-icon"
-              ></i>
-              <div className="kpi-details">
-                <span className="kpi-label">{t("claimsDashboard.todaysClaims")}</span>
-                <span className="kpi-value">{kpiData.todaysClaims}</span>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="kpi-card">
-            <div className="kpi-content">
-              <i
-                className="pi pi-chart-line kpi-icon"
-              ></i>
-              <div className="kpi-details">
-                <span className="kpi-label">{t("claimsDashboard.highestClaims")}</span>
-                <span className="kpi-value">
-                  {kpiData.highestClaimsCategory}
-                </span>
-                <span className="kpi-percentage">
-                  {formatPercent(kpiData.highestClaimsPercentage)}
-                </span>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="kpi-card">
-            <div className="kpi-content">
-              <i
-                className="pi pi-map-marker kpi-icon"
-              ></i>
-              <div className="kpi-details">
-                <span className="kpi-label">{t("claimsDashboard.maxClaimsByState")}</span>
-                <span className="kpi-value" title={kpiData.maxClaimsByState}>{kpiData.maxClaimsByState}</span>
-                <span className="kpi-percentage">
-                  {formatPercent(kpiData.statePercentage)}
-                </span>
-              </div>
-            </div>
-          </Card>
-        </div>
-      </div>
-
-      {/* Main Content Area */}
-      <div className="dashboard-content">
-        <div className="content-left">
-          {/* Recent Claims Table */}
-          <Card title={t("claimsDashboard.recentClaims")} className="recent-claims-card">
-            <div className="claims-table-container">
-              <DataTable
-                value={recentClaims}
-                loading={loading}
-                paginator
-                rows={20}
-                rowsPerPageOptions={[20, 50, 100]}
-                className="claims-table"
-              >
-                <Column field="claimId" header={t("claimsDashboard.claimId")} />
-                <Column field="lob" header={t("claimsDashboard.lob")} />
-                <Column field="customer" header={t("claimsDashboard.customer")} />
-                <Column field="policy" header={t("claimsDashboard.policy")} />
-                <Column body={(row) => formatAppDate(row.lossDate)} field="lossDate" header={t("claimsDashboard.lossDate")} />
-                <Column body={(row) => formatAppDate(row.reportedDate)} field="reportedDate" header={t("claimsDashboard.reported")} />
-                <Column field="reporter" header={t("claimsDashboard.reporter")} />
-                <Column body={priorityBodyTemplate} header={t("claimsDashboard.priority")} />
-                <Column body={statusBodyTemplate} header={t("claimsDashboard.status")} />
-                <Column field="amount" header={t("claimsDashboard.amount")} className="bv-num" headerClassName="bv-num" />
-                <Column
-                  body={actionBodyTemplate}
-                  header=""
-                  style={{ width: "100px" }}
-                />
-              </DataTable>
-            </div>
-          </Card>
-
-          {/* Claims Trend Chart */}
-          <Card title={t("claimsDashboard.claimsTrendAnalysis")} className="chart-card">
-            <Chart
-              type="line"
-              data={claimsTrendData}
-              options={chart.options({
-                maintainAspectRatio: false,
-                responsive: true,
-                plugins: {
-                  legend: {
-                    position: "bottom",
-                  },
-                },
-              })}
-              style={{ height: "300px" }}
-            />
-          </Card>
-        </div>
-
-        <div className="content-right">
-          {/* Claims by State */}
-          <Card title={t("claimsDashboard.claimsByState")} className="state-card">
-            {claimsByState.map((state) => (
-              <div key={state.state} className="state-item">
-                <div className="state-info">
-                  <span className="state-name">{state.state}</span>
-                  <span className="state-value">{state.value} {t("claimsDashboard.claims")}</span>
-                </div>
-                <div className="bv-meter">
-                  <ProgressBar value={progressValue(state.percentage)} showValue={false} />
-                  <span className="bv-meter__value">{formatPercent(state.percentage)}</span>
-                </div>
-              </div>
-            ))}
-          </Card>
-
-          {/* Claims by Source */}
-          <Card title={t("claimsDashboard.claimsBySource")} className="source-card">
-            <Chart
-              type="doughnut"
-              data={claimsBySourceData}
-              options={chart.options({
-                maintainAspectRatio: false,
-                responsive: true,
-                plugins: {
-                  legend: {
-                    position: "bottom",
-                  },
-                },
-              })}
-              style={{ height: "250px" }}
-            />
-          </Card>
-
-          {/* Loss Ratio */}
-          <Card title={t("claimsDashboard.lossRatioByProduct")} className="loss-ratio-card">
-            <Chart
-              type="bar"
-              data={lossRatioData}
-              options={chart.options({
-                maintainAspectRatio: false,
-                responsive: true,
-                plugins: {
-                  legend: {
-                    display: false,
-                  },
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    max: 100,
-                  },
-                },
-              })}
-              style={{ height: "200px" }}
-            />
-          </Card>
-        </div>
+        <ChartCard className="bv-dash-grid__wide" title={t("claimsDashboard.recentClaims")}>
+          <DataTable value={recentClaims} loading={loading && !data} className="claims-table" size="small" emptyMessage={t("dashboards.noData")}>
+            <Column field="claimId" header={t("claimsDashboard.claimId")} />
+            <Column field="lob" header={t("claimsDashboard.lob")} />
+            <Column field="customer" header={t("claimsDashboard.customer")} />
+            <Column field="policy" header={t("claimsDashboard.policy")} />
+            <Column body={(row) => formatAppDate(row.lossDate)} field="lossDate" header={t("claimsDashboard.lossDate")} />
+            <Column body={(row) => formatAppDate(row.reportedDate)} field="reportedDate" header={t("claimsDashboard.reported")} />
+            <Column field="reporter" header={t("claimsDashboard.reporter")} />
+            <Column body={priorityBodyTemplate} header={t("claimsDashboard.priority")} />
+            <Column body={statusBodyTemplate} header={t("claimsDashboard.status")} />
+            <Column field="amount" header={t("claimsDashboard.amount")} body={(row) => (row.amount ? formatCurrency(row.amount) : "-")} className="bv-num" headerClassName="bv-num" />
+            <Column body={actionBodyTemplate} header="" style={{ width: "100px" }} />
+          </DataTable>
+        </ChartCard>
       </div>
     </div>
   );

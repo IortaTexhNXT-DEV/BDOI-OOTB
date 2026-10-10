@@ -12,27 +12,28 @@ import { ProgressBar } from "primereact/progressbar";
 import { Tag } from "primereact/tag";
 import { Badge } from "primereact/badge";
 import { Dialog } from "primereact/dialog";
-import { MultiSelect } from "primereact/multiselect";
 import { Toast } from "primereact/toast";
 import remittanceService from "../../../services/remittanceService";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { calendarDateFormat, dateBody, downloadCsv, isoDate, showError } from "../shared";
 import { useChartTheme } from "../../../theme/chartTheme";
+import StatCards from "../../../components/StatCards";
+import { ChartCard, DashboardToolbar, ThemedChart, periodRange as dashboardPeriod } from "../../../components/Dashboard";
+import { businessDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 import { numberLocale } from "../../../utility/currencyConverter";
 import { progressValue, roundTo } from "../../../utility/numberFormat";
 const DAY_MS = 86400000;
 
-/** Date range for a period option. */
+/** Date range for a period option, in business dates (general.timezone). */
 const periodRange = (period, custom) => {
-  const now = new Date();
-  const to = isoDate(now);
+  const to = businessDate();
   if (period === "Custom Range") return { from: isoDate(custom?.[0]), to: isoDate(custom?.[1]) || to };
-  if (period === "Last 7 Days") return { from: isoDate(new Date(now - 7 * DAY_MS)), to };
-  if (period === "This Month") return { from: isoDate(new Date(now.getFullYear(), now.getMonth(), 1)), to };
-  if (period === "Last 3 Months") return { from: isoDate(new Date(now.getFullYear(), now.getMonth() - 2, 1)), to };
-  return { from: isoDate(new Date(now.getFullYear(), 0, 1)), to };
+  if (period === "Last 7 Days") return { from: businessDate(new Date(Date.now() - 7 * DAY_MS)), to };
+  if (period === "This Month") return { from: dashboardPeriod("month").from, to };
+  if (period === "Last 3 Months") return { from: isoDate(new Date(Number(to.slice(0, 4)), Number(to.slice(5, 7)) - 3, 1)), to };
+  return { from: dashboardPeriod("year").from, to };
 };
 
 const pctChange = (current, previous) => (previous ? ((current - previous) / previous) * 100 : 0);
@@ -45,7 +46,7 @@ const RemittanceAnalytics = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [dateRange, setDateRange] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState("This Month");
-  const [selectedMetrics, setSelectedMetrics] = useState(["Volume", "Value", "Success Rate"]);
+  const [asOf, setAsOf] = useState(null);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [selectedChart, setSelectedChart] = useState(null);
   const [analytics, setAnalytics] = useState({ kpiData: [], topClients: [], monthlyTrend: [], statusDistribution: {} });
@@ -59,6 +60,7 @@ const RemittanceAnalytics = () => {
         remittanceService.agencies()
       ]);
       setAnalytics(data);
+      setAsOf(new Date());
       const maxCommission = Math.max(1, ...agents.map((a) => Number(a.commission || 0)));
       setTopAgents(agents.filter((a) => a.policyCount > 0).sort((a, b) => b.commission - a.commission).slice(0, 10).map((a) => ({
         agentName: a.agencyName,
@@ -115,13 +117,14 @@ const RemittanceAnalytics = () => {
     ]
   };
 
+  const statusRows = Object.entries(statusDistribution).map(([status, count]) => ({ status, count })).sort((a, b) => b.count - a.count);
   const settlementStatusData = {
-    labels: Object.keys(statusDistribution),
+    labels: statusRows.map((r) => r.status),
     datasets: [
       {
-        data: Object.values(statusDistribution),
-        backgroundColor: chart.statuses(Object.keys(statusDistribution)),
-        borderWidth: 0
+        label: "Remittances",
+        data: statusRows.map((r) => r.count),
+        backgroundColor: chart.primary
       }
     ]
   };
@@ -155,14 +158,6 @@ const RemittanceAnalytics = () => {
     { label: "Custom Range", value: "Custom Range" }
   ];
 
-  const metricsOptions = [
-    { label: "Volume", value: "Volume" },
-    { label: "Value", value: "Value" },
-    { label: "Success Rate", value: "Success Rate" },
-    { label: "Processing Time", value: "Processing Time" },
-    { label: "Exception Rate", value: "Exception Rate" }
-  ];
-
   const chartOptions = chart.options({
     responsive: true,
     maintainAspectRatio: false,
@@ -179,13 +174,20 @@ const RemittanceAnalytics = () => {
     }
   });
 
-  const pieChartOptions = chart.options({
+  const statusChartOptions = chart.options({
+    indexAxis: 'y',
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'right'
+        display: false
       }
+    },
+    scales: {
+      x: {
+        beginAtZero: true
+      },
+      y: {}
     }
   });
 
@@ -287,166 +289,66 @@ const RemittanceAnalytics = () => {
   );
 
   return (
-    <div className="remittance-analytics">
+    <div className="remittance-analytics bv-dash-page">
       <Toast ref={toast} />
-      <div className="header-section">
-        <h2>{t("remittance.analyticsDashboard")}</h2>
-        <div className="header-actions">
-          <Button
-            label="Export"
-            icon="pi pi-download"
-            className="p-button-outlined mr-2"
-            onClick={handleExportData}
-          />
-          <Button
-            label="Refresh"
-            icon="pi pi-refresh"
-            className="p-button-outlined"
-            onClick={handleRefreshData}
-          />
-        </div>
-      </div>
-
-      <div className="controls-section">
-        <div className="control-group">
-          <label>Time Period:</label>
-          <Dropdown
-            value={selectedPeriod}
-            options={periodOptions}
-            onChange={(e) => setSelectedPeriod(e.value)}
-            className="period-dropdown"
-          />
-        </div>
+      <DashboardToolbar title={t("remittance.analyticsDashboard")} range={periodRange(selectedPeriod, dateRange)} asOf={asOf} onRefresh={handleRefreshData}
+        actions={<Button label="Export" icon="pi pi-download" className="p-button-outlined" onClick={handleExportData} />}>
+        <Dropdown value={selectedPeriod} options={periodOptions} onChange={(e) => setSelectedPeriod(e.value)} className="period-dropdown" aria-label="Time period" />
         {selectedPeriod === "Custom Range" && (
-          <div className="control-group">
-            <label>Date Range:</label>
-            <Calendar dateFormat={calendarDateFormat()}
-              value={dateRange}
-              onChange={(e) => setDateRange(e.value)}
-              selectionMode="range"
-              placeholder="Select date range"
-            />
-          </div>
+          <Calendar dateFormat={calendarDateFormat()} value={dateRange} onChange={(e) => setDateRange(e.value)} selectionMode="range" placeholder="Select date range" aria-label="Date range" />
         )}
-        <div className="control-group">
-          <label>Metrics:</label>
-          <MultiSelect
-            value={selectedMetrics}
-            options={metricsOptions}
-            onChange={(e) => setSelectedMetrics(e.value)}
-            display="chip"
-            className="metrics-selector"
-          />
-        </div>
-      </div>
+      </DashboardToolbar>
 
-      <div className="kpi-section">
-        <div className="kpi-grid">
-          {/* four cards hold their places until the figures arrive, so the charts below do not move */}
-          {!kpiData.length && [0, 1, 2, 3].map((i) => <Card key={`placeholder-${i}`} className="kpi-card" aria-hidden="true" />)}
-          {kpiData.map(kpi => (
-            <Card key={kpi.id} className="kpi-card">
-              <div className="kpi-content">
-                <div className="kpi-header">
-                  <h4>{kpi.name}</h4>
-                  <div className={`kpi-trend ${kpi.trend >= 0 ? 'positive' : 'negative'}`}>
-                    <i className={`pi ${kpi.trend >= 0 ? 'pi-arrow-up' : 'pi-arrow-down'}`} />
-                    <span>{formatPercent(kpi.trend)}</span>
-                  </div>
-                </div>
-                <div className="kpi-details">
-                  <div className="kpi-value">
-                    {kpi.value} {kpi.unit}
-                  </div>
-                  <div className="kpi-target">
-                    Target: {kpi.target} {kpi.unit}
-                  </div>
-                  {kpi.target > 0 && (
-                    <div className="bv-meter">
-                      <ProgressBar value={progressValue((Number(kpi.value || 0) / kpi.target) * 100)} showValue={false} />
-                      <span className="bv-meter__value">{`${roundTo((Number(kpi.value || 0) / kpi.target) * 100, 1) ?? 0}% of target`}</span>
-                    </div>
-                  )}
-                  <div className="kpi-description">
-                    {kpi.description}
-                  </div>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </div>
+      <StatCards className="bv-stat-cards--wide remittance-kpis" items={kpiData.length ? kpiData.map((k) => ({
+        key: String(k.id),
+        label: k.name,
+        value: `${k.value} ${k.unit}`,
+        change: Number.isFinite(Number(k.trend)) ? Number(k.trend) : null,
+        good: /time|exception/i.test(k.name) ? "down" : "up",
+        comparison: "vs previous period",
+        note: `Target ${k.target} ${k.unit}`,
+        status: k.status === "success" ? { severity: "good", label: "On target" } : { severity: "warning", label: "Off target" },
+      })) : [0, 1, 2, 3].map((i) => ({ key: `placeholder-${i}`, label: "\u00a0", value: null }))} />
 
-      <Card className="mt-4">
+      <Card>
         <TabView activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)}>
           <TabPanel header="Performance Overview">
-            <div className="charts-grid">
-              <Card className="chart-card">
-                <h4>Transaction Volume Trend</h4>
-                <div className="chart-container">
-                  <Chart
-                    type="line"
-                    data={volumeChartData}
-                    options={chartOptions}
-                    onClick={() => {
-                      setSelectedChart('volume');
-                      setShowDetailDialog(true);
-                    }}
-                  />
-                </div>
-              </Card>
-
-              <Card className="chart-card">
-                <h4>Revenue Analysis</h4>
-                <div className="chart-container">
-                  <Chart
-                    type="bar"
-                    data={revenueChartData}
-                    options={chartOptions}
-                    onClick={() => {
-                      setSelectedChart('revenue');
-                      setShowDetailDialog(true);
-                    }}
-                  />
-                </div>
-              </Card>
-
-              <Card className="chart-card">
-                <h4>Settlement Status Distribution</h4>
-                <div className="chart-container">
-                  <Chart
-                    type="pie"
-                    data={settlementStatusData}
-                    options={pieChartOptions}
-                    onClick={() => {
-                      setSelectedChart('settlement');
-                      setShowDetailDialog(true);
-                    }}
-                  />
-                </div>
-              </Card>
-
-              <Card className="chart-card summary-stats">
-                <h4>Key Statistics</h4>
+            <div className="bv-dash-grid">
+              <ChartCard title="Transaction volume by month" exportName="remittance-volume-by-month"
+                table={{ columns: [{ field: "month", header: "Month" }, { field: "count", header: "Transactions", format: "count" }], rows: monthlyTrend }}
+                actions={<Button type="button" icon="pi pi-window-maximize" text rounded size="small" className="bv-viz-tool" aria-label="Detailed view" onClick={() => { setSelectedChart('volume'); setShowDetailDialog(true); }} />}>
+                <ThemedChart type="line" data={volumeChartData} height={240} />
+              </ChartCard>
+              <ChartCard title="Remitted value by month" exportName="remittance-value-by-month"
+                table={{ columns: [{ field: "month", header: "Month" }, { field: "value", header: "Value", format: "currency" }], rows: monthlyTrend }}
+                actions={<Button type="button" icon="pi pi-window-maximize" text rounded size="small" className="bv-viz-tool" aria-label="Detailed view" onClick={() => { setSelectedChart('revenue'); setShowDetailDialog(true); }} />}>
+                <ThemedChart type="bar" data={revenueChartData} format="currency" directLabels={false} height={240} />
+              </ChartCard>
+              <ChartCard title="Remittances by settlement status" exportName="remittance-by-status"
+                table={{ columns: [{ field: "status", header: "Status" }, { field: "count", header: "Remittances", format: "count" }], rows: statusRows }}
+                actions={<Button type="button" icon="pi pi-window-maximize" text rounded size="small" className="bv-viz-tool" aria-label="Detailed view" onClick={() => { setSelectedChart('settlement'); setShowDetailDialog(true); }} />}>
+                <ThemedChart type="bar" data={settlementStatusData} options={{ indexAxis: "y" }} height={Math.max(140, statusRows.length * 34 + 40)} />
+              </ChartCard>
+              <ChartCard title="Key statistics">
                 <div className="stats-list">
                   <div className="stat-item">
-                    <span className="stat-label">Total Transactions</span>
+                    <span className="stat-label">Total transactions</span>
                     <span className="stat-value">{totalCount.toLocaleString(numberLocale())}</span>
                   </div>
                   <div className="stat-item">
-                    <span className="stat-label">Total Value</span>
+                    <span className="stat-label">Total value</span>
                     <span className="stat-value">{formatCurrency(totalValue)}</span>
                   </div>
                   <div className="stat-item">
-                    <span className="stat-label">Avg Processing Time</span>
+                    <span className="stat-label">Average processing time</span>
                     <span className="stat-value">{processing.value ?? 0} hours</span>
                   </div>
                   <div className="stat-item">
-                    <span className="stat-label">Success Rate</span>
-                    <span className="stat-value">{formatPercent(kpi("Payment Success Rate").value ?? 0)}</span>
+                    <span className="stat-label">Payment success rate</span>
+                    <span className="stat-value">{`${Number(kpi("Payment Success Rate").value ?? 0).toLocaleString(numberLocale(), { maximumFractionDigits: 1 })}%`}</span>
                   </div>
                 </div>
-              </Card>
+              </ChartCard>
             </div>
           </TabPanel>
 
@@ -629,12 +531,12 @@ const RemittanceAnalytics = () => {
               <h3>Settlement Status Distribution</h3>
               <div className="detail-chart-container">
                 <Chart
-                  type="pie"
+                  type="bar"
                   data={settlementStatusData}
                   options={{
-                    ...pieChartOptions,
+                    ...statusChartOptions,
                     plugins: {
-                      ...pieChartOptions.plugins,
+                      ...statusChartOptions.plugins,
                       title: {
                         display: true,
                         text: 'Current Settlement Status Breakdown'
