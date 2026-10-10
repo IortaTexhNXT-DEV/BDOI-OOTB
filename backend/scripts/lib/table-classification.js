@@ -80,6 +80,7 @@ export const TRANSACTION_TABLES = [
  *   remove     emptied
  *   partial    some rows go (see the reset script: documents by storage folder, sequences by series)
  *   optional   removed unless an option keeps it (opening balances: --keep-opening-balances; audit: kept unless --purge-audit)
+ *   mark-reset kept, the rows about removed records marked (loaded migration batches: undone by the transaction reset)
  *   keep       left as is
  */
 export const SYSTEM_RESET_ACTIONS = {
@@ -91,9 +92,11 @@ export const SYSTEM_RESET_ACTIONS = {
   login_history: 'remove',
   refresh_tokens: 'remove', // sign-in sessions: everyone signs in again
   password_resets: 'remove',
-  data_load_batches: 'remove', // go-live data load history: the loads of a smoke test go with the records they created
-  data_load_rows: 'remove',
-  data_load_comparisons: 'remove', // environment comparisons go with the load history (compare again after the reset)
+  // go-live data load history: kept as evidence across mock runs; the loaded migration batches (whose records the reset
+  // removes) and their rows are marked undone by the transaction reset
+  data_load_batches: 'mark-reset',
+  data_load_rows: 'mark-reset',
+  data_load_comparisons: 'keep', // environment comparisons stay with the load history
   documents: 'partial', // uploaded and generated file records of transaction folders (TRANSACTION_FILE_FOLDERS)
   sequences: 'partial', // document number counters: transaction series restart (MASTER_SERIES keep their counter)
   opening_balances: 'optional', // go-live opening balances: removed unless --keep-opening-balances
