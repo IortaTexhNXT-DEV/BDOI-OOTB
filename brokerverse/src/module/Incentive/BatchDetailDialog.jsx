@@ -155,7 +155,7 @@ const BatchDetailDialog = ({ batchId, onHide, onChanged }) => {
 
   const batchLoader = useCallback(() => incentiveService.getCalculation(batchId), [batchId]);
   const activityLoader = useCallback(() => incentiveService.calculationActivity(batchId), [batchId]);
-  const { data: batch, loading, refreshing, error, reload } = useStableLoad(batchLoader, { enabled: open });
+  const { data: batch, refreshing, error, reload } = useStableLoad(batchLoader, { enabled: open });
   const activity = useStableLoad(activityLoader, { enabled: open });
 
   const shown = batch && batch.batchId === batchId ? batch : null;
@@ -223,7 +223,7 @@ const BatchDetailDialog = ({ batchId, onHide, onChanged }) => {
       <DetailDialog visible={open} onHide={onHide} header={t("incentive.batch.title")} size="xl" footer={footer}>
         <div className="bv-loading-host">
           <LoadingBar active={refreshing} />
-          {!shown && loading ? <Skeleton height="10rem" /> : null}
+          {!shown && !error ? <Skeleton height="10rem" /> : null}
           {!shown && error ? <FieldError error={error} /> : null}
           {shown ? (
             <>
