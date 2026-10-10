@@ -150,6 +150,18 @@ export async function withProducts(codes = null) {
 }
 
 /**
+ * Switch back on the starter records TISPH does not use (seed 93_tisph_master_data.sql), as an administrator would: the
+ * insurers MAPFRE, FPG and Mercantile, the foreign currencies and the bank file layouts other than Metrobank. For suites
+ * that test other insurers, foreign currencies or other banks' payment files.
+ */
+export async function withStarterMasters() {
+  const { query } = await import('../src/db/pool.js');
+  await query("UPDATE insurance_companies SET status = 'active', updated_by = 'test' WHERE code IN ('MAPFRE', 'FPG', 'MERCANTILE')");
+  await query("UPDATE currencies SET status = 'active', updated_by = 'test' WHERE code IN ('USD', 'EUR', 'SGD', 'JPY')");
+  await query("UPDATE bank_file_layouts SET active = true, updated_by = 'test' WHERE code IN ('BDO-BULK', 'BPI-BULK', 'LBP-BULK', 'UBP-BULK', 'GENERIC-CSV')");
+}
+
+/**
  * The packaged products the package suites price (test/fixtures/packaged-products.sql: insurer rate tables and the SME
  * Shield and Home Protect bundles, on lines TISPH does not sell), loaded before withProducts() switches those lines on.
  */

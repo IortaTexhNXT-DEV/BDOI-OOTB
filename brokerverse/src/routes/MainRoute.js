@@ -16,10 +16,6 @@ import Paymentvoucher from "../module/PaymentVoucher/index";
 import CreateVoucher from "../module/PaymentVoucher/CreateVoucher/index";
 import Detailview from "../module/PaymentVoucher/DetailView/index";
 import BulkDisburse from "../module/PaymentVoucher/BulkDisburse";
-import BranchMasterInitial from "../module/FinanceMastersModule/BranchMaster/BranchMasterInitial";
-import BranchAdding from "../module/FinanceMastersModule/BranchMaster/BranchAdding";
-import BranchDetailsView from "../module/FinanceMastersModule/BranchMaster/BranchDetailsView";
-import CompanyMaster from "../module/FinanceMastersModule/CompanyMaster";
 import CurrencyMaster from "../module/FinanceMastersModule/CurrencyMaster";
 import ExchangeRateMaster from "../module/FinanceMastersModule/ExchangeRateMaster";
 // Main / Sub Account masters are the GL chart of accounts
@@ -848,19 +844,9 @@ const Maincomponent = () => {
             element={<MasterRecordView entity="role"><AddRole action="view" /></MasterRecordView>}
           />
 
-          {/* Branch Master Module */}
-          <Route
-            path="master/finance/branch/branchadding"
-            element={<BranchAdding />}
-          />
-          <Route
-            path="master/finance/branch/branchdetailsview"
-            element={<BranchDetailsView />}
-          />
-          <Route
-            path="master/finance/branch"
-            element={<BranchMasterInitial />}
-          />
+          {/* the earlier finance Branch and Company masters open the Organization masters */}
+          <Route path="master/finance/branch/*" element={<Navigate to="/master/generals/organization/branchmaster" replace />} />
+          <Route path="master/finance/company/*" element={<Navigate to="/master/generals/organization/companymaster" replace />} />
 
           {/* Department Master Module */}
           <Route
@@ -904,7 +890,6 @@ const Maincomponent = () => {
           <Route path="master/configuration/features" element={<FeatureCatalogue />} />
           <Route path="master/platform/features" element={<PlatformFeatures />} />
           <Route path="master/configuration/email-outbox" element={<EmailOutboxPage />} />
-          <Route path="master/finance/company" element={<CompanyMaster />} />
           <Route path="master/finance/currency" element={<CurrencyMaster />} />
 
           {/* Bank */}

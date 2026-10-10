@@ -140,6 +140,14 @@ describe("TISPH roles (RBAC v4): menus", () => {
     });
   });
 
+  it("opens the department and policy type masters only to the roles that see the Organization and Insurance Management masters", () => {
+    for (const p of ["/master/finance/department", "/master/finance/department/departmentadding", "/master/generals/insurancemanagement/policytype",
+      "/master/generals/insurancemanagement/policytype/edit/3"]) {
+      expect(isPathAllowed(p, menuList, ["tis-it-admin"])).toBe(true);
+      for (const role of TIS_ROLES.filter((r) => r !== "tis-it-admin")) expect(isPathAllowed(p, menuList, [role])).toBe(false);
+    }
+  });
+
   it("ships the TISPH edition of the user manual, with a chapter per role and a section for every screen of its menus", () => {
     const config = JSON.parse(fs.readFileSync(path.join(__dirname, "../../help.config.json"), "utf8"));
     const manual = JSON.parse(fs.readFileSync(path.join(__dirname, "../../public/help/sections.json"), "utf8"));

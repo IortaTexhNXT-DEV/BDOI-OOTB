@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs, withPackagedProducts, enableFeatures } from './helpers.js';
+import { setup, loginAs, withPackagedProducts, withStarterMasters, enableFeatures } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { premiumOnRate } from '../src/modules/packages/rateTables.js';
 import { insurerTotals } from '../src/modules/packages/issue.js';
@@ -23,6 +23,7 @@ beforeAll(async () => {
   ctx = await setup();
   // functions of a later release (modules/features), enabled as the platform administrators do
   await enableFeatures(ctx.app, ['package-bundles', 'payment-gateways']);
+  await withStarterMasters();
   await withPackagedProducts();
   sales = await persona('pk.sales', ['sales']);
   processing = await persona('pk.processing', ['processing']);
