@@ -156,6 +156,14 @@ describe('record history from the record itself', () => {
     const policy = (await ctx.api('get', '/audit/records/policy/POL-LC-0001')).body.data;
     expect(policy.map((e) => e.title)).toEqual(['Policy created']);
 
+    // a master record loaded with the set-up data still says when and by whom it was created
+    const cat = (await q(`INSERT INTO master_records(type_code, code, name, data, created_by) VALUES ('account-category', 'AC-LC', 'Lc category', '{}', $1) RETURNING id`, [admin])).rows[0];
+    const catTrail = (await ctx.api('get', `/audit/records/master:account-category/${cat.id}`)).body.data;
+    expect(catTrail).toHaveLength(1);
+    expect(catTrail[0]).toMatchObject({ action: 'create', user: { displayName: 'BrokerVerse Administrator' } });
+    const sig = (await q("SELECT id FROM signatories ORDER BY id LIMIT 1")).rows[0];
+    expect((await ctx.api('get', `/audit/records/master:signatory/${sig.id}`)).body.data.map((e) => e.action)).toEqual(['create']);
+
     // looked up by its number, and steps taken at the same moment read newest first: posted above created
     const journal = (await ctx.api('get', '/audit/records/journal_voucher/JV-LC-0001')).body.data;
     expect(journal.map((e) => e.action)).toEqual(['post', 'create']);

@@ -9,6 +9,7 @@ import { businessTimeZone } from '../../lib/dates.js';
 import { ENTITIES } from '../../lib/scope.js';
 import { RECORD_KEYS, groupFieldChanges, toEvents } from '../../lib/auditEvents.js';
 import { actionText, entityLabel } from '../../lib/auditLabels.js';
+import { getType } from '../masters/service.js';
 
 const COLUMNS = 'a.id, a.at, a.user_id, a.username, a.entity, a.entity_id, a.action, a.before_data, a.after_data, a.source';
 
@@ -77,8 +78,26 @@ const LIFECYCLE = {
 const SAME_STEP = { create: /^(create|create-from-.*|bulk-create|go-live-migration|convert.*)$/, 'convert-to-policy': /^(convert-to-policy|update-converted-policy)$/ };
 const sqlOf = (expr) => (/^[a-z_]+$/.test(expr) ? `t.${expr}` : expr);
 
+/**
+ * The creation of a master record loaded with the set-up data or before the trail was written: when and by whom, from
+ * the record itself, when the trail has no entry for it.
+ */
+async function masterCreation(entity, id, stored) {
+  if (stored.some((r) => SAME_STEP.create.test(String(r.action || '')))) return [];
+  const t = await getType(entity.slice('master:'.length)).catch(() => null);
+  if (!t || !['table', 'generic'].includes(t.storage)) return [];
+  const rec = t.storage === 'table'
+    ? await one(`SELECT created_at, created_by FROM "${t.table_name}" WHERE id::text = $1`, [id]).catch(() => null)
+    : await one('SELECT created_at, created_by FROM master_records WHERE id::text = $1 AND type_code = $2', [id, t.code]).catch(() => null);
+  if (!rec?.created_at) return [];
+  const by = rec.created_by || null;
+  return [{ id: `create-${id}`, at: rec.created_at, user_id: by && /^usr_/.test(by) ? by : null, username: by && !/^usr_/.test(by) ? by : null,
+    entity, entity_id: id, action: 'create', before_data: null, after_data: null, source: { channel: 'record' }, step: 0 }];
+}
+
 /** The steps of a record taken from its own columns that its trail does not hold, as audit rows (in step order). */
 async function lifecycleRows(entity, id, stored) {
+  if (String(entity).startsWith('master:')) return masterCreation(entity, id, stored);
   const [table, steps] = LIFECYCLE[entity] || [];
   if (!table) return [];
   const cols = steps.flatMap(([, at, by, extra = {}], i) => [

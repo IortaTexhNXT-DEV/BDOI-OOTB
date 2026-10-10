@@ -304,7 +304,7 @@ export const HistoryDialog = ({ kind, row, onHide }) => {
   const title = name && row.label && name !== row.label ? `${name} (${row.label})` : name || row.label || "";
   return (
     <DetailDialog visible onHide={onHide} header={t("productConfigurator.history.title", { name: title })} size="md">
-      <ActivityLog entries={fromConfigurationHistory(rows)} loading={loading} error={error} onRetry={load} emptyText={t("productConfigurator.history.empty")} />
+      <ActivityLog entries={fromConfigurationHistory(rows)} loading={loading} error={error} onRetry={load} />
     </DetailDialog>
   );
 };

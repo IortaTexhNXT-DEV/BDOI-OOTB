@@ -394,7 +394,7 @@ const PostingRules = () => {
 
       {history ? (
         <DetailDialog visible onHide={() => setHistory(null)} header={t("postingRules.historyOf", { event: selected?.label || selected?.eventCode || "" })} size="md">
-          <ActivityLog entries={fromPostingRuleHistory(history.rows)} loading={history.loading} error={history.error} onRetry={openHistory} emptyText={t("postingRules.noHistory")} />
+          <ActivityLog entries={fromPostingRuleHistory(history.rows)} loading={history.loading} error={history.error} onRetry={openHistory} />
         </DetailDialog>
       ) : null}
     </div>
