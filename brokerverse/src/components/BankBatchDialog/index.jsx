@@ -25,6 +25,7 @@ import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
 import DateField from "../DateField";
+import StatusChip from "../StatusChip";
 import { codeAmount } from "../../utility/currencyConverter";
 import { canOpen } from "../../utils/canOpen";
 import service from "../../services/integrationsService";
@@ -180,7 +181,7 @@ const BankBatchDialog = ({ visible, onHide, onCreated, preselectedIds, payeeType
           {dateProblem ? <small id="bank-batch-value-date-problem" className="bv-bank-batch__problem">{t(`bankBatchDialog.valueDateProblem.${dateProblem}`)}</small> : null}
         </div>
       </div>
-      {layout?.isExample && canOpen(LAYOUTS) ? <Message severity="warn" className="w-full bv-bank-batch__starter" text={t("integrations.exampleLayout")} /> : null}
+      {layout?.isExample && canOpen(LAYOUTS) ? <div className="bv-bank-batch__starter"><StatusChip label={t("integrations.starterLayout")} severity="warning" /></div> : null}
 
       <h3 className="bv-bank-batch__title">{preset ? t("bankBatchDialog.included") : t("bankBatchDialog.vouchers")}</h3>
       {missing > 0 ? <p className="bv-bank-batch__missing" role="status">{t("bankBatchDialog.notEligible", { count: missing })}</p> : null}
