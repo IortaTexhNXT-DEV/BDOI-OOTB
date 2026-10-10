@@ -918,6 +918,8 @@ export const menuList = [
               "/master/generals/organization/branchmaster/add/",
               "/master/generals/organization/branchmaster/edit/",
               "/master/generals/organization/branchmaster/view/",
+              // the departments of the branches
+              "/master/finance/department",
             ],
           },
           // the activity types and outcomes account executives choose when they log a sales activity
@@ -961,6 +963,8 @@ export const menuList = [
               "/master/generals/insurancemanagement/productmaster/add/",
               "/master/generals/insurancemanagement/productmaster/edit/",
               "/master/generals/insurancemanagement/productmaster/view/",
+              // the policy types (sub-classes) of the products
+              "/master/generals/insurancemanagement/policytype",
             ],
           },
           {

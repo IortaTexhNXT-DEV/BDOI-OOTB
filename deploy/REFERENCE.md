@@ -132,7 +132,7 @@ job that is running elsewhere answers `Job skipped`.
 |---|---|---|
 | `GET /api/health` | load balancer / readiness check (Docker `HEALTHCHECK`) | `200` with `{"status":"ok","ready":true,"database":{"reachable":true,"latencyMs":1},"pendingMigrations":0,...}` when start-up (migrations and seed) has finished, PostgreSQL answers and no migration is pending; otherwise `503` with `ready: false` and `status` `starting` or `unavailable` (e.g. `database.reachable: false`). It also answers `503` once the instance starts shutting down, so traffic drains. |
 | `GET /api/health/live` | liveness (restart) probe | `200` while the process serves HTTP; no database check |
-| `GET /api/version` | monitoring, post-deploy smoke test | version, `commit` and `buildTime` (from `GIT_COMMIT` / `BUILD_TIME`, else the release artefact's `build-info.json`), `ref`, `appEnvironment` (`APP_ENVIRONMENT`), start time, database reachability, pending migrations |
+| `GET /api/version` | monitoring, post-deploy smoke test | version, `commit` and `buildTime` (from `GIT_COMMIT` / `BUILD_TIME`, else the release artefact's `build-info.json`), `ref`, `appEnvironment` (`APP_ENVIRONMENT`), start time, database reachability, pending migrations, `release` (Help > About: web and API release, environment name, and for a signed-in user the approvers of the release; settings `release.*` on Master > Configuration > Release, `APP_ENVIRONMENT` wins over the environment name) |
 
 Health endpoints need no sign-in, are not rate limited and are not logged. The database check times out after
 `HEALTH_DB_TIMEOUT_MS` (default 2000 ms).

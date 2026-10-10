@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { setup } from './helpers.js';
+import { setup, withStarterMasters } from './helpers.js';
 import { one, pool, query } from '../src/db/pool.js';
 import { clearSettingsCache, getSetting } from '../src/lib/settings.js';
 import { clearLetterheadCache } from '../src/lib/letterhead.js';
@@ -20,7 +20,10 @@ const BRANDING = 'the brand pack (BRAND_PACK) and Master > System Configuration 
 
 const MIGRATIONS = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src', 'db', 'migrations');
 let ctx;
-beforeAll(async () => { ctx = await setup(); });
+beforeAll(async () => {
+  ctx = await setup();
+  await withStarterMasters();
+});
 afterAll(async () => { await pool.end(); });
 
 const value = async (key) => (await one('SELECT value FROM app_settings WHERE key = $1', [key]))?.value;

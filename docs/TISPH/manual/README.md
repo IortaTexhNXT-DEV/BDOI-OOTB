@@ -6,7 +6,7 @@ the base edition for other clients; `brokerverse/help.config.json` names the edi
 
 | Path | Contents |
 |---|---|
-| `manual.json` | The edition: title, version, date, status, document control, Toyota Insurance Services brand pack, file names, the chapter files in order, the forbidden terms |
+| `manual.json` | The edition: title, version and its label (`versionLabel`, "PH Version": the Help panel shows "PH Version 1.3 - 10 October 2026 Draft"), date, status, document control, Toyota Insurance Services brand pack, file names, the chapter files in order, the forbidden terms |
 | `chapters/` | One file per chapter: about, getting started, the TISPH process, one chapter per role (`role-<role>.md`), the screen reference (`screens-*.md`), reports, glossary |
 | `generated/role-facts.json`, `generated/roles/` | Per role: menus, access, approvals, limits, segregation of duties. Written by `npm run manual:role-facts` in `backend/`, never by hand |
 | `generated/TISPH_User_Manual.md` | The assembled source of the Word file, written by `npm run help:build` |

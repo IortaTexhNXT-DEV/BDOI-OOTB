@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
-    "version": "1.0.0",
+    "version": "2026.1.3",
     "description": "BrokerVerse Platform API (1351 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -97907,7 +97907,7 @@
       "name": "System",
       "item": [
         {
-          "name": "Build and runtime information: name, version, git commit (GIT_COMMIT), build time (BUILD_TIME), release ref (GIT_REF), environment name (APP_ENVIRONMENT), start time, Node version, database reachability, pending migrations",
+          "name": "Build and runtime information: name, version, git commit (GIT_COMMIT), build time (BUILD_TIME), release ref (GIT_REF), environment name (APP_ENVIRONMENT), start time, Node version, database reachability, pending migrations; release: the release identity of Help > About (settings release.*: web and API release, environment name, and with a bearer token the approvers of the release)",
           "request": {
             "method": "GET",
             "header": [],
@@ -97920,7 +97920,7 @@
                 "version"
               ]
             },
-            "description": "Build and runtime information: name, version, git commit (GIT_COMMIT), build time (BUILD_TIME), release ref (GIT_REF), environment name (APP_ENVIRONMENT), start time, Node version, database reachability, pending migrations\n\nFront-end touchpoint: Operations / monitoring\n\nAccess: Public",
+            "description": "Build and runtime information: name, version, git commit (GIT_COMMIT), build time (BUILD_TIME), release ref (GIT_REF), environment name (APP_ENVIRONMENT), start time, Node version, database reachability, pending migrations; release: the release identity of Help > About (settings release.*: web and API release, environment name, and with a bearer token the approvers of the release)\n\nFront-end touchpoint: Operations / monitoring; Help > About\n\nAccess: Public",
             "auth": {
               "type": "noauth"
             }
@@ -97940,7 +97940,7 @@
                     "version"
                   ]
                 },
-                "description": "Build and runtime information: name, version, git commit (GIT_COMMIT), build time (BUILD_TIME), release ref (GIT_REF), environment name (APP_ENVIRONMENT), start time, Node version, database reachability, pending migrations\n\nFront-end touchpoint: Operations / monitoring\n\nAccess: Public",
+                "description": "Build and runtime information: name, version, git commit (GIT_COMMIT), build time (BUILD_TIME), release ref (GIT_REF), environment name (APP_ENVIRONMENT), start time, Node version, database reachability, pending migrations; release: the release identity of Help > About (settings release.*: web and API release, environment name, and with a bearer token the approvers of the release)\n\nFront-end touchpoint: Operations / monitoring; Help > About\n\nAccess: Public",
                 "auth": {
                   "type": "noauth"
                 }
@@ -97955,7 +97955,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"name\": \"brokerverse-backend\",\n  \"version\": \"1.0.0\",\n  \"commit\": \"a1b2c3d4e5f60718293a4b5c6d7e8f9012345678\",\n  \"buildTime\": \"2026-09-27T23:10:00Z\",\n  \"ref\": \"v1.2.0\",\n  \"appEnvironment\": \"UAT\",\n  \"startedAt\": \"2026-09-28T00:00:00.000Z\",\n  \"uptimeSeconds\": 3600,\n  \"node\": \"v20.18.0\",\n  \"database\": {\n    \"reachable\": true,\n    \"latencyMs\": 2\n  },\n  \"pendingMigrations\": 0\n}"
+              "body": "{\n  \"name\": \"brokerverse-backend\",\n  \"version\": \"2026.1.3\",\n  \"commit\": \"a1b2c3d4e5f60718293a4b5c6d7e8f9012345678\",\n  \"buildTime\": \"2026-09-27T23:10:00Z\",\n  \"ref\": \"v1.2.0\",\n  \"appEnvironment\": \"UAT\",\n  \"startedAt\": \"2026-09-28T00:00:00.000Z\",\n  \"uptimeSeconds\": 3600,\n  \"node\": \"v20.18.0\",\n  \"database\": {\n    \"reachable\": true,\n    \"latencyMs\": 2\n  },\n  \"pendingMigrations\": 0,\n  \"release\": {\n    \"webVersion\": \"PH-WEB-2026.1.3\",\n    \"apiVersion\": \"PH-API-2026.1.3\",\n    \"environment\": \"Development\",\n    \"requirementsApprover\": \"Andrew\",\n    \"versionApprover\": \"Vijay\"\n  }\n}"
             }
           ]
         }

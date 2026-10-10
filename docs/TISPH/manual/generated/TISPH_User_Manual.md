@@ -5,7 +5,7 @@
 | Item | Value |
 |---|---|
 | Title | Toyota Insurance Services Philippines – User Manual |
-| Version | 1.0 |
+| Version | 1.3 |
 | Date | 10 October 2026 |
 | Status | Draft |
 | Classification | Internal |
@@ -20,6 +20,7 @@
 | Version | Date | Author | Change |
 |---|---|---|---|
 | 1.0 | 10 October 2026 | iorta TechNXT | First TISPH edition: TISPH roles, process and screens (Draft for TISPH review) |
+| 1.3 | 10 October 2026 | iorta TechNXT | Edition of release 2026.1.3: the Help panel shows the release, the environment, the build and release date and the approvers of the release (Draft for TISPH review) |
 
 **Approval**
 
@@ -507,8 +508,9 @@ Press F1, or **?** outside a text field, or choose **Help** in the account menu.
   **Support contacts not set up. Contact TIS IT AppSupport / Admin.**;
 - **Keyboard shortcuts**: F1 or ? opens the panel, / goes to the menu search, the arrows and Enter open a menu search
   result, Esc closes the panel or clears the search;
-- **About Toyota Insurance Services**: the version, environment and build date of the system and the version of this
-  manual.
+- **About Toyota Insurance Services**: the version of the system, the environment, the build and release date, the
+  version of this manual, and who approved the requirements and the release of this version. TIS IT AppSupport / Admin
+  keeps these on Master > System > Configuration (Release).
 
 ### When the system refuses an action {#when-the-system-refuses-an-action}
 | Message or situation | Reason | What to do |
