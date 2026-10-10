@@ -12,7 +12,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
-import SvgIconeye from "../../assets/icons/SvgIconeye";
+import RowActions, { actionsColumn } from "../../components/RowActions";
 import SvgDropdown from "../../assets/icons/SvgDropdown";
 import SvgDropdownicon from "../../assets/icons/SvgDropdownicon";
 import DropDowns from "../../components/DropDowns";
@@ -78,16 +78,7 @@ const Index = () => {
       payload: disbursementId,
     });
 
-    // A voucher still being prepared (agent payout lines, or an insurer voucher raised by a settlement)
-    // opens its invoice list so the cheque / payout can be raised and approved
-    const status = String(columnData?.status || "").toLowerCase();
-    const inPreparation =
-      ["draft", "for-approval"].includes(status) &&
-      (columnData?.payeeType === "Agent/Referrer" || columnData?.referrerId || columnData?.payeeType === "Insurer");
-    if (inPreparation) {
-      navigate(`/accounts/paymentvoucher/invoicelist/${disbursementId}`);
-      return;
-    }
+    // the voucher's own page: lines, figures, payments and activity; a draft offers there to issue its payment
     navigate(`/accounts/paymentvoucher/detailview/${disbursementId}`);
   };
 
@@ -625,14 +616,10 @@ const Index = () => {
                 }
               ></Column>
               <Column
-                body={(columnData) => (
-                  <SvgIconeye onClick={() => handleView(columnData)} />
-                )}
+                body={(columnData) => <RowActions onView={() => handleView(columnData)} viewLabel={t("common.view")} />}
                 header={t("paymentVoucher.action")}
-                style={{ textAlign: "center", width: "5rem" }}
-                headerStyle={headerStyle}
-                className="fieldvalue_container"
-              ></Column>
+                {...actionsColumn}
+              />
             </DataTable>
           </div>
         </div>
