@@ -96,7 +96,7 @@ describe('who may decide, and why not', () => {
     expect(rowOf(await inbox('cruz', 'mine'), big.id)).toBeUndefined();
     expect(rowOf(await inbox('cruz', 'mine'), small.id)).toMatchObject({ decision: { canDecide: true, myLimit: 1000000, limitSourceLabel: 'Role limit: TIS Finance & General Accounting' } });
     const row = rowOf(await inbox('cruz', 'all'), big.id);
-    expect(row.decision).toMatchObject({ canDecide: false, blockedCode: 'ABOVE_LIMIT', blockedReason: 'PHP 1,820,000.00 is above your approval limit of PHP 1,000,000.00.', myLimit: 1000000 });
+    expect(row.decision).toMatchObject({ canDecide: false, blockedCode: 'ABOVE_LIMIT', blockedReason: '₱1,820,000.00 is above your approval limit of ₱1,000,000.00.', myLimit: 1000000 });
     const refused = await people.cruz('post', `/remittance/approvals/${big.id}/approve`).send({ version: big.version });
     expect(refused.status).toBe(403);
     expect(refused.body.errors[0].code).toBe('ABOVE_LIMIT');

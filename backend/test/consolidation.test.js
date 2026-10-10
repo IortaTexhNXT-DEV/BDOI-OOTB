@@ -51,7 +51,7 @@ describe('remittance approval limits come from the Authority Matrix', () => {
     expect(a.requiredLevels).toBe(1);
     const refused = await ctx.as('checker')('post', `/remittance/approvals/${a.id}/approve`).send({ comments: 'ok' });
     expect(refused.status).toBe(403);
-    expect(refused.body.message).toBe('PHP 1,500,000.00 is above your approval limit of PHP 1,000,000.00.');
+    expect(refused.body.message).toBe('₱1,500,000.00 is above your approval limit of ₱1,000,000.00.');
     expect(refused.body.errors[0].code).toBe('ABOVE_LIMIT');
     const ok = await manager('post', `/remittance/approvals/${a.id}/approve`).send({ comments: 'Within my authority' });
     expect(ok.status).toBe(200);
@@ -70,7 +70,7 @@ describe('remittance approval limits come from the Authority Matrix', () => {
       const a = await pendingFor(t.body.data.id);
       const refused = await ctx.as('checker')('post', `/remittance/approvals/${a.id}/approve`).send({});
       expect(refused.status).toBe(403);
-      expect(refused.body.message).toBe('PHP 40,000.00 is above your approval limit of PHP 10,000.00.');
+      expect(refused.body.message).toBe('₱40,000.00 is above your approval limit of ₱10,000.00.');
       expect(refused.body.errors[0].code).toBe('ABOVE_LIMIT');
       expect((await manager('post', `/remittance/approvals/${a.id}/approve`).send({})).body.data.status).toBe('Approved');
     } finally {

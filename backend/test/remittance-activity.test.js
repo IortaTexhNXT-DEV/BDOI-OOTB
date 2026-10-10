@@ -56,7 +56,7 @@ describe('the decision under the remittance', () => {
       user: { displayName: 'J. Cruz', roles: ['TIS Finance & General Accounting'] },
       approval: { level: 1, requiredLevels: 1, limitAtDecision: 1000000, limitSourceLabel: 'Role limit: TIS Finance & General Accounting', reason: null } });
     expect(approved.changes).toEqual([
-      { field: 'limitAtDecision', label: 'Limit at decision', before: null, after: 'PHP 1,000,000.00' },
+      { field: 'limitAtDecision', label: 'Limit at decision', before: null, after: '₱1,000,000.00' },
       { field: 'limitSource', label: 'Limit source', before: null, after: 'Role limit: TIS Finance & General Accounting' }]);
     // the record carries the same log
     expect((await people.maker('get', `/remittance/remittances/${a.remittanceId}`)).body.data.activityLog.map((e) => e.actionCode)).toEqual(['create', 'submit', 'approve']);

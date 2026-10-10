@@ -201,7 +201,7 @@ describe('approve:remittance and the approval limit', () => {
     const big = await submitted('EXT-AUTH-3', 1250000);
     const above = await santos('post', `/remittance/approvals/${big.id}/approve`).send({ comments: 'ok' });
     expect(above.status).toBe(403);
-    expect(above.body).toMatchObject({ message: 'PHP 1,250,000.00 is above your approval limit of PHP 1,000,000.00.', errors: [{ code: 'ABOVE_LIMIT' }] });
+    expect(above.body).toMatchObject({ message: '₱1,250,000.00 is above your approval limit of ₱1,000,000.00.', errors: [{ code: 'ABOVE_LIMIT' }] });
     // a rejection is not bound by the amount, and takes a reason of the remittance_reject context
     expect((await santos('post', `/remittance/approvals/${big.id}/reject`).send({ reasonCode: 'BRJ-DUPLICATE' })).status).toBe(400);
     expect((await santos('post', `/remittance/approvals/${big.id}/reject`).send({ reasonCode: 'RRJ-OTHER' })).status).toBe(400);
