@@ -13,7 +13,7 @@ where it is held, its owner, its approver and its status.
 | [`pack/`](pack/) | Non-functional, technical, operational and governance documents (list below) |
 | [`testing/`](testing/) | Test strategy and test pack |
 | [`proposals/`](proposals/) | Design proposals and answers awaiting TISPH decisions |
-| [`manual/`](manual/) | Source of the TISPH user manual: chapters, generated role facts, Word and PDF (see its README) |
+| [`manual/`](manual/) | Source of the TISPH user manual: chapters, generated role facts and screenshots; the Word and PDF are published in `brokerverse/public/help` (see its README) |
 | [`tools/`](tools/) | `md2docx.py` and the document template the Word documents are built with |
 
 ## `frs/`: Functional Requirement Specifications

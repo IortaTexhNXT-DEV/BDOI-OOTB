@@ -11,14 +11,14 @@ the base edition for other clients; `brokerverse/help.config.json` names the edi
 | `generated/role-facts.json`, `generated/roles/` | Per role: menus, access, approvals, limits, segregation of duties. Written by `npm run manual:role-facts` in `backend/`, never by hand |
 | `generated/TISPH_User_Manual.md` | The assembled source of the Word file, written by `npm run help:build` |
 | `images/<chapter>/` | Screenshots, taken from a local system of the TISPH build with fictional sample data |
-| `TISPH_User_Manual.docx`, `.pdf` | Word and PDF, written by `npm run help:word` with `../tools/md2docx.py` and the document template, in the manual layout and the Toyota Insurance Services brand pack (cover, header, footer, colours and font of the pack; no template artwork) |
+| `brokerverse/public/help/TISPH_User_Manual.docx`, `.pdf` | Word and PDF, written by `npm run help:word` with `../tools/md2docx.py` and the document template, in the manual layout and the Toyota Insurance Services brand pack (cover, header, footer, colours and font of the pack; no template artwork). They are kept in `public/help` only, where the Help panel and the help page download them |
 
 ## Build
 
 ```bash
 cd backend && DATABASE_URL=<freshly migrated and seeded database> npm run manual:role-facts   # after a change to roles, grants, menus, limits or SoD rules
 cd brokerverse && npm run help:build              # public/help (commit it)
-cd brokerverse && npm run help:word               # Word and PDF, then public/help again
+cd brokerverse && npm run help:word               # Word and PDF into public/help, then public/help again
 cd brokerverse && npm run help:build -- --check   # the checks only
 cd brokerverse && npm run help:build -- --edition base --out /tmp/base-manual   # the product edition, for review
 ```

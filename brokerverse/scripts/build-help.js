@@ -7,7 +7,8 @@
  *                                  to one and a user to the chapter of his or her role
  *   public/help/manual.js          the contents list script of the page
  *   public/help/images/            the screenshots the manual shows
- *   public/help/<pdf>, <docx>      the manual as PDF and Word
+ *   public/help/<pdf>, <docx>      the manual as PDF and Word: the product PDF is copied in; the files of a client
+ *                                  edition are written here by npm run help:word and kept by the build (one copy only)
  *
  * Editions (help.config.json names the one this branch ships):
  *   base    the product manual: docs/package/source/user-manual.md, the product default theme
@@ -32,6 +33,7 @@ const { assemble, controlRows, effectiveStatus, loadManifest, wordSource } = req
 
 const ROOT = path.resolve(__dirname, "..");
 const REPO = path.resolve(ROOT, "..");
+const PUBLISHED = path.join(ROOT, "public", "help");
 const CONFIG = path.join(ROOT, "help.config.json");
 const BRAND_PACKS = path.join(REPO, "backend", "assets", "brand-packs");
 // the font files of the page, served with it: the help opens where Google Fonts is blocked
@@ -88,8 +90,11 @@ async function theme(packId) {
   };
 }
 
-function write(out, { html, sections, images, copies, script }) {
-  fs.rmSync(out, { recursive: true, force: true });
+/** Writes the help into `out`, emptied first except for the files named in `keep` (the edition's Word and PDF). */
+function write(out, { html, sections, images, copies, script, keep = [] }) {
+  if (fs.existsSync(out)) {
+    for (const entry of fs.readdirSync(out)) if (!keep.includes(entry)) fs.rmSync(path.join(out, entry), { recursive: true, force: true });
+  }
   fs.mkdirSync(path.join(out, "images"), { recursive: true });
   fs.writeFileSync(path.join(out, "user-manual.html"), html);
   fs.writeFileSync(path.join(out, "sections.json"), `${JSON.stringify(sections, null, 1)}\n`);
@@ -179,14 +184,20 @@ async function buildManifest(name, out, check) {
   }
 
   const { vars, pack } = await theme(manifest.brandPack);
+  // the Word and PDF are published in public/help only (npm run help:word writes them there); a build into another
+  // folder copies them from there
   const files = {};
   const copies = [];
+  const keep = [];
   for (const [kind, file] of Object.entries(manifest.files || {})) {
-    const from = path.join(manifest.dir, file);
-    if (fs.existsSync(from)) {
-      files[kind] = path.basename(file);
-      copies.push({ from, to: path.basename(file) });
-    } else console.warn(`help (${name}): ${kind} not found: ${path.relative(REPO, from)} (npm run help:word)`);
+    const from = path.join(PUBLISHED, file);
+    if (!fs.existsSync(from)) {
+      console.warn(`help (${name}): ${kind} not found: ${path.relative(REPO, from)} (npm run help:word)`);
+      continue;
+    }
+    files[kind] = file;
+    if (path.resolve(out) === PUBLISHED) keep.push(file);
+    else copies.push({ from, to: file });
   }
   if (pack) copies.push({ from: pack.logo, to: `logo${path.extname(pack.logo)}` });
   for (const f of pack?.fonts?.files || []) copies.push({ from: f.from, to: f.to });
@@ -199,7 +210,7 @@ async function buildManifest(name, out, check) {
     html: page({ edition, vars, toc: toc(heads), content }),
     sections: { edition: manifest.id, title: manifest.title, version: manifest.version, date: manifest.date, status, brandPack: pack?.id || null,
       files: { pdf: files.pdf || null, word: files.word || null }, sourceHash: result.hash, roles, sections: headingList(heads) },
-    images: result.images, copies, script: path.join(__dirname, "help", "manual.js"),
+    images: result.images, copies, keep, script: path.join(__dirname, "help", "manual.js"),
   });
   if (manifest.wordSource) {
     fs.mkdirSync(path.dirname(path.join(manifest.dir, manifest.wordSource)), { recursive: true });
@@ -213,7 +224,7 @@ async function main() {
   const configured = JSON.parse(fs.readFileSync(CONFIG, "utf8")).edition;
   const name = arg("edition") || configured;
   if (!EDITIONS[name]) fail([`unknown edition "${name}" (${Object.keys(EDITIONS).join(", ")})`]);
-  const out = arg("out") ? path.resolve(arg("out")) : path.join(ROOT, "public", "help");
+  const out = arg("out") ? path.resolve(arg("out")) : PUBLISHED;
   if (!arg("out") && name !== configured) fail([`help.config.json ships the ${configured} edition: write the ${name} edition with --out <folder>`]);
   const check = process.argv.includes("--check");
   if (EDITIONS[name].manifest) await buildManifest(name, out, check);
