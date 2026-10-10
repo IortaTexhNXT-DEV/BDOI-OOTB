@@ -135,8 +135,9 @@ export async function validateOpeningBalances(db, rows, { goLiveDate }) {
 /**
  * Validate and load the rows ({ accountCode, debit, credit } by column key). Returns the summary (ignored: the rows
  * with no balance, [{ row, accountCode }]); throws 400 with every row error when anything is wrong (nothing is loaded).
+ * batchId: the migration load that carries the balances (load_batch_id of the set).
  */
-export async function importOpeningBalances(db, rows, { goLiveDate }) {
+export async function importOpeningBalances(db, rows, { goLiveDate, batchId = null }) {
   if (!DATE.test(String(goLiveDate || ''))) throw badRequest('goLiveDate is required (YYYY-MM-DD): the first day of live transactions');
   if (!rows.length) throw badRequest('The file has no rows');
   const fy = await fiscalYearOf(db, goLiveDate);
@@ -156,7 +157,7 @@ export async function importOpeningBalances(db, rows, { goLiveDate }) {
   const run = `${GO_LIVE_PREFIX}${goLiveDate}`;
   const replaced = (await db.query('DELETE FROM opening_balances WHERE fiscal_year = $1 AND source_run = $2', [fy.code, run])).rowCount;
   for (const l of lines) {
-    await db.query('INSERT INTO opening_balances(fiscal_year, account_code, balance, source_run) VALUES ($1,$2,$3,$4)', [fy.code, l.code, l.balance, run]);
+    await db.query('INSERT INTO opening_balances(fiscal_year, account_code, balance, source_run, load_batch_id) VALUES ($1,$2,$3,$4,$5)', [fy.code, l.code, l.balance, run, batchId]);
   }
   return { fiscalYear: fy.code, goLiveDate, asAt: asAtOf(goLiveDate), accounts: lines.length, totalDebit, totalCredit, replaced, ignored };
 }

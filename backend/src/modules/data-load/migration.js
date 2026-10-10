@@ -2,9 +2,12 @@
  * Migration kit: the open business of the old system at cutover. Clients and in-force policies keep their legacy
  * numbers (the natural keys, so a workbook loaded again never duplicates), open premium bills become open items, open
  * claims are registered with their legacy claim number, and the trial balance of the day before the cutover date
- * becomes the GL opening balances. Migrated records carry source 'go-live-migration' (clients, policy doc.source,
- * claim details.source; open items: receivable source 'opening') and the load batch id. Nothing posts a journal, a
- * bill booking or a commission accrual: the opening balances carry the money.
+ * becomes the GL opening balances. Migrated records carry origin 'migrated' with the legacy system, the legacy number,
+ * when and by whom they were migrated and the load (lib/origin.js); the older flags (source 'go-live-migration' on
+ * clients, policy doc.source, claim details.source, receivable source 'opening') are still written for the readers of
+ * them. Each record created or changed gets its own audit entry (migrate-create / migrate-update) with its values
+ * before and after and the load number, written in the load transaction (ctx.record). Nothing posts a journal, a bill
+ * booking or a commission accrual: the opening balances carry the money.
  */
 import { many, one, query } from '../../db/pool.js';
 import { baseCurrency } from '../../lib/currency.js';
@@ -14,17 +17,23 @@ import { issuePolicy, derivedPremiumTaxes } from '../policies/service.js';
 import { lobOf } from '../documents/common.js';
 import { OPEN_ITEM_COLUMNS, OPENING_SOURCE, loadOpenItem } from '../receipts/opening.js';
 import { GO_LIVE_PREFIX, OPENING_BALANCE_COLUMNS, importOpeningBalances, zeroBalanceRow } from '../period-end/opening.js';
-import { seriesShape, sequenceOf } from './numbering.js';
+import { seriesClash, seriesShapes } from './numbering.js';
 import { MIGRATION_SOURCE, amountValue, beforeCutover, cell, dateValue, fail, isDate, keyText, numberCell } from './common.js';
+import { MIGRATED } from '../../lib/origin.js';
 import { regionOf } from '../../lib/address.js';
 import { revealPii } from '../../lib/pii.js';
 
-/** Refuse a legacy number that the numbering series of the same kind would issue again to a new record. */
-async function assertNoSeriesClash(code, number, column) {
-  const shape = await seriesShape(code);
-  const seq = sequenceOf(shape, number);
-  if (seq !== null && seq >= shape.next) {
-    fail(column, `${number} has the format of the ${code} numbering series, whose next number is ${shape.next}: a new record would get the same number. Set the series' Next Number above ${seq} (Numbering sheet of the configuration workbook) first`);
+/**
+ * Refuse a legacy number that the numbering series of the same kind would issue again to a new record, in any period
+ * and form of the go-live window (numbering.js). The forms are read once per series and load.
+ */
+async function assertNoSeriesClash(ctx, code, number, column) {
+  ctx.seriesShapes ||= {};
+  ctx.seriesShapes[code] ||= await seriesShapes(code);
+  const clash = await seriesClash(code, number, ctx.seriesShapes[code]);
+  if (clash) {
+    const period = clash.shape.periods.length === 1 ? ` in period ${clash.shape.periods[0]}` : '';
+    fail(column, `${number} has the format of the ${code} numbering series, whose next number${period} is ${clash.shape.next}: a new record would get the same number. Set the series' Next Number above ${clash.seq} (Numbering sheet of the configuration workbook) first`);
   }
 }
 
@@ -57,15 +66,17 @@ const CLIENT_COLUMNS = [
   { key: 'postalCode', header: 'ZIP Code', aliases: ['Postal Code'] },
 ];
 
+/** A stored client in the column keys of the Clients sheet (current data, audit before / after). */
+const clientValues = (c) => ({ clientCode: c.client_code, clientType: c.client_type, firstName: cell(c.first_name), lastName: cell(c.last_name), companyName: cell(c.company_name),
+  email: cell(c.email), phone: cell(c.phone), tin: cell(revealPii(c.tin)), birthDate: cell(c.birth_date), gender: cell(c.gender), address: cell(c.address), barangay: cell(c.barangay),
+  city: cell(c.city), province: cell(c.state), region: cell(c.region), country: cell(c.country), postalCode: cell(c.postal_code) });
+
 const clientsSheet = () => ({
   key: 'clients', name: 'Clients', menu: 'Operations > Clients', columns: CLIENT_COLUMNS, keyColumns: ['clientCode'], keyOf: (v) => keyText(v.clientCode),
   sample: { clientCode: 'C-000123', clientType: 'individual', firstName: 'Maria', lastName: 'Santos', email: 'maria.santos@example.ph', phone: '09171234567', tin: '123-456-789-000',
     birthDate: '1988-04-12', address: 'Unit 4B, 12 Mabini St.', barangay: 'San Antonio', city: 'Pasig City', province: 'Metro Manila', region: 'National Capital Region (NCR)', country: 'Philippines', postalCode: '1600' },
   async exportRows() {
-    const rows = await many('SELECT * FROM clients WHERE source = $1 ORDER BY client_code', [MIGRATION_SOURCE]);
-    return rows.map((c) => ({ clientCode: c.client_code, clientType: c.client_type, firstName: cell(c.first_name), lastName: cell(c.last_name), companyName: cell(c.company_name),
-      email: cell(c.email), phone: cell(c.phone), tin: cell(revealPii(c.tin)), birthDate: cell(c.birth_date), gender: cell(c.gender), address: cell(c.address), barangay: cell(c.barangay),
-      city: cell(c.city), province: cell(c.state), region: cell(c.region), country: cell(c.country), postalCode: cell(c.postal_code) }));
+    return (await many('SELECT * FROM clients WHERE origin = $1 ORDER BY client_code', [MIGRATED])).map(clientValues);
   },
   check(ctx, v) {
     if (v.birthDate) beforeCutover(ctx, 'birthDate', v.birthDate, 'Birth Date');
@@ -77,8 +88,8 @@ const clientsSheet = () => ({
     if (type === 'corporate' && !v.companyName) fail('companyName', 'A corporate client needs a Company Name');
     if (v.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) fail('email', 'Email must be a valid e-mail address');
     const displayName = type === 'corporate' ? v.companyName : `${v.firstName} ${v.lastName}`;
-    const before = await one('SELECT id, source FROM clients WHERE client_code = $1', [v.clientCode]);
-    if (before && before.source !== MIGRATION_SOURCE) fail('clientCode', `Client code ${v.clientCode} belongs to a client created in BrokerVerse; give the legacy client another code`);
+    const before = await one('SELECT * FROM clients WHERE client_code = $1', [v.clientCode]);
+    if (before && before.origin !== MIGRATED) fail('clientCode', `Client code ${v.clientCode} belongs to a client created in BrokerVerse; give the legacy client another code`);
     const region = v.region || (v.province ? await regionOf({ province: v.province, city: v.city || null }) : null);
     const values = [type, v.firstName || null, v.lastName || null, v.companyName || null, displayName, v.email || null, v.phone || null, v.tin || null, v.birthDate || null,
       v.gender || null, v.address || null, v.city || null, v.province || null, v.country || 'Philippines', v.postalCode || null, type === 'corporate' ? 'Corporate' : 'Retail',
@@ -88,13 +99,16 @@ const clientsSheet = () => ({
           birth_date = $10, gender = $11, address = $12, city = $13, state = $14, country = $15, postal_code = $16, lead_category = $17, barangay = $18, region = $19,
           updated_by = $20, updated_at = now()
         WHERE id = $1`, [before.id, ...values, ctx.user.id]);
+      await ctx.record({ entity: 'client', table: 'clients', id: before.id, key: v.clientCode, action: 'updated', before: clientValues(before),
+        after: clientValues(await one('SELECT * FROM clients WHERE id = $1', [before.id])) });
       return 'updated';
     }
-    await assertNoSeriesClash('client', v.clientCode, 'clientCode');
-    await query(`INSERT INTO clients(client_code, client_type, first_name, last_name, company_name, display_name, email, phone, tin, birth_date, gender, address, city, state,
-        country, postal_code, lead_category, barangay, region, source, created_by, owner_user_id, load_batch_id, extra)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$21,$22,$23)`,
-    [v.clientCode, ...values, MIGRATION_SOURCE, ctx.user.id, ctx.batchId, JSON.stringify({ loadBatchId: ctx.batchId, migratedAt: ctx.cutover })]);
+    await assertNoSeriesClash(ctx, 'client', v.clientCode, 'clientCode');
+    const c = await one(`INSERT INTO clients(client_code, client_type, first_name, last_name, company_name, display_name, email, phone, tin, birth_date, gender, address, city, state,
+        country, postal_code, lead_category, barangay, region, source, created_by, owner_user_id, load_batch_id, origin, legacy_system, legacy_number, migrated_at, migrated_by)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$21,$22,'migrated',$23,$1,now(),$24) RETURNING *`,
+    [v.clientCode, ...values, MIGRATION_SOURCE, ctx.user.id, ctx.batchId, ctx.legacySystem, ctx.migratedBy]);
+    await ctx.record({ entity: 'client', table: 'clients', id: c.id, key: v.clientCode, action: 'created', after: clientValues(c) });
     return 'created';
   },
 });
@@ -136,7 +150,7 @@ const policiesSheet = () => ({
   key: 'policies', name: 'Policies', menu: 'Operations > Policy', columns: POLICY_COLUMNS, keyColumns: ['policyNumber'], keyOf: (v) => keyText(v.policyNumber),
   sample: { policyNumber: 'PC-MLY-2026-000101', clientCode: 'C-000123', insurer: 'MALAYAN', product: 'MOTOR', inceptionDate: '2026-03-01', expiryDate: '2027-03-01', issueDate: '2026-02-25',
     sumInsured: '1250000', netPremium: '28750', grossPremium: '35946.88', billingMode: 'broker', paymentStatus: 'Completed', plateNumber: 'NCA 4521', accountExecutive: '' },
-  exportRows: () => policyExport("p.doc->>'source' = $1", [MIGRATION_SOURCE]),
+  exportRows: () => policyExport('p.origin = $1', [MIGRATED]),
   check(ctx, v) {
     beforeCutover(ctx, 'issueDate', v.issueDate, 'Issue Date');
     const inception = dateValue('inceptionDate', v.inceptionDate, 'Inception Date');
@@ -145,9 +159,9 @@ const policiesSheet = () => ({
     if (expiry && ctx.cutover && expiry < ctx.cutover) fail('expiryDate', `Expiry Date ${expiry} is before the cutover date ${ctx.cutover}: the policy is not in force (expired business stays in the old system)`);
   },
   async importRow(ctx, v) {
-    const existing = await one('SELECT id, doc FROM policies WHERE policy_number = $1', [v.policyNumber]);
+    const existing = await one('SELECT id, origin FROM policies WHERE policy_number = $1', [v.policyNumber]);
     if (existing) {
-      fail('policyNumber', existing.doc?.source === MIGRATION_SOURCE
+      fail('policyNumber', existing.origin === MIGRATED
         ? `Policy ${v.policyNumber} was already migrated with other values; correct it on the policy screen (Operations > Policy)`
         : `Policy number ${v.policyNumber} already belongs to a policy issued in BrokerVerse`);
     }
@@ -170,16 +184,18 @@ const policiesSheet = () => ({
     const paymentStatus = v.paymentStatus ? allowed.find((x) => x.toLowerCase() === String(v.paymentStatus).toLowerCase()) : 'Completed';
     if (!paymentStatus) fail('paymentStatus', `Payment Status must be one of ${allowed.join(', ')}`);
     const owner = await userIdOf('accountExecutive', v.accountExecutive);
-    await assertNoSeriesClash('policy', v.policyNumber, 'policyNumber');
+    await assertNoSeriesClash(ctx, 'policy', v.policyNumber, 'policyNumber');
     const lob = lobOf(product.line === 'fire' && /industrial/i.test(product.name) ? 'IAR' : product.line || product.code);
     const taxes = await derivedPremiumTaxes({ lob, productId: product.id, netPremium: net, grossPremium: gross });
     const r = await issuePolicy({ query }, {
       clientId: client.id, productId: product.id, insuranceCompanyId: insurer.id, sumInsured, netPremium: net, grossPremium: gross,
       commissionAmount: round2(net * rate), commissionRate: rate, currency: await baseCurrency(), insuredName: v.insuredName || client.display_name,
       productType: product.name, lob, ownerUserId: owner || ctx.user.id, agentUserId: owner || ctx.user.id, migration: true,
+      legacySystem: ctx.legacySystem, legacyNumber: v.policyNumber, migratedBy: ctx.migratedBy, loadBatchId: ctx.batchId,
       doc: { plateNumber: v.plateNumber || undefined, source: MIGRATION_SOURCE, loadBatchId: ctx.batchId, commissionRate: rate, ...(taxes || {}) },
     }, { policyNumber: v.policyNumber, inception: v.inceptionDate, expiry: v.expiryDate, issuedDate: v.issueDate, paymentStatus, billingMode }, ctx.user.id);
-    await query('UPDATE policies SET load_batch_id = $2 WHERE id = $1', [r.policyId, ctx.batchId]);
+    await ctx.record({ entity: 'policy', table: 'policies', id: r.policyId, key: v.policyNumber, action: 'created',
+      after: (await policyExport('p.id = $1', [r.policyId]))[0] });
     return 'created';
   },
   totals: (rows) => ({ grossPremium: sum(rows, 'grossPremium'), netPremium: sum(rows, 'netPremium', 'grossPremium'), sumInsured: sum(rows, 'sumInsured') }),
@@ -207,7 +223,7 @@ const openItemsSheet = () => ({
     if (amount !== null && amount < balance) fail('originalAmount', 'Original Amount cannot be less than the Open Balance');
     let r;
     try {
-      r = await loadOpenItem({ query }, v, { goLiveDate: ctx.cutover, user: ctx.user });
+      r = await loadOpenItem({ query }, v, { goLiveDate: ctx.cutover, user: ctx.user, legacySystem: ctx.legacySystem, batchId: ctx.batchId, migratedBy: ctx.migratedBy });
     } catch (e) {
       const col = Object.entries(OPEN_LABEL).find(([, label]) => String(e.message).startsWith(label) || String(e.message).includes(` ${label}`))?.[0]
         || (/Policy|policy/.test(e.message) ? 'policyNumber' : null);
@@ -215,7 +231,8 @@ const openItemsSheet = () => ({
       throw e;
     }
     if (r.status === 'skipped') return 'unchanged';
-    await query('UPDATE receivables SET load_batch_id = $2 WHERE bill_number = $1', [r.billNumber, ctx.batchId]);
+    await ctx.record({ entity: 'receivable', table: 'receivables', id: r.receivableId, key: `${v.policyNumber} / ${v.billReference}`, action: 'created',
+      after: { policyNumber: v.policyNumber, billReference: v.billReference, billNumber: r.billNumber, dueDate: v.dueDate, originalAmount: v.originalAmount || v.openBalance, openBalance: v.openBalance } });
     return 'created';
   },
   totals: (rows) => ({ originalAmount: sum(rows, 'originalAmount', 'openBalance'), openBalance: sum(rows, 'openBalance') }),
@@ -224,6 +241,10 @@ const openItemsSheet = () => ({
 // ------------------------------------------------------------------ open claims
 
 const CLAIM_STATUSES = ['registered', 'in-review'];
+const CLAIM_EXPORT = `SELECT c.*, p.policy_number, u.username AS handler_username FROM claims c JOIN policies p ON p.id = c.policy_id LEFT JOIN users u ON u.id = c.handler_user_id`;
+/** A stored claim in the column keys of the Open Claims sheet. */
+const claimValues = (c) => ({ claimNumber: c.claim_number, policyNumber: c.policy_number, lossDate: cell(c.loss_date), reportedDate: cell(c.reported_date), status: c.status,
+  lossType: cell(c.loss_type), description: cell(c.description), estimateAmount: String(Number(c.estimate_amount)), insurerClaimNumber: cell(c.insurer_claim_number), handler: cell(c.handler_username) });
 const claimsSheet = () => ({
   key: 'claims', name: 'Open Claims', menu: 'Operations > Claims',
   columns: [
@@ -242,10 +263,9 @@ const claimsSheet = () => ({
   sample: { claimNumber: 'OLD-CLM-2026-0042', policyNumber: 'PC-MLY-2026-000101', lossDate: '2026-09-12', reportedDate: '2026-09-13', status: 'in-review', lossType: 'Collision',
     description: 'Rear-end collision on EDSA', estimateAmount: '85000', insurerClaimNumber: 'MLY-CL-77812' },
   async exportRows() {
-    const rows = await many(`SELECT c.*, p.policy_number, u.username AS handler_username FROM claims c JOIN policies p ON p.id = c.policy_id LEFT JOIN users u ON u.id = c.handler_user_id
-      WHERE c.details->>'source' = $1 ORDER BY c.claim_number`, [MIGRATION_SOURCE]);
-    return rows.map((c) => ({ claimNumber: c.claim_number, policyNumber: c.policy_number, lossDate: cell(c.loss_date), reportedDate: cell(c.reported_date), status: c.status,
-      lossType: cell(c.loss_type), description: cell(c.description), estimateAmount: String(Number(c.estimate_amount)), insurerClaimNumber: cell(c.insurer_claim_number), handler: cell(c.handler_username) }));
+    const rows = await many(`${CLAIM_EXPORT}
+      WHERE c.origin = $1 ORDER BY c.claim_number`, [MIGRATED]);
+    return rows.map(claimValues);
   },
   check(ctx, v) {
     beforeCutover(ctx, 'lossDate', v.lossDate, 'Loss Date');
@@ -255,9 +275,9 @@ const claimsSheet = () => ({
   async importRow(ctx, v) {
     const status = (v.status || 'registered').toLowerCase();
     if (!CLAIM_STATUSES.includes(status)) fail('status', `Status must be ${CLAIM_STATUSES.join(' or ')}: settled and closed claims stay in the old system`);
-    const existing = await one('SELECT id, details FROM claims WHERE claim_number = $1', [v.claimNumber]);
+    const existing = await one('SELECT id, origin FROM claims WHERE claim_number = $1', [v.claimNumber]);
     if (existing) {
-      fail('claimNumber', existing.details?.source === MIGRATION_SOURCE ? `Claim ${v.claimNumber} was already migrated with other values; correct it on the claim screen`
+      fail('claimNumber', existing.origin === MIGRATED ? `Claim ${v.claimNumber} was already migrated with other values; correct it on the claim screen`
         : `Claim number ${v.claimNumber} already belongs to a claim registered in BrokerVerse`);
     }
     const policy = await one('SELECT id, client_id, lob, inception_date, expiry_date FROM policies WHERE policy_number = $1', [v.policyNumber]);
@@ -267,18 +287,20 @@ const claimsSheet = () => ({
     }
     const estimate = amountValue('estimateAmount', v.estimateAmount, 'Outstanding Estimate');
     const handler = await userIdOf('handler', v.handler);
-    await assertNoSeriesClash('claim', v.claimNumber, 'claimNumber');
+    await assertNoSeriesClash(ctx, 'claim', v.claimNumber, 'claimNumber');
     const reported = v.reportedDate || v.lossDate;
     const lob = String(policy.lob || 'MOTOR').toUpperCase();
     const sla = Number(await getSetting('claims.sla_days', 20));
     const claim = await one(`INSERT INTO claims(claim_number, policy_id, client_id, status, loss_date, reported_date, loss_type, description, estimate_amount, handler_user_id,
-        lob, claim_type, priority, insurer_claim_number, due_date, details, created_by, load_batch_id)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,($6::date + $15::int),$16,$17,$18) RETURNING id`,
+        lob, claim_type, priority, insurer_claim_number, due_date, details, created_by, load_batch_id, origin, legacy_system, legacy_number, migrated_at, migrated_by)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,($6::date + $15::int),$16,$17,$18,'migrated',$19,$1,now(),$20) RETURNING id`,
     [v.claimNumber, policy.id, policy.client_id, status, v.lossDate, reported, v.lossType || null, v.description || null, estimate ?? 0, handler, lob,
       lob.charAt(0) + lob.slice(1).toLowerCase(), await getSetting('claims.default_priority', 'Medium'), v.insurerClaimNumber || null, sla,
-      JSON.stringify({ source: MIGRATION_SOURCE, loadBatchId: ctx.batchId }), ctx.user.username, ctx.batchId]);
+      JSON.stringify({ source: MIGRATION_SOURCE, loadBatchId: ctx.batchId }), ctx.user.username, ctx.batchId, ctx.legacySystem, ctx.migratedBy]);
     await query('INSERT INTO claim_history(claim_id, by_user, status, note) VALUES ($1,$2,$3,$4)',
       [claim.id, ctx.user.username, status, `Open claim migrated from the old system (cutover ${ctx.cutover})`]);
+    await ctx.record({ entity: 'claim', table: 'claims', id: claim.id, key: v.claimNumber, action: 'created',
+      after: claimValues(await one(`${CLAIM_EXPORT} WHERE c.id = $1`, [claim.id])) });
     return 'created';
   },
   totals: (rows) => ({ estimateAmount: sum(rows, 'estimateAmount') }),
@@ -317,7 +339,7 @@ const openingBalancesSheet = () => ({
     if (same) return { rows: rows.map((_, i) => (zero[i] ? ignored : { action: 'unchanged' })) };
     let out;
     try {
-      out = await importOpeningBalances({ query }, rows.map((r) => r.values), { goLiveDate: ctx.cutover });
+      out = await importOpeningBalances({ query }, rows.map((r) => r.values), { goLiveDate: ctx.cutover, batchId: ctx.batchId });
     } catch (e) {
       const byRow = new Map();
       for (const d of e.details || []) {
@@ -334,6 +356,14 @@ const openingBalancesSheet = () => ({
       return { rows: rows.map((_, i) => (byRow.has(i) ? { errors: byRow.get(i) } : { held: true })), sheetError };
     }
     const skipped = new Set(out.ignored.map((x) => x.row - 2));
+    // one audit entry per account of the set: its balance before and after the load (accounts no longer in the set go to zero)
+    const run = `${GO_LIVE_PREFIX}${ctx.cutover}`;
+    const after = new Map((await many('SELECT account_code, balance FROM opening_balances WHERE source_run = $1', [run])).map((r) => [r.account_code, round2(Number(r.balance))]));
+    for (const code of new Set([...existing.keys(), ...after.keys()])) {
+      if (existing.get(code) === after.get(code)) continue;
+      await ctx.record({ entity: 'opening_balances', table: 'opening_balances', id: `${run}:${code}`, key: code, action: existing.has(code) ? 'updated' : 'created',
+        before: existing.has(code) ? { accountCode: code, balance: existing.get(code) } : null, after: { accountCode: code, balance: after.get(code) ?? 0 } });
+    }
     return { rows: rows.map((r, i) => (skipped.has(i) ? ignored : { action: existing.has(String(r.values.accountCode).trim()) ? 'updated' : 'created' })) };
   },
   totals: (rows) => ({ debit: sum(rows, 'debit'), credit: sum(rows, 'credit'), zeroBalanceRows: rows.filter(zeroBalanceRow).length }),
@@ -343,19 +373,18 @@ function sum(rows, key, fallback = null) {
   return round2(rows.reduce((s, r) => s + (numberCell(r[key]) ?? (fallback ? numberCell(r[fallback]) ?? 0 : 0)), 0));
 }
 
-/** Sheets of the migration kit, in load order. */
-export function migrationSheets() {
-  return [clientsSheet(), policiesSheet(), openItemsSheet(), claimsSheet(), openingBalancesSheet()];
-}
+/** Sheets of the migration kit by key; their load order and dependencies are declared in registry.js. */
+export const MIGRATION_SHEETS = {
+  clients: clientsSheet, policies: policiesSheet, 'open-items': openItemsSheet, claims: claimsSheet, 'opening-balances': openingBalancesSheet,
+};
 
 /**
  * Reconciliation summary of a migration load (inside the load transaction): control totals of the workbook and of
  * BrokerVerse after the load, and the checks the broker compares with the old system: trial balance debits = credits
- * and premiums receivable control account = open items.
+ * and premiums receivable control account = open items. sheets: the sheets of the migration kit (registry.js).
  */
-export async function reconciliation(ctx, rowsBySheet) {
+export async function reconciliation(ctx, rowsBySheet, sheets) {
   const cutover = ctx.cutover;
-  const sheets = migrationSheets();
   const wb = Object.fromEntries(sheets.map((s) => [s.key, (rowsBySheet[s.key] || []).filter((r) => r.status !== 'error').map((r) => r.values)]));
   const clients = await one(`SELECT count(*)::int AS n, count(*) FILTER (WHERE client_type = 'corporate')::int AS corporate FROM clients WHERE source = $1`, [MIGRATION_SOURCE]);
   const policies = await one(`SELECT count(*)::int AS n, COALESCE(sum(premium_total), 0) AS gross, COALESCE(sum(net_premium), 0) AS net, COALESCE(sum(sum_insured), 0) AS si,

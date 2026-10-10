@@ -55,7 +55,7 @@ export const ENTITY_LABELS = {
   generated_report: 'Report', entry_match: 'Entry match', document_numbering: 'Document numbering', direct_bill_client_payment: 'Direct bill payment',
   bank_rec_match: 'Bank reconciliation match', agent_event: 'Agent event', accounting_period: 'Accounting period', account_map: 'Account mapping',
   master_type: 'Master type', document: 'Document', database: 'Database', item: 'Item', task: 'Task',
-  cas_document: 'CAS document', cas_book_print: 'Book print',
+  cas_document: 'CAS document', cas_book_print: 'Book print', opening_balances: 'Opening balance',
 };
 
 /** "master:insurance-company" -> "Insurance company" (or the master type label when given). */
@@ -70,7 +70,8 @@ const ACTION_VERBS = {
   create: 'created', update: 'updated', delete: 'deleted', remove: 'removed', approve: 'approved', reject: 'rejected', cancel: 'cancelled',
   submit: 'submitted', issue: 'issued', close: 'closed', reopen: 'reopened', settle: 'settled', post: 'posted', reverse: 'reversed', void: 'voided',
   activate: 'activated', deactivate: 'deactivated', restore: 'restored', send: 'sent', resend: 'sent again', upload: 'uploaded', replace: 'replaced',
-  'bulk-create': 'created by bulk upload', 'go-live-migration': 'loaded at go-live', convert: 'converted', 'convert-lead': 'created from a prospect',
+  'bulk-create': 'created by bulk upload', 'go-live-migration': 'loaded at go-live', 'migrate-create': 'migrated', 'migrate-update': 'updated by migration load',
+  'migrate-undo': 'removed by undo of migration load', convert: 'converted', 'convert-lead': 'created from a prospect',
   login: 'signed in', logout: 'signed out', 'reset-password': 'password reset', lock: 'locked', unlock: 'unlocked', provision: 'provisioned',
   run: 'run', status: 'status changed', assign: 'assigned', renew: 'renewed', lapse: 'lapsed', endorse: 'endorsed', print: 'printed', email: 'e-mailed',
   'payment-capture': 'payment captured', 'pay-later': 'set to pay later', 'payment-confirm': 'payment confirmed', 'payment-reject': 'payment rejected',

@@ -37,7 +37,7 @@ const kitOf = (v) => {
 };
 
 const sheetExample = { sheet: 'policies', name: 'Policies', read: 120, valid: 118, errors: 2, held: 0, created: 118, updated: 0, unchanged: 0, proposed: 0, ignored: 0, skipped: 0, message: null };
-const batchExample = { id: 7, kit: 'migration', fileName: 'GoLive_Migration_Workbook.xlsx', status: 'failed', cutoverDate: '2026-11-01', rowsRead: 480, rowsValid: 478, rowsError: 2,
+const batchExample = { id: 7, loadNumber: 'MIG-000007', kit: 'migration', legacySystem: 'TISPH Excel', fileName: 'GoLive_Migration_Workbook.xlsx', status: 'failed', cutoverDate: '2026-11-01', rowsRead: 480, rowsValid: 478, rowsError: 2,
   sheets: [sheetExample], loadedCounts: null, reconciliation: null, createdBy: 'BrokerVerse Administrator', createdAt: '2026-10-28T09:00:00Z', validatedAt: '2026-10-28T09:00:05Z' };
 const errorExample = { sheet: 'policies', sheetName: 'Policies', row: 14, column: 'Issue Date', message: 'Issue Date 2026-11-02 is on or after the cutover date 2026-11-01' };
 
@@ -132,11 +132,11 @@ define({
 });
 define({
   method: 'POST', path: '/batches', summary: 'Upload a workbook (multipart "file", field kit): creates a load batch and validates it without saving (all sheets in load order in one transaction that is rolled back)',
-  screen: `${SCREEN} > Upload and validate`, middleware: [...canWrite, uploadFile], request: 'multipart/form-data file, kit=configuration|migration',
+  screen: `${SCREEN} > Upload and validate`, middleware: [...canWrite, uploadFile], request: 'multipart/form-data file, kit=configuration|migration, legacySystem (migration: the source shown on the migrated records; the default legacy system when empty)',
   response: { success: true, message: 'Validated: 2 row(s) with errors', data: { batch: batchExample, errors: [errorExample] } },
   handler: async (req, res) => {
     const kit = kitOf(req.body?.kit || req.query.kit);
-    const r = await svc.createBatch({ kit, file: req.file, user: req.user });
+    const r = await svc.createBatch({ kit, file: req.file, user: req.user, legacySystem: req.body?.legacySystem || null });
     await audit(req, { entity: 'data_load_batch', entityId: r.batch.id, action: 'validate', after: { kit, fileName: r.batch.fileName, rowsRead: r.batch.rowsRead, rowsError: r.batch.rowsError } });
     created(res, r, r.batch.rowsError ? `Validated: ${r.batch.rowsError} row(s) with errors` : 'Validated: no error');
   },
@@ -168,12 +168,12 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/batches/:id/load', summary: 'Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users\' temporary passwords are returned once; a migration load returns its reconciliation',
+  method: 'POST', path: '/batches/:id/load', summary: 'Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users\' temporary passwords are returned once; a migration load returns its reconciliation and writes one audit entry per record it creates or changes (values before and after, load number)',
   screen: `${SCREEN} > Load`, middleware: canWrite, request: { validRowsOnly: false },
   response: { success: true, message: 'Loaded', data: { batch: { ...batchExample, status: 'loaded' }, temporaryPasswords: [{ username: 'andrea.lim', displayName: 'Andrea Lim', temporaryPassword: '<shown once>' }], reconciliation: null } },
   handler: async (req, res) => {
     const validRowsOnly = req.body?.validRowsOnly === true || req.body?.validRowsOnly === 'true';
-    const r = await svc.loadBatch(req.params.id, req.user, { validRowsOnly });
+    const r = await svc.loadBatch(req.params.id, req.user, { validRowsOnly, req });
     await audit(req, { entity: 'data_load_batch', entityId: r.batch.id, action: 'load', after: { kit: r.batch.kit, loadedCounts: r.batch.loadedCounts, validRowsOnly,
       newUsers: r.temporaryPasswords.map((u) => u.username) } });
     const counts = Object.values(r.batch.loadedCounts || {}).reduce((a, c) => ({ created: a.created + (c.created || 0), updated: a.updated + (c.updated || 0) }), { created: 0, updated: 0 });

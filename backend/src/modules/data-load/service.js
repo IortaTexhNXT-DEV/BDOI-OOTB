@@ -5,26 +5,28 @@
  * transaction (db/pool.js runInTransaction) that is rolled back at the end, so a row may refer to a record created by
  * an earlier row or sheet of the same workbook. Each row runs in its own savepoint: a failing row is undone alone and
  * reported, the next rows carry on. The load does the same and commits, unless a row fails (then nothing is saved).
+ *
+ * The objects of each kit and their load order come from the registry (registry.js). A load writes one audit entry per
+ * record it creates or changes (migrate-create / migrate-update, values before and after, load number) in the load
+ * transaction, and keeps on each row of the batch the record it created or changed.
  */
 import { many, one, query, runInTransaction, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { clearSettingsCache, getSetting } from '../../lib/settings.js';
 import { clearLetterheadCache } from '../../lib/letterhead.js';
 import { today } from '../../lib/dates.js';
-import { configurationSheets } from './configuration.js';
-import { migrationSheets, reconciliation } from './migration.js';
+import { auditMany } from '../../lib/audit.js';
+import { legacySystemName } from '../../lib/origin.js';
+import { kitObjects } from './registry.js';
+import { reconciliation } from './migration.js';
 import { KITS, kitWorkbook, readKitWorkbook } from './workbook.js';
 import { comparable, isDate } from './common.js';
 
 export { KITS };
 const LOCK = "hashtext('brokerverse.data-load'), hashtext('data_load_batches')";
 
-/** Sheets of a kit, in load order. */
-export async function kitSheets(kit) {
-  if (kit === 'configuration') return configurationSheets();
-  if (kit === 'migration') return migrationSheets();
-  throw badRequest('kit must be configuration or migration');
-}
+/** Sheets of a kit, in load order (registry.js). */
+export const kitSheets = (kit) => kitObjects(kit);
 
 /** golive.* settings: { cutoverDate, locked }. */
 export async function goLiveState() {
@@ -61,7 +63,7 @@ export async function template(kit, { prefill = false, user = null } = {}) {
 // ------------------------------------------------------------------ batches
 
 const toBatch = (b) => b && ({
-  id: b.id, kit: b.kit, fileName: b.file_name, status: b.status, cutoverDate: b.cutover_date, rowsRead: b.rows_read, rowsValid: b.rows_valid, rowsError: b.rows_error,
+  id: b.id, loadNumber: b.load_number, kit: b.kit, legacySystem: b.legacy_system, fileName: b.file_name, status: b.status, cutoverDate: b.cutover_date, rowsRead: b.rows_read, rowsValid: b.rows_valid, rowsError: b.rows_error,
   sheets: b.sheets, loadedCounts: b.loaded_counts, reconciliation: b.reconciliation, validRowsOnly: b.valid_rows_only, message: b.message,
   createdBy: b.created_by_name || b.created_by, createdAt: b.created_at, validatedAt: b.validated_at, loadedBy: b.loaded_by_name || b.loaded_by, loadedAt: b.loaded_at,
 });
@@ -188,9 +190,10 @@ async function runSheets(ctx, sheets, rowsBySheet, { skip = new Set() } = {}) {
         seen.set(key, row.rowNumber);
         if (sheet.importSheet) { pending.push(row); continue; }
         ctx.rowWarnings = [];
+        ctx.rowRecord = null;
         // each row in its own savepoint: a failing row is undone alone
         const action = await withTransaction(() => sheet.importRow(ctx, v));
-        done(row, { status: 'valid', action, errors: [], warnings: ctx.rowWarnings });
+        done(row, { status: 'valid', action, errors: [], warnings: ctx.rowWarnings, record: ctx.rowRecord });
       } catch (e) {
         done(row, { status: 'error', action: null, errors: rowErrors(e, sheet) });
       }
@@ -233,21 +236,29 @@ async function loadRows(batchId) {
   return bySheet;
 }
 
+/** Results of the rows; record (a load): the record each row created or changed (table, id, key), else cleared. */
 async function saveResults(batchId, results, statusOf) {
   const ids = [];
   const statuses = [];
   const actions = [];
   const errors = [];
+  const tables = [];
+  const records = [];
+  const keys = [];
   for (const [id, r] of results) {
     ids.push(id);
     statuses.push(statusOf(r));
     actions.push(r.action || null);
     errors.push(JSON.stringify(r.errors || []));
+    tables.push(r.record?.table ?? null);
+    records.push(r.record?.id == null ? null : String(r.record.id));
+    keys.push(r.record?.key ?? null);
   }
   if (!ids.length) return;
-  await query(`UPDATE data_load_rows d SET status = x.status, action = x.action, errors = x.errors::jsonb
-    FROM unnest($1::bigint[], $2::text[], $3::text[], $4::text[]) AS x(id, status, action, errors) WHERE d.id = x.id AND d.batch_id = $5`,
-  [ids, statuses, actions, errors, batchId]);
+  await query(`UPDATE data_load_rows d SET status = x.status, action = x.action, errors = x.errors::jsonb, record_table = x.record_table, record_id = x.record_id, record_key = x.record_key
+    FROM unnest($1::bigint[], $2::text[], $3::text[], $4::text[], $5::text[], $6::text[], $7::text[]) AS x(id, status, action, errors, record_table, record_id, record_key)
+    WHERE d.id = x.id AND d.batch_id = $8`,
+  [ids, statuses, actions, errors, tables, records, keys, batchId]);
 }
 
 /** Guards of a kit: the migration kit needs a cutover date and is refused once go-live is locked. */
@@ -260,14 +271,33 @@ async function assertKitAllowed(kit) {
   return state;
 }
 
-const newCtx = (batch, user, state, dryRun) => ({
-  kit: batch.kit, batchId: batch.id, user: { id: user.id, username: user.username, roles: user.roles || [], permissions: user.permissions || [] },
-  cutover: state.cutoverDate, dryRun, temporaryPasswords: [], warnings: [], rowWarnings: [],
+const RECORD_ACTIONS = { created: 'migrate-create', updated: 'migrate-update' };
+
+/**
+ * Context of a validation or load. legacySystem and migratedBy (the uploader) tag the migrated records; record() is
+ * called by an importer for each record it creates or changes: the row keeps the record and the load writes its audit
+ * entry ({ entity, table, id, key, action: created | updated, before, after }).
+ */
+const newCtx = (batch, user, state, dryRun, { legacySystem, migratedBy }) => ({
+  kit: batch.kit, batchId: batch.id, loadNumber: batch.loadNumber, user: { id: user.id, username: user.username, roles: user.roles || [], permissions: user.permissions || [] },
+  cutover: state.cutoverDate, dryRun, temporaryPasswords: [], warnings: [], rowWarnings: [], rowRecord: null, audits: [], legacySystem, migratedBy,
   warn(message) { this.rowWarnings.push(message); this.warnings.push(message); },
+  async record({ entity, table, id, key, action, before = null, after = null }) {
+    this.rowRecord = { table, id, key };
+    if (this.dryRun) return;
+    this.audits.push({ entity, entityId: id, action: RECORD_ACTIONS[action], before,
+      after: { ...(after || {}), batchId: this.batchId, loadNumber: this.loadNumber, legacySystem: this.legacySystem } });
+  },
 });
 
-/** Create a batch from an uploaded workbook and validate it. */
-export async function createBatch({ kit, file, user }) {
+/** Legacy system and uploader of a batch (the migrated records carry them). */
+async function originOfBatch(batch) {
+  const b = await one('SELECT legacy_system, created_by FROM data_load_batches WHERE id = $1', [batch.id]);
+  return { legacySystem: b?.legacy_system || await legacySystemName(), migratedBy: b?.created_by || null };
+}
+
+/** Create a batch from an uploaded workbook and validate it. legacySystem: the source of the migrated records (setting by default). */
+export async function createBatch({ kit, file, user, legacySystem = null }) {
   if (!KITS[kit]) throw badRequest('kit must be configuration or migration');
   if (!file?.buffer?.length) throw badRequest('Upload the workbook (.xlsx) in the "file" field');
   await assertKitAllowed(kit);
@@ -276,8 +306,8 @@ export async function createBatch({ kit, file, user }) {
   const total = Object.values(parsed).reduce((s, r) => s + r.length, 0);
   if (!total) throw badRequest('The workbook has no data rows (data starts on row 3 of each sheet; the sample row is never loaded)');
   const batch = await withTransaction(async (db) => {
-    const b = (await db.query('INSERT INTO data_load_batches(kit, file_name, status, rows_read, created_by) VALUES ($1,$2,\'failed\',$3,$4) RETURNING *',
-      [kit, file.originalname || null, total, user.id])).rows[0];
+    const b = (await db.query('INSERT INTO data_load_batches(kit, file_name, status, rows_read, created_by, legacy_system) VALUES ($1,$2,\'failed\',$3,$4,$5) RETURNING *',
+      [kit, file.originalname || null, total, user.id, kit === 'migration' ? String(legacySystem || '').trim().slice(0, 100) || await legacySystemName() : null])).rows[0];
     for (const [sheet, rows] of Object.entries(parsed)) {
       for (let i = 0; i < rows.length; i += 500) {
         const chunk = rows.slice(i, i + 500);
@@ -297,13 +327,14 @@ export async function validateBatch(id, user) {
   const state = await assertKitAllowed(batch.kit);
   const sheets = await kitSheets(batch.kit);
   const rowsBySheet = await loadRows(batch.id);
+  const origin = await originOfBatch(batch);
   let outcome;
   try {
     outcome = await runInTransaction(async () => {
       await query(`SELECT pg_advisory_xact_lock(${LOCK})`);
-      const ctx = newCtx(batch, user, state, true);
+      const ctx = newCtx(batch, user, state, true, origin);
       const run = await runSheets(ctx, sheets, rowsBySheet);
-      const recon = batch.kit === 'migration' ? await reconciliation(ctx, withStatus(rowsBySheet, run.results)) : null;
+      const recon = batch.kit === 'migration' ? await reconciliation(ctx, withStatus(rowsBySheet, run.results), sheets) : null;
       return { ...run, reconciliation: recon, warnings: ctx.warnings };
     }, { rollback: true });
   } finally {
@@ -327,7 +358,7 @@ const withStatus = (rowsBySheet, results) => Object.fromEntries(Object.entries(r
  * skipped). Everything in one transaction; a row failing now (the data changed since the validation) saves nothing.
  * Returns the batch, the temporary passwords of new users (shown once, never stored) and the reconciliation.
  */
-export async function loadBatch(id, user, { validRowsOnly = false } = {}) {
+export async function loadBatch(id, user, { validRowsOnly = false, req = null } = {}) {
   const batch = await getBatch(id);
   if (batch.status === 'loaded') throw conflict(`Batch ${batch.id} is already loaded`);
   if (!batch.validatedAt) throw conflict('Validate the batch first');
@@ -338,18 +369,21 @@ export async function loadBatch(id, user, { validRowsOnly = false } = {}) {
   const sheets = await kitSheets(batch.kit);
   const rowsBySheet = await loadRows(batch.id);
   const skip = new Set(Object.values(rowsBySheet).flat().filter((r) => r.status === 'error').map((r) => r.id));
+  const origin = await originOfBatch(batch);
   let outcome;
   const failed = new Error('load failed');
   try {
     outcome = await runInTransaction(async () => {
       await query(`SELECT pg_advisory_xact_lock(${LOCK})`);
-      const ctx = newCtx(batch, user, state, false);
+      const ctx = newCtx(batch, user, state, false, origin);
       const run = await runSheets(ctx, sheets, rowsBySheet, { skip });
       if (unloadable(run.sheets)) {
         failed.run = run;
         throw failed;
       }
-      const recon = batch.kit === 'migration' ? await reconciliation(ctx, withStatus(rowsBySheet, run.results)) : null;
+      // one audit entry per record created or changed, committed with the records
+      await auditMany(req || { user }, ctx.audits);
+      const recon = batch.kit === 'migration' ? await reconciliation(ctx, withStatus(rowsBySheet, run.results), sheets) : null;
       await query('UPDATE data_load_batches SET status = \'loaded\', loaded_by = $2, loaded_at = now(), valid_rows_only = $3 WHERE id = $1', [batch.id, user.id, !!validRowsOnly && skip.size > 0]);
       return { ...run, reconciliation: recon, temporaryPasswords: ctx.temporaryPasswords };
     });

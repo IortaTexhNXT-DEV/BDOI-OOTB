@@ -18,7 +18,8 @@ import { badRequest, conflict } from '../../lib/errors.js';
 import { round2 } from '../../lib/money.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { excelDate } from '../accounting/lib/sheet.js';
-import { seriesShape, sequenceOf } from '../data-load/numbering.js';
+import { legacySystemName } from '../../lib/origin.js';
+import { seriesClash } from '../data-load/numbering.js';
 import { findPolicy } from './receivables.js';
 
 export const OPENING_SOURCE = 'opening';
@@ -40,8 +41,12 @@ export const OPEN_ITEM_COLUMNS = [
 
 const num = (v) => (v === undefined || v === null || String(v).trim() === '' ? null : Number(String(v).replace(/,/g, '').trim()));
 
-/** Load one row ({ policyNumber, billReference, dueDate, originalAmount, openBalance }); returns { status, billNumber }. */
-export async function loadOpenItem(db, v, { goLiveDate, user }) {
+/**
+ * Load one row ({ policyNumber, billReference, dueDate, originalAmount, openBalance }); returns { status, billNumber,
+ * receivableId }. The open item is a migrated record (origin migrated, legacy number = the bill reference, legacy system
+ * of the load or of the setting migration.legacy_system_name) of the migration load batchId when given.
+ */
+export async function loadOpenItem(db, v, { goLiveDate, user, legacySystem = null, batchId = null, migratedBy = null }) {
   if (!v.policyNumber) throw badRequest('Policy Number is required');
   if (!v.billReference) throw badRequest('Bill Reference is required');
   const policy = await findPolicy(db, v.policyNumber);
@@ -54,26 +59,27 @@ export async function loadOpenItem(db, v, { goLiveDate, user }) {
   const amount = num(v.originalAmount) ?? balance;
   if (!(amount >= balance)) throw badRequest('Original Amount cannot be less than the Open Balance');
   const ref = String(v.billReference).trim();
-  const existing = (await db.query('SELECT bill_number, go_live_date FROM receivables WHERE policy_id = $1 AND reference = $2 AND source = $3', [policy.id, ref, OPENING_SOURCE])).rows[0];
+  const existing = (await db.query('SELECT id, bill_number, go_live_date FROM receivables WHERE policy_id = $1 AND reference = $2 AND source = $3', [policy.id, ref, OPENING_SOURCE])).rows[0];
   if (existing) {
     const loadedFor = existing.go_live_date ? new Date(existing.go_live_date).toISOString().slice(0, 10) : null;
     if (loadedFor && loadedFor !== goLiveDate) throw conflict(`Bill ${ref} of ${policy.policy_number} was loaded for go-live date ${loadedFor}`);
-    return { status: 'skipped', billNumber: existing.bill_number };
+    return { status: 'skipped', billNumber: existing.bill_number, receivableId: existing.id };
   }
   // the old system's bill number is kept unless another bill carries it already
   const taken = (await db.query('SELECT 1 FROM receivables WHERE bill_number = $1', [ref])).rowCount > 0;
   if (!taken) {
-    const shape = await seriesShape('invoice');
-    const seq = sequenceOf(shape, ref);
-    if (seq !== null && seq >= shape.next) {
-      throw badRequest(`Bill Reference ${ref} has the format of the invoice numbering series, whose next number is ${shape.next}: a new bill would get the same number. `
-        + `Set the series' Next Number above ${seq} (Numbering sheet of the configuration workbook, or Master > Document Numbering) first`);
+    const clash = await seriesClash('invoice', ref);
+    if (clash) {
+      throw badRequest(`Bill Reference ${ref} has the format of the invoice numbering series, whose next number is ${clash.shape.next}: a new bill would get the same number. `
+        + `Set the series' Next Number above ${clash.seq} (Numbering sheet of the configuration workbook, or Master > Document Numbering) first`);
     }
   }
   const billNumber = taken ? await nextDocumentNumber('invoice', { db, unique: { table: 'receivables', column: 'bill_number' } }) : ref;
-  const r = (await db.query(`INSERT INTO receivables(bill_number, policy_id, client_id, amount, balance, due_date, status, source, reference, currency, net_premium, go_live_date, created_by)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$4,$11,$12) RETURNING id`,
-  [billNumber, policy.id, policy.client_id, round2(amount), round2(balance), due, balance < amount ? 'partial' : 'open', OPENING_SOURCE, ref, policy.currency || 'PHP', goLiveDate, user?.id ?? null])).rows[0];
+  const r = (await db.query(`INSERT INTO receivables(bill_number, policy_id, client_id, amount, balance, due_date, status, source, reference, currency, net_premium, go_live_date, created_by,
+      origin, legacy_system, legacy_number, migrated_at, migrated_by, load_batch_id)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$4,$11,$12,'migrated',$13,$9,now(),$14,$15) RETURNING id`,
+  [billNumber, policy.id, policy.client_id, round2(amount), round2(balance), due, balance < amount ? 'partial' : 'open', OPENING_SOURCE, ref, policy.currency || 'PHP', goLiveDate, user?.id ?? null,
+    legacySystem || await legacySystemName(), migratedBy || user?.id || null, batchId])).rows[0];
   await db.query('INSERT INTO collection_items(receivable_id, policy_id, client_id) VALUES ($1,$2,$3) ON CONFLICT (receivable_id) DO NOTHING', [r.id, policy.id, policy.client_id]);
-  return { status: 'created', billNumber, legacyNumberKept: billNumber === ref };
+  return { status: 'created', billNumber, legacyNumberKept: billNumber === ref, receivableId: r.id };
 }

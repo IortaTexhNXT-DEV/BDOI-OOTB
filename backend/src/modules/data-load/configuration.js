@@ -585,8 +585,7 @@ const numberingSheet = () => ({
     }
     // new numbers must not collide with migrated numbers of the same format (legacy numbers kept by migration)
     if (MIGRATED_NUMBER_TARGETS[code]) {
-      const next = nextOf(await counterOf());
-      const clash = await collidingNumber(code, next);
+      const clash = await collidingNumber(code);
       if (clash) fail('nextNumber', `${MIGRATED_NUMBER_TARGETS[code].label} ${clash} already exists with the format of this series: set the Next Number above it`);
     }
     return changed ? 'updated' : 'unchanged';
@@ -680,24 +679,14 @@ const cocSeriesSheet = () => ({
 
 // ------------------------------------------------------------------ the kit
 
-/** Sheets of the configuration kit, in load order. */
-export async function configurationSheets() {
-  const m = async (code) => masterSheet(code);
-  return [
-    await m('company'), settingsSheet(),
-    await m('country'), await m('region'), await m('state'), await m('city'), await m('barangay'),
-    await m('branch'), await m('department'), await m('hierarchy'), await m('designation'), usersSheet(),
-    await m('currency'), await m('exchange-rate'), accountsSheet(),
-    await m('bank'), await m('bank-account'), await m('signatory'), await m('transaction-code'), await m('write-off-reason'),
-    await m('insurance-company'), await m('line-of-business'), await m('product'), await m('policy-type'), await m('cover'),
-    await m('vehicle-brand'), await m('vehicle-model'), await m('vehicle-variant'), await m('vehicle'),
-    await m('supplier'), await m('asset-class'), await m('short-period-rate'), await m('cancellation-reason'), await m('claim-document-requirement'), await m('repair-shop'),
-    await m('lead-source'), await m('reason-code'),
-    commissionSheet(), chargesSheet(), lguSheet(), authoritySheet(), numberingSheet(),
-    // integrations: bank accounts of the payees paid by bank file, COC number series of the insurers
-    payeeAccountsSheet(), cocSeriesSheet(),
-  ];
-}
+/**
+ * Sheets of the configuration kit other than the generic masters (masterSheet), by key. Their place in the workbook and
+ * what each depends on are declared in registry.js.
+ */
+export const CONFIGURATION_SHEETS = {
+  settings: settingsSheet, users: usersSheet, 'chart-of-accounts': accountsSheet, 'commission-rates': commissionSheet, 'premium-charges': chargesSheet,
+  'lgu-rates': lguSheet, 'authority-limits': authoritySheet, numbering: numberingSheet, 'payee-bank-accounts': payeeAccountsSheet, 'coc-series': cocSeriesSheet,
+};
 
 /** Configuration objects without a sheet: entered on their screen (Instructions sheet). */
 export const CONFIGURATION_ON_SCREEN = [

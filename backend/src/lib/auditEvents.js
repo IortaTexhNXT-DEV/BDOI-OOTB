@@ -219,8 +219,13 @@ export function diffFields(entity, before, after, ctx) {
 
 // ---------------------------------------------------------------- source and user
 
+/** Actions of the per-record entries of a migration load (data-load/service.js). */
+const MIGRATION_ACTIONS = ['migrate-create', 'migrate-update', 'migrate-undo'];
+
 /** Where an event came from: the stored source, else derived from the row (older rows). */
 export function sourceOf(row) {
+  // a record created, changed or removed by a migration load names the load
+  if (MIGRATION_ACTIONS.includes(row.action)) return { channel: 'upload', label: 'Data load', name: row.after_data?.loadNumber || row.before_data?.loadNumber || null };
   const s = row.source && typeof row.source === 'object' ? row.source : null;
   if (s?.channel === 'screen') return { channel: 'screen', label: 'Screen', name: s.name ? String(s.name).replace(/\s*>?\s*\(any [^)]*\)/i, '') : null };
   if (s?.channel === 'api') return { channel: 'api', label: 'API', name: s.name || null };
