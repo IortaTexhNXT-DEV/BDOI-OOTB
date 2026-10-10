@@ -353,6 +353,7 @@ const LeadAssignment = () => {
                 <Column header={t("distribution.la.conditions", "Conditions")} body={(r) => Object.entries(r.conditions).map(([k, v]) => `${t(`distribution.la.cond.${k}`, k)}: ${conditionText(k, v)}`).join("; ") || t("distribution.la.any", "Any prospect")} />
                 <Column header={t("distribution.la.methodLabel", "Method")} body={(r) => t(`distribution.la.method.${r.method}`, r.method)} />
                 <Column header={t("distribution.la.assignees", "Account executives")} body={(r) => (r.assigneeNames || []).join(", ")} />
+                <Column header={t("distribution.la.maxOpen")} body={(r) => (r.maxOpen ? r.maxOpen : "-")} className="bv-num" headerClassName="bv-num" style={{ width: "7rem" }} />
                 <Column header={t("distribution.la.active", "Active")} body={(r) => (write
                   ? <InputSwitch checked={r.status === "active"} onChange={(e) => setStatus(r, e.value)} aria-label={t("distribution.la.active", "Active")} />
                   : <StatusTag status={r.status} />)} style={{ width: "6rem" }} />

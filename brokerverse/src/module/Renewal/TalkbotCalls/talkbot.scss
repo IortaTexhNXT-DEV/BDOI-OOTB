@@ -49,3 +49,16 @@
     font-size: 12px;
   }
 }
+
+.talkbot-action-hint {
+  display: inline-flex;
+}
+
+// the outcome names are long: let the label of a figure wrap instead of cutting it
+.bv-stat-cards.talkbot-figures {
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+
+  .bv-stat-label {
+    white-space: normal;
+  }
+}

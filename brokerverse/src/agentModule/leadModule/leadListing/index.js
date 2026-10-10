@@ -20,7 +20,7 @@ import useProspectStart from "./useProspectStart";
  * from calls, e-mail, walk-ins and the other manual channels (a Lead Number or Loan ID already loaded updates its status),
  * or the TFS account file (TIS-BRD-LEAD-01: one prospect per loan with the TFS detail set).
  */
-const uploadTargets = (t) => [
+export const uploadTargets = (t) => [
   { label: t("leads.uploadProspects"), templatePath: "/leads/bulk-upload/template", uploadPath: "/leads/bulk-upload" },
   { label: t("leads.uploadTfs"), templatePath: "/leads/tfs-import/template", uploadPath: "/leads/tfs-import" },
 ];

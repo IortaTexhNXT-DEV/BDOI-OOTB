@@ -147,8 +147,12 @@ const CallList = () => {
   const pageActions = list ? (
     <>
       {write && ["draft", "sent"].includes(status) ? <Button type="button" icon="pi pi-download" outlined label={t("talkbot.download")} onClick={download} /> : null}
-      {write && status === "draft" ? <Button type="button" icon="pi pi-send" outlined label={t("talkbot.markSent")} onClick={markSent} disabled={!list.downloads}
-        tooltip={!list.downloads ? t("talkbot.downloadFirst") : undefined} tooltipOptions={{ showOnDisabled: true, position: "top" }} /> : null}
+      {/* always inside the same span: a tooltip shown on a disabled button wraps it, and swapping the wrapper breaks the page */}
+      {write && status === "draft" ? (
+        <span className="talkbot-action-hint" title={!list.downloads ? t("talkbot.downloadFirst") : undefined}>
+          <Button type="button" icon="pi pi-send" outlined label={t("talkbot.markSent")} onClick={markSent} disabled={!list.downloads} />
+        </span>
+      ) : null}
       {write && ["sent", "results-loaded"].includes(status) ? <Button type="button" icon="pi pi-upload" outlined label={t("talkbot.uploadResults")} onClick={() => setUploading(true)} /> : null}
       {canBatch && status !== "cancelled" && list.willing > 0 ? <Button type="button" icon="pi pi-replay" label={t("talkbot.createBatch")} onClick={createBatch} /> : null}
       {write && status === "results-loaded" ? <Button type="button" icon="pi pi-lock" outlined label={t("talkbot.closeList")} onClick={closeList} /> : null}
@@ -199,7 +203,7 @@ const CallList = () => {
             <span>{expiryRange(list)}</span>
           </>
         ) : null} />
-      <StatCards items={figures} />
+      <StatCards items={figures} className="talkbot-figures" />
       <DetailSection title={t("talkbot.details")}>
         {list ? (
           <KeyValueGrid columns={4} items={[
