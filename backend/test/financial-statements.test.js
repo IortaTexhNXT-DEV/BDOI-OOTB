@@ -223,6 +223,9 @@ describe('files', () => {
     expect(table.columns.map((c) => c.label)).toEqual(['Account', 'Description', 'As of 30/09/2026', 'Previous year end 31/12/2025']);
     const sheet = statementSheet(st, { companyName: 'Toyota Insurance Services Philippines', generatedBy: 'Finance Maker', generatedAt: '09/10/2026 10:00', currency: 'PHP', format: fmt });
     expect(sheet.banner).toEqual(['Toyota Insurance Services Philippines', 'Balance Sheet', 'As of 30/09/2026', 'Printed by Finance Maker at 09/10/2026 10:00', 'Amounts in PHP']);
-    expect(typeof sheet.rows.find((r) => r[0] === CASH)[2]).toBe('number');
+    // An account line of the statement, whichever chart the database uses (cash may post to another account than CASH).
+    const account = linesOf({ statement: st }).find((l) => l.accountCode)?.accountCode;
+    expect(account).toBeTruthy();
+    expect(typeof sheet.rows.find((r) => r[0] === account)[2]).toBe('number');
   });
 });
