@@ -187,7 +187,7 @@ describe('migrations 0348 and 0400 on a database in use', () => {
     await q('DELETE FROM roles WHERE code LIKE \'tis-%\' AND NOT EXISTS (SELECT 1 FROM user_roles ur WHERE ur.role_id = roles.id)');
     await q('DELETE FROM role_permissions rp USING roles r WHERE r.id = rp.role_id AND r.code LIKE \'tis-%\'');
     await q("DELETE FROM permissions WHERE code IN ('approve:quotations', 'approve:policies', 'approve:renewals', 'approve:claims', 'approve:remittance')");
-    await q("DELETE FROM schema_migrations WHERE name IN ('0348_tisph_roles.sql', '0400_remittance_approval_authority.sql')");
+    await q("DELETE FROM schema_migrations WHERE name IN ('0348_tisph_roles.sql', '0400_remittance_approval_authority.sql', '0550_feature_entitlements.sql')");
     // later migrations that grant to the holders of a module permission (0387: approve:incentive, 0500: assign:renewals)
     // or to the TISPH roles (0480: extend:quotations, 0485: promotions, 0502: claim settlement cash, 0504: claim processing)
     // run again after it

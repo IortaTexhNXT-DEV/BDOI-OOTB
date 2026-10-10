@@ -16,6 +16,7 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const { HEADING, IMAGE } = require("./render");
+const { editionText } = require("./features");
 
 const PLACEHOLDER = /\{\{([a-z-]+):([^}]+)\}\}/g;
 
@@ -105,9 +106,10 @@ function checkText(chunks, forbidden = []) {
 
 /**
  * Assemble an edition: { markdown, chapters: [{ file, text }], images: [{ from, to }], problems: [], drafts, hash }.
+ * `edition` (scripts/help/features.js) leaves out what belongs to the features the edition does not run.
  * `facts` is the generated role-facts.json of the edition.
  */
-function assemble(manifest, facts) {
+function assemble(manifest, facts, edition = null) {
   const problems = [];
   const images = [];
   const chapters = [];
@@ -170,7 +172,9 @@ function assemble(manifest, facts) {
       problems.push(`chapter not found: ${rel}`);
       continue;
     }
-    const raw = fs.readFileSync(abs, "utf8").replace(/\r\n/g, "\n").replace(/<!--[\s\S]*?-->\n?/g, "");
+    const source = fs.readFileSync(abs, "utf8").replace(/\r\n/g, "\n").replace(/<!--[\s\S]*?-->\n?/g, "");
+    // the features the edition does not run are left out first (scripts/help/features.js)
+    const raw = edition ? editionText(source, edition) : source;
     // figures numbered by chapter: "Figure 4.2: <caption>"
     if (/^# /m.test(raw)) chapterNo += 1;
     let figureNo = 0;

@@ -207,4 +207,8 @@ accrual auto-reversal, period auto soft-close, SAP GL export). See [Schedules](#
 4. For e-mails, choose {{menu:/master/configuration/email-outbox}}: each e-mail shows its status, attempts and last
    error.
 
-See [Integrations](#integrations), [E-mail Outbox](#e-mail-outbox) and [Insurer integration](#insurer-integration).
+See [Integrations](#integrations) and [E-mail Outbox](#e-mail-outbox).
+
+::: feature insurer-api
+See also [Insurer integration](#insurer-integration).
+:::

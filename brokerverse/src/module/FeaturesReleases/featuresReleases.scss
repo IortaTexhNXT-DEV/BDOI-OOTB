@@ -1,0 +1,68 @@
+// Features & Releases (Master > System Configuration; Master > Platform)
+.fr-page {
+  .fr-tabs .p-tabview-panels {
+    padding: 1rem 0 0;
+  }
+}
+
+.fr-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.fr-link.p-button.p-button-link {
+  padding: 0;
+  text-align: left;
+}
+
+.fr-toolbar-actions {
+  display: inline-flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.fr-muted {
+  color: var(--color-text-muted, #656565);
+}
+
+.fr-impact {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 0.75rem 1.5rem;
+  margin: 1rem 0;
+
+  &__list {
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+}
+
+.fr-form {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.fr-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.fr-radios {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.fr-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fr-error {
+  margin-top: 0.75rem;
+  color: var(--red-600, #c62828);
+}

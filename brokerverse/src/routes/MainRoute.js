@@ -75,6 +75,8 @@ import DocumentNumberingPage from "../module/Administration/DocumentNumbering";
 import CommissionRateMatrix from "../module/FinanceMastersModule/CommissionRateMatrix";
 import DiscountCaps from "../module/FinanceMastersModule/DiscountCaps";
 import AuditTrailPage from "../module/Administration/AuditTrail";
+import FeatureCatalogue from "../module/FeaturesReleases/FeatureCatalogue";
+import PlatformFeatures from "../module/FeaturesReleases/PlatformFeatures";
 import EmailOutboxPage from "../module/Administration/EmailOutbox";
 import CompanyMasters from "../module/GeneralMasters/OrganizationMasters/CompanyMaster";
 import BranchMasters from "../module/GeneralMasters/OrganizationMasters/BranchMaster";
@@ -888,6 +890,9 @@ const Maincomponent = () => {
           <Route path="master/finance/commission-rate-matrix" element={<CommissionRateMatrix />} />
           <Route path="master/finance/discount-caps" element={<DiscountCaps />} />
           <Route path="master/configuration/audit-trail" element={<AuditTrailPage />} />
+          {/* features and releases: read only for the tenant; enabling by the iorta TechNXT platform administrator */}
+          <Route path="master/configuration/features" element={<FeatureCatalogue />} />
+          <Route path="master/platform/features" element={<PlatformFeatures />} />
           <Route path="master/configuration/email-outbox" element={<EmailOutboxPage />} />
           <Route path="master/finance/currency" element={<CurrencyMaster />} />
 

@@ -18,6 +18,7 @@ import { companyName } from '../../lib/letterhead.js';
 import { loadProfile, profileSchema, saveProfile } from './profile.js';
 import { identityOf, openTransaction, redeemCode, startSignIn, verifyIdToken } from '../../lib/entraId.js';
 import { passwordSignInAllowed, passwordSignInEnabled, resolveSsoUser } from './sso.js';
+import { PLATFORM_ROLE } from '../../lib/platform.js';
 
 const { router, define } = moduleRouter('Auth', '/auth');
 
@@ -39,8 +40,10 @@ async function issueTokens(user, deviceId, familyId = null) {
 }
 const tokenBody = ({ jti: _jti, ...rest }) => rest;
 
-/** Roles that must enrol in two-factor authentication (security.require_2fa_roles). */
+/** Roles that must enrol in two-factor authentication (security.require_2fa_roles, and always the platform administrator). */
 async function twoFactorRequiredFor(user) {
+  // the platform administrator always signs in with a second factor, whatever the tenant's setting says
+  if ((user.roles || []).includes(PLATFORM_ROLE)) return true;
   const roles = (await getSetting('security.require_2fa_roles', [])) || [];
   return Array.isArray(roles) && (user.roles || []).some((r) => roles.includes(r));
 }

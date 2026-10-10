@@ -21,6 +21,8 @@
  *   npm run help:build -- --edition base --out <dir>   another edition into a folder, for review
  *   npm run help:build -- --check                      checks only: fails when the edition breaks a rule
  *
+ * The manual covers the features of the delivered edition only: Phase 1 and platform functions (scripts/help/features.js).
+ *
  * The build stops when a chapter names a generic role, a withdrawn screen, a code or a forbidden term of the
  * manifest, when a role has no chapter, when a screen of a role's menu has no section, or when the role facts no
  * longer match the menus. helpRoutes.test.js fails when a heading the Help panel links to is missing.
@@ -30,6 +32,7 @@ const path = require("path");
 const { headingIds, parseFrontMatter, render, toc } = require("./help/render");
 const { page } = require("./help/page");
 const { assemble, controlRows, effectiveStatus, loadManifest, wordSource } = require("./help/edition");
+const { deliveredEdition } = require("./help/features");
 
 const ROOT = path.resolve(__dirname, "..");
 const REPO = path.resolve(ROOT, "..");
@@ -55,9 +58,26 @@ const fail = (problems) => {
   process.exit(1);
 };
 
+const load = (file) => import(path.join(ROOT, "src", file));
+
+/**
+ * The features of the edition (the delivered state: Phase 1 and platform functions) applied to the menus, and the
+ * screens of the features left out (their sections and links leave the manual).
+ */
+async function featureEdition() {
+  const edition = await deliveredEdition(REPO);
+  const [{ menuList }, { flattenLeaves }, { setFeatureState, hiddenMenus }] = await Promise.all([
+    load("components/SideBar/list.js"), load("components/SideBar/menuTree.js"), load("features/entitlements.js"),
+  ]);
+  setFeatureState(edition.off);
+  const hidden = hiddenMenus(edition.off);
+  const screens = new Set(flattenLeaves(menuList).filter((l) => l.item.path && hidden.has([...l.ancestors.map((a) => a.name), l.item.name].join(" > ")))
+    .map((l) => l.item.path));
+  return { ...edition, screens };
+}
+
 /** The screens of every role's menu, and the Help section each one opens. */
 async function menuChecks(facts) {
-  const load = (file) => import(path.join(ROOT, "src", file));
   const [{ menuList }, { filterMenuForRoles }, { flattenLeaves }, { helpSectionFor }] = await Promise.all([
     load("components/SideBar/list.js"), load("utils/menuPermissions.js"), load("components/SideBar/menuTree.js"), load("components/HelpPanel/helpRoutes.js"),
   ]);
@@ -141,7 +161,7 @@ async function buildManifest(name, out, check) {
   const factsFile = path.join(manifest.dir, manifest.roleFacts);
   if (!fs.existsSync(factsFile)) fail([`${path.relative(REPO, factsFile)} is missing: run npm run manual:role-facts in backend/`]);
   const facts = JSON.parse(fs.readFileSync(factsFile, "utf8"));
-  const result = assemble(manifest, facts);
+  const result = assemble(manifest, facts, await featureEdition());
   const menu = await menuChecks(facts);
   const problems = [...result.problems, ...menu.problems];
 

@@ -7,7 +7,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { ledgerIntegrity, makePolicy, setupFinance } from './accounting.fixtures.js';
-import { withDirectEndorsements } from './helpers.js';
+import { enableFeatures, withDirectEndorsements } from './helpers.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { one, pool, query, withTransaction } from '../src/db/pool.js';
 import { addDays, today } from '../src/lib/dates.js';
@@ -37,6 +37,8 @@ beforeAll(async () => {
   // (ISSUE-01) are covered by test/placement-moves.test.js
   await query(`UPDATE app_settings SET value = '["accepted","approved","submitted"]' WHERE key = 'cover_note.quote_statuses'`);
   clearSettingsCache();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['claims-settlements', 'payables', 'fixed-assets']);
   admin = await one("SELECT id, username FROM users WHERE username = 'BrokerVerse'");
   await ctx.api('post', '/users').send({ username: 'ops.manager', password: 'Welcome@123', displayName: 'AP manager', roles: ['accounting-manager'], email: 'ops.manager@example.ph' });
   const token = (await request(ctx.app).post('/api/auth/login').send({ username: 'ops.manager', password: 'Welcome@123' })).body.accessToken;

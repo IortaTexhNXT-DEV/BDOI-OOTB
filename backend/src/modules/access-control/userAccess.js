@@ -15,6 +15,7 @@ import { departmentOf, roleDirectory } from './roles.js';
 import { sodConflictList, STATE_WORDS } from './sod.js';
 import { listDelegations, STATUS_WORDS as DELEGATION_WORDS, userAuthority } from './delegations.js';
 import { OUTCOME_WORDS } from './reviews.js';
+import { isPlatformPermission } from '../../lib/platform.js';
 
 const USER_SQL = `SELECT u.id, u.username, u.display_name AS "displayName", u.employee_code AS "employeeCode", u.branch_code AS "branch", b.name AS "branchName",
     u.department AS "hrDepartment", u.designation, u.status, u.email, rt.display_name AS "reportingTo",
@@ -117,7 +118,7 @@ async function accessOf(db, userId, fullAccess) {
   const { rows } = await db.query(fullAccess ? 'SELECT code, module, description FROM permissions'
     : `SELECT DISTINCT p.code, p.module, p.description FROM user_effective_roles($1) er JOIN role_permissions rp ON rp.role_id = er.role_id
       JOIN permissions p ON p.id = rp.permission_id`, fullAccess ? [] : [userId]);
-  const held = rows.map((r) => describe(r.code, r)).filter((p) => p.checked);
+  const held = rows.filter((r) => !isPlatformPermission(r.code)).map((r) => describe(r.code, r)).filter((p) => p.checked);
   const modules = new Map();
   for (const p of held) {
     if (!modules.has(p.module)) {

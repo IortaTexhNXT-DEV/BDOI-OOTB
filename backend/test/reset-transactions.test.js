@@ -9,7 +9,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { setup } from './helpers.js';
+import { setup, enableFeatures } from './helpers.js';
 import { pool, query } from '../src/db/pool.js';
 import { nextDocumentNumber } from '../src/lib/numbering.js';
 import { importOpeningBalances } from '../src/modules/period-end/opening.js';
@@ -43,6 +43,8 @@ let ctx;
 let uploadDir;
 beforeAll(async () => {
   ctx = await setup(); // reference data + the sample book (masters and transactions)
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['petty-cash']);
   uploadDir = fs.mkdtempSync(path.join(os.tmpdir(), 'bv-reset-'));
 });
 afterAll(async () => {

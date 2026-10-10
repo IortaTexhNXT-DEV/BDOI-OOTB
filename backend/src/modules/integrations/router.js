@@ -15,6 +15,7 @@ import * as msg from './messaging.js';
 import ctplRoutes from './ctplRoutes.js';
 import insurerRoutes from './insurerRoutes.js';
 import bankRoutes from './bankRoutes.js';
+import { connectorAllowed } from '../features/service.js';
 
 /**
  * Integration framework routes.
@@ -164,7 +165,7 @@ pub.define({
   handler: async (req, res) => {
     if (!(await getSetting('integrations.inbound_enabled', true))) throw notFound('Inbound integration messages are switched off');
     const c = await connectorRow(req.params.connector);
-    if (!c.enabled) throw notFound('Connector not found');
+    if (!c.enabled || !(await connectorAllowed(c.code))) throw notFound('Connector not found');
     const type = messageTypeOf(req.body?.type);
     if (!type?.onInbound || type.kind !== c.kind) throw badRequest(`Unknown inbound message type ${req.body?.type || ''}`);
     const text = req.rawBody ? Buffer.from(req.rawBody).toString('utf8') : JSON.stringify(req.body || {});

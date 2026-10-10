@@ -21,6 +21,7 @@ import { calendarDateFormat, toIsoDate } from "../../utility/dateFormat";
 import { BirTag, PageHeader, date, money, showError, showSuccess } from "./common";
 import InvoiceDetail from "./InvoiceDetail";
 import "./tax.scss";
+import { useFeature } from "../../features/Feature";
 
 const SOURCES = ["manual", "debit_note", "override_commission", "policy_commission"];
 const VAT_CLASSES = ["vatable", "exempt", "zero_rated"];
@@ -141,6 +142,8 @@ const EMPTY_FILTERS = { search: "", status: null, sourceType: null, from: "", to
  */
 const SalesInvoices = () => {
   const { t } = useTranslation();
+  // electronic invoicing (EIS) is a future-release feature (features/entitlements.js)
+  const eis = useFeature("bir-eis");
   const toast = useRef(null);
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [creating, setCreating] = useState(false);
@@ -204,7 +207,7 @@ const SalesInvoices = () => {
             <Column header={t("birTax.totalAmount")} body={(r) => money(r.totalAmount)} footer={total("totalAmount")} className="bv-num" headerClassName="bv-num" footerClassName="bv-num" />
             <Column header={t("birTax.balance")} body={(r) => money(r.balance)} footer={total("balance")} className="bv-num" headerClassName="bv-num" footerClassName="bv-num" />
             <Column header={t("birTax.statusLabel")} body={(r) => <BirTag status={r.status} />} />
-            <Column header={t("birTax.eisStatus")} body={(r) => (r.eisStatus ? <BirTag status={r.eisStatus} /> : "")} />
+            {eis.visible ? <Column header={t("birTax.eisStatus")} body={(r) => (r.eisStatus ? <BirTag status={r.eisStatus} /> : "")} /> : null}
             <Column style={{ width: "4rem" }} body={(r) => <Button icon="pi pi-print" text size="small" aria-label={t("birTax.print")} tooltip={t("birTax.print")}
               onClick={() => birTaxService.invoicePdf(r.id).catch((e) => showError(toast, e))} />} />
           </DataTable>

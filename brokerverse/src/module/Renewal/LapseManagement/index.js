@@ -24,6 +24,7 @@ import { downloadCsv } from "../../../utility/csvExport";
 import { formatPercent } from "../../../utility/numberFormat";
 import { PolicyCell, RenewalHeader, useRenewalParam } from "../shared";
 import "./index.scss";
+import { useFeature } from "../../../features/Feature";
 
 const GRACE = "grace";
 const LAPSED = "lapsed";
@@ -67,13 +68,15 @@ const LapseManagement = () => {
   const showError = useCallback((e) => toast.current?.show({ severity: "error", summary: t("common.error", "Error"), detail: e?.message || String(e), life: 5000 }), [t]);
   const done = (summary, detail) => toast.current?.show({ severity: "success", summary, detail, life: 3000 });
 
+  // win-back campaigns are a future-release feature (features/entitlements.js)
+  const campaignFeature = useFeature("win-back");
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const [lapsed, queue, list, settings] = await Promise.all([
         renewalsWorkspaceService.getLapsed(),
         renewalsWorkspaceService.getQueue(),
-        renewalsWorkspaceService.getCampaigns(),
+        campaignFeature.visible ? renewalsWorkspaceService.getCampaigns() : Promise.resolve([]),
         renewalsWorkspaceService.getSettings("renewals"),
       ]);
       const graceDays = settings["renewals.grace_period_days"];
@@ -88,7 +91,7 @@ const LapseManagement = () => {
     } finally {
       setLoading(false);
     }
-  }, [showError]);
+  }, [showError, campaignFeature.visible]);
   useEffect(() => { load(); }, [load]);
 
   const filtered = useMemo(() => {
@@ -272,10 +275,10 @@ const LapseManagement = () => {
   );
 
   const campaignsTab = (
-    <SectionCard flush actions={<Button icon="pi pi-plus" label={t("lapse.newCampaign")} onClick={openCampaign} />} title={t("lapse.campaigns")}>
+    <SectionCard flush actions={campaignFeature.on ? <Button icon="pi pi-plus" label={t("lapse.newCampaign")} onClick={openCampaign} /> : null} title={t("lapse.campaigns")}>
       <DataTable value={campaigns} dataKey="id" loading={loading} size="small" paginator={campaigns.length > 20} rows={20}
         emptyMessage={<EmptyState icon="pi-megaphone" title={t("lapse.noCampaigns")} text={t("lapse.noCampaignsText")}
-          action={<Button outlined icon="pi pi-plus" label={t("lapse.newCampaign")} onClick={openCampaign} />} />}>
+          action={campaignFeature.on ? <Button outlined icon="pi pi-plus" label={t("lapse.newCampaign")} onClick={openCampaign} /> : null} />}>
         <Column field="campaignName" header={t("lapse.campaign.name")} body={(c) => <span className="bv-cell-stack"><span>{c.campaignName}</span><small>{c.campaignId}</small></span>} />
         <Column header={t("lapse.campaign.period")} body={(c) => `${formatDate(c.startDate)} - ${formatDate(c.endDate)}`} />
         <Column field="targetSegment" header={t("lapse.campaign.target")} body={(c) => t(`lapse.segments.${c.targetSegment}`, c.targetSegment || "—")} />
@@ -298,9 +301,9 @@ const LapseManagement = () => {
       <StatCards items={figures} />
       <TabView activeIndex={tab} onTabChange={(e) => setTab(e.index)} className="bv-tabbar">
         <TabPanel header={t("lapse.tabList")} />
-        <TabPanel header={t("lapse.tabCampaigns")} />
+        {campaignFeature.visible ? <TabPanel header={t("lapse.tabCampaigns")} /> : null}
       </TabView>
-      {tab === 0 ? listTab : campaignsTab}
+      {tab === 0 || !campaignFeature.visible ? listTab : campaignsTab}
 
       <SidePanel visible={!!selected} onHide={() => setPanelId(null)} wide title={selected ? `${selected.policyNumber} · ${selected.insuredName || ""}` : ""}
         meta={selected ? statusBody(selected) : null}
@@ -380,11 +383,13 @@ const LapseManagement = () => {
               <Dropdown inputId="wb-terms" value={winBack.paymentTerms} onChange={(e) => setWinBack({ ...winBack, paymentTerms: e.value })} className="w-full"
                 options={PAYMENT_TERMS.map((p) => ({ label: t(`lapse.paymentTerms.${p}`, p), value: p }))} />
             </div>
-            <div className="col-12 md:col-6">
-              <label htmlFor="wb-campaign">{t("lapse.campaignLabel")}</label>
-              <Dropdown inputId="wb-campaign" value={winBack.campaignId} onChange={(e) => setWinBack({ ...winBack, campaignId: e.value || null })} showClear className="w-full"
-                placeholder={t("lapse.noCampaign")} options={campaigns.map((c) => ({ label: `${c.campaignName} (${c.campaignId})`, value: c.id }))} />
-            </div>
+            {campaignFeature.on ? (
+              <div className="col-12 md:col-6">
+                <label htmlFor="wb-campaign">{t("lapse.campaignLabel")}</label>
+                <Dropdown inputId="wb-campaign" value={winBack.campaignId} onChange={(e) => setWinBack({ ...winBack, campaignId: e.value || null })} showClear className="w-full"
+                  placeholder={t("lapse.noCampaign")} options={campaigns.map((c) => ({ label: `${c.campaignName} (${c.campaignId})`, value: c.id }))} />
+              </div>
+            ) : null}
             <div className="col-12">
               <label>{t("lapse.benefitsLabel")}</label>
               <div className="lapse-benefits">

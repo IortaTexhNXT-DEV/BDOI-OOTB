@@ -9,6 +9,7 @@
  */
 import { getSetting } from '../../lib/settings.js';
 import { adminEquivalentRoles } from '../../lib/auth.js';
+import { PLATFORM_ROLE } from '../../lib/platform.js';
 
 const list = (v) => (Array.isArray(v) ? v : []);
 
@@ -31,7 +32,8 @@ export async function roleGroups() {
 export async function roleDirectory(db) {
   const { departments, place, platform: platformRoles } = await roleGroups();
   const fullAccess = new Set(await adminEquivalentRoles(db));
-  const { rows } = await db.query('SELECT id, code, name, description, status, inherits FROM roles ORDER BY id');
+  // the vendor role (lib/platform.js) is not a role of the tenant: not listed, not changed on the access screens
+  const { rows } = await db.query('SELECT id, code, name, description, status, inherits FROM roles WHERE code <> $1 ORDER BY id', [PLATFORM_ROLE]);
   const roles = rows.map((r) => ({
     id: r.id, code: r.code, name: r.name, description: r.description, status: r.status, inherits: r.inherits || [],
     department: place.get(r.code)?.department || null, summary: place.get(r.code)?.summary || null,

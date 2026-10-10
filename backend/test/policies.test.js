@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, enableFeatures } from './helpers.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { pool } from '../src/db/pool.js';
 
@@ -17,6 +17,8 @@ async function persona(username, roles) {
 
 beforeAll(async () => {
   ctx = await setup();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['lines-fire-engineering']);
   sales = await persona('p.sales', ['sales']);
   claims = await persona('p.claims', ['claims']);
 });

@@ -64,7 +64,9 @@ describe("TISPH roles (RBAC v4): menus", () => {
       "/master/configuration/settings"].filter((p) => !isPathAllowed(p, menuList, ["tis-it-admin"]))).toEqual([]);
     expect(isPathAllowed("/master/generals/usermanagement/user", menuList, ["tis-general-manager"])).toBe(true);
     expect(isPathAllowed("/master/configuration/settings", menuList, ["tis-general-manager"])).toBe(false);
-    expect(filterMenuForRoles(menuList, ["tis-superid", "system-admin"])).toEqual(menuList);
+    // every menu but the platform section of the iorta TechNXT platform administrator (features and releases)
+    const tenantMenu = menuList.map((m) => (m.submenu ? { ...m, submenu: m.submenu.filter((s) => !s.platform) } : m));
+    expect(filterMenuForRoles(menuList, ["tis-superid", "system-admin"])).toEqual(tenantMenu);
   });
 
   it("the Lead Sources and Reason Codes masters have their manual section", () => {

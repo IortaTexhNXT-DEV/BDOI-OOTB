@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { setupFinance } from './accounting.fixtures.js';
-import { withCalendarFiscalYear, withoutManualSignOffs } from './helpers.js';
+import { withCalendarFiscalYear, withoutManualSignOffs, enableFeatures } from './helpers.js';
 import { pool, query, withTransaction } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { createJournal, cancelJournal } from '../src/modules/accounting/lib/ledger.js';
@@ -18,6 +18,8 @@ let admin;
 let maker;
 beforeAll(async () => {
   ctx = await setupFinance();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['recurring-journals', 'bir-reports']);
   await withCalendarFiscalYear();
   admin = ctx.api;
   maker = ctx.as('maker');

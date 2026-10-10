@@ -12,6 +12,7 @@ import { pool } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { readWorkbook } from '../src/modules/documents/xlsx.js';
 import { PERMISSIONS, describe as describeCode } from '../src/modules/access-control/catalogue.js';
+import { MANAGE_FEATURES, PLATFORM_PERMISSIONS, PLATFORM_ROLE } from '../src/lib/platform.js';
 
 const PW = 'Welcome@123';
 let ctx;
@@ -48,10 +49,13 @@ afterAll(async () => { await pool.end(); });
 
 describe('access catalogue and overview', () => {
   it('describes every permission of the database in business words', async () => {
-    const codes = (await q('SELECT code FROM permissions ORDER BY code')).map((r) => r.code);
+    const codes = (await q('SELECT code FROM permissions ORDER BY code')).map((r) => r.code).filter((c) => !PLATFORM_PERMISSIONS.includes(c));
     expect(codes.filter((c) => describeCode(c).area === 'other')).toEqual([]);
     expect(PERMISSIONS.map((p) => p.code).sort()).toEqual(codes);
     const o = await overview();
+    // the platform permissions are never part of the tenant's catalogue
+    expect(o.catalogue.permissions.map((p) => p.code)).not.toContain(MANAGE_FEATURES);
+    expect(o.roles.map((r) => r.code)).not.toContain(PLATFORM_ROLE);
     const modules = new Map(o.catalogue.modules.map((m) => [m.code, m]));
     expect(o.catalogue.areas.map((a) => a.name)).toEqual(['Sales & Marketing', 'Operations', 'Accounts', 'Commission', 'Reports', 'Product Configurator',
       'Master data and configuration', 'Users and access', 'Basic and special access']);

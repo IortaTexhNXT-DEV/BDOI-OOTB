@@ -13,6 +13,7 @@ import { localizationErrors } from '../system-settings/service.js';
 import { EXPORT_COLUMNS, exportRows } from '../../lib/auditEvents.js';
 import { sendSheet } from '../claims/docs.js';
 import * as auditSvc from '../audit/service.js';
+import { assertSettingsAllowed } from '../features/service.js';
 
 const { router, define } = moduleRouter('System Settings', '/settings');
 /** Settings with the screen that owns them (managedBy: { screen, path }; null when Master > Configuration edits it). */
@@ -43,6 +44,7 @@ define({
     if (invalid.length) throw badRequest('Validation failed', invalid);
     await assertNotControlled(changes);
     assertParkedEvents(changes);
+    await assertSettingsAllowed(changes.filter(([, v, was]) => JSON.stringify(v) !== JSON.stringify(was)).map(([k]) => k));
     for (const [k, v] of changes) {
       const exists = (await query('SELECT editable FROM app_settings WHERE key = $1', [k])).rows[0];
       if (!exists || !exists.editable) continue;

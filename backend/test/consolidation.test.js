@@ -9,7 +9,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import cron from 'node-cron';
 import request from 'supertest';
 import { setupFinance } from './accounting.fixtures.js';
-import { remittanceBody } from './helpers.js';
+import { remittanceBody, enableFeatures } from './helpers.js';
 import { one, pool, query } from '../src/db/pool.js';
 import * as handlers from '../src/jobs/handlers.js';
 import { today } from '../src/lib/dates.js';
@@ -22,6 +22,8 @@ const PASSWORD = 'Welcome@123';
 
 beforeAll(async () => {
   ctx = await setupFinance();
+  // functions of a later release (modules/features), enabled as the platform administrators do
+  await enableFeatures(ctx.app, ['petty-cash']);
   await ctx.api('post', '/users').send({ username: 'cs.manager', password: PASSWORD, displayName: 'Consolidation manager', roles: ['accounting-manager'], email: 'cs.manager@example.ph' });
   const token = (await request(ctx.app).post('/api/auth/login').send({ username: 'cs.manager', password: PASSWORD })).body.accessToken;
   manager = (m, p) => request(ctx.app)[m](`/api${p}`).set('Authorization', `Bearer ${token}`);

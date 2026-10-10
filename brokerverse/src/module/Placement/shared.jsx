@@ -13,6 +13,7 @@ import placementService from "../../services/placementService";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import { formatDate as formatConfiguredDate, formatInstant } from "../../utility/dateFormat";
 import { statusSeverity as sharedSeverity } from "../../utils/statusSeverity";
+import { useFeature } from "../../features/Feature";
 
 export const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
 export const formatDate = (d) => formatConfiguredDate(d, { empty: "-" });
@@ -78,6 +79,8 @@ export const participantProblem = (parts, t) => {
 export const ParticipantEditor = ({ value, onChange, insurers, totals = {}, showReference = false, disabled = false }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
+  // co-insurance (several insurers on one risk) is a future-release feature: one insurer per client
+  const coinsurance = useFeature("coinsurance").on;
   const parts = useMemo(() => value || [], [value]);
   const preview = useMemo(() => splitPreview(parts, { sumInsured: totals.sumInsured, premium: totals.netPremium, premiumTotal: totals.grossPremium, commissionAmount: totals.commissionAmount }), [parts, totals]);
   const total = shareTotal(parts);
@@ -131,7 +134,7 @@ export const ParticipantEditor = ({ value, onChange, insurers, totals = {}, show
         </tbody>
         <tfoot>
           <tr>
-            <td>{!disabled && <Button label={t("placement.participants.add")} icon="pi pi-plus" text onClick={add} />}</td>
+            <td>{!disabled && (coinsurance || !parts.length) && <Button label={t("placement.participants.add")} icon="pi pi-plus" text onClick={add} />}</td>
             <td className="num"><strong className={problem ? "total-bad" : "total-ok"}>{Number(total.toFixed(4))}%</strong></td>
             <td colSpan={showReference ? 7 : 6}>
               {problem ? <span className="total-bad"><i className="pi pi-exclamation-triangle mr-1" />{problem}</span>
