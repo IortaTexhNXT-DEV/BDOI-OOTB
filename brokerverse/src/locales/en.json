@@ -3140,8 +3140,6 @@
     "bankFacts": "Bank",
     "bankCategory": "Category",
     "accountCode": "Account code",
-    "bankAccountsOf_one": "Company account at this bank ({{count}})",
-    "bankAccountsOf_other": "Company accounts at this bank ({{count}})",
     "noBankAccounts": "No company account is held at this bank.",
     "editAccountCategory": "Edit account category",
     "addAccountCategory": "Add account category",
@@ -3149,7 +3147,8 @@
     "cancel": "Cancel",
     "exchangeRateDetails": "Exchange rate",
     "fromCurrency": "From currency",
-    "toCurrency": "To currency"
+    "toCurrency": "To currency",
+    "bankAccountsAtBank": "Company accounts at this bank"
   },
   "automatedRemittance": {
     "pageTitle": "Automated Remittance Master",

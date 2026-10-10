@@ -3482,8 +3482,6 @@
     "bankFacts": "ธนาคาร",
     "bankCategory": "ประเภท",
     "accountCode": "รหัสบัญชี",
-    "bankAccountsOf_one": "บัญชีของบริษัทที่ธนาคารนี้ ({{count}})",
-    "bankAccountsOf_other": "บัญชีของบริษัทที่ธนาคารนี้ ({{count}})",
     "noBankAccounts": "ไม่มีบัญชีของบริษัทที่ธนาคารนี้",
     "editAccountCategory": "แก้ไขหมวดบัญชี",
     "addAccountCategory": "เพิ่มหมวดบัญชี",
@@ -3491,7 +3489,8 @@
     "cancel": "ยกเลิก",
     "exchangeRateDetails": "อัตราแลกเปลี่ยน",
     "fromCurrency": "จากสกุลเงิน",
-    "toCurrency": "เป็นสกุลเงิน"
+    "toCurrency": "เป็นสกุลเงิน",
+    "bankAccountsAtBank": "บัญชีของบริษัทที่ธนาคารนี้"
   },
   "automatedRemittance": {
     "pageTitle": "หลักการโอนเงินอัตโนมัติ",

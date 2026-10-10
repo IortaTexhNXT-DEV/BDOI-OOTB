@@ -507,7 +507,7 @@ const BankMaster = () => {
               { label: t("financeMasters.emailId"), value: viewing.email, hidden: !viewing.email },
             ]} />
           </DetailSection>
-          <DetailSection title={t("financeMasters.bankAccountsOf", { count: viewingAccounts.length })}>
+          <DetailSection title={t("financeMasters.bankAccountsAtBank")}>
             {viewingAccounts.length ? (
               <DataTable value={viewingAccounts} dataKey="id" size="small">
                 <Column field="accountCode" header={t("financeMasters.accountCode")} />
