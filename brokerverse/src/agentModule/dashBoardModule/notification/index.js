@@ -73,16 +73,19 @@ const Notification = () => {
   };
 
   const getPrioritySeverity = (priority) => {
-    switch (priority) {
+    switch (String(priority || "").toUpperCase()) {
       case "HIGH":
         return "danger";
-      case "NORMAL":
-        return "info";
       case "LOW":
         return "success";
       default:
         return "info";
     }
+  };
+  // only a priority other than normal is worth a pill
+  const priorityOf = (priority) => {
+    const p = String(priority || "").toLowerCase();
+    return p && p !== "normal" ? t(`notificationPage.priority.${p}`, { defaultValue: p.charAt(0).toUpperCase() + p.slice(1) }) : null;
   };
 
   const getNotificationIcon = (type) => {
@@ -199,11 +202,13 @@ const Notification = () => {
                   </div>
                   <div className="notificaition__dots col-12 md:col-6 lg:col-6">
                     <div className="notification-actions">
-                      <Tag
-                        value={notification.priority}
-                        severity={getPrioritySeverity(notification.priority)}
-                        className="priority-tag"
-                      />
+                      {priorityOf(notification.priority) ? (
+                        <Tag
+                          value={priorityOf(notification.priority)}
+                          severity={getPrioritySeverity(notification.priority)}
+                          className="priority-tag"
+                        />
+                      ) : null}
                       <Button
                         icon="pi pi-trash"
                         className="p-button-rounded p-button-text p-button-sm p-button-danger delete-btn"

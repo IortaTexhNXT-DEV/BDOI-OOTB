@@ -15,7 +15,7 @@ import { Toast } from "primereact/toast";
 import birTaxService from "../../services/birTaxService";
 import { insurerOptions } from "../InsurerReconciliation/common";
 import { calendarDateFormat, toDate, toIsoDate } from "../../utility/dateFormat";
-import { BirTag, PageHeader, date, money, showError, showSuccess } from "./common";
+import { BirTag, PageHeader, date, showError, showSuccess } from "./common";
 
 export const TYPES = ["overriding", "profit", "contingent"];
 export const BASES = ["production", "loss_ratio", "growth"];
@@ -113,7 +113,6 @@ const OverrideAgreements = () => {
                 <Column body={(_, o) => <Button icon="pi pi-trash" text severity="danger" aria-label={t("birTax.removeLine")} disabled={v.tiers.length === 1} onClick={() => set({ tiers: v.tiers.filter((__, j) => j !== o.rowIndex) })} />} />
               </DataTable>
               <Button icon="pi pi-plus" text label={t("birTax.addTier")} onClick={() => set({ tiers: [...v.tiers, { fromValue: v.tiers[v.tiers.length - 1]?.toValue || 0, toValue: null, rate: 0 }] })} />
-              <p className="pe-muted">{t("birTax.tierNote", { example: money(1000000) })}</p>
             </div>
             <div className="col-12"><label>{t("periodEnd.remarks")}</label><InputTextarea value={v.remarks} rows={2} onChange={(e) => set({ remarks: e.target.value })} className="w-full" /></div>
           </div>

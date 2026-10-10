@@ -129,8 +129,22 @@ export const describeParams = (np, fmt) => [
   ...Object.entries(np.filters || {}).map(([k, v]) => `${humanize(k)}: ${Array.isArray(v) ? v.join(', ') : v}`),
 ].filter(Boolean).join('   |   ');
 
+// status and type codes ("active", "asset", "for-approval") as words in the files people read; the CSV keeps the codes
+const CODE_COLUMN = /(status|type|kind|basis|mode|method)$/i;
+const CODE_VALUE = /^[a-z][a-z0-9]*([_-][a-z0-9]+)*$/;
+const readableCodes = (columns, rows) => {
+  const keys = columns.filter((c) => (!c.type || c.type === 'text') && CODE_COLUMN.test(c.key)).map((c) => c.key);
+  if (!keys.length) return rows;
+  return rows.map((r) => {
+    const out = { ...r };
+    for (const k of keys) if (typeof out[k] === 'string' && CODE_VALUE.test(out[k])) out[k] = humanize(out[k]);
+    return out;
+  });
+};
+
 async function renderFile(format, def, result, meta) {
-  const { columns, rows, totals } = result;
+  const { columns, totals } = result;
+  const rows = format === 'csv' ? result.rows : readableCodes(columns, result.rows);
   const totalRow = Object.keys(totals).length ? { ...Object.fromEntries(columns.map((c) => [c.key, null])), ...totals, [columns[0]?.key]: 'TOTAL' } : null;
   if (format === 'csv') return Buffer.from(toCsv(columns, totalRow ? [...rows, totalRow] : rows), 'utf8');
   if (format === 'pdf') {

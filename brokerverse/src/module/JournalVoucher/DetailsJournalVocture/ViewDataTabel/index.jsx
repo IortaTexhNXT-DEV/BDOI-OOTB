@@ -79,7 +79,7 @@ const ViewDataTabel = ({
         style={{ overflowY: "auto", maxWidth: "100%" }}
         responsive={true}
         className="table__view__Journal__Voture"
-        paginator
+        paginator={(pagination?.total || mappedTableData?.length || 0) > (rowsPerPage || 20)}
         paginatorLeft
         rows={rowsPerPage || 20}
         first={first || 0}
