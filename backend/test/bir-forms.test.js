@@ -11,7 +11,8 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { setupFinance } from './accounting.fixtures.js';
 import { pool, query } from '../src/db/pool.js';
 import { clearSettingsCache, getSetting } from '../src/lib/settings.js';
-import { alphalist1604EDat, qapDat, sawtDat, slspPurchasesDat, slspSalesDat, txt, DAT_LAYOUT } from '../src/modules/bir/dat.js';
+import { alphalist1604EDat, qapDat, sawtDat, slspPurchasesDat, slspSalesDat, splitRecord, txt, validateDat, DAT_LAYOUT } from '../src/modules/bir/dat.js';
+import { invoicingSetup } from '../src/modules/bir/invoices.js';
 import { buildPayload, canonical, signPayload } from '../src/modules/bir/eis.js';
 import { splitTin } from '../src/modules/bir/common.js';
 
@@ -167,6 +168,86 @@ describe('BIR DAT files (13.13)', () => {
   });
 });
 
+describe('register of generated DAT files', () => {
+  it('generates a file, validates it against its report and downloads it again unchanged', async () => {
+    const q = await sampleQuarter();
+    const g = await maker('post', '/bir/dat-files/qap/generate').send({ year: q.year, quarter: q.quarter });
+    expect(g.status, JSON.stringify(g.body)).toBe(201);
+    const f = g.body.data;
+    expect(f).toMatchObject({ type: 'qap', year: q.year, quarter: q.quarter, periodKey: `${q.year}-Q${q.quarter}`, generatedBy: expect.any(String), generatedByName: 'maker user' });
+    expect(f.fileName).toMatch(/1601EQ\.DAT$/);
+    expect(f.checks.map((c) => c.code)).toEqual(['records', 'incomePayment', 'taxWithheld']);
+    expect(f.checks.every((c) => c.agrees)).toBe(true);
+    expect(f.checks[0].report).toBe(f.rows);
+    expect(f.checks.find((c) => c.code === 'taxWithheld').report).toBeCloseTo(f.totals.taxWithheld, 2);
+    expect(f.valid).toBe(f.errors.length === 0);
+    expect(f.content.split('\r\n')[0]).toMatch(/^HQAP,H1601EQ,/);
+    expect(f.layout.records).toHaveLength(3);
+
+    const list = (await maker('get', `/bir/dat-files?year=${q.year}`)).body.data;
+    expect(list[0]).toMatchObject({ id: f.id, fileName: f.fileName, valid: f.valid });
+    expect(list[0].content).toBeUndefined();
+    const d = await file('get', `/bir/dat-files/generated/${f.id}/download`);
+    expect(d.status).toBe(200);
+    expect(d.body.toString('latin1')).toBe(f.content);
+    expect((await query('SELECT count(*)::int AS n FROM audit_log WHERE entity = \'bir_dat_file\' AND entity_id = $1', [f.id])).rows[0].n).toBe(2);
+
+    const sawt = (await maker('post', '/bir/dat-files/sawt/generate').send({ year: q.year, quarter: q.quarter, form: '2551Q' })).body.data;
+    expect(sawt).toMatchObject({ type: 'sawt', form: '2551Q' });
+    expect(sawt.fileName).toMatch(/2551Q\.DAT$/);
+    const annual = await maker('post', '/bir/dat-files/1604e/generate').send({ year: q.year });
+    expect(annual.status).toBe(201);
+    expect(annual.body.data).toMatchObject({ quarter: null, periodKey: String(q.year) });
+    expect((await maker('post', '/bir/dat-files/qap/generate').send({ year: q.year })).status).toBe(400);
+    expect((await maker('get', '/bir/dat-files/generated/bdf_missing')).status).toBe(404);
+  });
+
+  it('lists the records and totals that do not agree and the fields the BIR module refuses', () => {
+    const id = { tin: '123456789', branch: '00000', name: 'Broker', rdoCode: '047' };
+    const rows = [{ tin: '', registeredName: 'No TIN Corp.', atc: 'WC515', taxRate: 10, incomePayment: 1000, taxWithheld: 100 },
+      { tin: '444555666', registeredName: null, lastName: null, firstName: null, atc: '', taxRate: 5, incomePayment: 200, taxWithheld: 10 }];
+    const out = qapDat(id, rows, '2026-09-30');
+    const ok = validateDat('qap', out.content, rows);
+    expect(ok.checks.every((c) => c.agrees)).toBe(true);
+    expect(ok.errors).toEqual([{ record: 2, name: 'NO TIN CORP.', code: 'tinMissing' }, { record: 3, name: null, code: 'nameMissing' }, { record: 3, name: null, code: 'atcMissing' }]);
+    expect(ok.valid).toBe(false);
+    // a report that no longer matches the file: one row more, a different total
+    const off = validateDat('qap', out.content, [...rows, { tin: '777888999', registeredName: 'Late Payee', atc: 'WC515', incomePayment: 50, taxWithheld: 5 }]);
+    expect(off.checks.filter((c) => !c.agrees).map((c) => [c.code, c.report, c.file, c.difference])).toEqual([['records', 3, 2, -1], ['incomePayment', 1250, 1200, -50], ['taxWithheld', 115, 110, -5]]);
+    const sales = slspSalesDat(id, [{ tin: '000-111-222', registeredName: 'Malayan', address: 'Manila', exemptSales: 0, zeroRatedSales: 0, taxableSales: 50000, outputTax: 6000 }], '2026-09-30');
+    const v = validateDat('slspSales', sales.content, [{ exemptSales: 0, zeroRatedSales: 0, taxableSales: 50000, outputTax: 6000 }]);
+    expect(v).toMatchObject({ valid: true, errors: [] });
+    expect(v.checks.map((c) => c.code)).toEqual(['records', 'exemptSales', 'zeroRatedSales', 'taxableSales', 'outputTax']);
+    expect(splitRecord('D1,"A, B",3')).toEqual(['D1', 'A, B', '3']);
+  });
+
+  it('opens the register to period-end users and the generation to Accounting only', async () => {
+    const q = await sampleQuarter();
+    expect((await ctx.as('sales')('get', '/bir/dat-files')).status).toBe(403);
+    expect((await ctx.as('sales')('post', '/bir/dat-files/qap/generate').send({ year: q.year, quarter: q.quarter })).status).toBe(403);
+    expect((await ctx.as('sales')('get', '/bir/dat-files/generated/bdf_missing/download')).status).toBe(403);
+  });
+});
+
+describe('invoicing setup', () => {
+  it('says what is missing before invoices can carry the permit details, in codes the screen translates', async () => {
+    await setSetting('invoice.atp_number', '');
+    await setSetting('invoice.cas_permit_number', '');
+    const s = (await maker('get', '/bir/invoices/seller')).body.data;
+    expect(s.setup.state).toBe('incomplete');
+    expect(s.setup.missing).toContain('permit');
+    expect(s.setup.missing.every((m) => ['tin', 'address', 'permit', 'permitDate', 'serialRange'].includes(m))).toBe(true);
+    await setSetting('invoice.cas_permit_number', 'AC-123-2026');
+    expect((await maker('get', '/bir/invoices/seller')).body.data.setup.missing).toContain('permitDate');
+    await setSetting('invoice.cas_permit_date', '2026-01-15');
+    expect((await maker('get', '/bir/invoices/seller')).body.data.setup.missing).not.toContain('permitDate');
+    expect(invoicingSetup({ tin: '123456789', address: 'Makati', atpNumber: 'ATP-1', atpDateIssued: '2026-01-02', serialFrom: 1, serialTo: 1 })).toEqual({ state: 'incomplete', missing: ['serialRange'] });
+    expect(invoicingSetup({ tin: '123456789', address: 'Makati', atpNumber: 'ATP-1', atpDateIssued: '2026-01-02', serialFrom: 1, serialTo: 99999 })).toEqual({ state: 'ready', missing: [] });
+    await setSetting('invoice.cas_permit_number', '');
+    await setSetting('invoice.cas_permit_date', '');
+  });
+});
+
 describe('2551Q percentage tax working paper (13.04)', () => {
   it('computes the percentage tax of a non-VAT broker on the ledger revenue at the configured rate', async () => {
     const q = await sampleQuarter();
@@ -217,13 +298,23 @@ describe('sales invoices under the EOPT Act (13.10)', () => {
     expect(await bal('1302001', pay.body.data.journalId)).toBe(1000);
     expect(await bal('1205003', pay.body.data.journalId)).toBe(-11700);
     expect((await maker('post', `/bir/invoices/${inv.id}/payments`).send({ amount: 1 })).status).toBe(400);
-    expect((await maker('post', `/bir/invoices/${inv.id}/cancel`).send({ reason: 'Wrong buyer' })).status).toBe(409);
+    expect((await maker('post', `/bir/invoices/${inv.id}/cancel`).send({ reasonCode: 'SIC-WRONGBUYER' })).status).toBe(409);
     const ack = await file('get', `/bir/invoices/payments/${pay.body.data.id}/pdf`);
     expect(ack.body.subarray(0, 4).toString()).toBe('%PDF');
-    expect((await maker('post', `/bir/invoices/payments/${pay.body.data.id}/cancel`).send({ reason: 'Cheque returned' })).status).toBe(200);
-    const c = await maker('post', `/bir/invoices/${inv.id}/cancel`).send({ reason: 'Wrong buyer' });
+    // a payment acknowledgement is cancelled with a reason of its own list; a reason of another list is refused
+    expect((await maker('post', `/bir/invoices/payments/${pay.body.data.id}/cancel`).send({ reasonCode: 'SIC-WRONGBUYER' })).status).toBe(400);
+    expect((await maker('post', `/bir/invoices/payments/${pay.body.data.id}/cancel`).send({ reason: 'Cheque returned' })).status).toBe(400);
+    const pc = await maker('post', `/bir/invoices/payments/${pay.body.data.id}/cancel`).send({ reasonCode: 'IPC-RETURNED' });
+    expect(pc.status, JSON.stringify(pc.body)).toBe(200);
+    expect(pc.body.data).toMatchObject({ status: 'cancelled', cancelReasonCode: 'IPC-RETURNED', cancelReason: 'Cheque returned or payment reversed by the bank' });
+    // Other needs a note
+    const noNote = await maker('post', `/bir/invoices/${inv.id}/cancel`).send({ reasonCode: 'SIC-OTHER' });
+    expect(noNote.status).toBe(400);
+    expect(noNote.body.errors[0].path).toBe('note');
+    expect((await ctx.as('sales')('post', `/bir/invoices/${inv.id}/cancel`).send({ reasonCode: 'SIC-WRONGBUYER' })).status).toBe(403);
+    const c = await maker('post', `/bir/invoices/${inv.id}/cancel`).send({ reasonCode: 'SIC-WRONGBUYER', note: 'Billed to the dealer instead of the fleet owner' });
     expect(c.status).toBe(200);
-    expect(c.body.data).toMatchObject({ status: 'cancelled', cancelReason: 'Wrong buyer', balance: 0 });
+    expect(c.body.data).toMatchObject({ status: 'cancelled', cancelReasonCode: 'SIC-WRONGBUYER', cancelReason: 'Wrong buyer or buyer details: Billed to the dealer instead of the fleet owner', balance: 0 });
     // the journal was still parked: it is cancelled with the invoice instead of reversed
     const j = (await query('SELECT status FROM journal_vouchers WHERE id = $1', [inv.journalId])).rows[0];
     expect(j.status).toBe('cancelled');
@@ -270,8 +361,10 @@ describe('EIS connector (13.12)', () => {
     expect(signPayload(p, 'EIS_KEY', { EIS_KEY: 'k' }).alg).toBe('HS256-PLACEHOLDER');
     const r = (await maker('post', '/bir/invoices').send({ buyer: { buyerName: 'Walk-in customer' }, lines: [{ description: 'Fee', amount: 50 }] })).body.data;
     expect((await query('SELECT count(*)::int AS n FROM eis_submissions WHERE invoice_id = $1', [r.id])).rows[0].n).toBe(0);
-    expect((await maker('get', '/bir/eis/status')).body.data).toMatchObject({ enabled: false, mode: 'test', credentialsPresent: false, clientIdEnv: 'BIR_EIS_CLIENT_ID' });
-    expect((await maker('post', '/bir/eis/process')).body.data.skipped).toMatch(/switched off/);
+    const st = (await maker('get', '/bir/eis/status')).body.data;
+    expect(st).toMatchObject({ enabled: false, mode: 'test', credentialsPresent: false, clientIdEnv: 'BIR_EIS_CLIENT_ID', setup: { state: 'off', missing: ['accreditationId'] } });
+    expect(st.remainingWithBir).toBeUndefined();
+    expect((await maker('post', '/bir/eis/process')).body.data.skipped).toBe('the e-invoicing connection is switched off');
   });
 
   it('queues invoices and cancellations, sends them to the fake provider, retries failures and supports the manual fallback', async () => {
@@ -298,10 +391,10 @@ describe('EIS connector (13.12)', () => {
     expect(man.body.data).toMatchObject({ status: 'manual', eisReference: 'EIS-PORTAL-123' });
 
     // a cancellation of an invoice sent to the EIS is queued too
-    await maker('post', `/bir/invoices/${ok1.id}/cancel`).send({ reason: 'Duplicate' });
+    await maker('post', `/bir/invoices/${ok1.id}/cancel`).send({ reasonCode: 'SIC-DUPLICATE' });
     const cancelSub = (await query('SELECT kind, status, payload FROM eis_submissions WHERE invoice_id = $1 AND kind = \'cancellation\'', [ok1.id])).rows[0];
     expect(cancelSub).toMatchObject({ kind: 'cancellation', status: 'queued' });
-    expect(cancelSub.payload).toMatchObject({ DocType: 'SI-CANCEL', CancelReason: 'Duplicate' });
+    expect(cancelSub.payload).toMatchObject({ DocType: 'SI-CANCEL', CancelReason: 'Duplicate invoice' });
 
     // live mode without credentials fails with the variable names and is retried later; nothing is sent
     await setSetting('eis.mode', 'live');
@@ -311,6 +404,9 @@ describe('EIS connector (13.12)', () => {
     const ls = (await query('SELECT status, last_error, mode, provider FROM eis_submissions WHERE invoice_id = $1', [live.id])).rows[0];
     expect(ls).toMatchObject({ status: 'failed', mode: 'live', provider: 'http' });
     expect(ls.last_error).toMatch(/BIR_EIS_CLIENT_ID/);
+    const liveStatus = (await maker('get', '/bir/eis/status')).body.data;
+    expect(liveStatus.setup).toEqual({ state: 'incomplete', missing: ['accreditationId', 'credentials', 'signingKey'] });
+    expect(liveStatus.lastSentAt).toBeTruthy();
     await setSetting('eis.mode', 'test');
     await setSetting('eis.enabled', false);
   });

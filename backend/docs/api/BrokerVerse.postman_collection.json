@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1213 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1217 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -11648,6 +11648,67 @@
           "response": []
         },
         {
+          "name": "Register of the generated DAT files, newest first (filter year, type); without the file content",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/dat-files?year=2026",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "dat-files"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2026"
+                }
+              ]
+            },
+            "description": "Register of the generated DAT files, newest first (filter year, type); without the file content\n\nFront-end touchpoint: Accounts > Tax > BIR DAT Files\n\nAccess: read:period-end"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bir/dat-files?year=2026",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bir",
+                    "dat-files"
+                  ],
+                  "query": [
+                    {
+                      "key": "year",
+                      "value": "2026"
+                    }
+                  ]
+                },
+                "description": "Register of the generated DAT files, newest first (filter year, type); without the file content\n\nFront-end touchpoint: Accounts > Tax > BIR DAT Files\n\nAccess: read:period-end"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"bdf_1a2b\",\n      \"type\": \"qap\",\n      \"form\": null,\n      \"year\": 2026,\n      \"quarter\": 3,\n      \"periodKey\": \"2026-Q3\",\n      \"fileName\": \"12345678900000920261601EQ.DAT\",\n      \"records\": 4,\n      \"rows\": 2,\n      \"totals\": {\n        \"incomePayment\": 35000.5,\n        \"taxWithheld\": 3000.05\n      },\n      \"valid\": true,\n      \"checks\": [\n        {\n          \"code\": \"records\",\n          \"report\": 2,\n          \"file\": 2,\n          \"difference\": 0,\n          \"agrees\": true\n        }\n      ],\n      \"errors\": [],\n      \"generatedBy\": \"u_17\",\n      \"generatedByName\": \"Maria Santos\",\n      \"generatedAt\": \"2026-10-05T02:15:00.000Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
           "name": "Preview of a DAT file (QAP, SAWT, SLSP sales / purchases per quarter; 1604-E per year): file name, records, totals, warnings and content",
           "request": {
             "method": "GET",
@@ -11767,6 +11828,197 @@
               ]
             },
             "description": "Download a DAT file for validation with the BIR module and submission\n\nFront-end touchpoint: Accounts > Tax > BIR DAT Files > Download\n\nAccess: read:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "Generate a DAT file (QAP, SAWT, SLSP per quarter; 1604-E per year), validate it against its report (detail records, control totals, fields per record) and keep it in the register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bir/dat-files/:type/generate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "dat-files",
+                ":type",
+                "generate"
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "type (path parameter)"
+                }
+              ]
+            },
+            "description": "Generate a DAT file (QAP, SAWT, SLSP per quarter; 1604-E per year), validate it against its report (detail records, control totals, fields per record) and keep it in the register\n\nFront-end touchpoint: Accounts > Tax > BIR DAT Files > Generate file\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"year\": 2026,\n  \"quarter\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bir/dat-files/:type/generate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bir",
+                    "dat-files",
+                    ":type",
+                    "generate"
+                  ],
+                  "variable": [
+                    {
+                      "key": "type",
+                      "value": "",
+                      "description": "type (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Generate a DAT file (QAP, SAWT, SLSP per quarter; 1604-E per year), validate it against its report (detail records, control totals, fields per record) and keep it in the register\n\nFront-end touchpoint: Accounts > Tax > BIR DAT Files > Generate file\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"year\": 2026,\n  \"quarter\": 3\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"bdf_1a2b\",\n    \"type\": \"qap\",\n    \"form\": null,\n    \"year\": 2026,\n    \"quarter\": 3,\n    \"periodKey\": \"2026-Q3\",\n    \"fileName\": \"12345678900000920261601EQ.DAT\",\n    \"records\": 4,\n    \"rows\": 2,\n    \"totals\": {\n      \"incomePayment\": 35000.5,\n      \"taxWithheld\": 3000.05\n    },\n    \"valid\": true,\n    \"checks\": [\n      {\n        \"code\": \"records\",\n        \"report\": 2,\n        \"file\": 2,\n        \"difference\": 0,\n        \"agrees\": true\n      }\n    ],\n    \"errors\": [],\n    \"generatedBy\": \"u_17\",\n    \"generatedByName\": \"Maria Santos\",\n    \"generatedAt\": \"2026-10-05T02:15:00.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "A generated DAT file with its validation, content and record layout",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/dat-files/generated/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "dat-files",
+                "generated",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "A generated DAT file with its validation, content and record layout\n\nFront-end touchpoint: Accounts > Tax > BIR DAT Files\n\nAccess: read:period-end"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bir/dat-files/generated/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bir",
+                    "dat-files",
+                    "generated",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "A generated DAT file with its validation, content and record layout\n\nFront-end touchpoint: Accounts > Tax > BIR DAT Files\n\nAccess: read:period-end"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"bdf_1a2b\",\n    \"type\": \"qap\",\n    \"form\": null,\n    \"year\": 2026,\n    \"quarter\": 3,\n    \"periodKey\": \"2026-Q3\",\n    \"fileName\": \"12345678900000920261601EQ.DAT\",\n    \"records\": 4,\n    \"rows\": 2,\n    \"totals\": {\n      \"incomePayment\": 35000.5,\n      \"taxWithheld\": 3000.05\n    },\n    \"valid\": true,\n    \"checks\": [\n      {\n        \"code\": \"records\",\n        \"report\": 2,\n        \"file\": 2,\n        \"difference\": 0,\n        \"agrees\": true\n      }\n    ],\n    \"errors\": [],\n    \"generatedBy\": \"u_17\",\n    \"generatedByName\": \"Maria Santos\",\n    \"generatedAt\": \"2026-10-05T02:15:00.000Z\",\n    \"content\": \"HQAP,H1601EQ,...\",\n    \"layout\": {\n      \"name\": \"{TIN}{BRANCH}{MMYYYY}1601EQ.DAT\",\n      \"records\": []\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Download a generated DAT file exactly as it was generated",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/dat-files/generated/:id/download",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "dat-files",
+                "generated",
+                ":id",
+                "download"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Download a generated DAT file exactly as it was generated\n\nFront-end touchpoint: Accounts > Tax > BIR DAT Files > Download\n\nAccess: read:period-end"
           },
           "response": []
         },
@@ -11896,7 +12148,7 @@
           "response": []
         },
         {
-          "name": "EIS connector status: switched on, mode, endpoint, whether the credential variables are set (never their values), outbox counts, what remains with the BIR",
+          "name": "EIS connection status: switched on, mode, endpoint, whether the credential variables are set (never their values), outbox counts, last sent, setup (state off, incomplete or ready; missing: accreditationId, endpoint, credentials, signingKey)",
           "request": {
             "method": "GET",
             "header": [],
@@ -11911,9 +12163,40 @@
                 "status"
               ]
             },
-            "description": "EIS connector status: switched on, mode, endpoint, whether the credential variables are set (never their values), outbox counts, what remains with the BIR\n\nFront-end touchpoint: Accounts > Tax > E-Invoicing (EIS)\n\nAccess: read:period-end"
+            "description": "EIS connection status: switched on, mode, endpoint, whether the credential variables are set (never their values), outbox counts, last sent, setup (state off, incomplete or ready; missing: accreditationId, endpoint, credentials, signingKey)\n\nFront-end touchpoint: Accounts > Tax > E-Invoicing (EIS)\n\nAccess: read:period-end"
           },
-          "response": []
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bir/eis/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bir",
+                    "eis",
+                    "status"
+                  ]
+                },
+                "description": "EIS connection status: switched on, mode, endpoint, whether the credential variables are set (never their values), outbox counts, last sent, setup (state off, incomplete or ready; missing: accreditationId, endpoint, credentials, signingKey)\n\nFront-end touchpoint: Accounts > Tax > E-Invoicing (EIS)\n\nAccess: read:period-end"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"enabled\": false,\n    \"mode\": \"test\",\n    \"counts\": {\n      \"accepted\": 3,\n      \"failed\": 1\n    },\n    \"lastSentAt\": \"2026-10-04T03:00:00.000Z\",\n    \"setup\": {\n      \"state\": \"off\",\n      \"missing\": [\n        \"accreditationId\"\n      ]\n    }\n  }\n}"
+            }
+          ]
         },
         {
           "name": "EIS outbox (filter status, search)",
@@ -12405,7 +12688,7 @@
           ]
         },
         {
-          "name": "Cancel a sales invoice with a reason (kept with its number; a manual invoice's journal is reversed; the EIS is told)",
+          "name": "Cancel a sales invoice with a reason of the Reason Codes master (context sales_invoice_cancel) and a note when the reason needs one; kept with its number, a manual invoice's journal is reversed, the EIS is told",
           "request": {
             "method": "POST",
             "header": [
@@ -12433,10 +12716,10 @@
                 }
               ]
             },
-            "description": "Cancel a sales invoice with a reason (kept with its number; a manual invoice's journal is reversed; the EIS is told)\n\nFront-end touchpoint: Accounts > Tax > Sales Invoices\n\nAccess: write:period-end",
+            "description": "Cancel a sales invoice with a reason of the Reason Codes master (context sales_invoice_cancel) and a note when the reason needs one; kept with its number, a manual invoice's journal is reversed, the EIS is told\n\nFront-end touchpoint: Accounts > Tax > Sales Invoices > Cancel invoice\n\nAccess: write:period-end",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"Wrong buyer\"\n}",
+              "raw": "{\n  \"reasonCode\": \"SIC-WRONGBUYER\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -12543,7 +12826,7 @@
           "response": []
         },
         {
-          "name": "Cancel a payment acknowledgement (journal reversed, invoice balance restored)",
+          "name": "Cancel a payment acknowledgement with a reason of the Reason Codes master (context invoice_payment_cancel); journal reversed, invoice balance restored",
           "request": {
             "method": "POST",
             "header": [
@@ -12572,10 +12855,10 @@
                 }
               ]
             },
-            "description": "Cancel a payment acknowledgement (journal reversed, invoice balance restored)\n\nFront-end touchpoint: Accounts > Tax > Sales Invoices > Payment\n\nAccess: write:period-end",
+            "description": "Cancel a payment acknowledgement with a reason of the Reason Codes master (context invoice_payment_cancel); journal reversed, invoice balance restored\n\nFront-end touchpoint: Accounts > Tax > Sales Invoices > Cancel payment\n\nAccess: write:period-end",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"Cheque returned\"\n}",
+              "raw": "{\n  \"reasonCode\": \"IPC-RETURNED\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -12615,7 +12898,7 @@
           "response": []
         },
         {
-          "name": "Seller details printed on the invoices (Company master and invoice.* settings: TIN with branch, ATP / CAS permit, serial range)",
+          "name": "Seller details printed on the invoices (Company master and invoice.* settings: TIN with branch, ATP / CAS permit, serial range) and whether invoicing is set up (setup.state ready or incomplete, setup.missing: tin, address, permit, permitDate, serialRange)",
           "request": {
             "method": "GET",
             "header": [],
@@ -12630,9 +12913,40 @@
                 "seller"
               ]
             },
-            "description": "Seller details printed on the invoices (Company master and invoice.* settings: TIN with branch, ATP / CAS permit, serial range)\n\nFront-end touchpoint: Accounts > Tax > Sales Invoices\n\nAccess: read:period-end"
+            "description": "Seller details printed on the invoices (Company master and invoice.* settings: TIN with branch, ATP / CAS permit, serial range) and whether invoicing is set up (setup.state ready or incomplete, setup.missing: tin, address, permit, permitDate, serialRange)\n\nFront-end touchpoint: Accounts > Tax > Sales Invoices\n\nAccess: read:period-end"
           },
-          "response": []
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bir/invoices/seller",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bir",
+                    "invoices",
+                    "seller"
+                  ]
+                },
+                "description": "Seller details printed on the invoices (Company master and invoice.* settings: TIN with branch, ATP / CAS permit, serial range) and whether invoicing is set up (setup.state ready or incomplete, setup.missing: tin, address, permit, permitDate, serialRange)\n\nFront-end touchpoint: Accounts > Tax > Sales Invoices\n\nAccess: read:period-end"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"registeredName\": \"Toyota Insurance Services Philippines Corporation\",\n    \"tinFormatted\": \"685-442-861-00000\",\n    \"vatRegistered\": true,\n    \"serialFrom\": 1,\n    \"serialTo\": 9999999999,\n    \"setup\": {\n      \"state\": \"incomplete\",\n      \"missing\": [\n        \"permit\"\n      ]\n    }\n  }\n}"
+            }
+          ]
         },
         {
           "name": "A BIR return computed from the books, laid out as the form (items, schedules per ATC, alphalist, reconciliation with the QAP and the ledger, filing record)",
