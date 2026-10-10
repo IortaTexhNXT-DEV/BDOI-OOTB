@@ -11,7 +11,7 @@ jest.mock("./Approvals", () => () => <div>Approvals</div>);
 jest.mock("./Record", () => () => <div>Remittance record</div>);
 jest.mock("./RemittanceExceptions", () => () => <div>Exceptions</div>);
 jest.mock("./Settlement", () => () => <div>Settlement</div>);
-jest.mock("./Tracking", () => () => <div>Remittances</div>);
+jest.mock("./Remittances", () => () => <div>Remittances</div>);
 jest.mock("./Landing", () => () => <div>Landing</div>);
 jest.mock("./Setup", () => () => <div>Setup</div>);
 
