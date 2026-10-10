@@ -30,7 +30,8 @@ const amountBody = (field, foreign = false) => (row) => {
 function PolicyReceipts() {
   const { t } = useTranslation();
   const [selectedRows, setSelectedRows] = useState([]);
-  const [printLoading, setPrintLoading] = useState(false);
+  // the print being prepared ("all" or "selected"), until its print dialog opens
+  const [printing, setPrinting] = useState(null);
   const [emailOpen, setEmailOpen] = useState(false);
 
   const { receiptDetailList, loading, currentReceiptId, receiptNumber, clientEmail, receiptStatus, header } =
@@ -70,11 +71,12 @@ function PolicyReceipts() {
   };
 
   // prints the official receipt (the whole receipt or the lines chosen) from the server PDF
-  const printReceipt = (lineIds, fileName) => {
-    setPrintLoading(true);
-    printPdf(documentTemplateService.receiptPdfPath(currentReceiptId, { lineIds }), { fileName })
+  const printReceipt = (lineIds, fileName, which) => {
+    setPrinting(which);
+    const done = () => setPrinting((current) => (current === which ? null : current));
+    printPdf(documentTemplateService.receiptPdfPath(currentReceiptId, { lineIds }), { fileName, onReady: done })
       .catch((error) => showErrorMessage(error?.message || t("accounts.addReceiptEdit.failedToPrintReceipt"), t("common.error")))
-      .finally(() => setPrintLoading(false));
+      .finally(done);
   };
 
   const handlePrintAll = () => {
@@ -82,7 +84,7 @@ function PolicyReceipts() {
       showErrorMessage(t("accounts.addReceiptEdit.receiptIdMissing"));
       return;
     }
-    printReceipt([], `receipt-${receiptNumber || currentReceiptId}.pdf`);
+    printReceipt([], `receipt-${receiptNumber || currentReceiptId}.pdf`, "all");
   };
 
   const handlePrintSelected = () => {
@@ -95,7 +97,7 @@ function PolicyReceipts() {
       return;
     }
     const lineIds = selectedRows.map((row) => row.receiptListId || row.id).filter(Boolean);
-    printReceipt(lineIds, `receipt-${receiptNumber || currentReceiptId}-selected.pdf`);
+    printReceipt(lineIds, `receipt-${receiptNumber || currentReceiptId}-selected.pdf`, "selected");
   };
 
   return (
@@ -271,8 +273,8 @@ function PolicyReceipts() {
         <Button
           label={t("accounts.addReceiptEdit.printAll")}
           onClick={handlePrintAll}
-          disabled={!currentReceiptId || printLoading || loading}
-          loading={printLoading}
+          disabled={!currentReceiptId || !!printing || loading}
+          loading={printing === "all"}
           outlined
           style={{
             minWidth: "150px",
@@ -286,10 +288,10 @@ function PolicyReceipts() {
             !currentReceiptId ||
             !selectedRows ||
             selectedRows.length === 0 ||
-            printLoading ||
+            !!printing ||
             loading
           }
-          loading={printLoading}
+          loading={printing === "selected"}
           style={{
             minWidth: "160px",
             padding: "10px 20px",

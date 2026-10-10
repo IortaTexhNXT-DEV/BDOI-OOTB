@@ -72,6 +72,15 @@ describe("printPdf", () => {
     expect(window.open).not.toHaveBeenCalled();
   });
 
+  it("tells the caller when the print dialog opens, before printing ends", async () => {
+    const onReady = jest.fn();
+    frameWindow.print = jest.fn(() => expect(onReady).toHaveBeenCalledTimes(1));
+    const printing = printPdf("/document-templates/receipt/rc_1", { onReady });
+    await frameLoaded();
+    await expect(printing).resolves.toBe("printed");
+    expect(frameWindow.print).toHaveBeenCalledTimes(1);
+  });
+
   it("opens the PDF in a tab when the browser will not print the frame", async () => {
     frameWindow.print.mockImplementation(() => { throw new Error("Blocked a frame from printing"); });
     const tab = { opener: {} };

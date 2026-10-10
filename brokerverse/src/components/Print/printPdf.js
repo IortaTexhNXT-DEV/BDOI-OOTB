@@ -42,7 +42,7 @@ const dropFrame = () => {
   last = null;
 };
 
-const printInFrame = (url) =>
+const printInFrame = (url, onReady) =>
   new Promise((resolve, reject) => {
     dropFrame();
     const node = document.createElement("iframe");
@@ -61,6 +61,7 @@ const printInFrame = (url) =>
       setTimeout(() => {
         try {
           node.contentWindow.focus();
+          onReady?.();
           node.contentWindow.print();
           last = { node, url };
           resolve();
@@ -103,11 +104,13 @@ const deliver = (url, fileName, tab) => {
  *
  * @param {string|Blob|function(): Promise<Blob>} source API path (as the services write it), a PDF, or a function
  *   that fetches one
- * @param {{ fileName?: string }} [options] name of the file when the PDF has to be saved
+ * @param {{ fileName?: string, onReady?: function(): void }} [options] name of the file when the PDF has to be saved;
+ *   onReady is called once the document is ready and the print dialog (or its tab) opens, so the button that asked for
+ *   it can stop showing that it is busy while the user is still in the print dialog
  * @returns {Promise<"printed"|"opened"|"downloaded">} how the document reached the user; rejects with the API's
  *   message when the document could not be fetched
  */
-export const printPdf = async (source, { fileName = "document.pdf" } = {}) => {
+export const printPdf = async (source, { fileName = "document.pdf", onReady } = {}) => {
   const framed = canPrintInFrame();
   const tab = framed ? null : window.open("", "_blank");
   let pdf;
@@ -121,12 +124,13 @@ export const printPdf = async (source, { fileName = "document.pdf" } = {}) => {
   const url = URL.createObjectURL(pdf.type === "application/pdf" ? pdf : new Blob([pdf], { type: "application/pdf" }));
   if (framed) {
     try {
-      await printInFrame(url);
+      await printInFrame(url, onReady);
       return "printed";
     } catch {
       // the browser would not print the frame: the PDF opens in a tab instead
     }
   }
+  onReady?.();
   const how = deliver(url, fileName, tab);
   setTimeout(() => URL.revokeObjectURL(url), KEEP_URL);
   return how;
