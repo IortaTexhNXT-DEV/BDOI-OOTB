@@ -9,34 +9,40 @@ import * as svc from './service.js';
 /** Dashboard KPIs: Executive, Sales, Processing, Claims and the sales home (legacy APIROUTES.DASHBOARD.GET_DETAILS). */
 const { router, define } = moduleRouter('Dashboards', '');
 const send = (res, data) => res.json({ success: true, ...data, data });
+/**
+ * Origin of the business counted: origin=issued ("Issued since go-live", policies issued in BrokerVerse) or all; default
+ * dashboard.default_origin (service.js).
+ */
+const ORIGIN_QUERY = 'issued';
 /** Comparison of a dashboard period: the previous period (default) or the same period last year. */
 const compareOf = (v) => (v === 'lastYear' ? 'lastYear' : 'previous');
 
 define({
-  method: 'GET', path: '/agent/get-dashboard-details', summary: 'Sales home (Account Executive): own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers)', screen: 'Dashboard > Sales Dashboard',
-  middleware: [requireAuth, requirePermission('read:leads', 'read:quotations', 'read:policies')], query: { scope: 'mine' },
+  method: 'GET', path: '/agent/get-dashboard-details', summary: 'Sales home (Account Executive): own funnel, premium this month, renewals due, recent quotations, commission (scope=all for managers); origin=issued|all: the policies counted (renewals due count every policy)', screen: 'Dashboard > Sales Dashboard',
+  middleware: [requireAuth, requirePermission('read:leads', 'read:quotations', 'read:policies')], query: { scope: 'mine', origin: ORIGIN_QUERY },
   response: { success: true, data: { funnel: { leads: 16, quotations: 14, policies: 8 }, premiumThisMonth: 125000, renewalsDueIn60Days: 3, recentQuotations: [], expiringPolicies: [] } },
   handler: async (req, res) => {
     const scoped = await scopeOf(req);
     const all = !scoped && req.query.scope === 'all' && hasPermission(req.user, 'read:reports');
-    send(res, all ? await svc.sales(null) : { ...(await svc.agentHome(svc.ownBook(req.user))), scoped: Boolean(scoped) });
+    const origin = await svc.dashboardOrigin(req.query.origin);
+    send(res, all ? await svc.sales(null, origin) : { ...(await svc.agentHome(svc.ownBook(req.user), origin)), scoped: Boolean(scoped) });
   },
 });
 define({
-  method: 'GET', path: '/dashboard/executive', summary: 'Executive KPIs (premium, policies in force, new business, claims ratio, retention) with their change against the previous period or the same period last year (compare=previous|lastYear), premium by product, monthly trend, regions, products, agents; asOf = when the figures were read',
-  screen: 'Dashboard > Executive Dashboard', middleware: [requireAuth, requirePermission('read:reports')], query: { period: 'month', compare: 'previous' },
+  method: 'GET', path: '/dashboard/executive', summary: 'Executive KPIs (premium, policies in force, new business, claims ratio, retention) with their change against the previous period or the same period last year (compare=previous|lastYear), premium by product, monthly trend, regions, products, agents, issued since go-live; origin=issued|all: the business counted (default dashboard.default_origin; the retention rate counts migrated policies); asOf = when the figures were read',
+  screen: 'Dashboard > Executive Dashboard', middleware: [requireAuth, requirePermission('read:reports')], query: { period: 'month', compare: 'previous', origin: ORIGIN_QUERY },
   response: { success: true, data: { executiveKPIs: { totalRevenue: { value: 125000, change: 12.5, trend: 'up' } }, revenueByProduct: { labels: ['Motor'], data: [125000] }, monthlyTrend: { labels: ['Sep'], premium: [125000] } } },
-  handler: async (req, res) => send(res, await svc.executive(req.query.period, compareOf(req.query.compare))),
+  handler: async (req, res) => send(res, await svc.executive(req.query.period, compareOf(req.query.compare), await svc.dashboardOrigin(req.query.origin))),
 });
 define({
-  method: 'GET', path: '/dashboard/sales', summary: 'Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month (always own book for scoped roles)', screen: 'Dashboard > Sales',
-  middleware: [requireAuth, requirePermission('read:leads', 'read:quotations')], query: { scope: 'mine' },
+  method: 'GET', path: '/dashboard/sales', summary: 'Sales funnel: leads by status, quotations by status, conversion rates, premium by product and month (always own book for scoped roles); origin=issued|all', screen: 'Dashboard > Sales',
+  middleware: [requireAuth, requirePermission('read:leads', 'read:quotations')], query: { scope: 'mine', origin: ORIGIN_QUERY },
   response: { success: true, data: { funnel: { leads: 16, quotations: 14, policies: 8, leadToPolicyRate: 50 }, leadsByStatus: [{ status: 'New', count: 4 }] } },
-  handler: async (req, res) => send(res, await svc.sales(req.query.scope === 'mine' || (await scopeOf(req)) ? svc.ownBook(req.user) : null)),
+  handler: async (req, res) => send(res, await svc.sales(req.query.scope === 'mine' || (await scopeOf(req)) ? svc.ownBook(req.user) : null, await svc.dashboardOrigin(req.query.origin))),
 });
 define({
-  method: 'GET', path: '/dashboard/sales/overview', summary: 'Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to) and the same figures of the compared dates as previous (compare=previous|lastYear), pipeline by stage, figures by sales person, premium by product, monthly trend. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id)',
-  screen: 'Dashboard > Sales Dashboard', middleware: [requireAuth, requirePermission('read:leads', 'read:quotations')], query: { period: 'month', compare: 'previous', salesPerson: 'usr_0123' },
+  method: 'GET', path: '/dashboard/sales/overview', summary: 'Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to) and the same figures of the compared dates as previous (compare=previous|lastYear), pipeline by stage, figures by sales person, premium by product, monthly trend, issued since go-live. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id); origin=issued|all: the policies counted',
+  screen: 'Dashboard > Sales Dashboard', middleware: [requireAuth, requirePermission('read:leads', 'read:quotations')], query: { period: 'month', compare: 'previous', salesPerson: 'usr_0123', origin: ORIGIN_QUERY },
   response: { success: true, data: { period: { from: '2026-09-01', to: '2026-09-30', compare: 'previous', comparedFrom: '2026-08-01', comparedTo: '2026-08-30' }, kpis: { prospects: 61, newProspects: 12, quotations: 9, policies: 4, premium: 125000, prospectConversionRate: 25, pipelineValue: 350000 },
     previous: { prospects: 58, newProspects: 9, quotations: 7, policies: 3, premium: 98000 },
     pipeline: { prospects: [{ stage: 'New', count: 7 }], quotations: [{ stage: 'Draft', count: 2, premium: 45000 }] },
@@ -56,7 +62,7 @@ define({
       if (!u) throw badRequest('Unknown sales person');
       book = svc.ownBook(u);
     }
-    const data = await svc.salesOverview({ book, from, to, compared });
+    const data = await svc.salesOverview({ book, from, to, compared, origin: await svc.dashboardOrigin(req.query.origin) });
     send(res, { ...data, scoped: Boolean(scoped), salesPersons: scoped ? [] : await svc.salesPersons() });
   },
 });

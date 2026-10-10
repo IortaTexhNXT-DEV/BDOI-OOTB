@@ -38,16 +38,19 @@ const CREATOR_DIMS = `u.id AS _agent_id, u.username AS _agent_username, u.displa
 /** Billing mode label: broker billed (client pays the broker) or direct bill (client pays the insurer; commission billed by debit note). */
 const BILLING_MODE = "CASE p.billing_mode WHEN 'direct' THEN 'Direct bill' ELSE 'Broker billed' END";
 
+/** Origin of a record (migration 0440): Migrated (loaded from the legacy system at go-live) or Issued in BrokerVerse. */
+export const ORIGIN_LABEL = (alias) => `CASE ${alias}.origin WHEN 'migrated' THEN 'Migrated' ELSE 'Issued in BrokerVerse' END`;
 const STANDARD_CRITERIA = { Overall: {}, Agent: { groupBy: 'agent' }, 'Principal Insurer': { groupBy: 'insurer' }, Branch: { groupBy: 'branch' } };
 const POLICY_FILTERS = ['agent', 'insurer', 'branch', 'client', 'product', 'status'];
+const PRODUCTION_FILTERS = [...POLICY_FILTERS, 'origin'];
 
 const production = `SELECT p.id AS _id, p.policy_number AS "policyNumber", COALESCE(p.issued_date, p.created_at::date) AS "issueDate",
     p.inception_date AS "inceptionDate", p.expiry_date AS "expiryDate", to_char(p.inception_date, 'YYYY-MM') AS month,
     CASE WHEN p.renewed_from IS NULL THEN 'New Business' ELSE 'Renewal' END AS "businessType",
     ${POLICY_DIMS}, p.sum_insured AS "sumInsured", p.premium_total AS premium, p.commission_amount AS commission,
     ${BILLING_MODE} AS "billingMode", p.currency, p.status,
-    -- policies of the old system loaded by the go-live migration, kept apart from business written in BrokerVerse
-    CASE WHEN p.doc->>'source' = 'go-live-migration' OR p.load_batch_id IS NOT NULL THEN 'Migrated' ELSE 'BrokerVerse' END AS "source"
+    -- policies of the old system loaded by the go-live migration, kept apart from business issued in BrokerVerse
+    ${ORIGIN_LABEL('p')} AS origin, p.origin AS _origin
   FROM policies p ${POLICY_JOINS}
   WHERE p.inception_date BETWEEN $1 AND $2`;
 
@@ -220,18 +223,18 @@ export const QUERIES = {
   ...BANK_REC_QUERIES,
   ...CHANNEL_QUERIES,
   production: {
-    sql: production, filters: POLICY_FILTERS, criteria: { ...STANDARD_CRITERIA, 'Billing Mode': { groupBy: 'billingMode' }, Source: { groupBy: 'source' } },
+    sql: production, filters: PRODUCTION_FILTERS, criteria: { ...STANDARD_CRITERIA, 'Billing Mode': { groupBy: 'billingMode' }, Origin: { groupBy: 'origin' } },
     orderBy: 'f."inceptionDate", f."policyNumber"',
     summary: { newBusiness: 'count(*) FILTER (WHERE f."businessType" = \'New Business\')', renewals: 'count(*) FILTER (WHERE f."businessType" = \'Renewal\')',
-      directBill: 'count(*) FILTER (WHERE f."billingMode" = \'Direct bill\')', migrated: 'count(*) FILTER (WHERE f.source = \'Migrated\')' },
+      directBill: 'count(*) FILTER (WHERE f."billingMode" = \'Direct bill\')', migrated: 'count(*) FILTER (WHERE f._origin = \'migrated\')' },
   },
   premiumByProduct: {
-    sql: production, filters: POLICY_FILTERS,
+    sql: production, filters: PRODUCTION_FILTERS,
     criteria: { Overall: { dims: ['month', 'product', 'insurer'] }, Product: { dims: ['product'] }, Month: { dims: ['month'] }, 'Principal Insurer': { dims: ['insurer'] } },
     aggregate: { policies: 'count(*)', sumInsured: 'sum(t."sumInsured")', premium: 'sum(t.premium)', commission: 'sum(t.commission)' },
   },
   newVsRenewal: {
-    sql: production, filters: POLICY_FILTERS,
+    sql: production, filters: PRODUCTION_FILTERS,
     criteria: { Overall: { dims: ['month', 'businessType'] }, 'Business Type': { dims: ['businessType'] }, Agent: { dims: ['agent', 'businessType'] } },
     aggregate: { policies: 'count(*)', premium: 'sum(t.premium)', commission: 'sum(t.commission)' },
   },

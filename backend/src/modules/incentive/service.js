@@ -7,6 +7,7 @@ import { activityEntries } from '../../lib/auditEvents.js';
 import { baseCurrency } from '../../lib/currency.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
+import { kpiOriginWhere } from '../../lib/origin.js';
 import { today } from '../../lib/dates.js';
 import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import { assertChecker, fileUrl, isoDate, lastMonths, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
@@ -162,11 +163,17 @@ export async function eligibleAgents(agentId) {
                ORDER BY u.display_name`, [roles, agentId || null]);
 }
 
-/** Achievement of one agent for a metric over a date range. */
+/**
+ * Achievement of one agent for a metric over a date range. Premium and policies count the business issued in
+ * BrokerVerse: migrated policies were written in the legacy system (migration.incentive_include_migrated counts them
+ * too). The renewal rate counts every policy expiring in the range, migrated ones included: they are the renewal
+ * opportunities of the first year, and their renewals issued in BrokerVerse the renewals.
+ */
 export async function achievement(metric, agentId, from, to) {
   if (metric === 'premium' || metric === 'policies') {
+    const counted = (await kpiOriginWhere('', 'incentive')) || 'TRUE';
     const r = await one(`SELECT count(*)::int AS n, COALESCE(sum(premium_total), 0) AS v FROM policies
-                         WHERE owner_user_id = $1 AND inception_date BETWEEN $2::date AND $3::date AND status <> 'cancelled'`, [agentId, from, to]);
+                         WHERE owner_user_id = $1 AND inception_date BETWEEN $2::date AND $3::date AND status <> 'cancelled' AND ${counted}`, [agentId, from, to]);
     return metric === 'premium' ? round2(r.v) : r.n;
   }
   if (metric === 'renewal-rate') {
@@ -601,9 +608,10 @@ export async function agentPrograms(agentId) {
         metric: p.metric, programType: p.program_type, programStatus: p.status, applicableTo: p.applicable_to, currency: p.currency, ended: isoDate(p.period_to) < t,
         tiers: tiersOf(p), nextTier: nextTier(p, Number(achieved), Number(p.target)) });
     }
-    // activity to date only: a policy incepting after today is not an achievement yet
+    // activity to date only: a policy incepting after today is not an achievement yet, a migrated one never is
     const acts = await many(`SELECT p.inception_date, p.premium_total, p.renewed_from, pr.name AS product FROM policies p LEFT JOIN products pr ON pr.id = p.product_id
-                             WHERE p.owner_user_id = $1 AND p.inception_date <= $2::date AND p.status <> 'cancelled' ORDER BY p.inception_date DESC LIMIT 10`, [a.id, t]);
+                             WHERE p.owner_user_id = $1 AND p.inception_date <= $2::date AND p.status <> 'cancelled' AND ${(await kpiOriginWhere('p', 'incentive')) || 'TRUE'}
+                             ORDER BY p.inception_date DESC LIMIT 10`, [a.id, t]);
     out.push({ agentId: a.id, agentName: a.display_name, agentCode: a.code, branch: a.branch_name || a.branch_code, assignedPrograms: assigned,
       recentActivities: acts.map((x) => ({ date: x.inception_date, activity: `${x.renewed_from ? 'Policy Renewal' : 'New Policy'} - ${x.product || 'Policy'}`, impact: round2(x.premium_total), points: Math.round(Number(x.premium_total) / 100) })),
       activity: await incentiveEvents(a.id) });
