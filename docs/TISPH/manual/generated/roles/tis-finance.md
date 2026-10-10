@@ -8,6 +8,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Dashboard | Executive Dashboard | View |
 | Operations | Payments | View |
 | Accounts | Receipts | View |
+| Accounts | Unapplied Collections | View |
 | Accounts | Collections | View |
 | Accounts > Credit Control | Instalment Plans | Approve |
 | Accounts > Credit Control | Premium Warranty Monitor | Approve |
@@ -30,6 +31,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Accounts > Remittance | Insurer payments | Create and edit |
 | Accounts > Remittance | Reconciliation | Create and edit |
 | Accounts > Remittance | Exceptions | Create and edit |
+| Accounts > Remittance | Held policies | Create and edit |
 | Accounts > Remittance | Insurer billing | Create and edit |
 | Accounts > Remittance | Setup | Create and edit |
 | Accounts > Remittance | Settlement | Create and edit |
@@ -101,6 +103,7 @@ The menus of this role as delivered. Access: View (open and read), Create and ed
 | Master > Finance | Posting Rules | Approve |
 | Master > Finance | Configuration Approvals | Approve |
 | Master > Finance | Accounting Flow | View |
+| Master > Finance | Financial Statement Versions | Create and edit |
 | Master > Finance | Premium Taxes & LGU Rates | View |
 | Master > Finance | Payment Gateways | View |
 | Master > Finance | Taxation | View |
@@ -129,7 +132,9 @@ Where: the screens of your menus that show the module. A module without a screen
 | Operations | Renewals | View | See renewals | No screen of its own |
 | Operations | Claims | View | See claims | No screen of its own |
 | Operations | Claims | Special | Reverse claim settlement funds or a payment to the claimant recorded in error |  |
-| Accounts | Receipts | View | See receipts and post-dated cheques | Receipts, Post-Dated Cheques and Claims Settlements |
+| Accounts | Receipts | View | See receipts | Receipts, Unapplied Collections and Claims Settlements |
+| Accounts | Receipts | Approve | Approve or return the reversal of a receipt requested by another user |  |
+| Accounts | Post-dated cheques | View | See the post-dated cheque log, its sets, transmittals and cheque history | Post-Dated Cheques |
 | Accounts | Collections and credit control | View | See collections, instalment plans and credit limits | Collections, Instalment Plans, Premium Warranty Monitor, Client Credit Limits and Remittance Ageing |
 | Accounts | Collections and credit control | Approve | Approve premium warranty extensions and client credit limits (not the requester) |  |
 | Accounts | Disbursements and petty cash | View | See payment vouchers, petty cash and bank payment files | Disbursement, Bank Payment Files, Insurer payments, Initiate, Request and Replenish |
@@ -139,10 +144,11 @@ Where: the screens of your menus that show the module. A module without a screen
 | Accounts | Payables | Approve | Approve supplier invoices (not the preparer) |  |
 | Accounts | Fixed assets | View | See the fixed asset register and depreciation | Asset Register, Depreciation Run and Disposals |
 | Accounts | Fixed assets | Create and edit | Register assets and run the monthly depreciation |  |
-| Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher, SAP GL Export, Correction JV and Reversal JV |
+| Accounts | Journal vouchers | View | See journal vouchers and the SAP GL export | Journal Voucher, SAP GL Export, Correction JV, Reversal JV and Financial Statement Versions |
 | Accounts | Journal vouchers | Create and edit | Enter, correct and reverse journal vouchers; run the SAP GL export |  |
-| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Insurer billing, Setup and Settlement |
+| Accounts | Remittance and insurer reconciliation | View | See remittances to insurers and insurer statements | Remittances, Approvals, Insurer payments, Reconciliation, Exceptions, Held policies, Insurer billing, Setup and Settlement |
 | Accounts | Remittance and insurer reconciliation | Create and edit | Prepare remittances and insurer statement reconciliations |  |
+| Accounts | Remittance and insurer reconciliation | Approve | Approve or reject an insurer billing statement raised or submitted by another user |  |
 | Accounts | Remittance and insurer reconciliation | Approve | Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter) |  |
 | Accounts | Bank reconciliation | View | See bank reconciliations | Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines and Bank Book |
 | Accounts | Bank reconciliation | Create and edit | Prepare bank reconciliations |  |
@@ -171,9 +177,11 @@ This role approves the work of other users:
 
 - Approve and reopen bank reconciliations (not the preparer)
 - Approve premium warranty extensions and client credit limits (not the requester)
+- Approve or reject an insurer billing statement raised or submitted by another user
 - Approve supplier invoices (not the preparer)
 - Approve the close, post into soft-closed periods, reopen periods, reverse a year-end close
 - Approve changes to posting rules and account determination (not the requester)
+- Approve or return the reversal of a receipt requested by another user
 - Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter)
 
 Approval limits of this role on the Authority Matrix:
@@ -193,6 +201,7 @@ Who approves the work of this role:
 | Payables | Approve supplier invoices (not the preparer) | TIS Sales Unit Head, TIS Operations Unit Head, TIS Finance & General Accounting or TIS General Manager |
 | Period end and tax | Approve the close, post into soft-closed periods, reopen periods, reverse a year-end close | TIS Finance & General Accounting |
 | Posting rules and account determination | Approve changes to posting rules and account determination (not the requester) | TIS Finance & General Accounting |
+| Remittance and insurer reconciliation | Approve or reject an insurer billing statement raised or submitted by another user | TIS Finance & General Accounting or TIS General Manager |
 | Remittance and insurer reconciliation | Approve insurer statement reconciliations and post their adjustments (not the preparer) | CCD-Recon (Reconciliation and Reversals) |
 | Remittance and insurer reconciliation | Approve or reject remittances, settlements, adjustments and transfers within the Authority Matrix limit (not the preparer or submitter) | TIS Finance & General Accounting or TIS General Manager |
 | Accounts > Disbursements > Cheque approval, and bank payment batch approval | Payment voucher and cheque release within the approver's limit | TIS Finance & General Accounting |

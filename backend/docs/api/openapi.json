@@ -138233,7 +138233,7 @@
         "tags": [
           "Receipts"
         ],
-        "description": "Front-end touchpoint: Accounts > Receipts > Bank payments\n\nAccess: write:receipts",
+        "description": "Front-end touchpoint: Accounts > Receipts > Bulk Upload > Bank payments (matched by reference)\n\nAccess: write:receipts",
         "parameters": [],
         "responses": {
           "200": {
@@ -138290,7 +138290,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Accounts > Receipts > Bank payments",
+        "x-screen": "Accounts > Receipts > Bulk Upload > Bank payments (matched by reference)",
         "x-permissions": [
           "write:receipts"
         ],
@@ -138321,7 +138321,7 @@
         "tags": [
           "Receipts"
         ],
-        "description": "Front-end touchpoint: Accounts > Receipts > Bank payments > Download template\n\nAccess: read:receipts",
+        "description": "Front-end touchpoint: Accounts > Receipts > Bulk Upload > Bank payments (matched by reference) > Download template\n\nAccess: read:receipts",
         "parameters": [],
         "responses": {
           "200": {
@@ -138342,7 +138342,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Accounts > Receipts > Bank payments > Download template",
+        "x-screen": "Accounts > Receipts > Bulk Upload > Bank payments (matched by reference) > Download template",
         "x-permissions": [
           "read:receipts"
         ]
@@ -138668,7 +138668,7 @@
         "tags": [
           "Receipts"
         ],
-        "description": "Front-end touchpoint: Accounts > Receipts > Insurer-direct payments\n\nAccess: write:receipts",
+        "description": "Front-end touchpoint: Accounts > Receipts > Bulk Upload > Payments made to the insurer\n\nAccess: write:receipts",
         "parameters": [],
         "responses": {
           "200": {
@@ -138725,7 +138725,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Accounts > Receipts > Insurer-direct payments",
+        "x-screen": "Accounts > Receipts > Bulk Upload > Payments made to the insurer",
         "x-permissions": [
           "write:receipts"
         ],
@@ -138756,7 +138756,7 @@
         "tags": [
           "Receipts"
         ],
-        "description": "Front-end touchpoint: Accounts > Receipts > Insurer-direct payments > Download template\n\nAccess: read:receipts",
+        "description": "Front-end touchpoint: Accounts > Receipts > Bulk Upload > Payments made to the insurer > Download template\n\nAccess: read:receipts",
         "parameters": [],
         "responses": {
           "200": {
@@ -138777,7 +138777,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Accounts > Receipts > Insurer-direct payments > Download template",
+        "x-screen": "Accounts > Receipts > Bulk Upload > Payments made to the insurer > Download template",
         "x-permissions": [
           "read:receipts"
         ]
