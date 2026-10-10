@@ -76,9 +76,9 @@ export async function getAccessChange(db, id, user) {
   return changeOut(db, c, user);
 }
 
-/** Access changes, newest first: status pending by default (approved, rejected, withdrawn or all), a kind, a target. */
+/** Access changes, newest first: status pending by default (approved, rejected, withdrawn or all), kinds (comma separated), a target. */
 export async function listAccessChanges(db, { kind = null, status = 'pending', target = null } = {}, user = null) {
-  const kinds = kind ? [kind].filter((k) => KINDS.has(k)) : accessKinds();
+  const kinds = kind ? String(kind).split(',').map((k) => k.trim()).filter((k) => KINDS.has(k)) : accessKinds();
   const { rows } = await db.query(`${SELECT} WHERE c.kind = ANY($1) AND ($2 = 'all' OR c.status = $2) AND ($3::text IS NULL OR c.target = $3)
     ORDER BY c.requested_at DESC, c.id DESC LIMIT 500`, [kinds, status || 'pending', target || null]);
   const out = [];
