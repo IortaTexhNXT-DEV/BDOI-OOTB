@@ -22,7 +22,9 @@ export const TRANSACTION_TABLES = [
   'broker_slips', 'insurer_offers', 'placements', 'risk_participants', 'quote_customer_responses',
   // receivables, receipts, collections, disbursements, petty cash movements (the funds themselves are masters)
   'receivables', 'receipts', 'receipt_lines', 'receipt_applications', 'entry_matches', 'invoice_lists', 'receivable_participants', 'receivable_credits', 'remittance_allocations',
-  'collection_items', 'collection_actions', 'disbursements', 'checkbooks',
+  'collection_items', 'collection_actions', 'disbursements', 'checkbooks', 'nonpayment_insurer_notices',
+  // service level clocks of the open items (reopened by the sla-monitor job)
+  'sla_clocks',
   'petty_cash_requests', 'petty_cash_request_lines', 'petty_cash_disbursements', 'petty_cash_receipts', 'petty_cash_replenishments',
   // commission, direct bill, remittance
   'commissions', 'commission_debit_notes', 'commission_debit_note_lines', 'commission_debit_note_collections', 'direct_bill_items',
@@ -115,7 +117,7 @@ export const SYSTEM_TABLES = Object.keys(SYSTEM_RESET_ACTIONS);
 /** Masters, configuration, users and roles: never touched by the transaction reset (petty_cash_funds: see the script). */
 export const MASTER_CONFIG_TABLES = [
   // settings, numbering series, users, roles and access
-  'app_settings', 'document_numbering', 'users', 'user_roles', 'roles', 'role_permissions', 'permissions',
+  'app_settings', 'document_numbering', 'users', 'user_roles', 'roles', 'role_permissions', 'permissions', 'sla_targets', 'control_evidence',
   'authority_limits', 'authority_transaction_types', 'sod_rules', 'sod_exceptions', 'user_delegations', 'remittance_delegations',
   // generic and dedicated masters
   'master_types', 'master_records', 'branches', 'signatories', 'e_signatures', 'document_signature_slots', 'brand_pack_enablements', 'banks', 'insurance_companies', 'commission_referrers',

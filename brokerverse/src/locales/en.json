@@ -8734,7 +8734,9 @@
       "uploadEpolicy": "Upload e-policy",
       "checkAgainstSlip": "Check against slip",
       "book": "Book (Insurer issued)",
-      "printSlip": "Print slip"
+      "printSlip": "Print slip",
+      "verifyPayment": "Verify payment",
+      "paymentVerified": "Payment verified"
     },
     "brokerSlip": {
       "title": "Request for Quotation (Broker Slip)",
@@ -8839,7 +8841,8 @@
       "chooseProductFirst": "Choose the product first",
       "noCovers": "No cover for this line in the Cover master",
       "acknowledged": "Acknowledged",
-      "placementFile": "Placement file"
+      "placementFile": "Placement file",
+      "paymentVerified": "Proof of payment"
     },
     "list": {
       "allStatuses": "All statuses",
@@ -9083,6 +9086,15 @@
     },
     "addInsurer": {
       "invited": "Insurers already invited"
+    },
+    "payment": {
+      "title": "Verify proof of payment: {{number}}",
+      "mode": "Payment mode",
+      "amount": "Amount",
+      "reference": "Reference",
+      "pdcApproved": "Approved post-dated cheque instalments",
+      "verified": "Proof of payment verified",
+      "notVerified": "Not verified"
     }
   },
   "postingRules": {

@@ -78,6 +78,7 @@ const placementService = {
   createPlacement: async (body) => (await request("POST", "/placements", body)).data,
   updatePlacement: async (id, body) => (await request("PUT", `/placements/${enc(id)}`, body)).data,
   sendPlacement: (id, insurerIds) => request("POST", `/placements/${enc(id)}/send`, insurerIds ? { insurerIds } : {}),
+  verifyPayment: (id, body) => request("POST", `/placements/${enc(id)}/verify-payment`, body),
   acknowledgePlacement: async (id, body) => (await request("POST", `/placements/${enc(id)}/acknowledge`, body)).data,
   recordEpolicy: async (id, body) => (await request("POST", `/placements/${enc(id)}/epolicy`, body)).data,
   slipCheck: async (id) => (await request("GET", `/placements/${enc(id)}/check`)).data,

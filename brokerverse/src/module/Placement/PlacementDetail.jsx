@@ -15,6 +15,9 @@ import { useEmailSending, withQueuedNotice } from "../../utility/emailNotice";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import { loadKycConfig, requiredKycFor } from "../../utility/kyc";
 import { hasPermission } from "../../utils/canOpen";
+import mastersService from "../../services/mastersService";
+import { InputNumber } from "primereact/inputnumber";
+import { InputSwitch } from "primereact/inputswitch";
 import { openConfirm } from "../../components/ConfirmDialog";
 import DetailDialog from "../../components/DetailDialog";
 import KeyValueGrid from "../../components/KeyValueGrid";
@@ -48,6 +51,13 @@ const PlacementDetail = () => {
   const [editing, setEditing] = useState(null);
   const [booking, setBooking] = useState(null);
   const [kycConfig, setKycConfig] = useState(null);
+  const [verifying, setVerifying] = useState(null);
+  const [paymentModes, setPaymentModes] = useState([]);
+  const canVerifyPayment = hasPermission("write:receipts");
+  useEffect(() => {
+    if (!canVerifyPayment) return;
+    mastersService.options("payment-mode").then((o) => setPaymentModes(o.map((m) => ({ label: m.label, value: m.code })))).catch(() => setPaymentModes([]));
+  }, [canVerifyPayment]);
   const userId = String(authService.getUser()?.userId || localStorage.getItem("USER_ID") || "");
 
   const notify = (severity, detail) => toast.current?.show({ severity, summary: severity === "error" ? t("common.error") : t("placement.messages.done"), detail, life: severity === "error" ? 6000 : 3000 });
@@ -123,6 +133,22 @@ const PlacementDetail = () => {
     notify("success", withQueuedNotice(t("placement.messages.sent", { count: out?.sent?.length || 0 }), emailSending));
     await load();
   };
+  // Cash Control verifies the proof of payment (cash before cover) before the slip is sent
+  const verifyPayment = async () => {
+    const v = verifying;
+    if (!v.mode || !v.reference || !(Number(v.amount) > 0)) return;
+    setBusy(true);
+    try {
+      await placementService.verifyPayment(p.id, { mode: v.mode, reference: v.reference, amount: Number(v.amount), remarks: v.remarks || null, pdcApproved: !!v.pdcApproved });
+      notify("success", t("placement.payment.verified"));
+      setVerifying(null);
+      await load();
+    } catch (e) {
+      notify("error", e.message);
+    } finally {
+      setBusy(false);
+    }
+  };
   const recordDecline = (x) => confirmAct({
     title: t("placement.decline.title", { insurer: x.insuranceCompanyName }),
     severity: "danger",
@@ -176,6 +202,8 @@ const PlacementDetail = () => {
         <Button label={t("placement.actions.printSlip")} icon="pi pi-print" severity="secondary" outlined onClick={() => pdf()} />
         {editable && <Button label={t("placement.actions.editParticipants")} icon="pi pi-users" severity="secondary" outlined className="ml-2"
           onClick={() => setEditing(p.participants.filter((x) => x.status !== "declined").map((x) => ({ insuranceCompanyId: x.insuranceCompanyId, sharePercent: x.sharePercent, isLead: x.isLead })))} />}
+        {canVerifyPayment && !["issued", "cancelled"].includes(p.status) && <Button label={p.paymentVerification ? t("placement.actions.paymentVerified") : t("placement.actions.verifyPayment")} icon="pi pi-wallet" className="ml-2" severity="secondary" outlined
+          onClick={() => setVerifying({ mode: "", reference: "", amount: p.grossPremium, remarks: "", pdcApproved: false })} />}
         {write && ["draft", ...WITH_INSURER].includes(p.status) && <Button label={p.status === "draft" ? t("placement.actions.sendToInsurers") : t("placement.actions.resend")} icon="pi pi-send" className="ml-2" loading={busy}
           severity={p.status === "draft" ? undefined : "secondary"} outlined={p.status !== "draft"}
           onClick={() => sendToInsurers()} />}
@@ -246,6 +274,7 @@ const PlacementDetail = () => {
             <Field label={t("placement.fields.customer")}>{p.customerName}</Field>
             <Field label={t("placement.fields.period")}>{`${formatDate(p.inceptionDate)} - ${formatDate(p.expiryDate)}`}</Field>
             <Field label={t("placement.fields.billingMode")}>{p.billingMode ? t(`placement.billing.${p.billingMode}`) : t("placement.billing.default")}</Field>
+            <Field label={t("placement.fields.paymentVerified")}>{p.paymentVerification ? `${formatDate(p.paymentVerification.at)} · ${p.paymentVerification.mode} ${p.paymentVerification.reference}${p.paymentVerification.pdcApproved ? ` (${t("placement.payment.pdcApproved")})` : ""}` : t("placement.payment.notVerified")}</Field>
             <Field label={t("placement.fields.sent")}>{formatDate(p.sentAt)}</Field>
             <Field label={t("placement.fields.acknowledged")}>{p.acknowledgement ? `${formatDate(p.acknowledgement.at)}${p.acknowledgement.reference ? ` (${p.acknowledgement.reference})` : ""}` : "-"}</Field>
             {p.slipDocument && <Field label={t("placement.fields.placementFile")}><button type="button" className="journey-link" onClick={() => openFile(p.slipDocument.key)}>{p.slipDocument.fileName}</button></Field>}
@@ -331,6 +360,35 @@ const PlacementDetail = () => {
           onClick={async () => { const ok = await act(() => placementService.updatePlacement(p.id, { participants: editing }), t("placement.messages.participantsSaved")); if (ok) setEditing(null); }} /></>}>
         {editing && <ParticipantEditor value={editing} onChange={setEditing} insurers={options.insurers} totals={p} />}
       </Dialog>
+
+      <DetailDialog header={t("placement.payment.title", { number: p.placementNumber })} visible={Boolean(verifying)} onHide={() => setVerifying(null)} size="sm"
+        footer={<><Button label={t("placement.actions.cancel")} text onClick={() => setVerifying(null)} /><Button label={t("placement.actions.verifyPayment")} icon="pi pi-check" loading={busy}
+          disabled={!verifying || !verifying.mode || !verifying.reference || !(Number(verifying.amount) > 0)} onClick={verifyPayment} /></>}>
+        {verifying && (
+          <div className="grid">
+            <div className="col-12 md:col-6">
+              <label htmlFor="vp-mode">{t("placement.payment.mode")}</label>
+              <Dropdown inputId="vp-mode" value={verifying.mode} options={paymentModes} placeholder={t("placement.kyc.selectIdType")} className="w-full" onChange={(e) => setVerifying((v) => ({ ...v, mode: e.value }))} />
+            </div>
+            <div className="col-12 md:col-6">
+              <label htmlFor="vp-amount">{t("placement.payment.amount")}</label>
+              <InputNumber inputId="vp-amount" value={verifying.amount} mode="decimal" minFractionDigits={2} maxFractionDigits={2} className="w-full" onValueChange={(e) => setVerifying((v) => ({ ...v, amount: e.value }))} />
+            </div>
+            <div className="col-12">
+              <label htmlFor="vp-reference">{t("placement.payment.reference")}</label>
+              <InputText id="vp-reference" value={verifying.reference} maxLength={120} className="w-full" onChange={(e) => setVerifying((v) => ({ ...v, reference: e.target.value }))} />
+            </div>
+            <div className="col-12">
+              <label htmlFor="vp-remarks">{t("placement.fields.remarks")}</label>
+              <InputTextarea id="vp-remarks" rows={2} autoResize value={verifying.remarks} maxLength={1000} className="w-full" onChange={(e) => setVerifying((v) => ({ ...v, remarks: e.target.value }))} />
+            </div>
+            <div className="col-12 flex align-items-center gap-2">
+              <InputSwitch inputId="vp-pdc" checked={!!verifying.pdcApproved} onChange={(e) => setVerifying((v) => ({ ...v, pdcApproved: e.value }))} />
+              <label htmlFor="vp-pdc">{t("placement.payment.pdcApproved")}</label>
+            </div>
+          </div>
+        )}
+      </DetailDialog>
 
       <DetailDialog header={t("placement.book.title")} visible={Boolean(booking)} onHide={() => setBooking(null)} size="md"
         footer={<><Button label={t("placement.actions.cancel")} text onClick={() => setBooking(null)} /><Button label={t("placement.actions.book")} icon="pi pi-verified" loading={busy}

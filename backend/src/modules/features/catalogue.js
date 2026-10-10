@@ -328,7 +328,7 @@ export const FEATURES = Object.freeze([
     requirements: ['TIS-BRD-PROD-17', 'TIS-BRD-RPT-OPS-10', 'TIS-BRD-RPT-OPS-11', 'TIS-BRD-COMM-04', 'MOM-S3-COLL-CREDIT-TERMS'],
     menus: ['Accounts > Collections', 'Accounts > Credit Control > Instalment Plans', 'Accounts > Credit Control > Premium Warranty Monitor',
       'Accounts > Credit Control > Remittance Ageing'],
-    jobs: ['collection-reminders', 'receivable-ageing'],
+    jobs: ['collection-reminders', 'receivable-ageing', 'nonpayment-cadence'],
   }),
   feature({
     key: 'client-credit-limits', name: 'Client credit limits', module: 'Accounts', tier: FUT,

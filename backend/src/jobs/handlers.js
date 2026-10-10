@@ -83,6 +83,8 @@ export { housekeeping } from './housekeeping.js';
 export { dataRetention } from './retention.js';
 // Service levels: the clocks of the open items against the service level register, with escalation on breach
 export { slaMonitor } from '../lib/sla.js';
+// Non-payment cadence: customer notices at 5, 10 and 15 days, the cancellation flag, Sales and insurer notices
+export { nonpaymentCadence } from '../modules/collections/nonpayment.js';
 
 /** Deactivate accounts nobody has signed in to for access.dormant_days (Master > User Management). */
 export const dormantUsers = async () => {

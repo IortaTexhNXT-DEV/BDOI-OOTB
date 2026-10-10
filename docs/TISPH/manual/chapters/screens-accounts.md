@@ -44,6 +44,8 @@ Accounts > Collections lists every open premium with **Client Name**, **Policy N
 
 The cards show the **Outstanding** and **Overdue** amounts, the items **Committed** (the client gave a payment date) and **Escalated**, and the amount **Collected this month**. **Send Payment Reminders Now** e-mails the reminders of the overdue items at once; **Import open items** loads open premiums from a file.
 
+The non-payment cadence runs by itself every morning: the customer is e-mailed 5, 10 and 15 days after the due date of an unpaid bill (each notice is recorded on the item under **Actions**), the account is flagged for cancellation at the last notice and the collectors are told to raise the cancellation request, Sales and the insurer are told once a policy is cancelled for non-payment, and on or before the 26th each insurer receives the month's non-payment cancellations. The **Non-Payment Report** lists the accounts without payment.
+
 Select **View** to open an item. **Collection Details** shows the client and policy, the overdue level, the financial breakdown of the bill (gross premium, net premium, VAT, DST, LGT, paid, outstanding), the ageing, the **Follow-Up History** and the **Payment History**. The **Collection Actions** are **Send Email**, **E-mail invoice**, **Add Note** and **Set Commitment Date**; **Record receipt** opens the receipt for this bill.
 
 ![Accounts > Collections, the open premiums by ageing bucket](images/screens-accounts/collections.png)

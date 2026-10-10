@@ -270,6 +270,16 @@ define({
   },
 });
 define({
+  method: 'POST', path: '/:id/verify-payment', summary: 'Cash Control verifies the proof of payment of the placement slip (cash before cover): payment mode of the Payment Mode master, reference, amount, remarks; pdcApproved marks an approved post-dated cheque instalment plan. With placement.payment_verification_required the slip is sent and booked only after this; audited', screen: `${PS} > Verify payment`,
+  middleware: [requireAuth, requirePermission('write:receipts'), ownRecord('placement'), validate(z.object({ mode: z.string().min(1).max(40), reference: z.string().min(1).max(120), amount: z.coerce.number().positive(), remarks: z.string().max(1000).nullable().optional(), pdcApproved: z.boolean().optional() }).strict())],
+  request: { mode: 'BANK', reference: 'BDO 2026-10-10 7781234', amount: 23171.25 }, response: { success: true, data: { ...placementExample, paymentVerification: { mode: 'BANK', reference: 'BDO 2026-10-10 7781234', amount: 23171.25, at: '2026-10-10T02:00:00Z', by: 'CCD-BP Teller' } } },
+  handler: async (req, res) => {
+    const { before, after } = await plc.verifyPayment(req.params.id, req.body, req.user);
+    await audit(req, { entity: 'placement', entityId: after.id, action: 'verify-payment', before: { paymentVerification: before }, after: { paymentVerification: after.paymentVerification } });
+    res.json({ success: true, message: 'Proof of payment verified', data: after });
+  },
+});
+define({
   method: 'POST', path: '/:id/send', summary: 'Send the firm order to the participating insurers: one queued e-mail per participant with its placement slip PDF (its own share) and any LTO document attached; insurerIds limits it to some. A sent or acknowledged placement can be sent again', screen: `${PS} > Detail > Send to insurer`,
   middleware: [...canWrite, ownRecord('placement'), validate(z.object({ insurerIds: z.array(z.union([z.number(), z.string()])).optional() }))], request: {},
   response: { success: true, data: { ...placementExample, status: 'sent' }, sent: [{ insurer: 'Malayan Insurance Co., Inc.', email: 'uw@malayan.example' }] },

@@ -104,5 +104,12 @@
     "description": "Keep the service level clocks of the open items (Master > System Configuration > Service Levels): open a clock when an item enters a status, close it when the item moves on, mark the breaches and escalate each breach once to the roles of the service level",
     "cron": "*/30 * * * *",
     "handler": "slaMonitor"
+  },
+  {
+    "code": "nonpayment-cadence",
+    "name": "Non-payment cadence",
+    "description": "Tell the customer of an unpaid premium bill at 5, 10 and 15 days after the due date, flag the account for cancellation at the last notice, tell Sales and the insurer of each policy cancelled for non-payment, and send each insurer the month's non-payment cancellations on or before the insurer notice day",
+    "cron": "30 8 * * *",
+    "handler": "nonpaymentCadence"
   }
 ]

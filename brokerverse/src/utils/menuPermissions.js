@@ -205,7 +205,9 @@ Object.assign(roleMenuPermissions, {
   // insurer statements (approve:insurer-reconciliation) and reads payments and billing. The claim settlement funds an
   // insurer remits are banked by Cash Control (write:receipts).
   "tis-ccd-pdc": TIS_CCD(["Post-Dated Cheques", "Receipts", "Collections", "Bank Reconciliation", ...REMITTANCE("Remittances", "Reconciliation", "Exceptions")]),
-  "tis-ccd-bp": TIS_CCD(["Receipts", "Collections", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation", ...REMITTANCE("Remittances", "Reconciliation", "Exceptions")]),
+  // CCD-BP (the teller) also opens the placement slips to verify the proof of payment before the slip is sent (cash before cover)
+  "tis-ccd-bp": { ...TIS_CCD(["Receipts", "Collections", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation", ...REMITTANCE("Remittances", "Reconciliation", "Exceptions")]),
+    operations: ["Payments", "Sales & Marketing > Placement Slips"] },
   "tis-ccd-recon": TIS_CCD(["Receipts", "Collections", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation", "Open Entry Matching", "Open Entry Unmatching",
     "Disbursement", ...REMITTANCE("Remittances", "Approvals", "Insurer payments", "Reconciliation", "Exceptions", "Insurer billing")]),
   // Finance & General Accounting: the Accounting menus, plus the audit trail and the schedules (interface monitor)

@@ -107,6 +107,7 @@ There is no scheduled or e-mailed report in the TISPH menus: run the reports whe
 | **SOA / Premium Receivable** | The statement of account: premium bills issued in the period with amount, paid, balance, age and ageing bucket as of the To Date |
 | **Collection Report** | Bills due in the period with the amount billed, collected (receipts posted up to the To Date), balance and collection rate |
 | **Receivables Ageing** | Outstanding premium receivables as of the To Date by ageing bucket |
+| **Non-Payment Report** | Accounts without payment past the report days after the due date (cancellation basis): policy, client, insurer, bill, days past due, balance, notices sent, last notice and the cancellation flag; overall, by insurer, agent or branch |
 | **Receipts Register** | Official receipts of the period with bill, policy, payment mode, bank and reference |
 | **Bank Reconciliation Statement**, **Outstanding Cheques**, **Deposits in Transit**, **Unmatched Bank Lines**, **Bank Book** | The bank reconciliation reports; see [Bank reconciliation](#bank-reconciliation) |
 | **Remittance Summary** | Premium remittances to insurers in the period: gross premium, commission retained and net due, by status |

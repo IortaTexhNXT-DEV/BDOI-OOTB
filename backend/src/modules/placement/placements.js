@@ -24,6 +24,7 @@ import { quoteStatusOut } from '../documents/statuses.js';
 import { clientFromLead, createClientInTx } from '../clients/service.js';
 import { issuePolicy, getPolicyRow } from '../policies/service.js';
 import { assertKyc, kycPrefill, kycValue } from '../policies/kyc.js';
+import { activeRecords } from '../ops-masters/records.js';
 import { findDocument, reserveKey, writeObject, safeKey } from '../uploads/storage.js';
 import { premiumBreakdown } from '../quotations/premium.js';
 import { assertNotDeclined, assertReferralCleared } from '../product-configurator/underwriting.js';
@@ -42,6 +43,7 @@ const SELECT = `SELECT p.*, row_to_json(l.*) AS lead_row, c.display_name AS clie
   b.slip_number, pol.policy_number, (SELECT u.display_name FROM users u WHERE u.id = p.created_by) AS created_by_name,
   (SELECT u.display_name FROM users u WHERE u.id = p.acknowledged_by) AS acknowledged_by_name, (SELECT u.display_name FROM users u WHERE u.id = p.epolicy_received_by) AS epolicy_received_by_name,
   (SELECT u.display_name FROM users u WHERE u.id = p.checked_by) AS checked_by_name, (SELECT u.display_name FROM users u WHERE u.id = p.issued_by) AS issued_by_name,
+  (SELECT u.display_name FROM users u WHERE u.id = p.payment_verified_by) AS payment_verified_by_name,
   (SELECT count(*)::int FROM risk_participants rp WHERE rp.entity_type = 'placement' AND rp.entity_id = p.id) AS participants_count,
   (SELECT count(*)::int FROM risk_participants rp WHERE rp.entity_type = 'placement' AND rp.entity_id = p.id AND rp.status = 'confirmed') AS confirmed_count
   FROM placements p LEFT JOIN leads l ON l.id = p.lead_id LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
@@ -69,6 +71,7 @@ export function toPlacement(r, participants = null) {
     epolicy: r.epolicy_received_at ? { ...(r.epolicy || {}), documentKey: r.epolicy_document_key, documentName: r.epolicy_document_name, receivedAt: r.epolicy_received_at,
       receivedBy: r.epolicy_received_by_name || r.epolicy_received_by, receivedById: r.epolicy_received_by } : null,
     check: r.check_result ? { status: r.check_status, decision: r.check_decision, reason: r.check_reason, at: r.checked_at, by: r.checked_by_name || r.checked_by, byId: r.checked_by, ...r.check_result } : null,
+    paymentVerification: r.payment_verified_at ? { ...(r.payment_verification || {}), at: r.payment_verified_at, by: r.payment_verified_by_name || r.payment_verified_by, byId: r.payment_verified_by } : null,
     participantsCount: r.participants_count ?? null, confirmedCount: r.confirmed_count ?? null, remarks: r.remarks, cancelReason: r.cancel_reason,
     createdBy: r.created_by_name || r.created_by, createdAt: r.created_at, updatedAt: r.updated_at,
     ...(participants ? { participants, isCoInsurance: participants.length > 1 } : {}),
@@ -350,9 +353,40 @@ export async function updatePlacement(id, body, user) {
  * its placement slip PDF and any LTO document attached. A sent or acknowledged placement can be sent again (a corrected
  * e-policy requested); the status does not go back.
  */
+/**
+ * Cash before cover (Pre-BSM P04): with placement.payment_verification_required, the placement slip is sent and booked
+ * only after Cash Control has verified the proof of payment (verifyPayment), or recorded an approved post-dated cheque
+ * instalment plan when placement.pdc_cover_before_cash allows cover before cash.
+ */
+export async function assertPaymentVerified(p) {
+  if (!(await getSetting('placement.payment_verification_required', false))) return;
+  const v = p.paymentVerification || (p.payment_verified_at ? { ...(p.payment_verification || {}), at: p.payment_verified_at } : null);
+  if (!v) throw conflict(`The proof of payment of placement slip ${p.placementNumber || p.placement_number} must be verified by Cash Control before it is sent or booked`);
+  if (v.pdcApproved && !(await getSetting('placement.pdc_cover_before_cash', true))) throw conflict('A post-dated cheque instalment plan does not give cover before cash is received');
+}
+
+/**
+ * Cash Control verifies the proof of payment of a placement slip: { mode, reference, amount, remarks, pdcApproved }.
+ * Recorded once; a second verification replaces the first (both are in the audit trail).
+ */
+export async function verifyPayment(id, body, user) {
+  const p = await placementById(id);
+  if (['issued', 'cancelled'].includes(p.status)) throw conflict(`A ${p.placementStatus} placement slip has no payment to verify`);
+  const modes = (await activeRecords({ query }, 'payment-mode')).map((m) => String(m.code).toUpperCase());
+  const mode = String(body.mode || '').trim().toUpperCase();
+  if (modes.length && !modes.includes(mode)) throw badRequest('Validation failed', [{ path: 'mode', message: `mode must be a payment mode of the Payment Mode master (${modes.join(', ')})` }]);
+  const amount = round2(num(body.amount));
+  if (!(amount > 0)) throw badRequest('Validation failed', [{ path: 'amount', message: 'amount must be above zero' }]);
+  const verification = { mode, reference: String(body.reference || '').trim(), amount, remarks: body.remarks ? String(body.remarks).trim() : null, pdcApproved: body.pdcApproved === true };
+  if (!verification.reference) throw badRequest('Validation failed', [{ path: 'reference', message: 'reference is required' }]);
+  await query('UPDATE placements SET payment_verified_at = now(), payment_verified_by = $2, payment_verification = $3, updated_by = $2, updated_at = now() WHERE id = $1', [p.id, user.id, JSON.stringify(verification)]);
+  return { before: p.paymentVerification, after: await placementById(p.id) };
+}
+
 export async function sendPlacement(id, user, { insurerIds = null } = {}) {
   const p = await placementById(id);
   if (!['draft', ...WITH_INSURER].includes(p.status)) throw conflict(`A ${p.placementStatus} placement slip cannot be sent`);
+  await assertPaymentVerified(p);
   const toSend = p.participants.filter((r) => r.status !== 'declined' && (!insurerIds || insurerIds.map(Number).includes(Number(r.insuranceCompanyId))));
   const t = await emailTemplate('placement_order');
   const company = await companyName();
@@ -630,6 +664,7 @@ export async function bookPlacement(id, body, user) {
   const p = await getPlacementRow(id);
   const quote = p.quote_id ? await one('SELECT doc FROM quotes WHERE id = $1', [p.quote_id]) : null;
   const extra = body.additionalPolicyData && typeof body.additionalPolicyData === 'object' ? body.additionalPolicyData : body;
+  await assertPaymentVerified(p);
   await assertKyc({ lob: p.lob, sources: [quote?.doc?.insuranceVehicleDetails?.[0], quote?.doc, p.doc, p.epolicy?.vehicle, extra.customerInfo, extra] });
   const r = await withTransaction((db) => bookInTx(db, p.id, body, user));
   const policy = await getPolicyRow(r.policyId);

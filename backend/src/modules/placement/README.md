@@ -50,8 +50,12 @@ the e-policy are `documents` rows (entity `placement`).
 3. When the client accepts a quotation (approval link, customer response or status change to a status in
    `placement.auto_raise_statuses`), the placement slip is raised automatically if its journey requires one; the slip
    PDF is stored (`storeSlipDocument`). One open placement per quotation; a failure is notified to the quotation's owner.
-4. The placement is sent to the lead insurer and co-insurers, each with its own slip (`emailDocuments.js`
-   `placement-slip`) and, for a direct CTPL, the LTO document. The insurer acknowledges it.
+4. With `placement.payment_verification_required`, Cash Control (write:receipts; CCD-BP) first verifies the proof of
+   payment on the slip (`verify-payment`: payment mode of the Payment Mode master, reference, amount; an approved
+   post-dated cheque instalment plan counts when `placement.pdc_cover_before_cash` is on): cash before cover. The
+   placement is then sent to the lead insurer and co-insurers, each with its own slip (`emailDocuments.js`
+   `placement-slip`) and, for a direct CTPL, the LTO document. The insurer acknowledges it. The service level clocks
+   POL-KYC (before the verification) and POL-PEND (after it) time the step.
 5. The e-policy is recorded with both policy numbers, participant name, sum insured, premium, commission and the
    issue / issuance / effective / production dates; motor registration (plate or MV file) is required even where the
    quotation said TBA. Only a motor or CTPL placement (lob MOTOR) keeps vehicle identifiers and a vehicle photo; on
@@ -70,6 +74,7 @@ optional or skip; every TISPH line requires the placement slip, Motor the quotat
 `placement.auto_raise`, `placement.auto_raise_statuses`, `placement.check_fields`, `placement.check_tolerance_amount`,
 `placement.check_tolerance_pct`, `placement.check_maker_checker`, `placement.schedule_email_on_booking`,
 `placement.direct_document_products`, `placement.lob_keywords`, `placement.offer_validity_days`,
+`placement.payment_verification_required`, `placement.pdc_cover_before_cash`,
 `placement.editable_statuses`, `placement.quote_statuses`, and the e-mail templates `email.template.broker_slip_request`,
 `email.template.placement_order`, `email.template.placement_discrepancy` and `email.template.policy_schedule`.
 

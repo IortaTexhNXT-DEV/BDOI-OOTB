@@ -22,8 +22,12 @@ export const OPEN_ITEMS = {
     FROM leads l WHERE l.deleted_at IS NULL AND lower(l.status) = 'new'`,
   'QUOTE-DESPATCH': `SELECT q.id::text AS record_id, q.quote_number AS ref, 'Quotation' AS title, c.display_name AS client_name, COALESCE(q.agent_user_id, q.created_by) AS owner_id, '/agent/quotation-detail/' || q.id AS link, q.created_at AS started_at
     FROM quotes q LEFT JOIN clients c ON c.id = q.client_id WHERE q.deleted_at IS NULL AND q.status IN ('draft', 'quoted')`,
-  'POL-PEND': `SELECT pl.id::text AS record_id, pl.placement_number AS ref, 'Placement slip' AS title, COALESCE(c.display_name, pl.insured_name) AS client_name, COALESCE(pl.owner_user_id, pl.created_by) AS owner_id, '/placement/placement-slips/' || pl.id AS link, pl.created_at AS started_at
-    FROM placements pl LEFT JOIN clients c ON c.id = pl.client_id WHERE pl.status = 'draft'`,
+  'POL-KYC': `SELECT pl.id::text AS record_id, pl.placement_number AS ref, 'Placement slip' AS title, COALESCE(c.display_name, pl.insured_name) AS client_name, COALESCE(pl.owner_user_id, pl.created_by) AS owner_id, '/placement/placement-slips/' || pl.id AS link, pl.created_at AS started_at
+    FROM placements pl LEFT JOIN clients c ON c.id = pl.client_id WHERE pl.status = 'draft' AND pl.payment_verified_at IS NULL
+      AND COALESCE((SELECT value = 'true'::jsonb FROM app_settings WHERE key = 'placement.payment_verification_required'), false)`,
+  'POL-PEND': `SELECT pl.id::text AS record_id, pl.placement_number AS ref, 'Placement slip' AS title, COALESCE(c.display_name, pl.insured_name) AS client_name, COALESCE(pl.owner_user_id, pl.created_by) AS owner_id, '/placement/placement-slips/' || pl.id AS link, COALESCE(pl.payment_verified_at, pl.created_at) AS started_at
+    FROM placements pl LEFT JOIN clients c ON c.id = pl.client_id WHERE pl.status = 'draft'
+      AND (pl.payment_verified_at IS NOT NULL OR NOT COALESCE((SELECT value = 'true'::jsonb FROM app_settings WHERE key = 'placement.payment_verification_required'), false))`,
   'POL-PLACED': `SELECT pl.id::text AS record_id, pl.placement_number AS ref, 'Placement slip' AS title, COALESCE(c.display_name, pl.insured_name) AS client_name, COALESCE(pl.owner_user_id, pl.created_by) AS owner_id, '/placement/placement-slips/' || pl.id AS link, COALESCE(pl.sent_at, pl.updated_at) AS started_at
     FROM placements pl LEFT JOIN clients c ON c.id = pl.client_id WHERE pl.status IN ('sent', 'acknowledged')`,
   'POL-RECVD': `SELECT pl.id::text AS record_id, pl.placement_number AS ref, 'Placement slip' AS title, COALESCE(c.display_name, pl.insured_name) AS client_name, COALESCE(pl.owner_user_id, pl.created_by) AS owner_id, '/placement/placement-slips/' || pl.id AS link, COALESCE(pl.epolicy_received_at, pl.updated_at) AS started_at

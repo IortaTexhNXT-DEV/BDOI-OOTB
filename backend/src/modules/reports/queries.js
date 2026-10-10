@@ -11,6 +11,7 @@
 import { PERIOD_END_QUERIES } from './periodEndQueries.js';
 import { BANK_REC_QUERIES } from './bankRecQueries.js';
 import { CHANNEL_QUERIES } from './channelQueries.js';
+import { NON_PAYMENT_SQL } from '../collections/nonpayment.js';
 
 /** An extra positional parameter read from app_settings; `type` is its SQL type (every parameter is cast once so
  *  that parameters unused by a variant of the query still have a known type). */
@@ -191,6 +192,13 @@ const dueToInsurers = `SELECT x.*, round(x."collectedDue" - x.remitted, 2) AS ou
 
 export const QUERIES = {
   ...PERIOD_END_QUERIES,
+  // accounts without payment past the non-payment report days (cancellation basis; TIS-BRD-RPT-OPS-11)
+  nonPayment: {
+    sql: NON_PAYMENT_SQL, extras: [setting('collections.nonpayment_report_days', 5, 'int'), businessToday], filters: POLICY_FILTERS,
+    criteria: { Overall: {}, 'Principal Insurer': { groupBy: 'insurer' }, Agent: { groupBy: 'agent' }, Branch: { groupBy: 'branch' } },
+    orderBy: 'f."daysPastDue" DESC, f."policyNumber"',
+    summary: { accounts: 'count(*)', balance: 'COALESCE(sum(f.balance), 0)', flagged: 'count(*) FILTER (WHERE f."flaggedDate" IS NOT NULL)' },
+  },
   placementPipeline: {
     sql: placementPipeline, extras: [setting('reports.placement_age_buckets', [7, 14, 30, 60], 'int[]'),
       setting('reports.placement_open_statuses', ['draft', 'submitted', 'responses-in', 'sent', 'acknowledged', 'epolicy_received', 'checked', 'declined'], 'text[]')],
