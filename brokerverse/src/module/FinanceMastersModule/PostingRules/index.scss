@@ -152,6 +152,7 @@
 
 // line narrations are templates ("Premium due to {insurer}"): wrapped in their column, not cut at the panel edge
 .posting-rules__lines .posting-rules__narration {
+  min-width: 14rem;
   white-space: normal;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }

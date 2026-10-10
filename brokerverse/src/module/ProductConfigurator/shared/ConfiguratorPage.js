@@ -299,8 +299,11 @@ export const HistoryDialog = ({ kind, row, onHide }) => {
     load();
   }, [load]);
   if (!row) return null;
+  // the record by its name with its code, as the lists show it ("Hospitalisation (HOSP)")
+  const name = row.coverageName || row.factorName || row.ruleName || row.documentName || row.name || null;
+  const title = name && row.label && name !== row.label ? `${name} (${row.label})` : name || row.label || "";
   return (
-    <DetailDialog visible onHide={onHide} header={t("productConfigurator.history.title", { name: row.label || "" })} size="md">
+    <DetailDialog visible onHide={onHide} header={t("productConfigurator.history.title", { name: title })} size="md">
       <ActivityLog entries={fromConfigurationHistory(rows)} loading={loading} error={error} onRetry={load} emptyText={t("productConfigurator.history.empty")} />
     </DetailDialog>
   );

@@ -14,6 +14,7 @@ import { numberLocale } from "../../../utility/currencyConverter";
 import { formatPercent } from "../../../utility/numberFormat";
 import { ConfiguratorPage, FilterBar, RowActions, StatusTag, pagingFor, productText } from "../shared/ConfiguratorPage";
 import { useChartTheme } from "../../../theme/chartTheme";
+import { openConfirm } from "../../../components/ConfirmDialog";
 import "./style.scss";
 
 /** Product Configurator > Dashboard: templates, what is configured and in force, and the production of the products. */
@@ -47,14 +48,29 @@ const ProductDashboard = () => {
     loadData();
   }, [loadData]);
 
+  // a new draft version copies the template; the confirm names it, its next version and any draft already open
   const cloneProduct = async (row) => {
-    try {
-      const version = await productConfiguratorService.createProductVersion(row.id);
-      toast.current?.show({ severity: "success", summary: t("productTemplateManager.success"), detail: `${version.templateCode} ${version.version}` });
-      navigate(`/product-configurator/template/${version.id}`);
-    } catch (error) {
-      toast.current?.show({ severity: "error", summary: t("productConfiguratorDashboard.error"), detail: error.message });
-    }
+    const same = templates.filter((r) => r.templateCode === row.templateCode);
+    const numberOf = (v) => Number(String(v ?? "").replace(/\D/g, "")) || 0;
+    const next = Math.max(0, ...same.map((r) => numberOf(r.version))) + 1;
+    const drafts = same.filter((r) => String(r.status || "").toLowerCase() === "draft").map((r) => r.version);
+    let version = null;
+    const done = await openConfirm({
+      title: t("productConfiguratorDashboard.cloneTitle", { code: row.templateCode }),
+      message: t("productConfiguratorDashboard.cloneMessage"),
+      facts: [
+        { label: t("productConfiguratorDashboard.productName"), value: row.name },
+        { label: t("productConfiguratorDashboard.copiedFrom"), value: row.version },
+        { label: t("productConfiguratorDashboard.newVersion"), value: `v${next}` },
+        { label: t("productConfiguratorDashboard.openDrafts"), value: drafts.join(", "), hidden: !drafts.length },
+      ],
+      confirmLabel: t("productConfiguratorDashboard.cloneAction"),
+      confirmIcon: "pi pi-copy",
+      onConfirm: async () => { version = await productConfiguratorService.createProductVersion(row.id); },
+    });
+    if (!done || !version) return;
+    toast.current?.show({ severity: "success", summary: t("productTemplateManager.success"), detail: `${version.templateCode} ${version.version}` });
+    navigate(`/product-configurator/template/${version.id}`);
   };
 
   const s = String(filters.search || "").trim().toLowerCase();

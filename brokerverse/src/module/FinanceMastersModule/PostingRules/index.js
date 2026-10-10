@@ -14,7 +14,7 @@ import { Toast } from "primereact/toast";
 import SvgDot from "../../../assets/icons/SvgDot";
 import DetailDialog from "../../../components/DetailDialog";
 import { openConfirm } from "../../../components/ConfirmDialog";
-import { ActivityLog, fromPostingRuleHistory } from "../../../components/ActivityLog";
+import { ActivityLog, fromPostingRuleHistory, humanize } from "../../../components/ActivityLog";
 import postingRulesService from "../../../services/postingRulesService";
 import DateField from "../../../components/DateField";
 import { formatDate } from "../../../utility/dateFormat";
@@ -22,6 +22,11 @@ import "./index.scss";
 
 const money = (n) => Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const today = () => new Date().toISOString().slice(0, 10);
+// a narration as the journal will read it: each {{field}} it fills in is shown as the field's name ("‹Insurer›")
+const readableNarration = (text) => (text
+  ? String(text).replace(/\{\{\s*([a-zA-Z_]+)\s*\}\}/g, (_, key) => ` ‹${humanize(key)}›`).replace(/\s+/g, " ").trim()
+  : "—");
+
 const blankLine = (amountKey) => ({ side: "Dr", accountType: "role", account: "", fallbackRole: null, amountKey, perParticipant: false, narration: "" });
 const editable = (l) => ({ side: l.side, accountType: l.accountType, account: l.account, fallbackRole: l.fallbackRole || null, amountKey: l.amountKey, perParticipant: !!l.perParticipant, narration: l.narration || "" });
 
@@ -258,16 +263,16 @@ const PostingRules = () => {
               {!edit && rule && (
                 <>
                   <div className="text-sm text-600 mb-2">
-                    {t("postingRules.narration")}: <code>{rule.narration || "—"}</code> · {t("postingRules.branch")}: {t(`postingRules.branchSource.${rule.branchSource}`)} · {t("postingRules.effectiveFrom")}: {formatDate(rule.effectiveFrom)}
+                    {t("postingRules.narration")}: {readableNarration(rule.narration)} · {t("postingRules.branch")}: {t(`postingRules.branchSource.${rule.branchSource}`)} · {t("postingRules.effectiveFrom")}: {formatDate(rule.effectiveFrom)}
                     {rule.changeNote ? ` · ${rule.changeNote}` : ""}
                   </div>
                   <DataTable value={rule.lines} size="small" dataKey="lineNo" className="posting-rules__lines">
                     <Column field="lineNo" header="#" style={{ width: "3rem" }} />
                     <Column header={t("postingRules.side")} style={{ width: "5rem" }} body={(l) => <Tag value={l.side} severity={l.side === "Dr" ? "success" : "info"} />} />
                     <Column header={t("postingRules.account")} body={accountLabel} />
-                    <Column field="amountKey" header={t("postingRules.amount")} style={{ width: "9rem" }} />
+                    <Column header={t("postingRules.amount")} style={{ width: "9rem" }} body={(l) => humanize(l.amountKey)} />
                     <Column header={t("postingRules.perParticipant")} style={{ width: "6rem" }} body={(l) => (l.perParticipant ? <i className="pi pi-users" /> : null)} />
-                    <Column field="narration" header={t("postingRules.lineNarration")} bodyClassName="posting-rules__narration" />
+                    <Column header={t("postingRules.lineNarration")} body={(l) => readableNarration(l.narration)} bodyClassName="posting-rules__narration" />
                   </DataTable>
                   <div className="flex gap-2 mt-3 flex-wrap align-items-center">
                     <Button label={t("postingRules.simulate")} icon="pi pi-play" className="p-button-outlined" onClick={() => runSimulation(null)} />

@@ -7,7 +7,8 @@ import { loadUser } from '../src/lib/auth.js';
 import { usersWithRoles } from '../src/modules/documents/common.js';
 import { setup } from './helpers.js';
 
-beforeAll(async () => { await setup(); });
+let ctx;
+beforeAll(async () => { ctx = await setup(); });
 afterAll(async () => { await pool.end(); });
 
 describe('Finance Manager (role inheritance)', () => {
@@ -21,6 +22,12 @@ describe('Finance Manager (role inheritance)', () => {
     expect(u.roles).toEqual(expect.arrayContaining(['accounting', 'accounting-manager']));
     expect(u.permissions).toEqual(expect.arrayContaining(['approve:period-end', 'write:receipts', 'read:journal-vouchers']));
     expect((await usersWithRoles(['accounting'])).map((x) => x.id)).toContain('usr_fm_t');
+    // the user record shows the role assigned, as the list does; the inherited one is listed apart
+    const view = (await ctx.api('get', '/users/usr_fm_t')).body.data;
+    expect(view.roles).toEqual(['accounting-manager']);
+    expect(view.effectiveRoles).toEqual(expect.arrayContaining(['accounting', 'accounting-manager']));
+    const listed = (await ctx.api('get', '/users?search=fm.test')).body.data.find((x) => x.userId === 'usr_fm_t');
+    expect(listed.roles).toEqual(view.roles);
   });
   it('a plain finance user does not get the approval', async () => {
     const fin = (await query("SELECT id FROM roles WHERE code = 'accounting'")).rows[0];

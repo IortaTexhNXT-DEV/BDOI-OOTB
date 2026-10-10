@@ -665,6 +665,8 @@ export async function riskMappingHistory(id) {
   return auditHistory('risk_mapping', m.id);
 }
 
+const NEW_VERSION_LABEL = 'New version created from the previous one';
+
 /**
  * The audit rows of a configuration record, newest first: the action (code and label), who (login name, display name
  * and roles) and the fields it changed (key, label, old and new value).
@@ -674,10 +676,21 @@ async function auditHistory(entity, id) {
     FROM audit_log a WHERE a.entity = $1 AND a.entity_id = $2 ORDER BY a.at DESC, a.id DESC LIMIT 200`, [entity, String(id)]);
   // the insurers of a template are saved as a list of their own
   const wrap = (v) => (Array.isArray(v) ? { insurers: v } : v);
-  const events = await toEvents(rows.map((r) => ({ ...r, before_data: wrap(r.before_data), after_data: wrap(r.after_data) })));
+  // a new version written before its source was kept with it is compared with the version it was copied from as it is now
+  const parents = new Map();
+  for (const r of rows) {
+    const parentId = r.action === 'new-version' && !r.before_data && r.after_data?.parentId;
+    if (parentId && !parents.has(parentId)) parents.set(parentId, await getTemplateRow({ id: parentId }).then(templateOut).catch(() => null));
+  }
+  const lobs = new Map((await many("SELECT code, name FROM master_records WHERE type_code = 'line-of-business'").catch(() => [])).map((l) => [String(l.code).toUpperCase(), l.name]));
+  const events = await toEvents(rows.map((r) => ({ ...r, before_data: wrap(r.before_data || (r.after_data?.parentId && parents.get(r.after_data.parentId)) || null),
+    after_data: wrap(r.after_data) })));
+  // bookkeeping of the record (ids, counts, the version number the version label repeats) is not a change people make
+  const SKIP = new Set(['configuration', 'sections', '_count', 'id', 'parentId', 'versionNumber', 'createdAt', 'createdBy', 'updatedAt', 'updatedBy']);
+  const lobName = (v) => (v ? lobs.get(String(v).toUpperCase()) || v : v);
   return events.map((e, i) => ({
-    id: rows[i].id, action: rows[i].action, actionLabel: actionText(rows[i].action), at: e.at, user: e.user.username, userName: e.user.displayName,
-    roles: e.user.roles || [], changes: e.changes.filter((c) => !['configuration', 'sections', '_count'].includes(c.key.split('.')[0]))
-      .map((c) => ({ field: c.key, label: c.label, from: c.from, to: c.to })),
+    id: rows[i].id, action: rows[i].action, actionLabel: rows[i].action === 'new-version' ? NEW_VERSION_LABEL : actionText(rows[i].action), at: e.at, user: e.user.username,
+    userName: e.user.displayName, roles: e.user.roles || [], changes: e.changes.filter((c) => !SKIP.has(c.key.split('.')[0]))
+      .map((c) => (c.key === 'lineOfBusiness' ? { field: c.key, label: c.label, from: lobName(c.from), to: lobName(c.to) } : { field: c.key, label: c.label, from: c.from, to: c.to })),
   }));
 }

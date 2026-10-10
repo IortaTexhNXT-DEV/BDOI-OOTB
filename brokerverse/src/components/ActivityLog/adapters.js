@@ -82,11 +82,14 @@ export const fromConfigurationHistory = (rows = []) =>
     }, i);
   });
 
-/** GET /posting-rules/:id/history. */
+/** GET /posting-rules/:id/history: a new version lists the version it replaced and the lines it added or removed. */
 export const fromPostingRuleHistory = (rows = []) =>
   rows.map((r, i) => toEntry({
     id: `${r.ruleId}-${r.at}-${i}`, at: r.at, actionCode: r.action, actionLabel: r.actionLabel, user: userOf(r.displayName, r.username, r.roles),
-    remarks: r.changeNote, changes: r.version ? [{ field: "version", label: field("version"), before: null, after: String(r.version) }] : [],
+    remarks: r.changeNote,
+    changes: Array.isArray(r.changes)
+      ? r.changes.map((c) => ({ field: c.field, label: c.label || humanize(c.field), before: c.from, after: c.to }))
+      : [r.version ? { field: "version", label: field("version"), before: null, after: String(r.version) } : null],
   }, i));
 
 const SOURCES = { manual: "manual", "close-run": "closeRun", "year-end": "yearEnd", "year-end-reversal": "yearEndReversal", job: "job" };

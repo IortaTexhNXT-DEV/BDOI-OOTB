@@ -4043,7 +4043,13 @@
     "property": "Property",
     "travel": "Travel",
     "marine": "Marine",
-    "rulesInForce": "Acceptance rules in force"
+    "rulesInForce": "Acceptance rules in force",
+    "cloneTitle": "New version of {{code}}",
+    "cloneMessage": "A draft version is created as a copy of this template.",
+    "copiedFrom": "Copied from",
+    "newVersion": "New version",
+    "openDrafts": "Draft versions already open",
+    "cloneAction": "Create draft version"
   },
   "productTemplateManager": {
     "createTemplate": "Create Template",
@@ -4173,7 +4179,7 @@
     "usage": "The IAR risk sections are used by the IAR prospect and quotation screens: only the active sections are offered, with their default rates. The other definitions are kept for reference and are not read by the quotation screens yet.",
     "usedBy": "Used by",
     "usedByIar": "IAR prospect and quotation",
-    "referenceOnly": "Reference only",
+    "referenceOnly": "Reference only (not read by the prospect or quotation screens)",
     "removeTitle": "Remove risk section",
     "removeMessage": "The risk section below is removed from the product.",
     "removeNote": "New prospects and quotations no longer offer it. Quotations that already use it keep it.",
@@ -4387,7 +4393,9 @@
     "specialTerms": "Special terms",
     "policies": "policies",
     "ofTargetValue": "{{percent}}% of target",
-    "ofTargetAria": "{{percent}} percent of target"
+    "ofTargetAria": "{{percent}} percent of target",
+    "policyCount_one": "{{count}} policy",
+    "policyCount_other": "{{count}} policies"
   },
   "documentManager": {
     "format": "Format",

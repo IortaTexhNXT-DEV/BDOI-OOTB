@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { Message } from "primereact/message";
 import { InputTextarea } from "primereact/inputtextarea";
+import KeyValueGrid from "../../../components/KeyValueGrid";
 
 const GenericRiskConfigPlaceholder = ({ mapping, onSave }) => {
   const { t } = useTranslation();
@@ -39,21 +40,10 @@ const GenericRiskConfigPlaceholder = ({ mapping, onSave }) => {
       <h3 className="mt-0">
         {t("productRiskMapping.configuration", "Configuration")}
       </h3>
-      <p className="text-color-secondary mb-3">
-        {t(
-          "productRiskMapping.genericHelp",
-          "Definition: {{definition}}. Configuration for this LOB will be defined here and integrated into create-lead later.",
-          { definition: mapping.definitionLabel }
-        )}
-      </p>
-      <Message
-        className="w-full mb-3"
-        severity="info"
-        text={t(
-          "productRiskMapping.notIntegrated",
-          "Not integrated into create-lead / quote flows yet."
-        )}
-      />
+      <KeyValueGrid columns={2} className="mb-3" items={[
+        { label: t("productRiskMapping.definition", "Definition"), value: mapping.definitionLabel },
+        { label: t("productRiskMapping.usedBy", "Used by"), value: t("productRiskMapping.referenceOnly", "Reference only") },
+      ]} />
       {localError ? (
         <Message className="w-full mb-3" severity="error" text={localError} />
       ) : null}
@@ -64,7 +54,8 @@ const GenericRiskConfigPlaceholder = ({ mapping, onSave }) => {
         <InputTextarea
           id="rm-config"
           className="w-full"
-          rows={8}
+          rows={14}
+          style={{ minHeight: "16rem", fontFamily: "monospace" }}
           value={configText}
           onChange={(e) => setConfigText(e.target.value)}
         />

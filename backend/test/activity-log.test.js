@@ -100,8 +100,11 @@ describe('configuration histories', () => {
     expect(v2.status).toBe(201);
     const h = await ctx.api('get', `/posting-rules/${v2.body.data.id}/history`);
     expect(h.status).toBe(200);
-    expect(h.body.data[0]).toMatchObject({ action: 'create-version', actionLabel: 'Create version', username: 'BrokerVerse', displayName: 'BrokerVerse Administrator',
+    const v = h.body.data[0].version;
+    expect(h.body.data[0]).toMatchObject({ action: 'create-version', actionLabel: `Version ${v} replaced version ${v - 1}`, username: 'BrokerVerse', displayName: 'BrokerVerse Administrator',
       changeNote: 'Same lines as a new version' });
+    // the same lines: only the version moves
+    expect(h.body.data[0].changes).toEqual([{ field: 'version', label: 'Version', from: String(v - 1), to: String(v) }]);
     expect(h.body.data[0].roles.length).toBeGreaterThan(0);
 
     const tpl = (await ctx.api('get', '/product-configurator/products')).body.data[0];
