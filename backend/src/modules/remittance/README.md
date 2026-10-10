@@ -30,8 +30,11 @@ Broker-billed premium: the client pays the broker (receipts module). A settlemen
 collected premium; when it is approved, `service.js` raises the insurer payment voucher in Disbursement for the
 collected premium, net of the commission and the output VAT on it, plus the EWT the insurer withholds on the
 commission (`receivables.commission_vat` / `commission_ewt`, pro rata to the premium collected; the invoice list shows
-them in `vat` and `wht`). The cheque approval there posts the payment journal. Settlement credit and debit notes post
-through the posting rule `remittance.settlement`.
+them in `vat` and `wht`). The remittance and settlement lines show the same net as that voucher: the Tax column of a
+broker-billed policy line is its commission VAT less the commission EWT as booked on its bills, the automated
+processing estimate deducts them too, and the commission rate of a line is shown on the net premium, as booked. The
+cheque approval there posts the payment journal. Settlement credit and debit notes post through the posting rule
+`remittance.settlement`.
 
 Gross remittance (`remittance/basis.js`, migration 0344; FGA.09): for an insurer and product whose basis is `gross`,
 the bill is booked Dr Premium Receivable / Cr Due to Insurer for the whole premium (no commission, no commission VAT or

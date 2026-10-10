@@ -62,3 +62,14 @@
     text-overflow: ellipsis;
   }
 }
+
+// wider cards for figures with long values (a band name, an amount in the millions)
+.bv-stat-cards.bv-stat-cards--wide {
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+
+  .bv-stat-value {
+    font-size: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

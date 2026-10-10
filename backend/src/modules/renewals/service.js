@@ -660,11 +660,14 @@ export const COVERAGE_KEYS = ['lossAndDamageCoverage', 'lossAndDamageCoverageRat
 /** Term fields of a non-motor renewal (travel, personal accident, fire, ...). */
 const TERM_KEYS = ['totalSumInsured', 'netPremium'];
 export const ACCESSORY_KEYS = ['aircon', 'stereo', 'magWheels', 'others', 'deductible', 'towing', 'repairLimit'];
-/** Risk / vehicle fields carried from the expiring term into the renewal quotation. */
+/**
+ * Risk / vehicle fields carried from the expiring term into the renewal quotation. The expiring fire premium schedule
+ * is not carried: it would price the renewal at the old premium, while a fire renewal is quoted on the wizard's net premium.
+ */
 const CARRY_KEYS = ['insuranceVehicleDetails', 'plateNumber', 'chassisNumber', 'motorNumber', 'mvFileNumber', 'certNumber', 'authenCode', 'vehicleType',
   'vehicleBrand', 'modelYear', 'vehicleModel', 'modelVariant', 'vehicleColor', 'seatingCapacity', 'mortgage', 'truckType', 'aluminum', 'airBag', 'TNVS',
   'idCard', 'idCardNumber', 'insurancePolicyType', 'accountCode', 'paymentType', 'installmentType', 'isCoInsurance', 'participantDetails', 'authorizedSignature',
-  'fireRiskDetails', 'firePremiumDetails'];
+  'fireRiskDetails'];
 /** The vehicle part of CARRY_KEYS, carried on motor renewals only. */
 const MOTOR_CARRY_KEYS = CARRY_KEYS.slice(0, CARRY_KEYS.indexOf('TNVS') + 1);
 const present = (v) => v !== undefined && v !== null && v !== '';

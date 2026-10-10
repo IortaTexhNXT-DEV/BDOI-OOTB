@@ -69,7 +69,10 @@
     "information": "Information",
     "validation": "Validation",
     "activate": "Activate",
-    "deactivate": "Deactivate"
+    "deactivate": "Deactivate",
+    "loadFailedTitle": "This record could not be loaded",
+    "notFoundTitle": "Record not found",
+    "notFoundText": "The record of this link does not exist or is no longer available. It may have been replaced; open it again from its list."
   },
   "login": {
     "title": "Welcome to {{name}}",
@@ -802,7 +805,12 @@
     "paymentLines": "Payment lines",
     "reference": "Reference",
     "description": "Description",
-    "noChequeIssued": "No cheque has been issued on this voucher"
+    "noChequeIssued": "No cheque has been issued on this voucher",
+    "nextStepIssue": "Next step: issue the cheque or transfer",
+    "nextStepIssueText": "Select the payment lines and the bank account of the payment; the voucher is then approved by another user.",
+    "issuePayment": "Issue payment",
+    "nextStepApprove": "Next step: approval by another user",
+    "nextStepApproveText": "Select the cheque below and approve it; the user who created or issued the voucher cannot approve it."
   },
   "renewal": {
     "renewals": "Renewals",
@@ -2504,7 +2512,8 @@
       "Commercial": "Commercial",
       "PUV": "Public utility vehicle (PUV)",
       "TNVS": "TNVS (ride-hailing)"
-    }
+    },
+    "fireServiceTax": "Fire Service Tax"
   },
   "commission": {
     "addCommissions": "Add Commissions",
@@ -3187,7 +3196,12 @@
     "vehiclePhotoFrontSide": "Front Side",
     "vehiclePhotoRearSide": "Rear Side",
     "vehiclePhotoInterior": "Interior Dashboard",
-    "expiringWithin5Days": "Expiring within 5 days",
+    "expiresInDays": "Renewal due: expires in {{count}} days",
+    "expiresInDays_one": "Renewal due: expires in {{count}} day",
+    "expiresInDays_other": "Renewal due: expires in {{count}} days",
+    "expiredDaysAgo": "Expired {{count}} days ago",
+    "expiredDaysAgo_one": "Expired {{count}} day ago",
+    "expiredDaysAgo_other": "Expired {{count}} days ago",
     "issued": "Issued",
     "clientId": "Client ID",
     "policyNumber": "Policy Number",
@@ -3276,7 +3290,16 @@
     "valueAddedTaxRate": "Value Added Tax ({{rate}})",
     "localGovernmentTaxRate": "Local Government Tax ({{rate}})",
     "directBill": "Direct bill",
-    "directBillDescription": "The client pays the premium directly to the insurer. No premium payment is collected by the broker; the broker bills the insurer for its commission."
+    "directBillDescription": "The client pays the premium directly to the insurer. No premium payment is collected by the broker; the broker bills the insurer for its commission.",
+    "nextStepCollect": "Next step: collect the premium",
+    "nextStepCollectText": "The policy is booked and its bill {{bill}} is open. Record the receipt when the client pays.",
+    "recordReceipt": "Record receipt",
+    "renewedTitle": "Renewed",
+    "renewedText": "This policy was renewed; the next term is a policy of its own.",
+    "openRenewalTerm": "Open the renewal term",
+    "renewalOfTitle": "Renewal term",
+    "renewalOfText": "This policy renews an expiring term of the same client.",
+    "openExpiringTerm": "Open the expiring term"
   },
   "uploadPolicy": {
     "title": "Prospects",
@@ -4726,7 +4749,8 @@
     "quoteSentToSuccess": "Quote sent to {{sentTo}} successfully!",
     "errorSendingQuoteForApproval": "Error sending quote for approval",
     "notIncluded": "Not included",
-    "pageTitle": "Quotation Slip"
+    "pageTitle": "Quotation Slip",
+    "fst": "FST"
   },
   "policyList": {
     "title": "Policies",
@@ -5314,7 +5338,10 @@
     "leadInsurer": "Lead Insurer",
     "coInsurer": "Co-Insurer",
     "total": "TOTAL",
-    "outstandingNote": "* Outstanding amount shown above is the total across all insurers."
+    "outstandingNote": "* Outstanding amount shown above is the total across all insurers.",
+    "nextStepTitle": "Next step: record the premium received",
+    "nextStepText": "{{amount}} is outstanding on {{bill}}. Record the receipt when the client pays; it is applied to this bill.",
+    "recordReceipt": "Record receipt"
   },
   "agingReport": {
     "backToCollections": "Back to Collections",
@@ -5531,7 +5558,13 @@
     "partiallyPaid": "Partially Paid",
     "committed": "Committed",
     "escalated": "Escalated",
-    "sendPaymentRemindersNow": "Send Payment Reminders Now"
+    "sendPaymentRemindersNow": "Send Payment Reminders Now",
+    "title": "Collections",
+    "kpiOutstanding": "Outstanding",
+    "kpiItems": "{{count}} items",
+    "kpiItems_one": "{{count}} item",
+    "kpiItems_other": "{{count}} items",
+    "kpiCollected": "Collected this month"
   },
   "iarLead": {
     "lead": "Prospect",
@@ -6614,7 +6647,10 @@
       "motorNumber": "Motor number",
       "plateNumber": "Plate number",
       "fromQuote": "From the quotation if blank",
-      "notCaptured": "Not captured yet"
+      "notCaptured": "Not captured yet",
+      "idCardImage": "ID card image",
+      "idCardImageAttached": "ID card image on file",
+      "selectIdType": "Select the ID type"
     },
     "journey": {
       "title": "Placement journey",
@@ -10303,32 +10339,19 @@
     },
     "cancellation": {
       "title": "Policy Cancellation",
-      "intro": "The return premium is computed from the days left: pro-rata when the insurer cancels, the short-period scale when the insured cancels, flat from inception.",
+      "intro": "Computes the return premium of one policy from the days left: pro-rata when the insurer cancels, the short-period rates (Master > Short-Period Rates) when the insured cancels, flat from inception.",
       "effectiveDate": "Cancellation date",
       "reason": "Reason",
       "method": "Return premium method",
       "type": "Cancellation",
       "partialPercent": "Part cancelled (% of the premium)",
       "partialPremium": "Or net premium of the part cancelled",
-      "reasonHelp": "Initiated by the {{by}}; method: {{method}}.",
       "compute": "Compute return premium",
-      "period": "Policy period (days)",
       "inForce": "Days in force",
-      "daysLeft": "Days left",
-      "basePremium": "Net premium cancelled",
-      "retained": "Kept by the insurer",
+      "retained": "Premium kept",
       "returnNet": "Return net premium",
-      "vat": "VAT returned",
-      "dst": "Documentary stamp tax returned",
-      "lgt": "Local government tax returned",
-      "grossReturn": "Return premium",
-      "commission": "Commission taken back",
       "create": "Create cancellation endorsement",
       "created": "Cancellation endorsement {{number}} created",
-      "scale": "Short-period scale",
-      "band": "Band",
-      "upToDays": "Up to (days in force)",
-      "retainedPercent": "Premium kept",
       "by": {
         "insured": "insured",
         "insurer": "insurer"
@@ -10343,7 +10366,24 @@
       "types": {
         "FULL": "Whole policy",
         "PARTIAL": "Part of the cover"
-      }
+      },
+      "policyHint": "Policy number or insured",
+      "fromReason": "From the reason ({{method}})",
+      "resultTitle": "Return premium of {{number}}",
+      "periodLine": "Policy {{from}} - {{to}}, cancelled on {{on}}",
+      "daysLeftNote": "{{count}} days left",
+      "daysLeftNote_one": "{{count}} day left",
+      "daysLeftNote_other": "{{count}} days left",
+      "bandApplied": "Band applied",
+      "keptPercent": "Kept by the insurer (%)",
+      "ofPremium": "of {{amount}} net premium",
+      "taxesReturned": "Taxes returned",
+      "taxesNote": "VAT {{vat}}, LGT {{lgt}}",
+      "refundClient": "Refund to the client",
+      "dueFromInsurer": "Due from the insurer",
+      "commissionNote": "net of {{amount}} commission reversed",
+      "scaleLink": "Short-period rates (Master)",
+      "grossBasisNote": "premium remitted gross: the whole return"
     },
     "pdc": {
       "title": "Post-Dated Cheques",
@@ -10385,7 +10425,10 @@
       "cancelReason": "Why is the registration cancelled?",
       "cancelDone": "Cheque registration cancelled",
       "against": "Against",
-      "billNumber": "Bill number"
+      "billNumber": "Bill number",
+      "chequesCount": "{{count}} cheques",
+      "chequesCount_one": "{{count}} cheque",
+      "chequesCount_other": "{{count}} cheques"
     },
     "claimPay": {
       "title": "Claims Settlements",
@@ -10563,7 +10606,10 @@
       "alreadyPosted": "Already posted",
       "journalDate": "Journal date",
       "nothingDue": "Nothing to depreciate for this period",
-      "inServiceBeforeAcquired": "The asset cannot be in service before it was acquired"
+      "inServiceBeforeAcquired": "The asset cannot be in service before it was acquired",
+      "assetsCount": "{{count}} assets",
+      "assetsCount_one": "{{count}} asset",
+      "assetsCount_other": "{{count}} assets"
     },
     "required": "Required",
     "amountAboveZero": "Enter an amount above zero",

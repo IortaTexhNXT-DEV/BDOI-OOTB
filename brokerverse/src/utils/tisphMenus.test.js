@@ -45,6 +45,8 @@ describe("TISPH roles (RBAC v4): menus", () => {
     expect(isPathAllowed("/accounts/bank-reconciliation", menuList, ["tis-ccd-recon"])).toBe(true);
     expect(isPathAllowed("/accounts/bank-reconciliation", menuList, ["tis-ccd-pdu"])).toBe(false);
     expect(isPathAllowed("/agent/policy", menuList, ["tis-ccd-bp"])).toBe(false);
+    // the insurer's claim settlement funds are banked by Cash Control
+    expect(isPathAllowed("/accounts/claims-settlements", menuList, ["tis-ccd-bp"])).toBe(true);
     expect(["/accounts/journalvoucher", "/accounts/period-end/close", "/master/configuration/audit-trail"].filter((p) => !isPathAllowed(p, menuList, ["tis-finance"]))).toEqual([]);
   });
 

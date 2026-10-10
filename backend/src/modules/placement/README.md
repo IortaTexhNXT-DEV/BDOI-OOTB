@@ -85,6 +85,7 @@ optional or skip; every TISPH line requires the placement slip, Motor the quotat
 - The check cannot be confirmed: the same user recorded the e-policy (maker-checker), or `GET /placements/:id/check`
   lists a difference beyond the tolerance.
 - The policy cannot be booked: the placement is not `checked`, the KYC items of `policy.kyc_required_fields` are
-  missing, or the user lacks `write:policies`.
+  missing, or the user lacks `write:policies`. The booking dialog asks for the KYC items the client file lacks (ID type,
+  ID number, the ID card image uploaded with the booking); a renewal takes them from the expiring term.
 - The e-mail to an insurer or the schedule to the client did not arrive: see Master > E-mail Outbox (`email_outbox`,
   entity `placement` or `policy`), which also says whether e-mail sending is configured.

@@ -96,6 +96,19 @@ describe('remittances and approvals', () => {
   });
 });
 
+describe('commission taxes on a remittance', () => {
+  it('a policy line deducts the commission VAT less the EWT booked on its bills, as the insurer voucher does', async () => {
+    const pol = (await pool.query(`INSERT INTO policies(policy_number, client_id, insurance_company_id, status, inception_date, expiry_date, premium_total, net_premium, commission_amount)
+      VALUES ('POL-T-CTAX', (SELECT id FROM clients LIMIT 1), (SELECT id FROM insurance_companies WHERE code = 'MALAYAN'), 'active', current_date, current_date + 365, 12525, 10000, 1800)
+      RETURNING id, client_id`)).rows[0];
+    await pool.query(`INSERT INTO receivables(bill_number, policy_id, client_id, amount, balance, due_date, commission_amount, commission_vat, commission_ewt)
+      VALUES ('INV-T-CTAX', $1, $2, 12525, 0, current_date, 1800, 216, 180)`, [pol.id, pol.client_id]);
+    const c = await ctx.api('post', '/remittance/remittances').send({ insurerCode: 'MALAYAN', period: '2026-10', lines: [{ policyId: pol.id }] });
+    expect(c.status).toBe(201);
+    expect(c.body.data).toMatchObject({ grossAmount: 12525, commission: 1800, tax: 36, netAmount: 10689 });
+  });
+});
+
 describe('settlement to money out', () => {
   it('an approved settlement raises the insurer payment voucher for the collected premium', async () => {
     const { rows: [pol] } = await pool.query(`SELECT p.id, p.policy_number FROM receipt_applications a JOIN receivables r ON r.id = a.receivable_id JOIN policies p ON p.id = r.policy_id

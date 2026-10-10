@@ -98,6 +98,8 @@ describe('cancellation return premium', () => {
     expect(sp.taxes.dst).toBe(0);
     expect(sp.grossReturn).toBe(r2(8000 + sp.taxes.vat + sp.taxes.lgt + sp.taxes.fst + sp.taxes.other));
     expect(sp.commissionReversed).toBe(1200);
+    // the insurer gives back the return less the commission taken back and its VAT, plus the EWT withheld on it (net basis)
+    expect(sp).toMatchObject({ remittanceBasis: 'net', insurerReturn: r2(sp.grossReturn - 1200 - 1200 * 0.12 + 1200 * 0.1) });
     const pr = (await q({ reason: 'NON_PAYMENT' })).body.data;
     expect(pr).toMatchObject({ method: 'pro-rata', returnNetPremium: r2((10000 * 355) / 365) });
     const flat = (await q({ reason: 'NOT_TAKEN_UP' })).body.data;
@@ -115,7 +117,7 @@ describe('cancellation return premium', () => {
     expect(e.status).toBe(201);
     expect(e.body.premiumDelta).toBe(-quote.grossReturn);
     expect(e.body).toMatchObject({ cancellationMethod: 'pro-rata', cancellationReason: 'INSURER_DECISION' });
-    const c = await ctx.api('post', '/endorsements/complete-endorsement').send({ endorsementId: e.body.endorsementId });
+    const c = await ctx.as('sales')('post', '/endorsements/complete-endorsement').send({ endorsementId: e.body.endorsementId });
     expect(c.status).toBe(200);
     expect((await one('SELECT status FROM policies WHERE id = $1', [m.policy.id])).status).toBe('cancelled');
     const after = await one('SELECT balance FROM receivables WHERE id = $1', [rcv.id]);
@@ -133,7 +135,7 @@ describe('cancellation return premium', () => {
       partialPercent: 40, cancellationReason: 'INSURED_REQUEST', effectiveDate: asOf });
     expect(e.status).toBe(201);
     expect(e.body.returnCalculation.returnNetPremium).toBe(3200);
-    const c = await ctx.api('post', '/endorsements/complete-endorsement').send({ endorsementId: e.body.endorsementId });
+    const c = await ctx.as('sales')('post', '/endorsements/complete-endorsement').send({ endorsementId: e.body.endorsementId });
     expect(c.body.status).toBe('Completed');
     expect((await one('SELECT status FROM policies WHERE id = $1', [m.policy.id])).status).toBe('active');
   });
@@ -151,7 +153,7 @@ describe('cancellation return premium', () => {
       cancellationReason: 'NON_PAYMENT', effectiveDate: asOf });
     expect(e.status).toBe(201);
     expect(e.body.premiumDelta).toBe(-expected);
-    const c = await ctx.api('post', '/endorsements/complete-endorsement').send({ endorsementId: e.body.endorsementId });
+    const c = await ctx.as('sales')('post', '/endorsements/complete-endorsement').send({ endorsementId: e.body.endorsementId });
     expect(c.status).toBe(200);
     expect((await one('SELECT status FROM policies WHERE id = $1', [m.policy.id])).status).toBe('cancelled');
     expect(Number((await one('SELECT balance FROM receivables WHERE id = $1', [rcv.id])).balance)).toBe(r2(610.4 - expected));
@@ -281,6 +283,17 @@ describe('claim document checklist', () => {
     expect(q.summary.missing).toBeGreaterThanOrEqual(1);
     expect((await ctx.as('claims')('get', '/claim-documents/awaiting?stage=ready')).body.data.rows.map((x) => x.claimId)).not.toContain(claimId);
     expect((await ctx.as('claims')('get', '/claim-documents/awaiting?stage=bad')).status).toBe(400);
+  });
+  it('applies a document of a cause of loss to the claims with that cause only', async () => {
+    await query(`INSERT INTO master_records(type_code, code, name, data, status, created_by) VALUES ('claim-document-requirement', 'T-HPG', 'PNP-HPG alarm sheet',
+      '{"code": "T-HPG", "lineOfBusiness": "MOTOR", "claimType": "Theft", "documentName": "PNP-HPG alarm sheet", "required": true, "sortOrder": 900}', 'active', 'test')`);
+    const add = async (number, cause) => (await one(`INSERT INTO claims(claim_number, policy_id, client_id, status, loss_date, lob, claim_type, loss_type)
+      VALUES ($1, $2, $3, 'registered', current_date - 3, 'MOTOR', 'Motor', $4) RETURNING id`, [number, m.policy.id, m.client.id, cause])).id;
+    const names = async (id) => (await ctx.as('claims')('get', `/claim-documents/claims/${id}`)).body.data.items.map((i) => i.documentName);
+    expect(await names(await add('CLM-T-DOC4', 'Theft'))).toContain('PNP-HPG alarm sheet');
+    const collision = await names(await add('CLM-T-DOC5', 'Collision'));
+    expect(collision).toContain('Claim Form');
+    expect(collision).not.toContain('PNP-HPG alarm sheet');
   });
   it('refuses the submission to the insurer while a required document is missing', async () => {
     const r = await ctx.as('claims')('post', `/claim-documents/claims/${claimId}/submit-to-insurer`).send({});

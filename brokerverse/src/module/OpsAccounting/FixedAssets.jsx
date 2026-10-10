@@ -9,6 +9,7 @@ import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
+import StatCards from "../../components/StatCards";
 import service from "../../services/opsAccountingService";
 import { Field, OpsTag, PageHeader, blank, date, isoOf, money, numericColumn, showError, showSuccess, useFieldErrors } from "./common";
 import { DisposeAssetDialog } from "./AssetDisposals";
@@ -73,12 +74,12 @@ export const AssetRegister = () => {
         <Button icon="pi pi-plus" label={t("opsAcc.fa.newAsset")} onClick={() => openForm({ name: "", classCode: classes[0]?.code || null, acquisitionDate: new Date(), inServiceDate: null, cost: null })} />
       </PageHeader>
       {data && (
-        <div className="flex gap-4 mb-3">
-          <span>{t("opsAcc.fa.assets")}: <b>{data.summary.assets}</b></span>
-          <span>{t("opsAcc.fa.cost")}: <b>{money(data.summary.cost)}</b></span>
-          <span>{t("opsAcc.fa.accumulated")}: <b>{money(data.summary.accumulatedDepreciation)}</b></span>
-          <span>{t("opsAcc.fa.bookValue")}: <b>{money(data.summary.bookValue)}</b></span>
-        </div>
+        <StatCards items={[
+          { key: "assets", label: t("opsAcc.fa.assets"), value: data.summary.assets },
+          { key: "cost", label: t("opsAcc.fa.cost"), value: money(data.summary.cost) },
+          { key: "accumulated", label: t("opsAcc.fa.accumulated"), value: money(data.summary.accumulatedDepreciation) },
+          { key: "bookValue", label: t("opsAcc.fa.bookValue"), value: money(data.summary.bookValue) },
+        ]} />
       )}
       <div className="pe-card">
         <div className="flex gap-2 mb-2">
@@ -172,11 +173,11 @@ export const DepreciationRun = () => {
         <Button icon="pi pi-check" label={t("opsAcc.fa.post")} disabled={!data?.due.length} onClick={run} />
       </PageHeader>
       {data && (
-        <div className="flex gap-4 mb-3">
-          <span>{t("opsAcc.fa.due")}: <b>{money(data.total)}</b> ({data.due.length})</span>
-          {data.posted && <span>{t("opsAcc.fa.alreadyPosted")}: <b>{money(data.posted.amount)}</b> ({data.posted.assets}) · {data.posted.journals}</span>}
-          <span>{t("opsAcc.fa.journalDate")}: <b>{date(data.date)}</b></span>
-        </div>
+        <StatCards items={[
+          { key: "due", label: t("opsAcc.fa.due"), value: money(data.total), note: t("opsAcc.fa.assetsCount", { count: data.due.length }) },
+          ...(data.posted ? [{ key: "posted", label: t("opsAcc.fa.alreadyPosted"), value: money(data.posted.amount), note: `${t("opsAcc.fa.assetsCount", { count: data.posted.assets })} · ${data.posted.journals}` }] : []),
+          { key: "date", label: t("opsAcc.fa.journalDate"), value: date(data.date) },
+        ]} />
       )}
       <div className="pe-card">
         <DataTable value={data?.due || []} dataKey="assetId" size="small" stripedRows emptyMessage={t("opsAcc.fa.nothingDue")}>

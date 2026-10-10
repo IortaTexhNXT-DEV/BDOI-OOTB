@@ -115,7 +115,23 @@ export async function createQuote(body, userId, db = null) {
     return r.rows[0].id;
   };
   const id = db ? await run(db) : await withTransaction(run);
-  return getQuoteRow(id, db);
+  const q = await getQuoteRow(id, db);
+  await notifyReferral(q);
+  return q;
+}
+
+/**
+ * A quotation newly referred by an acceptance rule waits for a holder of the rule's authority role: tell each of them
+ * (My Work notifications), since nothing else brings the referral to their attention.
+ */
+async function notifyReferral(q, before = null) {
+  const ref = q.doc?.underwritingReferral;
+  if (ref?.status !== 'pending' || before?.doc?.underwritingReferral?.status === 'pending') return;
+  for (const u of await usersWithRoles(ref.authorityRoles || [])) {
+    await notify({ userId: u.id, type: 'approval', title: 'Quotation referred for underwriting',
+      message: `Quotation ${q.quote_number} is referred (${(ref.reasons || ref.ruleCodes || []).join('; ')}): approve or decline the referral`,
+      link: `/agent/quotedetailview/${q.id}`, entity: 'quotation', entityId: q.id });
+  }
 }
 
 export async function updateQuote(id, body, userId) {
@@ -140,7 +156,9 @@ export async function updateQuote(id, body, userId) {
     if (parts.length) await writeParticipants(c, 'quote', before.id, parts, quoteTotals(b), { userId, commissionRate: b.commissionRate });
     else await c.query("DELETE FROM risk_participants WHERE entity_type = 'quote' AND entity_id = $1", [before.id]);
   });
-  return { before, after: await getQuoteRow(before.id) };
+  const after = await getQuoteRow(before.id);
+  await notifyReferral(after, before);
+  return { before, after };
 }
 
 /** Drafts are removed; rejected / dropped quotations are soft-deleted. */

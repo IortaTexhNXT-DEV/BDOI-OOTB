@@ -16,6 +16,8 @@
  * returned premium, those of endorsements.cancellation_returned_taxes only (documentary stamp tax is not refundable by
  * default); the commission taken back is the policy's commission rate on the returned premium. The endorsement carries
  * the figures; completing it posts them through the return premium routine (posting rule policy.cancel).
+ * insurerReturn is what the insurer gives back: on premium remitted gross (remittance.basis_rules) the whole return,
+ * otherwise the return less the commission taken back and its output VAT, plus the EWT the insurer withheld on it.
  */
 import { badRequest, conflict } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
@@ -24,6 +26,8 @@ import { num, round2 } from '../../lib/money.js';
 import { quotationCharges } from '../premium-charges/service.js';
 import { resolveCommissionRate } from '../commission-rates/resolve.js';
 import { activeRecord, activeRecords } from '../ops-masters/records.js';
+import { policyBasis } from '../remittance/basis.js';
+import { commissionTaxSetup, commissionTaxes, ratesOf } from '../accounting/lib/commissionTax.js';
 
 export const METHODS = ['pro-rata', 'short-period', 'flat', 'manual'];
 const PARTIAL = new Set(['PARTIAL', 'PRO_RATA_PARTIAL']);
@@ -127,12 +131,15 @@ export async function computeReturn(db, policy, input = {}) {
   const booked = num(policy.commission_amount) > 0 && policyBase > 0 ? num(policy.commission_amount) / policyBase : null;
   const rate = booked ?? (await resolveCommissionRate({ insurerId: policy.insurance_company_id, productId: policy.product_id, lob: policy.lob, date: inception, db })).rate;
   const commission = round2(Math.min(returnNet * (rate || 0), returnNet));
+  const basis = policy.id ? await policyBasis(db, policy) : 'net';
+  const ctax = basis === 'gross' ? commissionTaxes(0) : commissionTaxes(commission, ratesOf(await commissionTaxSetup(db)));
+  const insurerReturn = basis === 'gross' ? grossReturn : round2(grossReturn - commission - ctax.commission_vat + ctax.commission_ewt);
   return {
     policyId: policy.id, policyNumber: policy.policy_number, inceptionDate: inception, expiryDate: expiry, effectiveDate: effective < inception ? inception : effective,
     totalDays, daysInForce, daysLeft, reason: { code: reason.code, name: reason.name, initiatedBy }, method, cancellationType: partial ? type : 'FULL', partial,
     policyNetPremium: policyBase, tariffOnly, basePremium: base, factor: factor === null ? null : Math.round(factor * 1e6) / 1e6, shortPeriodBand: band,
     returnNetPremium: returnNet, taxes, grossReturn, commissionRate: Math.round((rate || 0) * 1e6) / 1e6, commissionReversed: commission,
-    retainedNetPremium: round2(base - returnNet), explanation,
+    retainedNetPremium: round2(base - returnNet), remittanceBasis: basis, insurerReturn, explanation,
   };
 }
 

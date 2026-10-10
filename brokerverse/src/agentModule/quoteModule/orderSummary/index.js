@@ -159,6 +159,7 @@ const toPremiumFields = (breakdown) => {
     valueAddedTax: fixed(breakdown.valueAddedTax),
     documentaryStampTax: fixed(breakdown.documentaryStampTax),
     localGovernmentTax: fixed(breakdown.localGovernmentTax),
+    fireServiceTax: fixed(breakdown.fireServiceTax),
     accountPremiumOthers: fixed(breakdown.accountPremiumOthers),
     NCD: fixed(breakdown.NCD),
     grossPremium: fixed(breakdown.grossPremium),
@@ -178,6 +179,7 @@ const getFormValues = (quotationData, productConfigurator, settingsTaxRates) => 
         authorizedSignature: quotationData.authorizedSignature || "",
         documentaryStampTax: quotationData.documentaryStampTax,
         localGovtTax: quotationData.localGovernmentTax,
+        fireServiceTax: quotationData.fireServiceTax || "0.00",
         discount: quotationData.discount || "0.00",
         ncd: quotationData.NCD || quotationData.ncd || "0.00",
         grossPremium: quotationData.grossPremium,
@@ -201,6 +203,7 @@ const getFormValues = (quotationData, productConfigurator, settingsTaxRates) => 
       authorizedSignature: quotationData.authorizedSignature || "",
       documentaryStampTax: premiumValues.documentaryStampTax,
       localGovtTax: premiumValues.localGovernmentTax,
+      fireServiceTax: premiumValues.fireServiceTax || "0.00",
       discount: quotationData.discount || "0.00",
       ncd: quotationData.NCD || quotationData.ncd || "0.00",
       grossPremium: premiumValues.grossPremium,
@@ -663,11 +666,12 @@ const OrderSummary = ({ action, flow }) => {
     const vatNum = parseFloat(values.valueAddedTax) || 0;
     const dstNum = parseFloat(values.documentaryStampTax) || 0;
     const lgtNum = parseFloat(values.localGovtTax) || 0;
+    const fstNum = parseFloat(values.fireServiceTax) || 0;
     const othersNum = parseFloat(values.others) || 0;
     const discountNum = parseFloat(values.discount) || 0;
 
     const calculatedTotal =
-      netPremiumNum + vatNum + dstNum + lgtNum + othersNum + ctplAmount - discountNum;
+      netPremiumNum + vatNum + dstNum + lgtNum + fstNum + othersNum + ctplAmount - discountNum;
     const difference = Math.abs(grossPremiumNum - calculatedTotal);
 
     if (difference > 0.01 && grossPremiumNum > 0) {
@@ -717,12 +721,13 @@ const OrderSummary = ({ action, flow }) => {
   // CTPL: Insurance Commission tariff amount inclusive of taxes and fees, added to the gross and never discounted
   const ctplAmount = parseAmount(serverPremium?.ctplCoveragePremium ?? quotationData?.ctplCoveragePremium);
 
-  // Pre-discount base: net + taxes + others (customer discount comes out of broker)
+  // Pre-discount base: net + taxes (fire service tax on fire lines) + others (customer discount comes out of broker)
   const getPremiumBase = (values = formik.values) =>
     parseAmount(values.netPremium) +
     parseAmount(values.valueAddedTax) +
     parseAmount(values.documentaryStampTax) +
     parseAmount(values.localGovtTax) +
+    parseAmount(values.fireServiceTax) +
     parseAmount(values.others);
 
   const applyDiscountPercent = (discountPercent) => {
@@ -845,6 +850,15 @@ const OrderSummary = ({ action, flow }) => {
                   }
                 />
               </div>
+              {parseAmount(formik.values.fireServiceTax) > 0 && (
+                <div class="col-12 mt-2">
+                  <CalculaitionTextInputs
+                    label={t("agent.fireServiceTax")}
+                    value={formik.values.fireServiceTax}
+                    disabled={true}
+                  />
+                </div>
+              )}
               {ctplAmount > 0 && (
                 <div class="col-12 mt-2">
                   <CalculaitionTextInputs

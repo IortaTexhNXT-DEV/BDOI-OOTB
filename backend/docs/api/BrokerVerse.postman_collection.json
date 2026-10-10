@@ -16739,7 +16739,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"method\": \"short-period\",\n    \"totalDays\": 365,\n    \"daysInForce\": 120,\n    \"daysLeft\": 245,\n    \"returnNetPremium\": 5000,\n    \"taxes\": {\n      \"vat\": 600,\n      \"dst\": 0,\n      \"lgt\": 37.5\n    },\n    \"grossReturn\": 5637.5,\n    \"commissionReversed\": 750\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"method\": \"short-period\",\n    \"totalDays\": 365,\n    \"daysInForce\": 120,\n    \"daysLeft\": 245,\n    \"returnNetPremium\": 5000,\n    \"taxes\": {\n      \"vat\": 600,\n      \"dst\": 0,\n      \"lgt\": 37.5\n    },\n    \"grossReturn\": 5637.5,\n    \"commissionReversed\": 750,\n    \"remittanceBasis\": \"net\",\n    \"insurerReturn\": 4872.5\n  }\n}"
             }
           ]
         },
@@ -32116,7 +32116,7 @@
           ]
         },
         {
-          "name": "Complete the endorsement: apply changes and premium delta to the policy, bill a positive delta, notify the policy owner",
+          "name": "Complete the endorsement: apply changes and premium delta to the policy, bill a positive delta, notify the policy owner; a cancellation or return premium is completed by another user holding approve:policies (endorsements.return_approval)",
           "request": {
             "method": "POST",
             "header": [
@@ -32135,7 +32135,7 @@
                 "complete-endorsement"
               ]
             },
-            "description": "Complete the endorsement: apply changes and premium delta to the policy, bill a positive delta, notify the policy owner\n\nFront-end touchpoint: Operations > Policy > Endorsement > Upload endorsement > Submit\n\nAccess: write:endorsements",
+            "description": "Complete the endorsement: apply changes and premium delta to the policy, bill a positive delta, notify the policy owner; a cancellation or return premium is completed by another user holding approve:policies (endorsements.return_approval)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Upload endorsement > Submit\n\nAccess: write:endorsements",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"endorsementId\": \"end_1\",\n  \"policyNumber\": \"POL-2026-00001\",\n  \"endorsementNumber\": \"INS-END-778\",\n  \"issuedDate\": \"2026-09-28\",\n  \"expiryDate\": \"2027-09-28\",\n  \"documentKey\": \"endorsement/abc.pdf\"\n}",
@@ -32167,7 +32167,7 @@
                     "complete-endorsement"
                   ]
                 },
-                "description": "Complete the endorsement: apply changes and premium delta to the policy, bill a positive delta, notify the policy owner\n\nFront-end touchpoint: Operations > Policy > Endorsement > Upload endorsement > Submit\n\nAccess: write:endorsements",
+                "description": "Complete the endorsement: apply changes and premium delta to the policy, bill a positive delta, notify the policy owner; a cancellation or return premium is completed by another user holding approve:policies (endorsements.return_approval)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Upload endorsement > Submit\n\nAccess: write:endorsements",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"endorsementId\": \"end_1\",\n  \"policyNumber\": \"POL-2026-00001\",\n  \"endorsementNumber\": \"INS-END-778\",\n  \"issuedDate\": \"2026-09-28\",\n  \"expiryDate\": \"2027-09-28\",\n  \"documentKey\": \"endorsement/abc.pdf\"\n}",
@@ -32410,7 +32410,7 @@
           ]
         },
         {
-          "name": "Initiate policy cancellation (InitiateCancel)",
+          "name": "Initiate policy cancellation: notice to the customer and request to the insurer (InitiateCancel)",
           "request": {
             "method": "POST",
             "header": [
@@ -32437,7 +32437,7 @@
                 }
               ]
             },
-            "description": "Initiate policy cancellation (InitiateCancel)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Summary\n\nAccess: write:endorsements",
+            "description": "Initiate policy cancellation: notice to the customer and request to the insurer (InitiateCancel)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Summary\n\nAccess: write:endorsements",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"sentBy\": \"agent\"\n}",
@@ -32477,7 +32477,7 @@
                     }
                   ]
                 },
-                "description": "Initiate policy cancellation (InitiateCancel)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Summary\n\nAccess: write:endorsements",
+                "description": "Initiate policy cancellation: notice to the customer and request to the insurer (InitiateCancel)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Summary\n\nAccess: write:endorsements",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"sentBy\": \"agent\"\n}",
@@ -32498,12 +32498,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Endorsement sent\",\n  \"endorsement\": {\n    \"endorsementId\": \"end_1\",\n    \"endorsementNumber\": \"END-2026-00001\",\n    \"policyId\": \"pol_1\",\n    \"policyNumber\": \"POL-2026-00001\",\n    \"status\": \"InitiateCancel\",\n    \"endorsementTypeIds\": [\n      1\n    ],\n    \"premiumDelta\": 0\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Endorsement sent\",\n  \"emailedTo\": \"maria.santos@example.ph\",\n  \"insurerEmailedTo\": \"uw@malayan.example\",\n  \"endorsement\": {\n    \"endorsementId\": \"end_1\",\n    \"endorsementNumber\": \"END-2026-00001\",\n    \"policyId\": \"pol_1\",\n    \"policyNumber\": \"POL-2026-00001\",\n    \"status\": \"InitiateCancel\",\n    \"endorsementTypeIds\": [\n      1\n    ],\n    \"premiumDelta\": 0\n  }\n}"
             }
           ]
         },
         {
-          "name": "Send the endorsement to the customer (PendingCustomer)",
+          "name": "Send the endorsement to the customer and the request to the insurer (PendingCustomer)",
           "request": {
             "method": "POST",
             "header": [
@@ -32530,7 +32530,7 @@
                 }
               ]
             },
-            "description": "Send the endorsement to the customer (PendingCustomer)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Summary\n\nAccess: write:endorsements",
+            "description": "Send the endorsement to the customer and the request to the insurer (PendingCustomer)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Summary\n\nAccess: write:endorsements",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"sentBy\": \"agent\"\n}",
@@ -32570,7 +32570,7 @@
                     }
                   ]
                 },
-                "description": "Send the endorsement to the customer (PendingCustomer)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Summary\n\nAccess: write:endorsements",
+                "description": "Send the endorsement to the customer and the request to the insurer (PendingCustomer)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Summary\n\nAccess: write:endorsements",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"sentBy\": \"agent\"\n}",
@@ -32591,7 +32591,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Endorsement sent\",\n  \"endorsement\": {\n    \"endorsementId\": \"end_1\",\n    \"endorsementNumber\": \"END-2026-00001\",\n    \"policyId\": \"pol_1\",\n    \"policyNumber\": \"POL-2026-00001\",\n    \"status\": \"PendingCustomer\",\n    \"endorsementTypeIds\": [\n      1\n    ],\n    \"premiumDelta\": 0\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Endorsement sent\",\n  \"emailedTo\": \"maria.santos@example.ph\",\n  \"insurerEmailedTo\": \"uw@malayan.example\",\n  \"endorsement\": {\n    \"endorsementId\": \"end_1\",\n    \"endorsementNumber\": \"END-2026-00001\",\n    \"policyId\": \"pol_1\",\n    \"policyNumber\": \"POL-2026-00001\",\n    \"status\": \"PendingCustomer\",\n    \"endorsementTypeIds\": [\n      1\n    ],\n    \"premiumDelta\": 0\n  }\n}"
             }
           ]
         },

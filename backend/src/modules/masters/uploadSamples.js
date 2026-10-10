@@ -268,7 +268,7 @@ export const MASTER_TEMPLATES = [
   },
   {
     type: 'claim-document-requirement', menu: 'Master > Insurance Management > Claim Document Checklist',
-    formats: { lineOfBusiness: 'Line of business code as on the policy (MOTOR, FIRE ...) or * for every line', claimType: 'Claim type as on the claim (Own Damage, Theft, Third Party ...) or * for every type',
+    formats: { lineOfBusiness: 'Line of business code as on the policy (MOTOR, FIRE ...) or * for every line', claimType: 'Claim type or cause of loss as on the claim, or words of the cause of loss (Theft, Third Party, Collision ...; several separated by ;) or * for every claim',
       required: 'Yes when the claim cannot go to the insurer without it' },
     samples: [{ code: 'PA-MEDCERT', lineOfBusiness: 'PA', claimType: '*', documentName: 'Medical certificate and hospital bills', required: 'Yes', sortOrder: '40' }],
   },

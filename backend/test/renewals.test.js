@@ -351,6 +351,17 @@ describe('renewal quote wizard -> customer approval -> new policy term', () => {
     expect((await ctx.api('post', '/policy-renewals/policies/pol_sls_01/quotation').send({})).status).toBe(409);
   });
 
+  it('quotes a fire renewal on the net premium of the wizard, not on the expiring premium schedule', async () => {
+    const expiring = { fireRiskDetails: { constructionType: 'Class A', totalSumInsured: 60000000 }, firePremiumDetails: { totalCoverPremium: 150000, totalPremium: 168000 } };
+    await query("UPDATE policies SET doc = coalesce(doc, '{}'::jsonb) || $2::jsonb WHERE id = $1", ['pol_crs_06', JSON.stringify(expiring)]);
+    const c = await ctx.api('post', '/policy-renewals/policies/pol_crs_06/quotation').send({ coverageDetails: { totalSumInsured: '60000000', netPremium: '120000' } });
+    expect(c.status).toBe(201);
+    const q = await one('SELECT doc, premium_base FROM quotes WHERE id = $1', [c.body.data.quotationId]);
+    expect(Number(q.premium_base)).toBe(120000);
+    expect(q.doc.firePremiumDetails).toBeUndefined();
+    expect(q.doc.fireRiskDetails.constructionType).toBe('Class A');
+  });
+
   it('renews a seeded policy without quotation or lead (client e-mail, client-based conversion where renewals convert directly)', async () => {
     await query("UPDATE app_settings SET value = 'false' WHERE key = 'placement.journey_applies_to_renewals'");
     clearSettingsCache();

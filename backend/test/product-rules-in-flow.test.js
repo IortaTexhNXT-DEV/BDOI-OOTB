@@ -40,7 +40,7 @@ beforeAll(async () => {
   ctx = await setup();
   await withProducts();
   sales = await persona('r.sales', ['sales']);
-  proc = await persona('r.proc', ['processing']);
+  proc = await persona('r.proc', ['tis-ops-unit-head']);
   ic = Object.fromEntries((await q('SELECT code, id FROM insurance_companies')).map((r) => [r.code, r.id]));
   const lead = await sales('post', '/leads').send({ firstName: 'Rico', lastName: 'Villanueva', emailId: 'rico.v@example.ph', contactNumber: '09170000777', leadCategory: 'Retail' });
   leadId = lead.body.leadId;
@@ -84,14 +84,17 @@ describe('acceptance rules on a quotation', () => {
     expect(r.body.underwritingReferral).toBeUndefined();
   });
 
-  it('refers a 16-year-old vehicle to the rule\'s authority (Processing Team) and blocks sending, approval and issuance', async () => {
+  it('refers a 16-year-old vehicle to the rule\'s authority (Operations Unit Head) and blocks sending, approval and issuance', async () => {
     const r = await sales('post', '/quotations').send(motor({}, { modelYear: String(year - 16) }));
     expect(r.status).toBe(201);
     referred = r.body;
     const uw = r.body.premiumBreakdown.underwriting;
     expect(uw.decision).toBe('referred');
-    expect(uw.results.find((x) => x.ruleCode === 'VEH_AGE_LIMIT')).toMatchObject({ outcome: 'referred', authorityRole: 'processing', authorityRoleName: expect.stringContaining('Processing') });
-    expect(r.body.underwritingReferral).toMatchObject({ status: 'pending', ruleCodes: ['VEH_AGE_LIMIT'], authorityRoles: ['processing'] });
+    expect(uw.results.find((x) => x.ruleCode === 'VEH_AGE_LIMIT')).toMatchObject({ outcome: 'referred', authorityRole: 'tis-ops-unit-head', authorityRoleName: expect.stringContaining('Operations Unit Head') });
+    expect(r.body.underwritingReferral).toMatchObject({ status: 'pending', ruleCodes: ['VEH_AGE_LIMIT'], authorityRoles: ['tis-ops-unit-head'] });
+    // the holders of the authority role are told: nothing else brings the referral to them
+    const told = await q("SELECT u.username FROM notifications n JOIN users u ON u.id = n.user_id WHERE n.entity_id = $1 AND n.title = 'Quotation referred for underwriting'", [referred.quotationId]);
+    expect(told.map((x) => x.username)).toContain('r.proc');
     const send = await sales('post', `/quotations/${referred.quotationId}/send-for-approval`).send({});
     expect(send.status).toBe(400);
     expect(send.body.message).toContain('is referred');
@@ -107,13 +110,13 @@ describe('acceptance rules on a quotation', () => {
   it('lets only the authority role approve the referral, within its authority limit', async () => {
     const bySales = await sales('post', `/quotations/${referred.quotationId}/underwriting-referral`).send({ decision: 'approve' });
     expect(bySales.status).toBe(403);
-    expect(bySales.body.message).toContain('Processing');
-    // a Processing Team limit below the sum insured refuses the approval (authority matrix)
-    await q("UPDATE authority_limits SET max_amount = 500000 WHERE transaction_type = 'underwriting_referral' AND role_code = 'processing'");
+    expect(bySales.body.message).toContain('Operations Unit Head');
+    // an Operations Unit Head limit below the sum insured refuses the approval (authority matrix)
+    await q("INSERT INTO authority_limits(transaction_type, role_code, max_amount, status) VALUES ('underwriting_referral', 'tis-ops-unit-head', 500000, 'active')");
     const above = await proc('post', `/quotations/${referred.quotationId}/underwriting-referral`).send({ decision: 'approve' });
     expect(above.status).toBe(403);
     expect(above.body.message).toContain('Underwriting referral approval');
-    await q("UPDATE authority_limits SET max_amount = 10000000 WHERE transaction_type = 'underwriting_referral' AND role_code = 'processing'");
+    await q("UPDATE authority_limits SET max_amount = 10000000 WHERE transaction_type = 'underwriting_referral' AND role_code = 'tis-ops-unit-head'");
     const ok = await proc('post', `/quotations/${referred.quotationId}/underwriting-referral`).send({ decision: 'approve', remarks: 'Inspection report seen', insurerReference: 'UW-77' });
     expect(ok.status).toBe(200);
     expect(ok.body.data.underwritingReferral).toMatchObject({ status: 'approved', decidedBy: 'r.proc', insurerReference: 'UW-77' });

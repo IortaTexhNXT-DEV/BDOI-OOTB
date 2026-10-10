@@ -189,8 +189,10 @@ Object.assign(roleMenuPermissions, {
   "tis-ops-unit-head": { ...TIS_OPERATIONS, accounts: [...TIS_OPERATIONS.accounts, "Journal Voucher", "Fixed Assets", "Disbursement", "Payables"] },
   "tis-ccd-pdu": TIS_CCD(["Post-Dated Cheques", "Receipts"]),
   "tis-ccd-pdc": TIS_CCD(["Post-Dated Cheques", "Receipts", "Collections", "Bank Reconciliation", "Insurer Reconciliation"]),
-  "tis-ccd-bp": TIS_CCD(["Receipts", "Collections", "Post-Dated Cheques", "Bank Reconciliation", "Insurer Reconciliation"]),
-  "tis-ccd-recon": TIS_CCD(["Receipts", "Collections", "Post-Dated Cheques", "Bank Reconciliation", "Insurer Reconciliation", "Open Entry Matching", "Open Entry Unmatching", "Disbursement"]),
+  // the claim settlement funds an insurer remits are banked by Cash Control (write:receipts)
+  "tis-ccd-bp": TIS_CCD(["Receipts", "Collections", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation", "Insurer Reconciliation"]),
+  "tis-ccd-recon": TIS_CCD(["Receipts", "Collections", "Post-Dated Cheques", "Claims Settlements", "Bank Reconciliation", "Insurer Reconciliation", "Open Entry Matching",
+    "Open Entry Unmatching", "Disbursement"]),
   // Finance & General Accounting: the Accounting menus, plus the audit trail and the schedules (interface monitor)
   "tis-finance": {
     ...roleMenuPermissions.accounting,

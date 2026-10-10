@@ -12,6 +12,7 @@ import { InputText } from "primereact/inputtext";
 import { SelectButton } from "primereact/selectbutton";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
+import StatCards from "../../components/StatCards";
 import service from "../../services/opsAccountingService";
 import { Field, OpsTag, PageHeader, date, isoOf, money, numericColumn, showError, showSuccess } from "./common";
 
@@ -151,15 +152,14 @@ export const AssetDisposals = () => {
         <Calendar value={to} onChange={(e) => e.value && setTo(e.value)} showIcon aria-label={t("assetDisposal.to")} />
         <Button icon="pi pi-download" label={t("opsAcc.export")} outlined onClick={() => service.downloadDisposals(params).catch((e) => showError(toast, e))} />
       </PageHeader>
-      <div className="flex flex-wrap gap-4 mb-3">
-        <span>{t("assetDisposal.disposals")}: <b>{s.disposals ?? 0}</b></span>
-        <span>{t("opsAcc.fa.cost")}: <b>{money(s.cost)}</b></span>
-        <span>{t("opsAcc.fa.bookValue")}: <b>{money(s.bookValue)}</b></span>
-        <span>{t("assetDisposal.proceeds")}: <b>{money(s.proceeds)}</b></span>
-        <span>{t("assetDisposal.outputVat")}: <b>{money(s.outputVat)}</b></span>
-        <span>{t("assetDisposal.gain")}: <b>{money(s.gain)}</b></span>
-        <span>{t("assetDisposal.loss")}: <b>{money(s.loss)}</b></span>
-      </div>
+      <StatCards items={[
+        { key: "disposals", label: t("assetDisposal.disposals"), value: data ? s.disposals ?? 0 : null },
+        { key: "cost", label: t("opsAcc.fa.cost"), value: data ? money(s.cost) : null },
+        { key: "bookValue", label: t("opsAcc.fa.bookValue"), value: data ? money(s.bookValue) : null },
+        { key: "proceeds", label: t("assetDisposal.proceeds"), value: data ? money(s.proceeds) : null, note: data ? `${t("assetDisposal.outputVat")} ${money(s.outputVat)}` : null },
+        { key: "gain", label: t("assetDisposal.gain"), value: data ? money(s.gain) : null },
+        { key: "loss", label: t("assetDisposal.loss"), value: data ? money(s.loss) : null },
+      ]} />
       <div className="pe-card">
         <div className="flex gap-2 mb-2">
           <Dropdown value={disposalType} showClear placeholder={t("assetDisposal.allTypes")} onChange={(e) => setDisposalType(e.value)} className="w-14rem"

@@ -139,6 +139,10 @@ acceptable for data no other screen needs.
 | Bulk upload template | `agentModule/component/bulkUploadTemplate` |
 | Required-field checks without Formik | `utility/requiredFields` |
 | Lists | `components/DataTable` (skeleton rows while loading, paging, numeric alignment) |
+| Detail screen loading, error and not-found states | `components/LoadState` (skeleton while loading, error with Retry, not found with Back; never a loader without an end) |
+| What the user does next on a record | `components/NextStep` (title, short text and links or buttons to the next screen; renders nothing without them). The claim screens use the action bar `ClaimActions` of `claimsModule/shared/ClaimJourneyLayout` instead |
+| Totals of a screen | `components/StatCards` (KPI cards; `bv-stat-cards--wide` for longer values) rather than totals inside the text |
+| A long explanation of a screen or field | `InfoTip` of `components/RecordPage` (info icon with a tooltip; the `help` or `subtitle` of an accounts `PageHeader` and the `hint` of a `SectionCard` use it) rather than a paragraph under the title |
 | Record history | `components/AuditTrail/AuditTimeline` (business events of `GET /api/audit/records/:entity/:id`) |
 | Philippine address | `agentModule/component/PhAddressFields` (region, province, city or municipality, barangay, ZIP code) |
 | Colours and logo | the theme tokens; the saved theme is applied at run time by `theme/runtime/themeEngine.js` and `BrandingProvider`; never hard-code a brand colour |

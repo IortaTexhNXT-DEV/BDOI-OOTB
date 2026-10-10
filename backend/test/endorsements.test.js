@@ -5,6 +5,7 @@ import { pool } from '../src/db/pool.js';
 
 let ctx;
 let cs;
+let ap;
 let finance;
 const q = (sql, params) => pool.query(sql, params).then((r) => r.rows);
 const r2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
@@ -50,6 +51,8 @@ beforeAll(async () => {
   await withOwnDamageOnly('pol_sls_03', 1600000, 1.5);
   await withOwnDamageOnly('pol_sls_05', 1150000, 1.65);
   cs = await persona('e.cs', ['operations']);
+  // a second Operations user: cancellations and return premiums are completed by another user (endorsements.return_approval)
+  ap = await persona('e.ap', ['operations']);
   finance = await persona('e.finance', ['accounting']);
 });
 afterAll(async () => { await pool.end(); });
@@ -105,6 +108,14 @@ describe('endorsements', () => {
     expect(s.body.success).toBe(true);
     expect(s.body.endorsement.status).toBe('PendingCustomer');
     expect((await q("SELECT count(*)::int AS n FROM email_outbox WHERE template = 'endorsement_customer' AND entity_id = $1", [endorsementId]))[0].n).toBe(1);
+    // the insurer is sent the request with the endorsement PDF, which it confirms by issuing its own endorsement
+    const [toInsurer] = await q("SELECT to_address, attachments FROM email_outbox WHERE template = 'endorsement_insurer' AND entity_id = $1", [endorsementId]);
+    const [contact] = await q("SELECT ic.contact_email FROM policies p JOIN insurance_companies ic ON ic.id = p.insurance_company_id WHERE p.id = 'pol_sls_05'");
+    expect(toInsurer.to_address).toBe(contact.contact_email);
+    expect(s.body.insurerEmailedTo).toBe(contact.contact_email);
+    expect(toInsurer.attachments[0]).toMatchObject({ kind: 'document', document: 'endorsement' });
+    const { generateDocument } = await import('../src/modules/documents/emailDocuments.js');
+    expect((await generateDocument('endorsement', { endorsementId })).content.subarray(0, 4).toString()).toBe('%PDF');
     const up = await cs('post', '/endorsements/upload-document').field('endorsementId', endorsementId).attach('file', Buffer.from('%PDF-1.4 test'), 'endorsement.pdf');
     expect(up.status).toBe(200);
     expect(up.body.data.documentKey).toBeTruthy();
@@ -132,7 +143,12 @@ describe('endorsements', () => {
     expect(e.body.endorsementType).toBe('cancellation');
     const s = await cs('post', `/endorsements/initiate-cancel-policy/${e.body.endorsementId}`).send({ sentBy: 'agent' });
     expect(s.body.endorsement.status).toBe('InitiateCancel');
-    const c = await cs('post', '/endorsements/complete-endorsement').send({ endorsementId: e.body.endorsementId });
+    const asked = await q("SELECT audience, link FROM notifications WHERE entity = 'endorsement' AND entity_id = $1 AND type = 'approval'", [e.body.endorsementId]);
+    expect(asked).toEqual([{ audience: 'approve:policies', link: `/agent/uploadendorsement/${e.body.endorsementId}` }]);
+    const own = await cs('post', '/endorsements/complete-endorsement').send({ endorsementId: e.body.endorsementId });
+    expect(own.status).toBe(403);
+    expect(own.body.message).toMatch(/maker-checker/);
+    const c = await ap('post', '/endorsements/complete-endorsement').send({ endorsementId: e.body.endorsementId });
     expect(c.body.status).toBe('Cancelled');
     expect((await cs('get', '/policies/pol_sls_07')).body.status).toBe('Cancelled');
     expect((await cs('post', '/endorsements/create-endorsement').send({ policyId: 'pol_sls_07', endorsementTypeIds: [1] })).status).toBe(400);
@@ -142,7 +158,7 @@ describe('endorsements', () => {
 describe('coverage change endorsements (premium delta)', () => {
   // pol_sls_02: own damage 980,000 at 1.75% = 17,150 net
   const screen = (od, extra = {}) => ({ LossandDamagecoverage: String(od), LossandDamagecoverageRate: '1.75', BodilyInjury: '', PropertyDamage: '', APPATotalCoverage: '', ...extra });
-  const complete = (id) => cs('post', '/endorsements/complete-endorsement').send({ endorsementId: id, endorsementNumber: 'INS-COV-1', issuedDate: '2026-09-28' });
+  const complete = (id) => ap('post', '/endorsements/complete-endorsement').send({ endorsementId: id, endorsementNumber: 'INS-COV-1', issuedDate: '2026-09-28' });
   const receivableCount = async (policyId) => (await q('SELECT count(*)::int AS n FROM receivables WHERE policy_id = $1', [policyId]))[0].n;
 
   it('refuses a premiumDelta that does not match new gross - current gross', async () => {
@@ -159,7 +175,8 @@ describe('coverage change endorsements (premium delta)', () => {
     const net = r2(1180000 * 0.0175);
     const delta = r2((await grossOf(net)) - before);
     const rcvBefore = await receivableCount('pol_sls_02');
-    const e = await cs('post', '/endorsements/create-endorsement').send({ policyId: 'pol_sls_02', endorsementTypeIds: [3], coverageChanges: screen(1180000), premiumDelta: delta });
+    // the screen's flat-rate taxes may be centavos from the engine's (documentary stamp tax rounded per PHP 4): the server's figure is kept
+    const e = await cs('post', '/endorsements/create-endorsement').send({ policyId: 'pol_sls_02', endorsementTypeIds: [3], coverageChanges: screen(1180000), premiumDelta: r2(delta - 0.37) });
     expect(e.status).toBe(201);
     expect(e.body.premiumDelta).toBeCloseTo(delta, 2);
     expect(e.body.coverageChanges.LossandDamagecoveragepremium).toBe(net.toFixed(2));
@@ -173,6 +190,21 @@ describe('coverage change endorsements (premium delta)', () => {
     expect(Number(p.net_premium)).toBeCloseTo(net, 2);
     expect(p.od).toBe('1180000');
     expect(p.odp).toBe(net.toFixed(2));
+  });
+
+  it('earns the brokerage rate the policy was sold at on an additional premium', async () => {
+    await q(`UPDATE policies SET details = details || '{"commissionDetails":{"brokeragePct":18}}'::jsonb WHERE id = 'pol_sls_02'`);
+    const before = Number((await q("SELECT premium_total FROM policies WHERE id = 'pol_sls_02'"))[0].premium_total);
+    const net = r2(1200000 * 0.0175);
+    const e = await cs('post', '/endorsements/create-endorsement').send({ policyId: 'pol_sls_02', endorsementTypeIds: [3], coverageChanges: screen(1200000), premiumDelta: r2((await grossOf(net)) - before) });
+    expect(e.status).toBe(201);
+    const netDelta = Math.abs(Number(e.body.premiumChange.delta.netPremium));
+    const c = await complete(e.body.endorsementId);
+    const [bill] = await q('SELECT commission_amount FROM receivables WHERE id = $1', [c.body.receivableId]);
+    expect(Number(bill.commission_amount)).toBeCloseTo(r2(netDelta * 0.18), 2);
+    // the additional premium is open: the policy is no longer fully paid
+    const [p] = await q("SELECT payment_status FROM policies WHERE id = 'pol_sls_02'");
+    expect(p.payment_status).toBe('Partial');
   });
 
   it('prices the screen payload of a motor policy with BI / PD / APPA (own damage 1,200,000 -> 1,400,000 at 2%)', async () => {
@@ -230,7 +262,7 @@ describe('coverage change endorsements (premium delta)', () => {
     expect(e.status).toBe(201);
     const delta = e.body.premiumDelta;
     expect(delta).toBeGreaterThan(0);
-    const c = await cs('post', '/endorsements/complete-endorsement').send({ endorsementId: e.body.endorsementId, endorsementNumber: 'INS-COV-DB', issuedDate: '2026-09-28', billingMode: 'direct' });
+    const c = await ap('post', '/endorsements/complete-endorsement').send({ endorsementId: e.body.endorsementId, endorsementNumber: 'INS-COV-DB', issuedDate: '2026-09-28', billingMode: 'direct' });
     expect(c.status).toBe(200);
     expect(c.body.receivableId).toBeNull();
     expect(await receivableCount('pol_sls_03')).toBe(rcvBefore);

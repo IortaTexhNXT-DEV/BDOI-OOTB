@@ -1623,13 +1623,13 @@ The return premium of a cancellation is computed from the days left, never typed
 | Short-period | The insured cancels (`endorsements.short_period_for_insured`) | Net premium less the percentage the insurer keeps for the days in force, from Master > Insurance > Short-Period Rates (a shorter term is scaled to a year). |
 | Flat | Cancelled from inception, or a reason whose method is flat (not taken up, duplicate) | The whole net premium. |
 
-1. Choose Operations > Policy Cancellation and enter the policy number.
+1. Choose Operations > Policy Cancellation and type the policy number or the insured's name; choose the policy from the list (active policies only).
 2. Enter the **Cancellation date** and choose the **Reason** (Master > Insurance > Cancellation Reasons says who initiates it and the method). **Return premium method** = From the reason, unless you choose another one.
 3. For a cancellation of part of the cover choose **Part of the cover** and enter the percentage or the net premium of the part cancelled; the policy stays in force.
-4. Select **Compute return premium**. The page shows the days in force and left, the premium kept by the insurer, the return net premium, the premium taxes returned (from Master > Finance > Premium Taxes & LGU Rates on the return premium; the taxes returned are set in `endorsements.cancellation_returned_taxes`, documentary stamp tax is not refundable by default), the return premium and the commission taken back.
-5. Select **Create cancellation endorsement**. The endorsement summary opens; send it to the customer and complete it as any cancellation (Processing Team chapter). The server computes the same figures again, so a figure changed on the screen is not used.
+4. Select **Compute return premium**. The result of this policy only is shown as cards: days in force (and left), the band of the scale applied, the percentage the insurer keeps, the premium kept, the return net premium, the premium taxes returned (from Master > Finance > Premium Taxes & LGU Rates; the taxes returned are set in `endorsements.cancellation_returned_taxes`, documentary stamp tax is not refundable by default), the refund to the client and what the insurer gives back (the return premium less the commission taken back; the whole return premium on a gross remittance). The short-period scale itself is not shown; **Short-period scale** opens it in Master > Insurance > Short-Period Rates for the users who may open that master.
+5. Select **Create cancellation endorsement**. The endorsement summary opens; send it to the customer and complete it as any cancellation (Processing Team chapter). **Send to Insurance Company** also e-mails the insurer the endorsement request (`email.template.endorsement_insurer`). A cancellation or other endorsement that returns premium is completed by a user other than the one who raised it (`endorsements.return_approval`); the approvers are notified. The server computes the same figures again, so a figure changed on the screen is not used.
 
-When the endorsement is completed the open bills are credited with the return premium (what the client already paid becomes a refund), and the journal (posting rule policy.cancel, or endorsement.return_premium for a partial cancellation) reverses the premium due to the insurer, the premium taxes and the commission at the computed amounts. A cancellation raised from the endorsement screens is computed the same way.
+When the endorsement is completed the open bills are credited with the return premium (what the client already paid becomes a refund; the policy's payment status follows its bills), and the journal (posting rule policy.cancel, or endorsement.return_premium for a partial cancellation) reverses the premium due to the insurer, the premium taxes and the commission at the computed amounts. A cancellation raised from the endorsement screens is computed the same way.
 
 ## Record the client's payment
 
@@ -1685,8 +1685,8 @@ Every Renewals screen has the same layout: the page title with the breadcrumb an
 ![Operations > Renewals > Renewal Policy](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-renewal-policy.png)
 
 1. Choose Operations > Renewals > Renewal Policy. The figures count the policies by renewal state (Due for renewal, In grace period, Lapsed, renewable, Renewal in progress, Renewed); select one to show only those. Change the **Expiry between** dates or search by policy number, client or client code. Each row shows the policy and client, product and insurer, account executive, expiry (with the days since or to expiry), premium, payment and **Renewal state**.
-2. Select the renew icon on the policy (the arrow on a renewal already started). The eye opens the policy; on a renewed policy the link icon opens the new term. A policy whose renewal window has closed is quoted as new business.
-3. The renewal quotation opens with the covers of the expiring term, re-rated with the current base rates (`renewals.rating_rates`), a claims loading of 10% per claim in the expiring term up to 30%, and a loyalty discount of 2% per completed renewal up to 10%. Check the terms and continue.
+2. Select the renew icon on the policy (the arrow on a renewal already started). The eye opens the policy; on a renewed policy the link icon opens the new term. A policy whose renewal window has closed is quoted as new business. The policy detail also offers **Renew** while the policy is in the renewal window: from `renewals.pipeline_days` before expiry through the grace period and the lapsed-renewal days; the expiry card then says how many days are left. After the renewal the expiring policy links to the renewal term and the renewal term to the expiring one.
+3. The renewal quotation opens with the covers of the expiring term (a line other than motor, such as fire: the sum insured and the net premium of the renewal term, priced on that net premium with the taxes of the line, fire service tax included), re-rated with the current base rates (`renewals.rating_rates`), a claims loading of 10% per claim in the expiring term up to 30%, and a loyalty discount of 2% per completed renewal up to 10%. Check the terms and continue.
 4. Send it for customer approval as for any quotation. Renewal terms that need approval go to the Processing Team.
 5. When the client accepts, issue the renewal. The system issues the new term, marks the old policy **Renewed**, bills the premium (`renewals.create_receivable`) and accrues the commission to the original referrer.
 
@@ -1897,7 +1897,7 @@ The claim history lists every event of the claim with user, time, source and the
 
 ## Claim documents
 
-The documents are a step of the claim: **Documents** comes after **Insurer advice**, once the claim is registered, and the same list is on the claim page. A claim lists only the documents of its line of business and its cause of loss, taken from Master > Insurance > Claim Document Checklist: a document applies when its line is the claim's (or * for all) and its claim type is * or names the claim type or words of the cause of loss (for example Theft, Third Party, Collision, Death; several separated by ;). A theft claim therefore asks for the Affidavit of Theft, a third-party claim for the third party's licence and OR/CR, a Personal Accident death claim for the death certificate.
+The documents are a step of the claim: **Documents** comes after **Insurer advice**, once the claim is registered, and the same list is on the claim page. A claim lists only the documents of its line of business and its cause of loss, taken from Master > Insurance > Claim Document Checklist: a document applies when its line is the claim's (or * for all) and its claim type is * or names the claim type, the cause of loss or words of it (for example Theft, Third Party, Collision, Death; several separated by ;), each one required or optional. A theft claim therefore asks for the Affidavit of Theft, a third-party claim for the third party's licence and OR/CR, a Personal Accident death claim for the death certificate.
 
 ![Claim > Documents](/home/user/BDOI-OOTB/docs/package/source/manual-images/c-claim-documents.png)
 
@@ -2007,6 +2007,7 @@ Accounts > Collections lists every open premium with **Client Name**, **Policy N
 
 - The due date follows the insurer's premium payment warranty, else `collections.default_credit_days` (30 days).
 - Reminders are e-mailed to clients 7 days before the due date and then at most every 7 days by the Collection reminders job at 08:00 (`collections.reminder_days_before`, `collections.reminder_repeat_days`). **Send Payment Reminders Now** sends them at once.
+- A collection that cannot be loaded (for example a link to a bill that no longer exists) says so with **Retry** and **Back** instead of loading without end. The collection detail ends with the next step: record the receipt (users who post receipts get the link to Accounts > Receipts with the client and policy filled in).
 - The aging report (Collections > Aging Report) shows the total outstanding per bucket, a chart and the detail by client.
 - **E-mail invoice** on a collection item sends the premium invoice / statement of account of the bill to the client with its PDF attached (To, Cc and a note). With `billing.email_on_issue` switched on, a bill is e-mailed automatically when it is issued from a policy, endorsement or renewal.
 
@@ -2057,7 +2058,7 @@ Accounts > Claims Settlements lists the claims whose settlement through the brok
 - **Pay claimant**: payee, mode, bank account, cheque or transfer reference. Posting rule claim.paid_to_claimant: Dr Claim Settlements Payable (fiduciary) / Cr bank. The payment gets a claim payment voucher number (CPV-YYYY-NNNNN); the print icon opens the voucher.
 - **Release form**: the release and quitclaim the claimant signs, with the payments made.
 
-Recording funds needs the receipts permission and paying the claimant the disbursements permission (Accounting). The same cash panel stays on the claim screen.
+Recording funds needs the receipts permission (Cash Control: Billing & Payment and Reconciliation have this screen) and paying the claimant the disbursements permission (Finance). The same cash panel stays on the claim screen.
 
 ## Disbursement: payment vouchers and cheques
 

@@ -27580,6 +27580,12 @@
                         },
                         "commissionReversed": {
                           "type": "integer"
+                        },
+                        "remittanceBasis": {
+                          "type": "string"
+                        },
+                        "insurerReturn": {
+                          "type": "number"
                         }
                       }
                     }
@@ -27599,7 +27605,9 @@
                       "lgt": 37.5
                     },
                     "grossReturn": 5637.5,
-                    "commissionReversed": 750
+                    "commissionReversed": 750,
+                    "remittanceBasis": "net",
+                    "insurerReturn": 4872.5
                   }
                 }
               }
@@ -52495,7 +52503,7 @@
     "/endorsements/complete-endorsement": {
       "post": {
         "operationId": "postEndorsementsCompleteEndorsement",
-        "summary": "Complete the endorsement: apply changes and premium delta to the policy, bill a positive delta, notify the policy owner",
+        "summary": "Complete the endorsement: apply changes and premium delta to the policy, bill a positive delta, notify the policy owner; a cancellation or return premium is completed by another user holding approve:policies (endorsements.return_approval)",
         "tags": [
           "Endorsements"
         ],
@@ -53006,7 +53014,7 @@
     "/endorsements/initiate-cancel-policy/{id}": {
       "post": {
         "operationId": "postEndorsementsInitiateCancelPolicyId",
-        "summary": "Initiate policy cancellation (InitiateCancel)",
+        "summary": "Initiate policy cancellation: notice to the customer and request to the insurer (InitiateCancel)",
         "tags": [
           "Endorsements"
         ],
@@ -53033,6 +53041,12 @@
                       "type": "boolean"
                     },
                     "message": {
+                      "type": "string"
+                    },
+                    "emailedTo": {
+                      "type": "string"
+                    },
+                    "insurerEmailedTo": {
                       "type": "string"
                     },
                     "endorsement": {
@@ -53069,6 +53083,8 @@
                 "example": {
                   "success": true,
                   "message": "Endorsement sent",
+                  "emailedTo": "maria.santos@example.ph",
+                  "insurerEmailedTo": "uw@malayan.example",
                   "endorsement": {
                     "endorsementId": "end_1",
                     "endorsementNumber": "END-2026-00001",
@@ -53121,7 +53137,7 @@
     "/endorsements/send-endorsement-to-customer/{id}": {
       "post": {
         "operationId": "postEndorsementsSendEndorsementToCustomerId",
-        "summary": "Send the endorsement to the customer (PendingCustomer)",
+        "summary": "Send the endorsement to the customer and the request to the insurer (PendingCustomer)",
         "tags": [
           "Endorsements"
         ],
@@ -53148,6 +53164,12 @@
                       "type": "boolean"
                     },
                     "message": {
+                      "type": "string"
+                    },
+                    "emailedTo": {
+                      "type": "string"
+                    },
+                    "insurerEmailedTo": {
                       "type": "string"
                     },
                     "endorsement": {
@@ -53184,6 +53206,8 @@
                 "example": {
                   "success": true,
                   "message": "Endorsement sent",
+                  "emailedTo": "maria.santos@example.ph",
+                  "insurerEmailedTo": "uw@malayan.example",
                   "endorsement": {
                     "endorsementId": "end_1",
                     "endorsementNumber": "END-2026-00001",

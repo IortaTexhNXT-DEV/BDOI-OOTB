@@ -62,14 +62,15 @@ define({
     sendEntity(res, e, { status: 201, message: 'Endorsement created' });
   },
 });
-for (const [path, cancel, label] of [['/send-endorsement-to-customer/:id', false, 'Send the endorsement to the customer (PendingCustomer)'], ['/initiate-cancel-policy/:id', true, 'Initiate policy cancellation (InitiateCancel)']]) {
+for (const [path, cancel, label] of [['/send-endorsement-to-customer/:id', false, 'Send the endorsement to the customer and the request to the insurer (PendingCustomer)'],
+  ['/initiate-cancel-policy/:id', true, 'Initiate policy cancellation: notice to the customer and request to the insurer (InitiateCancel)']]) {
   define({
     method: 'POST', path, summary: label, screen: `${SCREEN} > Summary`, middleware: [...canWrite, ownRecord('endorsement')], request: { sentBy: 'agent' },
-    response: { success: true, message: 'Endorsement sent', endorsement: { ...example, status: cancel ? 'InitiateCancel' : 'PendingCustomer' } },
+    response: { success: true, message: 'Endorsement sent', emailedTo: 'maria.santos@example.ph', insurerEmailedTo: 'uw@malayan.example', endorsement: { ...example, status: cancel ? 'InitiateCancel' : 'PendingCustomer' } },
     handler: async (req, res) => {
-      const { before, after, emailedTo } = await svc.sendToCustomer(req.params.id, actor(req), cancel);
-      await audit(req, { entity: 'endorsement', entityId: after.id, action: cancel ? 'initiate-cancel' : 'send-to-customer', before: { status: out(before).status }, after: { status: out(after).status, emailedTo } });
-      res.json({ success: true, message: cancel ? 'Cancellation initiated' : 'Endorsement sent to customer', emailedTo, endorsement: out(after), data: out(after) });
+      const { before, after, emailedTo, insurerEmailedTo } = await svc.sendToCustomer(req.params.id, actor(req), cancel);
+      await audit(req, { entity: 'endorsement', entityId: after.id, action: cancel ? 'initiate-cancel' : 'send-to-customer', before: { status: out(before).status }, after: { status: out(after).status, emailedTo, insurerEmailedTo } });
+      res.json({ success: true, message: cancel ? 'Cancellation initiated' : 'Endorsement sent to customer', emailedTo, insurerEmailedTo, endorsement: out(after), data: out(after) });
     },
   });
 }
@@ -88,12 +89,12 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/complete-endorsement', summary: 'Complete the endorsement: apply changes and premium delta to the policy, bill a positive delta, notify the policy owner', screen: `${SCREEN} > Upload endorsement > Submit`,
+  method: 'POST', path: '/complete-endorsement', summary: 'Complete the endorsement: apply changes and premium delta to the policy, bill a positive delta, notify the policy owner; a cancellation or return premium is completed by another user holding approve:policies (endorsements.return_approval)', screen: `${SCREEN} > Upload endorsement > Submit`,
   middleware: [...canWrite, validate(completeBody), ownRecord('endorsement', (req) => req.body.endorsementId)],
   request: { endorsementId: 'end_1', policyNumber: 'POL-2026-00001', endorsementNumber: 'INS-END-778', issuedDate: '2026-09-28', expiryDate: '2027-09-28', documentKey: 'endorsement/abc.pdf' },
   response: { ...example, status: 'Completed', success: true },
   handler: async (req, res) => {
-    const { before, after } = await svc.completeEndorsement(req.body, actor(req));
+    const { before, after } = await svc.completeEndorsement(req.body, actor(req), { approver: req.user });
     await audit(req, { entity: 'endorsement', entityId: after.id, action: 'complete', before: out(before), after: out(after) });
     await audit(req, { entity: 'policy', entityId: after.policy_id, action: 'endorse', after: { endorsementNumber: after.endorsement_number, premiumDelta: Number(after.premium_delta), status: out(after).status } });
     sendEntity(res, out(after), { message: 'Endorsement completed' });

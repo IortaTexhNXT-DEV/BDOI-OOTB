@@ -2,14 +2,13 @@
  * Claim document checklist: the Documents step of a claim and the work queue Operations > Claims Awaiting Documents.
  *
  * The documents a claim needs come from the checklist master (claim-document-requirement: line of business and claim
- * type, * for any, required or optional). A claim type of the master applies when it is the claim's type or names the
- * cause of loss ("Theft", "Third Party", "Death"; several separated by ";"). They are copied onto the claim the first
- * time its checklist is opened; documents added
- * to the master later are added to open claims, nothing is removed (an item that does not apply is waived with a
- * reason). An uploaded claim document whose name matches an item marks it received. A reminder lists the missing
- * documents to the claimant (e-mail template claim_missing_documents), by hand or every claims.document_reminder_days
- * days (job claim-document-reminders). A claim is submitted to the insurer only when every required document is in
- * (claims.require_documents_before_submission).
+ * type, * for any, required or optional). A claim type of the master applies when it is the claim's type (Motor), its
+ * cause of loss (Theft) or words of the cause of loss ("Third Party", "Death"; several separated by ";"). They are
+ * copied onto the claim the first time its checklist is opened; documents added to the master later are added to open
+ * claims, nothing is removed (an item that does not apply is waived with a reason). An uploaded claim document whose
+ * name matches an item marks it received. A reminder lists the missing documents to the claimant (e-mail template
+ * claim_missing_documents), by hand or every claims.document_reminder_days days (job claim-document-reminders). A
+ * claim is submitted to the insurer only when every required document is in (claims.require_documents_before_submission).
  */
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
@@ -24,11 +23,11 @@ import { scopeSql } from '../../lib/scope.js';
 const esc = (v) => String(v).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 const matches = (rule, value) => !rule || rule === '*' || String(rule).trim().toLowerCase() === String(value || '').trim().toLowerCase();
 const escRe = (v) => v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-/** A claim-type rule: * (any), or types separated by ";", each the claim type or words of the cause of loss. */
+/** A claim-type rule: * (any), or types separated by ";", each the claim type, the cause of loss or words of it. */
 const typeMatches = (rule, claimType, cause) => {
   if (!rule || String(rule).trim() === '*') return true;
   return String(rule).split(';').map((x) => x.trim()).filter(Boolean)
-    .some((x) => matches(x, claimType) || (cause && new RegExp(`\\b${escRe(x)}\\b`, 'i').test(String(cause))));
+    .some((x) => matches(x, claimType) || (Boolean(cause) && (matches(x, cause) || new RegExp(`\\b${escRe(x)}\\b`, 'i').test(String(cause)))));
 };
 
 async function loadClaim(db, ref) {

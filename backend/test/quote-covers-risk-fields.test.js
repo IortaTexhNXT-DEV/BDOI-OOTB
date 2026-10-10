@@ -60,11 +60,12 @@ describe('quote set-up of the governing template', () => {
 describe('risk fields captured: every acceptance rule is evaluated', () => {
   it('evaluates the driver age (from the date of birth), the claims count, the fair market value and modifications', async () => {
     const dob = `${Number(asOf.slice(0, 4)) - 19}-01-01`;
-    const r = await sales('post', '/quotations').send(motor(riskFields(dob, { claimsLast3Years: 2 })));
+    // the wizard sends the total sum insured with the liability limits; the vehicle's own damage is what the value rules test
+    const r = await sales('post', '/quotations').send(motor(riskFields(dob, { claimsLast3Years: 2, totalSumInsured: '1450000' })));
     expect(r.status, JSON.stringify(r.body)).toBe(201);
     const uw = r.body.premiumBreakdown.underwriting;
     expect(uw.results.filter((x) => x.outcome === 'not-evaluated')).toEqual([]);
-    expect(uw.facts).toMatchObject({ driverAge: 19, claimsLast3Years: 2, fairMarketValue: 1000000, modified: false, vehicleUse: 'Private' });
+    expect(uw.facts).toMatchObject({ driverAge: 19, claimsLast3Years: 2, fairMarketValue: 1000000, modified: false, vehicleUse: 'Private', sumInsured: 1000000 });
     const by = Object.fromEntries(uw.results.map((x) => [x.ruleCode, x.outcome]));
     expect(by).toMatchObject({ YOUNG_DRV: 'loaded', CLAIMS_HIST: 'loaded', SI_VALIDATION: 'passed', MODIFIED: 'passed', PUV: 'passed', VEH_AGE_LIMIT: 'accepted', HIGH_SI: 'passed' });
     // the 15% young driver and 20% claims loadings on the net premium of the covers

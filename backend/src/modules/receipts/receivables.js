@@ -41,11 +41,15 @@ export async function findClient(db, ref) {
   return (await db.query('SELECT * FROM clients WHERE id = $1 OR client_code = $1 LIMIT 1', [String(ref)])).rows[0] || null;
 }
 
-/** Brokerage commission on a premium amount: the given amount, the policy's own commission for its full premium, else rate x net premium. */
+/** Brokerage commission on a premium amount: the given amount, the policy's own commission for its full premium or its sold rate on an endorsement, else rate x net premium. */
 export async function commissionFor(policy, amount, breakdown, source) {
   if (breakdown.commissionAmount !== undefined && breakdown.commissionAmount !== null) return round2(breakdown.commissionAmount);
   const base = breakdown.netPremium > 0 ? breakdown.netPremium : amount;
   if (source === 'policy' && Number(policy.commission_amount) > 0 && Math.abs(Number(policy.premium_total) - amount) < 0.01) return round2(policy.commission_amount);
+  // a premium change of an issued policy earns the brokerage rate the policy was sold at (its commission code), not the
+  // insurer's default rate
+  const sold = num(policy.details?.commissionDetails?.brokeragePct) || num(policy.doc?.commissionDetails?.brokeragePct);
+  if (source === 'endorsement' && sold > 0) return round2(Math.min(base * (sold / 100), amount));
   const rate = (await resolveCommissionRate({ insurerId: policy.insurance_company_id, productId: policy.product_id, lob: policy.lob || policy.product_line,
     policyType: source === 'renewal' || policy.renewed_from ? 'renewal' : 'new', date: policy.inception_date })).rate;
   return round2(Math.min(base * rate, amount));
@@ -163,6 +167,8 @@ export async function createReceivable(db, { policy, amount, breakdown = {}, sou
   await db.query('UPDATE receivables SET booking_jv_id = $2 WHERE id = $1', [r.id, jv.id]);
   if (basis === 'gross') await bookGrossCommission(db, { policy, rcv: r, commission: computed.commission, netPremium: breakdown.netPremium, date: bookedOn, user });
   await db.query('INSERT INTO collection_items(receivable_id, policy_id, client_id) VALUES ($1,$2,$3) ON CONFLICT (receivable_id) DO NOTHING', [r.id, policy.id, policy.client_id]);
+  // an additional premium leaves a paid policy with something to pay again
+  if (source === 'endorsement') await syncPolicyPaymentStatus(db, policy.id, user?.id ?? null);
   await autoEmailBill(db, r);
   return { ...r, booking_jv_id: jv.id };
 }
@@ -241,7 +247,25 @@ async function applyToReceivable(db, rcv, amount, ctx) {
   // collected_on: the date the money was received (the journal's date), not the time it was keyed in
   await db.query(`INSERT INTO receipt_applications(receipt_id, receipt_line_id, receivable_id, amount, journal_id, payment_mode, reference_no, applied_by, collected_on)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`, [ctx.receipt?.id || null, ctx.lineId || null, rcv.id, amount, jv.id, ctx.paymentMode || null, ctx.referenceNo || null, ctx.user?.id ?? null, jv.jv_date || null]);
+  await syncPolicyPaymentStatus(db, policy.id, ctx.user?.id ?? null);
   return upd;
+}
+
+/**
+ * Payment status of a policy from its bills (Completed once nothing is left to pay, Partial, Pending) and the payments
+ * captured and waiting for finance (Reviewing). Follows every receipt applied or reversed, from any screen.
+ */
+export async function syncPolicyPaymentStatus(db, policyId, userId = null) {
+  const r = (await db.query(`SELECT count(*)::int AS n, COALESCE(sum(amount),0) AS amt, COALESCE(sum(balance),0) AS bal FROM receivables WHERE policy_id = $1 AND status <> 'written-off'`, [policyId])).rows[0];
+  const pending = Number((await db.query('SELECT count(*)::int AS n FROM policy_payments WHERE policy_id = $1 AND status = \'submitted\'', [policyId])).rows[0].n);
+  let status = 'Pending';
+  if (r.n > 0 && Number(r.bal) <= 0) status = 'Completed';
+  else if (pending > 0) status = 'Reviewing';
+  else if (r.n > 0 && Number(r.bal) < Number(r.amt)) status = 'Partial';
+  const allowed = (await getSetting('policies.payment_statuses', ['Pending', 'Reviewing', 'Partial', 'Completed', 'Refunded'])) || [];
+  if (!allowed.includes(status)) return;
+  await db.query(`UPDATE policies SET payment_status = $2, paid_at = CASE WHEN $2 = 'Completed' THEN COALESCE(paid_at, now()) ELSE paid_at END, updated_by = $3, updated_at = now()
+    WHERE id = $1`, [policyId, status, userId]);
 }
 
 /** Commission eligibility: once nothing is open on the policy, the premium counts as collected. */
@@ -373,7 +397,10 @@ export async function returnPremium(db, { policy, amount, breakdown = {}, kind =
     participants: split.parts,
     vars: { policyNumber: policy.policy_number, reference: reference || '', billNumber: billNumbers || policy.bill_number || '', clientName: policy.client_name || 'client', insurer: policy.insurer_name || 'insurer', participantSuffix: '' },
   }, { db, user });
-  if (basis === 'gross') await returnGrossCommission(db, { policy, gross, reference, endorsementId, date, user });
+  if (basis === 'gross') {
+    const computedCommission = breakdown.commissionAmount !== undefined && breakdown.commissionAmount !== null ? round2(Math.abs(num(breakdown.commissionAmount))) : null;
+    await returnGrossCommission(db, { policy, gross, commission: computedCommission, reference, endorsementId, date, user });
+  }
   for (const c of credits) {
     await db.query(`INSERT INTO receivable_credits(receivable_id, policy_id, endorsement_id, kind, amount, refund_amount, journal_id, created_by) VALUES ($1,$2,$3,$4,$5,0,$6,$7)`,
       [c.receivable.id, policy.id, endorsementId, kind, c.amount, jv.id, user?.id ?? null]);
@@ -389,18 +416,22 @@ export async function returnPremium(db, { policy, amount, breakdown = {}, kind =
   // premium the client paid and the broker already remitted: the insurers owe their share back (netted against the next remittance)
   const { raiseInsurerRefunds } = await import('../remittance/insurerCredits.js');
   const insurerRefunds = await raiseInsurerRefunds(db, { policy, split, gross, refund, kind, reference, endorsementId, user });
+  if (credited > 0) await syncPolicyPaymentStatus(db, policy.id, user?.id ?? null);
   return { journalId: jv.id, journalNumber: jv.jv_number, amount: gross, credited, refund, commission: split.commission, refundPayableId: refundPayable?.id || null,
     credits: credits.map((c) => ({ billNumber: c.receivable.bill_number, amount: c.amount })), insurerRefunds };
 }
 
 /**
  * Gross basis: the commission on a return premium is credited to the insurer on the next billing statement (a negative
- * unbilled item), at the ratio of commission to premium of the policy's commission items.
+ * unbilled item): the commission computed for the return (a cancellation's, on the net premium returned), else the
+ * ratio of commission to premium of the policy's commission items.
  */
-async function returnGrossCommission(db, { policy, gross, reference, endorsementId, date, user }) {
-  const r = (await db.query(`SELECT COALESCE(sum(commission) FILTER (WHERE gross_premium > 0), 0) AS c, COALESCE(sum(gross_premium) FILTER (WHERE gross_premium > 0), 0) AS g
-    FROM direct_bill_items WHERE policy_id = $1 AND basis = 'gross' AND status <> 'cancelled'`, [policy.id])).rows[0];
-  const commission = Number(r.g) > 0 ? round2(Math.min(gross * (Number(r.c) / Number(r.g)), gross)) : 0;
+async function returnGrossCommission(db, { policy, gross, commission: computed = null, reference, endorsementId, date, user }) {
+  const r = (await db.query(`SELECT COALESCE(sum(commission) FILTER (WHERE gross_premium > 0), 0) AS c, COALESCE(sum(gross_premium) FILTER (WHERE gross_premium > 0), 0) AS g,
+      COALESCE(sum(commission), 0) AS left FROM direct_bill_items WHERE policy_id = $1 AND basis = 'gross' AND status <> 'cancelled'`, [policy.id])).rows[0];
+  const byRatio = Number(r.g) > 0 ? round2(Math.min(gross * (Number(r.c) / Number(r.g)), gross)) : 0;
+  // never more than the commission not yet taken back
+  const commission = computed !== null ? round2(Math.min(computed, Math.max(Number(r.left), 0))) : byRatio;
   if (!(commission > 0)) return;
   const { bookDirectBill } = await import('../remittance/directbill.js');
   await bookDirectBill(db, { policy, amount: -gross, breakdown: { commissionAmount: commission }, source: 'endorsement', reference, endorsementId, date: await postingDate(date), user, basis: 'gross' });
@@ -411,10 +442,11 @@ export async function reverseReceiptApplications(db, receipt, user) {
   const apps = (await db.query('SELECT * FROM receipt_applications WHERE receipt_id = $1 AND status = \'applied\' FOR UPDATE', [receipt.id])).rows;
   for (const a of apps) {
     if (a.journal_id) await reverseJournal(db, a.journal_id, user, { description: `Cancellation of receipt ${receipt.receipt_number}` });
-    await db.query(`UPDATE receivables SET balance = balance + $2, updated_at = now(),
-      status = CASE WHEN balance + $2 >= amount THEN 'open' ELSE 'partial' END WHERE id = $1`, [a.receivable_id, a.amount]);
+    const rcv = (await db.query(`UPDATE receivables SET balance = balance + $2, updated_at = now(),
+      status = CASE WHEN balance + $2 >= amount THEN 'open' ELSE 'partial' END WHERE id = $1 RETURNING policy_id`, [a.receivable_id, a.amount])).rows[0];
     await db.query('UPDATE collection_items SET closed_at = NULL, updated_at = now() WHERE receivable_id = $1', [a.receivable_id]);
     await db.query('UPDATE receipt_applications SET status = \'reversed\', reversed_at = now() WHERE id = $1', [a.id]);
+    if (rcv?.policy_id) await syncPolicyPaymentStatus(db, rcv.policy_id, user?.id ?? null);
   }
   return apps.length;
 }
