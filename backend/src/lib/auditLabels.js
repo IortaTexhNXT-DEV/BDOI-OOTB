@@ -45,7 +45,7 @@ export const ENTITY_LABELS = {
   product_template: 'Product template', checkbook: 'Checkbook', authority_limit: 'Authority limit', report_schedule: 'Report schedule',
   premium_warranty_extension: 'Premium warranty extension', petty_cash_request: 'Petty cash request', petty_cash_fund: 'Petty cash fund',
   payment_link: 'Payment link', package_quote: 'Package quotation', package_bundle: 'Package', data_load_batch: 'Data load batch',
-  bank_reconciliation: 'Bank reconciliation', accounting_config_change: 'Accounting configuration change', sod_rule: 'Segregation of duties rule',
+  bank_reconciliation: 'Bank reconciliation', accounting_config_change: 'Accounting configuration change', accounting_flow: 'Accounting flow', sod_rule: 'Segregation of duties rule',
   recurring_journal: 'Recurring journal', receivable: 'Receivable', premium_charge_rule: 'Premium charge rule', period_close_run: 'Month-end close',
   period_close_checklist: 'Month-end checklist', lgu_tax_rate: 'LGU tax rate', insurer_rate_table: 'Insurer rate table', gl_account: 'GL account',
   bank_transaction_type: 'Bank transaction type', bank_statement_line: 'Bank statement line', bank_statement_format: 'Bank statement format',

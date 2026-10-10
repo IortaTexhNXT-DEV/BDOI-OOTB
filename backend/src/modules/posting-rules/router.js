@@ -1,12 +1,17 @@
 import { moduleRouter } from '../../lib/registry.js';
-import { requireAuth, requirePermission } from '../../lib/auth.js';
+import { hasPermission, requireAuth, requirePermission } from '../../lib/auth.js';
 import { validate, z } from '../../lib/validate.js';
 import { pool, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created } from '../../lib/respond.js';
 import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import * as svc from './service.js';
-import { accountingFlow } from './flow.js';
+import { EVENTS } from '../accounting/lib/posting.js';
+import { writeXlsx } from '../../lib/xlsx.js';
+import { printContext, renderPdf, sendPdf } from '../documents/pdf.js';
+import { excelBrand } from '../reports/service.js';
+import { accountingFlow, flowExample } from './flow.js';
+import { flowHandbookSpec, flowWorkbook } from './flowExport.js';
 import { actionText } from '../../lib/auditLabels.js';
 
 const { router, define } = moduleRouter('Posting Rules', '/posting-rules');
@@ -48,13 +53,53 @@ define({
   response: { success: true, data: { sides: ['Dr', 'Cr'], accountTypes: ['role', 'gl', 'resolver', 'context'], roles: [{ role: 'premium_receivable', glCode: '1202001', glName: 'Premiums Receivable – Direct Clients' }], resolvers: [{ name: 'bank_account', label: 'Bank account of the receipt / payment' }], amountKeys: ['amount', 'gross'] } },
   handler: async (req, res) => ok(res, await svc.meta(pool)),
 });
+const F = 'Master > Finance > Accounting Flow';
+const flowLine = { side: 'Cr', amountKey: 'due_to_insurer', amount: 'Premium due to the insurer', perParticipant: true, condition: null,
+  account: { kind: 'role', role: 'due_to_insurer', source: 'Premium payable to insurers (Account Determination › Premium)', glCode: '210245', glName: 'Accounts Payable - Insurance Company',
+    mapping: 'provisional', configure: '/master/finance/premium-account-setup', fallback: null, options: null, pendingChange: null } };
+/** The worked example of every event with a rule in force (exports); an event that cannot be simulated is left out. */
+async function allExamples(flow) {
+  const out = [];
+  for (const e of flow.events.filter((x) => x.version)) {
+    for (const coInsurance of EVENTS[e.eventCode]?.sampleCoInsurance ? [false, true] : [false]) {
+      try { out.push({ ...(await flowExample(pool, e.eventCode, { coInsurance })), label: e.label }); } catch { /* left out of the handbook */ }
+    }
+  }
+  return out;
+}
 define({
-  method: 'GET', path: '/flow', summary: 'Accounting flow: for every business event, the screen that triggers it, the approval before posting, whether its journal is parked for approval or posted at once (accounting.parked_events) and the debit / credit lines of the rule in force (GL accounts resolved today)',
-  screen: 'Master > Finance > Accounting Flow', middleware: read,
-  response: { success: true, data: { asOf: '2026-09-30', events: [{ eventCode: 'receipt.apply', label: 'Premium collection applied', trigger: 'Accounts > Receipts', approval: 'Finance only',
-    posting: 'posted', alwaysPosted: 'Posts with its sub-ledger: the bill, collection, commission or refund it records is used at once by the next steps', version: 1, debits: [{ side: 'Dr', amountKey: 'amount', account: { kind: 'resolver', label: 'Bank account of the receipt', glCode: null } }],
-    credits: [{ side: 'Cr', amountKey: 'amount', account: { kind: 'role', label: 'Premiums receivable', glCode: '1202001', glName: 'Premiums Receivable' } }] }] } },
-  handler: async (_req, res) => ok(res, await accountingFlow(pool)),
+  method: 'GET', path: '/flow', summary: 'Accounting reference: every business event grouped by module with when it posts, where, the approval before posting (worded from the settings in force), its journal state, pending and scheduled rule changes, the last posting date and the debit / credit lines with today\'s accounts and their mapping state (provisional, outside the chart, inactive); the other system journals; the accounts pending mapping; an edition code of the configuration. ?format=xlsx (accounting reference workbook; Technical sheet for finance administrators) or pdf (Accounting Entries Handbook, &download=1 as attachment)',
+  screen: F, middleware: read, query: { format: 'xlsx' },
+  response: { success: true, data: { asOf: '2026-10-09', edition: '3F9A21C7', controls: { autoPost: true, configurationReview: true, splitPremiumTaxes: true, commissionVat: true, commissionEwt: true },
+    areas: [{ code: 'premium', name: 'Premium billing', count: 5 }], mapping: { state: 'incomplete', pending: [{ item: 'Premium payable to insurers', kind: 'role', glCode: '210245', reason: 'provisional',
+      events: [{ eventCode: 'policy.issue.broker_billed', label: 'Policy issued – broker billed' }], configure: '/master/finance/premium-account-setup' }] },
+    pendingChanges: [], events: [{ eventCode: 'policy.issue.broker_billed', label: 'Policy issued – broker billed', area: 'premium', when: 'A broker-billed policy is issued', screen: '/agent/policy',
+      where: 'Operations › Policy', approval: 'None: posted when the policy is issued', approvalControl: null, authority: null, posting: 'posted', postingText: 'Posted at once',
+      version: 2, scheduled: null, pending: null, lastPosted: '2026-10-08', mappingPending: true, lines: [flowLine], debits: [], credits: [flowLine] }], systemJournals: [] } },
+  handler: async (req, res) => {
+    const flow = await accountingFlow(pool);
+    const format = String(req.query.format || '').toLowerCase();
+    if (format !== 'xlsx' && format !== 'pdf') return ok(res, flow);
+    const examples = await allExamples(flow);
+    await audit(req, { entity: 'accounting_flow', entityId: flow.edition, action: 'export', after: { format, events: flow.events.length, edition: flow.edition } });
+    const base = `accounting-${format === 'pdf' ? 'entries-handbook' : 'reference'}-${flow.asOf.replace(/-/g, '')}`;
+    if (format === 'pdf') return sendPdf(res, await renderPdf(flowHandbookSpec(flow, examples)), `${base}.pdf`, req.query.download ? 'attachment' : 'inline');
+    const ctx = await printContext();
+    const banner = [ctx.letterhead?.name, 'Accounting reference', `Rules in force on ${flow.asOf} · Edition ${flow.edition} · exported by ${ctx.generatedBy}`].filter(Boolean);
+    const sheets = flowWorkbook(flow, { technical: hasPermission(req.user, 'write:posting-rules'), examples });
+    const buf = writeXlsx({ title: 'Accounting reference', brand: excelBrand(ctx), sheets: sheets.map((sh, i) => (i === 0 ? { ...sh, banner, logo: true } : sh)) });
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${base}.xlsx"`);
+    return res.send(buf);
+  },
+});
+define({
+  method: 'GET', path: '/flow/:eventCode/example', summary: 'Worked example of an event with sample amounts (nothing is posted): the amounts in business words and the balanced journal they build with today\'s accounts (?coInsurance=true: two insurers 60 / 40); 409 when the event has no rule in force',
+  screen: F, middleware: read, query: { coInsurance: 'false' },
+  response: { success: true, data: { eventCode: 'receipt.apply', coInsurance: false, coInsurable: false, sample: [{ amount: 'Amount of the receipt applied to the bill', value: 11200 }],
+    lines: [{ accountCode: '106010', accountName: 'MBT Bank Balance', debit: 11200, credit: 0, example: false }, { accountCode: '1202001', accountName: 'Premiums Receivable', debit: 0, credit: 11200, example: false }],
+    totalDebit: 11200, totalCredit: 11200, balanced: true, omitted: [] } },
+  handler: async (req, res) => ok(res, await flowExample(pool, req.params.eventCode, { coInsurance: ['1', 'true'].includes(String(req.query.coInsurance)) })),
 });
 const changeExample = { id: 3, kind: 'account-role', kindLabel: 'Account role', target: 'premium_receivable', payload: { glCode: '1202002' }, before: { glCode: '1202001' }, status: 'pending',
   requestedBy: 'Accounting user', requestedAt: '2026-09-30T02:00:00Z' };
