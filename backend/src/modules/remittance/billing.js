@@ -24,17 +24,9 @@ import { baseCurrency } from '../../lib/currency.js';
 import { round2 } from '../masters/helpers.js';
 import { commissionTax, ewtRate } from './directbill.js';
 import { lineOf } from './eligibility.js';
+import { holidays, toWorkingDay } from '../../lib/workingDays.js';
 
 const REMITTED = ['approved', 'settled'];
-const weekday = (iso) => new Date(`${iso}T00:00:00Z`).getUTCDay();
-
-/** The dates of the Holiday master (Master > General > Holiday) between from and to. */
-async function holidays(from, to) {
-  const rows = await many(`SELECT COALESCE(data->>'date', substring(code from '^\\d{4}-\\d{2}-\\d{2}')) AS d FROM master_records
-    WHERE type_code = 'holiday' AND status = 'active'`);
-  return new Set(rows.map((r) => r.d).filter((d) => d && d >= from && d <= to));
-}
-
 /** The billing dates of the month of `date`: each run day moved off non-working days. */
 export async function billingDates(date) {
   const days = ((await getSetting('insurer_billing.run_days', [15, 26])) || []).map(Number).filter((d) => d >= 1 && d <= 31);
@@ -42,11 +34,7 @@ export async function billingDates(date) {
   const month = date.slice(0, 7);
   const last = new Date(Date.UTC(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0)).getUTCDate();
   const off = await holidays(addDays(`${month}-01`, -7), addDays(`${month}-${String(last).padStart(2, '0')}`, 7));
-  return days.map((d) => {
-    let day = `${month}-${String(Math.min(d, last)).padStart(2, '0')}`;
-    while ([0, 6].includes(weekday(day)) || off.has(day)) day = addDays(day, step);
-    return day;
-  });
+  return days.map((d) => toWorkingDay(`${month}-${String(Math.min(d, last)).padStart(2, '0')}`, step, off));
 }
 
 /** Whether `date` is a billing date (the job runs only then). */

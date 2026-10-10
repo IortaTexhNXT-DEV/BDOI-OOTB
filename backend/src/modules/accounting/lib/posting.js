@@ -18,6 +18,7 @@ import { badRequest, notFound } from '../../../lib/errors.js';
 import { round2, today } from './http.js';
 import { account, cashAccountFor, createJournal, payableAccountFor } from './ledger.js';
 import { commissionTaxAccount } from './commissionTax.js';
+import { cutoffPeriod } from '../../period-end/posting.js';
 
 const P = (insurerName, share, amounts) => ({ insurerId: null, insurerName, share, amounts });
 /** Business events: label, module, amount keys the operation supplies, template variables and a sample context. */
@@ -268,6 +269,7 @@ export async function buildJournal(db, eventCode, ctx, { user = null, rule: give
     entryType: ctx.entryType || rule.entry_type, entrySubType: ctx.entrySubType ?? null, transactionCode: ctx.transactionCode, referenceType: ctx.referenceType,
     referenceId: ctx.referenceId, clientId: ctx.clientId, policyId: ctx.policyId, policyNumber: ctx.policyNumber, currency: ctx.currency, dueDate: ctx.dueDate,
     status: ctx.status, requiresApproval: ctx.requiresApproval, reversalOf: ctx.reversalOf, correctionOf: ctx.correctionOf,
+    period: ctx.period || (await cutoffPeriod(eventCode, date)),
   };
   return { rule, lines: out, header };
 }

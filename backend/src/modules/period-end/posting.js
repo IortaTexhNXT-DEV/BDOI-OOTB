@@ -4,16 +4,35 @@
  *   soft_closed  only finance managers (approve:period-end) may post
  *   closed       nobody posts (reopen the period first)
  *   locked       fiscal year closed by the year-end close; only a year-end reversal unlocks it
- * The period is the journal's adjustment period (yyyy-13) when it carries one, else the calendar month of its date.
+ * The period is the journal's own period: the calendar month of its date, the next month for an operations posting dated
+ * on or after the operations cut-off day (cutoffPeriod), or the adjustment period (yyyy-13) of the year-end entries.
  * A date before the first fiscal year is refused once a later fiscal year has been closed.
  */
 import { conflict } from '../../lib/errors.js';
 import { hasPermission } from '../../lib/auth.js';
+import { getSetting } from '../../lib/settings.js';
 
 export const APPROVE = 'approve:period-end';
 export const isAdjustmentPeriod = (p) => /^\d{4}-13$/.test(String(p || ''));
 export const monthOf = (date) => String(date).slice(0, 7);
-export const effectivePeriod = (date, period) => (isAdjustmentPeriod(period) ? period : monthOf(date));
+export const effectivePeriod = (date, period) => (/^\d{4}-(0[1-9]|1[0-3])$/.test(String(period || '')) ? period : monthOf(date));
+const nextMonth = (month) => {
+  const [y, m] = month.split('-').map(Number);
+  return m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, '0')}`;
+};
+
+/**
+ * Period of a system posting (TIS-BRD-GL-04): the posting events listed in accounting.operations_cutoff_events (the
+ * premium bookings) dated on or after accounting.operations_cutoff_day book into the next month; every other posting,
+ * or any posting when the cut-off day is 0, books into the month of its date.
+ */
+export async function cutoffPeriod(eventCode, date) {
+  const month = monthOf(date);
+  const day = Number(await getSetting('accounting.operations_cutoff_day', 0)) || 0;
+  if (!day || Number(String(date).slice(8, 10)) < day) return month;
+  const events = (await getSetting('accounting.operations_cutoff_events', [])) || [];
+  return events.includes(eventCode) ? nextMonth(month) : month;
+}
 export const mayPostSoftClosed = (user) => !!user && hasPermission(user, APPROVE);
 
 export async function assertPostingAllowed(db, date, user = null, period = null) {
