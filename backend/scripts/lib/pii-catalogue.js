@@ -374,6 +374,13 @@ export const CATALOGUE = {
   'migration_recon_signoffs.remarks': 'freeText',
   'migration_recon_differences.owner': 'freeText',
   'sap_opening_file_requests.decision_remarks': 'freeText',
+  // notes of a cutover checklist step, owner of a defect (a team or a person), remarks of a Go / No-Go vote, file name and
+  // note of an evidence file of a run (migration 0444)
+  'migration_run_steps.notes': 'freeText',
+  'migration_run_defects.owner': 'freeText',
+  'go_live_decision_votes.remarks': 'freeText',
+  'migration_evidence.file_name': 'fileName',
+  'migration_evidence.note': 'freeText',
   'campaign_recipients.party_name': 'partyName',
   'campaign_recipients.email': 'email',
 };
