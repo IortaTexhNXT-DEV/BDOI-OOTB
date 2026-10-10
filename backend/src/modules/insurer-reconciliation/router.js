@@ -11,8 +11,7 @@ import { validate, z } from '../../lib/validate.js';
 import { pool, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created } from '../../lib/respond.js';
-import { getSetting } from '../../lib/settings.js';
-import { companyName } from '../../lib/letterhead.js';
+import { printFormat } from '../../lib/pdf/index.js';
 import { writeXlsx } from '../../lib/xlsx.js';
 import { toCsv, uploadFile } from '../documents/tabular.js';
 import { printContext, renderPdf, sendPdf } from '../documents/pdf.js';
@@ -195,8 +194,7 @@ define({
     const base = `insurer-reconciliation-${s.statementNumber}`;
     const format = String(req.query.format || 'xlsx').toLowerCase();
     if (format === 'pdf') {
-      const company = { name: await companyName(), system: (await getSetting('general.system_name')) ?? '' };
-      sendPdf(res, await renderPdf(rc.reportPdfSpec(s, company)), `${base}.pdf`, req.query.download ? 'attachment' : 'inline');
+      sendPdf(res, await renderPdf(rc.reportPdfSpec(s, await printFormat())), `${base}.pdf`, req.query.download ? 'attachment' : 'inline');
       return;
     }
     const rows = rc.reportRows(s);

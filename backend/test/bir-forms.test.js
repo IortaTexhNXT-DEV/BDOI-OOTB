@@ -65,7 +65,8 @@ describe('0619-E and 1601-EQ (13.07)', () => {
     const r1 = (await maker('get', `/bir/returns/0619-E?year=${q.year}&month=${m1}`)).body.data;
     const r2 = (await maker('get', `/bir/returns/0619-E?year=${q.year}&month=${m2}`)).body.data;
     expect(r1.items.find((i) => i.no === '14').amount).toBeCloseTo(await whtBetween(r1.period.from, r1.period.to), 2);
-    expect(r1.header.find(([k]) => k === 'Due date')[1]).toBe(`${r1.period.to.slice(0, 4) === String(q.year) && m1 === 12 ? q.year + 1 : q.year}-${String(m1 + 1).padStart(2, '0')}-10`);
+    // the due date is shown in the configured date format (DD/MM/YYYY)
+    expect(r1.header.find(([k]) => k === 'Due date')[1]).toBe(`10/${String(m1 + 1).padStart(2, '0')}/${r1.period.to.slice(0, 4) === String(q.year) && m1 === 12 ? q.year + 1 : q.year}`);
 
     const f1 = await maker('post', '/bir/returns/0619-E/filings').send({ year: q.year, month: m1, dateFiled: r1.period.to, filingReference: 'EFPS-0001', amountPaid: r1.taxDue, paymentReference: 'LBP-1' });
     expect(f1.status, JSON.stringify(f1.body)).toBe(201);

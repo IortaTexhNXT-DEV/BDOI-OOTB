@@ -1,6 +1,10 @@
 /** Printed AP voucher (supplier invoice with its journal) and supplier payment voucher. */
 import { renderPdf, formatAmount, formatDate, printFormat, amountInWords } from '../../lib/pdf/index.js';
 import { getInvoice, getPayment } from './service.js';
+import { STATUS_LABELS, sentenceCase, statusText } from '../../lib/auditLabels.js';
+
+// the status as the screens show it ("for-approval" -> "For approval")
+const statusOf = (code) => statusText(code, STATUS_LABELS.supplier_invoice);
 
 async function journalTable(db, journalId) {
   if (!journalId) return [];
@@ -17,7 +21,7 @@ export async function invoicePdf(db, id) {
   const m = (v) => formatAmount(v, fmt.decimals);
   return { fileName: `${inv.voucherNumber}.pdf`, pdf: await renderPdf({
     title: 'Accounts Payable Voucher', number: inv.voucherNumber, dateLine: `Date ${formatDate(inv.invoiceDate, fmt)}`,
-    meta: [['Supplier', inv.supplierName], ['TIN', inv.supplierTin || ''], ['Supplier invoice', inv.supplierInvoiceNo], ['Due date', formatDate(inv.dueDate, fmt)], ['Status', inv.status]].filter(([, v]) => v),
+    meta: [['Supplier', inv.supplierName], ['TIN', inv.supplierTin || ''], ['Supplier invoice', inv.supplierInvoiceNo], ['Due date', formatDate(inv.dueDate, fmt)], ['Status', statusOf(inv.status)]].filter(([, v]) => v),
     sections: [
       { heading: 'Invoice lines', table: { columns: [{ key: 'description', label: 'Description' }, { key: 'account', label: 'Account' }, { key: 'amount', label: 'Amount', type: 'amount' },
         { key: 'vat', label: 'Input VAT', type: 'amount' }], rows: inv.lines.map((l) => ({ description: l.description, account: `${l.accountCode} ${l.accountName || ''}`.trim(), amount: l.amount, vat: l.vatAmount })) } },
@@ -35,7 +39,7 @@ export async function paymentPdf(db, id) {
   const fmt = await printFormat();
   return { fileName: `${p.paymentNumber}.pdf`, pdf: await renderPdf({
     title: 'Supplier Payment Voucher', number: p.paymentNumber, dateLine: `Date ${formatDate(p.paymentDate, fmt)}`,
-    meta: [['Payee', p.supplierName], ['Mode', p.paymentMode], ['Cheque no.', p.chequeNumber || ''], ['Paid from', p.payFromAccount], ['Status', p.status]].filter(([, v]) => v),
+    meta: [['Payee', p.supplierName], ['Mode', p.paymentMode ? sentenceCase(p.paymentMode) : ''], ['Cheque no.', p.chequeNumber || ''], ['Paid from', p.payFromAccount], ['Status', statusOf(p.status)]].filter(([, v]) => v),
     sections: [
       { columns: 1, rows: [['Amount', `${fmt.currency} ${formatAmount(p.amount, fmt.decimals)}`], ['Amount in words', amountInWords(p.amount, fmt.currency)]] },
       { heading: 'Invoices paid', table: { columns: [{ key: 'voucher', label: 'AP voucher' }, { key: 'invoice', label: 'Supplier invoice' }, { key: 'amount', label: 'Amount', type: 'amount' }],

@@ -13,7 +13,6 @@ import { audit } from '../../lib/audit.js';
 import { ok, created } from '../../lib/respond.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
-import { companyName } from '../../lib/letterhead.js';
 import { today } from '../../lib/dates.js';
 import { uploadFile } from '../documents/tabular.js';
 import { renderPdf, sendPdf } from '../documents/pdf.js';
@@ -559,8 +558,7 @@ define({
   response: '(application/pdf)',
   handler: async (req, res) => {
     const rec = await tx((db) => rc.getRec(db, req.params.id));
-    const company = { name: await companyName(), system: (await getSetting('general.system_name')) ?? '' };
-    sendPdf(res, await renderPdf(await rc.statementPdfSpec(rec, company)), `bank-reconciliation-${rec.recNumber}.pdf`, req.query.download ? 'attachment' : 'inline');
+    sendPdf(res, await renderPdf(await rc.statementPdfSpec(rec)), `bank-reconciliation-${rec.recNumber}.pdf`, req.query.download ? 'attachment' : 'inline');
   },
 });
 define({
