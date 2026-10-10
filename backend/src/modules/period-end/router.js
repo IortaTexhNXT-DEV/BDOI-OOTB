@@ -279,8 +279,11 @@ async function notifyClose(action, r, req) {
 const runAction = (path, summary, schema, fn, action, mw = write) => define({
   method: 'POST', path, summary, screen: `${S} > Month-End Close > Run`, middleware: [...mw, validate(schema)], request: {}, response: { success: true, data: runExample },
   handler: async (req, res) => {
+    // the run as it was, so the trail shows what the action changed (its status) and not the run's identity as new
+    const was = (await pool.query('SELECT run_number, status, period FROM period_close_runs WHERE id = $1 OR run_number = $1', [req.params.id])).rows[0] || {};
     const r = await tx((db) => fn(db, req));
-    await audit(req, { entity: 'period_close_run', entityId: r.id, action, after: { runNumber: r.runNumber, status: r.status, period: r.period, ...req.body } });
+    await audit(req, { entity: 'period_close_run', entityId: r.id, action, before: { runNumber: was.run_number, status: was.status, period: was.period },
+      after: { runNumber: r.runNumber, status: r.status, period: r.period, ...req.body } });
     await notifyClose(action, r, req);
     ok(res, r);
   },
@@ -338,8 +341,9 @@ define({
   method: 'PUT', path: '/recurring-journals/:id', summary: 'Change a recurring journal template (lines, frequency, next run date, end date, auto-post, status)', screen: 'Accounts > Period End > Recurring Journals',
   middleware: [...write, validate(rjSchema)], request: { endDate: '2026-12-31', autoPost: false }, response: { success: true, data: rjExample },
   handler: async (req, res) => {
+    const was = (await pool.query('SELECT * FROM recurring_journals WHERE id = $1 OR code = $1', [req.params.id])).rows[0];
     const r = await tx((db) => saveRecurring(db, req.body, req.user, req.params.id));
-    await audit(req, { entity: 'recurring_journal', entityId: r.id, action: 'update', after: rjRow(r) });
+    await audit(req, { entity: 'recurring_journal', entityId: r.id, action: 'update', before: was ? rjRow(was) : null, after: rjRow(r) });
     ok(res, rjRow(r));
   },
 });
@@ -406,9 +410,11 @@ async function notifyYearEnd(event, r, req, before = {}) {
 const yeAction = (path, summary, schema, fn, action, mw = write, request = {}) => define({
   method: 'POST', path, summary, screen: `${S} > Year-End Close`, middleware: [...mw, validate(schema)], request, response: { success: true, data: yeExample },
   handler: async (req, res) => {
-    const before = (await pool.query('SELECT status, reverse_requested_by FROM year_end_runs WHERE id = $1 OR run_number = $1', [req.params.id])).rows[0] || {};
+    const before = (await pool.query(`SELECT status, reverse_requested_by, run_number, fiscal_year, net_income, reverse_reason_code FROM year_end_runs
+      WHERE id = $1 OR run_number = $1`, [req.params.id])).rows[0] || {};
     const r = await tx((db) => fn(db, req));
-    await audit(req, { entity: 'year_end_run', entityId: r.id, action, before: { status: before.status },
+    await audit(req, { entity: 'year_end_run', entityId: r.id, action, before: { runNumber: before.run_number, status: before.status, fiscalYear: before.fiscal_year,
+      netIncome: before.net_income === null || before.net_income === undefined ? null : Number(before.net_income), reverseReasonCode: before.reverse_reason_code },
       after: { runNumber: r.runNumber, status: r.status, fiscalYear: r.fiscalYear, netIncome: r.netIncome, reverseReasonCode: r.reverseReasonCode, ...req.body } });
     if (action === 'check' && before.status === 'draft' && r.status === 'checked') await notifyYearEnd('ready', r, req);
     if (['close', 'reverse-request', 'reverse'].includes(action)) await notifyYearEnd(action, r, req, { reverseRequestedBy: before.reverse_requested_by });
