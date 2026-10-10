@@ -7,7 +7,7 @@ import KeyValueGrid from "../../../components/KeyValueGrid";
 import StatusChip from "../../../components/StatusChip";
 import ApprovalActions from "../../../components/ApprovalActions";
 import { openConfirm } from "../../../components/ConfirmDialog";
-import receiptsService from "../../../services/receiptsService";
+import { receiptsService } from "../../../services/receiptsService";
 import { hasPermission } from "../../../utils/canOpen";
 import { showErrorMessage, showSuccessMessage } from "../../../utility/toastUtils";
 

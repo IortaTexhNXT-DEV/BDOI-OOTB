@@ -5,7 +5,7 @@ import { Button } from "primereact/button";
 import DetailSection from "../../../components/DetailSection";
 import KeyValueGrid from "../../../components/KeyValueGrid";
 import S3FileUpload from "../../../components/S3FileUpload";
-import receiptsService from "../../../services/receiptsService";
+import { receiptsService } from "../../../services/receiptsService";
 import { hasPermission } from "../../../utils/canOpen";
 import { showErrorMessage, showSuccessMessage } from "../../../utility/toastUtils";
 

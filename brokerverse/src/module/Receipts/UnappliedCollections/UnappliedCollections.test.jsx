@@ -2,13 +2,13 @@ import React from "react";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import "../../../i18n";
-import receiptsService from "../../../services/receiptsService";
+import { receiptsService } from "../../../services/receiptsService";
 import UnappliedCollections from ".";
 import { allocationProblem, unappliedActions } from "./model";
 
 let mockPerms = [];
 jest.mock("../../../utils/canOpen", () => ({ ...jest.requireActual("../../../utils/canOpen"), hasPermission: (p) => mockPerms.includes(p) }));
-jest.mock("../../../services/receiptsService", () => ({ __esModule: true, default: {
+jest.mock("../../../services/receiptsService", () => ({ __esModule: true, receiptsService: {
   listUnapplied: jest.fn(), getUnapplied: jest.fn(), getOpenReceivables: jest.fn(), allocateUnapplied: jest.fn(), recordUnapplied: jest.fn(), refundUnapplied: jest.fn(), reverseUnapplied: jest.fn(),
 } }));
 jest.mock("../../../utility/toastUtils", () => ({ showErrorMessage: jest.fn(), showSuccessMessage: jest.fn() }));

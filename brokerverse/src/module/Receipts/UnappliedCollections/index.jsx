@@ -21,7 +21,7 @@ import DetailSection from "../../../components/DetailSection";
 import KeyValueGrid from "../../../components/KeyValueGrid";
 import { openConfirm } from "../../../components/ConfirmDialog";
 import { RecordActivityLog } from "../../../components/ActivityLog";
-import receiptsService from "../../../services/receiptsService";
+import { receiptsService } from "../../../services/receiptsService";
 import { hasPermission } from "../../../utils/canOpen";
 import { formatCurrency } from "../../../utility/currencyConverter";
 import { formatDate } from "../../../utility/dateFormat";

@@ -6,7 +6,7 @@ import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
 import LoadState from "../../../components/LoadState";
-import receiptsService from "../../../services/receiptsService";
+import { receiptsService } from "../../../services/receiptsService";
 import { formatCurrency } from "../../../utility/currencyConverter";
 import { formatDate } from "../../../utility/dateFormat";
 import { showErrorMessage } from "../../../utility/toastUtils";

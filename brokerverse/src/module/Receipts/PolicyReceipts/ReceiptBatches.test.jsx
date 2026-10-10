@@ -1,10 +1,10 @@
 import React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import "../../../i18n";
-import receiptsService from "../../../services/receiptsService";
+import { receiptsService } from "../../../services/receiptsService";
 import ReceiptBatches from "./ReceiptBatches";
 
-jest.mock("../../../services/receiptsService", () => ({ __esModule: true, default: { receiptBatches: jest.fn(), downloadBatchCommission: jest.fn() } }));
+jest.mock("../../../services/receiptsService", () => ({ __esModule: true, receiptsService: { receiptBatches: jest.fn(), downloadBatchCommission: jest.fn() } }));
 jest.mock("../../../utility/toastUtils", () => ({ showErrorMessage: jest.fn() }));
 
 const batch = (extra) => ({ id: "rvb_1", batchNumber: "RVB-2026-00004", fileName: "rv.xlsx", rows: 3, created: 2, failed: 1, premiumTotal: 20000, commissionTotal: 750,

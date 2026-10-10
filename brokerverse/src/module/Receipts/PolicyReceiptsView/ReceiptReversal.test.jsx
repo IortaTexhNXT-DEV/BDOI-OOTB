@@ -1,14 +1,14 @@
 import React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import "../../../i18n";
-import receiptsService from "../../../services/receiptsService";
+import { receiptsService } from "../../../services/receiptsService";
 import { openConfirm } from "../../../components/ConfirmDialog";
 import ReceiptReversal from "./ReceiptReversal";
 
 let mockPerms = [];
 jest.mock("../../../utils/canOpen", () => ({ ...jest.requireActual("../../../utils/canOpen"), hasPermission: (p) => mockPerms.includes(p) }));
 jest.mock("../../../utility/userIdentity", () => ({ currentUser: () => ({ userId: "usr_checker", username: "checker" }) }));
-jest.mock("../../../services/receiptsService", () => ({ __esModule: true, default: { requestReversal: jest.fn(), decideReversal: jest.fn() } }));
+jest.mock("../../../services/receiptsService", () => ({ __esModule: true, receiptsService: { requestReversal: jest.fn(), decideReversal: jest.fn() } }));
 jest.mock("../../../components/ConfirmDialog", () => ({ __esModule: true, openConfirm: jest.fn() }));
 jest.mock("../../../utility/toastUtils", () => ({ showErrorMessage: jest.fn(), showSuccessMessage: jest.fn() }));
 
