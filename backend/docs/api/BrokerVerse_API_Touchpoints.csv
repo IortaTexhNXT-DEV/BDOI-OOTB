@@ -28018,9 +28018,9 @@
   ""total"": 1,
   ""query"": ""NQQ 2025""
 }"
-1298,System,GET,/api/version,"Build and runtime information: name, version, git commit (GIT_COMMIT), build time (BUILD_TIME), release ref (GIT_REF), environment name (APP_ENVIRONMENT), start time, Node version, database reachability, pending migrations",Operations / monitoring,Public,Public,,"{
+1298,System,GET,/api/version,"Build and runtime information: name, version, git commit (GIT_COMMIT), build time (BUILD_TIME), release ref (GIT_REF), environment name (APP_ENVIRONMENT), start time, Node version, database reachability, pending migrations; release: the release identity of Help > About (settings release.*: web and API release, environment name, and with a bearer token the approvers of the release)",Operations / monitoring; Help > About,Public,Public,,"{
   ""name"": ""brokerverse-backend"",
-  ""version"": ""1.0.0"",
+  ""version"": ""2026.1.3"",
   ""commit"": ""a1b2c3d4e5f60718293a4b5c6d7e8f9012345678"",
   ""buildTime"": ""2026-09-27T23:10:00Z"",
   ""ref"": ""v1.2.0"",
@@ -28032,7 +28032,14 @@
     ""reachable"": true,
     ""latencyMs"": 2
   },
-  ""pendingMigrations"": 0
+  ""pendingMigrations"": 0,
+  ""release"": {
+    ""webVersion"": ""PH-WEB-2026.1.3"",
+    ""apiVersion"": ""PH-API-2026.1.3"",
+    ""environment"": ""Development"",
+    ""requirementsApprover"": ""Andrew"",
+    ""versionApprover"": ""Vijay""
+  }
 }"
 1299,System Settings,GET,/api/settings,All configuration values (grouped); managedBy names the screen that changes a setting owned elsewhere,Master > Configuration,Bearer JWT,Any authenticated user,Query: ?group=tax,"{
   ""success"": true,

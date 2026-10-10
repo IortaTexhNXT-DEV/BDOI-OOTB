@@ -54,7 +54,7 @@ function styleSheet(vars) {
 }
 
 /**
- * The page. `edition`: { title, version, date, status, logo, files: { pdf, word }, fontUrl or fonts }; `vars`: the theme's
+ * The page. `edition`: { title, version, versionLabel, date, status, logo, files: { pdf, word }, fontUrl or fonts }; `vars`: the theme's
  * custom properties; `toc` and `content`: HTML from render.js.
  */
 function page({ edition, vars, toc, content }) {
@@ -62,7 +62,7 @@ function page({ edition, vars, toc, content }) {
     edition.files.word && `<a class="button outlined" href="${escapeHtml(edition.files.word)}" download>Download Word</a>`,
     edition.files.pdf && `<a class="button" href="${escapeHtml(edition.files.pdf)}" download>Download PDF</a>`,
   ].filter(Boolean).join("\n  ");
-  const meta = [edition.version && `Version ${escapeHtml(edition.version)}`, edition.date && escapeHtml(edition.date)].filter(Boolean).join(" · ");
+  const meta = [edition.version && `${escapeHtml(edition.versionLabel || "Version")} ${escapeHtml(edition.version)}`, edition.date && escapeHtml(edition.date)].filter(Boolean).join(" · ");
   return `<!doctype html>
 <html lang="en">
 <head>

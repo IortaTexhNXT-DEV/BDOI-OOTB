@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs, withPackagedProducts } from './helpers.js';
+import { setup, loginAs, withPackagedProducts, withStarterMasters } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { premiumOnRate } from '../src/modules/packages/rateTables.js';
 import { insurerTotals } from '../src/modules/packages/issue.js';
@@ -21,6 +21,7 @@ async function persona(username, roles) {
 
 beforeAll(async () => {
   ctx = await setup();
+  await withStarterMasters();
   await withPackagedProducts();
   sales = await persona('pk.sales', ['sales']);
   processing = await persona('pk.processing', ['processing']);
