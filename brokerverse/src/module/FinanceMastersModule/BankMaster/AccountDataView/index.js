@@ -228,7 +228,7 @@ const BankAccounts = () => {
             {field("contactPerson", "Bank Contact Person", text("contactPerson"))}
             {field("contactNumber", "Contact Number", text("contactNumber", { placeholder: "+63 2 8840 7000" }))}
             {field("email", "E-mail", text("email"))}
-            <div className="col-12 text-sm" style={{ color: "#6c737f" }}>
+            <div className="col-12 text-sm" style={{ color: "var(--text-color-secondary)" }}>
               The GL cash account and statement format used for bank reconciliation are set in Accounts &gt; Bank Reconciliation.
             </div>
           </div>

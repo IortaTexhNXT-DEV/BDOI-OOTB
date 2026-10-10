@@ -129,7 +129,7 @@ const AddReceipts = () => {
                 classNames="input__filed"
                 label={t("pettyCash.receiptNumber")}
                 disabled={true}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.ReceiptNumber}
@@ -144,7 +144,7 @@ const AddReceipts = () => {
                 className="input__filed"
                 label={t("pettyCash.requester")} required
                 placeholder={t("pettyCash.select")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -166,7 +166,7 @@ const AddReceipts = () => {
                 className="input__filed"
                 label={t("pettyCash.bankCode")} required
                 placeholder={t("pettyCash.select")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -187,7 +187,7 @@ const AddReceipts = () => {
                 classNames="input__filed"
                 label={t("pettyCash.bankAccountName")}
                 disabled={true}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.BankAccountName}
@@ -205,7 +205,7 @@ const AddReceipts = () => {
                 className="input__filed"
                 label={t("pettyCash.subAccountCode")} required
                 placeholder={t("pettyCash.select")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -228,7 +228,7 @@ const AddReceipts = () => {
                 classNames="input__filed"
                 label={t("pettyCash.subAccountDescription")}
                 disabled={true}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.SubAccountDescription}
@@ -246,7 +246,7 @@ const AddReceipts = () => {
                 className="input__filed"
                 label={t("pettyCash.transactionCode")} required
                 placeholder={t("pettyCash.select")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -270,7 +270,7 @@ const AddReceipts = () => {
                 classNames="input__filed"
                 label={t("pettyCash.transactionDescription")}
                 disabled={true}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.TransactionDescription}
@@ -288,7 +288,7 @@ const AddReceipts = () => {
                 className="input__filed"
                 label={t("pettyCash.branchCode")} required
                 placeholder={t("pettyCash.select")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -309,7 +309,7 @@ const AddReceipts = () => {
                 classNames="input__filed"
                 label={t("pettyCash.branchDescription")}
                 disabled={true}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.BranchDescription}
@@ -327,7 +327,7 @@ const AddReceipts = () => {
                 className="input__filed"
                 label={t("pettyCash.departmentCode")} required
                 placeholder={t("pettyCash.select")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -350,7 +350,7 @@ const AddReceipts = () => {
                 classNames="input__filed"
                 label={t("pettyCash.departmentDescription")}
                 disabled={true}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.DepartmentDescription}

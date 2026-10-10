@@ -369,7 +369,7 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
                   onChange={formik.handleChange}
                   placeholder={t("agent.placeholderPrimaryShare")}
                 />
-                <div style={{ fontSize: 12, color: "#666", marginTop: 4 }}>
+                <div style={{ fontSize: 12, color: "var(--text-color-secondary)", marginTop: 4 }}>
                   {t("agent.primaryInsurerShareHint")}
                 </div>
               </div>

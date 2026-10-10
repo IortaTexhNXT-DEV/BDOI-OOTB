@@ -219,7 +219,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             fontWeight: 600,
                             fontFamily: "Nunito, Arial, sans-serif",
                             lineHeight: '51px',
-                            color: '#111927',
+                            color: "var(--text-color)",
                         }}
                     >
                         {action === "quotedetails" ? "Edit Quote" : "Create Quote"}
@@ -458,7 +458,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                                     borderRadius: '10px',
                                     textAlign: 'center',
                                     cursor: 'pointer',
-                                    backgroundColor: '#f9f9ff',
+                                    backgroundColor: "var(--surface-ground)",
                                     color: '#333',
                                 }}
                             >
@@ -469,7 +469,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                                         <span>Click to upload CSV file</span>
                                     )}
                                 </div>
-                                <div style={{ fontSize: '12px', color: '#666' }}>Only .csv files allowed</div>
+                                <div style={{ fontSize: '12px', color: "var(--text-color-secondary)" }}>Only .csv files allowed</div>
                             </div>
                         </div>
 

@@ -245,7 +245,7 @@ const AddReceiptsTable = () => {
             classNames="input__filed"
             label={t("pettyCash.disbursedAmount")}
             disabled={true}
-            textColor={"#111927"}
+            textColor={"var(--text-color)"}
             textSize={"16"}
             textWeight={500}
             value={formatCurrency(totalAmount)}
@@ -256,7 +256,7 @@ const AddReceiptsTable = () => {
             classNames="input__filed"
             label={t("pettyCash.balanceAmount")}
             disabled={true}
-            textColor={"#111927"}
+            textColor={"var(--text-color)"}
             textSize={"16"}
             textWeight={500}
             value={selectedFund?.availableCash == null ? "" : formatCurrency(selectedFund.availableCash)}

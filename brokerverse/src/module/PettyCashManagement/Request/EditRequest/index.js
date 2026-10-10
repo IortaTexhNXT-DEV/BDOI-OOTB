@@ -296,7 +296,7 @@ const EditRequestForm = ({ action }) => {
                         <InputField
                             classNames="input__filed"
                             label={t("pettyCash.transactionCode")}
-                            textColor={"#111927"}
+                            textColor={"var(--text-color)"}
                             textSize={"16"}
                             textWeight={500}
                             value={formik.values.TransactionCode}
@@ -308,7 +308,7 @@ const EditRequestForm = ({ action }) => {
                         <InputField
                             classNames="input__filed"
                             label={t("pettyCash.transactionNumber")}
-                            textColor={"#111927"}
+                            textColor={"var(--text-color)"}
                             textSize={"16"}
                             textWeight={500}
                             value={formik.values.TransactionNumber}
@@ -338,7 +338,7 @@ const EditRequestForm = ({ action }) => {
                             className="input__filed"
                             label={t("pettyCash.requesterName")}
                             placeholder="Select"
-                            textColor={"#111927"}
+                            textColor={"var(--text-color)"}
                             textSize={"16"}
                             textWeight={500}
                             dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -435,7 +435,7 @@ const EditRequestForm = ({ action }) => {
                         <InputField
                             classNames="input__filed"
                             label={t("pettyCash.totalAmount")}
-                            textColor={"#111927"}
+                            textColor={"var(--text-color)"}
                             textSize={"16"}
                             textWeight={500}
                             value={totalAmount}

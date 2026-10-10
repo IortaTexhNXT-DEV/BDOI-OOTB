@@ -455,7 +455,7 @@ function Detailview() {
           {t("paymentVoucher.disbursementDetails")}
         </label>
         {loading && (
-          <span style={{ marginLeft: "10px", color: "#666" }}>
+          <span style={{ marginLeft: "10px", color: "var(--text-color-secondary)" }}>
             {t("common.loading")}
           </span>
         )}
@@ -656,7 +656,7 @@ function Detailview() {
       {paymentLines.length > 0 && (
         <DetailSection title={t("paymentVoucher.paymentLines", "Payment lines")} className="pv-detail__section">
           <div>
-            <DataTable value={paymentLines} dataKey="id" tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}>
+            <DataTable value={paymentLines} dataKey="id" tableStyle={{ minWidth: "50rem", color: "var(--text-color)" }}>
               <Column field="reference" header={t("paymentVoucher.reference", "Reference")} headerStyle={headerStyle} className="fieldvalue_container" />
               <Column field="description" header={t("paymentVoucher.description", "Description")} headerStyle={headerStyle} className="fieldvalue_container" />
               <Column field="gross" header={t("paymentVoucher.grossAmount", "Gross Amount")} body={(r) => money(r.gross)} headerStyle={headerStyle} className="fieldvalue_container" />
@@ -694,7 +694,7 @@ function Detailview() {
         <DataTable
           value={processedChequeBookData}
           emptyMessage={t("paymentVoucher.noChequeIssued", "No cheque has been issued on this voucher")}
-          tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}
+          tableStyle={{ minWidth: "50rem", color: "var(--text-color)" }}
           paginator
           rows={20}
           rowsPerPageOptions={[20, 50, 100]}

@@ -137,7 +137,7 @@ function PolicyReceipts() {
           value={receiptDetailList}
           tableStyle={{
             minWidth: "50rem",
-            color: "#2e2e2e",
+            color: "var(--text-color)",
             maxHeight: "50vh",
             overflowy: "auto",
           }}

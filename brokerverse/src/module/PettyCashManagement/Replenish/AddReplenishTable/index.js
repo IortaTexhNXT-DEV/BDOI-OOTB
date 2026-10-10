@@ -225,7 +225,7 @@ const AddReplenishTable = () => {
             classNames="input__filed"
             label={t("pettyCash.disbursedAmount")}
             disabled={true}
-            textColor={"#111927"}
+            textColor={"var(--text-color)"}
             textSize={"16"}
             textWeight={500}
             value={formatCurrency(totalAmount)}
@@ -236,7 +236,7 @@ const AddReplenishTable = () => {
             classNames="input__filed"
             label={t("pettyCash.reimbursementAmount")}
             disabled={true}
-            textColor={"#111927"}
+            textColor={"var(--text-color)"}
             textSize={"16"}
             textWeight={500}
             value={formatCurrency(totalAmount)}
@@ -247,7 +247,7 @@ const AddReplenishTable = () => {
             classNames="input__filed"
             label={t("pettyCash.currentBalance")}
             disabled={true}
-            textColor={"#111927"}
+            textColor={"var(--text-color)"}
             textSize={"16"}
             textWeight={500}
             value={ReplenishFund.availableCash == null ? "" : formatCurrency(ReplenishFund.availableCash)}

@@ -15,7 +15,7 @@ const grouped = (secret) => String(secret || "").replace(/(.{4})/g, "$1 ").trim(
 export const qrImage = async (uri) => {
   if (!uri) return null;
   try {
-    const svg = await QRCode.toString(uri, { type: "svg", errorCorrectionLevel: "M", margin: 1, color: { dark: "#111927", light: "#ffffff" } });
+    const svg = await QRCode.toString(uri, { type: "svg", errorCorrectionLevel: "M", margin: 1, color: { dark: "var(--text-color)", light: "#ffffff" } });
     return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
   } catch {
     return null;

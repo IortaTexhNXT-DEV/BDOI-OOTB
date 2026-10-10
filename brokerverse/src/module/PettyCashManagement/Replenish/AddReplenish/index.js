@@ -126,7 +126,7 @@ const AddReplenish = () => {
                 classNames="input__filed"
                 label={t("pettyCash.date")}
                 disabled={true}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value="24/01/2024"
@@ -137,7 +137,7 @@ const AddReplenish = () => {
                 classNames="input__filed"
                 label={t("pettyCash.transactionCode")}
                 disabled={true}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 
@@ -148,7 +148,7 @@ const AddReplenish = () => {
                 classNames="input__filed"
                 label={t("pettyCash.transactionNumber")}
                 disabled={true}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value=""
@@ -161,7 +161,7 @@ const AddReplenish = () => {
                 className="input__filed"
                 label={t("pettyCash.pettyCashCode")} required
                 placeholder={t("pettyCash.select")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -183,7 +183,7 @@ const AddReplenish = () => {
                 classNames="input__filed"
                 label={t("pettyCash.pettyCashDescription")}
                 disabled={true}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.PettycashDescription}
@@ -197,7 +197,7 @@ const AddReplenish = () => {
                 className="input__filed"
                 label={t("pettyCash.bankCode")} required
                 placeholder={t("pettyCash.select")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -217,7 +217,7 @@ const AddReplenish = () => {
                 classNames="input__filed"
                 label={t("pettyCash.bankAccountName")}
                 disabled={true}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.BankAccountName}
@@ -235,7 +235,7 @@ const AddReplenish = () => {
                 className="input__filed"
                 label={t("pettyCash.subAccountCode")}
                 placeholder={t("pettyCash.select")}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -257,7 +257,7 @@ const AddReplenish = () => {
                 classNames="input__filed"
                 label={t("pettyCash.subAccountDescription")}
                 disabled={true}
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.SubAccountDescription}

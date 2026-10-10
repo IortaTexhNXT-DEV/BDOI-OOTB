@@ -208,7 +208,7 @@ const InitiateTable = () => {
           <DataTable
             value={search ? InitiateListSearch : InitiateList}
             tableStyle={{
-              color: "#2e2e2e",
+              color: "var(--text-color)",
             }}
             scrollable={true}
             scrollHeight="40vh"

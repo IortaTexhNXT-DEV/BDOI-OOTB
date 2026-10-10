@@ -534,7 +534,7 @@ const Index = () => {
                   ? paymentVocherFilterList
                   : paymentVocherList
               }
-              tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}
+              tableStyle={{ minWidth: "50rem", color: "var(--text-color)" }}
               rowClassName={(row) =>
                 recorded && ((recorded.disbursementId && (row.id || row.disbursementId) === recorded.disbursementId) || (recorded.voucherNumber && row.VoucherNumber === recorded.voucherNumber))
                   ? "voucher-row--recorded"

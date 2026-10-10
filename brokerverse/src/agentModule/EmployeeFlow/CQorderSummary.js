@@ -251,15 +251,15 @@ const CQOrderSummary = ({ action, flow }) => {
                   <div style={{
                     fontSize: '14px', color: 'black'
                   }}>Co Insurance Summary</div>
-                  <div style={{ fontSize: "10px", color: "#6c737f" }}>
+                  <div style={{ fontSize: "10px", color: "var(--text-color-secondary)" }}>
                     ▼
                   </div>
                 </div>
               }>
                 <div style={{
-                  borderRadius: "10px", border: '1px solid #d1d5db'
+                  borderRadius: "10px", border: "1px solid var(--surface-border)"
                 }} >
-                  <div style={{ display: "flex", marginBottom: "8px", paddingBottom: "4px", borderBottom: '1px solid #d1d5db', height: '32px', alignItems: 'center', padding: '0 12px' }}>
+                  <div style={{ display: "flex", marginBottom: "8px", paddingBottom: "4px", borderBottom: "1px solid var(--surface-border)", height: '32px', alignItems: 'center', padding: '0 12px' }}>
                     <div style={{
                       width: '20%', textAlign: 'left', fontSize: 16
                     }}>Comp code</div>
@@ -279,10 +279,10 @@ const CQOrderSummary = ({ action, flow }) => {
                   <div style={{ display: "flex", marginBottom: "8px", padding: '0 12px' }}>
 
                     <div style={{
-                      width: '20%', textAlign: 'left', fontSize: 14, color: '#6c737f'
+                      width: '20%', textAlign: 'left', fontSize: 14, color: "var(--text-color-secondary)"
                     }}>CO-INS-1</div>
                     <div style={{
-                      width: '50%', textAlign: 'left', fontSize: 14, color: '#6c737f'
+                      width: '50%', textAlign: 'left', fontSize: 14, color: "var(--text-color-secondary)"
                     }}>Apex Assurance</div>
                     <div style={{
                       width: '10%', fontSize: 14,
@@ -297,10 +297,10 @@ const CQOrderSummary = ({ action, flow }) => {
                   <div style={{ display: "flex", marginBottom: "8px", padding: '0 12px' }}>
 
                     <div style={{
-                      width: '20%', textAlign: 'left', fontSize: 14, color: '#6c737f'
+                      width: '20%', textAlign: 'left', fontSize: 14, color: "var(--text-color-secondary)"
                     }}>CO-INS-2</div>
                     <div style={{
-                      width: '50%', textAlign: 'left', fontSize: 14, color: '#6c737f'
+                      width: '50%', textAlign: 'left', fontSize: 14, color: "var(--text-color-secondary)"
                     }}>Liberty Shield Insurance</div>
                     <div style={{
                       width: '10%', fontSize: 14, color: 'var(--bv-primary)'
@@ -315,10 +315,10 @@ const CQOrderSummary = ({ action, flow }) => {
                   <div style={{ display: "flex", marginBottom: "8px", padding: '0 12px' }}>
 
                     <div style={{
-                      width: '20%', textAlign: 'left', fontSize: 14, color: '#6c737f'
+                      width: '20%', textAlign: 'left', fontSize: 14, color: "var(--text-color-secondary)"
                     }}>CO-INS-3</div>
                     <div style={{
-                      width: '50%', textAlign: 'left', fontSize: 14, color: '#6c737f'
+                      width: '50%', textAlign: 'left', fontSize: 14, color: "var(--text-color-secondary)"
                     }}>Sentinel Underwriters</div>
                     <div style={{
                       width: '10%', fontSize: 14, color: 'var(--bv-primary)'
@@ -335,7 +335,7 @@ const CQOrderSummary = ({ action, flow }) => {
                   <div
                     style={{
                       padding: "12px",
-                      borderTop: "1px solid #d1d5db",
+                      borderTop: "1px solid var(--surface-border)",
                       display: 'flex'
                     }}
                   >
@@ -343,7 +343,7 @@ const CQOrderSummary = ({ action, flow }) => {
                       width: '20%', textAlign: 'left', fontSize: 14
                     }} />
                     <div style={{
-                      width: '50%', textAlign: 'left', fontSize: 14, color: '#6c737f'
+                      width: '50%', textAlign: 'left', fontSize: 14, color: "var(--text-color-secondary)"
                     }}>Total</div>
                     <div style={{
                       width: '10%', fontSize: 14, color: 'var(--bv-primary)'

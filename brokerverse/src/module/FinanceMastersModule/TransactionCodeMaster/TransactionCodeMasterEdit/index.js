@@ -155,7 +155,7 @@ const TransactionCodeEdit = () => {
                 classNames="input__filed"
                 label="Transaction Code"
                 placeholder="Enter"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 //
@@ -172,7 +172,7 @@ const TransactionCodeEdit = () => {
                 classNames="input__filed"
                 label="Transaction Name"
                 placeholder="Enter"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.TransactionName}
@@ -190,7 +190,7 @@ const TransactionCodeEdit = () => {
                 classNames="input__filed"
                 label="Description"
                 placeholder="Enter"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.Description}
@@ -203,7 +203,7 @@ const TransactionCodeEdit = () => {
                 className="input__filed"
                 label="Transaction Basis"
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -226,7 +226,7 @@ const TransactionCodeEdit = () => {
                 className="input__filed"
                 label="Main Account Code"
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -246,7 +246,7 @@ const TransactionCodeEdit = () => {
               <InputField
                 classNames="input__filed"
                 label="Main Account Description"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.MainAccountDescription}
@@ -264,7 +264,7 @@ const TransactionCodeEdit = () => {
                 className="input__filed"
                 label="Sub Account Code"
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -281,7 +281,7 @@ const TransactionCodeEdit = () => {
                 classNames="input__filed"
                 label="Description"
                 placeholder="Enter"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.SubAccountDescription}
@@ -299,7 +299,7 @@ const TransactionCodeEdit = () => {
                 className="input__filed"
                 label="Branch Code"
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -319,7 +319,7 @@ const TransactionCodeEdit = () => {
                 classNames="input__filed"
                 label="Branch Description"
                 placeholder="Enter"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.BranchDescription}
@@ -333,7 +333,7 @@ const TransactionCodeEdit = () => {
                 className="input__filed"
                 label="Department"
                 placeholder="Select"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -350,7 +350,7 @@ const TransactionCodeEdit = () => {
                 classNames="input__filed"
                 label="Department Description"
                 placeholder="Enter"
-                textColor={"#111927"}
+                textColor={"var(--text-color)"}
                 textSize={"16"}
                 textWeight={500}
                 value={formik.values.DepartmentDescription}

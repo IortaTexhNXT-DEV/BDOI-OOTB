@@ -75,7 +75,7 @@ const ReplenishtDetailView = () => {
               classNames="input__filed"
               label={t("pettyCash.date")}
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={ViewReplenish.Date}
@@ -86,7 +86,7 @@ const ReplenishtDetailView = () => {
               classNames="input__filed"
               label={t("pettyCash.transactionCode")}
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={ViewReplenish.Transactioncode}
@@ -97,7 +97,7 @@ const ReplenishtDetailView = () => {
               classNames="input__filed"
               label={t("pettyCash.transactionNumber")}
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={ViewReplenish.TransactionNumber}
@@ -110,7 +110,7 @@ const ReplenishtDetailView = () => {
               classNames="input__filed"
               label={t("pettyCash.pettyCashCode")}
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={ViewReplenish.Pettycashcode}
@@ -121,7 +121,7 @@ const ReplenishtDetailView = () => {
               classNames="input__filed"
               label={t("pettyCash.pettyCashDescription")}
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={describe(funds, ViewReplenish.Pettycashcode)}
@@ -134,7 +134,7 @@ const ReplenishtDetailView = () => {
               classNames="input__filed"
               label={t("pettyCash.bankCode")}
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={ViewReplenish.BankCode}
@@ -145,7 +145,7 @@ const ReplenishtDetailView = () => {
               classNames="input__filed"
               label={t("pettyCash.bankAccountName")}
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={describe(banks, ViewReplenish.BankCode)}
@@ -158,7 +158,7 @@ const ReplenishtDetailView = () => {
               classNames="input__filed"
               label={t("pettyCash.subAccountCode")}
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={ViewReplenish.SubAccount}
@@ -169,7 +169,7 @@ const ReplenishtDetailView = () => {
               classNames="input__filed"
               label={t("pettyCash.subAccountDescription")}
               disabled={true}
-              textColor={"#111927"}
+              textColor={"var(--text-color)"}
               textSize={"16"}
               textWeight={500}
               value={describe(subAccounts, ViewReplenish.SubAccount)}
